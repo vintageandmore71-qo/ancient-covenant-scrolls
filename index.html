@@ -307,8 +307,13 @@ if(idx<0)return;
 cur=idx;
 stopVoice();
 document.getElementById(‘content’).innerHTML=’<div id="loading">Loading…</div>’;
-fetch(‘data/’+fid+’.json’)
-.then(function(r){return r.json();})
+var url=‘data/’+fid+’.json’;
+document.getElementById(‘content’).innerHTML=’<div id="loading" style="padding:40px;text-align:center;color:#333">Fetching: ‘+url+’…</div>’;
+fetch(url)
+.then(function(r){
+if(!r.ok)throw new Error(‘HTTP ‘+r.status+’ for ‘+url);
+return r.json();
+})
 .then(function(d){
 CACHE[fid]=d.html;
 document.getElementById(‘content’).innerHTML=d.html;
