@@ -1,5 +1,5 @@
-
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -38,10 +38,10 @@ body.dark #sidebar{background:#1e1e1e}
 #main.nosb{margin-left:0}
 #main.vopen{padding-bottom:104px}
 @media(max-width:700px){
-  #main{margin-left:0;padding:16px 14px 60px}
-  #sidebar{transform:translateX(-270px)}
-  #sidebar.mob{transform:translateX(0)}
-  #botnav,#voice-row{left:0!important}
+#main{margin-left:0;padding:16px 14px 60px}
+#sidebar{transform:translateX(-270px)}
+#sidebar.mob{transform:translateX(0)}
+#botnav,#voice-row{left:0!important}
 }
 #content p{font-family:Arial,sans-serif;line-height:1.65;margin:.12em 0}
 p.speaking{background:#fffde7;border-radius:3px}
@@ -75,23 +75,23 @@ body.dark #home p{color:#888}
 <body>
 <div id="prog"><div id="prog-fill"></div></div>
 <div id="topnav">
-  <button id="sb-btn">&#9776;</button>
-  <div id="title-bar">The Ancient Covenant Record</div>
-  <div id="fc">
-    <button id="fa-btn">A-</button>
-    <button id="fb-btn">A+</button>
-  </div>
-  <input id="sq" type="text" placeholder="Search...">
-  <button id="bm-btn">&#9734;</button>
-  <button id="dk-btn">&#9685;</button>
-  <button id="rd-btn">&#8865;</button>
-  <button id="vt-btn">&#128266;</button>
+<button id="sb-btn">&#9776;</button>
+<div id="title-bar">The Ancient Covenant Record</div>
+<div id="fc">
+<button id="fa-btn">A-</button>
+<button id="fb-btn">A+</button>
+</div>
+<input id="sq" type="text" placeholder="Search...">
+<button id="bm-btn">&#9734;</button>
+<button id="dk-btn">&#9685;</button>
+<button id="rd-btn">&#8865;</button>
+<button id="vt-btn">&#128266;</button>
 </div>
 <div id="sidebar">
-  <div style="padding:8px 12px 6px;color:#555;font-size:9px;letter-spacing:.05em;border-bottom:1px solid #333">
-    &#128214; THE ANCIENT COVENANT RECORD &#8212; 46 VOLUMES
-  </div>
-  <div class="toc-sec">TORAH — THE FIVE BOOKS OF MOSHEH</div>
+<div style="padding:8px 12px 6px;color:#555;font-size:9px;letter-spacing:.05em;border-bottom:1px solid #333">
+&#128214; THE ANCIENT COVENANT RECORD &#8212; 46 VOLUMES
+</div>
+<div class="toc-sec">TORAH — THE FIVE BOOKS OF MOSHEH</div>
 <div class="toc-vol">Vol 1 — Bereshit (Genesis)</div>
 <div class="toc-file" data-id="file_1">Part 1 — Chapters 1–11</div>
 <div class="toc-file" data-id="file_2">Part 2 — Chapters 12–25</div>
@@ -257,35 +257,35 @@ body.dark #home p{color:#888}
 <div class="toc-file" data-id="file_111">Part 3 — Columns 45–66</div>
 </div>
 <div id="main">
-  <div id="content">
-    <div id="home">
-      <div class="ph">𐤉𐤄𐤅𐤄</div>
-      <h1>THE ANCIENT COVENANT RECORD</h1>
-      <p>46 Volumes &#183; 111 Parts<br>
-      Dead Sea Scrolls &#183; Orit Ge&#39;ez &#183; Ancient Hebrew<br>
-      DSS Primary &#183; No Western Bias &#183; No Christian Framing</p>
-      <button class="sb" id="start-btn">Begin with Bereshit &#9654;</button>
-    </div>
-  </div>
+<div id="content">
+<div id="home">
+<div class="ph">𐤉𐤄𐤅𐤄</div>
+<h1>THE ANCIENT COVENANT RECORD</h1>
+<p>46 Volumes &#183; 111 Parts<br>
+Dead Sea Scrolls &#183; Orit Ge&#39;ez &#183; Ancient Hebrew<br>
+DSS Primary &#183; No Western Bias &#183; No Christian Framing</p>
+<button class="sb" id="start-btn">Begin with Bereshit &#9654;</button>
+</div>
+</div>
 </div>
 <div id="voice-row">
-  <button id="play-btn">&#9654;</button>
-  <button id="pause-btn" style="display:none">&#9646;&#9646;</button>
-  <button id="stop-btn">&#9646;&#9646;&#9646;</button>
-  <select id="vspd">
-    <option value="0.7">0.7x</option>
-    <option value="0.85">0.85x</option>
-    <option value="1" selected>1x</option>
-    <option value="1.2">1.2x</option>
-    <option value="1.5">1.5x</option>
-  </select>
-  <button id="vo-btn">Verses</button>
-  <span id="vstat">Ready</span>
+<button id="play-btn">&#9654;</button>
+<button id="pause-btn" style="display:none">&#9646;&#9646;</button>
+<button id="stop-btn">&#9646;&#9646;&#9646;</button>
+<select id="vspd">
+<option value="0.7">0.7x</option>
+<option value="0.85">0.85x</option>
+<option value="1" selected>1x</option>
+<option value="1.2">1.2x</option>
+<option value="1.5">1.5x</option>
+</select>
+<button id="vo-btn">Verses</button>
+<span id="vstat">Ready</span>
 </div>
 <div id="botnav">
-  <button id="prev-btn" disabled>&#9664; Prev</button>
-  <span id="pos-lbl">&#8212;</span>
-  <button id="next-btn">Next &#9654;</button>
+<button id="prev-btn" disabled>&#9664; Prev</button>
+<span id="pos-lbl">&#8212;</span>
+<button id="next-btn">Next &#9654;</button>
 </div>
 <button id="top-btn">&#8593;</button>
 <script>
@@ -298,210 +298,211 @@ var bms=JSON.parse(localStorage.getItem('acr_bms')||'[]');
 var cur=-1;
 var sp=false,pa=false,vo=false,pi=0,ps=[],spd=1.0,cp=null,vopen=false;
 
-if(localStorage.getItem('acr_dark')==='1')document.body.classList.add('dark');
-document.getElementById('content').style.fontSize=fs+'pt';
+if(localStorage.getItem(‘acr_dark’)===‘1’)document.body.classList.add(‘dark’);
+document.getElementById(‘content’).style.fontSize=fs+‘pt’;
 
 function navTo(fid){
-  var idx=IDS.indexOf(fid);
-  if(idx<0)return;
-  cur=idx;
-  stopVoice();
-  document.getElementById('content').innerHTML='<div id="loading">Loading...</div>';
-  var url='data/'+fid+'.json';
-  document.getElementById('content').innerHTML='<div id="loading" style="padding:40px;text-align:center;color:#333">Fetching: '+url+'...</div>';
-  fetch(url)
-    .then(function(r){
-      if(!r.ok)throw new Error('HTTP '+r.status+' for '+url);
-      return r.json();
-    })
-    .then(function(d){
-      CACHE[fid]=d.html;
-      document.getElementById('content').innerHTML=d.html;
-      document.getElementById('content').style.fontSize=fs+'pt';
-      document.getElementById('title-bar').textContent=LABELS[idx]||fid;
-      document.querySelectorAll('.toc-file').forEach(function(el){
-        el.classList.toggle('active',el.getAttribute('data-id')===fid);
-      });
-      var a=document.querySelector('.toc-file.active');
-      if(a)a.scrollIntoView({block:'nearest'});
-      document.getElementById('prev-btn').disabled=idx<=0;
-      document.getElementById('next-btn').disabled=idx>=IDS.length-1;
-      document.getElementById('pos-lbl').textContent=(idx+1)+' of '+IDS.length;
-      document.getElementById('bm-btn').textContent=bms.indexOf(fid)>=0?'★':'☆';
-      window.scrollTo(0,0);
-      localStorage.setItem('acr_last',fid);
-      if(window.innerWidth<=700)document.getElementById('sidebar').classList.remove('mob');
-    })
-    .catch(function(e){
-      document.getElementById('content').innerHTML='<p style="color:#888;padding:40px;text-align:center">Error loading content: '+e.message+'</p>';
-    });
+var idx=IDS.indexOf(fid);
+if(idx<0)return;
+cur=idx;
+stopVoice();
+document.getElementById(‘content’).innerHTML=’<div id="loading">Loading…</div>’;
+var url=‘data/’+fid+’.json’;
+document.getElementById(‘content’).innerHTML=’<div id="loading" style="padding:40px;text-align:center;color:#333">Fetching: ‘+url+’…</div>’;
+fetch(url)
+.then(function(r){
+if(!r.ok)throw new Error(‘HTTP ‘+r.status+’ for ‘+url);
+return r.json();
+})
+.then(function(d){
+CACHE[fid]=d.html;
+document.getElementById(‘content’).innerHTML=d.html;
+document.getElementById(‘content’).style.fontSize=fs+‘pt’;
+document.getElementById(‘title-bar’).textContent=LABELS[idx]||fid;
+document.querySelectorAll(’.toc-file’).forEach(function(el){
+el.classList.toggle(‘active’,el.getAttribute(‘data-id’)===fid);
+});
+var a=document.querySelector(’.toc-file.active’);
+if(a)a.scrollIntoView({block:‘nearest’});
+document.getElementById(‘prev-btn’).disabled=idx<=0;
+document.getElementById(‘next-btn’).disabled=idx>=IDS.length-1;
+document.getElementById(‘pos-lbl’).textContent=(idx+1)+’ of ‘+IDS.length;
+document.getElementById(‘bm-btn’).textContent=bms.indexOf(fid)>=0?‘★’:‘☆’;
+window.scrollTo(0,0);
+localStorage.setItem(‘acr_last’,fid);
+if(window.innerWidth<=700)document.getElementById(‘sidebar’).classList.remove(‘mob’);
+})
+.catch(function(e){
+document.getElementById(‘content’).innerHTML=’<p style="color:#888;padding:40px;text-align:center">Error loading content: ‘+e.message+’</p>’;
+});
 }
 
 // Attach TOC click listeners after DOM ready
-document.querySelectorAll('.toc-file').forEach(function(el){
-  el.addEventListener('click',function(){
-    navTo(el.getAttribute('data-id'));
-  });
+document.querySelectorAll(’.toc-file’).forEach(function(el){
+el.addEventListener(‘click’,function(){
+navTo(el.getAttribute(‘data-id’));
+});
 });
 
 // Button listeners
-document.getElementById('start-btn').addEventListener('click',function(){navTo(IDS[0]);});
-document.getElementById('prev-btn').addEventListener('click',function(){if(cur>0)navTo(IDS[cur-1]);});
-document.getElementById('next-btn').addEventListener('click',function(){
-  if(cur<0)navTo(IDS[0]);
-  else if(cur<IDS.length-1)navTo(IDS[cur+1]);
+document.getElementById(‘start-btn’).addEventListener(‘click’,function(){navTo(IDS[0]);});
+document.getElementById(‘prev-btn’).addEventListener(‘click’,function(){if(cur>0)navTo(IDS[cur-1]);});
+document.getElementById(‘next-btn’).addEventListener(‘click’,function(){
+if(cur<0)navTo(IDS[0]);
+else if(cur<IDS.length-1)navTo(IDS[cur+1]);
 });
-document.getElementById('top-btn').addEventListener('click',function(){window.scrollTo(0,0);});
-document.getElementById('sb-btn').addEventListener('click',function(){
-  if(window.innerWidth<=700){document.getElementById('sidebar').classList.toggle('mob');}
-  else{
-    sbOpen=!sbOpen;
-    document.getElementById('sidebar').classList.toggle('hidden',!sbOpen);
-    document.getElementById('main').classList.toggle('nosb',!sbOpen);
-    var l=sbOpen?'270px':'0';
-    document.getElementById('botnav').style.left=l;
-    document.getElementById('voice-row').style.left=l;
-  }
+document.getElementById(‘top-btn’).addEventListener(‘click’,function(){window.scrollTo(0,0);});
+document.getElementById(‘sb-btn’).addEventListener(‘click’,function(){
+if(window.innerWidth<=700){document.getElementById(‘sidebar’).classList.toggle(‘mob’);}
+else{
+sbOpen=!sbOpen;
+document.getElementById(‘sidebar’).classList.toggle(‘hidden’,!sbOpen);
+document.getElementById(‘main’).classList.toggle(‘nosb’,!sbOpen);
+var l=sbOpen?‘270px’:‘0’;
+document.getElementById(‘botnav’).style.left=l;
+document.getElementById(‘voice-row’).style.left=l;
+}
 });
-document.getElementById('dk-btn').addEventListener('click',function(){
-  var d=document.body.classList.toggle('dark');
-  localStorage.setItem('acr_dark',d?'1':'0');
+document.getElementById(‘dk-btn’).addEventListener(‘click’,function(){
+var d=document.body.classList.toggle(‘dark’);
+localStorage.setItem(‘acr_dark’,d?‘1’:‘0’);
 });
-document.getElementById('rd-btn').addEventListener('click',function(){
-  var r=document.body.classList.toggle('acr-rd');
-  document.getElementById('sidebar').classList.toggle('hidden',r);
-  document.getElementById('main').classList.toggle('nosb',r);
-  var l=r?'0':(sbOpen?'270px':'0');
-  document.getElementById('botnav').style.left=l;
-  document.getElementById('voice-row').style.left=l;
+document.getElementById(‘rd-btn’).addEventListener(‘click’,function(){
+var r=document.body.classList.toggle(‘acr-rd’);
+document.getElementById(‘sidebar’).classList.toggle(‘hidden’,r);
+document.getElementById(‘main’).classList.toggle(‘nosb’,r);
+var l=r?‘0’:(sbOpen?‘270px’:‘0’);
+document.getElementById(‘botnav’).style.left=l;
+document.getElementById(‘voice-row’).style.left=l;
 });
-document.getElementById('fa-btn').addEventListener('click',function(){
-  fs=Math.max(8,fs-1);
-  document.getElementById('content').style.fontSize=fs+'pt';
-  localStorage.setItem('acr_fs',fs);
+document.getElementById(‘fa-btn’).addEventListener(‘click’,function(){
+fs=Math.max(8,fs-1);
+document.getElementById(‘content’).style.fontSize=fs+‘pt’;
+localStorage.setItem(‘acr_fs’,fs);
 });
-document.getElementById('fb-btn').addEventListener('click',function(){
-  fs=Math.min(20,fs+1);
-  document.getElementById('content').style.fontSize=fs+'pt';
-  localStorage.setItem('acr_fs',fs);
+document.getElementById(‘fb-btn’).addEventListener(‘click’,function(){
+fs=Math.min(20,fs+1);
+document.getElementById(‘content’).style.fontSize=fs+‘pt’;
+localStorage.setItem(‘acr_fs’,fs);
 });
-document.getElementById('bm-btn').addEventListener('click',function(){
-  var fid=IDS[cur];if(!fid)return;
-  var i=bms.indexOf(fid);
-  if(i>=0){bms.splice(i,1);this.textContent='☆';}
-  else{bms.push(fid);this.textContent='★';}
-  localStorage.setItem('acr_bms',JSON.stringify(bms));
+document.getElementById(‘bm-btn’).addEventListener(‘click’,function(){
+var fid=IDS[cur];if(!fid)return;
+var i=bms.indexOf(fid);
+if(i>=0){bms.splice(i,1);this.textContent=‘☆’;}
+else{bms.push(fid);this.textContent=‘★’;}
+localStorage.setItem(‘acr_bms’,JSON.stringify(bms));
 });
-document.getElementById('sq').addEventListener('input',function(){
-  var q=this.value;
-  document.querySelectorAll('mark').forEach(function(m){m.outerHTML=m.innerHTML;});
-  if(!q||q.length<3)return;
-  var c=document.getElementById('content'),ql=q.toLowerCase();
-  var walker=document.createTreeWalker(c,NodeFilter.SHOW_TEXT,null,false);
-  var nodes=[],nd;
-  while(nd=walker.nextNode())nodes.push(nd);
-  var first=null;
-  nodes.forEach(function(n){
-    var t=n.textContent,ix=t.toLowerCase().indexOf(ql);
-    if(ix>=0){
-      var r=document.createRange();r.setStart(n,ix);r.setEnd(n,ix+q.length);
-      try{var m=document.createElement('mark');r.surroundContents(m);if(!first)first=m;}catch(e){}
-    }
-  });
-  if(first)window.scrollTo(0,first.getBoundingClientRect().top+(window.pageYOffset||0)-80);
+document.getElementById(‘sq’).addEventListener(‘input’,function(){
+var q=this.value;
+document.querySelectorAll(‘mark’).forEach(function(m){m.outerHTML=m.innerHTML;});
+if(!q||q.length<3)return;
+var c=document.getElementById(‘content’),ql=q.toLowerCase();
+var walker=document.createTreeWalker(c,NodeFilter.SHOW_TEXT,null,false);
+var nodes=[],nd;
+while(nd=walker.nextNode())nodes.push(nd);
+var first=null;
+nodes.forEach(function(n){
+var t=n.textContent,ix=t.toLowerCase().indexOf(ql);
+if(ix>=0){
+var r=document.createRange();r.setStart(n,ix);r.setEnd(n,ix+q.length);
+try{var m=document.createElement(‘mark’);r.surroundContents(m);if(!first)first=m;}catch(e){}
+}
+});
+if(first)window.scrollTo(0,first.getBoundingClientRect().top+(window.pageYOffset||0)-80);
 });
 
 // Voice
 function getParas(vonly){
-  var all=document.getElementById('content').querySelectorAll('p.dp');
-  var r=[];
-  all.forEach(function(p){
-    if(!p.textContent.trim())return;
-    if(vonly){if(p.getAttribute('data-ptype')==='verse')r.push(p);}
-    else r.push(p);
-  });
-  return r;
-}
-document.getElementById('vt-btn').addEventListener('click',function(){
-  vopen=!vopen;
-  document.getElementById('voice-row').classList.toggle('show',vopen);
-  document.getElementById('main').classList.toggle('vopen',vopen);
-  this.classList.toggle('active',vopen);
-  if(!vopen)stopVoice();
+var all=document.getElementById(‘content’).querySelectorAll(‘p.dp’);
+var r=[];
+all.forEach(function(p){
+if(!p.textContent.trim())return;
+if(vonly){if(p.getAttribute(‘data-ptype’)===‘verse’)r.push(p);}
+else r.push(p);
 });
-document.getElementById('play-btn').addEventListener('click',function(){
-  if(!window.speechSynthesis){alert('Use Safari for voice.');return;}
-  if(pa){window.speechSynthesis.resume();pa=false;document.getElementById('play-btn').style.display='none';document.getElementById('pause-btn').style.display='inline';document.getElementById('vstat').textContent='Reading...';return;}
-  ps=getParas(vo);
-  if(!ps.length){document.getElementById('vstat').textContent='No content';return;}
-  if(pi>=ps.length)pi=0;
-  sp=true;
-  document.getElementById('play-btn').style.display='none';
-  document.getElementById('pause-btn').style.display='inline';
-  readNext();
+return r;
+}
+document.getElementById(‘vt-btn’).addEventListener(‘click’,function(){
+vopen=!vopen;
+document.getElementById(‘voice-row’).classList.toggle(‘show’,vopen);
+document.getElementById(‘main’).classList.toggle(‘vopen’,vopen);
+this.classList.toggle(‘active’,vopen);
+if(!vopen)stopVoice();
+});
+document.getElementById(‘play-btn’).addEventListener(‘click’,function(){
+if(!window.speechSynthesis){alert(‘Use Safari for voice.’);return;}
+if(pa){window.speechSynthesis.resume();pa=false;document.getElementById(‘play-btn’).style.display=‘none’;document.getElementById(‘pause-btn’).style.display=‘inline’;document.getElementById(‘vstat’).textContent=‘Reading…’;return;}
+ps=getParas(vo);
+if(!ps.length){document.getElementById(‘vstat’).textContent=‘No content’;return;}
+if(pi>=ps.length)pi=0;
+sp=true;
+document.getElementById(‘play-btn’).style.display=‘none’;
+document.getElementById(‘pause-btn’).style.display=‘inline’;
+readNext();
 });
 function readNext(){
-  if(!sp||pi>=ps.length){doneSpeaking();return;}
-  var p=ps[pi];
-  if(cp)cp.classList.remove('speaking');
-  p.classList.add('speaking');cp=p;
-  window.scrollTo(0,p.getBoundingClientRect().top+(window.pageYOffset||0)-120);
-  var u=new SpeechSynthesisUtterance(p.textContent.trim());
-  u.rate=spd;u.lang='en-US';
-  u.onend=function(){pi++;if(sp)readNext();};
-  u.onerror=function(){pi++;if(sp)readNext();};
-  document.getElementById('vstat').textContent=(pi+1)+'/'+ps.length;
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(u);
+if(!sp||pi>=ps.length){doneSpeaking();return;}
+var p=ps[pi];
+if(cp)cp.classList.remove(‘speaking’);
+p.classList.add(‘speaking’);cp=p;
+window.scrollTo(0,p.getBoundingClientRect().top+(window.pageYOffset||0)-120);
+var u=new SpeechSynthesisUtterance(p.textContent.trim());
+u.rate=spd;u.lang=‘en-US’;
+u.onend=function(){pi++;if(sp)readNext();};
+u.onerror=function(){pi++;if(sp)readNext();};
+document.getElementById(‘vstat’).textContent=(pi+1)+’/’+ps.length;
+window.speechSynthesis.cancel();
+window.speechSynthesis.speak(u);
 }
-document.getElementById('pause-btn').addEventListener('click',function(){
-  window.speechSynthesis.pause();pa=true;
-  this.style.display='none';
-  document.getElementById('play-btn').style.display='inline';
-  document.getElementById('play-btn').textContent='Resume';
-  document.getElementById('vstat').textContent='Paused';
+document.getElementById(‘pause-btn’).addEventListener(‘click’,function(){
+window.speechSynthesis.pause();pa=true;
+this.style.display=‘none’;
+document.getElementById(‘play-btn’).style.display=‘inline’;
+document.getElementById(‘play-btn’).textContent=‘Resume’;
+document.getElementById(‘vstat’).textContent=‘Paused’;
 });
-document.getElementById('stop-btn').addEventListener('click',stopVoice);
+document.getElementById(‘stop-btn’).addEventListener(‘click’,stopVoice);
 function stopVoice(){
-  if(window.speechSynthesis)window.speechSynthesis.cancel();
-  sp=false;pa=false;pi=0;
-  if(cp)cp.classList.remove('speaking');cp=null;
-  document.getElementById('play-btn').style.display='inline';
-  document.getElementById('play-btn').textContent='▶';
-  document.getElementById('pause-btn').style.display='none';
-  document.getElementById('vstat').textContent='Ready';
+if(window.speechSynthesis)window.speechSynthesis.cancel();
+sp=false;pa=false;pi=0;
+if(cp)cp.classList.remove(‘speaking’);cp=null;
+document.getElementById(‘play-btn’).style.display=‘inline’;
+document.getElementById(‘play-btn’).textContent=‘▶’;
+document.getElementById(‘pause-btn’).style.display=‘none’;
+document.getElementById(‘vstat’).textContent=‘Ready’;
 }
 function doneSpeaking(){
-  sp=false;pi=0;
-  if(cp)cp.classList.remove('speaking');cp=null;
-  document.getElementById('play-btn').style.display='inline';
-  document.getElementById('play-btn').textContent='▶';
-  document.getElementById('pause-btn').style.display='none';
-  document.getElementById('vstat').textContent='Done';
+sp=false;pi=0;
+if(cp)cp.classList.remove(‘speaking’);cp=null;
+document.getElementById(‘play-btn’).style.display=‘inline’;
+document.getElementById(‘play-btn’).textContent=‘▶’;
+document.getElementById(‘pause-btn’).style.display=‘none’;
+document.getElementById(‘vstat’).textContent=‘Done’;
 }
-document.getElementById('vspd').addEventListener('change',function(){
-  spd=parseFloat(this.value);
-  if(sp&&!pa){var i=pi;stopVoice();pi=i;sp=true;document.getElementById('play-btn').style.display='none';document.getElementById('pause-btn').style.display='inline';readNext();}
+document.getElementById(‘vspd’).addEventListener(‘change’,function(){
+spd=parseFloat(this.value);
+if(sp&&!pa){var i=pi;stopVoice();pi=i;sp=true;document.getElementById(‘play-btn’).style.display=‘none’;document.getElementById(‘pause-btn’).style.display=‘inline’;readNext();}
 });
-document.getElementById('vo-btn').addEventListener('click',function(){
-  vo=!vo;
-  this.classList.toggle('von',vo);
-  this.textContent=vo?'All':'Verses';
-  if(sp)stopVoice();
-  document.getElementById('vstat').textContent=vo?getParas(true).length+' verses':'Ready';
+document.getElementById(‘vo-btn’).addEventListener(‘click’,function(){
+vo=!vo;
+this.classList.toggle(‘von’,vo);
+this.textContent=vo?‘All’:‘Verses’;
+if(sp)stopVoice();
+document.getElementById(‘vstat’).textContent=vo?getParas(true).length+’ verses’:‘Ready’;
 });
 
 window.onscroll=function(){
-  var s=window.pageYOffset||0;
-  var h=document.documentElement.scrollHeight-window.innerHeight;
-  document.getElementById('prog-fill').style.width=(h>0?Math.round(s/h*100):0)+'%';
-  document.getElementById('top-btn').style.display=s>300?'block':'none';
+var s=window.pageYOffset||0;
+var h=document.documentElement.scrollHeight-window.innerHeight;
+document.getElementById(‘prog-fill’).style.width=(h>0?Math.round(s/h*100):0)+’%’;
+document.getElementById(‘top-btn’).style.display=s>300?‘block’:‘none’;
 };
 
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
+if(‘serviceWorker’ in navigator)navigator.serviceWorker.register(‘sw.js’).catch(function(){});
 
-var last=localStorage.getItem('acr_last');
+var last=localStorage.getItem(‘acr_last’);
 if(last&&IDS.indexOf(last)>=0)navTo(last);
 </script>
+
 </body>
 </html>
