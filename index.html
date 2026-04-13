@@ -353,7 +353,6 @@ body.dark #home p{color:#888}
   <div class="hl-dot" style="background:#e1bee7" data-hl="hl-p" title="Purple"></div>
   <div class="hl-dot" style="background:#ffe0b2" data-hl="hl-o" title="Orange"></div>
   <button id="hl-copy">&#128203; Copy</button>
-  <button id="hl-clr">&#10005; Remove</button>
 </div>
 
 <div id="vr">
@@ -509,7 +508,8 @@ function restoreHL(fid){
   });
 }
 document.getElementById('content').addEventListener('mouseup',handleSel);
-document.getElementById('content').addEventListener('touchend',function(){setTimeout(handleSel,150);});
+document.getElementById('content').addEventListener('touchend',function(){setTimeout(handleSel,300);});
+document.addEventListener('selectionchange',function(){if(window.getSelection&&window.getSelection().toString().trim().length>0)setTimeout(handleSel,200);});
 function handleSel(){
   var sel=window.getSelection();
   if(!sel||!sel.toString().trim()||sel.rangeCount===0){if(!document.getElementById('hl-bar').classList.contains('on'))return;return;}
@@ -608,12 +608,24 @@ document.getElementById('vs').addEventListener('change',function(){spd=parseFloa
 document.getElementById('b-pv').addEventListener('click',function(){if(!window.speechSynthesis)return;window.speechSynthesis.cancel();var u=new SpeechSynthesisUtterance('In the beginning The Creator created the heavens and the earth.');u.rate=spd;u.lang='en-US';var voice=getVoice();if(voice)u.voice=voice;window.speechSynthesis.speak(u);});
 function gps(){var mode=document.getElementById('vm').value,all=document.getElementById('content').querySelectorAll('p.dp'),r=[];all.forEach(function(p){if(!p.textContent.trim())return;var pt=p.getAttribute('data-ptype');if(mode==='verses'){if(pt==='verse')r.push(p);}else if(mode==='notes'){if(pt==='note')r.push(p);}else r.push(p);});return r;}
 document.getElementById('b-vt').addEventListener('click',function(){vop=!vop;document.getElementById('vr').classList.toggle('on',vop);document.getElementById('main').classList.toggle('vopen',vop||npop);this.classList.toggle('on',vop);document.getElementById('tb2').classList.toggle('up',vop||npop);if(!vop)stp();});
-document.getElementById('b-pl').addEventListener('click',function(){if(!window.speechSynthesis){alert('Use Safari for voice.');return;}if(pa){window.speechSynthesis.resume();pa=false;document.getElementById('b-pl').style.display='none';document.getElementById('b-pa').style.display='inline';document.getElementById('vst').textContent='Reading...';return;}ps=gps();if(!ps.length){document.getElementById('vst').textContent='No content';return;}if(pi>=ps.length)pi=0;sp=true;document.getElementById('b-pl').style.display='none';document.getElementById('b-pa').style.display='inline';document.getElementById('vst').textContent='Starting...';
-// iOS Safari requires direct speak() call in user gesture to unlock
-var unlock=new SpeechSynthesisUtterance('');unlock.volume=0;
-unlock.onend=function(){if(sp)rn();};
-unlock.onerror=function(){if(sp)rn();};
-window.speechSynthesis.cancel();window.speechSynthesis.speak(unlock);});
+document.getElementById('b-pl').addEventListener('click',function(){
+  if(!window.speechSynthesis){alert('Use Safari for voice.');return;}
+  if(pa){window.speechSynthesis.resume();pa=false;document.getElementById('b-pl').style.display='none';document.getElementById('b-pa').style.display='inline';document.getElementById('vst').textContent='Reading...';return;}
+  ps=gps();if(!ps.length){document.getElementById('vst').textContent='No content';return;}
+  if(pi>=ps.length)pi=0;sp=true;
+  document.getElementById('b-pl').style.display='none';
+  document.getElementById('b-pa').style.display='inline';
+  // iOS Safari: speak() MUST be called synchronously inside the gesture handler
+  window.speechSynthesis.cancel();
+  var p=ps[pi];
+  if(cp)cp.classList.remove('sp');p.classList.add('sp');cp=p;
+  window.scrollTo(0,p.getBoundingClientRect().top+(window.pageYOffset||0)-120);
+  document.getElementById('vst').textContent='1/'+ps.length;
+  var u=new SpeechSynthesisUtterance(prepTTS(p.textContent.trim()));
+  u.rate=spd;u.lang='en-US';var voice=getVoice();if(voice)u.voice=voice;
+  u.onend=function(){if(!sp)return;pi++;rn();};
+  u.onerror=function(){if(!sp)return;pi++;rn();};
+  window.speechSynthesis.speak(u);});
 function rn(){
   if(!sp||pi>=ps.length){
     if(sp&&cur<IDS.length-1){var nextFid=IDS[cur+1];pi=0;go(nextFid);setTimeout(function(){ps=gps();if(ps.length&&sp)rn();else dn();},900);}
