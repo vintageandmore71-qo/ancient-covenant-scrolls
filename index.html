@@ -10,6 +10,9 @@
 <meta name="apple-mobile-web-app-title" content="ACR">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Phoenician&display=swap" rel="stylesheet">
 <title>The Ancient Covenant Record</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -109,7 +112,7 @@ body.dark #recent-bar{background:#1e1e1e}
 .rb-item{background:#3a3a3a;border:none;color:#ccc;padding:3px 8px;border-radius:3px;cursor:pointer;font-size:10px;font-family:Arial;white-space:nowrap;flex-shrink:0}
 .rb-item:hover{background:#555;color:#fff}
 #pw-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:#1a1a1a;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px}
-#pw-screen .ph2,.ph{font-family:"Segoe UI Historic","Noto Sans Phoenician","Noto Serif","Arial Unicode MS",serif;direction:ltr;unicode-bidi:bidi-override}
+#pw-screen .ph2,.ph{font-family:"Noto Sans Phoenician","Segoe UI Historic","Arial Unicode MS",serif;direction:ltr;unicode-bidi:bidi-override;letter-spacing:.04em}
 #pw-screen .ph2{font-size:3.5em;margin-bottom:24px;color:#e8e8e0}
 #pw-screen h2{color:#e8e8e0;font-family:Arial;font-size:1.2em;font-weight:bold;margin-bottom:8px;text-align:center}
 #pw-screen p{color:#888;font-family:Arial;font-size:.85em;margin-bottom:28px;text-align:center}
@@ -519,7 +522,10 @@ document.getElementById('hl-bar').classList.add('on');
 document.getElementById('main').classList.add('vopen');
 }
 function hideHL(){document.getElementById('hl-bar').classList.remove('on');if(!vop&&!npop)document.getElementById('main').classList.remove('vopen');selText='';selRange=null;}
-document.querySelectorAll('#hl-bar .hl-dot,#hl-copy,#hl-clr').forEach(function(el){el.addEventListener('mousedown',function(e){e.preventDefault();});});
+document.querySelectorAll('#hl-bar .hl-dot,#hl-copy,#hl-clr').forEach(function(el){
+['mousedown','touchstart','pointerdown'].forEach(function(evt){el.addEventListener(evt,function(e){e.preventDefault();},{passive:false});});
+});
+document.addEventListener('selectionchange',function(){var sel=window.getSelection();if(!sel||sel.rangeCount===0)return;var a=sel.anchorNode;if(!a)return;var c=document.getElementById('content');if(c&&(c===a||c.contains(a))&&sel.toString().trim())handleSel();});
 document.querySelectorAll('.hl-dot').forEach(function(dot){
 dot.addEventListener('click',function(){
 if(!selRange||!selText)return;
@@ -612,10 +618,23 @@ document.getElementById('vs').addEventListener('change',function(){spd=parseFloa
 document.getElementById('b-pv').addEventListener('click',function(){if(!window.speechSynthesis)return;window.speechSynthesis.cancel();var u=new SpeechSynthesisUtterance('In the beginning The Creator created the heavens and the earth.');u.rate=spd;u.lang='en-US';var voice=getVoice();if(voice)u.voice=voice;window.speechSynthesis.speak(u);});
 function gps(){var mode=document.getElementById('vm').value,all=document.getElementById('content').querySelectorAll('p.dp'),r=[];all.forEach(function(p){if(!p.textContent.trim())return;var pt=p.getAttribute('data-ptype');if(mode==='verses'){if(pt==='verse')r.push(p);}else if(mode==='notes'){if(pt==='note')r.push(p);}else r.push(p);});return r;}
 document.getElementById('b-vt').addEventListener('click',function(){vop=!vop;document.getElementById('vr').classList.toggle('on',vop);document.getElementById('main').classList.toggle('vopen',vop||npop);this.classList.toggle('on',vop);document.getElementById('tb2').classList.toggle('up',vop||npop);if(!vop)stp();});
-var ttsPrimed=false;
-function primeTTS(){if(ttsPrimed||!window.speechSynthesis)return;try{window.speechSynthesis.cancel();var pu=new SpeechSynthesisUtterance(' ');pu.volume=0;pu.rate=spd;window.speechSynthesis.speak(pu);ttsPrimed=true;}catch(e){}}
+function speakCurrent(){
+if(!sp||pi<0||pi>=ps.length)return false;
+var p=ps[pi];if(cp)cp.classList.remove('sp');p.classList.add('sp');cp=p;
+window.scrollTo(0,p.getBoundingClientRect().top+(window.pageYOffset||0)-120);
+document.getElementById('vst').textContent=(pi+1)+'/'+ps.length;
+try{localStorage.setItem('acr_vpos',JSON.stringify({fid:IDS[cur],pi:pi}));}catch(e){}
+var txt=prepTTS(p.textContent.trim());
+if(!txt){pi++;return speakCurrent();}
+var u=new SpeechSynthesisUtterance(txt);
+u.rate=spd;u.lang='en-US';
+var voice=getVoice();if(voice)u.voice=voice;
+u.onend=function(){if(!sp)return;pi++;rn();};
+u.onerror=function(ev){if(!sp)return;if(ev&&(ev.error==='canceled'||ev.error==='interrupted'))return;pi++;rn();};
+try{window.speechSynthesis.speak(u);return true;}catch(e){return false;}
+}
 document.getElementById('b-pl').addEventListener('click',function(){
-if(!window.speechSynthesis){alert('Use Safari for voice.');return;}
+if(!window.speechSynthesis){alert('Voice reader not supported in this browser.');return;}
 if(pa){window.speechSynthesis.resume();pa=false;document.getElementById('b-pl').style.display='none';document.getElementById('b-pa').style.display='inline';document.getElementById('vst').textContent='Reading...';return;}
 ps=gps();
 if(!ps.length){document.getElementById('vst').textContent='No content';return;}
@@ -623,26 +642,16 @@ if(pi>=ps.length)pi=0;
 sp=true;
 document.getElementById('b-pl').style.display='none';
 document.getElementById('b-pa').style.display='inline';
-primeTTS();
-rn();
+// speak() MUST run synchronously inside the click handler or iOS Safari rejects it
+speakCurrent();
 });
 function rn(){
-if(!sp||pi>=ps.length){
-if(sp&&cur<IDS.length-1){var nextFid=IDS[cur+1];pi=0;go(nextFid);setTimeout(function(){ps=gps();if(ps.length&&sp)rn();else dn();},900);}
+if(!sp)return;
+if(pi>=ps.length){
+if(cur<IDS.length-1){var nextFid=IDS[cur+1];pi=0;go(nextFid);setTimeout(function(){ps=gps();if(ps.length&&sp)rn();else dn();},900);}
 else dn();return;
 }
-var p=ps[pi];if(cp)cp.classList.remove('sp');p.classList.add('sp');cp=p;
-window.scrollTo(0,p.getBoundingClientRect().top+(window.pageYOffset||0)-120);
-document.getElementById('vst').textContent=(pi+1)+'/'+ps.length;
-localStorage.setItem('acr_vpos',JSON.stringify({fid:IDS[cur],pi:pi}));
-var txt=prepTTS(p.textContent.trim());
-if(!txt){pi++;rn();return;}
-var u=new SpeechSynthesisUtterance(txt);
-u.rate=spd;u.lang='en-US';
-var voice=getVoice();if(voice)u.voice=voice;
-u.onend=function(){if(!sp)return;pi++;rn();};
-u.onerror=function(ev){if(!sp)return;if(ev&&(ev.error==='canceled'||ev.error==='interrupted'))return;pi++;rn();};
-try{window.speechSynthesis.speak(u);}catch(e){pi++;setTimeout(rn,50);}
+speakCurrent();
 }
 document.getElementById('b-pa').addEventListener('click',function(){window.speechSynthesis.pause();pa=true;this.style.display='none';document.getElementById('b-pl').style.display='inline';document.getElementById('vst').textContent='Paused';});
 document.getElementById('b-st').addEventListener('click',stp);
@@ -651,10 +660,20 @@ function stp(){sp=false;pa=false;if(window.speechSynthesis)window.speechSynthesi
 function dn(){sp=false;pi=0;if(cp)cp.classList.remove('sp');cp=null;document.getElementById('b-pl').style.display='inline';document.getElementById('b-pa').style.display='none';document.getElementById('vst').textContent='Done';}
 
 window.onscroll=function(){var s=window.scrollY||0,h=document.documentElement.scrollHeight-window.innerHeight;document.getElementById('pf').style.width=(h>0?Math.round(s/h*100):0)+'%';document.getElementById('tb2').style.display=s>300?'block':'none';};
-if('serviceWorker' in navigator){
-try{if(!localStorage.getItem('acr_sw_reset_v3')){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister();});});if(window.caches&&caches.keys)caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k);});});localStorage.setItem('acr_sw_reset_v3','1');}}catch(e){}
-navigator.serviceWorker.register('sw.js').catch(function(){});
+(function(){
+if(!('serviceWorker' in navigator))return;
+var RESET_KEY='acr_sw_reset_v5';
+if(!localStorage.getItem(RESET_KEY)){
+localStorage.setItem(RESET_KEY,'1');
+navigator.serviceWorker.getRegistrations().then(function(regs){
+var p=Promise.all(regs.map(function(r){return r.unregister();}));
+if(window.caches&&caches.keys){p=p.then(function(){return caches.keys().then(function(ks){return Promise.all(ks.map(function(k){return caches.delete(k);}));});});}
+p.then(function(){location.reload();}).catch(function(){location.reload();});
+}).catch(function(){});
+return;
 }
+navigator.serviceWorker.register('sw.js').catch(function(){});
+})();
 var last=localStorage.getItem('acr_last');if(last&&IDS.indexOf(last)>=0)go(last);
 </script>
 
