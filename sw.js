@@ -1,3 +1,4 @@
+@@ -0,0 +1,18 @@
 const CACHE = ‘acr-v1’;
 const SHELL = [‘index.html’, ‘manifest.json’, ‘icon.png’];
 self.addEventListener(‘install’, e => {
