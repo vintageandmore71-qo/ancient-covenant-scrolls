@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -12,495 +13,628 @@
 <title>The Ancient Covenant Record</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,sans-serif;font-size:10.5pt;background:#f5f5f0;color:#111111}
+body{font-family:Arial,sans-serif;font-size:10.5pt;background:#f5f5f0;color:#111;transition:background .3s,color .3s}
 body.dark{background:#1a1a1a;color:#e8e8e0}
+body.sepia{background:#f4ecd8;color:#3b2e1a}
+body.sepia #topnav,body.sepia #bn,body.sepia #vr,body.sepia #np{background:#7a5c10}
+body.sepia #sb{background:#5a3e08}
+body.sepia .toc-file{color:#f4d090}
+body.sepia .toc-file:hover{background:#6a4a10;color:#fff}
+body.sepia .toc-file.on{background:#4a2e05;border-left-color:#f4d090}
+body.sepia .toc-vol{color:#f0c040}
+body.sepia .toc-sec{color:#b89030}
 #prog{position:fixed;top:0;left:0;right:0;height:3px;background:#e0e0e0;z-index:9999}
-#prog-fill{height:3px;background:#444;width:0%}
-#topnav{position:fixed;top:3px;left:0;right:0;height:46px;background:#222;display:flex;align-items:center;gap:5px;padding:0 8px;z-index:1000;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+#pf{height:3px;background:#444;width:0%}
+#topnav{position:fixed;top:3px;left:0;right:0;height:46px;background:#222;display:flex;align-items:center;gap:3px;padding:0 5px;z-index:1000;box-shadow:0 2px 8px rgba(0,0,0,.4)}
 body.dark #topnav{background:#111}
-#topnav button{background:none;border:none;color:#ccc;cursor:pointer;padding:4px 7px;border-radius:4px;font-size:13px;font-family:Arial}
-#topnav button:hover{background:#444;color:#fff}
-#topnav button.active{background:#555;color:#fff}
-#title-bar{flex:1;color:#888;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#sq{background:#333;border:1px solid #555;border-radius:4px;color:#ddd;padding:4px 6px;font-size:12px;width:110px;font-family:Arial}
+#topnav button{background:none;border:none;color:#ccc;cursor:pointer;padding:4px 5px;border-radius:4px;font-size:12px;font-family:Arial}
+#topnav button:hover,#topnav button.on{background:#555;color:#fff}
+#tb{flex:1;color:#888;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#sq{background:#333;border:1px solid #555;border-radius:4px;color:#ddd;padding:3px 5px;font-size:11px;width:80px;font-family:Arial}
 #sq::placeholder{color:#777}
-#sidebar{position:fixed;top:49px;left:0;bottom:0;width:270px;background:#2a2a2a;overflow-y:auto;z-index:900;transition:transform .3s}
-#sidebar.hidden{transform:translateX(-270px)}
-body.dark #sidebar{background:#1e1e1e}
+#sb{position:fixed;top:49px;left:0;bottom:0;width:270px;background:#2a2a2a;overflow-y:auto;z-index:900;transition:transform .3s}
+#sb.h{transform:translateX(-270px)}
+body.dark #sb{background:#1e1e1e}
 .toc-sec{padding:10px 12px 4px;color:#777;font-size:9px;font-weight:bold;text-transform:uppercase;letter-spacing:.08em;border-top:1px solid #3a3a3a;margin-top:4px}
 .toc-vol{padding:5px 12px 2px;color:#aaa;font-size:11px;font-weight:bold}
-.toc-file{padding:4px 12px 4px 22px;color:#bbb;font-size:11px;cursor:pointer;user-select:none;-webkit-user-select:none}
+.toc-file{padding:4px 12px 4px 22px;color:#bbb;font-size:11px;cursor:pointer}
 .toc-file:hover{background:#3a3a3a;color:#fff}
-.toc-file.active{background:#444;color:#fff;font-weight:bold;border-left:3px solid #888}
+.toc-file.on{background:#444;color:#fff;font-weight:bold;border-left:3px solid #888}
 .warn{color:#c8a000}
-#main{margin-left:270px;margin-top:49px;padding:28px 44px 60px;max-width:880px}
-#main.nosb{margin-left:0}
-#main.vopen{padding-bottom:104px}
+#main{margin-left:270px;margin-top:49px;padding:28px 44px 60px;max-width:880px;transition:margin-left .3s,padding-bottom .3s}
+#main.x{margin-left:0}
+#main.vopen{padding-bottom:152px}
+#main.has-recent{margin-top:86px}
 @media(max-width:700px){
-  #main{margin-left:0;padding:16px 14px 60px}
-  #sidebar{transform:translateX(-270px)}
-  #sidebar.mob{transform:translateX(0)}
-  #botnav,#voice-row{left:0!important}
+#main{margin-left:0;padding:16px 14px 60px}
+#sb{transform:translateX(-270px)}
+#sb.m{transform:translateX(0)}
+#bn,#vr,#np,#nv,#hl-bar,#recent-bar{left:0!important}
 }
-#content p{font-family:Arial,sans-serif;line-height:1.65;margin:.12em 0}
-p.speaking{background:#fffde7;border-radius:3px}
-body.dark p.speaking{background:#2a2a00}
-mark{background:#ffeb3b}body.dark mark{background:#7a6000;color:#fff}
-#loading{text-align:center;padding:80px 20px;color:#888;font-size:14px}
-#botnav{position:fixed;bottom:0;left:270px;right:0;height:44px;background:#222;display:flex;align-items:center;justify-content:space-between;padding:0 12px;z-index:1000;border-top:1px solid #333}
-body.dark #botnav{background:#111}
-#botnav button{background:#444;border:none;color:#ddd;padding:6px 14px;border-radius:4px;font-size:12px;font-family:Arial;cursor:pointer}
-#botnav button:disabled{opacity:.3;cursor:default}
-#pos-lbl{color:#888;font-size:10px}
-#voice-row{position:fixed;bottom:44px;left:270px;right:0;height:44px;background:#1c1c1c;display:none;align-items:center;gap:6px;padding:0 10px;z-index:1000;border-top:1px solid #444}
-#voice-row.show{display:flex}
-#voice-row button{background:#3a3a3a;border:none;color:#ddd;padding:6px 10px;border-radius:4px;cursor:pointer;font-size:12px;font-family:Arial}
-#voice-row button.von{background:#335533;color:#aaffaa}
-#vspd{background:#2a2a2a;border:1px solid #555;border-radius:4px;color:#ddd;padding:5px 3px;font-size:11px;font-family:Arial}
-#vstat{color:#777;font-size:10px;flex:1;text-align:center}
-#top-btn{position:fixed;bottom:52px;right:14px;background:#444;color:#ddd;border:none;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:15px;display:none;z-index:1001}
+#content p{font-family:Arial,sans-serif;line-height:var(--lh,1.65);margin:.12em 0}
+p.sp{background:#fffde7;border-radius:3px}
+body.dark p.sp{background:#2a2a00}
+mark{background:#ffeb3b}
+.hl-y{background:#fff176;border-radius:2px}
+.hl-g{background:#b9f6ca;border-radius:2px}
+.hl-b{background:#bbdefb;border-radius:2px}
+.hl-p{background:#e1bee7;border-radius:2px}
+.hl-o{background:#ffe0b2;border-radius:2px}
+body.dark .hl-y{background:#7a6000;color:#fff}
+body.dark .hl-g{background:#1b5e20;color:#fff}
+body.dark .hl-b{background:#0d47a1;color:#fff}
+body.dark .hl-p{background:#4a148c;color:#fff}
+body.dark .hl-o{background:#e65100;color:#fff}
+#hl-bar{position:fixed;bottom:44px;left:270px;right:0;height:44px;background:#1a1a1a;display:none;align-items:center;gap:8px;padding:0 12px;z-index:1002;border-top:1px solid #444;transition:left .3s}
+#hl-bar.on{display:flex}
+#hl-bar span{color:#aaa;font-size:11px;font-family:Arial;white-space:nowrap}
+.hl-dot{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;flex-shrink:0}
+.hl-dot:hover{border-color:#fff}
+#hl-copy{background:#3a3a3a;border:none;color:#ddd;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-family:Arial;margin-left:auto;white-space:nowrap}
+#hl-clr{background:#3a3a3a;border:none;color:#e88;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-family:Arial;white-space:nowrap}
+#bn{position:fixed;bottom:0;left:270px;right:0;height:44px;background:#222;display:flex;align-items:center;justify-content:space-between;padding:0 10px;z-index:1000;border-top:1px solid #333;transition:left .3s,background .3s}
+body.dark #bn{background:#111}
+#bn button{background:#444;border:none;color:#ddd;padding:5px 12px;border-radius:4px;font-size:12px;font-family:Arial;cursor:pointer}
+#bn button:disabled{opacity:.3;cursor:default}
+#pl{color:#888;font-size:10px}
+#vr{position:fixed;bottom:44px;left:270px;right:0;height:44px;background:#1c1c1c;display:none;align-items:center;gap:4px;padding:0 6px;z-index:1000;border-top:1px solid #444;transition:left .3s}
+#vr.on{display:flex}
+#vr button{background:#3a3a3a;border:none;color:#ddd;padding:5px 6px;border-radius:4px;cursor:pointer;font-size:12px;font-family:Arial}
+#vr button:hover{background:#555}
+#vs,#vc,#vm{background:#2a2a2a;border:1px solid #555;border-radius:4px;color:#ddd;padding:4px 2px;font-size:11px;font-family:Arial}
+#vs{width:48px}#vc{flex:1;max-width:120px}#vm{width:62px}
+#vst{color:#777;font-size:10px;white-space:nowrap}
+#np{position:fixed;bottom:44px;left:270px;right:0;height:155px;background:#12121e;display:none;flex-direction:column;z-index:999;border-top:1px solid #444;transition:left .3s}
+#np.on{display:flex}
+#np-head{display:flex;align-items:center;padding:5px 10px;border-bottom:1px solid #2a2a2a;gap:5px}
+#np-lbl{color:#aaa;font-size:11px;font-family:Arial;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#np-head button{background:#333;border:none;color:#aaa;padding:3px 8px;border-radius:3px;cursor:pointer;font-size:11px;font-family:Arial;white-space:nowrap}
+#np-save{background:#2d5a2d;color:#aaffaa}
+#np-ta{flex:1;background:#0d0d1a;color:#ddd;border:none;padding:8px 12px;font-size:11px;font-family:Arial;resize:none;outline:none;line-height:1.5}
+#nv{position:fixed;top:49px;left:270px;right:0;bottom:44px;background:#f5f5f0;z-index:800;display:none;overflow-y:auto;padding:20px 28px;transition:left .3s}
+body.dark #nv{background:#1a1a1a}
+body.sepia #nv{background:#f4ecd8}
+#nv.on{display:block}
+#nv h2{font-size:14px;font-family:Arial;color:#333;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #ccc}
+body.dark #nv h2{color:#ddd;border-color:#444}
+.ni{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:12px 14px;margin-bottom:12px}
+body.dark .ni{background:#2a2a2a;border-color:#444}
+.ni-lbl{font-size:10px;color:#1a5276;font-family:Arial;margin-bottom:6px;cursor:pointer;text-decoration:underline}
+.ni-txt{font-size:11px;color:#222;font-family:Arial;line-height:1.5;white-space:pre-wrap}
+body.dark .ni-txt{color:#ddd}
+.ni-del{float:right;background:none;border:none;color:#c00;cursor:pointer;font-size:13px}
+#recent-bar{position:fixed;top:49px;left:270px;right:0;height:36px;background:#2a2a2a;display:none;align-items:center;gap:6px;padding:0 12px;z-index:899;border-bottom:1px solid #3a3a3a;overflow-x:auto;transition:left .3s}
+body.dark #recent-bar{background:#1e1e1e}
+#recent-bar.on{display:flex}
+.rb-item{background:#3a3a3a;border:none;color:#ccc;padding:3px 8px;border-radius:3px;cursor:pointer;font-size:10px;font-family:Arial;white-space:nowrap;flex-shrink:0}
+.rb-item:hover{background:#555;color:#fff}
+#pw-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:#1a1a1a;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px}
+#pw-screen .ph2{font-size:3.5em;margin-bottom:24px;color:#e8e8e0}
+#pw-screen h2{color:#e8e8e0;font-family:Arial;font-size:1.2em;font-weight:bold;margin-bottom:8px;text-align:center}
+#pw-screen p{color:#888;font-family:Arial;font-size:.85em;margin-bottom:28px;text-align:center}
+#pw-input{background:#2a2a2a;border:1px solid #555;border-radius:6px;color:#e8e8e0;padding:12px 16px;font-size:16px;font-family:Arial;width:100%;max-width:280px;margin-bottom:12px;outline:none;text-align:center}
+#pw-input:focus{border-color:#888}
+#pw-btn{background:#444;border:none;color:#ddd;padding:12px 32px;border-radius:6px;font-size:14px;font-family:Arial;cursor:pointer;width:100%;max-width:280px}
+#pw-btn:hover{background:#666}
+#pw-err{color:#e05555;font-family:Arial;font-size:12px;margin-top:8px;height:18px;text-align:center}
+#cj-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#222;border:1px solid #555;border-radius:8px;padding:20px;z-index:10000;display:none;min-width:240px}
+#cj-modal.on{display:block}
+#cj-modal h3{color:#ddd;font-family:Arial;font-size:13px;margin-bottom:12px}
+#cj-input{background:#333;border:1px solid #555;border-radius:4px;color:#ddd;padding:8px 12px;font-size:14px;font-family:Arial;width:100%;margin-bottom:10px;outline:none}
+#cj-modal button{background:#444;border:none;color:#ddd;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:12px;font-family:Arial;margin-right:6px}
+#overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;display:none;background:rgba(0,0,0,.4)}
+#overlay.on{display:block}
+#tb2{position:fixed;bottom:52px;right:14px;background:#444;color:#ddd;border:none;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:15px;display:none;z-index:1001}
+#tb2.up{bottom:100px}
+#fc{display:flex;gap:2px}
+#fc button{width:22px;height:22px;border-radius:3px;background:#444;border:none;color:#ddd;cursor:pointer;font-size:11px}
+#lhc{display:flex;gap:2px}
+#lhc button{width:22px;height:22px;border-radius:3px;background:#444;border:none;color:#ddd;cursor:pointer;font-size:10px}
 #home{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px 20px}
-#home .ph{font-size:4em;margin-bottom:20px}
+.ph{font-size:4em;margin-bottom:20px}
 #home h1{font-size:1.4em;font-weight:bold;margin-bottom:8px}
 #home p{color:#666;font-size:.85em;margin-bottom:24px;line-height:1.6}
 body.dark #home p{color:#888}
-#home .sb{background:#444;color:#ddd;border:none;padding:12px 28px;border-radius:6px;font-size:14px;font-family:Arial;cursor:pointer}
-#fc{display:flex;gap:3px}
-#fc button{width:24px;height:24px;border-radius:3px;background:#444;border:none;color:#ddd;cursor:pointer;font-size:13px}
-#sidebar::-webkit-scrollbar{width:3px}
-#sidebar::-webkit-scrollbar-thumb{background:#555}
+#home button{background:#444;color:#ddd;border:none;padding:12px 28px;border-radius:6px;font-size:14px;font-family:Arial;cursor:pointer}
+#sb::-webkit-scrollbar{width:3px}
+#sb::-webkit-scrollbar-thumb{background:#555}
 </style>
 </head>
 <body>
-<div id="prog"><div id="prog-fill"></div></div>
+
+<div id="pw-screen">
+<div class="ph2">&#x10909;&#x10904;&#x10905;&#x10912;</div>
+<h2>THE ANCIENT COVENANT RECORD</h2>
+<p>Enter your access password to continue</p>
+<input id="pw-input" type="password" placeholder="Password" autocomplete="off">
+<button id="pw-btn">Enter</button>
+<div id="pw-err"></div>
+</div>
+
+<div id="prog"><div id="pf"></div></div>
 <div id="topnav">
-  <button id="sb-btn">&#9776;</button>
-  <div id="title-bar">The Ancient Covenant Record</div>
-  <div id="fc">
-    <button id="fa-btn">A-</button>
-    <button id="fb-btn">A+</button>
-  </div>
-  <input id="sq" type="text" placeholder="Search...">
-  <button id="bm-btn">&#9734;</button>
-  <button id="dk-btn">&#9685;</button>
-  <button id="rd-btn">&#8865;</button>
-  <button id="vt-btn">&#128266;</button>
+<button id="b-sb">&#9776;</button>
+<div id="tb">The Ancient Covenant Record</div>
+<div id="fc"><button id="b-fa" title="Font smaller">A-</button><button id="b-fb" title="Font larger">A+</button></div>
+<div id="lhc"><button id="b-lhd" title="Less spacing">&#8597;</button><button id="b-lhu" title="More spacing">&#8645;</button></div>
+<input id="sq" type="text" placeholder="Search...">
+<button id="b-bm" title="Bookmark">&#9734;</button>
+<button id="b-cj" title="Jump to chapter">&#9654;&#9654;</button>
+<button id="b-nt" title="Notes">&#128221;</button>
+<button id="b-nv" title="All notes">&#128196;</button>
+<button id="b-rec" title="Recently read">&#128336;</button>
+<button id="b-sep" title="Sepia mode">&#9728;</button>
+<button id="b-dk" title="Dark mode">&#9685;</button>
+<button id="b-rd" title="Reading mode">&#8865;</button>
+<button id="b-vt" title="Voice reader">&#128266;</button>
 </div>
-<div id="sidebar">
-  <div style="padding:8px 12px 6px;color:#555;font-size:9px;letter-spacing:.05em;border-bottom:1px solid #333">
-    &#128214; THE ANCIENT COVENANT RECORD &#8212; 46 VOLUMES
-  </div>
-  <div class="toc-sec">TORAH — THE FIVE BOOKS OF MOSHEH</div>
-<div class="toc-vol">Vol 1 — Bereshit (Genesis)</div>
-<div class="toc-file" data-id="file_1">Part 1 — Chapters 1–11</div>
-<div class="toc-file" data-id="file_2">Part 2 — Chapters 12–25</div>
-<div class="toc-file" data-id="file_3">Part 3 — Chapters 26–36</div>
-<div class="toc-file" data-id="file_4">Part 4 — Chapters 37–50</div>
-<div class="toc-vol">Vol 2 — Shemot (Exodus)</div>
-<div class="toc-file" data-id="file_5">Part 1 — Chapters 1–18</div>
-<div class="toc-file" data-id="file_6">Part 2 — Chapters 19–40</div>
-<div class="toc-vol">Vol 3 — Vayikra (Leviticus)</div>
-<div class="toc-file" data-id="file_7">Part 1 — Chapters 1–16</div>
-<div class="toc-file" data-id="file_8">Part 2 — Chapters 17–27</div>
-<div class="toc-vol">Vol 4 — Bamidbar (Numbers)</div>
-<div class="toc-file" data-id="file_9">Part 1 — Chapters 1–19</div>
-<div class="toc-file" data-id="file_10">Part 2 — Chapters 20–36</div>
-<div class="toc-vol">Vol 5 — Devarim (Deuteronomy)</div>
-<div class="toc-file" data-id="file_11">Part 1 — Chapters 1–17</div>
-<div class="toc-file" data-id="file_12">Part 2 — Chapters 18–34</div>
-<div class="toc-sec">SECOND CANON — ORIT GE'EZ AND QUMRAN</div>
-<div class="toc-vol">Vol 6 — Chanokh (1 Enoch) — DSS Attested Ch 1–73</div>
-<div class="toc-file" data-id="file_13">Part 1 — Chapters 1–36 — Book of Watchers</div>
-<div class="toc-file" data-id="file_14">Part 2 — Chapters 37–55 — Astronomical and Dream Visions</div>
-<div class="toc-file" data-id="file_15">Part 3 — Chapters 56–73 — Epistle</div>
-<div class="toc-vol">Vol 7 — Yovelim (Jubilees) — All 50 Chapters</div>
-<div class="toc-file" data-id="file_16">Part 1 — Chapters 1–25</div>
-<div class="toc-file" data-id="file_17">Part 2 — Chapters 26–50</div>
-<div class="toc-vol">Vol 8 — Book of Giants</div>
-<div class="toc-file" data-id="file_18">Complete — Fragments 1–6</div>
-<div class="toc-vol">Vol 9 — Visions of Amram (4QAmram)</div>
-<div class="toc-file" data-id="file_19">Complete — Columns 1–3</div>
-<div class="toc-sec">NEVI'IM — FORMER PROPHETS</div>
-<div class="toc-vol">Vol 10 — Yehoshua (Joshua)</div>
-<div class="toc-file" data-id="file_20">Part 1 — Chapters 1–8</div>
-<div class="toc-file" data-id="file_21">Part 2 — Chapters 9–15</div>
-<div class="toc-file" data-id="file_22">Part 3 — Chapters 16–24</div>
-<div class="toc-vol">Vol 11 — Shofetim (Judges)</div>
-<div class="toc-file" data-id="file_23">Part 1 — Chapters 1–7</div>
-<div class="toc-file" data-id="file_24">Part 2 — Chapters 8–14</div>
-<div class="toc-file" data-id="file_25">Part 3 — Chapters 15–21</div>
-<div class="toc-vol">Vol 12 — Shemu'el Aleph (1 Samuel)</div>
-<div class="toc-file" data-id="file_26">Part 1 — Chapters 1–10</div>
-<div class="toc-file" data-id="file_27">Part 2 — Chapters 11–17</div>
-<div class="toc-file" data-id="file_28">Part 3 — Chapters 18–24</div>
-<div class="toc-file" data-id="file_29">Part 4 — Chapters 25–31</div>
-<div class="toc-vol">Vol 13 — Shemu'el Bet (2 Samuel)</div>
-<div class="toc-file" data-id="file_30">Part 1 — Chapters 1–6</div>
-<div class="toc-file" data-id="file_31">Part 2 — Chapters 7–12</div>
-<div class="toc-file" data-id="file_32">Part 3 — Chapters 13–18</div>
-<div class="toc-file" data-id="file_33">Part 4 — Chapters 19–24</div>
-<div class="toc-vol">Vol 14 — Melakhim Aleph (1 Kings)</div>
-<div class="toc-file" data-id="file_34">Part 1 — Chapters 1–6</div>
-<div class="toc-file" data-id="file_35">Part 2 — Chapters 7–12</div>
-<div class="toc-file" data-id="file_36">Part 3 — Chapters 13–18</div>
-<div class="toc-file" data-id="file_37">Part 4 — Chapters 19–22</div>
-<div class="toc-vol">Vol 15 — Melakhim Bet (2 Kings)</div>
-<div class="toc-file" data-id="file_38">Part 1 — Chapters 1–7</div>
-<div class="toc-file" data-id="file_39">Part 2 — Chapters 8–13</div>
-<div class="toc-file" data-id="file_40">Part 3 — Chapters 14–19</div>
-<div class="toc-file" data-id="file_41">Part 4 — Chapters 20–25</div>
-<div class="toc-sec">NEVI'IM — LATTER PROPHETS</div>
-<div class="toc-vol">Vol 16 — Yesha'yahu (Isaiah) — 1QIsa-a</div>
-<div class="toc-file" data-id="file_42">Part 1 — Chapters 1–12</div>
-<div class="toc-file" data-id="file_43">Part 2 — Chapters 13–27</div>
-<div class="toc-file" data-id="file_44">Part 3 — Chapters 28–41</div>
-<div class="toc-file" data-id="file_45">Part 4 — Chapters 42–54</div>
-<div class="toc-file" data-id="file_46">Part 5 — Chapters 55–66</div>
-<div class="toc-vol">Vol 17 — Yirmeyahu (Jeremiah) — DSS Primary</div>
-<div class="toc-file" data-id="file_47">Part 1 — Chapters 1–7</div>
-<div class="toc-file" data-id="file_48">Part 2 — Chapters 8–15</div>
-<div class="toc-file" data-id="file_49">Part 3 — Chapters 16–23</div>
-<div class="toc-file" data-id="file_50">Part 4 — Chapters 24–31</div>
-<div class="toc-file" data-id="file_51">Part 5 — Chapters 32–39</div>
-<div class="toc-file" data-id="file_52">Part 6 — Chapters 40–48</div>
-<div class="toc-file" data-id="file_53">Part 7 — Chapters 49–52</div>
-<div class="toc-vol">Vol 18 — Yehezkel (Ezekiel) — 4QEzek</div>
-<div class="toc-file" data-id="file_54">Part 1 — Chapters 1–11</div>
-<div class="toc-file" data-id="file_55">Part 2 — Chapters 12–19</div>
-<div class="toc-file" data-id="file_56">Part 3 — Chapters 20–24</div>
-<div class="toc-file" data-id="file_57">Part 4 — Chapters 25–32</div>
-<div class="toc-file" data-id="file_58">Part 5 — Chapters 33–39</div>
-<div class="toc-file" data-id="file_59">Part 6 — Chapters 40–48</div>
-<div class="toc-sec">NEVI'IM — THE TWELVE MINOR PROPHETS — 4QXII</div>
-<div class="toc-vol">Vol 19 — The Twelve</div>
-<div class="toc-file" data-id="file_60">Part 1 — Hoshea</div>
-<div class="toc-file" data-id="file_61">Part 2 — Yoel and Amos</div>
-<div class="toc-file" data-id="file_62">Part 3 — Ovadyah, Yonah, Mikhah, Nakhum</div>
-<div class="toc-file" data-id="file_63">Part 4 — Havakuk, Tzefanyah, Khagai, Zekhariyahu 1–8</div>
-<div class="toc-file" data-id="file_64">Part 5 — Zekhariyahu 9–14 and Malakhi</div>
-<div class="toc-sec">KETUVIM — THE WRITINGS</div>
-<div class="toc-vol">Vol 20 — Tehillim (Psalms) — Including Ps 151, 154, 155</div>
-<div class="toc-file" data-id="file_65">Part 1 — Psalms 1–20</div>
-<div class="toc-file" data-id="file_66">Part 2 — Psalms 21–41</div>
-<div class="toc-file" data-id="file_67">Part 3 — Psalms 42–72</div>
-<div class="toc-file" data-id="file_68">Part 4 — Psalms 73–89</div>
-<div class="toc-file" data-id="file_69">Part 5 — Psalms 90–106</div>
-<div class="toc-file" data-id="file_70">Part 6 — Psalms 107–118</div>
-<div class="toc-file" data-id="file_71">Part 7 — Psalm 119</div>
-<div class="toc-file" data-id="file_72">Part 8 — Psalms 120–150</div>
-<div class="toc-file" data-id="file_73">Part 9 — Psalms 151, 154, 155 — DSS Only</div>
-<div class="toc-vol">Vol 21 — Mishlei (Proverbs)</div>
-<div class="toc-file" data-id="file_74">Part 1 — Chapters 1–10</div>
-<div class="toc-file" data-id="file_75">Part 2 — Chapters 11–20</div>
-<div class="toc-file" data-id="file_76">Part 3 — Chapters 21–31</div>
-<div class="toc-vol">Vol 22 — Iyov (Job)</div>
-<div class="toc-file" data-id="file_77">Part 1 — Chapters 1–14</div>
-<div class="toc-file" data-id="file_78">Part 2 — Chapters 15–28</div>
-<div class="toc-file" data-id="file_79">Part 3 — Chapters 29–42</div>
-<div class="toc-vol">Vol 23 — Shir HaShirim (Song of Songs)</div>
-<div class="toc-file" data-id="file_80">Complete</div>
-<div class="toc-vol">Vol 24 — Ruth</div>
-<div class="toc-file" data-id="file_81">Complete</div>
-<div class="toc-vol">Vol 25 — Eikha (Lamentations)</div>
-<div class="toc-file" data-id="file_82">Complete</div>
-<div class="toc-vol">Vol 26 — Kohelet (Ecclesiastes)</div>
-<div class="toc-file" data-id="file_83">Complete</div>
-<div class="toc-vol">Vol 27 — Esther — Orit Ge'ez Primary</div>
-<div class="toc-file" data-id="file_84">Complete</div>
-<div class="toc-vol">Vol 28 — Daniyel (Daniel) — 8 DSS Manuscripts</div>
-<div class="toc-file" data-id="file_85">Part 1 — Chapters 1–6</div>
-<div class="toc-file" data-id="file_86">Part 2 — Chapters 7–12</div>
-<div class="toc-vol">Vol 29 — Ezra-Nekhemyah</div>
-<div class="toc-file" data-id="file_87">Part 1 — Ezra</div>
-<div class="toc-file" data-id="file_88">Part 2 — Nekhemyah</div>
-<div class="toc-vol">Vol 30 — Divrei HaYamim Aleph (1 Chronicles)</div>
-<div class="toc-file" data-id="file_89">Part 1 — Chapters 1–9</div>
-<div class="toc-file" data-id="file_90">Part 2 — Chapters 10–29</div>
-<div class="toc-vol">Vol 31 — Divrei HaYamim Bet (2 Chronicles)</div>
-<div class="toc-file" data-id="file_91">Part 1 — Chapters 1–18</div>
-<div class="toc-file" data-id="file_92">Part 2 — Chapters 19–36</div>
-<div class="toc-sec">QUMRAN SECTARIAN TEXTS</div>
-<div class="toc-vol">Vol 32 — 4Q246 — Aramaic Apocalypse</div>
-<div class="toc-file" data-id="file_93">Complete — Columns 1–2</div>
-<div class="toc-vol">Vol 33 — War Scroll 1QM — All 19 Columns</div>
-<div class="toc-file" data-id="file_94">Complete</div>
-<div class="toc-vol">Vol 34 — 4QMMT — Some Works of the Torah</div>
-<div class="toc-file" data-id="file_95">Complete — Sections A–C</div>
-<div class="toc-vol">Vol 35 — Damascus Document</div>
-<div class="toc-file" data-id="file_96">Part 1 — Columns 1–8</div>
-<div class="toc-file" data-id="file_97">Part 2 — Columns 9–16</div>
-<div class="toc-vol">Vol 36 — Community Rule 1QS</div>
-<div class="toc-file" data-id="file_98">Complete</div>
-<div class="toc-vol">Vol 37 — Rule of the Congregation 1QSa</div>
-<div class="toc-file" data-id="file_99">Complete — Columns 1–2</div>
-<div class="toc-vol">Vol 38 — Rule of Blessings 1QSb</div>
-<div class="toc-file" data-id="file_100">Complete — Columns 1–5</div>
-<div class="toc-vol">Vol 39 — Words of the Luminaries 4QDibHam</div>
-<div class="toc-file" data-id="file_101">Complete — Weekly Prayer Cycle</div>
-<div class="toc-vol">Vol 40 — Pesher Nahum 4QpNah</div>
-<div class="toc-file" data-id="file_102">Complete — Fragments 1–4</div>
-<div class="toc-vol">Vol 41 — Hodayot — Thanksgiving Hymns 1QH</div>
-<div class="toc-file" data-id="file_103">Part 1 — Columns 1–4</div>
-<div class="toc-file" data-id="file_104">Part 2 — Columns 5–8</div>
-<div class="toc-vol">Vol 42 — Pesher Habakkuk 1QpHab <span class="warn">&#9888;</span></div>
-<div class="toc-file" data-id="file_105">Complete — Columns 1–6</div>
-<div class="toc-vol">Vol 43 — Songs of Sabbath Sacrifice <span class="warn">&#9888;</span></div>
-<div class="toc-file" data-id="file_106">Complete — Selected Songs</div>
-<div class="toc-vol">Vol 44 — Genesis Apocryphon 1QapGen <span class="warn">&#9888;</span></div>
-<div class="toc-file" data-id="file_107">Complete — Selected Columns</div>
-<div class="toc-vol">Vol 45 — 11QMelchizedek <span class="warn">&#9888;</span></div>
-<div class="toc-file" data-id="file_108">Complete — Columns 1–2</div>
-<div class="toc-vol">Vol 46 — Temple Scroll 11Q19 — All 66 Columns <span class="warn">&#9888;</span></div>
-<div class="toc-file" data-id="file_109">Part 1 — Columns 1–22</div>
-<div class="toc-file" data-id="file_110">Part 2 — Columns 23–44</div>
-<div class="toc-file" data-id="file_111">Part 3 — Columns 45–66</div>
+
+<div id="sb">
+<div style="padding:8px 12px 6px;color:#555;font-size:9px;letter-spacing:.05em;border-bottom:1px solid #333">&#128214; THE ANCIENT COVENANT RECORD &#8212; 46 VOLUMES</div>
+<div class="toc-vol">Vol 1</div>
+<div class="toc-file" data-id="file_1">Bereshit (Genesis) — Part 1 — Chapters 1–11</div>
+<div class="toc-file" data-id="file_2">Bereshit (Genesis) — Part 2 — Chapters 12–25</div>
+<div class="toc-file" data-id="file_3">Bereshit (Genesis) — Part 3 — Chapters 26–36</div>
+<div class="toc-file" data-id="file_4">Bereshit (Genesis) — Part 4 — Chapters 37–50</div>
+<div class="toc-vol">Vol 2</div>
+<div class="toc-file" data-id="file_5">Shemot (Exodus) — Part 1 — Chapters 1–18</div>
+<div class="toc-file" data-id="file_6">Shemot (Exodus) — Part 2 — Chapters 19–40</div>
+<div class="toc-vol">Vol 3</div>
+<div class="toc-file" data-id="file_7">Vayikra (Leviticus) — Part 1 — Chapters 1–16</div>
+<div class="toc-file" data-id="file_8">Vayikra (Leviticus) — Part 2 — Chapters 17–27</div>
+<div class="toc-vol">Vol 4</div>
+<div class="toc-file" data-id="file_9">Bamidbar (Numbers) — Part 1 — Chapters 1–19</div>
+<div class="toc-file" data-id="file_10">Bamidbar (Numbers) — Part 2 — Chapters 20–36</div>
+<div class="toc-vol">Vol 5</div>
+<div class="toc-file" data-id="file_11">Devarim (Deuteronomy) — Part 1 — Chapters 1–17</div>
+<div class="toc-file" data-id="file_12">Devarim (Deuteronomy) — Part 2 — Chapters 18–34</div>
+<div class="toc-vol">Vol 6</div>
+<div class="toc-file" data-id="file_13">Chanokh (1 Enoch) — DSS Attested Ch 1–73 — Part 1 — Chapters 1–36 — Book of Watchers</div>
+<div class="toc-file" data-id="file_14">Chanokh (1 Enoch) — DSS Attested Ch 1–73 — Part 2 — Chapters 37–55 — Astronomical and Dream Visions</div>
+<div class="toc-file" data-id="file_15">Chanokh (1 Enoch) — DSS Attested Ch 1–73 — Part 3 — Chapters 56–73 — Epistle</div>
+<div class="toc-vol">Vol 7</div>
+<div class="toc-file" data-id="file_16">Yovelim (Jubilees) — All 50 Chapters — Part 1 — Chapters 1–25</div>
+<div class="toc-file" data-id="file_17">Yovelim (Jubilees) — All 50 Chapters — Part 2 — Chapters 26–50</div>
+<div class="toc-vol">Vol 8</div>
+<div class="toc-file" data-id="file_18">Book of Giants — Complete — Fragments 1–6</div>
+<div class="toc-vol">Vol 9</div>
+<div class="toc-file" data-id="file_19">Visions of Amram (4QAmram) — Complete — Columns 1–3</div>
+<div class="toc-vol">Vol 10</div>
+<div class="toc-file" data-id="file_20">Yehoshua (Joshua) — Part 1 — Chapters 1–8</div>
+<div class="toc-file" data-id="file_21">Yehoshua (Joshua) — Part 2 — Chapters 9–15</div>
+<div class="toc-file" data-id="file_22">Yehoshua (Joshua) — Part 3 — Chapters 16–24</div>
+<div class="toc-vol">Vol 11</div>
+<div class="toc-file" data-id="file_23">Shofetim (Judges) — Part 1 — Chapters 1–7</div>
+<div class="toc-file" data-id="file_24">Shofetim (Judges) — Part 2 — Chapters 8–14</div>
+<div class="toc-file" data-id="file_25">Shofetim (Judges) — Part 3 — Chapters 15–21</div>
+<div class="toc-vol">Vol 12</div>
+<div class="toc-file" data-id="file_26">Shemu'el Aleph (1 Samuel) — Part 1 — Chapters 1–10</div>
+<div class="toc-file" data-id="file_27">Shemu'el Aleph (1 Samuel) — Part 2 — Chapters 11–17</div>
+<div class="toc-file" data-id="file_28">Shemu'el Aleph (1 Samuel) — Part 3 — Chapters 18–24</div>
+<div class="toc-file" data-id="file_29">Shemu'el Aleph (1 Samuel) — Part 4 — Chapters 25–31</div>
+<div class="toc-vol">Vol 13</div>
+<div class="toc-file" data-id="file_30">Shemu'el Bet (2 Samuel) — Part 1 — Chapters 1–6</div>
+<div class="toc-file" data-id="file_31">Shemu'el Bet (2 Samuel) — Part 2 — Chapters 7–12</div>
+<div class="toc-file" data-id="file_32">Shemu'el Bet (2 Samuel) — Part 3 — Chapters 13–18</div>
+<div class="toc-file" data-id="file_33">Shemu'el Bet (2 Samuel) — Part 4 — Chapters 19–24</div>
+<div class="toc-vol">Vol 14</div>
+<div class="toc-file" data-id="file_34">Melakhim Aleph (1 Kings) — Part 1 — Chapters 1–6</div>
+<div class="toc-file" data-id="file_35">Melakhim Aleph (1 Kings) — Part 2 — Chapters 7–12</div>
+<div class="toc-file" data-id="file_36">Melakhim Aleph (1 Kings) — Part 3 — Chapters 13–18</div>
+<div class="toc-file" data-id="file_37">Melakhim Aleph (1 Kings) — Part 4 — Chapters 19–22</div>
+<div class="toc-vol">Vol 15</div>
+<div class="toc-file" data-id="file_38">Melakhim Bet (2 Kings) — Part 1 — Chapters 1–7</div>
+<div class="toc-file" data-id="file_39">Melakhim Bet (2 Kings) — Part 2 — Chapters 8–13</div>
+<div class="toc-file" data-id="file_40">Melakhim Bet (2 Kings) — Part 3 — Chapters 14–19</div>
+<div class="toc-file" data-id="file_41">Melakhim Bet (2 Kings) — Part 4 — Chapters 20–25</div>
+<div class="toc-vol">Vol 16</div>
+<div class="toc-file" data-id="file_42">Yesha'yahu (Isaiah) — 1QIsa-a — Part 1 — Chapters 1–12</div>
+<div class="toc-file" data-id="file_43">Yesha'yahu (Isaiah) — 1QIsa-a — Part 2 — Chapters 13–27</div>
+<div class="toc-file" data-id="file_44">Yesha'yahu (Isaiah) — 1QIsa-a — Part 3 — Chapters 28–41</div>
+<div class="toc-file" data-id="file_45">Yesha'yahu (Isaiah) — 1QIsa-a — Part 4 — Chapters 42–54</div>
+<div class="toc-file" data-id="file_46">Yesha'yahu (Isaiah) — 1QIsa-a — Part 5 — Chapters 55–66</div>
+<div class="toc-vol">Vol 17</div>
+<div class="toc-file" data-id="file_47">Yirmeyahu (Jeremiah) — DSS Primary — Part 1 — Chapters 1–7</div>
+<div class="toc-file" data-id="file_48">Yirmeyahu (Jeremiah) — DSS Primary — Part 2 — Chapters 8–15</div>
+<div class="toc-file" data-id="file_49">Yirmeyahu (Jeremiah) — DSS Primary — Part 3 — Chapters 16–23</div>
+<div class="toc-file" data-id="file_50">Yirmeyahu (Jeremiah) — DSS Primary — Part 4 — Chapters 24–31</div>
+<div class="toc-file" data-id="file_51">Yirmeyahu (Jeremiah) — DSS Primary — Part 5 — Chapters 32–39</div>
+<div class="toc-file" data-id="file_52">Yirmeyahu (Jeremiah) — DSS Primary — Part 6 — Chapters 40–48</div>
+<div class="toc-file" data-id="file_53">Yirmeyahu (Jeremiah) — DSS Primary — Part 7 — Chapters 49–52</div>
+<div class="toc-vol">Vol 18</div>
+<div class="toc-file" data-id="file_54">Yehezkel (Ezekiel) — 4QEzek — Part 1 — Chapters 1–11</div>
+<div class="toc-file" data-id="file_55">Yehezkel (Ezekiel) — 4QEzek — Part 2 — Chapters 12–19</div>
+<div class="toc-file" data-id="file_56">Yehezkel (Ezekiel) — 4QEzek — Part 3 — Chapters 20–24</div>
+<div class="toc-file" data-id="file_57">Yehezkel (Ezekiel) — 4QEzek — Part 4 — Chapters 25–32</div>
+<div class="toc-file" data-id="file_58">Yehezkel (Ezekiel) — 4QEzek — Part 5 — Chapters 33–39</div>
+<div class="toc-file" data-id="file_59">Yehezkel (Ezekiel) — 4QEzek — Part 6 — Chapters 40–48</div>
+<div class="toc-vol">Vol 19</div>
+<div class="toc-file" data-id="file_60">The Twelve — Part 1 — Hoshea</div>
+<div class="toc-file" data-id="file_61">The Twelve — Part 2 — Yoel and Amos</div>
+<div class="toc-file" data-id="file_62">The Twelve — Part 3 — Ovadyah, Yonah, Mikhah, Nakhum</div>
+<div class="toc-file" data-id="file_63">The Twelve — Part 4 — Havakuk, Tzefanyah, Khagai, Zekhariyahu 1–8</div>
+<div class="toc-file" data-id="file_64">The Twelve — Part 5 — Zekhariyahu 9–14 and Malakhi</div>
+<div class="toc-vol">Vol 20</div>
+<div class="toc-file" data-id="file_65">Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 1 — Psalms 1–20</div>
+<div class="toc-file" data-id="file_66">Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 2 — Psalms 21–41</div>
+<div class="toc-file" data-id="file_67">Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 3 — Psalms 42–72</div>
+<div class="toc-file" data-id="file_68">Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 4 — Psalms 73–89</div>
+<div class="toc-file" data-id="file_69">Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 5 — Psalms 90–106</div>
+<div class="toc-file" data-id="file_70">Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 6 — Psalms 107–118</div>
+<div class="toc-file" data-id="file_71">Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 7 — Psalm 119</div>
+<div class="toc-file" data-id="file_72">Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 8 — Psalms 120–150</div>
+<div class="toc-file" data-id="file_73">Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 9 — Psalms 151, 154, 155 — DSS Only</div>
+<div class="toc-vol">Vol 21</div>
+<div class="toc-file" data-id="file_74">Mishlei (Proverbs) — Part 1 — Chapters 1–10</div>
+<div class="toc-file" data-id="file_75">Mishlei (Proverbs) — Part 2 — Chapters 11–20</div>
+<div class="toc-file" data-id="file_76">Mishlei (Proverbs) — Part 3 — Chapters 21–31</div>
+<div class="toc-vol">Vol 22</div>
+<div class="toc-file" data-id="file_77">Iyov (Job) — Part 1 — Chapters 1–14</div>
+<div class="toc-file" data-id="file_78">Iyov (Job) — Part 2 — Chapters 15–28</div>
+<div class="toc-file" data-id="file_79">Iyov (Job) — Part 3 — Chapters 29–42</div>
+<div class="toc-vol">Vol 23</div>
+<div class="toc-file" data-id="file_80">Shir HaShirim (Song of Songs) — Complete</div>
+<div class="toc-vol">Vol 24</div>
+<div class="toc-file" data-id="file_81">Ruth — Complete</div>
+<div class="toc-vol">Vol 25</div>
+<div class="toc-file" data-id="file_82">Eikha (Lamentations) — Complete</div>
+<div class="toc-vol">Vol 26</div>
+<div class="toc-file" data-id="file_83">Kohelet (Ecclesiastes) — Complete</div>
+<div class="toc-vol">Vol 27</div>
+<div class="toc-file" data-id="file_84">Esther — Orit Ge'ez Primary — Complete</div>
+<div class="toc-vol">Vol 28</div>
+<div class="toc-file" data-id="file_85">Daniyel (Daniel) — 8 DSS Manuscripts — Part 1 — Chapters 1–6</div>
+<div class="toc-file" data-id="file_86">Daniyel (Daniel) — 8 DSS Manuscripts — Part 2 — Chapters 7–12</div>
+<div class="toc-vol">Vol 29</div>
+<div class="toc-file" data-id="file_87">Ezra-Nekhemyah — Part 1 — Ezra</div>
+<div class="toc-file" data-id="file_88">Ezra-Nekhemyah — Part 2 — Nekhemyah</div>
+<div class="toc-vol">Vol 30</div>
+<div class="toc-file" data-id="file_89">Divrei HaYamim Aleph (1 Chronicles) — Part 1 — Chapters 1–9</div>
+<div class="toc-file" data-id="file_90">Divrei HaYamim Aleph (1 Chronicles) — Part 2 — Chapters 10–29</div>
+<div class="toc-vol">Vol 31</div>
+<div class="toc-file" data-id="file_91">Divrei HaYamim Bet (2 Chronicles) — Part 1 — Chapters 1–18</div>
+<div class="toc-file" data-id="file_92">Divrei HaYamim Bet (2 Chronicles) — Part 2 — Chapters 19–36</div>
+<div class="toc-vol">Vol 32</div>
+<div class="toc-file" data-id="file_93">4Q246 — Aramaic Apocalypse — Complete — Columns 1–2</div>
+<div class="toc-vol">Vol 33</div>
+<div class="toc-file" data-id="file_94">War Scroll 1QM — All 19 Columns — Complete</div>
+<div class="toc-vol">Vol 34</div>
+<div class="toc-file" data-id="file_95">4QMMT — Some Works of the Torah — Complete — Sections A–C</div>
+<div class="toc-vol">Vol 35</div>
+<div class="toc-file" data-id="file_96">Damascus Document — Part 1 — Columns 1–8</div>
+<div class="toc-file" data-id="file_97">Damascus Document — Part 2 — Columns 9–16</div>
+<div class="toc-vol">Vol 36</div>
+<div class="toc-file" data-id="file_98">Community Rule 1QS — Complete</div>
+<div class="toc-vol">Vol 37</div>
+<div class="toc-file" data-id="file_99">Rule of the Congregation 1QSa — Complete — Columns 1–2</div>
+<div class="toc-vol">Vol 38</div>
+<div class="toc-file" data-id="file_100">Rule of Blessings 1QSb — Complete — Columns 1–5</div>
+<div class="toc-vol">Vol 39</div>
+<div class="toc-file" data-id="file_101">Words of the Luminaries 4QDibHam — Complete — Weekly Prayer Cycle</div>
+<div class="toc-vol">Vol 40</div>
+<div class="toc-file" data-id="file_102">Pesher Nahum 4QpNah — Complete — Fragments 1–4</div>
+<div class="toc-vol">Vol 41</div>
+<div class="toc-file" data-id="file_103">Hodayot — Thanksgiving Hymns 1QH — Part 1 — Columns 1–4</div>
+<div class="toc-file" data-id="file_104">Hodayot — Thanksgiving Hymns 1QH — Part 2 — Columns 5–8</div>
+<div class="toc-vol">Vol 42</div>
+<div class="toc-file" data-id="file_105">Pesher Habakkuk 1QpHab — Complete — Columns 1–6</div>
+<div class="toc-vol">Vol 43</div>
+<div class="toc-file" data-id="file_106">Songs of Sabbath Sacrifice — Complete — Selected Songs</div>
+<div class="toc-vol">Vol 44</div>
+<div class="toc-file" data-id="file_107">Genesis Apocryphon 1QapGen — Complete — Selected Columns</div>
+<div class="toc-vol">Vol 45</div>
+<div class="toc-file" data-id="file_108">11QMelchizedek — Complete — Columns 1–2</div>
+<div class="toc-vol">Vol 46</div>
+<div class="toc-file" data-id="file_109">Temple Scroll 11Q19 — All 66 Columns — Part 1 — Columns 1–22</div>
+<div class="toc-file" data-id="file_110">Temple Scroll 11Q19 — All 66 Columns — Part 2 — Columns 23–44</div>
+<div class="toc-file" data-id="file_111">Temple Scroll 11Q19 — All 66 Columns — Part 3 — Columns 45–66</div>
 </div>
+
+<div id="recent-bar"></div>
+
 <div id="main">
-  <div id="content">
-    <div id="home">
-      <div class="ph">𐤉𐤄𐤅𐤄</div>
-      <h1>THE ANCIENT COVENANT RECORD</h1>
-      <p>46 Volumes &#183; 111 Parts<br>
-      Dead Sea Scrolls &#183; Orit Ge&#39;ez &#183; Ancient Hebrew<br>
-      DSS Primary &#183; No Western Bias &#183; No Christian Framing</p>
-      <button class="sb" id="start-btn">Begin with Bereshit &#9654;</button>
-    </div>
-  </div>
+<div id="content">
+<div id="home">
+<div class="ph">&#x10909;&#x10904;&#x10905;&#x10912;</div>
+<h1>THE ANCIENT COVENANT RECORD</h1>
+<p>46 Volumes &#183; 111 Parts<br>Dead Sea Scrolls &#183; Orit Ge&#39;ez &#183; Ancient Hebrew<br>DSS Primary &#183; No Western Bias &#183; No Christian Framing</p>
+<button id="b-start">Begin with Bereshit &#9654;</button>
 </div>
-<div id="voice-row">
-  <button id="play-btn">&#9654;</button>
-  <button id="pause-btn" style="display:none">&#9646;&#9646;</button>
-  <button id="stop-btn">&#9646;&#9646;&#9646;</button>
-  <select id="vspd">
-    <option value="0.7">0.7x</option>
-    <option value="0.85">0.85x</option>
-    <option value="1" selected>1x</option>
-    <option value="1.2">1.2x</option>
-    <option value="1.5">1.5x</option>
-  </select>
-  <button id="vo-btn">Verses</button>
-  <span id="vstat">Ready</span>
 </div>
-<div id="botnav">
-  <button id="prev-btn" disabled>&#9664; Prev</button>
-  <span id="pos-lbl">&#8212;</span>
-  <button id="next-btn">Next &#9654;</button>
 </div>
-<button id="top-btn">&#8593;</button>
+
+<div id="hl-bar">
+<span>Highlight:</span>
+<div class="hl-dot" style="background:#fff176" data-hl="hl-y" title="Yellow"></div>
+<div class="hl-dot" style="background:#b9f6ca" data-hl="hl-g" title="Green"></div>
+<div class="hl-dot" style="background:#bbdefb" data-hl="hl-b" title="Blue"></div>
+<div class="hl-dot" style="background:#e1bee7" data-hl="hl-p" title="Purple"></div>
+<div class="hl-dot" style="background:#ffe0b2" data-hl="hl-o" title="Orange"></div>
+<button id="hl-copy">&#128203; Copy</button>
+<button id="hl-clr">&#10005; Remove</button>
+</div>
+
+<div id="vr">
+<button id="b-pl">&#9654;</button>
+<button id="b-pa" style="display:none">&#9646;&#9646;</button>
+<button id="b-st">&#9632;</button>
+<select id="vs"><option value="0.7">0.7x</option><option value="0.85">0.85x</option><option value="1" selected>1x</option><option value="1.2">1.2x</option><option value="1.5">1.5x</option></select>
+<select id="vc"><option value="">Loading...</option></select>
+<button id="b-pv" title="Preview voice">&#9654;&#9654;</button>
+<select id="vm"><option value="verses">Verses</option><option value="notes">Notes</option><option value="all">All</option></select>
+<span id="vst">Ready</span>
+</div>
+
+<div id="np">
+<div id="np-head">
+<span id="np-lbl">Notes</span>
+<button id="np-save">&#10003; Save</button>
+<button id="np-clr">Clear</button>
+<button id="np-cls">&#10005;</button>
+</div>
+<textarea id="np-ta" placeholder="Write your notes for this section..."></textarea>
+</div>
+
+<div id="nv">
+<h2>&#128221; All Notes</h2>
+<div id="nv-list"></div>
+</div>
+
+<div id="overlay"></div>
+<div id="cj-modal">
+<h3>Jump to chapter</h3>
+<input id="cj-input" type="number" min="1" placeholder="Chapter number...">
+<button id="cj-go">Go</button>
+<button id="cj-cls">Cancel</button>
+</div>
+
+<div id="bn">
+<button id="b-pv2" disabled>&#9664; Prev</button>
+<span id="pl">&#8212;</span>
+<button id="b-nx">Next &#9654;</button>
+</div>
+<button id="tb2">&#8593;</button>
+
 <script>
 var IDS=["file_1", "file_2", "file_3", "file_4", "file_5", "file_6", "file_7", "file_8", "file_9", "file_10", "file_11", "file_12", "file_13", "file_14", "file_15", "file_16", "file_17", "file_18", "file_19", "file_20", "file_21", "file_22", "file_23", "file_24", "file_25", "file_26", "file_27", "file_28", "file_29", "file_30", "file_31", "file_32", "file_33", "file_34", "file_35", "file_36", "file_37", "file_38", "file_39", "file_40", "file_41", "file_42", "file_43", "file_44", "file_45", "file_46", "file_47", "file_48", "file_49", "file_50", "file_51", "file_52", "file_53", "file_54", "file_55", "file_56", "file_57", "file_58", "file_59", "file_60", "file_61", "file_62", "file_63", "file_64", "file_65", "file_66", "file_67", "file_68", "file_69", "file_70", "file_71", "file_72", "file_73", "file_74", "file_75", "file_76", "file_77", "file_78", "file_79", "file_80", "file_81", "file_82", "file_83", "file_84", "file_85", "file_86", "file_87", "file_88", "file_89", "file_90", "file_91", "file_92", "file_93", "file_94", "file_95", "file_96", "file_97", "file_98", "file_99", "file_100", "file_101", "file_102", "file_103", "file_104", "file_105", "file_106", "file_107", "file_108", "file_109", "file_110", "file_111"];
-var LABELS=["Vol 1 — Bereshit (Genesis) — Part 1 — Chapters 1–11", "Vol 1 — Bereshit (Genesis) — Part 2 — Chapters 12–25", "Vol 1 — Bereshit (Genesis) — Part 3 — Chapters 26–36", "Vol 1 — Bereshit (Genesis) — Part 4 — Chapters 37–50", "Vol 2 — Shemot (Exodus) — Part 1 — Chapters 1–18", "Vol 2 — Shemot (Exodus) — Part 2 — Chapters 19–40", "Vol 3 — Vayikra (Leviticus) — Part 1 — Chapters 1–16", "Vol 3 — Vayikra (Leviticus) — Part 2 — Chapters 17–27", "Vol 4 — Bamidbar (Numbers) — Part 1 — Chapters 1–19", "Vol 4 — Bamidbar (Numbers) — Part 2 — Chapters 20–36", "Vol 5 — Devarim (Deuteronomy) — Part 1 — Chapters 1–17", "Vol 5 — Devarim (Deuteronomy) — Part 2 — Chapters 18–34", "Vol 6 — Chanokh (1 Enoch) — DSS Attested Ch 1–73 — Part 1 — Chapters 1–36 — Book of Watchers", "Vol 6 — Chanokh (1 Enoch) — DSS Attested Ch 1–73 — Part 2 — Chapters 37–55 — Astronomical and Dream Visions", "Vol 6 — Chanokh (1 Enoch) — DSS Attested Ch 1–73 — Part 3 — Chapters 56–73 — Epistle", "Vol 7 — Yovelim (Jubilees) — All 50 Chapters — Part 1 — Chapters 1–25", "Vol 7 — Yovelim (Jubilees) — All 50 Chapters — Part 2 — Chapters 26–50", "Vol 8 — Book of Giants — Complete — Fragments 1–6", "Vol 9 — Visions of Amram (4QAmram) — Complete — Columns 1–3", "Vol 10 — Yehoshua (Joshua) — Part 1 — Chapters 1–8", "Vol 10 — Yehoshua (Joshua) — Part 2 — Chapters 9–15", "Vol 10 — Yehoshua (Joshua) — Part 3 — Chapters 16–24", "Vol 11 — Shofetim (Judges) — Part 1 — Chapters 1–7", "Vol 11 — Shofetim (Judges) — Part 2 — Chapters 8–14", "Vol 11 — Shofetim (Judges) — Part 3 — Chapters 15–21", "Vol 12 — Shemu'el Aleph (1 Samuel) — Part 1 — Chapters 1–10", "Vol 12 — Shemu'el Aleph (1 Samuel) — Part 2 — Chapters 11–17", "Vol 12 — Shemu'el Aleph (1 Samuel) — Part 3 — Chapters 18–24", "Vol 12 — Shemu'el Aleph (1 Samuel) — Part 4 — Chapters 25–31", "Vol 13 — Shemu'el Bet (2 Samuel) — Part 1 — Chapters 1–6", "Vol 13 — Shemu'el Bet (2 Samuel) — Part 2 — Chapters 7–12", "Vol 13 — Shemu'el Bet (2 Samuel) — Part 3 — Chapters 13–18", "Vol 13 — Shemu'el Bet (2 Samuel) — Part 4 — Chapters 19–24", "Vol 14 — Melakhim Aleph (1 Kings) — Part 1 — Chapters 1–6", "Vol 14 — Melakhim Aleph (1 Kings) — Part 2 — Chapters 7–12", "Vol 14 — Melakhim Aleph (1 Kings) — Part 3 — Chapters 13–18", "Vol 14 — Melakhim Aleph (1 Kings) — Part 4 — Chapters 19–22", "Vol 15 — Melakhim Bet (2 Kings) — Part 1 — Chapters 1–7", "Vol 15 — Melakhim Bet (2 Kings) — Part 2 — Chapters 8–13", "Vol 15 — Melakhim Bet (2 Kings) — Part 3 — Chapters 14–19", "Vol 15 — Melakhim Bet (2 Kings) — Part 4 — Chapters 20–25", "Vol 16 — Yesha'yahu (Isaiah) — 1QIsa-a — Part 1 — Chapters 1–12", "Vol 16 — Yesha'yahu (Isaiah) — 1QIsa-a — Part 2 — Chapters 13–27", "Vol 16 — Yesha'yahu (Isaiah) — 1QIsa-a — Part 3 — Chapters 28–41", "Vol 16 — Yesha'yahu (Isaiah) — 1QIsa-a — Part 4 — Chapters 42–54", "Vol 16 — Yesha'yahu (Isaiah) — 1QIsa-a — Part 5 — Chapters 55–66", "Vol 17 — Yirmeyahu (Jeremiah) — DSS Primary — Part 1 — Chapters 1–7", "Vol 17 — Yirmeyahu (Jeremiah) — DSS Primary — Part 2 — Chapters 8–15", "Vol 17 — Yirmeyahu (Jeremiah) — DSS Primary — Part 3 — Chapters 16–23", "Vol 17 — Yirmeyahu (Jeremiah) — DSS Primary — Part 4 — Chapters 24–31", "Vol 17 — Yirmeyahu (Jeremiah) — DSS Primary — Part 5 — Chapters 32–39", "Vol 17 — Yirmeyahu (Jeremiah) — DSS Primary — Part 6 — Chapters 40–48", "Vol 17 — Yirmeyahu (Jeremiah) — DSS Primary — Part 7 — Chapters 49–52", "Vol 18 — Yehezkel (Ezekiel) — 4QEzek — Part 1 — Chapters 1–11", "Vol 18 — Yehezkel (Ezekiel) — 4QEzek — Part 2 — Chapters 12–19", "Vol 18 — Yehezkel (Ezekiel) — 4QEzek — Part 3 — Chapters 20–24", "Vol 18 — Yehezkel (Ezekiel) — 4QEzek — Part 4 — Chapters 25–32", "Vol 18 — Yehezkel (Ezekiel) — 4QEzek — Part 5 — Chapters 33–39", "Vol 18 — Yehezkel (Ezekiel) — 4QEzek — Part 6 — Chapters 40–48", "Vol 19 — The Twelve — Part 1 — Hoshea", "Vol 19 — The Twelve — Part 2 — Yoel and Amos", "Vol 19 — The Twelve — Part 3 — Ovadyah, Yonah, Mikhah, Nakhum", "Vol 19 — The Twelve — Part 4 — Havakuk, Tzefanyah, Khagai, Zekhariyahu 1–8", "Vol 19 — The Twelve — Part 5 — Zekhariyahu 9–14 and Malakhi", "Vol 20 — Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 1 — Psalms 1–20", "Vol 20 — Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 2 — Psalms 21–41", "Vol 20 — Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 3 — Psalms 42–72", "Vol 20 — Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 4 — Psalms 73–89", "Vol 20 — Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 5 — Psalms 90–106", "Vol 20 — Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 6 — Psalms 107–118", "Vol 20 — Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 7 — Psalm 119", "Vol 20 — Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 8 — Psalms 120–150", "Vol 20 — Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 9 — Psalms 151, 154, 155 — DSS Only", "Vol 21 — Mishlei (Proverbs) — Part 1 — Chapters 1–10", "Vol 21 — Mishlei (Proverbs) — Part 2 — Chapters 11–20", "Vol 21 — Mishlei (Proverbs) — Part 3 — Chapters 21–31", "Vol 22 — Iyov (Job) — Part 1 — Chapters 1–14", "Vol 22 — Iyov (Job) — Part 2 — Chapters 15–28", "Vol 22 — Iyov (Job) — Part 3 — Chapters 29–42", "Vol 23 — Shir HaShirim (Song of Songs) — Complete", "Vol 24 — Ruth — Complete", "Vol 25 — Eikha (Lamentations) — Complete", "Vol 26 — Kohelet (Ecclesiastes) — Complete", "Vol 27 — Esther — Orit Ge'ez Primary — Complete", "Vol 28 — Daniyel (Daniel) — 8 DSS Manuscripts — Part 1 — Chapters 1–6", "Vol 28 — Daniyel (Daniel) — 8 DSS Manuscripts — Part 2 — Chapters 7–12", "Vol 29 — Ezra-Nekhemyah — Part 1 — Ezra", "Vol 29 — Ezra-Nekhemyah — Part 2 — Nekhemyah", "Vol 30 — Divrei HaYamim Aleph (1 Chronicles) — Part 1 — Chapters 1–9", "Vol 30 — Divrei HaYamim Aleph (1 Chronicles) — Part 2 — Chapters 10–29", "Vol 31 — Divrei HaYamim Bet (2 Chronicles) — Part 1 — Chapters 1–18", "Vol 31 — Divrei HaYamim Bet (2 Chronicles) — Part 2 — Chapters 19–36", "Vol 32 — 4Q246 — Aramaic Apocalypse — Complete — Columns 1–2", "Vol 33 — War Scroll 1QM — All 19 Columns — Complete", "Vol 34 — 4QMMT — Some Works of the Torah — Complete — Sections A–C", "Vol 35 — Damascus Document — Part 1 — Columns 1–8", "Vol 35 — Damascus Document — Part 2 — Columns 9–16", "Vol 36 — Community Rule 1QS — Complete", "Vol 37 — Rule of the Congregation 1QSa — Complete — Columns 1–2", "Vol 38 — Rule of Blessings 1QSb — Complete — Columns 1–5", "Vol 39 — Words of the Luminaries 4QDibHam — Complete — Weekly Prayer Cycle", "Vol 40 — Pesher Nahum 4QpNah — Complete — Fragments 1–4", "Vol 41 — Hodayot — Thanksgiving Hymns 1QH — Part 1 — Columns 1–4", "Vol 41 — Hodayot — Thanksgiving Hymns 1QH — Part 2 — Columns 5–8", "Vol 42 — Pesher Habakkuk 1QpHab — Complete — Columns 1–6", "Vol 43 — Songs of Sabbath Sacrifice — Complete — Selected Songs", "Vol 44 — Genesis Apocryphon 1QapGen — Complete — Selected Columns", "Vol 45 — 11QMelchizedek — Complete — Columns 1–2", "Vol 46 — Temple Scroll 11Q19 — All 66 Columns — Part 1 — Columns 1–22", "Vol 46 — Temple Scroll 11Q19 — All 66 Columns — Part 2 — Columns 23–44", "Vol 46 — Temple Scroll 11Q19 — All 66 Columns — Part 3 — Columns 45–66"];
-var CACHE={};
+var LBL=["Vol 1 — Bereshit (Genesis) — Part 1 — Chapters 1–11", "Vol 1 — Bereshit (Genesis) — Part 2 — Chapters 12–25", "Vol 1 — Bereshit (Genesis) — Part 3 — Chapters 26–36", "Vol 1 — Bereshit (Genesis) — Part 4 — Chapters 37–50", "Vol 2 — Shemot (Exodus) — Part 1 — Chapters 1–18", "Vol 2 — Shemot (Exodus) — Part 2 — Chapters 19–40", "Vol 3 — Vayikra (Leviticus) — Part 1 — Chapters 1–16", "Vol 3 — Vayikra (Leviticus) — Part 2 — Chapters 17–27", "Vol 4 — Bamidbar (Numbers) — Part 1 — Chapters 1–19", "Vol 4 — Bamidbar (Numbers) — Part 2 — Chapters 20–36", "Vol 5 — Devarim (Deuteronomy) — Part 1 — Chapters 1–17", "Vol 5 — Devarim (Deuteronomy) — Part 2 — Chapters 18–34", "Vol 6 — Chanokh (1 Enoch) — DSS Attested Ch 1–73 — Part 1 — Chapters 1–36 — Book of Watchers", "Vol 6 — Chanokh (1 Enoch) — DSS Attested Ch 1–73 — Part 2 — Chapters 37–55 — Astronomical and Dream Visions", "Vol 6 — Chanokh (1 Enoch) — DSS Attested Ch 1–73 — Part 3 — Chapters 56–73 — Epistle", "Vol 7 — Yovelim (Jubilees) — All 50 Chapters — Part 1 — Chapters 1–25", "Vol 7 — Yovelim (Jubilees) — All 50 Chapters — Part 2 — Chapters 26–50", "Vol 8 — Book of Giants — Complete — Fragments 1–6", "Vol 9 — Visions of Amram (4QAmram) — Complete — Columns 1–3", "Vol 10 — Yehoshua (Joshua) — Part 1 — Chapters 1–8", "Vol 10 — Yehoshua (Joshua) — Part 2 — Chapters 9–15", "Vol 10 — Yehoshua (Joshua) — Part 3 — Chapters 16–24", "Vol 11 — Shofetim (Judges) — Part 1 — Chapters 1–7", "Vol 11 — Shofetim (Judges) — Part 2 — Chapters 8–14", "Vol 11 — Shofetim (Judges) — Part 3 — Chapters 15–21", "Vol 12 — Shemu'el Aleph (1 Samuel) — Part 1 — Chapters 1–10", "Vol 12 — Shemu'el Aleph (1 Samuel) — Part 2 — Chapters 11–17", "Vol 12 — Shemu'el Aleph (1 Samuel) — Part 3 — Chapters 18–24", "Vol 12 — Shemu'el Aleph (1 Samuel) — Part 4 — Chapters 25–31", "Vol 13 — Shemu'el Bet (2 Samuel) — Part 1 — Chapters 1–6", "Vol 13 — Shemu'el Bet (2 Samuel) — Part 2 — Chapters 7–12", "Vol 13 — Shemu'el Bet (2 Samuel) — Part 3 — Chapters 13–18", "Vol 13 — Shemu'el Bet (2 Samuel) — Part 4 — Chapters 19–24", "Vol 14 — Melakhim Aleph (1 Kings) — Part 1 — Chapters 1–6", "Vol 14 — Melakhim Aleph (1 Kings) — Part 2 — Chapters 7–12", "Vol 14 — Melakhim Aleph (1 Kings) — Part 3 — Chapters 13–18", "Vol 14 — Melakhim Aleph (1 Kings) — Part 4 — Chapters 19–22", "Vol 15 — Melakhim Bet (2 Kings) — Part 1 — Chapters 1–7", "Vol 15 — Melakhim Bet (2 Kings) — Part 2 — Chapters 8–13", "Vol 15 — Melakhim Bet (2 Kings) — Part 3 — Chapters 14–19", "Vol 15 — Melakhim Bet (2 Kings) — Part 4 — Chapters 20–25", "Vol 16 — Yesha'yahu (Isaiah) — 1QIsa-a — Part 1 — Chapters 1–12", "Vol 16 — Yesha'yahu (Isaiah) — 1QIsa-a — Part 2 — Chapters 13–27", "Vol 16 — Yesha'yahu (Isaiah) — 1QIsa-a — Part 3 — Chapters 28–41", "Vol 16 — Yesha'yahu (Isaiah) — 1QIsa-a — Part 4 — Chapters 42–54", "Vol 16 — Yesha'yahu (Isaiah) — 1QIsa-a — Part 5 — Chapters 55–66", "Vol 17 — Yirmeyahu (Jeremiah) — DSS Primary — Part 1 — Chapters 1–7", "Vol 17 — Yirmeyahu (Jeremiah) — DSS Primary — Part 2 — Chapters 8–15", "Vol 17 — Yirmeyahu (Jeremiah) — DSS Primary — Part 3 — Chapters 16–23", "Vol 17 — Yirmeyahu (Jeremiah) — DSS Primary — Part 4 — Chapters 24–31", "Vol 17 — Yirmeyahu (Jeremiah) — DSS Primary — Part 5 — Chapters 32–39", "Vol 17 — Yirmeyahu (Jeremiah) — DSS Primary — Part 6 — Chapters 40–48", "Vol 17 — Yirmeyahu (Jeremiah) — DSS Primary — Part 7 — Chapters 49–52", "Vol 18 — Yehezkel (Ezekiel) — 4QEzek — Part 1 — Chapters 1–11", "Vol 18 — Yehezkel (Ezekiel) — 4QEzek — Part 2 — Chapters 12–19", "Vol 18 — Yehezkel (Ezekiel) — 4QEzek — Part 3 — Chapters 20–24", "Vol 18 — Yehezkel (Ezekiel) — 4QEzek — Part 4 — Chapters 25–32", "Vol 18 — Yehezkel (Ezekiel) — 4QEzek — Part 5 — Chapters 33–39", "Vol 18 — Yehezkel (Ezekiel) — 4QEzek — Part 6 — Chapters 40–48", "Vol 19 — The Twelve — Part 1 — Hoshea", "Vol 19 — The Twelve — Part 2 — Yoel and Amos", "Vol 19 — The Twelve — Part 3 — Ovadyah, Yonah, Mikhah, Nakhum", "Vol 19 — The Twelve — Part 4 — Havakuk, Tzefanyah, Khagai, Zekhariyahu 1–8", "Vol 19 — The Twelve — Part 5 — Zekhariyahu 9–14 and Malakhi", "Vol 20 — Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 1 — Psalms 1–20", "Vol 20 — Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 2 — Psalms 21–41", "Vol 20 — Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 3 — Psalms 42–72", "Vol 20 — Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 4 — Psalms 73–89", "Vol 20 — Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 5 — Psalms 90–106", "Vol 20 — Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 6 — Psalms 107–118", "Vol 20 — Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 7 — Psalm 119", "Vol 20 — Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 8 — Psalms 120–150", "Vol 20 — Tehillim (Psalms) — Including Ps 151, 154, 155 — Part 9 — Psalms 151, 154, 155 — DSS Only", "Vol 21 — Mishlei (Proverbs) — Part 1 — Chapters 1–10", "Vol 21 — Mishlei (Proverbs) — Part 2 — Chapters 11–20", "Vol 21 — Mishlei (Proverbs) — Part 3 — Chapters 21–31", "Vol 22 — Iyov (Job) — Part 1 — Chapters 1–14", "Vol 22 — Iyov (Job) — Part 2 — Chapters 15–28", "Vol 22 — Iyov (Job) — Part 3 — Chapters 29–42", "Vol 23 — Shir HaShirim (Song of Songs) — Complete", "Vol 24 — Ruth — Complete", "Vol 25 — Eikha (Lamentations) — Complete", "Vol 26 — Kohelet (Ecclesiastes) — Complete", "Vol 27 — Esther — Orit Ge'ez Primary — Complete", "Vol 28 — Daniyel (Daniel) — 8 DSS Manuscripts — Part 1 — Chapters 1–6", "Vol 28 — Daniyel (Daniel) — 8 DSS Manuscripts — Part 2 — Chapters 7–12", "Vol 29 — Ezra-Nekhemyah — Part 1 — Ezra", "Vol 29 — Ezra-Nekhemyah — Part 2 — Nekhemyah", "Vol 30 — Divrei HaYamim Aleph (1 Chronicles) — Part 1 — Chapters 1–9", "Vol 30 — Divrei HaYamim Aleph (1 Chronicles) — Part 2 — Chapters 10–29", "Vol 31 — Divrei HaYamim Bet (2 Chronicles) — Part 1 — Chapters 1–18", "Vol 31 — Divrei HaYamim Bet (2 Chronicles) — Part 2 — Chapters 19–36", "Vol 32 — 4Q246 — Aramaic Apocalypse — Complete — Columns 1–2", "Vol 33 — War Scroll 1QM — All 19 Columns — Complete", "Vol 34 — 4QMMT — Some Works of the Torah — Complete — Sections A–C", "Vol 35 — Damascus Document — Part 1 — Columns 1–8", "Vol 35 — Damascus Document — Part 2 — Columns 9–16", "Vol 36 — Community Rule 1QS — Complete", "Vol 37 — Rule of the Congregation 1QSa — Complete — Columns 1–2", "Vol 38 — Rule of Blessings 1QSb — Complete — Columns 1–5", "Vol 39 — Words of the Luminaries 4QDibHam — Complete — Weekly Prayer Cycle", "Vol 40 — Pesher Nahum 4QpNah — Complete — Fragments 1–4", "Vol 41 — Hodayot — Thanksgiving Hymns 1QH — Part 1 — Columns 1–4", "Vol 41 — Hodayot — Thanksgiving Hymns 1QH — Part 2 — Columns 5–8", "Vol 42 — Pesher Habakkuk 1QpHab — Complete — Columns 1–6", "Vol 43 — Songs of Sabbath Sacrifice — Complete — Selected Songs", "Vol 44 — Genesis Apocryphon 1QapGen — Complete — Selected Columns", "Vol 45 — 11QMelchizedek — Complete — Columns 1–2", "Vol 46 — Temple Scroll 11Q19 — All 66 Columns — Part 1 — Columns 1–22", "Vol 46 — Temple Scroll 11Q19 — All 66 Columns — Part 2 — Columns 23–44", "Vol 46 — Temple Scroll 11Q19 — All 66 Columns — Part 3 — Columns 45–66"];
+var ACR_HASH="0e96ee430baf9fef2d358854d5d2f8b83af983efe7acdf1e95884d5831be85ac";
 var fs=parseFloat(localStorage.getItem('acr_fs')||'10.5');
-var sbOpen=true;
-var bms=JSON.parse(localStorage.getItem('acr_bms')||'[]');
-var cur=-1;
-var sp=false,pa=false,vo=false,pi=0,ps=[],spd=1.0,cp=null,vopen=false;
-
+var lh=parseFloat(localStorage.getItem('acr_lh')||'1.65');
+var sbo=true,bms=JSON.parse(localStorage.getItem('acr_bms')||'[]'),cur=-1;
+var sp=false,pa=false,pi=0,ps=[],spd=1.0,cp=null,vop=false,npop=false,nvop=false,recop=false;
+var hist=JSON.parse(localStorage.getItem('acr_hist')||'[]');
+var selText='',selRange=null;
+document.documentElement.style.setProperty('--lh',lh);
 if(localStorage.getItem('acr_dark')==='1')document.body.classList.add('dark');
+if(localStorage.getItem('acr_sepia')==='1')document.body.classList.add('sepia');
 document.getElementById('content').style.fontSize=fs+'pt';
 
-function navTo(fid){
-  var idx=IDS.indexOf(fid);
-  if(idx<0)return;
-  cur=idx;
-  stopVoice();
-  document.getElementById('content').innerHTML='<div id="loading">Loading...</div>';
-  var url='data/'+fid+'.json';
-  document.getElementById('content').innerHTML='<div id="loading" style="padding:40px;text-align:center;color:#333">Fetching: '+url+'...</div>';
-  fetch(url)
-    .then(function(r){
-      if(!r.ok)throw new Error('HTTP '+r.status+' for '+url);
-      return r.json();
-    })
-    .then(function(d){
-      CACHE[fid]=d.html;
-      document.getElementById('content').innerHTML=d.html;
-      document.getElementById('content').style.fontSize=fs+'pt';
-      document.getElementById('title-bar').textContent=LABELS[idx]||fid;
-      document.querySelectorAll('.toc-file').forEach(function(el){
-        el.classList.toggle('active',el.getAttribute('data-id')===fid);
-      });
-      var a=document.querySelector('.toc-file.active');
-      if(a)a.scrollIntoView({block:'nearest'});
-      document.getElementById('prev-btn').disabled=idx<=0;
-      document.getElementById('next-btn').disabled=idx>=IDS.length-1;
-      document.getElementById('pos-lbl').textContent=(idx+1)+' of '+IDS.length;
-      document.getElementById('bm-btn').textContent=bms.indexOf(fid)>=0?'★':'☆';
-      window.scrollTo(0,0);
-      localStorage.setItem('acr_last',fid);
-      if(window.innerWidth<=700)document.getElementById('sidebar').classList.remove('mob');
-    })
-    .catch(function(e){
-      document.getElementById('content').innerHTML='<p style="color:#888;padding:40px;text-align:center">Error loading content: '+e.message+'</p>';
-    });
-}
+function sha256(s){return new Promise(function(r){var b=new TextEncoder().encode(s);crypto.subtle.digest('SHA-256',b).then(function(h){r(Array.from(new Uint8Array(h)).map(function(x){return x.toString(16).padStart(2,'0');}).join(''));});});}
 
-// Attach TOC click listeners after DOM ready
-document.querySelectorAll('.toc-file').forEach(function(el){
-  el.addEventListener('click',function(){
-    navTo(el.getAttribute('data-id'));
-  });
-});
+function showApp(){document.getElementById('pw-screen').style.display='none';}
+function doPwd(){var v=document.getElementById('pw-input').value;if(!v){document.getElementById('pw-err').textContent='Please enter your password';return;}sha256(v).then(function(h){if(h===ACR_HASH){showApp();}else{document.getElementById('pw-err').textContent='Incorrect password';document.getElementById('pw-input').value='';document.getElementById('pw-input').focus();}});}
+document.getElementById('pw-btn').addEventListener('click',doPwd);
+document.getElementById('pw-input').addEventListener('keydown',function(e){if(e.key==='Enter')doPwd();});
+// password required every session
 
-// Button listeners
-document.getElementById('start-btn').addEventListener('click',function(){navTo(IDS[0]);});
-document.getElementById('prev-btn').addEventListener('click',function(){if(cur>0)navTo(IDS[cur-1]);});
-document.getElementById('next-btn').addEventListener('click',function(){
-  if(cur<0)navTo(IDS[0]);
-  else if(cur<IDS.length-1)navTo(IDS[cur+1]);
-});
-document.getElementById('top-btn').addEventListener('click',function(){window.scrollTo(0,0);});
-document.getElementById('sb-btn').addEventListener('click',function(){
-  if(window.innerWidth<=700){document.getElementById('sidebar').classList.toggle('mob');}
-  else{
-    sbOpen=!sbOpen;
-    document.getElementById('sidebar').classList.toggle('hidden',!sbOpen);
-    document.getElementById('main').classList.toggle('nosb',!sbOpen);
-    var l=sbOpen?'270px':'0';
-    document.getElementById('botnav').style.left=l;
-    document.getElementById('voice-row').style.left=l;
-  }
-});
-document.getElementById('dk-btn').addEventListener('click',function(){
-  var d=document.body.classList.toggle('dark');
-  localStorage.setItem('acr_dark',d?'1':'0');
-});
-document.getElementById('rd-btn').addEventListener('click',function(){
-  var r=document.body.classList.toggle('acr-rd');
-  document.getElementById('sidebar').classList.toggle('hidden',r);
-  document.getElementById('main').classList.toggle('nosb',r);
-  var l=r?'0':(sbOpen?'270px':'0');
-  document.getElementById('botnav').style.left=l;
-  document.getElementById('voice-row').style.left=l;
-});
-document.getElementById('fa-btn').addEventListener('click',function(){
-  fs=Math.max(8,fs-1);
-  document.getElementById('content').style.fontSize=fs+'pt';
-  localStorage.setItem('acr_fs',fs);
-});
-document.getElementById('fb-btn').addEventListener('click',function(){
-  fs=Math.min(20,fs+1);
-  document.getElementById('content').style.fontSize=fs+'pt';
-  localStorage.setItem('acr_fs',fs);
-});
-document.getElementById('bm-btn').addEventListener('click',function(){
-  var fid=IDS[cur];if(!fid)return;
-  var i=bms.indexOf(fid);
-  if(i>=0){bms.splice(i,1);this.textContent='☆';}
-  else{bms.push(fid);this.textContent='★';}
-  localStorage.setItem('acr_bms',JSON.stringify(bms));
-});
-document.getElementById('sq').addEventListener('input',function(){
-  var q=this.value;
-  document.querySelectorAll('mark').forEach(function(m){m.outerHTML=m.innerHTML;});
-  if(!q||q.length<3)return;
-  var c=document.getElementById('content'),ql=q.toLowerCase();
-  var walker=document.createTreeWalker(c,NodeFilter.SHOW_TEXT,null,false);
-  var nodes=[],nd;
-  while(nd=walker.nextNode())nodes.push(nd);
-  var first=null;
-  nodes.forEach(function(n){
-    var t=n.textContent,ix=t.toLowerCase().indexOf(ql);
-    if(ix>=0){
-      var r=document.createRange();r.setStart(n,ix);r.setEnd(n,ix+q.length);
-      try{var m=document.createElement('mark');r.surroundContents(m);if(!first)first=m;}catch(e){}
-    }
-  });
-  if(first)window.scrollTo(0,first.getBoundingClientRect().top+(window.pageYOffset||0)-80);
-});
+function setLeft(l){['bn','vr','np','nv','hl-bar','recent-bar'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.left=l;});}
 
-// Voice
-function getParas(vonly){
-  var all=document.getElementById('content').querySelectorAll('p.dp');
-  var r=[];
-  all.forEach(function(p){
-    if(!p.textContent.trim())return;
-    if(vonly){if(p.getAttribute('data-ptype')==='verse')r.push(p);}
-    else r.push(p);
-  });
-  return r;
+function go(fid){
+var i=IDS.indexOf(fid);if(i<0)return;
+if(cur>=0)savePos(IDS[cur],window.scrollY||0);
+cur=i;stp();closeNP();if(nvop)toggleNV();
+addHist(fid);
+document.getElementById('content').innerHTML='<div style="text-align:center;padding:80px;color:#888">Loading...</div>';
+fetch('data/'+fid+'.json')
+.then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+.then(function(d){
+document.getElementById('content').innerHTML=d.html;
+document.getElementById('content').style.fontSize=fs+'pt';
+document.getElementById('tb').textContent=LBL[i]||fid;
+document.querySelectorAll('.toc-file').forEach(function(e){e.classList.toggle('on',e.getAttribute('data-id')===fid);});
+var a=document.querySelector('.toc-file.on');if(a)a.scrollIntoView({block:'nearest'});
+document.getElementById('b-pv2').disabled=i<=0;
+document.getElementById('b-nx').disabled=i>=IDS.length-1;
+document.getElementById('pl').textContent=(i+1)+' of '+IDS.length;
+document.getElementById('b-bm').textContent=bms.indexOf(fid)>=0?'★':'☆';
+document.getElementById('np-lbl').textContent='Notes — '+LBL[i];
+document.getElementById('np-ta').value=getNote(fid)||'';
+restoreHL(fid);
+setTimeout(function(){window.scrollTo(0,getPos(fid));},120);
+localStorage.setItem('acr_last',fid);
+if(window.innerWidth<=700)document.getElementById('sb').classList.remove('m');
+var vpos=JSON.parse(localStorage.getItem('acr_vpos')||'null');
+if(vpos&&vpos.fid===fid&&vpos.pi>0){pi=vpos.pi;document.getElementById('vst').textContent='Resume v'+(pi+1);}else{pi=0;}
+})
+.catch(function(e){document.getElementById('content').innerHTML='<p style="color:#888;padding:40px;text-align:center">Error: '+e.message+'</p>';});
 }
-document.getElementById('vt-btn').addEventListener('click',function(){
-  vopen=!vopen;
-  document.getElementById('voice-row').classList.toggle('show',vopen);
-  document.getElementById('main').classList.toggle('vopen',vopen);
-  this.classList.toggle('active',vopen);
-  if(!vopen)stopVoice();
-});
-document.getElementById('play-btn').addEventListener('click',function(){
-  if(!window.speechSynthesis){alert('Use Safari for voice.');return;}
-  if(pa){window.speechSynthesis.resume();pa=false;document.getElementById('play-btn').style.display='none';document.getElementById('pause-btn').style.display='inline';document.getElementById('vstat').textContent='Reading...';return;}
-  ps=getParas(vo);
-  if(!ps.length){document.getElementById('vstat').textContent='No content';return;}
-  if(pi>=ps.length)pi=0;
-  sp=true;
-  document.getElementById('play-btn').style.display='none';
-  document.getElementById('pause-btn').style.display='inline';
-  readNext();
-});
-function readNext(){
-  if(!sp||pi>=ps.length){doneSpeaking();return;}
-  var p=ps[pi];
-  if(cp)cp.classList.remove('speaking');
-  p.classList.add('speaking');cp=p;
-  window.scrollTo(0,p.getBoundingClientRect().top+(window.pageYOffset||0)-120);
-  var u=new SpeechSynthesisUtterance(p.textContent.trim());
-  u.rate=spd;u.lang='en-US';
-  u.onend=function(){pi++;if(sp)readNext();};
-  u.onerror=function(){pi++;if(sp)readNext();};
-  document.getElementById('vstat').textContent=(pi+1)+'/'+ps.length;
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(u);
+document.querySelectorAll('.toc-file').forEach(function(e){e.addEventListener('click',function(){go(e.getAttribute('data-id'));});});
+document.getElementById('b-start').addEventListener('click',function(){go(IDS[0]);});
+document.getElementById('b-pv2').addEventListener('click',function(){if(cur>0)go(IDS[cur-1]);});
+document.getElementById('b-nx').addEventListener('click',function(){if(cur<0)go(IDS[0]);else if(cur<IDS.length-1)go(IDS[cur+1]);});
+document.getElementById('tb2').addEventListener('click',function(){window.scrollTo(0,0);});
+
+function savePos(fid,y){try{var p=JSON.parse(localStorage.getItem('acr_pos')||'{}');p[fid]=y;localStorage.setItem('acr_pos',JSON.stringify(p));}catch(e){}}
+function getPos(fid){try{var p=JSON.parse(localStorage.getItem('acr_pos')||'{}');return p[fid]||0;}catch(e){return 0;}}
+setInterval(function(){if(cur>=0)savePos(IDS[cur],window.scrollY||0);},3000);
+
+function addHist(fid){hist=hist.filter(function(x){return x!==fid;});hist.unshift(fid);if(hist.length>10)hist.pop();localStorage.setItem('acr_hist',JSON.stringify(hist));renderRecent();}
+function renderRecent(){
+var bar=document.getElementById('recent-bar'),items=hist.slice(1,6);
+bar.innerHTML='<span style="color:#888;font-size:10px;white-space:nowrap;font-family:Arial;flex-shrink:0">Recent:</span>';
+items.forEach(function(fid){var idx=IDS.indexOf(fid);var lbl=idx>=0?LBL[idx].replace(/Vol \d+ \u2014 /,'').split(' \u2014 ')[0]:fid;var b=document.createElement('button');b.className='rb-item';b.textContent=lbl;b.addEventListener('click',function(){go(fid);});bar.appendChild(b);});
 }
-document.getElementById('pause-btn').addEventListener('click',function(){
-  window.speechSynthesis.pause();pa=true;
-  this.style.display='none';
-  document.getElementById('play-btn').style.display='inline';
-  document.getElementById('play-btn').textContent='Resume';
-  document.getElementById('vstat').textContent='Paused';
-});
-document.getElementById('stop-btn').addEventListener('click',stopVoice);
-function stopVoice(){
-  if(window.speechSynthesis)window.speechSynthesis.cancel();
-  sp=false;pa=false;pi=0;
-  if(cp)cp.classList.remove('speaking');cp=null;
-  document.getElementById('play-btn').style.display='inline';
-  document.getElementById('play-btn').textContent='▶';
-  document.getElementById('pause-btn').style.display='none';
-  document.getElementById('vstat').textContent='Ready';
+document.getElementById('b-rec').addEventListener('click',function(){recop=!recop;document.getElementById('recent-bar').classList.toggle('on',recop);document.getElementById('main').classList.toggle('has-recent',recop);setLeft(sbo?'270px':'0');this.classList.toggle('on',recop);renderRecent();});
+
+function getNotes(){try{return JSON.parse(localStorage.getItem('acr_notes')||'{}');}catch(e){return {};}}
+function getNote(fid){return getNotes()[fid]||'';}
+function saveNote(fid,t){var n=getNotes();if(t&&t.trim())n[fid]=t;else delete n[fid];localStorage.setItem('acr_notes',JSON.stringify(n));}
+function closeNP(){npop=false;document.getElementById('np').classList.remove('on');document.getElementById('b-nt').classList.remove('on');document.getElementById('main').classList.toggle('vopen',vop);}
+document.getElementById('b-nt').addEventListener('click',function(){npop=!npop;document.getElementById('np').classList.toggle('on',npop);this.classList.toggle('on',npop);document.getElementById('main').classList.toggle('vopen',npop||vop);if(npop&&cur>=0)document.getElementById('np-ta').focus();});
+document.getElementById('np-cls').addEventListener('click',closeNP);
+document.getElementById('np-save').addEventListener('click',function(){if(cur<0)return;saveNote(IDS[cur],document.getElementById('np-ta').value);var t=this;t.textContent='Saved!';setTimeout(function(){t.textContent='\u2713 Save';},1500);});
+document.getElementById('np-clr').addEventListener('click',function(){document.getElementById('np-ta').value='';if(cur>=0)saveNote(IDS[cur],'');});
+document.getElementById('np-ta').addEventListener('input',function(){if(cur>=0)saveNote(IDS[cur],this.value);});
+function renderNV(){
+var notes=getNotes(),keys=Object.keys(notes),list=document.getElementById('nv-list');
+if(!keys.length){list.innerHTML='<p style="color:#888;font-family:Arial;font-size:12px;padding:20px 0">No notes yet.</p>';return;}
+list.innerHTML='';
+keys.forEach(function(fid){var idx=IDS.indexOf(fid),label=idx>=0?LBL[idx]:fid;var div=document.createElement('div');div.className='ni';div.innerHTML='<button class="ni-del" data-fid="'+fid+'">&#10005;</button><div class="ni-lbl" data-fid="'+fid+'">'+label+'</div><div class="ni-txt">'+notes[fid].replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>';div.querySelector('.ni-del').addEventListener('click',function(){saveNote(this.getAttribute('data-fid'),'');renderNV();});div.querySelector('.ni-lbl').addEventListener('click',function(){toggleNV();go(this.getAttribute('data-fid'));});list.appendChild(div);});
 }
-function doneSpeaking(){
-  sp=false;pi=0;
-  if(cp)cp.classList.remove('speaking');cp=null;
-  document.getElementById('play-btn').style.display='inline';
-  document.getElementById('play-btn').textContent='▶';
-  document.getElementById('pause-btn').style.display='none';
-  document.getElementById('vstat').textContent='Done';
+function toggleNV(){nvop=!nvop;document.getElementById('nv').classList.toggle('on',nvop);document.getElementById('b-nv').classList.toggle('on',nvop);if(nvop)renderNV();}
+document.getElementById('b-nv').addEventListener('click',toggleNV);
+
+function getHLs(){try{return JSON.parse(localStorage.getItem('acr_hl')||'{}');}catch(e){return {};}}
+function saveHL(fid,data){var h=getHLs();if(data&&data.length)h[fid]=data;else delete h[fid];localStorage.setItem('acr_hl',JSON.stringify(h));}
+function restoreHL(fid){
+var items=getHLs()[fid];if(!items||!items.length)return;
+var paras=document.getElementById('content').querySelectorAll('p.dp');
+items.forEach(function(item){
+if(item.pi<paras.length){
+try{var p=paras[item.pi],walker=document.createTreeWalker(p,NodeFilter.SHOW_TEXT,null,false),n,off=0,done=false;
+while(n=walker.nextNode()){
+var s=item.text,start=off,end=off+n.length;
+if(!done&&n.textContent.indexOf(s)>=0){
+var idx=n.textContent.indexOf(s);
+var r=document.createRange();r.setStart(n,idx);r.setEnd(n,idx+s.length);
+var sp=document.createElement('span');sp.className=item.cls;r.surroundContents(sp);done=true;
 }
-document.getElementById('vspd').addEventListener('change',function(){
-  spd=parseFloat(this.value);
-  if(sp&&!pa){var i=pi;stopVoice();pi=i;sp=true;document.getElementById('play-btn').style.display='none';document.getElementById('pause-btn').style.display='inline';readNext();}
+off+=n.length;
+}}catch(e){}
+}
 });
-document.getElementById('vo-btn').addEventListener('click',function(){
-  vo=!vo;
-  this.classList.toggle('von',vo);
-  this.textContent=vo?'All':'Verses';
-  if(sp)stopVoice();
-  document.getElementById('vstat').textContent=vo?getParas(true).length+' verses':'Ready';
+}
+document.getElementById('content').addEventListener('mouseup',handleSel);
+document.getElementById('content').addEventListener('touchend',function(){setTimeout(handleSel,150);});
+function handleSel(){
+var sel=window.getSelection();
+if(!sel||!sel.toString().trim()||sel.rangeCount===0){if(!document.getElementById('hl-bar').classList.contains('on'))return;return;}
+selText=sel.toString().trim();
+if(!selText){hideHL();return;}
+selRange=sel.getRangeAt(0).cloneRange();
+document.getElementById('hl-bar').classList.add('on');
+document.getElementById('main').classList.add('vopen');
+}
+function hideHL(){document.getElementById('hl-bar').classList.remove('on');if(!vop&&!npop)document.getElementById('main').classList.remove('vopen');selText='';selRange=null;}
+document.querySelectorAll('.hl-dot').forEach(function(dot){
+dot.addEventListener('click',function(){
+if(!selRange||!selText)return;
+var cls=this.getAttribute('data-hl');
+try{var span=document.createElement('span');span.className=cls;selRange.surroundContents(span);
+if(cur>=0){var paras=document.getElementById('content').querySelectorAll('p.dp');var pidx=-1;paras.forEach(function(p,i){if(p.contains(span))pidx=i;});if(pidx>=0){var h=getHLs()[IDS[cur]]||[];h.push({pi:pidx,text:selText,cls:cls});saveHL(IDS[cur],h);}}}catch(e){}
+window.getSelection().removeAllRanges();hideHL();
+});
+});
+document.getElementById('hl-copy').addEventListener('click',function(){
+if(selText)navigator.clipboard.writeText(selText).then(function(){var b=document.getElementById('hl-copy');b.textContent='Copied!';setTimeout(function(){b.textContent='\u{1F4CB} Copy';},1500);}).catch(function(){});
+window.getSelection().removeAllRanges();hideHL();
+});
+document.getElementById('hl-clr').addEventListener('click',function(){
+if(cur>=0)saveHL(IDS[cur],[]);
+document.getElementById('content').querySelectorAll('.hl-y,.hl-g,.hl-b,.hl-p,.hl-o').forEach(function(s){s.outerHTML=s.innerHTML;});
+hideHL();
 });
 
-window.onscroll=function(){
-  var s=window.pageYOffset||0;
-  var h=document.documentElement.scrollHeight-window.innerHeight;
-  document.getElementById('prog-fill').style.width=(h>0?Math.round(s/h*100):0)+'%';
-  document.getElementById('top-btn').style.display=s>300?'block':'none';
-};
+document.getElementById('b-cj').addEventListener('click',function(){document.getElementById('cj-modal').classList.add('on');document.getElementById('overlay').classList.add('on');document.getElementById('cj-input').value='';setTimeout(function(){document.getElementById('cj-input').focus();},100);});
+function closeCJ(){document.getElementById('cj-modal').classList.remove('on');document.getElementById('overlay').classList.remove('on');}
+document.getElementById('cj-cls').addEventListener('click',closeCJ);
+document.getElementById('overlay').addEventListener('click',closeCJ);
+document.getElementById('cj-go').addEventListener('click',function(){
+var num=parseInt(document.getElementById('cj-input').value);if(isNaN(num))return;
+var paras=document.getElementById('content').querySelectorAll('p.dp'),found=null;
+paras.forEach(function(p){if(found)return;var m=p.textContent.match(/CHAPTER\s+(\d+)/i);if(m&&parseInt(m[1])===num)found=p;});
+if(found)window.scrollTo(0,found.getBoundingClientRect().top+(window.pageYOffset||0)-60);
+else alert('Chapter '+num+' not found in this section.');
+closeCJ();
+});
+document.getElementById('cj-input').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('cj-go').click();});
 
+document.getElementById('b-sb').addEventListener('click',function(){if(window.innerWidth<=700){document.getElementById('sb').classList.toggle('m');}else{sbo=!sbo;document.getElementById('sb').classList.toggle('h',!sbo);document.getElementById('main').classList.toggle('x',!sbo);setLeft(sbo?'270px':'0');}});
+document.getElementById('b-dk').addEventListener('click',function(){document.body.classList.remove('sepia');localStorage.setItem('acr_sepia','0');document.getElementById('b-sep').classList.remove('on');var d=document.body.classList.toggle('dark');localStorage.setItem('acr_dark',d?'1':'0');this.classList.toggle('on',d);});
+document.getElementById('b-sep').addEventListener('click',function(){document.body.classList.remove('dark');localStorage.setItem('acr_dark','0');document.getElementById('b-dk').classList.remove('on');var s=document.body.classList.toggle('sepia');localStorage.setItem('acr_sepia',s?'1':'0');this.classList.toggle('on',s);});
+document.getElementById('b-rd').addEventListener('click',function(){var r=document.body.classList.toggle('acr-rd');document.getElementById('sb').classList.toggle('h',r);document.getElementById('main').classList.toggle('x',r);setLeft(r?'0':(sbo?'270px':'0'));});
+document.getElementById('b-fa').addEventListener('click',function(){fs=Math.max(8,fs-1);document.getElementById('content').style.fontSize=fs+'pt';localStorage.setItem('acr_fs',fs);});
+document.getElementById('b-fb').addEventListener('click',function(){fs=Math.min(20,fs+1);document.getElementById('content').style.fontSize=fs+'pt';localStorage.setItem('acr_fs',fs);});
+document.getElementById('b-lhd').addEventListener('click',function(){lh=Math.max(1.2,parseFloat((lh-.1).toFixed(1)));document.documentElement.style.setProperty('--lh',lh);localStorage.setItem('acr_lh',lh);});
+document.getElementById('b-lhu').addEventListener('click',function(){lh=Math.min(2.5,parseFloat((lh+.1).toFixed(1)));document.documentElement.style.setProperty('--lh',lh);localStorage.setItem('acr_lh',lh);});
+document.getElementById('b-bm').addEventListener('click',function(){var fid=IDS[cur];if(!fid)return;var i=bms.indexOf(fid);if(i>=0){bms.splice(i,1);this.textContent='☆';}else{bms.push(fid);this.textContent='★';}localStorage.setItem('acr_bms',JSON.stringify(bms));});
+document.getElementById('sq').addEventListener('input',function(){document.querySelectorAll('mark').forEach(function(m){m.outerHTML=m.innerHTML;});var q=this.value;if(!q||q.length<3)return;var c=document.getElementById('content'),ql=q.toLowerCase(),w=document.createTreeWalker(c,NodeFilter.SHOW_TEXT,null,false),ns=[],n,f=null;while(n=w.nextNode())ns.push(n);ns.forEach(function(n){var t=n.textContent,i=t.toLowerCase().indexOf(ql);if(i>=0){var r=document.createRange();r.setStart(n,i);r.setEnd(n,i+q.length);try{var m=document.createElement('mark');r.surroundContents(m);if(!f)f=m;}catch(e){}}} );if(f)window.scrollTo(0,f.getBoundingClientRect().top+(window.pageYOffset||0)-80);});
+
+function prepTTS(txt){
+txt=txt.replace(/\u{10909}\u{10904}\u{10905}\u{10912}/gu,'Yahweh');
+txt=txt.replace(/YHWH/g,'Yahweh');
+txt=txt.replace(/\bYH\b/g,'Yah');
+txt=txt.replace(/\bMosheh\b/g,'Mo-sheh');
+txt=txt.replace(/\bYehoshua\b/g,'Yeh-ho-shua');
+txt=txt.replace(/\bYirmeyahu\b/g,'Yir-meh-yah-hoo');
+txt=txt.replace(/\bYesha.yahu\b/g,'Yeh-sha-yah-hoo');
+txt=txt.replace(/\bYehezkel\b/g,'Yeh-hez-kel');
+txt=txt.replace(/\bYisrael\b/g,'Yis-rah-el');
+txt=txt.replace(/\bBereshit\b/g,'Beh-reh-sheet');
+txt=txt.replace(/\bShemot\b/g,'Sheh-mot');
+txt=txt.replace(/\bVayikra\b/g,'Vah-yik-rah');
+txt=txt.replace(/\bBamidbar\b/g,'Bah-mid-bar');
+txt=txt.replace(/\bDevarim\b/g,'Deh-vah-reem');
+txt=txt.replace(/\bChanokh\b/g,'Hha-nokh');
+txt=txt.replace(/\bYovelim\b/g,'Yo-veh-leem');
+txt=txt.replace(/\bTehillim\b/g,'Teh-hil-leem');
+txt=txt.replace(/\bMelakhim\b/g,'Meh-lah-kheem');
+txt=txt.replace(/\bShemu.el\b/g,'Sheh-moo-el');
+txt=txt.replace(/\bShofetim\b/g,'Sho-feh-teem');
+txt=txt.replace(/\bNevi.im\b/g,'Neh-vee-eem');
+txt=txt.replace(/\bKetuvim\b/g,'Keh-too-veem');
+txt=txt.replace(/\bQumran\b/g,'Koom-rahn');
+txt=txt.replace(/\bOrit\b/g,'Oh-reet');
+txt=txt.replace(/\bGe.ez\b/g,'Geh-ez');
+txt=txt.replace(/\b4Q/g,'fragment 4Q');
+txt=txt.replace(/\b1Q/g,'fragment 1Q');
+txt=txt.replace(/\bDSS\b/g,'Dead Sea Scrolls');
+txt=txt.replace(/\[DSS\]/g,'Dead Sea Scrolls note:');
+txt=txt.replace(/\[ORIT GE.EZ\]/g,'Orit Gezz note:');
+txt=txt.replace(/\[MASORETIC VARIANT\]/g,'Masoretic variant note:');
+txt=txt.replace(/\[CRITICAL NOTE\]/g,'Critical note:');
+txt=txt.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g,'');
+return txt;
+}
+function getVoice(){var voices=window.speechSynthesis.getVoices(),saved=localStorage.getItem('acr_voice');if(saved){for(var i=0;i<voices.length;i++){if(voices[i].name===saved)return voices[i];}}var enh=voices.filter(function(v){return v.name.indexOf('Enhanced')>=0;});if(enh.length)return enh[0];var siri=voices.filter(function(v){return v.name.indexOf('Siri')>=0;});if(siri.length)return siri[0];var idx=parseInt(document.getElementById('vc').value);return(!isNaN(idx)&&voices[idx])||null;}
+function loadVoices(){var voices=window.speechSynthesis.getVoices(),vc=document.getElementById('vc');if(!voices||!voices.length)return;var saved=localStorage.getItem('acr_voice');vc.innerHTML='';var enh=[],siri=[],other=[];voices.forEach(function(v,i){if(v.name.indexOf('Enhanced')>=0)enh.push({v:v,i:i});else if(v.name.indexOf('Siri')>=0)siri.push({v:v,i:i});else other.push({v:v,i:i});});enh.concat(siri).concat(other).forEach(function(item){var o=document.createElement('option');o.value=item.i;o.textContent=item.v.name.replace('(Enhanced)',' \u2605').replace('(Compact)','').trim();if(saved&&item.v.name===saved)o.selected=true;else if(!saved&&item.v.name.indexOf('Enhanced')>=0&&!vc.querySelector('[selected]'))o.selected=true;vc.appendChild(o);});if(!vc.value&&vc.options.length)vc.options[0].selected=true;}
+window.speechSynthesis.onvoiceschanged=loadVoices;loadVoices();setTimeout(loadVoices,500);setTimeout(loadVoices,1500);setTimeout(loadVoices,3000);
+document.getElementById('vc').addEventListener('change',function(){var voices=window.speechSynthesis.getVoices();var v=voices[parseInt(this.value)];if(v)localStorage.setItem('acr_voice',v.name);});
+document.getElementById('vs').addEventListener('change',function(){spd=parseFloat(this.value);if(sp&&!pa){var i=pi;stp();pi=i;sp=true;document.getElementById('b-pl').style.display='none';document.getElementById('b-pa').style.display='inline';rn();}});
+document.getElementById('b-pv').addEventListener('click',function(){if(!window.speechSynthesis)return;window.speechSynthesis.cancel();var u=new SpeechSynthesisUtterance('In the beginning The Creator created the heavens and the earth.');u.rate=spd;u.lang='en-US';var voice=getVoice();if(voice)u.voice=voice;window.speechSynthesis.speak(u);});
+function gps(){var mode=document.getElementById('vm').value,all=document.getElementById('content').querySelectorAll('p.dp'),r=[];all.forEach(function(p){if(!p.textContent.trim())return;var pt=p.getAttribute('data-ptype');if(mode==='verses'){if(pt==='verse')r.push(p);}else if(mode==='notes'){if(pt==='note')r.push(p);}else r.push(p);});return r;}
+document.getElementById('b-vt').addEventListener('click',function(){vop=!vop;document.getElementById('vr').classList.toggle('on',vop);document.getElementById('main').classList.toggle('vopen',vop||npop);this.classList.toggle('on',vop);document.getElementById('tb2').classList.toggle('up',vop||npop);if(!vop)stp();});
+document.getElementById('b-pl').addEventListener('click',function(){if(!window.speechSynthesis){alert('Use Safari for voice.');return;}if(pa){window.speechSynthesis.resume();pa=false;document.getElementById('b-pl').style.display='none';document.getElementById('b-pa').style.display='inline';document.getElementById('vst').textContent='Reading...';return;}ps=gps();if(!ps.length){document.getElementById('vst').textContent='No content';return;}if(pi>=ps.length)pi=0;sp=true;document.getElementById('b-pl').style.display='none';document.getElementById('b-pa').style.display='inline';rn();});
+function rn(){
+if(!sp||pi>=ps.length){
+if(sp&&cur<IDS.length-1){var nextFid=IDS[cur+1];pi=0;go(nextFid);setTimeout(function(){ps=gps();if(ps.length&&sp)rn();else dn();},900);}
+else dn();return;
+}
+var p=ps[pi];if(cp)cp.classList.remove('sp');p.classList.add('sp');cp=p;
+window.scrollTo(0,p.getBoundingClientRect().top+(window.pageYOffset||0)-120);
+document.getElementById('vst').textContent=(pi+1)+'/'+ps.length;
+localStorage.setItem('acr_vpos',JSON.stringify({fid:IDS[cur],pi:pi}));
+setTimeout(function(){
+if(!sp)return;
+var u=new SpeechSynthesisUtterance(prepTTS(p.textContent.trim()));
+u.rate=spd;u.lang='en-US';
+var voice=getVoice();if(voice)u.voice=voice;
+u.onend=function(){if(!sp)return;pi++;rn();};
+u.onerror=function(){if(!sp)return;pi++;rn();};
+window.speechSynthesis.speak(u);
+},50);
+}
+document.getElementById('b-pa').addEventListener('click',function(){window.speechSynthesis.pause();pa=true;this.style.display='none';document.getElementById('b-pl').style.display='inline';document.getElementById('vst').textContent='Paused';});
+document.getElementById('b-st').addEventListener('click',stp);
+
+function stp(){sp=false;pa=false;if(window.speechSynthesis)window.speechSynthesis.cancel();pi=0;if(cp)cp.classList.remove('sp');cp=null;document.getElementById('b-pl').style.display='inline';document.getElementById('b-pa').style.display='none';document.getElementById('vst').textContent='Ready';}
+function dn(){sp=false;pi=0;if(cp)cp.classList.remove('sp');cp=null;document.getElementById('b-pl').style.display='inline';document.getElementById('b-pa').style.display='none';document.getElementById('vst').textContent='Done';}
+
+window.onscroll=function(){var s=window.scrollY||0,h=document.documentElement.scrollHeight-window.innerHeight;document.getElementById('pf').style.width=(h>0?Math.round(s/h*100):0)+'%';document.getElementById('tb2').style.display=s>300?'block':'none';};
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
-
-var last=localStorage.getItem('acr_last');
-if(last&&IDS.indexOf(last)>=0)navTo(last);
+var last=localStorage.getItem('acr_last');if(last&&IDS.indexOf(last)>=0)go(last);
 </script>
+
 </body>
 </html>
