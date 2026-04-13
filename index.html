@@ -109,6 +109,7 @@ body.dark #recent-bar{background:#1e1e1e}
 .rb-item{background:#3a3a3a;border:none;color:#ccc;padding:3px 8px;border-radius:3px;cursor:pointer;font-size:10px;font-family:Arial;white-space:nowrap;flex-shrink:0}
 .rb-item:hover{background:#555;color:#fff}
 #pw-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:#1a1a1a;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px}
+#pw-screen .ph2,.ph{font-family:"Segoe UI Historic","Noto Sans Phoenician","Noto Serif","Arial Unicode MS",serif;direction:ltr;unicode-bidi:bidi-override}
 #pw-screen .ph2{font-size:3.5em;margin-bottom:24px;color:#e8e8e0}
 #pw-screen h2{color:#e8e8e0;font-family:Arial;font-size:1.2em;font-weight:bold;margin-bottom:8px;text-align:center}
 #pw-screen p{color:#888;font-family:Arial;font-size:.85em;margin-bottom:28px;text-align:center}
@@ -650,7 +651,10 @@ function stp(){sp=false;pa=false;if(window.speechSynthesis)window.speechSynthesi
 function dn(){sp=false;pi=0;if(cp)cp.classList.remove('sp');cp=null;document.getElementById('b-pl').style.display='inline';document.getElementById('b-pa').style.display='none';document.getElementById('vst').textContent='Done';}
 
 window.onscroll=function(){var s=window.scrollY||0,h=document.documentElement.scrollHeight-window.innerHeight;document.getElementById('pf').style.width=(h>0?Math.round(s/h*100):0)+'%';document.getElementById('tb2').style.display=s>300?'block':'none';};
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
+if('serviceWorker' in navigator){
+try{if(!localStorage.getItem('acr_sw_reset_v3')){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister();});});if(window.caches&&caches.keys)caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k);});});localStorage.setItem('acr_sw_reset_v3','1');}}catch(e){}
+navigator.serviceWorker.register('sw.js').catch(function(){});
+}
 var last=localStorage.getItem('acr_last');if(last&&IDS.indexOf(last)>=0)go(last);
 </script>
 
