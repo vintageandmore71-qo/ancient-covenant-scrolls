@@ -511,21 +511,28 @@ off+=n.length;
 });
 }
 document.getElementById('content').addEventListener('mouseup',handleSel);
-document.getElementById('content').addEventListener('touchend',function(){setTimeout(handleSel,150);});
+document.getElementById('content').addEventListener('touchend',function(){setTimeout(handleSel,200);});
 function handleSel(){
 var sel=window.getSelection();
-if(!sel||!sel.toString().trim()||sel.rangeCount===0){if(!document.getElementById('hl-bar').classList.contains('on'))return;return;}
-selText=sel.toString().trim();
-if(!selText){hideHL();return;}
-selRange=sel.getRangeAt(0).cloneRange();
+if(!sel||sel.rangeCount===0)return;
+var t=sel.toString().trim();
+if(!t)return;
+selText=t;
+try{selRange=sel.getRangeAt(0).cloneRange();}catch(e){return;}
 document.getElementById('hl-bar').classList.add('on');
 document.getElementById('main').classList.add('vopen');
 }
 function hideHL(){document.getElementById('hl-bar').classList.remove('on');if(!vop&&!npop)document.getElementById('main').classList.remove('vopen');selText='';selRange=null;}
-document.querySelectorAll('#hl-bar .hl-dot,#hl-copy,#hl-clr').forEach(function(el){
-['mousedown','touchstart','pointerdown'].forEach(function(evt){el.addEventListener(evt,function(e){e.preventDefault();},{passive:false});});
+// Only mousedown preventDefault - touchstart/pointerdown preventDefault kills click on iOS
+document.querySelectorAll('#hl-bar .hl-dot,#hl-copy,#hl-clr').forEach(function(el){el.addEventListener('mousedown',function(e){e.preventDefault();});});
+document.addEventListener('selectionchange',function(){
+var sel=window.getSelection();
+if(!sel||sel.rangeCount===0)return;
+var a=sel.anchorNode;if(!a)return;
+var c=document.getElementById('content');
+if(!c||!(c===a||c.contains(a)))return;
+if(sel.toString().trim())handleSel();
 });
-document.addEventListener('selectionchange',function(){var sel=window.getSelection();if(!sel||sel.rangeCount===0)return;var a=sel.anchorNode;if(!a)return;var c=document.getElementById('content');if(c&&(c===a||c.contains(a))&&sel.toString().trim())handleSel();});
 document.querySelectorAll('.hl-dot').forEach(function(dot){
 dot.addEventListener('click',function(){
 if(!selRange||!selText)return;
@@ -536,7 +543,8 @@ try{selRange.surroundContents(span);ok=true;}catch(e){
 try{var frag=selRange.extractContents();span.appendChild(frag);selRange.insertNode(span);ok=true;}catch(e2){}
 }
 if(ok&&cur>=0){var paras=document.getElementById('content').querySelectorAll('p.dp');var pidx=-1;paras.forEach(function(p,i){if(p.contains(span))pidx=i;});if(pidx>=0){var h=getHLs()[IDS[cur]]||[];h.push({pi:pidx,text:selText,cls:cls});saveHL(IDS[cur],h);}}
-window.getSelection().removeAllRanges();hideHL();
+try{window.getSelection().removeAllRanges();}catch(e){}
+hideHL();
 });
 });
 document.getElementById('hl-copy').addEventListener('click',function(){
@@ -616,8 +624,30 @@ window.speechSynthesis.onvoiceschanged=loadVoices;loadVoices();setTimeout(loadVo
 document.getElementById('vc').addEventListener('change',function(){var voices=window.speechSynthesis.getVoices();var v=voices[parseInt(this.value)];if(v)localStorage.setItem('acr_voice',v.name);});
 document.getElementById('vs').addEventListener('change',function(){spd=parseFloat(this.value);if(sp&&!pa){var i=pi;stp();pi=i;sp=true;document.getElementById('b-pl').style.display='none';document.getElementById('b-pa').style.display='inline';rn();}});
 document.getElementById('b-pv').addEventListener('click',function(){if(!window.speechSynthesis)return;window.speechSynthesis.cancel();var u=new SpeechSynthesisUtterance('In the beginning The Creator created the heavens and the earth.');u.rate=spd;u.lang='en-US';var voice=getVoice();if(voice)u.voice=voice;window.speechSynthesis.speak(u);});
-function gps(){var mode=document.getElementById('vm').value,all=document.getElementById('content').querySelectorAll('p.dp'),r=[];all.forEach(function(p){if(!p.textContent.trim())return;var pt=p.getAttribute('data-ptype');if(mode==='verses'){if(pt==='verse')r.push(p);}else if(mode==='notes'){if(pt==='note')r.push(p);}else r.push(p);});return r;}
-document.getElementById('b-vt').addEventListener('click',function(){vop=!vop;document.getElementById('vr').classList.toggle('on',vop);document.getElementById('main').classList.toggle('vopen',vop||npop);this.classList.toggle('on',vop);document.getElementById('tb2').classList.toggle('up',vop||npop);if(!vop)stp();});
+function gps(){
+var mode=document.getElementById('vm').value,all=document.getElementById('content').querySelectorAll('p.dp'),r=[],anyTyped=false;
+all.forEach(function(p){
+if(!p.textContent.trim())return;
+var pt=p.getAttribute('data-ptype');
+if(pt)anyTyped=true;
+if(mode==='verses'){if(pt==='verse')r.push(p);}
+else if(mode==='notes'){if(pt==='note')r.push(p);}
+else r.push(p);
+});
+// Fallback: if the filter removed everything (e.g. legacy content without data-ptype), read all non-empty paragraphs
+if(!r.length&&!anyTyped){all.forEach(function(p){if(p.textContent.trim())r.push(p);});}
+return r;
+}
+document.getElementById('b-vt').addEventListener('click',function(){
+vop=!vop;
+document.getElementById('vr').classList.toggle('on',vop);
+document.getElementById('main').classList.toggle('vopen',vop||npop);
+this.classList.toggle('on',vop);
+document.getElementById('tb2').classList.toggle('up',vop||npop);
+if(!vop){stp();return;}
+// Auto-start playback when opening the voice reader from a loaded section - gives immediate audio feedback
+if(cur>=0&&window.speechSynthesis&&!sp)startPlayback();
+});
 function speakCurrent(){
 if(!sp||pi<0||pi>=ps.length)return false;
 var p=ps[pi];if(cp)cp.classList.remove('sp');p.classList.add('sp');cp=p;
@@ -633,18 +663,20 @@ u.onend=function(){if(!sp)return;pi++;rn();};
 u.onerror=function(ev){if(!sp)return;if(ev&&(ev.error==='canceled'||ev.error==='interrupted'))return;pi++;rn();};
 try{window.speechSynthesis.speak(u);return true;}catch(e){return false;}
 }
-document.getElementById('b-pl').addEventListener('click',function(){
-if(!window.speechSynthesis){alert('Voice reader not supported in this browser.');return;}
-if(pa){window.speechSynthesis.resume();pa=false;document.getElementById('b-pl').style.display='none';document.getElementById('b-pa').style.display='inline';document.getElementById('vst').textContent='Reading...';return;}
+function startPlayback(){
+if(!window.speechSynthesis){alert('Voice reader not supported in this browser.');return false;}
+if(pa){window.speechSynthesis.resume();pa=false;document.getElementById('b-pl').style.display='none';document.getElementById('b-pa').style.display='inline';document.getElementById('vst').textContent='Reading...';return true;}
+if(cur<0){document.getElementById('vst').textContent='Open a section first';return false;}
 ps=gps();
-if(!ps.length){document.getElementById('vst').textContent='No content';return;}
+if(!ps.length){document.getElementById('vst').textContent='No content';return false;}
 if(pi>=ps.length)pi=0;
 sp=true;
 document.getElementById('b-pl').style.display='none';
 document.getElementById('b-pa').style.display='inline';
-// speak() MUST run synchronously inside the click handler or iOS Safari rejects it
-speakCurrent();
-});
+// speak() MUST run synchronously inside the user gesture or iOS Safari rejects it
+return speakCurrent();
+}
+document.getElementById('b-pl').addEventListener('click',startPlayback);
 function rn(){
 if(!sp)return;
 if(pi>=ps.length){
