@@ -29,7 +29,7 @@ body.sepia .toc-sec{color:#b89030}
 #pf{height:3px;background:#444;width:0%}
 #topnav{position:fixed;top:3px;left:0;right:0;height:46px;background:#222;display:flex;align-items:center;gap:3px;padding:0 5px;z-index:1000;box-shadow:0 2px 8px rgba(0,0,0,.4)}
 body.dark #topnav{background:#111}
-#topnav button{background:none;border:none;color:#ccc;cursor:pointer;padding:4px 5px;border-radius:4px;font-size:12px;font-family:Arial}
+#topnav button{background:none;border:none;color:#ccc;cursor:pointer;padding:4px 5px;border-radius:4px;font-size:12px;font-family:Arial;touch-action:manipulation;-webkit-tap-highlight-color:rgba(255,255,255,0.2)}
 #topnav button:hover,#topnav button.on{background:#555;color:#fff}
 #tb{flex:1;color:#888;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #sq{background:#333;border:1px solid #555;border-radius:4px;color:#ddd;padding:3px 5px;font-size:11px;width:80px;font-family:Arial}
@@ -39,7 +39,7 @@ body.dark #topnav{background:#111}
 body.dark #sb{background:#1e1e1e}
 .toc-sec{padding:10px 12px 4px;color:#777;font-size:9px;font-weight:bold;text-transform:uppercase;letter-spacing:.08em;border-top:1px solid #3a3a3a;margin-top:4px}
 .toc-vol{padding:5px 12px 2px;color:#aaa;font-size:11px;font-weight:bold}
-.toc-file{padding:4px 12px 4px 22px;color:#bbb;font-size:11px;cursor:pointer}
+.toc-file{padding:4px 12px 4px 22px;color:#bbb;font-size:11px;cursor:pointer;touch-action:manipulation}
 .toc-file:hover{background:#3a3a3a;color:#fff}
 .toc-file.on{background:#444;color:#fff;font-weight:bold;border-left:3px solid #888}
 .warn{color:#c8a000}
@@ -555,8 +555,12 @@ document.getElementById('cj-input').addEventListener('keydown',function(e){if(e.
 
 document.getElementById('b-sb').addEventListener('click',function(){if(window.innerWidth<=700){document.getElementById('sb').classList.toggle('m');}else{sbo=!sbo;document.getElementById('sb').classList.toggle('h',!sbo);document.getElementById('main').classList.toggle('x',!sbo);setLeft(sbo?'270px':'0');}});
 document.getElementById('b-dk').addEventListener('click',function(){document.body.classList.remove('sepia');localStorage.setItem('acr_sepia','0');document.getElementById('b-sep').classList.remove('on');var d=document.body.classList.toggle('dark');localStorage.setItem('acr_dark',d?'1':'0');this.classList.toggle('on',d);});
+document.getElementById('b-dk').addEventListener('touchstart',function(e){e.preventDefault();document.body.classList.remove('sepia');localStorage.setItem('acr_sepia','0');document.getElementById('b-sep').classList.remove('on');var d=document.body.classList.toggle('dark');localStorage.setItem('acr_dark',d?'1':'0');this.classList.toggle('on',d);});
+document.getElementById('b-sb').addEventListener('touchstart',function(e){e.preventDefault();if(window.innerWidth<=700){document.getElementById('sb').classList.toggle('m');}else{sbo=!sbo;document.getElementById('sb').classList.toggle('h',!sbo);document.getElementById('main').classList.toggle('x',!sbo);setLeft(sbo?'270px':'0');}});
+document.getElementById('b-dk').addEventListener('touchstart',function(e){e.preventDefault();document.body.classList.remove('sepia');localStorage.setItem('acr_sepia','0');document.getElementById('b-sep').classList.remove('on');var d=document.body.classList.toggle('dark');localStorage.setItem('acr_dark',d?'1':'0');this.classList.toggle('on',d);});
 document.getElementById('b-sep').addEventListener('click',function(){document.body.classList.remove('dark');localStorage.setItem('acr_dark','0');document.getElementById('b-dk').classList.remove('on');var s=document.body.classList.toggle('sepia');localStorage.setItem('acr_sepia',s?'1':'0');this.classList.toggle('on',s);});
 document.getElementById('b-rd').addEventListener('click',function(){var r=document.body.classList.toggle('acr-rd');document.getElementById('sb').classList.toggle('h',r);document.getElementById('main').classList.toggle('x',r);setLeft(r?'0':(sbo?'270px':'0'));});
+document.getElementById('b-rd').addEventListener('touchstart',function(e){e.preventDefault();var r=document.body.classList.toggle('acr-rd');document.getElementById('sb').classList.toggle('h',r);document.getElementById('main').classList.toggle('x',r);setLeft(r?'0':(sbo?'270px':'0'));});
 document.getElementById('b-fa').addEventListener('click',function(){fs=Math.max(8,fs-1);document.getElementById('content').style.fontSize=fs+'pt';localStorage.setItem('acr_fs',fs);});
 document.getElementById('b-fb').addEventListener('click',function(){fs=Math.min(20,fs+1);document.getElementById('content').style.fontSize=fs+'pt';localStorage.setItem('acr_fs',fs);});
 document.getElementById('b-lhd').addEventListener('click',function(){lh=Math.max(1.2,parseFloat((lh-.1).toFixed(1)));document.documentElement.style.setProperty('--lh',lh);localStorage.setItem('acr_lh',lh);});
@@ -608,6 +612,7 @@ document.getElementById('vs').addEventListener('change',function(){spd=parseFloa
 document.getElementById('b-pv').addEventListener('click',function(){if(!window.speechSynthesis)return;window.speechSynthesis.cancel();var u=new SpeechSynthesisUtterance('In the beginning The Creator created the heavens and the earth.');u.rate=spd;u.lang='en-US';var voice=getVoice();if(voice)u.voice=voice;window.speechSynthesis.speak(u);});
 function gps(){var mode=document.getElementById('vm').value,all=document.getElementById('content').querySelectorAll('p.dp'),r=[];all.forEach(function(p){if(!p.textContent.trim())return;var pt=p.getAttribute('data-ptype');if(mode==='verses'){if(pt==='verse')r.push(p);}else if(mode==='notes'){if(pt==='note')r.push(p);}else r.push(p);});return r;}
 document.getElementById('b-vt').addEventListener('click',function(){vop=!vop;document.getElementById('vr').classList.toggle('on',vop);document.getElementById('main').classList.toggle('vopen',vop||npop);this.classList.toggle('on',vop);document.getElementById('tb2').classList.toggle('up',vop||npop);if(!vop)stp();});
+document.getElementById('b-vt').addEventListener('touchstart',function(e){e.preventDefault();vop=!vop;document.getElementById('vr').classList.toggle('on',vop);document.getElementById('main').classList.toggle('vopen',vop||npop);this.classList.toggle('on',vop);document.getElementById('tb2').classList.toggle('up',vop||npop);if(!vop)stp();});
 document.getElementById('b-pl').addEventListener('click',function(){
   if(!window.speechSynthesis){alert('Use Safari for voice.');return;}
   if(pa){window.speechSynthesis.resume();pa=false;document.getElementById('b-pl').style.display='none';document.getElementById('b-pa').style.display='inline';document.getElementById('vst').textContent='Reading...';return;}
