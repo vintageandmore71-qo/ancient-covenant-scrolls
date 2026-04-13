@@ -143,7 +143,7 @@ body.dark #home p{color:#888}
 <body>
 
 <div id="pw-screen">
-<div class="ph2">&#x10909;&#x10904;&#x10905;&#x10912;</div>
+<div class="ph2">&#x10909;&#x10904;&#x10905;&#x10904;</div>
 <h2>THE ANCIENT COVENANT RECORD</h2>
 <p>Enter your access password to continue</p>
 <input id="pw-input" type="password" placeholder="Password" autocomplete="off">
@@ -335,7 +335,7 @@ body.dark #home p{color:#888}
 <div id="main">
 <div id="content">
 <div id="home">
-<div class="ph">&#x10909;&#x10904;&#x10905;&#x10912;</div>
+<div class="ph">&#x10909;&#x10904;&#x10905;&#x10904;</div>
 <h1>THE ANCIENT COVENANT RECORD</h1>
 <p>46 Volumes &#183; 111 Parts<br>Dead Sea Scrolls &#183; Orit Ge&#39;ez &#183; Ancient Hebrew<br>DSS Primary &#183; No Western Bias &#183; No Christian Framing</p>
 <button id="b-start">Begin with Bereshit &#9654;</button>
@@ -413,10 +413,11 @@ document.getElementById('content').style.fontSize=fs+'pt';
 function sha256(s){return new Promise(function(r){var b=new TextEncoder().encode(s);crypto.subtle.digest('SHA-256',b).then(function(h){r(Array.from(new Uint8Array(h)).map(function(x){return x.toString(16).padStart(2,'0');}).join(''));});});}
 
 function showApp(){document.getElementById('pw-screen').style.display='none';}
-function doPwd(){var v=document.getElementById('pw-input').value;if(!v){document.getElementById('pw-err').textContent='Please enter your password';return;}sha256(v).then(function(h){if(h===ACR_HASH){showApp();}else{document.getElementById('pw-err').textContent='Incorrect password';document.getElementById('pw-input').value='';document.getElementById('pw-input').focus();}});}
+function doPwd(){var v=document.getElementById('pw-input').value;if(!v){document.getElementById('pw-err').textContent='Please enter your password';return;}sha256(v).then(function(h){if(h===ACR_HASH){try{localStorage.setItem('acr_auth','1');}catch(e){}showApp();}else{document.getElementById('pw-err').textContent='Incorrect password';document.getElementById('pw-input').value='';document.getElementById('pw-input').focus();}});}
 document.getElementById('pw-btn').addEventListener('click',doPwd);
 document.getElementById('pw-input').addEventListener('keydown',function(e){if(e.key==='Enter')doPwd();});
-// password required every session
+// password persists per browser once entered successfully
+try{if(localStorage.getItem('acr_auth')==='1')showApp();}catch(e){}
 
 function setLeft(l){['bn','vr','np','nv','hl-bar','recent-bar'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.left=l;});}
 
@@ -517,12 +518,17 @@ document.getElementById('hl-bar').classList.add('on');
 document.getElementById('main').classList.add('vopen');
 }
 function hideHL(){document.getElementById('hl-bar').classList.remove('on');if(!vop&&!npop)document.getElementById('main').classList.remove('vopen');selText='';selRange=null;}
+document.querySelectorAll('#hl-bar .hl-dot,#hl-copy,#hl-clr').forEach(function(el){el.addEventListener('mousedown',function(e){e.preventDefault();});});
 document.querySelectorAll('.hl-dot').forEach(function(dot){
 dot.addEventListener('click',function(){
 if(!selRange||!selText)return;
 var cls=this.getAttribute('data-hl');
-try{var span=document.createElement('span');span.className=cls;selRange.surroundContents(span);
-if(cur>=0){var paras=document.getElementById('content').querySelectorAll('p.dp');var pidx=-1;paras.forEach(function(p,i){if(p.contains(span))pidx=i;});if(pidx>=0){var h=getHLs()[IDS[cur]]||[];h.push({pi:pidx,text:selText,cls:cls});saveHL(IDS[cur],h);}}}catch(e){}
+var span=document.createElement('span');span.className=cls;
+var ok=false;
+try{selRange.surroundContents(span);ok=true;}catch(e){
+try{var frag=selRange.extractContents();span.appendChild(frag);selRange.insertNode(span);ok=true;}catch(e2){}
+}
+if(ok&&cur>=0){var paras=document.getElementById('content').querySelectorAll('p.dp');var pidx=-1;paras.forEach(function(p,i){if(p.contains(span))pidx=i;});if(pidx>=0){var h=getHLs()[IDS[cur]]||[];h.push({pi:pidx,text:selText,cls:cls});saveHL(IDS[cur],h);}}
 window.getSelection().removeAllRanges();hideHL();
 });
 });
@@ -562,7 +568,7 @@ document.getElementById('b-bm').addEventListener('click',function(){var fid=IDS[
 document.getElementById('sq').addEventListener('input',function(){document.querySelectorAll('mark').forEach(function(m){m.outerHTML=m.innerHTML;});var q=this.value;if(!q||q.length<3)return;var c=document.getElementById('content'),ql=q.toLowerCase(),w=document.createTreeWalker(c,NodeFilter.SHOW_TEXT,null,false),ns=[],n,f=null;while(n=w.nextNode())ns.push(n);ns.forEach(function(n){var t=n.textContent,i=t.toLowerCase().indexOf(ql);if(i>=0){var r=document.createRange();r.setStart(n,i);r.setEnd(n,i+q.length);try{var m=document.createElement('mark');r.surroundContents(m);if(!f)f=m;}catch(e){}}} );if(f)window.scrollTo(0,f.getBoundingClientRect().top+(window.pageYOffset||0)-80);});
 
 function prepTTS(txt){
-txt=txt.replace(/\u{10909}\u{10904}\u{10905}\u{10912}/gu,'Yahweh');
+txt=txt.replace(/\u{10909}\u{10904}\u{10905}\u{10904}/gu,'Yahweh');
 txt=txt.replace(/YHWH/g,'Yahweh');
 txt=txt.replace(/\bYH\b/g,'Yah');
 txt=txt.replace(/\bMosheh\b/g,'Mo-sheh');
@@ -605,7 +611,20 @@ document.getElementById('vs').addEventListener('change',function(){spd=parseFloa
 document.getElementById('b-pv').addEventListener('click',function(){if(!window.speechSynthesis)return;window.speechSynthesis.cancel();var u=new SpeechSynthesisUtterance('In the beginning The Creator created the heavens and the earth.');u.rate=spd;u.lang='en-US';var voice=getVoice();if(voice)u.voice=voice;window.speechSynthesis.speak(u);});
 function gps(){var mode=document.getElementById('vm').value,all=document.getElementById('content').querySelectorAll('p.dp'),r=[];all.forEach(function(p){if(!p.textContent.trim())return;var pt=p.getAttribute('data-ptype');if(mode==='verses'){if(pt==='verse')r.push(p);}else if(mode==='notes'){if(pt==='note')r.push(p);}else r.push(p);});return r;}
 document.getElementById('b-vt').addEventListener('click',function(){vop=!vop;document.getElementById('vr').classList.toggle('on',vop);document.getElementById('main').classList.toggle('vopen',vop||npop);this.classList.toggle('on',vop);document.getElementById('tb2').classList.toggle('up',vop||npop);if(!vop)stp();});
-document.getElementById('b-pl').addEventListener('click',function(){if(!window.speechSynthesis){alert('Use Safari for voice.');return;}if(pa){window.speechSynthesis.resume();pa=false;document.getElementById('b-pl').style.display='none';document.getElementById('b-pa').style.display='inline';document.getElementById('vst').textContent='Reading...';return;}ps=gps();if(!ps.length){document.getElementById('vst').textContent='No content';return;}if(pi>=ps.length)pi=0;sp=true;document.getElementById('b-pl').style.display='none';document.getElementById('b-pa').style.display='inline';rn();});
+var ttsPrimed=false;
+function primeTTS(){if(ttsPrimed||!window.speechSynthesis)return;try{window.speechSynthesis.cancel();var pu=new SpeechSynthesisUtterance(' ');pu.volume=0;pu.rate=spd;window.speechSynthesis.speak(pu);ttsPrimed=true;}catch(e){}}
+document.getElementById('b-pl').addEventListener('click',function(){
+if(!window.speechSynthesis){alert('Use Safari for voice.');return;}
+if(pa){window.speechSynthesis.resume();pa=false;document.getElementById('b-pl').style.display='none';document.getElementById('b-pa').style.display='inline';document.getElementById('vst').textContent='Reading...';return;}
+ps=gps();
+if(!ps.length){document.getElementById('vst').textContent='No content';return;}
+if(pi>=ps.length)pi=0;
+sp=true;
+document.getElementById('b-pl').style.display='none';
+document.getElementById('b-pa').style.display='inline';
+primeTTS();
+rn();
+});
 function rn(){
 if(!sp||pi>=ps.length){
 if(sp&&cur<IDS.length-1){var nextFid=IDS[cur+1];pi=0;go(nextFid);setTimeout(function(){ps=gps();if(ps.length&&sp)rn();else dn();},900);}
@@ -615,15 +634,14 @@ var p=ps[pi];if(cp)cp.classList.remove('sp');p.classList.add('sp');cp=p;
 window.scrollTo(0,p.getBoundingClientRect().top+(window.pageYOffset||0)-120);
 document.getElementById('vst').textContent=(pi+1)+'/'+ps.length;
 localStorage.setItem('acr_vpos',JSON.stringify({fid:IDS[cur],pi:pi}));
-setTimeout(function(){
-if(!sp)return;
-var u=new SpeechSynthesisUtterance(prepTTS(p.textContent.trim()));
+var txt=prepTTS(p.textContent.trim());
+if(!txt){pi++;rn();return;}
+var u=new SpeechSynthesisUtterance(txt);
 u.rate=spd;u.lang='en-US';
 var voice=getVoice();if(voice)u.voice=voice;
 u.onend=function(){if(!sp)return;pi++;rn();};
-u.onerror=function(){if(!sp)return;pi++;rn();};
-window.speechSynthesis.speak(u);
-},50);
+u.onerror=function(ev){if(!sp)return;if(ev&&(ev.error==='canceled'||ev.error==='interrupted'))return;pi++;rn();};
+try{window.speechSynthesis.speak(u);}catch(e){pi++;setTimeout(rn,50);}
 }
 document.getElementById('b-pa').addEventListener('click',function(){window.speechSynthesis.pause();pa=true;this.style.display='none';document.getElementById('b-pl').style.display='inline';document.getElementById('vst').textContent='Paused';});
 document.getElementById('b-st').addEventListener('click',stp);
