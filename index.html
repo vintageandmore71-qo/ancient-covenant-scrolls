@@ -311,18 +311,10 @@ var ACR = {
 var voiceMode = 'verses';
 
 // ─── AUTH ─────────────────────────────────────────────────────────────────────
-async function acrAuth() {
+function acrAuth() {
   var pw = document.getElementById('pw-input').value;
-  var ok = false;
-  try {
-    // SHA-256 check (requires HTTPS / secure context)
-    var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
-    var hash = Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
-    ok = (hash === PW_HASH);
-  } catch(e) {
-    // Fallback for non-HTTPS preview context
-    try { ok = (pw === atob('UHJAeTNyKg==')); } catch(e2) { ok = false; }
-  }
+  // Simple hash check - works in all browsers, no async, no HTTPS requirement
+  var ok = (simpleHash(pw) === 547885903);
   if(ok) {
     sessionStorage.setItem('acr_auth','1');
     document.getElementById('auth-screen').style.display='none';
@@ -332,7 +324,14 @@ async function acrAuth() {
     err.style.display='block';
     err.textContent='Incorrect password';
     document.getElementById('pw-input').value='';
+    setTimeout(function(){err.style.display='none';},2000);
   }
+}
+function simpleHash(s) {
+  // djb2 hash of 'Pr@y3r*' = computed below
+  var h = 5381;
+  for(var i=0;i<s.length;i++) h = ((h<<5)+h)+s.charCodeAt(i);
+  return h >>> 0;
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
@@ -371,6 +370,10 @@ window.addEventListener('load', function() {
     document.getElementById('auth-screen').style.display='none';
     acrInit();
   }
+  // Ensure Enter key works
+  document.getElementById('pw-input').addEventListener('keydown',function(e){
+    if(e.key==='Enter') acrAuth();
+  });
 });
 
 // ─── SECTION LOADING ──────────────────────────────────────────────────────────
