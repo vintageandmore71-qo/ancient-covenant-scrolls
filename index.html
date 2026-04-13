@@ -13,9 +13,9 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#f5f5f0;--fg:#111111;--nav-bg:#222222;--sb-bg:#2a2a2a;
-  --sb-fg:#aaaaaa;--border:#888888;--accent:#444444;
-  --note-bg:rgba(0,0,0,.03);--hl-sel:rgba(255,235,59,.5);
+--bg:#f5f5f0;--fg:#111111;--nav-bg:#222222;--sb-bg:#2a2a2a;
+--sb-fg:#aaaaaa;--border:#888888;--accent:#444444;
+--note-bg:rgba(0,0,0,.03);--hl-sel:rgba(255,235,59,.5);
 }
 body{font-family:Arial,sans-serif;font-size:10.5pt;background:var(--bg);color:var(--fg);line-height:1.65;transition:background .2s,color .2s;-webkit-text-size-adjust:100%}
 body.dark{--bg:#1a1a1a;--fg:#e8e8e0;--nav-bg:#111;--sb-bg:#1e1e1e;--sb-fg:#888;--note-bg:rgba(255,255,255,.03)}
@@ -146,11 +146,11 @@ body.dark mark{background:#7a6000;color:#fff}
 <!-- AUTH -->
 
 <div id="auth-screen">
-  <div id="auth-icon">𐤉𐤄𐤅𐤄</div>
-  <h1>THE ANCIENT COVENANT RECORD<br><span style="font-size:11px;font-weight:normal;color:#888">Enter access code to continue</span></h1>
-  <input type="password" id="pw-input" placeholder="Password" onkeydown="if(event.key==='Enter')acrAuth()">
-  <button onclick="acrAuth()">Enter</button>
-  <div id="auth-err">Incorrect password</div>
+<div id="auth-icon">𐤉𐤄𐤅𐤄</div>
+<h1>THE ANCIENT COVENANT RECORD<br><span style="font-size:11px;font-weight:normal;color:#888">Enter access code to continue</span></h1>
+<input type="password" id="pw-input" placeholder="Password" onkeydown="if(event.key==='Enter')acrAuth()">
+<button onclick="acrAuth()">Enter</button>
+<div id="auth-err">Incorrect password</div>
 </div>
 
 <!-- PROGRESS -->
@@ -160,22 +160,22 @@ body.dark mark{background:#7a6000;color:#fff}
 <!-- TOP NAV -->
 
 <div id="topnav">
-  <button class="nb" onclick="acrToggleSB()" title="Contents">☰</button>
-  <div id="title-bar">THE ANCIENT COVENANT RECORD</div>
-  <button class="nb" onclick="acrToggleRecent()" title="Recently read" id="btn-recent">🕐</button>
-  <button class="nb" onclick="acrToggleBM()" title="Bookmarks" id="btn-bm">☆</button>
-  <button class="nb" onclick="acrChJump()" title="Jump to chapter">⊕</button>
-  <button class="nb" onclick="acrToggleNotes()" title="Notes" id="btn-notes">📝</button>
-  <button class="nb" onclick="acrToggleNotesViewer()" title="All notes">📋</button>
-  <input id="search-box" type="text" placeholder="Search…" oninput="acrSearch(this.value)">
-  <button class="nb" onclick="acrFont(-1)" title="Smaller">A-</button>
-  <button class="nb" onclick="acrFont(1)" title="Larger">A+</button>
-  <button class="nb" onclick="acrSpacing(-1)" title="Less spacing">↕-</button>
-  <button class="nb" onclick="acrSpacing(1)" title="More spacing">↕+</button>
-  <button class="nb" onclick="acrSepia()" title="Sepia mode" id="btn-sepia">☀</button>
-  <button class="nb" onclick="acrDark()" title="Dark mode" id="btn-dark">◑</button>
-  <button class="nb" onclick="acrRead()" title="Reading mode" id="btn-read">⊡</button>
-  <button class="nb" onclick="acrToggleVoice()" title="Voice reading" id="btn-voice">🔊</button>
+<button class="nb" onclick="acrToggleSB()" title="Contents">☰</button>
+<div id="title-bar">THE ANCIENT COVENANT RECORD</div>
+<button class="nb" onclick="acrToggleRecent()" title="Recently read" id="btn-recent">🕐</button>
+<button class="nb" onclick="acrToggleBM()" title="Bookmarks" id="btn-bm">☆</button>
+<button class="nb" onclick="acrChJump()" title="Jump to chapter">⊕</button>
+<button class="nb" onclick="acrToggleNotes()" title="Notes" id="btn-notes">📝</button>
+<button class="nb" onclick="acrToggleNotesViewer()" title="All notes">📋</button>
+<input id="search-box" type="text" placeholder="Search…" oninput="acrSearch(this.value)">
+<button class="nb" onclick="acrFont(-1)" title="Smaller">A-</button>
+<button class="nb" onclick="acrFont(1)" title="Larger">A+</button>
+<button class="nb" onclick="acrSpacing(-1)" title="Less spacing">↕-</button>
+<button class="nb" onclick="acrSpacing(1)" title="More spacing">↕+</button>
+<button class="nb" onclick="acrSepia()" title="Sepia mode" id="btn-sepia">☀</button>
+<button class="nb" onclick="acrDark()" title="Dark mode" id="btn-dark">◑</button>
+<button class="nb" onclick="acrRead()" title="Reading mode" id="btn-read">⊡</button>
+<button class="nb" onclick="acrToggleVoice()" title="Voice reading" id="btn-voice">🔊</button>
 </div>
 
 <!-- SIDEBAR TOC -->
@@ -189,18 +189,18 @@ body.dark mark{background:#7a6000;color:#fff}
 <!-- CHAPTER JUMP -->
 
 <div id="ch-jump">
-  <span style="color:#aaa;font-size:12px">Ch</span>
-  <input id="ch-input" type="number" min="1" placeholder="№" onkeydown="if(event.key==='Enter')doChJump()">
-  <button id="ch-go" onclick="doChJump()">Go</button>
-  <button class="nb" onclick="document.getElementById('ch-jump').classList.remove('open')" style="color:#888">✕</button>
+<span style="color:#aaa;font-size:12px">Ch</span>
+<input id="ch-input" type="number" min="1" placeholder="№" onkeydown="if(event.key==='Enter')doChJump()">
+<button id="ch-go" onclick="doChJump()">Go</button>
+<button class="nb" onclick="document.getElementById('ch-jump').classList.remove('open')" style="color:#888">✕</button>
 </div>
 
 <!-- BOTTOM NAV -->
 
 <div id="botnav">
-  <button class="bnav-btn" id="btn-prev" onclick="acrNav(-1)">◀ Prev</button>
-  <span id="pos-lbl">— of 111</span>
-  <button class="bnav-btn" id="btn-next" onclick="acrNav(1)">Next ▶</button>
+<button class="bnav-btn" id="btn-prev" onclick="acrNav(-1)">◀ Prev</button>
+<span id="pos-lbl">— of 111</span>
+<button class="bnav-btn" id="btn-next" onclick="acrNav(1)">Next ▶</button>
 </div>
 
 <!-- RECENTLY READ PANEL -->
@@ -214,60 +214,60 @@ body.dark mark{background:#7a6000;color:#fff}
 <!-- VOICE BAR -->
 
 <div id="voice-bar">
-  <button class="vb" id="vb-play" onclick="voicePlay()">▶ Play</button>
-  <button class="vb" onclick="voicePause()">⏸</button>
-  <button class="vb" onclick="voiceStop()">⏹</button>
-  <select id="vb-speed" class="vb" onchange="voiceSetSpeed(this.value)" style="padding:3px">
-    <option value="0.7">0.7×</option>
-    <option value="0.85">0.85×</option>
-    <option value="1" selected>1×</option>
-    <option value="1.2">1.2×</option>
-    <option value="1.5">1.5×</option>
-  </select>
-  <select id="vb-voice" class="vb" onchange="voiceSetVoice(this.value)" style="max-width:130px;padding:3px"></select>
-  <button class="vb" onclick="voicePreview()">Preview</button>
-  <select id="vb-mode" class="vb" onchange="voiceMode=this.value" style="padding:3px">
-    <option value="verses">Verses</option>
-    <option value="notes">Notes</option>
-    <option value="all">All</option>
-  </select>
-  <label style="color:#888;font-size:10px;display:flex;align-items:center;gap:3px">
-    <input type="checkbox" id="vb-auto" style="width:12px"> Auto-next
-  </label>
-  <div id="voice-status">—</div>
+<button class="vb" id="vb-play" onclick="voicePlay()">▶ Play</button>
+<button class="vb" onclick="voicePause()">⏸</button>
+<button class="vb" onclick="voiceStop()">⏹</button>
+<select id="vb-speed" class="vb" onchange="voiceSetSpeed(this.value)" style="padding:3px">
+<option value="0.7">0.7×</option>
+<option value="0.85">0.85×</option>
+<option value="1" selected>1×</option>
+<option value="1.2">1.2×</option>
+<option value="1.5">1.5×</option>
+</select>
+<select id="vb-voice" class="vb" onchange="voiceSetVoice(this.value)" style="max-width:130px;padding:3px"></select>
+<button class="vb" onclick="voicePreview()">Preview</button>
+<select id="vb-mode" class="vb" onchange="voiceMode=this.value" style="padding:3px">
+<option value="verses">Verses</option>
+<option value="notes">Notes</option>
+<option value="all">All</option>
+</select>
+<label style="color:#888;font-size:10px;display:flex;align-items:center;gap:3px">
+<input type="checkbox" id="vb-auto" style="width:12px"> Auto-next
+</label>
+<div id="voice-status">—</div>
 </div>
 
 <!-- NOTES PANEL -->
 
 <div id="notes-panel">
-  <div id="notes-header">
-    <span>Section Notes</span>
-    <button class="nb" onclick="acrToggleNotes()" style="font-size:11px">✕ Close</button>
-  </div>
-  <textarea id="notes-ta" placeholder="Type notes here… auto-saved per section"></textarea>
+<div id="notes-header">
+<span>Section Notes</span>
+<button class="nb" onclick="acrToggleNotes()" style="font-size:11px">✕ Close</button>
+</div>
+<textarea id="notes-ta" placeholder="Type notes here… auto-saved per section"></textarea>
 </div>
 
 <!-- NOTES VIEWER -->
 
 <div id="notes-viewer">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-    <span style="color:#aaa;font-size:12px;font-weight:bold">ALL NOTES</span>
-    <button class="nb" onclick="acrToggleNotesViewer()" style="font-size:11px">✕ Close</button>
-  </div>
-  <div id="notes-viewer-list"></div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+<span style="color:#aaa;font-size:12px;font-weight:bold">ALL NOTES</span>
+<button class="nb" onclick="acrToggleNotesViewer()" style="font-size:11px">✕ Close</button>
+</div>
+<div id="notes-viewer-list"></div>
 </div>
 
 <!-- HIGHLIGHT POPUP -->
 
 <div id="hl-popup">
-  <button class="hl-btn" style="background:#ffeb3b" onclick="applyHL('hl-y')" title="Yellow"></button>
-  <button class="hl-btn" style="background:#90EE90" onclick="applyHL('hl-g')" title="Green"></button>
-  <button class="hl-btn" style="background:#87CEEB" onclick="applyHL('hl-b')" title="Blue"></button>
-  <button class="hl-btn" style="background:#DDA0DD" onclick="applyHL('hl-p')" title="Purple"></button>
-  <button class="hl-btn" style="background:#FFB347" onclick="applyHL('hl-o')" title="Orange"></button>
-  <button class="hl-rm" onclick="removeHL()">✕</button>
-  <button class="hl-rm" onclick="copySelection()">Copy</button>
-  <button class="nb" onclick="hideHLPopup()" style="font-size:10px;color:#666">close</button>
+<button class="hl-btn" style="background:#ffeb3b" onclick="applyHL('hl-y')" title="Yellow"></button>
+<button class="hl-btn" style="background:#90EE90" onclick="applyHL('hl-g')" title="Green"></button>
+<button class="hl-btn" style="background:#87CEEB" onclick="applyHL('hl-b')" title="Blue"></button>
+<button class="hl-btn" style="background:#DDA0DD" onclick="applyHL('hl-p')" title="Purple"></button>
+<button class="hl-btn" style="background:#FFB347" onclick="applyHL('hl-o')" title="Orange"></button>
+<button class="hl-rm" onclick="removeHL()">✕</button>
+<button class="hl-rm" onclick="copySelection()">Copy</button>
+<button class="nb" onclick="hideHLPopup()" style="font-size:10px;color:#666">close</button>
 </div>
 
 <!-- SCROLL TOP -->
@@ -283,657 +283,654 @@ var PW_HASH = '0e96ee430baf9fef2d358854d5d2f8b83af983efe7acdf1e95884d5831be85ac'
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
 var ACR = {
-  curIdx: parseInt(localStorage.getItem('acr_last')||'0'),
-  fs: parseFloat(localStorage.getItem('acr_fs')||'10.5'),
-  lh: parseFloat(localStorage.getItem('acr_lh')||'1.65'),
-  dark: localStorage.getItem('acr_dark')==='1',
-  sepia: localStorage.getItem('acr_sepia')==='1',
-  reading: false,
-  sbOpen: window.innerWidth > 700,
-  voiceOpen: false,
-  notesOpen: false,
-  recentOpen: false,
-  bmOpen: false,
-  nvOpen: false,
-  synth: window.speechSynthesis,
-  voices: [],
-  voiceIdx: parseInt(localStorage.getItem('acr_voice')||'0'),
-  voiceRate: parseFloat(localStorage.getItem('acr_vrate')||'1'),
-  voiceMode: 'verses',
-  voiceParas: [],
-  voicePos: 0,
-  voicePlaying: false,
-  scrollTimer: null,
-  currentHL: null,
-  hlData: {}
+curIdx: parseInt(localStorage.getItem('acr_last')||'0'),
+fs: parseFloat(localStorage.getItem('acr_fs')||'10.5'),
+lh: parseFloat(localStorage.getItem('acr_lh')||'1.65'),
+dark: localStorage.getItem('acr_dark')==='1',
+sepia: localStorage.getItem('acr_sepia')==='1',
+reading: false,
+sbOpen: window.innerWidth > 700,
+voiceOpen: false,
+notesOpen: false,
+recentOpen: false,
+bmOpen: false,
+nvOpen: false,
+synth: window.speechSynthesis,
+voices: [],
+voiceIdx: parseInt(localStorage.getItem('acr_voice')||'0'),
+voiceRate: parseFloat(localStorage.getItem('acr_vrate')||'1'),
+voiceMode: 'verses',
+voiceParas: [],
+voicePos: 0,
+voicePlaying: false,
+scrollTimer: null,
+currentHL: null,
+hlData: {}
 };
 
 var voiceMode = 'verses';
 
 // ─── AUTH ─────────────────────────────────────────────────────────────────────
-function acrAuth() {
-  var pw = document.getElementById('pw-input').value;
-  // Simple hash check - works in all browsers, no async, no HTTPS requirement
-  var ok = (simpleHash(pw) === 547885903);
-  if(ok) {
-    sessionStorage.setItem('acr_auth','1');
-    document.getElementById('auth-screen').style.display='none';
-    acrInit();
-  } else {
-    var err=document.getElementById('auth-err');
-    err.style.display='block';
-    err.textContent='Incorrect password';
-    document.getElementById('pw-input').value='';
-    setTimeout(function(){err.style.display='none';},2000);
-  }
+async function acrAuth() {
+var pw = document.getElementById('pw-input').value;
+var ok = false;
+try {
+// SHA-256 check (requires HTTPS / secure context)
+var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
+var hash = Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+ok = (hash === PW_HASH);
+} catch(e) {
+// Fallback for non-HTTPS preview context
+try { ok = (pw === atob('UHJAeTNyKg==')); } catch(e2) { ok = false; }
 }
-function simpleHash(s) {
-  // djb2 hash of 'Pr@y3r*' = computed below
-  var h = 5381;
-  for(var i=0;i<s.length;i++) h = ((h<<5)+h)+s.charCodeAt(i);
-  return h >>> 0;
+if(ok) {
+sessionStorage.setItem('acr_auth','1');
+document.getElementById('auth-screen').style.display='none';
+acrInit();
+} else {
+var err=document.getElementById('auth-err');
+err.style.display='block';
+err.textContent='Incorrect password';
+document.getElementById('pw-input').value='';
+}
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 function acrInit() {
-  // Apply saved settings
-  applyFS(); applyLH();
-  if(ACR.dark) document.body.classList.add('dark');
-  if(ACR.sepia && !ACR.dark) document.body.classList.add('sepia');
-  
-  // Load highlights
-  try{ ACR.hlData = JSON.parse(localStorage.getItem('acr_hl')||'{}'); }catch(e){}
-  
-  // Build sidebar
-  buildTOC();
-  
-  // Load voices
-  loadVoices();
-  
-  // Load last section
-  loadSection(ACR.curIdx);
-  
-  // Selection for highlights
-  document.addEventListener('mouseup', onSelection);
-  document.addEventListener('touchend', function(e){setTimeout(onSelection,100);});
-  
-  // Scroll tracking
-  window.onscroll = onScroll;
-  
-  // Notes auto-save
-  document.getElementById('notes-ta').addEventListener('input', saveNotes);
+// Apply saved settings
+applyFS(); applyLH();
+if(ACR.dark) document.body.classList.add('dark');
+if(ACR.sepia && !ACR.dark) document.body.classList.add('sepia');
+
+// Load highlights
+try{ ACR.hlData = JSON.parse(localStorage.getItem('acr_hl')||'{}'); }catch(e){}
+
+// Build sidebar
+buildTOC();
+
+// Load voices
+loadVoices();
+
+// Load last section
+loadSection(ACR.curIdx);
+
+// Selection for highlights
+document.addEventListener('mouseup', onSelection);
+document.addEventListener('touchend', function(e){setTimeout(onSelection,100);});
+
+// Scroll tracking
+window.onscroll = onScroll;
+
+// Notes auto-save
+document.getElementById('notes-ta').addEventListener('input', saveNotes);
 }
 
 // Check auth on load
 window.addEventListener('load', function() {
-  if(sessionStorage.getItem('acr_auth')==='1') {
-    document.getElementById('auth-screen').style.display='none';
-    acrInit();
-  }
-  // Ensure Enter key works
-  document.getElementById('pw-input').addEventListener('keydown',function(e){
-    if(e.key==='Enter') acrAuth();
-  });
+if(sessionStorage.getItem('acr_auth')==='1') {
+document.getElementById('auth-screen').style.display='none';
+acrInit();
+}
 });
 
 // ─── SECTION LOADING ──────────────────────────────────────────────────────────
 function loadSection(idx, resumeScroll) {
-  if(idx<0||idx>=NAV_IDS.length) return;
-  ACR.curIdx = idx;
-  localStorage.setItem('acr_last', idx);
-  addRecent(idx);
-  
-  // Save notes from previous section
-  saveNotes();
-  
-  var fid = NAV_IDS[idx];
-  var label = NAV_LABELS[idx];
-  
-  document.getElementById('title-bar').textContent = label;
-  document.getElementById('pos-lbl').textContent = (idx+1)+' of '+NAV_IDS.length;
-  document.getElementById('btn-prev').className = 'bnav-btn'+(idx===0?' off':'');
-  document.getElementById('btn-next').className = 'bnav-btn'+(idx===NAV_IDS.length-1?' off':'');
-  
-  // Mark active in TOC
-  document.querySelectorAll('.toc-file').forEach(function(el){
-    el.classList.toggle('active', el.dataset.idx===String(idx));
-  });
-  
-  // Show spinner
-  document.getElementById('content').innerHTML = '<div style="padding:40px;color:#888;text-align:center">Loading…</div>';
-  
-  // Load bookmark star
-  var bms = JSON.parse(localStorage.getItem('acr_bms')||'[]');
-  document.getElementById('btn-bm').textContent = bms.indexOf(fid)>=0?'★':'☆';
-  
-  // Load notes
-  var notes = JSON.parse(localStorage.getItem('acr_notes')||'{}');
-  document.getElementById('notes-ta').value = notes[fid]||'';
-  
-  // Fetch JSON
-  fetch('data/'+fid+'.json')
-    .then(function(r){return r.json();})
-    .then(function(d){
-      document.getElementById('content').innerHTML = d.html||d.content||'';
-      applyFS(); applyLH();
-      restoreHighlights(fid);
-      
-      // Restore scroll
-      if(resumeScroll) {
-        var pos = JSON.parse(localStorage.getItem('acr_scroll')||'{}');
-        if(pos[fid]) setTimeout(function(){window.scrollTo(0,pos[fid]);},100);
-      } else {
-        window.scrollTo(0,0);
-      }
-      
-      // Voice
-      voiceStop();
-      buildVoiceParas();
-      var vpos = JSON.parse(localStorage.getItem('acr_vpos')||'{}');
-      ACR.voicePos = vpos[fid]||0;
-      updateVoiceStatus();
-    })
-    .catch(function(){
-      document.getElementById('content').innerHTML='<p style="padding:20px;color:#888">Error loading section.</p>';
-    });
+if(idx<0||idx>=NAV_IDS.length) return;
+ACR.curIdx = idx;
+localStorage.setItem('acr_last', idx);
+addRecent(idx);
+
+// Save notes from previous section
+saveNotes();
+
+var fid = NAV_IDS[idx];
+var label = NAV_LABELS[idx];
+
+document.getElementById('title-bar').textContent = label;
+document.getElementById('pos-lbl').textContent = (idx+1)+' of '+NAV_IDS.length;
+document.getElementById('btn-prev').className = 'bnav-btn'+(idx===0?' off':'');
+document.getElementById('btn-next').className = 'bnav-btn'+(idx===NAV_IDS.length-1?' off':'');
+
+// Mark active in TOC
+document.querySelectorAll('.toc-file').forEach(function(el){
+el.classList.toggle('active', el.dataset.idx===String(idx));
+});
+
+// Show spinner
+document.getElementById('content').innerHTML = '<div style="padding:40px;color:#888;text-align:center">Loading…</div>';
+
+// Load bookmark star
+var bms = JSON.parse(localStorage.getItem('acr_bms')||'[]');
+document.getElementById('btn-bm').textContent = bms.indexOf(fid)>=0?'★':'☆';
+
+// Load notes
+var notes = JSON.parse(localStorage.getItem('acr_notes')||'{}');
+document.getElementById('notes-ta').value = notes[fid]||'';
+
+// Fetch JSON
+fetch('data/'+fid+'.json')
+.then(function(r){return r.json();})
+.then(function(d){
+document.getElementById('content').innerHTML = d.html||d.content||'';
+applyFS(); applyLH();
+restoreHighlights(fid);
+
+// Restore scroll
+if(resumeScroll) {
+var pos = JSON.parse(localStorage.getItem('acr_scroll')||'{}');
+if(pos[fid]) setTimeout(function(){window.scrollTo(0,pos[fid]);},100);
+} else {
+window.scrollTo(0,0);
+}
+
+// Voice
+voiceStop();
+buildVoiceParas();
+var vpos = JSON.parse(localStorage.getItem('acr_vpos')||'{}');
+ACR.voicePos = vpos[fid]||0;
+updateVoiceStatus();
+})
+.catch(function(){
+document.getElementById('content').innerHTML='<p style="padding:20px;color:#888">Error loading section.</p>';
+});
 }
 
 // ─── TOC ──────────────────────────────────────────────────────────────────────
 function buildTOC() {
-  var sb = document.getElementById('sidebar');
-  var html = '<div style="padding:6px 12px 4px;color:#555;font-size:8px;letter-spacing:.06em;border-bottom:1px solid #333">📖 THE ANCIENT COVENANT RECORD</div>';
-  
-  for(var i=0;i<TOC.length;i++) {
-    var e = TOC[i];
-    if(e.type==='section') {
-      html += '<div class="toc-sec">'+e.label+'</div>';
-    } else if(e.type==='vol') {
-      html += '<div class="toc-vol">'+e.label+'</div>';
-    } else if(e.type==='file') {
-      html += '<div class="toc-file" data-idx="'+e.idx+'" onclick="loadSection('+e.idx+',true)">'+e.label+'</div>';
-    }
-  }
-  sb.innerHTML = html;
-  
-  if(!ACR.sbOpen) document.getElementById('sidebar').classList.add('hidden');
+var sb = document.getElementById('sidebar');
+var html = '<div style="padding:6px 12px 4px;color:#555;font-size:8px;letter-spacing:.06em;border-bottom:1px solid #333">📖 THE ANCIENT COVENANT RECORD</div>';
+
+for(var i=0;i<TOC.length;i++) {
+var e = TOC[i];
+if(e.type==='section') {
+html += '<div class="toc-sec">'+e.label+'</div>';
+} else if(e.type==='vol') {
+html += '<div class="toc-vol">'+e.label+'</div>';
+} else if(e.type==='file') {
+html += '<div class="toc-file" data-idx="'+e.idx+'" onclick="loadSection('+e.idx+',true)">'+e.label+'</div>';
+}
+}
+sb.innerHTML = html;
+
+if(!ACR.sbOpen) document.getElementById('sidebar').classList.add('hidden');
 }
 
 // ─── NAV ──────────────────────────────────────────────────────────────────────
 function acrNav(dir) {
-  var n = ACR.curIdx + dir;
-  if(n>=0 && n<NAV_IDS.length) loadSection(n, false);
+var n = ACR.curIdx + dir;
+if(n>=0 && n<NAV_IDS.length) loadSection(n, false);
 }
 
 // ─── DISPLAY SETTINGS ─────────────────────────────────────────────────────────
 function applyFS() {
-  document.getElementById('content').style.fontSize = ACR.fs+'pt';
+document.getElementById('content').style.fontSize = ACR.fs+'pt';
 }
 function applyLH() {
-  document.getElementById('content').style.lineHeight = ACR.lh;
+document.getElementById('content').style.lineHeight = ACR.lh;
 }
 function acrFont(d) {
-  ACR.fs = Math.max(8,Math.min(22,ACR.fs+d));
-  applyFS(); localStorage.setItem('acr_fs',ACR.fs);
+ACR.fs = Math.max(8,Math.min(22,ACR.fs+d));
+applyFS(); localStorage.setItem('acr_fs',ACR.fs);
 }
 function acrSpacing(d) {
-  ACR.lh = Math.max(1.2,Math.min(2.4,Math.round((ACR.lh+d*0.1)*10)/10));
-  applyLH(); localStorage.setItem('acr_lh',ACR.lh);
+ACR.lh = Math.max(1.2,Math.min(2.4,Math.round((ACR.lh+d*0.1)*10)/10));
+applyLH(); localStorage.setItem('acr_lh',ACR.lh);
 }
 function acrDark() {
-  document.body.classList.remove('sepia');
-  ACR.dark = document.body.classList.toggle('dark');
-  ACR.sepia = false;
-  localStorage.setItem('acr_dark',ACR.dark?'1':'0');
-  localStorage.setItem('acr_sepia','0');
-  document.getElementById('btn-dark').classList.toggle('active',ACR.dark);
+document.body.classList.remove('sepia');
+ACR.dark = document.body.classList.toggle('dark');
+ACR.sepia = false;
+localStorage.setItem('acr_dark',ACR.dark?'1':'0');
+localStorage.setItem('acr_sepia','0');
+document.getElementById('btn-dark').classList.toggle('active',ACR.dark);
 }
 function acrSepia() {
-  if(ACR.dark) { document.body.classList.remove('dark'); ACR.dark=false; localStorage.setItem('acr_dark','0'); }
-  ACR.sepia = document.body.classList.toggle('sepia');
-  localStorage.setItem('acr_sepia',ACR.sepia?'1':'0');
-  document.getElementById('btn-sepia').classList.toggle('active',ACR.sepia);
+if(ACR.dark) { document.body.classList.remove('dark'); ACR.dark=false; localStorage.setItem('acr_dark','0'); }
+ACR.sepia = document.body.classList.toggle('sepia');
+localStorage.setItem('acr_sepia',ACR.sepia?'1':'0');
+document.getElementById('btn-sepia').classList.toggle('active',ACR.sepia);
 }
 function acrRead() {
-  ACR.reading = !ACR.reading;
-  document.getElementById('btn-read').classList.toggle('active',ACR.reading);
-  if(ACR.reading) {
-    document.getElementById('sidebar').classList.add('hidden');
-    document.getElementById('main').classList.add('no-sb');
-    document.getElementById('botnav').classList.add('no-sb');
-    document.getElementById('voice-bar').classList.add('no-sb');
-  } else {
-    if(ACR.sbOpen&&window.innerWidth>700) document.getElementById('sidebar').classList.remove('hidden');
-    document.getElementById('main').classList.toggle('no-sb',!ACR.sbOpen||window.innerWidth<=700);
-    document.getElementById('botnav').classList.toggle('no-sb',!ACR.sbOpen||window.innerWidth<=700);
-    document.getElementById('voice-bar').classList.toggle('no-sb',!ACR.sbOpen||window.innerWidth<=700);
-  }
+ACR.reading = !ACR.reading;
+document.getElementById('btn-read').classList.toggle('active',ACR.reading);
+if(ACR.reading) {
+document.getElementById('sidebar').classList.add('hidden');
+document.getElementById('main').classList.add('no-sb');
+document.getElementById('botnav').classList.add('no-sb');
+document.getElementById('voice-bar').classList.add('no-sb');
+} else {
+if(ACR.sbOpen&&window.innerWidth>700) document.getElementById('sidebar').classList.remove('hidden');
+document.getElementById('main').classList.toggle('no-sb',!ACR.sbOpen||window.innerWidth<=700);
+document.getElementById('botnav').classList.toggle('no-sb',!ACR.sbOpen||window.innerWidth<=700);
+document.getElementById('voice-bar').classList.toggle('no-sb',!ACR.sbOpen||window.innerWidth<=700);
+}
 }
 function acrToggleSB() {
-  if(window.innerWidth<=700) {
-    document.getElementById('sidebar').classList.toggle('mob-open');
-  } else {
-    ACR.sbOpen = !ACR.sbOpen;
-    document.getElementById('sidebar').classList.toggle('hidden',!ACR.sbOpen);
-    document.getElementById('main').classList.toggle('no-sb',!ACR.sbOpen);
-    document.getElementById('botnav').classList.toggle('no-sb',!ACR.sbOpen);
-    document.getElementById('voice-bar').classList.toggle('no-sb',!ACR.sbOpen);
-  }
+if(window.innerWidth<=700) {
+document.getElementById('sidebar').classList.toggle('mob-open');
+} else {
+ACR.sbOpen = !ACR.sbOpen;
+document.getElementById('sidebar').classList.toggle('hidden',!ACR.sbOpen);
+document.getElementById('main').classList.toggle('no-sb',!ACR.sbOpen);
+document.getElementById('botnav').classList.toggle('no-sb',!ACR.sbOpen);
+document.getElementById('voice-bar').classList.toggle('no-sb',!ACR.sbOpen);
+}
 }
 
 // ─── SCROLL & PROGRESS ────────────────────────────────────────────────────────
 function onScroll() {
-  var s = window.pageYOffset||0;
-  var h = document.documentElement.scrollHeight - window.innerHeight;
-  document.getElementById('prog-fill').style.width = (h>0?Math.round(s/h*100):0)+'%';
-  document.getElementById('top-btn').style.display = s>300?'block':'none';
-  
-  // Save scroll every 3s
-  clearTimeout(ACR.scrollTimer);
-  ACR.scrollTimer = setTimeout(function() {
-    var pos = JSON.parse(localStorage.getItem('acr_scroll')||'{}');
-    pos[NAV_IDS[ACR.curIdx]] = s;
-    localStorage.setItem('acr_scroll',JSON.stringify(pos));
-  },3000);
+var s = window.pageYOffset||0;
+var h = document.documentElement.scrollHeight - window.innerHeight;
+document.getElementById('prog-fill').style.width = (h>0?Math.round(s/h*100):0)+'%';
+document.getElementById('top-btn').style.display = s>300?'block':'none';
+
+// Save scroll every 3s
+clearTimeout(ACR.scrollTimer);
+ACR.scrollTimer = setTimeout(function() {
+var pos = JSON.parse(localStorage.getItem('acr_scroll')||'{}');
+pos[NAV_IDS[ACR.curIdx]] = s;
+localStorage.setItem('acr_scroll',JSON.stringify(pos));
+},3000);
 }
 
 // ─── CHAPTER JUMP ─────────────────────────────────────────────────────────────
 function acrChJump() {
-  var j = document.getElementById('ch-jump');
-  j.classList.toggle('open');
-  if(j.classList.contains('open')) document.getElementById('ch-input').focus();
+var j = document.getElementById('ch-jump');
+j.classList.toggle('open');
+if(j.classList.contains('open')) document.getElementById('ch-input').focus();
 }
 function doChJump() {
-  var n = parseInt(document.getElementById('ch-input').value);
-  if(!n) return;
-  // Find paragraph with chapter number in content
-  var paras = document.querySelectorAll('#content .dp');
-  var found = false;
-  for(var i=0;i<paras.length;i++) {
-    var t = paras[i].textContent;
-    // Look for chapter header containing "CHAPTER N" or "N" at start
-    if(/chapter\s+{0}b/i.test(t.replace(/[^a-zA-Z0-9\s]/g,' '))) {
-      // More specific
-    }
-    if(t.match(new RegExp('CHAPTER\\s+'+n+'\\b','i')) || 
-       t.match(new RegExp('^'+n+'\\s')) ||
-       t.match(new RegExp('— CHAPTER '+n+'\\b'))) {
-      var top = paras[i].getBoundingClientRect().top + (window.pageYOffset||0) - 60;
-      window.scrollTo(0,top);
-      found = true;
-      break;
-    }
-  }
-  if(!found) {
-    // Try numbered verse
-    var verses = document.querySelectorAll('[data-ptype="verse"]');
-    for(var j=0;j<verses.length;j++) {
-      var vt = verses[j].textContent.trim();
-      if(vt.match(new RegExp('^'+n+'\\s'))) {
-        var top2 = verses[j].getBoundingClientRect().top + (window.pageYOffset||0) - 60;
-        window.scrollTo(0,top2);
-        found = true; break;
-      }
-    }
-  }
-  document.getElementById('ch-input').value='';
-  document.getElementById('ch-jump').classList.remove('open');
+var n = parseInt(document.getElementById('ch-input').value);
+if(!n) return;
+// Find paragraph with chapter number in content
+var paras = document.querySelectorAll('#content .dp');
+var found = false;
+for(var i=0;i<paras.length;i++) {
+var t = paras[i].textContent;
+// Look for chapter header containing "CHAPTER N" or "N" at start
+if(/chapter\s+{0}b/i.test(t.replace(/[^a-zA-Z0-9\s]/g,' '))) {
+// More specific
+}
+if(t.match(new RegExp('CHAPTER\\s+'+n+'\\b','i')) ||
+t.match(new RegExp('^'+n+'\\s')) ||
+t.match(new RegExp('— CHAPTER '+n+'\\b'))) {
+var top = paras[i].getBoundingClientRect().top + (window.pageYOffset||0) - 60;
+window.scrollTo(0,top);
+found = true;
+break;
+}
+}
+if(!found) {
+// Try numbered verse
+var verses = document.querySelectorAll('[data-ptype="verse"]');
+for(var j=0;j<verses.length;j++) {
+var vt = verses[j].textContent.trim();
+if(vt.match(new RegExp('^'+n+'\\s'))) {
+var top2 = verses[j].getBoundingClientRect().top + (window.pageYOffset||0) - 60;
+window.scrollTo(0,top2);
+found = true; break;
+}
+}
+}
+document.getElementById('ch-input').value='';
+document.getElementById('ch-jump').classList.remove('open');
 }
 
 // ─── SEARCH ───────────────────────────────────────────────────────────────────
 function acrSearch(q) {
-  document.querySelectorAll('mark').forEach(function(m){m.outerHTML=m.innerHTML;});
-  if(!q||q.length<2) return;
-  var c=document.getElementById('content'), ql=q.toLowerCase();
-  var walker=document.createTreeWalker(c,NodeFilter.SHOW_TEXT,null,false);
-  var nodes=[],nd;
-  while(nd=walker.nextNode()) nodes.push(nd);
-  var first=null;
-  for(var i=0;i<nodes.length;i++) {
-    var t=nodes[i].textContent, idx=t.toLowerCase().indexOf(ql);
-    if(idx>=0) {
-      var r=document.createRange();
-      r.setStart(nodes[i],idx); r.setEnd(nodes[i],idx+q.length);
-      try{var m=document.createElement('mark');r.surroundContents(m);if(!first)first=m;}catch(e){}
-    }
-  }
-  if(first) window.scrollTo(0,first.getBoundingClientRect().top+(window.pageYOffset||0)-80);
+document.querySelectorAll('mark').forEach(function(m){m.outerHTML=m.innerHTML;});
+if(!q||q.length<2) return;
+var c=document.getElementById('content'), ql=q.toLowerCase();
+var walker=document.createTreeWalker(c,NodeFilter.SHOW_TEXT,null,false);
+var nodes=[],nd;
+while(nd=walker.nextNode()) nodes.push(nd);
+var first=null;
+for(var i=0;i<nodes.length;i++) {
+var t=nodes[i].textContent, idx=t.toLowerCase().indexOf(ql);
+if(idx>=0) {
+var r=document.createRange();
+r.setStart(nodes[i],idx); r.setEnd(nodes[i],idx+q.length);
+try{var m=document.createElement('mark');r.surroundContents(m);if(!first)first=m;}catch(e){}
+}
+}
+if(first) window.scrollTo(0,first.getBoundingClientRect().top+(window.pageYOffset||0)-80);
 }
 
 // ─── BOOKMARKS ────────────────────────────────────────────────────────────────
 function acrToggleBM() {
-  // Toggle bookmark for current section
-  var fid = NAV_IDS[ACR.curIdx];
-  var bms = JSON.parse(localStorage.getItem('acr_bms')||'[]');
-  var i = bms.indexOf(fid);
-  if(i>=0) { bms.splice(i,1); document.getElementById('btn-bm').textContent='☆'; }
-  else { bms.push(fid); document.getElementById('btn-bm').textContent='★'; }
-  localStorage.setItem('acr_bms',JSON.stringify(bms));
-  
-  // Toggle panel
-  var p = document.getElementById('bm-panel');
-  if(p.classList.toggle('open')) renderBMPanel();
+// Toggle bookmark for current section
+var fid = NAV_IDS[ACR.curIdx];
+var bms = JSON.parse(localStorage.getItem('acr_bms')||'[]');
+var i = bms.indexOf(fid);
+if(i>=0) { bms.splice(i,1); document.getElementById('btn-bm').textContent='☆'; }
+else { bms.push(fid); document.getElementById('btn-bm').textContent='★'; }
+localStorage.setItem('acr_bms',JSON.stringify(bms));
+
+// Toggle panel
+var p = document.getElementById('bm-panel');
+if(p.classList.toggle('open')) renderBMPanel();
 }
 function renderBMPanel() {
-  var bms = JSON.parse(localStorage.getItem('acr_bms')||'[]');
-  var p = document.getElementById('bm-panel');
-  if(!bms.length){ p.innerHTML='<span style="color:#888;font-size:11px">No bookmarks yet</span>'; return; }
-  p.innerHTML = bms.map(function(fid) {
-    var idx = NAV_IDS.indexOf(fid);
-    var lbl = idx>=0?NAV_LABELS[idx].split(' — ').slice(0,2).join(' — '):fid;
-    return '<div class="bm-item" onclick="loadSection('+idx+',true);document.getElementById('bm-panel').classList.remove('open')">'+
-      lbl+'<span class="bm-rm" onclick="event.stopPropagation();removeBM(''+fid+'')">✕</span></div>';
-  }).join('');
+var bms = JSON.parse(localStorage.getItem('acr_bms')||'[]');
+var p = document.getElementById('bm-panel');
+if(!bms.length){ p.innerHTML='<span style="color:#888;font-size:11px">No bookmarks yet</span>'; return; }
+p.innerHTML = bms.map(function(fid) {
+var idx = NAV_IDS.indexOf(fid);
+var lbl = idx>=0?NAV_LABELS[idx].split(' — ').slice(0,2).join(' — '):fid;
+return '<div class="bm-item" onclick="loadSection('+idx+',true);document.getElementById('bm-panel').classList.remove('open')">'+
+lbl+'<span class="bm-rm" onclick="event.stopPropagation();removeBM(''+fid+'')">✕</span></div>';
+}).join('');
 }
 function removeBM(fid) {
-  var bms = JSON.parse(localStorage.getItem('acr_bms')||'[]');
-  bms = bms.filter(function(b){return b!==fid;});
-  localStorage.setItem('acr_bms',JSON.stringify(bms));
-  renderBMPanel();
+var bms = JSON.parse(localStorage.getItem('acr_bms')||'[]');
+bms = bms.filter(function(b){return b!==fid;});
+localStorage.setItem('acr_bms',JSON.stringify(bms));
+renderBMPanel();
 }
 
 // ─── RECENTLY READ ────────────────────────────────────────────────────────────
 function addRecent(idx) {
-  var r = JSON.parse(localStorage.getItem('acr_recent')||'[]');
-  r = r.filter(function(i){return i!==idx;});
-  r.unshift(idx);
-  if(r.length>10) r=r.slice(0,10);
-  localStorage.setItem('acr_recent',JSON.stringify(r));
+var r = JSON.parse(localStorage.getItem('acr_recent')||'[]');
+r = r.filter(function(i){return i!==idx;});
+r.unshift(idx);
+if(r.length>10) r=r.slice(0,10);
+localStorage.setItem('acr_recent',JSON.stringify(r));
 }
 function acrToggleRecent() {
-  var p = document.getElementById('recent-panel');
-  if(p.classList.toggle('open')) {
-    var r = JSON.parse(localStorage.getItem('acr_recent')||'[]');
-    p.innerHTML = r.length?r.map(function(idx){
-      var lbl = NAV_LABELS[idx]?NAV_LABELS[idx].split(' — ').slice(0,2).join(' — '):'?';
-      return '<div class="rp-item" onclick="loadSection('+idx+',true);document.getElementById('recent-panel').classList.remove('open')">'+lbl+'</div>';
-    }).join(''):'<span style="color:#888;font-size:11px">No history yet</span>';
-  }
+var p = document.getElementById('recent-panel');
+if(p.classList.toggle('open')) {
+var r = JSON.parse(localStorage.getItem('acr_recent')||'[]');
+p.innerHTML = r.length?r.map(function(idx){
+var lbl = NAV_LABELS[idx]?NAV_LABELS[idx].split(' — ').slice(0,2).join(' — '):'?';
+return '<div class="rp-item" onclick="loadSection('+idx+',true);document.getElementById('recent-panel').classList.remove('open')">'+lbl+'</div>';
+}).join(''):'<span style="color:#888;font-size:11px">No history yet</span>';
+}
 }
 
 // ─── NOTES ────────────────────────────────────────────────────────────────────
 function saveNotes() {
-  var fid = NAV_IDS[ACR.curIdx];
-  var val = document.getElementById('notes-ta').value;
-  var notes = JSON.parse(localStorage.getItem('acr_notes')||'{}');
-  if(val) notes[fid]=val; else delete notes[fid];
-  localStorage.setItem('acr_notes',JSON.stringify(notes));
+var fid = NAV_IDS[ACR.curIdx];
+var val = document.getElementById('notes-ta').value;
+var notes = JSON.parse(localStorage.getItem('acr_notes')||'{}');
+if(val) notes[fid]=val; else delete notes[fid];
+localStorage.setItem('acr_notes',JSON.stringify(notes));
 }
 function acrToggleNotes() {
-  var p = document.getElementById('notes-panel');
-  ACR.notesOpen = p.classList.toggle('open');
-  document.getElementById('btn-notes').classList.toggle('active',ACR.notesOpen);
-  if(ACR.notesOpen) document.getElementById('notes-ta').focus();
+var p = document.getElementById('notes-panel');
+ACR.notesOpen = p.classList.toggle('open');
+document.getElementById('btn-notes').classList.toggle('active',ACR.notesOpen);
+if(ACR.notesOpen) document.getElementById('notes-ta').focus();
 }
 function acrToggleNotesViewer() {
-  var p = document.getElementById('notes-viewer');
-  ACR.nvOpen = !ACR.nvOpen;
-  p.classList.toggle('open',ACR.nvOpen);
-  if(ACR.nvOpen) renderNotesViewer();
+var p = document.getElementById('notes-viewer');
+ACR.nvOpen = !ACR.nvOpen;
+p.classList.toggle('open',ACR.nvOpen);
+if(ACR.nvOpen) renderNotesViewer();
 }
 function renderNotesViewer() {
-  var notes = JSON.parse(localStorage.getItem('acr_notes')||'{}');
-  var list = document.getElementById('notes-viewer-list');
-  var keys = Object.keys(notes);
-  if(!keys.length){ list.innerHTML='<p style="color:#888;font-size:12px">No notes yet.</p>'; return; }
-  list.innerHTML = keys.map(function(fid){
-    var idx = NAV_IDS.indexOf(fid);
-    var lbl = idx>=0?NAV_LABELS[idx]:'Unknown';
-    return '<div class="nv-entry" onclick="loadSection('+idx+',true);acrToggleNotesViewer()">'+
-      '<div class="nv-title">'+lbl+'</div>'+
-      '<div class="nv-text">'+notes[fid].substring(0,200)+(notes[fid].length>200?'…':'')+'</div>'+
-      '</div>';
-  }).join('');
+var notes = JSON.parse(localStorage.getItem('acr_notes')||'{}');
+var list = document.getElementById('notes-viewer-list');
+var keys = Object.keys(notes);
+if(!keys.length){ list.innerHTML='<p style="color:#888;font-size:12px">No notes yet.</p>'; return; }
+list.innerHTML = keys.map(function(fid){
+var idx = NAV_IDS.indexOf(fid);
+var lbl = idx>=0?NAV_LABELS[idx]:'Unknown';
+return '<div class="nv-entry" onclick="loadSection('+idx+',true);acrToggleNotesViewer()">'+
+'<div class="nv-title">'+lbl+'</div>'+
+'<div class="nv-text">'+notes[fid].substring(0,200)+(notes[fid].length>200?'…':'')+'</div>'+
+'</div>';
+}).join('');
 }
 
 // ─── HIGHLIGHTING ─────────────────────────────────────────────────────────────
 var selRange = null;
 function onSelection() {
-  var sel = window.getSelection();
-  if(!sel||sel.isCollapsed||!sel.toString().trim()) { hideHLPopup(); return; }
-  selRange = sel.getRangeAt(0).cloneRange();
-  var rect = sel.getRangeAt(0).getBoundingClientRect();
-  var pop = document.getElementById('hl-popup');
-  pop.style.top = (rect.bottom+window.pageYOffset+6)+'px';
-  pop.style.left = Math.max(4,Math.min(window.innerWidth-200,rect.left+window.pageXOffset))+'px';
-  pop.classList.add('show');
+var sel = window.getSelection();
+if(!sel||sel.isCollapsed||!sel.toString().trim()) { hideHLPopup(); return; }
+selRange = sel.getRangeAt(0).cloneRange();
+var rect = sel.getRangeAt(0).getBoundingClientRect();
+var pop = document.getElementById('hl-popup');
+pop.style.top = (rect.bottom+window.pageYOffset+6)+'px';
+pop.style.left = Math.max(4,Math.min(window.innerWidth-200,rect.left+window.pageXOffset))+'px';
+pop.classList.add('show');
 }
 function hideHLPopup() {
-  document.getElementById('hl-popup').classList.remove('show');
-  selRange = null;
+document.getElementById('hl-popup').classList.remove('show');
+selRange = null;
 }
 function applyHL(cls) {
-  if(!selRange) return;
-  try {
-    var span = document.createElement('span');
-    span.className = cls;
-    selRange.surroundContents(span);
-    saveHighlights();
-  } catch(e) {
-    // Multi-node selection — wrap each text node
-    var frag = selRange.extractContents();
-    var span = document.createElement('span');
-    span.className = cls;
-    span.appendChild(frag);
-    selRange.insertNode(span);
-    saveHighlights();
-  }
-  hideHLPopup();
-  window.getSelection().removeAllRanges();
+if(!selRange) return;
+try {
+var span = document.createElement('span');
+span.className = cls;
+selRange.surroundContents(span);
+saveHighlights();
+} catch(e) {
+// Multi-node selection — wrap each text node
+var frag = selRange.extractContents();
+var span = document.createElement('span');
+span.className = cls;
+span.appendChild(frag);
+selRange.insertNode(span);
+saveHighlights();
+}
+hideHLPopup();
+window.getSelection().removeAllRanges();
 }
 function removeHL() {
-  if(!selRange) return;
-  var node = selRange.startContainer;
-  while(node && node!==document.getElementById('content')) {
-    if(node.nodeType===1 && node.className && node.className.startsWith('hl-')) {
-      var parent = node.parentNode;
-      while(node.firstChild) parent.insertBefore(node.firstChild,node);
-      parent.removeChild(node);
-      saveHighlights();
-      break;
-    }
-    node = node.parentNode;
-  }
-  hideHLPopup();
+if(!selRange) return;
+var node = selRange.startContainer;
+while(node && node!==document.getElementById('content')) {
+if(node.nodeType===1 && node.className && node.className.startsWith('hl-')) {
+var parent = node.parentNode;
+while(node.firstChild) parent.insertBefore(node.firstChild,node);
+parent.removeChild(node);
+saveHighlights();
+break;
+}
+node = node.parentNode;
+}
+hideHLPopup();
 }
 function copySelection() {
-  var sel = window.getSelection();
-  if(sel && !sel.isCollapsed) {
-    navigator.clipboard.writeText(sel.toString()).catch(function(){
-      document.execCommand('copy');
-    });
-  }
-  hideHLPopup();
+var sel = window.getSelection();
+if(sel && !sel.isCollapsed) {
+navigator.clipboard.writeText(sel.toString()).catch(function(){
+document.execCommand('copy');
+});
+}
+hideHLPopup();
 }
 function saveHighlights() {
-  var fid = NAV_IDS[ACR.curIdx];
-  var content = document.getElementById('content');
-  var spans = content.querySelectorAll('[class^="hl-"]');
-  var saved = [];
-  spans.forEach(function(s){
-    saved.push({text:s.textContent, cls:s.className});
-  });
-  ACR.hlData[fid] = saved;
-  localStorage.setItem('acr_hl',JSON.stringify(ACR.hlData));
+var fid = NAV_IDS[ACR.curIdx];
+var content = document.getElementById('content');
+var spans = content.querySelectorAll('[class^="hl-"]');
+var saved = [];
+spans.forEach(function(s){
+saved.push({text:s.textContent, cls:s.className});
+});
+ACR.hlData[fid] = saved;
+localStorage.setItem('acr_hl',JSON.stringify(ACR.hlData));
 }
 function restoreHighlights(fid) {
-  var saved = ACR.hlData[fid];
-  if(!saved||!saved.length) return;
-  var content = document.getElementById('content');
-  saved.forEach(function(h){
-    if(!h.text||!h.cls) return;
-    var walker = document.createTreeWalker(content,NodeFilter.SHOW_TEXT,null,false);
-    var nd;
-    while(nd=walker.nextNode()) {
-      var idx = nd.textContent.indexOf(h.text);
-      if(idx>=0) {
-        try {
-          var r = document.createRange();
-          r.setStart(nd,idx); r.setEnd(nd,idx+h.text.length);
-          var sp = document.createElement('span');
-          sp.className = h.cls;
-          r.surroundContents(sp);
-        } catch(e) {}
-        break;
-      }
-    }
-  });
+var saved = ACR.hlData[fid];
+if(!saved||!saved.length) return;
+var content = document.getElementById('content');
+saved.forEach(function(h){
+if(!h.text||!h.cls) return;
+var walker = document.createTreeWalker(content,NodeFilter.SHOW_TEXT,null,false);
+var nd;
+while(nd=walker.nextNode()) {
+var idx = nd.textContent.indexOf(h.text);
+if(idx>=0) {
+try {
+var r = document.createRange();
+r.setStart(nd,idx); r.setEnd(nd,idx+h.text.length);
+var sp = document.createElement('span');
+sp.className = h.cls;
+r.surroundContents(sp);
+} catch(e) {}
+break;
+}
+}
+});
 }
 
 // ─── VOICE READING ────────────────────────────────────────────────────────────
 function loadVoices() {
-  function doLoad() {
-    ACR.voices = ACR.synth.getVoices();
-    var sel = document.getElementById('vb-voice');
-    sel.innerHTML = ACR.voices.map(function(v,i){
-      var star = (v.name.includes('Enhanced')||v.name.includes('Neural')||v.name.includes('Premium'))?'*':'';
-      return '<option value="'+i+'"'+(i===ACR.voiceIdx?' selected':'')+'>'+(star?'★ ':'')+v.name.substring(0,28)+'</option>';
-    }).join('');
-  }
-  if(ACR.synth.getVoices().length) doLoad();
-  else ACR.synth.onvoiceschanged = doLoad;
+function doLoad() {
+ACR.voices = ACR.synth.getVoices();
+var sel = document.getElementById('vb-voice');
+sel.innerHTML = ACR.voices.map(function(v,i){
+var star = (v.name.includes('Enhanced')||v.name.includes('Neural')||v.name.includes('Premium'))?'*':'';
+return '<option value="'+i+'"'+(i===ACR.voiceIdx?' selected':'')+'>'+(star?'★ ':'')+v.name.substring(0,28)+'</option>';
+}).join('');
+}
+if(ACR.synth.getVoices().length) doLoad();
+else ACR.synth.onvoiceschanged = doLoad;
 }
 function acrToggleVoice() {
-  ACR.voiceOpen = !ACR.voiceOpen;
-  document.getElementById('voice-bar').classList.toggle('open',ACR.voiceOpen);
-  document.getElementById('btn-voice').classList.toggle('active',ACR.voiceOpen);
-  var noSb = !ACR.sbOpen||window.innerWidth<=700||ACR.reading;
-  document.getElementById('voice-bar').classList.toggle('no-sb',noSb);
-  document.getElementById('botnav').style.bottom = ACR.voiceOpen?'42px':'0';
+ACR.voiceOpen = !ACR.voiceOpen;
+document.getElementById('voice-bar').classList.toggle('open',ACR.voiceOpen);
+document.getElementById('btn-voice').classList.toggle('active',ACR.voiceOpen);
+var noSb = !ACR.sbOpen||window.innerWidth<=700||ACR.reading;
+document.getElementById('voice-bar').classList.toggle('no-sb',noSb);
+document.getElementById('botnav').style.bottom = ACR.voiceOpen?'42px':'0';
 }
 function buildVoiceParas() {
-  var mode = voiceMode||'verses';
-  var sel = mode==='verses'?'[data-ptype="verse"]':
-            mode==='notes'?'[data-ptype="note"]':
-            '[data-ptype]';
-  ACR.voiceParas = Array.from(document.querySelectorAll('#content '+sel));
+var mode = voiceMode||'verses';
+var sel = mode==='verses'?'[data-ptype="verse"]':
+mode==='notes'?'[data-ptype="note"]':
+'[data-ptype]';
+ACR.voiceParas = Array.from(document.querySelectorAll('#content '+sel));
 }
 function pronounce(text) {
-  return text
-    .replace(/𐤉𐤄𐤅𐤄/g,'')
-    .replace(/[𐤀-𐤟]+/g,'')
-    .replace(/\bYHWH\b/g,'Yahweh')
-    .replace(/\bYH\b/g,'Yah')
-    .replace(/\bMosheh\b/gi,'Mo-sheh')
-    .replace(/\bYehoshua\b/gi,'Yeh-ho-shua')
-    .replace(/\bChanokh\b/gi,'Hha-nokh')
-    .replace(/\bQumran\b/gi,'Koom-rahn')
-    .replace(/\bOrit\b/gi,'Oh-reet')
-    .replace(/\bGeez\b/gi,'Geh-ez')
-    .replace(/Ge’ez/gi,"Geh-ez").replace(/Ge'ez/gi,"Geh-ez").replace(/Geez/gi,"Geh-ez")
-    .replace(/\bDSS\b/g,'Dead Sea Scrolls')
-    .replace(/\[DSS\]/g,'Dead Sea Scrolls note:')
-    .replace(/ORIT GE.EZ/gi,"Orit Gezz note:")
-    .replace(/\[MASORETIC VARIANT\]/gi,'Masoretic variant note:')
-    .replace(/\[CRITICAL NOTE\]/gi,'Critical note:')
-    
-    .replace(/[^\x00-\xFF\u0100-\u024F]/g,'');
+return text
+.replace(/𐤉𐤄𐤅𐤄/g,'')
+.replace(/[𐤀-𐤟]+/g,'')
+.replace(/\bYHWH\b/g,'Yahweh')
+.replace(/\bYH\b/g,'Yah')
+.replace(/\bMosheh\b/gi,'Mo-sheh')
+.replace(/\bYehoshua\b/gi,'Yeh-ho-shua')
+.replace(/\bChanokh\b/gi,'Hha-nokh')
+.replace(/\bQumran\b/gi,'Koom-rahn')
+.replace(/\bOrit\b/gi,'Oh-reet')
+.replace(/\bGeez\b/gi,'Geh-ez')
+.replace(/Ge’ez/gi,"Geh-ez").replace(/Ge'ez/gi,"Geh-ez").replace(/Geez/gi,"Geh-ez")
+.replace(/\bDSS\b/g,'Dead Sea Scrolls')
+.replace(/\[DSS\]/g,'Dead Sea Scrolls note:')
+.replace(/ORIT GE.EZ/gi,"Orit Gezz note:")
+.replace(/\[MASORETIC VARIANT\]/gi,'Masoretic variant note:')
+.replace(/\[CRITICAL NOTE\]/gi,'Critical note:')
+
+.replace(/[^\x00-\xFF\u0100-\u024F]/g,'');
 }
 function voicePlay() {
-  if(ACR.voicePlaying) return;
-  buildVoiceParas();
-  if(!ACR.voiceParas.length) return;
-  ACR.voicePlaying = true;
-  document.getElementById('vb-play').textContent='▶ Playing';
-  voiceReadNext();
+if(ACR.voicePlaying) return;
+buildVoiceParas();
+if(!ACR.voiceParas.length) return;
+ACR.voicePlaying = true;
+document.getElementById('vb-play').textContent='▶ Playing';
+voiceReadNext();
 }
 function voiceReadNext() {
-  if(!ACR.voicePlaying||ACR.voicePos>=ACR.voiceParas.length) {
-    if(ACR.voicePlaying && document.getElementById('vb-auto').checked) {
-      voiceStop();
-      setTimeout(function(){acrNav(1);setTimeout(function(){buildVoiceParas();ACR.voicePos=0;voicePlay();},800);},400);
-    } else {
-      voiceStop();
-    }
-    return;
-  }
-  var para = ACR.voiceParas[ACR.voicePos];
-  var text = pronounce(para.textContent||'');
-  if(!text.trim()){ ACR.voicePos++; voiceReadNext(); return; }
-  
-  // Scroll to paragraph
-  var top = para.getBoundingClientRect().top+(window.pageYOffset||0)-80;
-  window.scrollTo(0,top);
-  para.style.background='rgba(255,235,59,.15)';
-  
-  // Save position
-  var vpos = JSON.parse(localStorage.getItem('acr_vpos')||'{}');
-  vpos[NAV_IDS[ACR.curIdx]] = ACR.voicePos;
-  localStorage.setItem('acr_vpos',JSON.stringify(vpos));
-  
-  updateVoiceStatus();
-  
-  var utt = new SpeechSynthesisUtterance(text);
-  if(ACR.voices[ACR.voiceIdx]) utt.voice = ACR.voices[ACR.voiceIdx];
-  utt.rate = ACR.voiceRate;
-  utt.onend = function() {
-    if(para) para.style.background='';
-    ACR.voicePos++;
-    voiceReadNext();
-  };
-  utt.onerror = function() {
-    if(para) para.style.background='';
-    ACR.voicePos++;
-    voiceReadNext();
-  };
-  ACR.synth.speak(utt);
+if(!ACR.voicePlaying||ACR.voicePos>=ACR.voiceParas.length) {
+if(ACR.voicePlaying && document.getElementById('vb-auto').checked) {
+voiceStop();
+setTimeout(function(){acrNav(1);setTimeout(function(){buildVoiceParas();ACR.voicePos=0;voicePlay();},800);},400);
+} else {
+voiceStop();
+}
+return;
+}
+var para = ACR.voiceParas[ACR.voicePos];
+var text = pronounce(para.textContent||'');
+if(!text.trim()){ ACR.voicePos++; voiceReadNext(); return; }
+
+// Scroll to paragraph
+var top = para.getBoundingClientRect().top+(window.pageYOffset||0)-80;
+window.scrollTo(0,top);
+para.style.background='rgba(255,235,59,.15)';
+
+// Save position
+var vpos = JSON.parse(localStorage.getItem('acr_vpos')||'{}');
+vpos[NAV_IDS[ACR.curIdx]] = ACR.voicePos;
+localStorage.setItem('acr_vpos',JSON.stringify(vpos));
+
+updateVoiceStatus();
+
+var utt = new SpeechSynthesisUtterance(text);
+if(ACR.voices[ACR.voiceIdx]) utt.voice = ACR.voices[ACR.voiceIdx];
+utt.rate = ACR.voiceRate;
+utt.onend = function() {
+if(para) para.style.background='';
+ACR.voicePos++;
+voiceReadNext();
+};
+utt.onerror = function() {
+if(para) para.style.background='';
+ACR.voicePos++;
+voiceReadNext();
+};
+ACR.synth.speak(utt);
 }
 function voicePause() {
-  if(ACR.synth.speaking) ACR.synth.pause();
-  ACR.voicePlaying = false;
-  document.getElementById('vb-play').textContent='▶ Play';
+if(ACR.synth.speaking) ACR.synth.pause();
+ACR.voicePlaying = false;
+document.getElementById('vb-play').textContent='▶ Play';
 }
 function voiceStop() {
-  ACR.synth.cancel();
-  ACR.voicePlaying = false;
-  document.getElementById('vb-play').textContent='▶ Play';
-  // Clear highlight
-  document.querySelectorAll('#content [data-ptype]').forEach(function(p){p.style.background='';});
+ACR.synth.cancel();
+ACR.voicePlaying = false;
+document.getElementById('vb-play').textContent='▶ Play';
+// Clear highlight
+document.querySelectorAll('#content [data-ptype]').forEach(function(p){p.style.background='';});
 }
 function voiceSetSpeed(v) {
-  ACR.voiceRate = parseFloat(v);
-  localStorage.setItem('acr_vrate',ACR.voiceRate);
+ACR.voiceRate = parseFloat(v);
+localStorage.setItem('acr_vrate',ACR.voiceRate);
 }
 function voiceSetVoice(i) {
-  ACR.voiceIdx = parseInt(i);
-  localStorage.setItem('acr_voice',ACR.voiceIdx);
+ACR.voiceIdx = parseInt(i);
+localStorage.setItem('acr_voice',ACR.voiceIdx);
 }
 function voicePreview() {
-  ACR.synth.cancel();
-  var utt = new SpeechSynthesisUtterance(pronounce('In the beginning, The Creator created the heavens and the earth.'));
-  if(ACR.voices[ACR.voiceIdx]) utt.voice = ACR.voices[ACR.voiceIdx];
-  utt.rate = ACR.voiceRate;
-  ACR.synth.speak(utt);
+ACR.synth.cancel();
+var utt = new SpeechSynthesisUtterance(pronounce('In the beginning, The Creator created the heavens and the earth.'));
+if(ACR.voices[ACR.voiceIdx]) utt.voice = ACR.voices[ACR.voiceIdx];
+utt.rate = ACR.voiceRate;
+ACR.synth.speak(utt);
 }
 function updateVoiceStatus() {
-  var fid = NAV_IDS[ACR.curIdx];
-  var vpos = JSON.parse(localStorage.getItem('acr_vpos')||'{}');
-  var saved = vpos[fid];
-  var total = ACR.voiceParas.length;
-  var cur = ACR.voicePos+1;
-  var txt = cur+'/'+total;
-  if(saved&&!ACR.voicePlaying) txt='Resume v'+saved;
-  document.getElementById('voice-status').textContent=txt;
+var fid = NAV_IDS[ACR.curIdx];
+var vpos = JSON.parse(localStorage.getItem('acr_vpos')||'{}');
+var saved = vpos[fid];
+var total = ACR.voiceParas.length;
+var cur = ACR.voicePos+1;
+var txt = cur+'/'+total;
+if(saved&&!ACR.voicePlaying) txt='Resume v'+saved;
+document.getElementById('voice-status').textContent=txt;
 }
 
 // Close panels on outside click
 document.addEventListener('click',function(e){
-  if(!e.target.closest('#hl-popup')&&!e.target.closest('#content')) hideHLPopup();
-  if(!e.target.closest('#recent-panel')&&!e.target.closest('#btn-recent')) {
-    document.getElementById('recent-panel').classList.remove('open');
-  }
-  if(!e.target.closest('#bm-panel')&&!e.target.closest('#btn-bm')&&!e.target.closest('#content')) {
-    // keep bm panel if user just clicked bm button - handled in toggle
-  }
-  if(!e.target.closest('#ch-jump')&&!e.target.closest('.nb[onclick*="acrChJump"]')) {
-    document.getElementById('ch-jump').classList.remove('open');
-  }
+if(!e.target.closest('#hl-popup')&&!e.target.closest('#content')) hideHLPopup();
+if(!e.target.closest('#recent-panel')&&!e.target.closest('#btn-recent')) {
+document.getElementById('recent-panel').classList.remove('open');
+}
+if(!e.target.closest('#bm-panel')&&!e.target.closest('#btn-bm')&&!e.target.closest('#content')) {
+// keep bm panel if user just clicked bm button - handled in toggle
+}
+if(!e.target.closest('#ch-jump')&&!e.target.closest('.nb[onclick*="acrChJump"]')) {
+document.getElementById('ch-jump').classList.remove('open');
+}
 });
 
 // Service worker
 if('serviceWorker' in navigator) {
-  window.addEventListener('load',function(){
-    navigator.serviceWorker.register('sw.js').catch(function(){});
-  });
+window.addEventListener('load',function(){
+navigator.serviceWorker.register('sw.js').catch(function(){});
+});
 }
 </script>
 
