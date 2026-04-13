@@ -415,7 +415,8 @@ document.getElementById('content').style.fontSize=fs+'pt';
 function sha256(s){return new Promise(function(r){var b=new TextEncoder().encode(s);crypto.subtle.digest('SHA-256',b).then(function(h){r(Array.from(new Uint8Array(h)).map(function(x){return x.toString(16).padStart(2,'0');}).join(''));});});}
 
 function showApp(){document.getElementById('pw-screen').style.display='none';}
-function doPwd(){var v=document.getElementById('pw-input').value;if(!v){document.getElementById('pw-err').textContent='Please enter your password';return;}sha256(v).then(function(h){if(h===ACR_HASH){showApp();}else{document.getElementById('pw-err').textContent='Incorrect password';document.getElementById('pw-input').value='';document.getElementById('pw-input').focus();}});}
+function doPwd(){var v=document.getElementById('pw-input').value;if(!v){document.getElementById('pw-err').textContent='Please enter your password';return;}sha256(v).then(function(h){if(h===ACR_HASH){localStorage.setItem('acr_auth',h);showApp();}else{document.getElementById('pw-err').textContent='Incorrect password';document.getElementById('pw-input').value='';document.getElementById('pw-input').focus();}});}
+if(localStorage.getItem('acr_auth')===ACR_HASH){showApp();}
 document.getElementById('pw-btn').addEventListener('click',doPwd);
 document.getElementById('pw-input').addEventListener('keydown',function(e){if(e.key==='Enter')doPwd();});
 // password required every session
@@ -607,7 +608,12 @@ document.getElementById('vs').addEventListener('change',function(){spd=parseFloa
 document.getElementById('b-pv').addEventListener('click',function(){if(!window.speechSynthesis)return;window.speechSynthesis.cancel();var u=new SpeechSynthesisUtterance('In the beginning The Creator created the heavens and the earth.');u.rate=spd;u.lang='en-US';var voice=getVoice();if(voice)u.voice=voice;window.speechSynthesis.speak(u);});
 function gps(){var mode=document.getElementById('vm').value,all=document.getElementById('content').querySelectorAll('p.dp'),r=[];all.forEach(function(p){if(!p.textContent.trim())return;var pt=p.getAttribute('data-ptype');if(mode==='verses'){if(pt==='verse')r.push(p);}else if(mode==='notes'){if(pt==='note')r.push(p);}else r.push(p);});return r;}
 document.getElementById('b-vt').addEventListener('click',function(){vop=!vop;document.getElementById('vr').classList.toggle('on',vop);document.getElementById('main').classList.toggle('vopen',vop||npop);this.classList.toggle('on',vop);document.getElementById('tb2').classList.toggle('up',vop||npop);if(!vop)stp();});
-document.getElementById('b-pl').addEventListener('click',function(){if(!window.speechSynthesis){alert('Use Safari for voice.');return;}if(pa){window.speechSynthesis.resume();pa=false;document.getElementById('b-pl').style.display='none';document.getElementById('b-pa').style.display='inline';document.getElementById('vst').textContent='Reading...';return;}ps=gps();if(!ps.length){document.getElementById('vst').textContent='No content';return;}if(pi>=ps.length)pi=0;sp=true;document.getElementById('b-pl').style.display='none';document.getElementById('b-pa').style.display='inline';rn();});
+document.getElementById('b-pl').addEventListener('click',function(){if(!window.speechSynthesis){alert('Use Safari for voice.');return;}if(pa){window.speechSynthesis.resume();pa=false;document.getElementById('b-pl').style.display='none';document.getElementById('b-pa').style.display='inline';document.getElementById('vst').textContent='Reading...';return;}ps=gps();if(!ps.length){document.getElementById('vst').textContent='No content';return;}if(pi>=ps.length)pi=0;sp=true;document.getElementById('b-pl').style.display='none';document.getElementById('b-pa').style.display='inline';document.getElementById('vst').textContent='Starting...';
+// iOS Safari requires direct speak() call in user gesture to unlock
+var unlock=new SpeechSynthesisUtterance('');unlock.volume=0;
+unlock.onend=function(){if(sp)rn();};
+unlock.onerror=function(){if(sp)rn();};
+window.speechSynthesis.cancel();window.speechSynthesis.speak(unlock);});
 function rn(){
   if(!sp||pi>=ps.length){
     if(sp&&cur<IDS.length-1){var nextFid=IDS[cur+1];pi=0;go(nextFid);setTimeout(function(){ps=gps();if(ps.length&&sp)rn();else dn();},900);}
