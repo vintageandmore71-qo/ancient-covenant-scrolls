@@ -1,18 +1,24 @@
-const CACHE = ‘acr-v1’;
-const SHELL = [‘index.html’, ‘manifest.json’, ‘icon.png’];
-self.addEventListener(‘install’, e => {
-e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)));
+var CACHE = ‘acr-v3’;
+var STATIC = [’./’,’./index.html’,’./manifest.json’,’./icon.png’,’./data/nav.json’];
+
+self.addEventListener(‘install’,function(e){
+e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(STATIC);}));
 self.skipWaiting();
 });
-self.addEventListener(‘activate’, e => {
-e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));
+self.addEventListener(‘activate’,function(e){
+e.waitUntil(caches.keys().then(function(keys){
+return Promise.all(keys.filter(function(k){return k!==CACHE;}).map(function(k){return caches.delete(k);}));
+}));
+self.clients.claim();
 });
-self.addEventListener(‘fetch’, e => {
-e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).then(res => {
-if(e.request.url.includes(’/data/’)) {
-var clone = res.clone();
-caches.open(CACHE).then(c => c.put(e.request, clone));
+self.addEventListener(‘fetch’,function(e){
+e.respondWith(caches.match(e.request).then(function(r){
+return r||fetch(e.request).then(function(res){
+if(res.ok&&e.request.url.includes(’/data/’)){
+var clone=res.clone();
+caches.open(CACHE).then(function(c){c.put(e.request,clone);});
 }
 return res;
-})));
+});
+}));
 });
