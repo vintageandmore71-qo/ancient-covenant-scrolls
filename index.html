@@ -705,17 +705,29 @@ function dn(){sp=false;pi=0;if(cp)cp.classList.remove('sp');cp=null;document.get
 window.onscroll=function(){var s=window.scrollY||0,h=document.documentElement.scrollHeight-window.innerHeight;document.getElementById('pf').style.width=(h>0?Math.round(s/h*100):0)+'%';document.getElementById('tb2').style.display=s>300?'block':'none';};
 (function(){
 if(!('serviceWorker' in navigator))return;
-var RESET_KEY='acr_sw_reset_v5';
+var RESET_KEY='acr_sw_reset_v6';
 if(!localStorage.getItem(RESET_KEY)){
 localStorage.setItem(RESET_KEY,'1');
 navigator.serviceWorker.getRegistrations().then(function(regs){
-var p=Promise.all(regs.map(function(r){return r.unregister();}));
-if(window.caches&&caches.keys){p=p.then(function(){return caches.keys().then(function(ks){return Promise.all(ks.map(function(k){return caches.delete(k);}));});});}
+// Only unregister the reader SW(s). The /study/ sub-app has its own SW
+// that we must leave intact so the study PWA's offline state survives.
+var readerRegs=regs.filter(function(r){return r.scope.indexOf('/study/')<0;});
+var p=Promise.all(readerRegs.map(function(r){return r.unregister();}));
+if(window.caches&&caches.keys){p=p.then(function(){return caches.keys().then(function(ks){
+// Only wipe reader caches. Leave acr-study-* caches alone.
+var readerCaches=ks.filter(function(k){return k.indexOf('acr-study-')!==0;});
+return Promise.all(readerCaches.map(function(k){return caches.delete(k);}));
+});});}
 p.then(function(){location.reload();}).catch(function(){location.reload();});
 }).catch(function(){});
 return;
 }
-navigator.serviceWorker.register('sw.js').catch(function(){});
+// updateViaCache:'none' tells Safari to bypass the HTTP cache when checking
+// for sw.js updates, so future sw.js edits propagate without waiting for the
+// 10-minute GitHub Pages Cache-Control to expire.
+navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(function(reg){
+try{reg.update();}catch(e){}
+}).catch(function(){});
 })();
 var last=localStorage.getItem('acr_last');if(last&&IDS.indexOf(last)>=0)go(last);
 </script>
