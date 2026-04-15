@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="ACR Study">
+<meta name="description" content="Spaced repetition study companion for The Ancient Covenant Record">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<title>ACR Study</title>
+<link rel="stylesheet" href="study.css">
+</head>
+<body>
+
+<div id="topnav">
+  <button id="b-sb" title="Toggle sidebar" aria-label="Toggle sidebar">&#9776;</button>
+  <div id="tb">ACR Study</div>
+  <div id="fc">
+    <button id="b-fs-" title="Smaller text" aria-label="Smaller text">A&#8722;</button>
+    <button id="b-fs+" title="Larger text" aria-label="Larger text">A&#43;</button>
+  </div>
+  <button id="b-theme" title="Cycle theme (dark / sepia / light)" aria-label="Theme">&#9680;</button>
+  <a href="../" class="lnk" title="Back to Reader">&#8592;<span class="hide-mobile">&nbsp;Reader</span></a>
+</div>
+
+<div id="sb"></div>
+
+<div id="main">
+  <div id="content">
+    <div id="home">
+      <div class="logo">&#x1F4D6;</div>
+      <h1>ACR STUDY</h1>
+      <p class="tag">
+        Spaced repetition study companion<br>
+        for The Ancient Covenant Record
+      </p>
+      <div class="btns">
+        <button id="b-begin">Begin with Bereshit &#9654;</button>
+        <button id="b-resume" style="display:none">Resume where I left off</button>
+      </div>
+      <p class="small">
+        Phase 1 &middot; Shell only &middot; Study engine arriving in Phase 2<br>
+        Data shared with the <a href="../">ACR Reader</a> on this device<br>
+        Add to Home Screen from Safari for offline access
+      </p>
+    </div>
+  </div>
+</div>
+
+<script src="study.js"></script>
+
+</body>
+</html>

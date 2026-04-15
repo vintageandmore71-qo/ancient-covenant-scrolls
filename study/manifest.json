@@ -1,0 +1,19 @@
+{
+  "name": "ACR Study",
+  "short_name": "ACR Study",
+  "description": "Spaced repetition study companion for The Ancient Covenant Record",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f0f1e",
+  "theme_color": "#1a1a2e",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

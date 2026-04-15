@@ -1,0 +1,156 @@
+/* ACR Study — Phase 1 Shell styles
+   Scoped so it can coexist with the reader on the same origin.
+   Default theme: dark indigo. Themes: dark (default), sepia, light. */
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:Arial,sans-serif;
+  font-size:10.5pt;
+  background:#0f0f1e;
+  color:#e8e8f0;
+  transition:background .3s,color .3s;
+  -webkit-text-size-adjust:100%;
+}
+body.sepia{background:#f4ecd8;color:#3b2e1a}
+body.light{background:#f5f5f8;color:#111}
+
+/* Top nav */
+#topnav{
+  position:fixed;top:0;left:0;right:0;height:48px;
+  background:#1a1a2e;
+  display:flex;align-items:center;gap:4px;padding:0 8px;
+  z-index:1000;box-shadow:0 2px 8px rgba(0,0,0,.4);
+}
+#topnav button,#topnav a.lnk{
+  background:none;border:none;color:#b8b8d8;cursor:pointer;
+  padding:6px 8px;border-radius:4px;font-size:13px;font-family:Arial;
+  text-decoration:none;display:inline-flex;align-items:center;
+}
+#topnav button:hover,#topnav button.on,#topnav a.lnk:hover{
+  background:#2a2a3e;color:#fff;
+}
+#tb{
+  flex:1;color:#9090b0;font-size:11px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  padding:0 6px;
+}
+#fc{display:flex;gap:2px}
+#fc button{width:26px;height:26px;padding:0;font-size:11px;border-radius:3px;background:#2a2a3e;color:#ccc}
+#fc button:hover{background:#3a3a5e;color:#fff}
+
+/* Sidebar */
+#sb{
+  position:fixed;top:48px;left:0;bottom:0;width:280px;
+  background:#1a1a2e;overflow-y:auto;z-index:900;
+  transition:transform .3s;border-right:1px solid #2a2a3e;
+}
+#sb.h{transform:translateX(-280px)}
+.sb-intro{
+  padding:10px 14px;color:#5a5a80;font-size:9px;
+  letter-spacing:.08em;text-transform:uppercase;
+  border-bottom:1px solid #2a2a3e;
+}
+.vol-hdr{
+  padding:12px 14px 6px;color:#8888bb;font-size:10px;
+  font-weight:bold;text-transform:uppercase;letter-spacing:.08em;
+  border-top:1px solid #2a2a3e;margin-top:4px;
+}
+.vol-hdr:first-of-type{border-top:none;margin-top:0}
+.sec{
+  padding:9px 14px 9px 24px;color:#c0c0d8;font-size:12px;
+  cursor:pointer;transition:background .15s;line-height:1.4;
+}
+.sec:hover{background:#2a2a3e;color:#fff}
+.sec.on{background:#3a3a5e;color:#fff;font-weight:bold;border-left:3px solid #8888cc;padding-left:21px}
+
+/* Main content */
+#main{
+  margin-left:280px;margin-top:48px;
+  padding:28px 44px 60px;max-width:900px;
+  transition:margin-left .3s;
+}
+#main.x{margin-left:0}
+
+#content p{
+  font-family:Arial,sans-serif;
+  line-height:var(--lh,1.65);
+  margin:.14em 0;
+}
+
+/* Home screen */
+#home{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:70vh;text-align:center;padding:40px 20px;
+}
+#home .logo{font-size:4em;margin-bottom:20px;color:#8888cc;line-height:1}
+#home h1{font-size:1.6em;font-weight:bold;margin-bottom:8px;color:#fff;letter-spacing:.04em}
+#home .tag{color:#8888a8;font-size:.9em;margin:8px 0 28px;line-height:1.7}
+#home .btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+#home button{
+  background:#3a3a5e;color:#fff;border:1px solid #5a5a8a;
+  padding:14px 28px;border-radius:8px;font-size:15px;font-family:Arial;
+  cursor:pointer;transition:background .15s,transform .15s;
+}
+#home button:hover{background:#4a4a7e}
+#home button:active{transform:scale(.97)}
+#home .small{font-size:.82em;color:#7a7a98;margin-top:20px;line-height:1.7}
+#home .small a{color:#8888cc;text-decoration:none}
+#home .small a:hover{text-decoration:underline}
+
+.loading{text-align:center;padding:60px 20px;color:#7a7a98;font-family:Arial}
+.err{text-align:center;padding:40px 20px;color:#d88;font-family:Arial}
+
+/* Mobile */
+@media(max-width:768px){
+  #main{margin-left:0;padding:16px 14px 60px}
+  #sb{transform:translateX(-280px)}
+  #sb.m{transform:translateX(0)}
+  #home .logo{font-size:3em}
+  #home h1{font-size:1.3em}
+  #topnav a.lnk span.hide-mobile{display:none}
+}
+
+/* Sepia theme overrides */
+body.sepia #topnav{background:#7a5c10}
+body.sepia #topnav button,body.sepia #topnav a.lnk{color:#f4d090}
+body.sepia #topnav button:hover,body.sepia #topnav button.on,body.sepia #topnav a.lnk:hover{background:#6a4a10;color:#fff}
+body.sepia #fc button{background:#6a4a10;color:#f4d090}
+body.sepia #tb{color:#b89030}
+body.sepia #sb{background:#5a3e08;border-right-color:#4a2e05}
+body.sepia .sb-intro{color:#a07818;border-bottom-color:#4a2e05}
+body.sepia .vol-hdr{color:#f0c040;border-top-color:#4a2e05}
+body.sepia .sec{color:#f4d090}
+body.sepia .sec:hover{background:#6a4a10;color:#fff}
+body.sepia .sec.on{background:#4a2e05;border-left-color:#f4d090}
+body.sepia #home .logo{color:#7a5c10}
+body.sepia #home h1{color:#3b2e1a}
+body.sepia #home .tag{color:#7a5c10}
+body.sepia #home button{background:#d4a020;color:#3b2e1a;border-color:#a07818}
+body.sepia #home button:hover{background:#e4b030}
+body.sepia #home .small{color:#7a5c10}
+body.sepia #home .small a{color:#7a5c10;font-weight:bold}
+
+/* Light theme overrides */
+body.light #topnav{background:#e8e8f0;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+body.light #topnav button,body.light #topnav a.lnk{color:#555}
+body.light #topnav button:hover,body.light #topnav button.on,body.light #topnav a.lnk:hover{background:#d0d0e0;color:#111}
+body.light #fc button{background:#d0d0e0;color:#333}
+body.light #tb{color:#666}
+body.light #sb{background:#e8e8f0;border-right-color:#d0d0e0}
+body.light .sb-intro{color:#888;border-bottom-color:#d0d0e0}
+body.light .vol-hdr{color:#555;border-top-color:#d0d0e0}
+body.light .sec{color:#333}
+body.light .sec:hover{background:#d0d0e0;color:#111}
+body.light .sec.on{background:#b8b8d0;color:#111;border-left-color:#5a5a8a}
+body.light #home .logo{color:#5a5a8a}
+body.light #home h1{color:#111}
+body.light #home .tag{color:#666}
+body.light #home button{background:#5a5a8a;color:#fff;border-color:#4a4a7a}
+body.light #home button:hover{background:#6a6a9a}
+body.light #home .small{color:#666}
+
+/* Scrollbar */
+#sb::-webkit-scrollbar{width:4px}
+#sb::-webkit-scrollbar-thumb{background:#3a3a5e;border-radius:2px}
+body.sepia #sb::-webkit-scrollbar-thumb{background:#7a5c10}
+body.light #sb::-webkit-scrollbar-thumb{background:#8888a8}
