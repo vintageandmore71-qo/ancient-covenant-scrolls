@@ -2,7 +2,7 @@
 // Scope: /ancient-covenant-scrolls/study/
 // Own cache namespace so it never touches the reader's cache.
 
-const CACHE = 'acr-study-v2';
+const CACHE = 'acr-study-v3';
 const SHELL = [
   './',
   'index.html',

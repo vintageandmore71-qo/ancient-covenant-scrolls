@@ -132,6 +132,52 @@ function go(fid) {
     });
 }
 
+// Render (or re-render) the home screen. Safe to call any time — the
+// Resume button is computed from localStorage on every call, so it always
+// reflects the latest saved position.
+function goHome() {
+  var lastFid = localStorage.getItem('acr_study_last');
+  var hasResume = lastFid && IDS.indexOf(lastFid) >= 0;
+  var resumeLbl = hasResume ? LBL[IDS.indexOf(lastFid)] : '';
+
+  var html = '<div id="home">' +
+    '<img src="icon.png" alt="DSS Orit Study App" class="hero" decoding="async">' +
+    '<p class="tag">Spaced repetition study companion<br>for The Ancient Covenant Record</p>' +
+    '<div class="btns">' +
+    '<button id="b-begin">Begin with Bereshit \u25B6</button>' +
+    (hasResume
+      ? '<button id="b-resume" title="' + resumeLbl + '">Resume where I left off</button>'
+      : '') +
+    '</div>' +
+    '<p class="small">' +
+    'Phase 1 \u00B7 Shell only \u00B7 Study engine arriving in Phase 2<br>' +
+    'Data shared with the <a href="../">ACR Reader</a> on this device<br>' +
+    'Add to Home Screen from Safari for offline access' +
+    '</p>' +
+    '</div>';
+
+  document.getElementById('content').innerHTML = html;
+  document.getElementById('tb').textContent = 'DSS Orit Study App';
+  cur = -1;
+
+  // Clear sidebar highlight
+  var secs = document.querySelectorAll('.sec');
+  for (var i = 0; i < secs.length; i++) secs[i].classList.remove('on');
+
+  // Rebind the home-screen buttons (freshly rendered so old listeners are gone)
+  var bBegin = document.getElementById('b-begin');
+  if (bBegin) bBegin.addEventListener('click', function () { go(IDS[0]); });
+  var bResume = document.getElementById('b-resume');
+  if (bResume) {
+    bResume.addEventListener('click', function () {
+      var f = localStorage.getItem('acr_study_last');
+      if (f && IDS.indexOf(f) >= 0) go(f);
+    });
+  }
+
+  window.scrollTo(0, 0);
+}
+
 function bindUI() {
   document.getElementById('b-sb').addEventListener('click', function () {
     if (window.innerWidth <= 768) {
@@ -141,6 +187,12 @@ function bindUI() {
       document.getElementById('sb').classList.toggle('h', !sbo);
       document.getElementById('main').classList.toggle('x', !sbo);
     }
+  });
+
+  document.getElementById('b-home').addEventListener('click', goHome);
+  document.getElementById('tb').addEventListener('click', goHome);
+  document.getElementById('tb').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goHome(); }
   });
 
   document.getElementById('b-theme').addEventListener('click', function () {
@@ -171,21 +223,15 @@ function bindUI() {
     applyFontSize();
     try { localStorage.setItem('acr_study_fs', fs); } catch (e) {}
   });
-
-  var bBegin = document.getElementById('b-begin');
-  if (bBegin) bBegin.addEventListener('click', function () { go(IDS[0]); });
-
-  var bResume = document.getElementById('b-resume');
-  var lastFid = localStorage.getItem('acr_study_last');
-  if (bResume && lastFid && IDS.indexOf(lastFid) >= 0) {
-    bResume.style.display = 'inline-block';
-    bResume.addEventListener('click', function () { go(lastFid); });
-  }
 }
 
 document.addEventListener('DOMContentLoaded', function () {
   buildTOC();
   bindUI();
+  // Re-render the home screen through goHome() so the Resume button
+  // is always computed from fresh localStorage state, not the static
+  // HTML placeholder that ships in index.html.
+  goHome();
 });
 
 // Service worker registration. Failures are silent — the app still works
