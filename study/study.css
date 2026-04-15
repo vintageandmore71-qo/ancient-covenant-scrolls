@@ -1,67 +1,68 @@
-/* ACR Study — Phase 1 Shell styles
-   Scoped so it can coexist with the reader on the same origin.
-   Default theme: dark indigo. Themes: dark (default), sepia, light. */
+/* DSS Orit Study App — Phase 1 Shell styles
+   Default: clean white for study / focus.
+   Alt: sepia (warm parchment), dark (brown + gold, matches the icon palette). */
 
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family:Arial,sans-serif;
   font-size:10.5pt;
-  background:#0f0f1e;
-  color:#e8e8f0;
+  background:#ffffff;
+  color:#1a1208;
   transition:background .3s,color .3s;
   -webkit-text-size-adjust:100%;
 }
 body.sepia{background:#f4ecd8;color:#3b2e1a}
-body.light{background:#f5f5f8;color:#111}
+body.dark{background:#1a1208;color:#f0e0c0}
 
 /* Top nav */
 #topnav{
   position:fixed;top:0;left:0;right:0;height:48px;
-  background:#1a1a2e;
+  background:#faf5ec;
   display:flex;align-items:center;gap:4px;padding:0 8px;
-  z-index:1000;box-shadow:0 2px 8px rgba(0,0,0,.4);
+  z-index:1000;box-shadow:0 1px 4px rgba(90,62,8,.08);
+  border-bottom:2px solid #d4a020;
 }
 #topnav button,#topnav a.lnk{
-  background:none;border:none;color:#b8b8d8;cursor:pointer;
+  background:none;border:none;color:#5a3e08;cursor:pointer;
   padding:6px 8px;border-radius:4px;font-size:13px;font-family:Arial;
   text-decoration:none;display:inline-flex;align-items:center;
 }
 #topnav button:hover,#topnav button.on,#topnav a.lnk:hover{
-  background:#2a2a3e;color:#fff;
+  background:#f0e8d4;color:#1a1208;
 }
 #tb{
-  flex:1;color:#9090b0;font-size:11px;
+  flex:1;color:#8a7050;font-size:11px;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  padding:0 6px;
+  padding:0 6px;letter-spacing:.02em;font-weight:bold;
 }
 #fc{display:flex;gap:2px}
-#fc button{width:26px;height:26px;padding:0;font-size:11px;border-radius:3px;background:#2a2a3e;color:#ccc}
-#fc button:hover{background:#3a3a5e;color:#fff}
+#fc button{width:26px;height:26px;padding:0;font-size:11px;border-radius:3px;background:#f0e8d4;color:#5a3e08}
+#fc button:hover{background:#e4d8b0;color:#1a1208}
 
 /* Sidebar */
 #sb{
   position:fixed;top:48px;left:0;bottom:0;width:280px;
-  background:#1a1a2e;overflow-y:auto;z-index:900;
-  transition:transform .3s;border-right:1px solid #2a2a3e;
+  background:#fbf8ef;overflow-y:auto;z-index:900;
+  transition:transform .3s;border-right:1px solid #e4d8b0;
 }
 #sb.h{transform:translateX(-280px)}
 .sb-intro{
-  padding:10px 14px;color:#5a5a80;font-size:9px;
+  padding:10px 14px;color:#8a7050;font-size:9px;
   letter-spacing:.08em;text-transform:uppercase;
-  border-bottom:1px solid #2a2a3e;
+  border-bottom:1px solid #e4d8b0;font-weight:bold;
 }
 .vol-hdr{
-  padding:12px 14px 6px;color:#8888bb;font-size:10px;
+  padding:12px 14px 6px;color:#7a5c10;font-size:10px;
   font-weight:bold;text-transform:uppercase;letter-spacing:.08em;
-  border-top:1px solid #2a2a3e;margin-top:4px;
+  border-top:1px solid #e4d8b0;margin-top:4px;
 }
 .vol-hdr:first-of-type{border-top:none;margin-top:0}
 .sec{
-  padding:9px 14px 9px 24px;color:#c0c0d8;font-size:12px;
+  padding:9px 14px 9px 24px;color:#3b2e1a;font-size:12px;
   cursor:pointer;transition:background .15s;line-height:1.4;
 }
-.sec:hover{background:#2a2a3e;color:#fff}
-.sec.on{background:#3a3a5e;color:#fff;font-weight:bold;border-left:3px solid #8888cc;padding-left:21px}
+.sec:hover{background:#f0e8d4;color:#1a1208}
+.sec.on{background:#e8dcb0;color:#1a1208;font-weight:bold;border-left:3px solid #c08828;padding-left:21px}
 
 /* Main content */
 #main{
@@ -82,75 +83,87 @@ body.light{background:#f5f5f8;color:#111}
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   min-height:70vh;text-align:center;padding:40px 20px;
 }
-#home .logo{font-size:4em;margin-bottom:20px;color:#8888cc;line-height:1}
-#home h1{font-size:1.6em;font-weight:bold;margin-bottom:8px;color:#fff;letter-spacing:.04em}
-#home .tag{color:#8888a8;font-size:.9em;margin:8px 0 28px;line-height:1.7}
+#home .hero{
+  width:min(78vw,320px);
+  height:auto;display:block;
+  margin:0 auto 28px;
+  border-radius:14px;
+  box-shadow:0 6px 24px rgba(90,62,8,.18),0 2px 6px rgba(0,0,0,.08);
+}
+#home h1{font-size:1.6em;font-weight:bold;margin-bottom:8px;color:#1a1208;letter-spacing:.04em}
+#home .tag{color:#5a3e08;font-size:.95em;margin:8px 0 28px;line-height:1.7;font-style:italic}
 #home .btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 #home button{
-  background:#3a3a5e;color:#fff;border:1px solid #5a5a8a;
+  background:linear-gradient(180deg,#5a3e08 0%,#3b2e1a 100%);
+  color:#ffd84a;border:1px solid #3b2e1a;
   padding:14px 28px;border-radius:8px;font-size:15px;font-family:Arial;
-  cursor:pointer;transition:background .15s,transform .15s;
+  cursor:pointer;transition:background .15s,transform .15s,box-shadow .15s;
+  font-weight:bold;letter-spacing:.02em;
+  box-shadow:0 2px 8px rgba(90,62,8,.3);
 }
-#home button:hover{background:#4a4a7e}
+#home button:hover{background:linear-gradient(180deg,#6a4e18 0%,#4b3e2a 100%);box-shadow:0 4px 14px rgba(90,62,8,.35)}
 #home button:active{transform:scale(.97)}
-#home .small{font-size:.82em;color:#7a7a98;margin-top:20px;line-height:1.7}
-#home .small a{color:#8888cc;text-decoration:none}
-#home .small a:hover{text-decoration:underline}
+#home .small{font-size:.82em;color:#7a5c10;margin-top:22px;line-height:1.7}
+#home .small a{color:#5a3e08;text-decoration:none;font-weight:bold}
+#home .small a:hover{text-decoration:underline;color:#1a1208}
 
-.loading{text-align:center;padding:60px 20px;color:#7a7a98;font-family:Arial}
-.err{text-align:center;padding:40px 20px;color:#d88;font-family:Arial}
+.loading{text-align:center;padding:60px 20px;color:#7a5c10;font-family:Arial;font-style:italic}
+.err{text-align:center;padding:40px 20px;color:#a04020;font-family:Arial}
 
 /* Mobile */
 @media(max-width:768px){
   #main{margin-left:0;padding:16px 14px 60px}
   #sb{transform:translateX(-280px)}
   #sb.m{transform:translateX(0)}
-  #home .logo{font-size:3em}
+  #home .hero{width:min(72vw,280px)}
   #home h1{font-size:1.3em}
   #topnav a.lnk span.hide-mobile{display:none}
 }
 
-/* Sepia theme overrides */
-body.sepia #topnav{background:#7a5c10}
-body.sepia #topnav button,body.sepia #topnav a.lnk{color:#f4d090}
-body.sepia #topnav button:hover,body.sepia #topnav button.on,body.sepia #topnav a.lnk:hover{background:#6a4a10;color:#fff}
-body.sepia #fc button{background:#6a4a10;color:#f4d090}
-body.sepia #tb{color:#b89030}
-body.sepia #sb{background:#5a3e08;border-right-color:#4a2e05}
-body.sepia .sb-intro{color:#a07818;border-bottom-color:#4a2e05}
-body.sepia .vol-hdr{color:#f0c040;border-top-color:#4a2e05}
-body.sepia .sec{color:#f4d090}
-body.sepia .sec:hover{background:#6a4a10;color:#fff}
-body.sepia .sec.on{background:#4a2e05;border-left-color:#f4d090}
-body.sepia #home .logo{color:#7a5c10}
+/* Sepia theme — warm parchment for long reading */
+body.sepia #topnav{background:#f0d8a0;border-bottom-color:#7a5c10}
+body.sepia #topnav button,body.sepia #topnav a.lnk{color:#5a3e08}
+body.sepia #topnav button:hover,body.sepia #topnav button.on,body.sepia #topnav a.lnk:hover{background:#e8c888;color:#1a1208}
+body.sepia #fc button{background:#e8c888;color:#5a3e08}
+body.sepia #tb{color:#7a5c10}
+body.sepia #sb{background:#eadbb0;border-right-color:#c0a868}
+body.sepia .sb-intro{color:#7a5c10;border-bottom-color:#c0a868}
+body.sepia .vol-hdr{color:#5a3e08;border-top-color:#c0a868}
+body.sepia .sec{color:#3b2e1a}
+body.sepia .sec:hover{background:#d4c090;color:#1a1208}
+body.sepia .sec.on{background:#c0a868;border-left-color:#5a3e08;color:#1a1208}
 body.sepia #home h1{color:#3b2e1a}
 body.sepia #home .tag{color:#7a5c10}
-body.sepia #home button{background:#d4a020;color:#3b2e1a;border-color:#a07818}
-body.sepia #home button:hover{background:#e4b030}
+body.sepia #home button{background:linear-gradient(180deg,#7a5c10 0%,#5a3e08 100%);color:#ffd84a;border-color:#3b2e1a}
+body.sepia #home button:hover{background:linear-gradient(180deg,#8a6c20 0%,#6a4e18 100%)}
 body.sepia #home .small{color:#7a5c10}
-body.sepia #home .small a{color:#7a5c10;font-weight:bold}
+body.sepia .loading{color:#7a5c10}
 
-/* Light theme overrides */
-body.light #topnav{background:#e8e8f0;box-shadow:0 2px 8px rgba(0,0,0,.1)}
-body.light #topnav button,body.light #topnav a.lnk{color:#555}
-body.light #topnav button:hover,body.light #topnav button.on,body.light #topnav a.lnk:hover{background:#d0d0e0;color:#111}
-body.light #fc button{background:#d0d0e0;color:#333}
-body.light #tb{color:#666}
-body.light #sb{background:#e8e8f0;border-right-color:#d0d0e0}
-body.light .sb-intro{color:#888;border-bottom-color:#d0d0e0}
-body.light .vol-hdr{color:#555;border-top-color:#d0d0e0}
-body.light .sec{color:#333}
-body.light .sec:hover{background:#d0d0e0;color:#111}
-body.light .sec.on{background:#b8b8d0;color:#111;border-left-color:#5a5a8a}
-body.light #home .logo{color:#5a5a8a}
-body.light #home h1{color:#111}
-body.light #home .tag{color:#666}
-body.light #home button{background:#5a5a8a;color:#fff;border-color:#4a4a7a}
-body.light #home button:hover{background:#6a6a9a}
-body.light #home .small{color:#666}
+/* Dark theme — brown + gold, matches the icon palette for night reading */
+body.dark #topnav{background:#2a1f10;border-bottom-color:#d4a020;box-shadow:0 2px 10px rgba(0,0,0,.6)}
+body.dark #topnav button,body.dark #topnav a.lnk{color:#e8cd80}
+body.dark #topnav button:hover,body.dark #topnav button.on,body.dark #topnav a.lnk:hover{background:#3a2c18;color:#ffd84a}
+body.dark #fc button{background:#3a2c18;color:#e8cd80}
+body.dark #fc button:hover{background:#4a3620;color:#ffd84a}
+body.dark #tb{color:#a08860}
+body.dark #sb{background:#241810;border-right-color:#3a2c18}
+body.dark .sb-intro{color:#8a7050;border-bottom-color:#3a2c18}
+body.dark .vol-hdr{color:#d4a020;border-top-color:#3a2c18}
+body.dark .sec{color:#d8c498}
+body.dark .sec:hover{background:#3a2c18;color:#ffd84a}
+body.dark .sec.on{background:#4a3620;color:#ffd84a;border-left-color:#d4a020}
+body.dark #home h1{color:#ffd84a}
+body.dark #home .tag{color:#c8a870}
+body.dark #home .hero{box-shadow:0 8px 40px rgba(212,160,32,.25),0 2px 10px rgba(0,0,0,.5)}
+body.dark #home button{background:linear-gradient(180deg,#4a3620 0%,#3a2818 100%);color:#ffd84a;border-color:#d4a020}
+body.dark #home button:hover{background:linear-gradient(180deg,#5a4428 0%,#4a3620 100%);box-shadow:0 4px 14px rgba(212,160,32,.3)}
+body.dark #home .small{color:#8a7050}
+body.dark #home .small a{color:#d4a020}
+body.dark #home .small a:hover{color:#ffd84a}
+body.dark .loading{color:#a08860}
 
 /* Scrollbar */
 #sb::-webkit-scrollbar{width:4px}
-#sb::-webkit-scrollbar-thumb{background:#3a3a5e;border-radius:2px}
+#sb::-webkit-scrollbar-thumb{background:#c0a868;border-radius:2px}
 body.sepia #sb::-webkit-scrollbar-thumb{background:#7a5c10}
-body.light #sb::-webkit-scrollbar-thumb{background:#8888a8}
+body.dark #sb::-webkit-scrollbar-thumb{background:#d4a020}

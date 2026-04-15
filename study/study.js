@@ -47,15 +47,16 @@ var VOL_GROUPS = [
 ];
 
 // Settings with localStorage persistence (acr_study_* prefix)
+// Default theme is 'white' (no body class) — study mode should be bright.
 var fs = parseFloat(localStorage.getItem('acr_study_fs') || '10.5');
 var lh = parseFloat(localStorage.getItem('acr_study_lh') || '1.65');
-var theme = localStorage.getItem('acr_study_theme') || 'dark';
+var theme = localStorage.getItem('acr_study_theme') || 'white';
 var sbo = true;
 var cur = -1;
 
 document.documentElement.style.setProperty('--lh', lh);
 if (theme === 'sepia') document.body.classList.add('sepia');
-else if (theme === 'light') document.body.classList.add('light');
+else if (theme === 'dark') document.body.classList.add('dark');
 
 function buildTOC() {
   var sb = document.getElementById('sb');
@@ -144,13 +145,14 @@ function bindUI() {
 
   document.getElementById('b-theme').addEventListener('click', function () {
     var b = document.body;
+    // Cycle: white (default) -> sepia -> dark -> white
     if (b.classList.contains('sepia')) {
       b.classList.remove('sepia');
-      b.classList.add('light');
-      theme = 'light';
-    } else if (b.classList.contains('light')) {
-      b.classList.remove('light');
+      b.classList.add('dark');
       theme = 'dark';
+    } else if (b.classList.contains('dark')) {
+      b.classList.remove('dark');
+      theme = 'white';
     } else {
       b.classList.add('sepia');
       theme = 'sepia';

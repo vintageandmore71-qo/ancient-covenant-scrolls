@@ -1,13 +1,13 @@
 {
-  "name": "ACR Study",
-  "short_name": "ACR Study",
+  "name": "DSS Orit Study App",
+  "short_name": "DSS Study",
   "description": "Spaced repetition study companion for The Ancient Covenant Record",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#0f0f1e",
-  "theme_color": "#1a1a2e",
+  "background_color": "#ffffff",
+  "theme_color": "#faf5ec",
   "icons": [
     {
       "src": "icon.png",
