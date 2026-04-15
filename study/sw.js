@@ -1,8 +1,11 @@
-// ACR Study — service worker
+// DSS Orit Study — service worker
 // Scope: /ancient-covenant-scrolls/study/
 // Own cache namespace so it never touches the reader's cache.
+// Pre-caches the shell AND every chapter JSON the study app references,
+// so every section works offline after the first online install.
 
-const CACHE = 'acr-study-v3';
+const CACHE = 'acr-study-v4';
+
 const SHELL = [
   './',
   'index.html',
@@ -10,6 +13,20 @@ const SHELL = [
   'study.js',
   'manifest.json',
   'icon.png'
+];
+
+// The 18 chapter files the study app uses — Bereshit, Shemot, Vayikra,
+// Bamidbar, Devarim, Chanokh, Yovelim, and War Scroll 1QM.
+const DATA_FILES = [
+  '../data/file_1.json',  '../data/file_2.json',
+  '../data/file_3.json',  '../data/file_4.json',
+  '../data/file_5.json',  '../data/file_6.json',
+  '../data/file_7.json',  '../data/file_8.json',
+  '../data/file_9.json',  '../data/file_10.json',
+  '../data/file_11.json', '../data/file_12.json',
+  '../data/file_13.json', '../data/file_14.json',
+  '../data/file_15.json', '../data/file_16.json',
+  '../data/file_17.json', '../data/file_94.json'
 ];
 
 self.addEventListener('install', e => {
@@ -21,13 +38,33 @@ self.addEventListener('install', e => {
 
 self.addEventListener('activate', e => {
   e.waitUntil(
+    // 1. Clean up our own old study caches (never touches reader's acr-* caches).
     caches.keys().then(ks => Promise.all(
-      // Only delete old acr-study-* caches; never touch reader's acr-* caches.
       ks.filter(k => k.indexOf('acr-study-') === 0 && k !== CACHE)
         .map(k => caches.delete(k))
-    )).then(() => self.clients.claim())
+    ))
+      // 2. Take control of any open clients.
+      .then(() => self.clients.claim())
+      // 3. Background pre-fetch every study chapter JSON so offline study
+      //    works for every section after the first online visit.
+      .then(() => prefetchAllChapters())
   );
 });
+
+function prefetchAllChapters() {
+  return caches.open(CACHE).then(cache =>
+    Promise.all(DATA_FILES.map(url =>
+      cache.match(url).then(hit => {
+        if (hit) return;
+        return fetch(url, { credentials: 'same-origin' })
+          .then(res => {
+            if (res && res.ok) return cache.put(url, res);
+          })
+          .catch(() => {});
+      })
+    ))
+  );
+}
 
 self.addEventListener('fetch', e => {
   const req = e.request;
