@@ -157,6 +157,7 @@ function openActivity(mode, fid) {
   if (mode === 'terms') { showTermsMode(fid); return; }
   if (mode === 'faq') { showFaqMode(fid); return; }
   if (mode === 'filblank') { showFillBlank(fid); return; }
+  if (mode === 'mc') { showMC(fid); return; }
   // Stub for modes not yet built
   document.getElementById('content').innerHTML =
     '<div class="study-view"><div class="sv-sec">' +
@@ -231,11 +232,69 @@ function getBestVoice() {
   return ttsVoices[0] || null;
 }
 
+function prepTTS(txt) {
+  txt = txt.replace(/\u{10909}\u{10904}\u{10905}\u{10904}/gu, 'Yahweh');
+  txt = txt.replace(/YHWH/g, 'Yahweh');
+  txt = txt.replace(/\bYH\b/g, 'Yah');
+  txt = txt.replace(/\bMosheh\b/g, 'Mo-sheh');
+  txt = txt.replace(/\bYehoshua\b/g, 'Yeh-ho-shua');
+  txt = txt.replace(/\bYirmeyahu\b/g, 'Yir-meh-yah-hoo');
+  txt = txt.replace(/\bYesha.yahu\b/g, 'Yeh-sha-yah-hoo');
+  txt = txt.replace(/\bYehezkel\b/g, 'Yeh-hez-kel');
+  txt = txt.replace(/\bYisrael\b/g, 'Yis-rah-el');
+  txt = txt.replace(/\bBereshit\b/g, 'Beh-reh-sheet');
+  txt = txt.replace(/\bShemot\b/g, 'Sheh-mot');
+  txt = txt.replace(/\bVayikra\b/g, 'Vah-yik-rah');
+  txt = txt.replace(/\bBamidbar\b/g, 'Bah-mid-bar');
+  txt = txt.replace(/\bDevarim\b/g, 'Deh-vah-reem');
+  txt = txt.replace(/\bChanokh\b/g, 'Hha-nokh');
+  txt = txt.replace(/\bYovelim\b/g, 'Yo-veh-leem');
+  txt = txt.replace(/\bTehillim\b/g, 'Teh-hil-leem');
+  txt = txt.replace(/\bMelakhim\b/g, 'Meh-lah-kheem');
+  txt = txt.replace(/\bShemu.el\b/g, 'Sheh-moo-el');
+  txt = txt.replace(/\bShofetim\b/g, 'Sho-feh-teem');
+  txt = txt.replace(/\bNevi.im\b/g, 'Neh-vee-eem');
+  txt = txt.replace(/\bKetuvim\b/g, 'Keh-too-veem');
+  txt = txt.replace(/\bQumran\b/g, 'Koom-rahn');
+  txt = txt.replace(/\bOrit\b/g, 'Oh-reet');
+  txt = txt.replace(/\bGe.ez\b/g, 'Geh-ez');
+  txt = txt.replace(/\bQayin\b/g, 'Kah-yin');
+  txt = txt.replace(/\bHevel\b/g, 'Heh-vel');
+  txt = txt.replace(/\bNoakh\b/g, 'No-akh');
+  txt = txt.replace(/\bChavah\b/g, 'Khah-vah');
+  txt = txt.replace(/\bMetushelakh\b/g, 'Meh-too-sheh-lakh');
+  txt = txt.replace(/\bBavel\b/g, 'Bah-vel');
+  txt = txt.replace(/\bAvram\b/g, 'Ahv-rahm');
+  txt = txt.replace(/\bAvraham\b/g, 'Ahv-rah-hahm');
+  txt = txt.replace(/\bYitzkhak\b/g, 'Yeets-khahk');
+  txt = txt.replace(/\bYaakov\b/g, 'Yah-ah-kov');
+  txt = txt.replace(/\bYosef\b/g, 'Yo-sef');
+  txt = txt.replace(/\bYehudah\b/g, 'Yeh-hoo-dah');
+  txt = txt.replace(/\bMasoretic\b/g, 'Mah-so-reh-tic');
+  txt = txt.replace(/\bElohim\b/g, 'Eh-lo-heem');
+  txt = txt.replace(/\bNephilim\b/g, 'Neh-fi-leem');
+  txt = txt.replace(/\bShet\b/g, 'Sheht');
+  txt = txt.replace(/\bEnosh\b/g, 'Eh-nosh');
+  txt = txt.replace(/\bQeynan\b/g, 'Kay-nahn');
+  txt = txt.replace(/\bMahalalel\b/g, 'Mah-hah-lah-lel');
+  txt = txt.replace(/\bYered\b/g, 'Yeh-red');
+  txt = txt.replace(/\bLamekh\b/g, 'Lah-mekh');
+  txt = txt.replace(/\b4Q/g, 'fragment 4Q');
+  txt = txt.replace(/\b1Q/g, 'fragment 1Q');
+  txt = txt.replace(/\bDSS\b/g, 'Dead Sea Scrolls');
+  txt = txt.replace(/\[DSS\]/g, 'Dead Sea Scrolls note:');
+  txt = txt.replace(/\[ORIT GE.EZ\]/g, 'Oh-reet Geh-ez note:');
+  txt = txt.replace(/\[MASORETIC VARIANT\]/g, 'Mah-so-reh-tic variant note:');
+  txt = txt.replace(/\[CRITICAL NOTE\]/g, 'Critical note:');
+  txt = txt.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '');
+  return txt;
+}
+
 function speakText(text) {
   if (!window.speechSynthesis) return;
   try { window.speechSynthesis.resume(); } catch (e) {}
   try { window.speechSynthesis.cancel(); } catch (e) {}
-  var u = new SpeechSynthesisUtterance(text);
+  var u = new SpeechSynthesisUtterance(prepTTS(text));
   u.rate = 1; u.lang = 'en-US'; u.volume = 1;
   var voice = getBestVoice();
   if (voice) u.voice = voice;
@@ -327,6 +386,83 @@ function showFillBlank(fid) {
       document.getElementById('content').innerHTML = h;
       document.getElementById('b-cloze-retry').addEventListener('click', function () { showFillBlank(fid); });
       document.getElementById('b-cloze-back').addEventListener('click', function () { go(fid); });
+    }
+
+    renderQ();
+  });
+}
+
+// ---- Multiple Choice quiz ----
+function showMC(fid) {
+  loadContent(fid).then(function (data) {
+    if (!data || !data.multiple_choice || !data.multiple_choice.length) {
+      openActivity('stub', fid); return;
+    }
+    var questions = shuffle(data.multiple_choice.slice());
+    var qi = 0, score = 0;
+    var mcColors = ['#dc2626', '#2563eb', '#059669', '#d97706'];
+
+    function renderQ() {
+      if (qi >= questions.length) { showResults(); return; }
+      var q = questions[qi];
+
+      var h = '<div class="mc-view">';
+      h += '<div class="mc-progress">' + (qi + 1) + ' of ' + questions.length + '</div>';
+      h += '<div class="mc-ref">Bereshit ' + q.ref + '</div>';
+      h += '<div class="mc-question">' + q.question + '</div>';
+      h += '<button class="cloze-audio" id="b-mc-hear">\u{1F50A} Listen</button>';
+      h += '<div class="mc-opts">';
+      for (var o = 0; o < q.options.length; o++) {
+        h += '<button class="mc-opt" data-idx="' + o +
+          '" style="background:' + mcColors[o % 4] + '">' +
+          q.options[o] + '</button>';
+      }
+      h += '</div>';
+      h += '<div class="mc-feedback" id="mc-fb"></div>';
+      h += '</div>';
+
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-mc-hear').addEventListener('click', function () {
+        speakText(q.question);
+      });
+      var btns = document.querySelectorAll('.mc-opt');
+      for (var b = 0; b < btns.length; b++) {
+        btns[b].addEventListener('click', function () {
+          var idx = parseInt(this.getAttribute('data-idx'));
+          var fb = document.getElementById('mc-fb');
+          if (idx === q.correct) {
+            this.classList.add('mc-correct');
+            fb.innerHTML = '<span class="fb-correct">\u2714 Correct!</span>' +
+              '<div class="cloze-source">' + (q.source_quote || '') + '</div>';
+            score++;
+            var all = document.querySelectorAll('.mc-opt');
+            for (var x = 0; x < all.length; x++) all[x].disabled = true;
+            setTimeout(function () { qi++; renderQ(); }, 2200);
+          } else {
+            this.classList.add('mc-wrong');
+            this.disabled = true;
+            fb.innerHTML = '<span class="fb-try">Not quite \u2014 try another \u2192</span>';
+          }
+        });
+      }
+    }
+
+    function showResults() {
+      var pct = Math.round(score / questions.length * 100);
+      var emoji = pct >= 80 ? '\u{1F3C6}' : pct >= 60 ? '\u{1F31F}' : '\u{1F4AA}';
+      var msg = pct >= 80 ? 'Outstanding!' : pct >= 60 ? 'Good work!' : 'Keep studying!';
+      var h = '<div class="cloze-results">';
+      h += '<div class="cr-emoji">' + emoji + '</div>';
+      h += '<div class="cr-score">' + score + ' / ' + questions.length + '</div>';
+      h += '<div class="cr-pct">' + pct + '%</div>';
+      h += '<div class="cr-msg">' + msg + '</div>';
+      h += '<div class="cr-btns">';
+      h += '<button class="study-btn sb-pri" id="b-mc-retry">\u{1F504} Try Again</button>';
+      h += '<button class="study-btn" id="b-mc-back">Back to activities</button>';
+      h += '</div></div>';
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-mc-retry').addEventListener('click', function () { showMC(fid); });
+      document.getElementById('b-mc-back').addEventListener('click', function () { go(fid); });
     }
 
     renderQ();

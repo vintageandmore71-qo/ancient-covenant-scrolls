@@ -425,6 +425,36 @@ body.font-dyslexic .cloze-opt{font-family:var(--font-dyslexic)}
   text-align:left;border-left:4px solid #059669;
 }
 
+/* =========================================================================
+   Multiple Choice quiz
+   ========================================================================= */
+.mc-view{text-align:center;padding:16px 0}
+.mc-progress{font-size:14px;color:var(--text-muted);font-weight:700;margin-bottom:6px}
+.mc-ref{font-size:13px;color:var(--vol5);font-weight:700;margin-bottom:14px;letter-spacing:.04em}
+.mc-question{
+  font-size:1.3em;line-height:1.8;color:var(--text-main);
+  padding:24px 22px;background:var(--bg-card);border-radius:var(--radius);
+  box-shadow:var(--shadow);margin-bottom:18px;text-align:left;
+  font-weight:700;border-left:5px solid var(--vol5);
+}
+body.font-dyslexic .mc-question{font-family:var(--font-dyslexic);line-height:2.1}
+.mc-opts{display:flex;flex-direction:column;gap:12px;margin-bottom:20px;padding:0 4px}
+.mc-opt{
+  color:#fff;border:none;padding:20px 22px;border-radius:16px;
+  font-size:1.1em;font-weight:700;cursor:pointer;min-height:64px;
+  box-shadow:0 4px 12px rgba(0,0,0,.18);
+  transition:transform .15s,opacity .15s,box-shadow .15s;
+  font-family:var(--font-main);text-align:left;
+  text-shadow:0 1px 2px rgba(0,0,0,.15);
+}
+body.font-dyslexic .mc-opt{font-family:var(--font-dyslexic)}
+.mc-opt:hover:not(:disabled){transform:scale(1.03);box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.mc-opt:active:not(:disabled){transform:scale(.97)}
+.mc-opt:disabled{opacity:.4;cursor:default;transform:none}
+.mc-correct{animation:correctPulse .6s ease}
+.mc-wrong{animation:wrongShake .45s ease}
+.mc-feedback{min-height:50px;padding:10px}
+
 /* Quiz results screen */
 .cloze-results{text-align:center;padding:50px 20px}
 .cr-emoji{font-size:5em;margin-bottom:16px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.15))}
