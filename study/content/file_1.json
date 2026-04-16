@@ -2,93 +2,53 @@
   "id": "file_1",
   "label": "Bereshit — Part 1 — Chapters 1–11",
   "volume": 1,
-  "content_version": 2,
-  "summary_plain": "Bereshit Part 1 tells the beginning. The Creator makes the heavens, the earth, and every living thing in six days and rests on the seventh. The first humans, Adam and Chavah, live in a garden called Eden. They are given one rule — do not eat from the tree of the knowledge of good and evil — and they break it. Their sons Qa'in and Hevel bring offerings to The Creator; Qa'in kills Hevel. Generations pass. Chanokh walks so closely with The Creator that The Creator takes him without death. Noach and his family are the only humans saved when The Creator sends a flood to cleanse the earth. After the flood The Creator sets a bow in the cloud as the sign of a covenant never to destroy the earth by water again. Humanity builds a tower at Bavel, and The Creator confuses their language and scatters them across the earth.",
-  "summary_scholarly": "Chapters 1 through 11 run from the creation of the heavens and the earth to the scattering of humanity at Bavel. The ACR reads this material directly from two living primary witnesses: the Ethiopian Orit Ge'ez — kept continuously by the African Israelite community through millennia without interruption — and the Dead Sea Scrolls at Qumran (4QGen-a through 4QGen-j, Cave 4). The Orit is the living witness that preserved the text, and the Qumran scrolls attest the same text in the land itself. The Masoretic is a later variant. It is not a baseline. Where it differs from the Orit and the Qumran readings, the difference is noted at the end of each chapter and the Orit / Qumran reading is kept as the main text. What this produces is concrete, not cosmetic. YHWH / 𐤉𐤄𐤅𐤄 is the personal name and it is preserved as the personal name. Elohim is rendered here as The Creator. There is no 'LORD' and no 'God' — those are later European Christian substitutions imposed on the text through Greek, then Latin, then English. Personal names are in their original Hebrew: Qa'in, Hevel, Chanokh, Metushelakh, Noach, Bavel. The anglicized forms familiar from European Bibles came through Christian missionary translation and are noted here only so a new learner can recognize which figure is meant. The Chanokh narrative at chapter 5 — 'he walked with The Creator and was not, for The Creator took him' — opens directly into the full Book of Chanokh, preserved complete in the Orit Ge'ez and attested in the Dead Sea Scrolls. It is primary scripture. The ACR reproduces Chanokh as Volume 6. The Nephilim and the Watchers named briefly in chapter 6 are told in full in that same Chanokh text and in Yovelim (Book of Jubilees), also preserved in the Orit Ge'ez and attested at Qumran, reproduced as ACR Volume 7.",
+  "content_version": 3,
+  "summary_plain": "Bereshit Part 1 tells the beginning. The Creator makes the heavens, the earth, and every living thing in six days and rests on the seventh. The first humans, Adam and Chavah, live in a garden called Eden. They are given one rule — do not eat from the tree of the knowledge of good and evil — and they break it. Their sons Qayin and Hevel bring offerings to YHWH; Qayin kills Hevel. Generations pass. Chanokh walks so closely with The Creator that The Creator takes him without death. Noakh and his family are the only humans saved when YHWH sends a flood to cleanse the earth. After the flood The Creator sets his bow in the cloud as the sign of a covenant never to destroy the earth by water again. Humanity builds a tower at Bavel, and YHWH confuses their language and scatters them across the earth.",
+  "summary_scholarly": "Chapters 1 through 11 run from the creation of the heavens and the earth to the scattering of humanity at Bavel. The ACR reads this material directly from two living primary witnesses: the Ethiopian Orit Ge'ez — kept continuously by the African Israelite community through millennia without interruption — and the Dead Sea Scrolls at Qumran (4QGen-a through 4QGen-j, Cave 4). The Orit is the living witness that preserved the text, and the Qumran scrolls attest the same text in the land itself. The Masoretic is a later variant. It is not a baseline. Where it differs from the Orit and the Qumran readings, the difference is noted at the end of each chapter and the Orit / Qumran reading is kept as the main text. What this produces is concrete. YHWH / 𐤉𐤄𐤅𐤄 is the personal name and it is preserved as the personal name. Elohim is rendered here as The Creator. There is no 'LORD' and no 'God' — those are European substitutions imposed on the text through Greek, then Latin, then English. Personal names are in their original Hebrew: Qayin, Hevel, Chanokh, Metushelakh, Noakh, Bavel. The Chanokh narrative at chapter 5 — 'he walked with The Creator and was not, for The Creator took him' — opens directly into the full Book of Chanokh, preserved complete in the Orit Ge'ez and attested in the Dead Sea Scrolls. It is primary scripture. The ACR reproduces Chanokh as Volume 6. The Nephilim and the Watchers named briefly in chapter 6 are told in full in that same Chanokh text and in Yovelim (Book of Jubilees), also preserved in the Orit Ge'ez and attested at Qumran, reproduced as ACR Volume 7.",
   "key_terms": [
-    {
-      "term": "Bereshit",
-      "phonetic": "Beh-reh-SHEET",
-      "definition": "Hebrew for 'in the beginning' — the first word of the book, and the Hebrew name for what European Bibles later called Genesis."
-    },
-    {
-      "term": "Tohu va-Vohu",
-      "phonetic": "TOH-hoo vah-VOH-hoo",
-      "definition": "'Without form and void' (1:2). The state of the earth before The Creator's ordering work of the six days."
-    },
-    {
-      "term": "Ruach",
-      "phonetic": "ROO-akh",
-      "definition": "Spirit or breath. 'The Spirit of The Creator was hovering over the face of the waters' (1:2)."
-    },
-    {
-      "term": "Adam",
-      "phonetic": "ah-DAHM",
-      "definition": "The first human. Formed 'of dust from the ground' (2:7). The name shares its root with adamah — Hebrew for 'ground'."
-    },
-    {
-      "term": "Chavah",
-      "phonetic": "khah-VAH",
-      "definition": "The first woman. The name means 'living' — 'mother of all living' (3:20). Anglicized in European Bibles as Eve."
-    },
-    {
-      "term": "Qa'in and Hevel",
-      "phonetic": "KAH-yin and HEH-vel",
-      "definition": "Adam and Chavah's first two sons (chapter 4). Qa'in killed Hevel after The Creator received their offerings differently. Anglicized in European Bibles as Cain and Abel."
-    },
-    {
-      "term": "Chanokh",
-      "phonetic": "HHA-nokh",
-      "definition": "The seventh from Adam in the line of Shet. 'He walked with The Creator and was not, for The Creator took him' (5:24). The full Book of Chanokh is preserved complete in the Orit Ge'ez of the African Israelite community and attested in multiple Qumran scrolls. ACR reproduces it as Volume 6, Parts 1 through 3."
-    },
-    {
-      "term": "Metushelakh",
-      "phonetic": "meh-too-SHEH-lakh",
-      "definition": "Chanokh's son. Lived 969 years — the longest lifespan recorded in the generations before the flood. Anglicized as Methuselah."
-    },
-    {
-      "term": "Noach",
-      "phonetic": "NOH-akh",
-      "definition": "The patriarch of the flood narrative (chapters 6 through 9). Righteous in his generation. The ancestor of every human after the flood. Anglicized as Noah."
-    },
-    {
-      "term": "Bavel",
-      "phonetic": "BAH-vel",
-      "definition": "The city and tower (chapter 11) where The Creator confused the languages of humanity. The Hebrew plays on balal, 'to confuse'. Anglicized through Greek and Latin as Babel, later as Babylon."
-    }
+    { "term": "Bereshit", "phonetic": "Beh-reh-SHEET", "definition": "Hebrew for 'in the beginning' — the first word of the book, and the Hebrew name for what European Bibles later called Genesis." },
+    { "term": "Tohu va-Vohu", "phonetic": "TOH-hoo vah-VOH-hoo", "definition": "'Without form and void' (1:2). The state of the earth before The Creator's ordering work of the six days." },
+    { "term": "Ruach", "phonetic": "ROO-akh", "definition": "Spirit or breath. 'The Spirit of The Creator was hovering over the face of the waters' (1:2)." },
+    { "term": "Adam", "phonetic": "ah-DAHM", "definition": "The first human. Formed 'of dust from the ground' (2:7). The name shares its root with adamah — Hebrew for 'ground'." },
+    { "term": "Chavah", "phonetic": "khah-VAH", "definition": "The first woman. The name means 'living' — 'mother of all living' (3:20). Anglicized in European Bibles as Eve." },
+    { "term": "Qayin and Hevel", "phonetic": "KAH-yin and HEH-vel", "definition": "Adam and Chavah's first two sons (chapter 4). Qayin killed Hevel after YHWH received their offerings differently. Anglicized in European Bibles as Cain and Abel." },
+    { "term": "Chanokh", "phonetic": "HHA-nokh", "definition": "The seventh from Adam in the line of Shet. 'He walked with The Creator and was not, for The Creator took him' (5:24). The full Book of Chanokh is preserved complete in the Orit Ge'ez of the African Israelite community and attested in multiple Qumran scrolls. ACR reproduces it as Volume 6, Parts 1 through 3." },
+    { "term": "Metushelakh", "phonetic": "meh-too-SHEH-lakh", "definition": "Chanokh's son. Lived 969 years — the longest lifespan recorded in the generations before the flood. Anglicized as Methuselah." },
+    { "term": "Noakh", "phonetic": "NOH-akh", "definition": "The patriarch of the flood narrative (chapters 6 through 9). Righteous in his generation. Noakh walked with The Creator. The ancestor of every human after the flood. Anglicized as Noah." },
+    { "term": "Bavel", "phonetic": "BAH-vel", "definition": "The city and tower (chapter 11) where YHWH confused the languages of humanity. The Hebrew plays on balal, 'to confuse'. Anglicized through Greek and Latin as Babel, later as Babylon." }
   ],
   "fill_blank": [
-    { "ref": "1:1", "prompt": "In the beginning The Creator created the ______ and the earth.", "answer": "heavens" },
-    { "ref": "1:2", "prompt": "The earth was without form and ______, and darkness was over the face of the deep.", "answer": "void" },
-    { "ref": "1:3", "prompt": "And The Creator said: Let there be ______, and there was ______.", "answer": "light" },
-    { "ref": "1:27", "prompt": "So The Creator created man in his own ______.", "answer": "image" },
-    { "ref": "2:7", "prompt": "The Creator formed the man of dust from the ground and breathed into his nostrils the breath of ______.", "answer": "life" },
-    { "ref": "4:9", "prompt": "Am I my brother's ______?", "answer": "keeper" },
-    { "ref": "5:24", "prompt": "Chanokh walked with The Creator, and he was ______, for The Creator took him.", "answer": "not" },
-    { "ref": "7:11", "prompt": "On that day all the ______ of the great deep burst forth, and the windows of the heavens were opened.", "answer": "fountains" },
-    { "ref": "9:13", "prompt": "I have set my ______ in the cloud, and it shall be for a sign of the covenant between me and the earth.", "answer": "bow" },
-    { "ref": "11:9", "prompt": "Therefore its name was called Bavel, because there The Creator confused the ______ of all the earth.", "answer": "language" }
+    { "ref": "1:1", "prompt": "In the beginning The Creator created the ______ and the earth.", "answer": "heavens", "source_quote": "In the beginning The Creator created the heavens and the earth." },
+    { "ref": "1:2", "prompt": "The earth was without form and ______, and darkness was over the face of the deep.", "answer": "void", "source_quote": "The earth was without form and void, and darkness was over the face of the deep. And the Spirit of The Creator was hovering over the face of the waters." },
+    { "ref": "1:3", "prompt": "And The Creator said: Let there be ______, and there was ______.", "answer": "light", "source_quote": "And The Creator said: Let there be light, and there was light." },
+    { "ref": "1:27", "prompt": "So The Creator created man in his own ______.", "answer": "image", "source_quote": "So The Creator created man in his own image, in the image of The Creator he created him — male and female he created them." },
+    { "ref": "2:7", "prompt": "Then YHWH The Creator formed the man of dust from the ground and breathed into his nostrils the breath of ______.", "answer": "life", "source_quote": "Then YHWH The Creator formed the man of dust from the ground and breathed into his nostrils the breath of life, and the man became a living creature." },
+    { "ref": "4:9", "prompt": "I do not know — am I my brother's ______?", "answer": "keeper", "source_quote": "Then YHWH said to Qayin: Where is Hevel your brother? He said: I do not know — am I my brother's keeper?" },
+    { "ref": "5:24", "prompt": "Chanokh walked with The Creator, and he was ______, for The Creator took him.", "answer": "not", "source_quote": "Chanokh walked with The Creator, and he was not, for The Creator took him." },
+    { "ref": "7:11", "prompt": "On that day all the ______ of the great deep burst forth, and the windows of the heavens were opened.", "answer": "fountains", "source_quote": "In the six hundredth year of Noakh's life, in the second month, on the seventeenth day of the month, on that day all the fountains of the great deep burst forth, and the windows of the heavens were opened." },
+    { "ref": "9:13", "prompt": "I have set my ______ in the cloud, and it shall be a sign of the covenant between me and the earth.", "answer": "bow", "source_quote": "I have set my bow in the cloud, and it shall be a sign of the covenant between me and the earth." },
+    { "ref": "11:9", "prompt": "Therefore its name was called Bavel, because there YHWH confused the ______ of all the earth.", "answer": "language", "source_quote": "Therefore its name was called Bavel, because there YHWH confused the language of all the earth. And from there YHWH dispersed them over the face of all the earth." }
   ],
   "multiple_choice": [
-    { "ref": "1:5", "question": "On which day did The Creator separate the light from the darkness?", "options": ["The first day", "The second day", "The third day", "The sixth day"], "correct": 0 },
-    { "ref": "1:10", "question": "What did The Creator call the dry land?", "options": ["Sky", "Ground", "Earth", "Soil"], "correct": 2 },
-    { "ref": "2:17", "question": "Which tree was Adam forbidden to eat from?", "options": ["The tree of life", "The tree of the knowledge of good and evil", "The tree of wisdom", "The olive tree"], "correct": 1 },
-    { "ref": "4:1–2", "question": "Who were Adam and Chavah's first two sons?", "options": ["Shet and Enosh", "Qa'in and Hevel", "Noach and Yapheth", "Chanokh and Metushelakh"], "correct": 1 },
-    { "ref": "5:23–24", "question": "Which patriarch lived 365 years and was taken by The Creator without dying?", "options": ["Metushelakh", "Adam", "Chanokh", "Lamekh"], "correct": 2 },
-    { "ref": "7:2", "question": "How many of each kind of clean animal did Noach take onto the ark?", "options": ["Two", "Seven pairs", "Three", "Ten"], "correct": 1 },
-    { "ref": "7:12", "question": "How long did the rain of the flood fall on the earth?", "options": ["Thirty days", "Forty days and forty nights", "One hundred days", "A full year"], "correct": 1 },
-    { "ref": "9:13", "question": "What did The Creator set in the cloud as the sign of his covenant with Noach?", "options": ["A star", "A dove", "A rainbow", "An olive branch"], "correct": 2 },
-    { "ref": "6:4", "question": "How does the text describe the Nephilim?", "options": ["The descendants of Qa'in", "The mighty men of old, men of renown", "Angels who remained faithful", "Another name for Noach's sons"], "correct": 1 },
-    { "ref": "11:7–8", "question": "At Bavel, what did The Creator do to stop the building of the tower?", "options": ["Destroyed it with fire", "Confused their language", "Sent another flood", "Struck the builders blind"], "correct": 1 }
+    { "ref": "1:4–5", "question": "On which day did The Creator separate the light from the darkness?", "options": ["The first day", "The second day", "The third day", "The sixth day"], "correct": 0, "source_quote": "And The Creator separated the light from the darkness. The Creator called the light Day, and the darkness he called Night. And there was evening and there was morning — the first day." },
+    { "ref": "1:10", "question": "What did The Creator call the dry land?", "options": ["Sky", "Ground", "Earth", "Soil"], "correct": 2, "source_quote": "The Creator called the dry land Earth, and the waters that were gathered together he called Seas." },
+    { "ref": "2:17", "question": "Which tree was Adam forbidden to eat from?", "options": ["The tree of life", "The tree of the knowledge of good and evil", "The tree of wisdom", "The olive tree"], "correct": 1, "source_quote": "But of the tree of the knowledge of good and evil you shall not eat, for in the day that you eat of it you shall surely die." },
+    { "ref": "4:1–2", "question": "Who were Adam and Chavah's first two sons?", "options": ["Shet and Enosh", "Qayin and Hevel", "Noakh and Yafet", "Chanokh and Metushelakh"], "correct": 1, "source_quote": "Now Adam knew Chavah his wife, and she conceived and bore Qayin... And again, she bore his brother Hevel." },
+    { "ref": "5:23–24", "question": "Which patriarch lived 365 years and was taken by The Creator without dying?", "options": ["Metushelakh", "Adam", "Chanokh", "Lamekh"], "correct": 2, "source_quote": "Thus all the days of Chanokh were 365 years. Chanokh walked with The Creator, and he was not, for The Creator took him." },
+    { "ref": "7:2", "question": "How many of each kind of clean animal did Noakh take onto the ark?", "options": ["Two", "Seven pairs", "Three", "Ten"], "correct": 1, "source_quote": "Take with you seven pairs of all clean animals, the male and his mate, and a pair of the animals that are not clean, the male and his mate." },
+    { "ref": "7:12", "question": "How long did the rain of the flood fall on the earth?", "options": ["Thirty days", "Forty days and forty nights", "One hundred days", "A full year"], "correct": 1, "source_quote": "And rain fell upon the earth forty days and forty nights." },
+    { "ref": "9:12–13", "question": "What did The Creator set in the cloud as the sign of his covenant with Noakh?", "options": ["A star", "A dove", "His bow", "An olive branch"], "correct": 2, "source_quote": "I have set my bow in the cloud, and it shall be a sign of the covenant between me and the earth." },
+    { "ref": "6:4", "question": "How does the text describe the Nephilim?", "options": ["The descendants of Qayin", "The mighty men who were of old, the men of renown", "Angels who remained faithful", "Another name for Noakh's sons"], "correct": 1, "source_quote": "The Nephilim were on the earth in those days, and also afterward, when the sons of The Creator came in to the daughters of man and they bore children to them. These were the mighty men who were of old, the men of renown." },
+    { "ref": "11:7–9", "question": "At Bavel, what did YHWH do to stop the building of the tower?", "options": ["Destroyed it with fire", "Confused their language", "Sent another flood", "Struck the builders blind"], "correct": 1, "source_quote": "Come, let us go down and there confuse their language, so that they may not understand one another's speech. So YHWH dispersed them from there over the face of all the earth." }
   ],
   "faq": [
     {
-      "question": "Why does the ACR say 'The Creator' and 'YHWH', instead of 'God' and 'LORD'?",
-      "answer": "'God' is a generic Germanic word that European Bibles substituted for Elohim. 'LORD' in capital letters is an even later substitution that hides YHWH — the personal name the text itself uses. The Orit Ge'ez and the Dead Sea Scrolls both preserve YHWH as the personal name and Elohim (rendered here as The Creator) as the title. There is no substitution in those primary witnesses. The ACR follows them directly. It does not carry forward the European Christian translation habit of replacing the personal name with 'LORD' and the title with the generic 'God'."
+      "question": "Why does the ACR say 'The Creator' and 'YHWH' instead of 'God' and 'LORD'?",
+      "answer": "'God' is a generic Germanic word that European Bibles substituted for Elohim. 'LORD' in capital letters is a substitution that hides YHWH — the personal name the text itself uses. The Orit Ge'ez and the Dead Sea Scrolls both preserve YHWH as the personal name and Elohim (rendered here as The Creator) as the title. European Bibles replaced YHWH with 'LORD' and Elohim with 'God'. The ACR does not."
     },
     {
-      "question": "Why are the names in Hebrew — Qa'in, Hevel, Chanokh, Noach — instead of Cain, Abel, Enoch, Noah?",
-      "answer": "Those Hebrew forms are the names the text actually uses. The anglicized forms came through Greek, then Latin, then English — translation layers carried by European Christian missionary Bibles. The ACR keeps the names as the manuscripts record them. The anglicized form is noted only so a reader who grew up with a European Bible can recognize which figure is meant."
+      "question": "Why are the names in Hebrew — Qayin, Hevel, Chanokh, Noakh — instead of Cain, Abel, Enoch, Noah?",
+      "answer": "Those Hebrew forms are the names the text actually uses. The anglicized forms came through Greek, then Latin, then English — three layers of substitution carried by European missionary Bibles. The ACR keeps the names as the manuscripts record them. The anglicized form is noted only so a reader who grew up with a European Bible can recognize which figure is meant."
     },
     {
       "question": "Who was Chanokh and why is his book in ACR Volume 6?",
@@ -96,15 +56,15 @@
     },
     {
       "question": "Does the ACR use the same chronology as a European Bible for the generations before the flood?",
-      "answer": "No. The ACR preserves the lifespans as the Orit Ge'ez and the Dead Sea Scrolls record them. The Masoretic Text sometimes differs — in places by hundreds of years per generation. Where it differs, the Masoretic reading is noted at the end of the chapter as a variant rather than being adopted as the main text."
+      "answer": "No. The ACR preserves the lifespans as the Orit Ge'ez and the Dead Sea Scrolls record them. The Masoretic was altered in places by hundreds of years per generation. The Masoretic reading is noted at the end of the chapter as a variant, not adopted as the main text."
     },
     {
       "question": "What are the Nephilim in chapter 6?",
-      "answer": "Chapter 6:4 names the Nephilim — 'fallen ones', 'the mighty men of old, men of renown' — as the offspring of 'the sons of The Creator' and 'the daughters of men'. The Bereshit account is brief. The full story is told in the Book of Chanokh, specifically the Book of the Watchers, which the ACR reproduces as Volume 6 Part 1. The Watchers are named individually. Their descent to the earth, what they taught humanity, the judgment passed on them, and the flood as The Creator's response to the corruption they caused are all laid out there. This material is not hidden, not lost, not late invention. It was removed from European canonical lists by decisions made at Christian councils and by rabbinic redactors; it was preserved continuously in the African Israelite tradition and found in the Dead Sea Scrolls at Qumran."
+      "answer": "Chapter 6:4 names the Nephilim — 'the mighty men who were of old, the men of renown' — as the offspring of 'the sons of The Creator' and 'the daughters of man'. The Bereshit account is brief. The full story is told in the Book of Chanokh, specifically the Book of the Watchers, which the ACR reproduces as Volume 6 Part 1. The Watchers are named individually. Their descent to the earth, what they taught humanity, the judgment passed on them, and the flood as The Creator's response to the corruption they caused are all laid out there. This material was preserved continuously by the African Israelite community and found in the Dead Sea Scrolls at Qumran."
     },
     {
       "question": "What does the scattering at Bavel mean?",
-      "answer": "The tower at Bavel (chapter 11) follows the table of nations in chapter 10. The text records that a unified human language and settlement was broken up — The Creator confused the languages and scattered the people into the many peoples, languages, and territories already named in the preceding chapter. The Hebrew name Bavel plays on the verb balal, 'to confuse'. 'Babel' and 'Babylon' are anglicizations that came through Greek and Latin."
+      "answer": "The tower at Bavel (chapter 11) follows the table of nations in chapter 10. The text records that a unified human language and settlement was broken up — YHWH confused the languages and scattered the people into the many peoples, languages, and territories already named in the preceding chapter. The Hebrew name Bavel plays on the verb balal, 'to confuse'."
     }
   ]
 }
