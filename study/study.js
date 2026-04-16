@@ -1,8 +1,8 @@
-// ACR Study — Phase 1 shell
-// Loads chapter JSON from the reader's /data/ folder (same origin, sibling path).
-// Settings namespaced under acr_study_* so they never collide with reader state.
+// ACR Study — Phase 1.5 stub
+// Shell + navigation + TOC + font controls.
+// Voice reader and notes panels are wired up to empty handlers here;
+// actual logic lands in follow-up commits one function at a time.
 
-// Volumes 1-7 + War Scroll 1QM, per Phase 1 scope.
 var IDS = [
   'file_1', 'file_2', 'file_3', 'file_4',
   'file_5', 'file_6',
@@ -30,8 +30,8 @@ var LBL = [
   'Chanokh (1 Enoch) — Part 1 — Chapters 1–36 — Book of Watchers',
   'Chanokh (1 Enoch) — Part 2 — Chapters 37–55 — Dream Visions',
   'Chanokh (1 Enoch) — Part 3 — Chapters 56–73 — Epistle',
-  "Yovelim (Jubilees) — Part 1 — Chapters 1–25",
-  "Yovelim (Jubilees) — Part 2 — Chapters 26–50",
+  'Yovelim (Jubilees) — Part 1 — Chapters 1–25',
+  'Yovelim (Jubilees) — Part 2 — Chapters 26–50',
   'War Scroll 1QM — Complete — All 19 Columns'
 ];
 
@@ -42,25 +42,22 @@ var VOL_GROUPS = [
   { title: 'Vol 4 — Bamidbar', count: 2 },
   { title: 'Vol 5 — Devarim', count: 2 },
   { title: 'Vol 6 — Chanokh', count: 3 },
-  { title: "Vol 7 — Yovelim", count: 2 },
+  { title: 'Vol 7 — Yovelim', count: 2 },
   { title: 'Vol 33 — War Scroll 1QM', count: 1 }
 ];
 
-// Settings with localStorage persistence (acr_study_* prefix)
-// Default theme is 'white' (no body class) — study mode should be bright.
 var fs = parseFloat(localStorage.getItem('acr_study_fs') || '10.5');
 var lh = parseFloat(localStorage.getItem('acr_study_lh') || '1.65');
-var theme = localStorage.getItem('acr_study_theme') || 'white';
 var sbo = true;
 var cur = -1;
+var vop = false;
+var npop = false;
+var nvop = false;
 
 document.documentElement.style.setProperty('--lh', lh);
-if (theme === 'sepia') document.body.classList.add('sepia');
-else if (theme === 'dark') document.body.classList.add('dark');
 
 function buildTOC() {
   var sb = document.getElementById('sb');
-  // Intro label
   var intro = document.createElement('div');
   intro.className = 'sb-intro';
   intro.textContent = '\u{1F4D6} ACR STUDY — 8 VOLUMES';
@@ -99,10 +96,8 @@ function go(fid) {
   cur = i;
 
   var content = document.getElementById('content');
-  content.innerHTML =
-    '<div class="loading">Loading ' + LBL[i] + '…</div>';
+  content.innerHTML = '<div class="loading">Loading ' + LBL[i] + '…</div>';
 
-  // Fetch from ../data/file_N.json — sibling folder in the reader repo.
   fetch('../data/' + fid + '.json')
     .then(function (r) {
       if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -114,10 +109,7 @@ function go(fid) {
       document.getElementById('tb').textContent = LBL[i];
       var secs = document.querySelectorAll('.sec');
       for (var j = 0; j < secs.length; j++) {
-        secs[j].classList.toggle(
-          'on',
-          secs[j].getAttribute('data-id') === fid
-        );
+        secs[j].classList.toggle('on', secs[j].getAttribute('data-id') === fid);
       }
       try { localStorage.setItem('acr_study_last', fid); } catch (e) {}
       if (window.innerWidth <= 768) {
@@ -126,45 +118,32 @@ function go(fid) {
       window.scrollTo(0, 0);
     })
     .catch(function (e) {
-      content.innerHTML =
-        '<div class="err">Could not load section: ' + e.message +
-        '<br><br>Check your connection and tap the section again.</div>';
+      content.innerHTML = '<div class="err">Could not load section: ' + e.message + '</div>';
     });
 }
 
-// Render (or re-render) the home screen. Safe to call any time — the
-// Resume button is computed from localStorage on every call, so it always
-// reflects the latest saved position.
 function goHome() {
   var lastFid = localStorage.getItem('acr_study_last');
   var hasResume = lastFid && IDS.indexOf(lastFid) >= 0;
-  var resumeLbl = hasResume ? LBL[IDS.indexOf(lastFid)] : '';
-
   var html = '<div id="home">' +
-    '<img src="icon.png" alt="DSS Orit Study App" class="hero" decoding="async">' +
+    '<div class="logo">\u{1F4D6}</div>' +
+    '<h1>ACR STUDY</h1>' +
     '<p class="tag">Spaced repetition study companion<br>for The Ancient Covenant Record</p>' +
     '<div class="btns">' +
     '<button id="b-begin">Begin with Bereshit \u25B6</button>' +
-    (hasResume
-      ? '<button id="b-resume" title="' + resumeLbl + '">Resume where I left off</button>'
-      : '') +
+    (hasResume ? '<button id="b-resume">Resume where I left off</button>' : '') +
     '</div>' +
     '<p class="small">' +
-    'Phase 1 \u00B7 Shell only \u00B7 Study engine arriving in Phase 2<br>' +
+    'Phase 1 \u00B7 Shell + voice + notes<br>' +
     'Data shared with the <a href="../">ACR Reader</a> on this device<br>' +
     'Add to Home Screen from Safari for offline access' +
     '</p>' +
     '</div>';
-
   document.getElementById('content').innerHTML = html;
-  document.getElementById('tb').textContent = 'DSS Orit Study App';
+  document.getElementById('tb').textContent = 'ACR Study';
   cur = -1;
-
-  // Clear sidebar highlight
   var secs = document.querySelectorAll('.sec');
   for (var i = 0; i < secs.length; i++) secs[i].classList.remove('on');
-
-  // Rebind the home-screen buttons (freshly rendered so old listeners are gone)
   var bBegin = document.getElementById('b-begin');
   if (bBegin) bBegin.addEventListener('click', function () { go(IDS[0]); });
   var bResume = document.getElementById('b-resume');
@@ -174,9 +153,33 @@ function goHome() {
       if (f && IDS.indexOf(f) >= 0) go(f);
     });
   }
-
   window.scrollTo(0, 0);
 }
+
+// ---- Stub implementations (real logic lands in follow-up commits) ----
+
+function closeNP() {
+  npop = false;
+  var np = document.getElementById('np');
+  if (np) np.classList.remove('on');
+  var bnt = document.getElementById('b-nt');
+  if (bnt) bnt.classList.remove('on');
+  var main = document.getElementById('main');
+  if (main) main.classList.toggle('vopen', vop);
+}
+
+function toggleNV() {
+  nvop = !nvop;
+  var nv = document.getElementById('nv');
+  if (nv) nv.classList.toggle('on', nvop);
+  var bnv = document.getElementById('b-nv');
+  if (bnv) bnv.classList.toggle('on', nvop);
+}
+
+function stopVoice() { /* implemented in follow-up commit */ }
+function startPlayback() { /* implemented in follow-up commit */ }
+
+// ---- UI bindings ----
 
 function bindUI() {
   document.getElementById('b-sb').addEventListener('click', function () {
@@ -195,23 +198,6 @@ function bindUI() {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goHome(); }
   });
 
-  document.getElementById('b-theme').addEventListener('click', function () {
-    var b = document.body;
-    // Cycle: white (default) -> sepia -> dark -> white
-    if (b.classList.contains('sepia')) {
-      b.classList.remove('sepia');
-      b.classList.add('dark');
-      theme = 'dark';
-    } else if (b.classList.contains('dark')) {
-      b.classList.remove('dark');
-      theme = 'white';
-    } else {
-      b.classList.add('sepia');
-      theme = 'sepia';
-    }
-    try { localStorage.setItem('acr_study_theme', theme); } catch (e) {}
-  });
-
   document.getElementById('b-fs-').addEventListener('click', function () {
     fs = Math.max(8, fs - 1);
     applyFontSize();
@@ -223,19 +209,42 @@ function bindUI() {
     applyFontSize();
     try { localStorage.setItem('acr_study_fs', fs); } catch (e) {}
   });
+
+  // Notes — toggle only; save/restore logic added in follow-up commit
+  document.getElementById('b-nt').addEventListener('click', function () {
+    npop = !npop;
+    document.getElementById('np').classList.toggle('on', npop);
+    this.classList.toggle('on', npop);
+    document.getElementById('main').classList.toggle('vopen', npop || vop);
+  });
+  document.getElementById('np-cls').addEventListener('click', closeNP);
+  document.getElementById('np-save').addEventListener('click', function () {});
+  document.getElementById('np-clr').addEventListener('click', function () {});
+
+  document.getElementById('b-nv').addEventListener('click', toggleNV);
+
+  // Voice reader — toggle only; speech logic added in follow-up commit
+  document.getElementById('b-vt').addEventListener('click', function () {
+    vop = !vop;
+    document.getElementById('vr').classList.toggle('on', vop);
+    document.getElementById('main').classList.toggle('vopen', vop || npop);
+    this.classList.toggle('on', vop);
+  });
+  document.getElementById('b-pl').addEventListener('click', startPlayback);
+  document.getElementById('b-pa').addEventListener('click', function () {});
+  document.getElementById('b-st').addEventListener('click', stopVoice);
+  document.getElementById('b-pv').addEventListener('click', function () {});
+  document.getElementById('vs').addEventListener('change', function () {});
+  document.getElementById('vc').addEventListener('change', function () {});
+  document.getElementById('vm').addEventListener('change', function () {});
 }
 
 document.addEventListener('DOMContentLoaded', function () {
   buildTOC();
   bindUI();
-  // Re-render the home screen through goHome() so the Resume button
-  // is always computed from fresh localStorage state, not the static
-  // HTML placeholder that ships in index.html.
   goHome();
 });
 
-// Service worker registration. Failures are silent — the app still works
-// online without it.
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
     navigator.serviceWorker.register('sw.js').catch(function () {});

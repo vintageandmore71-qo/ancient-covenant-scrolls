@@ -1,174 +1,214 @@
-/* DSS Orit Study App — Phase 1 Shell styles
-   Default: clean white for study / focus.
-   Alt: sepia (warm parchment), dark (brown + gold, matches the icon palette). */
+/* ACR Study — Phase 1.5
+   Blue indigo chrome (topnav, sidebar, home screen, voice panel, notes panel)
+   with a WHITE content area for reading. One fixed theme — no cycle. */
 
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family:Arial,sans-serif;
   font-size:10.5pt;
   background:#ffffff;
-  color:#1a1208;
-  transition:background .3s,color .3s;
+  color:#1a1a2e;
   -webkit-text-size-adjust:100%;
 }
-body.sepia{background:#f4ecd8;color:#3b2e1a}
-body.dark{background:#1a1208;color:#f0e0c0}
 
-/* Top nav */
+/* =========================================================================
+   Top nav — blue indigo
+   ========================================================================= */
 #topnav{
   position:fixed;top:0;left:0;right:0;height:48px;
-  background:#faf5ec;
-  display:flex;align-items:center;gap:4px;padding:0 8px;
-  z-index:1000;box-shadow:0 1px 4px rgba(90,62,8,.08);
-  border-bottom:2px solid #d4a020;
+  background:#1a1a2e;
+  display:flex;align-items:center;gap:3px;padding:0 6px;
+  z-index:1000;box-shadow:0 2px 10px rgba(0,0,0,.3);
 }
 #topnav button,#topnav a.lnk{
-  background:none;border:none;color:#5a3e08;cursor:pointer;
-  padding:6px 8px;border-radius:4px;font-size:13px;font-family:Arial;
+  background:none;border:none;color:#b8b8d8;cursor:pointer;
+  padding:6px 7px;border-radius:4px;font-size:13px;font-family:Arial;
   text-decoration:none;display:inline-flex;align-items:center;
 }
 #topnav button:hover,#topnav button.on,#topnav a.lnk:hover{
-  background:#f0e8d4;color:#1a1208;
+  background:#2a2a3e;color:#fff;
 }
 #tb{
-  flex:1;color:#8a7050;font-size:11px;
+  flex:1;color:#a0a0c0;font-size:11px;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   padding:6px;letter-spacing:.02em;font-weight:bold;
-  cursor:pointer;border-radius:4px;
-  transition:background .15s;
+  cursor:pointer;border-radius:4px;transition:background .15s;
 }
-#tb:hover{background:#f0e8d4;color:#1a1208}
-body.sepia #tb:hover{background:#e8c888;color:#1a1208}
-body.dark #tb:hover{background:#3a2c18;color:#ffd84a}
+#tb:hover{background:#2a2a3e;color:#fff}
 #fc{display:flex;gap:2px}
-#fc button{width:26px;height:26px;padding:0;font-size:11px;border-radius:3px;background:#f0e8d4;color:#5a3e08}
-#fc button:hover{background:#e4d8b0;color:#1a1208}
+#fc button{width:26px;height:26px;padding:0;font-size:11px;border-radius:3px;background:#2a2a3e;color:#b8b8d8}
+#fc button:hover{background:#3a3a5e;color:#fff}
 
-/* Sidebar */
+/* =========================================================================
+   Sidebar — blue indigo
+   ========================================================================= */
 #sb{
   position:fixed;top:48px;left:0;bottom:0;width:280px;
-  background:#fbf8ef;overflow-y:auto;z-index:900;
-  transition:transform .3s;border-right:1px solid #e4d8b0;
+  background:#1a1a2e;overflow-y:auto;z-index:900;
+  transition:transform .3s;border-right:1px solid #2a2a3e;
 }
 #sb.h{transform:translateX(-280px)}
 .sb-intro{
-  padding:10px 14px;color:#8a7050;font-size:9px;
+  padding:10px 14px;color:#6a6a8a;font-size:9px;
   letter-spacing:.08em;text-transform:uppercase;
-  border-bottom:1px solid #e4d8b0;font-weight:bold;
+  border-bottom:1px solid #2a2a3e;font-weight:bold;
 }
 .vol-hdr{
-  padding:12px 14px 6px;color:#7a5c10;font-size:10px;
+  padding:12px 14px 6px;color:#8888cc;font-size:10px;
   font-weight:bold;text-transform:uppercase;letter-spacing:.08em;
-  border-top:1px solid #e4d8b0;margin-top:4px;
+  border-top:1px solid #2a2a3e;margin-top:4px;
 }
 .vol-hdr:first-of-type{border-top:none;margin-top:0}
 .sec{
-  padding:9px 14px 9px 24px;color:#3b2e1a;font-size:12px;
+  padding:9px 14px 9px 24px;color:#c0c0d8;font-size:12px;
   cursor:pointer;transition:background .15s;line-height:1.4;
 }
-.sec:hover{background:#f0e8d4;color:#1a1208}
-.sec.on{background:#e8dcb0;color:#1a1208;font-weight:bold;border-left:3px solid #c08828;padding-left:21px}
+.sec:hover{background:#2a2a3e;color:#fff}
+.sec.on{background:#3a3a5e;color:#fff;font-weight:bold;border-left:3px solid #8888cc;padding-left:21px}
 
-/* Main content */
+/* =========================================================================
+   Main content area — WHITE (reading surface)
+   ========================================================================= */
 #main{
   margin-left:280px;margin-top:48px;
   padding:28px 44px 60px;max-width:900px;
-  transition:margin-left .3s;
+  background:#ffffff;
+  transition:margin-left .3s,padding-bottom .3s;
+  min-height:calc(100vh - 48px);
 }
 #main.x{margin-left:0}
+#main.vopen{padding-bottom:240px}
 
+#content{color:#1a1a2e}
 #content p{
   font-family:Arial,sans-serif;
   line-height:var(--lh,1.65);
   margin:.14em 0;
 }
+/* Currently-speaking paragraph highlight during voice reading */
+p.sp{background:#fff9c4;border-radius:3px}
 
-/* Home screen */
+/* =========================================================================
+   Home / welcome screen — blue indigo, breaks out of the white #main
+   ========================================================================= */
 #home{
+  background:#0f0f1e;
+  color:#e8e8f0;
+  margin:-28px -44px -60px -44px;
+  min-height:calc(100vh - 48px);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  min-height:70vh;text-align:center;padding:40px 20px;
+  padding:40px 20px;text-align:center;
 }
-#home .hero{
-  width:min(78vw,320px);
-  height:auto;display:block;
-  margin:0 auto 28px;
-  border-radius:14px;
-  box-shadow:0 6px 24px rgba(90,62,8,.18),0 2px 6px rgba(0,0,0,.08);
-}
-#home h1{font-size:1.6em;font-weight:bold;margin-bottom:8px;color:#1a1208;letter-spacing:.04em}
-#home .tag{color:#5a3e08;font-size:.95em;margin:8px 0 28px;line-height:1.7;font-style:italic}
+#home .logo{font-size:4em;margin-bottom:20px;color:#8888cc;line-height:1}
+#home h1{font-size:1.6em;font-weight:bold;margin-bottom:8px;color:#fff;letter-spacing:.04em}
+#home .tag{color:#8888a8;font-size:.95em;margin:8px 0 28px;line-height:1.7;font-style:italic}
 #home .btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 #home button{
-  background:linear-gradient(180deg,#5a3e08 0%,#3b2e1a 100%);
-  color:#ffd84a;border:1px solid #3b2e1a;
+  background:#3a3a5e;color:#fff;border:1px solid #5a5a8a;
   padding:14px 28px;border-radius:8px;font-size:15px;font-family:Arial;
-  cursor:pointer;transition:background .15s,transform .15s,box-shadow .15s;
+  cursor:pointer;transition:background .15s,transform .15s;
   font-weight:bold;letter-spacing:.02em;
-  box-shadow:0 2px 8px rgba(90,62,8,.3);
 }
-#home button:hover{background:linear-gradient(180deg,#6a4e18 0%,#4b3e2a 100%);box-shadow:0 4px 14px rgba(90,62,8,.35)}
+#home button:hover{background:#4a4a7e}
 #home button:active{transform:scale(.97)}
-#home .small{font-size:.82em;color:#7a5c10;margin-top:22px;line-height:1.7}
-#home .small a{color:#5a3e08;text-decoration:none;font-weight:bold}
-#home .small a:hover{text-decoration:underline;color:#1a1208}
+#home .small{font-size:.82em;color:#7a7a98;margin-top:22px;line-height:1.7}
+#home .small a{color:#8888cc;text-decoration:none}
+#home .small a:hover{text-decoration:underline;color:#fff}
 
-.loading{text-align:center;padding:60px 20px;color:#7a5c10;font-family:Arial;font-style:italic}
-.err{text-align:center;padding:40px 20px;color:#a04020;font-family:Arial}
+.loading{text-align:center;padding:60px 20px;color:#888;font-family:Arial;font-style:italic}
+.err{text-align:center;padding:40px 20px;color:#c00;font-family:Arial}
 
-/* Mobile */
+/* =========================================================================
+   Voice reader panel — dark indigo, bottom of viewport
+   ========================================================================= */
+#vr{
+  position:fixed;bottom:0;left:280px;right:0;height:48px;
+  background:#12121e;display:none;align-items:center;gap:4px;padding:0 8px;
+  z-index:1000;border-top:1px solid #2a2a3e;transition:left .3s;
+}
+#vr.on{display:flex}
+#vr button{
+  background:#3a3a5e;border:none;color:#e0e0f0;
+  padding:6px 10px;border-radius:4px;cursor:pointer;font-size:12px;font-family:Arial;
+}
+#vr button:hover{background:#5a5a8a;color:#fff}
+#vs,#vc,#vm{
+  background:#2a2a3e;border:1px solid #3a3a5e;border-radius:4px;
+  color:#e0e0f0;padding:4px 2px;font-size:11px;font-family:Arial;
+}
+#vs{width:50px}
+#vc{flex:1;max-width:130px}
+#vm{width:66px}
+#vst{color:#8888a8;font-size:10px;white-space:nowrap;padding:0 4px;flex-shrink:0;margin-left:auto}
+
+/* =========================================================================
+   Notes panel — per section, dark indigo, bottom of viewport
+   ========================================================================= */
+#np{
+  position:fixed;bottom:0;left:280px;right:0;height:200px;
+  background:#12121e;display:none;flex-direction:column;
+  z-index:999;border-top:1px solid #2a2a3e;transition:left .3s;
+}
+#np.on{display:flex}
+#np-head{display:flex;align-items:center;padding:6px 10px;border-bottom:1px solid #2a2a3e;gap:6px}
+#np-lbl{color:#b8b8d8;font-size:11px;font-family:Arial;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#np-head button{
+  background:#3a3a5e;border:none;color:#e0e0f0;
+  padding:5px 11px;border-radius:3px;cursor:pointer;font-size:11px;font-family:Arial;white-space:nowrap;
+}
+#np-head button:hover{background:#5a5a8a;color:#fff}
+#np-save{background:#2d5a2d!important;color:#aaffaa!important}
+#np-save:hover{background:#3d6a3d!important;color:#fff!important}
+#np-ta{
+  flex:1;background:#1a1a2e;color:#e8e8f0;border:none;
+  padding:12px 16px;font-size:12px;font-family:Arial;resize:none;outline:none;line-height:1.5;
+}
+
+/* =========================================================================
+   All-notes viewer — takes over main area, white background
+   ========================================================================= */
+#nv{
+  position:fixed;top:48px;left:280px;right:0;bottom:0;
+  background:#ffffff;z-index:800;display:none;overflow-y:auto;
+  padding:24px 32px;transition:left .3s;
+}
+#nv.on{display:block}
+#nv h2{
+  font-size:15px;font-family:Arial;color:#1a1a2e;
+  margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid #ddd;
+}
+.ni{
+  background:#f6f6fa;border:1px solid #e0e0e8;border-radius:6px;
+  padding:12px 14px;margin-bottom:12px;
+}
+.ni-lbl{
+  font-size:10px;color:#3a3a7e;font-family:Arial;
+  margin-bottom:6px;cursor:pointer;text-decoration:underline;font-weight:bold;
+}
+.ni-txt{
+  font-size:12px;color:#1a1a2e;font-family:Arial;
+  line-height:1.5;white-space:pre-wrap;
+}
+.ni-del{
+  float:right;background:none;border:none;color:#c00;
+  cursor:pointer;font-size:14px;
+}
+
+/* =========================================================================
+   Mobile
+   ========================================================================= */
 @media(max-width:768px){
   #main{margin-left:0;padding:16px 14px 60px}
   #sb{transform:translateX(-280px)}
   #sb.m{transform:translateX(0)}
-  #home .hero{width:min(72vw,280px)}
+  #home{margin:-16px -14px -60px -14px}
+  #home .logo{font-size:3em}
   #home h1{font-size:1.3em}
   #topnav a.lnk span.hide-mobile{display:none}
+  #vr,#np,#nv{left:0!important}
 }
 
-/* Sepia theme — warm parchment for long reading */
-body.sepia #topnav{background:#f0d8a0;border-bottom-color:#7a5c10}
-body.sepia #topnav button,body.sepia #topnav a.lnk{color:#5a3e08}
-body.sepia #topnav button:hover,body.sepia #topnav button.on,body.sepia #topnav a.lnk:hover{background:#e8c888;color:#1a1208}
-body.sepia #fc button{background:#e8c888;color:#5a3e08}
-body.sepia #tb{color:#7a5c10}
-body.sepia #sb{background:#eadbb0;border-right-color:#c0a868}
-body.sepia .sb-intro{color:#7a5c10;border-bottom-color:#c0a868}
-body.sepia .vol-hdr{color:#5a3e08;border-top-color:#c0a868}
-body.sepia .sec{color:#3b2e1a}
-body.sepia .sec:hover{background:#d4c090;color:#1a1208}
-body.sepia .sec.on{background:#c0a868;border-left-color:#5a3e08;color:#1a1208}
-body.sepia #home h1{color:#3b2e1a}
-body.sepia #home .tag{color:#7a5c10}
-body.sepia #home button{background:linear-gradient(180deg,#7a5c10 0%,#5a3e08 100%);color:#ffd84a;border-color:#3b2e1a}
-body.sepia #home button:hover{background:linear-gradient(180deg,#8a6c20 0%,#6a4e18 100%)}
-body.sepia #home .small{color:#7a5c10}
-body.sepia .loading{color:#7a5c10}
-
-/* Dark theme — brown + gold, matches the icon palette for night reading */
-body.dark #topnav{background:#2a1f10;border-bottom-color:#d4a020;box-shadow:0 2px 10px rgba(0,0,0,.6)}
-body.dark #topnav button,body.dark #topnav a.lnk{color:#e8cd80}
-body.dark #topnav button:hover,body.dark #topnav button.on,body.dark #topnav a.lnk:hover{background:#3a2c18;color:#ffd84a}
-body.dark #fc button{background:#3a2c18;color:#e8cd80}
-body.dark #fc button:hover{background:#4a3620;color:#ffd84a}
-body.dark #tb{color:#a08860}
-body.dark #sb{background:#241810;border-right-color:#3a2c18}
-body.dark .sb-intro{color:#8a7050;border-bottom-color:#3a2c18}
-body.dark .vol-hdr{color:#d4a020;border-top-color:#3a2c18}
-body.dark .sec{color:#d8c498}
-body.dark .sec:hover{background:#3a2c18;color:#ffd84a}
-body.dark .sec.on{background:#4a3620;color:#ffd84a;border-left-color:#d4a020}
-body.dark #home h1{color:#ffd84a}
-body.dark #home .tag{color:#c8a870}
-body.dark #home .hero{box-shadow:0 8px 40px rgba(212,160,32,.25),0 2px 10px rgba(0,0,0,.5)}
-body.dark #home button{background:linear-gradient(180deg,#4a3620 0%,#3a2818 100%);color:#ffd84a;border-color:#d4a020}
-body.dark #home button:hover{background:linear-gradient(180deg,#5a4428 0%,#4a3620 100%);box-shadow:0 4px 14px rgba(212,160,32,.3)}
-body.dark #home .small{color:#8a7050}
-body.dark #home .small a{color:#d4a020}
-body.dark #home .small a:hover{color:#ffd84a}
-body.dark .loading{color:#a08860}
-
 /* Scrollbar */
-#sb::-webkit-scrollbar{width:4px}
-#sb::-webkit-scrollbar-thumb{background:#c0a868;border-radius:2px}
-body.sepia #sb::-webkit-scrollbar-thumb{background:#7a5c10}
-body.dark #sb::-webkit-scrollbar-thumb{background:#d4a020}
+#sb::-webkit-scrollbar,#nv::-webkit-scrollbar{width:4px}
+#sb::-webkit-scrollbar-thumb{background:#3a3a5e;border-radius:2px}
+#nv::-webkit-scrollbar-thumb{background:#c0c0c8;border-radius:2px}

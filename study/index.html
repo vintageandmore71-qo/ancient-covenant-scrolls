@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#faf5ec">
+<meta name="theme-color" content="#1a1a2e">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="ACR Study">
 <meta name="description" content="Spaced repetition study companion for The Ancient Covenant Record">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.png">
-<title>DSS Orit Study App</title>
+<title>ACR Study</title>
 <link rel="stylesheet" href="study.css">
 </head>
 <body>
@@ -18,12 +18,14 @@
 <div id="topnav">
   <button id="b-sb" title="Toggle sidebar" aria-label="Toggle sidebar">&#9776;</button>
   <button id="b-home" title="Home" aria-label="Home">&#8962;</button>
-  <div id="tb" role="button" tabindex="0" title="Go to home screen">DSS Orit Study App</div>
+  <div id="tb" role="button" tabindex="0" title="Go to home screen">ACR Study</div>
   <div id="fc">
-    <button id="b-fs-" title="Smaller text" aria-label="Smaller text">A&#8722;</button>
-    <button id="b-fs+" title="Larger text" aria-label="Larger text">A&#43;</button>
+    <button id="b-fs-" title="Smaller text">A&#8722;</button>
+    <button id="b-fs+" title="Larger text">A&#43;</button>
   </div>
-  <button id="b-theme" title="Cycle theme (white / sepia / dark)" aria-label="Theme">&#9680;</button>
+  <button id="b-nt" title="Notes">&#128221;</button>
+  <button id="b-nv" title="All notes">&#128196;</button>
+  <button id="b-vt" title="Voice reader">&#128266;</button>
   <a href="../" class="lnk" title="Back to Reader">&#8592;<span class="hide-mobile">&nbsp;Reader</span></a>
 </div>
 
@@ -32,7 +34,8 @@
 <div id="main">
   <div id="content">
     <div id="home">
-      <img src="icon.png" alt="DSS Orit Study App" class="hero" decoding="async">
+      <div class="logo">&#x1F4D6;</div>
+      <h1>ACR STUDY</h1>
       <p class="tag">
         Spaced repetition study companion<br>
         for The Ancient Covenant Record
@@ -42,12 +45,51 @@
         <button id="b-resume" style="display:none">Resume where I left off</button>
       </div>
       <p class="small">
-        Phase 1 &middot; Shell only &middot; Study engine arriving in Phase 2<br>
+        Phase 1 &middot; Shell + voice + notes<br>
         Data shared with the <a href="../">ACR Reader</a> on this device<br>
         Add to Home Screen from Safari for offline access
       </p>
     </div>
   </div>
+</div>
+
+<!-- Voice reader panel -->
+<div id="vr">
+  <button id="b-pl" title="Play">&#9654;</button>
+  <button id="b-pa" style="display:none" title="Pause">&#9646;&#9646;</button>
+  <button id="b-st" title="Stop">&#9632;</button>
+  <select id="vs" title="Speed">
+    <option value="0.7">0.7x</option>
+    <option value="0.85">0.85x</option>
+    <option value="1" selected>1x</option>
+    <option value="1.2">1.2x</option>
+    <option value="1.5">1.5x</option>
+  </select>
+  <select id="vc" title="Voice"><option value="">Loading…</option></select>
+  <button id="b-pv" title="Preview voice">&#9654;&#9654;</button>
+  <select id="vm" title="Mode">
+    <option value="verses">Verses</option>
+    <option value="notes">Notes</option>
+    <option value="all">All</option>
+  </select>
+  <span id="vst">Ready</span>
+</div>
+
+<!-- Notes panel (per section) -->
+<div id="np">
+  <div id="np-head">
+    <span id="np-lbl">Notes</span>
+    <button id="np-save">&#10003; Save</button>
+    <button id="np-clr">Clear</button>
+    <button id="np-cls">&#10005;</button>
+  </div>
+  <textarea id="np-ta" placeholder="Write your notes for this section…"></textarea>
+</div>
+
+<!-- All-notes viewer -->
+<div id="nv">
+  <h2>&#128221; All Notes</h2>
+  <div id="nv-list"></div>
 </div>
 
 <script src="study.js"></script>
