@@ -158,6 +158,7 @@ function openActivity(mode, fid) {
   if (mode === 'faq') { showFaqMode(fid); return; }
   if (mode === 'filblank') { showFillBlank(fid); return; }
   if (mode === 'mc') { showMC(fid); return; }
+  if (mode === 'flash') { showFlashcards(fid); return; }
   // Stub for modes not yet built
   document.getElementById('content').innerHTML =
     '<div class="study-view"><div class="sv-sec">' +
@@ -490,6 +491,104 @@ function showMC(fid) {
     }
 
     renderQ();
+  });
+}
+
+// ---- Flashcards with flip animation + confidence rating ----
+function showFlashcards(fid) {
+  loadContent(fid).then(function (data) {
+    if (!data) { openActivity('stub', fid); return; }
+    // Build cards from key_terms + fill_blank source quotes
+    var cards = [];
+    if (data.key_terms) {
+      data.key_terms.forEach(function (t) {
+        cards.push({ front: t.term + ' (' + t.phonetic + ')', back: t.definition, type: 'term' });
+      });
+    }
+    if (data.fill_blank) {
+      data.fill_blank.forEach(function (q) {
+        cards.push({ front: 'Bereshit ' + q.ref, back: q.source_quote, type: 'verse' });
+      });
+    }
+    cards = shuffle(cards);
+    var ci = 0, flipped = false;
+    var ratings = [];
+
+    function renderCard() {
+      if (ci >= cards.length) { showSummary(); return; }
+      var c = cards[ci];
+      flipped = false;
+      var typeColor = c.type === 'term' ? 'var(--vol6)' : 'var(--vol1)';
+      var typeLabel = c.type === 'term' ? 'KEY TERM' : 'VERSE';
+
+      var h = '<div class="fc-view">';
+      h += '<div class="fc-progress">' + (ci + 1) + ' of ' + cards.length + '</div>';
+      h += '<div class="fc-type" style="color:' + typeColor + '">' + typeLabel + '</div>';
+      h += '<div class="fc-card" id="fc-card">';
+      h += '<div class="fc-front" id="fc-front">' + c.front + '</div>';
+      h += '<div class="fc-back" id="fc-back" style="display:none">' + c.back + '</div>';
+      h += '</div>';
+      h += '<button class="cloze-audio" id="b-fc-hear">\u{1F50A} Listen</button>';
+      h += '<div class="fc-action" id="fc-action">';
+      h += '<button class="study-btn sb-pri" id="b-fc-flip">\u{1F504} Flip to reveal</button>';
+      h += '</div>';
+      h += '<div class="fc-rate" id="fc-rate" style="display:none">';
+      h += '<div class="fc-rate-label">How well did you know this?</div>';
+      h += '<div class="fc-rate-btns">';
+      var rLabels = ['Blank', 'Hard', 'Okay', 'Good', 'Easy'];
+      var rColors = ['#dc2626', '#d97706', '#0891b2', '#059669', '#2563eb'];
+      for (var r = 1; r <= 5; r++) {
+        h += '<button class="fc-rate-btn" data-r="' + r +
+          '" style="background:' + rColors[r - 1] + '">' +
+          r + '<br><span class="fc-rate-sub">' + rLabels[r - 1] + '</span></button>';
+      }
+      h += '</div></div>';
+      h += '</div>';
+
+      document.getElementById('content').innerHTML = h;
+
+      document.getElementById('b-fc-hear').addEventListener('click', function () {
+        speakText(flipped ? c.back : c.front);
+      });
+
+      document.getElementById('b-fc-flip').addEventListener('click', function () {
+        flipped = true;
+        document.getElementById('fc-front').style.display = 'none';
+        document.getElementById('fc-back').style.display = '';
+        document.getElementById('fc-card').classList.add('fc-flipped');
+        document.getElementById('fc-action').style.display = 'none';
+        document.getElementById('fc-rate').style.display = '';
+      });
+
+      var rBtns = document.querySelectorAll('.fc-rate-btn');
+      for (var b = 0; b < rBtns.length; b++) {
+        rBtns[b].addEventListener('click', function () {
+          ratings.push(parseInt(this.getAttribute('data-r')));
+          ci++;
+          renderCard();
+        });
+      }
+    }
+
+    function showSummary() {
+      var avg = ratings.reduce(function (a, b) { return a + b; }, 0) / ratings.length;
+      var emoji = avg >= 4 ? '\u{1F3C6}' : avg >= 3 ? '\u{1F31F}' : '\u{1F4AA}';
+      var msg = avg >= 4 ? 'You know this well!' : avg >= 3 ? 'Getting there!' : 'Keep practicing!';
+      var h = '<div class="cloze-results">';
+      h += '<div class="cr-emoji">' + emoji + '</div>';
+      h += '<div class="cr-score">' + cards.length + ' cards reviewed</div>';
+      h += '<div class="cr-pct">Average confidence: ' + avg.toFixed(1) + ' / 5</div>';
+      h += '<div class="cr-msg">' + msg + '</div>';
+      h += '<div class="cr-btns">';
+      h += '<button class="study-btn sb-pri" id="b-fc-retry">\u{1F504} Again</button>';
+      h += '<button class="study-btn" id="b-fc-back">Back to activities</button>';
+      h += '</div></div>';
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-fc-retry').addEventListener('click', function () { showFlashcards(fid); });
+      document.getElementById('b-fc-back').addEventListener('click', function () { go(fid); });
+    }
+
+    renderCard();
   });
 }
 

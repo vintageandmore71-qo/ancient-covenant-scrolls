@@ -455,6 +455,46 @@ body.font-dyslexic .mc-opt{font-family:var(--font-dyslexic)}
 .mc-wrong{animation:wrongShake .45s ease}
 .mc-feedback{min-height:50px;padding:10px}
 
+/* =========================================================================
+   Flashcards with flip + confidence rating
+   ========================================================================= */
+.fc-view{text-align:center;padding:16px 0}
+.fc-progress{font-size:14px;color:var(--text-muted);font-weight:700;margin-bottom:4px}
+.fc-type{font-size:12px;font-weight:700;letter-spacing:.08em;margin-bottom:12px}
+.fc-card{
+  background:var(--bg-card);border-radius:20px;box-shadow:0 6px 24px rgba(0,0,0,.12);
+  padding:40px 28px;margin:0 auto 20px;max-width:500px;min-height:200px;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .4s ease,box-shadow .3s;
+  cursor:pointer;
+}
+.fc-card.fc-flipped{transform:rotateY(0deg);box-shadow:0 8px 32px rgba(0,0,0,.16);
+  border-left:6px solid var(--vol3)}
+.fc-front{
+  font-size:1.6em;font-weight:700;color:var(--text-main);line-height:1.6;
+  text-align:center;
+}
+body.font-dyslexic .fc-front{font-family:var(--font-dyslexic)}
+.fc-back{
+  font-size:1.05em;color:var(--text-main);line-height:1.8;text-align:left;
+}
+body.font-dyslexic .fc-back{font-family:var(--font-dyslexic);line-height:2.0}
+.fc-action{margin-bottom:16px}
+.fc-rate{margin-top:8px}
+.fc-rate-label{font-size:15px;font-weight:700;color:var(--text-muted);margin-bottom:14px}
+.fc-rate-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.fc-rate-btn{
+  color:#fff;border:none;padding:14px 8px;border-radius:14px;
+  font-size:1.3em;font-weight:700;cursor:pointer;min-width:60px;min-height:70px;
+  box-shadow:0 3px 10px rgba(0,0,0,.15);
+  transition:transform .15s,box-shadow .15s;
+  font-family:var(--font-main);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:2px;
+}
+.fc-rate-btn:hover{transform:translateY(-3px);box-shadow:0 6px 18px rgba(0,0,0,.22)}
+.fc-rate-btn:active{transform:scale(.94)}
+.fc-rate-sub{font-size:.45em;font-weight:700;opacity:.9;letter-spacing:.04em}
+
 /* Quiz results screen */
 .cloze-results{text-align:center;padding:50px 20px}
 .cr-emoji{font-size:5em;margin-bottom:16px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.15))}
