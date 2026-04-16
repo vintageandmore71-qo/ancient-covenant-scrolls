@@ -160,6 +160,7 @@ function openActivity(mode, fid) {
   if (mode === 'mc') { showMC(fid); return; }
   if (mode === 'flash') { showFlashcards(fid); return; }
   if (mode === 'memory') { showMemoryMatch(fid); return; }
+  if (mode === 'listen') { showListenLearn(fid); return; }
   // Stub for modes not yet built
   document.getElementById('content').innerHTML =
     '<div class="study-view"><div class="sv-sec">' +
@@ -704,6 +705,116 @@ function showMemoryMatch(fid) {
 
     render();
   });
+}
+
+// ---- Listen & Learn — read chapter aloud verse by verse ----
+function getVerses(fid) {
+  var data = CHAPTER_CACHE[fid];
+  if (!data) return [];
+  var div = document.createElement('div');
+  div.innerHTML = data.html;
+  var paras = div.querySelectorAll('p.dp');
+  var verses = [];
+  for (var i = 0; i < paras.length; i++) {
+    var t = paras[i].textContent.trim();
+    if (t && t.length > 3) verses.push(t);
+  }
+  return verses;
+}
+
+function showListenLearn(fid) {
+  var verses = getVerses(fid);
+  if (!verses.length) {
+    // Data might not be cached yet — try fetching
+    fetch('../data/' + fid + '.json')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (d) { CHAPTER_CACHE[fid] = d; showListenLearn(fid); }
+        else { openActivity('stub', fid); }
+      }).catch(function () { openActivity('stub', fid); });
+    return;
+  }
+
+  var vi = 0, playing = false, utterance = null;
+  var idx = IDS.indexOf(fid);
+  var label = idx >= 0 ? LBL[idx] : fid;
+
+  function renderVerse() {
+    var h = '<div class="ll-view">';
+    h += '<div class="ll-header">Listen &amp; Learn</div>';
+    h += '<div class="ll-section">' + label + '</div>';
+    h += '<div class="ll-card" id="ll-card">' + verses[vi] + '</div>';
+    h += '<div class="ll-progress">' + (vi + 1) + ' of ' + verses.length + '</div>';
+    h += '<div class="ll-controls">';
+    h += '<button class="ll-btn ll-prev" id="b-ll-prev">\u25C0 Prev</button>';
+    h += '<button class="ll-btn ll-play" id="b-ll-play">\u25B6 Play</button>';
+    h += '<button class="ll-btn ll-stop" id="b-ll-stop">\u25A0 Stop</button>';
+    h += '<button class="ll-btn ll-next" id="b-ll-next">Next \u25B6</button>';
+    h += '</div>';
+    h += '<div class="ll-auto">';
+    h += '<label><input type="checkbox" id="ll-autoplay" checked> Auto-advance to next verse</label>';
+    h += '</div>';
+    h += '<button class="study-btn" id="b-ll-back" style="margin-top:20px">Back to activities</button>';
+    h += '</div>';
+
+    document.getElementById('content').innerHTML = h;
+
+    document.getElementById('b-ll-prev').addEventListener('click', function () {
+      stopSpeech(); vi = Math.max(0, vi - 1); renderVerse();
+    });
+    document.getElementById('b-ll-next').addEventListener('click', function () {
+      stopSpeech(); vi = Math.min(verses.length - 1, vi + 1); renderVerse();
+    });
+    document.getElementById('b-ll-play').addEventListener('click', function () {
+      playVerse();
+    });
+    document.getElementById('b-ll-stop').addEventListener('click', function () {
+      stopSpeech();
+      this.textContent = '\u25A0 Stopped';
+    });
+    document.getElementById('b-ll-back').addEventListener('click', function () {
+      stopSpeech(); go(fid);
+    });
+  }
+
+  function playVerse() {
+    if (!window.speechSynthesis) return;
+    try { window.speechSynthesis.resume(); } catch (e) {}
+    try { window.speechSynthesis.cancel(); } catch (e) {}
+    var card = document.getElementById('ll-card');
+    if (card) card.classList.add('ll-speaking');
+    var btn = document.getElementById('b-ll-play');
+    if (btn) btn.textContent = '\u{1F50A} Reading...';
+
+    utterance = new SpeechSynthesisUtterance(prepTTS(verses[vi]));
+    utterance.rate = 1; utterance.lang = 'en-US'; utterance.volume = 1;
+    var voice = getBestVoice();
+    if (voice) utterance.voice = voice;
+
+    utterance.onend = function () {
+      if (card) card.classList.remove('ll-speaking');
+      if (btn) btn.textContent = '\u25B6 Play';
+      var auto = document.getElementById('ll-autoplay');
+      if (auto && auto.checked && vi < verses.length - 1) {
+        vi++;
+        renderVerse();
+        setTimeout(playVerse, 400);
+      }
+    };
+    utterance.onerror = function (ev) {
+      if (card) card.classList.remove('ll-speaking');
+      if (btn) btn.textContent = '\u25B6 Play';
+    };
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function stopSpeech() {
+    if (window.speechSynthesis) {
+      try { window.speechSynthesis.cancel(); } catch (e) {}
+    }
+  }
+
+  renderVerse();
 }
 
 function goHome() {
