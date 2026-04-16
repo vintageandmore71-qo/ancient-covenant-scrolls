@@ -119,6 +119,56 @@ p.sp{background:#fff9c4;border-radius:3px}
 .err{text-align:center;padding:40px 20px;color:#c00;font-family:Arial}
 
 /* =========================================================================
+   Study banner (appears at top of loaded chapter)
+   ========================================================================= */
+.study-banner{text-align:center;padding:14px 0 18px;border-bottom:1px solid #e0e0e8;margin-bottom:16px}
+
+/* =========================================================================
+   Study mode buttons (shared)
+   ========================================================================= */
+.study-btn{
+  background:#3a3a5e;color:#fff;border:1px solid #5a5a8a;
+  padding:10px 22px;border-radius:6px;font-size:14px;font-family:Arial;
+  cursor:pointer;transition:background .15s;margin:4px;
+}
+.study-btn:hover{background:#4a4a7e}
+.study-btn:disabled{opacity:.45;cursor:default}
+.sb-pri{background:#2a2a4e;border-color:#4a4a8a;font-weight:bold}
+.sb-pri:hover:not(:disabled){background:#3a3a6e}
+
+/* =========================================================================
+   Chapter Breakdown study view
+   ========================================================================= */
+.study-view{padding:10px 0}
+.study-na{color:#888;font-family:Arial;font-size:13px;padding:40px 0;text-align:center}
+.sv-title{font-size:1.3em;font-weight:bold;color:#1a1a2e;margin:0 0 20px;padding-bottom:12px;border-bottom:2px solid #8888cc}
+.sv-sec{margin-bottom:28px}
+.sv-sec h3{font-size:.95em;font-weight:bold;color:#3a3a5e;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+.sv-text{font-size:.95em;line-height:1.7;color:#222;margin-bottom:10px}
+.sv-toggle{
+  background:none;border:1px solid #8888cc;color:#3a3a5e;padding:6px 14px;
+  border-radius:4px;font-size:12px;cursor:pointer;font-family:Arial;
+}
+.sv-toggle:hover{background:#eeeef8;color:#1a1a2e}
+
+/* Key terms */
+.sv-term{padding:10px 0;border-bottom:1px solid #f0f0f4}
+.sv-term:last-child{border-bottom:none}
+.sv-tw{color:#1a1a2e;font-size:.95em}
+.sv-tp{color:#8888cc;font-size:.82em;font-style:italic}
+.sv-td{display:block;color:#444;font-size:.9em;line-height:1.6;margin-top:4px}
+
+/* FAQ */
+.sv-faq{padding:12px 0;border-bottom:1px solid #f0f0f4}
+.sv-faq:last-child{border-bottom:none}
+.sv-fq{font-weight:bold;color:#1a1a2e;font-size:.95em;margin-bottom:6px}
+.sv-fa{color:#333;font-size:.9em;line-height:1.65}
+
+/* Practice buttons row */
+.sv-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}
+.sv-actions h3{width:100%}
+
+/* =========================================================================
    Voice reader panel — dark indigo, bottom of viewport
    ========================================================================= */
 #vr{

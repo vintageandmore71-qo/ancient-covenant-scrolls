@@ -104,8 +104,12 @@ function go(fid) {
       return r.json();
     })
     .then(function (d) {
-      content.innerHTML = d.html;
+      content.innerHTML =
+        '<div class="study-banner"><button class="study-btn sb-pri" id="b-study-sec">' +
+        '\u{1F4D6} Study this section</button></div>' + d.html;
       applyFontSize();
+      var bStudy = document.getElementById('b-study-sec');
+      if (bStudy) bStudy.addEventListener('click', function () { showStudyMode(fid); });
       document.getElementById('tb').textContent = LBL[i];
       var secs = document.querySelectorAll('.sec');
       for (var j = 0; j < secs.length; j++) {
@@ -157,6 +161,59 @@ function goHome() {
     });
   }
   window.scrollTo(0, 0);
+}
+
+// ---- Chapter Breakdown study view ----
+
+function showStudyMode(fid) {
+  var i = IDS.indexOf(fid);
+  if (i < 0) return;
+  loadContent(fid).then(function (data) {
+    if (!data) {
+      document.getElementById('content').innerHTML =
+        '<div class="study-view"><p class="study-na">Study content is not available for this section yet.</p>' +
+        '<button class="study-btn" id="b-back-na">Back to reading</button></div>';
+      document.getElementById('b-back-na').addEventListener('click', function () { go(fid); });
+      return;
+    }
+    var h = '<div class="study-view">';
+    h += '<h2 class="sv-title">' + data.label + '</h2>';
+    h += '<div class="sv-sec"><h3>Summary</h3>';
+    h += '<div id="sv-plain" class="sv-text">' + data.summary_plain + '</div>';
+    h += '<div id="sv-deep" class="sv-text" style="display:none">' + data.summary_scholarly + '</div>';
+    h += '<button class="sv-toggle" id="b-sum-toggle">Show deeper summary</button></div>';
+    h += '<div class="sv-sec"><h3>Key Terms (' + data.key_terms.length + ')</h3>';
+    for (var t = 0; t < data.key_terms.length; t++) {
+      var k = data.key_terms[t];
+      h += '<div class="sv-term"><strong class="sv-tw">' + k.term + '</strong> ';
+      h += '<span class="sv-tp">(' + k.phonetic + ')</span> ';
+      h += '<span class="sv-td">' + k.definition + '</span></div>';
+    }
+    h += '</div>';
+    h += '<div class="sv-sec"><h3>Questions &amp; Answers (' + data.faq.length + ')</h3>';
+    for (var f = 0; f < data.faq.length; f++) {
+      h += '<div class="sv-faq"><div class="sv-fq">' + data.faq[f].question + '</div>';
+      h += '<div class="sv-fa">' + data.faq[f].answer + '</div></div>';
+    }
+    h += '</div>';
+    h += '<div class="sv-sec sv-actions"><h3>Practice</h3>';
+    h += '<button class="study-btn sb-pri" disabled>Fill in the blank (' + data.fill_blank.length + ')</button>';
+    h += '<button class="study-btn sb-pri" disabled>Multiple choice (' + data.multiple_choice.length + ')</button>';
+    h += '<button class="study-btn sb-pri" disabled>Flashcards (coming soon)</button>';
+    h += '</div>';
+    h += '<button class="study-btn" id="b-back-read">Back to reading</button>';
+    h += '</div>';
+    document.getElementById('content').innerHTML = h;
+    document.getElementById('tb').textContent = 'Study \u2014 ' + LBL[i];
+    document.getElementById('b-sum-toggle').addEventListener('click', function () {
+      var p = document.getElementById('sv-plain');
+      var d = document.getElementById('sv-deep');
+      if (p.style.display === 'none') { p.style.display = ''; d.style.display = 'none'; this.textContent = 'Show deeper summary'; }
+      else { p.style.display = 'none'; d.style.display = ''; this.textContent = 'Show plain summary'; }
+    });
+    document.getElementById('b-back-read').addEventListener('click', function () { go(fid); });
+    window.scrollTo(0, 0);
+  });
 }
 
 // ---- Curated study content loader ----
