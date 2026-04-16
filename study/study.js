@@ -714,10 +714,20 @@ function getVerses(fid) {
   var div = document.createElement('div');
   div.innerHTML = data.html;
   var paras = div.querySelectorAll('p.dp');
-  var verses = [];
+  var verses = [], anyTyped = false;
   for (var i = 0; i < paras.length; i++) {
-    var t = paras[i].textContent.trim();
-    if (t && t.length > 3) verses.push(t);
+    var pt = paras[i].getAttribute('data-ptype');
+    if (pt) anyTyped = true;
+    if (pt === 'verse') {
+      var t = paras[i].textContent.trim();
+      if (t) verses.push(t);
+    }
+  }
+  if (!verses.length && !anyTyped) {
+    for (var i = 0; i < paras.length; i++) {
+      var t = paras[i].textContent.trim();
+      if (t && t.length > 20) verses.push(t);
+    }
   }
   return verses;
 }
