@@ -156,6 +156,7 @@ function openActivity(mode, fid) {
   if (mode === 'summary') { showStudyMode(fid); return; }
   if (mode === 'terms') { showTermsMode(fid); return; }
   if (mode === 'faq') { showFaqMode(fid); return; }
+  if (mode === 'filblank') { showFillBlank(fid); return; }
   // Stub for modes not yet built
   document.getElementById('content').innerHTML =
     '<div class="study-view"><div class="sv-sec">' +
@@ -200,6 +201,106 @@ function showFaqMode(fid) {
     document.getElementById('content').innerHTML = h;
     document.getElementById('b-back-grid').addEventListener('click', function () { go(fid); });
     window.scrollTo(0, 0);
+  });
+}
+
+// ---- Minimal TTS helper (full voice reader logic comes later) ----
+function speakText(text) {
+  if (!window.speechSynthesis) return;
+  try { window.speechSynthesis.cancel(); } catch (e) {}
+  var u = new SpeechSynthesisUtterance(text);
+  u.rate = 1; u.lang = 'en-US'; u.volume = 1;
+  try { window.speechSynthesis.speak(u); } catch (e) {}
+}
+
+// ---- Fill in the Blank (cloze deletion) quiz ----
+function shuffle(arr) {
+  for (var i = arr.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+  }
+  return arr;
+}
+
+function showFillBlank(fid) {
+  loadContent(fid).then(function (data) {
+    if (!data || !data.fill_blank || !data.fill_blank.length) {
+      openActivity('stub', fid); return;
+    }
+    var questions = shuffle(data.fill_blank.slice());
+    var allAns = data.fill_blank.map(function (q) { return q.answer; });
+    var qi = 0, score = 0;
+
+    function renderQ() {
+      if (qi >= questions.length) { showResults(); return; }
+      var q = questions[qi];
+      var correct = q.answer;
+      var others = shuffle(allAns.filter(function (a) {
+        return a.toLowerCase() !== correct.toLowerCase();
+      })).slice(0, 3);
+      var opts = shuffle([correct].concat(others));
+      var colors = ['#2563eb', '#059669', '#7c3aed', '#d97706'];
+
+      var h = '<div class="cloze-view">';
+      h += '<div class="cloze-progress">' + (qi + 1) + ' of ' + questions.length + '</div>';
+      h += '<div class="cloze-ref">Bereshit ' + q.ref + '</div>';
+      h += '<div class="cloze-prompt">' +
+        q.prompt.replace('______', '<span class="cloze-blank">______</span>') + '</div>';
+      h += '<button class="cloze-audio" id="b-cloze-hear">\u{1F50A} Listen</button>';
+      h += '<div class="cloze-opts">';
+      for (var o = 0; o < opts.length; o++) {
+        h += '<button class="cloze-opt" data-val="' + opts[o] +
+          '" style="background:' + colors[o % 4] + '">' + opts[o] + '</button>';
+      }
+      h += '</div>';
+      h += '<div class="cloze-feedback" id="cloze-fb"></div>';
+      h += '</div>';
+
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-cloze-hear').addEventListener('click', function () {
+        speakText(q.source_quote || q.prompt.replace('______', correct));
+      });
+      var btns = document.querySelectorAll('.cloze-opt');
+      for (var b = 0; b < btns.length; b++) {
+        btns[b].addEventListener('click', function () {
+          var val = this.getAttribute('data-val');
+          var fb = document.getElementById('cloze-fb');
+          if (val.toLowerCase() === correct.toLowerCase()) {
+            this.classList.add('cloze-correct');
+            fb.innerHTML = '<span class="fb-correct">\u2714 Correct!</span>' +
+              '<div class="cloze-source">' + (q.source_quote || '') + '</div>';
+            score++;
+            var all = document.querySelectorAll('.cloze-opt');
+            for (var x = 0; x < all.length; x++) all[x].disabled = true;
+            setTimeout(function () { qi++; renderQ(); }, 2200);
+          } else {
+            this.classList.add('cloze-wrong');
+            this.disabled = true;
+            fb.innerHTML = '<span class="fb-try">Try another \u2192</span>';
+          }
+        });
+      }
+    }
+
+    function showResults() {
+      var pct = Math.round(score / questions.length * 100);
+      var emoji = pct >= 80 ? '\u{1F3C6}' : pct >= 60 ? '\u{1F31F}' : '\u{1F4AA}';
+      var msg = pct >= 80 ? 'Outstanding!' : pct >= 60 ? 'Good work!' : 'Keep studying!';
+      var h = '<div class="cloze-results">';
+      h += '<div class="cr-emoji">' + emoji + '</div>';
+      h += '<div class="cr-score">' + score + ' / ' + questions.length + '</div>';
+      h += '<div class="cr-pct">' + pct + '%</div>';
+      h += '<div class="cr-msg">' + msg + '</div>';
+      h += '<div class="cr-btns">';
+      h += '<button class="study-btn sb-pri" id="b-cloze-retry">\u{1F504} Try Again</button>';
+      h += '<button class="study-btn" id="b-cloze-back">Back to activities</button>';
+      h += '</div></div>';
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-cloze-retry').addEventListener('click', function () { showFillBlank(fid); });
+      document.getElementById('b-cloze-back').addEventListener('click', function () { go(fid); });
+    }
+
+    renderQ();
   });
 }
 

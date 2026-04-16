@@ -363,6 +363,77 @@ body.font-dyslexic .act-label{font-family:var(--font-dyslexic)}
 }
 
 /* =========================================================================
+   Cloze deletion (Fill in the Blank) quiz
+   ========================================================================= */
+.cloze-view{text-align:center;padding:16px 0}
+.cloze-progress{font-size:14px;color:var(--text-muted);font-weight:700;margin-bottom:6px}
+.cloze-ref{font-size:13px;color:var(--vol1);font-weight:700;margin-bottom:14px;letter-spacing:.04em}
+.cloze-prompt{
+  font-size:1.25em;line-height:1.9;color:var(--text-main);
+  padding:24px 22px;background:var(--bg-card);border-radius:var(--radius);
+  box-shadow:var(--shadow);margin-bottom:18px;text-align:left;
+}
+body.font-dyslexic .cloze-prompt{font-family:var(--font-dyslexic);line-height:2.1}
+.cloze-blank{
+  background:linear-gradient(135deg,#e8e8ff,#d8d8ff);color:var(--vol5);
+  padding:4px 16px;border-radius:8px;font-weight:700;
+  border:2px dashed var(--vol5);
+}
+.cloze-audio{
+  background:var(--vol1);color:#fff;border:none;
+  padding:14px 28px;border-radius:var(--radius);font-size:16px;font-weight:700;
+  cursor:pointer;margin-bottom:22px;min-height:52px;
+  box-shadow:0 3px 10px rgba(37,99,235,.25);
+  font-family:var(--font-main);transition:transform .15s;
+}
+.cloze-audio:hover{transform:scale(1.04)}
+.cloze-audio:active{transform:scale(.97)}
+.cloze-opts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;padding:0 4px}
+.cloze-opt{
+  color:#fff;border:none;padding:20px 16px;border-radius:16px;
+  font-size:1.15em;font-weight:700;cursor:pointer;min-height:64px;
+  box-shadow:0 4px 12px rgba(0,0,0,.18);
+  transition:transform .15s,opacity .15s,box-shadow .15s;
+  font-family:var(--font-main);letter-spacing:.02em;
+  text-shadow:0 1px 2px rgba(0,0,0,.15);
+}
+body.font-dyslexic .cloze-opt{font-family:var(--font-dyslexic)}
+.cloze-opt:hover:not(:disabled){transform:scale(1.05);box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.cloze-opt:active:not(:disabled){transform:scale(.96)}
+.cloze-opt:disabled{opacity:.4;cursor:default;transform:none}
+.cloze-correct{animation:correctPulse .6s ease}
+.cloze-wrong{animation:wrongShake .45s ease}
+@keyframes correctPulse{
+  0%{transform:scale(1)}
+  30%{transform:scale(1.12);box-shadow:0 0 30px rgba(5,150,105,.5)}
+  100%{transform:scale(1)}
+}
+@keyframes wrongShake{
+  0%{transform:translateX(0)}
+  20%{transform:translateX(-10px)}
+  40%{transform:translateX(10px)}
+  60%{transform:translateX(-7px)}
+  80%{transform:translateX(5px)}
+  100%{transform:translateX(0)}
+}
+.cloze-feedback{min-height:50px;padding:10px}
+.fb-correct{color:#059669;font-size:1.3em;font-weight:700}
+.fb-try{color:var(--vol4);font-size:1.1em;font-weight:700}
+.cloze-source{
+  font-size:.9em;color:var(--text-muted);margin-top:10px;line-height:1.7;
+  padding:14px 16px;background:var(--bg-card);border-radius:10px;
+  text-align:left;border-left:4px solid #059669;
+}
+
+/* Quiz results screen */
+.cloze-results{text-align:center;padding:50px 20px}
+.cr-emoji{font-size:5em;margin-bottom:16px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.15))}
+.cr-score{font-size:2.8em;font-weight:700;color:var(--text-main)}
+.cr-pct{font-size:1.6em;color:var(--vol5);font-weight:700;margin-bottom:8px}
+.cr-msg{font-size:1.3em;color:var(--text-muted);margin-bottom:28px;font-weight:700}
+.cr-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+/* =========================================================================
    Font toggle button (added dynamically by JS)
    ========================================================================= */
 .font-toggle-btn{
