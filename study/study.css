@@ -1,118 +1,159 @@
-/* ACR Study — Phase 1.5
-   Blue indigo chrome (topnav, sidebar, home screen, voice panel, notes panel)
-   with a WHITE content area for reading. One fixed theme — no cycle. */
+/* ACR Study — Dyslexia-optimized visual design
+   Atkinson Hyperlegible default, OpenDyslexic toggle.
+   Color-coded volumes. Card layouts. Warm background. Large fonts.
+   Left-aligned, 1.5x+ spacing, no italics, no justified text. */
+
+:root{
+  --font-main:'Atkinson Hyperlegible','Open Sans',Arial,sans-serif;
+  --font-dyslexic:'OpenDyslexic','Atkinson Hyperlegible',Arial,sans-serif;
+  --bg-warm:#faf6f0;
+  --bg-card:#ffffff;
+  --text-main:#1a1a2e;
+  --text-muted:#5a5a6e;
+  --radius:12px;
+  --shadow:0 2px 8px rgba(0,0,0,.08);
+  /* Volume colors */
+  --vol1:#2563eb;--vol2:#dc2626;--vol3:#059669;--vol4:#d97706;
+  --vol5:#7c3aed;--vol6:#0891b2;--vol7:#ea580c;--vol8:#b8860b;
+}
 
 *{box-sizing:border-box;margin:0;padding:0}
 body{
-  font-family:Arial,sans-serif;
-  font-size:10.5pt;
-  background:#ffffff;
-  color:#1a1a2e;
+  font-family:var(--font-main);
+  font-size:14pt;
+  background:var(--bg-warm);
+  color:var(--text-main);
   -webkit-text-size-adjust:100%;
+  line-height:1.7;
+  letter-spacing:.02em;
+  text-align:left;
 }
+body.font-dyslexic{font-family:var(--font-dyslexic);letter-spacing:.04em;word-spacing:.12em}
 
 /* =========================================================================
-   Top nav — blue indigo
+   Top nav — deep indigo with warm accent
    ========================================================================= */
 #topnav{
-  position:fixed;top:0;left:0;right:0;height:48px;
-  background:#1a1a2e;
-  display:flex;align-items:center;gap:3px;padding:0 6px;
-  z-index:1000;box-shadow:0 2px 10px rgba(0,0,0,.3);
+  position:fixed;top:0;left:0;right:0;height:54px;
+  background:linear-gradient(135deg,#1a1a2e 0%,#2a2a4e 100%);
+  display:flex;align-items:center;gap:4px;padding:0 8px;
+  z-index:1000;box-shadow:0 3px 12px rgba(0,0,0,.25);
 }
 #topnav button,#topnav a.lnk{
-  background:none;border:none;color:#b8b8d8;cursor:pointer;
-  padding:6px 7px;border-radius:4px;font-size:13px;font-family:Arial;
+  background:none;border:none;color:#c8c8e8;cursor:pointer;
+  padding:8px 10px;border-radius:8px;font-size:15px;font-family:var(--font-main);
   text-decoration:none;display:inline-flex;align-items:center;
+  min-width:44px;min-height:44px;justify-content:center;
+  transition:background .15s;
 }
 #topnav button:hover,#topnav button.on,#topnav a.lnk:hover{
-  background:#2a2a3e;color:#fff;
+  background:rgba(255,255,255,.12);color:#fff;
 }
 #tb{
-  flex:1;color:#a0a0c0;font-size:11px;
+  flex:1;color:#b8b8d8;font-size:13px;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  padding:6px;letter-spacing:.02em;font-weight:bold;
-  cursor:pointer;border-radius:4px;transition:background .15s;
+  padding:8px;font-weight:700;
+  cursor:pointer;border-radius:8px;transition:background .15s;
 }
-#tb:hover{background:#2a2a3e;color:#fff}
-#fc{display:flex;gap:2px}
-#fc button{width:26px;height:26px;padding:0;font-size:11px;border-radius:3px;background:#2a2a3e;color:#b8b8d8}
-#fc button:hover{background:#3a3a5e;color:#fff}
+#tb:hover{background:rgba(255,255,255,.1);color:#fff}
+#fc{display:flex;gap:3px}
+#fc button{width:40px;height:40px;padding:0;font-size:14px;border-radius:8px;background:rgba(255,255,255,.08);color:#c8c8e8;font-weight:700}
+#fc button:hover{background:rgba(255,255,255,.18);color:#fff}
 
 /* =========================================================================
-   Sidebar — blue indigo
+   Sidebar — dark with color-coded volume headers
    ========================================================================= */
 #sb{
-  position:fixed;top:48px;left:0;bottom:0;width:280px;
-  background:#1a1a2e;overflow-y:auto;z-index:900;
+  position:fixed;top:54px;left:0;bottom:0;width:290px;
+  background:linear-gradient(180deg,#1a1a2e 0%,#12121e 100%);
+  overflow-y:auto;z-index:900;
   transition:transform .3s;border-right:1px solid #2a2a3e;
 }
-#sb.h{transform:translateX(-280px)}
+#sb.h{transform:translateX(-290px)}
 .sb-intro{
-  padding:10px 14px;color:#6a6a8a;font-size:9px;
-  letter-spacing:.08em;text-transform:uppercase;
-  border-bottom:1px solid #2a2a3e;font-weight:bold;
+  padding:14px 16px;color:#8888aa;font-size:11px;
+  letter-spacing:.06em;text-transform:uppercase;
+  border-bottom:1px solid #2a2a3e;font-weight:700;
+  font-family:var(--font-main);
 }
 .vol-hdr{
-  padding:12px 14px 6px;color:#8888cc;font-size:10px;
-  font-weight:bold;text-transform:uppercase;letter-spacing:.08em;
-  border-top:1px solid #2a2a3e;margin-top:4px;
+  padding:14px 16px 8px;font-size:12px;
+  font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  border-top:1px solid #2a2a3e;margin-top:6px;
+  font-family:var(--font-main);
 }
 .vol-hdr:first-of-type{border-top:none;margin-top:0}
+/* Color-coded volume headers */
+.vol-hdr[data-vol="1"]{color:var(--vol1)}.vol-hdr[data-vol="2"]{color:var(--vol2)}
+.vol-hdr[data-vol="3"]{color:var(--vol3)}.vol-hdr[data-vol="4"]{color:var(--vol4)}
+.vol-hdr[data-vol="5"]{color:var(--vol5)}.vol-hdr[data-vol="6"]{color:var(--vol6)}
+.vol-hdr[data-vol="7"]{color:var(--vol7)}.vol-hdr[data-vol="8"]{color:var(--vol8)}
 .sec{
-  padding:9px 14px 9px 24px;color:#c0c0d8;font-size:12px;
-  cursor:pointer;transition:background .15s;line-height:1.4;
+  padding:12px 16px 12px 28px;color:#c8c8e0;font-size:13px;
+  cursor:pointer;transition:all .15s;line-height:1.5;
+  border-radius:0 8px 8px 0;margin-right:8px;
+  font-family:var(--font-main);min-height:48px;
+  display:flex;align-items:center;
 }
-.sec:hover{background:#2a2a3e;color:#fff}
-.sec.on{background:#3a3a5e;color:#fff;font-weight:bold;border-left:3px solid #8888cc;padding-left:21px}
+.sec:hover{background:rgba(255,255,255,.08);color:#fff}
+.sec.on{background:rgba(255,255,255,.12);color:#fff;font-weight:700;border-left:4px solid #8888cc;padding-left:24px}
 
 /* =========================================================================
-   Main content area — WHITE (reading surface)
+   Main content area — warm off-white reading surface
    ========================================================================= */
 #main{
-  margin-left:280px;margin-top:48px;
-  padding:28px 44px 60px;max-width:900px;
-  background:#ffffff;
+  margin-left:290px;margin-top:54px;
+  padding:28px 40px 60px;max-width:900px;
+  background:var(--bg-warm);
   transition:margin-left .3s,padding-bottom .3s;
-  min-height:calc(100vh - 48px);
+  min-height:calc(100vh - 54px);
 }
 #main.x{margin-left:0}
-#main.vopen{padding-bottom:240px}
+#main.vopen{padding-bottom:260px}
 
-#content{color:#1a1a2e}
+#content{color:var(--text-main)}
 #content p{
-  font-family:Arial,sans-serif;
-  line-height:var(--lh,1.65);
-  margin:.14em 0;
+  font-family:var(--font-main);
+  line-height:1.8;
+  margin:.3em 0;
+  text-align:left;
 }
-/* Currently-speaking paragraph highlight during voice reading */
-p.sp{background:#fff9c4;border-radius:3px}
+body.font-dyslexic #content p{font-family:var(--font-dyslexic);line-height:2.0}
+p.sp{background:#fff3cd;border-radius:6px;padding:2px 4px}
 
 /* =========================================================================
-   Home / welcome screen — blue indigo, breaks out of the white #main
+   Home / welcome screen — bold, colorful, inviting
    ========================================================================= */
 #home{
-  background:#0f0f1e;
-  color:#e8e8f0;
-  margin:-28px -44px -60px -44px;
-  min-height:calc(100vh - 48px);
+  background:linear-gradient(160deg,#0f0f2e 0%,#1a1a3e 40%,#2a1a3e 100%);
+  color:#f0f0ff;
+  margin:-28px -40px -60px -40px;
+  min-height:calc(100vh - 54px);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:40px 20px;text-align:center;
+  padding:50px 24px;text-align:center;
 }
-#home .logo{font-size:4em;margin-bottom:20px;color:#8888cc;line-height:1}
-#home h1{font-size:1.6em;font-weight:bold;margin-bottom:8px;color:#fff;letter-spacing:.04em}
-#home .tag{color:#8888a8;font-size:.95em;margin:8px 0 28px;line-height:1.7;font-style:italic}
-#home .btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+#home .logo{font-size:5em;margin-bottom:24px;line-height:1;
+  background:linear-gradient(135deg,var(--vol1),var(--vol5),var(--vol6));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;filter:drop-shadow(0 2px 8px rgba(100,100,255,.3));
+}
+#home h1{font-size:2em;font-weight:700;margin-bottom:10px;color:#fff;letter-spacing:.04em;
+  font-family:var(--font-main);text-shadow:0 2px 12px rgba(100,100,255,.2)}
+#home .tag{color:#b8b8d8;font-size:1.05em;margin:10px 0 32px;line-height:1.8}
+#home .btns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
 #home button{
-  background:#3a3a5e;color:#fff;border:1px solid #5a5a8a;
-  padding:14px 28px;border-radius:8px;font-size:15px;font-family:Arial;
-  cursor:pointer;transition:background .15s,transform .15s;
-  font-weight:bold;letter-spacing:.02em;
+  background:linear-gradient(135deg,var(--vol1) 0%,var(--vol5) 100%);
+  color:#fff;border:none;
+  padding:18px 36px;border-radius:var(--radius);font-size:17px;
+  font-family:var(--font-main);font-weight:700;
+  cursor:pointer;transition:transform .15s,box-shadow .15s;
+  box-shadow:0 4px 16px rgba(37,99,235,.3);
+  min-height:56px;letter-spacing:.02em;
 }
-#home button:hover{background:#4a4a7e}
+#home button:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(37,99,235,.4)}
 #home button:active{transform:scale(.97)}
-#home .small{font-size:.82em;color:#7a7a98;margin-top:22px;line-height:1.7}
-#home .small a{color:#8888cc;text-decoration:none}
+#home .small{font-size:.9em;color:#8888b8;margin-top:28px;line-height:1.8}
+#home .small a{color:#a8a8e8;text-decoration:none;font-weight:700}
 #home .small a:hover{text-decoration:underline;color:#fff}
 
 .loading{text-align:center;padding:60px 20px;color:#888;font-family:Arial;font-style:italic}
@@ -121,81 +162,119 @@ p.sp{background:#fff9c4;border-radius:3px}
 /* =========================================================================
    Study banner (appears at top of loaded chapter)
    ========================================================================= */
-.study-banner{text-align:center;padding:14px 0 18px;border-bottom:1px solid #e0e0e8;margin-bottom:16px}
+.study-banner{text-align:center;padding:18px 0 22px;
+  background:var(--bg-card);border-radius:var(--radius);
+  box-shadow:var(--shadow);margin-bottom:20px}
 
 /* =========================================================================
    Study mode buttons (shared)
    ========================================================================= */
 .study-btn{
-  background:#3a3a5e;color:#fff;border:1px solid #5a5a8a;
-  padding:10px 22px;border-radius:6px;font-size:14px;font-family:Arial;
-  cursor:pointer;transition:background .15s;margin:4px;
+  background:linear-gradient(135deg,#3a3a5e 0%,#4a4a7e 100%);
+  color:#fff;border:none;
+  padding:14px 28px;border-radius:var(--radius);font-size:16px;
+  font-family:var(--font-main);font-weight:700;
+  cursor:pointer;transition:transform .15s,box-shadow .15s;
+  margin:6px;min-height:52px;
+  box-shadow:0 3px 10px rgba(0,0,0,.12);
 }
-.study-btn:hover{background:#4a4a7e}
-.study-btn:disabled{opacity:.45;cursor:default}
-.sb-pri{background:#2a2a4e;border-color:#4a4a8a;font-weight:bold}
-.sb-pri:hover:not(:disabled){background:#3a3a6e}
+.study-btn:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(0,0,0,.18)}
+.study-btn:active{transform:scale(.97)}
+.study-btn:disabled{opacity:.4;cursor:default;transform:none;box-shadow:none}
+.sb-pri{
+  background:linear-gradient(135deg,var(--vol1) 0%,var(--vol5) 100%);
+  box-shadow:0 3px 12px rgba(37,99,235,.25);
+}
+.sb-pri:hover:not(:disabled){box-shadow:0 5px 20px rgba(37,99,235,.35)}
 
 /* =========================================================================
-   Chapter Breakdown study view
+   Chapter Breakdown study view — card-based, colorful
    ========================================================================= */
 .study-view{padding:10px 0}
-.study-na{color:#888;font-family:Arial;font-size:13px;padding:40px 0;text-align:center}
-.sv-title{font-size:1.3em;font-weight:bold;color:#1a1a2e;margin:0 0 20px;padding-bottom:12px;border-bottom:2px solid #8888cc}
-.sv-sec{margin-bottom:28px}
-.sv-sec h3{font-size:.95em;font-weight:bold;color:#3a3a5e;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
-.sv-text{font-size:.95em;line-height:1.7;color:#222;margin-bottom:10px}
-.sv-toggle{
-  background:none;border:1px solid #8888cc;color:#3a3a5e;padding:6px 14px;
-  border-radius:4px;font-size:12px;cursor:pointer;font-family:Arial;
+.study-na{color:var(--text-muted);font-size:15px;padding:50px 0;text-align:center}
+.sv-title{
+  font-size:1.5em;font-weight:700;color:var(--text-main);
+  margin:0 0 24px;padding:16px 20px;
+  background:var(--bg-card);border-radius:var(--radius);
+  box-shadow:var(--shadow);border-left:5px solid var(--vol1);
 }
-.sv-toggle:hover{background:#eeeef8;color:#1a1a2e}
+.sv-sec{
+  margin-bottom:24px;padding:20px;
+  background:var(--bg-card);border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+.sv-sec h3{
+  font-size:1.05em;font-weight:700;color:var(--vol5);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px;
+  padding-bottom:10px;border-bottom:2px solid #eee;
+}
+.sv-text{font-size:1em;line-height:1.8;color:var(--text-main);margin-bottom:12px}
+.sv-toggle{
+  background:var(--bg-warm);border:2px solid var(--vol6);color:var(--vol6);
+  padding:10px 20px;border-radius:var(--radius);font-size:14px;
+  cursor:pointer;font-family:var(--font-main);font-weight:700;
+  transition:all .15s;min-height:48px;
+}
+.sv-toggle:hover{background:var(--vol6);color:#fff}
 
-/* Key terms */
-.sv-term{padding:10px 0;border-bottom:1px solid #f0f0f4}
-.sv-term:last-child{border-bottom:none}
-.sv-tw{color:#1a1a2e;font-size:.95em}
-.sv-tp{color:#8888cc;font-size:.82em;font-style:italic}
-.sv-td{display:block;color:#444;font-size:.9em;line-height:1.6;margin-top:4px}
+/* Key terms — individual cards */
+.sv-term{
+  padding:16px;margin-bottom:10px;
+  background:var(--bg-warm);border-radius:10px;
+  border-left:4px solid var(--vol3);
+  transition:transform .15s;
+}
+.sv-term:hover{transform:translateX(4px)}
+.sv-tw{color:var(--text-main);font-size:1.05em;font-weight:700}
+.sv-tp{color:var(--vol6);font-size:.9em;margin-left:6px}
+.sv-td{display:block;color:var(--text-muted);font-size:.95em;line-height:1.7;margin-top:6px}
 
-/* FAQ */
-.sv-faq{padding:12px 0;border-bottom:1px solid #f0f0f4}
-.sv-faq:last-child{border-bottom:none}
-.sv-fq{font-weight:bold;color:#1a1a2e;font-size:.95em;margin-bottom:6px}
-.sv-fa{color:#333;font-size:.9em;line-height:1.65}
+/* FAQ — expandable cards */
+.sv-faq{
+  padding:16px;margin-bottom:10px;
+  background:var(--bg-warm);border-radius:10px;
+  border-left:4px solid var(--vol1);
+}
+.sv-fq{font-weight:700;color:var(--vol1);font-size:1em;margin-bottom:8px}
+.sv-fa{color:var(--text-main);font-size:.95em;line-height:1.75}
 
-/* Practice buttons row */
-.sv-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}
+/* Practice buttons — grid */
+.sv-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start}
 .sv-actions h3{width:100%}
+.sv-actions .study-btn{flex:1;min-width:200px}
 
 /* =========================================================================
    Voice reader panel — dark indigo, bottom of viewport
    ========================================================================= */
 #vr{
-  position:fixed;bottom:0;left:280px;right:0;height:48px;
-  background:#12121e;display:none;align-items:center;gap:4px;padding:0 8px;
-  z-index:1000;border-top:1px solid #2a2a3e;transition:left .3s;
+  position:fixed;bottom:0;left:290px;right:0;height:56px;
+  background:linear-gradient(135deg,#12121e 0%,#1a1a2e 100%);
+  display:none;align-items:center;gap:6px;padding:0 10px;
+  z-index:1000;border-top:2px solid var(--vol5);transition:left .3s;
 }
 #vr.on{display:flex}
 #vr button{
-  background:#3a3a5e;border:none;color:#e0e0f0;
-  padding:6px 10px;border-radius:4px;cursor:pointer;font-size:12px;font-family:Arial;
+  background:rgba(255,255,255,.1);border:none;color:#e0e0f0;
+  padding:10px 14px;border-radius:8px;cursor:pointer;font-size:14px;
+  font-family:var(--font-main);min-width:44px;min-height:44px;
+  transition:background .15s;
 }
-#vr button:hover{background:#5a5a8a;color:#fff}
+#vr button:hover{background:rgba(255,255,255,.2);color:#fff}
 #vs,#vc,#vm{
-  background:#2a2a3e;border:1px solid #3a3a5e;border-radius:4px;
-  color:#e0e0f0;padding:4px 2px;font-size:11px;font-family:Arial;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);
+  border-radius:8px;color:#e0e0f0;padding:6px 4px;font-size:13px;
+  font-family:var(--font-main);min-height:44px;
 }
 #vs{width:50px}
 #vc{flex:1;max-width:130px}
 #vm{width:66px}
-#vst{color:#8888a8;font-size:10px;white-space:nowrap;padding:0 4px;flex-shrink:0;margin-left:auto}
+#vst{color:#b8b8d8;font-size:12px;white-space:nowrap;padding:0 6px;flex-shrink:0;margin-left:auto;font-weight:700}
 
 /* =========================================================================
    Notes panel — per section, dark indigo, bottom of viewport
    ========================================================================= */
 #np{
-  position:fixed;bottom:0;left:280px;right:0;height:200px;
+  position:fixed;bottom:0;left:290px;right:0;height:200px;
   background:#12121e;display:none;flex-direction:column;
   z-index:999;border-top:1px solid #2a2a3e;transition:left .3s;
 }
@@ -203,62 +282,81 @@ p.sp{background:#fff9c4;border-radius:3px}
 #np-head{display:flex;align-items:center;padding:6px 10px;border-bottom:1px solid #2a2a3e;gap:6px}
 #np-lbl{color:#b8b8d8;font-size:11px;font-family:Arial;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #np-head button{
-  background:#3a3a5e;border:none;color:#e0e0f0;
-  padding:5px 11px;border-radius:3px;cursor:pointer;font-size:11px;font-family:Arial;white-space:nowrap;
+  background:rgba(255,255,255,.1);border:none;color:#e0e0f0;
+  padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;
+  font-family:var(--font-main);white-space:nowrap;min-height:40px;
+  transition:background .15s;
 }
-#np-head button:hover{background:#5a5a8a;color:#fff}
+#np-head button:hover{background:rgba(255,255,255,.2);color:#fff}
 #np-save{background:#2d5a2d!important;color:#aaffaa!important}
 #np-save:hover{background:#3d6a3d!important;color:#fff!important}
 #np-ta{
   flex:1;background:#1a1a2e;color:#e8e8f0;border:none;
-  padding:12px 16px;font-size:12px;font-family:Arial;resize:none;outline:none;line-height:1.5;
+  padding:14px 18px;font-size:14px;font-family:var(--font-main);
+  resize:none;outline:none;line-height:1.7;
 }
 
 /* =========================================================================
-   All-notes viewer — takes over main area, white background
+   All-notes viewer
    ========================================================================= */
 #nv{
-  position:fixed;top:48px;left:280px;right:0;bottom:0;
-  background:#ffffff;z-index:800;display:none;overflow-y:auto;
-  padding:24px 32px;transition:left .3s;
+  position:fixed;top:54px;left:290px;right:0;bottom:0;
+  background:var(--bg-warm);z-index:800;display:none;overflow-y:auto;
+  padding:28px 32px;transition:left .3s;
 }
 #nv.on{display:block}
 #nv h2{
-  font-size:15px;font-family:Arial;color:#1a1a2e;
-  margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid #ddd;
+  font-size:1.3em;font-family:var(--font-main);font-weight:700;color:var(--text-main);
+  margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #ddd;
 }
 .ni{
-  background:#f6f6fa;border:1px solid #e0e0e8;border-radius:6px;
-  padding:12px 14px;margin-bottom:12px;
+  background:var(--bg-card);border:none;border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:16px 18px;margin-bottom:14px;
+  border-left:4px solid var(--vol1);
 }
 .ni-lbl{
-  font-size:10px;color:#3a3a7e;font-family:Arial;
-  margin-bottom:6px;cursor:pointer;text-decoration:underline;font-weight:bold;
+  font-size:12px;color:var(--vol5);font-family:var(--font-main);
+  margin-bottom:8px;cursor:pointer;text-decoration:underline;font-weight:700;
 }
 .ni-txt{
-  font-size:12px;color:#1a1a2e;font-family:Arial;
-  line-height:1.5;white-space:pre-wrap;
+  font-size:14px;color:var(--text-main);font-family:var(--font-main);
+  line-height:1.7;white-space:pre-wrap;
 }
 .ni-del{
-  float:right;background:none;border:none;color:#c00;
-  cursor:pointer;font-size:14px;
+  float:right;background:none;border:none;color:#dc2626;
+  cursor:pointer;font-size:16px;min-width:44px;min-height:44px;
 }
+
+/* =========================================================================
+   Font toggle button (added dynamically by JS)
+   ========================================================================= */
+.font-toggle-btn{
+  position:fixed;bottom:16px;right:16px;
+  background:var(--vol5);color:#fff;border:none;
+  width:52px;height:52px;border-radius:50%;
+  font-size:14px;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 16px rgba(124,58,237,.3);
+  z-index:1100;transition:transform .15s;
+  font-family:var(--font-main);
+}
+.font-toggle-btn:hover{transform:scale(1.08)}
 
 /* =========================================================================
    Mobile
    ========================================================================= */
 @media(max-width:768px){
   #main{margin-left:0;padding:16px 14px 60px}
-  #sb{transform:translateX(-280px)}
+  #sb{transform:translateX(-290px)}
   #sb.m{transform:translateX(0)}
   #home{margin:-16px -14px -60px -14px}
-  #home .logo{font-size:3em}
-  #home h1{font-size:1.3em}
+  #home .logo{font-size:3.5em}
+  #home h1{font-size:1.5em}
   #topnav a.lnk span.hide-mobile{display:none}
   #vr,#np,#nv{left:0!important}
+  .sv-actions .study-btn{min-width:auto;flex:1 1 100%}
 }
 
 /* Scrollbar */
-#sb::-webkit-scrollbar,#nv::-webkit-scrollbar{width:4px}
-#sb::-webkit-scrollbar-thumb{background:#3a3a5e;border-radius:2px}
-#nv::-webkit-scrollbar-thumb{background:#c0c0c8;border-radius:2px}
+#sb::-webkit-scrollbar,#nv::-webkit-scrollbar{width:5px}
+#sb::-webkit-scrollbar-thumb{background:#4a4a6e;border-radius:3px}
+#nv::-webkit-scrollbar-thumb{background:#b0b0c0;border-radius:3px}

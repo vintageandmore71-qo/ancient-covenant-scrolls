@@ -4,7 +4,7 @@
 // Pre-caches the shell AND every chapter JSON the study app references,
 // so every section works offline after the first online install.
 
-const CACHE = 'acr-study-v5';
+const CACHE = 'acr-study-v6';
 
 const SHELL = [
   './',
