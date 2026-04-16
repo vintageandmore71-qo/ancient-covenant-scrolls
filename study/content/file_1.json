@@ -1,0 +1,200 @@
+{
+  "id": "file_1",
+  "label": "Bereshit (Genesis) — Part 1 — Chapters 1–11",
+  "volume": 1,
+  "content_version": 1,
+  "summary_plain": "Bereshit Part 1 tells the story of how everything began. The Creator makes the heavens, the earth, and all living things in six days and rests on the seventh. The first humans, Adam and Chavah, live in a garden called Eden. They are given one rule: don't eat from the tree of the knowledge of good and evil. They break the rule, and everything changes. Their sons Qa'in and Hevel bring offerings to The Creator; Qa'in kills Hevel out of jealousy. Generations pass and the earth fills with violence. One man, Chanokh, walks so closely with The Creator that he is taken away without dying. Then comes Noach — his family is the only one saved when The Creator sends a great flood to cleanse the earth. After the flood The Creator promises never to destroy the world by water again, marking the promise with a rainbow. Finally, humanity builds a great tower at Bavel, but The Creator scatters them by confusing their languages.",
+  "summary_scholarly": "Bereshit chapters 1 through 11 constitute the primordial history — the protohistory of the Hebrew scriptures, tracing the arc from cosmogony to the dispersion of the nations at Bavel. The ACR presentation draws primarily from Dead Sea Scrolls witnesses (4QGen-a through 4QGen-j and related Cave 4 manuscripts), supplemented by the Ethiopian Orit Ge'ez as a parallel primary witness, with the Masoretic Text referenced only for variant comparison in the end-of-chapter notes. Notable distinctions from the Masoretic tradition include the preservation of personal names in their original Hebrew forms (Qa'in, Hevel, Chanokh, Metushelakh, Noach), the retention of YHWH / 𐤉𐤄𐤅𐤄 and 'The Creator' without substitute titles, and several chronological readings consistent with the Samaritan and Septuagint traditions. The Chanokh narrative in chapter 5 ('he walked with The Creator and was not, for The Creator took him') prefigures the full Enochic corpus in ACR Volume 6. The flood narrative in chapters 6 through 9 shows clear intertextual links with Jubilees (Volume 7) and the Book of the Watchers (Volume 6, Part 1). The table of nations in chapter 10 and the Bavel episode in chapter 11 serve as the literary hinge into the Abrahamic cycle that begins in Part 2.",
+  "key_terms": [
+    {
+      "term": "Bereshit",
+      "phonetic": "Beh-reh-SHEET",
+      "definition": "Hebrew for 'in the beginning'. The first word of Genesis and the traditional Hebrew name for the whole book."
+    },
+    {
+      "term": "Tohu va-Vohu",
+      "phonetic": "TOH-hoo vah-VOH-hoo",
+      "definition": "'Formless and void' (1:2). Describes the primordial state of the earth before the six days of creation."
+    },
+    {
+      "term": "Ruach",
+      "phonetic": "ROO-akh",
+      "definition": "Spirit or breath. 'The Spirit of The Creator was hovering over the face of the waters' (1:2)."
+    },
+    {
+      "term": "Adam",
+      "phonetic": "ah-DAHM",
+      "definition": "The first human. The name shares a root with adamah, the Hebrew word for ground or earth — the human is formed from the dust of the ground."
+    },
+    {
+      "term": "Chavah (Eve)",
+      "phonetic": "khah-VAH",
+      "definition": "Adam's counterpart, named by Adam in chapter 3. The name means 'living' or 'mother of all living'."
+    },
+    {
+      "term": "Qa'in and Hevel",
+      "phonetic": "KAH-yin and HEH-vel",
+      "definition": "Adam and Chavah's first two sons (chapter 4). Qa'in murdered Hevel after The Creator received their offerings differently. Known in English as Cain and Abel."
+    },
+    {
+      "term": "Chanokh",
+      "phonetic": "HHA-nokh",
+      "definition": "The seventh from Adam in the line of Shet. 'He walked with The Creator and was not, for The Creator took him' (5:24). His full story is expanded in the Book of 1 Enoch — ACR Volume 6, Chanokh Parts 1 through 3."
+    },
+    {
+      "term": "Metushelakh",
+      "phonetic": "meh-too-SHEH-lakh",
+      "definition": "Chanokh's son, recorded as living 969 years — the longest lifespan in the antediluvian genealogy. Known in English as Methuselah."
+    },
+    {
+      "term": "Noach",
+      "phonetic": "NOH-akh",
+      "definition": "The patriarch of the flood narrative. Righteous in his generation; the ancestor of all humanity after the flood. Known in English as Noah."
+    },
+    {
+      "term": "Bavel",
+      "phonetic": "BAH-vel",
+      "definition": "The city and tower (chapter 11) where The Creator confused the languages and scattered humanity. The Hebrew name plays on the word balal — 'to confuse'. Known in English as Babel (and historically as Babylon)."
+    }
+  ],
+  "fill_blank": [
+    {
+      "ref": "1:1",
+      "prompt": "In the beginning The Creator created the ______ and the earth.",
+      "answer": "heavens"
+    },
+    {
+      "ref": "1:2",
+      "prompt": "The earth was without form and ______, and darkness was over the face of the deep.",
+      "answer": "void"
+    },
+    {
+      "ref": "1:3",
+      "prompt": "And The Creator said: Let there be ______, and there was ______.",
+      "answer": "light"
+    },
+    {
+      "ref": "1:27",
+      "prompt": "So The Creator created man in his own ______.",
+      "answer": "image"
+    },
+    {
+      "ref": "2:7",
+      "prompt": "The Creator formed the man of dust from the ground and breathed into his nostrils the breath of ______.",
+      "answer": "life"
+    },
+    {
+      "ref": "4:9",
+      "prompt": "Am I my brother's ______?",
+      "answer": "keeper"
+    },
+    {
+      "ref": "5:24",
+      "prompt": "Chanokh walked with The Creator, and he was ______, for The Creator took him.",
+      "answer": "not"
+    },
+    {
+      "ref": "7:11",
+      "prompt": "On that day all the ______ of the great deep burst forth, and the windows of the heavens were opened.",
+      "answer": "fountains"
+    },
+    {
+      "ref": "9:13",
+      "prompt": "I have set my ______ in the cloud, and it shall be for a sign of the covenant between me and the earth.",
+      "answer": "bow"
+    },
+    {
+      "ref": "11:9",
+      "prompt": "Therefore its name was called Bavel, because there The Creator confused the ______ of all the earth.",
+      "answer": "language"
+    }
+  ],
+  "multiple_choice": [
+    {
+      "ref": "1:5",
+      "question": "On which day did The Creator separate the light from the darkness?",
+      "options": ["The first day", "The second day", "The third day", "The sixth day"],
+      "correct": 0
+    },
+    {
+      "ref": "1:10",
+      "question": "What did The Creator call the dry land?",
+      "options": ["Sky", "Ground", "Earth", "Soil"],
+      "correct": 2
+    },
+    {
+      "ref": "2:17",
+      "question": "Which tree was Adam forbidden to eat from?",
+      "options": ["The tree of life", "The tree of the knowledge of good and evil", "The tree of wisdom", "The olive tree"],
+      "correct": 1
+    },
+    {
+      "ref": "4:1–2",
+      "question": "Who were Adam and Chavah's first two sons?",
+      "options": ["Shet and Enosh", "Qa'in and Hevel", "Noach and Yapheth", "Chanokh and Metushelakh"],
+      "correct": 1
+    },
+    {
+      "ref": "5:23–24",
+      "question": "Which patriarch lived 365 years and was taken by The Creator without dying?",
+      "options": ["Metushelakh", "Adam", "Chanokh", "Lamekh"],
+      "correct": 2
+    },
+    {
+      "ref": "7:2",
+      "question": "How many of each kind of clean animal did Noach take onto the ark?",
+      "options": ["Two", "Seven pairs", "Three", "Ten"],
+      "correct": 1
+    },
+    {
+      "ref": "7:12",
+      "question": "How long did the rain of the flood fall on the earth?",
+      "options": ["Thirty days", "Forty days and forty nights", "One hundred days", "A full year"],
+      "correct": 1
+    },
+    {
+      "ref": "9:13",
+      "question": "What did The Creator set in the cloud as the sign of his covenant with Noach?",
+      "options": ["A star", "A dove", "A rainbow", "An olive branch"],
+      "correct": 2
+    },
+    {
+      "ref": "6:4",
+      "question": "How does the text describe the Nephilim?",
+      "options": ["The descendants of Qa'in", "The mighty men of old, men of renown", "Angels who remained faithful", "Another name for Noach's sons"],
+      "correct": 1
+    },
+    {
+      "ref": "11:7–8",
+      "question": "At Bavel, what did The Creator do to stop the building of the tower?",
+      "options": ["Destroyed it with fire", "Confused their language", "Sent another flood", "Struck the builders blind"],
+      "correct": 1
+    }
+  ],
+  "faq": [
+    {
+      "question": "Why does the ACR say 'The Creator' instead of 'God'?",
+      "answer": "The ACR follows the Dead Sea Scrolls primary witnesses in preserving the distinction between YHWH (the personal name) and Elohim (rendered 'The Creator' rather than the generic English 'God'). This keeps the reader close to the vocabulary of the original Hebrew text and avoids overlaying later theological tradition onto the scripture."
+    },
+    {
+      "question": "Why are the names spelled differently — Qa'in, Hevel, Chanokh, Noach — from what I'm used to?",
+      "answer": "The ACR keeps personal names in their original Hebrew form throughout. Qa'in is Cain, Hevel is Abel, Chanokh is Enoch, Noach is Noah. The anglicized forms you may know come to us through Greek and Latin transliteration; the Hebrew originals are preserved here so the names can be read and pronounced as they appear in the manuscripts themselves."
+    },
+    {
+      "question": "Who was Chanokh and why is he important?",
+      "answer": "Chanokh (Enoch) was the seventh patriarch from Adam in the line of Shet. The text says he 'walked with The Creator' — a unique phrase repeated only of Noach and a few later figures — and that he 'was not, for The Creator took him' (5:24). Unlike every other patriarch in the genealogy he does not die. The full story of Chanokh is preserved in the Ethiopian Book of 1 Enoch, which the ACR reproduces as Volume 6 (Chanokh Parts 1 through 3)."
+    },
+    {
+      "question": "Does the ACR use the same chronology as the Masoretic Bible for the pre-flood ages?",
+      "answer": "The ACR presents the lifespans as they appear in its primary manuscript witnesses. For some generations the Masoretic, Samaritan, and Septuagint traditions differ by tens or hundreds of years. Those variants are noted in the comparative notes at the end of each chapter rather than changing the main text."
+    },
+    {
+      "question": "What are the 'Nephilim' in chapter 6?",
+      "answer": "Chapter 6:4 introduces the Nephilim ('fallen ones' or 'giants') as figures on the earth 'in those days, and also afterward'. The text describes them as 'the mighty men of old, men of renown'. The narrative surrounding them — the union of 'the sons of The Creator' with 'the daughters of men' — is greatly expanded in the Book of 1 Enoch (ACR Volume 6, Part 1: Book of Watchers), which treats the Nephilim as offspring of the Watchers and provides the backstory referenced only briefly in Bereshit."
+    },
+    {
+      "question": "What does the scattering at Bavel mean?",
+      "answer": "The tower-of-Bavel story in chapter 11 follows the table of nations in chapter 10. It explains how a single human language and settlement was broken up into the many peoples, languages, and geographies already named in the preceding chapter. The ACR renders 'Babel' as Bavel — its Hebrew form — and ties the narrative to the word balal, 'to confuse': a wordplay in the original Hebrew between the place name and the verb for what The Creator does to the language of humanity."
+    }
+  ]
+}
