@@ -96,38 +96,111 @@ function go(fid) {
   if (i < 0) return;
   cur = i;
 
-  var content = document.getElementById('content');
-  content.innerHTML = '<div class="loading">Loading ' + LBL[i] + '…</div>';
-
+  // Silently fetch and cache the chapter data for quiz engines to use later,
+  // but never display raw text — this is a study app, not a reader.
   fetch('../data/' + fid + '.json')
-    .then(function (r) {
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
-    })
-    .then(function (d) {
-      content.innerHTML =
-        '<div class="study-banner"><button class="study-btn sb-pri" id="b-study-sec">' +
-        '\u{1F4D6} Study this section</button></div>' + d.html;
-      applyFontSize();
-      var bStudy = document.getElementById('b-study-sec');
-      if (bStudy) bStudy.addEventListener('click', function () { showStudyMode(fid); });
-      document.getElementById('tb').textContent = LBL[i];
-      var secs = document.querySelectorAll('.sec');
-      for (var j = 0; j < secs.length; j++) {
-        secs[j].classList.toggle('on', secs[j].getAttribute('data-id') === fid);
-      }
-      try { localStorage.setItem('acr_study_last', fid); } catch (e) {}
-      // Load any saved note for this section into the notes textarea
-      document.getElementById('np-lbl').textContent = 'Notes — ' + LBL[i];
-      document.getElementById('np-ta').value = getNote(fid) || '';
-      if (window.innerWidth <= 768) {
-        document.getElementById('sb').classList.remove('m');
-      }
-      window.scrollTo(0, 0);
-    })
-    .catch(function (e) {
-      content.innerHTML = '<div class="err">Could not load section: ' + e.message + '</div>';
-    });
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) { if (d) CHAPTER_CACHE[fid] = d; })
+    .catch(function () {});
+
+  // Also pre-load curated content
+  loadContent(fid);
+
+  // Render the activity card grid
+  var h = '<div class="activity-grid-header">' + LBL[i] + '</div>';
+  h += '<div class="activity-grid">';
+  h += actCard('\u{1F4D6}', 'Chapter Summary', '#2563eb', 'summary', fid);
+  h += actCard('\u{1F9E9}', 'Fill in the Blank', '#059669', 'filblank', fid);
+  h += actCard('\u270F\uFE0F', 'Multiple Choice', '#7c3aed', 'mc', fid);
+  h += actCard('\u{1F0CF}', 'Flashcards', '#d97706', 'flash', fid);
+  h += actCard('\u{1F4DA}', 'Key Terms', '#0891b2', 'terms', fid);
+  h += actCard('\u2753', 'FAQ', '#ea580c', 'faq', fid);
+  h += actCard('\u{1F9E0}', 'Memory Match', '#dc2626', 'memory', fid);
+  h += actCard('\u{1F50A}', 'Listen & Learn', '#4f46e5', 'listen', fid);
+  h += actCard('\u{1F3C6}', 'Progress', '#b8860b', 'progress', fid);
+  h += '</div>';
+
+  document.getElementById('content').innerHTML = h;
+  document.getElementById('tb').textContent = LBL[i];
+  var secs = document.querySelectorAll('.sec');
+  for (var j = 0; j < secs.length; j++) {
+    secs[j].classList.toggle('on', secs[j].getAttribute('data-id') === fid);
+  }
+  try { localStorage.setItem('acr_study_last', fid); } catch (e) {}
+  document.getElementById('np-lbl').textContent = 'Notes \u2014 ' + LBL[i];
+  document.getElementById('np-ta').value = getNote(fid) || '';
+  if (window.innerWidth <= 768) {
+    document.getElementById('sb').classList.remove('m');
+  }
+  window.scrollTo(0, 0);
+
+  // Wire up activity card clicks
+  var cards = document.querySelectorAll('.act-card');
+  for (var c = 0; c < cards.length; c++) {
+    cards[c].addEventListener('click', (function (mode, f) {
+      return function () { openActivity(mode, f); };
+    })(cards[c].getAttribute('data-mode'), fid));
+  }
+}
+
+var CHAPTER_CACHE = {};
+
+function actCard(icon, label, color, mode, fid) {
+  return '<div class="act-card" data-mode="' + mode + '" style="background:' + color + '">' +
+    '<div class="act-icon">' + icon + '</div>' +
+    '<div class="act-label">' + label + '</div>' +
+    '</div>';
+}
+
+function openActivity(mode, fid) {
+  if (mode === 'summary') { showStudyMode(fid); return; }
+  if (mode === 'terms') { showTermsMode(fid); return; }
+  if (mode === 'faq') { showFaqMode(fid); return; }
+  // Stub for modes not yet built
+  document.getElementById('content').innerHTML =
+    '<div class="study-view"><div class="sv-sec">' +
+    '<h3>' + mode.charAt(0).toUpperCase() + mode.slice(1) + ' Mode</h3>' +
+    '<p class="study-na">This activity is coming soon.</p>' +
+    '<button class="study-btn" id="b-back-grid">Back to activities</button>' +
+    '</div></div>';
+  document.getElementById('b-back-grid').addEventListener('click', function () { go(fid); });
+}
+
+// Split-out views for terms and FAQ so they can be opened from the grid
+function showTermsMode(fid) {
+  loadContent(fid).then(function (data) {
+    if (!data) { openActivity('stub', fid); return; }
+    var h = '<div class="study-view">';
+    h += '<h2 class="sv-title" style="border-left-color:var(--vol6)">Key Terms \u2014 ' + data.label + '</h2>';
+    h += '<div class="sv-sec">';
+    for (var t = 0; t < data.key_terms.length; t++) {
+      var k = data.key_terms[t];
+      h += '<div class="sv-term"><strong class="sv-tw">' + k.term + '</strong> ';
+      h += '<span class="sv-tp">(' + k.phonetic + ')</span> ';
+      h += '<span class="sv-td">' + k.definition + '</span></div>';
+    }
+    h += '</div><button class="study-btn" id="b-back-grid">Back to activities</button></div>';
+    document.getElementById('content').innerHTML = h;
+    document.getElementById('b-back-grid').addEventListener('click', function () { go(fid); });
+    window.scrollTo(0, 0);
+  });
+}
+
+function showFaqMode(fid) {
+  loadContent(fid).then(function (data) {
+    if (!data) { openActivity('stub', fid); return; }
+    var h = '<div class="study-view">';
+    h += '<h2 class="sv-title" style="border-left-color:var(--vol1)">FAQ \u2014 ' + data.label + '</h2>';
+    h += '<div class="sv-sec">';
+    for (var f = 0; f < data.faq.length; f++) {
+      h += '<div class="sv-faq"><div class="sv-fq">' + data.faq[f].question + '</div>';
+      h += '<div class="sv-fa">' + data.faq[f].answer + '</div></div>';
+    }
+    h += '</div><button class="study-btn" id="b-back-grid">Back to activities</button></div>';
+    document.getElementById('content').innerHTML = h;
+    document.getElementById('b-back-grid').addEventListener('click', function () { go(fid); });
+    window.scrollTo(0, 0);
+  });
 }
 
 function goHome() {
@@ -202,7 +275,7 @@ function showStudyMode(fid) {
     h += '<button class="study-btn sb-pri" disabled>Multiple choice (' + data.multiple_choice.length + ')</button>';
     h += '<button class="study-btn sb-pri" disabled>Flashcards (coming soon)</button>';
     h += '</div>';
-    h += '<button class="study-btn" id="b-back-read">Back to reading</button>';
+    h += '<button class="study-btn" id="b-back-read">Back to activities</button>';
     h += '</div>';
     document.getElementById('content').innerHTML = h;
     document.getElementById('tb').textContent = 'Study \u2014 ' + LBL[i];
@@ -213,6 +286,7 @@ function showStudyMode(fid) {
       else { p.style.display = 'none'; d.style.display = ''; this.textContent = 'Show plain summary'; }
     });
     document.getElementById('b-back-read').addEventListener('click', function () { go(fid); });
+    window.scrollTo(0, 0);
     window.scrollTo(0, 0);
   });
 }
