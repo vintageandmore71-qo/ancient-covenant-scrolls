@@ -611,7 +611,7 @@ function showMemoryMatch(fid) {
 
     var flippedA = null, flippedB = null;
     var matched = 0, attempts = 0, locked = false;
-    var tileColors = ['#2563eb', '#dc2626', '#059669', '#7c3aed', '#d97706', '#0891b2'];
+    var tileColors = ['#ef4444', '#f97316', '#e91e90', '#16a34a', '#2563eb', '#ca8a04'];
 
     function render() {
       var h = '<div class="mm-view">';
