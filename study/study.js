@@ -205,12 +205,26 @@ function showFaqMode(fid) {
 }
 
 // ---- Minimal TTS helper (full voice reader logic comes later) ----
+var ttsVoices = [];
+function initTTS() {
+  if (!window.speechSynthesis) return;
+  ttsVoices = window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged = function () {
+    ttsVoices = window.speechSynthesis.getVoices();
+  };
+}
+initTTS();
+setTimeout(initTTS, 500);
+setTimeout(initTTS, 2000);
+
 function speakText(text) {
   if (!window.speechSynthesis) return;
+  try { window.speechSynthesis.resume(); } catch (e) {}
   try { window.speechSynthesis.cancel(); } catch (e) {}
   var u = new SpeechSynthesisUtterance(text);
   u.rate = 1; u.lang = 'en-US'; u.volume = 1;
-  try { window.speechSynthesis.speak(u); } catch (e) {}
+  if (ttsVoices.length > 0) u.voice = ttsVoices[0];
+  window.speechSynthesis.speak(u);
 }
 
 // ---- Fill in the Blank (cloze deletion) quiz ----
