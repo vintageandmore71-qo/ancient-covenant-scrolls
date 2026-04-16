@@ -210,9 +210,33 @@ var ttsVoices = [];
 function initTTS() {
   if (!window.speechSynthesis) return;
   ttsVoices = window.speechSynthesis.getVoices();
+  loadVoiceSelector();
   window.speechSynthesis.onvoiceschanged = function () {
     ttsVoices = window.speechSynthesis.getVoices();
+    loadVoiceSelector();
   };
+}
+
+function loadVoiceSelector() {
+  var vc = document.getElementById('vc');
+  if (!vc || !ttsVoices.length) return;
+  var saved = localStorage.getItem('acr_study_voice');
+  vc.innerHTML = '';
+  var enh = [], siri = [], other = [];
+  ttsVoices.forEach(function (v, i) {
+    if (v.name.indexOf('Enhanced') >= 0) enh.push({ v: v, i: i });
+    else if (v.name.indexOf('Siri') >= 0) siri.push({ v: v, i: i });
+    else other.push({ v: v, i: i });
+  });
+  enh.concat(siri).concat(other).forEach(function (item) {
+    var o = document.createElement('option');
+    o.value = item.i;
+    o.textContent = item.v.name.replace('(Enhanced)', ' \u2605').replace('(Compact)', '').trim();
+    if (saved && item.v.name === saved) o.selected = true;
+    else if (!saved && item.v.name.indexOf('Enhanced') >= 0 && !vc.querySelector('[selected]')) o.selected = true;
+    vc.appendChild(o);
+  });
+  if (!vc.value && vc.options.length) vc.options[0].selected = true;
 }
 initTTS();
 setTimeout(initTTS, 500);
@@ -681,7 +705,10 @@ function bindUI() {
   document.getElementById('b-st').addEventListener('click', stopVoice);
   document.getElementById('b-pv').addEventListener('click', function () {});
   document.getElementById('vs').addEventListener('change', function () {});
-  document.getElementById('vc').addEventListener('change', function () {});
+  document.getElementById('vc').addEventListener('change', function () {
+    var v = ttsVoices[parseInt(this.value)];
+    if (v) { try { localStorage.setItem('acr_study_voice', v.name); } catch (e) {} }
+  });
   document.getElementById('vm').addEventListener('change', function () {});
 }
 
