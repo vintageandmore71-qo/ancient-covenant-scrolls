@@ -159,6 +159,7 @@ function openActivity(mode, fid) {
   if (mode === 'filblank') { showFillBlank(fid); return; }
   if (mode === 'mc') { showMC(fid); return; }
   if (mode === 'flash') { showFlashcards(fid); return; }
+  if (mode === 'memory') { showMemoryMatch(fid); return; }
   // Stub for modes not yet built
   document.getElementById('content').innerHTML =
     '<div class="study-view"><div class="sv-sec">' +
@@ -589,6 +590,119 @@ function showFlashcards(fid) {
     }
 
     renderCard();
+  });
+}
+
+// ---- Memory Match — flip cards, find matching pairs ----
+function showMemoryMatch(fid) {
+  loadContent(fid).then(function (data) {
+    if (!data || !data.key_terms || data.key_terms.length < 4) {
+      openActivity('stub', fid); return;
+    }
+    // Use first 6 terms for a 4x3 grid (6 pairs = 12 cards)
+    var terms = data.key_terms.slice(0, 6);
+    var tiles = [];
+    terms.forEach(function (t, i) {
+      tiles.push({ id: i, side: 'term', text: t.term, pairId: i });
+      tiles.push({ id: i, side: 'def', text: t.definition.split('.')[0] + '.', pairId: i });
+    });
+    tiles = shuffle(tiles);
+
+    var flippedA = null, flippedB = null;
+    var matched = 0, attempts = 0, locked = false;
+    var tileColors = ['#2563eb', '#dc2626', '#059669', '#7c3aed', '#d97706', '#0891b2'];
+
+    function render() {
+      var h = '<div class="mm-view">';
+      h += '<div class="mm-header">Match the term to its meaning</div>';
+      h += '<div class="mm-stats">Pairs: ' + matched + '/' + terms.length +
+        ' &nbsp; Attempts: ' + attempts + '</div>';
+      h += '<div class="mm-grid">';
+      for (var i = 0; i < tiles.length; i++) {
+        var t = tiles[i];
+        h += '<div class="mm-tile" data-idx="' + i + '">';
+        h += '<div class="mm-tile-inner">';
+        h += '<div class="mm-tile-front">?</div>';
+        h += '<div class="mm-tile-back" style="background:' +
+          tileColors[t.pairId % 6] + '">' + t.text + '</div>';
+        h += '</div></div>';
+      }
+      h += '</div>';
+      h += '<button class="study-btn" id="b-mm-back" style="margin-top:20px">Back to activities</button>';
+      h += '</div>';
+
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-mm-back').addEventListener('click', function () { go(fid); });
+
+      var tileEls = document.querySelectorAll('.mm-tile');
+      for (var i = 0; i < tileEls.length; i++) {
+        tileEls[i].addEventListener('click', function () {
+          if (locked) return;
+          var idx = parseInt(this.getAttribute('data-idx'));
+          var tile = tiles[idx];
+          if (this.classList.contains('mm-matched') || this.classList.contains('mm-open')) return;
+
+          this.classList.add('mm-open');
+          speakText(tile.text);
+
+          if (flippedA === null) {
+            flippedA = { idx: idx, tile: tile, el: this };
+          } else {
+            flippedB = { idx: idx, tile: tile, el: this };
+            attempts++;
+            locked = true;
+
+            if (flippedA.tile.pairId === flippedB.tile.pairId &&
+                flippedA.tile.side !== flippedB.tile.side) {
+              // Match!
+              flippedA.el.classList.add('mm-matched');
+              flippedB.el.classList.add('mm-matched');
+              matched++;
+              updateStats();
+              flippedA = null; flippedB = null;
+              locked = false;
+              if (matched === terms.length) {
+                setTimeout(showWin, 600);
+              }
+            } else {
+              // No match — flip back after delay
+              var elA = flippedA.el, elB = flippedB.el;
+              setTimeout(function () {
+                elA.classList.remove('mm-open');
+                elB.classList.remove('mm-open');
+                flippedA = null; flippedB = null;
+                locked = false;
+                updateStats();
+              }, 1000);
+            }
+          }
+        });
+      }
+    }
+
+    function updateStats() {
+      var s = document.querySelector('.mm-stats');
+      if (s) s.innerHTML = 'Pairs: ' + matched + '/' + terms.length +
+        ' &nbsp; Attempts: ' + attempts;
+    }
+
+    function showWin() {
+      var h = '<div class="cloze-results">';
+      h += '<div class="cr-emoji">\u{1F3C6}</div>';
+      h += '<div class="cr-score">All ' + terms.length + ' pairs matched!</div>';
+      h += '<div class="cr-pct">in ' + attempts + ' attempts</div>';
+      h += '<div class="cr-msg">' + (attempts <= terms.length + 2 ? 'Amazing memory!' :
+        attempts <= terms.length * 2 ? 'Well done!' : 'Keep practicing!') + '</div>';
+      h += '<div class="cr-btns">';
+      h += '<button class="study-btn sb-pri" id="b-mm-retry">\u{1F504} Play Again</button>';
+      h += '<button class="study-btn" id="b-mm-done">Back to activities</button>';
+      h += '</div></div>';
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-mm-retry').addEventListener('click', function () { showMemoryMatch(fid); });
+      document.getElementById('b-mm-done').addEventListener('click', function () { go(fid); });
+    }
+
+    render();
   });
 }
 
