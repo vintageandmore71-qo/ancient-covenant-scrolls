@@ -578,6 +578,60 @@ body.font-dyslexic .fc-back{font-family:var(--font-dyslexic);line-height:2.0}
 .cr-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
 
 /* =========================================================================
+   Progress & Stats view
+   ========================================================================= */
+.prog-view{padding:10px 0}
+.prog-card{
+  background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:24px 20px;margin-bottom:16px;
+}
+.prog-level{text-align:center;border-left:6px solid #6b7280}
+.prog-level-icon{font-size:4em;margin-bottom:8px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.15))}
+.prog-level-name{font-size:1.5em;font-weight:700;color:var(--text-main);margin-bottom:4px}
+.prog-xp{font-size:1.1em;color:var(--vol5);font-weight:700;margin-bottom:12px}
+.prog-bar-wrap{
+  background:#e5e7eb;border-radius:10px;height:14px;overflow:hidden;margin-bottom:8px;
+}
+.prog-bar{
+  height:100%;border-radius:10px;
+  background:linear-gradient(90deg,var(--vol1),var(--vol5));
+  transition:width .5s ease;
+}
+.prog-next{font-size:.9em;color:var(--text-muted);font-weight:700}
+.prog-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+@media(max-width:500px){.prog-stats{grid-template-columns:repeat(2,1fr)}}
+.prog-stat{
+  border-radius:var(--radius);color:#fff;text-align:center;
+  padding:16px 8px;box-shadow:0 3px 10px rgba(0,0,0,.12);
+}
+.ps-val{font-size:1.6em;font-weight:700}
+.ps-label{font-size:.75em;font-weight:700;opacity:.9;margin-top:4px;letter-spacing:.04em}
+.prog-h3{font-size:1em;font-weight:700;color:var(--text-main);margin-bottom:14px;
+  padding-bottom:8px;border-bottom:2px solid #eee}
+.prog-road{
+  display:flex;align-items:center;gap:8px;padding:10px 12px;
+  border-radius:8px;margin-bottom:6px;font-size:.95em;color:var(--text-muted);
+}
+.prog-reached{background:var(--bg-warm);color:var(--text-main);font-weight:700}
+.prog-road-icon{font-size:1.4em}
+.prog-road-name{flex:1;font-weight:700}
+.prog-road-xp{font-size:.85em;color:var(--text-muted)}
+.prog-road-check{color:#059669;font-weight:700}
+.prog-session{
+  display:flex;align-items:center;gap:8px;padding:8px 0;
+  border-bottom:1px solid #f0f0f4;font-size:.9em;
+}
+.prog-session:last-child{border-bottom:none}
+.prog-ses-mode{
+  background:var(--vol5);color:#fff;padding:3px 8px;border-radius:6px;
+  font-size:.75em;font-weight:700;text-transform:uppercase;min-width:60px;text-align:center;
+}
+.prog-ses-label{flex:1;color:var(--text-main);font-weight:700}
+.prog-ses-score{color:var(--vol3);font-weight:700}
+.cr-xp{font-size:1.2em;color:var(--vol3);font-weight:700;margin-bottom:4px}
+.cr-level{font-size:1em;color:var(--text-muted);font-weight:700;margin-bottom:8px}
+
+/* =========================================================================
    Font toggle button (added dynamically by JS)
    ========================================================================= */
 .font-toggle-btn{

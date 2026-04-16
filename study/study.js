@@ -56,6 +56,72 @@ var nvop = false;
 
 document.documentElement.style.setProperty('--lh', lh);
 
+// ---- XP, Streak & Level system ----
+var LEVELS = [
+  { name: 'Seeker', icon: '\u{1F50D}', xp: 0 },
+  { name: 'Scholar', icon: '\u{1F4DC}', xp: 100 },
+  { name: 'Sage', icon: '\u{1F9D9}', xp: 500 },
+  { name: 'Keeper of the Scroll', icon: '\u{1F3C6}', xp: 1500 }
+];
+
+function getStats() {
+  try { return JSON.parse(localStorage.getItem('acr_study_stats') || '{}'); }
+  catch (e) { return {}; }
+}
+
+function saveStats(s) {
+  try { localStorage.setItem('acr_study_stats', JSON.stringify(s)); } catch (e) {}
+}
+
+function addXP(amount) {
+  var s = getStats();
+  s.xp = (s.xp || 0) + amount;
+  s.totalAnswered = (s.totalAnswered || 0) + 1;
+  updateStreak(s);
+  saveStats(s);
+  return s;
+}
+
+function recordSession(fid, mode, score, total) {
+  var s = getStats();
+  if (!s.sessions) s.sessions = [];
+  s.sessions.push({
+    fid: fid, mode: mode, score: score, total: total,
+    date: new Date().toISOString().slice(0, 10)
+  });
+  if (s.sessions.length > 100) s.sessions = s.sessions.slice(-100);
+  var xpEarned = Math.round(score * 10);
+  s.xp = (s.xp || 0) + xpEarned;
+  updateStreak(s);
+  saveStats(s);
+  return xpEarned;
+}
+
+function updateStreak(s) {
+  var today = new Date().toISOString().slice(0, 10);
+  if (s.lastStudyDate === today) return;
+  if (!s.lastStudyDate) {
+    s.streak = 1;
+  } else {
+    var last = new Date(s.lastStudyDate);
+    var now = new Date(today);
+    var diff = Math.round((now - last) / 86400000);
+    s.streak = diff === 1 ? (s.streak || 0) + 1 : 1;
+  }
+  s.lastStudyDate = today;
+  if (!s.bestStreak || s.streak > s.bestStreak) s.bestStreak = s.streak;
+}
+
+function getLevel(xp) {
+  var lvl = LEVELS[0];
+  for (var i = LEVELS.length - 1; i >= 0; i--) {
+    if (xp >= LEVELS[i].xp) { lvl = LEVELS[i]; break; }
+  }
+  var nextIdx = LEVELS.indexOf(lvl) + 1;
+  var next = nextIdx < LEVELS.length ? LEVELS[nextIdx] : null;
+  return { current: lvl, next: next };
+}
+
 function buildTOC() {
   var sb = document.getElementById('sb');
   var intro = document.createElement('div');
@@ -161,6 +227,7 @@ function openActivity(mode, fid) {
   if (mode === 'flash') { showFlashcards(fid); return; }
   if (mode === 'memory') { showMemoryMatch(fid); return; }
   if (mode === 'listen') { showListenLearn(fid); return; }
+  if (mode === 'progress') { showProgress(fid); return; }
   // Stub for modes not yet built
   document.getElementById('content').innerHTML =
     '<div class="study-view"><div class="sv-sec">' +
@@ -399,12 +466,18 @@ function showFillBlank(fid) {
 
     function showResults() {
       var pct = Math.round(score / questions.length * 100);
+      var xpEarned = recordSession(fid, 'filblank', score, questions.length);
+      var stats = getStats();
+      var lvl = getLevel(stats.xp || 0);
       var emoji = pct >= 80 ? '\u{1F3C6}' : pct >= 60 ? '\u{1F31F}' : '\u{1F4AA}';
       var msg = pct >= 80 ? 'Outstanding!' : pct >= 60 ? 'Good work!' : 'Keep studying!';
       var h = '<div class="cloze-results">';
       h += '<div class="cr-emoji">' + emoji + '</div>';
       h += '<div class="cr-score">' + score + ' / ' + questions.length + '</div>';
       h += '<div class="cr-pct">' + pct + '%</div>';
+      h += '<div class="cr-xp">+' + xpEarned + ' XP earned</div>';
+      h += '<div class="cr-level">' + lvl.current.icon + ' ' + lvl.current.name +
+        ' \u2014 ' + (stats.xp || 0) + ' XP total</div>';
       h += '<div class="cr-msg">' + msg + '</div>';
       h += '<div class="cr-btns">';
       h += '<button class="study-btn sb-pri" id="b-cloze-retry">\u{1F504} Try Again</button>';
@@ -476,12 +549,18 @@ function showMC(fid) {
 
     function showResults() {
       var pct = Math.round(score / questions.length * 100);
+      var xpEarned = recordSession(fid, 'mc', score, questions.length);
+      var stats = getStats();
+      var lvl = getLevel(stats.xp || 0);
       var emoji = pct >= 80 ? '\u{1F3C6}' : pct >= 60 ? '\u{1F31F}' : '\u{1F4AA}';
       var msg = pct >= 80 ? 'Outstanding!' : pct >= 60 ? 'Good work!' : 'Keep studying!';
       var h = '<div class="cloze-results">';
       h += '<div class="cr-emoji">' + emoji + '</div>';
       h += '<div class="cr-score">' + score + ' / ' + questions.length + '</div>';
       h += '<div class="cr-pct">' + pct + '%</div>';
+      h += '<div class="cr-xp">+' + xpEarned + ' XP earned</div>';
+      h += '<div class="cr-level">' + lvl.current.icon + ' ' + lvl.current.name +
+        ' \u2014 ' + (stats.xp || 0) + ' XP total</div>';
       h += '<div class="cr-msg">' + msg + '</div>';
       h += '<div class="cr-btns">';
       h += '<button class="study-btn sb-pri" id="b-mc-retry">\u{1F504} Try Again</button>';
@@ -825,6 +904,86 @@ function showListenLearn(fid) {
   }
 
   renderVerse();
+}
+
+// ---- Progress & Stats view ----
+function showProgress(fid) {
+  var s = getStats();
+  var xp = s.xp || 0;
+  var streak = s.streak || 0;
+  var best = s.bestStreak || 0;
+  var total = s.totalAnswered || 0;
+  var lvl = getLevel(xp);
+  var sessions = s.sessions || [];
+
+  var h = '<div class="prog-view">';
+
+  // Level card
+  h += '<div class="prog-card prog-level" style="border-color:' +
+    (lvl.current.name === 'Keeper of the Scroll' ? '#b8860b' :
+     lvl.current.name === 'Sage' ? '#7c3aed' :
+     lvl.current.name === 'Scholar' ? '#2563eb' : '#6b7280') + '">';
+  h += '<div class="prog-level-icon">' + lvl.current.icon + '</div>';
+  h += '<div class="prog-level-name">' + lvl.current.name + '</div>';
+  h += '<div class="prog-xp">' + xp + ' XP</div>';
+  if (lvl.next) {
+    var pct = Math.min(100, Math.round((xp - lvl.current.xp) / (lvl.next.xp - lvl.current.xp) * 100));
+    h += '<div class="prog-bar-wrap"><div class="prog-bar" style="width:' + pct + '%"></div></div>';
+    h += '<div class="prog-next">' + (lvl.next.xp - xp) + ' XP to ' + lvl.next.icon + ' ' + lvl.next.name + '</div>';
+  } else {
+    h += '<div class="prog-next">Maximum level reached!</div>';
+  }
+  h += '</div>';
+
+  // Stats row
+  h += '<div class="prog-stats">';
+  h += '<div class="prog-stat" style="background:#ef4444"><div class="ps-val">' +
+    (streak > 0 ? '\u{1F525}' : '') + ' ' + streak + '</div><div class="ps-label">Day Streak</div></div>';
+  h += '<div class="prog-stat" style="background:#2563eb"><div class="ps-val">' +
+    best + '</div><div class="ps-label">Best Streak</div></div>';
+  h += '<div class="prog-stat" style="background:#059669"><div class="ps-val">' +
+    sessions.length + '</div><div class="ps-label">Sessions</div></div>';
+  h += '<div class="prog-stat" style="background:#7c3aed"><div class="ps-val">' +
+    total + '</div><div class="ps-label">Answered</div></div>';
+  h += '</div>';
+
+  // Level roadmap
+  h += '<div class="prog-card"><h3 class="prog-h3">Level Roadmap</h3>';
+  for (var i = 0; i < LEVELS.length; i++) {
+    var l = LEVELS[i];
+    var reached = xp >= l.xp;
+    h += '<div class="prog-road ' + (reached ? 'prog-reached' : '') + '">';
+    h += '<span class="prog-road-icon">' + l.icon + '</span> ';
+    h += '<span class="prog-road-name">' + l.name + '</span>';
+    h += '<span class="prog-road-xp">' + l.xp + ' XP</span>';
+    if (reached) h += ' <span class="prog-road-check">\u2714</span>';
+    h += '</div>';
+  }
+  h += '</div>';
+
+  // Recent sessions
+  if (sessions.length > 0) {
+    h += '<div class="prog-card"><h3 class="prog-h3">Recent Sessions</h3>';
+    var recent = sessions.slice(-8).reverse();
+    for (var r = 0; r < recent.length; r++) {
+      var rs = recent[r];
+      var ridx = IDS.indexOf(rs.fid);
+      var rlbl = ridx >= 0 ? LBL[ridx].split(' \u2014 ')[0] : rs.fid;
+      h += '<div class="prog-session">';
+      h += '<span class="prog-ses-mode">' + rs.mode + '</span> ';
+      h += '<span class="prog-ses-label">' + rlbl + '</span> ';
+      h += '<span class="prog-ses-score">' + rs.score + '/' + rs.total + '</span>';
+      h += '</div>';
+    }
+    h += '</div>';
+  }
+
+  h += '<button class="study-btn" id="b-prog-back" style="margin-top:16px">Back to activities</button>';
+  h += '</div>';
+
+  document.getElementById('content').innerHTML = h;
+  document.getElementById('b-prog-back').addEventListener('click', function () { go(fid); });
+  window.scrollTo(0, 0);
 }
 
 function goHome() {
