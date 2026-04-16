@@ -217,13 +217,28 @@ initTTS();
 setTimeout(initTTS, 500);
 setTimeout(initTTS, 2000);
 
+function getBestVoice() {
+  var saved = localStorage.getItem('acr_study_voice');
+  if (saved) {
+    for (var i = 0; i < ttsVoices.length; i++) {
+      if (ttsVoices[i].name === saved) return ttsVoices[i];
+    }
+  }
+  var enh = ttsVoices.filter(function (v) { return v.name.indexOf('Enhanced') >= 0; });
+  if (enh.length) return enh[0];
+  var siri = ttsVoices.filter(function (v) { return v.name.indexOf('Siri') >= 0; });
+  if (siri.length) return siri[0];
+  return ttsVoices[0] || null;
+}
+
 function speakText(text) {
   if (!window.speechSynthesis) return;
   try { window.speechSynthesis.resume(); } catch (e) {}
   try { window.speechSynthesis.cancel(); } catch (e) {}
   var u = new SpeechSynthesisUtterance(text);
   u.rate = 1; u.lang = 'en-US'; u.volume = 1;
-  if (ttsVoices.length > 0) u.voice = ttsVoices[0];
+  var voice = getBestVoice();
+  if (voice) u.voice = voice;
   window.speechSynthesis.speak(u);
 }
 
