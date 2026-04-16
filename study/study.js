@@ -159,6 +159,26 @@ function goHome() {
   window.scrollTo(0, 0);
 }
 
+// ---- Curated study content loader ----
+// Fetches study/content/file_N.json, caches in-memory per session.
+// Returns a Promise that resolves to the content object, or null on failure.
+
+var CONTENT_CACHE = {};
+
+function loadContent(fid) {
+  if (CONTENT_CACHE[fid]) return Promise.resolve(CONTENT_CACHE[fid]);
+  return fetch('content/' + fid + '.json')
+    .then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function (d) {
+      CONTENT_CACHE[fid] = d;
+      return d;
+    })
+    .catch(function () { return null; });
+}
+
 // ---- Notes (per section) ----
 
 function getNotes() {
