@@ -112,6 +112,9 @@ function go(fid) {
         secs[j].classList.toggle('on', secs[j].getAttribute('data-id') === fid);
       }
       try { localStorage.setItem('acr_study_last', fid); } catch (e) {}
+      // Load any saved note for this section into the notes textarea
+      document.getElementById('np-lbl').textContent = 'Notes — ' + LBL[i];
+      document.getElementById('np-ta').value = getNote(fid) || '';
       if (window.innerWidth <= 768) {
         document.getElementById('sb').classList.remove('m');
       }
@@ -156,7 +159,19 @@ function goHome() {
   window.scrollTo(0, 0);
 }
 
-// ---- Stub implementations (real logic lands in follow-up commits) ----
+// ---- Notes (per section) ----
+
+function getNotes() {
+  try { return JSON.parse(localStorage.getItem('acr_study_notes') || '{}'); }
+  catch (e) { return {}; }
+}
+function getNote(fid) { return getNotes()[fid] || ''; }
+function saveNote(fid, t) {
+  var n = getNotes();
+  if (t && t.trim()) n[fid] = t;
+  else delete n[fid];
+  try { localStorage.setItem('acr_study_notes', JSON.stringify(n)); } catch (e) {}
+}
 
 function closeNP() {
   npop = false;
@@ -210,16 +225,29 @@ function bindUI() {
     try { localStorage.setItem('acr_study_fs', fs); } catch (e) {}
   });
 
-  // Notes — toggle only; save/restore logic added in follow-up commit
+  // Notes — per-section textarea, saved under acr_study_notes[fid]
   document.getElementById('b-nt').addEventListener('click', function () {
     npop = !npop;
     document.getElementById('np').classList.toggle('on', npop);
     this.classList.toggle('on', npop);
     document.getElementById('main').classList.toggle('vopen', npop || vop);
+    if (npop && cur >= 0) document.getElementById('np-ta').focus();
   });
   document.getElementById('np-cls').addEventListener('click', closeNP);
-  document.getElementById('np-save').addEventListener('click', function () {});
-  document.getElementById('np-clr').addEventListener('click', function () {});
+  document.getElementById('np-save').addEventListener('click', function () {
+    if (cur < 0) return;
+    saveNote(IDS[cur], document.getElementById('np-ta').value);
+    var t = this;
+    t.textContent = 'Saved!';
+    setTimeout(function () { t.textContent = '\u2713 Save'; }, 1500);
+  });
+  document.getElementById('np-clr').addEventListener('click', function () {
+    document.getElementById('np-ta').value = '';
+    if (cur >= 0) saveNote(IDS[cur], '');
+  });
+  document.getElementById('np-ta').addEventListener('input', function () {
+    if (cur >= 0) saveNote(IDS[cur], this.value);
+  });
 
   document.getElementById('b-nv').addEventListener('click', toggleNV);
 
