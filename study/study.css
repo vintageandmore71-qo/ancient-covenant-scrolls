@@ -30,6 +30,28 @@ body{
 }
 body.font-dyslexic{font-family:var(--font-dyslexic);letter-spacing:.04em;word-spacing:.12em}
 
+/* High contrast themes */
+body.theme-parchment{background:#2c2416;color:#e8d8b8;--bg-warm:#2c2416;--bg-card:#3a3020;--text-main:#e8d8b8;--text-muted:#b8a888}
+body.theme-parchment #topnav{background:#3a3020;border-bottom-color:#8a7040}
+body.theme-parchment #sb{background:#2c2416;border-right-color:#4a3e28}
+body.theme-parchment .sec{color:#d8c898}
+body.theme-parchment .sec.on{background:#4a3e28}
+body.theme-parchment .act-card{box-shadow:0 4px 14px rgba(0,0,0,.3)}
+
+body.theme-navy{background:#0a1628;color:#c8d8f0;--bg-warm:#0a1628;--bg-card:#142040;--text-main:#d0e0f8;--text-muted:#8098c0}
+body.theme-navy #topnav{background:#142040;border-bottom-color:#2563eb}
+body.theme-navy #sb{background:#0a1628;border-right-color:#1e3050}
+body.theme-navy .sec{color:#a0b8d8}
+body.theme-navy .sec.on{background:#1e3050}
+body.theme-navy .act-card{box-shadow:0 4px 14px rgba(0,0,0,.4)}
+
+body.theme-amber{background:#1a1408;color:#f0e0c0;--bg-warm:#1a1408;--bg-card:#2a2010;--text-main:#f0e0c0;--text-muted:#b8a070}
+body.theme-amber #topnav{background:#2a2010;border-bottom-color:#d97706}
+body.theme-amber #sb{background:#1a1408;border-right-color:#3a2c18}
+body.theme-amber .sec{color:#e0c890}
+body.theme-amber .sec.on{background:#3a2c18}
+body.theme-amber .act-card{box-shadow:0 4px 14px rgba(0,0,0,.3)}
+
 /* =========================================================================
    Top nav — deep indigo with warm accent
    ========================================================================= */
@@ -567,6 +589,8 @@ body.font-dyslexic .mc-opt{font-family:var(--font-dyslexic)}
 }
 body.font-dyslexic .ll-card{font-family:var(--font-dyslexic);line-height:2.1}
 .ll-card.ll-speaking{border-color:var(--vol1);box-shadow:0 6px 30px rgba(37,99,235,.2)}
+.ll-word{transition:background .15s,color .15s;border-radius:4px;padding:1px 2px}
+.ll-word-active{background:var(--vol1);color:#fff;border-radius:6px;padding:2px 4px;box-shadow:0 2px 8px rgba(37,99,235,.3)}
 .ll-progress{font-size:14px;color:var(--text-muted);font-weight:700;margin-bottom:16px}
 .ll-controls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
 .ll-btn{

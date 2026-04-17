@@ -1039,7 +1039,19 @@ function showListenLearn(fid) {
     var h = '<div class="ll-view">';
     h += '<div class="ll-header">Listen &amp; Learn</div>';
     h += '<div class="ll-section">' + label + '</div>';
-    h += '<div class="ll-card" id="ll-card">' + verses[vi] + '</div>';
+    // Wrap each word in a span for word-by-word highlight during TTS
+    var words = verses[vi].split(/(\s+)/);
+    var wordHtml = '';
+    var wIdx = 0;
+    for (var w = 0; w < words.length; w++) {
+      if (words[w].trim()) {
+        wordHtml += '<span class="ll-word" data-w="' + wIdx + '">' + words[w] + '</span>';
+        wIdx++;
+      } else {
+        wordHtml += words[w];
+      }
+    }
+    h += '<div class="ll-card" id="ll-card">' + wordHtml + '</div>';
     h += '<div class="ll-progress">' + (vi + 1) + ' of ' + verses.length + '</div>';
     h += '<div class="ll-controls">';
     h += '<button class="ll-btn ll-prev" id="b-ll-prev">\u25C0 Prev</button>';
@@ -1082,12 +1094,33 @@ function showListenLearn(fid) {
     var btn = document.getElementById('b-ll-play');
     if (btn) btn.textContent = '\u{1F50A} Reading...';
 
-    utterance = new SpeechSynthesisUtterance(prepTTS(verses[vi]));
+    var ttsText = prepTTS(verses[vi]);
+    utterance = new SpeechSynthesisUtterance(ttsText);
     utterance.rate = 1; utterance.lang = 'en-US'; utterance.volume = 1;
     var voice = getBestVoice();
     if (voice) utterance.voice = voice;
 
+    // Word-by-word sync highlighting
+    var wordSpans = card ? card.querySelectorAll('.ll-word') : [];
+    var lastHighlight = null;
+    utterance.onboundary = function (ev) {
+      if (ev.name !== 'word' || !wordSpans.length) return;
+      // Map charIndex in TTS text to word index
+      var before = ttsText.slice(0, ev.charIndex);
+      var wCount = before.split(/\s+/).filter(function (s) { return s.length > 0; }).length;
+      if (wCount < wordSpans.length) {
+        if (lastHighlight !== null && lastHighlight < wordSpans.length) {
+          wordSpans[lastHighlight].classList.remove('ll-word-active');
+        }
+        wordSpans[wCount].classList.add('ll-word-active');
+        lastHighlight = wCount;
+      }
+    };
+
     utterance.onend = function () {
+      if (lastHighlight !== null && lastHighlight < wordSpans.length) {
+        wordSpans[lastHighlight].classList.remove('ll-word-active');
+      }
       if (card) card.classList.remove('ll-speaking');
       if (btn) btn.textContent = '\u25B6 Play';
       var auto = document.getElementById('ll-autoplay');
@@ -1376,6 +1409,20 @@ function bindUI() {
     applyFontSize();
     try { localStorage.setItem('acr_study_fs', fs); } catch (e) {}
   });
+
+  // Theme cycle: light -> parchment -> navy -> amber -> light
+  var themes = ['', 'theme-parchment', 'theme-navy', 'theme-amber'];
+  var curTheme = localStorage.getItem('acr_study_theme_mode') || '';
+  if (curTheme) document.body.classList.add(curTheme);
+  document.getElementById('b-theme').addEventListener('click', function () {
+    var idx = themes.indexOf(curTheme);
+    document.body.classList.remove(curTheme);
+    curTheme = themes[(idx + 1) % themes.length];
+    if (curTheme) document.body.classList.add(curTheme);
+    try { localStorage.setItem('acr_study_theme_mode', curTheme); } catch (e) {}
+    this.classList.toggle('on', curTheme !== '');
+  });
+  if (curTheme) document.getElementById('b-theme').classList.add('on');
 
   // Reading aids
   document.getElementById('b-beeline').addEventListener('click', function () {
