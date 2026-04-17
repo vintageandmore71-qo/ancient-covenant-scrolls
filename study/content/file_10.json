@@ -1,0 +1,70 @@
+{
+  "id": "file_10",
+  "label": "Bamidbar (Numbers) — Part 2 — Chapters 20–36",
+  "volume": 4,
+  "content_version": 1,
+  "summary_plain": "Bamidbar Part 2 covers the final years in the wilderness. Miryam dies. The people need water, and YHWH tells Moshe to speak to the rock, but Moshe strikes it — YHWH says Moshe and Aharon will not enter the land because they did not uphold him as holy. Aharon dies on Mount Hor. Poisonous serpents bite the people; YHWH tells Moshe to make a bronze serpent on a pole — whoever looks at it lives. Balak king of Mo'av hires Bila'am to curse Yisra'EL, but YHWH puts blessings in his mouth instead: 'A star shall come out of Yaakov, and a scepter shall rise out of Yisra'EL.' The daughters of Tzelofkhad stand before Moshe and win the right to inherit land. YHWH tells Moshe to lay his hand on Yehoshua and invest him with authority — Yehoshua will lead the people into the land. Cities of refuge are established.",
+  "summary_scholarly": "Chapters 20 through 36 complete the wilderness narrative. The ACR reads from the Dead Sea Scrolls (4QNum-b and fragments) and the Orit Ge'ez of the African Israelite community. The Masoretic is noted as a variant only. The deaths of Miryam (20:1) and Aharon (20:28) — two of the three leaders of the exodus — frame this section. Moshe's exclusion from the land (20:12) is stated directly: 'Because you did not believe in me, to uphold me as holy.' The Bila'am oracles (ch 22-24) are significant: Bila'am is a non-Israelite prophet through whom YHWH speaks. His fourth oracle (24:17) — 'A star shall come out of Yaakov, and a scepter shall rise out of Yisra'EL' — is referenced in multiple Dead Sea Scrolls texts. The succession of Yehoshua (27:18-20) is the formal transfer of leadership. The daughters of Tzelofkhad (27:1-11) win a ruling that daughters may inherit when there is no son — the text records this as YHWH's direct decision.",
+  "key_terms": [
+    { "term": "Merivah", "phonetic": "Meh-ree-VAH", "definition": "The place where the people quarreled over water (20:2-13). Moshe struck the rock instead of speaking to it. YHWH said Moshe would not enter the land." },
+    { "term": "Bronze Serpent", "phonetic": "", "definition": "When poisonous serpents bit the people, YHWH told Moshe to make a bronze serpent and set it on a pole. Anyone who was bitten could look at it and live (21:9)." },
+    { "term": "Bila'am", "phonetic": "Bee-LAHM", "definition": "A non-Israelite prophet hired by Balak king of Mo'av to curse Yisra'EL. YHWH puts blessings in his mouth instead. His fourth oracle speaks of a star and scepter from Yaakov (24:17). Anglicized as Balaam." },
+    { "term": "Star out of Yaakov", "phonetic": "", "definition": "Bila'am's oracle: 'I see him, but not now — I behold him, but not near. A star shall come out of Yaakov, and a scepter shall rise out of Yisra'EL' (24:17)." },
+    { "term": "Daughters of Tzelofkhad", "phonetic": "Tze-lof-KHAD", "definition": "Five women — Makhlah, No'ah, Hoglah, Milkah, and Tirzah — who stood before Moshe and the congregation and won the right to inherit their father's land when there was no son (27:1-11). YHWH ruled in their favor." },
+    { "term": "Yehoshua's Succession", "phonetic": "", "definition": "YHWH told Moshe: 'Take Yehoshua the son of Nun, a man in whom is the Spirit, and lay your hand on him' (27:18). Yehoshua received some of Moshe's authority to lead the people into the land." },
+    { "term": "Cities of Refuge", "phonetic": "", "definition": "Six cities set aside where a person who kills someone unintentionally may flee and live, safe from the avenger of blood until trial (35:6, 35:11-15)." },
+    { "term": "Mount Hor", "phonetic": "", "definition": "The mountain where Aharon dies. Moshe strips Aharon's garments and puts them on El'azar his son. Aharon dies on the top of the mountain (20:28)." },
+    { "term": "Mo'av", "phonetic": "Mo-AHV", "definition": "The land east of the Yarden where Yisra'EL camps before entering Kena'an. Balak king of Mo'av fears them and hires Bila'am (22:1-5). Anglicized as Moab." },
+    { "term": "El'azar", "phonetic": "El-ah-ZAR", "definition": "Aharon's son who inherits the priesthood when Aharon dies on Mount Hor (20:28). He serves as priest alongside Moshe and then Yehoshua." }
+  ],
+  "fill_blank": [
+    { "ref": "20:12", "prompt": "Because you did not ______ in me, to uphold me as holy in the eyes of the people of Yisra'EL, therefore you shall not bring this assembly into the land.", "answer": "believe", "source_quote": "And YHWH said to Moshe and Aharon: Because you did not believe in me, to uphold me as holy in the eyes of the people of Yisra'EL, therefore you shall not bring this assembly into the land that I have given them." },
+    { "ref": "21:9", "prompt": "So Moshe made a bronze serpent and set it on a ______. And if a serpent bit anyone, he would look at the bronze serpent and live.", "answer": "pole", "source_quote": "So Moshe made a bronze serpent and set it on a pole. And if a serpent bit anyone, he would look at the bronze serpent and live." },
+    { "ref": "24:17", "prompt": "A ______ shall come out of Yaakov, and a scepter shall rise out of Yisra'EL.", "answer": "star", "source_quote": "I see him, but not now — I behold him, but not near. A star shall come out of Yaakov, and a scepter shall rise out of Yisra'EL." },
+    { "ref": "27:18", "prompt": "Take Yehoshua the son of Nun, a man in whom is the ______, and lay your hand on him.", "answer": "Spirit", "source_quote": "So YHWH said to Moshe: Take Yehoshua the son of Nun, a man in whom is the Spirit, and lay your hand on him." },
+    { "ref": "20:1", "prompt": "And the people stayed in Kadesh. And ______ died there and was buried there.", "answer": "Miryam", "source_quote": "And the people of Yisra'EL, the whole congregation, came into the wilderness of Tzin in the first month, and the people stayed in Kadesh. And Miryam died there and was buried there." },
+    { "ref": "20:28", "prompt": "And Moshe stripped Aharon of his garments and put them on ______ his son. And Aharon died there on the top of the mountain.", "answer": "El'azar", "source_quote": "And Moshe stripped Aharon of his garments and put them on El'azar his son. And Aharon died there on the top of the mountain." },
+    { "ref": "20:8", "prompt": "Take the staff, and assemble the congregation, and tell the ______ before their eyes to yield its water.", "answer": "rock", "source_quote": "Take the staff, and assemble the congregation, you and Aharon your brother, and tell the rock before their eyes to yield its water." },
+    { "ref": "27:20", "prompt": "You shall invest him with some of your ______, that all the congregation of the people of Yisra'EL may obey.", "answer": "authority", "source_quote": "You shall invest him with some of your authority, that all the congregation of the people of Yisra'EL may obey." },
+    { "ref": "22:5", "prompt": "Balak sent messengers to Bila'am the son of Be'or to call him, saying: A people has come out of ______.", "answer": "Egypt", "source_quote": "He sent messengers to Bila'am the son of Be'or." },
+    { "ref": "35:6", "prompt": "The cities that you give to the Levites shall be the six cities of ______.", "answer": "refuge", "source_quote": "The cities that you give to the Levites shall be the six cities of refuge." }
+  ],
+  "multiple_choice": [
+    { "ref": "20:12", "question": "Why was Moshe not allowed to enter the land?", "options": ["He was too old", "He did not believe in YHWH and did not uphold him as holy", "He refused to lead", "YHWH chose Aharon instead"], "correct": 1, "source_quote": "Because you did not believe in me, to uphold me as holy in the eyes of the people of Yisra'EL, therefore you shall not bring this assembly into the land." },
+    { "ref": "21:9", "question": "What did Moshe make to heal the people bitten by serpents?", "options": ["A golden altar", "A bronze serpent on a pole", "A basin of holy water", "A staff of healing"], "correct": 1, "source_quote": "So Moshe made a bronze serpent and set it on a pole. And if a serpent bit anyone, he would look at the bronze serpent and live." },
+    { "ref": "24:17", "question": "What did Bila'am prophesy would come out of Yaakov?", "options": ["A great flood", "A star and a scepter", "A river of fire", "A mighty army"], "correct": 1, "source_quote": "A star shall come out of Yaakov, and a scepter shall rise out of Yisra'EL." },
+    { "ref": "27:1-7", "question": "What did the daughters of Tzelofkhad win from YHWH?", "options": ["A priestly role", "The right to inherit land when there is no son", "Command of the army", "Exemption from the census"], "correct": 1, "source_quote": "Then drew near the daughters of Tzelofkhad... The names of his daughters were: Makhlah, No'ah, Hoglah, Milkah, and Tirzah." },
+    { "ref": "27:18", "question": "Who did YHWH choose to succeed Moshe?", "options": ["El'azar", "Kalev", "Yehoshua", "Aharon's grandson"], "correct": 2, "source_quote": "So YHWH said to Moshe: Take Yehoshua the son of Nun, a man in whom is the Spirit, and lay your hand on him." },
+    { "ref": "20:28", "question": "Where did Aharon die?", "options": ["At the tent of meeting", "On Mount Hor", "At Merivah", "In the plains of Mo'av"], "correct": 1, "source_quote": "And Aharon died there on the top of the mountain." },
+    { "ref": "22:2-5", "question": "Why did Balak hire Bila'am?", "options": ["To build an altar", "To curse Yisra'EL because he feared them", "To negotiate peace", "To teach the people"], "correct": 1, "source_quote": "And Balak the son of Tzippor saw all that Yisra'EL had done to the Amorites. And Mo'av was in great dread of the people." },
+    { "ref": "35:6,11", "question": "What are the cities of refuge for?", "options": ["For the Levites to farm", "For anyone who kills a person unintentionally to flee to", "For storing the tabernacle furnishings", "For holding prisoners"], "correct": 1, "source_quote": "The cities that you give to the Levites shall be the six cities of refuge." },
+    { "ref": "20:1", "question": "Which leader of the exodus died at Kadesh?", "options": ["Moshe", "Aharon", "Miryam", "Yehoshua"], "correct": 2, "source_quote": "And the people stayed in Kadesh. And Miryam died there and was buried there." },
+    { "ref": "20:8", "question": "What did YHWH tell Moshe to do to get water from the rock?", "options": ["Strike it with his staff", "Speak to it before the people", "Pour oil on it", "Walk around it seven times"], "correct": 1, "source_quote": "Take the staff, and assemble the congregation, you and Aharon your brother, and tell the rock before their eyes to yield its water." }
+  ],
+  "faq": [
+    {
+      "question": "Why couldn't Moshe enter the promised land?",
+      "answer": "At Merivah, YHWH told Moshe to speak to the rock to bring water. Instead, Moshe struck the rock (20:11). YHWH's response was direct: 'Because you did not believe in me, to uphold me as holy in the eyes of the people of Yisra'EL, therefore you shall not bring this assembly into the land' (20:12). Moshe sees the land from a distance but does not enter."
+    },
+    {
+      "question": "Who was Bila'am?",
+      "answer": "A non-Israelite prophet from Pethor, hired by Balak king of Mo'av to curse Yisra'EL (22:5-6). YHWH spoke through him and put blessings in his mouth instead of curses. His fourth oracle — 'A star shall come out of Yaakov, and a scepter shall rise out of Yisra'EL' (24:17) — is one of the most cited verses in the Dead Sea Scrolls."
+    },
+    {
+      "question": "Who were the daughters of Tzelofkhad?",
+      "answer": "Makhlah, No'ah, Hoglah, Milkah, and Tirzah — five daughters whose father died in the wilderness with no sons. They stood before Moshe, El'azar, and the whole congregation and said: 'Why should the name of our father be taken away from his clan because he had no son?' (27:4). YHWH ruled that they were right and that daughters may inherit when there is no son. The text records this as YHWH's direct legal ruling."
+    },
+    {
+      "question": "What is the bronze serpent?",
+      "answer": "When poisonous serpents bit the people in the wilderness and many died, YHWH told Moshe to make a bronze serpent and set it on a pole. Anyone who was bitten could look at the bronze serpent and live (21:8-9). The healing came from looking at what YHWH commanded — obedience to the instruction, not the object itself."
+    },
+    {
+      "question": "How did leadership transfer from Moshe to Yehoshua?",
+      "answer": "YHWH told Moshe: 'Take Yehoshua the son of Nun, a man in whom is the Spirit, and lay your hand on him' (27:18). Moshe was to invest Yehoshua with some of his authority so the congregation would obey (27:20). The transfer happened publicly before El'azar the priest and the whole assembly."
+    },
+    {
+      "question": "What are the cities of refuge?",
+      "answer": "Six cities designated for anyone who kills a person unintentionally to flee to and be safe from the avenger of blood until trial (35:6, 35:11-15). Three cities on each side of the Yarden. The person stays in the city of refuge until the death of the high priest, after which they may return to their property."
+    }
+  ]
+}
