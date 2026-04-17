@@ -1,0 +1,70 @@
+{
+  "id": "file_12",
+  "label": "Devarim (Deuteronomy) — Part 2 — Chapters 18–34",
+  "volume": 5,
+  "content_version": 1,
+  "summary_plain": "Devarim Part 2 completes the Torah. YHWH promises to raise up a prophet like Moshe from among the brothers of Yisra'EL. The covenant blessings and curses are given in full: if you obey, YHWH will set you high; if you reject, the consequences reach to exile. YHWH promises restoration: even after the curse, if you return to YHWH with all your heart, he will circumcise your heart and gather you back. Moshe sets before the people life and death, blessing and curse: 'Therefore choose life.' He commissions Yehoshua: 'Be strong and courageous. YHWH your Creator goes with you. He will not leave you or forsake you.' Moshe writes the Torah and places it beside the Ark. He sings the Song of Moshe. Then Moshe goes up Mount Nevo and YHWH shows him all the land. Moshe dies at 120 years old. YHWH buries him, and no one knows the place of his burial to this day.",
+  "summary_scholarly": "Chapters 18 through 34 contain the prophet-like-Moshe promise, the full covenant blessings and curses, the restoration prophecy, the Song of Moshe, and Moshe's death. The ACR reads from the Dead Sea Scrolls (4QDeut-a through 4QDeut-n) and the Orit Ge'ez. The Masoretic is noted as a variant only. The promise of a prophet like Moshe (18:15, 18:18) is one of the most significant passages — the text states 'YHWH your Creator will raise up for you a prophet like me from among you, from your brothers.' The covenant curses in chapter 28 are the most detailed prophecy of exile in the Torah. The restoration in chapter 30 — 'YHWH your Creator will circumcise your heart and the heart of your offspring, so that you will love YHWH your Creator with all your heart' (30:6) — promises return after exile. The Song of Moshe (Ha'azinu, ch 32) is attested in multiple Qumran manuscripts. Moshe's death at 120 years (34:5-7) closes the Torah. The text notes that no prophet like Moshe has arisen since.",
+  "key_terms": [
+    { "term": "Prophet like Moshe", "phonetic": "", "definition": "'YHWH your Creator will raise up for you a prophet like me from among you, from your brothers — it is to him you shall listen' (18:15). A future prophet with Moshe's level of authority." },
+    { "term": "Choose life", "phonetic": "", "definition": "'I have set before you life and death, blessing and curse. Therefore choose life, that you and your offspring may live' (30:19). Moshe's final appeal to the people." },
+    { "term": "Circumcision of the heart", "phonetic": "", "definition": "'YHWH your Creator will circumcise your heart and the heart of your offspring, so that you will love YHWH your Creator with all your heart and with all your soul, that you may live' (30:6). An internal transformation promised after exile." },
+    { "term": "Ha'azinu", "phonetic": "Hah-ah-ZEE-noo", "definition": "'Give ear' — the opening word of the Song of Moshe (ch 32). 'Give ear, O heavens, and I will speak, and let the earth hear the words of my mouth' (32:1)." },
+    { "term": "The Rock", "phonetic": "", "definition": "YHWH is called 'The Rock' in the Song of Moshe: 'The Rock, his work is perfect, for all his ways are justice. A Creator of faithfulness and without iniquity, just and upright is he' (32:4)." },
+    { "term": "Mount Nevo", "phonetic": "Neh-VO", "definition": "The mountain where Moshe goes to see the land before his death. YHWH shows him all the land from there (34:1). Moshe dies on Nevo and is buried by YHWH in an unknown grave (34:5-6)." },
+    { "term": "120 years", "phonetic": "", "definition": "Moshe's age at death: 'Moshe was 120 years old when he died. His eye was undimmed, and his vigor unabated' (34:7)." },
+    { "term": "Covenant blessings and curses", "phonetic": "", "definition": "Chapter 28: the full terms. Blessings for obedience — 'YHWH will set you high above all the nations.' Curses for disobedience — reaching to exile and scattering among the nations." },
+    { "term": "Be strong and courageous", "phonetic": "", "definition": "Moshe's charge to Yehoshua and the people: 'Be strong and courageous. Do not fear or be in dread of them, for it is YHWH your Creator who goes with you. He will not leave you or forsake you' (31:6)." },
+    { "term": "The word is near you", "phonetic": "", "definition": "'But the word is very near you. It is in your mouth and in your heart, so that you can do it' (30:14). The Torah is not distant or unreachable — it is present and doable." }
+  ],
+  "fill_blank": [
+    { "ref": "18:15", "prompt": "YHWH your Creator will raise up for you a ______ like me from among you, from your brothers.", "answer": "prophet", "source_quote": "YHWH your Creator will raise up for you a prophet like me from among you, from your brothers — it is to him you shall listen." },
+    { "ref": "30:19", "prompt": "I have set before you life and death, blessing and curse. Therefore choose ______.", "answer": "life", "source_quote": "I call heaven and earth to witness against you today, that I have set before you life and death, blessing and curse. Therefore choose life, that you and your offspring may live." },
+    { "ref": "30:6", "prompt": "YHWH your Creator will circumcise your ______ and the ______ of your offspring.", "answer": "heart", "source_quote": "And YHWH your Creator will circumcise your heart and the heart of your offspring, so that you will love YHWH your Creator with all your heart and with all your soul, that you may live." },
+    { "ref": "31:6", "prompt": "Be strong and ______. Do not fear or be in dread of them, for it is YHWH your Creator who goes with you.", "answer": "courageous", "source_quote": "Be strong and courageous. Do not fear or be in dread of them, for it is YHWH your Creator who goes with you. He will not leave you or forsake you." },
+    { "ref": "32:4", "prompt": "The Rock, his work is ______, for all his ways are justice.", "answer": "perfect", "source_quote": "The Rock, his work is perfect, for all his ways are justice. A Creator of faithfulness and without iniquity, just and upright is he." },
+    { "ref": "34:5", "prompt": "So Moshe the servant of YHWH ______ there in the land of Mo'av, according to the word of YHWH.", "answer": "died", "source_quote": "So Moshe the servant of YHWH died there in the land of Mo'av, according to the word of YHWH." },
+    { "ref": "30:14", "prompt": "But the word is very near you. It is in your mouth and in your ______, so that you can do it.", "answer": "heart", "source_quote": "But the word is very near you. It is in your mouth and in your heart, so that you can do it." },
+    { "ref": "32:1", "prompt": "Give ear, O heavens, and I will speak, and let the ______ hear the words of my mouth.", "answer": "earth", "source_quote": "Give ear, O heavens, and I will speak, and let the earth hear the words of my mouth." },
+    { "ref": "18:18", "prompt": "I will raise up for them a prophet like you from among their brothers. And I will put my ______ in his mouth.", "answer": "words", "source_quote": "I will raise up for them a prophet like you from among their brothers. And I will put my words in his mouth, and he shall speak to them all that I command him." },
+    { "ref": "34:6", "prompt": "And he buried him in the valley in the land of Mo'av, but no one knows the place of his ______ to this day.", "answer": "burial", "source_quote": "And he buried him in the valley in the land of Mo'av opposite Beit-Pe'or, but no one knows the place of his burial to this day." }
+  ],
+  "multiple_choice": [
+    { "ref": "18:15", "question": "What prophet did YHWH promise to raise up?", "options": ["A prophet from Egypt", "A prophet like Moshe from among the brothers of Yisra'EL", "A prophet from the nations", "A prophet from the priests"], "correct": 1, "source_quote": "YHWH your Creator will raise up for you a prophet like me from among you, from your brothers — it is to him you shall listen." },
+    { "ref": "30:19", "question": "What does Moshe set before the people?", "options": ["War and peace", "Life and death, blessing and curse", "Land and sea", "Wealth and poverty"], "correct": 1, "source_quote": "I have set before you life and death, blessing and curse. Therefore choose life." },
+    { "ref": "34:7", "question": "How old was Moshe when he died?", "options": ["100 years", "110 years", "120 years", "175 years"], "correct": 2, "source_quote": "Moshe was 120 years old when he died. His eye was undimmed, and his vigor unabated." },
+    { "ref": "34:6", "question": "Who buried Moshe?", "options": ["Yehoshua", "Aharon", "YHWH", "The elders of Yisra'EL"], "correct": 2, "source_quote": "And he buried him in the valley in the land of Mo'av opposite Beit-Pe'or, but no one knows the place of his burial to this day." },
+    { "ref": "31:6", "question": "What did Moshe tell the people about YHWH going with them?", "options": ["YHWH will watch from afar", "YHWH goes with you, he will not leave you or forsake you", "YHWH will send angels instead", "YHWH will go ahead but not with you"], "correct": 1, "source_quote": "Be strong and courageous. Do not fear or be in dread of them, for it is YHWH your Creator who goes with you. He will not leave you or forsake you." },
+    { "ref": "30:6", "question": "What does YHWH promise to circumcise after the exile?", "options": ["The land", "The altar", "The heart", "The covenant"], "correct": 2, "source_quote": "And YHWH your Creator will circumcise your heart and the heart of your offspring, so that you will love YHWH your Creator with all your heart and with all your soul." },
+    { "ref": "32:4", "question": "What does the Song of Moshe call YHWH?", "options": ["The Shepherd", "The Rock — his work is perfect", "The King of kings", "The Hidden One"], "correct": 1, "source_quote": "The Rock, his work is perfect, for all his ways are justice." },
+    { "ref": "30:14", "question": "Where does Moshe say the word of YHWH is?", "options": ["In heaven, beyond reach", "Across the sea", "Very near — in your mouth and in your heart", "Hidden in the ark"], "correct": 2, "source_quote": "But the word is very near you. It is in your mouth and in your heart, so that you can do it." },
+    { "ref": "28:1", "question": "What happens if Yisra'EL faithfully obeys YHWH?", "options": ["Nothing changes", "YHWH will set them high above all nations", "They must leave the land", "The covenant ends"], "correct": 1, "source_quote": "And if you faithfully obey the voice of YHWH your Creator, being careful to do all his commandments that I command you today, YHWH your Creator will set you high above all the nations of the earth." },
+    { "ref": "34:1", "question": "From which mountain did Moshe see the promised land?", "options": ["Mount Sinai", "Mount Hor", "Mount Nevo", "Mount Moriah"], "correct": 2, "source_quote": "Then Moshe went up from the plains of Mo'av to Mount Nevo, to the top of Pisgah, which is opposite Yeriho. And YHWH showed him all the land." }
+  ],
+  "faq": [
+    {
+      "question": "Who is the prophet like Moshe?",
+      "answer": "YHWH promises: 'I will raise up for them a prophet like you from among their brothers. And I will put my words in his mouth, and he shall speak to them all that I command him' (18:18). The text in the Torah does not name this prophet. Devarim 34:10 notes that 'there has not arisen a prophet since in Yisra'EL like Moshe.' The promise stands as given."
+    },
+    {
+      "question": "What does 'choose life' mean?",
+      "answer": "Moshe calls heaven and earth as witnesses and presents a choice: 'I have set before you life and death, blessing and curse. Therefore choose life, that you and your offspring may live' (30:19). Choosing life means obeying YHWH's voice, loving him, and holding fast to him — the word is not far away, it is 'in your mouth and in your heart' (30:14)."
+    },
+    {
+      "question": "How did Moshe die?",
+      "answer": "Moshe went up from the plains of Mo'av to Mount Nevo, to the top of Pisgah. YHWH showed him all the land (34:1-4). Moshe died there 'according to the word of YHWH' at 120 years old, his eye undimmed and his vigor unabated. YHWH buried him in the valley in Mo'av. No one knows where his burial place is to this day (34:5-7)."
+    },
+    {
+      "question": "What is the circumcision of the heart?",
+      "answer": "After describing exile and return, Moshe says YHWH will circumcise the heart of the people and their offspring 'so that you will love YHWH your Creator with all your heart and with all your soul, that you may live' (30:6). It is an internal transformation — not just outward obedience but the heart itself being changed so that love for YHWH becomes natural."
+    },
+    {
+      "question": "What is the Song of Moshe?",
+      "answer": "Ha'azinu — 'Give ear' — chapter 32. Moshe's final song, spoken before his death. It begins: 'Give ear, O heavens, and I will speak, and let the earth hear the words of my mouth' (32:1). It calls YHWH 'The Rock' and traces the covenant faithfulness of YHWH against the unfaithfulness of the people. Multiple Dead Sea Scrolls manuscripts preserve this song."
+    },
+    {
+      "question": "What happens at the end of the Torah?",
+      "answer": "Moshe dies. Yehoshua takes command. The Torah is complete. Devarim 34:10 states: no prophet has arisen since in Yisra'EL like Moshe, whom YHWH knew face to face. The promise of a future prophet like Moshe (18:15) remains open. The people stand at the edge of the land. Shemot began with their descent into Egypt; Devarim ends with their preparation to enter Kena'an."
+    }
+  ]
+}
