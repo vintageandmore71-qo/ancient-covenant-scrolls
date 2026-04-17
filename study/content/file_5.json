@@ -1,0 +1,70 @@
+{
+  "id": "file_5",
+  "label": "Shemot (Exodus) — Part 1 — Chapters 1–18",
+  "volume": 2,
+  "content_version": 1,
+  "summary_plain": "Shemot Part 1 tells how the children of Yisra'EL multiply in Egypt until a new king arises who does not know Yosef. The Egyptians oppress them with hard labor. Pharaoh commands that every son born to the Hebrews be thrown into the Nile. A Levite woman hides her son in a basket among the reeds. Pharaoh's daughter finds him and names him Moshe. Moshe grows up, kills an Egyptian, and flees to Midyan. YHWH appears to Moshe in a burning bush at Horev and reveals his name: I AM WHO I AM. YHWH sends Moshe and Aharon to Pharaoh: Let my people go. Pharaoh refuses. YHWH brings ten plagues on Egypt. On the night of the Pesach, the firstborn of Egypt die. The children of Yisra'EL leave Egypt. Pharaoh pursues them to the sea. Moshe stretches out his hand and YHWH drives the sea back. Yisra'EL crosses on dry ground. The Egyptians are destroyed. Moshe and the people sing the Song of the Sea. Miryam the prophet takes a tambourine and leads the women in song.",
+  "summary_scholarly": "Chapters 1 through 18 cover the oppression, the calling of Moshe, the plagues, the Pesach, the crossing of the sea, and the journey to Horev. The ACR reads from the Dead Sea Scrolls witnesses (4QExod-a through 4QExod-c, 4QPaleoExod-m, and 2QExod-a) and the Orit Ge'ez of the African Israelite community. The Masoretic is noted as a variant only. The revelation of YHWH's name in chapter 3 — Ehyeh Asher Ehyeh, I AM WHO I AM — is preserved in the DSS text. The Pesach instructions in chapter 12 are given before the exodus begins: the lamb on the tenth day, slaughtered on the fourteenth, blood on the doorposts. The crossing of the sea in chapter 14 is told as YHWH's direct action — 'YHWH drove the sea back by a strong east wind all night' (14:21). Miryam is named as a prophet (15:20) — this title is in the text itself. The Song of the Sea (chapter 15) is one of the oldest poetic texts preserved in the Hebrew scriptures. The Yovelim text (ACR Volume 7) provides the jubilee chronology for the exodus.",
+  "key_terms": [
+    { "term": "Moshe", "phonetic": "Mo-SHEH", "definition": "Born to a Levite family, hidden in a basket among the reeds, raised by Pharaoh's daughter. Called by YHWH at the burning bush to bring Yisra'EL out of Egypt. Anglicized as Moses." },
+    { "term": "Aharon", "phonetic": "Ah-ha-RON", "definition": "Moshe's brother. Speaks on Moshe's behalf before Pharaoh. Anglicized as Aaron." },
+    { "term": "Miryam", "phonetic": "Mir-YAHM", "definition": "Moshe's sister. Named as 'the prophet' in the text (15:20). She takes a tambourine and leads the women in song after the crossing of the sea. Anglicized as Miriam." },
+    { "term": "Ehyeh Asher Ehyeh", "phonetic": "Eh-YEH Ah-SHER Eh-YEH", "definition": "I AM WHO I AM — the name YHWH reveals to Moshe at the burning bush (3:14). 'Say this to the people of Yisra'EL — I AM has sent me to you.'" },
+    { "term": "Pesach", "phonetic": "PEH-sakh", "definition": "The night YHWH strikes down the firstborn of Egypt and passes over the houses with blood on the doorposts (ch 12). The lamb is taken on the tenth day and slaughtered on the fourteenth. Anglicized as Passover." },
+    { "term": "Horev", "phonetic": "Kho-REV", "definition": "The mountain of The Creator where YHWH appears to Moshe in the burning bush (3:1). Also called the mountain of The Creator throughout Shemot. Anglicized as Horeb." },
+    { "term": "Midyan", "phonetic": "Mid-YAHN", "definition": "The land where Moshe flees after killing the Egyptian. He marries Tzipporah, daughter of Yitro the priest of Midyan (2:15-21). Anglicized as Midian." },
+    { "term": "Yitro", "phonetic": "Yit-RO", "definition": "Priest of Midyan, Moshe's father-in-law. He comes to Moshe at the mountain of The Creator after hearing what YHWH did for Yisra'EL, and advises Moshe to appoint judges (ch 18). Anglicized as Jethro." },
+    { "term": "Song of the Sea", "phonetic": "", "definition": "The song Moshe and the people of Yisra'EL sing after crossing the sea (ch 15). 'I will sing to YHWH, for he has triumphed gloriously — the horse and his rider he has thrown into the sea' (15:1)." },
+    { "term": "Ten Plagues", "phonetic": "", "definition": "The signs YHWH brings on Egypt: blood, frogs, gnats, flies, livestock plague, boils, hail, locusts, darkness, and the death of the firstborn. Pharaoh's heart is hardened after each one until the final plague." }
+  ],
+  "fill_blank": [
+    { "ref": "1:8", "prompt": "Now there arose a new king over Egypt, who did not know ______.", "answer": "Yosef", "source_quote": "Now there arose a new king over Egypt, who did not know Yosef." },
+    { "ref": "3:2", "prompt": "And the angel of YHWH appeared to him in a flame of fire out of the midst of a ______.", "answer": "bush", "source_quote": "And the angel of YHWH appeared to him in a flame of fire out of the midst of a bush. He looked, and behold, the bush was burning, yet it was not consumed." },
+    { "ref": "3:14", "prompt": "The Creator said to Moshe: I AM WHO I ______.", "answer": "AM", "source_quote": "The Creator said to Moshe: I AM WHO I AM. And he said: Say this to the people of Yisra'EL — I AM has sent me to you." },
+    { "ref": "5:1", "prompt": "Thus says YHWH, The Creator of Yisra'EL — Let my people ______, that they may hold a feast to me in the wilderness.", "answer": "go", "source_quote": "Thus says YHWH, The Creator of Yisra'EL — Let my people go, that they may hold a feast to me in the wilderness." },
+    { "ref": "14:13", "prompt": "And Moshe said to the people: Fear not, stand firm, and see the ______ of YHWH.", "answer": "salvation", "source_quote": "And Moshe said to the people: Fear not, stand firm, and see the salvation of YHWH, which he will work for you today." },
+    { "ref": "14:21", "prompt": "Then Moshe stretched out his hand over the sea, and YHWH drove the sea back by a strong east ______ all night.", "answer": "wind", "source_quote": "Then Moshe stretched out his hand over the sea, and YHWH drove the sea back by a strong east wind all night and made the sea dry land." },
+    { "ref": "15:1", "prompt": "I will sing to YHWH, for he has triumphed gloriously — the horse and his ______ he has thrown into the sea.", "answer": "rider", "source_quote": "I will sing to YHWH, for he has triumphed gloriously — the horse and his rider he has thrown into the sea." },
+    { "ref": "15:20", "prompt": "Then Miryam the ______, the sister of Aharon, took a tambourine in her hand.", "answer": "prophet", "source_quote": "Then Miryam the prophet, the sister of Aharon, took a tambourine in her hand, and all the women went out after her with tambourines and dancing." },
+    { "ref": "3:5", "prompt": "Do not come near — take your sandals off your feet, for the place on which you are standing is ______ ground.", "answer": "holy", "source_quote": "Then he said: Do not come near — take your sandals off your feet, for the place on which you are standing is holy ground." },
+    { "ref": "12:11", "prompt": "In this manner you shall eat it — with your belt fastened, your sandals on your feet, and your ______ in your hand.", "answer": "staff", "source_quote": "In this manner you shall eat it — with your belt fastened, your sandals on your feet, and your staff in your hand. And you shall eat it in haste." }
+  ],
+  "multiple_choice": [
+    { "ref": "3:1-2", "question": "Where did YHWH appear to Moshe in a burning bush?", "options": ["In Egypt", "At Horev, the mountain of The Creator", "In the land of Kena'an", "At the sea"], "correct": 1, "source_quote": "Now Moshe was keeping the flock of his father-in-law Yitro, the priest of Midyan, and he led his flock to the west side of the wilderness and came to Horev, the mountain of The Creator." },
+    { "ref": "3:14", "question": "What name did The Creator reveal to Moshe at the burning bush?", "options": ["El Shaddai", "I AM WHO I AM", "The Creator Almighty", "Adonai"], "correct": 1, "source_quote": "The Creator said to Moshe: I AM WHO I AM. And he said: Say this to the people of Yisra'EL — I AM has sent me to you." },
+    { "ref": "2:3", "question": "Where did Moshe's mother place him as a baby?", "options": ["In a cave", "In a basket among the reeds by the river", "In the temple", "In Pharaoh's palace"], "correct": 1, "source_quote": "She took for him a basket made of bulrushes and daubed it with bitumen and pitch. She put the child in it and placed it among the reeds by the river bank." },
+    { "ref": "14:21", "question": "How did YHWH drive back the sea for Yisra'EL to cross?", "options": ["By an earthquake", "By a strong east wind all night", "By splitting the ground", "By drying it with fire"], "correct": 1, "source_quote": "Then Moshe stretched out his hand over the sea, and YHWH drove the sea back by a strong east wind all night and made the sea dry land." },
+    { "ref": "15:20", "question": "What title does the text give Miryam?", "options": ["Queen", "Prophet", "Priestess", "Judge"], "correct": 1, "source_quote": "Then Miryam the prophet, the sister of Aharon, took a tambourine in her hand." },
+    { "ref": "12:3-6", "question": "On which day of the month is the Pesach lamb to be slaughtered?", "options": ["The first day", "The tenth day", "The fourteenth day", "The twenty-first day"], "correct": 2, "source_quote": "Tell all the congregation of Yisra'EL that on the tenth day of this month every man shall take a lamb... and you shall keep it until the fourteenth day of this month, when the whole assembly of the congregation of Yisra'EL shall kill their lambs at twilight." },
+    { "ref": "1:5", "question": "How many descendants of Yaakov came to Egypt?", "options": ["Twelve", "Forty", "Seventy", "Six hundred"], "correct": 2, "source_quote": "All the descendants of Yaakov were seventy persons — Yosef was already in Egypt." },
+    { "ref": "15:3", "question": "What does the Song of the Sea call YHWH?", "options": ["A shepherd", "A man of war", "A king of kings", "A healer"], "correct": 1, "source_quote": "YHWH is a man of war — YHWH is his name." },
+    { "ref": "2:15", "question": "Where did Moshe flee after killing the Egyptian?", "options": ["Kena'an", "Midyan", "Haran", "Shinar"], "correct": 1, "source_quote": "When Pharaoh heard of it, he sought to kill Moshe. But Moshe fled from Pharaoh and stayed in the land of Midyan." },
+    { "ref": "18:1", "question": "Who visited Moshe at the mountain of The Creator and advised him to appoint judges?", "options": ["Aharon", "Pharaoh", "Yitro", "Avraham"], "correct": 2, "source_quote": "Yitro, the priest of Midyan, Moshe's father-in-law, heard of all that The Creator had done for Moshe and for Yisra'EL his people, how YHWH had brought Yisra'EL out of Egypt." }
+  ],
+  "faq": [
+    {
+      "question": "What does Ehyeh Asher Ehyeh mean?",
+      "answer": "I AM WHO I AM. The Creator reveals this name to Moshe at the burning bush (3:14). The Hebrew is Ehyeh Asher Ehyeh — preserved in the DSS text. YHWH then tells Moshe: 'Say this to the people of Yisra'EL — I AM has sent me to you.' This is the direct revelation of YHWH's identity in his own words."
+    },
+    {
+      "question": "What is the Pesach?",
+      "answer": "The night YHWH strikes down the firstborn of Egypt (ch 12). Each household takes a lamb on the tenth day, slaughters it on the fourteenth, and puts the blood on the doorposts and lintel. YHWH passes over the houses with blood. The people eat the lamb with belt fastened, sandals on feet, staff in hand — ready to leave. This is the beginning of the departure from Egypt."
+    },
+    {
+      "question": "Why is Miryam called a prophet?",
+      "answer": "The text names Miryam as 'the prophet, the sister of Aharon' (15:20). The title is in the text itself — it is not added later. She takes a tambourine and leads all the women in song and dance after the crossing of the sea: 'Sing to YHWH, for he has triumphed gloriously — the horse and his rider he has thrown into the sea' (15:21)."
+    },
+    {
+      "question": "How did Yisra'EL cross the sea?",
+      "answer": "Moshe stretched out his hand over the sea, and YHWH drove the sea back by a strong east wind all night and made the sea dry land, and the waters were divided (14:21). The people of Yisra'EL went into the midst of the sea on dry ground (14:22). When the Egyptians pursued, YHWH threw them into confusion and the waters returned over them (14:27-28)."
+    },
+    {
+      "question": "Who was Yitro?",
+      "answer": "Yitro was the priest of Midyan and Moshe's father-in-law. Moshe married his daughter Tzipporah when he fled to Midyan (2:21). After the exodus, Yitro came to the mountain of The Creator, heard what YHWH had done, and said 'Now I know that YHWH is greater than all gods' (18:11). He advised Moshe to appoint capable men as judges so Moshe would not wear himself out judging alone (18:17-23)."
+    },
+    {
+      "question": "What are the DSS witnesses for Shemot?",
+      "answer": "The Dead Sea Scrolls preserve portions of Shemot in multiple manuscripts: 4QExod-a, 4QExod-b, 4QExod-c, 4QPaleoExod-m (written in Paleo-Hebrew script), and 2QExod-a. The Orit Ge'ez of the African Israelite community preserves the full text as a living witness. The Masoretic Text is noted only where it differs."
+    }
+  ]
+}
