@@ -1,0 +1,70 @@
+{
+  "id": "file_11",
+  "label": "Devarim (Deuteronomy) — Part 1 — Chapters 1–17",
+  "volume": 5,
+  "content_version": 1,
+  "summary_plain": "Devarim Part 1 is Moshe's final address to Yisra'EL before they enter the land. He retells the wilderness journey. He restates the Ten Words. He speaks the Shema — the foundational declaration: Hear, O Yisra'EL: YHWH our Creator, YHWH is one. You shall love YHWH your Creator with all your heart and with all your soul and with all your might. He commands: teach these words diligently to your children, talk of them when you sit, when you walk, when you lie down, when you rise. Do not add to the word that I command you, nor take from it. Love the sojourner, for you were sojourners in Egypt. What does YHWH require of you? To fear YHWH, to walk in his ways, to love him, to serve him with all your heart and soul.",
+  "summary_scholarly": "Chapters 1 through 17 contain Moshe's first and second addresses: the retelling of the wilderness journey, the restatement of the Torah, and the Shema. The ACR reads from the Dead Sea Scrolls witnesses (4QDeut-a through 4QDeut-n, with 4QDeut-j and 4QDeut-n being particularly significant for textual variants) and the Orit Ge'ez of the African Israelite community. The Masoretic is noted as a variant only. The Shema in 6:4-9 is the most widely attested single passage in the Qumran corpus — found on multiple scrolls and on phylacteries from the caves. Moshe's instruction 'You shall not add to the word that I command you, nor take from it' (4:2) establishes the principle of textual integrity. The requirement summary in 10:12 — 'what does YHWH your Creator require of you, but to fear YHWH your Creator, to walk in all his ways, to love him, to serve YHWH your Creator with all your heart and with all your soul' — distills the entire Torah into one statement.",
+  "key_terms": [
+    { "term": "Devarim", "phonetic": "Deh-vah-REEM", "definition": "'Words' — the first distinctive word of the book. 'These are the words that Moshe spoke to all Yisra'EL' (1:1). European Bibles named it Deuteronomy ('second law')." },
+    { "term": "Shema", "phonetic": "Sheh-MAH", "definition": "'Hear' — the first word of the foundational declaration: 'Hear, O Yisra'EL: YHWH our Creator, YHWH is one' (6:4). The most widely attested passage in the Dead Sea Scrolls." },
+    { "term": "YHWH is one", "phonetic": "", "definition": "The core declaration of the Shema: 'YHWH our Creator, YHWH is one' (6:4). One YHWH. No division, no substitution, no multiplicity." },
+    { "term": "Love YHWH", "phonetic": "", "definition": "'You shall love YHWH your Creator with all your heart and with all your soul and with all your might' (6:5). The command that follows the Shema directly." },
+    { "term": "Teach your children", "phonetic": "", "definition": "'You shall teach them diligently to your children, and shall talk of them when you sit in your house, and when you walk by the way, and when you lie down, and when you rise' (6:7)." },
+    { "term": "Do not add or take away", "phonetic": "", "definition": "'You shall not add to the word that I command you, nor take from it' (4:2). The principle of textual integrity — the Torah is not to be expanded or diminished." },
+    { "term": "Love the sojourner", "phonetic": "", "definition": "'Love the sojourner, therefore, for you were sojourners in the land of Egypt' (10:19). YHWH himself 'loves the sojourner, giving him food and clothing' (10:18)." },
+    { "term": "What does YHWH require", "phonetic": "", "definition": "'What does YHWH your Creator require of you, but to fear YHWH your Creator, to walk in all his ways, to love him, to serve YHWH your Creator with all your heart and with all your soul' (10:12)." },
+    { "term": "Horev", "phonetic": "Kho-REV", "definition": "The mountain where the covenant was made: 'YHWH our Creator made a covenant with us in Horev' (5:2). Moshe retells the Sinai events using the name Horev throughout Devarim." },
+    { "term": "The Test of the Prophet", "phonetic": "", "definition": "If a prophet arises and gives a sign that comes true, but says 'let us go after other deities' — do not listen (13:1-3). The test is not whether the sign comes true but whether the prophet leads toward YHWH or away." }
+  ],
+  "fill_blank": [
+    { "ref": "6:4", "prompt": "Hear, O Yisra'EL: YHWH our Creator, YHWH is ______.", "answer": "one", "source_quote": "Hear, O Yisra'EL: YHWH our Creator, YHWH is one." },
+    { "ref": "6:5", "prompt": "You shall love YHWH your Creator with all your heart and with all your soul and with all your ______.", "answer": "might", "source_quote": "You shall love YHWH your Creator with all your heart and with all your soul and with all your might." },
+    { "ref": "6:7", "prompt": "You shall teach them diligently to your ______, and shall talk of them when you sit in your house.", "answer": "children", "source_quote": "You shall teach them diligently to your children, and shall talk of them when you sit in your house, and when you walk by the way, and when you lie down, and when you rise." },
+    { "ref": "4:2", "prompt": "You shall not ______ to the word that I command you, nor take from it.", "answer": "add", "source_quote": "You shall not add to the word that I command you, nor take from it, that you may keep the commandments of YHWH your Creator that I command you." },
+    { "ref": "10:19", "prompt": "Love the sojourner, therefore, for you were sojourners in the land of ______.", "answer": "Egypt", "source_quote": "Love the sojourner, therefore, for you were sojourners in the land of Egypt." },
+    { "ref": "10:12", "prompt": "What does YHWH your Creator require of you, but to fear YHWH your Creator, to walk in all his ways, to ______ him.", "answer": "love", "source_quote": "And now, Yisra'EL, what does YHWH your Creator require of you, but to fear YHWH your Creator, to walk in all his ways, to love him, to serve YHWH your Creator with all your heart and with all your soul." },
+    { "ref": "5:2", "prompt": "YHWH our Creator made a ______ with us in Horev.", "answer": "covenant", "source_quote": "YHWH our Creator made a covenant with us in Horev." },
+    { "ref": "6:6", "prompt": "And these words that I command you today shall be on your ______.", "answer": "heart", "source_quote": "And these words that I command you today shall be on your heart." },
+    { "ref": "10:18", "prompt": "He executes justice for the fatherless and the widow, and loves the ______.", "answer": "sojourner", "source_quote": "He executes justice for the fatherless and the widow, and loves the sojourner, giving him food and clothing." },
+    { "ref": "1:1", "prompt": "These are the ______ that Moshe spoke to all Yisra'EL beyond the Yarden in the wilderness.", "answer": "words", "source_quote": "These are the words that Moshe spoke to all Yisra'EL beyond the Yarden in the wilderness." }
+  ],
+  "multiple_choice": [
+    { "ref": "6:4", "question": "What does the Shema declare?", "options": ["YHWH is the greatest among many deities", "YHWH our Creator, YHWH is one", "YHWH rules from heaven alone", "YHWH will send a king"], "correct": 1, "source_quote": "Hear, O Yisra'EL: YHWH our Creator, YHWH is one." },
+    { "ref": "6:5", "question": "How are you to love YHWH according to the Shema?", "options": ["With your wealth only", "With all your heart, soul, and might", "By offering sacrifices", "By fasting"], "correct": 1, "source_quote": "You shall love YHWH your Creator with all your heart and with all your soul and with all your might." },
+    { "ref": "4:2", "question": "What does Moshe say about adding to or taking from the word?", "options": ["Add what is helpful", "You shall not add to it nor take from it", "Only the priests may change it", "It can be updated each generation"], "correct": 1, "source_quote": "You shall not add to the word that I command you, nor take from it." },
+    { "ref": "10:12", "question": "What does YHWH require?", "options": ["Wealth and offerings", "To fear YHWH, walk in his ways, love and serve him with all your heart and soul", "To conquer all nations", "To build a temple"], "correct": 1, "source_quote": "What does YHWH your Creator require of you, but to fear YHWH your Creator, to walk in all his ways, to love him, to serve YHWH your Creator with all your heart and with all your soul." },
+    { "ref": "10:18-19", "question": "Why must Yisra'EL love the sojourner?", "options": ["Because sojourners are wealthy", "Because they were sojourners in Egypt", "Because YHWH commands war", "Because sojourners are priests"], "correct": 1, "source_quote": "Love the sojourner, therefore, for you were sojourners in the land of Egypt." },
+    { "ref": "6:7", "question": "When are the words of YHWH to be taught to children?", "options": ["Only at the temple", "When sitting, walking, lying down, and rising", "Once a year at Pesach", "Only when they are adults"], "correct": 1, "source_quote": "You shall teach them diligently to your children, and shall talk of them when you sit in your house, and when you walk by the way, and when you lie down, and when you rise." },
+    { "ref": "5:2-3", "question": "With whom did YHWH make the covenant at Horev?", "options": ["Only with Moshe", "Only with the fathers", "With us who are all here alive today", "With the priests alone"], "correct": 2, "source_quote": "YHWH our Creator made a covenant with us in Horev. Not with our fathers did YHWH make this covenant, but with us, who are all of us here alive today." },
+    { "ref": "13:1-3", "question": "If a prophet gives a true sign but says 'follow other deities', what should you do?", "options": ["Follow him because the sign was true", "Not listen to that prophet", "Ask for a second sign", "Bring him to the priests"], "correct": 1, "source_quote": "If a prophet or a dreamer of dreams arises among you and gives you a sign or a wonder, and the sign or wonder comes to pass, and if he says: Let us go after other deities... you shall not listen." },
+    { "ref": "1:1", "question": "What is Devarim?", "options": ["A history of Egypt", "The words Moshe spoke to all Yisra'EL before they entered the land", "A book of songs", "The story of the judges"], "correct": 1, "source_quote": "These are the words that Moshe spoke to all Yisra'EL beyond the Yarden in the wilderness." },
+    { "ref": "10:17", "question": "How does Moshe describe YHWH in chapter 10?", "options": ["A hidden deity", "The Creator of deities, the great, mighty, and awesome Creator who takes no bribe", "A local protector", "A silent watcher"], "correct": 1, "source_quote": "For YHWH your Creator is The Creator of deities and Lord of lords, the great, the mighty, and the awesome Creator, who is not partial and takes no bribe." }
+  ],
+  "faq": [
+    {
+      "question": "What is the Shema?",
+      "answer": "'Hear, O Yisra'EL: YHWH our Creator, YHWH is one. You shall love YHWH your Creator with all your heart and with all your soul and with all your might' (6:4-5). It is the foundational declaration of the Torah — the oneness of YHWH and the command to love him completely. It is the most widely attested passage in the Dead Sea Scrolls, found on multiple scrolls and phylacteries from the Qumran caves."
+    },
+    {
+      "question": "Why does Moshe say 'you shall not add to the word nor take from it'?",
+      "answer": "Moshe states this in 4:2 as a principle of textual integrity. The Torah as given is complete. Nothing is to be added, nothing removed. This principle is directly relevant to the ACR's approach: reading from the primary witnesses (Dead Sea Scrolls and Orit Ge'ez) without adding later rabbinic or Christian commentary into the text itself."
+    },
+    {
+      "question": "What does 'love the sojourner' mean?",
+      "answer": "YHWH himself 'executes justice for the fatherless and the widow, and loves the sojourner, giving him food and clothing' (10:18). Therefore: 'Love the sojourner, for you were sojourners in the land of Egypt' (10:19). The command is grounded in YHWH's own character and in Yisra'EL's own experience of being strangers."
+    },
+    {
+      "question": "Why does Devarim retell the wilderness story?",
+      "answer": "Moshe is speaking to the generation that will enter the land — the children of the generation that died in the wilderness. They need to hear the covenant, the Torah, and the history directly from Moshe before he dies and Yehoshua takes over. Devarim is Moshe's final address. Everything in it is spoken in his voice."
+    },
+    {
+      "question": "What DSS manuscripts preserve Devarim?",
+      "answer": "Devarim is one of the most attested books in the Dead Sea Scrolls, with manuscripts 4QDeut-a through 4QDeut-n. The Shema (6:4-9) appears on multiple phylacteries found at Qumran. The Orit Ge'ez of the African Israelite community preserves the full text as a living witness."
+    },
+    {
+      "question": "What is the test of a true prophet?",
+      "answer": "If a prophet gives a sign that comes true but then says 'let us go after other deities which you have not known' — do not listen (13:1-3). The test is not whether the sign works. The test is whether the prophet leads toward YHWH or away from YHWH. A true sign from a false prophet is still a false prophet."
+    }
+  ]
+}
