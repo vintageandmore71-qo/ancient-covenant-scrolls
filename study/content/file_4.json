@@ -1,0 +1,70 @@
+{
+  "id": "file_4",
+  "label": "Bereshit — Part 4 — Chapters 37–50",
+  "volume": 1,
+  "content_version": 1,
+  "summary_plain": "Bereshit Part 4 is the story of Yosef. Yisra'EL loves Yosef more than his other sons and makes him a robe of many colors. Yosef dreams that his brothers' sheaves bow to his sheaf and that the sun, moon, and eleven stars bow to him. His brothers hate him and sell him to traders for twenty pieces of silver. Yosef is taken to Egypt and sold to Potifar. YHWH is with Yosef and he prospers. He is falsely accused and imprisoned. In prison he interprets the dreams of Pharaoh's cupbearer and baker. Pharaoh dreams of seven fat cows and seven lean cows — Yosef interprets it as seven years of plenty and seven years of famine. Pharaoh puts Yosef in charge of all Egypt. The famine drives Yosef's brothers to Egypt for grain. Yosef reveals himself: 'I am Yosef. The Creator sent me before you to preserve life.' Yaakov and all his family go down to Egypt and settle in Goshen. Yaakov blesses his sons before his death, lives 147 years, and is gathered to his people. Yosef dies at 110 and makes his brothers swear to carry his bones from Egypt when The Creator brings them to the promised land.",
+  "summary_scholarly": "Chapters 37 through 50 tell the Yosef cycle — from his sale into Egypt through the descent of all Yisra'EL's household into Goshen. The ACR reads from the Dead Sea Scrolls witnesses (4QGen-a through 4QGen-k, with 4QGen-k providing additional Cave 4 attestation for the later chapters) and the Orit Ge'ez of the African Israelite community. The Masoretic is noted as a variant only. The Yosef narrative is structured around two acts of The Creator: preservation through Yosef's elevation in Egypt (45:5 — 'The Creator sent me before you to preserve life'), and the covenant promise that The Creator will bring the people back to the land sworn to Avraham, Yitzhak, and Yaakov (50:24). Yosef's dying oath — 'you shall carry up my bones from here' (50:25) — is fulfilled in Shemot. Yaakov's deathbed blessings in chapter 49 establish the tribal destinies. The Yovelim text (ACR Volume 7) provides the jubilee chronology for the descent into Egypt.",
+  "key_terms": [
+    { "term": "Yosef", "phonetic": "Yo-SEF", "definition": "Yaakov and Rachel's firstborn son. Sold into Egypt by his brothers, he rises to rule all Egypt under Pharaoh. 'The Creator sent me before you to preserve life' (45:5). Dies at 110 years. Anglicized as Joseph." },
+    { "term": "Potifar", "phonetic": "Po-tee-FAR", "definition": "An officer of Pharaoh, captain of the guard, who buys Yosef from the traders (37:36). YHWH blesses Potifar's house for Yosef's sake (39:5)." },
+    { "term": "Pharaoh", "phonetic": "Par-OH", "definition": "The king of Egypt. His dreams of seven fat cows and seven lean cows are interpreted by Yosef as seven years of plenty followed by seven years of famine (ch 41)." },
+    { "term": "Goshen", "phonetic": "GO-shen", "definition": "The region in Egypt where Yaakov's family settles at Yosef's direction (45:10, 46:34). They live there through the famine and beyond." },
+    { "term": "Yehudah", "phonetic": "Yeh-hoo-DAH", "definition": "Yaakov's fourth son by Leah. He proposes selling Yosef rather than killing him (37:26-27). Later he pledges himself as surety for Binyamin (43:9). Yaakov's blessing names him as the one to whom the scepter belongs (49:10). Anglicized as Judah." },
+    { "term": "Re'uven", "phonetic": "Reh-oo-VEN", "definition": "Yaakov's firstborn by Leah. He tries to save Yosef from the pit (37:21-22) and later offers his own sons as pledge for Binyamin (42:37). Anglicized as Reuben." },
+    { "term": "Binyamin", "phonetic": "Bin-yah-MEEN", "definition": "Yaakov and Rachel's youngest son. Yosef's only full brother. Yaakov refuses to send him to Egypt until the famine forces his hand (ch 43). Anglicized as Benjamin." },
+    { "term": "Makhpelah", "phonetic": "Makh-peh-LAH", "definition": "The burial cave where Yaakov is buried alongside Avraham, Sarah, Yitzhak, and Rivkah (49:30-31, 50:13)." },
+    { "term": "Robe of many colors", "phonetic": "", "definition": "The garment Yisra'EL made for Yosef because he loved him more than his other sons (37:3). His brothers' jealousy of this favor drives the events of the entire Yosef cycle." },
+    { "term": "Twenty pieces of silver", "phonetic": "", "definition": "The price for which Yosef was sold to the traders (37:28). He was taken from the pit and carried to Egypt." }
+  ],
+  "fill_blank": [
+    { "ref": "37:3", "prompt": "Now Yisra'EL loved Yosef more than any other of his sons, because he was the son of his old ______.", "answer": "age", "source_quote": "Now Yisra'EL loved Yosef more than any other of his sons, because he was the son of his old age. And he made him a robe of many colors." },
+    { "ref": "37:7", "prompt": "Behold, we were binding sheaves in the field, and behold, my sheaf arose and stood upright. And behold, your sheaves gathered around it and ______ down to my sheaf.", "answer": "bowed", "source_quote": "Behold, we were binding sheaves in the field, and behold, my sheaf arose and stood upright. And behold, your sheaves gathered around it and bowed down to my sheaf." },
+    { "ref": "39:2", "prompt": "YHWH was with Yosef, and he became a ______ man.", "answer": "successful", "source_quote": "YHWH was with Yosef, and he became a successful man, and he was in the house of his Egyptian master." },
+    { "ref": "45:3", "prompt": "And Yosef said to his brothers: I am ______.", "answer": "Yosef", "source_quote": "And Yosef said to his brothers: I am Yosef. Is my father still alive? But his brothers could not answer him, for they were dismayed at his presence." },
+    { "ref": "45:5", "prompt": "Do not be distressed or angry with yourselves because you sold me here, for The Creator sent me before you to preserve ______.", "answer": "life", "source_quote": "And now do not be distressed or angry with yourselves because you sold me here, for The Creator sent me before you to preserve life." },
+    { "ref": "47:28", "prompt": "And Yaakov lived in the land of ______ seventeen years.", "answer": "Egypt", "source_quote": "And Yaakov lived in the land of Egypt seventeen years. So the days of Yaakov, the years of his life, were 147 years." },
+    { "ref": "49:33", "prompt": "When Yaakov finished commanding his sons, he drew up his feet into the bed and breathed his last and was gathered to his ______.", "answer": "people", "source_quote": "When Yaakov finished commanding his sons, he drew up his feet into the bed and breathed his last and was gathered to his people." },
+    { "ref": "50:24", "prompt": "The Creator will visit you and bring you up out of this land to the ______ that he swore to Avraham, to Yitzhak, and to Yaakov.", "answer": "land", "source_quote": "And Yosef said to his brothers: I am about to die, but The Creator will visit you and bring you up out of this land to the land that he swore to Avraham, to Yitzhak, and to Yaakov." },
+    { "ref": "50:25", "prompt": "The Creator will surely visit you, and you shall carry up my ______ from here.", "answer": "bones", "source_quote": "Then Yosef made the sons of Yisra'EL swear, saying: The Creator will surely visit you, and you shall carry up my bones from here." },
+    { "ref": "50:26", "prompt": "So Yosef died, being ______ years old.", "answer": "110", "source_quote": "So Yosef died, being 110 years old. They embalmed him, and he was put in a coffin in Egypt." }
+  ],
+  "multiple_choice": [
+    { "ref": "37:3", "question": "Why did Yisra'EL love Yosef more than his other sons?", "options": ["Because he was the strongest", "Because he was the son of his old age", "Because he was the firstborn", "Because YHWH told him to"], "correct": 1, "source_quote": "Now Yisra'EL loved Yosef more than any other of his sons, because he was the son of his old age." },
+    { "ref": "37:28", "question": "For how much was Yosef sold to the traders?", "options": ["Ten pieces of silver", "Twenty pieces of silver", "Thirty pieces of silver", "Fifty pieces of silver"], "correct": 1, "source_quote": "Then Midyanite traders passed by. And they drew Yosef up and lifted him out of the pit, and sold him to the Yishma'elites for twenty pieces of silver." },
+    { "ref": "37:36", "question": "To whom was Yosef sold in Egypt?", "options": ["Pharaoh directly", "Potifar, captain of the guard", "The priests of Egypt", "The governor of Goshen"], "correct": 1, "source_quote": "Meanwhile the Midyanites had sold him in Egypt to Potifar, an officer of Pharaoh, the captain of the guard." },
+    { "ref": "41:1-2", "question": "What did Pharaoh dream about?", "options": ["Seven fat cows and seven lean cows coming from the Nile", "A ladder reaching to heaven", "Eleven stars bowing down", "A burning bush"], "correct": 0, "source_quote": "After two whole years, Pharaoh dreamed that he was standing by the Nile, And behold, there came up out of the Nile seven cows, attractive and plump, and they fed in the reed grass." },
+    { "ref": "45:5", "question": "What reason did Yosef give his brothers for why he was sent to Egypt?", "options": ["To punish them", "To escape from Potifar", "The Creator sent him to preserve life", "Pharaoh called for him"], "correct": 2, "source_quote": "And now do not be distressed or angry with yourselves because you sold me here, for The Creator sent me before you to preserve life." },
+    { "ref": "47:28", "question": "How many years did Yaakov live?", "options": ["120 years", "130 years", "147 years", "175 years"], "correct": 2, "source_quote": "And Yaakov lived in the land of Egypt seventeen years. So the days of Yaakov, the years of his life, were 147 years." },
+    { "ref": "50:26", "question": "How old was Yosef when he died?", "options": ["100 years", "110 years", "120 years", "147 years"], "correct": 1, "source_quote": "So Yosef died, being 110 years old. They embalmed him, and he was put in a coffin in Egypt." },
+    { "ref": "37:21-22", "question": "Which brother tried to save Yosef from the pit?", "options": ["Yehudah", "Re'uven", "Shim'on", "Levi"], "correct": 1, "source_quote": "But when Re'uven heard it, he rescued him out of their hands, saying: Let us not take his life." },
+    { "ref": "50:13", "question": "Where was Yaakov buried?", "options": ["In Egypt", "At Beit-El", "In the cave of Makhpelah", "At Beer-Sheva"], "correct": 2, "source_quote": "For his sons carried him to the land of Kena'an and buried him in the cave of the field of Makhpelah." },
+    { "ref": "37:26-27", "question": "Which brother proposed selling Yosef instead of killing him?", "options": ["Re'uven", "Shim'on", "Yehudah", "Dan"], "correct": 2, "source_quote": "Then Yehudah said to his brothers: What profit is it if we kill our brother and conceal his blood? Come, let us sell him to the Yishma'elites." }
+  ],
+  "faq": [
+    {
+      "question": "Why did Yosef's brothers sell him?",
+      "answer": "Yisra'EL loved Yosef more than his other sons and made him a robe of many colors (37:3). Yosef's dreams — that his brothers' sheaves would bow to his, and that the sun, moon, and eleven stars would bow to him — made them hate him even more (37:5-11). They sold him to traders for twenty pieces of silver (37:28)."
+    },
+    {
+      "question": "What does 'The Creator sent me before you to preserve life' mean?",
+      "answer": "When Yosef reveals himself to his brothers in Egypt, he tells them not to be distressed. He says The Creator was behind his being sold into Egypt — not to punish anyone, but to preserve life during the famine (45:5-7). The entire Yosef cycle is framed as The Creator acting through human events to keep Yaakov's family alive."
+    },
+    {
+      "question": "Why does Yosef say 'carry up my bones from here'?",
+      "answer": "Yosef makes the sons of Yisra'EL swear an oath: when The Creator visits them and brings them up out of Egypt to the land promised to Avraham, Yitzhak, and Yaakov, they must carry his bones with them (50:24-25). He does not want to remain buried in Egypt. This oath is fulfilled in Shemot when Mosheh carries Yosef's bones out during the departure from Egypt."
+    },
+    {
+      "question": "What are the deathbed blessings in chapter 49?",
+      "answer": "Before dying, Yaakov calls his twelve sons and speaks over each one. These are not general blessings — they are specific prophetic statements about each tribe's future. Yehudah receives the scepter promise (49:10). Yosef receives the richest blessing (49:22-26). Re'uven loses his preeminence. Shim'on and Levi are scattered. Each statement shapes the tribal identity."
+    },
+    {
+      "question": "How does the Yosef story connect to the rest of the ACR?",
+      "answer": "The descent into Egypt sets up Shemot (Exodus) — ACR Volume 2. Yaakov's family enters Egypt as seventy people. They will leave as a nation. Yosef's bones will be carried out. The covenant promise — the land sworn to Avraham, Yitzhak, and Yaakov — remains unfulfilled at the end of Bereshit. The Yovelim text (ACR Volume 7) provides the jubilee-year chronology for the Egyptian sojourn."
+    },
+    {
+      "question": "Who was Potifar?",
+      "answer": "Potifar was an officer of Pharaoh, the captain of the guard, who purchased Yosef from the traders (37:36). YHWH was with Yosef in Potifar's house and made everything he did succeed (39:2-3). Potifar put Yosef in charge of all he had (39:4-6). When Potifar's wife falsely accused Yosef, he was put in prison — but YHWH was with him there too (39:21)."
+    }
+  ]
+}
