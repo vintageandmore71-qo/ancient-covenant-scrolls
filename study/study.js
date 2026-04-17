@@ -75,16 +75,21 @@ function toggleLineFocus() {
 if (beelineOn) document.body.classList.add('beeline-on');
 if (lineFocusOn) document.body.classList.add('linefocus-on');
 
-// ---- Volume images (loaded from Wikimedia at runtime, decorative only) ----
-var VOL_IMAGES = {
-  '1': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/The_cave_of_Qumran_place_of_the_dead_Sea_Scrolls.JPG/320px-The_cave_of_Qumran_place_of_the_dead_Sea_Scrolls.JPG',
-  '2': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Sinai_Peninsula_from_Southeastern_Mediterranean_panorama.jpg/320px-Sinai_Peninsula_from_Southeastern_Mediterranean_panorama.jpg',
-  '3': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Dea_sea_scroll_display_is.JPG/320px-Dea_sea_scroll_display_is.JPG',
-  '4': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/The_cave_of_Qumran_place_of_the_dead_Sea_Scrolls.JPG/320px-The_cave_of_Qumran_place_of_the_dead_Sea_Scrolls.JPG',
-  '5': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Dea_sea_scroll_display_is.JPG/320px-Dea_sea_scroll_display_is.JPG',
-  '6': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Great_Isaiah_Scroll.jpg/320px-Great_Isaiah_Scroll.jpg',
-  '7': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Great_Isaiah_Scroll.jpg/320px-Great_Isaiah_Scroll.jpg',
-  '8': 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Dead_Sea_Scrolls.jpg/320px-Dead_Sea_Scrolls.jpg'
+// ---- Volume banner graphics (inline SVG, no external dependency) ----
+var VOL_ICONS = {
+  '1': '\u{1F30D}', '2': '\u{1F525}', '3': '\u{1F54E}', '4': '\u{1F3DC}',
+  '5': '\u{1F4DC}', '6': '\u{1F47C}', '7': '\u{1F4C5}', '8': '\u2694\uFE0F'
+};
+var VOL_COLORS = {
+  '1': ['#2563eb','#1e40af'], '2': ['#dc2626','#991b1b'], '3': ['#059669','#065f46'],
+  '4': ['#d97706','#92400e'], '5': ['#7c3aed','#5b21b6'], '6': ['#0891b2','#155e75'],
+  '7': ['#ea580c','#9a3412'], '8': ['#b8860b','#78350f']
+};
+var VOL_NAMES = {
+  '1': 'Bereshit \u00B7 Genesis', '2': 'Shemot \u00B7 Exodus',
+  '3': 'Vayikra \u00B7 Leviticus', '4': 'Bamidbar \u00B7 Numbers',
+  '5': 'Devarim \u00B7 Deuteronomy', '6': 'Chanokh \u00B7 Book of Chanokh',
+  '7': 'Yovelim \u00B7 Book of Jubilees', '8': 'War Scroll 1QM'
 };
 
 function getVolForFid(fid) {
@@ -96,6 +101,16 @@ function getVolForFid(fid) {
     if (idx < count) return VOL_GROUPS[g].vol;
   }
   return '1';
+}
+
+function volBanner(volId) {
+  var c = VOL_COLORS[volId] || ['#333','#111'];
+  var icon = VOL_ICONS[volId] || '\u{1F4D6}';
+  var name = VOL_NAMES[volId] || '';
+  return '<div class="vol-banner" style="background:linear-gradient(135deg,' + c[0] + ',' + c[1] + ')">' +
+    '<div class="vol-banner-icon">' + icon + '</div>' +
+    '<div class="vol-banner-name">' + name + '</div>' +
+    '</div>';
 }
 
 // ---- SM-2 Spaced Repetition Algorithm ----
@@ -289,11 +304,7 @@ function go(fid) {
   var dueCount = getDueCards(fid).length;
   var totalDue = getAllDueCount();
   var volId = getVolForFid(fid);
-  var volImg = VOL_IMAGES[volId] || '';
-  var h = '';
-  if (volImg) {
-    h += '<div class="vol-hero"><img src="' + volImg + '" alt="" class="vol-hero-img" loading="lazy" onerror="this.style.display=\'none\'"></div>';
-  }
+  var h = volBanner(volId);
   h += '<div class="activity-grid-header">' + LBL[i] + '</div>';
   if (dueCount > 0 || totalDue > 0) {
     h += '<div class="due-banner">';

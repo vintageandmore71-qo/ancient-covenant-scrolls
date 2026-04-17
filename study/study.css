@@ -233,13 +233,23 @@ p.sp{background:#fff3cd;border-radius:6px;padding:2px 4px}
 .due-total{
   display:block;color:var(--text-muted);font-size:12px;margin-top:6px;font-weight:700;
 }
-/* Volume hero image */
-.vol-hero{text-align:center;margin-bottom:12px}
-.vol-hero-img{
-  width:100%;max-width:480px;height:160px;object-fit:cover;
-  border-radius:var(--radius);box-shadow:var(--shadow);
-  opacity:.85;
+/* Volume banner (inline, always works, no external images) */
+.vol-banner{
+  border-radius:var(--radius);padding:28px 20px;text-align:center;
+  margin-bottom:14px;box-shadow:0 4px 16px rgba(0,0,0,.18);
+  position:relative;overflow:hidden;
 }
+.vol-banner::after{
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:radial-gradient(circle at 70% 30%,rgba(255,255,255,.15) 0%,transparent 60%);
+  pointer-events:none;
+}
+.vol-banner-icon{font-size:3.5em;margin-bottom:8px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.2))}
+.vol-banner-name{
+  color:#fff;font-size:1.15em;font-weight:700;letter-spacing:.03em;
+  text-shadow:0 2px 4px rgba(0,0,0,.3);font-family:var(--font-main);
+}
+body.font-dyslexic .vol-banner-name{font-family:var(--font-dyslexic)}
 .activity-grid-header{
   font-size:1.4em;font-weight:700;color:var(--text-main);
   text-align:center;padding:20px 10px 16px;
