@@ -56,6 +56,77 @@ var nvop = false;
 
 document.documentElement.style.setProperty('--lh', lh);
 
+// ---- SM-2 Spaced Repetition Algorithm ----
+// Each card: {id, fid, front, back, type, ease:2.5, interval:1, reps:0, nextReview:dateStr}
+// Confidence 1-5 maps: 1=again(0), 2=hard(1), 3=okay(3), 4=good(4), 5=easy(5)
+
+function getCards() {
+  try { return JSON.parse(localStorage.getItem('acr_study_cards') || '{}'); } catch (e) { return {}; }
+}
+function saveCards(cards) {
+  try { localStorage.setItem('acr_study_cards', JSON.stringify(cards)); } catch (e) {}
+}
+
+function sm2(card, quality) {
+  // quality: 0-5 (mapped from confidence 1-5)
+  var c = Object.assign({}, card);
+  if (quality < 3) {
+    c.reps = 0;
+    c.interval = 1;
+  } else {
+    if (c.reps === 0) c.interval = 1;
+    else if (c.reps === 1) c.interval = 6;
+    else c.interval = Math.round(c.interval * c.ease);
+    c.reps++;
+  }
+  c.ease = c.ease + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+  if (c.ease < 1.3) c.ease = 1.3;
+  var next = new Date();
+  next.setDate(next.getDate() + c.interval);
+  c.nextReview = next.toISOString().slice(0, 10);
+  return c;
+}
+
+function getOrCreateCard(fid, front, back, type) {
+  var cards = getCards();
+  var id = fid + ':' + type + ':' + front.slice(0, 30);
+  if (!cards[id]) {
+    cards[id] = { id: id, fid: fid, front: front, back: back, type: type,
+      ease: 2.5, interval: 1, reps: 0, nextReview: new Date().toISOString().slice(0, 10) };
+    saveCards(cards);
+  }
+  return cards[id];
+}
+
+function getDueCards(fid) {
+  var cards = getCards();
+  var today = new Date().toISOString().slice(0, 10);
+  var due = [];
+  for (var id in cards) {
+    if (cards[id].fid === fid && cards[id].nextReview <= today) {
+      due.push(cards[id]);
+    }
+  }
+  due.sort(function (a, b) { return a.ease - b.ease; });
+  return due;
+}
+
+function getAllDueCount() {
+  var cards = getCards();
+  var today = new Date().toISOString().slice(0, 10);
+  var count = 0;
+  for (var id in cards) {
+    if (cards[id].nextReview <= today) count++;
+  }
+  return count;
+}
+
+function updateCard(card) {
+  var cards = getCards();
+  cards[card.id] = card;
+  saveCards(cards);
+}
+
 // ---- XP, Streak & Level system ----
 var LEVELS = [
   { name: 'Seeker', icon: '\u{1F50D}', xp: 0 },
@@ -173,7 +244,15 @@ function go(fid) {
   loadContent(fid);
 
   // Render the activity card grid
+  var dueCount = getDueCards(fid).length;
+  var totalDue = getAllDueCount();
   var h = '<div class="activity-grid-header">' + LBL[i] + '</div>';
+  if (dueCount > 0 || totalDue > 0) {
+    h += '<div class="due-banner">';
+    if (dueCount > 0) h += '<span class="due-badge">\u{1F4DA} ' + dueCount + ' cards due for review in this section</span>';
+    if (totalDue > dueCount) h += '<span class="due-total">' + totalDue + ' total due across all sections</span>';
+    h += '</div>';
+  }
   h += '<div class="activity-grid">';
   h += actCard('\u{1F4D6}', 'Chapter Summary', '#2563eb', 'summary', fid);
   h += actCard('\u{1F9E9}', 'Fill in the Blank', '#059669', 'filblank', fid);
@@ -644,7 +723,13 @@ function showFlashcards(fid) {
       var rBtns = document.querySelectorAll('.fc-rate-btn');
       for (var b = 0; b < rBtns.length; b++) {
         rBtns[b].addEventListener('click', function () {
-          ratings.push(parseInt(this.getAttribute('data-r')));
+          var r = parseInt(this.getAttribute('data-r'));
+          ratings.push(r);
+          // SM-2: update the card's schedule based on confidence rating
+          var qualityMap = [0, 0, 1, 3, 4, 5]; // confidence 1-5 -> SM-2 quality 0-5
+          var card = getOrCreateCard(fid, c.front, c.back, c.type);
+          var updated = sm2(card, qualityMap[r]);
+          updateCard(updated);
           ci++;
           renderCard();
         });

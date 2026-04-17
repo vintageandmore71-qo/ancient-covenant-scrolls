@@ -162,6 +162,15 @@ p.sp{background:#fff3cd;border-radius:6px;padding:2px 4px}
 /* =========================================================================
    Activity card grid — big bold colorful tappable cards
    ========================================================================= */
+.due-banner{text-align:center;padding:10px 16px;margin-bottom:12px}
+.due-badge{
+  display:inline-block;background:var(--vol1);color:#fff;
+  padding:8px 18px;border-radius:20px;font-size:14px;font-weight:700;
+  font-family:var(--font-main);box-shadow:0 2px 8px rgba(37,99,235,.25);
+}
+.due-total{
+  display:block;color:var(--text-muted);font-size:12px;margin-top:6px;font-weight:700;
+}
 .activity-grid-header{
   font-size:1.4em;font-weight:700;color:var(--text-main);
   text-align:center;padding:20px 10px 16px;
