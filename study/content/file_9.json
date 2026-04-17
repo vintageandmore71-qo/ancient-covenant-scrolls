@@ -1,0 +1,70 @@
+{
+  "id": "file_9",
+  "label": "Bamidbar (Numbers) — Part 1 — Chapters 1–19",
+  "volume": 4,
+  "content_version": 1,
+  "summary_plain": "Bamidbar Part 1 takes place in the wilderness of Sinai. YHWH commands a census of all men of war age — twenty years and older. The twelve tribes are numbered and arranged around the Mishkan. YHWH gives the Priestly Blessing: YHWH bless you and keep you, YHWH make his face shine on you and be gracious to you, YHWH lift up his countenance upon you and give you shalom. The people depart from Sinai. They complain, and YHWH sends fire. They crave meat, and YHWH sends quail. Moshe sends twelve spies into Kena'an. Ten bring a fearful report. Only Kalev and Yehoshua say: we can take the land. The people rebel and want to return to Egypt. YHWH sentences the generation to forty years in the wilderness — a year for each day the spies explored. That generation will die in the wilderness. Only Kalev and Yehoshua will enter the land.",
+  "summary_scholarly": "Chapters 1 through 19 cover the census at Sinai, the departure, the wilderness complaints, and the catastrophic spy episode. The ACR reads from the Dead Sea Scrolls witnesses (4QNum-b and other fragments) and the Orit Ge'ez of the African Israelite community. The Masoretic is noted as a variant only. The Priestly Blessing in 6:24-26 — preserved on two silver scrolls from Ketef Hinnom dating to the seventh or sixth century BCE, the oldest known biblical text — is reproduced exactly as the ACR records it. The spy narrative (ch 13-14) is central: ten spies report fear, two report faith. The forty-year sentence (14:34) shapes the rest of Bamidbar and Devarim. YHWH's self-description in 14:18 echoes the thirteen attributes from Shemot 34:6-7. The Yovelim text (ACR Volume 7) records these events in jubilee chronology.",
+  "key_terms": [
+    { "term": "Bamidbar", "phonetic": "Bah-mid-BAR", "definition": "'In the wilderness' — the first distinctive word of the book. The events take place in the wilderness between Sinai and Kena'an. European Bibles named it Numbers because of the censuses." },
+    { "term": "Priestly Blessing", "phonetic": "", "definition": "YHWH's blessing spoken through the priests: 'YHWH bless you and keep you. YHWH make his face shine on you and be gracious to you. YHWH lift up his countenance upon you and give you shalom' (6:24-26)." },
+    { "term": "Shalom", "phonetic": "Shah-LOHM", "definition": "Peace, wholeness, completeness. The final word of the Priestly Blessing: 'YHWH lift up his countenance upon you and give you shalom' (6:26)." },
+    { "term": "Kalev", "phonetic": "Kah-LEV", "definition": "Son of Yefunneh, from the tribe of Yehudah. One of only two spies who gave a faithful report. He and Yehoshua alone from the exodus generation will enter the land (14:30). Anglicized as Caleb." },
+    { "term": "Yehoshua", "phonetic": "Yeh-ho-SHOO-ah", "definition": "Son of Nun, from the tribe of Efrayim. Originally named Hoshea — Moshe renamed him Yehoshua (13:16). One of two faithful spies. Anglicized as Joshua." },
+    { "term": "Twelve Spies", "phonetic": "", "definition": "Moshe sends one man from each tribe to spy out Kena'an (ch 13). Ten return with a fearful report. Only Kalev and Yehoshua say the people can take the land. The congregation rebels." },
+    { "term": "Forty Years", "phonetic": "", "definition": "YHWH's sentence on the generation that refused to enter Kena'an: 'A year for each day, you shall bear your iniquity forty years' (14:34). The entire exodus generation except Kalev and Yehoshua will die in the wilderness." },
+    { "term": "Nazirite", "phonetic": "Nah-zee-REET", "definition": "A person who takes a special vow of separation to YHWH (6:2). No wine, no razor, no contact with the dead for the duration of the vow." },
+    { "term": "Census", "phonetic": "", "definition": "YHWH commands Moshe to count every male twenty years and older who can go to war (1:2-3). The twelve tribes are numbered and arranged in specific positions around the Mishkan." },
+    { "term": "Ketef Hinnom Scrolls", "phonetic": "", "definition": "Two tiny silver scrolls found near Jerusalem bearing the Priestly Blessing (6:24-26), dating to the seventh or sixth century BCE — the oldest known physical text of any biblical passage." }
+  ],
+  "fill_blank": [
+    { "ref": "6:24", "prompt": "YHWH bless you and ______ you.", "answer": "keep", "source_quote": "YHWH bless you and keep you." },
+    { "ref": "6:25", "prompt": "YHWH make his face ______ on you and be gracious to you.", "answer": "shine", "source_quote": "YHWH make his face shine on you and be gracious to you." },
+    { "ref": "6:26", "prompt": "YHWH lift up his countenance upon you and give you ______.", "answer": "shalom", "source_quote": "YHWH lift up his countenance upon you and give you shalom." },
+    { "ref": "14:34", "prompt": "A year for each day, you shall bear your iniquity ______ years.", "answer": "forty", "source_quote": "According to the number of the days in which you spied out the land, forty days, a year for each day, you shall bear your iniquity forty years." },
+    { "ref": "1:1", "prompt": "YHWH spoke to Moshe in the ______ of Sinai, in the tent of meeting.", "answer": "wilderness", "source_quote": "YHWH spoke to Moshe in the wilderness of Sinai, in the tent of meeting, on the first day of the second month, in the second year after they had come out of the land of Egypt." },
+    { "ref": "13:2", "prompt": "Send men to spy out the land of ______, which I am giving to the people of Yisra'EL.", "answer": "Kena'an", "source_quote": "Send men to spy out the land of Kena'an, which I am giving to the people of Yisra'EL." },
+    { "ref": "14:4", "prompt": "And they said to one another: Let us choose a leader and go back to ______.", "answer": "Egypt", "source_quote": "And they said to one another: Let us choose a leader and go back to Egypt." },
+    { "ref": "14:18", "prompt": "YHWH is slow to anger and abounding in steadfast love, forgiving iniquity and ______.", "answer": "transgression", "source_quote": "YHWH is slow to anger and abounding in steadfast love, forgiving iniquity and transgression, but he will by no means clear the guilty." },
+    { "ref": "13:16", "prompt": "And Moshe called Hoshea the son of Nun ______.", "answer": "Yehoshua", "source_quote": "These were the names of the men whom Moshe sent to spy out the land. And Moshe called Hoshea the son of Nun Yehoshua." },
+    { "ref": "11:1", "prompt": "And the people complained in the hearing of YHWH about their misfortunes, and when YHWH heard it, his anger was kindled, and the ______ of YHWH burned among them.", "answer": "fire", "source_quote": "And the people complained in the hearing of YHWH about their misfortunes, and when YHWH heard it, his anger was kindled, and the fire of YHWH burned among them and consumed some outlying parts of the camp." }
+  ],
+  "multiple_choice": [
+    { "ref": "6:24-26", "question": "What is the Priestly Blessing?", "options": ["A prayer for the king", "YHWH bless you and keep you, make his face shine on you, give you shalom", "A blessing over the offerings", "A song of praise"], "correct": 1, "source_quote": "YHWH bless you and keep you. YHWH make his face shine on you and be gracious to you. YHWH lift up his countenance upon you and give you shalom." },
+    { "ref": "14:34", "question": "How long was the generation sentenced to wander in the wilderness?", "options": ["Seven years", "Twenty years", "Forty years", "Seventy years"], "correct": 2, "source_quote": "A year for each day, you shall bear your iniquity forty years." },
+    { "ref": "13:6,8", "question": "Which two spies gave a faithful report?", "options": ["Moshe and Aharon", "Kalev and Yehoshua", "Nadav and Avihu", "Re'uven and Shim'on"], "correct": 1, "source_quote": "From the tribe of Yehudah, Kalev the son of Yefunneh... From the tribe of Efrayim, Hoshea the son of Nun." },
+    { "ref": "1:2-3", "question": "Who was counted in the census?", "options": ["Every person in Yisra'EL", "Every male twenty years old and upward who could go to war", "Only the Levites", "Only the firstborn"], "correct": 1, "source_quote": "Take a census of all the congregation of the people of Yisra'EL, by clans, by fathers' houses, according to the number of names, every male, head by head. From twenty years old and upward, all in Yisra'EL who are able to go to war." },
+    { "ref": "14:4", "question": "What did the people want to do after the spies' fearful report?", "options": ["Attack immediately", "Choose a leader and go back to Egypt", "Build a city in the wilderness", "Send more spies"], "correct": 1, "source_quote": "And they said to one another: Let us choose a leader and go back to Egypt." },
+    { "ref": "13:16", "question": "What did Moshe rename Hoshea the son of Nun?", "options": ["Kalev", "Yehoshua", "Aharon", "Elazar"], "correct": 1, "source_quote": "And Moshe called Hoshea the son of Nun Yehoshua." },
+    { "ref": "6:2-3", "question": "What must a Nazirite abstain from?", "options": ["Bread and water", "Wine, strong drink, and grapes", "All animal food", "Speaking in public"], "correct": 1, "source_quote": "When either a man or a woman makes a special vow, the vow of a Nazirite, to separate himself to YHWH, he shall separate himself from wine and strong drink." },
+    { "ref": "14:18", "question": "How does YHWH describe himself when Moshe intercedes?", "options": ["A consuming fire", "Slow to anger and abounding in steadfast love", "The judge of all nations", "Silent and hidden"], "correct": 1, "source_quote": "YHWH is slow to anger and abounding in steadfast love, forgiving iniquity and transgression." },
+    { "ref": "11:4-5", "question": "What did the people crave in the wilderness?", "options": ["Gold and silver", "Meat — they remembered the fish and cucumbers of Egypt", "Weapons for war", "A new leader"], "correct": 1, "source_quote": "Now the rabble that was among them had a strong craving. And the people of Yisra'EL also wept again and said: Oh that we had meat to eat. We remember the fish we ate in Egypt." },
+    { "ref": "14:21", "question": "What did YHWH swear about the rebellious generation?", "options": ["They would be forgiven", "None who saw his glory and signs would see the promised land", "They would return to Egypt", "Their children would be punished"], "correct": 1, "source_quote": "But truly, as I live, and as all the earth shall be filled with the glory of YHWH, none of the men who have seen my glory and my signs." }
+  ],
+  "faq": [
+    {
+      "question": "What is the Priestly Blessing and why is it significant?",
+      "answer": "The Priestly Blessing (6:24-26) is the blessing YHWH gives to be spoken over the people of Yisra'EL: 'YHWH bless you and keep you. YHWH make his face shine on you and be gracious to you. YHWH lift up his countenance upon you and give you shalom.' Two silver scrolls found at Ketef Hinnom near Jerusalem, dating to the seventh or sixth century BCE, bear this blessing — the oldest known physical text of any passage from the Hebrew scriptures."
+    },
+    {
+      "question": "Why did the generation die in the wilderness?",
+      "answer": "After the twelve spies returned from Kena'an, ten reported fear. Only Kalev and Yehoshua said the people could take the land. The congregation rebelled and wanted to return to Egypt (14:4). YHWH sentenced the generation: 'A year for each day, you shall bear your iniquity forty years' (14:34). Every person twenty years and older at the time of the census — except Kalev and Yehoshua — would die in the wilderness."
+    },
+    {
+      "question": "Who was Yehoshua?",
+      "answer": "Originally named Hoshea, son of Nun, from the tribe of Efrayim. Moshe renamed him Yehoshua (13:16). He and Kalev were the only spies who gave a faithful report. Yehoshua will lead the people into Kena'an after Moshe's death. His story continues in ACR Volume 10 (Yehoshua)."
+    },
+    {
+      "question": "What is a Nazirite?",
+      "answer": "A person — man or woman — who takes a special vow of separation to YHWH (6:2). For the duration of the vow: no wine, no strong drink, no grapes or grape products; no razor touches the head; no contact with a dead body. When the vow is complete, specific offerings are brought. The Nazirite vow is voluntary and temporary."
+    },
+    {
+      "question": "Why does the text end the Priestly Blessing with 'shalom'?",
+      "answer": "Shalom is the final word YHWH gives in the blessing — peace, wholeness, completeness. YHWH's blessing builds: first keeping, then grace, then the full presence ('lift up his countenance'), and the culmination is shalom. The verse that follows says: 'So shall they put my name upon the people of Yisra'EL, and I will bless them' (6:27). The blessing places YHWH's name on the people."
+    },
+    {
+      "question": "What DSS manuscripts preserve Bamidbar?",
+      "answer": "4QNum-b and other Qumran fragments preserve portions of Bamidbar. The Orit Ge'ez of the African Israelite community preserves the full text as a living witness. The Masoretic is noted only where it differs."
+    }
+  ]
+}
