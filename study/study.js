@@ -75,6 +75,29 @@ function toggleLineFocus() {
 if (beelineOn) document.body.classList.add('beeline-on');
 if (lineFocusOn) document.body.classList.add('linefocus-on');
 
+// ---- Volume images (loaded from Wikimedia at runtime, decorative only) ----
+var VOL_IMAGES = {
+  '1': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/The_cave_of_Qumran_place_of_the_dead_Sea_Scrolls.JPG/320px-The_cave_of_Qumran_place_of_the_dead_Sea_Scrolls.JPG',
+  '2': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Sinai_Peninsula_from_Southeastern_Mediterranean_panorama.jpg/320px-Sinai_Peninsula_from_Southeastern_Mediterranean_panorama.jpg',
+  '3': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Dea_sea_scroll_display_is.JPG/320px-Dea_sea_scroll_display_is.JPG',
+  '4': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/The_cave_of_Qumran_place_of_the_dead_Sea_Scrolls.JPG/320px-The_cave_of_Qumran_place_of_the_dead_Sea_Scrolls.JPG',
+  '5': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Dea_sea_scroll_display_is.JPG/320px-Dea_sea_scroll_display_is.JPG',
+  '6': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Great_Isaiah_Scroll.jpg/320px-Great_Isaiah_Scroll.jpg',
+  '7': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Great_Isaiah_Scroll.jpg/320px-Great_Isaiah_Scroll.jpg',
+  '8': 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Dead_Sea_Scrolls.jpg/320px-Dead_Sea_Scrolls.jpg'
+};
+
+function getVolForFid(fid) {
+  var idx = IDS.indexOf(fid);
+  if (idx < 0) return '1';
+  var count = 0;
+  for (var g = 0; g < VOL_GROUPS.length; g++) {
+    count += VOL_GROUPS[g].count;
+    if (idx < count) return VOL_GROUPS[g].vol;
+  }
+  return '1';
+}
+
 // ---- SM-2 Spaced Repetition Algorithm ----
 // Each card: {id, fid, front, back, type, ease:2.5, interval:1, reps:0, nextReview:dateStr}
 // Confidence 1-5 maps: 1=again(0), 2=hard(1), 3=okay(3), 4=good(4), 5=easy(5)
@@ -265,7 +288,13 @@ function go(fid) {
   // Render the activity card grid
   var dueCount = getDueCards(fid).length;
   var totalDue = getAllDueCount();
-  var h = '<div class="activity-grid-header">' + LBL[i] + '</div>';
+  var volId = getVolForFid(fid);
+  var volImg = VOL_IMAGES[volId] || '';
+  var h = '';
+  if (volImg) {
+    h += '<div class="vol-hero"><img src="' + volImg + '" alt="" class="vol-hero-img" loading="lazy" onerror="this.style.display=\'none\'"></div>';
+  }
+  h += '<div class="activity-grid-header">' + LBL[i] + '</div>';
   if (dueCount > 0 || totalDue > 0) {
     h += '<div class="due-banner">';
     if (dueCount > 0) h += '<span class="due-badge">\u{1F4DA} ' + dueCount + ' cards due for review in this section</span>';
