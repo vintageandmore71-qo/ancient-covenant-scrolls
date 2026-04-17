@@ -1,6 +1,6 @@
 # ACR Study App — Complete Build Plan & Status
-# Locked in: 2026-04-16
-# Tagged: study-9-cards-working
+# Locked in: 2026-04-16 (updated 2026-04-17)
+# Tags: study-9-cards-working, study-13-of-18-content
 # Repo: https://github.com/dssorit/ancient-covenant-scrolls
 # Live: https://dssorit.github.io/ancient-covenant-scrolls/study/
 
@@ -111,26 +111,26 @@
 
 ## REMAINING — Build Plan (Priority Order)
 
-### Priority 1: Content Generation (17 files remaining)
+### Priority 1: Content Generation (3 files remaining — 15 of 18 done)
 Generate curated content for each section, one at a time, in chat.
 Each file requires: read full ACR source text → write JSON → audit every
 quiz item word-for-word against ACR → commit.
 
 Content files needed:
-- [ ] file_2.json — Bereshit Part 2, Chapters 12-25
-- [ ] file_3.json — Bereshit Part 3, Chapters 26-36
-- [ ] file_4.json — Bereshit Part 4, Chapters 37-50
-- [ ] file_5.json — Shemot Part 1, Chapters 1-18
-- [ ] file_6.json — Shemot Part 2, Chapters 19-40
-- [ ] file_7.json — Vayikra Part 1, Chapters 1-16
-- [ ] file_8.json — Vayikra Part 2, Chapters 17-27
-- [ ] file_9.json — Bamidbar Part 1, Chapters 1-19
-- [ ] file_10.json — Bamidbar Part 2, Chapters 20-36
-- [ ] file_11.json — Devarim Part 1, Chapters 1-17
-- [ ] file_12.json — Devarim Part 2, Chapters 18-34
-- [ ] file_13.json — Chanokh Part 1, Chapters 1-36 (Book of Watchers)
-- [ ] file_14.json — Chanokh Part 2, Chapters 37-55 (Dream Visions)
-- [ ] file_15.json — Chanokh Part 3, Chapters 56-73 (Epistle)
+- [x] file_2.json — Bereshit Part 2, Chapters 12-25 ✅
+- [x] file_3.json — Bereshit Part 3, Chapters 26-36 ✅
+- [x] file_4.json — Bereshit Part 4, Chapters 37-50 ✅
+- [x] file_5.json — Shemot Part 1, Chapters 1-18 ✅
+- [x] file_6.json — Shemot Part 2, Chapters 19-40 ✅
+- [x] file_7.json — Vayikra Part 1, Chapters 1-16 ✅
+- [x] file_8.json — Vayikra Part 2, Chapters 17-27 ✅
+- [x] file_9.json — Bamidbar Part 1, Chapters 1-19 ✅
+- [x] file_10.json — Bamidbar Part 2, Chapters 20-36 ✅
+- [x] file_11.json — Devarim Part 1, Chapters 1-17 ✅
+- [x] file_12.json — Devarim Part 2, Chapters 18-34 ✅
+- [x] file_13.json — Chanokh Part 1, Chapters 1-36 (Book of Watchers) ✅
+- [x] file_14.json — Chanokh Part 2, Chapters 37-55 (Dream Visions) ✅
+- [x] file_15.json — Chanokh Part 3, Chapters 56-73 (Epistle) ✅
 - [ ] file_16.json — Yovelim Part 1, Chapters 1-25
 - [ ] file_17.json — Yovelim Part 2, Chapters 26-50
 - [ ] file_94.json — War Scroll 1QM, All 19 Columns
@@ -248,8 +248,8 @@ All curated content must follow these rules without exception:
 
 ## GIT STATE
 
-Latest commit: 982ae98 (Progress view + XP/streak/level system)
-Tag: study-9-cards-working
+Latest commit: e881ad2 (Chanokh Part 3, Epistle)
+Tags: study-9-cards-working, study-13-of-18-content
 Branch: main
 Reader tag: all-features-working (commit 0083767)
 
@@ -257,11 +257,30 @@ Files in /study/:
   study/index.html          — PWA shell with Google Fonts links
   study/study.css           — dyslexia-optimized visual design
   study/study.js            — all 9 activity modes + XP/streak/level
-  study/sw.js               — scoped service worker (acr-study-v18)
+  study/sw.js               — scoped service worker
   study/manifest.json       — PWA manifest
-  study/icon.png            — app icon (copy of reader's, to be replaced)
+  study/icon.png            — app icon (user uploading Attain icon via GitHub web UI)
   study/README.md           — phase checklist
-  study/content/file_1.json — curated content for Bereshit Part 1 (v3, audited)
+  study/BUILD_PLAN.md       — this file
+  study/content/file_1.json — Bereshit Part 1 (v3, audited)
+  study/content/file_2.json — Bereshit Part 2 (audited)
+  study/content/file_3.json — Bereshit Part 3 (audited)
+  study/content/file_4.json — Bereshit Part 4 (audited)
+  study/content/file_5.json — Shemot Part 1 (audited)
+  study/content/file_6.json — Shemot Part 2 (audited)
+  study/content/file_7.json — Vayikra Part 1 (audited)
+  study/content/file_8.json — Vayikra Part 2 (audited)
+  study/content/file_9.json — Bamidbar Part 1 (audited)
+  study/content/file_10.json — Bamidbar Part 2 (audited)
+  study/content/file_11.json — Devarim Part 1 (audited)
+  study/content/file_12.json — Devarim Part 2 (audited)
+  study/content/file_13.json — Chanokh Part 1 — Book of Watchers (audited)
+  study/content/file_14.json — Chanokh Part 2 — Astronomical/Dream Visions (audited)
+  study/content/file_15.json — Chanokh Part 3 — Epistle (audited)
 
-Total study.js size: ~950 lines
-Total study.css size: ~450 lines
+Volumes complete: 1 (Bereshit), 2 (Shemot), 3 (Vayikra), 4 (Bamidbar), 5 (Devarim), 6 (Chanokh)
+Volumes remaining: 7 (Yovelim — 2 files), 33 (War Scroll — 1 file)
+
+## NEXT SESSION INSTRUCTIONS
+
+Open with: "Read study/BUILD_PLAN.md. Continue content generation from file_16 (Yovelim Part 1). Then file_17 and file_94. After content is complete, continue with SM-2, images, and remaining features from the build plan."
