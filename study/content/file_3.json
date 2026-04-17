@@ -1,0 +1,70 @@
+{
+  "id": "file_3",
+  "label": "Bereshit — Part 3 — Chapters 26–36",
+  "volume": 1,
+  "content_version": 1,
+  "summary_plain": "Bereshit Part 3 follows Yitzhak and Yaakov. YHWH confirms the covenant with Yitzhak — the same oath sworn to Avraham. Yaakov and Esav are twins. Esav sells his birthright. Yaakov receives the blessing from his blind father Yitzhak through Rivkah's plan. Yaakov flees to Paddan-Aram and dreams at Beit-El — a ladder set up on the earth reaching to heaven with angels ascending and descending. YHWH speaks to him and confirms the covenant. Yaakov works for Lavan and marries Leah and Rachel. Eleven sons are born. Yaakov leaves Lavan and returns to Kena'an. At the Yabok river he wrestles through the night and his name is changed to Yisra'EL — 'for you have striven with The Creator and with men.' Yaakov and Esav are reconciled. Rachel dies giving birth to Binyamin. The twelve sons are listed. Yitzhak dies at 180 years.",
+  "summary_scholarly": "Chapters 26 through 36 trace the covenant line from Yitzhak through Yaakov, ending with the full roster of twelve sons and the deaths of Rachel and Yitzhak. The ACR reads from the Dead Sea Scrolls witnesses (4QGen-a through 4QGen-j) and the Orit Ge'ez of the African Israelite community. The Masoretic is noted as a variant only. The covenant is confirmed to Yitzhak in chapter 26 in the same language YHWH used with Avraham — 'I will multiply your offspring as the stars of heaven.' The Beit-El vision in chapter 28 — a ladder reaching to heaven with angels ascending and descending — establishes Yaakov's direct encounter with YHWH. The wrestling at the Yabok in chapter 32 produces the name change: 'Your name shall no longer be called Yaakov, but Yisra'EL — for you have striven with The Creator and with men.' The Yovelim text (ACR Volume 7) provides the jubilee-year chronology for these events. The twelve sons born to Yaakov through Leah, Rachel, Bilhah, and Zilpah become the twelve tribes. Rachel dies on the road to Efrat giving birth to Binyamin. Yitzhak dies at 180 and is buried by both Yaakov and Esav.",
+  "key_terms": [
+    { "term": "Yaakov", "phonetic": "Yah-ah-KOV", "definition": "Yitzhak and Rivkah's younger son, twin of Esav. He receives the blessing and the covenant. His name is changed to Yisra'EL at the Yabok (32:28). Anglicized as Jacob." },
+    { "term": "Esav", "phonetic": "Eh-SAHV", "definition": "Yitzhak and Rivkah's older son, twin of Yaakov. He sells his birthright (25:33) and loses the blessing (ch 27). Settles in the land of Seir / Edom. Anglicized as Esau." },
+    { "term": "Yisra'EL", "phonetic": "Yis-rah-EL", "definition": "The name given to Yaakov after he wrestles at the Yabok: 'for you have striven with The Creator and with men, and have prevailed' (32:28). The name carries the Hebrew El — The Creator." },
+    { "term": "Beit-El", "phonetic": "Bayt-EL", "definition": "The place where Yaakov dreams of the ladder reaching to heaven (28:12). He names the place Beit-El — 'House of The Creator.' Anglicized as Bethel." },
+    { "term": "Rivkah", "phonetic": "Riv-KAH", "definition": "Wife of Yitzhak, mother of Yaakov and Esav. She directs Yaakov to receive the blessing from the blind Yitzhak (ch 27). Anglicized as Rebekah." },
+    { "term": "Lavan", "phonetic": "Lah-VAHN", "definition": "Rivkah's brother in Paddan-Aram. Yaakov works for him for fourteen years to marry Leah and Rachel (29:18-28). Anglicized as Laban." },
+    { "term": "Leah and Rachel", "phonetic": "Leh-AH / Rah-KHEL", "definition": "Lavan's daughters, both married to Yaakov. Leah bears six sons and a daughter (Dinah). Rachel bears Yosef and Binyamin. Rachel dies giving birth to Binyamin (35:18-19)." },
+    { "term": "Binyamin", "phonetic": "Bin-yah-MEEN", "definition": "Yaakov and Rachel's second son. Rachel dies giving birth to him on the road to Efrat (35:18-19). His mother named him Ben-oni but his father called him Binyamin. Anglicized as Benjamin." },
+    { "term": "Yabok", "phonetic": "Yah-BOK", "definition": "The river where Yaakov wrestles through the night and receives the name Yisra'EL (32:24-28)." },
+    { "term": "Paddan-Aram", "phonetic": "Pah-dahn Ah-RAHM", "definition": "The region where Lavan lives and where Yaakov spends twenty years, marries Leah and Rachel, and fathers eleven sons before returning to Kena'an." }
+  ],
+  "fill_blank": [
+    { "ref": "26:4", "prompt": "I will multiply your offspring as the ______ of heaven and will give to your offspring all these lands.", "answer": "stars", "source_quote": "I will multiply your offspring as the stars of heaven and will give to your offspring all these lands. And in your offspring all the nations of the earth shall be blessed." },
+    { "ref": "28:12", "prompt": "And he dreamed, and behold, there was a ______ set up on the earth, and the top of it reached to heaven.", "answer": "ladder", "source_quote": "And he dreamed, and behold, there was a ladder set up on the earth, and the top of it reached to heaven. And behold, the angels of The Creator were ascending and descending on it." },
+    { "ref": "32:28", "prompt": "Your name shall no longer be called Yaakov, but ______ — for you have striven with The Creator and with men, and have prevailed.", "answer": "Yisra'EL", "source_quote": "Then he said: Your name shall no longer be called Yaakov, but Yisra'EL — for you have striven with The Creator and with men, and have prevailed." },
+    { "ref": "27:1", "prompt": "When Yitzhak was old and his eyes were dim so that he could not ______, he called Esav his older son.", "answer": "see", "source_quote": "When Yitzhak was old and his eyes were dim so that he could not see, he called Esav his older son and said to him: My son. And he answered him: Here I am." },
+    { "ref": "29:20", "prompt": "So Yaakov served seven years for Rachel, and they seemed to him but a few ______ because of the love he had for her.", "answer": "days", "source_quote": "So Yaakov served seven years for Rachel, and they seemed to him but a few days because of the love he had for her." },
+    { "ref": "33:4", "prompt": "But Esav ran to meet him and ______ him and fell on his neck and kissed him, and they wept.", "answer": "embraced", "source_quote": "But Esav ran to meet him and embraced him and fell on his neck and kissed him, and they wept." },
+    { "ref": "35:18", "prompt": "His mother named him Ben-oni, but his father called him ______.", "answer": "Binyamin", "source_quote": "And as her soul was departing — for she was dying — she called his name Ben-oni, but his father called him Binyamin." },
+    { "ref": "26:5", "prompt": "Because Avraham obeyed my voice and kept my charge, my commandments, my statutes, and my ______.", "answer": "laws", "source_quote": "Because Avraham obeyed my voice and kept my charge, my commandments, my statutes, and my laws." },
+    { "ref": "35:19", "prompt": "So Rachel died, and she was buried on the way to ______, that is, Bethlehem.", "answer": "Efrat", "source_quote": "So Rachel died, and she was buried on the way to Efrat, that is, Bethlehem." },
+    { "ref": "28:15", "prompt": "Behold, I am with you and will keep you wherever you go, and will bring you back to this ______.", "answer": "land", "source_quote": "Behold, I am with you and will keep you wherever you go, and will bring you back to this land. For I will not leave you until I have done what I have promised you." }
+  ],
+  "multiple_choice": [
+    { "ref": "28:12", "question": "What did Yaakov see in his dream at Beit-El?", "options": ["A burning bush", "A ladder reaching to heaven with angels ascending and descending", "A river of fire", "A pillar of cloud"], "correct": 1, "source_quote": "And he dreamed, and behold, there was a ladder set up on the earth, and the top of it reached to heaven. And behold, the angels of The Creator were ascending and descending on it." },
+    { "ref": "32:28", "question": "What name was Yaakov given after wrestling at the Yabok?", "options": ["Avraham", "Yisra'EL", "Yehudah", "Yosef"], "correct": 1, "source_quote": "Your name shall no longer be called Yaakov, but Yisra'EL — for you have striven with The Creator and with men, and have prevailed." },
+    { "ref": "27:1", "question": "Why did Yitzhak call Esav to give him the blessing?", "options": ["He was leaving the land", "He was old and could not see", "YHWH told him to", "Esav demanded it"], "correct": 1, "source_quote": "When Yitzhak was old and his eyes were dim so that he could not see, he called Esav his older son." },
+    { "ref": "29:18-20", "question": "How many years did Yaakov serve Lavan to marry Rachel?", "options": ["Three years", "Seven years", "Fourteen years", "Twenty years"], "correct": 1, "source_quote": "So Yaakov served seven years for Rachel, and they seemed to him but a few days because of the love he had for her." },
+    { "ref": "33:4", "question": "How did Esav react when he finally met Yaakov returning to Kena'an?", "options": ["He attacked him", "He ran to meet him, embraced him, and they wept", "He turned away", "He demanded payment"], "correct": 1, "source_quote": "But Esav ran to meet him and embraced him and fell on his neck and kissed him, and they wept." },
+    { "ref": "35:18-19", "question": "Where did Rachel die?", "options": ["In Paddan-Aram", "At Beit-El", "On the way to Efrat", "In Egypt"], "correct": 2, "source_quote": "So Rachel died, and she was buried on the way to Efrat, that is, Bethlehem." },
+    { "ref": "35:28", "question": "How many years did Yitzhak live?", "options": ["120 years", "175 years", "180 years", "200 years"], "correct": 2, "source_quote": "Now the days of Yitzhak were 180 years." },
+    { "ref": "35:23–26", "question": "How many sons did Yaakov have?", "options": ["Eight", "Ten", "Twelve", "Fourteen"], "correct": 2, "source_quote": "Now the sons of Leah: Re'uven, Yaakov's firstborn, Shim'on, Levi, Yehudah, Yissakhar, and Zevulun. The sons of Rachel: Yosef and Binyamin. The sons of Bilhah, Rachel's servant: Dan and Naftali. The sons of Zilpah, Leah's servant: Gad and Asher. These were the sons of Yaakov who were born to him in Paddan-Aram." },
+    { "ref": "29:25", "question": "Who did Lavan give Yaakov on his wedding night instead of Rachel?", "options": ["Zilpah", "Bilhah", "Leah", "Dinah"], "correct": 2, "source_quote": "And in the morning, behold, it was Leah. And Yaakov said to Lavan: What is this you have done to me? Did I not serve with you for Rachel?" },
+    { "ref": "26:3-5", "question": "Why did YHWH confirm the covenant oath to Yitzhak?", "options": ["Because of Yitzhak's own righteousness", "Because Avraham obeyed YHWH's voice and kept his commandments", "Because Rivkah prayed for it", "Because Esav sold his birthright"], "correct": 1, "source_quote": "I will establish the oath that I swore to Avraham your father... Because Avraham obeyed my voice and kept my charge, my commandments, my statutes, and my laws." }
+  ],
+  "faq": [
+    {
+      "question": "Why did Yaakov receive the blessing instead of Esav?",
+      "answer": "Rivkah directed Yaakov to present himself to the blind Yitzhak as Esav (ch 27). The text records what happened without imposing later moral commentary. The Yovelim text (ACR Volume 7) provides additional context: it records Avraham's direct blessing of Yaakov before his death, choosing Yaakov over Esav by name."
+    },
+    {
+      "question": "What does the name Yisra'EL mean?",
+      "answer": "The text says directly: 'Your name shall no longer be called Yaakov, but Yisra'EL — for you have striven with The Creator and with men, and have prevailed' (32:28). The name carries El — The Creator — as its ending. Yaakov strove (sarah) with El."
+    },
+    {
+      "question": "What happened at the Yabok river?",
+      "answer": "Yaakov was alone at the Yabok crossing at night. A man wrestled with him until the breaking of the day (32:24). When the man could not prevail, he struck Yaakov's hip socket. Yaakov would not let go until he received a blessing. The man gave him the name Yisra'EL. Yaakov named the place Peniel — 'For I have seen The Creator face to face, and yet my life has been delivered' (32:30)."
+    },
+    {
+      "question": "Who were the mothers of the twelve sons?",
+      "answer": "Leah bore Re'uven, Shim'on, Levi, Yehudah, Yissakhar, and Zevulun. Rachel bore Yosef and Binyamin. Bilhah (Rachel's servant) bore Dan and Naftali. Zilpah (Leah's servant) bore Gad and Asher. Leah also bore a daughter, Dinah."
+    },
+    {
+      "question": "What is the dream at Beit-El?",
+      "answer": "Yaakov slept at a place on his journey to Paddan-Aram and dreamed of a ladder set up on the earth with its top reaching to heaven. The angels of The Creator were ascending and descending on it. YHWH stood above it and confirmed the covenant: the land, the offspring, and the blessing through his seed. Yaakov named the place Beit-El — 'House of The Creator' (28:12-19)."
+    },
+    {
+      "question": "How did Yaakov and Esav part?",
+      "answer": "When Yaakov returned from Paddan-Aram, Esav ran to meet him, embraced him, fell on his neck, kissed him, and they wept (33:4). They parted in peace. Esav settled in the land of Seir (Edom). Yaakov settled in the land of Kena'an. Both were present at Yitzhak's burial (35:29)."
+    }
+  ]
+}
