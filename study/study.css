@@ -120,6 +120,67 @@ body.font-dyslexic{font-family:var(--font-dyslexic);letter-spacing:.04em;word-sp
   text-align:left;
 }
 body.font-dyslexic #content p{font-family:var(--font-dyslexic);line-height:2.0}
+
+/* =========================================================================
+   BeeLine reading aid — alternating color gradient on text lines
+   Helps the eye track from end of one line to start of the next.
+   Research: 50%+ speed improvement for many dyslexic readers.
+   ========================================================================= */
+body.beeline-on #content p,
+body.beeline-on .ll-card,
+body.beeline-on .cloze-prompt,
+body.beeline-on .mc-question,
+body.beeline-on .fc-front,
+body.beeline-on .fc-back,
+body.beeline-on .sv-text,
+body.beeline-on .sv-td,
+body.beeline-on .sv-fa{
+  background:linear-gradient(
+    180deg,
+    #2563eb 0%, #2563eb 12%,
+    #7c3aed 12%, #7c3aed 25%,
+    #dc2626 25%, #dc2626 37%,
+    #d97706 37%, #d97706 50%,
+    #059669 50%, #059669 62%,
+    #0891b2 62%, #0891b2 75%,
+    #2563eb 75%, #2563eb 87%,
+    #7c3aed 87%, #7c3aed 100%
+  );
+  background-size:100% calc(var(--lh, 1.7) * 1em * 8);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  color:transparent;
+}
+
+/* =========================================================================
+   Line focus — dims everything except the area near the cursor/finger.
+   Tap anywhere on the text to position the focus band.
+   ========================================================================= */
+body.linefocus-on .ll-card,
+body.linefocus-on .cloze-prompt,
+body.linefocus-on .mc-question,
+body.linefocus-on .sv-text,
+body.linefocus-on .fc-front,
+body.linefocus-on .fc-back{
+  position:relative;
+}
+body.linefocus-on .ll-card::before,
+body.linefocus-on .cloze-prompt::before,
+body.linefocus-on .mc-question::before,
+body.linefocus-on .sv-text::before{
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:linear-gradient(
+    180deg,
+    rgba(0,0,0,.55) 0%,
+    rgba(0,0,0,.55) 35%,
+    rgba(0,0,0,0) 35%,
+    rgba(0,0,0,0) 65%,
+    rgba(0,0,0,.55) 65%,
+    rgba(0,0,0,.55) 100%
+  );
+  pointer-events:none;border-radius:inherit;z-index:1;
+}
 p.sp{background:#fff3cd;border-radius:6px;padding:2px 4px}
 
 /* =========================================================================

@@ -56,6 +56,25 @@ var nvop = false;
 
 document.documentElement.style.setProperty('--lh', lh);
 
+// ---- Reading Aids: BeeLine gradient + Line Focus ----
+var beelineOn = localStorage.getItem('acr_study_beeline') === '1';
+var lineFocusOn = localStorage.getItem('acr_study_linefocus') === '1';
+
+function toggleBeeline() {
+  beelineOn = !beelineOn;
+  document.body.classList.toggle('beeline-on', beelineOn);
+  try { localStorage.setItem('acr_study_beeline', beelineOn ? '1' : '0'); } catch (e) {}
+}
+
+function toggleLineFocus() {
+  lineFocusOn = !lineFocusOn;
+  document.body.classList.toggle('linefocus-on', lineFocusOn);
+  try { localStorage.setItem('acr_study_linefocus', lineFocusOn ? '1' : '0'); } catch (e) {}
+}
+
+if (beelineOn) document.body.classList.add('beeline-on');
+if (lineFocusOn) document.body.classList.add('linefocus-on');
+
 // ---- SM-2 Spaced Repetition Algorithm ----
 // Each card: {id, fid, front, back, type, ease:2.5, interval:1, reps:0, nextReview:dateStr}
 // Confidence 1-5 maps: 1=again(0), 2=hard(1), 3=okay(3), 4=good(4), 5=easy(5)
@@ -1244,6 +1263,18 @@ function bindUI() {
     applyFontSize();
     try { localStorage.setItem('acr_study_fs', fs); } catch (e) {}
   });
+
+  // Reading aids
+  document.getElementById('b-beeline').addEventListener('click', function () {
+    toggleBeeline();
+    this.classList.toggle('on', beelineOn);
+  });
+  if (beelineOn) document.getElementById('b-beeline').classList.add('on');
+  document.getElementById('b-linefocus').addEventListener('click', function () {
+    toggleLineFocus();
+    this.classList.toggle('on', lineFocusOn);
+  });
+  if (lineFocusOn) document.getElementById('b-linefocus').classList.add('on');
 
   // Notes — per-section textarea, saved under acr_study_notes[fid]
   document.getElementById('b-nt').addEventListener('click', function () {
