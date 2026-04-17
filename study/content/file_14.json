@@ -1,0 +1,70 @@
+{
+  "id": "file_14",
+  "label": "Chanokh — Part 2 — Chapters 37–55 — Astronomical and Dream Visions",
+  "volume": 6,
+  "content_version": 1,
+  "summary_plain": "Chanokh Part 2 contains two sections. The Astronomical Book describes the solar calendar of 364 days. Uriel shows Chanokh the courses of the sun, the moon, and the stars through six eastern and six western portals. The year has exactly 364 days — four seasons of 91 days each. Chanokh transmits this knowledge to his son Metushelakh, written on the heavenly tablets. The Dream Visions are two dreams. The first foresees the flood. The second — the Animal Apocalypse — retells all of history from Adam to the end using animals as symbols. Adam and Chavah are a white bull and heifer. The patriarchs are bulls. Yisra'EL becomes sheep. The nations are wolves, lions, and wild beasts. Seventy shepherds are given charge over the sheep during the exile. The vision ends with a new age: a great white bull is born and all creatures are transformed.",
+  "summary_scholarly": "Chapters 37 through 55 combine the Astronomical Book (the 364-day solar calendar) and the Dream Visions (including the Animal Apocalypse). The ACR reads from 4QEnastr (4Q208-211) for the Astronomical Book — the oldest Aramaic copies of any Chanokh material at Qumran — and from 4QEn-c through 4QEn-g (4Q204-206, 4Q212) for the Dream Visions. The Orit Ge'ez preserves both sections complete. The Astronomical Book's 364-day calendar is significant: it divides the year into four equal seasons of 91 days, with the sun passing through six gates. This is the calendar of the Dead Sea Scrolls community — attested in the Temple Scroll, the War Scroll, and Yovelim. The Animal Apocalypse (chapters 50-55) is a symbolic history from creation to the messianic age. Adam is a white bull. The patriarchs are bulls and sheep. The seventy shepherds commissioned over the exile sheep correspond to the nations given authority over Yisra'EL. Chanokh reads all these things from the heavenly tablets (ch 46).",
+  "key_terms": [
+    { "term": "364-Day Solar Calendar", "phonetic": "", "definition": "The calendar Uriel shows to Chanokh. The year has 364 days — four seasons of 91 days. The sun passes through six eastern and six western portals. This is the calendar used at Qumran and in the Yovelim text (ACR Volume 7)." },
+    { "term": "Astronomical Book", "phonetic": "", "definition": "Chapters 37-47. Chanokh is shown the courses of the sun, moon, and stars by Uriel. The laws of the luminaries, their gates, their seasons. Preserved in the oldest Chanokh manuscripts at Qumran (4QEnastr, 4Q208-211)." },
+    { "term": "Heavenly Tablets", "phonetic": "", "definition": "The tablets Chanokh reads in chapter 46: 'Look at the book of the tablets of heaven, and read what is written thereon, and mark every individual fact.' The fate of all humanity is recorded there." },
+    { "term": "Animal Apocalypse", "phonetic": "", "definition": "Chapters 50-55. A symbolic retelling of history from creation to the messianic age using animals. Bulls represent the patriarchs. Sheep represent Yisra'EL. Predators represent the nations. Seventy shepherds oversee the exile." },
+    { "term": "White Bull", "phonetic": "", "definition": "Adam is the first white bull (50:2). The great patriarchs are white bulls. At the end of the vision, a new great white bull is born — all creatures are transformed and return to the beginning (55:1)." },
+    { "term": "Seventy Shepherds", "phonetic": "", "definition": "In the Animal Apocalypse, seventy shepherds are given charge over the sheep (Yisra'EL) during the exile period. They correspond to the nations given authority — each commissioned directly from YHWH and accountable for what they do to the sheep." },
+    { "term": "Uriel", "phonetic": "Oo-ree-EL", "definition": "The archangel who guides Chanokh through the Astronomical Book: 'Uriel, the holy angel who was with me and who is their guide, showed to me' (37:1). He reveals the laws of the luminaries." },
+    { "term": "Metushelakh", "phonetic": "Meh-too-SHEH-lakh", "definition": "Chanokh's son. The Astronomical Book is transmitted to him: 'And now, my son Metushelakh, all these things I am recounting to you and writing down for you' (47:1)." },
+    { "term": "Six Portals", "phonetic": "", "definition": "The sun rises through six eastern portals and sets through six western portals (37:2-3). The moon follows the same portals. The entire astronomical order is governed by these gates." },
+    { "term": "Dream Visions", "phonetic": "", "definition": "Two prophetic dreams. The first foresees the flood (ch 48-49). The second — the Animal Apocalypse — spans from creation to the final age (ch 50-55)." }
+  ],
+  "fill_blank": [
+    { "ref": "37:1", "prompt": "The book of the courses of the luminaries of the heaven... which ______, the holy angel who was with me and who is their guide, showed to me.", "answer": "Uriel", "source_quote": "The book of the courses of the luminaries of the heaven, the relations of each, according to their classes, their dominion and their seasons, according to their names and places of origin, and according to their months, which Uriel, the holy angel who was with me and who is their guide, showed to me." },
+    { "ref": "46:1", "prompt": "Chanokh, look at the book of the tablets of ______, and read what is written thereon.", "answer": "heaven", "source_quote": "And he said unto me: Chanokh, look at the book of the tablets of heaven, and read what is written thereon, and mark every individual fact." },
+    { "ref": "47:1", "prompt": "And now, my son ______, all these things I am recounting to you and writing down for you.", "answer": "Metushelakh", "source_quote": "And now, my son Metushelakh, all these things I am recounting to you and writing down for you." },
+    { "ref": "37:2", "prompt": "The luminary the Sun has its rising in the eastern portals of the heaven, and its setting in the ______ portals.", "answer": "western", "source_quote": "And this is the first law of the luminaries: the luminary the Sun has its rising in the eastern portals of the heaven, and its setting in the western portals of the heaven." },
+    { "ref": "37:3", "prompt": "And I saw ______ portals in which the sun rises, and six portals in which the sun sets.", "answer": "six", "source_quote": "And I saw six portals in which the sun rises, and six portals in which the sun sets and the moon rises and sets in these portals." },
+    { "ref": "48:1", "prompt": "And now, my son Metushelakh, I will show you all my ______ which I have seen.", "answer": "visions", "source_quote": "And now, my son Metushelakh, I will show you all my visions which I have seen, recounting them before you." },
+    { "ref": "50:1", "prompt": "And after this I saw another ______, and I will show the whole dream to you, my son.", "answer": "dream", "source_quote": "And after this I saw another dream, and I will show the whole dream to you, my son." },
+    { "ref": "53:1", "prompt": "And one of those four went to that white ______ and instructed him in a secret.", "answer": "bull", "source_quote": "And one of those four went to that white bull and instructed him in a secret, without his being terrified." },
+    { "ref": "1:9", "prompt": "In the days of the sinners the years shall be shortened, and their seed shall be tardy on their lands, and all things on the earth shall alter and not appear in their ______.", "answer": "time", "source_quote": "In the days of the sinners the years shall be shortened, and their seed shall be tardy on their lands and fields, and all things on the earth shall alter, and shall not appear in their time." },
+    { "ref": "46:2", "prompt": "And I looked at everything in the tablets of heaven, and I read everything which was written thereon and understood ______.", "answer": "everything", "source_quote": "And I looked at everything in the tablets of heaven, and I read everything which was written thereon and understood everything, and read the book of all the deeds of men." }
+  ],
+  "multiple_choice": [
+    { "ref": "37:1", "question": "Who showed Chanokh the courses of the luminaries?", "options": ["Mikha'el", "Gavri'el", "Uriel", "Shemikhazah"], "correct": 2, "source_quote": "Uriel, the holy angel who was with me and who is their guide, showed to me." },
+    { "ref": "header", "question": "How many days are in the solar calendar described in the Astronomical Book?", "options": ["354 days", "360 days", "364 days", "365 days"], "correct": 2, "source_quote": "The Solar Calendar of 364 Days — The Gates of the Sun and Moon." },
+    { "ref": "37:3", "question": "How many portals does the sun rise and set through?", "options": ["Two eastern, two western", "Four eastern, four western", "Six eastern, six western", "Twelve eastern, twelve western"], "correct": 2, "source_quote": "And I saw six portals in which the sun rises, and six portals in which the sun sets." },
+    { "ref": "46:1", "question": "What did Chanokh read the fate of all men from?", "options": ["A scroll of fire", "The tablets of heaven", "A book carried by Uriel", "A stone pillar"], "correct": 1, "source_quote": "Chanokh, look at the book of the tablets of heaven, and read what is written thereon, and mark every individual fact." },
+    { "ref": "50:2", "question": "In the Animal Apocalypse, what animal represents Adam?", "options": ["A lamb", "A white bull", "An eagle", "A lion"], "correct": 1, "source_quote": "And after this I saw another dream... and she bore another white bull." },
+    { "ref": "53:1", "question": "In the Animal Apocalypse, who is the white bull instructed by one of the four?", "options": ["Adam", "Avraham", "Noakh", "Moshe"], "correct": 2, "source_quote": "And one of those four went to that white bull and instructed him in a secret, without his being terrified." },
+    { "ref": "header", "question": "Who are the seventy shepherds in the Animal Apocalypse?", "options": ["The seventy elders of Yisra'EL", "The nations given authority over Yisra'EL during the exile", "The patriarchs from Adam to Moshe", "The seventy members of Yaakov's household"], "correct": 1, "source_quote": "The seventy shepherds who are given charge of the sheep during the exile period — the nations given authority over Yisra'EL." },
+    { "ref": "47:1", "question": "To whom does Chanokh transmit the Astronomical Book?", "options": ["Noakh", "Moshe", "Metushelakh", "Avraham"], "correct": 2, "source_quote": "And now, my son Metushelakh, all these things I am recounting to you and writing down for you." },
+    { "ref": "header", "question": "Which Qumran manuscripts preserve the Astronomical Book?", "options": ["4QEn-a and 4QEn-b", "4QEnastr (4Q208-211)", "The Temple Scroll", "The War Scroll"], "correct": 1, "source_quote": "Dead Sea Scrolls — 4QEnastr (4Q208-211) — Astronomical Book — Aramaic Primary." },
+    { "ref": "48:1", "question": "What does Chanokh's first dream vision foresee?", "options": ["The exodus", "The flood", "The building of the Mishkan", "The fall of Bavel"], "correct": 1, "source_quote": "And now, my son Metushelakh, I will show you all my visions which I have seen, recounting them before you. The First Dream Vision — The Flood Foreseen." }
+  ],
+  "faq": [
+    {
+      "question": "What is the 364-day solar calendar?",
+      "answer": "The Astronomical Book describes a year of exactly 364 days — four seasons of 91 days, with the sun rising and setting through six eastern and six western portals. This is not the 354-day lunar calendar used in later rabbinic practice. The 364-day calendar is the calendar of the Dead Sea Scrolls community, the Yovelim text (ACR Volume 7), and the Temple Scroll (ACR Volume 46). It was the calendar in use before the rabbinic change."
+    },
+    {
+      "question": "What is the Animal Apocalypse?",
+      "answer": "A symbolic vision retelling all of history from creation to the messianic age using animals. Adam and Chavah are a white bull and heifer. The patriarchs are bulls. Yisra'EL becomes sheep. The nations are predators — wolves, lions, wild beasts. Seventy shepherds are commissioned to oversee the sheep during the exile. The vision ends with a new white bull born and all creatures transformed. Every figure and event in the Hebrew scriptures is represented."
+    },
+    {
+      "question": "Who are the seventy shepherds?",
+      "answer": "In the Animal Apocalypse, seventy shepherds are given charge over the sheep (Yisra'EL) during the exile. They represent the nations given authority over Yisra'EL. Each shepherd is commissioned by YHWH and is accountable for what they do — some destroy more sheep than they were permitted. Their excess will be judged."
+    },
+    {
+      "question": "What are the heavenly tablets?",
+      "answer": "In chapter 46, Chanokh is told to look at the tablets of heaven and read what is written. He reads the fate of all men, the deeds of all the children of flesh to the remotest generations. The heavenly tablets contain the complete record — past and future. The Yovelim text (ACR Volume 7) also references the heavenly tablets as the source of its jubilee chronology."
+    },
+    {
+      "question": "Why does the ACR include the Astronomical Book?",
+      "answer": "The Astronomical Book is preserved in the oldest Chanokh manuscripts at Qumran — 4QEnastr (4Q208-211), dating to the third century BCE, making it among the oldest texts found at Qumran. The Orit Ge'ez preserves it complete. The 364-day calendar it describes is the calendar of Qumran, of Yovelim, and of the Temple Scroll. It is primary scripture preserved continuously by the African Israelite community."
+    },
+    {
+      "question": "How does the Animal Apocalypse end?",
+      "answer": "The vision ends with a new age. A great white bull is born. All the animals are transformed. The creatures of the earth return to the house. The text describes a restoration to the original created order — the same white-bull imagery used for Adam at the beginning of the vision reappears at the end."
+    }
+  ]
+}
