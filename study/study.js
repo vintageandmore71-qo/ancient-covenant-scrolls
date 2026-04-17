@@ -27,23 +27,23 @@ var LBL = [
   'Bamidbar (Numbers) — Part 2 — Chapters 20–36',
   'Devarim (Deuteronomy) — Part 1 — Chapters 1–17',
   'Devarim (Deuteronomy) — Part 2 — Chapters 18–34',
-  'Chanokh (1 Enoch) — Part 1 — Chapters 1–36 — Book of Watchers',
-  'Chanokh (1 Enoch) — Part 2 — Chapters 37–55 — Dream Visions',
-  'Chanokh (1 Enoch) — Part 3 — Chapters 56–73 — Epistle',
+  'Chanokh — Part 1 — Chapters 1–36 — Book of the Watchers',
+  'Chanokh — Part 2 — Chapters 37–55 — Astronomical and Dream Visions',
+  'Chanokh — Part 3 — Chapters 56–73 — Epistle',
   'Yovelim (Jubilees) — Part 1 — Chapters 1–25',
   'Yovelim (Jubilees) — Part 2 — Chapters 26–50',
   'War Scroll 1QM — Complete — All 19 Columns'
 ];
 
 var VOL_GROUPS = [
-  { title: 'Vol 1 — Bereshit', count: 4, vol: '1' },
-  { title: 'Vol 2 — Shemot', count: 2, vol: '2' },
-  { title: 'Vol 3 — Vayikra', count: 2, vol: '3' },
-  { title: 'Vol 4 — Bamidbar', count: 2, vol: '4' },
-  { title: 'Vol 5 — Devarim', count: 2, vol: '5' },
-  { title: 'Vol 6 — Chanokh', count: 3, vol: '6' },
-  { title: 'Vol 7 — Yovelim', count: 2, vol: '7' },
-  { title: 'Vol 33 — War Scroll 1QM', count: 1, vol: '8' }
+  { title: 'Vol 1 — Bereshit', eng: 'Genesis', count: 4, vol: '1' },
+  { title: 'Vol 2 — Shemot', eng: 'Exodus', count: 2, vol: '2' },
+  { title: 'Vol 3 — Vayikra', eng: 'Leviticus', count: 2, vol: '3' },
+  { title: 'Vol 4 — Bamidbar', eng: 'Numbers', count: 2, vol: '4' },
+  { title: 'Vol 5 — Devarim', eng: 'Deuteronomy', count: 2, vol: '5' },
+  { title: 'Vol 6 — Chanokh', eng: 'Book of Chanokh', count: 3, vol: '6' },
+  { title: 'Vol 7 — Yovelim', eng: 'Book of Jubilees', count: 2, vol: '7' },
+  { title: 'Vol 33 — War Scroll 1QM', eng: 'Sons of Light vs Sons of Darkness', count: 1, vol: '8' }
 ];
 
 var fs = parseFloat(localStorage.getItem('acr_study_fs') || '10.5');
@@ -206,7 +206,7 @@ function buildTOC() {
     var h = document.createElement('div');
     h.className = 'vol-hdr';
     h.setAttribute('data-vol', group.vol);
-    h.textContent = group.title;
+    h.innerHTML = group.title + (group.eng ? '<span class="vol-eng">' + group.eng + '</span>' : '');
     sb.appendChild(h);
     for (var i = 0; i < group.count; i++) {
       var fid = IDS[idx];

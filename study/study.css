@@ -83,6 +83,7 @@ body.font-dyslexic{font-family:var(--font-dyslexic);letter-spacing:.04em;word-sp
   font-family:var(--font-main);
 }
 .vol-hdr:first-of-type{border-top:none;margin-top:0}
+.vol-eng{display:block;font-size:.8em;font-weight:400;opacity:.65;margin-top:2px;text-transform:none;letter-spacing:0}
 /* Color-coded volume headers */
 .vol-hdr[data-vol="1"]{color:var(--vol1)}.vol-hdr[data-vol="2"]{color:var(--vol2)}
 .vol-hdr[data-vol="3"]{color:var(--vol3)}.vol-hdr[data-vol="4"]{color:var(--vol4)}
