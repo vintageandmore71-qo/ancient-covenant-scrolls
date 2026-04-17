@@ -113,6 +113,26 @@ function volBanner(volId) {
     '</div>';
 }
 
+// ---- Tap-to-hear: tap any word in content areas to hear it spoken ----
+document.addEventListener('click', function (e) {
+  var target = e.target;
+  if (!target || target.tagName === 'BUTTON' || target.tagName === 'SELECT' ||
+      target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'A') return;
+  // Only in content areas
+  var inContent = target.closest('.ll-card, .cloze-prompt, .mc-question, .sv-text, .sv-td, .sv-fa, .fc-front, .fc-back, .sv-fq');
+  if (!inContent) return;
+  var sel = window.getSelection();
+  if (sel && sel.toString().trim().length > 0) return; // don't interfere with selection
+  // Get the word under the tap
+  var range = document.caretRangeFromPoint ? document.caretRangeFromPoint(e.clientX, e.clientY) : null;
+  if (!range) return;
+  range.expand('word');
+  var word = range.toString().trim();
+  if (word && word.length > 1 && word.length < 40) {
+    speakText(word);
+  }
+});
+
 // ---- SM-2 Spaced Repetition Algorithm ----
 // Each card: {id, fid, front, back, type, ease:2.5, interval:1, reps:0, nextReview:dateStr}
 // Confidence 1-5 maps: 1=again(0), 2=hard(1), 3=okay(3), 4=good(4), 5=easy(5)
@@ -182,6 +202,26 @@ function updateCard(card) {
   var cards = getCards();
   cards[card.id] = card;
   saveCards(cards);
+}
+
+function isVolumeMastered(volId) {
+  var cards = getCards();
+  var volFids = [];
+  var count = 0;
+  for (var g = 0; g < VOL_GROUPS.length; g++) {
+    for (var i = 0; i < VOL_GROUPS[g].count; i++) {
+      if (VOL_GROUPS[g].vol === volId) volFids.push(IDS[count]);
+      count++;
+    }
+  }
+  if (!volFids.length) return false;
+  var volCards = [];
+  for (var id in cards) {
+    if (volFids.indexOf(cards[id].fid) >= 0) volCards.push(cards[id]);
+  }
+  if (volCards.length < 5) return false; // need at least 5 cards studied
+  var mastered = volCards.filter(function (c) { return c.ease >= 2.5 && c.reps >= 3; });
+  return mastered.length >= volCards.length * 0.8; // 80% mastered
 }
 
 // ---- XP, Streak & Level system ----
@@ -263,7 +303,10 @@ function buildTOC() {
     var h = document.createElement('div');
     h.className = 'vol-hdr';
     h.setAttribute('data-vol', group.vol);
-    h.innerHTML = group.title + (group.eng ? '<span class="vol-eng">' + group.eng + '</span>' : '');
+    var mastered = isVolumeMastered(group.vol);
+    h.innerHTML = group.title +
+      (mastered ? ' <span class="vol-badge">\u{1F3C6}</span>' : '') +
+      (group.eng ? '<span class="vol-eng">' + group.eng + '</span>' : '');
     sb.appendChild(h);
     for (var i = 0; i < group.count; i++) {
       var fid = IDS[idx];
@@ -729,9 +772,19 @@ function showFlashcards(fid) {
         cards.push({ front: 'Bereshit ' + q.ref, back: q.source_quote, type: 'verse' });
       });
     }
-    cards = shuffle(cards);
+    // Sort due cards first, then shuffle the rest
+    var today = new Date().toISOString().slice(0, 10);
+    var dueCards = [], otherCards = [];
+    cards.forEach(function (c) {
+      var stored = getOrCreateCard(fid, c.front, c.back, c.type);
+      if (stored.nextReview <= today) dueCards.push(c);
+      else otherCards.push(c);
+    });
+    cards = shuffle(dueCards).concat(shuffle(otherCards));
     var ci = 0, flipped = false;
     var ratings = [];
+    var weakQueue = [];
+    var sinceWeak = 0;
 
     function renderCard() {
       if (ci >= cards.length) { showSummary(); return; }
@@ -789,7 +842,17 @@ function showFlashcards(fid) {
           var card = getOrCreateCard(fid, c.front, c.back, c.type);
           var updated = sm2(card, qualityMap[r]);
           updateCard(updated);
+          // Weak card queue: cards rated 1-2 resurface after 3 more cards
+          if (r <= 2) {
+            weakQueue.push(cards[ci]);
+          }
+          sinceWeak++;
           ci++;
+          // Re-insert a weak card after every 3 cards
+          if (weakQueue.length > 0 && sinceWeak >= 3) {
+            cards.splice(ci, 0, weakQueue.shift());
+            sinceWeak = 0;
+          }
           renderCard();
         });
       }
@@ -1133,16 +1196,26 @@ function showProgress(fid) {
 function goHome() {
   var lastFid = localStorage.getItem('acr_study_last');
   var hasResume = lastFid && IDS.indexOf(lastFid) >= 0;
+  var totalDue = getAllDueCount();
+  var stats = getStats();
+  var lvl = getLevel(stats.xp || 0);
+  var streak = stats.streak || 0;
   var html = '<div id="home">' +
     '<div class="logo">\u{1F4D6}</div>' +
     '<h1>ACR STUDY</h1>' +
-    '<p class="tag">Spaced repetition study companion<br>for The Ancient Covenant Record</p>' +
-    '<div class="btns">' +
+    '<p class="tag">Spaced repetition study companion<br>for The Ancient Covenant Record</p>';
+  if (totalDue > 0 || streak > 0 || (stats.xp || 0) > 0) {
+    html += '<div class="home-stats">';
+    if (totalDue > 0) html += '<div class="home-stat home-due">\u{1F4DA} ' + totalDue + ' cards due</div>';
+    if (streak > 0) html += '<div class="home-stat home-streak">\u{1F525} ' + streak + ' day streak</div>';
+    html += '<div class="home-stat home-level">' + lvl.current.icon + ' ' + lvl.current.name + ' \u00B7 ' + (stats.xp || 0) + ' XP</div>';
+    html += '</div>';
+  }
+  html += '<div class="btns">' +
     '<button id="b-begin">Begin with Bereshit \u25B6</button>' +
     (hasResume ? '<button id="b-resume">Resume where I left off</button>' : '') +
     '</div>' +
     '<p class="small">' +
-    'Phase 1 \u00B7 Shell + voice + notes<br>' +
     'Data shared with the <a href="../">ACR Reader</a> on this device<br>' +
     'Add to Home Screen from Safari for offline access' +
     '</p>' +
