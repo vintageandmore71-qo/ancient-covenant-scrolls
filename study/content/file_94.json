@@ -1,0 +1,70 @@
+{
+  "id": "file_94",
+  "label": "War Scroll 1QM — Complete — All 19 Columns",
+  "volume": 33,
+  "content_version": 1,
+  "summary_plain": "The War Scroll describes a 40-year war between the Sons of Light and the Sons of Darkness. The Sons of Light are led by the tribes of Levi, Yehudah, and Binyamin. The Sons of Darkness are the Kittim and all nations allied with Belial. The war is cosmic — YHWH fights on behalf of the Sons of Light. Angels stand in the battle ranks. The priests direct the fighting from behind the lines. YHWH's name is inscribed on banners and trumpets — physically written on the weapons of war. Every spear, shield, and javelin carries an inscription: 'Lightning of a spear for the power of The Creator.' The scroll gives detailed battle formations, trumpet signals, and priestly hymns. The chief priest prays before battle: 'Be strong and courageous.' After victory, the congregation gives thanks. Belial and all the angels of his dominion are defeated. The scroll ends with eternal peace and the covenant renewed before YHWH.",
+  "summary_scholarly": "The War Scroll (1QM — Milkhemet Benei Ohr be-Venei Khoshekh) was among the first seven scrolls discovered in Qumran Cave 1 in 1947. It is one of the longest and best preserved Dead Sea Scrolls. The ACR reads from the primary scroll 1QM with supporting fragments from 4Q491-496 (Cave 4). This text is unique to Qumran — it has no parallel in the Masoretic canon and no parallel in the Orit Ge'ez. The 40-year war structure mirrors the 40 years in the wilderness. Six years of war against specific nations, then one Sabbath year of rest, then continued warfare against the Kittim (the primary enemy). The scroll is theological: weapons carry YHWH's name, priests blow trumpets according to prescribed signals, formations rotate in three-line systems. Column XI references the 'tabernacle of David' raised up. The hymns in Columns X and XIV are structured prayers. The final columns describe Belial's defeat and the renewal of the covenant. The War Scroll preserves an ancient Hebrew military theology found nowhere else in the preserved literature.",
+  "key_terms": [
+    { "term": "Sons of Light", "phonetic": "", "definition": "The righteous forces in the 40-year war — led by Levi, Yehudah, and Binyamin. They fight under YHWH's command with angels in their ranks." },
+    { "term": "Sons of Darkness", "phonetic": "", "definition": "The opposing forces — the Kittim and all nations allied with Belial. They represent the forces of darkness against YHWH's people." },
+    { "term": "Belial", "phonetic": "Beh-lee-AHL", "definition": "The adversary figure in the War Scroll. He leads the Sons of Darkness. His defeat in Column XVII is the climax of the war: 'When The Creator has defeated Belial and all the angels of his dominion.'" },
+    { "term": "Kittim", "phonetic": "Kit-TEEM", "definition": "The primary enemy of the Sons of Light. Historically associated with foreign imperial powers. In the War Scroll they are the military arm of the Sons of Darkness." },
+    { "term": "1QM", "phonetic": "", "definition": "The designation for the War Scroll — 1Q (Cave 1, Qumran), M (Milkhamah, 'war'). Discovered in 1947 among the first seven scrolls found. Written in Hebrew." },
+    { "term": "Milkhemet Benei Ohr be-Venei Khoshekh", "phonetic": "Mil-KHEH-met Beh-NEY OHR beh-Veh-NEY KHO-shekh", "definition": "The Hebrew title: 'The War of the Sons of Light Against the Sons of Darkness.' The full name of the scroll." },
+    { "term": "Inscribed Banners", "phonetic": "", "definition": "YHWH's name and declarations are physically inscribed on the banners carried in battle. Each unit has a banner with a specific inscription naming YHWH's power." },
+    { "term": "Inscribed Trumpets", "phonetic": "", "definition": "The priests blow trumpets with specific inscriptions: signals for assembly, for advance, for pursuit, for recall. Each trumpet carries a written inscription." },
+    { "term": "King of Glory", "phonetic": "", "definition": "'And the King of Glory shall be with them — YHWH shall be with the host of Yisra'EL forever' (Column I:4). YHWH himself is present in the battle." },
+    { "term": "40-Year War", "phonetic": "", "definition": "The war lasts 40 years — mirroring the 40 years in the wilderness. Six years of specific campaigns, one Sabbath year, then continued warfare until final victory." }
+  ],
+  "fill_blank": [
+    { "ref": "I:1", "prompt": "The first attack of the Sons of ______ shall be undertaken against the forces of the Sons of Darkness.", "answer": "Light", "source_quote": "For the Instructor — the Rule of War. The first attack of the Sons of Light shall be undertaken against the forces of the Sons of Darkness, the army of Belial." },
+    { "ref": "I:4", "prompt": "And the King of ______ shall be with them — YHWH shall be with the host of Yisra'EL forever.", "answer": "Glory", "source_quote": "And after the battle they shall go up from there and the King of Glory shall be with them — YHWH shall be with the host of Yisra'EL forever." },
+    { "ref": "V:2", "prompt": "On the blade of each javelin they shall write: Lightning of a spear for the power of The ______.", "answer": "Creator", "source_quote": "The first formation shall advance and cast seven battle javelins into the enemy line — on the blade of each javelin they shall write: Lightning of a spear for the power of The Creator." },
+    { "ref": "X:2", "prompt": "Be strong and ______ — the chief priest speaks before the battle.", "answer": "courageous", "source_quote": "And the chief priest shall rise and stand before the congregation and shall speak all these words: Be strong and courageous." },
+    { "ref": "XVII:1", "prompt": "When The Creator has defeated ______ and all the angels of his dominion.", "answer": "Belial", "source_quote": "When The Creator has defeated Belial and all the angels of his dominion — and all the men of his lot are destroyed — then a great shout of praise." },
+    { "ref": "I:1", "prompt": "The army of Belial — against the band of Edom and Mo'av and the sons of ______.", "answer": "Ammon", "source_quote": "The first attack of the Sons of Light shall be undertaken against the forces of the Sons of Darkness, the army of Belial — against the band of Edom and Moab and the sons of Ammon." },
+    { "ref": "XI:1", "prompt": "For The Creator has raised up the fallen ______ of David.", "answer": "tabernacle", "source_quote": "For The Creator has raised up the fallen tabernacle of David — who has sat down with us in the council of the holy ones." },
+    { "ref": "XII:1", "prompt": "The chief priest shall call out: This is the appointed ______ of The Creator — a great battle.", "answer": "time", "source_quote": "The chief priest shall call out in a loud voice to all the congregation: This is the appointed time of The Creator — a great battle." },
+    { "ref": "I:3", "prompt": "After the battle against the Kittim, the sons of Yisra'EL shall return from the wilderness of the ______.", "answer": "nations", "source_quote": "After the battle against the Kittim, the sons of Yisra'EL shall return from the wilderness of the nations and encamp in the wilderness of Yerushalaym." },
+    { "ref": "XIX:1", "prompt": "After the seven days of the feast of victory the congregation shall renew the ______ before YHWH.", "answer": "covenant", "source_quote": "And after the seven days of the feast of victory the congregation shall renew the covenant before YHWH." }
+  ],
+  "multiple_choice": [
+    { "ref": "I:1", "question": "Who are the two sides in the War Scroll?", "options": ["Yisra'EL and Egypt", "The Sons of Light and the Sons of Darkness", "The priests and the kings", "Yehudah and Yisra'EL"], "correct": 1, "source_quote": "The first attack of the Sons of Light shall be undertaken against the forces of the Sons of Darkness, the army of Belial." },
+    { "ref": "header", "question": "How long does the war last?", "options": ["Seven years", "Twenty years", "Forty years", "One hundred years"], "correct": 2, "source_quote": "The scroll describes a 40-year war — cosmic and earthly — between the Sons of Light and the Sons of Darkness." },
+    { "ref": "I:4", "question": "Who does the scroll say will be with the host of Yisra'EL?", "options": ["Moshe", "The King of Glory — YHWH himself", "An army of angels only", "The prophet Chanokh"], "correct": 1, "source_quote": "And the King of Glory shall be with them — YHWH shall be with the host of Yisra'EL forever." },
+    { "ref": "V:2", "question": "What is written on the javelins?", "options": ["The names of the twelve tribes", "Lightning of a spear for the power of The Creator", "The Ten Words", "The names of the enemy kings"], "correct": 1, "source_quote": "On the blade of each javelin they shall write: Lightning of a spear for the power of The Creator." },
+    { "ref": "XVII:1", "question": "What happens when Belial is defeated?", "options": ["The Sons of Darkness flee to Egypt", "A great shout of praise rises from the congregation", "The war continues for another cycle", "The scroll ends abruptly"], "correct": 1, "source_quote": "When The Creator has defeated Belial and all the angels of his dominion — and all the men of his lot are destroyed — then a great shout of praise." },
+    { "ref": "header", "question": "Where was the War Scroll found?", "options": ["In Ethiopia", "In Egypt", "In Cave 1 at Qumran in 1947", "In the Temple Mount"], "correct": 2, "source_quote": "The War Scroll was discovered in Cave 1 at Qumran in 1947 among the first Dead Sea Scrolls found." },
+    { "ref": "I:1", "question": "Which tribes lead the Sons of Light?", "options": ["All twelve tribes equally", "Levi, Yehudah, and Binyamin", "Efrayim and Menasheh", "Dan and Naftali"], "correct": 1, "source_quote": "The Sons of Light, led by the tribe of Levi, Yehudah, and Binyamin." },
+    { "ref": "XIX:1", "question": "What happens after the final victory?", "options": ["The army disbands", "The congregation renews the covenant before YHWH", "A new king is crowned", "The scroll is buried"], "correct": 1, "source_quote": "And after the seven days of the feast of victory the congregation shall renew the covenant before YHWH." },
+    { "ref": "header", "question": "Does the War Scroll have a parallel in the Masoretic canon or the Orit Ge'ez?", "options": ["Yes, in both", "Only in the Orit Ge'ez", "Only in the Masoretic", "No — it is unique to Qumran"], "correct": 3, "source_quote": "Unique to Qumran — No parallel in the Masoretic canon or Orit Ge'ez." },
+    { "ref": "XII:1", "question": "What does the chief priest declare before the final battle?", "options": ["Retreat to the mountains", "This is the appointed time of The Creator — a great battle", "Wait for the next Sabbath", "Surrender to the Kittim"], "correct": 1, "source_quote": "The chief priest shall call out in a loud voice to all the congregation: This is the appointed time of The Creator — a great battle." }
+  ],
+  "faq": [
+    {
+      "question": "What is the War Scroll?",
+      "answer": "A Dead Sea Scroll discovered in Cave 1 at Qumran in 1947 — one of the first seven scrolls found. Its Hebrew title is Milkhemet Benei Ohr be-Venei Khoshekh — the War of the Sons of Light Against the Sons of Darkness. It describes a 40-year cosmic and earthly war. YHWH fights on behalf of the Sons of Light. It is unique to Qumran — no parallel exists in the Masoretic canon or the Orit Ge'ez."
+    },
+    {
+      "question": "Who are the Sons of Light and Sons of Darkness?",
+      "answer": "The Sons of Light are the righteous forces led by the tribes of Levi, Yehudah, and Binyamin. The Sons of Darkness are the Kittim and all nations allied with Belial. The war is not just military — it is theological. Angels stand in the battle ranks of the Sons of Light. Belial commands the forces of darkness. YHWH himself — called the King of Glory — is present with the host of Yisra'EL."
+    },
+    {
+      "question": "Why is YHWH's name inscribed on the weapons?",
+      "answer": "Every weapon in the War Scroll carries YHWH's name or a declaration of his power. Javelins are inscribed 'Lightning of a spear for the power of The Creator.' Banners carry specific inscriptions. Trumpets carry written signals. The weapons are not independent instruments of human power — they are tools of YHWH's judgment. The inscription makes the war explicitly YHWH's war."
+    },
+    {
+      "question": "Why does the war last 40 years?",
+      "answer": "The 40-year structure mirrors the 40 years in the wilderness (Bamidbar). The first six years are campaigns against specific nations. The seventh year is a Sabbath rest. The remaining years are warfare against the Kittim until Belial's defeat. The 40-year framework ties the final war to the original wilderness generation — the pattern of judgment and deliverance repeats."
+    },
+    {
+      "question": "What happens at the end of the War Scroll?",
+      "answer": "Belial and all the angels of his dominion are defeated (Column XVII). A great shout of praise rises. After seven days of victory feasting, the congregation renews the covenant before YHWH (Column XIX). The scroll ends with eternal peace and the covenant restored. The war resolves into worship."
+    },
+    {
+      "question": "Why is the War Scroll unique?",
+      "answer": "It has no parallel in any other known text — not in the Masoretic canon, not in the Orit Ge'ez, not in any other ancient collection. It preserves an ancient Hebrew military theology: priests directing battle, trumpets with inscriptions, three-line rotation formations, weapons carrying YHWH's name, angels in the ranks. It was found at Qumran and exists only in the Dead Sea Scrolls (1QM and fragments 4Q491-496)."
+    }
+  ]
+}
