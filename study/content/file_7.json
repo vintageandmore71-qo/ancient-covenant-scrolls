@@ -1,0 +1,70 @@
+{
+  "id": "file_7",
+  "label": "Vayikra (Leviticus) — Part 1 — Chapters 1–16",
+  "volume": 3,
+  "content_version": 1,
+  "summary_plain": "Vayikra Part 1 begins with YHWH calling to Moshe from the tent of meeting. YHWH gives the instructions for the offerings: the Olah (burnt offering), the Minchah (grain offering), the Shelamim (peace offering), the sin offering, and the guilt offering. Aharon and his sons are consecrated as priests. On the day of their consecration, Nadav and Avihu offer unauthorized fire before YHWH and are consumed. YHWH gives the laws of clean and unclean animals — which may be eaten and which may not. He commands: 'Consecrate yourselves therefore, and be holy, for I am holy.' Part 1 ends with the Yom Kippur instructions — the one day each year when Aharon enters the Most Holy Place to make atonement for all the sins of Yisra'EL.",
+  "summary_scholarly": "Chapters 1 through 16 contain the sacrificial instructions, the priestly consecration, the purity laws, and the Yom Kippur ritual. The ACR reads from the Dead Sea Scrolls witnesses (4QLev-a through 4QLev-f and 11QLev-a) and the Orit Ge'ez of the African Israelite community. The Masoretic is noted as a variant only. The offerings in chapters 1 through 7 use the Hebrew terms: Olah (burnt offering), Minchah (grain offering), Shelamim (peace offering). The death of Nadav and Avihu in chapter 10 — consumed by fire for offering what YHWH had not commanded — establishes the principle that the worship of YHWH follows YHWH's instructions exactly. The dietary laws in chapter 11 end with the foundational statement: 'Be holy, for I am holy' (11:44). Yom Kippur in chapter 16 is the annual cleansing: two goats — one for YHWH, one sent to Azazel in the wilderness. The high priest enters the Most Holy Place once a year to make atonement for the people.",
+  "key_terms": [
+    { "term": "Vayikra", "phonetic": "Vah-yik-RAH", "definition": "'And he called' — the first word of the book. YHWH called to Moshe from the tent of meeting (1:1). European Bibles named it Leviticus." },
+    { "term": "Olah", "phonetic": "Oh-LAH", "definition": "The burnt offering. A male without blemish from the herd or flock, entirely consumed on the altar. The worshipper lays his hand on its head (1:3-4)." },
+    { "term": "Shelamim", "phonetic": "Sheh-lah-MEEM", "definition": "The peace offering. Male or female, without blemish. Part is burned on the altar, part is eaten by the worshipper and the priest (ch 3)." },
+    { "term": "Nadav and Avihu", "phonetic": "Nah-DAHV / Ah-vee-HOO", "definition": "Sons of Aharon. They offered unauthorized fire before YHWH which he had not commanded. Fire came out from YHWH and consumed them (10:1-2)." },
+    { "term": "Clean and Unclean", "phonetic": "", "definition": "The dietary laws of chapter 11. Animals that part the hoof and chew the cud may be eaten. Fish with fins and scales may be eaten. Many creatures are declared unclean. The chapter ends: 'Be holy, for I am holy' (11:44)." },
+    { "term": "Yom Kippur", "phonetic": "Yohm Kee-POOR", "definition": "The Day of Atonement (ch 16). Once a year, Aharon enters the Most Holy Place to make atonement. 'On this day shall atonement be made for you to cleanse you. You shall be clean before YHWH from all your sins' (16:30)." },
+    { "term": "Azazel", "phonetic": "Ah-zah-ZEL", "definition": "On Yom Kippur, two goats are chosen by lot — one for YHWH, one for Azazel. The goat for Azazel is sent into the wilderness bearing the sins of the people (16:10)." },
+    { "term": "Tent of Meeting", "phonetic": "", "definition": "The Mishkan, from which YHWH speaks to Moshe. 'YHWH called to Moshe and spoke to him from the tent of meeting' (1:1). All of Vayikra is spoken from this location." },
+    { "term": "Be holy, for I am holy", "phonetic": "", "definition": "YHWH's command and reason: 'Consecrate yourselves therefore, and be holy, for I am holy' (11:44). This statement is the foundation for the purity and holiness laws throughout Vayikra." },
+    { "term": "Atonement", "phonetic": "", "definition": "The covering or cleansing of sin through the prescribed offerings. Yom Kippur is the annual atonement for all the sins of Yisra'EL: 'a statute forever' (16:34)." }
+  ],
+  "fill_blank": [
+    { "ref": "1:1", "prompt": "YHWH called to Moshe and spoke to him from the tent of ______, saying.", "answer": "meeting", "source_quote": "YHWH called to Moshe and spoke to him from the tent of meeting, saying." },
+    { "ref": "11:44", "prompt": "Consecrate yourselves therefore, and be ______, for I am ______.", "answer": "holy", "source_quote": "For I am YHWH your Creator. Consecrate yourselves therefore, and be holy, for I am holy." },
+    { "ref": "16:30", "prompt": "For on this day shall atonement be made for you to ______ you. You shall be clean before YHWH from all your sins.", "answer": "cleanse", "source_quote": "For on this day shall atonement be made for you to cleanse you. You shall be clean before YHWH from all your sins." },
+    { "ref": "10:1", "prompt": "Now Nadav and Avihu offered ______ fire before YHWH, which he had not commanded them.", "answer": "unauthorized", "source_quote": "Now Nadav and Avihu, the sons of Aharon, each took his censer and put fire in it and laid incense on it and offered unauthorized fire before YHWH, which he had not commanded them." },
+    { "ref": "10:2", "prompt": "And fire came out from before YHWH and ______ them, and they died before YHWH.", "answer": "consumed", "source_quote": "And fire came out from before YHWH and consumed them, and they died before YHWH." },
+    { "ref": "11:3", "prompt": "Whatever parts the hoof and is cloven-footed and chews the ______, among the animals, you may eat.", "answer": "cud", "source_quote": "Whatever parts the hoof and is cloven-footed and chews the cud, among the animals, you may eat." },
+    { "ref": "11:45", "prompt": "For I am YHWH who brought you up out of the land of ______ to be your Creator.", "answer": "Egypt", "source_quote": "For I am YHWH who brought you up out of the land of Egypt to be your Creator. You shall therefore be holy, for I am holy." },
+    { "ref": "16:34", "prompt": "And this shall be a statute ______ for you, that atonement may be made for the people of Yisra'EL once in the year.", "answer": "forever", "source_quote": "And this shall be a statute forever for you, that atonement may be made for the people of Yisra'EL once in the year because of all their sins." },
+    { "ref": "1:3", "prompt": "If his offering is a burnt offering from the herd, he shall offer a male without ______.", "answer": "blemish", "source_quote": "If his offering is a burnt offering from the herd, he shall offer a male without blemish. He shall bring it to the entrance of the tent of meeting, that he may be accepted before YHWH." },
+    { "ref": "10:3", "prompt": "Among those who are near me I will be ______, and before all the people I will be glorified.", "answer": "sanctified", "source_quote": "Then Moshe said to Aharon: This is what YHWH has said: Among those who are near me I will be sanctified, and before all the people I will be glorified." }
+  ],
+  "multiple_choice": [
+    { "ref": "1:1", "question": "From where did YHWH speak to Moshe at the beginning of Vayikra?", "options": ["From Mount Sinai", "From the burning bush", "From the tent of meeting", "From the cloud over the sea"], "correct": 2, "source_quote": "YHWH called to Moshe and spoke to him from the tent of meeting, saying." },
+    { "ref": "11:44", "question": "What reason does YHWH give for the command to be holy?", "options": ["Because you are priests", "Because I am holy", "Because you left Egypt", "Because you are many"], "correct": 1, "source_quote": "Consecrate yourselves therefore, and be holy, for I am holy." },
+    { "ref": "10:1-2", "question": "What happened to Nadav and Avihu?", "options": ["They were promoted to high priests", "They offered unauthorized fire and were consumed by fire from YHWH", "They fled to the wilderness", "They built a golden calf"], "correct": 1, "source_quote": "Now Nadav and Avihu, the sons of Aharon, each took his censer and put fire in it and laid incense on it and offered unauthorized fire before YHWH, which he had not commanded them. And fire came out from before YHWH and consumed them, and they died before YHWH." },
+    { "ref": "16:8-10", "question": "On Yom Kippur, what happens to the two goats?", "options": ["Both are sacrificed on the altar", "One is for YHWH and one is sent to Azazel in the wilderness", "One is given to the people and one to the priests", "Both are released into the wilderness"], "correct": 1, "source_quote": "And Aharon shall cast lots over the two goats, one lot for YHWH and the other lot for Azazel." },
+    { "ref": "11:3", "question": "Which animals may be eaten according to the dietary laws?", "options": ["All animals from the herd", "Those that part the hoof and chew the cud", "Only birds and fish", "Any clean-looking animal"], "correct": 1, "source_quote": "Whatever parts the hoof and is cloven-footed and chews the cud, among the animals, you may eat." },
+    { "ref": "16:30", "question": "What is the purpose of Yom Kippur?", "options": ["To celebrate the harvest", "To remember the crossing of the sea", "To make atonement and cleanse the people from all their sins before YHWH", "To consecrate new priests"], "correct": 2, "source_quote": "For on this day shall atonement be made for you to cleanse you. You shall be clean before YHWH from all your sins." },
+    { "ref": "1:3-4", "question": "What must the worshipper do when bringing a burnt offering?", "options": ["Lay his hand on the head of the offering", "Carry it around the altar seven times", "Burn incense first", "Wash it in the river"], "correct": 0, "source_quote": "If his offering is a burnt offering from the herd, he shall offer a male without blemish. He shall bring it to the entrance of the tent of meeting, that he may be accepted before YHWH. He shall lay his hand on the head of the burnt offering, and it shall be accepted for him to make atonement for him." },
+    { "ref": "16:2", "question": "How often may the high priest enter the Most Holy Place?", "options": ["Every day", "Every Sabbath", "Once a year on Yom Kippur", "Whenever he chooses"], "correct": 2, "source_quote": "YHWH said to Moshe: Tell Aharon your brother not to come at any time into the Holy Place inside the veil, before the mercy seat that is on the ark, so that he may not die." },
+    { "ref": "10:3", "question": "What did Moshe tell Aharon after the death of Nadav and Avihu?", "options": ["Build a new altar", "Among those near me I will be sanctified, and before all the people I will be glorified", "Leave the tent of meeting", "Offer another sacrifice"], "correct": 1, "source_quote": "Then Moshe said to Aharon: This is what YHWH has said: Among those who are near me I will be sanctified, and before all the people I will be glorified." },
+    { "ref": "16:34", "question": "How often is atonement to be made for Yisra'EL?", "options": ["Every day", "Every month", "Once in the year", "Every seven years"], "correct": 2, "source_quote": "And this shall be a statute forever for you, that atonement may be made for the people of Yisra'EL once in the year because of all their sins." }
+  ],
+  "faq": [
+    {
+      "question": "What does Vayikra mean?",
+      "answer": "'And he called.' It is the first word of the book — YHWH called to Moshe from the tent of meeting (1:1). European Bibles named it Leviticus because of its focus on the Levitical priesthood, but the Hebrew name describes what happens: YHWH speaks."
+    },
+    {
+      "question": "Why were Nadav and Avihu killed?",
+      "answer": "They offered unauthorized fire before YHWH — fire which he had not commanded them (10:1). Fire came out from YHWH and consumed them (10:2). Moshe's response to Aharon was: 'Among those who are near me I will be sanctified.' The text records what happened without softening it. The worship of YHWH follows YHWH's instructions exactly."
+    },
+    {
+      "question": "What is Azazel?",
+      "answer": "On Yom Kippur, two goats are chosen by lot — one for YHWH and one for Azazel (16:8). The goat for Azazel is sent into the wilderness bearing the sins of the people (16:21-22). The Book of Chanokh (ACR Volume 6, Book of the Watchers) names Azazel as one of the fallen Watchers — the Yom Kippur ritual and the Chanokh text are connected."
+    },
+    {
+      "question": "What are the dietary laws based on?",
+      "answer": "YHWH's direct instruction in chapter 11. Land animals that part the hoof AND chew the cud may be eaten. Water creatures with fins AND scales may be eaten. Specific birds are listed as unclean. The chapter ends with the reason: 'Be holy, for I am holy' (11:44). The laws are not health advice — they are holiness instructions from YHWH."
+    },
+    {
+      "question": "What DSS manuscripts preserve Vayikra?",
+      "answer": "Multiple scrolls from Qumran: 4QLev-a through 4QLev-f and 11QLev-a. The Orit Ge'ez of the African Israelite community preserves the full text as a living witness. The Masoretic is noted only where it differs."
+    },
+    {
+      "question": "Why does YHWH say 'Be holy, for I am holy'?",
+      "answer": "YHWH's holiness is the reason and the standard for the people's holiness. It appears in 11:44-45 and is repeated throughout Vayikra. The people are to be set apart because YHWH who brought them out of Egypt is set apart. The dietary laws, the purity laws, and the Yom Kippur ritual all flow from this single principle."
+    }
+  ]
+}
