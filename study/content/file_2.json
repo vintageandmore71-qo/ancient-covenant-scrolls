@@ -1,0 +1,70 @@
+{
+  "id": "file_2",
+  "label": "Bereshit — Part 2 — Chapters 12–25",
+  "volume": 1,
+  "content_version": 1,
+  "summary_plain": "Bereshit Part 2 is the story of Avraham. YHWH calls Avram to leave his country and go to the land of Kena'an. Avram obeys. YHWH makes a covenant with him — his offspring will be as many as the stars. Avram's name is changed to Avraham and Sarai's to Sarah. YHWH gives the covenant of circumcision. Three visitors come to Avraham and promise that Sarah will have a son. She laughs because she is old. YHWH destroys Sedom and Amorah for their wickedness, but Lot escapes. Sarah gives birth to Yitzhak in her old age. The Creator tests Avraham by telling him to offer Yitzhak on Mount Moriah — the Aqedah, the binding. Avraham obeys, and at the last moment YHWH provides a ram instead. Sarah dies and Avraham buries her in the cave of Makhpelah. A wife is found for Yitzhak — Rivkah. Avraham dies at 175 years and is buried by his sons Yitzhak and Yishma'el.",
+  "summary_scholarly": "Chapters 12 through 25 trace the complete life of Avraham from YHWH's call at Haran to his burial at Makhpelah. The ACR reads this material from the Dead Sea Scrolls witnesses (4QGen-a through 4QGen-j) and from the Genesis Apocryphon (1QapGen, Cave 1), which preserves an Aramaic first-person expansion of several Avraham narratives — reproduced in full as ACR Volume 44. The Orit Ge'ez of the African Israelite community is the living primary witness. The Masoretic is noted as a variant only. The covenant structure is central: YHWH's unilateral covenant in chapter 15 (the covenant between the parts), the covenant of circumcision in chapter 17 (where Avram becomes Avraham and Sarai becomes Sarah), and the covenant oath after the Aqedah in chapter 22. The Aqedah — the binding of Yitzhak on Mount Moriah — is presented as the ACR text records it: The Creator tested Avraham. The Yovelim text (ACR Volume 7) provides the full backstory of this test, attributing the challenge to Mastema and placing it in a specific jubilee year. Hagar the Egyptian and Yishma'el are named as they appear in the text — Yishma'el is Avraham's firstborn son, circumcised at thirteen, present at his father's burial. The destruction of Sedom and Amorah in chapter 19 is told without the later moral framings imposed by European commentaries — the text says what it says.",
+  "key_terms": [
+    { "term": "Avram / Avraham", "phonetic": "Ahv-RAHM / Ahv-rah-HAHM", "definition": "YHWH changes Avram's name to Avraham in chapter 17 — 'father of a multitude of nations' (17:5). The name change marks the covenant of circumcision." },
+    { "term": "Sarai / Sarah", "phonetic": "Sah-RYE / Sah-RAH", "definition": "Avram's wife. Her name is changed to Sarah in chapter 17. She bears Yitzhak in her old age after YHWH's promise (21:1-2)." },
+    { "term": "Yitzhak", "phonetic": "Yeets-KHAHK", "definition": "The son born to Avraham and Sarah in their old age. His name means 'he laughs' — Sarah laughed when told she would bear a son (18:12). Bound on the altar at Moriah in the Aqedah (ch 22). Anglicized as Isaac." },
+    { "term": "Yishma'el", "phonetic": "Yish-mah-EL", "definition": "Avraham's firstborn son, born to Hagar the Egyptian (16:15). Circumcised at thirteen (17:25). Present at Avraham's burial alongside Yitzhak (25:9). Anglicized as Ishmael." },
+    { "term": "Hagar", "phonetic": "Hah-GAR", "definition": "Sarah's Egyptian servant. She bears Yishma'el to Avram (ch 16). The angel of YHWH finds her at a spring in the wilderness and speaks to her directly (16:7-12)." },
+    { "term": "Aqedah", "phonetic": "Ah-keh-DAH", "definition": "The binding — the event in chapter 22 where The Creator tests Avraham by telling him to offer Yitzhak on Mount Moriah. Avraham obeys; YHWH provides a ram at the last moment." },
+    { "term": "Kena'an", "phonetic": "Keh-NAH-ahn", "definition": "The land YHWH promises to Avraham and his offspring (12:7, 15:18, 17:8). Anglicized through Greek and Latin as Canaan." },
+    { "term": "Sedom", "phonetic": "Seh-DOHM", "definition": "The city destroyed by YHWH in chapter 19 for its wickedness. Lot and his daughters escape. Anglicized as Sodom." },
+    { "term": "Rivkah", "phonetic": "Riv-KAH", "definition": "The wife found for Yitzhak in chapter 24. Avraham's servant finds her at the well in Aram-Naharayim. Anglicized as Rebekah." },
+    { "term": "Makhpelah", "phonetic": "Makh-peh-LAH", "definition": "The cave Avraham purchases from the Hittites to bury Sarah (ch 23). Avraham himself is later buried there (25:9)." }
+  ],
+  "fill_blank": [
+    { "ref": "12:1", "prompt": "Now YHWH said to Avram: Go from your country and your kindred and your father's house to the ______ that I will show you.", "answer": "land", "source_quote": "Now YHWH said to Avram: Go from your country and your kindred and your father's house to the land that I will show you." },
+    { "ref": "15:5", "prompt": "Look toward heaven, and number the ______, if you are able to number them. Then he said to him: So shall your offspring be.", "answer": "stars", "source_quote": "And he brought him outside and said: Look toward heaven, and number the stars, if you are able to number them. Then he said to him: So shall your offspring be." },
+    { "ref": "15:6", "prompt": "And he believed YHWH, and he counted it to him as ______.", "answer": "righteousness", "source_quote": "And he believed YHWH, and he counted it to him as righteousness." },
+    { "ref": "17:5", "prompt": "No longer shall your name be called Avram, but your name shall be ______, for I have made you the father of a multitude of nations.", "answer": "Avraham", "source_quote": "No longer shall your name be called Avram, but your name shall be Avraham, for I have made you the father of a multitude of nations." },
+    { "ref": "17:10", "prompt": "This is my covenant, which you shall keep, between me and you and your offspring after you: Every male among you shall be ______.", "answer": "circumcised", "source_quote": "This is my covenant, which you shall keep, between me and you and your offspring after you: Every male among you shall be circumcised." },
+    { "ref": "18:12", "prompt": "So Sarah ______ to herself, saying: After I am worn out, and my lord is old, shall I have pleasure?", "answer": "laughed", "source_quote": "So Sarah laughed to herself, saying: After I am worn out, and my lord is old, shall I have pleasure?" },
+    { "ref": "22:1", "prompt": "After these things The Creator ______ Avraham and said to him: Avraham. And he said: Here I am.", "answer": "tested", "source_quote": "After these things The Creator tested Avraham and said to him: Avraham. And he said: Here I am." },
+    { "ref": "22:8", "prompt": "Avraham said: The Creator will ______ for himself the lamb for a burnt offering, my son.", "answer": "provide", "source_quote": "Avraham said: The Creator will provide for himself the lamb for a burnt offering, my son. So they went both of them together." },
+    { "ref": "21:3", "prompt": "Avraham called the name of his son who was born to him, whom Sarah bore him, ______.", "answer": "Yitzhak", "source_quote": "Avraham called the name of his son who was born to him, whom Sarah bore him, Yitzhak." },
+    { "ref": "25:8", "prompt": "Avraham breathed his last and died in a good old age, an old man and full of years, and was gathered to his ______.", "answer": "people", "source_quote": "Avraham breathed his last and died in a good old age, an old man and full of years, and was gathered to his people." }
+  ],
+  "multiple_choice": [
+    { "ref": "12:1", "question": "What did YHWH tell Avram to leave?", "options": ["His flocks and herds", "His country, kindred, and father's house", "The land of Kena'an", "The city of Sedom"], "correct": 1, "source_quote": "Now YHWH said to Avram: Go from your country and your kindred and your father's house to the land that I will show you." },
+    { "ref": "12:4", "question": "How old was Avram when he departed from Haran?", "options": ["Sixty-five", "Seventy-five", "Eighty-five", "Ninety-nine"], "correct": 1, "source_quote": "So Avram went, as YHWH had told him, and Lot went with him. Avram was seventy-five years old when he departed from Haran." },
+    { "ref": "15:5-6", "question": "What did YHWH tell Avram to count, saying 'So shall your offspring be'?", "options": ["The grains of sand", "The stars", "The trees of the field", "The drops of rain"], "correct": 1, "source_quote": "Look toward heaven, and number the stars, if you are able to number them. Then he said to him: So shall your offspring be." },
+    { "ref": "17:5", "question": "What was Avram's name changed to in chapter 17?", "options": ["Aviyahu", "Avraham", "Avner", "Avimelekh"], "correct": 1, "source_quote": "No longer shall your name be called Avram, but your name shall be Avraham, for I have made you the father of a multitude of nations." },
+    { "ref": "17:10", "question": "What is the sign of the covenant YHWH made with Avraham in chapter 17?", "options": ["A rainbow", "A burnt offering", "Circumcision", "An altar of stones"], "correct": 2, "source_quote": "This is my covenant, which you shall keep, between me and you and your offspring after you: Every male among you shall be circumcised." },
+    { "ref": "18:2", "question": "How many men appeared to Avraham by the oaks of Mamre?", "options": ["Two", "Three", "Four", "Seven"], "correct": 1, "source_quote": "He lifted up his eyes and looked, and behold, three men were standing in front of him." },
+    { "ref": "22:2", "question": "Where did The Creator tell Avraham to take Yitzhak for the offering?", "options": ["Mount Sinai", "The land of Moriah", "The oaks of Mamre", "Beer-Sheva"], "correct": 1, "source_quote": "He said: Take your son, your only son Yitzhak, whom you love, and go to the land of Moriah, and offer him there as a burnt offering on one of the mountains of which I shall tell you." },
+    { "ref": "21:5", "question": "How old was Avraham when Yitzhak was born?", "options": ["Seventy-five", "Eighty-six", "One hundred", "One hundred and seventy-five"], "correct": 2, "source_quote": "Avraham was a hundred years old when his son Yitzhak was born to him." },
+    { "ref": "25:7", "question": "How many years did Avraham live?", "options": ["120 years", "150 years", "175 years", "200 years"], "correct": 2, "source_quote": "These are the days of the years of Avraham's life, 175 years." },
+    { "ref": "25:9", "question": "Who buried Avraham in the cave of Makhpelah?", "options": ["Yitzhak alone", "Yitzhak and Yishma'el", "The men of Haran", "Lot and his sons"], "correct": 1, "source_quote": "Yitzhak and Yishma'el his sons buried him in the cave of Makhpelah, in the field of Efron the son of Tzohar the Hittite, east of Mamre." }
+  ],
+  "faq": [
+    {
+      "question": "Who was Hagar and what happened to her?",
+      "answer": "Hagar was Sarah's Egyptian servant. When Sarah could not bear children, she gave Hagar to Avram as a wife. Hagar conceived Yishma'el. When Hagar was mistreated, the angel of YHWH found her at a spring in the wilderness and spoke to her directly (16:7-12) — she is one of the few people in the text to whom an angel of YHWH speaks. Yishma'el was Avraham's firstborn, circumcised at thirteen (17:25), and present at Avraham's burial alongside Yitzhak (25:9)."
+    },
+    {
+      "question": "What is the Aqedah?",
+      "answer": "The Aqedah is the binding of Yitzhak in chapter 22. The Creator tested Avraham by telling him to offer his son Yitzhak as a burnt offering on Mount Moriah. Avraham obeyed. He bound Yitzhak on the altar. At the last moment YHWH called out from heaven and provided a ram instead. The Yovelim text (ACR Volume 7) provides the full backstory, attributing the challenge to Mastema and placing it in a specific jubilee year."
+    },
+    {
+      "question": "Why does Avram's name change to Avraham?",
+      "answer": "In chapter 17, YHWH makes the covenant of circumcision with Avram and changes his name to Avraham — 'for I have made you the father of a multitude of nations' (17:5). Sarai's name is also changed to Sarah in the same chapter (17:15). The name changes mark the covenant."
+    },
+    {
+      "question": "What happened to Sedom?",
+      "answer": "YHWH destroyed Sedom and Amorah in chapter 19. Lot and his daughters escaped. Before the destruction, Avraham interceded with YHWH, asking if he would destroy the city if righteous people were found in it (18:23-32). YHWH agreed he would not destroy it for the sake of even ten righteous — but ten were not found."
+    },
+    {
+      "question": "What is the Genesis Apocryphon and how does it relate to this section?",
+      "answer": "The Genesis Apocryphon (1QapGen) is an Aramaic scroll found in Qumran Cave 1 that retells portions of Bereshit in first-person, including Avram's journey to Egypt and his vision of the covenant. It is not a secondary source — it is a primary Aramaic witness to these events, preserved at Qumran alongside the Hebrew text. The ACR reproduces it in full as Volume 44 (Genesis Apocryphon)."
+    },
+    {
+      "question": "Who buried Avraham?",
+      "answer": "Yitzhak and Yishma'el together buried their father in the cave of Makhpelah (25:9) — the same cave Avraham had purchased to bury Sarah. Both sons were present. The text names them side by side."
+    }
+  ]
+}
