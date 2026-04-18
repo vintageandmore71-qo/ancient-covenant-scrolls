@@ -1,0 +1,30 @@
+{
+  "id": "file_21",
+  "label": "Yehoshua (Joshua) — Part 2 — Chapters 9–15",
+  "volume": 10,
+  "content_version": 1,
+  "summary_plain": "The Giv'onites deceive Yehoshua into making a peace treaty. The sun stands still at Giv'on while Yisra'EL defeats the five Amorite kings. The southern and northern campaigns are completed. Yehoshua takes the whole land as YHWH promised. The land is divided among the tribes. Kalev receives Hevron — he says: I am as strong today as I was the day Moshe sent me, and he drives out the Anakites.",
+  "summary_scholarly": "The ACR reads from 4QJosh-a, 4QJosh-b and the Orit Ge'ez. The land division (ch 13-15) allocates African-plate territory among the twelve tribes. The tribal boundaries recorded here define the covenant inheritance — the physical land YHWH promised in Bereshit 15. Kalev's possession of Hevron (ch 14) connects to the Makhpelah cave where Avraham, Sarah, Yitzhak, Rivkah, Yaakov, and Leah are buried.",
+  "key_terms": [
+    { "term": "Kalev", "phonetic": "Kah-LEV", "definition": "One of only two spies (with Yehoshua) who gave a faithful report. Forty-five years later he claims Hevron at age 85, saying he is as strong as when Moshe sent him. Anglicized as Caleb." },
+    { "term": "Land Division", "phonetic": "", "definition": "Chapters 13-19 record the division of the covenant land among the tribes by lot. Each tribe receives a specific inheritance. Levi receives no territorial portion — YHWH is their inheritance." }
+  ],
+  "fill_blank": [
+    { "ref": "10:13", "prompt": "And the sun stood still, and the ______ stopped, until the nation took vengeance on their enemies.", "answer": "moon", "source_quote": "And the sun stood still, and the moon stopped, until the nation took vengeance on their enemies." },
+    { "ref": "14:11", "prompt": "I am still as strong today as I was in the day that Moshe sent me — my ______ now is as my strength was then.", "answer": "strength", "source_quote": "I am still as strong today as I was in the day that Moshe sent me — my strength now is as my strength was then, for war and for going and coming." }
+  ],
+  "multiple_choice": [
+    { "ref": "10:12-13", "question": "What happened at Giv'on during the battle?", "options": ["The walls fell", "The sun stood still until Yisra'EL prevailed", "Lightning struck the enemy", "The earth opened"], "correct": 1, "source_quote": "The sun stood still, and the moon stopped, until the nation took vengeance on their enemies." },
+    { "ref": "14:10-12", "question": "How old was Kalev when he took Hevron?", "options": ["40", "65", "85", "120"], "correct": 2, "source_quote": "And now, behold, I am this day eighty-five years old." }
+  ],
+  "faq": [
+    {
+      "question": "What does the tribal land division mean geologically?",
+      "answer": "The tribal boundaries in chapters 13-19 allocate territory that sits entirely on the African tectonic plate (Nubian Plate). From Dan in the north to Beersheva in the south, from the Mediterranean coast to the Yarden — all of it is physically African soil. The Jordan Rift Valley is the geological boundary. The covenant inheritance given to the twelve tribes is African land. Every boundary stone, every city of refuge, every Levitical city — all on the African continent."
+    },
+    {
+      "question": "Why does Kalev's claim of Hevron matter?",
+      "answer": "Kalev claims Hevron — the city where Avraham purchased the Makhpelah cave to bury Sarah (Bereshit 23). Avraham, Sarah, Yitzhak, Rivkah, Yaakov, and Leah are all buried there. The patriarchal burial site is the physical anchor connecting the covenant people to their land. In every ancient Afro-Asiatic civilization — Egyptian, Canaanite, Israelite — burial sites were where genealogy, identity, and territorial claim were physically anchored. The documented destruction of cemeteries in Gaza and Lebanon (documented in Amnesty International 2025 and UN OHCHR reports) severs living populations from this same ancestral anchor."
+    }
+  ]
+}

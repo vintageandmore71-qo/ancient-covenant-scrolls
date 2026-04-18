@@ -1,0 +1,30 @@
+{
+  "id": "file_22",
+  "label": "Yehoshua (Joshua) — Part 3 — Chapters 16–24",
+  "volume": 10,
+  "content_version": 1,
+  "summary_plain": "The remaining tribal territories are assigned — Efrayim, Menasheh, Binyamin, Shim'on, Zevulun, Yissakhar, Asher, Naftali, Dan. The Levitical cities and cities of refuge are designated. Yehoshua's farewell speech: choose this day whom you will serve. As for me and my house, we will serve YHWH. The people renew the covenant at Shekhem. Yehoshua dies at 110 years old. Yosef's bones, which Moshe carried out of Egypt, are buried at Shekhem.",
+  "summary_scholarly": "The covenant renewal at Shekhem (ch 24) is the climactic moment of the book — the people choose YHWH and commit to the covenant terms. The burial of Yosef's bones at Shekhem (24:32) fulfills the oath from Bereshit 50:25. The cycle is complete: Yosef was taken from the land to Egypt, and his bones return. The covenant people have entered the promised land, divided it, and renewed their commitment to YHWH.",
+  "key_terms": [
+    { "term": "Shekhem", "phonetic": "SHEH-khem", "definition": "The site of the covenant renewal (ch 24). Also where Yosef's bones are buried. An ancient covenant site — Avraham built his first altar in the land at Shekhem (Bereshit 12:6-7)." },
+    { "term": "Cities of Refuge", "phonetic": "", "definition": "Six cities designated for those who kill unintentionally — three on each side of the Yarden (ch 20). Physical safe havens built into the covenant legal system." }
+  ],
+  "fill_blank": [
+    { "ref": "24:15", "prompt": "Choose this day whom you will serve. But as for me and my house, we will serve ______.", "answer": "YHWH", "source_quote": "Choose this day whom you will serve — whether the gods your fathers served in the region beyond the River, or the gods of the Amorites. But as for me and my house, we will serve YHWH." },
+    { "ref": "24:32", "prompt": "The bones of Yosef, which the people of Yisra'EL brought up from Egypt, were buried at ______.", "answer": "Shekhem", "source_quote": "The bones of Yosef, which the people of Yisra'EL brought up from Egypt, were buried at Shekhem." }
+  ],
+  "multiple_choice": [
+    { "ref": "24:15", "question": "What does Yehoshua tell the people at Shekhem?", "options": ["Build more cities", "Choose this day whom you will serve", "Go back to Egypt", "Appoint a king"], "correct": 1, "source_quote": "Choose this day whom you will serve." },
+    { "ref": "24:29", "question": "How old was Yehoshua when he died?", "options": ["80", "100", "110", "120"], "correct": 2, "source_quote": "After these things Yehoshua the son of Nun, the servant of YHWH, died, being 110 years old." }
+  ],
+  "faq": [
+    {
+      "question": "Why does Yehoshua say 'choose this day'?",
+      "answer": "The covenant is not automatic. It requires choice — active, conscious, deliberate commitment. Yehoshua does not say 'you were born into this, so you are bound.' He says choose. The same principle appears in Yovelim 23:26: the restoration begins when the children return to study the laws and seek the commandments. The covenant is activated by choosing it. The generation currently accessing the Dead Sea Scrolls, the Orit Ge'ez, and the ancient Hebrew primary sources directly — choosing to engage with the covenant texts rather than accepting institutional filters — is making the choice Yehoshua described."
+    },
+    {
+      "question": "What does the burial of Yosef's bones complete?",
+      "answer": "In Bereshit 50:25, Yosef makes the sons of Yisra'EL swear: when YHWH visits you, carry up my bones from here. In Shemot 13:19, Moshe carries Yosef's bones out of Egypt. In Yehoshua 24:32, the bones are finally buried at Shekhem — the land Yaakov purchased (Bereshit 33:19). The cycle is complete: taken from the land, carried through 400 years of bondage, liberated, carried through 40 years of wilderness, and finally returned to the soil of the promise. The covenant people's bones belong in the covenant land. The Atlantic Ocean floor holds the remains of approximately 1.8 million people who never completed that return."
+    }
+  ]
+}

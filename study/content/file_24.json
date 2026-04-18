@@ -1,0 +1,31 @@
+{
+  "id": "file_24",
+  "label": "Shofetim (Judges) — Part 2 — Chapters 8–14",
+  "volume": 11,
+  "content_version": 1,
+  "summary_plain": "After Gid'on's victory, the people ask him to rule over them — he refuses: YHWH will rule over you. But Gid'on makes a golden ephod that becomes a snare. His son Avimelekh murders seventy brothers and makes himself king at Shekhem — the first Israelite to claim kingship by force. Yotam speaks the parable of the trees. YHWH raises Yiftach as judge — he makes a rash vow. Shimshon is born — a Nazirite from the womb, whose strength comes from YHWH.",
+  "summary_scholarly": "The ACR reads from 4QJudg-a, 4QJudg-b and the Orit Ge'ez. Gid'on's refusal of kingship (8:23) is the clearest statement of theocratic principle in the pre-monarchic period. Avimelekh's self-made kingship at Shekhem (ch 9) is the anti-model — human power seized without YHWH's appointment. Shimshon's Nazirite dedication (ch 13) connects to the Bamidbar 6 Nazirite laws.",
+  "key_terms": [
+    { "term": "Avimelekh", "phonetic": "Ah-vee-MEH-lekh", "definition": "Gid'on's son by a Shekhemite concubine. He murders seventy of his brothers and makes himself king at Shekhem. His kingship is self-appointed, not YHWH-appointed. He dies when a woman drops a millstone on his head." },
+    { "term": "Shimshon", "phonetic": "Shim-SHON", "definition": "A Nazirite from birth — set apart by YHWH before his birth. His strength is from YHWH, not from his hair. Anglicized as Samson." },
+    { "term": "Yiftach", "phonetic": "Yif-TAKH", "definition": "A judge who defeats the Ammonites. He makes a rash vow — whatever comes out of his house first will be offered to YHWH. His daughter comes out. Anglicized as Jephthah." }
+  ],
+  "fill_blank": [
+    { "ref": "8:23", "prompt": "Gid'on said to them: I will not rule over you, and my son will not rule over you. ______ will rule over you.", "answer": "YHWH", "source_quote": "Gid'on said to them: I will not rule over you, and my son will not rule over you. YHWH will rule over you." },
+    { "ref": "13:5", "prompt": "The child shall be a ______ to The Creator from the womb, and he shall begin to save Yisra'EL from the hand of the Philistines.", "answer": "Nazirite", "source_quote": "For behold, you shall conceive and bear a son. No razor shall come upon his head, for the child shall be a Nazirite to The Creator from the womb." }
+  ],
+  "multiple_choice": [
+    { "ref": "8:23", "question": "What did Gid'on say when asked to be king?", "options": ["He accepted", "YHWH will rule over you — I will not", "He asked for time to decide", "He appointed his son"], "correct": 1, "source_quote": "I will not rule over you, and my son will not rule over you. YHWH will rule over you." },
+    { "ref": "9:1-6", "question": "How did Avimelekh become king?", "options": ["YHWH anointed him", "He was chosen by lot", "He murdered seventy brothers and seized power", "The people elected him"], "correct": 2, "source_quote": "Avimelekh went to his mother's relatives at Shekhem — and they gave him seventy pieces of silver. He hired worthless and reckless fellows and killed his seventy brothers." }
+  ],
+  "faq": [
+    {
+      "question": "What does Gid'on's refusal of kingship mean?",
+      "answer": "Gid'on says: 'I will not rule over you, and my son will not rule over you. YHWH will rule over you' (8:23). This is the clearest statement of theocratic principle in the pre-monarchic period. YHWH is the direct king. Human monarchy is not the covenant design. When the people later demand a king in 1 Shemu'el 8, YHWH tells Shemu'el: they have rejected me from being king over them. The Qumran community returned to this pre-monarchic framework — no king, no institutional hierarchy, just the covenant texts and YHWH's direct governance."
+    },
+    {
+      "question": "What does Avimelekh's kingship reveal?",
+      "answer": "Avimelekh seizes power through murder — killing seventy brothers on a single stone (9:5). His kingship is the anti-model: human power seized without YHWH's appointment, through violence, funded by the temple of Baal-Berith (9:4). He dies when a woman drops a millstone on his head (9:53). The text's message: self-appointed power, seized through violence and funded by false worship, ends in destruction. Every empire documented in the Great Eraser research — Roman, British, Portuguese, Belgian — followed the same pattern: power seized through violence, maintained through institutional systems, and destined for judgment."
+    }
+  ]
+}

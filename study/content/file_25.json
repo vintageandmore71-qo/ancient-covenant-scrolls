@@ -1,0 +1,30 @@
+{
+  "id": "file_25",
+  "label": "Shofetim (Judges) — Part 3 — Chapters 15–21",
+  "volume": 11,
+  "content_version": 1,
+  "summary_plain": "Shimshon defeats the Philistines with the jawbone of a donkey — YHWH opens a spring from the rock. Delilah betrays Shimshon — his hair is cut, his eyes are gouged, he is bound with bronze chains. But his hair grows back. In the temple of Dagon, Shimshon pushes apart the pillars and the house falls on the lords of the Philistines. The closing chapters record the corruption at Dan and the civil war against Binyamin. The book ends: In those days there was no king in Yisra'EL — everyone did what was right in his own eyes.",
+  "summary_scholarly": "The ACR reads from 4QJudg-a, 4QJudg-b and the Orit Ge'ez. The closing refrain — 'there was no king in Yisra'EL, everyone did what was right in his own eyes' (17:6, 18:1, 19:1, 21:25) — frames the entire book. The absence of centralized covenant authority produces moral chaos. This sets the stage for the demand for a king in 1 Shemu'el 8 — and YHWH's assessment that the demand is a rejection of him.",
+  "key_terms": [
+    { "term": "Dagon", "phonetic": "Dah-GON", "definition": "The deity of the Philistines. Shimshon destroys Dagon's temple in Gaza at the cost of his own life. The Ark of the Covenant earlier caused Dagon's image to fall on its face (1 Shemu'el 5:3-4)." },
+    { "term": "No King in Yisra'EL", "phonetic": "", "definition": "The closing refrain of Shofetim: 'In those days there was no king in Yisra'EL — everyone did what was right in his own eyes' (21:25). This is not a call for monarchy — it is a diagnosis of the problem: YHWH was supposed to be king, and the people were not following him." }
+  ],
+  "fill_blank": [
+    { "ref": "15:15", "prompt": "He found a fresh jawbone of a donkey, and put out his hand and took it, and with it he struck ______ men.", "answer": "a thousand", "source_quote": "And he found a fresh jawbone of a donkey, and put out his hand and took it, and with it he struck a thousand men." },
+    { "ref": "21:25", "prompt": "In those days there was no king in Yisra'EL. Everyone did what was right in his own ______.", "answer": "eyes", "source_quote": "In those days there was no king in Yisra'EL. Everyone did what was right in his own eyes." }
+  ],
+  "multiple_choice": [
+    { "ref": "16:28-30", "question": "How did Shimshon defeat the Philistines at the end?", "options": ["With an army", "He pushed apart the pillars of Dagon's temple and it collapsed", "With fire from heaven", "With the jawbone again"], "correct": 1, "source_quote": "Shimshon grasped the two middle pillars on which the house rested, and he leaned his weight against them. And the house fell upon the lords and upon all the people who were in it." },
+    { "ref": "21:25", "question": "What is the final verse of Shofetim?", "options": ["And they lived in peace", "In those days there was no king in Yisra'EL — everyone did what was right in his own eyes", "And YHWH raised up a new judge", "And the land had rest"], "correct": 1, "source_quote": "In those days there was no king in Yisra'EL. Everyone did what was right in his own eyes." }
+  ],
+  "faq": [
+    {
+      "question": "What does 'no king in Yisra'EL' really mean?",
+      "answer": "The refrain is not a call for human monarchy — it is a diagnosis. YHWH was supposed to be the king (Gid'on said so explicitly in 8:23). When the people refused YHWH's direct governance, the result was moral chaos — not because they lacked a human ruler, but because they rejected the divine one. The Qumran community's entire program was a return to YHWH's direct governance without human institutional intermediaries. The Damascus Document describes the corrupt institutional center as a deviation from the covenant. Shofetim's closing refrain describes what happens when every person defines right in their own eyes rather than in YHWH's Torah."
+    },
+    {
+      "question": "Why does Shimshon's story end in Gaza?",
+      "answer": "Shimshon destroys the temple of Dagon in Gaza — the same territory documented as one of the oldest continuously inhabited places in the ancient Afro-Asiatic corridor. Gaza has been a crossing point between Africa and Asia for over 5,000 years. The archaeological sites destroyed in Gaza — dating back to the Phoenician era — document the same Afro-Asiatic Semitic material culture as the ancient Israelites. Shimshon's final act is in Gaza. The covenant people's story has always been connected to this geographic corridor."
+    }
+  ]
+}
