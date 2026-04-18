@@ -107,7 +107,7 @@ var LBL = [
 'Community Rule 1QS (Serekh HaYakhad) \u2014 Complete',
 'Rule of the Congregation 1QSa (Serekh HaEdah) \u2014 Complete',
 'Rule of Blessings 1QSb (Serekh HaBerakhot) \u2014 Complete',
-'Words of the Luminaries (Divrei HaMe'orot) \u2014 Complete',
+"Words of the Luminaries (Divrei HaMe'orot) \u2014 Complete",
 'Pesher Nahum (Commentary on Nahum) \u2014 Complete',
 'Hodayot (Thanksgiving Hymns) \u2014 Part 1 \u2014 Col 1\u20134',
 'Hodayot (Thanksgiving Hymns) \u2014 Part 2 \u2014 Col 5\u20138',
