@@ -762,9 +762,27 @@ function showFillBlank(fid) {
       if (qi >= questions.length) { showResults(); return; }
       var q = questions[qi];
       var correct = q.answer;
-      var others = shuffle(allAns.filter(function (a) {
+      // Pick distractors similar to the correct answer (same length range, alphabetic proximity)
+      var candidates = allAns.filter(function (a) {
         return a.toLowerCase() !== correct.toLowerCase();
-      })).slice(0, 3);
+      });
+      candidates.sort(function (a, b) {
+        var aDiff = Math.abs(a.length - correct.length);
+        var bDiff = Math.abs(b.length - correct.length);
+        if (aDiff !== bDiff) return aDiff - bDiff;
+        return Math.abs(a.charCodeAt(0) - correct.charCodeAt(0)) -
+               Math.abs(b.charCodeAt(0) - correct.charCodeAt(0));
+      });
+      // Also add plausible words from the same verse if available
+      if (q.source_quote) {
+        var verseWords = q.source_quote.split(/\s+/).filter(function (w) {
+          return w.length > 3 && w.toLowerCase() !== correct.toLowerCase() &&
+                 w !== '______' && candidates.indexOf(w) < 0;
+        });
+        candidates = candidates.concat(shuffle(verseWords).slice(0, 3));
+      }
+      var others = candidates.slice(0, 3);
+      if (others.length < 3) others = shuffle(candidates).slice(0, 3);
       var opts = shuffle([correct].concat(others));
       var colors = ['#2563eb', '#059669', '#7c3aed', '#d97706'];
 
