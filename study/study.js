@@ -821,7 +821,129 @@ function speakText(text) {
   window.speechSynthesis.speak(u);
 }
 
-// ---- Fill in the Blank (cloze deletion) quiz ----
+// ---- Smart Algorithmic Question Generator ----
+var IMPORTANT_WORDS = /\b(YHWH|Creator|covenant|Torah|Yisra.EL|holy|righteous|judgment|Sinai|Tziyon|Yerushalayim|temple|priest|prophet|angel|heaven|earth|glory|blessing|curse|commandment|Shabbat|Pesach|altar|offering|blood|fire|spirit|kingdom|throne|servant|nations|wilderness|promise|faithfulness|iniquity|transgression|sin|mercy|steadfast|everlasting|forever|inheritance|firstborn|circumcision|Pesach|jubilee|Sabbath|anointed|tabernacle|ark|sword|shield|trumpet|banner|pillar|cloud|lamp|bread|wine|oil|water|stone|mountain|river|garden|vineyard|sheep|shepherd|flock|seed|grain|harvest|tithe|vow|dream|vision|sign|wonder|plague|deliver|redeem|gather|scatter|exile|return|restore|remember|forget|forsake|seek|find|call|answer|hear|speak|write|teach|learn|obey|rebel|repent|forgive|heal|save|destroy|build|rest|rise|fall|live|die)\b/gi;
+
+var NAMES_PATTERN = /\b(Adam|Chavah|Qayin|Hevel|Chanokh|Noakh|Avram|Avraham|Sarah|Yitzhak|Rivkah|Yaakov|Esav|Yosef|Moshe|Aharon|Miryam|Yehoshua|Dawid|Shelomoh|Eliyahu|Elisha|Yesha.yahu|Yirmeyahu|Yehezkel|Daniyel|Shem|Ham|Yafet|Levi|Yehudah|Binyamin|Reuven|Shim.on|Dan|Naftali|Gad|Asher|Yissakhar|Zevulun|Efrayim|Menasheh|Sha.ul|Bat.Sheva|Devorah|Gid.on|Shimshon|Ruth|Na.omi|Bo.az|Chanah|Shemu.el|Yonatan|Rachav|Kalev|Tzipporah|Yitro|Pharaoh|Nevukhadnetzar|Koresh)\b/g;
+
+var NUMBERS_PATTERN = /\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|hundred|thousand|first|second|third|fourth|fifth|sixth|seventh|tenth|twelfth|fortieth|fiftieth)\b/gi;
+
+var PLACES_PATTERN = /\b(Egypt|Mitsrayim|Babylon|Bavel|Sinai|Horev|Yerushalayim|Tziyon|Shekhem|Hevron|Beit.El|Gilgal|Yericho|Shiloh|Midyan|Negev|Yarden|Kedar|Lebanon|Karmel|Seir|Edom|Mo.av|Ammon|Aram|Asshur|Kena.an|En.Gedi|Ophir|Beersheva|Ramah|Giv.on|Ai|Nevo|Pisgah)\b/g;
+
+function smartBlank(verse) {
+  var words = verse.split(/\s+/);
+  if (words.length < 5) return null;
+  var targets = [];
+  for (var i = 1; i < words.length - 1; i++) {
+    var w = words[i].replace(/[.,;:!?"'()]/g, '');
+    if (w.length < 3) continue;
+    var score = 0;
+    if (NAMES_PATTERN.test(w)) { score += 10; NAMES_PATTERN.lastIndex = 0; }
+    if (PLACES_PATTERN.test(w)) { score += 8; PLACES_PATTERN.lastIndex = 0; }
+    if (NUMBERS_PATTERN.test(w)) { score += 7; NUMBERS_PATTERN.lastIndex = 0; }
+    if (IMPORTANT_WORDS.test(w)) { score += 5; IMPORTANT_WORDS.lastIndex = 0; }
+    if (w.length >= 5) score += 2;
+    if (score > 0) targets.push({ idx: i, word: w, score: score });
+  }
+  if (!targets.length) {
+    var eligible = [];
+    for (var i = 1; i < words.length - 1; i++) {
+      var w = words[i].replace(/[.,;:!?"'()]/g, '');
+      if (w.length >= 4) eligible.push({ idx: i, word: w, score: 1 });
+    }
+    if (!eligible.length) return null;
+    targets = eligible;
+  }
+  targets.sort(function (a, b) { return b.score - a.score; });
+  var pick = targets[Math.floor(Math.random() * Math.min(3, targets.length))];
+  var prompt = verse.replace(new RegExp('\\b' + pick.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b'), '______');
+  if (prompt === verse) return null;
+  return { ref: '', prompt: prompt, answer: pick.word, source_quote: verse, difficulty: pick.score >= 8 ? 'hard' : pick.score >= 5 ? 'medium' : 'easy' };
+}
+
+function generateSmartQuestions(fid, count) {
+  var verses = getVerses(fid);
+  if (!verses.length) return [];
+  var usable = verses.filter(function (v) { return v.length > 25 && v.length < 250; });
+  usable = shuffle(usable);
+  var questions = [];
+  var seen = {};
+  for (var i = 0; i < usable.length && questions.length < count; i++) {
+    var q = smartBlank(usable[i]);
+    if (q && !seen[q.answer.toLowerCase()]) {
+      seen[q.answer.toLowerCase()] = true;
+      questions.push(q);
+    }
+  }
+  return questions;
+}
+
+function generateSmartMC(fid, count) {
+  var verses = getVerses(fid);
+  if (!verses.length) return [];
+  var usable = verses.filter(function (v) { return v.length > 30 && v.length < 200; });
+  usable = shuffle(usable);
+  var questions = [];
+  for (var i = 0; i < usable.length && questions.length < count; i++) {
+    var words = usable[i].split(/\s+/);
+    var nameMatches = usable[i].match(NAMES_PATTERN);
+    var placeMatches = usable[i].match(PLACES_PATTERN);
+    if (nameMatches && nameMatches.length > 0) {
+      var name = nameMatches[0];
+      var snippet = words.slice(0, Math.min(10, words.length)).join(' ');
+      if (snippet.length > 60) snippet = snippet.slice(0, 57) + '...';
+      var allNames = [];
+      for (var v = 0; v < usable.length; v++) {
+        var m = usable[v].match(NAMES_PATTERN);
+        if (m) for (var n = 0; n < m.length; n++) if (allNames.indexOf(m[n]) < 0 && m[n] !== name) allNames.push(m[n]);
+      }
+      var opts = [name].concat(shuffle(allNames).slice(0, 3));
+      opts = shuffle(opts);
+      questions.push({ ref: '', question: 'Who is mentioned in: "' + snippet + '"?', options: opts, correct: opts.indexOf(name), source_quote: usable[i], difficulty: 'medium' });
+    } else if (placeMatches && placeMatches.length > 0) {
+      var place = placeMatches[0];
+      var snippet = words.slice(0, Math.min(10, words.length)).join(' ');
+      if (snippet.length > 60) snippet = snippet.slice(0, 57) + '...';
+      var allPlaces = [];
+      for (var v = 0; v < usable.length; v++) {
+        var m = usable[v].match(PLACES_PATTERN);
+        if (m) for (var p = 0; p < m.length; p++) if (allPlaces.indexOf(m[p]) < 0 && m[p] !== place) allPlaces.push(m[p]);
+      }
+      var opts = [place].concat(shuffle(allPlaces).slice(0, 3));
+      opts = shuffle(opts);
+      questions.push({ ref: '', question: 'Which place appears in: "' + snippet + '"?', options: opts, correct: opts.indexOf(place), source_quote: usable[i], difficulty: 'medium' });
+    }
+  }
+  return questions;
+}
+
+// ---- Difficulty Tiers ----
+function getDifficultyTier(fid) {
+  var m = getSectionMastery(fid);
+  if (m.pct >= 80) return 'hard';
+  if (m.pct >= 40) return 'medium';
+  return 'easy';
+}
+
+function getCrossReferenceQuestions(fid, count) {
+  var idx = IDS.indexOf(fid);
+  if (idx < 0) return [];
+  var nearby = [];
+  for (var i = Math.max(0, idx - 3); i <= Math.min(IDS.length - 1, idx + 3); i++) {
+    if (i !== idx) nearby.push(IDS[i]);
+  }
+  var questions = [];
+  for (var n = 0; n < nearby.length && questions.length < count; n++) {
+    var nq = generateSmartQuestions(nearby[n], 2);
+    for (var q = 0; q < nq.length && questions.length < count; q++) {
+      nq[q].difficulty = 'hard';
+      nq[q].crossRef = nearby[n];
+      questions.push(nq[q]);
+    }
+  }
+  return questions;
+}
+
 function shuffle(arr) {
   for (var i = arr.length - 1; i > 0; i--) {
     var j = Math.floor(Math.random() * (i + 1));
@@ -832,34 +954,48 @@ function shuffle(arr) {
 
 function showFillBlank(fid) {
   loadContent(fid).then(function (data) {
-    var questions, allAns;
+    var questions = [], allAns = [];
+    var tier = getDifficultyTier(fid);
+
+    // Easy tier: curated questions (prioritize unmastered)
     if (data && data.fill_blank && data.fill_blank.length) {
-      questions = shuffle(data.fill_blank.slice());
+      var curated = data.fill_blank.slice();
+      var unmastered = getUnmasteredQuestions(fid, 'filblank', curated);
+      if (unmastered.length > 0 && tier === 'easy') {
+        questions = shuffle(unmastered.map(function (u) { return u.q; }));
+      } else {
+        questions = shuffle(curated);
+      }
       allAns = data.fill_blank.map(function (q) { return q.answer; });
-    } else {
-      // Algorithmic fallback: generate fill-in-blank from chapter verses
+    }
+
+    // Medium tier: add smart algorithmic questions from same section
+    if (tier !== 'easy' || questions.length < 5) {
       var verses = getVerses(fid);
       if (!verses.length) {
         fetch('../data/' + fid + '.json').then(function(r){return r.ok?r.json():null;}).then(function(d){
-          if(d){CHAPTER_CACHE[fid]=d;showFillBlank(fid);}else{openActivity('stub',fid);}
-        }).catch(function(){openActivity('stub',fid);});
-        return;
+          if(d){CHAPTER_CACHE[fid]=d;showFillBlank(fid);}else if(!questions.length){openActivity('stub',fid);}
+        }).catch(function(){if(!questions.length) openActivity('stub',fid);});
+        if (!questions.length) return;
       }
-      var usable = verses.filter(function(v){return v.length > 30 && v.length < 200;});
-      usable = shuffle(usable).slice(0, 10);
-      questions = []; allAns = [];
-      for (var vi = 0; vi < usable.length; vi++) {
-        var words = usable[vi].split(/\s+/).filter(function(w){return w.length > 3;});
-        if (words.length < 4) continue;
-        var blankIdx = Math.floor(Math.random() * (words.length - 2)) + 1;
-        var answer = words[blankIdx].replace(/[.,;:!?]/g, '');
-        var prompt = usable[vi].replace(new RegExp('\\b' + answer.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '\\b'), '______');
-        if (prompt === usable[vi]) continue;
-        questions.push({ ref: '', prompt: prompt, answer: answer, source_quote: usable[vi] });
-        allAns.push(answer);
+      var smartQ = generateSmartQuestions(fid, tier === 'hard' ? 15 : 10);
+      for (var sq = 0; sq < smartQ.length; sq++) {
+        questions.push(smartQ[sq]);
+        if (allAns.indexOf(smartQ[sq].answer) < 0) allAns.push(smartQ[sq].answer);
       }
-      if (!questions.length) { openActivity('stub', fid); return; }
     }
+
+    // Hard tier: add cross-reference questions from nearby sections
+    if (tier === 'hard') {
+      var crossQ = getCrossReferenceQuestions(fid, 5);
+      for (var cq = 0; cq < crossQ.length; cq++) {
+        questions.push(crossQ[cq]);
+        if (allAns.indexOf(crossQ[cq].answer) < 0) allAns.push(crossQ[cq].answer);
+      }
+    }
+
+    if (!questions.length) { openActivity('stub', fid); return; }
+    questions = shuffle(questions).slice(0, tier === 'hard' ? 15 : 10);
     var qi = 0, score = 0, firstAttempt = true;
 
     function renderQ() {
@@ -892,7 +1028,10 @@ function showFillBlank(fid) {
       var colors = ['#2563eb', '#059669', '#7c3aed', '#d97706'];
 
       var h = '<div class="cloze-view">';
-      h += '<div class="cloze-progress">' + (qi + 1) + ' of ' + questions.length + '</div>';
+      var tierNames = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
+      var tierColors = { easy: '#059669', medium: '#d97706', hard: '#dc2626' };
+      h += '<div class="cloze-progress">' + (qi + 1) + ' of ' + questions.length +
+        ' <span style="color:' + (tierColors[tier] || '#059669') + ';font-size:.85em">\u25CF ' + (tierNames[tier] || 'Easy') + '</span></div>';
       var clozeIdx = IDS.indexOf(fid);
       var clozeLabel = clozeIdx >= 0 ? LBL[clozeIdx].split(' \u2014 ')[0] : fid;
       h += '<div class="cloze-ref">' + clozeLabel + (q.ref ? ' ' + q.ref : '') + '</div>';
@@ -978,32 +1117,51 @@ function showFillBlank(fid) {
 // ---- Multiple Choice quiz ----
 function showMC(fid) {
   loadContent(fid).then(function (data) {
-    var questions;
+    var questions = [];
+    var tier = getDifficultyTier(fid);
+
+    // Easy tier: curated questions (prioritize unmastered)
     if (data && data.multiple_choice && data.multiple_choice.length) {
-      questions = shuffle(data.multiple_choice.slice());
-    } else {
+      var curated = data.multiple_choice.slice();
+      var unmastered = getUnmasteredQuestions(fid, 'mc', curated);
+      if (unmastered.length > 0 && tier === 'easy') {
+        questions = shuffle(unmastered.map(function (u) { return u.q; }));
+      } else {
+        questions = shuffle(curated);
+      }
+    }
+
+    // Medium tier: add smart algorithmic MC from same section
+    if (tier !== 'easy' || questions.length < 5) {
       var verses = getVerses(fid);
       if (!verses.length) {
         fetch('../data/'+fid+'.json').then(function(r){return r.ok?r.json():null;}).then(function(d){
-          if(d){CHAPTER_CACHE[fid]=d;showMC(fid);}else{openActivity('stub',fid);}
-        }).catch(function(){openActivity('stub',fid);}); return;
+          if(d){CHAPTER_CACHE[fid]=d;showMC(fid);}else if(!questions.length){openActivity('stub',fid);}
+        }).catch(function(){if(!questions.length) openActivity('stub',fid);});
+        if (!questions.length) return;
       }
-      var usable = verses.filter(function(v){return v.length>30&&v.length<200;});
-      usable = shuffle(usable);
-      questions = [];
-      for (var vi=0; vi<Math.min(usable.length,10); vi++) {
-        var words = usable[vi].split(/\s+/);
-        var snippet = words.slice(0, Math.min(8, words.length)).join(' ');
-        var opts = [usable[vi]];
-        var others = usable.filter(function(_,j){return j!==vi;});
-        others = shuffle(others).slice(0,3);
-        for (var oi=0;oi<others.length;oi++) opts.push(others[oi]);
-        opts = shuffle(opts);
-        var correct = opts.indexOf(usable[vi]);
-        questions.push({ref:'',question:'Which verse contains: "'+snippet+'..."?',options:opts.map(function(o){return o.length>60?o.slice(0,57)+'...':o;}),correct:correct,source_quote:usable[vi]});
-      }
-      if (!questions.length) { openActivity('stub', fid); return; }
+      var smartMC = generateSmartMC(fid, tier === 'hard' ? 10 : 8);
+      for (var sm = 0; sm < smartMC.length; sm++) questions.push(smartMC[sm]);
     }
+
+    // Hard tier: cross-reference MC from nearby sections
+    if (tier === 'hard') {
+      var idx = IDS.indexOf(fid);
+      var nearby = [];
+      for (var ni = Math.max(0, idx - 3); ni <= Math.min(IDS.length - 1, idx + 3); ni++) {
+        if (ni !== idx) nearby.push(IDS[ni]);
+      }
+      for (var nn = 0; nn < nearby.length && questions.length < 20; nn++) {
+        var crossMC = generateSmartMC(nearby[nn], 2);
+        for (var cm = 0; cm < crossMC.length; cm++) {
+          crossMC[cm].difficulty = 'hard';
+          questions.push(crossMC[cm]);
+        }
+      }
+    }
+
+    if (!questions.length) { openActivity('stub', fid); return; }
+    questions = shuffle(questions).slice(0, tier === 'hard' ? 15 : 10);
     var qi = 0, score = 0, mcFirstAttempt = true;
     var mcColors = ['#dc2626', '#2563eb', '#059669', '#d97706'];
 
@@ -1013,7 +1171,10 @@ function showMC(fid) {
       mcFirstAttempt = true;
 
       var h = '<div class="mc-view">';
-      h += '<div class="mc-progress">' + (qi + 1) + ' of ' + questions.length + '</div>';
+      var tierNames = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
+      var tierColors = { easy: '#059669', medium: '#d97706', hard: '#dc2626' };
+      h += '<div class="mc-progress">' + (qi + 1) + ' of ' + questions.length +
+        ' <span style="color:' + (tierColors[tier] || '#059669') + ';font-size:.85em">\u25CF ' + (tierNames[tier] || 'Easy') + '</span></div>';
       var mcIdx = IDS.indexOf(fid);
       var mcLabel = mcIdx >= 0 ? LBL[mcIdx].split(' \u2014 ')[0] : fid;
       h += '<div class="mc-ref">' + mcLabel + (q.ref ? ' ' + q.ref : '') + '</div>';
