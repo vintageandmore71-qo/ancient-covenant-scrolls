@@ -754,6 +754,59 @@ body.font-dyslexic .fc-back{font-family:var(--font-dyslexic);line-height:2.0}
 .cr-level{font-size:1em;color:var(--text-muted);font-weight:700;margin-bottom:8px}
 
 /* =========================================================================
+   Verse Builder puzzle
+   ========================================================================= */
+.vb-view{text-align:center;padding:16px 0}
+.vb-progress{font-size:14px;color:var(--text-muted);font-weight:700;margin-bottom:6px}
+.vb-ref{font-size:13px;color:var(--vol1);font-weight:700;margin-bottom:16px}
+.vb-placed{
+  min-height:80px;padding:16px;margin-bottom:16px;
+  background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);
+  display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;
+  border:2px dashed #ccc;
+}
+.vb-word{
+  display:inline-block;padding:10px 16px;border-radius:10px;
+  font-size:1em;font-weight:700;font-family:var(--font-main);
+  cursor:pointer;transition:transform .15s,box-shadow .15s;
+}
+body.font-dyslexic .vb-word{font-family:var(--font-dyslexic)}
+.vb-done{background:#059669;color:#fff;cursor:default;box-shadow:0 2px 6px rgba(5,150,105,.2)}
+.vb-pick{
+  background:var(--vol1);color:#fff;border:none;
+  box-shadow:0 3px 10px rgba(0,0,0,.15);min-height:48px;
+}
+.vb-pick:hover{transform:scale(1.05);box-shadow:0 5px 16px rgba(0,0,0,.22)}
+.vb-pick:active{transform:scale(.96)}
+.vb-cursor{color:var(--vol5);font-size:1.4em;font-weight:700;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.vb-bank{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px;padding:0 8px}
+.vb-btns{display:flex;gap:10px;justify-content:center;margin-bottom:12px}
+
+/* =========================================================================
+   Word Match puzzle
+   ========================================================================= */
+.wm-view{padding:16px 0}
+.wm-header{text-align:center;font-size:1.1em;font-weight:700;color:var(--text-main);margin-bottom:8px}
+.wm-stats{text-align:center;font-size:14px;color:var(--text-muted);font-weight:700;margin-bottom:16px}
+.wm-cols{display:flex;gap:12px}
+@media(max-width:600px){.wm-cols{flex-direction:column}}
+.wm-col{flex:1;display:flex;flex-direction:column;gap:8px}
+.wm-item{
+  padding:14px 16px;border-radius:10px;font-size:.95em;font-weight:700;
+  font-family:var(--font-main);cursor:pointer;text-align:left;
+  border:none;transition:transform .15s,box-shadow .15s;min-height:52px;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+body.font-dyslexic .wm-item{font-family:var(--font-dyslexic)}
+.wm-term{background:var(--bg-card);color:var(--text-main)}
+.wm-term:hover{transform:scale(1.02);box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.wm-term.wm-selected{background:var(--vol1);color:#fff;box-shadow:0 4px 16px rgba(37,99,235,.3)}
+.wm-def{background:var(--bg-card);color:var(--text-muted);line-height:1.5}
+.wm-def:hover{transform:scale(1.02);box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.wm-done{opacity:.5;pointer-events:none;background:#059669;color:#fff}
+
+/* =========================================================================
    Font toggle button (added dynamically by JS)
    ========================================================================= */
 .font-toggle-btn{
