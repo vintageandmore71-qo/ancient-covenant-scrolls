@@ -1,6 +1,6 @@
 # ACR Study App — Complete Build Plan & Status
-# Locked in: 2026-04-16 (updated 2026-04-17)
-# Tags: study-9-cards-working, study-13-of-18-content
+# Locked in: 2026-04-16 (updated 2026-04-18)
+# Tags: study-9-cards-working, study-13-of-18-content, study-all-features
 # Repo: https://github.com/dssorit/ancient-covenant-scrolls
 # Live: https://dssorit.github.io/ancient-covenant-scrolls/study/
 
@@ -111,7 +111,7 @@
 
 ## REMAINING — Build Plan (Priority Order)
 
-### Priority 1: Content Generation (3 files remaining — 15 of 18 done)
+### Priority 1: Content Generation (COMPLETE — 18 of 18 done)
 Generate curated content for each section, one at a time, in chat.
 Each file requires: read full ACR source text → write JSON → audit every
 quiz item word-for-word against ACR → commit.
@@ -131,9 +131,9 @@ Content files needed:
 - [x] file_13.json — Chanokh Part 1, Chapters 1-36 (Book of Watchers) ✅
 - [x] file_14.json — Chanokh Part 2, Chapters 37-55 (Dream Visions) ✅
 - [x] file_15.json — Chanokh Part 3, Chapters 56-73 (Epistle) ✅
-- [ ] file_16.json — Yovelim Part 1, Chapters 1-25
-- [ ] file_17.json — Yovelim Part 2, Chapters 26-50
-- [ ] file_94.json — War Scroll 1QM, All 19 Columns
+- [x] file_16.json ✅ — Yovelim Part 1, Chapters 1-25
+- [x] file_17.json ✅ — Yovelim Part 2, Chapters 26-50
+- [x] file_94.json ✅ — War Scroll 1QM, All 19 Columns
 
 Each content file schema:
   id, label, volume, content_version,
@@ -144,13 +144,13 @@ Each content file schema:
   faq[{question, answer}]
 
 ### Priority 2: SM-2 Spaced Repetition Algorithm
-- [ ] SM-2 algorithm: ease factor, interval, repetition count, next review date
-- [ ] Confidence 1-5 maps to SM-2 quality ratings
-- [ ] Card state stored in localStorage (acr_study_cards)
-- [ ] Flashcard mode reads from SM-2 schedule: due cards first
-- [ ] Weak card queue: cards rated 1-2 resurface same session
-- [ ] "Due today" count shown on home screen and Progress view
-- [ ] Mastery threshold: ease >= 2.5 after 3+ reviews
+- [x] SM-2 algorithm: ease factor, interval, repetition count, next review date
+- [x] Confidence 1-5 maps to SM-2 quality ratings
+- [x] Card state stored in localStorage (acr_study_cards)
+- [x] Flashcard mode reads from SM-2 schedule: due cards first
+- [x] Weak card queue: cards rated 1-2 resurface same session
+- [x] "Due today" count shown on home screen and Progress view
+- [x] Mastery threshold: ease >= 2.5 after 3+ reviews
 
 ### Priority 3: Images
 - [ ] Source public domain scroll/manuscript images from Wikimedia Commons
@@ -161,26 +161,26 @@ Each content file schema:
 - [ ] Commit to study/img/ folder
 
 ### Priority 4: Reading Aids (Dyslexia Layer)
-- [ ] BeeLine Reader-style color gradient across lines
-- [ ] Line focus mode (dim all except current 1/3/5 lines)
-- [ ] Word-by-word synchronized highlighting during TTS (onboundary event)
-- [ ] Tap any word for instant audio pronunciation
-- [ ] High contrast color themes (dark parchment, deep navy, warm amber)
+- [x] BeeLine Reader-style color gradient across lines
+- [x] Line focus mode (dim all except current 1/3/5 lines)
+- [x] Word-by-word synchronized highlighting during TTS (onboundary event)
+- [x] Tap any word for instant audio pronunciation
+- [x] High contrast color themes (dark parchment, deep navy, warm amber)
 
 ### Priority 5: Child Mode
-- [ ] Toggle in settings
-- [ ] OpenDyslexic locked on
-- [ ] Even larger text (+4pt)
-- [ ] Every word tappable for audio pronunciation
-- [ ] Simplified plain-language summaries
-- [ ] Encouraging animated feedback ("Great job!" with animation)
-- [ ] Swipe-friendly large tap targets
-- [ ] No time pressure on any drill
-- [ ] 3-option multiple choice instead of 4
+- [x] Toggle in settings
+- [x] OpenDyslexic locked on
+- [x] Even larger text (+4pt)
+- [x] Every word tappable for audio pronunciation
+- [x] Simplified plain-language summaries
+- [x] Encouraging animated feedback ("Great job!" with animation)
+- [x] Swipe-friendly large tap targets
+- [x] No time pressure on any drill
+- [x] 3-option multiple choice instead of 4
 
 ### Priority 6: Additional Puzzle Modes
-- [ ] Verse reconstruction — drag and drop scrambled words into correct order
-- [ ] Word matching puzzle — draw lines connecting Hebrew terms to meanings
+- [x] Verse reconstruction — drag and drop scrambled words into correct order
+- [x] Word matching puzzle — draw lines connecting Hebrew terms to meanings
 - [ ] Crossword puzzle per chapter using key terms
 - [ ] Jigsaw reveal — correct answers progressively reveal a chapter image
 - [ ] Chapter sequence puzzle — reorder events/passages by dragging
