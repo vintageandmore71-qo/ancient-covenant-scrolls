@@ -728,11 +728,34 @@ function shuffle(arr) {
 
 function showFillBlank(fid) {
   loadContent(fid).then(function (data) {
-    if (!data || !data.fill_blank || !data.fill_blank.length) {
-      openActivity('stub', fid); return;
+    var questions, allAns;
+    if (data && data.fill_blank && data.fill_blank.length) {
+      questions = shuffle(data.fill_blank.slice());
+      allAns = data.fill_blank.map(function (q) { return q.answer; });
+    } else {
+      // Algorithmic fallback: generate fill-in-blank from chapter verses
+      var verses = getVerses(fid);
+      if (!verses.length) {
+        fetch('../data/' + fid + '.json').then(function(r){return r.ok?r.json():null;}).then(function(d){
+          if(d){CHAPTER_CACHE[fid]=d;showFillBlank(fid);}else{openActivity('stub',fid);}
+        }).catch(function(){openActivity('stub',fid);});
+        return;
+      }
+      var usable = verses.filter(function(v){return v.length > 30 && v.length < 200;});
+      usable = shuffle(usable).slice(0, 10);
+      questions = []; allAns = [];
+      for (var vi = 0; vi < usable.length; vi++) {
+        var words = usable[vi].split(/\s+/).filter(function(w){return w.length > 3;});
+        if (words.length < 4) continue;
+        var blankIdx = Math.floor(Math.random() * (words.length - 2)) + 1;
+        var answer = words[blankIdx].replace(/[.,;:!?]/g, '');
+        var prompt = usable[vi].replace(new RegExp('\\b' + answer.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '\\b'), '______');
+        if (prompt === usable[vi]) continue;
+        questions.push({ ref: '', prompt: prompt, answer: answer, source_quote: usable[vi] });
+        allAns.push(answer);
+      }
+      if (!questions.length) { openActivity('stub', fid); return; }
     }
-    var questions = shuffle(data.fill_blank.slice());
-    var allAns = data.fill_blank.map(function (q) { return q.answer; });
     var qi = 0, score = 0;
 
     function renderQ() {
@@ -911,19 +934,39 @@ function showMC(fid) {
 // ---- Flashcards with flip animation + confidence rating ----
 function showFlashcards(fid) {
   loadContent(fid).then(function (data) {
-    if (!data) { openActivity('stub', fid); return; }
-    // Build cards from key_terms + fill_blank source quotes
     var cards = [];
-    if (data.key_terms) {
+    var idx = IDS.indexOf(fid);
+    var secLabel = idx >= 0 ? LBL[idx] : fid;
+    if (data && data.key_terms) {
       data.key_terms.forEach(function (t) {
-        cards.push({ front: t.term + ' (' + t.phonetic + ')', back: t.definition, type: 'term' });
+        cards.push({ front: t.term + (t.phonetic ? ' (' + t.phonetic + ')' : ''), back: t.definition, type: 'term' });
       });
     }
-    if (data.fill_blank) {
+    if (data && data.fill_blank) {
       data.fill_blank.forEach(function (q) {
-        cards.push({ front: 'Bereshit ' + q.ref, back: q.source_quote, type: 'verse' });
+        cards.push({ front: secLabel + ' ' + q.ref, back: q.source_quote, type: 'verse' });
       });
     }
+    // Algorithmic fallback: if no curated content, generate cards from chapter verses
+    if (!cards.length) {
+      var verses = getVerses(fid);
+      if (!verses.length && CHAPTER_CACHE[fid]) { verses = getVerses(fid); }
+      if (!verses.length) {
+        // Try fetching chapter data first
+        fetch('../data/' + fid + '.json').then(function(r){return r.ok?r.json():null;}).then(function(d){
+          if(d){CHAPTER_CACHE[fid]=d;showFlashcards(fid);}else{openActivity('stub',fid);}
+        }).catch(function(){openActivity('stub',fid);});
+        return;
+      }
+      var usable = verses.filter(function(v){return v.length > 20 && v.length < 300;});
+      usable = shuffle(usable).slice(0, 15);
+      for (var v = 0; v < usable.length; v++) {
+        var words = usable[v].split(/\s+/);
+        var front = words.slice(0, Math.min(6, Math.ceil(words.length / 2))).join(' ') + '...';
+        cards.push({ front: front, back: usable[v], type: 'verse' });
+      }
+    }
+    if (!cards.length) { openActivity('stub', fid); return; }
     // Sort due cards first, then shuffle the rest
     var today = new Date().toISOString().slice(0, 10);
     var dueCards = [], otherCards = [];
