@@ -363,7 +363,7 @@ function isVolumeMastered(volId) {
 var LEVELS = [
   { name: 'Seeker', icon: '\u{1F50D}', xp: 0 },
   { name: 'Scholar', icon: '\u{1F4DC}', xp: 100 },
-  { name: 'Sage', icon: '\u{1F9D9}', xp: 500 },
+  { name: 'Guardian', icon: '\u{1F6E1}\uFE0F', xp: 500 },
   { name: 'Keeper of the Scroll', icon: '\u{1F3C6}', xp: 1500 }
 ];
 
@@ -435,9 +435,11 @@ function buildTOC() {
   var idx = 0;
   for (var g = 0; g < VOL_GROUPS.length; g++) {
     var group = VOL_GROUPS[g];
+    var volColorVars = ['--vol1','--vol2','--vol3','--vol4','--vol5','--vol6','--vol7','--vol8'];
     var h = document.createElement('div');
     h.className = 'vol-hdr';
     h.setAttribute('data-vol', group.vol);
+    h.style.color = 'var(' + volColorVars[g % 8] + ')';
     var mastered = isVolumeMastered(group.vol);
     h.innerHTML = group.title +
       (mastered ? ' <span class="vol-badge">\u{1F3C6}</span>' : '') +
@@ -1080,7 +1082,8 @@ function showMemoryMatch(fid) {
           if (this.classList.contains('mm-matched') || this.classList.contains('mm-open')) return;
 
           this.classList.add('mm-open');
-          speakText(tile.text);
+          // Strip verse references like (1:2) or (15:25) before speaking
+          speakText(tile.text.replace(/\(\d+:\d+[^)]*\)/g, ''));
 
           if (flippedA === null) {
             flippedA = { idx: idx, tile: tile, el: this };
@@ -1311,7 +1314,7 @@ function showProgress(fid) {
   // Level card
   h += '<div class="prog-card prog-level" style="border-color:' +
     (lvl.current.name === 'Keeper of the Scroll' ? '#b8860b' :
-     lvl.current.name === 'Sage' ? '#7c3aed' :
+     lvl.current.name === 'Guardian' ? '#7c3aed' :
      lvl.current.name === 'Scholar' ? '#2563eb' : '#6b7280') + '">';
   h += '<div class="prog-level-icon">' + lvl.current.icon + '</div>';
   h += '<div class="prog-level-name">' + lvl.current.name + '</div>';
@@ -1394,7 +1397,9 @@ function showVerseBuild(fid) {
       function draw() {
         var h = '<div class="vb-view">';
         h += '<div class="vb-progress">' + (qi + 1) + ' of ' + Math.min(verses.length, 5) + '</div>';
-        h += '<div class="vb-ref">Rebuild: ' + v.ref + '</div>';
+        var vbIdx = IDS.indexOf(fid);
+        var vbLabel = vbIdx >= 0 ? LBL[vbIdx] : fid;
+        h += '<div class="vb-ref">' + vbLabel + ' \u2014 ' + v.ref + '</div>';
         h += '<div class="vb-placed" id="vb-placed">';
         for (var p = 0; p < placed.length; p++) {
           h += '<span class="vb-word vb-done" data-pi="' + p + '">' + placed[p] + '</span>';

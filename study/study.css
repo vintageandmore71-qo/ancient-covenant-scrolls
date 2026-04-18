@@ -108,10 +108,7 @@ body.theme-amber .act-card{box-shadow:0 4px 14px rgba(0,0,0,.3)}
 .vol-eng{display:block;font-size:.8em;font-weight:400;opacity:.65;margin-top:2px;text-transform:none;letter-spacing:0}
 .vol-badge{font-size:1.1em;vertical-align:middle;margin-left:4px}
 /* Color-coded volume headers */
-.vol-hdr[data-vol="1"]{color:var(--vol1)}.vol-hdr[data-vol="2"]{color:var(--vol2)}
-.vol-hdr[data-vol="3"]{color:var(--vol3)}.vol-hdr[data-vol="4"]{color:var(--vol4)}
-.vol-hdr[data-vol="5"]{color:var(--vol5)}.vol-hdr[data-vol="6"]{color:var(--vol6)}
-.vol-hdr[data-vol="7"]{color:var(--vol7)}.vol-hdr[data-vol="8"]{color:var(--vol8)}
+/* Volume colors applied inline via JS — cycles 8 colors for all 46 volumes */
 .sec{
   padding:12px 16px 12px 28px;color:#c8c8e0;font-size:13px;
   cursor:pointer;transition:all .15s;line-height:1.5;
@@ -180,29 +177,21 @@ body.beeline-on .sv-fa{
    Line focus — dims everything except the area near the cursor/finger.
    Tap anywhere on the text to position the focus band.
    ========================================================================= */
-body.linefocus-on .ll-card,
-body.linefocus-on .cloze-prompt,
-body.linefocus-on .mc-question,
-body.linefocus-on .sv-text,
-body.linefocus-on .fc-front,
-body.linefocus-on .fc-back{
+body.linefocus-on #main{
   position:relative;
 }
-body.linefocus-on .ll-card::before,
-body.linefocus-on .cloze-prompt::before,
-body.linefocus-on .mc-question::before,
-body.linefocus-on .sv-text::before{
-  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+body.linefocus-on #main::after{
+  content:'';position:fixed;top:0;left:0;right:0;bottom:0;
   background:linear-gradient(
     180deg,
-    rgba(0,0,0,.55) 0%,
-    rgba(0,0,0,.55) 35%,
-    rgba(0,0,0,0) 35%,
-    rgba(0,0,0,0) 65%,
-    rgba(0,0,0,.55) 65%,
-    rgba(0,0,0,.55) 100%
+    rgba(0,0,0,.7) 0%,
+    rgba(0,0,0,.7) 30%,
+    rgba(0,0,0,0) 30%,
+    rgba(0,0,0,0) 55%,
+    rgba(0,0,0,.7) 55%,
+    rgba(0,0,0,.7) 100%
   );
-  pointer-events:none;border-radius:inherit;z-index:1;
+  pointer-events:none;z-index:999;
 }
 p.sp{background:#fff3cd;border-radius:6px;padding:2px 4px}
 
@@ -336,6 +325,7 @@ body.font-dyslexic .act-label{font-family:var(--font-dyslexic)}
 .study-btn:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(0,0,0,.18)}
 .study-btn:active{transform:scale(.97)}
 .study-btn:disabled{opacity:.4;cursor:default;transform:none;box-shadow:none}
+.study-btn[id*="back"]{display:block;width:100%;max-width:400px;margin:30px auto 20px;text-align:center}
 .sb-pri{
   background:linear-gradient(135deg,var(--vol1) 0%,var(--vol5) 100%);
   box-shadow:0 3px 12px rgba(37,99,235,.25);

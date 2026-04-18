@@ -6,45 +6,245 @@
   "summary_plain": "Vayikra Part 2 contains the Holiness Code. YHWH commands: You shall be holy, for I YHWH your Creator am holy. The laws cover forbidden practices, how to treat one another, and the commandment: you shall love your neighbor as yourself — I am YHWH. YHWH gives the Mo'adim — the appointed times: the Pesach, the Feast of Unleavened Bread, the day of first fruits, the counting of seven weeks, the first day of the seventh month (a day of solemn rest and trumpet blast), Yom Kippur (the tenth day of the seventh month), and the Feast of Booths. YHWH gives the Shemitah — every seventh year the land rests. And the Jubilee — the fiftieth year, when liberty is proclaimed throughout the land and every person returns to their property. The book ends with the covenant blessings and curses: if you walk in my statutes I will walk among you and be your Creator, and you shall be my people.",
   "summary_scholarly": "Chapters 17 through 27 contain the Holiness Code, the Mo'adim calendar, the Shemitah and Jubilee laws, and the covenant blessings and curses. The ACR reads from the Dead Sea Scrolls (4QLev-a through 4QLev-f) and the Orit Ge'ez of the African Israelite community. The Masoretic is noted as a variant only. Chapter 19 is the center of the Holiness Code: 'You shall be holy, for I YHWH your Creator am holy' (19:2), culminating in 'you shall love your neighbor as yourself — I am YHWH' (19:18). The Mo'adim in chapter 23 are not 'Jewish holidays' — they are YHWH's appointed times, announced as 'my appointed feasts' (23:2). The Jubilee in chapter 25 is the fiftieth year: 'proclaim liberty throughout the land to all its inhabitants' (25:10). The Yovelim text (ACR Volume 7) takes its name from this institution and structures all of history by jubilee cycles. The covenant terms in chapter 26 are direct: 'I will walk among you and will be your Creator, and you shall be my people' (26:12).",
   "key_terms": [
-    { "term": "Holiness Code", "phonetic": "", "definition": "Chapters 17-26 of Vayikra. The central command is 'You shall be holy, for I YHWH your Creator am holy' (19:2). Every law in these chapters flows from that principle." },
-    { "term": "Love your neighbor", "phonetic": "", "definition": "'You shall not take vengeance or bear a grudge against the sons of your own people, but you shall love your neighbor as yourself — I am YHWH' (19:18)." },
-    { "term": "Mo'adim", "phonetic": "Mo-ah-DEEM", "definition": "The appointed times of YHWH (ch 23). YHWH says: 'These are my appointed feasts' (23:2). They include: Pesach, Unleavened Bread, First Fruits, Shavuot (Weeks), the first of the seventh month, Yom Kippur, and Sukkot (Booths)." },
-    { "term": "Shemitah", "phonetic": "Sheh-mee-TAH", "definition": "The seventh-year rest for the land (25:1-7). 'In the seventh year there shall be a Sabbath of solemn rest for the land, a Sabbath to YHWH.'" },
-    { "term": "Jubilee (Yovel)", "phonetic": "Yo-VEL", "definition": "The fiftieth year: 'Proclaim liberty throughout the land to all its inhabitants. It shall be a jubilee for you, when each of you shall return to his property' (25:10). The Yovelim text (ACR Volume 7) is named after this institution." },
-    { "term": "Sukkot", "phonetic": "Soo-KOHT", "definition": "The Feast of Booths — seven days beginning the fifteenth of the seventh month (23:34). The people dwell in booths to remember that YHWH made the children of Yisra'EL dwell in booths when he brought them out of Egypt." },
-    { "term": "Pesach (in the Mo'adim)", "phonetic": "PEH-sakh", "definition": "'In the first month, on the fourteenth day of the month at twilight, is YHWH's Pesach' (23:5). Listed first among the appointed times." },
-    { "term": "Covenant blessings", "phonetic": "", "definition": "Chapter 26: if you walk in YHWH's statutes, the rains come in season, the land yields, enemies flee. 'I will walk among you and will be your Creator, and you shall be my people' (26:12)." },
-    { "term": "Covenant curses", "phonetic": "", "definition": "Chapter 26: if you reject YHWH's statutes, the consequences are severe — disease, defeat, exile. But even then, YHWH says he will not utterly destroy them or break his covenant (26:44)." },
-    { "term": "I am YHWH", "phonetic": "", "definition": "The phrase that closes nearly every law in the Holiness Code. After each commandment — 'I am YHWH' or 'I am YHWH your Creator.' The laws are grounded in who is speaking them." }
+    {
+      "term": "Holiness Code",
+      "phonetic": "",
+      "definition": "Chapters 17-26 of Vayikra. The central command is 'You shall be holy, for I YHWH your Creator am holy' (19:2). Every law in these chapters flows from that principle."
+    },
+    {
+      "term": "Love your neighbor",
+      "phonetic": "",
+      "definition": "'You shall not take vengeance or bear a grudge against the sons of your own people, but you shall love your neighbor as yourself — I am YHWH' (19:18)."
+    },
+    {
+      "term": "Mo'adim",
+      "phonetic": "Mo-ah-DEEM",
+      "definition": "The appointed times of YHWH (ch 23). YHWH says: 'These are my appointed feasts' (23:2). They include: Pesach, Unleavened Bread, First Fruits, Shavuot (Weeks), the first of the seventh month, Yom Kippur, and Sukkot (Booths)."
+    },
+    {
+      "term": "Shemitah",
+      "phonetic": "Sheh-mee-TAH",
+      "definition": "The seventh-year rest for the land (25:1-7). 'In the seventh year there shall be a Sabbath of solemn rest for the land, a Sabbath to YHWH.'"
+    },
+    {
+      "term": "Jubilee (Yovel)",
+      "phonetic": "Yo-VEL",
+      "definition": "The fiftieth year: 'Proclaim liberty throughout the land to all its inhabitants. It shall be a jubilee for you, when each of you shall return to his property' (25:10). The Yovelim text (ACR Volume 7) is named after this institution."
+    },
+    {
+      "term": "Sukkot",
+      "phonetic": "Soo-KOHT",
+      "definition": "The Feast of Booths — seven days beginning the fifteenth of the seventh month (23:34). The people dwell in booths to remember that YHWH made the children of Yisra'EL dwell in booths when he brought them out of Egypt."
+    },
+    {
+      "term": "Pesach (in the Mo'adim)",
+      "phonetic": "PEH-sakh",
+      "definition": "'In the first month, on the fourteenth day of the month at twilight, is YHWH's Pesach' (23:5). Listed first among the appointed times."
+    },
+    {
+      "term": "Covenant blessings",
+      "phonetic": "",
+      "definition": "Chapter 26: if you walk in YHWH's statutes, the rains come in season, the land yields, enemies flee. 'I will walk among you and will be your Creator, and you shall be my people' (26:12)."
+    },
+    {
+      "term": "Covenant curses",
+      "phonetic": "",
+      "definition": "Chapter 26: if you reject YHWH's statutes, the consequences are severe — disease, defeat, exile. But even then, YHWH says he will not utterly destroy them or break his covenant (26:44)."
+    },
+    {
+      "term": "I am YHWH",
+      "phonetic": "",
+      "definition": "The phrase that closes nearly every law in the Holiness Code. After each commandment — 'I am YHWH' or 'I am YHWH your Creator.' The laws are grounded in who is speaking them."
+    }
   ],
   "fill_blank": [
-    { "ref": "19:2", "prompt": "You shall be ______, for I YHWH your Creator am ______.", "answer": "holy", "source_quote": "Speak to all the congregation of the people of Yisra'EL and say to them: You shall be holy, for I YHWH your Creator am holy." },
-    { "ref": "19:18", "prompt": "You shall love your ______ as yourself — I am YHWH.", "answer": "neighbor", "source_quote": "You shall not take vengeance or bear a grudge against the sons of your own people, but you shall love your neighbor as yourself — I am YHWH." },
-    { "ref": "23:2", "prompt": "These are the appointed feasts of YHWH that you shall proclaim as holy ______.", "answer": "convocations", "source_quote": "Speak to the people of Yisra'EL and say to them: These are the appointed feasts of YHWH that you shall proclaim as holy convocations — they are my appointed feasts." },
-    { "ref": "25:10", "prompt": "And you shall consecrate the fiftieth year, and proclaim ______ throughout the land to all its inhabitants.", "answer": "liberty", "source_quote": "And you shall consecrate the fiftieth year, and proclaim liberty throughout the land to all its inhabitants. It shall be a jubilee for you, when each of you shall return to his property." },
-    { "ref": "26:12", "prompt": "And I will walk among you and will be your Creator, and you shall be my ______.", "answer": "people", "source_quote": "And I will walk among you and will be your Creator, and you shall be my people." },
-    { "ref": "23:5", "prompt": "In the first month, on the fourteenth day of the month at twilight, is YHWH's ______.", "answer": "Pesach", "source_quote": "In the first month, on the fourteenth day of the month at twilight, is YHWH's Pesach." },
-    { "ref": "25:4", "prompt": "But in the seventh year there shall be a Sabbath of solemn rest for the ______, a Sabbath to YHWH.", "answer": "land", "source_quote": "But in the seventh year there shall be a Sabbath of solemn rest for the land, a Sabbath to YHWH. You shall not sow your field or prune your vineyard." },
-    { "ref": "23:34", "prompt": "On the fifteenth day of this seventh month and for seven days is the Feast of ______ to YHWH.", "answer": "Booths", "source_quote": "Speak to the people of Yisra'EL, saying: On the fifteenth day of this seventh month and for seven days is the Feast of Booths to YHWH." },
-    { "ref": "18:4", "prompt": "You shall follow my rules and keep my statutes and walk in them. I am YHWH your ______.", "answer": "Creator", "source_quote": "You shall follow my rules and keep my statutes and walk in them. I am YHWH your Creator." },
-    { "ref": "23:27", "prompt": "Now on the tenth day of this seventh month is the Day of ______.", "answer": "Atonement", "source_quote": "Now on the tenth day of this seventh month is the Day of Atonement. It shall be for you a time of holy convocation, and you shall afflict yourselves." }
+    {
+      "ref": "19:2",
+      "prompt": "You shall be ______, for I YHWH your Creator am ______.",
+      "answer": "holy",
+      "source_quote": "Speak to all the congregation of the people of Yisra'EL and say to them: You shall be holy, for I YHWH your Creator am holy."
+    },
+    {
+      "ref": "19:18",
+      "prompt": "You shall love your ______ as yourself — I am YHWH.",
+      "answer": "neighbor",
+      "source_quote": "You shall not take vengeance or bear a grudge against the sons of your own people, but you shall love your neighbor as yourself — I am YHWH."
+    },
+    {
+      "ref": "23:2",
+      "prompt": "These are the appointed feasts of YHWH that you shall proclaim as holy ______.",
+      "answer": "convocations",
+      "source_quote": "Speak to the people of Yisra'EL and say to them: These are the appointed feasts of YHWH that you shall proclaim as holy convocations — they are my appointed feasts."
+    },
+    {
+      "ref": "25:10",
+      "prompt": "And you shall consecrate the fiftieth year, and proclaim ______ throughout the land to all its inhabitants.",
+      "answer": "liberty",
+      "source_quote": "And you shall consecrate the fiftieth year, and proclaim liberty throughout the land to all its inhabitants. It shall be a jubilee for you, when each of you shall return to his property."
+    },
+    {
+      "ref": "26:12",
+      "prompt": "And I will walk among you and will be your Creator, and you shall be my ______.",
+      "answer": "people",
+      "source_quote": "And I will walk among you and will be your Creator, and you shall be my people."
+    },
+    {
+      "ref": "23:5",
+      "prompt": "In the first month, on the fourteenth day of the month at twilight, is YHWH's ______.",
+      "answer": "Pesach",
+      "source_quote": "In the first month, on the fourteenth day of the month at twilight, is YHWH's Pesach."
+    },
+    {
+      "ref": "25:4",
+      "prompt": "But in the seventh year there shall be a Sabbath of solemn rest for the ______, a Sabbath to YHWH.",
+      "answer": "land",
+      "source_quote": "But in the seventh year there shall be a Sabbath of solemn rest for the land, a Sabbath to YHWH. You shall not sow your field or prune your vineyard."
+    },
+    {
+      "ref": "23:34",
+      "prompt": "On the fifteenth day of this seventh month and for seven days is the Feast of ______ to YHWH.",
+      "answer": "Booths",
+      "source_quote": "Speak to the people of Yisra'EL, saying: On the fifteenth day of this seventh month and for seven days is the Feast of Booths to YHWH."
+    },
+    {
+      "ref": "18:4",
+      "prompt": "You shall follow my rules and keep my statutes and walk in them. I am YHWH your ______.",
+      "answer": "Creator",
+      "source_quote": "You shall follow my rules and keep my statutes and walk in them. I am YHWH your Creator."
+    },
+    {
+      "ref": "23:27",
+      "prompt": "Now on the tenth day of this seventh month is the Day of ______.",
+      "answer": "Atonement",
+      "source_quote": "Now on the tenth day of this seventh month is the Day of Atonement. It shall be for you a time of holy convocation, and you shall afflict yourselves."
+    }
   ],
   "multiple_choice": [
-    { "ref": "19:2", "question": "What is the central command of the Holiness Code?", "options": ["You shall build an altar", "You shall be holy, for I YHWH your Creator am holy", "You shall not leave Egypt", "You shall offer a burnt offering daily"], "correct": 1, "source_quote": "Speak to all the congregation of the people of Yisra'EL and say to them: You shall be holy, for I YHWH your Creator am holy." },
-    { "ref": "19:18", "question": "What does YHWH command about your neighbor?", "options": ["Fear your neighbor", "Love your neighbor as yourself", "Judge your neighbor", "Avoid your neighbor"], "correct": 1, "source_quote": "You shall not take vengeance or bear a grudge against the sons of your own people, but you shall love your neighbor as yourself — I am YHWH." },
-    { "ref": "25:10", "question": "What happens in the Jubilee (fiftieth) year?", "options": ["A new king is crowned", "Liberty is proclaimed and each person returns to their property", "The temple is rebuilt", "All debts are doubled"], "correct": 1, "source_quote": "And you shall consecrate the fiftieth year, and proclaim liberty throughout the land to all its inhabitants." },
-    { "ref": "23:2", "question": "Whose appointed feasts are the Mo'adim?", "options": ["The priests'", "The kings'", "YHWH's", "Moshe's"], "correct": 2, "source_quote": "These are the appointed feasts of YHWH that you shall proclaim as holy convocations — they are my appointed feasts." },
-    { "ref": "25:4", "question": "What must happen every seventh year?", "options": ["A new census", "The land must rest — no sowing or pruning", "A burnt offering for the nation", "The priests rotate"], "correct": 1, "source_quote": "But in the seventh year there shall be a Sabbath of solemn rest for the land, a Sabbath to YHWH." },
-    { "ref": "26:12", "question": "What does YHWH promise if the people walk in his statutes?", "options": ["He will give them gold", "He will walk among them and be their Creator, and they will be his people", "He will make them kings over all nations", "He will never speak to them again"], "correct": 1, "source_quote": "And I will walk among you and will be your Creator, and you shall be my people." },
-    { "ref": "23:5", "question": "When is YHWH's Pesach?", "options": ["The first day of the first month", "The fourteenth day of the first month at twilight", "The tenth day of the seventh month", "The fifteenth day of the seventh month"], "correct": 1, "source_quote": "In the first month, on the fourteenth day of the month at twilight, is YHWH's Pesach." },
-    { "ref": "23:34", "question": "How long is the Feast of Booths?", "options": ["One day", "Three days", "Seven days", "Forty days"], "correct": 2, "source_quote": "On the fifteenth day of this seventh month and for seven days is the Feast of Booths to YHWH." },
-    { "ref": "23:27", "question": "On which day of the seventh month is the Day of Atonement?", "options": ["The first day", "The tenth day", "The fifteenth day", "The twenty-first day"], "correct": 1, "source_quote": "Now on the tenth day of this seventh month is the Day of Atonement." },
-    { "ref": "18:3-4", "question": "What does YHWH tell Yisra'EL about the practices of Egypt and Kena'an?", "options": ["Learn from them", "You shall not do as they do — follow my rules instead", "Teach them to your children", "Record them in a book"], "correct": 1, "source_quote": "You shall not do as they do in the land of Egypt, where you lived, and you shall not do as they do in the land of Kena'an, to which I am bringing you. You shall not walk in their statutes." }
+    {
+      "ref": "19:2",
+      "question": "What is the central command of the Holiness Code?",
+      "options": [
+        "You shall build an altar",
+        "You shall be holy, for I YHWH your Creator am holy",
+        "You shall not leave Egypt",
+        "You shall offer a burnt offering daily"
+      ],
+      "correct": 1,
+      "source_quote": "Speak to all the congregation of the people of Yisra'EL and say to them: You shall be holy, for I YHWH your Creator am holy."
+    },
+    {
+      "ref": "19:18",
+      "question": "What does YHWH command about your neighbor?",
+      "options": [
+        "Fear your neighbor",
+        "Love your neighbor as yourself",
+        "Judge your neighbor",
+        "Avoid your neighbor"
+      ],
+      "correct": 1,
+      "source_quote": "You shall not take vengeance or bear a grudge against the sons of your own people, but you shall love your neighbor as yourself — I am YHWH."
+    },
+    {
+      "ref": "25:10",
+      "question": "What happens in the Jubilee (fiftieth) year?",
+      "options": [
+        "A new king is crowned",
+        "Liberty is proclaimed and each person returns to their property",
+        "The temple is rebuilt",
+        "All debts are doubled"
+      ],
+      "correct": 1,
+      "source_quote": "And you shall consecrate the fiftieth year, and proclaim liberty throughout the land to all its inhabitants."
+    },
+    {
+      "ref": "23:2",
+      "question": "Whose appointed feasts are the Mo'adim?",
+      "options": [
+        "The priests'",
+        "The kings'",
+        "YHWH's",
+        "Moshe's"
+      ],
+      "correct": 2,
+      "source_quote": "These are the appointed feasts of YHWH that you shall proclaim as holy convocations — they are my appointed feasts."
+    },
+    {
+      "ref": "25:4",
+      "question": "What must happen every seventh year?",
+      "options": [
+        "A new census",
+        "The land must rest — no sowing or pruning",
+        "A burnt offering for the nation",
+        "The priests rotate"
+      ],
+      "correct": 1,
+      "source_quote": "But in the seventh year there shall be a Sabbath of solemn rest for the land, a Sabbath to YHWH."
+    },
+    {
+      "ref": "26:12",
+      "question": "What does YHWH promise if the people walk in his statutes?",
+      "options": [
+        "He will give them gold",
+        "He will walk among them and be their Creator, and they will be his people",
+        "He will make them kings over all nations",
+        "He will never speak to them again"
+      ],
+      "correct": 1,
+      "source_quote": "And I will walk among you and will be your Creator, and you shall be my people."
+    },
+    {
+      "ref": "23:5",
+      "question": "When is YHWH's Pesach?",
+      "options": [
+        "The first day of the first month",
+        "The fourteenth day of the first month at twilight",
+        "The tenth day of the seventh month",
+        "The fifteenth day of the seventh month"
+      ],
+      "correct": 1,
+      "source_quote": "In the first month, on the fourteenth day of the month at twilight, is YHWH's Pesach."
+    },
+    {
+      "ref": "23:34",
+      "question": "How long is the Feast of Booths?",
+      "options": [
+        "One day",
+        "Three days",
+        "Seven days",
+        "Forty days"
+      ],
+      "correct": 2,
+      "source_quote": "On the fifteenth day of this seventh month and for seven days is the Feast of Booths to YHWH."
+    },
+    {
+      "ref": "23:27",
+      "question": "On which day of the seventh month is the Day of Atonement?",
+      "options": [
+        "The first day",
+        "The tenth day",
+        "The fifteenth day",
+        "The twenty-first day"
+      ],
+      "correct": 1,
+      "source_quote": "Now on the tenth day of this seventh month is the Day of Atonement."
+    },
+    {
+      "ref": "18:3-4",
+      "question": "What does YHWH tell Yisra'EL about the practices of Egypt and Kena'an?",
+      "options": [
+        "Learn from them",
+        "You shall not do as they do — follow my rules instead",
+        "Teach them to your children",
+        "Record them in a book"
+      ],
+      "correct": 1,
+      "source_quote": "You shall not do as they do in the land of Egypt, where you lived, and you shall not do as they do in the land of Kena'an, to which I am bringing you. You shall not walk in their statutes."
+    }
   ],
   "faq": [
     {
       "question": "What are the Mo'adim?",
-      "answer": "The appointed times of YHWH, listed in chapter 23. YHWH calls them 'my appointed feasts' (23:2). They are: the Sabbath, Pesach (14th of the first month), Unleavened Bread (15th-21st), First Fruits, Shavuot (counting seven weeks), the first day of the seventh month (trumpet blast), Yom Kippur (10th of the seventh month), and Sukkot / Feast of Booths (15th-21st of the seventh month). These are YHWH's calendar, not a cultural tradition."
+      "answer": "The appointed times of YHWH, listed in chapter 23. YHWH calls them 'my appointed feasts' (23:2). They are: the Sabbath, Pesach (14th of the first month), Unleavened Bread (15th-21st), First Fruits, Shavuot (counting seven weeks), the first day of the seventh month (trumpet blast), Yom Kippur (10th of the seventh month), and Sukkot / Feast of Booths (15th-21st of the seventh month). These are YHWH's calendar, not cultural custom."
     },
     {
       "question": "What is the Jubilee?",

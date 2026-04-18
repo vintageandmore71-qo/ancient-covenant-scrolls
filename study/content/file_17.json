@@ -6,40 +6,240 @@
   "summary_plain": "Yovelim Part 2 continues the retelling from Yaakov to the departure from Egypt. Yaakov serves Lavan for Leah and Rachel. He returns to the land and is renamed Yisra'EL. Levi is ordained as priest of the Most High YHWH in a dream at Bethel. Yaakov's twelve sons are born with jubilee dates. Yosef is sold into Egypt. Yaakov goes down to Egypt with seventy souls — YHWH appears to him and says: I am the Creator of your father. The Yovelim text gives the full Pesach law: the lamb on the fourteenth of the first month, eaten by night on the fifteenth. The final chapter gives the Shabbat laws and the jubilee structure: the land shall rest for ten weeks of years. The angel of the presence declares: this entire history is written for you and the Sabbaths of the years.",
   "summary_scholarly": "Chapters 26 through 50 complete the Yovelim retelling — from Yaakov's sojourn with Lavan through the Pesach and the jubilee structure. The ACR reads from 4QJub-a through 4QJub-g and the Orit Ge'ez. The ordination of Levi in chapter 32 is significant: Levi dreams that he is ordained priest of the Most High YHWH — him and his sons forever. This establishes the Levitical priesthood before the Sinai legislation. The descent into Egypt (ch 45) includes YHWH's direct appearance to Yaakov: 'I am YHWH the Creator of your father.' The Pesach law in chapter 49 is the most detailed Pesach legislation outside the Torah itself — with specific times (kill before evening, eat by night on the fifteenth, from sunset) and warnings. Chapter 50 closes the book with the Shabbat laws and the jubilee framework, then the final command: everything is written. The angel of the presence confirms: the entire chronological structure is authored from the heavenly tablets.",
   "key_terms": [
-    { "term": "Levi's Ordination", "phonetic": "", "definition": "In chapter 32, Levi dreams at Bethel that he is ordained priest of the Most High YHWH — him and his sons forever. This establishes the priesthood before the Torah is given at Sinai." },
-    { "term": "Pesach Law in Yovelim", "phonetic": "", "definition": "Chapter 49 gives the most detailed Pesach instructions: kill the lamb on the fourteenth of the first month before evening. Eat it by night on the fifteenth from the time of sunset. Every detail is dated and commanded." },
-    { "term": "Seventy Souls", "phonetic": "", "definition": "Yaakov goes down to Egypt with seventy souls (ch 45), matching Bereshit and Shemot. YHWH appears to him at Beersheva before the descent." },
-    { "term": "Shabbat Laws", "phonetic": "", "definition": "Chapter 50 gives specific Shabbat commandments — what may and may not be done on the seventh day. The Shabbat is tied to the jubilee structure and the heavenly order." },
-    { "term": "Jubilee Framework", "phonetic": "", "definition": "The entire book ends by affirming the jubilee framework: 'the Sabbaths of the years... the jubilees... till the land shall rest' (50:1). History is measured in jubilee periods from creation to Sinai." },
-    { "term": "Tithe of Sons", "phonetic": "", "definition": "In chapter 32, Yaakov tithes all that came with him. He counts his sons and sets apart Levi as the tenth — the tithe — to YHWH. This is the reason Levi becomes the priestly tribe." },
-    { "term": "Intermarriage Prohibition", "phonetic": "", "definition": "Chapter 30 records the law against intermarriage as written on the heavenly tablets. The prohibition is tied to the holiness of Yisra'EL as YHWH's people." },
-    { "term": "Beersheva Vision", "phonetic": "", "definition": "YHWH appears to Yaakov at Beersheva before the descent to Egypt: 'I am YHWH the Creator of your father — I am the Creator of Avraham and the Creator of Yitzhak' (45:2-4). A direct theophany confirming the descent is within the plan." },
-    { "term": "Angel of the Presence (closing)", "phonetic": "", "definition": "The book ends with the angel of the presence confirming that everything has been written from the heavenly tablets and commanded to Moshe. The entire text is framed as heavenly revelation." },
-    { "term": "Ten Weeks of Years", "phonetic": "", "definition": "The land shall rest for 'ten weeks of years' (50:1) — the jubilee cycles that structure the future beyond Sinai." }
+    {
+      "term": "Levi's Ordination",
+      "phonetic": "",
+      "definition": "In chapter 32, Levi dreams at Bethel that he is ordained priest of the Most High YHWH — him and his sons forever. This establishes the priesthood before the Torah is given at Sinai."
+    },
+    {
+      "term": "Pesach Law in Yovelim",
+      "phonetic": "",
+      "definition": "Chapter 49 gives the most detailed Pesach instructions: kill the lamb on the fourteenth of the first month before evening. Eat it by night on the fifteenth from the time of sunset. Every detail is dated and commanded."
+    },
+    {
+      "term": "Seventy Souls",
+      "phonetic": "",
+      "definition": "Yaakov goes down to Egypt with seventy souls (ch 45), matching Bereshit and Shemot. YHWH appears to him at Beersheva before the descent."
+    },
+    {
+      "term": "Shabbat Laws",
+      "phonetic": "",
+      "definition": "Chapter 50 gives specific Shabbat commandments — what may and may not be done on the seventh day. The Shabbat is tied to the jubilee structure and the heavenly order."
+    },
+    {
+      "term": "Jubilee Framework",
+      "phonetic": "",
+      "definition": "The entire book ends by affirming the jubilee framework: 'the Sabbaths of the years... the jubilees... till the land shall rest' (50:1). History is measured in jubilee periods from creation to Sinai."
+    },
+    {
+      "term": "Tithe of Sons",
+      "phonetic": "",
+      "definition": "In chapter 32, Yaakov tithes all that came with him. He counts his sons and sets apart Levi as the tenth — the tithe — to YHWH. This is the reason Levi becomes the priestly tribe."
+    },
+    {
+      "term": "Intermarriage Prohibition",
+      "phonetic": "",
+      "definition": "Chapter 30 records the law against intermarriage as written on the heavenly tablets. The prohibition is tied to the holiness of Yisra'EL as YHWH's people."
+    },
+    {
+      "term": "Beersheva Vision",
+      "phonetic": "",
+      "definition": "YHWH appears to Yaakov at Beersheva before the descent to Egypt: 'I am YHWH the Creator of your father — I am the Creator of Avraham and the Creator of Yitzhak' (45:2-4). A direct theophany confirming the descent is within the plan."
+    },
+    {
+      "term": "Angel of the Presence (closing)",
+      "phonetic": "",
+      "definition": "The book ends with the angel of the presence confirming that everything has been written from the heavenly tablets and commanded to Moshe. The entire text is framed as heavenly revelation."
+    },
+    {
+      "term": "Ten Weeks of Years",
+      "phonetic": "",
+      "definition": "The land shall rest for 'ten weeks of years' (50:1) — the jubilee cycles that structure the future beyond Sinai."
+    }
   ],
   "fill_blank": [
-    { "ref": "45:4", "prompt": "I am YHWH the Creator of your father — I am the Creator of ______ and the Creator of Yitzhak.", "answer": "Avraham", "source_quote": "And he said: I am YHWH the Creator of your father — I am the Creator of Avraham and the Creator of Yitzhak." },
-    { "ref": "49:1", "prompt": "Remember the commandment which YHWH commanded you concerning the ______, that you should celebrate it in its season on the fourteenth of the first month.", "answer": "Passover", "source_quote": "Remember the commandment which YHWH commanded you concerning the Passover, that you should celebrate it in its season on the fourteenth of the first month." },
-    { "ref": "32:1", "prompt": "Levi dreamed that they had ordained and made him the ______ of the Most High YHWH — him and his sons forever.", "answer": "priest", "source_quote": "And he dwelt that night at Bethel, and Levi dreamed that they had ordained and made him the priest of the Most High YHWH — him and his sons forever." },
-    { "ref": "50:1", "prompt": "And after this law I gave you the command of the ______ of the land.", "answer": "Sabbaths", "source_quote": "And after this law I gave you the command of the Sabbaths of the land, and the jubilees in the years of weeks." },
-    { "ref": "26:1", "prompt": "He served him for Rachel his daughter one ______ of years.", "answer": "week", "source_quote": "And in the second year of this week Yaakov came to the land of the east, to Lavan the brother of Rivkah his mother, and he was with him, and he served him for Rachel his daughter one week of years." },
-    { "ref": "50:2", "prompt": "And this entire history I have ______ for you.", "answer": "written", "source_quote": "And this entire history I have written for you and the Sabbaths of the years I have reported to you." },
-    { "ref": "49:1", "prompt": "That you should kill it before it is evening, and that they should eat it by night on the evening of the ______.", "answer": "fifteenth", "source_quote": "That you should kill it before it is evening, and that they should eat it by night on the evening of the fifteenth from the time of the setting of the sun." },
-    { "ref": "45:1", "prompt": "And Yisra'EL took his journey with all that he had, and came to ______, and offered sacrifices.", "answer": "Beersheva", "source_quote": "And Yisra'EL took his journey with all that he had, and came to Beersheva, and offered sacrifices to the Creator of his father Yitzhak." },
-    { "ref": "32:3", "prompt": "And Yaakov rose early in the morning, on the fourteenth of this month, and he gave a ______ of all that came with him.", "answer": "tithe", "source_quote": "And Yaakov rose early in the morning, on the fourteenth of this month, and he gave a tithe of all that came with him." },
-    { "ref": "45:2", "prompt": "And YHWH appeared to Yisra'EL in a vision of the ______ and said: Yaakov, Yaakov.", "answer": "night", "source_quote": "And YHWH appeared to Yisra'EL in a vision of the night and said: Yaakov, Yaakov." }
+    {
+      "ref": "45:4",
+      "prompt": "I am YHWH the Creator of your father — I am the Creator of ______ and the Creator of Yitzhak.",
+      "answer": "Avraham",
+      "source_quote": "And he said: I am YHWH the Creator of your father — I am the Creator of Avraham and the Creator of Yitzhak."
+    },
+    {
+      "ref": "49:1",
+      "prompt": "Remember the commandment which YHWH commanded you concerning the ______, that you should celebrate it in its season on the fourteenth of the first month.",
+      "answer": "Passover",
+      "source_quote": "Remember the commandment which YHWH commanded you concerning the Passover, that you should celebrate it in its season on the fourteenth of the first month."
+    },
+    {
+      "ref": "32:1",
+      "prompt": "Levi dreamed that they had ordained and made him the ______ of the Most High YHWH — him and his sons forever.",
+      "answer": "priest",
+      "source_quote": "And he dwelt that night at Bethel, and Levi dreamed that they had ordained and made him the priest of the Most High YHWH — him and his sons forever."
+    },
+    {
+      "ref": "50:1",
+      "prompt": "And after this law I gave you the command of the ______ of the land.",
+      "answer": "Sabbaths",
+      "source_quote": "And after this law I gave you the command of the Sabbaths of the land, and the jubilees in the years of weeks."
+    },
+    {
+      "ref": "26:1",
+      "prompt": "He served him for Rachel his daughter one ______ of years.",
+      "answer": "week",
+      "source_quote": "And in the second year of this week Yaakov came to the land of the east, to Lavan the brother of Rivkah his mother, and he was with him, and he served him for Rachel his daughter one week of years."
+    },
+    {
+      "ref": "50:2",
+      "prompt": "And this entire history I have ______ for you.",
+      "answer": "written",
+      "source_quote": "And this entire history I have written for you and the Sabbaths of the years I have reported to you."
+    },
+    {
+      "ref": "49:1",
+      "prompt": "That you should kill it before it is evening, and that they should eat it by night on the evening of the ______.",
+      "answer": "fifteenth",
+      "source_quote": "That you should kill it before it is evening, and that they should eat it by night on the evening of the fifteenth from the time of the setting of the sun."
+    },
+    {
+      "ref": "45:1",
+      "prompt": "And Yisra'EL took his journey with all that he had, and came to ______, and offered sacrifices.",
+      "answer": "Beersheva",
+      "source_quote": "And Yisra'EL took his journey with all that he had, and came to Beersheva, and offered sacrifices to the Creator of his father Yitzhak."
+    },
+    {
+      "ref": "32:3",
+      "prompt": "And Yaakov rose early in the morning, on the fourteenth of this month, and he gave a ______ of all that came with him.",
+      "answer": "tithe",
+      "source_quote": "And Yaakov rose early in the morning, on the fourteenth of this month, and he gave a tithe of all that came with him."
+    },
+    {
+      "ref": "45:2",
+      "prompt": "And YHWH appeared to Yisra'EL in a vision of the ______ and said: Yaakov, Yaakov.",
+      "answer": "night",
+      "source_quote": "And YHWH appeared to Yisra'EL in a vision of the night and said: Yaakov, Yaakov."
+    }
   ],
   "multiple_choice": [
-    { "ref": "32:1", "question": "What did Levi dream at Bethel?", "options": ["That he would be king", "That he was ordained priest of the Most High YHWH forever", "That the temple would be built", "That he would lead the army"], "correct": 1, "source_quote": "Levi dreamed that they had ordained and made him the priest of the Most High YHWH — him and his sons forever." },
-    { "ref": "49:1", "question": "When is the Pesach lamb to be killed according to Yovelim?", "options": ["The tenth of the first month", "The fourteenth of the first month before evening", "The first of the seventh month", "The fifteenth of the first month at dawn"], "correct": 1, "source_quote": "You should celebrate it in its season on the fourteenth of the first month — that you should kill it before it is evening." },
-    { "ref": "45:2-4", "question": "What did YHWH say to Yaakov at Beersheva before the descent to Egypt?", "options": ["Do not go to Egypt", "I am YHWH the Creator of your father — the Creator of Avraham and Yitzhak", "Take only your sons", "Return to Kena'an immediately"], "correct": 1, "source_quote": "I am YHWH the Creator of your father — I am the Creator of Avraham and the Creator of Yitzhak." },
-    { "ref": "50:1", "question": "What does chapter 50 give the command of?", "options": ["The army of Yisra'EL", "The Sabbaths of the land and the jubilees", "The building of the temple", "The crossing of the sea"], "correct": 1, "source_quote": "And after this law I gave you the command of the Sabbaths of the land, and the jubilees in the years of weeks." },
-    { "ref": "32:3", "question": "Why did Levi become the priestly tribe?", "options": ["He was the oldest", "He was Yaakov's tithe — the tenth son set apart to YHWH", "Moshe chose him", "YHWH cast lots"], "correct": 1, "source_quote": "And Yaakov rose early in the morning, on the fourteenth of this month, and he gave a tithe of all that came with him." },
-    { "ref": "26:1", "question": "How long did Yaakov serve Lavan for Rachel?", "options": ["Three years", "One week of years (seven years)", "Fourteen years", "Twenty years"], "correct": 1, "source_quote": "He served him for Rachel his daughter one week of years." },
-    { "ref": "49:1", "question": "When is the Pesach lamb to be eaten?", "options": ["In the morning", "At noon", "By night on the evening of the fifteenth from sunset", "On the tenth day"], "correct": 2, "source_quote": "They should eat it by night on the evening of the fifteenth from the time of the setting of the sun." },
-    { "ref": "50:2", "question": "Who confirms that the entire history has been written?", "options": ["Moshe", "YHWH directly", "The angel of the presence", "Chanokh"], "correct": 2, "source_quote": "And this entire history I have written for you and the Sabbaths of the years I have reported to you." },
-    { "ref": "45:1", "question": "Where did Yaakov offer sacrifices before going down to Egypt?", "options": ["Bethel", "Hebron", "Beersheva", "Shechem"], "correct": 2, "source_quote": "And Yisra'EL took his journey with all that he had, and came to Beersheva, and offered sacrifices to the Creator of his father Yitzhak." },
-    { "ref": "30:1", "question": "What does chapter 30 record as written on the heavenly tablets?", "options": ["The law of sacrifices", "The law against intermarriage", "The law of the Nazirite", "The law of the firstborn"], "correct": 1, "source_quote": "The Law Against Intermarriage — The Heavenly Tablets Record." }
+    {
+      "ref": "32:1",
+      "question": "What did Levi dream at Bethel?",
+      "options": [
+        "That he would be king",
+        "That he was ordained priest of the Most High YHWH forever",
+        "That the temple would be built",
+        "That he would lead the army"
+      ],
+      "correct": 1,
+      "source_quote": "Levi dreamed that they had ordained and made him the priest of the Most High YHWH — him and his sons forever."
+    },
+    {
+      "ref": "49:1",
+      "question": "When is the Pesach lamb to be killed according to Yovelim?",
+      "options": [
+        "The tenth of the first month",
+        "The fourteenth of the first month before evening",
+        "The first of the seventh month",
+        "The fifteenth of the first month at dawn"
+      ],
+      "correct": 1,
+      "source_quote": "You should celebrate it in its season on the fourteenth of the first month — that you should kill it before it is evening."
+    },
+    {
+      "ref": "45:2-4",
+      "question": "What did YHWH say to Yaakov at Beersheva before the descent to Egypt?",
+      "options": [
+        "Do not go to Egypt",
+        "I am YHWH the Creator of your father — the Creator of Avraham and Yitzhak",
+        "Take only your sons",
+        "Return to Kena'an immediately"
+      ],
+      "correct": 1,
+      "source_quote": "I am YHWH the Creator of your father — I am the Creator of Avraham and the Creator of Yitzhak."
+    },
+    {
+      "ref": "50:1",
+      "question": "What does chapter 50 give the command of?",
+      "options": [
+        "The army of Yisra'EL",
+        "The Sabbaths of the land and the jubilees",
+        "The building of the temple",
+        "The crossing of the sea"
+      ],
+      "correct": 1,
+      "source_quote": "And after this law I gave you the command of the Sabbaths of the land, and the jubilees in the years of weeks."
+    },
+    {
+      "ref": "32:3",
+      "question": "Why did Levi become the priestly tribe?",
+      "options": [
+        "He was the oldest",
+        "He was Yaakov's tithe — the tenth son set apart to YHWH",
+        "Moshe chose him",
+        "YHWH cast lots"
+      ],
+      "correct": 1,
+      "source_quote": "And Yaakov rose early in the morning, on the fourteenth of this month, and he gave a tithe of all that came with him."
+    },
+    {
+      "ref": "26:1",
+      "question": "How long did Yaakov serve Lavan for Rachel?",
+      "options": [
+        "Three years",
+        "One week of years (seven years)",
+        "Fourteen years",
+        "Twenty years"
+      ],
+      "correct": 1,
+      "source_quote": "He served him for Rachel his daughter one week of years."
+    },
+    {
+      "ref": "49:1",
+      "question": "When is the Pesach lamb to be eaten?",
+      "options": [
+        "In the morning",
+        "At noon",
+        "By night on the evening of the fifteenth from sunset",
+        "On the tenth day"
+      ],
+      "correct": 2,
+      "source_quote": "They should eat it by night on the evening of the fifteenth from the time of the setting of the sun."
+    },
+    {
+      "ref": "50:2",
+      "question": "Who confirms that the entire history has been written?",
+      "options": [
+        "Moshe",
+        "YHWH directly",
+        "The angel of the presence",
+        "Chanokh"
+      ],
+      "correct": 2,
+      "source_quote": "And this entire history I have written for you and the Sabbaths of the years I have reported to you."
+    },
+    {
+      "ref": "45:1",
+      "question": "Where did Yaakov offer sacrifices before going down to Egypt?",
+      "options": [
+        "Bethel",
+        "Hebron",
+        "Beersheva",
+        "Shechem"
+      ],
+      "correct": 2,
+      "source_quote": "And Yisra'EL took his journey with all that he had, and came to Beersheva, and offered sacrifices to the Creator of his father Yitzhak."
+    },
+    {
+      "ref": "30:1",
+      "question": "What does chapter 30 record as written on the heavenly tablets?",
+      "options": [
+        "The law of sacrifices",
+        "The law against intermarriage",
+        "The law of the Nazirite",
+        "The law of the firstborn"
+      ],
+      "correct": 1,
+      "source_quote": "The Law Against Intermarriage — The Heavenly Tablets Record."
+    }
   ],
   "faq": [
     {
@@ -48,7 +248,7 @@
     },
     {
       "question": "What does the Yovelim Pesach law add to the Torah?",
-      "answer": "Chapter 49 gives the most detailed Pesach legislation: kill the lamb on the fourteenth of the first month before evening, eat it by night on the fifteenth from sunset, with specific warnings about timing. The Yovelim instructions complement Shemot 12 and Vayikra 23 — they are not a separate tradition but an expansion of the same law, dictated from the heavenly tablets."
+      "answer": "Chapter 49 gives the most detailed Pesach legislation: kill the lamb on the fourteenth of the first month before evening, eat it by night on the fifteenth from sunset, with specific warnings about timing. The Yovelim instructions complement Shemot 12 and Vayikra 23 — they are not separate from the Torah but are an expansion of the same law, dictated from the heavenly tablets."
     },
     {
       "question": "How does Yovelim end?",
