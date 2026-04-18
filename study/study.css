@@ -105,7 +105,7 @@ body.theme-amber .act-card{box-shadow:0 4px 14px rgba(0,0,0,.3)}
   font-family:var(--font-main);
 }
 .vol-hdr:first-of-type{border-top:none;margin-top:0}
-.vol-eng{display:block;font-size:1em;font-weight:600;opacity:.85;margin-top:4px;text-transform:none;letter-spacing:.02em;color:#b8b8d8}
+.vol-eng{display:block;font-size:1.1em;font-weight:700;opacity:1;margin-top:4px;text-transform:none;letter-spacing:.02em;color:#e0e0f0}
 .vol-badge{font-size:1.1em;vertical-align:middle;margin-left:4px}
 /* Color-coded volume headers */
 /* Volume colors applied inline via JS — cycles 8 colors for all 46 volumes */
