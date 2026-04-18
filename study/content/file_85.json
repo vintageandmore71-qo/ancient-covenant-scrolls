@@ -1,0 +1,38 @@
+{
+  "id": "file_85",
+  "label": "Daniyel (Daniel) — Part 1 — Chapters 1–6",
+  "volume": 29,
+  "content_version": 1,
+  "summary_plain": "Daniyel and his companions are taken captive to Babylon. They refuse the king's food and drink — they keep the covenant dietary laws in exile. Daniyel interprets Nevukhadnetzar's dream of a great image — head of gold, chest of silver, belly of bronze, legs of iron, feet of iron and clay. A stone cut without hands strikes the image and becomes a great mountain filling the whole earth. Chananyah, Misha'el, and Azaryah refuse to bow to the golden image and are thrown into the furnace — YHWH delivers them. Daniyel reads the writing on the wall for Belshatzar. Daniyel is thrown into the lion's den — YHWH shuts the lions' mouths.",
+  "summary_scholarly": "The ACR reads from eight DSS Daniel manuscripts (4QDan-a through 4QDan-e, 1QDan-a, 1QDan-b, and 6QDan) and the Orit Ge'ez. The DSS Daniel manuscripts are among the oldest found at Qumran. Chapters 1-6 are court narratives set in Babylon demonstrating that covenant identity and YHWH's sovereignty are maintained even in the deepest exile under the most powerful empire. The dietary refusal (ch 1), the furnace (ch 3), and the lion's den (ch 6) are all tests of covenant faithfulness under imperial pressure.",
+  "key_terms": [
+    { "term": "Daniyel", "phonetic": "Dah-nee-YEL", "definition": "A young man from the Judean royal family, taken captive to Babylon. His name means 'El is my judge.' He maintains covenant practice in exile and receives visions. Anglicized as Daniel." },
+    { "term": "Nevukhadnetzar", "phonetic": "Neh-voo-khad-NETZ-ar", "definition": "King of Babylon who conquered Yerushalayim in 586 BCE. He dreams of a great image representing four successive kingdoms. Anglicized as Nebuchadnezzar." },
+    { "term": "The Stone Cut Without Hands", "phonetic": "", "definition": "In the dream (2:34-35), a stone cut without human hands strikes the image's feet and becomes a great mountain filling the whole earth. This is YHWH's kingdom replacing all human empires — without human military intervention." },
+    { "term": "Mene Mene Tekel Upharsin", "phonetic": "", "definition": "The writing on the wall at Belshatzar's feast (5:25-28). Daniyel interprets: your kingdom has been numbered, weighed, and divided. That night Belshatzar is slain." }
+  ],
+  "fill_blank": [
+    { "ref": "2:44", "prompt": "The Creator of heaven will set up a kingdom that shall never be ______.", "answer": "destroyed", "source_quote": "And in the days of those kings the Creator of heaven will set up a kingdom that shall never be destroyed, nor shall the kingdom be left to another people." },
+    { "ref": "1:8", "prompt": "Daniyel resolved that he would not ______ himself with the king's food or with the wine that he drank.", "answer": "defile", "source_quote": "But Daniyel resolved in his heart that he would not defile himself with the king's food, or with the wine that he drank." },
+    { "ref": "3:17-18", "prompt": "Our Creator whom we serve is able to deliver us from the burning fiery furnace. But if not, be it known to you, O king, that we will not serve your ______.", "answer": "gods", "source_quote": "If this be so, our Creator whom we serve is able to deliver us from the burning fiery furnace, and he will deliver us out of your hand, O king. But if not, be it known to you, O king, that we will not serve your gods." }
+  ],
+  "multiple_choice": [
+    { "ref": "2:31-35", "question": "What did the stone cut without hands do to the great image?", "options": ["Polished it", "Struck its feet and the whole image broke — then the stone became a mountain filling the earth", "Placed a crown on its head", "Stood beside it"], "correct": 1, "source_quote": "A stone was cut out by no human hand, and it struck the image on its feet of iron and clay, and broke them in pieces." },
+    { "ref": "1:8", "question": "Why did Daniyel refuse the king's food?", "options": ["He was not hungry", "He would not defile himself — he kept the covenant dietary laws", "The food was poisoned", "He was fasting for a vision"], "correct": 1, "source_quote": "Daniyel resolved in his heart that he would not defile himself with the king's food." },
+    { "ref": "6:22", "question": "How did YHWH save Daniyel in the lion's den?", "options": ["He removed the lions", "He sent an angel who shut the lions' mouths", "He made Daniyel invisible", "He opened the den walls"], "correct": 1, "source_quote": "My Creator sent his angel and shut the lions' mouths, and they have not harmed me." }
+  ],
+  "faq": [
+    {
+      "question": "What does the four-kingdom vision reveal about covenant history?",
+      "answer": "Nevukhadnetzar's dream (ch 2) shows four successive empires — gold (Babylon), silver (Persia), bronze (Greece), iron (Rome). Each is inferior to the last in quality but wider in reach. The stone cut without human hands — YHWH's kingdom — strikes the image at its weakest point (the iron-clay feet) and replaces all human empires. The Qumran community identified Rome as the fourth kingdom (the Kittim in the War Scroll). The NT construction of a pacified messianic figure who says 'render unto Caesar' directly contradicts this vision — the stone destroys the image, it does not render unto it."
+    },
+    {
+      "question": "What does Daniyel's dietary refusal in exile reveal?",
+      "answer": "Daniyel refuses the king's food in Babylon — the most powerful empire on earth (1:8). He maintains covenant dietary laws under maximum imperial pressure. The Beta Israel of Ethiopia maintained covenant dietary laws for over a thousand years in Africa — in isolation from both Rabbinical Judaism and Roman Christianity. Plantation records from South Carolina and Virginia document that enslaved 'Heebos' (Igbo) refused swine's flesh at the risk of starvation. Three independent populations across three continents maintaining the same dietary restrictions without institutional coordination — Daniyel in Babylon, the Beta Israel in Ethiopia, enslaved Africans in the Americas. The covenant practice survived every empire it passed through."
+    },
+    {
+      "question": "What do the eight DSS Daniel manuscripts prove?",
+      "answer": "Daniyel is preserved in eight Dead Sea Scrolls manuscripts — among the most attested books at Qumran. The manuscripts date to the 2nd-1st centuries BCE, proving the text was in circulation and treated as authoritative scripture by the Qumran community centuries before the Masoretic standardization. The DSS Daniel manuscripts include both the Hebrew and Aramaic portions of the text (Daniyel switches between Hebrew and Aramaic at 2:4 and back at 8:1). Both languages are Afro-Asiatic Semitic languages — sister tongues within the same African-origin language family."
+    }
+  ]
+}

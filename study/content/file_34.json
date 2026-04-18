@@ -1,0 +1,37 @@
+{
+  "id": "file_34",
+  "label": "Melakhim Aleph (1 Kings) — Part 1 — Chapters 1–6",
+  "volume": 14,
+  "content_version": 1,
+  "summary_plain": "Dawid is old. Adoniyahu attempts to take the throne. Bat-Sheva and Natan the prophet secure the succession for Shelomoh. Dawid charges Shelomoh: Be strong and keep the charge of YHWH — walk in his ways, keep his statutes, his commandments, his rules, his testimonies. Shelomoh asks YHWH for wisdom — not riches, not long life, not the death of his enemies. YHWH gives him wisdom and also what he did not ask. Shelomoh builds the Temple — the House of YHWH — in Yerushalayim.",
+  "summary_scholarly": "The ACR reads from DSS Kings fragments (4QKgs, 5QKgs) and the Orit Ge'ez. Shelomoh's Temple construction (ch 5-6) is the covenant people's central architectural achievement — but the building itself is not the covenant. Yirmeyahu will later warn: 'do not trust in the words — the temple of YHWH, the temple of YHWH' (Jer 7:4). The Temple Scroll (11QT) at Qumran provides an alternative temple architecture that the Qumran community believed was the correct design — differing from Shelomoh's temple.",
+  "key_terms": [
+    { "term": "Shelomoh", "phonetic": "Sheh-lo-MOH", "definition": "Son of Dawid and Bat-Sheva. Third king of Yisra'EL. Built the Temple in Yerushalayim. His name comes from shalom — peace. Anglicized as Solomon." },
+    { "term": "Bat-Sheva", "phonetic": "Bat-SHEH-vah", "definition": "Mother of Shelomoh. Wife of Dawid. She secures Shelomoh's succession to the throne. Anglicized as Bathsheba." },
+    { "term": "Temple (Beit YHWH)", "phonetic": "Bayt YHWH", "definition": "The House of YHWH built by Shelomoh in Yerushalayim (ch 5-6). Cedar from Lebanon. Inner sanctuary (Devir) overlaid with gold. The Ark of the Covenant placed inside." }
+  ],
+  "fill_blank": [
+    { "ref": "2:2-3", "prompt": "Be strong, and show yourself a man, and keep the charge of YHWH your Creator, walking in his ways and keeping his statutes, his ______, his rules, and his testimonies.", "answer": "commandments", "source_quote": "Keep the charge of YHWH your Creator, walking in his ways and keeping his statutes, his commandments, his rules, and his testimonies, as it is written in the Torah of Moshe." },
+    { "ref": "3:9", "prompt": "Give your servant therefore an understanding heart to judge your people, that I may discern between ______ and evil.", "answer": "good", "source_quote": "Give your servant therefore an understanding heart to judge your people, that I may discern between good and evil." },
+    { "ref": "6:1", "prompt": "In the four hundred and eightieth year after the people of Yisra'EL came out of the land of ______, Shelomoh began to build the house of YHWH.", "answer": "Egypt", "source_quote": "In the four hundred and eightieth year after the people of Yisra'EL came out of the land of Egypt, in the fourth year of Shelomoh's reign over Yisra'EL, he began to build the house of YHWH." }
+  ],
+  "multiple_choice": [
+    { "ref": "3:5-9", "question": "What did Shelomoh ask YHWH for?", "options": ["Long life", "Riches", "Wisdom to judge the people", "Victory over enemies"], "correct": 2, "source_quote": "Give your servant an understanding heart to judge your people, that I may discern between good and evil." },
+    { "ref": "6:1", "question": "How many years after the exodus did Shelomoh begin building the Temple?", "options": ["40 years", "120 years", "480 years", "1,000 years"], "correct": 2, "source_quote": "In the four hundred and eightieth year after the people of Yisra'EL came out of the land of Egypt." },
+    { "ref": "5:1-6", "question": "Where did the cedar for the Temple come from?", "options": ["Egypt", "Lebanon", "Babylon", "The Negev"], "correct": 1, "source_quote": "Shelomoh sent to Hiram king of Tyre — command that cedars of Lebanon be cut for me." }
+  ],
+  "faq": [
+    {
+      "question": "What does the Temple Scroll (11QT) say about Shelomoh's Temple?",
+      "answer": "The Temple Scroll (11QT) — the longest Dead Sea Scroll, found in Cave 11 — provides an alternative temple architecture that the Qumran community believed was the correct divine blueprint. It differs from Shelomoh's temple in dimensions, layout, and ritual procedures. The Qumran community believed the Jerusalem Temple had been corrupted — not just in its calendar and priesthood, but in its very design. The Temple Scroll presents itself as direct instruction from YHWH — Torah-level authority. The community withdrew from the Temple because they believed it failed to match YHWH's specifications."
+    },
+    {
+      "question": "What do the spice trade routes in Shelomoh's era reveal?",
+      "answer": "Shelomoh's Temple was built with cedar from Lebanon and gold from Ophir (9:28). The luxury goods of Shelomoh's kingdom — gold, silver, ivory, apes, peacocks (10:22) — came through the Red Sea trade routes connecting the Horn of Africa, the Arabian Peninsula, and India. The Queen of Sheva (10:1-13) came from the African-Arabian corridor with spices, gold, and precious stones. The Aksumite kingdom — which Mani (3rd century CE) placed alongside Rome, Persia, and China as one of four world powers — controlled these same Red Sea trade routes. Shelomoh's wealth flowed through African commercial networks."
+    },
+    {
+      "question": "Why does Dawid's charge to Shelomoh matter?",
+      "answer": "Dawid's deathbed charge (2:2-3): 'Keep the charge of YHWH your Creator, walking in his ways, keeping his statutes, his commandments, his rules, and his testimonies — as it is written in the Torah of Moshe.' The charge is entirely Torah-centered. No mention of any institution beyond the Torah. No Rabbinical oral law. No priestly intermediary system. No ecclesiastical hierarchy. Walk in YHWH's ways as written in the Torah of Moshe. The Qumran community's entire program was exactly this: return to what is written, reject what was added by human institutional authority."
+    }
+  ]
+}

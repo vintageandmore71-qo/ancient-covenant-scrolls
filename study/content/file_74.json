@@ -1,0 +1,37 @@
+{
+  "id": "file_74",
+  "label": "Mishlei (Proverbs) — Part 1 — Chapters 1–10",
+  "volume": 22,
+  "content_version": 1,
+  "summary_plain": "Mishlei — the Proverbs of Shelomoh son of Dawid, king of Yisra'EL. The fear of YHWH is the beginning of knowledge. Wisdom cries out in the streets. YHWH by wisdom founded the earth. Trust in YHWH with all your heart and lean not on your own understanding. Chapters 8-9 present Wisdom as a person — she was with YHWH before creation, when he marked out the foundations of the earth, she was beside him as a master craftsman.",
+  "summary_scholarly": "The ACR reads from DSS Proverbs fragments (4QProv-a, 4QProv-b) and the Orit Ge'ez. The personification of Wisdom (Chokmah) in chapters 1-9 has parallels in the Egyptian wisdom tradition — particularly the Instructions of Ptahhotep (c. 2400 BCE) and the Instructions of Amenemope (c. 1200 BCE). The Hebrew wisdom tradition emerges from the same Afro-Asiatic intellectual matrix as the Egyptian tradition. Mishlei 22:17-24:22 corresponds closely to the Instructions of Amenemope — both texts draw from the same ancient African wisdom framework.",
+  "key_terms": [
+    { "term": "Mishlei", "phonetic": "Mish-LAY", "definition": "Hebrew for 'Proverbs' — wisdom sayings attributed to Shelomoh. The Hebrew root mashal means comparison, analogy, or parable." },
+    { "term": "Chokmah", "phonetic": "Khokh-MAH", "definition": "Wisdom — personified in chapters 1-9 as a woman who cries out in the streets and was with YHWH before creation. She is not a separate deity — she is YHWH's attribute given voice." },
+    { "term": "Fear of YHWH", "phonetic": "", "definition": "'The fear of YHWH is the beginning of knowledge' (1:7). Yir'at YHWH — not terror but awe, reverence, recognition of who YHWH is. This is the foundation of the entire wisdom tradition." }
+  ],
+  "fill_blank": [
+    { "ref": "1:7", "prompt": "The fear of YHWH is the beginning of ______.", "answer": "knowledge", "source_quote": "The fear of YHWH is the beginning of knowledge — fools despise wisdom and instruction." },
+    { "ref": "3:5", "prompt": "Trust in YHWH with all your heart, and do not lean on your own ______.", "answer": "understanding", "source_quote": "Trust in YHWH with all your heart, and do not lean on your own understanding." },
+    { "ref": "8:30", "prompt": "Then I was beside him, like a master ______.", "answer": "craftsman", "source_quote": "Then I was beside him, like a master craftsman, and I was daily his delight, rejoicing before him always." }
+  ],
+  "multiple_choice": [
+    { "ref": "1:7", "question": "What does Mishlei say is the beginning of knowledge?", "options": ["Studying the Torah", "The fear of YHWH", "Reading the prophets", "Consulting the priests"], "correct": 1, "source_quote": "The fear of YHWH is the beginning of knowledge." },
+    { "ref": "8:22-30", "question": "What does Wisdom say about her presence at creation?", "options": ["She was created last", "She was with YHWH before the earth was made — beside him as a master craftsman", "She came after the flood", "She was found by Shelomoh"], "correct": 1, "source_quote": "YHWH possessed me at the beginning of his work — before his acts of old. I was beside him, like a master craftsman." },
+    { "ref": "3:5-6", "question": "What does Mishlei say about trusting in YHWH?", "options": ["Trust only when you understand", "Trust with all your heart — do not lean on your own understanding", "Trust but verify", "Trust the priests"], "correct": 1, "source_quote": "Trust in YHWH with all your heart, and do not lean on your own understanding." }
+  ],
+  "faq": [
+    {
+      "question": "How does Mishlei connect to the Egyptian wisdom tradition?",
+      "answer": "Mishlei 22:17-24:22 corresponds closely to the Egyptian Instructions of Amenemope (c. 1200 BCE). Both texts contain wisdom sayings on honesty, treatment of the poor, self-control, and humility in a parallel sequence. The Instructions of Ptahhotep (c. 2400 BCE) — the oldest surviving wisdom text on earth — belong to the same Afro-Asiatic intellectual tradition. Acts 7:22 states Moshe was 'learned in all the wisdom of the Egyptians.' The Hebrew wisdom tradition did not arrive from nowhere — it emerges from the same African intellectual matrix that produced the world's oldest wisdom literature, medical texts, and mathematical documents. Hebrew Chokmah and Egyptian Ma'at are cognate concepts from the same ancestral tradition."
+    },
+    {
+      "question": "What does 'fear of YHWH' mean in the covenant framework?",
+      "answer": "Yir'at YHWH — the fear of YHWH — is not terror. It is awe, recognition, proper orientation toward who YHWH is. It is the beginning (reshit) of knowledge (1:7) and the beginning of wisdom (9:10). Everything in the wisdom tradition flows from this single orientation. The Hodayot (1QH) at Qumran use similar language: covenant identity begins with YHWH's direct selection (Bachar — to choose). Knowledge begins with recognizing who is choosing. Every institutional system documented in the Great Eraser research — Rabbinical, Roman Christian, colonial, academic — placed itself between the individual and YHWH. Mishlei says: start with YHWH directly. That is the beginning of knowledge."
+    },
+    {
+      "question": "Why does Wisdom cry out in the streets?",
+      "answer": "Chokmah — Wisdom personified — does not sit in a temple or an academy waiting to be sought. She cries out in the public square, at the city gates, at the entrance of the city (1:20-21, 8:1-3). Wisdom is publicly available. She is not behind institutional walls or paywalls. The Dead Sea Scrolls were sealed in caves for 1,900 years and are now publicly accessible at deadseascrolls.org.il. The Orit Ge'ez manuscripts are being digitized at nli.org.il. The Bowen map is at the Library of Congress. Wisdom cries out — the primary sources exist. They require only that someone goes to them directly."
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "id": "file_30",
+  "label": "Shemu'el Bet (2 Samuel) — Part 1 — Chapters 1–6",
+  "volume": 13,
+  "content_version": 1,
+  "summary_plain": "Dawid mourns Sha'ul and Yonatan — How the mighty have fallen! Dawid is anointed king over Yehudah at Hevron. War between the house of Dawid and the house of Sha'ul. Dawid becomes king over all Yisra'EL. He takes Yerushalayim from the Yevusites and makes it his city — the City of Dawid. Dawid brings the Ark of the Covenant to Yerushalayim with dancing and shouting. Mikhal despises him for dancing before YHWH.",
+  "summary_scholarly": "The ACR reads from 4QSam-a, 4QSam-b, and 4QSam-c alongside the Orit Ge'ez. The DSS Samuel manuscripts preserve significant readings absent from the Masoretic. The capture of Yerushalayim (ch 5) establishes the Davidic capital — but this territory sits on the African tectonic plate (Nubian Plate). Dawid's kingdom was physically on African soil. The Ark's procession to Yerushalayim (ch 6) establishes the city as the covenant center — YHWH's presence in the City of Dawid.",
+  "key_terms": [
+    { "term": "Dawid", "phonetic": "Dah-VEED", "definition": "Son of Yishai, from the tribe of Yehudah. Anointed king by Shemu'el. King over Yehudah at Hevron, then over all Yisra'EL. Anglicized as David." },
+    { "term": "City of Dawid", "phonetic": "", "definition": "Yerushalayim — captured from the Yevusites (5:6-9). Dawid made it his capital and renamed it the City of Dawid. The Ophel ridge is the original City of Dawid — south of the present-day Temple Mount." },
+    { "term": "Hevron", "phonetic": "Khev-RON", "definition": "Dawid's first capital — he reigned there over Yehudah for seven and a half years before taking Yerushalayim and uniting all Yisra'EL (5:5)." }
+  ],
+  "fill_blank": [
+    { "ref": "1:19", "prompt": "How the mighty have ______! The beauty of Yisra'EL is slain on your high places.", "answer": "fallen", "source_quote": "Your glory, O Yisra'EL, is slain on your high places! How the mighty have fallen!" },
+    { "ref": "5:7", "prompt": "Dawid took the stronghold of Tziyon — that is, the ______ of Dawid.", "answer": "City", "source_quote": "Nevertheless, Dawid took the stronghold of Tziyon — that is, the City of Dawid." },
+    { "ref": "6:14", "prompt": "And Dawid ______ before YHWH with all his might.", "answer": "danced", "source_quote": "And Dawid danced before YHWH with all his might, wearing a linen ephod." }
+  ],
+  "multiple_choice": [
+    { "ref": "5:4-5", "question": "How long did Dawid reign at Hevron before taking Yerushalayim?", "options": ["Two years", "Seven and a half years", "Twelve years", "Forty years"], "correct": 1, "source_quote": "In Hevron he reigned over Yehudah seven years and six months, and in Yerushalayim he reigned thirty-three years over all Yisra'EL and Yehudah." },
+    { "ref": "1:17-27", "question": "How does Dawid respond to the death of Sha'ul and Yonatan?", "options": ["He celebrates", "He mourns — How the mighty have fallen!", "He immediately claims the throne", "He flees to the Philistines"], "correct": 1, "source_quote": "How the mighty have fallen! The beauty of Yisra'EL is slain on your high places." },
+    { "ref": "6:14-16", "question": "What did Dawid do when the Ark came to Yerushalayim?", "options": ["He built a temple", "He danced before YHWH with all his might", "He offered a burnt offering alone", "He wept and prayed"], "correct": 1, "source_quote": "Dawid danced before YHWH with all his might." }
+  ],
+  "faq": [
+    {
+      "question": "What does it mean that Dawid's kingdom was on the African tectonic plate?",
+      "answer": "The City of Dawid — Yerushalayim — sits on the Nubian Plate, physically African soil. The Jordan Rift Valley is the geological boundary between Africa and the Arabian Plate. Everything west of the Jordan — including Yerushalayim, Hevron, Beit-Lehem, the Negev, the Galilee, and the coastal plain — is on the African continent geologically. The Davidic kingdom was an African kingdom. The term 'Middle East' was invented in 1902 by a US naval strategist. Before that date, no such geographic category existed. Every ancient cartographic framework placed this territory within or at the boundary of the African geographic zone."
+    },
+    {
+      "question": "What does the Dawid-Golyat narrative (1 Shemu'el 17) establish about the Davidic line?",
+      "answer": "Dawid — a shepherd boy from Beit-Lehem — defeats Golyat the Philistine with a sling and a stone. He declares: 'I come to you in the name of YHWH of hosts, The Creator of the armies of Yisra'EL' (1 Sam 17:45). The covenant framework is clear: victory comes through YHWH's name, not through human military power. The Qumran War Scroll (1QM) preserves this exact framework — weapons inscribed with YHWH's name, victory belonging to YHWH, the battle itself an act of covenant faith. Dawid's lineage — through Yehudah, through Ruth the Mo'avite, through Yishai — leads to the kingly messiah the DSS community awaited: a mortal human king, not a divine incarnation."
+    },
+    {
+      "question": "Why does the Ophel matter for the Temple location question?",
+      "answer": "The original City of Dawid is on the Ophel ridge — south of the present-day Temple Mount platform. The Gihon Spring — the city's only natural water source — is at the base of the Ophel. Josephus describes the Temple precinct as approximately 600 feet on a side. The current Temple Mount platform is approximately 1,500 feet by 1,000 feet — nearly three times larger. Ernest Martin's archaeological analysis documents that the massive platform may be the Roman Antonia Fortress. The actual Second Temple may have sat on the Ophel ridge adjacent to the Gihon Spring — which would have supplied the ritual water purification the Temple required. No functioning Temple can exist without a reliable water source for the mikveh."
+    }
+  ]
+}

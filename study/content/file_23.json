@@ -1,0 +1,37 @@
+{
+  "id": "file_23",
+  "label": "Shofetim (Judges) — Part 1 — Chapters 1–7",
+  "volume": 11,
+  "content_version": 1,
+  "summary_plain": "After Yehoshua's death, the tribes fight to possess the land. They fail to drive out the inhabitants completely. A pattern repeats: Yisra'EL does evil, YHWH gives them into the hand of an oppressor, they cry out, YHWH raises a judge to deliver them. Otniel, Ehud, Shamgar, Devorah and Barak, and Gid'on are raised as judges. Devorah the prophet leads Yisra'EL to victory. Gid'on defeats Midyan with 300 men — YHWH says the people are too many, lest they say their own hand saved them.",
+  "summary_scholarly": "The ACR reads from DSS Judges fragments (4QJudg-a, 4QJudg-b) and the Orit Ge'ez. The cyclical pattern of Shofetim — apostasy, oppression, cry, deliverance — is the covenant justice framework in action. YHWH does not abandon the covenant permanently — he responds to the cry. The Gid'on narrative (ch 6-7) establishes that covenant victory comes through YHWH's direct action with minimal human resources, not through military superiority.",
+  "key_terms": [
+    { "term": "Shofetim", "phonetic": "Sho-feh-TEEM", "definition": "Judges — military and spiritual leaders raised by YHWH to deliver Yisra'EL from oppression. They are not kings. They do not establish dynasties. YHWH raises them for specific crises." },
+    { "term": "Devorah", "phonetic": "Deh-vo-RAH", "definition": "A prophet and judge who leads Yisra'EL. She summons Barak to battle and accompanies him. She composes the Song of Devorah (ch 5) — one of the oldest Hebrew poems." },
+    { "term": "Gid'on", "phonetic": "Gid-ON", "definition": "Judge who defeats Midyan with 300 men. YHWH reduces his army from 32,000 to 300 — so Yisra'EL cannot claim their own strength saved them. Anglicized as Gideon." }
+  ],
+  "fill_blank": [
+    { "ref": "6:12", "prompt": "The angel of YHWH appeared to Gid'on and said: YHWH is with you, O mighty man of ______.", "answer": "valor", "source_quote": "And the angel of YHWH appeared to him and said to him: YHWH is with you, O mighty man of valor." },
+    { "ref": "5:7", "prompt": "The villagers ceased in Yisra'EL — they ceased until I arose, until I, Devorah, arose as a ______ in Yisra'EL.", "answer": "mother", "source_quote": "The villagers ceased in Yisra'EL — they ceased until I arose, Devorah — I arose as a mother in Yisra'EL." },
+    { "ref": "7:7", "prompt": "With the ______ hundred men who lapped I will save you and give the Midyanites into your hand.", "answer": "three", "source_quote": "And YHWH said to Gid'on: With the three hundred men who lapped I will save you and give the Midyanites into your hand." }
+  ],
+  "multiple_choice": [
+    { "ref": "4:4", "question": "What titles does the text give Devorah?", "options": ["Queen and commander", "Prophet and judge", "Priestess and seer", "Mother and warrior"], "correct": 1, "source_quote": "Now Devorah, a prophet, the wife of Lappidoth, was judging Yisra'EL at that time." },
+    { "ref": "7:2", "question": "Why did YHWH reduce Gid'on's army?", "options": ["They were too weak", "So Yisra'EL would not say their own hand saved them", "The enemy was small", "To punish them"], "correct": 1, "source_quote": "YHWH said to Gid'on: The people with you are too many for me to give the Midyanites into their hand, lest Yisra'EL boast over me, saying: My own hand has saved me." },
+    { "ref": "2:16-19", "question": "What is the repeating cycle in Shofetim?", "options": ["Prosperity, war, exile, return", "Evil, oppression, cry, YHWH raises a deliverer", "Building, destruction, rebuilding, rest", "Prophecy, fulfillment, prophecy, fulfillment"], "correct": 1, "source_quote": "Then YHWH raised up judges, who saved them out of the hand of those who plundered them." }
+  ],
+  "faq": [
+    {
+      "question": "What does the Shofetim cycle reveal about covenant justice?",
+      "answer": "The pattern repeats throughout the book: Yisra'EL abandons the covenant, YHWH allows an oppressor nation to dominate them, they cry out, YHWH raises a deliverer. This is not random. It is the covenant justice framework from Vayikra 26 and Devarim 28 in action — the covenant blessings and curses operating in real time. The Damascus Document (CD) at Qumran describes the same framework for the current age: the Period of Wrath (domination) followed by the Period of Visitation (deliverance). The covenant people's cry to YHWH — not to human institutions — activates the deliverance."
+    },
+    {
+      "question": "Why is Devorah called a 'mother in Yisra'EL'?",
+      "answer": "Devorah's song (5:7) uses the title 'mother in Yisra'EL' — not queen, not commander, but mother. She holds the prophetic, judicial, and military authority simultaneously. The text names her as a prophet first (4:4), then as judge, then as the one who summons and accompanies the army. Miryam in Shemot 15:20 is similarly titled 'the prophet.' The covenant tradition names women as prophets and leaders in the primary text itself — these are not later additions. They are in the oldest manuscript witnesses."
+    },
+    {
+      "question": "How does Gid'on's 300 connect to the War Scroll?",
+      "answer": "YHWH reduces Gid'on's army from 32,000 to 300 — deliberately — so that the victory cannot be attributed to human military strength. The War Scroll (1QM) preserves this same principle: the weapons carry YHWH's name, the priests direct the battle, the victory belongs to YHWH. Human power is not the mechanism of covenant victory. YHWH's direct intervention is. Gid'on's 300 with trumpets and torches defeating a vast Midyanite army is the Shofetim version of the War Scroll's Sons of Light prevailing through YHWH's direct action."
+    }
+  ]
+}

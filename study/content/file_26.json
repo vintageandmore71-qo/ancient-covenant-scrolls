@@ -1,0 +1,38 @@
+{
+  "id": "file_26",
+  "label": "Shemu'el Aleph (1 Samuel) — Part 1 — Chapters 1–10",
+  "volume": 12,
+  "content_version": 1,
+  "summary_plain": "Chanah prays at Shiloh for a son and vows to give him to YHWH. Shemu'el is born and dedicated to the service of YHWH at the Mishkan. The boy Shemu'el hears YHWH calling his name at night. The Philistines capture the Ark — Eli's sons Chofni and Pinchas are killed. The Ark is returned. The people demand a king like the nations. YHWH tells Shemu'el: they have not rejected you — they have rejected me from being king over them. Sha'ul son of Kish from Binyamin is anointed as the first king.",
+  "summary_scholarly": "The ACR reads from the Dead Sea Scrolls witnesses (4QSam-a, 4QSam-b, 4QSam-c) and the Orit Ge'ez. The DSS Samuel manuscripts are among the most significant textual finds at Qumran — 4QSam-a preserves readings that differ substantially from the Masoretic and often agree with the Septuagint, confirming the Masoretic as a later editorial tradition. The demand for a king (ch 8) is YHWH's direct assessment: they have rejected YHWH as king. Monarchy is presented as a concession to human weakness, not YHWH's original design.",
+  "key_terms": [
+    { "term": "Shemu'el", "phonetic": "Sheh-moo-EL", "definition": "Prophet, priest, and judge. Born to Chanah after her prayer at Shiloh. His name means 'heard by El.' He anoints both Sha'ul and Dawid as kings. Anglicized as Samuel." },
+    { "term": "Chanah", "phonetic": "Khah-NAH", "definition": "Mother of Shemu'el. She prays at the Mishkan in Shiloh while weeping, and vows: if YHWH gives her a son, she will dedicate him to YHWH's service all his days. Her prayer-song (ch 2) is one of the oldest hymns in the Hebrew canon." },
+    { "term": "Sha'ul", "phonetic": "Shah-OOL", "definition": "First king of Yisra'EL, from the tribe of Binyamin. Anointed by Shemu'el at YHWH's command. Anglicized as Saul." },
+    { "term": "Ark of the Covenant", "phonetic": "", "definition": "The gold-covered chest containing the tablets of the Torah, housed in the Mishkan. Captured by the Philistines (ch 4-6) but returned after YHWH strikes the Philistines with plagues." }
+  ],
+  "fill_blank": [
+    { "ref": "3:4", "prompt": "Then YHWH called: Shemu'el! Shemu'el! And he said: Here I ______.", "answer": "am", "source_quote": "Then YHWH called: Shemu'el! Shemu'el! And he said: Here I am." },
+    { "ref": "8:7", "prompt": "YHWH said to Shemu'el: They have not rejected you, but they have rejected ______ from being king over them.", "answer": "me", "source_quote": "And YHWH said to Shemu'el: Obey the voice of the people in all that they say to you, for they have not rejected you, but they have rejected me from being king over them." },
+    { "ref": "1:11", "prompt": "And she vowed a vow and said: O YHWH of hosts, if you will look on the affliction of your servant and give to your servant a ______.", "answer": "son", "source_quote": "And she vowed a vow and said: O YHWH of hosts, if you will indeed look on the affliction of your servant and remember me and give to your servant a son, then I will give him to YHWH all the days of his life." }
+  ],
+  "multiple_choice": [
+    { "ref": "8:7", "question": "What did YHWH say when the people demanded a king?", "options": ["He approved immediately", "They have rejected me from being king over them", "He refused to allow it", "He punished them with a plague"], "correct": 1, "source_quote": "They have not rejected you, but they have rejected me from being king over them." },
+    { "ref": "3:1-10", "question": "How did Shemu'el first hear YHWH's voice?", "options": ["Through a burning bush", "YHWH called his name at night while he slept in the Mishkan", "Through a prophet", "Through thunder on a mountain"], "correct": 1, "source_quote": "YHWH called Shemu'el, and he said: Here I am." },
+    { "ref": "9:1-2", "question": "From which tribe was Sha'ul?", "options": ["Yehudah", "Levi", "Binyamin", "Efrayim"], "correct": 2, "source_quote": "There was a man of Binyamin whose name was Kish... and he had a son whose name was Sha'ul." }
+  ],
+  "faq": [
+    {
+      "question": "Why are the DSS Samuel manuscripts so significant?",
+      "answer": "4QSam-a is one of the most important Dead Sea Scrolls manuscripts. It preserves readings that differ substantially from the Masoretic and often agree with the Septuagint — confirming that the Masoretic Samuel is a later editorial tradition, not the original text. Emanuel Tov's Textual Criticism of the Hebrew Bible (Fortress Press, 2012) documents these variants in detail. The three-witness method — DSS, Orit Ge'ez, Septuagint — recovers readings the Masoretic altered. The Masoretic Text was assembled by the Ben Asher family 1,200 years after the oldest DSS manuscripts. It is the youngest witness. Western scholarship made it the primary one."
+    },
+    {
+      "question": "What does the demand for a king reveal about YHWH's governance?",
+      "answer": "YHWH tells Shemu'el: 'They have not rejected you — they have rejected me from being king over them' (8:7). YHWH's original design was theocracy — direct divine governance without a human king. Yovelim 15 provides the framework: every nation was assigned to angelic governors, but Yisra'EL was kept under YHWH's direct jurisdiction. The demand for a king 'like the nations' (8:5) is the covenant people asking to be governed like other nations — asking to leave YHWH's direct jurisdiction. Monarchy was a concession, not the covenant ideal. The Qumran community's return to direct covenant governance — no king, no temple institution, just the covenant texts and YHWH — was a return to the pre-monarchic framework."
+    },
+    {
+      "question": "How does Chanah's prayer connect to the covenant people's experience?",
+      "answer": "Chanah prays from affliction — barren, provoked by her rival, weeping at the Mishkan. She makes no offering. She brings no sacrifice. She speaks directly to YHWH from her grief. Eli the priest sees her lips moving without sound and accuses her of drunkenness (1:13-14). The institutional priest misreads the genuine prayer. Chanah corrects him: 'I am a woman deeply troubled — I have been pouring out my soul before YHWH.' YHWH hears her directly — not through the priest, not through the institution. Her son Shemu'el becomes the prophet who dismantles the corrupt priestly institution (Eli's house) and anoints the kings. The pattern: YHWH responds to the individual who cries out directly, bypassing the institutional system."
+    }
+  ]
+}
