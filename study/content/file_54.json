@@ -1,0 +1,38 @@
+{
+  "id": "file_54",
+  "label": "Yehezkel (Ezekiel) — Part 1 — Chapters 1–11",
+  "volume": 18,
+  "content_version": 1,
+  "summary_plain": "Yehezkel sees the heavens opened by the river Kevar in Babylon. He sees four living creatures with four faces — man, lion, ox, eagle — and wheels within wheels full of eyes. Above them is a throne of sapphire, and on the throne a figure like the appearance of a man surrounded by fire and radiance. YHWH sends Yehezkel to speak to the rebellious house. He eats a scroll. He lies on his side for 390 days. He sees the elders of Yisra'EL worshipping abominations in the Temple — including women weeping for Tammuz at the north gate.",
+  "summary_scholarly": "The ACR reads from the DSS Ezekiel fragments (4QEzek-a, 4QEzek-b, 4QEzek-c, 11QEzek) and the Orit Ge'ez. The throne vision (Merkavah) in chapter 1 is the most elaborate divine throne description in the covenant literature — more detailed than Yesha'yahu 6 or Chanokh 14. Chapter 8:14 documents women weeping for Tammuz at the north gate of the Temple — the Babylonian dying-rising deity whose mourning cycle structurally parallels the Easter death-resurrection tradition.",
+  "key_terms": [
+    { "term": "Yehezkel", "phonetic": "Yeh-KHEZ-kel", "definition": "A priest and prophet exiled to Babylon. He receives visions by the river Kevar. His name means 'El strengthens.' Anglicized as Ezekiel." },
+    { "term": "Merkavah (Throne Chariot)", "phonetic": "Mer-kah-VAH", "definition": "The divine throne-chariot vision of chapter 1. Four living creatures, wheels within wheels, a sapphire throne, and the glory of YHWH. The most detailed divine throne description in the Hebrew canon." },
+    { "term": "Tammuz", "phonetic": "Tah-MOOZ", "definition": "A Babylonian dying-rising deity. Chapter 8:14 records women weeping for Tammuz at the Temple's north gate — presented as an abomination. The same dying-rising deity cycle was later adopted by Roman Christianity." },
+    { "term": "Kevar", "phonetic": "Keh-VAR", "definition": "The river in Babylon where Yehezkel receives his visions. The covenant community is in exile — and YHWH appears to them there. The divine presence is not confined to the Temple." }
+  ],
+  "fill_blank": [
+    { "ref": "1:1", "prompt": "The heavens were opened, and I saw visions of The ______.", "answer": "Creator", "source_quote": "The heavens were opened, and I saw visions of The Creator." },
+    { "ref": "2:1", "prompt": "And he said to me: Son of man, stand on your ______, and I will speak with you.", "answer": "feet", "source_quote": "And he said to me: Son of man, stand on your feet, and I will speak with you." },
+    { "ref": "3:3", "prompt": "Son of man, feed your belly with this ______ that I give you and fill your stomach with it.", "answer": "scroll", "source_quote": "Son of man, feed your belly with this scroll that I give you and fill your stomach with it. Then I ate it, and it was in my mouth as sweet as honey." }
+  ],
+  "multiple_choice": [
+    { "ref": "1:5-10", "question": "What did the four living creatures in the throne vision have?", "options": ["Two wings each", "Four faces each — man, lion, ox, eagle", "Crowns of gold", "Swords of fire"], "correct": 1, "source_quote": "Each had four faces, and each of them had four wings — the face of a man, the face of a lion, the face of an ox, and the face of an eagle." },
+    { "ref": "8:14", "question": "What abomination did Yehezkel see at the Temple's north gate?", "options": ["Idol worship of Baal", "Women weeping for Tammuz", "A golden calf", "Burning incense to the sun"], "correct": 1, "source_quote": "Then he brought me to the entrance of the north gate of the house of YHWH, and behold, there sat women weeping for Tammuz." },
+    { "ref": "1:26", "question": "What was above the throne in the Merkavah vision?", "options": ["A burning mountain", "A figure like the appearance of a man surrounded by fire", "A golden menorah", "A seraph with six wings"], "correct": 1, "source_quote": "And above the likeness of a throne was a likeness with the appearance of a man, from his waist upward with fire, and from his waist downward with fire — and there was brightness around him." }
+  ],
+  "faq": [
+    {
+      "question": "Why does Yehezkel 8:14 matter for understanding Roman Christianity?",
+      "answer": "Yehezkel 8:14 records women weeping for Tammuz at the north gate of the Temple — and YHWH presents this as an abomination. Tammuz is a Sumerian-Babylonian dying-rising deity whose mourning cycle follows the agricultural seasons: death in winter, resurrection in spring. The structural parallel with the Easter death-resurrection celebration is documented across centuries of comparative religion scholarship. The Hebrew prophetic tradition specifically identified the worship of a dying-rising god as an abomination in YHWH's Temple. The Roman Church then built its central celebration on the same dying-rising framework the prophets condemned — and named it Easter, after Eostre/Ishtar, the spring fertility goddess documented in Bede's De Temporum Ratione (725 CE)."
+    },
+    {
+      "question": "What does the Merkavah vision reveal about YHWH's presence in exile?",
+      "answer": "Yehezkel receives the throne vision by the river Kevar in Babylon — not in the Temple, not in the land, but in exile. YHWH's glory appears to the covenant community where they are scattered. The Damascus Document (CD) at Qumran makes the same point: YHWH remembers the covenant even when the people are in exile, and from the scattered remnant raises up those who hold the covenant outside the corrupt institutional center. The divine presence is not confined to a building or a geographic coordinate. It follows the covenant people wherever they are."
+    },
+    {
+      "question": "What are the DSS witnesses for Yehezkel?",
+      "answer": "The Dead Sea Scrolls preserve Yehezkel in fragments from Cave 4 (4QEzek-a, 4QEzek-b, 4QEzek-c) and Cave 11 (11QEzek). The Orit Ge'ez preserves the full text. The DSS fragments confirm readings that differ from the Masoretic in significant places. The Masoretic is noted as a variant only — not primary authority. The three-witness method compares DSS, Orit, and Septuagint readings to recover the oldest recoverable form of the text."
+    }
+  ]
+}

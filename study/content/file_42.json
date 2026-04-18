@@ -1,0 +1,44 @@
+{
+  "id": "file_42",
+  "label": "Yesha'yahu (Isaiah) — 1QIsa-a — Part 1 — Chapters 1–12",
+  "volume": 16,
+  "content_version": 1,
+  "summary_plain": "Yesha'yahu opens with YHWH's case against Yisra'EL. The ox knows its owner but Yisra'EL does not know. YHWH calls the nation to repentance: though your sins are like scarlet, they shall be as white as snow. Yesha'yahu sees YHWH seated on a high throne — the seraphim cry Holy, holy, holy is YHWH of hosts. A coal touches the prophet's lips. He is sent. The sign of Immanuel is given. The people who walked in darkness have seen a great light. A child is born — Wonderful Counselor, Mighty Creator, Everlasting Father, Prince of Peace.",
+  "summary_scholarly": "The ACR reads from the Great Isaiah Scroll (1QIsa-a) — the oldest complete prophetic manuscript known, found in Qumran Cave 1. This single scroll preserves all 66 chapters and predates the Masoretic Isaiah by approximately 1,000 years. The Orit Ge'ez serves as the second witness. The throne vision in chapter 6 is the most detailed divine throne description in the prophetic literature. The child of chapters 7 and 9 is a mortal Davidic heir — not a divine incarnation. The Qumran community read these passages as descriptions of a human king in the Davidic line.",
+  "key_terms": [
+    { "term": "1QIsa-a", "phonetic": "", "definition": "The Great Isaiah Scroll — the oldest complete prophetic manuscript in existence. Found in Qumran Cave 1 in 1947. 7.3 meters long. Preserves all 66 chapters of Yesha'yahu. Predates the Masoretic text by approximately 1,000 years." },
+    { "term": "Seraphim", "phonetic": "Seh-rah-FEEM", "definition": "Fiery beings above YHWH's throne (6:2). Each has six wings — two covering the face, two covering the feet, two for flight. They cry: Holy, holy, holy is YHWH of hosts — the whole earth is full of his glory." },
+    { "term": "Immanuel", "phonetic": "Im-mah-noo-EL", "definition": "Hebrew for 'El is with us.' A sign given through a young woman (almah) bearing a son (7:14). In context, this is a sign to King Ahaz about events in his own time — not a prediction of events 700 years later." },
+    { "term": "Remnant (She'ar Yashuv)", "phonetic": "Sheh-AR Yah-SHOOV", "definition": "Yesha'yahu names his son She'ar Yashuv — 'a remnant shall return' (7:3). The name is a prophecy: after judgment, a remnant of the covenant people will return to YHWH." }
+  ],
+  "fill_blank": [
+    { "ref": "6:3", "prompt": "Holy, holy, holy is YHWH of hosts — the whole ______ is full of his glory.", "answer": "earth", "source_quote": "And one called to another and said: Holy, holy, holy is YHWH of hosts — the whole earth is full of his glory." },
+    { "ref": "1:18", "prompt": "Though your sins are like scarlet, they shall be as white as ______.", "answer": "snow", "source_quote": "Come now, let us reason together, says YHWH: though your sins are like scarlet, they shall be as white as snow." },
+    { "ref": "9:6", "prompt": "For to us a child is born, to us a son is given, and the government shall be upon his ______.", "answer": "shoulder", "source_quote": "For to us a child is born, to us a son is given, and the government shall be upon his shoulder." },
+    { "ref": "1:3", "prompt": "The ox knows its owner, and the donkey its master's crib, but Yisra'EL does not ______.", "answer": "know", "source_quote": "The ox knows its owner, and the donkey its master's crib, but Yisra'EL does not know, my people do not understand." }
+  ],
+  "multiple_choice": [
+    { "ref": "6:1-3", "question": "What did Yesha'yahu see in his throne vision?", "options": ["An angel with a sword", "YHWH seated on a high throne with seraphim crying Holy, holy, holy", "A burning mountain", "A ladder reaching to heaven"], "correct": 1, "source_quote": "I saw YHWH sitting upon a throne, high and lifted up — and the seraphim called: Holy, holy, holy is YHWH of hosts." },
+    { "ref": "1QIsa-a", "question": "What is the Great Isaiah Scroll?", "options": ["A medieval copy", "The oldest complete prophetic manuscript known — from Qumran Cave 1", "A Greek translation", "A Masoretic variant"], "correct": 1, "source_quote": "The Great Isaiah Scroll (1QIsa-a) is the oldest complete prophetic manuscript in existence." },
+    { "ref": "9:6", "question": "What titles are given to the child in chapter 9?", "options": ["King of Kings and Lord of Lords", "Wonderful Counselor, Mighty Creator, Everlasting Father, Prince of Peace", "The Anointed One and the Holy One", "Prophet, Priest, and King"], "correct": 1, "source_quote": "His name shall be called Wonderful Counselor, Mighty Creator, Everlasting Father, Prince of Peace." },
+    { "ref": "7:14", "question": "What does the name Immanuel mean?", "options": ["YHWH saves", "El is with us", "The anointed one", "YHWH remembers"], "correct": 1, "source_quote": "The young woman shall conceive and bear a son, and shall call his name Immanuel — El is with us." }
+  ],
+  "faq": [
+    {
+      "question": "Why is the Great Isaiah Scroll (1QIsa-a) the most important DSS manuscript?",
+      "answer": "1QIsa-a is the oldest complete prophetic manuscript in existence — 7.3 meters long, preserving all 66 chapters. It predates the Masoretic Isaiah by approximately 1,000 years. The Qumran scribes wrote YHWH in Paleo-Hebrew script (𐤉𐤄𐤅𐤄) within the square-script text — marking the Name as categorically different from all other words. This visual distinction was deliberate. The Nahal Hever Septuagint fragments show early Greek copies also preserved the Name in Paleo-Hebrew within Greek text. The substitution of 'LORD' for YHWH — 7,000+ times across translations — was introduced later. It has no ancient basis."
+    },
+    {
+      "question": "Is the child of chapters 7 and 9 a divine figure?",
+      "answer": "No. The Qumran community read these passages as describing a mortal Davidic king. The DSS messianic expectation — documented in 1QS, 1QSa, and the Damascus Document — describes two mortal messiahs: a Messiah of Aaron (priestly) and a Messiah of Israel (kingly). Neither is divine. Neither is an object of worship. The titles in 9:6 — Wonderful Counselor, Mighty Creator, Everlasting Father, Prince of Peace — are throne names given to a human king at enthronement, following the ancient Near Eastern pattern of royal titles. Roman Christianity later reinterpreted these passages as predictions of a divine incarnation — a reading absent from the DSS, the Orit Ge'ez, and every pre-Roman Hebrew source."
+    },
+    {
+      "question": "What does the 44-year DSS publication delay reveal?",
+      "answer": "The Dead Sea Scrolls were discovered in 1947. Full publication was not completed until 1991 — a 44-year delay. The original publication committee was dominated by scholars trained at Catholic institutions, including Roland de Vaux, a Dominican friar who headed the project for decades. John Allegro, who published findings suggesting the scrolls contradicted Roman Christian theological claims, was professionally destroyed by the Catholic-dominated team. When the Huntington Library forced open access in 1991 by releasing photographic copies, the suppression ended. The scrolls hidden by the Qumran community in 68 CE to preserve them for a future generation are now directly accessible — for the first time in 1,900 years."
+    },
+    {
+      "question": "How does Yesha'yahu connect to the African covenant geography?",
+      "answer": "Yesha'yahu 18:1-2 (preserved in 1QIsa-a): 'Woe to the land shadowing with wings which is beyond the rivers of Ethiopia — that sends ambassadors by the sea — go swift messengers to a nation scattered and peeled — to a people terrible from their beginning onward — a nation meted out and trodden down.' The text's own geography: 'beyond the rivers of Ethiopia' places this land west of Africa — the direction of the Americas from the African perspective. 'A nation scattered and peeled' — a population dispersed and stripped. The oldest complete prophetic manuscript on earth contains a geographic description that corresponds to the documented experience of the covenant people taken in ships from the Kingdom of Juda."
+    }
+  ]
+}

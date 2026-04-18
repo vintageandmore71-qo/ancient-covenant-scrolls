@@ -1,0 +1,38 @@
+{
+  "id": "file_38",
+  "label": "Melakhim Bet (2 Kings) — Part 1 — Chapters 1–7",
+  "volume": 15,
+  "content_version": 1,
+  "summary_plain": "Melakhim Bet Part 1 continues the history of the divided kingdoms. Eliyahu is taken up to heaven in a whirlwind with a chariot of fire. Elisha takes up his mantle and carries a double portion of his spirit. Elisha purifies the waters of Yericho, multiplies oil for a widow, raises the Shunamite woman's son from death, heals Na'aman the Aramean of tzara'at, and makes an iron axe head float. The king of Aram besieges Shomron — Elisha's servant sees the mountain full of horses and chariots of fire.",
+  "summary_scholarly": "The ACR reads from DSS Kings fragments (4QKgs) and the Orit Ge'ez. Elisha's prophetic ministry demonstrates YHWH's direct action through covenant prophets. The Na'aman narrative (chapter 5) is significant for phenotypic analysis: Na'aman the Aramean carries tzara'at, and his healing involves washing in the Yarden seven times until his flesh is restored 'like the flesh of a little child.' The tzara'at-as-phenotypic-mirror pattern documented in Vayikra 13-14 and Bamidbar 12 continues here.",
+  "key_terms": [
+    { "term": "Elisha", "phonetic": "Eh-lee-SHAH", "definition": "Prophet who succeeds Eliyahu. Receives a double portion of his spirit. Performs twice as many signs as Eliyahu. Anglicized as Elisha." },
+    { "term": "Na'aman", "phonetic": "Nah-ah-MAHN", "definition": "Commander of the Aramean army who carries tzara'at. Healed by washing in the Yarden seven times at Elisha's instruction. His healing demonstrates YHWH's sovereignty over nations beyond Yisra'EL." },
+    { "term": "Chariot of Fire", "phonetic": "", "definition": "Eliyahu is taken up to heaven in a whirlwind — a chariot of fire and horses of fire separate him from Elisha (2:11). Elisha cries: 'My father, my father! The chariots of Yisra'EL and its horsemen!'" },
+    { "term": "Double Portion", "phonetic": "", "definition": "Elisha asks for a double portion of Eliyahu's spirit (2:9). This is the inheritance portion of the firstborn — Elisha claims the position of Eliyahu's spiritual heir." }
+  ],
+  "fill_blank": [
+    { "ref": "2:11", "prompt": "A chariot of fire and horses of fire separated the two of them, and Eliyahu went up by a ______ into heaven.", "answer": "whirlwind", "source_quote": "And as they still went on and talked, behold, chariots of fire and horses of fire separated the two of them. And Eliyahu went up by a whirlwind into heaven." },
+    { "ref": "5:14", "prompt": "So Na'aman went down and dipped himself seven times in the ______, according to the word of the man of The Creator.", "answer": "Yarden", "source_quote": "So he went down and dipped himself seven times in the Yarden, according to the word of the man of The Creator, and his flesh was restored like the flesh of a little child, and he was clean." },
+    { "ref": "6:17", "prompt": "And Elisha prayed: O YHWH, please open his eyes that he may see. And the mountain was full of horses and chariots of ______.", "answer": "fire", "source_quote": "Then YHWH opened the eyes of the young man, and he saw, and behold, the mountain was full of horses and chariots of fire all around Elisha." }
+  ],
+  "multiple_choice": [
+    { "ref": "2:9", "question": "What did Elisha ask from Eliyahu before he was taken up?", "options": ["His cloak", "A double portion of his spirit", "The gift of prophecy", "Authority over Yisra'EL"], "correct": 1, "source_quote": "Elisha said: Please let there be a double portion of your spirit on me." },
+    { "ref": "5:1", "question": "Who was Na'aman?", "options": ["A priest of YHWH", "Commander of the Aramean army", "King of Yisra'EL", "A Levite"], "correct": 1, "source_quote": "Na'aman, commander of the army of the king of Aram, was a great man with his master." },
+    { "ref": "5:14", "question": "How many times did Na'aman dip in the Yarden?", "options": ["Three", "Five", "Seven", "Twelve"], "correct": 2, "source_quote": "He dipped himself seven times in the Yarden." }
+  ],
+  "faq": [
+    {
+      "question": "What does Na'aman's tzara'at reveal about the Levantine phenotype?",
+      "answer": "Na'aman — commander of the Aramean (Syrian) army — carries tzara'at (2 Kings 5). The Aramean population north of Yisra'EL is documented using the same diagnostic category. After washing in the Yarden, his flesh is restored 'like the flesh of a little child' — meaning the tzara'at (which produces whitening of the skin) is reversed. The same phenotypic-mirror pattern from Vayikra 13-14 and Bamidbar 12 (Miriam white as snow) applies across the entire ancient Afro-Asiatic corridor. Both the Israelite and Aramean populations shared a dark-complexioned baseline for which white skin produced by tzara'at was the documented marker of affliction."
+    },
+    {
+      "question": "How does the Taharqa-Hezekiah alliance connect to later chapters?",
+      "answer": "In 2 Melakhim 19:9 (Part 3 of this volume), the Cushite Pharaoh Taharqa of the 25th Dynasty brings his army to relieve Yerushalayim from the Assyrian siege of 701 BCE. Without this African military intervention, the Kingdom of Yehudah would have been destroyed 130 years before the Babylonian destruction. The survival of the covenant community through the entire prophetic period — including Yesha'yahu, Yirmeyahu, and the writing of the Qumran texts — depends on this African military alliance. Taharqa's statues, discovered at Kerma by the University of Geneva, are among the finest examples of ancient African royal portraiture. They depict African faces — the faces of the king who saved the covenant community."
+    },
+    {
+      "question": "What does Elisha's servant seeing the chariots of fire mean?",
+      "answer": "When Aram besieges the city where Elisha stays, his servant is terrified. Elisha prays: 'YHWH, open his eyes.' The servant sees the mountain full of horses and chariots of fire surrounding them (6:17). The covenant protection is already present — it requires spiritual sight to perceive. The War Scroll (1QM) describes angels fighting alongside the Sons of Light. The Damascus Document describes YHWH remembering the covenant even when the people are scattered and their identity denied. Elisha's words — 'those who are with us are more than those who are with them' — is the covenant community's declaration in every period of apparent domination."
+    }
+  ]
+}

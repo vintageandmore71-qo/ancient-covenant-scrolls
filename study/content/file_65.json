@@ -1,0 +1,44 @@
+{
+  "id": "file_65",
+  "label": "Tehillim (Psalms) — Part 1 — Psalms 1–20",
+  "volume": 20,
+  "content_version": 1,
+  "summary_plain": "Tehillim opens with the two paths: the righteous who delight in YHWH's Torah, and the wicked who are like chaff. YHWH sets his anointed on Tziyon. The heavens declare the glory of The Creator. YHWH is my shepherd — I shall not want. Psalm 19 declares: the Torah of YHWH is perfect, restoring the soul. Psalm 8 asks: what is man that you are mindful of him? These are prayers, praises, and declarations spoken directly to YHWH.",
+  "summary_scholarly": "The ACR reads Tehillim from the Dead Sea Scrolls witnesses (11QPsa, 4QPsa-q, and additional fragments) and the Orit Ge'ez. The DSS Psalms Scroll (11QPsa) preserves a different arrangement than the Masoretic — including additional psalms (151, 154, 155) and a prose composition about David's writings. The Qumran arrangement demonstrates that the Psalter was not yet fixed in the form the Masoretes later standardized. Psalm 14 in the DSS differs from the Masoretic in significant readings.",
+  "key_terms": [
+    { "term": "Tehillim", "phonetic": "Teh-hee-LEEM", "definition": "Hebrew for 'Praises' — the Hebrew name for the Psalms. The book is a collection of prayers, hymns, laments, and declarations addressed directly to YHWH." },
+    { "term": "Torah of YHWH", "phonetic": "", "definition": "Psalm 19:7: 'The Torah of YHWH is perfect, restoring the soul.' Torah here means instruction, teaching — YHWH's direct guidance. It is not a burden but a restoration." },
+    { "term": "Mashiach (Anointed)", "phonetic": "Mah-SHEE-akh", "definition": "Psalm 2:2: the kings of the earth set themselves against YHWH and against his anointed. The anointed is a human king — the Davidic ruler. In the DSS framework, mashiach is a functional title for a mortal appointed by YHWH." },
+    { "term": "11QPsa", "phonetic": "", "definition": "The Great Psalms Scroll from Qumran Cave 11. Preserves psalms in a different order than the Masoretic and includes compositions absent from European Bibles — Psalms 151, 154, 155, and others." }
+  ],
+  "fill_blank": [
+    { "ref": "1:1-2", "prompt": "Blessed is the man who walks not in the counsel of the wicked — but his delight is in the ______ of YHWH.", "answer": "Torah", "source_quote": "Blessed is the man who walks not in the counsel of the wicked, nor stands in the way of sinners, nor sits in the seat of scoffers — but his delight is in the Torah of YHWH, and on his Torah he meditates day and night." },
+    { "ref": "19:1", "prompt": "The heavens declare the glory of The Creator, and the sky above proclaims his ______.", "answer": "handiwork", "source_quote": "The heavens declare the glory of The Creator, and the sky above proclaims his handiwork." },
+    { "ref": "19:7", "prompt": "The Torah of YHWH is perfect, restoring the ______.", "answer": "soul", "source_quote": "The Torah of YHWH is perfect, restoring the soul. The testimony of YHWH is sure, making wise the simple." },
+    { "ref": "8:4", "prompt": "What is man that you are ______ of him, and the son of man that you care for him?", "answer": "mindful", "source_quote": "What is man that you are mindful of him, and the son of man that you care for him?" }
+  ],
+  "multiple_choice": [
+    { "ref": "1:1-3", "question": "What is the righteous person compared to in Psalm 1?", "options": ["A mighty warrior", "A tree planted by streams of water", "A mountain fortress", "A burning flame"], "correct": 1, "source_quote": "He is like a tree planted by streams of water that yields its fruit in its season, and its leaf does not wither." },
+    { "ref": "19:7", "question": "What does Psalm 19 say about the Torah of YHWH?", "options": ["It is too difficult to keep", "It is perfect, restoring the soul", "It has been replaced", "It is only for priests"], "correct": 1, "source_quote": "The Torah of YHWH is perfect, restoring the soul." },
+    { "ref": "2:2", "question": "Against whom do the kings of the earth set themselves in Psalm 2?", "options": ["Against each other", "Against YHWH and his anointed", "Against the prophets", "Against the angels"], "correct": 1, "source_quote": "The kings of the earth set themselves, and the rulers take counsel together, against YHWH and against his anointed." },
+    { "ref": "14:1", "question": "What does Psalm 14 say in the DSS reading?", "options": ["The wise seek YHWH", "The fool says in his heart there is no Creator", "The righteous shall never be moved", "The wicked flee when no one pursues"], "correct": 1, "source_quote": "The fool says in his heart: There is no Creator. They are corrupt, they do abominable deeds." }
+  ],
+  "faq": [
+    {
+      "question": "Why does the DSS Psalms Scroll (11QPsa) differ from the Masoretic Psalter?",
+      "answer": "The 11QPsa preserves psalms in a different order than the Masoretic and includes compositions the Masoretic excludes — Psalms 151, 154, 155, and a prose piece about David's writings. This proves the Psalter was not yet fixed in the Masoretic form when the Qumran community sealed their scrolls in 68 CE. The Masoretic arrangement — assembled by the Ben Asher family in Tiberias between 850 and 950 CE — represents one particular editorial tradition, not the original order. The DSS arrangement is 800-1,000 years older."
+    },
+    {
+      "question": "What does Psalm 83 say about the erasure of Yisra'EL's name?",
+      "answer": "Psalm 83:4 (11QPsa): 'They say: Come, let us wipe them out as a nation — let the name of Yisra'EL be remembered no more. For they conspire with one accord — against you they make a covenant.' This is the most precise single-verse description of the systematic identity erasure documented across the Great Eraser research. The coordinated removal of identity. The erasure of the name. Every institution — canon exclusion, Slave Bible, publication delay, content filter — serves the same function the psalm describes: a coalition acting in coordination to ensure the name is remembered no more."
+    },
+    {
+      "question": "What does Psalm 68:4 reveal about the Rider on the Clouds?",
+      "answer": "Psalm 68:4: 'Sing to The Creator, sing praises to his name — lift up a song to him who rides through the deserts — his name is YAH.' The title Rider on the Clouds (Rokev ba-Aravot) is applied to YHWH. This exact epithet — Rkb 'rpt — appears 1,200 years earlier in the Ugaritic Baal Cycle tablets (KTU 1.1-1.6) as the primary title of the Canaanite storm deity Baal. The Hebrew prophetic tradition took the title from Baal and applied it to YHWH — reclaiming it. When Matthew 26:64 later applies the same title to the NT's central figure, it is taking a title that already passed from Ugaritic Baal to YHWH and reassigning it again — a third transfer of the same ancient Afro-Asiatic title."
+    },
+    {
+      "question": "How does the Hodayot at Qumran relate to Tehillim?",
+      "answer": "The Hodayot (1QH) — Thanksgiving Hymns found at Qumran — are psalm-like compositions written by and for the covenant community. They use the same literary forms as Tehillim: praise, lament, declaration of trust, covenant affirmation. The Hodayot use the specific language of Bachar — to choose, to elect — establishing that covenant identity was understood as YHWH's direct selection, not institutional human recognition. No DNA company, no Rabbinate, no European academic framework can nullify what was established before those institutions existed. The Hodayot are the covenant people's own psalms for the Period of Wrath."
+    }
+  ]
+}

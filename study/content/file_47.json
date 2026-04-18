@@ -1,0 +1,42 @@
+{
+  "id": "file_47",
+  "label": "Yirmeyahu (Jeremiah) — Part 1 — Chapters 1–7",
+  "volume": 17,
+  "content_version": 1,
+  "summary_plain": "YHWH calls Yirmeyahu: Before I formed you in the womb I knew you. Before you were born I consecrated you. I appointed you a prophet to the nations. Yirmeyahu is shown two visions — an almond branch and a boiling pot tilting from the north. YHWH's case against Yisra'EL: they have forsaken me, the fountain of living waters, and hewn out broken cisterns that can hold no water. Chapter 7 is the temple sermon: do not trust in the words 'the temple of YHWH' — amend your ways.",
+  "summary_scholarly": "The ACR reads from the DSS Jeremiah manuscripts (4QJer-a through 4QJer-e). The Qumran Jeremiah (4QJer-b) is substantially shorter than the Masoretic Jeremiah — confirming that the Masoretic contains significant later additions. The shorter DSS recession is the primary authority. The Orit Ge'ez preserves the full text as a second witness. Yirmeyahu 10:2-4 describes and condemns the practice of cutting a tree, bringing it indoors, and decorating it with silver and gold — structurally identical to the modern Christmas tree tradition.",
+  "key_terms": [
+    { "term": "Yirmeyahu", "phonetic": "Yir-meh-YAH-hoo", "definition": "Called by YHWH before birth. A prophet to the nations. He preached during the final decades before the Babylonian destruction of Yerushalayim (586 BCE). Anglicized as Jeremiah." },
+    { "term": "Almond Branch (Shaqed)", "phonetic": "Shah-KED", "definition": "YHWH's first vision to Yirmeyahu (1:11-12). The Hebrew word shaqed (almond) sounds like shoqed (watching). YHWH says: I am watching (shoqed) over my word to perform it." },
+    { "term": "Living Waters", "phonetic": "", "definition": "YHWH describes himself as 'the fountain of living waters' (2:13). The people have forsaken this fountain and hewn broken cisterns. Living water versus dead storage." },
+    { "term": "Temple Sermon", "phonetic": "", "definition": "Chapter 7: Yirmeyahu stands at the gate of the temple and says — do not trust in deceptive words: 'the temple of YHWH, the temple of YHWH.' The building itself does not save. Only amended conduct does." }
+  ],
+  "fill_blank": [
+    { "ref": "1:5", "prompt": "Before I formed you in the womb I ______ you, and before you were born I consecrated you.", "answer": "knew", "source_quote": "Before I formed you in the womb I knew you, and before you were born I consecrated you. I appointed you a prophet to the nations." },
+    { "ref": "2:13", "prompt": "They have forsaken me, the fountain of ______ waters, and hewn out cisterns, broken cisterns that can hold no water.", "answer": "living", "source_quote": "For my people have committed two evils: they have forsaken me, the fountain of living waters, and hewn out cisterns for themselves, broken cisterns that can hold no water." },
+    { "ref": "7:4", "prompt": "Do not trust in these deceptive words: The ______ of YHWH, the ______ of YHWH.", "answer": "temple", "source_quote": "Do not trust in these deceptive words: The temple of YHWH, the temple of YHWH, the temple of YHWH." }
+  ],
+  "multiple_choice": [
+    { "ref": "1:5", "question": "When did YHWH say he knew Yirmeyahu?", "options": ["When he began prophesying", "Before he formed him in the womb", "After the exile", "At the temple dedication"], "correct": 1, "source_quote": "Before I formed you in the womb I knew you, and before you were born I consecrated you." },
+    { "ref": "2:13", "question": "What does YHWH call himself in 2:13?", "options": ["The Rock", "The fountain of living waters", "The shepherd", "The fire"], "correct": 1, "source_quote": "They have forsaken me, the fountain of living waters." },
+    { "ref": "4QJer-b", "question": "How does the Qumran Jeremiah differ from the Masoretic?", "options": ["It is identical", "It is substantially shorter — the Masoretic has later additions", "It is substantially longer", "It is in Greek"], "correct": 1, "source_quote": "The Qumran Jeremiah (4QJer-b) is substantially shorter than the Masoretic Jeremiah — confirming significant later additions." }
+  ],
+  "faq": [
+    {
+      "question": "What does Yirmeyahu 10:2-4 condemn?",
+      "answer": "Yirmeyahu 10:2-4 in the Qumran fragments: 'Do not learn the way of the nations — for the customs of the peoples are vanity. A tree from the forest is cut down, the work of craftsmen with the axe. They adorn it with silver and gold, they fasten it with hammer and nails so that it does not move.' The practice condemned — cutting a tree, bringing it indoors, decorating it with precious metals — is structurally identical to the modern Christmas tree tradition. The practice was condemned in the DSS-era Hebrew text and then standardized as the primary domestic celebration of the Roman Christian calendar. The Hebrew prophets condemned it. The institution that claimed to succeed them adopted it."
+    },
+    {
+      "question": "Why is the shorter Qumran Jeremiah the primary authority?",
+      "answer": "The Qumran Jeremiah (4QJer-b) is substantially shorter than the Masoretic Jeremiah. Emanuel Tov's definitive analysis in Textual Criticism of the Hebrew Bible (Fortress Press, 2012) documents that the Masoretic Jeremiah contains significant later additions. The Septuagint — translated before the Masoretic standardization — also preserves a shorter Jeremiah, confirming that the shorter text is older. Where the DSS and the Septuagint agree against the Masoretic, the Masoretic is the later expansion. The three-witness method (DSS + Orit + Septuagint) identifies the shorter text as primary."
+    },
+    {
+      "question": "What does Ebed-Melek the Cushite reveal about African presence in the covenant community?",
+      "answer": "Ebed-Melek — documented in Yirmeyahu 38-39, confirmed in Qumran fragments — is a Cushite (Ethiopian/Nubian) court official serving at the highest level of the Judean royal court. He rescued the prophet Yirmeyahu from the cistern where the officials had thrown him to die. He is named, textually confirmed, high-status, African, and integrated at the apex of Judean political life in the 6th century BCE. YHWH specifically promises Ebed-Melek personal protection during the coming destruction (39:15-18). An African man rescues the prophet of YHWH, and YHWH personally guarantees his survival. This is in the primary text."
+    },
+    {
+      "question": "What does Yirmeyahu prophesy about the nations that enslaved the covenant people?",
+      "answer": "Yirmeyahu 50-51 (ACR Part 7) contains the most detailed judgment prophecy against Babylon — the enslaving nation. 51:13: 'O you that dwell upon many waters, abundant in treasures — your end is come.' 50:23: 'How is the hammer of the whole earth cut asunder.' 51:7: 'Babylon has been a golden cup in YHWH's hand that made all the earth drunk.' The covenant framework in Bereshit 15:14 states YHWH will judge the enslaving nation. Yirmeyahu provides the detailed description of that judgment. The pattern applies to every nation that holds the covenant people in bondage."
+    }
+  ]
+}

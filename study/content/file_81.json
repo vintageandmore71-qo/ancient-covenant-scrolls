@@ -1,0 +1,38 @@
+{
+  "id": "file_81",
+  "label": "Ruth — Complete",
+  "volume": 25,
+  "content_version": 1,
+  "summary_plain": "Ruth is a Mo'avite woman who clings to her mother-in-law Na'omi after the death of their husbands. She says: Where you go I will go. Where you lodge I will lodge. Your people shall be my people, and your Creator my Creator. Ruth gleans in the fields of Bo'az, a relative of Na'omi's husband. Bo'az acts as the kinsman redeemer. Ruth and Bo'az marry. Their son Oved is the father of Yishai, the father of Dawid. Ruth the Mo'avite is in the direct lineage of King Dawid.",
+  "summary_scholarly": "Ruth is preserved in DSS fragments (4QRuth-a, 4QRuth-b) and in the Orit Ge'ez. The text establishes that the Davidic royal lineage includes a non-Israelite woman — a Mo'avite. The kinsman-redeemer (go'el) framework is central to covenant law: the obligation to redeem family property and preserve a deceased relative's name through levirate marriage. Bo'az fulfills this obligation publicly at the gate.",
+  "key_terms": [
+    { "term": "Ruth", "phonetic": "Root", "definition": "A Mo'avite woman who joins the covenant people through her declaration to Na'omi. She becomes the great-grandmother of King Dawid." },
+    { "term": "Go'el (Kinsman Redeemer)", "phonetic": "Go-EL", "definition": "The relative with the right and obligation to redeem family property and preserve a deceased kinsman's name. Bo'az acts as go'el for Ruth and Na'omi." },
+    { "term": "Levirate Marriage", "phonetic": "", "definition": "The obligation to marry a deceased brother's or kinsman's widow to preserve his lineage (Devarim 25:5-10). Bo'az fulfills this for Ruth. The practice is documented independently in Igbo and Zulu customary tradition." },
+    { "term": "Gleaning", "phonetic": "", "definition": "The right of the poor, the sojourner, the widow, and the orphan to gather grain left at the edges and corners of the field (Vayikra 19:9, 23:22). Ruth gleans in Bo'az's field under this covenant provision." }
+  ],
+  "fill_blank": [
+    { "ref": "1:16", "prompt": "Where you go I will go, and where you lodge I will lodge. Your people shall be my ______, and your Creator my Creator.", "answer": "people", "source_quote": "Where you go I will go, and where you lodge I will lodge. Your people shall be my people, and your Creator my Creator." },
+    { "ref": "4:17", "prompt": "They named him Oved. He was the father of Yishai, the father of ______.", "answer": "Dawid", "source_quote": "And they named him Oved. He was the father of Yishai, the father of Dawid." },
+    { "ref": "2:12", "prompt": "YHWH repay you for what you have done, and a full reward be given you by YHWH, The Creator of Yisra'EL, under whose ______ you have come to take refuge.", "answer": "wings", "source_quote": "YHWH repay you for what you have done, and a full reward be given you by YHWH, The Creator of Yisra'EL, under whose wings you have come to take refuge." }
+  ],
+  "multiple_choice": [
+    { "ref": "1:16", "question": "What did Ruth declare to Na'omi?", "options": ["I will return to Mo'av", "Your people shall be my people, and your Creator my Creator", "I will find another husband in Mo'av", "I will stay only for the harvest"], "correct": 1, "source_quote": "Where you go I will go. Your people shall be my people, and your Creator my Creator." },
+    { "ref": "4:17", "question": "Who is Ruth's great-grandson?", "options": ["Shelomoh", "Dawid", "Sha'ul", "Yosef"], "correct": 1, "source_quote": "He was the father of Yishai, the father of Dawid." },
+    { "ref": "3:9", "question": "What does Bo'az act as for Ruth?", "options": ["A prophet", "A priest", "A kinsman redeemer (go'el)", "A judge"], "correct": 2, "source_quote": "I am Ruth, your servant. Spread your wings over your servant, for you are a redeemer." }
+  ],
+  "faq": [
+    {
+      "question": "What does levirate marriage in Ruth connect to in West African tradition?",
+      "answer": "Levirate marriage — the obligation to marry a deceased kinsman's widow to preserve his lineage (Devarim 25:5-10) — is documented independently in Igbo tradition (in ethnographic scholarship and in Chinua Achebe's works) and in Zulu customary law. Its presence in West and Southern African populations alongside other documented covenant parallels — eighth-day circumcision, dietary restrictions, purification rituals — is part of the cultural fingerprint record connecting the African diaspora to the ancient covenant tradition. These practices were documented by European observers who had no theological motivation to find the parallel."
+    },
+    {
+      "question": "Why does the Davidic lineage include a Mo'avite woman?",
+      "answer": "Ruth the Mo'avite is in the direct lineage of King Dawid — Oved, Yishai, Dawid. The covenant framework includes people who were not born Israelite but who joined through genuine covenant commitment: 'your people shall be my people, your Creator my Creator.' This is not conversion through institutional process — there is no Rabbinical court, no conversion ceremony. Ruth declares her commitment and acts on it. The go'el framework at the gate is a public community witness, not an institutional religious process. The Rabbinical geirut (conversion) requirement imposed on the Beta Israel — the people who preserved 1 Chanokh and Yovelim for over a thousand years — has no basis in this text."
+    },
+    {
+      "question": "What does gleaning reveal about the covenant economic system?",
+      "answer": "The gleaning right in Ruth comes directly from Vayikra 19:9 and 23:22 — YHWH's command to leave the corners and edges of the field for the poor, the sojourner, the widow, and the orphan. This is not charity — it is a covenant economic obligation. The landowner does not give from surplus. The poor have a right to what grows at the margins. Combined with the Shemitah (seventh-year land rest) and the Jubilee (fiftieth-year land return), the covenant economic system prevents permanent accumulation and permanent dispossession. The Federal Reserve's 2022 data documents a 6.3:1 white-to-Black wealth ratio in the United States — the compound result of 400 years of the covenant economic system being denied to the covenant people."
+    }
+  ]
+}
