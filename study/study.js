@@ -194,6 +194,21 @@ function toggleLineFocus() {
   try { localStorage.setItem('acr_study_linefocus', lineFocusOn ? '1' : '0'); } catch (e) {}
 }
 
+var childMode = localStorage.getItem('acr_study_child') === '1';
+
+function toggleChildMode() {
+  childMode = !childMode;
+  document.body.classList.toggle('child-mode', childMode);
+  if (childMode) {
+    document.body.classList.add('font-dyslexic');
+  }
+  try { localStorage.setItem('acr_study_child', childMode ? '1' : '0'); } catch (e) {}
+}
+
+if (childMode) {
+  document.body.classList.add('child-mode');
+  document.body.classList.add('font-dyslexic');
+}
 if (beelineOn) document.body.classList.add('beeline-on');
 if (lineFocusOn) document.body.classList.add('linefocus-on');
 
@@ -817,10 +832,20 @@ function showMC(fid) {
       h += '<div class="mc-question">' + q.question + '</div>';
       h += '<button class="cloze-audio" id="b-mc-hear">\u{1F50A} Listen</button>';
       h += '<div class="mc-opts">';
-      for (var o = 0; o < q.options.length; o++) {
+      // Child mode: show only 3 options (correct + 2 distractors)
+      var mcOpts = q.options.slice();
+      if (childMode && mcOpts.length > 3) {
+        var correctOpt = mcOpts[q.correct];
+        var others = mcOpts.filter(function (_, i) { return i !== q.correct; });
+        others = shuffle(others).slice(0, 2);
+        mcOpts = shuffle([correctOpt].concat(others));
+        // remap correct index
+        q._childCorrect = mcOpts.indexOf(correctOpt);
+      }
+      for (var o = 0; o < mcOpts.length; o++) {
         h += '<button class="mc-opt" data-idx="' + o +
           '" style="background:' + mcColors[o % 4] + '">' +
-          q.options[o] + '</button>';
+          mcOpts[o] + '</button>';
       }
       h += '</div>';
       h += '<div class="mc-feedback" id="mc-fb"></div>';
@@ -835,9 +860,10 @@ function showMC(fid) {
         btns[b].addEventListener('click', function () {
           var idx = parseInt(this.getAttribute('data-idx'));
           var fb = document.getElementById('mc-fb');
-          if (idx === q.correct) {
+          var correctIdx = (q._childCorrect !== undefined) ? q._childCorrect : q.correct;
+          if (idx === correctIdx) {
             this.classList.add('mc-correct');
-            fb.innerHTML = '<span class="fb-correct">\u2714 Correct!</span>' +
+            fb.innerHTML = '<span class="fb-correct">' + (childMode ? '\u{1F31F} Great job!' : '\u2714 Correct!') + '</span>' +
               '<div class="cloze-source">' + (q.source_quote || '') + '</div>';
             score++;
             var all = document.querySelectorAll('.mc-opt');
@@ -1722,6 +1748,13 @@ function bindUI() {
     this.classList.toggle('on', curTheme !== '');
   });
   if (curTheme) document.getElementById('b-theme').classList.add('on');
+
+  // Child mode
+  document.getElementById('b-child').addEventListener('click', function () {
+    toggleChildMode();
+    this.classList.toggle('on', childMode);
+  });
+  if (childMode) document.getElementById('b-child').classList.add('on');
 
   // Reading aids
   document.getElementById('b-beeline').addEventListener('click', function () {
