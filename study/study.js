@@ -770,7 +770,9 @@ function showFillBlank(fid) {
 
       var h = '<div class="cloze-view">';
       h += '<div class="cloze-progress">' + (qi + 1) + ' of ' + questions.length + '</div>';
-      h += '<div class="cloze-ref">Bereshit ' + q.ref + '</div>';
+      var clozeIdx = IDS.indexOf(fid);
+      var clozeLabel = clozeIdx >= 0 ? LBL[clozeIdx].split(' \u2014 ')[0] : '';
+      h += '<div class="cloze-ref">' + clozeLabel + ' ' + q.ref + '</div>';
       h += '<div class="cloze-prompt">' +
         q.prompt.replace('______', '<span class="cloze-blank">______</span>') + '</div>';
       h += '<button class="cloze-audio" id="b-cloze-hear">\u{1F50A} Listen</button>';
@@ -853,7 +855,9 @@ function showMC(fid) {
 
       var h = '<div class="mc-view">';
       h += '<div class="mc-progress">' + (qi + 1) + ' of ' + questions.length + '</div>';
-      h += '<div class="mc-ref">Bereshit ' + q.ref + '</div>';
+      var mcIdx = IDS.indexOf(fid);
+      var mcLabel = mcIdx >= 0 ? LBL[mcIdx].split(' \u2014 ')[0] : '';
+      h += '<div class="mc-ref">' + mcLabel + ' ' + q.ref + '</div>';
       h += '<div class="mc-question">' + q.question + '</div>';
       h += '<button class="cloze-audio" id="b-mc-hear">\u{1F50A} Listen</button>';
       h += '<div class="mc-opts">';
