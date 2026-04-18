@@ -1,0 +1,31 @@
+{
+  "id": "file_19",
+  "label": "Visions of Amram (4QAmram) — Complete",
+  "volume": 9,
+  "content_version": 1,
+  "summary_plain": "The Visions of Amram record the deathbed vision of Amram — father of Moshe, Aharon, and Miryam. Amram sees two beings contending over him — one of light and one of darkness. The being of light is Malki-Tzedek (King of Righteousness). The being of darkness is Malki-Resha (King of Wickedness). Amram must choose between them. The vision establishes the cosmic dualism that runs through the entire Qumran literature — Sons of Light versus Sons of Darkness.",
+  "summary_scholarly": "4QAmram (4Q543-548) is preserved in Aramaic fragments from Qumran Cave 4. The text is a testament — Amram's words to his sons before death. The cosmic dualism between Malki-Tzedek and Malki-Resha parallels the War Scroll's Sons of Light versus Sons of Darkness framework. The text establishes that the covenant struggle between light and darkness precedes the Mosaic covenant — it is already operative in the generation before Sinai.",
+  "key_terms": [
+    { "term": "Amram", "phonetic": "Am-RAHM", "definition": "Father of Moshe, Aharon, and Miryam. A Levite. His testament records a vision of two cosmic beings — one of light, one of darkness — contending over his destiny." },
+    { "term": "Malki-Tzedek", "phonetic": "Mal-kee-TZEH-dek", "definition": "King of Righteousness — the being of light in Amram's vision. The same figure appears in Bereshit 14 (the priest-king of Shalem who blesses Avram) and in 11QMelchizedek at Qumran." },
+    { "term": "Malki-Resha", "phonetic": "Mal-kee-REH-shah", "definition": "King of Wickedness — the being of darkness. The adversarial counterpart to Malki-Tzedek. This dualism structures the War Scroll framework." }
+  ],
+  "fill_blank": [
+    { "ref": "4Q544", "prompt": "Amram saw two beings contending over him — one of ______ and one of darkness.", "answer": "light", "source_quote": "Amram saw two beings — one of light and one of darkness — contending over his destiny." },
+    { "ref": "4Q544", "prompt": "The being of light was called Malki-Tzedek, which means King of ______.", "answer": "Righteousness", "source_quote": "The being of light is Malki-Tzedek — King of Righteousness." }
+  ],
+  "multiple_choice": [
+    { "ref": "4Q544", "question": "Who is Amram in the covenant lineage?", "options": ["Father of Avraham", "Father of Moshe, Aharon, and Miryam", "Father of Dawid", "Father of Shelomoh"], "correct": 1, "source_quote": "Amram — father of Moshe, Aharon, and Miryam." },
+    { "ref": "4Q544", "question": "What does Malki-Resha mean?", "options": ["King of Peace", "King of Wickedness", "King of Salem", "King of the East"], "correct": 1, "source_quote": "Malki-Resha — King of Wickedness — the being of darkness." }
+  ],
+  "faq": [
+    {
+      "question": "How does the Amram vision connect to the War Scroll?",
+      "answer": "The cosmic dualism in Amram's vision — Malki-Tzedek (light) versus Malki-Resha (darkness) — is the same framework that structures the entire War Scroll (1QM): Sons of Light versus Sons of Darkness. The Amram text establishes that this cosmic struggle precedes the Mosaic covenant — it is already operative in the generation before Sinai. The covenant people's struggle against domination is not a historical accident. It is part of a cosmic contest between righteousness and wickedness that the ancient texts describe as bounded and destined for resolution."
+    },
+    {
+      "question": "What does 11QMelchizedek add to the Amram vision?",
+      "answer": "11QMelchizedek — a Qumran Cave 11 text — expands the Malki-Tzedek figure into a cosmic agent of YHWH's final judgment. Malki-Tzedek proclaims liberty (the Jubilee) and executes judgment against Belial (the adversary). The Amram vision shows Malki-Tzedek contending over an individual. 11QMelchizedek shows him executing judgment at the cosmic level. The Jubilee framework from Vayikra 25 — 'proclaim liberty throughout the land' — is applied by Malki-Tzedek at the end of the age. This is not Christian christology — Malki-Tzedek in the DSS is an angelic figure executing YHWH's justice, not a divine incarnation."
+    }
+  ]
+}

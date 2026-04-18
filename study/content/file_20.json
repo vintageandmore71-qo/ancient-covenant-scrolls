@@ -1,0 +1,37 @@
+{
+  "id": "file_20",
+  "label": "Yehoshua (Joshua) — Part 1 — Chapters 1–8",
+  "volume": 10,
+  "content_version": 1,
+  "summary_plain": "After Moshe's death, YHWH speaks to Yehoshua: Be strong and courageous. Do not be frightened. YHWH your Creator is with you wherever you go. Yehoshua sends spies to Yericho. Rachav the innkeeper hides them and declares: YHWH your Creator — he is Creator in the heavens above and on the earth beneath. Yisra'EL crosses the Yarden on dry ground. They take twelve stones from the river. They circumcise the new generation at Gilgal. The commander of YHWH's army appears to Yehoshua. Yericho falls when the people shout. Ai is taken after Akhan's sin is purged.",
+  "summary_scholarly": "The ACR reads from DSS Joshua fragments (4QJosh-a, 4QJosh-b) and the Orit Ge'ez. The Yehoshua narrative is the fulfillment of the land promise in Bereshit 15. The crossing of the Yarden parallels the crossing of the sea in Shemot 14. The twelve stones mark the covenant community's entry into the promised territory — physically African soil on the Nubian tectonic plate west of the Jordan Rift Valley.",
+  "key_terms": [
+    { "term": "Yehoshua", "phonetic": "Yeh-ho-SHOO-ah", "definition": "Son of Nun, from the tribe of Efrayim. Moshe's successor. His name means 'YHWH saves.' Originally named Hoshea — Moshe renamed him (Bamidbar 13:16). Anglicized as Joshua." },
+    { "term": "Rachav", "phonetic": "Rah-KHAV", "definition": "A woman of Yericho who hides the Israelite spies and declares faith in YHWH. Her household is spared when Yericho falls. She joins the covenant community. Anglicized as Rahab." },
+    { "term": "Gilgal", "phonetic": "Gil-GAHL", "definition": "The place where Yisra'EL first camps after crossing the Yarden. The new generation is circumcised here. YHWH says: Today I have rolled away the reproach of Egypt from you (5:9)." }
+  ],
+  "fill_blank": [
+    { "ref": "1:9", "prompt": "Be strong and courageous. Do not be frightened and do not be dismayed, for YHWH your Creator is with you wherever you ______.", "answer": "go", "source_quote": "Be strong and courageous. Do not be frightened and do not be dismayed, for YHWH your Creator is with you wherever you go." },
+    { "ref": "2:11", "prompt": "YHWH your Creator — he is Creator in the ______ above and on the earth beneath.", "answer": "heavens", "source_quote": "For YHWH your Creator — he is Creator in the heavens above and on the earth beneath." },
+    { "ref": "6:20", "prompt": "So the people shouted, and the trumpets were blown. The wall fell down ______.", "answer": "flat", "source_quote": "So the people shouted, and the trumpets were blown. As soon as the people heard the sound of the trumpet, the people shouted a great shout, and the wall fell down flat." }
+  ],
+  "multiple_choice": [
+    { "ref": "1:1-2", "question": "Who does YHWH speak to after Moshe's death?", "options": ["Aharon", "Kalev", "Yehoshua son of Nun", "El'azar"], "correct": 2, "source_quote": "After the death of Moshe the servant of YHWH, YHWH said to Yehoshua the son of Nun, Moshe's assistant." },
+    { "ref": "2:1-11", "question": "Who hid the Israelite spies in Yericho?", "options": ["The king of Yericho", "Rachav", "A priest", "An elder"], "correct": 1, "source_quote": "Rachav took the two men and hid them." },
+    { "ref": "5:9", "question": "What did YHWH say he rolled away at Gilgal?", "options": ["The curse of Bavel", "The reproach of Egypt", "The sin of Adam", "The shame of the wilderness"], "correct": 1, "source_quote": "YHWH said to Yehoshua: Today I have rolled away the reproach of Egypt from you." }
+  ],
+  "faq": [
+    {
+      "question": "What land did Yisra'EL cross into?",
+      "answer": "The land west of the Yarden (Jordan River). This territory sits on the African tectonic plate — the Nubian Plate. The Jordan Rift Valley is the geological boundary between Africa and the Arabian Plate. Land west of the Jordan is physically African soil. Before the Suez Canal was dug in 1869, there was no water barrier separating this territory from the rest of Africa. The covenant people entered African land and received the promise made to Avraham on African soil."
+    },
+    {
+      "question": "Why does YHWH say 'I have rolled away the reproach of Egypt'?",
+      "answer": "At Gilgal, YHWH declares: 'Today I have rolled away the reproach of Egypt from you' (5:9). The Hebrew galal (to roll) gives Gilgal its name. The reproach of Egypt is the identity of slavery — being known as enslaved people rather than as YHWH's covenant nation. The circumcision at Gilgal marks the transition: the wilderness generation (who were not circumcised) is renewed, and the covenant mark is restored. The pattern applies to every restoration: the reproach of bondage is rolled away when the covenant people reclaim their identity through the covenant itself."
+    },
+    {
+      "question": "What does the commander of YHWH's army reveal?",
+      "answer": "Before Yericho, Yehoshua encounters a man with a drawn sword (5:13-15). Yehoshua asks: are you for us or for our adversaries? The answer: 'Neither — I have come as commander of YHWH's army.' The commander is not on Yisra'EL's side or the enemy's side. He is on YHWH's side. The War Scroll (1QM) at Qumran describes this same framework: the final battle is YHWH's war, not a human political project. The angels fight alongside the Sons of Light because the cause is YHWH's, not because the Sons of Light have earned it."
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "id": "file_83",
+  "label": "Kohelet (Ecclesiastes) — Complete",
+  "volume": 28,
+  "content_version": 1,
+  "summary_plain": "Kohelet — the Assembler — speaks: Vanity of vanities, all is vanity. What does man gain by all the toil at which he toils under the sun? A generation goes and a generation comes, but the earth remains forever. Kohelet tested wisdom, pleasure, wealth, and labor — all is vanity and a striving after wind. For everything there is a season — a time to be born and a time to die, a time to weep and a time to laugh. The end of the matter: Fear The Creator and keep his commandments, for this is the whole duty of man.",
+  "summary_scholarly": "The ACR reads from DSS fragments (4QQoh-a, 4QQoh-b) and the Orit Ge'ez. Kohelet is attributed to Shelomoh but composed later. The text is the most philosophically skeptical in the Hebrew canon — questioning the value of wisdom, wealth, and human effort. Yet it concludes with covenant affirmation: fear The Creator and keep his commandments (12:13). The DSS fragments confirm readings that differ from the Masoretic in places.",
+  "key_terms": [
+    { "term": "Kohelet", "phonetic": "Ko-HEH-let", "definition": "Hebrew for 'the Assembler' or 'the Preacher' — one who gathers people to hear wisdom. Anglicized as Ecclesiastes (from the Greek)." },
+    { "term": "Hevel", "phonetic": "HEH-vel", "definition": "Breath, vapor, vanity — the key word of the book. Everything is hevel — fleeting, insubstantial, like breath that appears and disappears. The same word as Hevel (Abel), Adam's son." },
+    { "term": "Under the Sun", "phonetic": "", "definition": "Kohelet's repeated phrase: 'under the sun' — meaning in this present world, in human experience. Everything done 'under the sun' is hevel. The perspective is limited to the earthly realm." }
+  ],
+  "fill_blank": [
+    { "ref": "1:2", "prompt": "Vanity of vanities, says Kohelet. Vanity of vanities — all is ______.", "answer": "vanity", "source_quote": "Vanity of vanities, says Kohelet. Vanity of vanities — all is vanity." },
+    { "ref": "3:1", "prompt": "For everything there is a ______, and a time for every matter under heaven.", "answer": "season", "source_quote": "For everything there is a season, and a time for every matter under heaven." },
+    { "ref": "12:13", "prompt": "The end of the matter — all has been heard. Fear The Creator and keep his ______.", "answer": "commandments", "source_quote": "The end of the matter — all has been heard. Fear The Creator and keep his commandments, for this is the whole duty of man." }
+  ],
+  "multiple_choice": [
+    { "ref": "1:2", "question": "What does Kohelet declare about all things under the sun?", "options": ["All is permanent", "All is vanity — hevel", "All is good", "All is wisdom"], "correct": 1, "source_quote": "Vanity of vanities — all is vanity." },
+    { "ref": "3:1", "question": "What does Kohelet say about time?", "options": ["Time is eternal", "For everything there is a season and a time for every matter", "Time does not exist", "Only the present matters"], "correct": 1, "source_quote": "For everything there is a season, and a time for every matter under heaven." },
+    { "ref": "12:13", "question": "What is the conclusion of Kohelet?", "options": ["Eat, drink, and be merry", "Fear The Creator and keep his commandments", "Seek wisdom above all", "Reject all traditions"], "correct": 1, "source_quote": "Fear The Creator and keep his commandments, for this is the whole duty of man." }
+  ],
+  "faq": [
+    {
+      "question": "Why does Kohelet question everything but conclude with Torah obedience?",
+      "answer": "Kohelet tests every human system — wisdom, wealth, pleasure, labor — and finds them all hevel (vapor). But the conclusion (12:13) does not say 'therefore nothing matters.' It says: 'Fear The Creator and keep his commandments.' The covenant framework survives the deconstruction of everything else. Every human institution is vapor. The commandments of YHWH are not. The Qumran community reached the same conclusion: they withdrew from every corrupt human institution — the Jerusalem Temple, the Rabbinical system, the Roman order — and returned to the covenant texts directly. Kohelet's skepticism is not nihilism. It is the demolition of everything that is not YHWH's direct instruction."
+    },
+    {
+      "question": "How does Kohelet connect to the Great Eraser framework?",
+      "answer": "Kohelet 1:9: 'There is nothing new under the sun.' The mechanisms of identity erasure documented across the Great Eraser research — geographic renaming, calendar substitution, name suppression, canon exclusion, forced conversion, institutional gatekeeping — are not new. They are the same patterns operating across 2,000 years. Kohelet's insight applies: the system that erased the covenant people's identity is not novel. It is the same hevel — the same vapor of human institutional power — that every previous empire produced and that every previous empire's collapse exposed. The commandments of YHWH endure. The empires that suppressed them do not."
+    },
+    {
+      "question": "What does 'for everything there is a season' mean in covenant terms?",
+      "answer": "Kohelet 3:1-8 lists the seasons: a time to be born and a time to die, a time to weep and a time to laugh, a time to keep silence and a time to speak. The Damascus Document at Qumran uses similar language: the Period of Wrath has its season, and the Period of Visitation has its season. The covenant people's current experience — the season of weeping, the season of silence, the season of scattering — is bounded. It has its time. The season that follows — laughing, speaking, gathering — also has its time. Kohelet does not say which season is permanent. Kohelet says every season has its time."
+    }
+  ]
+}

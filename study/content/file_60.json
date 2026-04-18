@@ -1,0 +1,37 @@
+{
+  "id": "file_60",
+  "label": "The Twelve — Part 1 — Hoshea",
+  "volume": 19,
+  "content_version": 1,
+  "summary_plain": "Hoshea is commanded by YHWH to marry a woman of harlotry — Gomer — as a sign of Yisra'EL's unfaithfulness to YHWH. Their children are given names that are judgments: Yizre'el, Lo-Ruchamah (Not Pitied), Lo-Ammi (Not My People). But YHWH also promises restoration: 'I will say to Lo-Ammi — You are my people, and he shall say — You are my Creator.' YHWH declares: I will betroth you to me forever.",
+  "summary_scholarly": "The ACR reads from the Minor Prophets Scroll (4QXII) at Qumran and the Orit Ge'ez. Hoshea is the first of the Twelve (Trei Asar). The marriage metaphor structures the entire book: YHWH as husband, Yisra'EL as unfaithful wife, the children's names as prophetic signs, and the ultimate restoration as remarriage. The judgment-restoration pattern in Hoshea parallels the Damascus Document's Period of Wrath followed by Period of Visitation.",
+  "key_terms": [
+    { "term": "Hoshea", "phonetic": "Ho-SHAY-ah", "definition": "Prophet to the Northern Kingdom before the Assyrian deportation (722 BCE). His name means 'salvation.' Anglicized as Hosea." },
+    { "term": "Lo-Ammi", "phonetic": "Lo-Ah-MEE", "definition": "'Not My People' — the name YHWH gives to Hoshea's third child (1:9). YHWH declares: you are not my people and I am not your Creator. But the reversal follows: 'I will say to Lo-Ammi — You are my people' (2:23)." },
+    { "term": "Lo-Ruchamah", "phonetic": "Lo-Roo-KHAH-mah", "definition": "'Not Pitied' — the name of Hoshea's daughter (1:6). YHWH withdraws his rachamim (womb-love) from the Northern Kingdom. Rachamim — from rechem (womb) — is the most intimate mercy in Hebrew." }
+  ],
+  "fill_blank": [
+    { "ref": "2:23", "prompt": "I will say to Lo-Ammi — You are my ______, and he shall say — You are my Creator.", "answer": "people", "source_quote": "And I will say to Lo-Ammi — You are my people, and he shall say — You are my Creator." },
+    { "ref": "6:6", "prompt": "For I desire steadfast love and not ______, the knowledge of The Creator rather than burnt offerings.", "answer": "sacrifice", "source_quote": "For I desire steadfast love and not sacrifice, the knowledge of The Creator rather than burnt offerings." },
+    { "ref": "2:19", "prompt": "I will betroth you to me ______. I will betroth you to me in righteousness and in justice.", "answer": "forever", "source_quote": "And I will betroth you to me forever. I will betroth you to me in righteousness and in justice, in steadfast love and in mercy." }
+  ],
+  "multiple_choice": [
+    { "ref": "1:9", "question": "What does the name Lo-Ammi mean?", "options": ["My people", "Not my people", "Beloved", "Faithful"], "correct": 1, "source_quote": "Call his name Lo-Ammi, for you are not my people, and I am not your Creator." },
+    { "ref": "6:6", "question": "What does YHWH desire more than sacrifice?", "options": ["Temple worship", "Steadfast love and the knowledge of The Creator", "Burnt offerings and incense", "Fasting and prayer"], "correct": 1, "source_quote": "For I desire steadfast love and not sacrifice, the knowledge of The Creator rather than burnt offerings." },
+    { "ref": "2:23", "question": "What does YHWH promise about Lo-Ammi?", "options": ["He will be punished forever", "He will become Not My People permanently", "YHWH will say to him — You are my people", "He will be forgotten"], "correct": 2, "source_quote": "I will say to Lo-Ammi — You are my people." }
+  ],
+  "faq": [
+    {
+      "question": "What does Lo-Ammi ('Not My People') mean for the scattered covenant people?",
+      "answer": "YHWH declares to the Northern Kingdom through Hoshea: 'You are not my people and I am not your Creator' (1:9). This is the most devastating covenant statement possible. But the reversal immediately follows: 'In the place where it was said to them — You are not my people — it shall be said to them — Children of the living Creator' (1:10). The covenant people's current condition — scattered, identity denied, called 'not my people' by every institution — is the Lo-Ammi state. The restoration is YHWH reversing that declaration. The Damascus Document at Qumran describes this as the transition from the Period of Wrath to the Period of Visitation."
+    },
+    {
+      "question": "What does rachamim (mercy) mean at its root?",
+      "answer": "Lo-Ruchamah means 'Not Pitied' — YHWH withdraws his rachamim. The Hebrew word rachamim (mercy/compassion) comes from rechem — womb. The divine mercy in the ancient Afro-Asiatic covenant framework is described through the image of the mother's womb — involuntary, instinctive, pre-rational protective love. Not the Latin Misericordia (pity for the miserable) but womb-love. When YHWH withdraws rachamim, he withdraws the most intimate biological protective instinct. When he restores it — 'I will have rachamim on Lo-Ruchamah' (2:23) — the womb-love returns."
+    },
+    {
+      "question": "How does Hoshea connect to the Assyrian deportation?",
+      "answer": "Hoshea prophesied to the Northern Kingdom before the Assyrian deportation of 722 BCE. Sargon II's own inscriptions document the deportation of approximately 27,290 inhabitants. The deported populations were settled in Halah, Habor, and the river of Gozan in Mesopotamia. Josephus documents the ten tribes as beyond the Euphrates in 'countless myriads.' The migration paths documented in Arabic medieval sources, in the Beta Israel oral tradition, and in Josephus point southward and eastward from Mesopotamia — through the Afro-Asiatic corridor into East and West Africa. Hoshea's Lo-Ammi declaration describes a people who would lose their identity as YHWH's people — and the restoration promise applies to wherever they are scattered."
+    }
+  ]
+}
