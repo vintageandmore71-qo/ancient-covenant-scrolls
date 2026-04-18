@@ -1,0 +1,31 @@
+{
+  "id": "file_37",
+  "label": "Melakhim Aleph (1 Kings) — Part 4 — Chapters 19–22",
+  "volume": 14,
+  "content_version": 1,
+  "summary_plain": "Eliyahu flees from Izevel to the wilderness. He sits under a broom tree and asks YHWH to take his life. An angel feeds him. He travels forty days and forty nights to Horev — the mountain of The Creator. YHWH passes by: a great wind, an earthquake, fire — but YHWH is not in any of them. After the fire — a still small voice. YHWH tells Eliyahu: anoint Chaza'el king over Aram, Yehu king over Yisra'EL, and Elisha as prophet in your place. I have kept seven thousand in Yisra'EL who have not bowed to Ba'al. Elisha follows Eliyahu. Ach'av defeats Aram twice. Navot refuses to sell his vineyard — Izevel frames him and has him killed. Eliyahu pronounces judgment on Ach'av. Ach'av dies in battle at Ramot-Gil'ad — a random arrow strikes him between the joints of his armor.",
+  "summary_scholarly": "The ACR reads from DSS Kings fragments (4QKgs) and the Orit Ge'ez. The Horev theophany (ch 19) is one of the most significant divine self-revelations in the Hebrew canon. YHWH bypasses the dramatic phenomena — wind, earthquake, fire — and speaks in the qol demamah daqqah (still small voice, or sound of thin silence). This is the opposite of Ba'alist religion, which associated deity with storms and thunderbolts. The seven thousand who have not bowed to Ba'al (19:18) establish the covenant remnant concept — a faithful minority preserved even when the majority falls into idolatry. The Qumran community understood themselves as this remnant. The Navot narrative (ch 21) demonstrates the Torah's land justice principle: the nahalah (inheritance) cannot be permanently alienated from the family.",
+  "key_terms": [
+    { "term": "Qol Demamah Daqqah", "phonetic": "Kol deh-mah-MAH dah-KAH", "definition": "Still small voice — literally 'sound of thin silence.' How YHWH reveals himself to Eliyahu at Horev (19:12). YHWH is not in the wind, not in the earthquake, not in the fire — but in the quiet voice that follows. The contrast with Ba'alist storm-deity theology is deliberate." },
+    { "term": "Navot", "phonetic": "Nah-VOHT", "definition": "Yizre'elite who owns a vineyard adjacent to Ach'av's palace. He refuses to sell his nahalah (inheritance): 'YHWH forbid that I should give you the inheritance of my fathers' (21:3). Izevel frames him for blasphemy and has him stoned. Eliyahu pronounces YHWH's judgment on Ach'av at Navot's vineyard. Anglicized as Naboth." },
+    { "term": "Horev", "phonetic": "Kho-REV", "definition": "The mountain of The Creator — the same mountain where Moshe received the Torah. Eliyahu travels forty days and forty nights to reach it (19:8). Also called Sinai. The location connects Eliyahu's experience directly to the Mosaic revelation." }
+  ],
+  "fill_blank": [
+    { "ref": "19:12", "prompt": "And after the fire — a still ______ voice.", "answer": "small", "source_quote": "And after the earthquake a fire, but YHWH was not in the fire. And after the fire a still small voice." },
+    { "ref": "21:3", "prompt": "Navot said to Ach'av: YHWH forbid that I should give you the ______ of my fathers.", "answer": "inheritance", "source_quote": "YHWH forbid that I should give you the inheritance of my fathers." }
+  ],
+  "multiple_choice": [
+    { "ref": "19:11-12", "question": "How did YHWH reveal himself to Eliyahu at Horev?", "options": ["In a great wind", "In an earthquake", "In fire", "In a still small voice"], "correct": 3, "source_quote": "And after the fire a still small voice." },
+    { "ref": "19:18", "question": "How many in Yisra'EL had not bowed to Ba'al?", "options": ["Twelve", "One hundred", "Seven thousand", "Seventy thousand"], "correct": 2, "source_quote": "Yet I will leave seven thousand in Yisra'EL, all the knees that have not bowed to Ba'al." }
+  ],
+  "faq": [
+    {
+      "question": "What does the seven thousand remnant mean for the covenant community throughout history?",
+      "answer": "YHWH tells Eliyahu: 'I have kept seven thousand in Yisra'EL — all the knees that have not bowed to Ba'al' (19:18). Eliyahu believed he was alone — the only faithful one left. YHWH corrects him: there is always a remnant. The Qumran community understood themselves as this remnant — the yahad, the community of the covenant, preserved while the Jerusalem institution fell into corruption. The Damascus Document describes how YHWH 'remembered the covenant of the forefathers and raised from Aharon men of understanding and from Yisra'EL men of wisdom.' Throughout the Great Eraser period — the systematic destruction of African and Indigenous covenant knowledge — remnant communities preserved the texts and practices. The Beta Yisra'EL in Ethiopia maintained Torah observance for millennia. The Lemba of southern Africa preserved Semitic genetic markers and covenant practices. The seven thousand are never the institution. They are the ones the institution tried to erase."
+    },
+    {
+      "question": "How does the Navot narrative connect to African and Indigenous land dispossession?",
+      "answer": "Navot refuses to sell his ancestral inheritance: 'YHWH forbid that I should give you the inheritance of my fathers' (21:3). He appeals to Torah — the nahalah cannot be permanently alienated from the family (Vayikra 25:23-28). Ach'av and Izevel respond with state power: false accusation, a rigged trial, judicial murder, and confiscation of the land. This is the template for every colonial land dispossession. The Berlin Conference of 1884 divided African land among European powers. The Dawes Act of 1887 broke up Indigenous communal land holdings in North America. The Native Land Act of 1913 in South Africa dispossessed Black South Africans. In every case, the pattern matches Navot: the people refuse to surrender their ancestral inheritance, the state fabricates legal justification, and the land is taken. YHWH's response to Navot's murder is judgment on the king. The Torah's land justice framework stands against every system that uses state power to steal ancestral land."
+    }
+  ]
+}

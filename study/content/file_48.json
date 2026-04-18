@@ -1,0 +1,37 @@
+{
+  "id": "file_48",
+  "label": "Yirmeyahu (Jeremiah) — Part 2 — Chapters 8–15",
+  "volume": 17,
+  "content_version": 1,
+  "summary_plain": "The harvest is past, the summer is ended, and we are not saved. Is there no balm in Gil'ad? Is there no healer there? Yirmeyahu weeps for his people — O that my head were waters and my eyes a fountain of tears, that I might weep day and night for the slain of the daughter of my people. YHWH says: Let not the wise boast in wisdom, let not the mighty boast in might, let not the rich boast in riches — but let him who boasts boast in this: that he understands and knows me. The heart is deceitful above all things and desperately sick — who can understand it? I, YHWH, search the heart.",
+  "summary_scholarly": "The ACR reads from the DSS Jeremiah manuscripts (4QJer-a through 4QJer-e) and the Orit Ge'ez. The shorter Qumran Jeremiah (4QJer-b) is the primary authority — the Masoretic contains later additions. Yirmeyahu's weeping (8:18-9:1) earns him the designation 'weeping prophet' — but the tears are not sentimental. They are the response of a covenant prophet watching his people choose destruction. The 'balm in Gil'ad' passage (8:22) asks whether healing exists for the covenant community. The broken cisterns metaphor from Part 1 continues: the people have abandoned living water for dead storage, and the prophet mourns the consequence.",
+  "key_terms": [
+    { "term": "Balm in Gil'ad", "phonetic": "Gil-AHD", "definition": "Yirmeyahu asks: 'Is there no balm in Gil'ad? Is there no healer there? Why then has the health of the daughter of my people not been restored?' (8:22). Gil'ad was known for its medicinal resin. The question is rhetorical — healing exists, but the people refuse it." },
+    { "term": "Weeping Prophet", "phonetic": "", "definition": "Yirmeyahu cries: 'O that my head were waters and my eyes a fountain of tears, that I might weep day and night for the slain of the daughter of my people' (9:1). The prophet's grief is not weakness — it is covenant faithfulness in the face of national destruction." },
+    { "term": "Heart (Lev)", "phonetic": "LEV", "definition": "YHWH declares: 'The heart is deceitful above all things and desperately sick — who can understand it? I, YHWH, search the heart' (17:9-10). The diagnosis is internal. The corruption is not primarily in institutions but in the human heart itself." }
+  ],
+  "fill_blank": [
+    { "ref": "8:22", "prompt": "Is there no ______ in Gil'ad? Is there no healer there?", "answer": "balm", "source_quote": "Is there no balm in Gil'ad? Is there no healer there? Why then has the health of the daughter of my people not been restored?" },
+    { "ref": "9:23", "prompt": "Let him who boasts boast in this: that he understands and ______ me.", "answer": "knows", "source_quote": "Let him who boasts boast in this: that he understands and knows me, that I am YHWH who practices steadfast love, justice, and righteousness in the earth." },
+    { "ref": "9:1", "prompt": "O that my head were waters and my eyes a fountain of ______, that I might weep day and night.", "answer": "tears", "source_quote": "O that my head were waters and my eyes a fountain of tears, that I might weep day and night for the slain of the daughter of my people." }
+  ],
+  "multiple_choice": [
+    { "ref": "8:22", "question": "What does Yirmeyahu ask about Gil'ad?", "options": ["Is there no king in Gil'ad?", "Is there no balm in Gil'ad?", "Is there no prophet in Gil'ad?", "Is there no temple in Gil'ad?"], "correct": 1, "source_quote": "Is there no balm in Gil'ad? Is there no healer there?" },
+    { "ref": "9:23-24", "question": "In what should a person boast, according to YHWH?", "options": ["In wisdom, might, or riches", "In understanding and knowing YHWH", "In military victories", "In the number of sacrifices offered"], "correct": 1, "source_quote": "Let him who boasts boast in this: that he understands and knows me." },
+    { "ref": "17:9-10", "question": "What does YHWH say about the human heart?", "options": ["It is pure and righteous", "It is deceitful above all things and desperately sick", "It is strong and faithful", "It is like a rock"], "correct": 1, "source_quote": "The heart is deceitful above all things and desperately sick — who can understand it? I, YHWH, search the heart." }
+  ],
+  "faq": [
+    {
+      "question": "How does the shorter DSS Jeremiah affect these chapters?",
+      "answer": "The Qumran Jeremiah (4QJer-b) is substantially shorter than the Masoretic Jeremiah. Emanuel Tov's analysis documents that the Masoretic contains significant later additions — expanded prose sections, doubled oracles, and editorial frameworks not present in the older text. The Septuagint Jeremiah, translated before the Masoretic standardization, is also shorter and agrees with the DSS against the Masoretic in both length and chapter order. In chapters 8-15, the shorter text strips away later editorial additions and reveals the prophet's raw voice — the weeping, the diagnosis of the deceitful heart, the question about healing. The Masoretic additions soften and theologize what the older text presents as direct, unmediated prophetic speech. The DSS text is sharper, more direct, and more painful."
+    },
+    {
+      "question": "What does Yirmeyahu's weeping reveal about the covenant community's current condition?",
+      "answer": "Yirmeyahu does not weep abstractly. He weeps for 'the slain of the daughter of my people' (9:1). The prophet sees the destruction coming — the Babylonian siege, the burning of the Temple, the exile — and he weeps because the people will not turn. 'The harvest is past, the summer is ended, and we are not saved' (8:20). This is the language of a people who have missed their window. The Great Eraser pattern is embedded here: when the covenant people's identity is denied, their history erased, their language stripped — the harvest passes and they do not recognize the season. Yirmeyahu's tears are not for a past event only. They are for every generation of the covenant people that is scattered and does not know who they are."
+    },
+    {
+      "question": "Why does YHWH say boasting in wisdom, might, or riches is empty?",
+      "answer": "Yirmeyahu 9:23-24: 'Let not the wise boast in his wisdom, let not the mighty boast in his might, let not the rich boast in his riches — but let him who boasts boast in this: that he understands and knows me, that I am YHWH who practices steadfast love, justice, and righteousness in the earth.' The three categories — wisdom, military power, wealth — are the categories of empire. Every enslaving nation boasts in these three. The covenant alternative is direct knowledge of YHWH and the practice of justice. The Qumran community organized around exactly this principle: they rejected the wealth of the Temple establishment, the military power of the Hasmonean kings, and the wisdom of the Hellenistic philosophical tradition. They pursued direct knowledge of YHWH through the preserved texts. Afro-Asiatic covenant identity is not built on institutional power — it is built on knowing YHWH."
+    }
+  ]
+}

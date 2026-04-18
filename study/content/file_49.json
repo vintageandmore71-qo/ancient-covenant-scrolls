@@ -1,0 +1,38 @@
+{
+  "id": "file_49",
+  "label": "Yirmeyahu (Jeremiah) — Part 3 — Chapters 16–23",
+  "volume": 17,
+  "content_version": 1,
+  "summary_plain": "YHWH tells Yirmeyahu: Do not take a wife or have children in this place — for those born here will die of deadly diseases. YHWH will hurl the people from this land into a land they have not known. But the days are coming when they will no longer say 'as YHWH lives who brought up the people from Mitsrayim' but 'as YHWH lives who brought up the people from the land of the north and from all lands.' Woe to the shepherds who destroy and scatter the sheep of my pasture. I will raise up for Dawid a righteous Branch — he shall reign as king and deal wisely, and execute justice and righteousness in the land. His name: YHWH Tsidqenu — YHWH is our righteousness.",
+  "summary_scholarly": "The ACR reads from the DSS Jeremiah manuscripts (4QJer-a through 4QJer-e) and the Orit Ge'ez. The false shepherds oracle (chapter 23) is a direct indictment of covenant leadership that scatters rather than gathers the people. The righteous Branch (Tsemah Tsaddiq) of 23:5 is the Davidic messianic expectation — a mortal king who executes justice. The Qumran community's messianic expectation, documented in 4Q174 (Florilegium) and 4Q252, describes this Branch as a human descendant of Dawid — not a divine figure. The second exodus prophecy (16:14-15) declares that YHWH's future ingathering will surpass the Mitsrayim exodus as the defining redemptive act.",
+  "key_terms": [
+    { "term": "Tsemah Tsaddiq (Righteous Branch)", "phonetic": "TSEH-makh Tsah-DEEQ", "definition": "YHWH promises to raise up for Dawid a righteous Branch who will reign as king and execute justice (23:5). The Qumran texts (4Q174, 4Q252) read this as a mortal Davidic descendant. His name: YHWH Tsidqenu — YHWH is our righteousness." },
+    { "term": "False Shepherds", "phonetic": "", "definition": "YHWH condemns the shepherds (leaders) who destroy and scatter the sheep of his pasture (23:1-2). The indictment is against covenant leadership that fails its charge — prophets who prophesy lies, priests who lead astray, kings who exploit." },
+    { "term": "Second Exodus", "phonetic": "", "definition": "YHWH declares that the future ingathering will replace the Mitsrayim exodus as the primary redemptive reference: 'As YHWH lives who brought up the people from the land of the north and from all the lands where he had driven them' (16:15). The future ingathering surpasses the past." },
+    { "term": "YHWH Tsidqenu", "phonetic": "YHWH Tsid-KEH-noo", "definition": "The name of the righteous Branch: 'YHWH is our righteousness' (23:6). The king's name contains the Name of YHWH — the king carries the covenant identity in his very name." }
+  ],
+  "fill_blank": [
+    { "ref": "23:5", "prompt": "I will raise up for Dawid a righteous ______, and he shall reign as king and deal wisely.", "answer": "Branch", "source_quote": "Behold, the days are coming, declares YHWH, when I will raise up for Dawid a righteous Branch, and he shall reign as king and deal wisely, and shall execute justice and righteousness in the land." },
+    { "ref": "23:1", "prompt": "Woe to the ______ who destroy and scatter the sheep of my pasture, declares YHWH.", "answer": "shepherds", "source_quote": "Woe to the shepherds who destroy and scatter the sheep of my pasture, declares YHWH." },
+    { "ref": "16:15", "prompt": "As YHWH lives who brought up the people of Yisra'EL from the land of the ______ and from all the lands where he had driven them.", "answer": "north", "source_quote": "As YHWH lives who brought up the people of Yisra'EL out of the land of the north and out of all the lands where he had driven them." }
+  ],
+  "multiple_choice": [
+    { "ref": "23:5-6", "question": "What is the name of the righteous Branch?", "options": ["Immanuel", "YHWH Tsidqenu — YHWH is our righteousness", "Shelomoh", "Mashiah"], "correct": 1, "source_quote": "And this is the name by which he will be called: YHWH Tsidqenu — YHWH is our righteousness." },
+    { "ref": "23:1-2", "question": "Who does YHWH condemn for scattering the sheep?", "options": ["The foreign nations", "The false shepherds — the leaders of the covenant people", "The Babylonians", "The Philistines"], "correct": 1, "source_quote": "Woe to the shepherds who destroy and scatter the sheep of my pasture." },
+    { "ref": "16:14-15", "question": "What will the second exodus replace as the primary redemptive reference?", "options": ["The creation account", "The Mitsrayim exodus", "The covenant with Avraham", "The building of the Temple"], "correct": 1, "source_quote": "They shall no longer say: As YHWH lives who brought up the people from Mitsrayim — but: As YHWH lives who brought up the people from the land of the north." }
+  ],
+  "faq": [
+    {
+      "question": "How does the false shepherds oracle apply to institutional erasure?",
+      "answer": "Yirmeyahu 23:1-2: 'Woe to the shepherds who destroy and scatter the sheep of my pasture. You have scattered my flock and driven them away and you have not attended to them.' The false shepherds are not foreign enemies — they are the covenant community's own leaders. The indictment is against internal leadership that fails to protect, teach, and gather. The Great Eraser operates through false shepherds in every era: religious leaders who substitute institutional authority for the written Torah, scholars who control access to the primary texts, translators who replace YHWH with 'LORD' 7,000+ times. The scattering of the covenant people is not only geographic — it is epistemic. When the people's own leaders deny them access to their own texts, their own Name, their own identity, the shepherds are doing the scattering."
+    },
+    {
+      "question": "Is the righteous Branch a divine figure in the DSS?",
+      "answer": "No. The Qumran texts interpret the righteous Branch (Tsemah Tsaddiq) of Yirmeyahu 23:5 as a mortal Davidic descendant. 4Q174 (Florilegium) quotes 2 Shmu'el 7:11-14 — 'I will raise up your offspring after you' — and interprets this as 'the Branch of David who shall arise with the Interpreter of the Torah.' 4Q252 (Commentary on Genesis) identifies the Branch with the scepter of Bereshit 49:10 — a human ruler from the tribe of Yehudah. The Qumran community expected a mortal king who would execute justice and righteousness — not a divine incarnation. The title YHWH Tsidqenu means the king carries YHWH's name, not that the king is YHWH. Human kings in the ancient Near East regularly bore theophoric names — names containing the divine name — without being identified as divine."
+    },
+    {
+      "question": "What does the second exodus prophecy mean for scattered covenant people?",
+      "answer": "Yirmeyahu 16:14-15 declares that YHWH's future ingathering will be so significant that it will replace the Mitsrayim exodus as the defining act of redemption. 'They shall no longer say: As YHWH lives who brought up the people from Mitsrayim — but: As YHWH lives who brought up the people from the land of the north and from all the lands where he had driven them.' The phrase 'all the lands where he had driven them' encompasses every place the covenant people have been scattered — not just Babylon, not just the ancient Near East, but all the lands. The Afro-Asiatic diaspora, the transatlantic scattering, every place the covenant people were taken in ships and by force — all of it is within the scope of this prophecy. The future ingathering is not a metaphor. It is the covenant promise that exceeds even the exodus from Mitsrayim."
+    }
+  ]
+}
