@@ -359,6 +359,61 @@ function isVolumeMastered(volId) {
   return mastered.length >= volCards.length * 0.8; // 80% mastered
 }
 
+// ---- Question Mastery Tracking ----
+function getQuizMastery() {
+  try { return JSON.parse(localStorage.getItem('acr_study_qmastery') || '{}'); } catch (e) { return {}; }
+}
+function saveQuizMastery(m) {
+  try { localStorage.setItem('acr_study_qmastery', JSON.stringify(m)); } catch (e) {}
+}
+function recordQuestionResult(fid, mode, qIndex, correct) {
+  var m = getQuizMastery();
+  var key = fid + ':' + mode + ':' + qIndex;
+  if (!m[key]) m[key] = { correct: 0, attempts: 0, mastered: false };
+  m[key].attempts++;
+  if (correct) m[key].correct++;
+  if (m[key].correct >= 3) m[key].mastered = true;
+  saveQuizMastery(m);
+}
+function getSectionMastery(fid) {
+  var m = getQuizMastery();
+  var total = 0, mastered = 0;
+  for (var key in m) {
+    if (key.indexOf(fid + ':') === 0) {
+      total++;
+      if (m[key].mastered) mastered++;
+    }
+  }
+  if (total === 0) return { total: 0, mastered: 0, pct: 0, badge: '' };
+  var pct = Math.round(mastered / total * 100);
+  var badge = pct >= 100 ? '\u{1F947}' : pct >= 80 ? '\u{1F948}' : pct >= 50 ? '\u{1F949}' : '';
+  return { total: total, mastered: mastered, pct: pct, badge: badge };
+}
+function getUnmasteredQuestions(fid, mode, questions) {
+  var m = getQuizMastery();
+  var unmastered = [];
+  for (var i = 0; i < questions.length; i++) {
+    var key = fid + ':' + mode + ':' + i;
+    if (!m[key] || !m[key].mastered) unmastered.push({ q: questions[i], origIdx: i });
+  }
+  return unmastered;
+}
+function getNextSectionFid(fid) {
+  var idx = IDS.indexOf(fid);
+  if (idx < 0 || idx >= IDS.length - 1) return null;
+  return IDS[idx + 1];
+}
+function getAllDueCards() {
+  var cards = getCards();
+  var today = new Date().toISOString().slice(0, 10);
+  var due = [];
+  for (var id in cards) {
+    if (cards[id].nextReview <= today) due.push(cards[id]);
+  }
+  due.sort(function (a, b) { return a.ease - b.ease; });
+  return due;
+}
+
 // ---- XP, Streak & Level system ----
 var LEVELS = [
   { name: 'Seeker', icon: '\u{1F50D}', xp: 0 },
@@ -491,6 +546,13 @@ function go(fid) {
     if (dueCount > 0) h += '<span class="due-badge">\u{1F4DA} ' + dueCount + ' cards due for review in this section</span>';
     if (totalDue > dueCount) h += '<span class="due-total">' + totalDue + ' total due across all sections</span>';
     h += '</div>';
+  }
+  var secMastery = getSectionMastery(fid);
+  if (secMastery.total > 0) {
+    h += '<div class="mastery-bar"><div class="mastery-label">' +
+      (secMastery.badge || '\u{1F4CA}') + ' ' + secMastery.mastered + '/' + secMastery.total +
+      ' questions mastered (' + secMastery.pct + '%)</div>' +
+      '<div class="prog-bar-wrap"><div class="prog-bar" style="width:' + secMastery.pct + '%"></div></div></div>';
   }
   h += '<div class="activity-grid">';
   h += actCard('\u{1F4D6}', 'Chapter Summary', '#2563eb', 'summary', fid);
@@ -862,6 +924,7 @@ function showFillBlank(fid) {
             fb.innerHTML = '<span class="fb-correct">\u2714 Correct!</span>' +
               '<div class="cloze-source">' + (q.source_quote || '') + '</div>';
             if (firstAttempt) score++;
+            recordQuestionResult(fid, 'filblank', qi, firstAttempt);
             var all = document.querySelectorAll('.cloze-opt');
             for (var x = 0; x < all.length; x++) all[x].disabled = true;
             setTimeout(function () { qi++; renderQ(); }, 2200);
@@ -880,22 +943,31 @@ function showFillBlank(fid) {
       var xpEarned = recordSession(fid, 'filblank', score, questions.length);
       var stats = getStats();
       var lvl = getLevel(stats.xp || 0);
+      var mastery = getSectionMastery(fid);
       var emoji = pct >= 80 ? '\u{1F3C6}' : pct >= 60 ? '\u{1F31F}' : '\u{1F4AA}';
       var msg = pct >= 80 ? 'Outstanding!' : pct >= 60 ? 'Good work!' : 'Keep studying!';
       var h = '<div class="cloze-results">';
       h += '<div class="cr-emoji">' + emoji + '</div>';
       h += '<div class="cr-score">' + score + ' / ' + questions.length + '</div>';
       h += '<div class="cr-pct">' + pct + '%</div>';
+      if (mastery.badge) h += '<div class="cr-mastery">' + mastery.badge + ' ' + mastery.mastered + '/' + mastery.total + ' questions mastered</div>';
       h += '<div class="cr-xp">+' + xpEarned + ' XP earned</div>';
       h += '<div class="cr-level">' + lvl.current.icon + ' ' + lvl.current.name +
         ' \u2014 ' + (stats.xp || 0) + ' XP total</div>';
       h += '<div class="cr-msg">' + msg + '</div>';
       h += '<div class="cr-btns">';
       h += '<button class="study-btn sb-pri" id="b-cloze-retry">\u{1F504} Try Again</button>';
+      var nextFid = pct >= 80 ? getNextSectionFid(fid) : null;
+      if (nextFid) {
+        var nextIdx = IDS.indexOf(nextFid);
+        var nextLabel = nextIdx >= 0 ? LBL[nextIdx].split(' \u2014 ')[0] : '';
+        h += '<button class="study-btn sb-pri" id="b-cloze-next">\u25B6 Next: ' + nextLabel + '</button>';
+      }
       h += '<button class="study-btn" id="b-cloze-back">Back to activities</button>';
       h += '</div></div>';
       document.getElementById('content').innerHTML = h;
       document.getElementById('b-cloze-retry').addEventListener('click', function () { showFillBlank(fid); });
+      if (nextFid) document.getElementById('b-cloze-next').addEventListener('click', function () { go(nextFid); });
       document.getElementById('b-cloze-back').addEventListener('click', function () { go(fid); });
     }
 
@@ -984,6 +1056,7 @@ function showMC(fid) {
             fb.innerHTML = '<span class="fb-correct">' + (childMode ? '\u{1F31F} Great job!' : '\u2714 Correct!') + '</span>' +
               '<div class="cloze-source">' + (q.source_quote || '') + '</div>';
             if (mcFirstAttempt) score++;
+            recordQuestionResult(fid, 'mc', qi, mcFirstAttempt);
             var all = document.querySelectorAll('.mc-opt');
             for (var x = 0; x < all.length; x++) all[x].disabled = true;
             setTimeout(function () { qi++; renderQ(); }, 2200);
@@ -1002,22 +1075,31 @@ function showMC(fid) {
       var xpEarned = recordSession(fid, 'mc', score, questions.length);
       var stats = getStats();
       var lvl = getLevel(stats.xp || 0);
+      var mastery = getSectionMastery(fid);
       var emoji = pct >= 80 ? '\u{1F3C6}' : pct >= 60 ? '\u{1F31F}' : '\u{1F4AA}';
       var msg = pct >= 80 ? 'Outstanding!' : pct >= 60 ? 'Good work!' : 'Keep studying!';
       var h = '<div class="cloze-results">';
       h += '<div class="cr-emoji">' + emoji + '</div>';
       h += '<div class="cr-score">' + score + ' / ' + questions.length + '</div>';
       h += '<div class="cr-pct">' + pct + '%</div>';
+      if (mastery.badge) h += '<div class="cr-mastery">' + mastery.badge + ' ' + mastery.mastered + '/' + mastery.total + ' questions mastered</div>';
       h += '<div class="cr-xp">+' + xpEarned + ' XP earned</div>';
       h += '<div class="cr-level">' + lvl.current.icon + ' ' + lvl.current.name +
         ' \u2014 ' + (stats.xp || 0) + ' XP total</div>';
       h += '<div class="cr-msg">' + msg + '</div>';
       h += '<div class="cr-btns">';
       h += '<button class="study-btn sb-pri" id="b-mc-retry">\u{1F504} Try Again</button>';
+      var nextFid = pct >= 80 ? getNextSectionFid(fid) : null;
+      if (nextFid) {
+        var nextIdx = IDS.indexOf(nextFid);
+        var nextLabel = nextIdx >= 0 ? LBL[nextIdx].split(' \u2014 ')[0] : '';
+        h += '<button class="study-btn sb-pri" id="b-mc-next">\u25B6 Next: ' + nextLabel + '</button>';
+      }
       h += '<button class="study-btn" id="b-mc-back">Back to activities</button>';
       h += '</div></div>';
       document.getElementById('content').innerHTML = h;
       document.getElementById('b-mc-retry').addEventListener('click', function () { showMC(fid); });
+      if (nextFid) document.getElementById('b-mc-next').addEventListener('click', function () { go(nextFid); });
       document.getElementById('b-mc-back').addEventListener('click', function () { go(fid); });
     }
 
@@ -1956,6 +2038,105 @@ function showChallenge(fid) {
   setupScreen();
 }
 
+// ---- Cross-Volume Review — pull due cards from ALL sections ----
+function showCrossReview() {
+  var allDue = getAllDueCards();
+  if (!allDue.length) {
+    document.getElementById('content').innerHTML =
+      '<div class="cloze-results"><div class="cr-emoji">\u2705</div>' +
+      '<div class="cr-msg">No cards due for review!</div>' +
+      '<div class="cr-btns"><button class="study-btn sb-pri" id="b-rev-home">Home</button></div></div>';
+    document.getElementById('b-rev-home').addEventListener('click', function () { goHome(); });
+    return;
+  }
+  var cards = allDue.slice(0, 20);
+  var ci = 0, flipped = false;
+  var ratings = [];
+
+  function renderCard() {
+    if (ci >= cards.length) { showRevSummary(); return; }
+    var c = cards[ci];
+    flipped = false;
+    var secIdx = IDS.indexOf(c.fid);
+    var secName = secIdx >= 0 ? LBL[secIdx].split(' \u2014 ')[0] : c.fid;
+    var typeColor = c.type === 'term' ? 'var(--vol6)' : 'var(--vol1)';
+
+    var h = '<div class="fc-view">';
+    h += '<div class="fc-progress">' + (ci + 1) + ' of ' + cards.length + ' due</div>';
+    h += '<div class="fc-type" style="color:' + typeColor + '">' + secName + '</div>';
+    h += '<div class="fc-card" id="fc-card">';
+    h += '<div class="fc-front" id="fc-front">' + c.front + '</div>';
+    h += '<div class="fc-back" id="fc-back" style="display:none">' + c.back + '</div>';
+    h += '</div>';
+    h += '<button class="cloze-audio" id="b-fc-hear">\u{1F50A} Listen</button>';
+    h += '<div class="fc-action" id="fc-action">';
+    h += '<button class="study-btn sb-pri" id="b-fc-flip">\u{1F504} Flip to reveal</button>';
+    h += '</div>';
+    h += '<div class="fc-rate" id="fc-rate" style="display:none">';
+    h += '<div class="fc-rate-label">How well did you know this?</div>';
+    h += '<div class="fc-rate-btns">';
+    var rLabels = ['Blank', 'Hard', 'Okay', 'Good', 'Easy'];
+    var rColors = ['#dc2626', '#d97706', '#0891b2', '#059669', '#2563eb'];
+    for (var r = 1; r <= 5; r++) {
+      h += '<button class="fc-rate-btn" data-r="' + r +
+        '" style="background:' + rColors[r - 1] + '">' +
+        r + '<br><span class="fc-rate-sub">' + rLabels[r - 1] + '</span></button>';
+    }
+    h += '</div></div>';
+    h += '<button class="study-btn" id="b-rev-quit" style="margin-top:18px">Back to Home</button>';
+    h += '</div>';
+
+    document.getElementById('content').innerHTML = h;
+    document.getElementById('b-rev-quit').addEventListener('click', function () { goHome(); });
+    document.getElementById('b-fc-hear').addEventListener('click', function () {
+      speakText(flipped ? c.back : c.front);
+    });
+    document.getElementById('b-fc-flip').addEventListener('click', function () {
+      flipped = true;
+      document.getElementById('fc-front').style.display = 'none';
+      document.getElementById('fc-back').style.display = '';
+      document.getElementById('fc-card').classList.add('fc-flipped');
+      document.getElementById('fc-action').style.display = 'none';
+      document.getElementById('fc-rate').style.display = '';
+    });
+    var rBtns = document.querySelectorAll('.fc-rate-btn');
+    for (var b = 0; b < rBtns.length; b++) {
+      rBtns[b].addEventListener('click', function () {
+        var r = parseInt(this.getAttribute('data-r'));
+        ratings.push(r);
+        var qualityMap = [0, 0, 1, 3, 4, 5];
+        var updated = sm2(c, qualityMap[r]);
+        updateCard(updated);
+        ci++;
+        renderCard();
+      });
+    }
+  }
+
+  function showRevSummary() {
+    var avg = ratings.reduce(function (a, b) { return a + b; }, 0) / ratings.length;
+    var remaining = getAllDueCount();
+    var xpEarned = recordSession('review', 'review', cards.length, cards.length);
+    var emoji = avg >= 4 ? '\u{1F3C6}' : avg >= 3 ? '\u{1F31F}' : '\u{1F4AA}';
+    var h = '<div class="cloze-results">';
+    h += '<div class="cr-emoji">' + emoji + '</div>';
+    h += '<div class="cr-score">' + cards.length + ' cards reviewed</div>';
+    h += '<div class="cr-pct">Average confidence: ' + avg.toFixed(1) + ' / 5</div>';
+    h += '<div class="cr-xp">+' + xpEarned + ' XP earned</div>';
+    if (remaining > 0) h += '<div class="cr-mastery">\u{1F4DA} ' + remaining + ' more cards still due</div>';
+    else h += '<div class="cr-mastery">\u2705 All caught up!</div>';
+    h += '<div class="cr-btns">';
+    if (remaining > 0) h += '<button class="study-btn sb-pri" id="b-rev-more">\u{1F504} Review More</button>';
+    h += '<button class="study-btn" id="b-rev-home">Home</button>';
+    h += '</div></div>';
+    document.getElementById('content').innerHTML = h;
+    if (remaining > 0) document.getElementById('b-rev-more').addEventListener('click', function () { showCrossReview(); });
+    document.getElementById('b-rev-home').addEventListener('click', function () { goHome(); });
+  }
+
+  renderCard();
+}
+
 function goHome() {
   var lastFid = localStorage.getItem('acr_study_last');
   var hasResume = lastFid && IDS.indexOf(lastFid) >= 0;
@@ -1974,8 +2155,9 @@ function goHome() {
     html += '<div class="home-stat home-level">' + lvl.current.icon + ' ' + lvl.current.name + ' \u00B7 ' + (stats.xp || 0) + ' XP</div>';
     html += '</div>';
   }
-  html += '<div class="btns">' +
-    '<button id="b-begin">Begin with Bereshit \u25B6</button>' +
+  html += '<div class="btns">';
+  if (totalDue > 0) html += '<button id="b-review">\u{1F4DA} Review All Due (' + totalDue + ' cards)</button>';
+  html += '<button id="b-begin">Begin with Bereshit \u25B6</button>' +
     (hasResume ? '<button id="b-resume">Resume where I left off</button>' : '') +
     '</div>' +
     '<p class="small">' +
@@ -1990,6 +2172,8 @@ function goHome() {
   for (var i = 0; i < secs.length; i++) secs[i].classList.remove('on');
   var bBegin = document.getElementById('b-begin');
   if (bBegin) bBegin.addEventListener('click', function () { go(IDS[0]); });
+  var bReview = document.getElementById('b-review');
+  if (bReview) bReview.addEventListener('click', function () { showCrossReview(); });
   var bResume = document.getElementById('b-resume');
   if (bResume) {
     bResume.addEventListener('click', function () {
