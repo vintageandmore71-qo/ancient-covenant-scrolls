@@ -1772,11 +1772,100 @@ function showProgress(fid) {
     h += '</div>';
   }
 
+  h += '<div class="prog-card"><h3 class="prog-h3">Backup &amp; Restore</h3>';
+  h += '<div style="display:flex;gap:10px;flex-wrap:wrap">';
+  h += '<button class="study-btn" id="b-prog-export" style="background:#059669" aria-label="Export progress to file">\u{1F4E5} Export Progress</button>';
+  h += '<button class="study-btn" id="b-prog-import" style="background:#2563eb" aria-label="Import progress from file">\u{1F4E4} Import Progress</button>';
+  h += '</div>';
+  h += '<input type="file" id="prog-file" accept=".json" style="display:none">';
+  h += '<div id="prog-io-msg" role="status" aria-live="polite" style="margin-top:8px;font-size:13px;color:var(--text-muted);font-weight:700"></div>';
+  h += '</div>';
+
   h += '<button class="study-btn" id="b-prog-back" style="margin-top:16px">Back to activities</button>';
   h += '</div>';
 
   document.getElementById('content').innerHTML = h;
   document.getElementById('b-prog-back').addEventListener('click', function () { go(fid); });
+
+  document.getElementById('b-prog-export').addEventListener('click', function () {
+    var exportData = {
+      version: 1,
+      exportDate: new Date().toISOString(),
+      stats: getStats(),
+      cards: getCards(),
+      quizMastery: getQuizMastery(),
+      notes: (function () { try { return JSON.parse(localStorage.getItem('acr_study_notes') || '{}'); } catch (e) { return {}; } })()
+    };
+    var blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'acr-study-progress-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    document.getElementById('prog-io-msg').textContent = '\u2705 Progress exported successfully';
+  });
+
+  document.getElementById('b-prog-import').addEventListener('click', function () {
+    document.getElementById('prog-file').click();
+  });
+
+  document.getElementById('prog-file').addEventListener('change', function (e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function (ev) {
+      try {
+        var imported = JSON.parse(ev.target.result);
+        if (!imported.version || !imported.stats) {
+          document.getElementById('prog-io-msg').textContent = '\u274C Invalid file — not an ACR Study export';
+          return;
+        }
+        if (imported.stats) {
+          var current = getStats();
+          imported.stats.xp = Math.max(current.xp || 0, imported.stats.xp || 0);
+          imported.stats.bestStreak = Math.max(current.bestStreak || 0, imported.stats.bestStreak || 0);
+          var currentSessions = current.sessions || [];
+          var importedSessions = imported.stats.sessions || [];
+          imported.stats.sessions = currentSessions.concat(importedSessions).slice(-100);
+          saveStats(imported.stats);
+        }
+        if (imported.cards) {
+          var currentCards = getCards();
+          for (var id in imported.cards) {
+            if (!currentCards[id] || imported.cards[id].reps > (currentCards[id].reps || 0)) {
+              currentCards[id] = imported.cards[id];
+            }
+          }
+          saveCards(currentCards);
+        }
+        if (imported.quizMastery) {
+          var currentM = getQuizMastery();
+          for (var key in imported.quizMastery) {
+            if (!currentM[key] || imported.quizMastery[key].correct > (currentM[key].correct || 0)) {
+              currentM[key] = imported.quizMastery[key];
+            }
+          }
+          saveQuizMastery(currentM);
+        }
+        if (imported.notes) {
+          var currentNotes = (function () { try { return JSON.parse(localStorage.getItem('acr_study_notes') || '{}'); } catch (e) { return {}; } })();
+          for (var nk in imported.notes) {
+            if (!currentNotes[nk]) currentNotes[nk] = imported.notes[nk];
+          }
+          try { localStorage.setItem('acr_study_notes', JSON.stringify(currentNotes)); } catch (e) {}
+        }
+        document.getElementById('prog-io-msg').textContent = '\u2705 Progress imported — merging with existing data';
+        setTimeout(function () { showProgress(fid); }, 1500);
+      } catch (err) {
+        document.getElementById('prog-io-msg').textContent = '\u274C Error reading file: ' + err.message;
+      }
+    };
+    reader.readAsText(file);
+  });
+
   window.scrollTo(0, 0);
 }
 
