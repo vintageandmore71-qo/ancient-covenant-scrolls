@@ -796,12 +796,13 @@ function showFillBlank(fid) {
       }
       if (!questions.length) { openActivity('stub', fid); return; }
     }
-    var qi = 0, score = 0;
+    var qi = 0, score = 0, firstAttempt = true;
 
     function renderQ() {
       if (qi >= questions.length) { showResults(); return; }
       var q = questions[qi];
       var correct = q.answer;
+      firstAttempt = true;
       // Pick distractors similar to the correct answer (same length range, alphabetic proximity)
       var candidates = allAns.filter(function (a) {
         return a.toLowerCase() !== correct.toLowerCase();
@@ -856,11 +857,12 @@ function showFillBlank(fid) {
             this.classList.add('cloze-correct');
             fb.innerHTML = '<span class="fb-correct">\u2714 Correct!</span>' +
               '<div class="cloze-source">' + (q.source_quote || '') + '</div>';
-            score++;
+            if (firstAttempt) score++;
             var all = document.querySelectorAll('.cloze-opt');
             for (var x = 0; x < all.length; x++) all[x].disabled = true;
             setTimeout(function () { qi++; renderQ(); }, 2200);
           } else {
+            firstAttempt = false;
             this.classList.add('cloze-wrong');
             this.disabled = true;
             fb.innerHTML = '<span class="fb-try">Try another \u2192</span>';
@@ -926,12 +928,13 @@ function showMC(fid) {
       }
       if (!questions.length) { openActivity('stub', fid); return; }
     }
-    var qi = 0, score = 0;
+    var qi = 0, score = 0, mcFirstAttempt = true;
     var mcColors = ['#dc2626', '#2563eb', '#059669', '#d97706'];
 
     function renderQ() {
       if (qi >= questions.length) { showResults(); return; }
       var q = questions[qi];
+      mcFirstAttempt = true;
 
       var h = '<div class="mc-view">';
       h += '<div class="mc-progress">' + (qi + 1) + ' of ' + questions.length + '</div>';
@@ -974,11 +977,12 @@ function showMC(fid) {
             this.classList.add('mc-correct');
             fb.innerHTML = '<span class="fb-correct">' + (childMode ? '\u{1F31F} Great job!' : '\u2714 Correct!') + '</span>' +
               '<div class="cloze-source">' + (q.source_quote || '') + '</div>';
-            score++;
+            if (mcFirstAttempt) score++;
             var all = document.querySelectorAll('.mc-opt');
             for (var x = 0; x < all.length; x++) all[x].disabled = true;
             setTimeout(function () { qi++; renderQ(); }, 2200);
           } else {
+            mcFirstAttempt = false;
             this.classList.add('mc-wrong');
             this.disabled = true;
             fb.innerHTML = '<span class="fb-try">Not quite \u2014 try another \u2192</span>';
