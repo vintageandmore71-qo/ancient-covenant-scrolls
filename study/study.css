@@ -20,7 +20,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family:var(--font-main);
-  font-size:14pt;
+  font-size:12pt;
   background:var(--bg-warm);
   color:var(--text-main);
   -webkit-text-size-adjust:100%;
@@ -256,7 +256,7 @@ p.sp{background:#fff3cd;border-radius:6px;padding:2px 4px}
 }
 /* Volume banner (inline, always works, no external images) */
 .vol-banner{
-  border-radius:var(--radius);padding:32px 24px;text-align:center;
+  border-radius:var(--radius);padding:20px 18px;text-align:center;
   margin-bottom:14px;box-shadow:0 4px 16px rgba(0,0,0,.18);
   position:relative;overflow:hidden;
 }
@@ -266,7 +266,7 @@ p.sp{background:#fff3cd;border-radius:6px;padding:2px 4px}
   pointer-events:none;
 }
 .vol-banner-name{
-  color:#fff;font-size:1.3em;font-weight:700;letter-spacing:.04em;
+  color:#fff;font-size:1.05em;font-weight:700;letter-spacing:.04em;
   text-shadow:0 2px 4px rgba(0,0,0,.3);font-family:var(--font-main);
   line-height:1.5;
 }
@@ -282,21 +282,21 @@ body.font-dyslexic .vol-banner-name{font-family:var(--font-dyslexic)}
   gap:16px;padding:0 4px 30px;
 }
 .act-card{
-  border-radius:20px;
-  padding:24px 12px 20px;
+  border-radius:16px;
+  padding:18px 10px 16px;
   text-align:center;cursor:pointer;
   box-shadow:0 4px 14px rgba(0,0,0,.15);
   transition:transform .15s,box-shadow .15s;
-  min-height:140px;
+  min-height:100px;
   display:flex;flex-direction:column;
   align-items:center;justify-content:center;
   user-select:none;-webkit-user-select:none;
 }
 .act-card:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 8px 24px rgba(0,0,0,.22)}
 .act-card:active{transform:scale(.96)}
-.act-icon{font-size:3em;margin-bottom:10px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2))}
+.act-icon{font-size:2.2em;margin-bottom:6px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2))}
 .act-label{
-  color:#fff;font-size:1em;font-weight:700;
+  color:#fff;font-size:.85em;font-weight:700;
   font-family:var(--font-main);letter-spacing:.02em;
   text-shadow:0 1px 3px rgba(0,0,0,.2);
   line-height:1.3;
