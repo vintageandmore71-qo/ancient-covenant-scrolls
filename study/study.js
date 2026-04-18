@@ -504,6 +504,7 @@ function go(fid) {
   h += actCard('\u{1F3C6}', 'Progress', '#b8860b', 'progress', fid);
   h += actCard('\u{1F9E9}', 'Verse Builder', '#e91e90', 'versebuild', fid);
   h += actCard('\u{1F517}', 'Word Match', '#6d28d9', 'wordmatch', fid);
+  h += actCard('\u2694\uFE0F', 'Challenge', '#b91c1c', 'challenge', fid);
   h += '</div>';
 
   document.getElementById('content').innerHTML = h;
@@ -550,6 +551,7 @@ function openActivity(mode, fid) {
   if (mode === 'progress') { showProgress(fid); return; }
   if (mode === 'versebuild') { showVerseBuild(fid); return; }
   if (mode === 'wordmatch') { showWordMatch(fid); return; }
+  if (mode === 'challenge') { showChallenge(fid); return; }
   // Stub for modes not yet built
   document.getElementById('content').innerHTML =
     '<div class="study-view"><div class="sv-sec">' +
@@ -842,9 +844,11 @@ function showFillBlank(fid) {
       }
       h += '</div>';
       h += '<div class="cloze-feedback" id="cloze-fb"></div>';
+      h += '<button class="study-btn" id="b-cloze-quit" style="margin-top:18px">Back to activities</button>';
       h += '</div>';
 
       document.getElementById('content').innerHTML = h;
+      document.getElementById('b-cloze-quit').addEventListener('click', function () { go(fid); });
       document.getElementById('b-cloze-hear').addEventListener('click', function () {
         speakText(q.source_quote || q.prompt.replace('______', correct));
       });
@@ -961,9 +965,11 @@ function showMC(fid) {
       }
       h += '</div>';
       h += '<div class="mc-feedback" id="mc-fb"></div>';
+      h += '<button class="study-btn" id="b-mc-quit" style="margin-top:18px">Back to activities</button>';
       h += '</div>';
 
       document.getElementById('content').innerHTML = h;
+      document.getElementById('b-mc-quit').addEventListener('click', function () { go(fid); });
       document.getElementById('b-mc-hear').addEventListener('click', function () {
         speakText(q.question);
       });
@@ -1098,10 +1104,12 @@ function showFlashcards(fid) {
           r + '<br><span class="fc-rate-sub">' + rLabels[r - 1] + '</span></button>';
       }
       h += '</div></div>';
+      h += '<button class="study-btn" id="b-fc-quit" style="margin-top:18px">Back to activities</button>';
       h += '</div>';
 
       document.getElementById('content').innerHTML = h;
 
+      document.getElementById('b-fc-quit').addEventListener('click', function () { go(fid); });
       document.getElementById('b-fc-hear').addEventListener('click', function () {
         speakText(flipped ? c.back : c.front);
       });
@@ -1578,9 +1586,11 @@ function showVerseBuild(fid) {
         h += '<button class="cloze-audio" id="b-vb-hear">\u{1F50A} Listen</button>';
         h += '</div>';
         h += '<div id="vb-fb" class="cloze-feedback"></div>';
+        h += '<button class="study-btn" id="b-vb-quit" style="margin-top:18px">Back to activities</button>';
         h += '</div>';
         document.getElementById('content').innerHTML = h;
 
+        document.getElementById('b-vb-quit').addEventListener('click', function () { go(fid); });
         document.getElementById('b-vb-hear').addEventListener('click', function () { speakText(v.text); });
         document.getElementById('b-vb-undo').addEventListener('click', function () {
           if (placed.length > 0) { placed.pop(); draw(); }
@@ -1731,6 +1741,193 @@ function showWordMatch(fid) {
     }
     render();
   });
+}
+
+// ---- Challenge (Family Feud) mode — 2-player competitive quiz ----
+function showChallenge(fid) {
+  var secIdx = IDS.indexOf(fid);
+  var secLabel = secIdx >= 0 ? LBL[secIdx].split(' \u2014 ')[0] : fid;
+
+  function setupScreen() {
+    var h = '<div class="ch-setup">';
+    h += '<div class="ch-title">\u2694\uFE0F CHALLENGE</div>';
+    h += '<div class="ch-subtitle">' + secLabel + '</div>';
+    h += '<div class="ch-players">';
+    h += '<div class="ch-player-input"><label>Player 1</label><input id="ch-p1" type="text" value="Player 1" maxlength="12" class="ch-name"></div>';
+    h += '<div class="ch-vs">VS</div>';
+    h += '<div class="ch-player-input"><label>Player 2</label><input id="ch-p2" type="text" value="Player 2" maxlength="12" class="ch-name"></div>';
+    h += '</div>';
+    h += '<button class="study-btn sb-pri" id="b-ch-start">Start Challenge \u25B6</button>';
+    h += '<button class="study-btn" id="b-ch-back">Back to activities</button>';
+    h += '</div>';
+    document.getElementById('content').innerHTML = h;
+    document.getElementById('b-ch-back').addEventListener('click', function () { go(fid); });
+    document.getElementById('b-ch-start').addEventListener('click', function () {
+      var p1 = document.getElementById('ch-p1').value.trim() || 'Player 1';
+      var p2 = document.getElementById('ch-p2').value.trim() || 'Player 2';
+      startGame(p1, p2);
+    });
+  }
+
+  function startGame(p1Name, p2Name) {
+    var allQ = [];
+    loadContent(fid).then(function (data) {
+      if (data && data.fill_blank) {
+        data.fill_blank.forEach(function (q) {
+          var opts = [q.answer];
+          var others = data.fill_blank.filter(function (o) { return o.answer !== q.answer; });
+          others = shuffle(others).slice(0, 3);
+          for (var i = 0; i < others.length; i++) opts.push(others[i].answer);
+          opts = shuffle(opts);
+          allQ.push({ question: q.prompt.replace('______', '___'), options: opts, correct: opts.indexOf(q.answer), source: q.source_quote || '' });
+        });
+      }
+      if (data && data.multiple_choice) {
+        data.multiple_choice.forEach(function (q) {
+          allQ.push({ question: q.question, options: q.options.slice(), correct: q.correct, source: q.source_quote || '' });
+        });
+      }
+      if (allQ.length < 5) {
+        var verses = getVerses(fid);
+        if (!verses.length) {
+          fetch('../data/' + fid + '.json').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+            if (d) { CHAPTER_CACHE[fid] = d; showChallenge(fid); } else { openActivity('stub', fid); }
+          }).catch(function () { openActivity('stub', fid); }); return;
+        }
+        var usable = verses.filter(function (v) { return v.length > 30 && v.length < 200; });
+        usable = shuffle(usable).slice(0, 10);
+        for (var vi = 0; vi < usable.length; vi++) {
+          var words = usable[vi].split(/\s+/).filter(function (w) { return w.length > 3; });
+          if (words.length < 4) continue;
+          var bIdx = Math.floor(Math.random() * (words.length - 2)) + 1;
+          var ans = words[bIdx].replace(/[.,;:!?]/g, '');
+          var prompt = usable[vi].replace(new RegExp('\\b' + ans.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b'), '___');
+          if (prompt === usable[vi]) continue;
+          var dOpts = [ans];
+          var dWords = shuffle(words.filter(function (w) { return w.replace(/[.,;:!?]/g, '') !== ans && w.length > 3; })).slice(0, 3);
+          for (var di = 0; di < dWords.length; di++) dOpts.push(dWords[di].replace(/[.,;:!?]/g, ''));
+          dOpts = shuffle(dOpts);
+          allQ.push({ question: prompt, options: dOpts, correct: dOpts.indexOf(ans), source: usable[vi] });
+        }
+      }
+      if (allQ.length < 2) { openActivity('stub', fid); return; }
+      allQ = shuffle(allQ).slice(0, 10);
+      runGame(p1Name, p2Name, allQ);
+    });
+  }
+
+  function runGame(p1, p2, questions) {
+    var scores = [0, 0];
+    var currentPlayer = 0;
+    var qi = 0;
+    var strikes = 0;
+    var timer = null;
+    var timeLeft = 0;
+    var names = [p1, p2];
+    var colors = ['#2563eb', '#dc2626'];
+
+    function renderQuestion() {
+      if (qi >= questions.length) { showFinalResults(); return; }
+      var q = questions[qi];
+      timeLeft = 20;
+      strikes = 0;
+
+      var h = '<div class="ch-game">';
+      h += '<div class="ch-scorebar">';
+      h += '<div class="ch-p" style="background:' + colors[0] + '"><div class="ch-pname">' + names[0] + '</div><div class="ch-pscore">' + scores[0] + '</div></div>';
+      h += '<div class="ch-timer" id="ch-timer">' + timeLeft + '</div>';
+      h += '<div class="ch-p" style="background:' + colors[1] + '"><div class="ch-pname">' + names[1] + '</div><div class="ch-pscore">' + scores[1] + '</div></div>';
+      h += '</div>';
+      h += '<div class="ch-turn" style="color:' + colors[currentPlayer] + '">' + names[currentPlayer] + "&#39;s turn</div>";
+      h += '<div class="ch-round">Round ' + (qi + 1) + ' of ' + questions.length + '</div>';
+      h += '<div class="ch-question">' + q.question + '</div>';
+      h += '<div class="ch-strikes" id="ch-strikes"></div>';
+      h += '<div class="ch-opts">';
+      for (var o = 0; o < q.options.length; o++) {
+        h += '<button class="ch-opt" data-idx="' + o + '" style="background:' + ['#2563eb', '#059669', '#7c3aed', '#d97706'][o % 4] + '">' + q.options[o] + '</button>';
+      }
+      h += '</div>';
+      h += '<div class="ch-fb" id="ch-fb"></div>';
+      h += '<button class="study-btn" id="b-ch-quit" style="margin-top:14px">Back to activities</button>';
+      h += '</div>';
+
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-ch-quit').addEventListener('click', function () { clearInterval(timer); go(fid); });
+
+      var timerEl = document.getElementById('ch-timer');
+      timer = setInterval(function () {
+        timeLeft--;
+        if (timerEl) timerEl.textContent = timeLeft;
+        if (timeLeft <= 5 && timerEl) timerEl.style.color = '#dc2626';
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          currentPlayer = 1 - currentPlayer;
+          scores[currentPlayer] += 50;
+          document.getElementById('ch-fb').innerHTML = '<span class="fb-try">Time up! ' + names[currentPlayer] + ' gets 50 pts</span>';
+          setTimeout(function () { qi++; currentPlayer = qi % 2; renderQuestion(); }, 2000);
+        }
+      }, 1000);
+
+      var optBtns = document.querySelectorAll('.ch-opt');
+      for (var b = 0; b < optBtns.length; b++) {
+        optBtns[b].addEventListener('click', function () {
+          var idx = parseInt(this.getAttribute('data-idx'));
+          var fb = document.getElementById('ch-fb');
+          if (idx === q.correct) {
+            clearInterval(timer);
+            this.classList.add('cloze-correct');
+            var pts = Math.max(10, timeLeft * 5);
+            scores[currentPlayer] += pts;
+            fb.innerHTML = '<span class="fb-correct">\u2714 ' + names[currentPlayer] + ' +' + pts + ' pts!</span>';
+            var all = document.querySelectorAll('.ch-opt'); for (var x = 0; x < all.length; x++) all[x].disabled = true;
+            setTimeout(function () { qi++; currentPlayer = qi % 2; renderQuestion(); }, 2000);
+          } else {
+            this.classList.add('cloze-wrong');
+            this.disabled = true;
+            strikes++;
+            var strikesEl = document.getElementById('ch-strikes');
+            strikesEl.innerHTML = '\u274C'.repeat(strikes);
+            if (strikes >= 3) {
+              clearInterval(timer);
+              currentPlayer = 1 - currentPlayer;
+              fb.innerHTML = '<span class="fb-try">3 strikes! ' + names[currentPlayer] + ' can steal!</span>';
+            } else {
+              fb.innerHTML = '<span class="fb-try">Strike ' + strikes + '! Try again</span>';
+            }
+          }
+        });
+      }
+    }
+
+    function showFinalResults() {
+      var winner = scores[0] > scores[1] ? names[0] : scores[1] > scores[0] ? names[1] : 'Tie';
+      var xpEarned = recordSession(fid, 'challenge', Math.max(scores[0], scores[1]), questions.length * 100);
+      var h = '<div class="ch-results">';
+      h += '<div class="cr-emoji">\u{1F3C6}</div>';
+      if (winner === 'Tie') {
+        h += '<div class="ch-winner">It\'s a tie!</div>';
+      } else {
+        h += '<div class="ch-winner">' + winner + ' wins!</div>';
+      }
+      h += '<div class="ch-final-scores">';
+      h += '<div class="ch-final-p" style="border-color:' + colors[0] + '">' + names[0] + '<br><span class="ch-final-pts">' + scores[0] + '</span></div>';
+      h += '<div class="ch-final-vs">VS</div>';
+      h += '<div class="ch-final-p" style="border-color:' + colors[1] + '">' + names[1] + '<br><span class="ch-final-pts">' + scores[1] + '</span></div>';
+      h += '</div>';
+      h += '<div class="cr-xp">+' + xpEarned + ' XP</div>';
+      h += '<div class="cr-btns">';
+      h += '<button class="study-btn sb-pri" id="b-ch-again">\u{1F504} Rematch</button>';
+      h += '<button class="study-btn" id="b-ch-done">Back to activities</button>';
+      h += '</div></div>';
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-ch-again').addEventListener('click', function () { showChallenge(fid); });
+      document.getElementById('b-ch-done').addEventListener('click', function () { go(fid); });
+    }
+
+    renderQuestion();
+  }
+
+  setupScreen();
 }
 
 function goHome() {

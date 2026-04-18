@@ -1,0 +1,270 @@
+{
+  "id": "file_80",
+  "label": "Shir HaShirim (Song of Songs) — Complete — Chapters 1–8",
+  "volume": 26,
+  "content_version": 1,
+  "summary_plain": "Shir HaShirim is the Song of Songs, which is Shelomoh's. The Beloved declares: I am dark and lovely, O daughters of Yerushalayim, like the tents of Kedar, like the curtains of Shelomoh. Do not gaze at me because I am dark, because the sun has looked upon me. She seeks the one her soul loves through the city at night. The watchmen find her — the first time they let her pass, the second time they beat her and wound her. The mutual possession formula progresses: my beloved is mine and I am his (2:16), then I am my beloved's and my beloved is mine (6:3), then I am my beloved's and his desire is for me (7:10). The poem reaches its climax: set me as a seal upon your heart, as a seal upon your arm — for love is strong as death, jealousy is fierce as the grave. Its flashes are flashes of fire — the very flame of YHWH. Many waters cannot quench love, neither can floods drown it.",
+  "summary_scholarly": "Shir HaShirim is preserved in the Dead Sea Scrolls — 4QCant-a and 4QCant-b from Cave 4 — and in the Orit Ge'ez of the African Israelite community. The ACR reads from these primary witnesses. The opening self-identification in 1:5 — shechorah ani ve-na'vah — uses the Hebrew root shachar (shin-chet-resh), meaning dark or black. The conjunction ve- is 'and,' not 'but.' The woman states: I am dark AND lovely. She does not apologize for her complexion. She compares herself to the tents of Kedar — an Ishmaelite clan of the Afro-Asiatic corridor — and to the curtains of Shelomoh. Dark and royal. The poem names YHWH only once — at its climax in 8:6: shalhevet Yah — the very flame of YHWH. Love itself is identified as divine fire. The mutual possession formula progresses through three stages: my beloved is mine and I am his (2:16), I am my beloved's and my beloved is mine (6:3), I am my beloved's and his desire is for me (7:10) — the self recedes as love deepens. The word teshukah (desire) in 7:10 appears only three times in the Hebrew canon: Bereshit 3:16, Bereshit 4:7, and here — where the Bereshit dynamic is reversed from distress to delight.",
+  "key_terms": [
+    {
+      "term": "Shechorah (shachar root)",
+      "phonetic": "Sheh-kho-RAH",
+      "definition": "From the Hebrew root shin-chet-resh (shachar), meaning dark or black. In 1:5, the Beloved says shechorah ani ve-na'vah — I am dark AND lovely. The root shachar describes phenotypic skin color in the DSS corpus. The conjunction ve- means 'and' — coordinate, not adversative. Western translations that render 'but' impose an apology the Hebrew does not contain."
+    },
+    {
+      "term": "Kedar",
+      "phonetic": "KEH-dar",
+      "definition": "An Ishmaelite clan of the Afro-Asiatic geographic corridor. The Beloved compares her dark complexion to the tents of Kedar — black goat-hair tents of the desert peoples of the Negev and Arabian corridor. She locates herself in the phenotypic and geographic world of northeast Africa and southwest Asia."
+    },
+    {
+      "term": "Shalhevet Yah",
+      "phonetic": "Shal-HEH-vet YAH",
+      "definition": "The very flame of YHWH (8:6). The only occurrence of the divine name in the entire poem. Yah is the short form of YHWH. Love is identified as divine fire — not metaphor but ontological statement. The flame of YHWH cannot be quenched by waters or drowned by floods."
+    },
+    {
+      "term": "Mutual Possession Formula",
+      "phonetic": "",
+      "definition": "Three stages: my beloved is mine and I am his (2:16) — self first. I am my beloved's and my beloved is mine (6:3) — self second. I am my beloved's and his desire is for me (7:10) — self given completely. As love matures in the poem, the self recedes and the beloved comes first."
+    },
+    {
+      "term": "Teshukah",
+      "phonetic": "Teh-shoo-KAH",
+      "definition": "Desire or longing. Appears only three times in the Hebrew canon: Bereshit 3:16 (the woman's desire for the man after the fall), Bereshit 4:7 (sin's desire for Qayin), and Shir HaShirim 7:10 (his desire is for me). Shir HaShirim reverses the Bereshit dynamic — desire becomes delight instead of distress."
+    },
+    {
+      "term": "Daughters of Yerushalayim",
+      "phonetic": "",
+      "definition": "The recurring audience the Beloved addresses throughout the poem. She adjures them three times: do not stir up or awaken love until it pleases (2:7, 3:5, 8:4). They witness her beauty, her searching, her suffering, and her declarations."
+    },
+    {
+      "term": "The Watchmen",
+      "phonetic": "",
+      "definition": "The city watchmen appear twice. In Chapter 3 they let the Beloved pass. In Chapter 5 they beat her, wound her, and take her veil. The poem does not protect its central voice from suffering. The search for love carries real danger."
+    },
+    {
+      "term": "Wasf",
+      "phonetic": "WAHSF",
+      "definition": "A detailed physical description using natural imagery. The Beloved describes her beloved (5:10-16): radiant, locks black as a raven, body polished ivory. He describes her (4:1-7, 7:1-9): eyes like doves, hair like goats on Gil'ad, altogether beautiful with no flaw. Both voices speak with equal weight."
+    },
+    {
+      "term": "The Sealed Garden",
+      "phonetic": "",
+      "definition": "A garden locked is my sister, my bride, a spring locked, a fountain sealed (4:12). The locked garden full of the most precious spices of the Afro-Asiatic trade corridor — nard, saffron, cinnamon, frankincense, myrrh, aloes. Exclusivity and abundance together."
+    },
+    {
+      "term": "Many Waters Cannot Quench Love",
+      "phonetic": "",
+      "definition": "The covenant statement of 8:7: many waters cannot quench love, neither can floods drown it. If a man offered for love all the wealth of his house, he would be utterly despised. Love cannot be purchased and cannot be destroyed. It exists outside every economic system."
+    }
+  ],
+  "fill_blank": [
+    {
+      "ref": "1:5",
+      "prompt": "I am ______, but lovely, O daughters of Yerushalayim, like the tents of Kedar, like the curtains of Shelomoh.",
+      "answer": "dark",
+      "source_quote": "I am dark, but lovely, O daughters of Yerushalayim, like the tents of Kedar, like the curtains of Shelomoh."
+    },
+    {
+      "ref": "8:6",
+      "prompt": "Set me as a seal upon your heart, as a seal upon your arm, for love is strong as ______.",
+      "answer": "death",
+      "source_quote": "Set me as a seal upon your heart, as a seal upon your arm, for love is strong as death, jealousy is fierce as the grave."
+    },
+    {
+      "ref": "8:6",
+      "prompt": "Its flashes are flashes of fire, the very flame of ______.",
+      "answer": "YHWH",
+      "source_quote": "Its flashes are flashes of fire, the very flame of YHWH."
+    },
+    {
+      "ref": "8:7",
+      "prompt": "Many ______ cannot quench love, neither can floods drown it.",
+      "answer": "waters",
+      "source_quote": "Many waters cannot quench love, neither can floods drown it."
+    },
+    {
+      "ref": "2:16",
+      "prompt": "My beloved is mine, and I am ______. He grazes among the lilies.",
+      "answer": "his",
+      "source_quote": "My beloved is mine, and I am his. He grazes among the lilies."
+    },
+    {
+      "ref": "4:7",
+      "prompt": "You are altogether beautiful, my love. There is no ______ in you.",
+      "answer": "flaw",
+      "source_quote": "You are altogether beautiful, my love. There is no flaw in you."
+    },
+    {
+      "ref": "1:6",
+      "prompt": "Do not gaze at me because I am dark, because the ______ has looked upon me.",
+      "answer": "sun",
+      "source_quote": "Do not gaze at me because I am dark, because the sun has looked upon me."
+    },
+    {
+      "ref": "5:16",
+      "prompt": "His mouth is most sweet, and he is altogether ______. This is my beloved and this is my friend.",
+      "answer": "desirable",
+      "source_quote": "His mouth is most sweet, and he is altogether desirable. This is my beloved and this is my friend, O daughters of Yerushalayim."
+    },
+    {
+      "ref": "7:10",
+      "prompt": "I am my beloved's, and his ______ is for me.",
+      "answer": "desire",
+      "source_quote": "I am my beloved's, and his desire is for me."
+    },
+    {
+      "ref": "2:11-12",
+      "prompt": "For behold, the winter is past. The rain is over and gone. The ______ appear on the earth.",
+      "answer": "flowers",
+      "source_quote": "For behold, the winter is past. The rain is over and gone. The flowers appear on the earth. The time of singing has come."
+    }
+  ],
+  "multiple_choice": [
+    {
+      "ref": "1:5",
+      "question": "What does the Beloved declare about herself in 1:5?",
+      "options": [
+        "I am pale and sorrowful",
+        "I am dark and lovely, like the tents of Kedar",
+        "I am hidden and afraid",
+        "I am a daughter of priests"
+      ],
+      "correct": 1,
+      "source_quote": "I am dark, but lovely, O daughters of Yerushalayim, like the tents of Kedar, like the curtains of Shelomoh."
+    },
+    {
+      "ref": "1:5-6",
+      "question": "What does the Hebrew root shachar (shin-chet-resh) mean in Shir HaShirim 1:5?",
+      "options": [
+        "Dawn or morning",
+        "Dark or black — a phenotypic skin color description",
+        "Sinful or blemished",
+        "Sunburned temporarily"
+      ],
+      "correct": 1,
+      "source_quote": "I am dark, but lovely, O daughters of Yerushalayim, like the tents of Kedar, like the curtains of Shelomoh."
+    },
+    {
+      "ref": "8:6",
+      "question": "What is love identified as in 8:6?",
+      "options": [
+        "A gentle breeze",
+        "A passing season",
+        "The very flame of YHWH — shalhevet Yah",
+        "A dream of the night"
+      ],
+      "correct": 2,
+      "source_quote": "Its flashes are flashes of fire, the very flame of YHWH."
+    },
+    {
+      "ref": "8:7",
+      "question": "What cannot quench love?",
+      "options": [
+        "Many waters",
+        "Time and distance",
+        "A king's command",
+        "The north wind"
+      ],
+      "correct": 0,
+      "source_quote": "Many waters cannot quench love, neither can floods drown it."
+    },
+    {
+      "ref": "7:10",
+      "question": "How many times does the word teshukah (desire) appear in the Hebrew canon?",
+      "options": [
+        "Once — only in Shir HaShirim",
+        "Twice — Bereshit and Shir HaShirim",
+        "Three times — Bereshit 3:16, Bereshit 4:7, and Shir HaShirim 7:10",
+        "Five times across the Torah"
+      ],
+      "correct": 2,
+      "source_quote": "I am my beloved's, and his desire is for me."
+    },
+    {
+      "ref": "5:10-16",
+      "question": "How does the Beloved describe her beloved's locks?",
+      "options": [
+        "Golden as wheat",
+        "White as wool",
+        "Black as a raven",
+        "Red as scarlet"
+      ],
+      "correct": 2,
+      "source_quote": "His head is the finest gold. His locks are wavy, black as a raven."
+    },
+    {
+      "ref": "6:3",
+      "question": "How does the mutual possession formula change from 2:16 to 6:3?",
+      "options": [
+        "It stays the same",
+        "The self comes second instead of first — I am my beloved's and my beloved is mine",
+        "It disappears entirely",
+        "It adds a third party"
+      ],
+      "correct": 1,
+      "source_quote": "I am my beloved's and my beloved is mine. He grazes among the lilies."
+    },
+    {
+      "ref": "5:7",
+      "question": "What do the watchmen do to the Beloved the second time they find her?",
+      "options": [
+        "They guide her to her beloved",
+        "They let her pass without speaking",
+        "They beat her, wound her, and take her veil",
+        "They carry her to the king"
+      ],
+      "correct": 2,
+      "source_quote": "The watchmen found me as they went about in the city. They beat me, they wounded me. They took away my veil, those watchmen of the walls."
+    },
+    {
+      "ref": "1:5",
+      "question": "What does the Hebrew conjunction ve- mean in shechorah ani ve-na'vah?",
+      "options": [
+        "But — creating a contrast between dark and lovely",
+        "And — coordinating dark and lovely as equal qualities",
+        "Despite — apologizing for darkness",
+        "Or — offering alternatives"
+      ],
+      "correct": 1,
+      "source_quote": "I am dark, but lovely, O daughters of Yerushalayim, like the tents of Kedar, like the curtains of Shelomoh."
+    },
+    {
+      "ref": "8:6",
+      "question": "Where in the poem does YHWH's name appear?",
+      "options": [
+        "In the opening verse",
+        "Never — the divine name is absent",
+        "Only at the climax in 8:6 — the very flame of YHWH",
+        "In every chapter heading"
+      ],
+      "correct": 2,
+      "source_quote": "Its flashes are flashes of fire, the very flame of YHWH."
+    }
+  ],
+  "faq": [
+    {
+      "question": "What does shechorah (shachar root) actually mean in 1:5?",
+      "answer": "The Hebrew word shechorah comes from the root shin-chet-resh (shachar), which means dark or black. In the Dead Sea Scrolls corpus, shachar describes phenotypic color — it is a physical descriptor, not a metaphor for sin or spiritual condition. The woman of Shir HaShirim states shechorah ani ve-na'vah — I am dark AND lovely. The conjunction ve- is the Hebrew 'and,' which coordinates two qualities as equal. Western translation traditions that render this as 'but' impose an adversative meaning the Hebrew does not carry. She is not saying 'dark despite which I am lovely.' She is saying 'dark AND lovely' — both qualities standing together without apology. She compares herself to the tents of Kedar, the black goat-hair tents of the Ishmaelite peoples of the Afro-Asiatic corridor. Dark and royal."
+    },
+    {
+      "question": "Why does the Beloved say 'do not gaze at me because I am dark'?",
+      "answer": "In 1:6, the Beloved says: do not gaze at me because I am dark, because the sun has looked upon me. My mother's sons were angry with me. They made me keeper of the vineyards, but my own vineyard I have not kept. The context is familial injustice — her brothers forced her to labor in the vineyards while neglecting her own. The darkness is a physical reality of her Afro-Asiatic identity deepened by outdoor labor. She addresses the daughters of Yerushalayim who stare — not to apologize but to explain and assert. Her declaration in 1:5 already established: dark AND lovely. The staring is their problem, not hers."
+    },
+    {
+      "question": "What is shalhevet Yah and why does it matter?",
+      "answer": "Shalhevet Yah (8:6) means the very flame of YHWH — or the flame of Yah. Yah is the short form of the divine name YHWH. This is the only time YHWH's name appears in the entire poem. For seven chapters, no divine name. Then at the climax: love is strong as death, jealousy is fierce as the grave, its flashes are flashes of fire — the very flame of YHWH. The poem identifies love as divine fire. Not a metaphor for YHWH's love. Love itself — human, passionate, embodied — is the flame of YHWH. This is the poem's theology: love is the fire of the divine name, and many waters cannot quench it."
+    },
+    {
+      "question": "What are the primary manuscript sources for Shir HaShirim?",
+      "answer": "The ACR reads from the Dead Sea Scrolls — 4QCant-a and 4QCant-b from Cave 4 at Qumran — and the Orit Ge'ez of the African Israelite community. The DSS fragments confirm the antiquity of the text and its presence in the Qumran covenant library. The Orit Ge'ez preserves the complete text. The Masoretic is noted as a variant. These are the primary witnesses — not later Talmudic interpretations or Christian allegorical readings that strip the poem of its embodied meaning."
+    },
+    {
+      "question": "How does the mutual possession formula progress through the poem?",
+      "answer": "Three stages of love's maturation. In 2:16: my beloved is mine, and I am his — the self comes first, claiming the beloved. In 6:3: I am my beloved's and my beloved is mine — the self comes second, giving before claiming. In 7:10: I am my beloved's, and his desire is for me — the self is given completely, with no counter-claim, only the joy of being desired. As love deepens through the poem, the self recedes. This is not loss of self — it is the maturation of love from possession to self-gift."
+    },
+    {
+      "question": "What is the phenotypic world of Shir HaShirim?",
+      "answer": "The poem describes dark-complexioned people of the Afro-Asiatic corridor. The Beloved: dark as the tents of Kedar (1:5), an Ishmaelite clan. Her beloved: his locks are black as a raven (5:11), his body polished ivory (5:14). The geographic references span Kedar, En-Gedi, Gil'ad, Lebanon, Heshbon, Damascus, Karmel, Tirtza, Yerushalayim — the entire land and its surrounding regions. The spices — nard, saffron, cinnamon, frankincense, myrrh, aloes — are the luxury goods of the Afro-Asiatic trade routes connecting northeast Africa to southwest Asia. This is not a European poem. It belongs to the physical and cultural world of the ancient Afro-Asiatic covenant peoples."
+    }
+  ]
+}

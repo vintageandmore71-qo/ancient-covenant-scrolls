@@ -828,6 +828,62 @@ body.child-mode .activity-grid{gap:18px}
 body.child-mode .cloze-audio,body.child-mode #b-mc-hear{font-size:18px;padding:16px 30px;min-height:56px}
 
 /* =========================================================================
+   Challenge (Family Feud) mode — 2-player competitive quiz
+   ========================================================================= */
+.ch-setup{text-align:center;padding:40px 16px;max-width:480px;margin:0 auto}
+.ch-title{font-size:2.4em;font-weight:700;color:var(--text-main);margin-bottom:6px;letter-spacing:.04em;font-family:var(--font-main)}
+.ch-subtitle{font-size:1.1em;color:var(--text-muted);font-weight:700;margin-bottom:32px}
+.ch-players{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:32px;flex-wrap:wrap}
+.ch-player-input{display:flex;flex-direction:column;gap:6px}
+.ch-player-input label{font-size:.85em;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em}
+.ch-name{width:140px;padding:14px 16px;border-radius:var(--radius);border:2px solid #ddd;font-size:1.05em;font-weight:700;font-family:var(--font-main);text-align:center;background:var(--bg-card);color:var(--text-main);min-height:52px}
+body.font-dyslexic .ch-name{font-family:var(--font-dyslexic)}
+.ch-name:focus{border-color:var(--vol1);outline:none;box-shadow:0 0 0 3px rgba(37,99,235,.2)}
+.ch-vs{font-size:1.8em;font-weight:700;color:var(--vol2);text-shadow:0 2px 4px rgba(0,0,0,.1)}
+.ch-game{padding:8px 0}
+.ch-scorebar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px}
+.ch-p{flex:1;max-width:160px;padding:12px 10px;border-radius:var(--radius);color:#fff;text-align:center;box-shadow:0 3px 10px rgba(0,0,0,.2)}
+.ch-pname{font-size:.8em;font-weight:700;opacity:.9;letter-spacing:.04em}
+.ch-pscore{font-size:1.8em;font-weight:700}
+.ch-timer{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#1a1a2e,#2a2a4e);color:#fff;font-size:1.6em;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.25);border:3px solid rgba(255,255,255,.15);transition:color .3s}
+.ch-turn{font-size:1.3em;font-weight:700;text-align:center;margin-bottom:4px}
+.ch-round{font-size:.9em;color:var(--text-muted);font-weight:700;text-align:center;margin-bottom:16px}
+.ch-question{font-size:1.2em;line-height:1.8;font-weight:700;color:var(--text-main);padding:22px 20px;background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:16px;text-align:left;border-left:5px solid var(--vol5)}
+body.font-dyslexic .ch-question{font-family:var(--font-dyslexic);line-height:2.1}
+.ch-strikes{text-align:center;font-size:2em;min-height:40px;margin-bottom:8px;letter-spacing:8px}
+.ch-opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;padding:0 4px}
+.ch-opt{color:#fff;border:none;padding:18px 14px;border-radius:16px;font-size:1.1em;font-weight:700;cursor:pointer;min-height:60px;box-shadow:0 4px 12px rgba(0,0,0,.18);transition:transform .15s,opacity .15s,box-shadow .15s;font-family:var(--font-main);text-shadow:0 1px 2px rgba(0,0,0,.15)}
+body.font-dyslexic .ch-opt{font-family:var(--font-dyslexic)}
+.ch-opt:hover:not(:disabled){transform:scale(1.04);box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.ch-opt:active:not(:disabled){transform:scale(.96)}
+.ch-opt:disabled{opacity:.35;cursor:default;transform:none}
+.ch-fb{min-height:40px;padding:8px;text-align:center}
+.ch-results{text-align:center;padding:50px 20px}
+.ch-winner{font-size:2.2em;font-weight:700;color:var(--text-main);margin-bottom:24px}
+.ch-final-scores{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.ch-final-p{padding:20px 28px;border-radius:var(--radius);background:var(--bg-card);box-shadow:var(--shadow);border-top:5px solid;font-size:1.1em;font-weight:700;color:var(--text-main);min-width:120px}
+.ch-final-vs{font-size:1.6em;font-weight:700;color:var(--vol2)}
+.ch-final-pts{font-size:2em;font-weight:700;color:var(--vol1);display:block;margin-top:6px}
+@media(max-width:600px){
+  .ch-opts{grid-template-columns:1fr}
+  .ch-players{flex-direction:column;gap:8px}
+  .ch-scorebar{gap:6px}
+  .ch-p{max-width:120px;padding:10px 8px}
+  .ch-timer{width:52px;height:52px;font-size:1.3em}
+}
+body.child-mode .ch-title{font-size:2.8em}
+body.child-mode .ch-name{font-size:1.15em;padding:16px 18px;min-height:56px}
+body.child-mode .ch-opt{min-height:72px;font-size:1.25em;border-radius:20px;padding:22px 18px}
+body.child-mode .ch-question{font-size:1.4em;line-height:2.1;padding:28px 24px}
+body.child-mode .ch-winner{font-size:2.6em}
+body.child-mode .ch-timer{width:72px;height:72px;font-size:1.8em}
+body.beeline-on .ch-question{
+  background:linear-gradient(180deg,#2563eb 0%,#2563eb 12%,#7c3aed 12%,#7c3aed 25%,#dc2626 25%,#dc2626 37%,#d97706 37%,#d97706 50%,#059669 50%,#059669 62%,#0891b2 62%,#0891b2 75%,#2563eb 75%,#2563eb 87%,#7c3aed 87%,#7c3aed 100%);
+  background-size:100% calc(var(--lh, 1.7) * 1em * 8);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+}
+
+/* =========================================================================
    Font toggle button (added dynamically by JS)
    ========================================================================= */
 .font-toggle-btn{
