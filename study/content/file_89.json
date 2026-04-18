@@ -1,0 +1,37 @@
+{
+  "id": "file_89",
+  "label": "Divrei HaYamim Aleph (1 Chronicles) — Part 1 — Chapters 1–9",
+  "volume": 31,
+  "content_version": 1,
+  "summary_plain": "Divrei HaYamim Aleph opens with genealogies stretching from Adam through all the tribes of Yisra'EL. Adam, Shet, Enosh. Noakh, Shem, Cham, Yafet. Avraham, Yitzchaq, Ya'aqov. The twelve tribes are listed with their family lines: Yehudah, Shim'on, Re'uven, Gad, the half-tribe of Menasheh, Levi, Yissakhar, Binyamin, Naftali, Menasheh, Efrayim, Asher, and the returned exiles. These nine chapters are the biological record — who belongs to Yisra'EL by descent, by family, by tribe.",
+  "summary_scholarly": "The ACR reads Divrei HaYamim from DSS fragments (4QChr) and the Orit Ge'ez. Chapters 1-9 are the most comprehensive genealogical record in all of scripture. They trace the covenant lineage from Adam through the patriarchs, through the twelve tribes, through the priestly and Levitical families, and into the post-exilic community. The genealogies are not decorative — they are legal documentation of biological descent. They establish who belongs to the covenant community by birth, not by institutional decree. The Chronicler's genealogies record all twelve tribes — including the northern tribes that did not return from the Assyrian exile. This is significant: the genealogical record preserves the existence and identity of tribes whose physical return is not documented. The record outlasts the displacement. Chapter 1:8-16 traces the Hamite lineage through Cush, Mitzrayim, Put, and Canaan — the same African geography as Bereshit 10. Nimrod (1:10) is 'the first on earth to be a mighty man' — originating from Cush, Northeast Africa.",
+  "key_terms": [
+    { "term": "Divrei HaYamim", "phonetic": "Div-RAY hah-Yah-MEEM", "definition": "Hebrew for 'Words (or Chronicles) of the Days.' The Septuagint called it Paraleipomena — 'Things Omitted.' The Hebrew title is the accurate one: these are the recorded events, the historical record." },
+    { "term": "Toledot (Genealogies)", "phonetic": "Tol-DOT", "definition": "Generations, family records. Chapters 1-9 are toledot — biological descent records tracing who belongs to each tribe by birth. These are not optional appendices. They are the legal record of covenant membership." },
+    { "term": "Shevatim (Tribes)", "phonetic": "Sheh-vah-TEEM", "definition": "The twelve tribes of Yisra'EL — biological-territorial divisions descended from Ya'aqov's twelve sons. The genealogies record all twelve, including the northern tribes displaced by Assyria. The tribal structure is the organizing principle of the covenant people." }
+  ],
+  "fill_blank": [
+    { "ref": "1:1", "prompt": "Adam, Shet, ______.", "answer": "Enosh", "source_quote": "Adam, Shet, Enosh." },
+    { "ref": "1:34", "prompt": "The sons of Yitzchaq: ______ and Yisra'EL.", "answer": "Esav", "source_quote": "Avraham fathered Yitzchaq. The sons of Yitzchaq: Esav and Yisra'EL." },
+    { "ref": "2:1-2", "prompt": "These are the sons of Yisra'EL: Re'uven, Shim'on, Levi, ______, Yissakhar, Zevulun.", "answer": "Yehudah", "source_quote": "These are the sons of Yisra'EL: Re'uven, Shim'on, Levi, Yehudah, Yissakhar, Zevulun." }
+  ],
+  "multiple_choice": [
+    { "ref": "1:1-4", "question": "Where do the genealogies of Divrei HaYamim begin?", "options": ["With Avraham", "With Adam — tracing all of humanity from the first man", "With Moshe", "With Dawid"], "correct": 1, "source_quote": "Adam, Shet, Enosh, Qenan, Mahalal'el, Yered, Chanokh, Metushelakh, Lemekh, Noakh." },
+    { "ref": "2:1-2", "question": "How many sons of Yisra'EL (Ya'aqov) are listed?", "options": ["Six", "Ten", "Twelve", "Eight"], "correct": 2, "source_quote": "These are the sons of Yisra'EL: Re'uven, Shim'on, Levi, Yehudah, Yissakhar, Zevulun, Dan, Yosef, Binyamin, Naftali, Gad, Asher." },
+    { "ref": "1:10", "question": "From which lineage does Nimrod originate?", "options": ["Shem", "Yafet", "Cush — the son of Cham, from Northeast Africa", "Canaan"], "correct": 2, "source_quote": "Cush fathered Nimrod. He was the first on earth to be a mighty man." }
+  ],
+  "faq": [
+    {
+      "question": "Why do the genealogies matter for covenant identity?",
+      "answer": "The genealogies of Divrei HaYamim 1-9 are the biological record of the covenant people. They trace descent from Adam through the patriarchs through all twelve tribes. This is not ceremonial or symbolic — it is legal documentation. You are in a tribe because you were born into it. The covenant is carried by blood and descent, not by institutional declaration. The Great Eraser mechanism replaces genealogical identity with institutional identity. The Rabbinical definition ('Who is a Jew?' — determined by a bet din, a rabbinic court) replaces the biblical definition (membership by tribal descent). The Christian definition ('Who is saved?' — determined by creedal confession) replaces covenant membership entirely. DNA companies reassign Israelite genetic markers to European population labels. In every case, an institutional authority overrides the genealogical record. Divrei HaYamim 1-9 is the record itself. It does not require institutional validation."
+    },
+    {
+      "question": "Why does the Chronicler record all twelve tribes if the northern tribes were lost?",
+      "answer": "The northern tribes were displaced by Assyria in 722 BCE. They did not return with the Judean exiles. But the Chronicler — writing after the return — still records their genealogies (1 Chronicles 2-8). Efrayim is there. Menasheh is there. Dan, Naftali, Gad, Asher, Yissakhar, Zevulun — all are there. The genealogical record preserves what the political reality erased. The tribes exist in the record even when they cannot be located on the ground. This is the opposite of the Great Eraser: the Chronicler insists on preserving the identity of peoples whose physical location is unknown. The tribes did not cease to exist because they were displaced. Their descendants are somewhere. The genealogical record waits for them."
+    },
+    {
+      "question": "What does the Cush-Nimrod genealogy in chapter 1 reveal?",
+      "answer": "1 Chronicles 1:10: 'Cush fathered Nimrod. He was the first on earth to be a mighty man.' Nimrod — the first mighty man, the founder of Babylon and Nineveh (Bereshit 10:8-12) — originates from Cush, which is Northeast Africa (Nubia/Ethiopia/Sudan). The world's first empire-builder comes from Africa. The first civilization builders in the genealogical record are Hamite — Cush, Mitzrayim (Egypt), Put (Libya), Canaan. The genealogical record places African peoples at the origin of civilization. The Great Eraser separates the 'Middle East' from Africa, treats Mesopotamian civilization as non-African, and obscures the genealogical record that connects Babylon's founder to Cush. The text says what it says: Nimrod was Cushite."
+    }
+  ]
+}
