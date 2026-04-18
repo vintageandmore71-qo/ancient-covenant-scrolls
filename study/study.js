@@ -1080,7 +1080,8 @@ function showFlashcards(fid) {
       var c = cards[ci];
       flipped = false;
       var typeColor = c.type === 'term' ? 'var(--vol6)' : 'var(--vol1)';
-      var typeLabel = c.type === 'term' ? 'KEY TERM' : 'VERSE';
+      var shortLabel = secLabel.split(' \u2014 ')[0];
+      var typeLabel = c.type === 'term' ? 'KEY TERM' : shortLabel;
 
       var h = '<div class="fc-view">';
       h += '<div class="fc-progress">' + (ci + 1) + ' of ' + cards.length + '</div>';
