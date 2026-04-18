@@ -1,0 +1,30 @@
+{
+  "id": "file_111",
+  "label": "Temple Scroll 11Q19 (Megillat HaMikdash) \u2014 Part 3 \u2014 Col 45\u201366",
+  "volume": 46,
+  "content_version": 1,
+  "summary_plain": "The final section of the Temple Scroll covers the purity of the Temple city, laws of vows and oaths, regulations for witnesses, laws of warfare, and the statutes for the entire land of Yisra\u2019el. The Temple city itself is holy \u2014 no impurity may enter it. The scroll details what may and may not be brought into the city. Laws about idolatry are strict: if a city worships other gods, it shall be utterly destroyed. The warfare regulations prescribe how Yisra\u2019el shall go to battle: the priest shall speak to the army, and YHWH shall fight for them. The scroll concludes with a comprehensive restatement of the covenant blessings and curses.",
+  "summary_scholarly": "Columns 45-66 of the Temple Scroll cover the purity of the Temple city (expanding on Devarim\u2019s laws of the camp), laws of vows and oaths (paralleling Bamidbar 30), laws of witnesses (expanding Devarim 17:6-7 and 19:15), laws of warfare (rewriting Devarim 20), and the apostasy laws (expanding Devarim 13). The scroll treats the entire Temple city as a sacred zone equivalent to the wilderness camp of Yisra\u2019el, applying the purity laws of Bamidbar and Vayikra to urban space. The warfare regulations require priestly involvement in military decisions, consistent with the War Scroll (1QM). The apostasy laws are more detailed than the Masoretic Torah. The final columns effectively create a comprehensive legal code for the ideal covenant society \u2014 a constitution derived entirely from Torah rewritten as YHWH\u2019s direct speech.",
+  "key_terms": [
+    { "term": "Ir HaMikdash", "phonetic": "Eer Ha-Mik-DAHSH", "definition": "The \u2018Temple City\u2019 \u2014 the entire city surrounding the Temple is treated as a sacred zone in the Temple Scroll. Purity laws that the Masoretic Torah applies only to the Temple courts are extended to the entire city." },
+    { "term": "Torat HaMilkhamah", "phonetic": "Toh-RAHT Ha-Mil-khah-MAH", "definition": "The \u2018Law of Warfare\u2019 in the Temple Scroll, rewriting Devarim 20. The priest speaks to the army before battle. YHWH fights for Yisra\u2019el. The regulations require priestly oversight of all military operations." }
+  ],
+  "fill_blank": [
+    { "ref": "Col XLV:11-12", "prompt": "You shall not defile the ______ in which I dwell, for I, YHWH, dwell among the children of Yisra\u2019el.", "answer": "city", "source_quote": "You shall not defile the city in which I cause my name to dwell, for I, YHWH, dwell among the children of Yisra\u2019el." },
+    { "ref": "Col LXI:12-14", "prompt": "When you go out to war against your enemies, the priest shall stand and speak to the ______.", "answer": "army", "source_quote": "When you go out to war against your enemies, the priest shall stand and speak to the army." }
+  ],
+  "multiple_choice": [
+    { "ref": "Col XLV-XLVII", "question": "How does the Temple Scroll treat the Temple city?", "options": ["As an ordinary marketplace", "As a sacred zone where the same purity laws apply as in the Temple itself", "As a place where foreigners may settle freely", "As separate from the Temple\u2019s holiness"], "correct": 1, "source_quote": "The entire Temple city is treated as a sacred zone. No impurity may enter the city where YHWH causes his name to dwell." },
+    { "ref": "Col LXI-LXII", "question": "What do the Temple Scroll\u2019s warfare regulations require?", "options": ["The king alone decides on war", "The community votes democratically", "The priest speaks to the army and YHWH fights for Yisra\u2019el", "War is forbidden entirely"], "correct": 2, "source_quote": "The priest shall stand and speak to the army. YHWH your Creator goes with you to fight for you against your enemies." }
+  ],
+  "faq": [
+    {
+      "question": "What does the Temple Scroll\u2019s comprehensive legal code reveal about Qumran\u2019s vision for society?",
+      "answer": "The final columns of the Temple Scroll cover warfare, witnesses, vows, apostasy, and the purity of the entire Temple city. Combined with the earlier sections on architecture, festivals, and the Law of the King, the scroll constitutes a complete constitution for the ideal covenant society. Every area of life \u2014 worship, governance, military, economics, urban planning, and criminal justice \u2014 is derived from Torah rewritten as YHWH\u2019s direct speech. The Great Eraser has presented the Qumran community as a marginal sect with no political relevance. The Temple Scroll reveals a community that had a fully developed vision for society \u2014 not a retreat from the world but a blueprint for its reconstruction on Torah terms. The vision was never implemented because Rome destroyed the community. But the blueprint survived in the cave."
+    },
+    {
+      "question": "Why does the Temple Scroll extend sanctuary purity to the entire Temple city?",
+      "answer": "In the Masoretic Torah, the strictest purity laws apply to the Temple courts. The Temple Scroll extends these laws to the entire city: no impurity may enter the city where YHWH causes his name to dwell. The theological implication is that the sacred space is not confined to the Temple building but extends outward into the community\u2019s living space. If YHWH dwells among his people, then the entire community is a sanctuary. The Great Eraser has confined holiness to designated buildings \u2014 churches, synagogues, mosques \u2014 separating \u2018sacred\u2019 space from \u2018secular\u2019 space. The Temple Scroll\u2019s vision has no such division. The city is the sanctuary. The community is the Temple. The purity of daily life is the purity of worship. This is the same principle the Community Rule (1QS) applies to the community itself: the community is an \u2018eternal planting, a house of holiness for Yisra\u2019el.\u2019"
+    }
+  ]
+}
