@@ -1,0 +1,33 @@
+{
+  "id": "file_75",
+  "label": "Mishlei (Proverbs) — Part 2 — Chapters 11–20",
+  "volume": 22,
+  "content_version": 1,
+  "summary_plain": "Mishlei chapters 11 through 20 deliver the core proverbial wisdom of Shelomoh. These are paired contrasts: the righteous and the wicked, the wise and the fool, the diligent and the lazy. A false balance is an abomination to YHWH, but a just weight is his delight. The tongue of the righteous is choice silver. Whoever loves discipline loves knowledge. The name of YHWH is a strong tower — the righteous run into it and are safe. A friend loves at all times. Even a fool who keeps silent is considered wise.",
+  "summary_scholarly": "The ACR reads Mishlei 11-20 from DSS Proverbs fragments (4QProv-a, 4QProv-b) and the Orit Ge'ez. These chapters form the dense core of Shelomoh's mashal collection — antithetical parallelism in its purest form. The instruction on honest weights and measures (11:1, 16:11, 20:10, 20:23) connects to the Egyptian Ma'at tradition — justice, balance, and cosmic order as the foundation of wisdom. The Instructions of Amenemope contain the same emphasis on honest scales. The Hebrew wisdom tradition and the Egyptian wisdom tradition are sister branches of the same Afro-Asiatic intellectual heritage. The proverbs on speech — the tongue, the lips, the mouth — form the largest thematic cluster, reflecting the Afro-Asiatic understanding that language creates and destroys reality.",
+  "key_terms": [
+    { "term": "Mashal", "phonetic": "Mah-SHAHL", "definition": "A proverb, comparison, or parable. The root means 'to compare, to liken.' Mishlei is a collection of meshalim — wisdom teachings that compare the righteous and the wicked, the wise and the foolish, to make the right path visible." },
+    { "term": "Migdal Oz (Strong Tower)", "phonetic": "Mig-DAHL Oz", "definition": "18:10: 'The name of YHWH is a strong tower — the righteous run into it and are safe.' YHWH's personal name itself is the refuge. Not a temple, not an institution — the name." },
+    { "term": "Mo'znei Tzedeq (Just Scales)", "phonetic": "Mohz-NAY TZEH-deq", "definition": "11:1: 'A false balance is an abomination to YHWH, but a just weight is his delight.' Justice in commerce is not secular — it is covenant obligation. This instruction parallels the Egyptian Ma'at tradition of cosmic justice symbolized by balanced scales." }
+  ],
+  "fill_blank": [
+    { "ref": "18:10", "prompt": "The name of YHWH is a strong ______ — the righteous run into it and are safe.", "answer": "tower", "source_quote": "The name of YHWH is a strong tower — the righteous run into it and are safe." },
+    { "ref": "11:1", "prompt": "A false balance is an abomination to YHWH, but a just ______ is his delight.", "answer": "weight", "source_quote": "A false balance is an abomination to YHWH, but a just weight is his delight." },
+    { "ref": "17:17", "prompt": "A ______ loves at all times, and a brother is born for adversity.", "answer": "friend", "source_quote": "A friend loves at all times, and a brother is born for adversity." }
+  ],
+  "multiple_choice": [
+    { "ref": "18:10", "question": "What does Mishlei call the name of YHWH?", "options": ["A distant memory", "A strong tower — the righteous run into it and are safe", "A hidden secret", "A code for scholars only"], "correct": 1, "source_quote": "The name of YHWH is a strong tower — the righteous run into it and are safe." },
+    { "ref": "11:1", "question": "What does YHWH say about false balances?", "options": ["They are acceptable in the marketplace", "They are an abomination — a just weight is his delight", "They are allowed in emergencies", "They are only forbidden for priests"], "correct": 1, "source_quote": "A false balance is an abomination to YHWH, but a just weight is his delight." },
+    { "ref": "12:1", "question": "Who loves knowledge according to Mishlei 12:1?", "options": ["Whoever avoids discipline", "Whoever loves discipline", "Whoever has wealth", "Whoever has power"], "correct": 1, "source_quote": "Whoever loves discipline loves knowledge, but he who hates reproof is stupid." }
+  ],
+  "faq": [
+    {
+      "question": "What does the instruction on honest weights and measures reveal about the covenant?",
+      "answer": "Mishlei repeatedly insists on honest scales and weights (11:1, 16:11, 20:10, 20:23). A false balance is an abomination to YHWH. This instruction connects directly to the Egyptian Ma'at tradition — the judgment of the dead involves weighing the heart against the feather of Ma'at on balanced scales. Both Hebrew and Egyptian wisdom traditions treat commercial honesty as cosmic justice, not merely civil law. The Hebrew and Egyptian traditions share this emphasis because they share the same Afro-Asiatic intellectual origin. The Great Eraser disconnects Hebrew wisdom from its African roots by classifying it as 'Ancient Near Eastern' rather than African — despite the text itself acknowledging Egyptian influence and despite Hebrew and Egyptian being Afro-Asiatic sister languages."
+    },
+    {
+      "question": "Why does Mishlei 18:10 say the name of YHWH is the strong tower?",
+      "answer": "Mishlei 18:10 says: 'The name of YHWH is a strong tower — the righteous run into it and are safe.' Not a building. Not a temple. Not an institution. The name itself is the refuge. Every Great Eraser system replaces the name: 'LORD' in English Bibles, 'HaShem' in Rabbinical practice, 'the Lord' in Christian liturgy. If the name is the strong tower and the name has been erased, the refuge has been hidden. The righteous cannot run into what they do not know. Restoring the name YHWH is not a scholarly preference — it is restoring the refuge the text describes."
+    }
+  ]
+}

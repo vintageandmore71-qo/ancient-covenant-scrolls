@@ -1,0 +1,38 @@
+{
+  "id": "file_67",
+  "label": "Tehillim (Psalms) — Part 3 — Psalms 42–72",
+  "volume": 20,
+  "content_version": 1,
+  "summary_plain": "Psalms 42 through 72 contain the prayers of the Korachites and Dawid in exile and hope. Psalm 42 opens: As a deer pants for flowing streams, so pants my soul for you, O YHWH. Psalm 45 is a royal wedding song. Psalm 46 declares: YHWH of hosts is with us — the Creator of Ya'aqov is our refuge. Psalm 51 is Dawid's plea for a clean heart after his sin: Create in me a clean heart, O Creator, and renew a right spirit within me. Psalm 68 exalts YHWH as the Rider on the Clouds — his name is YAH. Psalm 72 closes with a prayer for the righteous king and the declaration: Blessed be YHWH, the Creator of Yisra'EL, who alone does wondrous things.",
+  "summary_scholarly": "The ACR reads Psalms 42-72 from DSS witnesses and the Orit Ge'ez. Psalm 51 is critical for understanding teshuvah (return/repentance) in the covenant framework — Dawid does not seek a priestly sacrifice but a direct encounter with YHWH: 'The sacrifices of The Creator are a broken spirit — a broken and contrite heart, O Creator, you will not despise' (51:17). This is the covenant relationship without institutional mediation. Psalm 68:4 applies the title Rider on the Clouds (Rokev ba-Aravot) to YHWH and names him YAH. This same title — Rkb 'rpt — appears in the Ugaritic Baal Cycle tablets (KTU 1.1-1.6, c. 1300 BCE) as the primary epithet of Baal. The Hebrew tradition reclaimed this Afro-Asiatic title and applied it to YHWH — the true Rider on the Clouds. The Elohistic Psalter (42-83) uses Elohim more frequently than YHWH, suggesting an editorial layer that substituted the title for the personal name.",
+  "key_terms": [
+    { "term": "Lev Tahor (Clean Heart)", "phonetic": "Lev Tah-HOR", "definition": "Psalm 51:10: Create in me a clean heart (lev tahor). Dawid asks YHWH directly for internal renewal — not through sacrifice, not through priestly mediation, but through YHWH's own creative act." },
+    { "term": "YAH", "phonetic": "YAH", "definition": "The short form of YHWH's personal name. Psalm 68:4: 'His name is YAH.' This contracted form appears throughout Tehillim and in names like Eliyahu (my El is YAH), Yeshayahu (YAH saves), and Zekharyah (YAH remembers)." },
+    { "term": "Rokev ba-Aravot (Rider on the Clouds)", "phonetic": "Roh-KEV bah-ah-rah-VOT", "definition": "Psalm 68:4 title for YHWH. The same title — Rkb 'rpt — appears in the Ugaritic Baal Cycle tablets (c. 1300 BCE). The Hebrew tradition reclaimed this ancient Afro-Asiatic epithet from Baal and applied it to YHWH." }
+  ],
+  "fill_blank": [
+    { "ref": "51:10", "prompt": "Create in me a ______ heart, O Creator, and renew a right spirit within me.", "answer": "clean", "source_quote": "Create in me a clean heart, O Creator, and renew a right spirit within me." },
+    { "ref": "68:4", "prompt": "Sing to The Creator, sing praises to his name — lift up a song to him who rides through the deserts — his name is ______.", "answer": "YAH", "source_quote": "Sing to The Creator, sing praises to his name — lift up a song to him who rides through the deserts — his name is YAH — rejoice before him." },
+    { "ref": "42:1", "prompt": "As a deer pants for flowing streams, so pants my ______ for you, O YHWH.", "answer": "soul", "source_quote": "As a deer pants for flowing streams, so pants my soul for you, O YHWH." },
+    { "ref": "51:17", "prompt": "The sacrifices of The Creator are a broken ______ — a broken and contrite heart, O Creator, you will not despise.", "answer": "spirit", "source_quote": "The sacrifices of The Creator are a broken spirit — a broken and contrite heart, O Creator, you will not despise." }
+  ],
+  "multiple_choice": [
+    { "ref": "51:10-12", "question": "What does Dawid ask for in Psalm 51?", "options": ["A new throne and kingdom", "A clean heart and a right spirit — do not take your holy spirit from me", "A temple built in his name", "Military victory over his enemies"], "correct": 1, "source_quote": "Create in me a clean heart, O Creator, and renew a right spirit within me. Cast me not away from your presence, and take not your holy spirit from me." },
+    { "ref": "68:4", "question": "What title does Psalm 68 give to YHWH?", "options": ["King of Kings", "Rider on the Clouds — his name is YAH", "Ancient of Days", "The Good Shepherd"], "correct": 1, "source_quote": "Lift up a song to him who rides through the deserts — his name is YAH." },
+    { "ref": "46:1", "question": "What does Psalm 46 declare about YHWH?", "options": ["YHWH is a distant watcher", "YHWH is our refuge and strength, a very present help in trouble", "YHWH has abandoned his people", "YHWH will send a new prophet"], "correct": 1, "source_quote": "YHWH is our refuge and strength, a very present help in trouble." }
+  ],
+  "faq": [
+    {
+      "question": "What does the Rider on the Clouds title reveal about YHWH and the Ugaritic Baal tradition?",
+      "answer": "Psalm 68:4 calls YHWH the Rider on the Clouds (Rokev ba-Aravot) and names him YAH. This exact epithet — Rkb 'rpt — is the primary title of Baal in the Ugaritic tablets discovered at Ras Shamra (KTU 1.1-1.6, c. 1300 BCE). The Hebrew prophetic tradition took this ancient Afro-Asiatic title from the Canaanite storm deity and applied it to YHWH — a direct theological reclamation. YHWH is the true Rider. When the NT later applies cloud-riding imagery to its central figure (Matthew 26:64, Revelation 1:7), it is performing a third transfer of the same title: from Ugaritic Baal, to YHWH, to a human figure elevated to divine status. Each transfer serves a different theological agenda. The Great Eraser research documents how the NT transfer obscures the original YHWH attribution — European readers are taught the title belongs to the NT figure, unaware it was YHWH's title, and before that a Canaanite title from the same Afro-Asiatic cultural matrix."
+    },
+    {
+      "question": "Why does Psalm 51 undermine institutional mediation?",
+      "answer": "Dawid's prayer in Psalm 51 is addressed directly to YHWH after his sin with Bat-Sheva. He does not go to the priest. He does not bring a sacrifice first. He says: 'You do not delight in sacrifice, or I would give it — you do not take pleasure in burnt offerings. The sacrifices of The Creator are a broken spirit — a broken and contrite heart, O Creator, you will not despise' (51:16-17). This is the covenant relationship in its purest form: a human being, broken, speaking directly to YHWH, asking for internal renewal. Every Great Eraser system inserts something between this moment and YHWH — a priest, a church, a creed, a conversion process. Psalm 51 says the only thing YHWH requires is the broken heart itself. No institution can provide that. No institution can block it."
+    },
+    {
+      "question": "What is the Elohistic Psalter and why does it matter?",
+      "answer": "Psalms 42-83 are called the Elohistic Psalter because they use the title Elohim (The Creator) far more frequently than the personal name YHWH — even in passages where parallel psalms elsewhere use YHWH. This suggests an editorial layer that systematically replaced YHWH with Elohim. The phenomenon is relevant to the Great Eraser research because it documents name substitution within the Hebrew text itself — the same mechanism that later produced 'LORD' in English Bibles. The impulse to obscure the personal name YHWH is ancient. The DSS preserve earlier readings that in some cases retain YHWH where the Masoretic Elohistic Psalter has substituted Elohim."
+    }
+  ]
+}

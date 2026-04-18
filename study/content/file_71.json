@@ -1,0 +1,34 @@
+{
+  "id": "file_71",
+  "label": "Tehillim (Psalms) — Part 7 — Psalm 119",
+  "volume": 20,
+  "content_version": 1,
+  "summary_plain": "Psalm 119 is the longest chapter in all of scripture — 176 verses arranged as an acrostic with each section of eight verses beginning with a successive letter of the Hebrew aleph-bet. The entire psalm is a sustained declaration of devotion to the Torah of YHWH. Your word is a lamp to my feet and a light to my path. I will run in the way of your commandments when you enlarge my heart. Oh how I love your Torah — it is my meditation all the day. The law of your mouth is better to me than thousands of gold and silver pieces.",
+  "summary_scholarly": "The ACR reads Psalm 119 from DSS witnesses (11QPsa and fragments) and the Orit Ge'ez. Psalm 119 is the most sustained Torah-devotion text in all of scripture. Its acrostic structure — 22 Hebrew letters, eight verses per letter, 176 verses total — is a literary monument. Every verse uses at least one of eight key terms for YHWH's instruction: Torah, edot (testimonies), piqqudim (precepts), chuqqim (statutes), mitzvot (commandments), mishpatim (judgments), davar (word), and imrah (saying). The psalm demolishes any claim that devotion to Torah was experienced as legalistic burden. The psalmist loves the Torah. He meditates on it. He runs in its path. He finds it sweeter than honey. The Qumran community's own sectarian texts (1QS, CD) demonstrate the same Torah devotion — the DSS community structured their entire communal life around Torah observance. The NT framing of Torah as bondage (Galatians 3:23-25, Romans 7:6) directly contradicts the witness of Psalm 119 and the entire DSS corpus.",
+  "key_terms": [
+    { "term": "Aleph-Bet Acrostic", "phonetic": "AH-lef Bet", "definition": "Psalm 119 is structured as a 22-section acrostic: each section begins with the next letter of the Hebrew alphabet. Aleph through Tav — the complete alphabet devoted to the complete Torah. The form itself declares: Torah covers everything from A to Z." },
+    { "term": "Torah", "phonetic": "Toh-RAH", "definition": "Instruction, teaching, guidance — YHWH's direct guidance for the covenant people. Psalm 119 uses Torah as its primary term and treats it as the source of life, light, freedom, and delight. Not burden. Not bondage. Delight." },
+    { "term": "Ner le-Ragli (Lamp to My Feet)", "phonetic": "Ner leh-Rahg-LEE", "definition": "Psalm 119:105: 'Your word is a lamp to my feet and a light to my path.' Torah is not an abstract law code — it is the practical light that guides the covenant person's daily steps." }
+  ],
+  "fill_blank": [
+    { "ref": "119:105", "prompt": "Your word is a ______ to my feet and a light to my path.", "answer": "lamp", "source_quote": "Your word is a lamp to my feet and a light to my path." },
+    { "ref": "119:97", "prompt": "Oh how I ______ your Torah — it is my meditation all the day.", "answer": "love", "source_quote": "Oh how I love your Torah — it is my meditation all the day." },
+    { "ref": "119:32", "prompt": "I will run in the way of your commandments when you enlarge my ______.", "answer": "heart", "source_quote": "I will run in the way of your commandments when you enlarge my heart." },
+    { "ref": "119:72", "prompt": "The law of your mouth is better to me than thousands of gold and ______.", "answer": "silver", "source_quote": "The law of your mouth is better to me than thousands of gold and silver." }
+  ],
+  "multiple_choice": [
+    { "ref": "119:1-176", "question": "What is the literary structure of Psalm 119?", "options": ["A chiastic poem of 50 verses", "A 22-section acrostic — one section per Hebrew letter, eight verses per section, 176 verses total", "A dialogue between YHWH and Dawid", "A ten-verse summary of the commandments"], "correct": 1, "source_quote": "Each section of eight verses begins with the successive letter of the Hebrew aleph-bet, from Aleph to Tav." },
+    { "ref": "119:97", "question": "How does the psalmist describe their relationship to Torah?", "options": ["It is a heavy burden", "Oh how I love your Torah — it is my meditation all the day", "It was given only to the priests", "It has been replaced"], "correct": 1, "source_quote": "Oh how I love your Torah — it is my meditation all the day." },
+    { "ref": "119:105", "question": "What does Psalm 119 call YHWH's word?", "options": ["A weapon of war", "A lamp to my feet and a light to my path", "A mystery hidden from the people", "A code that only scholars understand"], "correct": 1, "source_quote": "Your word is a lamp to my feet and a light to my path." }
+  ],
+  "faq": [
+    {
+      "question": "How does Psalm 119 contradict the NT framing of Torah as bondage?",
+      "answer": "The NT frames Torah as bondage, curse, and confinement: 'Before faith came, we were held captive under the law, imprisoned until the coming faith would be revealed' (Galatians 3:23). 'Now we are released from the law, having died to that which held us captive' (Romans 7:6). Psalm 119 — the longest chapter in all of scripture, 176 verses — says the exact opposite. The psalmist loves the Torah (119:97). He runs in its way (119:32). It is sweeter than honey (119:103). It is a lamp to his feet (119:105). It gives understanding to the simple (119:130). It is his delight, not his prison. The Qumran community organized their entire communal life around Torah observance (1QS, CD). The Beta Israel maintained Torah practice for millennia in Ethiopia. The Torah-as-bondage framework is a Great Eraser construction — it requires the reader to reject the longest psalm in scripture to accept a Pauline theological claim written centuries later."
+    },
+    {
+      "question": "Why does the acrostic structure matter?",
+      "answer": "Psalm 119's acrostic structure — 22 Hebrew letters, every letter devoted to Torah — is not decorative. It is theological. The Hebrew alphabet is the building block of all Hebrew expression. By devoting every letter to Torah, the psalm declares: there is no dimension of language, thought, or life that Torah does not cover. From Aleph to Tav — the first letter to the last — everything is Torah. This is the Great Eraser's most fundamental target. If the entire alphabet belongs to Torah, then no external system — Greek philosophy, Roman theology, European Enlightenment rationalism — can claim a domain outside Torah's reach. The psalm's structure is its argument: Torah is total, Torah is beautiful, and Torah is the covenant person's greatest delight."
+    }
+  ]
+}

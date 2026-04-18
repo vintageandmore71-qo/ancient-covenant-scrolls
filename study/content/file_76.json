@@ -1,0 +1,33 @@
+{
+  "id": "file_76",
+  "label": "Mishlei (Proverbs) — Part 3 — Chapters 21–31",
+  "volume": 22,
+  "content_version": 1,
+  "summary_plain": "Mishlei chapters 21 through 31 conclude the wisdom of Shelomoh and introduce the words of Agur and the words of Lemu'el's mother. The heart of the king is in the hand of YHWH — he turns it wherever he wills. A good name is to be chosen rather than great riches. Train up a child in the way he should go — when he is old he will not depart from it. The book closes with Eshet Chayil — the woman of valor: Who can find a woman of valor? Her worth is far above rubies. She opens her mouth with wisdom, and the Torah of kindness is on her tongue.",
+  "summary_scholarly": "The ACR reads Mishlei 21-31 from DSS fragments and the Orit Ge'ez. The final chapter — Eshet Chayil (31:10-31) — is an aleph-bet acrostic, the same literary structure as Psalm 119. Each of its 22 verses begins with the next letter of the Hebrew alphabet. The woman of valor is not a passive domestic figure — she buys fields, plants vineyards, trades merchandise, strengthens her arms, opens her hands to the poor, and speaks wisdom with Torah on her tongue. She is the embodiment of Chokmah (Wisdom) from chapters 1-9 made tangible. The words of Agur (ch 30) and the words of King Lemu'el's mother (ch 31:1-9) are wisdom from outside the Shelomoh tradition — possibly Arabian or East African origin, given the non-Israelite names. The wisdom tradition is broader than one king, one court, one nation.",
+  "key_terms": [
+    { "term": "Eshet Chayil (Woman of Valor)", "phonetic": "EH-shet KHAH-yil", "definition": "Mishlei 31:10-31: an aleph-bet acrostic describing the woman of valor. She is industrious, wise, generous, and strong. Her worth is far above rubies. She opens her mouth with wisdom, and the Torah of kindness is on her tongue." },
+    { "term": "Agur ben Yaqeh", "phonetic": "Ah-GOOR ben Yah-KEH", "definition": "The speaker of chapter 30. Not identified as Israelite. His sayings include the famous 'four things too wonderful for me' passage. His presence in Mishlei demonstrates the wisdom tradition's openness to truth from beyond the Israelite court." },
+    { "term": "Torat Chesed (Torah of Kindness)", "phonetic": "Toh-RAHT KHEH-sed", "definition": "31:26: 'She opens her mouth with wisdom, and the Torah of kindness is on her tongue.' Torah here is not law code but instruction — and it is qualified by chesed (lovingkindness, covenant faithfulness). Wisdom spoken with chesed." }
+  ],
+  "fill_blank": [
+    { "ref": "31:10", "prompt": "Who can find a woman of valor? Her worth is far above ______.", "answer": "rubies", "source_quote": "Who can find a woman of valor? Her worth is far above rubies." },
+    { "ref": "22:1", "prompt": "A good ______ is to be chosen rather than great riches.", "answer": "name", "source_quote": "A good name is to be chosen rather than great riches, and favor is better than silver or gold." },
+    { "ref": "22:6", "prompt": "Train up a child in the way he should go — when he is old he will not ______ from it.", "answer": "depart", "source_quote": "Train up a child in the way he should go — when he is old he will not depart from it." }
+  ],
+  "multiple_choice": [
+    { "ref": "31:10-31", "question": "What is Eshet Chayil (the woman of valor) in Mishlei 31?", "options": ["A passive domestic figure who stays indoors", "A woman who buys fields, plants vineyards, trades, strengthens her arms, helps the poor, and speaks wisdom with Torah on her tongue", "A figurative name for the temple", "A queen who rules by military power"], "correct": 1, "source_quote": "She considers a field and buys it; with the fruit of her hands she plants a vineyard. She dresses herself with strength and makes her arms strong... She opens her hand to the poor and reaches out her hands to the needy... She opens her mouth with wisdom, and the Torah of kindness is on her tongue." },
+    { "ref": "22:1", "question": "What does Mishlei say is to be chosen rather than great riches?", "options": ["Great power", "A good name", "Many children", "A large house"], "correct": 1, "source_quote": "A good name is to be chosen rather than great riches." },
+    { "ref": "31:30", "question": "What does the Eshet Chayil passage say about beauty?", "options": ["Beauty is the highest virtue", "Charm is deceitful and beauty is vain — a woman who fears YHWH is to be praised", "Beauty is eternal", "Beauty proves righteousness"], "correct": 1, "source_quote": "Charm is deceitful, and beauty is vain, but a woman who fears YHWH is to be praised." }
+  ],
+  "faq": [
+    {
+      "question": "Why does Eshet Chayil matter for understanding covenant women?",
+      "answer": "Eshet Chayil (Mishlei 31:10-31) describes a woman who buys fields, plants vineyards, conducts international trade, strengthens her arms, helps the poor, and speaks wisdom with the Torah of kindness on her tongue. She is not passive. She is not decorative. She is the embodiment of Chokmah (Wisdom) from chapters 1-9 made real in a household. The colonial and institutional erasure of women's covenant roles — reducing them to silent subordinates based on Pauline instructions ('women should be silent in the assemblies,' 1 Corinthians 14:34) — directly contradicts the Hebrew wisdom tradition's portrait. Devorah judged Yisra'EL. Miriam prophesied. The Eshet Chayil speaks wisdom with Torah on her tongue. The Great Eraser silence imposed on women is not from the Hebrew text."
+    },
+    {
+      "question": "Who are Agur and Lemu'el and why are non-Israelite wisdom teachers in scripture?",
+      "answer": "Agur ben Yaqeh (chapter 30) and King Lemu'el (chapter 31:1-9) are not identified as Israelite. Their names suggest Arabian or East African origin. Their presence in Mishlei — canonical scripture — demonstrates that the Hebrew wisdom tradition recognized truth from beyond its own national borders. This is consistent with the Afro-Asiatic intellectual heritage: wisdom circulated across the African-Arabian corridor from Cush to Egypt to the Levant to Arabia. The Instructions of Amenemope (Egyptian), the Proverbs of Ahiqar (Aramaic), and the wisdom of Agur all participate in the same ancient tradition. The Great Eraser isolates Hebrew wisdom from its African and Arabian context, treating it as uniquely 'Judeo-Christian' when it is Afro-Asiatic in origin."
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "id": "file_66",
+  "label": "Tehillim (Psalms) — Part 2 — Psalms 21–41",
+  "volume": 20,
+  "content_version": 1,
+  "summary_plain": "Psalms 21 through 41 move between royal victory psalms and deep personal lament. Psalm 22 opens with the cry: My El, my El, why have you forsaken me? The speaker is mocked, pierced, his garments divided by lot — yet the psalm ends not in death but in YHWH's deliverance and the declaration that all the ends of the earth shall turn to YHWH. Psalm 23 declares: YHWH is my shepherd, I shall not want. He leads me beside still waters, he restores my soul. Psalm 24 asks: Who shall ascend the hill of YHWH? He who has clean hands and a pure heart. Psalm 34 proclaims: YHWH is near to the brokenhearted. Psalm 37 counsels: do not fret because of evildoers — trust in YHWH and do good.",
+  "summary_scholarly": "The ACR reads Psalms 21-41 from the Dead Sea Scrolls witnesses (fragments across 4QPsa-q, 11QPsa) and the Orit Ge'ez. Psalm 22 is critical to understanding the Great Eraser mechanism: the NT appropriates the opening line (My El, my El, why have you forsaken me) as a crucifixion quotation (Matthew 27:46), but the full psalm is a communal lament that resolves in national restoration — 'All the ends of the earth shall remember and turn to YHWH, and all the families of the nations shall worship before you' (22:27). The psalm was never about an individual dying for sins. The NT extracted one verse from its covenantal context and reframed it as prophecy fulfilled. The DSS preserve Psalm 22 as a communal lament of the covenant people under oppression — the suffering is national, the deliverance is YHWH's, and the resolution is that all nations acknowledge YHWH directly.",
+  "key_terms": [
+    { "term": "Eli Eli Lama Azavtani", "phonetic": "Eh-LEE Eh-LEE LAH-mah ah-ZAHV-tah-nee", "definition": "My El, my El, why have you forsaken me — the opening cry of Psalm 22. A communal lament of the covenant people under oppression, not a prophecy of individual death. The psalm resolves in YHWH's deliverance and all nations turning to YHWH." },
+    { "term": "Ro'i (Shepherd)", "phonetic": "Roh-EE", "definition": "YHWH is my shepherd (Psalm 23:1). Ro'eh means shepherd, one who tends and guides. YHWH as shepherd is the direct relationship — no intermediary priest, king, or institution between the individual and YHWH." },
+    { "term": "Gey Tzalmavet", "phonetic": "Gay Tzal-MAH-vet", "definition": "Valley of the shadow of death (Psalm 23:4). The Hebrew tzalmavet combines shadow (tzel) and death (mavet). Even through the deepest darkness, the psalmist fears no evil because YHWH is present." }
+  ],
+  "fill_blank": [
+    { "ref": "22:1", "prompt": "My El, my El, why have you ______ me?", "answer": "forsaken", "source_quote": "My El, my El, why have you forsaken me? Why are you so far from saving me, from the words of my groaning?" },
+    { "ref": "23:1", "prompt": "YHWH is my ______, I shall not want.", "answer": "shepherd", "source_quote": "YHWH is my shepherd, I shall not want." },
+    { "ref": "23:4", "prompt": "Even though I walk through the valley of the shadow of death, I will fear no ______, for you are with me.", "answer": "evil", "source_quote": "Even though I walk through the valley of the shadow of death, I will fear no evil, for you are with me; your rod and your staff, they comfort me." },
+    { "ref": "24:3-4", "prompt": "Who shall ascend the hill of YHWH? He who has clean ______ and a pure heart.", "answer": "hands", "source_quote": "Who shall ascend the hill of YHWH? And who shall stand in his holy place? He who has clean hands and a pure heart, who does not lift up his soul to what is false." }
+  ],
+  "multiple_choice": [
+    { "ref": "22:27", "question": "How does Psalm 22 resolve — what happens after the suffering described?", "options": ["The speaker dies and is buried", "All the ends of the earth shall remember and turn to YHWH", "The enemies are never defeated", "A new king is appointed"], "correct": 1, "source_quote": "All the ends of the earth shall remember and turn to YHWH, and all the families of the nations shall worship before you." },
+    { "ref": "23:1-3", "question": "What does YHWH as shepherd do for the psalmist?", "options": ["He leads him into battle", "He makes him lie down in green pastures and leads him beside still waters — he restores his soul", "He builds a temple for him", "He sends him into exile"], "correct": 1, "source_quote": "He makes me lie down in green pastures. He leads me beside still waters. He restores my soul." },
+    { "ref": "34:18", "question": "Who does YHWH draw near to according to Psalm 34?", "options": ["The wealthy and powerful", "The brokenhearted and those crushed in spirit", "Only the priests", "The kings of the earth"], "correct": 1, "source_quote": "YHWH is near to the brokenhearted and saves the crushed in spirit." }
+  ],
+  "faq": [
+    {
+      "question": "Was Psalm 22 written as a prophecy of crucifixion?",
+      "answer": "No. Psalm 22 is a communal lament — the covenant people crying out under oppression. The NT extracted the opening line ('My El, my El, why have you forsaken me') and placed it in the mouth of a dying figure (Matthew 27:46), retroactively framing the entire psalm as prophecy fulfilled. But the psalm itself resolves in national restoration: 'All the ends of the earth shall remember and turn to YHWH' (22:27). The suffering described is national. The deliverance is YHWH's own act. There is no substitutionary atonement theology in the psalm. The DSS preserve Psalm 22 as part of the covenant community's liturgical collection — it is a prayer of the people, not a prediction about one person. The appropriation of this psalm is one of the clearest examples of the Great Eraser mechanism: taking a Hebrew text out of its covenantal context and reframing it to serve a different theological system."
+    },
+    {
+      "question": "Why does YHWH as shepherd matter for understanding the Great Eraser?",
+      "answer": "Psalm 23 declares YHWH is my shepherd — direct, personal, no intermediary. Every Great Eraser system inserts an intermediary between the individual and YHWH. The Rabbinical system interposes the Oral Torah and rabbinic authority. Roman Christianity interposes the church, the pope, and a mediating divine figure. Colonial religion imposed plantation Christianity with slave masters as spiritual authorities. Academic systems interpose credentialed scholars who determine what counts as scripture. Psalm 23 says none of this: YHWH is my shepherd. The relationship is direct. The covenant person walks through the valley of the shadow of death — exile, slavery, persecution — and YHWH is present without any institutional mediation. The psalm is the covenant in one sentence."
+    },
+    {
+      "question": "What do the DSS fragments of Psalms 21-41 show about textual transmission?",
+      "answer": "Multiple Qumran fragments preserve portions of Psalms 21-41, with some variant readings against the Masoretic. The DSS manuscripts are 800-1,000 years older than the oldest complete Masoretic Psalter. Where variants exist, the DSS and Orit Ge'ez readings are given priority in the ACR as the older witnesses. The Masoretic is not the baseline — it is one late editorial tradition."
+    }
+  ]
+}

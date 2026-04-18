@@ -1,0 +1,32 @@
+{
+  "id": "file_70",
+  "label": "Tehillim (Psalms) — Part 6 — Psalms 107–118",
+  "volume": 20,
+  "content_version": 1,
+  "summary_plain": "Psalms 107 through 118 move from thanksgiving to the great Hallel. Psalm 107 opens: Give thanks to YHWH, for he is good, for his steadfast love endures forever. Psalm 110 declares: YHWH says to my master, sit at my right hand. Psalm 113 begins the Egyptian Hallel — YHWH raises the poor from the dust. Psalm 118 is the climax: the stone the builders rejected has become the cornerstone. This is YHWH's doing — it is marvelous in our eyes. Open to me the gates of righteousness, that I may enter and give thanks to YHWH.",
+  "summary_scholarly": "The ACR reads Psalms 107-118 from DSS witnesses and the Orit Ge'ez. Psalm 118:22-23 — the stone the builders rejected has become the cornerstone — is among the most appropriated verses in all scripture. The NT applies it to its central figure (Matthew 21:42, Acts 4:11, 1 Peter 2:7). In its original covenantal context, the rejected stone is Yisra'EL itself — the nation rejected by the imperial powers (the builders) that becomes the cornerstone of YHWH's order. The DSS community at Qumran understood themselves as the rejected community that would be vindicated. Psalm 110:1 — 'YHWH says to my master (la-adoni)' — uses adoni (my master, a human title) not Adonai (a divine title). The NT's use of this verse to argue for a divine messiah sitting at YHWH's right hand depends on the Greek translation (Kyrios), which obscures the Hebrew distinction between YHWH and the human king.",
+  "key_terms": [
+    { "term": "Even Ma'asu HaBonim (The Rejected Stone)", "phonetic": "EH-ven mah-AH-soo hah-boh-NEEM", "definition": "Psalm 118:22: 'The stone the builders rejected has become the cornerstone.' In the covenant context, this is Yisra'EL — the nation rejected by empires that becomes the foundation of YHWH's order. The NT reapplied this to an individual figure." },
+    { "term": "Hallel", "phonetic": "Hah-LEL", "definition": "Psalms 113-118 form the Egyptian Hallel, sung during Pesach, Sukkot, and Shavuot. Hallel means praise — from the same root as Halleluyah (Praise YAH). These psalms celebrate YHWH's deliverance from Mitzrayim and ongoing faithfulness." },
+    { "term": "Adoni vs. Adonai", "phonetic": "Ah-doh-NEE vs. Ah-doh-NAI", "definition": "Psalm 110:1 uses adoni — 'my master' — a title for a human superior, not a divine title. Adonai is reserved for YHWH. The Greek Septuagint rendered both as Kyrios (Lord), erasing the Hebrew distinction the text itself preserves." }
+  ],
+  "fill_blank": [
+    { "ref": "118:22", "prompt": "The stone the ______ rejected has become the cornerstone.", "answer": "builders", "source_quote": "The stone the builders rejected has become the cornerstone." },
+    { "ref": "118:23", "prompt": "This is YHWH's doing — it is ______ in our eyes.", "answer": "marvelous", "source_quote": "This is YHWH's doing — it is marvelous in our eyes." },
+    { "ref": "107:1", "prompt": "Give thanks to YHWH, for he is good, for his steadfast love endures ______.", "answer": "forever", "source_quote": "Give thanks to YHWH, for he is good, for his steadfast love endures forever." }
+  ],
+  "multiple_choice": [
+    { "ref": "118:22-23", "question": "What does Psalm 118 say about the rejected stone?", "options": ["It was destroyed by the builders", "The stone the builders rejected has become the cornerstone — this is YHWH's doing", "The stone was replaced with a better one", "The builders repented and used it"], "correct": 1, "source_quote": "The stone the builders rejected has become the cornerstone. This is YHWH's doing — it is marvelous in our eyes." },
+    { "ref": "110:1", "question": "What does Psalm 110:1 say in the Hebrew?", "options": ["YHWH says to YHWH, sit at my right hand", "YHWH says to adoni (my master — a human title), sit at my right hand", "YHWH says to the angel, sit at my right hand", "YHWH says to Elohim, sit at my right hand"], "correct": 1, "source_quote": "YHWH says to my master: Sit at my right hand, until I make your enemies your footstool." }
+  ],
+  "faq": [
+    {
+      "question": "Who is the rejected stone in Psalm 118:22?",
+      "answer": "In the covenant context, the rejected stone is Yisra'EL itself — the nation despised and rejected by the empires (the builders of world order) that becomes the cornerstone of YHWH's order. The NT appropriated this verse and applied it to an individual (Matthew 21:42, Acts 4:11). This is a textbook Great Eraser operation: taking a national-covenantal image (Yisra'EL as the rejected cornerstone) and reassigning it to an individual figure, thereby stripping the original people of their own text. The DSS community at Qumran understood themselves as the rejected remnant — the people cast aside by the Temple establishment and by Rome — who would be vindicated by YHWH. The stone is national. The rejection is real. The cornerstone is still Yisra'EL."
+    },
+    {
+      "question": "Why does the Hebrew distinction between adoni and Adonai matter in Psalm 110?",
+      "answer": "Psalm 110:1 reads: 'YHWH says to adoni (my master).' The Hebrew adoni is a human title — used for kings, military commanders, husbands. It is not a divine title. Adonai (with the long vowel) is reserved for YHWH. The Greek Septuagint translated both as Kyrios — Lord — erasing the distinction. The NT then uses the Greek to argue that Psalm 110 describes a divine figure at YHWH's right hand (Matthew 22:44, Hebrews 1:13). The argument only works in Greek. In Hebrew, the psalm describes YHWH addressing a human king — the Davidic ruler — with a human title. The Great Eraser operates through translation: the original Hebrew preserves a clear distinction, the Greek flattens it, and the theological system built on the Greek cannot survive contact with the Hebrew original."
+    }
+  ]
+}

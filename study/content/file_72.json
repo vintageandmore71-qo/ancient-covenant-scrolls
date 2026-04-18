@@ -1,0 +1,38 @@
+{
+  "id": "file_72",
+  "label": "Tehillim (Psalms) — Part 8 — Psalms 120–150",
+  "volume": 20,
+  "content_version": 1,
+  "summary_plain": "Psalms 120 through 150 include the Songs of Ascent (120-134) — pilgrim songs sung going up to Yerushalayim — and the final Halleluyah psalms. Psalm 121: I lift up my eyes to the hills — from where does my help come? My help comes from YHWH, who made heaven and earth. Psalm 127: Unless YHWH builds the house, those who build it labor in vain. Psalm 137 is the exile lament: By the rivers of Babylon — there we sat down and wept when we remembered Tziyon. How shall we sing YHWH's song in a foreign land? Psalm 150 closes the entire Psalter: Let everything that has breath praise YAH. Halleluyah.",
+  "summary_scholarly": "The ACR reads Psalms 120-150 from DSS witnesses (11QPsa, 4QPs fragments) and the Orit Ge'ez. The Songs of Ascent (Shir HaMa'alot, Psalms 120-134) are pilgrimage psalms — they accompany the physical ascent to Yerushalayim. Psalm 137 is the definitive exile psalm: 'By the rivers of Babylon, there we sat down and wept when we remembered Tziyon.' The question 'How shall we sing YHWH's song in a foreign land?' is not rhetorical — it is the central identity question of every displaced covenant community. The Beta Israel sang YHWH's songs in Ethiopia. Enslaved Africans encoded covenant memory in spirituals on plantations. The Qumran community preserved YHWH's songs in caves. Psalm 137 is the ongoing condition of every scattered Israelite community that remembers Tziyon. The 11QPsa arrangement differs significantly from the Masoretic in this section — the closing psalms appear in a different order, demonstrating that the Psalter's final shape was not fixed when the DSS were sealed.",
+  "key_terms": [
+    { "term": "Shir HaMa'alot (Song of Ascent)", "phonetic": "Sheer hah-Mah-ah-LOT", "definition": "The superscription of Psalms 120-134 — songs sung by pilgrims ascending to Yerushalayim. Ma'alot means steps, ascent. The physical journey up to the temple mount accompanied by these songs." },
+    { "term": "Naharot Bavel (Rivers of Babylon)", "phonetic": "Nah-hah-ROT Bah-VEL", "definition": "Psalm 137:1: 'By the rivers of Babylon — there we sat down and wept when we remembered Tziyon.' The rivers are the Euphrates and its canals. The exiles sat, wept, and hung their lyres on the willows. The song could not be sung in a foreign land." },
+    { "term": "Halleluyah", "phonetic": "Hah-leh-loo-YAH", "definition": "Praise YAH — a direct command to praise YHWH by his shortened name. The closing psalms (146-150) each begin and end with Halleluyah. The Psalter ends with praise, not lament." }
+  ],
+  "fill_blank": [
+    { "ref": "137:1", "prompt": "By the rivers of ______, there we sat down and wept, when we remembered Tziyon.", "answer": "Babylon", "source_quote": "By the rivers of Babylon, there we sat down and wept, when we remembered Tziyon." },
+    { "ref": "137:4", "prompt": "How shall we sing YHWH's song in a ______ land?", "answer": "foreign", "source_quote": "How shall we sing YHWH's song in a foreign land?" },
+    { "ref": "121:1-2", "prompt": "I lift up my eyes to the hills — from where does my help come? My help comes from ______, who made heaven and earth.", "answer": "YHWH", "source_quote": "I lift up my eyes to the hills — from where does my help come? My help comes from YHWH, who made heaven and earth." },
+    { "ref": "150:6", "prompt": "Let everything that has ______ praise YAH. Halleluyah.", "answer": "breath", "source_quote": "Let everything that has breath praise YAH. Halleluyah." }
+  ],
+  "multiple_choice": [
+    { "ref": "137:1-4", "question": "What do the exiles do by the rivers of Babylon?", "options": ["They celebrate their new home", "They sit down and weep when they remember Tziyon — they cannot sing YHWH's song in a foreign land", "They build a new temple", "They forget Yerushalayim"], "correct": 1, "source_quote": "By the rivers of Babylon, there we sat down and wept, when we remembered Tziyon. On the willows there we hung up our lyres. For there our captors required of us songs... How shall we sing YHWH's song in a foreign land?" },
+    { "ref": "127:1", "question": "What does Psalm 127 say about building a house?", "options": ["Only priests may build", "Unless YHWH builds the house, those who build it labor in vain", "The house must be built of cedar", "Building is forbidden on Shabbat only"], "correct": 1, "source_quote": "Unless YHWH builds the house, those who build it labor in vain. Unless YHWH watches over the city, the watchman stays awake in vain." },
+    { "ref": "121:1-2", "question": "Where does the psalmist's help come from in Psalm 121?", "options": ["From the mountains themselves", "From YHWH, who made heaven and earth", "From the king in Yerushalayim", "From the priests in the temple"], "correct": 1, "source_quote": "My help comes from YHWH, who made heaven and earth." }
+  ],
+  "faq": [
+    {
+      "question": "What does Psalm 137 reveal about exile and memory?",
+      "answer": "Psalm 137 is the exile psalm: 'By the rivers of Babylon, there we sat down and wept, when we remembered Tziyon.' The question 'How shall we sing YHWH's song in a foreign land?' is the fundamental question of every displaced covenant community across every era. The Babylonian exile (586 BCE) was the first major displacement, but the pattern repeats: the Roman exile (70 CE), the scattering across Africa, the transatlantic slave trade, the forced dispersions across every continent. In each case the question is the same — how do you maintain covenant identity when you are removed from the covenant land? The Great Eraser operates precisely in this space. When a people is displaced, the erasure of their songs, their language, their names, and their memory becomes possible. Psalm 137:5 answers: 'If I forget you, O Yerushalayim, let my right hand forget its skill.' Memory is resistance. Forgetting is the erasure. The psalm commands: do not forget."
+    },
+    {
+      "question": "How shall we sing YHWH's song in a foreign land — who has answered this question?",
+      "answer": "Three communities answered this question across three continents without coordinating with each other. The Beta Israel in Ethiopia sang YHWH's songs in Ge'ez for over a thousand years — maintaining Shabbat, kashrut, and pilgrimage to their own Tziyon. Enslaved Africans on American plantations encoded covenant memory in spirituals: 'Go Down, Moses' is the Exodus. 'Swing Low, Sweet Chariot' carries Eliyahu's chariot. 'Didn't My Lord Deliver Daniel' names Daniyel. The Qumran community at the Dead Sea preserved the songs physically — sealing the Psalms Scroll (11QPsa) in caves where it waited 1,900 years. Each community found its own way to sing YHWH's song in exile. None of them forgot Yerushalayim."
+    },
+    {
+      "question": "Why does 11QPsa arrange the closing psalms differently than the Masoretic?",
+      "answer": "The Great Psalms Scroll (11QPsa) from Qumran Cave 11 presents Psalms 101-150 in a different sequence than the Masoretic text and includes additional compositions — Psalms 151, 154, 155, a prose piece about Dawid's writings, and other texts. This proves the Psalter was not yet fixed in the Masoretic form when the Qumran community sealed their scrolls (c. 68 CE). The Masoretic arrangement was standardized by the Ben Asher family in Tiberias between 850-950 CE — 800 years later. The DSS arrangement is older. The Great Eraser mechanism depends on treating the Masoretic as the original and only text. The 11QPsa demonstrates that the Masoretic is one editorial tradition, not the original."
+    }
+  ]
+}
