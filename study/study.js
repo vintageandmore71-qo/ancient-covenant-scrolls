@@ -563,7 +563,37 @@ function openActivity(mode, fid) {
 // Split-out views for terms and FAQ so they can be opened from the grid
 function showTermsMode(fid) {
   loadContent(fid).then(function (data) {
-    if (!data) { openActivity('stub', fid); return; }
+    if (!data) {
+      // Algorithmic fallback: extract unique capitalized names from verses
+      var verses = getVerses(fid);
+      if (!verses.length) {
+        fetch('../data/'+fid+'.json').then(function(r){return r.ok?r.json():null;}).then(function(d){
+          if(d){CHAPTER_CACHE[fid]=d;showTermsMode(fid);}else{openActivity('stub',fid);}
+        }).catch(function(){openActivity('stub',fid);}); return;
+      }
+      var allText = verses.join(' ');
+      var nameSet = {};
+      var words = allText.split(/\s+/);
+      for (var w = 0; w < words.length; w++) {
+        var clean = words[w].replace(/[.,;:!?"'()]/g, '');
+        if (clean.length > 3 && clean[0] === clean[0].toUpperCase() && clean[0] !== clean[0].toLowerCase() &&
+            ['And','The','But','For','Now','Then','When','So','Let','Not','All','His','Her','Who','This','That','These','Those'].indexOf(clean) < 0) {
+          nameSet[clean] = (nameSet[clean] || 0) + 1;
+        }
+      }
+      var names = Object.keys(nameSet).sort(function(a,b){return nameSet[b]-nameSet[a];}).slice(0, 10);
+      var secLabel = IDS.indexOf(fid) >= 0 ? LBL[IDS.indexOf(fid)] : fid;
+      var h = '<div class="study-view">';
+      h += '<h2 class="sv-title" style="border-left-color:var(--vol6)">Key Names \u2014 ' + secLabel.split(' \u2014 ')[0] + '</h2>';
+      h += '<div class="sv-sec">';
+      for (var n = 0; n < names.length; n++) {
+        h += '<div class="sv-term"><strong class="sv-tw">' + names[n] + '</strong> <span class="sv-td">Appears ' + nameSet[names[n]] + ' times in this section</span></div>';
+      }
+      h += '</div><button class="study-btn" id="b-back-grid">Back to activities</button></div>';
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-back-grid').addEventListener('click', function () { go(fid); });
+      window.scrollTo(0, 0); return;
+    }
     var h = '<div class="study-view">';
     h += '<h2 class="sv-title" style="border-left-color:var(--vol6)">Key Terms \u2014 ' + data.label + '</h2>';
     h += '<div class="sv-sec">';
@@ -582,7 +612,17 @@ function showTermsMode(fid) {
 
 function showFaqMode(fid) {
   loadContent(fid).then(function (data) {
-    if (!data) { openActivity('stub', fid); return; }
+    if (!data) {
+      var secIdx = IDS.indexOf(fid);
+      var secLabel = secIdx >= 0 ? LBL[secIdx].split(' \u2014 ')[0] : fid;
+      var h = '<div class="study-view">';
+      h += '<h2 class="sv-title" style="border-left-color:var(--vol1)">FAQ \u2014 ' + secLabel + '</h2>';
+      h += '<div class="sv-sec"><p class="study-na">Curated FAQ for this section will be added in a future session. Use Listen &amp; Learn to hear the full text, or try Fill in the Blank and Flashcards which work now.</p></div>';
+      h += '<button class="study-btn" id="b-back-grid">Back to activities</button></div>';
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-back-grid').addEventListener('click', function () { go(fid); });
+      window.scrollTo(0, 0); return;
+    }
     var h = '<div class="study-view">';
     h += '<h2 class="sv-title" style="border-left-color:var(--vol1)">FAQ \u2014 ' + data.label + '</h2>';
     h += '<div class="sv-sec">';
@@ -860,10 +900,32 @@ function showFillBlank(fid) {
 // ---- Multiple Choice quiz ----
 function showMC(fid) {
   loadContent(fid).then(function (data) {
-    if (!data || !data.multiple_choice || !data.multiple_choice.length) {
-      openActivity('stub', fid); return;
+    var questions;
+    if (data && data.multiple_choice && data.multiple_choice.length) {
+      questions = shuffle(data.multiple_choice.slice());
+    } else {
+      var verses = getVerses(fid);
+      if (!verses.length) {
+        fetch('../data/'+fid+'.json').then(function(r){return r.ok?r.json():null;}).then(function(d){
+          if(d){CHAPTER_CACHE[fid]=d;showMC(fid);}else{openActivity('stub',fid);}
+        }).catch(function(){openActivity('stub',fid);}); return;
+      }
+      var usable = verses.filter(function(v){return v.length>30&&v.length<200;});
+      usable = shuffle(usable);
+      questions = [];
+      for (var vi=0; vi<Math.min(usable.length,10); vi++) {
+        var words = usable[vi].split(/\s+/);
+        var snippet = words.slice(0, Math.min(8, words.length)).join(' ');
+        var opts = [usable[vi]];
+        var others = usable.filter(function(_,j){return j!==vi;});
+        others = shuffle(others).slice(0,3);
+        for (var oi=0;oi<others.length;oi++) opts.push(others[oi]);
+        opts = shuffle(opts);
+        var correct = opts.indexOf(usable[vi]);
+        questions.push({ref:'',question:'Which verse contains: "'+snippet+'..."?',options:opts.map(function(o){return o.length>60?o.slice(0,57)+'...':o;}),correct:correct,source_quote:usable[vi]});
+      }
+      if (!questions.length) { openActivity('stub', fid); return; }
     }
-    var questions = shuffle(data.multiple_choice.slice());
     var qi = 0, score = 0;
     var mcColors = ['#dc2626', '#2563eb', '#059669', '#d97706'];
 
@@ -1101,7 +1163,22 @@ function showFlashcards(fid) {
 function showMemoryMatch(fid) {
   loadContent(fid).then(function (data) {
     if (!data || !data.key_terms || data.key_terms.length < 4) {
-      openActivity('stub', fid); return;
+      // Algorithmic fallback: match first half of verse to second half
+      var verses = getVerses(fid);
+      if (!verses.length) {
+        fetch('../data/'+fid+'.json').then(function(r){return r.ok?r.json():null;}).then(function(d){
+          if(d){CHAPTER_CACHE[fid]=d;showMemoryMatch(fid);}else{openActivity('stub',fid);}
+        }).catch(function(){openActivity('stub',fid);}); return;
+      }
+      var usable = verses.filter(function(v){return v.length>30&&v.length<150;});
+      usable = shuffle(usable).slice(0, 6);
+      if (usable.length < 4) { openActivity('stub', fid); return; }
+      // Create fake key_terms from verse halves
+      data = { key_terms: usable.map(function(v) {
+        var words = v.split(/\s+/);
+        var half = Math.ceil(words.length / 2);
+        return { term: words.slice(0, half).join(' '), definition: words.slice(half).join(' ') + '.' };
+      })};
     }
     // Use first 6 terms for a 4x3 grid (6 pairs = 12 cards)
     var terms = data.key_terms.slice(0, 6);
@@ -1447,8 +1524,21 @@ function showProgress(fid) {
 // ---- Verse Builder — tap scrambled words in order to rebuild a verse ----
 function showVerseBuild(fid) {
   loadContent(fid).then(function (data) {
-    if (!data || !data.fill_blank || !data.fill_blank.length) { openActivity('stub', fid); return; }
-    var verses = data.fill_blank.map(function (q) { return { ref: q.ref, text: q.source_quote }; });
+    var verses;
+    if (data && data.fill_blank && data.fill_blank.length) {
+      verses = data.fill_blank.map(function (q) { return { ref: q.ref, text: q.source_quote }; });
+    } else {
+      var rawVerses = getVerses(fid);
+      if (!rawVerses.length) {
+        fetch('../data/'+fid+'.json').then(function(r){return r.ok?r.json():null;}).then(function(d){
+          if(d){CHAPTER_CACHE[fid]=d;showVerseBuild(fid);}else{openActivity('stub',fid);}
+        }).catch(function(){openActivity('stub',fid);}); return;
+      }
+      var usable = rawVerses.filter(function(v){return v.split(/\s+/).length>=5&&v.split(/\s+/).length<=15;});
+      usable = shuffle(usable).slice(0, 5);
+      if (!usable.length) { openActivity('stub', fid); return; }
+      verses = usable.map(function(v){ return { ref: '', text: v }; });
+    }
     verses = shuffle(verses);
     var qi = 0, score = 0;
 
@@ -1550,8 +1640,26 @@ function showVerseBuild(fid) {
 // ---- Word Match — tap term then tap its definition ----
 function showWordMatch(fid) {
   loadContent(fid).then(function (data) {
-    if (!data || !data.key_terms || data.key_terms.length < 4) { openActivity('stub', fid); return; }
-    var terms = shuffle(data.key_terms.slice(0, 6));
+    var terms;
+    if (data && data.key_terms && data.key_terms.length >= 4) {
+      terms = shuffle(data.key_terms.slice(0, 6));
+    } else {
+      // Algorithmic fallback: match first words of verse to rest
+      var rawV = getVerses(fid);
+      if (!rawV.length) {
+        fetch('../data/'+fid+'.json').then(function(r){return r.ok?r.json():null;}).then(function(d){
+          if(d){CHAPTER_CACHE[fid]=d;showWordMatch(fid);}else{openActivity('stub',fid);}
+        }).catch(function(){openActivity('stub',fid);}); return;
+      }
+      var us = rawV.filter(function(v){return v.length>30&&v.length<150;});
+      us = shuffle(us).slice(0, 6);
+      if (us.length < 4) { openActivity('stub', fid); return; }
+      terms = us.map(function(v) {
+        var w = v.split(/\s+/);
+        var h = Math.ceil(w.length / 2);
+        return { term: w.slice(0, Math.min(4, h)).join(' ') + '...', definition: v };
+      });
+    }
     var defs = shuffle(terms.map(function (t) { return { term: t.term, def: t.definition.split('.')[0] + '.' }; }));
     var matched = 0, selectedTerm = null;
 
@@ -1672,9 +1780,21 @@ function showStudyMode(fid) {
   if (i < 0) return;
   loadContent(fid).then(function (data) {
     if (!data) {
-      document.getElementById('content').innerHTML =
-        '<div class="study-view"><p class="study-na">Study content is not available for this section yet.</p>' +
-        '<button class="study-btn" id="b-back-na">Back to reading</button></div>';
+      // Algorithmic fallback: show first verses as summary
+      var verses = getVerses(fid);
+      if (!verses.length) {
+        fetch('../data/'+fid+'.json').then(function(r){return r.ok?r.json():null;}).then(function(d){
+          if(d){CHAPTER_CACHE[fid]=d;showStudyMode(fid);}else{openActivity('stub',fid);}
+        }).catch(function(){openActivity('stub',fid);}); return;
+      }
+      var secLabel = i >= 0 ? LBL[i] : fid;
+      var preview = verses.slice(0, Math.min(5, verses.length)).join(' ');
+      var h = '<div class="study-view">';
+      h += '<h2 class="sv-title">' + secLabel + '</h2>';
+      h += '<div class="sv-sec"><h3>Preview</h3><div class="sv-text">' + preview + '</div></div>';
+      h += '<div class="sv-sec"><p class="study-na">Full curated summary, key terms, and FAQ will be added in a future session.</p></div>';
+      h += '<button class="study-btn" id="b-back-na">Back to activities</button></div>';
+      document.getElementById('content').innerHTML = h;
       document.getElementById('b-back-na').addEventListener('click', function () { go(fid); });
       return;
     }
