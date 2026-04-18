@@ -505,6 +505,9 @@ function buildTOC() {
       var s = document.createElement('div');
       s.className = 'sec';
       s.setAttribute('data-id', fid);
+      s.setAttribute('role', 'button');
+      s.setAttribute('tabindex', '0');
+      s.setAttribute('aria-label', 'Study section: ' + LBL[idx]);
       s.textContent = LBL[idx];
       (function (capturedFid) {
         s.addEventListener('click', function () { go(capturedFid); });
@@ -595,8 +598,8 @@ function go(fid) {
 var CHAPTER_CACHE = {};
 
 function actCard(icon, label, color, mode, fid) {
-  return '<div class="act-card" data-mode="' + mode + '" style="background:' + color + '">' +
-    '<div class="act-icon">' + icon + '</div>' +
+  return '<div class="act-card" data-mode="' + mode + '" style="background:' + color + '" role="button" tabindex="0" aria-label="' + label + ' activity">' +
+    '<div class="act-icon" aria-hidden="true">' + icon + '</div>' +
     '<div class="act-label">' + label + '</div>' +
     '</div>';
 }
@@ -1041,10 +1044,10 @@ function showFillBlank(fid) {
       h += '<div class="cloze-opts">';
       for (var o = 0; o < opts.length; o++) {
         h += '<button class="cloze-opt" data-val="' + opts[o] +
-          '" style="background:' + colors[o % 4] + '">' + opts[o] + '</button>';
+          '" style="background:' + colors[o % 4] + '" aria-label="Answer option: ' + opts[o] + '">' + opts[o] + '</button>';
       }
       h += '</div>';
-      h += '<div class="cloze-feedback" id="cloze-fb"></div>';
+      h += '<div class="cloze-feedback" id="cloze-fb" role="status" aria-live="polite"></div>';
       h += '<button class="study-btn" id="b-cloze-quit" style="margin-top:18px">Back to activities</button>';
       h += '</div>';
 
@@ -1193,11 +1196,11 @@ function showMC(fid) {
       }
       for (var o = 0; o < mcOpts.length; o++) {
         h += '<button class="mc-opt" data-idx="' + o +
-          '" style="background:' + mcColors[o % 4] + '">' +
+          '" style="background:' + mcColors[o % 4] + '" aria-label="Option ' + (o + 1) + ': ' + mcOpts[o] + '">' +
           mcOpts[o] + '</button>';
       }
       h += '</div>';
-      h += '<div class="mc-feedback" id="mc-fb"></div>';
+      h += '<div class="mc-feedback" id="mc-fb" role="status" aria-live="polite"></div>';
       h += '<button class="study-btn" id="b-mc-quit" style="margin-top:18px">Back to activities</button>';
       h += '</div>';
 
@@ -1344,7 +1347,7 @@ function showFlashcards(fid) {
       var rColors = ['#dc2626', '#d97706', '#0891b2', '#059669', '#2563eb'];
       for (var r = 1; r <= 5; r++) {
         h += '<button class="fc-rate-btn" data-r="' + r +
-          '" style="background:' + rColors[r - 1] + '">' +
+          '" style="background:' + rColors[r - 1] + '" aria-label="Rate ' + r + ' out of 5: ' + rLabels[r - 1] + '">' +
           r + '<br><span class="fc-rate-sub">' + rLabels[r - 1] + '</span></button>';
       }
       h += '</div></div>';

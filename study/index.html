@@ -19,28 +19,28 @@
 </head>
 <body>
 
-<div id="topnav">
-  <button id="b-sb" title="Toggle sidebar" aria-label="Toggle sidebar">&#9776;</button>
-  <button id="b-home" title="Home" aria-label="Home">&#8962;</button>
-  <div id="tb" role="button" tabindex="0" title="Go to home screen">ACR Study</div>
-  <div id="fc">
-    <button id="b-fs-" title="Smaller text">A&#8722;</button>
-    <button id="b-fs+" title="Larger text">A&#43;</button>
+<div id="topnav" role="navigation" aria-label="Main navigation">
+  <button id="b-sb" title="Toggle sidebar" aria-label="Toggle sidebar" aria-expanded="false">&#9776;</button>
+  <button id="b-home" title="Home" aria-label="Go to home screen">&#8962;</button>
+  <div id="tb" role="button" tabindex="0" title="Go to home screen" aria-label="Current section title">ACR Study</div>
+  <div id="fc" role="group" aria-label="Font size controls">
+    <button id="b-fs-" title="Smaller text" aria-label="Decrease font size">A&#8722;</button>
+    <button id="b-fs+" title="Larger text" aria-label="Increase font size">A&#43;</button>
   </div>
-  <button id="b-theme" title="Theme: light / parchment / navy / amber">&#9680;</button>
-  <button id="b-beeline" title="BeeLine reading aid">&#127752;</button>
-  <button id="b-linefocus" title="Line focus mode">&#128065;</button>
-  <button id="b-child" title="Child mode">&#129490;</button>
-  <button id="b-nt" title="Notes">&#128221;</button>
-  <button id="b-nv" title="All notes">&#128196;</button>
-  <button id="b-vt" title="Voice reader">&#128266;</button>
-  <a href="../" class="lnk" title="Back to Reader">&#8592;<span class="hide-mobile">&nbsp;Reader</span></a>
+  <button id="b-theme" title="Theme: light / parchment / navy / amber" aria-label="Switch color theme">&#9680;</button>
+  <button id="b-beeline" title="BeeLine reading aid" aria-label="Toggle BeeLine reading gradient">&#127752;</button>
+  <button id="b-linefocus" title="Line focus mode" aria-label="Toggle line focus overlay">&#128065;</button>
+  <button id="b-child" title="Child mode" aria-label="Toggle child mode with larger text">&#129490;</button>
+  <button id="b-nt" title="Notes" aria-label="Open notes for this section">&#128221;</button>
+  <button id="b-nv" title="All notes" aria-label="View all saved notes">&#128196;</button>
+  <button id="b-vt" title="Voice reader" aria-label="Toggle voice reader panel">&#128266;</button>
+  <a href="../" class="lnk" title="Back to Reader" aria-label="Return to ACR Reader">&#8592;<span class="hide-mobile">&nbsp;Reader</span></a>
 </div>
 
-<div id="sb"></div>
+<div id="sb" role="navigation" aria-label="Volume and section navigation"></div>
 
-<div id="main">
-  <div id="content">
+<div id="main" role="main">
+  <div id="content" aria-live="polite" aria-atomic="false">
     <div id="home">
       <div class="logo">&#x1F4D6;</div>
       <h1>ACR STUDY</h1>
@@ -62,40 +62,40 @@
 </div>
 
 <!-- Voice reader panel -->
-<div id="vr">
-  <button id="b-pl" title="Play">&#9654;</button>
-  <button id="b-pa" style="display:none" title="Pause">&#9646;&#9646;</button>
-  <button id="b-st" title="Stop">&#9632;</button>
-  <select id="vs" title="Speed">
+<div id="vr" role="region" aria-label="Voice reader controls">
+  <button id="b-pl" title="Play" aria-label="Play voice reader">&#9654;</button>
+  <button id="b-pa" style="display:none" title="Pause" aria-label="Pause voice reader">&#9646;&#9646;</button>
+  <button id="b-st" title="Stop" aria-label="Stop voice reader">&#9632;</button>
+  <select id="vs" title="Speed" aria-label="Reading speed">
     <option value="0.7">0.7x</option>
     <option value="0.85">0.85x</option>
     <option value="1" selected>1x</option>
     <option value="1.2">1.2x</option>
     <option value="1.5">1.5x</option>
   </select>
-  <select id="vc" title="Voice"><option value="">Loading…</option></select>
-  <button id="b-pv" title="Preview voice">&#9654;&#9654;</button>
-  <select id="vm" title="Mode">
+  <select id="vc" title="Voice" aria-label="Select voice"><option value="">Loading…</option></select>
+  <button id="b-pv" title="Preview voice" aria-label="Preview selected voice">&#9654;&#9654;</button>
+  <select id="vm" title="Mode" aria-label="Reading mode">
     <option value="verses">Verses</option>
     <option value="notes">Notes</option>
     <option value="all">All</option>
   </select>
-  <span id="vst">Ready</span>
+  <span id="vst" role="status" aria-live="polite">Ready</span>
 </div>
 
 <!-- Notes panel (per section) -->
-<div id="np">
+<div id="np" role="region" aria-label="Section notes">
   <div id="np-head">
     <span id="np-lbl">Notes</span>
-    <button id="np-save">&#10003; Save</button>
-    <button id="np-clr">Clear</button>
-    <button id="np-cls">&#10005;</button>
+    <button id="np-save" aria-label="Save notes">&#10003; Save</button>
+    <button id="np-clr" aria-label="Clear notes">Clear</button>
+    <button id="np-cls" aria-label="Close notes panel">&#10005;</button>
   </div>
-  <textarea id="np-ta" placeholder="Write your notes for this section…"></textarea>
+  <textarea id="np-ta" placeholder="Write your notes for this section…" aria-label="Notes text area"></textarea>
 </div>
 
 <!-- All-notes viewer -->
-<div id="nv">
+<div id="nv" role="region" aria-label="All saved notes viewer">
   <h2>&#128221; All Notes</h2>
   <div id="nv-list"></div>
 </div>
