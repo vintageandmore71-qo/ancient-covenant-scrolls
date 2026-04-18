@@ -267,7 +267,7 @@ p.sp{background:#fff3cd;border-radius:6px;padding:2px 4px}
 }
 /* Volume banner (inline, always works, no external images) */
 .vol-banner{
-  border-radius:var(--radius);padding:28px 20px;text-align:center;
+  border-radius:var(--radius);padding:32px 24px;text-align:center;
   margin-bottom:14px;box-shadow:0 4px 16px rgba(0,0,0,.18);
   position:relative;overflow:hidden;
 }
@@ -276,10 +276,10 @@ p.sp{background:#fff3cd;border-radius:6px;padding:2px 4px}
   background:radial-gradient(circle at 70% 30%,rgba(255,255,255,.15) 0%,transparent 60%);
   pointer-events:none;
 }
-.vol-banner-icon{font-size:3.5em;margin-bottom:8px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.2))}
 .vol-banner-name{
-  color:#fff;font-size:1.15em;font-weight:700;letter-spacing:.03em;
+  color:#fff;font-size:1.3em;font-weight:700;letter-spacing:.04em;
   text-shadow:0 2px 4px rgba(0,0,0,.3);font-family:var(--font-main);
+  line-height:1.5;
 }
 body.font-dyslexic .vol-banner-name{font-family:var(--font-dyslexic)}
 .activity-grid-header{

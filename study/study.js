@@ -105,10 +105,8 @@ function getVolForFid(fid) {
 
 function volBanner(volId) {
   var c = VOL_COLORS[volId] || ['#333','#111'];
-  var icon = VOL_ICONS[volId] || '\u{1F4D6}';
   var name = VOL_NAMES[volId] || '';
   return '<div class="vol-banner" style="background:linear-gradient(135deg,' + c[0] + ',' + c[1] + ')">' +
-    '<div class="vol-banner-icon">' + icon + '</div>' +
     '<div class="vol-banner-name">' + name + '</div>' +
     '</div>';
 }
@@ -365,6 +363,8 @@ function go(fid) {
   h += actCard('\u{1F9E0}', 'Memory Match', '#dc2626', 'memory', fid);
   h += actCard('\u{1F50A}', 'Listen & Learn', '#4f46e5', 'listen', fid);
   h += actCard('\u{1F3C6}', 'Progress', '#b8860b', 'progress', fid);
+  h += actCard('\u{1F9E9}', 'Verse Builder', '#e91e90', 'versebuild', fid);
+  h += actCard('\u{1F517}', 'Word Match', '#6d28d9', 'wordmatch', fid);
   h += '</div>';
 
   document.getElementById('content').innerHTML = h;
@@ -409,6 +409,8 @@ function openActivity(mode, fid) {
   if (mode === 'memory') { showMemoryMatch(fid); return; }
   if (mode === 'listen') { showListenLearn(fid); return; }
   if (mode === 'progress') { showProgress(fid); return; }
+  if (mode === 'versebuild') { showVerseBuild(fid); return; }
+  if (mode === 'wordmatch') { showWordMatch(fid); return; }
   // Stub for modes not yet built
   document.getElementById('content').innerHTML =
     '<div class="study-view"><div class="sv-sec">' +
@@ -1224,6 +1226,181 @@ function showProgress(fid) {
   document.getElementById('content').innerHTML = h;
   document.getElementById('b-prog-back').addEventListener('click', function () { go(fid); });
   window.scrollTo(0, 0);
+}
+
+// ---- Verse Builder — tap scrambled words in order to rebuild a verse ----
+function showVerseBuild(fid) {
+  loadContent(fid).then(function (data) {
+    if (!data || !data.fill_blank || !data.fill_blank.length) { openActivity('stub', fid); return; }
+    var verses = data.fill_blank.map(function (q) { return { ref: q.ref, text: q.source_quote }; });
+    verses = shuffle(verses);
+    var qi = 0, score = 0;
+
+    function renderPuzzle() {
+      if (qi >= Math.min(verses.length, 5)) { showResults(); return; }
+      var v = verses[qi];
+      var origWords = v.text.split(/\s+/).filter(function (w) { return w.length > 0; });
+      var scrambled = shuffle(origWords.slice());
+      var placed = [];
+
+      function draw() {
+        var h = '<div class="vb-view">';
+        h += '<div class="vb-progress">' + (qi + 1) + ' of ' + Math.min(verses.length, 5) + '</div>';
+        h += '<div class="vb-ref">Rebuild: ' + v.ref + '</div>';
+        h += '<div class="vb-placed" id="vb-placed">';
+        for (var p = 0; p < placed.length; p++) {
+          h += '<span class="vb-word vb-done" data-pi="' + p + '">' + placed[p] + '</span>';
+        }
+        if (placed.length < origWords.length) h += '<span class="vb-cursor">_</span>';
+        h += '</div>';
+        h += '<div class="vb-bank" id="vb-bank">';
+        for (var s = 0; s < scrambled.length; s++) {
+          var used = placed.indexOf(scrambled[s]) >= 0 && countIn(placed, scrambled[s]) >= countIn(scrambled.slice(0, s + 1), scrambled[s]);
+          if (!used) {
+            h += '<button class="vb-word vb-pick" data-si="' + s + '">' + scrambled[s] + '</button>';
+          }
+        }
+        h += '</div>';
+        h += '<div class="vb-btns">';
+        h += '<button class="study-btn" id="b-vb-undo" style="background:#6b7280">\u21A9 Undo</button>';
+        h += '<button class="cloze-audio" id="b-vb-hear">\u{1F50A} Listen</button>';
+        h += '</div>';
+        h += '<div id="vb-fb" class="cloze-feedback"></div>';
+        h += '</div>';
+        document.getElementById('content').innerHTML = h;
+
+        document.getElementById('b-vb-hear').addEventListener('click', function () { speakText(v.text); });
+        document.getElementById('b-vb-undo').addEventListener('click', function () {
+          if (placed.length > 0) { placed.pop(); draw(); }
+        });
+
+        var picks = document.querySelectorAll('.vb-pick');
+        for (var i = 0; i < picks.length; i++) {
+          picks[i].addEventListener('click', function () {
+            var si = parseInt(this.getAttribute('data-si'));
+            var word = scrambled[si];
+            placed.push(word);
+            // Check if correct so far
+            var correct = true;
+            for (var c = 0; c < placed.length; c++) {
+              if (placed[c] !== origWords[c]) { correct = false; break; }
+            }
+            if (!correct) {
+              placed.pop();
+              this.classList.add('cloze-wrong');
+              document.getElementById('vb-fb').innerHTML = '<span class="fb-try">Not that word \u2014 try another</span>';
+              var self = this;
+              setTimeout(function () { self.classList.remove('cloze-wrong'); }, 500);
+            } else if (placed.length === origWords.length) {
+              score++;
+              document.getElementById('vb-fb').innerHTML = '<span class="fb-correct">\u2714 Perfect!</span>';
+              setTimeout(function () { qi++; renderPuzzle(); }, 1500);
+              draw();
+            } else {
+              draw();
+            }
+          });
+        }
+      }
+      draw();
+    }
+
+    function countIn(arr, val) {
+      var c = 0; for (var i = 0; i < arr.length; i++) if (arr[i] === val) c++; return c;
+    }
+
+    function showResults() {
+      var pct = Math.round(score / Math.min(verses.length, 5) * 100);
+      var emoji = pct >= 80 ? '\u{1F3C6}' : pct >= 60 ? '\u{1F31F}' : '\u{1F4AA}';
+      var xpEarned = recordSession(fid, 'versebuild', score, Math.min(verses.length, 5));
+      var h = '<div class="cloze-results"><div class="cr-emoji">' + emoji + '</div>';
+      h += '<div class="cr-score">' + score + ' / ' + Math.min(verses.length, 5) + '</div>';
+      h += '<div class="cr-xp">+' + xpEarned + ' XP</div>';
+      h += '<div class="cr-btns">';
+      h += '<button class="study-btn sb-pri" id="b-vb-retry">\u{1F504} Again</button>';
+      h += '<button class="study-btn" id="b-vb-back">Back to activities</button>';
+      h += '</div></div>';
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-vb-retry').addEventListener('click', function () { showVerseBuild(fid); });
+      document.getElementById('b-vb-back').addEventListener('click', function () { go(fid); });
+    }
+
+    renderPuzzle();
+  });
+}
+
+// ---- Word Match — tap term then tap its definition ----
+function showWordMatch(fid) {
+  loadContent(fid).then(function (data) {
+    if (!data || !data.key_terms || data.key_terms.length < 4) { openActivity('stub', fid); return; }
+    var terms = shuffle(data.key_terms.slice(0, 6));
+    var defs = shuffle(terms.map(function (t) { return { term: t.term, def: t.definition.split('.')[0] + '.' }; }));
+    var matched = 0, selectedTerm = null;
+
+    function render() {
+      var h = '<div class="wm-view">';
+      h += '<div class="wm-header">Tap a term, then tap its meaning</div>';
+      h += '<div class="wm-stats">Matched: ' + matched + ' / ' + terms.length + '</div>';
+      h += '<div class="wm-cols">';
+      h += '<div class="wm-col">';
+      for (var i = 0; i < terms.length; i++) {
+        var mClass = terms[i]._matched ? ' wm-done' : '';
+        h += '<button class="wm-item wm-term' + mClass + '" data-t="' + i + '" style="border-left:4px solid ' +
+          ['#2563eb','#dc2626','#059669','#7c3aed','#d97706','#0891b2'][i % 6] + '">' + terms[i].term + '</button>';
+      }
+      h += '</div><div class="wm-col">';
+      for (var j = 0; j < defs.length; j++) {
+        var dClass = defs[j]._matched ? ' wm-done' : '';
+        h += '<button class="wm-item wm-def' + dClass + '" data-d="' + j + '">' + defs[j].def + '</button>';
+      }
+      h += '</div></div>';
+      h += '<div id="wm-fb" class="cloze-feedback"></div>';
+      h += '<button class="study-btn" id="b-wm-back" style="margin-top:16px">Back to activities</button>';
+      h += '</div>';
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-wm-back').addEventListener('click', function () { go(fid); });
+
+      var termBtns = document.querySelectorAll('.wm-term:not(.wm-done)');
+      var defBtns = document.querySelectorAll('.wm-def:not(.wm-done)');
+
+      for (var t = 0; t < termBtns.length; t++) {
+        termBtns[t].addEventListener('click', function () {
+          document.querySelectorAll('.wm-term').forEach(function (b) { b.classList.remove('wm-selected'); });
+          this.classList.add('wm-selected');
+          selectedTerm = parseInt(this.getAttribute('data-t'));
+          speakText(terms[selectedTerm].term);
+        });
+      }
+      for (var d = 0; d < defBtns.length; d++) {
+        defBtns[d].addEventListener('click', function () {
+          if (selectedTerm === null) {
+            document.getElementById('wm-fb').innerHTML = '<span class="fb-try">Tap a term first</span>';
+            return;
+          }
+          var di = parseInt(this.getAttribute('data-d'));
+          if (defs[di].term === terms[selectedTerm].term) {
+            terms[selectedTerm]._matched = true;
+            defs[di]._matched = true;
+            matched++;
+            if (matched === terms.length) {
+              var xp = recordSession(fid, 'wordmatch', matched, terms.length);
+              document.getElementById('wm-fb').innerHTML = '<span class="fb-correct">\u{1F3C6} All matched! +' + xp + ' XP</span>';
+              setTimeout(function () { go(fid); }, 2000);
+            } else {
+              selectedTerm = null;
+              render();
+            }
+          } else {
+            this.classList.add('cloze-wrong');
+            document.getElementById('wm-fb').innerHTML = '<span class="fb-try">Not a match \u2014 try again</span>';
+            var self = this;
+            setTimeout(function () { self.classList.remove('cloze-wrong'); }, 500);
+          }
+        });
+      }
+    }
+    render();
+  });
 }
 
 function goHome() {
