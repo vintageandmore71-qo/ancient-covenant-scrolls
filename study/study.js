@@ -1743,33 +1743,50 @@ function showWordMatch(fid) {
   });
 }
 
-// ---- Challenge (Family Feud) mode — 2-player competitive quiz ----
+// ---- Challenge (Family Feud) mode — 4-6 player competitive quiz ----
 function showChallenge(fid) {
   var secIdx = IDS.indexOf(fid);
   var secLabel = secIdx >= 0 ? LBL[secIdx].split(' \u2014 ')[0] : fid;
+  var playerColors = ['#2563eb', '#dc2626', '#059669', '#7c3aed', '#d97706', '#0891b2'];
+  var playerCount = 4;
 
   function setupScreen() {
     var h = '<div class="ch-setup">';
     h += '<div class="ch-title">\u2694\uFE0F CHALLENGE</div>';
     h += '<div class="ch-subtitle">' + secLabel + '</div>';
-    h += '<div class="ch-players">';
-    h += '<div class="ch-player-input"><label>Player 1</label><input id="ch-p1" type="text" value="Player 1" maxlength="12" class="ch-name"></div>';
-    h += '<div class="ch-vs">VS</div>';
-    h += '<div class="ch-player-input"><label>Player 2</label><input id="ch-p2" type="text" value="Player 2" maxlength="12" class="ch-name"></div>';
+    h += '<div class="ch-player-count"><label>Players:</label>';
+    for (var n = 2; n <= 6; n++) {
+      h += '<button class="ch-count-btn' + (n === playerCount ? ' ch-count-on' : '') + '" data-n="' + n + '">' + n + '</button>';
+    }
+    h += '</div>';
+    h += '<div class="ch-players" id="ch-player-list">';
+    for (var p = 1; p <= playerCount; p++) {
+      h += '<div class="ch-player-input"><label>Player ' + p + '</label><input id="ch-p' + p + '" type="text" value="Player ' + p + '" maxlength="12" class="ch-name"></div>';
+    }
     h += '</div>';
     h += '<button class="study-btn sb-pri" id="b-ch-start">Start Challenge \u25B6</button>';
     h += '<button class="study-btn" id="b-ch-back">Back to activities</button>';
     h += '</div>';
     document.getElementById('content').innerHTML = h;
     document.getElementById('b-ch-back').addEventListener('click', function () { go(fid); });
+    var countBtns = document.querySelectorAll('.ch-count-btn');
+    for (var cb = 0; cb < countBtns.length; cb++) {
+      countBtns[cb].addEventListener('click', function () {
+        playerCount = parseInt(this.getAttribute('data-n'));
+        setupScreen();
+      });
+    }
     document.getElementById('b-ch-start').addEventListener('click', function () {
-      var p1 = document.getElementById('ch-p1').value.trim() || 'Player 1';
-      var p2 = document.getElementById('ch-p2').value.trim() || 'Player 2';
-      startGame(p1, p2);
+      var pNames = [];
+      for (var i = 1; i <= playerCount; i++) {
+        var el = document.getElementById('ch-p' + i);
+        pNames.push(el ? (el.value.trim() || 'Player ' + i) : 'Player ' + i);
+      }
+      startGame(pNames);
     });
   }
 
-  function startGame(p1Name, p2Name) {
+  function startGame(playerNames) {
     var allQ = [];
     loadContent(fid).then(function (data) {
       if (data && data.fill_blank) {
@@ -1811,20 +1828,23 @@ function showChallenge(fid) {
         }
       }
       if (allQ.length < 2) { openActivity('stub', fid); return; }
-      allQ = shuffle(allQ).slice(0, 10);
-      runGame(p1Name, p2Name, allQ);
+      allQ = shuffle(allQ).slice(0, Math.max(10, playerNames.length * 3));
+      runGame(playerNames, allQ);
     });
   }
 
-  function runGame(p1, p2, questions) {
-    var scores = [0, 0];
+  function runGame(names, questions) {
+    var scores = [];
+    for (var si = 0; si < names.length; si++) scores.push(0);
     var currentPlayer = 0;
     var qi = 0;
     var strikes = 0;
     var timer = null;
     var timeLeft = 0;
-    var names = [p1, p2];
-    var colors = ['#2563eb', '#dc2626'];
+
+    function nextPlayer() {
+      currentPlayer = (currentPlayer + 1) % names.length;
+    }
 
     function renderQuestion() {
       if (qi >= questions.length) { showFinalResults(); return; }
@@ -1834,11 +1854,12 @@ function showChallenge(fid) {
 
       var h = '<div class="ch-game">';
       h += '<div class="ch-scorebar">';
-      h += '<div class="ch-p" style="background:' + colors[0] + '"><div class="ch-pname">' + names[0] + '</div><div class="ch-pscore">' + scores[0] + '</div></div>';
-      h += '<div class="ch-timer" id="ch-timer">' + timeLeft + '</div>';
-      h += '<div class="ch-p" style="background:' + colors[1] + '"><div class="ch-pname">' + names[1] + '</div><div class="ch-pscore">' + scores[1] + '</div></div>';
+      for (var s = 0; s < names.length; s++) {
+        h += '<div class="ch-p' + (s === currentPlayer ? ' ch-p-active' : '') + '" style="background:' + playerColors[s % 6] + '"><div class="ch-pname">' + names[s] + '</div><div class="ch-pscore">' + scores[s] + '</div></div>';
+      }
       h += '</div>';
-      h += '<div class="ch-turn" style="color:' + colors[currentPlayer] + '">' + names[currentPlayer] + "&#39;s turn</div>";
+      h += '<div class="ch-timer" id="ch-timer">' + timeLeft + '</div>';
+      h += '<div class="ch-turn" style="color:' + playerColors[currentPlayer % 6] + '">' + names[currentPlayer] + "&#39;s turn</div>";
       h += '<div class="ch-round">Round ' + (qi + 1) + ' of ' + questions.length + '</div>';
       h += '<div class="ch-question">' + q.question + '</div>';
       h += '<div class="ch-strikes" id="ch-strikes"></div>';
@@ -1861,10 +1882,10 @@ function showChallenge(fid) {
         if (timeLeft <= 5 && timerEl) timerEl.style.color = '#dc2626';
         if (timeLeft <= 0) {
           clearInterval(timer);
-          currentPlayer = 1 - currentPlayer;
+          nextPlayer();
           scores[currentPlayer] += 50;
           document.getElementById('ch-fb').innerHTML = '<span class="fb-try">Time up! ' + names[currentPlayer] + ' gets 50 pts</span>';
-          setTimeout(function () { qi++; currentPlayer = qi % 2; renderQuestion(); }, 2000);
+          setTimeout(function () { qi++; currentPlayer = qi % names.length; renderQuestion(); }, 2000);
         }
       }, 1000);
 
@@ -1880,7 +1901,7 @@ function showChallenge(fid) {
             scores[currentPlayer] += pts;
             fb.innerHTML = '<span class="fb-correct">\u2714 ' + names[currentPlayer] + ' +' + pts + ' pts!</span>';
             var all = document.querySelectorAll('.ch-opt'); for (var x = 0; x < all.length; x++) all[x].disabled = true;
-            setTimeout(function () { qi++; currentPlayer = qi % 2; renderQuestion(); }, 2000);
+            setTimeout(function () { qi++; currentPlayer = qi % names.length; renderQuestion(); }, 2000);
           } else {
             this.classList.add('cloze-wrong');
             this.disabled = true;
@@ -1889,7 +1910,7 @@ function showChallenge(fid) {
             strikesEl.innerHTML = '\u274C'.repeat(strikes);
             if (strikes >= 3) {
               clearInterval(timer);
-              currentPlayer = 1 - currentPlayer;
+              nextPlayer();
               fb.innerHTML = '<span class="fb-try">3 strikes! ' + names[currentPlayer] + ' can steal!</span>';
             } else {
               fb.innerHTML = '<span class="fb-try">Strike ' + strikes + '! Try again</span>';
@@ -1900,19 +1921,23 @@ function showChallenge(fid) {
     }
 
     function showFinalResults() {
-      var winner = scores[0] > scores[1] ? names[0] : scores[1] > scores[0] ? names[1] : 'Tie';
-      var xpEarned = recordSession(fid, 'challenge', Math.max(scores[0], scores[1]), questions.length * 100);
+      var maxScore = Math.max.apply(null, scores);
+      var winners = [];
+      for (var w = 0; w < names.length; w++) { if (scores[w] === maxScore) winners.push(names[w]); }
+      var winnerText = winners.length > 1 ? 'Tie: ' + winners.join(' & ') : winners[0] + ' wins!';
+      var xpEarned = recordSession(fid, 'challenge', maxScore, questions.length * 100);
       var h = '<div class="ch-results">';
       h += '<div class="cr-emoji">\u{1F3C6}</div>';
-      if (winner === 'Tie') {
-        h += '<div class="ch-winner">It\'s a tie!</div>';
-      } else {
-        h += '<div class="ch-winner">' + winner + ' wins!</div>';
-      }
+      h += '<div class="ch-winner">' + winnerText + '</div>';
       h += '<div class="ch-final-scores">';
-      h += '<div class="ch-final-p" style="border-color:' + colors[0] + '">' + names[0] + '<br><span class="ch-final-pts">' + scores[0] + '</span></div>';
-      h += '<div class="ch-final-vs">VS</div>';
-      h += '<div class="ch-final-p" style="border-color:' + colors[1] + '">' + names[1] + '<br><span class="ch-final-pts">' + scores[1] + '</span></div>';
+      var sorted = [];
+      for (var fi = 0; fi < names.length; fi++) sorted.push({ name: names[fi], score: scores[fi], color: playerColors[fi % 6] });
+      sorted.sort(function (a, b) { return b.score - a.score; });
+      for (var ri = 0; ri < sorted.length; ri++) {
+        h += '<div class="ch-final-p" style="border-color:' + sorted[ri].color + '">';
+        h += '<span class="ch-final-rank">' + (ri + 1) + '</span> ' + sorted[ri].name;
+        h += '<br><span class="ch-final-pts">' + sorted[ri].score + '</span></div>';
+      }
       h += '</div>';
       h += '<div class="cr-xp">+' + xpEarned + ' XP</div>';
       h += '<div class="cr-btns">';

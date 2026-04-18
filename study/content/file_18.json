@@ -1,0 +1,38 @@
+{
+  "id": "file_18",
+  "label": "Book of Giants (Sefer HaNephilim) — Complete — Fragments 1–6",
+  "volume": 8,
+  "content_version": 1,
+  "summary_plain": "The Book of Giants tells the story of the Nephilim — the offspring of the Watchers and human women. The giants Ohya and Hahya receive terrifying dreams warning of the coming flood. They send Mahaway to Chanokh to interpret the dreams. Chanokh confirms: the destruction is coming because of what the Watchers did. Gilgamesh is named as one of the Nephilim. The text survives in Aramaic fragments from Qumran — 4Q203, 4Q530, 4Q531, 4Q532.",
+  "summary_scholarly": "The Book of Giants is preserved in Aramaic fragments from Qumran Cave 4 (4Q203, 4Q530-532). It is absent from the Ge'ez Orit — the text was not transmitted to Africa through the Greek translation chain. The fragments name Gilgamesh — the central figure of Mesopotamian mythology — as a Nephilim, directly connecting the Sumerian dynastic tradition to the Watcher/Nephilim framework. The giants Ohya and Hahya receive dream visions of the coming flood. They send the messenger Mahaway flying to Chanokh at the ends of the earth to interpret the dreams. Chanokh delivers the judgment: the tablet of destruction has been issued. The text fills the gap between the Watcher descent in Chanokh 6-16 and the flood narrative in Bereshit 6-9.",
+  "key_terms": [
+    { "term": "Nephilim", "phonetic": "Neh-fee-LEEM", "definition": "The offspring of the Watchers and human women. Bereshit 6:4 calls them 'the mighty men who were of old, the men of renown.' The Book of Giants names specific Nephilim and documents their dreams before the flood." },
+    { "term": "Gilgamesh", "phonetic": "GIL-gah-mesh", "definition": "Named in the Qumran fragments (4Q530) as one of the Nephilim. The central figure of Mesopotamian mythology — the king of Uruk in the Epic of Gilgamesh — is identified within the covenant textual tradition as a giant of Watcher descent." },
+    { "term": "Ohya and Hahya", "phonetic": "OH-yah, HAH-yah", "definition": "Two named Nephilim who receive terrifying dream visions warning of the coming flood. They are sons of the Watcher Shemikhazah." },
+    { "term": "Mahaway", "phonetic": "Mah-HAH-way", "definition": "The Nephilim messenger sent to Chanokh to interpret the dreams. The text describes him flying to find Chanokh at the ends of the earth." }
+  ],
+  "fill_blank": [
+    { "ref": "4Q530", "prompt": "The Book of Giants names ______ as one of the Nephilim — the central figure of Mesopotamian mythology.", "answer": "Gilgamesh", "source_quote": "The Book of Giants names Gilgamesh as a Nephilim in the Qumran Aramaic fragments." },
+    { "ref": "4Q203", "prompt": "The giants sent ______ to Chanokh to interpret their dreams of the coming destruction.", "answer": "Mahaway", "source_quote": "They sent the messenger Mahaway to Chanokh at the ends of the earth." },
+    { "ref": "4Q531", "prompt": "Ohya and Hahya received terrifying ______ warning of the coming flood.", "answer": "dreams", "source_quote": "The giants Ohya and Hahya receive dream visions warning of the coming flood." }
+  ],
+  "multiple_choice": [
+    { "ref": "4Q530", "question": "Who is named as a Nephilim in the Book of Giants?", "options": ["Nimrod", "Gilgamesh", "Esav", "Pharaoh"], "correct": 1, "source_quote": "The Book of Giants names Gilgamesh as a Nephilim in the Qumran Aramaic fragments." },
+    { "ref": "4Q203", "question": "What were the Nephilim warned about in their dreams?", "options": ["A war between nations", "The coming flood that would destroy them", "A famine in the land", "A plague from the heavens"], "correct": 1, "source_quote": "The giants receive terrifying dream visions warning of the coming flood." },
+    { "ref": "4Q531", "question": "Where is the Book of Giants preserved?", "options": ["In the Ge'ez Orit only", "In the Masoretic canon", "In Aramaic fragments from Qumran Cave 4", "In the Greek Septuagint"], "correct": 2, "source_quote": "The Book of Giants is preserved in Aramaic fragments from Qumran — 4Q203, 4Q530, 4Q531, 4Q532." }
+  ],
+  "faq": [
+    {
+      "question": "Why is the naming of Gilgamesh as a Nephilim significant?",
+      "answer": "The Qumran fragments (4Q530) name Gilgamesh — the central figure of Mesopotamian mythology, the king of Uruk in the Sumerian Epic of Gilgamesh — as a Nephilim. This directly connects Mesopotamian dynastic mythology to the Watcher/Nephilim framework of the covenant tradition. The first civilizations of Mesopotamia, according to the covenant texts, were founded through the Watcher corruption — not through independent human achievement. Bereshit 10:8-10 names Nimrod son of Cush as the builder of Babylon, Erech (Uruk), and Akkad. The Sumerians called themselves saggiga — black-headed people — a self-designation by the color black, consistent with the Afro-Asiatic populations of the Nile-Cushite corridor."
+    },
+    {
+      "question": "Why is the Book of Giants absent from the Ge'ez Orit?",
+      "answer": "The Book of Giants was not transmitted to Africa through the Greek translation chain. The Ge'ez Orit preserves texts that passed through Greek before reaching Ge'ez. The Book of Giants appears only in the Aramaic Qumran fragments — it circulated in Aramaic-speaking communities in the land but did not enter the Greek transmission that carried Chanokh and Yovelim to Ethiopia. This is why the three-witness method (DSS + Orit + Samaritan) is essential: each transmission chain preserved some texts and lost others. What Qumran preserved in Aramaic, Africa preserved in Ge'ez. Together they recover what no single chain could."
+    },
+    {
+      "question": "What does the Watcher tradition reveal about the origin of imperial power?",
+      "answer": "The Book of Chanokh and the Book of Giants together document that every domain of knowledge enabling autonomous human power outside YHWH's governance was transmitted through cosmic rebellion. Azazel transmitted weapons manufacturing. Semyaza transmitted occult manipulation. The Nephilim — including Gilgamesh — built the first imperial systems from this forbidden knowledge. The covenant framework's specific statement is that human imperial power — military, intelligence, social manipulation — originates in rebellion against YHWH's created order. This is not metaphor. It is the covenant tradition's explanation for why empires exist and why they are destined to fall."
+    }
+  ]
+}

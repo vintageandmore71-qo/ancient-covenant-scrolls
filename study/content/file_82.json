@@ -1,0 +1,37 @@
+{
+  "id": "file_82",
+  "label": "Eikha (Lamentations) — Complete",
+  "volume": 27,
+  "content_version": 1,
+  "summary_plain": "Eikha mourns the destruction of Yerushalayim and the Temple. The city that was full of people sits alone. She weeps bitterly in the night. Her children have gone into exile. YHWH has done what he purposed — he has torn down without pity. Yet Eikha also declares: the steadfast love of YHWH never ceases, his mercies never come to an end — they are new every morning. Great is your faithfulness. The text is an acrostic — each chapter follows the Hebrew alphabet.",
+  "summary_scholarly": "Eikha is preserved in DSS fragments (4QLam, 5QLam-a, 5QLam-b) and in the Orit Ge'ez. The acrostic structure follows the 22 letters of the Hebrew alphabet. Eikha 4:8 contains a phenotypic statement using the shachar root: 'their visage is darker than blackness' — describing a change from the normal dark complexion as catastrophe, confirming that dark complexion was the healthy baseline condition of the covenant people.",
+  "key_terms": [
+    { "term": "Eikha", "phonetic": "Ay-KHAH", "definition": "Hebrew for 'How!' — the first word of the book. The cry of lament over the destroyed city. Anglicized as Lamentations." },
+    { "term": "Acrostic Structure", "phonetic": "", "definition": "Each chapter follows the Hebrew alphabet — 22 verses per chapter (chapter 3 has 66 verses, three per letter). The structure imposes order on grief." },
+    { "term": "Steadfast Love (Chesed)", "phonetic": "KHEH-sed", "definition": "YHWH's covenant loyalty. Eikha 3:22-23: 'The steadfast love of YHWH never ceases, his mercies never come to an end — they are new every morning.'" }
+  ],
+  "fill_blank": [
+    { "ref": "3:22-23", "prompt": "The steadfast love of YHWH never ceases, his mercies never come to an end — they are new every ______.", "answer": "morning", "source_quote": "The steadfast love of YHWH never ceases, his mercies never come to an end — they are new every morning. Great is your faithfulness." },
+    { "ref": "1:1", "prompt": "How lonely sits the city that was full of ______!", "answer": "people", "source_quote": "How lonely sits the city that was full of people! How like a widow has she become, she who was great among the nations!" },
+    { "ref": "3:24", "prompt": "YHWH is my portion, says my soul, therefore I will ______ in him.", "answer": "hope", "source_quote": "YHWH is my portion, says my soul, therefore I will hope in him." }
+  ],
+  "multiple_choice": [
+    { "ref": "3:22", "question": "What does Eikha say about YHWH's steadfast love?", "options": ["It has ended", "It never ceases — his mercies are new every morning", "It is only for the priests", "It depends on obedience"], "correct": 1, "source_quote": "The steadfast love of YHWH never ceases, his mercies never come to an end — they are new every morning." },
+    { "ref": "1:1", "question": "What literary structure does Eikha follow?", "options": ["Chronological narrative", "Hebrew alphabetic acrostic", "Question-and-answer format", "Genealogical lists"], "correct": 1, "source_quote": "Each chapter follows the 22 letters of the Hebrew alphabet." },
+    { "ref": "4:8", "question": "What does Eikha 4:8 describe as a change from the normal state?", "options": ["Hair turning gray", "Visage becoming darker than blackness", "Eyes growing dim", "Hands trembling"], "correct": 1, "source_quote": "Their visage is blacker than coal — they are not recognized in the streets." }
+  ],
+  "faq": [
+    {
+      "question": "What does Eikha 4:8 reveal about the covenant people's normal phenotype?",
+      "answer": "Eikha 4:8 uses the shachar root in a reversal construction: 'their visage is darker than blackness (shachar) — they are not recognized in the streets.' The text describes maximum darkness as a change from a previously lighter appearance — but the key is that the change is toward DEEPER darkness, not toward lightness. The normal state was already dark. The catastrophe produced a darkening beyond the normal dark baseline. This confirms that shachar operates as the maximum-darkness end of a phenotypic spectrum, and that the covenant people's baseline complexion was dark enough that an intensification beyond it was described as visually unrecognizable. Shir HaShirim 1:5 uses shacharah as a straightforward self-description. Eikha 4:8 uses the comparative form as deterioration. Both confirm the root's phenotypic application is direct, physical, and not metaphorical."
+    },
+    {
+      "question": "Why does Eikha lament with such grief and yet affirm YHWH's faithfulness?",
+      "answer": "Eikha 3:22-23 is embedded within the deepest lament: the city destroyed, children in exile, the people scattered. Yet within this grief: 'the steadfast love of YHWH never ceases, his mercies are new every morning. Great is your faithfulness.' The covenant people have always held destruction and hope together. The Damascus Document (CD) at Qumran describes the Period of Wrath — the current age of suffering — as bounded. The covenant obligation of YHWH is not nullified by the catastrophe. The lament acknowledges what happened. The affirmation declares that the covenant survives what happened."
+    },
+    {
+      "question": "How does Eikha connect to the covenant people's experience across history?",
+      "answer": "Eikha mourns the Babylonian destruction (586 BCE). But the pattern it describes — the city that was full sits alone, the children gone into exile, the faithful scattered, the enemies in triumph — has recurred. The Roman destruction (70 CE). The medieval persecutions. The Trans-Atlantic slave trade. Psalm 83:4 describes the same coordinated assault: 'let the name of Yisra'EL be remembered no more.' Eikha is not a one-time lament. It is the covenant people's vocabulary for every instance of the same pattern. The text gives words to the grief. The covenant gives a framework for the restoration that follows."
+    }
+  ]
+}

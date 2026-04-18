@@ -840,12 +840,18 @@ body.child-mode .cloze-audio,body.child-mode #b-mc-hear{font-size:18px;padding:1
 body.font-dyslexic .ch-name{font-family:var(--font-dyslexic)}
 .ch-name:focus{border-color:var(--vol1);outline:none;box-shadow:0 0 0 3px rgba(37,99,235,.2)}
 .ch-vs{font-size:1.8em;font-weight:700;color:var(--vol2);text-shadow:0 2px 4px rgba(0,0,0,.1)}
+.ch-player-count{margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:8px}
+.ch-player-count label{font-size:.9em;font-weight:700;color:var(--text-muted)}
+.ch-count-btn{width:44px;height:44px;border-radius:10px;border:2px solid #ddd;background:var(--bg-card);color:var(--text-main);font-size:1.1em;font-weight:700;cursor:pointer;font-family:var(--font-main);transition:all .15s}
+.ch-count-btn:hover{border-color:var(--vol1);background:rgba(37,99,235,.1)}
+.ch-count-btn.ch-count-on{background:var(--vol1);color:#fff;border-color:var(--vol1)}
 .ch-game{padding:8px 0}
-.ch-scorebar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px}
-.ch-p{flex:1;max-width:160px;padding:12px 10px;border-radius:var(--radius);color:#fff;text-align:center;box-shadow:0 3px 10px rgba(0,0,0,.2)}
+.ch-scorebar{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.ch-p{flex:1;min-width:70px;max-width:140px;padding:10px 8px;border-radius:var(--radius);color:#fff;text-align:center;box-shadow:0 3px 10px rgba(0,0,0,.2);opacity:.7;transition:opacity .3s,transform .3s}
+.ch-p-active,.ch-p.ch-p-active{opacity:1;transform:scale(1.08);box-shadow:0 4px 16px rgba(0,0,0,.3)}
 .ch-pname{font-size:.8em;font-weight:700;opacity:.9;letter-spacing:.04em}
 .ch-pscore{font-size:1.8em;font-weight:700}
-.ch-timer{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#1a1a2e,#2a2a4e);color:#fff;font-size:1.6em;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.25);border:3px solid rgba(255,255,255,.15);transition:color .3s}
+.ch-timer{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#1a1a2e,#2a2a4e);color:#fff;font-size:1.6em;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.25);border:3px solid rgba(255,255,255,.15);transition:color .3s;margin:8px auto}
 .ch-turn{font-size:1.3em;font-weight:700;text-align:center;margin-bottom:4px}
 .ch-round{font-size:.9em;color:var(--text-muted);font-weight:700;text-align:center;margin-bottom:16px}
 .ch-question{font-size:1.2em;line-height:1.8;font-weight:700;color:var(--text-main);padding:22px 20px;background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:16px;text-align:left;border-left:5px solid var(--vol5)}
@@ -864,6 +870,7 @@ body.font-dyslexic .ch-opt{font-family:var(--font-dyslexic)}
 .ch-final-p{padding:20px 28px;border-radius:var(--radius);background:var(--bg-card);box-shadow:var(--shadow);border-top:5px solid;font-size:1.1em;font-weight:700;color:var(--text-main);min-width:120px}
 .ch-final-vs{font-size:1.6em;font-weight:700;color:var(--vol2)}
 .ch-final-pts{font-size:2em;font-weight:700;color:var(--vol1);display:block;margin-top:6px}
+.ch-final-rank{display:inline-block;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.15);color:#fff;font-size:.7em;line-height:28px;text-align:center;vertical-align:middle;margin-right:4px}
 @media(max-width:600px){
   .ch-opts{grid-template-columns:1fr}
   .ch-players{flex-direction:column;gap:8px}

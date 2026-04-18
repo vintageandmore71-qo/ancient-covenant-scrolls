@@ -1,0 +1,38 @@
+{
+  "id": "file_77",
+  "label": "Iyov (Job) — Part 1 — Chapters 1–14",
+  "volume": 21,
+  "content_version": 1,
+  "summary_plain": "Iyov is a righteous man — blameless and upright, fearing The Creator and turning away from evil. The adversary challenges YHWH: does Iyov fear The Creator for nothing? YHWH permits the adversary to test Iyov. Everything is taken — children, livestock, health. Iyov sits in ashes scraping his sores. Three friends come — Elifaz, Bildad, Tzofar. They argue that suffering proves guilt. Iyov refuses to accept their theology. He maintains his innocence and demands an audience with The Creator.",
+  "summary_scholarly": "Chapters 1-14 establish the covenant lawsuit framework. The ACR reads from Dead Sea Scrolls witnesses (4QJob-a, 4QJob-b, 4QpaleoJob-c, and the Targum 11QtgJob) and the Orit Ge'ez. The prose prologue (ch 1-2) establishes the heavenly court scene. The poetry (ch 3-14) begins Iyov's legal complaint against the covenant terms. Iyov 30:30 — 'my skin is black upon me' — uses shachar, the same root as Shir HaShirim 1:5, as a first-person phenotypic statement.",
+  "key_terms": [
+    { "term": "Iyov", "phonetic": "ee-YOV", "definition": "A righteous man from the land of Utz. Described as blameless and upright, fearing The Creator and turning away from evil. Anglicized as Job." },
+    { "term": "The Adversary (HaSatan)", "phonetic": "hah-sah-TAHN", "definition": "In the Iyov prologue, HaSatan is not a proper name but a title — 'the adversary' or 'the accuser.' He appears among the sons of The Creator in the heavenly court and challenges YHWH's assessment of Iyov." },
+    { "term": "Elifaz, Bildad, Tzofar", "phonetic": "", "definition": "Iyov's three friends who come to comfort him but argue that suffering is always the result of sin. Their theology — that the righteous always prosper and the wicked always suffer — is directly challenged by Iyov and ultimately rejected by YHWH (42:7)." },
+    { "term": "11QtgJob", "phonetic": "", "definition": "The Qumran Job Targum — an Aramaic translation/interpretation of Iyov found in Cave 11. One of the most important Aramaic texts from Qumran, preserving the text as it was read in Aramaic-speaking covenant communities." }
+  ],
+  "fill_blank": [
+    { "ref": "1:1", "prompt": "There was a man in the land of Utz, whose name was Iyov, and that man was blameless and ______, one who feared The Creator and turned away from evil.", "answer": "upright", "source_quote": "There was a man in the land of Utz, whose name was Iyov, and that man was blameless and upright, one who feared The Creator and turned away from evil." },
+    { "ref": "1:21", "prompt": "YHWH gave, and YHWH has taken away — blessed be the ______ of YHWH.", "answer": "name", "source_quote": "And he said: Naked I came from my mother's womb, and naked shall I return. YHWH gave, and YHWH has taken away — blessed be the name of YHWH." },
+    { "ref": "13:15", "prompt": "Though he slay me, I will ______ in him.", "answer": "hope", "source_quote": "Though he slay me, I will hope in him — yet I will argue my ways to his face." }
+  ],
+  "multiple_choice": [
+    { "ref": "1:1", "question": "How does the text describe Iyov?", "options": ["A wealthy king", "A blameless and upright man who feared The Creator", "A priest in the temple", "A prophet of YHWH"], "correct": 1, "source_quote": "There was a man in the land of Utz, whose name was Iyov, and that man was blameless and upright, one who feared The Creator and turned away from evil." },
+    { "ref": "1:9", "question": "What does the adversary challenge?", "options": ["Whether Iyov exists", "Whether Iyov fears The Creator for nothing", "Whether YHWH is just", "Whether the covenant is valid"], "correct": 1, "source_quote": "Then the adversary answered YHWH and said: Does Iyov fear The Creator for nothing?" },
+    { "ref": "2:13", "question": "How long did Iyov's three friends sit with him in silence?", "options": ["One day", "Three days", "Seven days and seven nights", "Forty days"], "correct": 2, "source_quote": "And they sat with him on the ground seven days and seven nights, and no one spoke a word to him, for they saw that his suffering was very great." }
+  ],
+  "faq": [
+    {
+      "question": "What does Iyov 30:30 reveal about the covenant people's phenotype?",
+      "answer": "Iyov 30:30 is a first-person statement: 'my skin is black (shachar) upon me, and my bones are burned with heat.' The Hebrew root shachar — shin-chet-resh — is the same root used in Shir HaShirim 1:5 (shechorah ani ve-na'vah — I am black and lovely). In both texts, shachar is a phenotypic descriptor — a physical description of skin color, not a metaphor for spiritual condition. Iyov describes a change: his skin has darkened further and his bones burn with heat — meaning his already dark baseline complexion has intensified through suffering. The text records the covenant people's normal phenotype through direct first-person statement."
+    },
+    {
+      "question": "What does the heavenly court scene reveal about covenant justice?",
+      "answer": "The prologue of Iyov (chapters 1-2) shows the adversary appearing among the sons of The Creator in the heavenly court. He does not act independently — he requires YHWH's permission before touching Iyov. This framework is consistent with Yovelim 15: every nation is under angelic jurisdiction, but Yisra'EL is under YHWH's direct governance. The adversary operates within YHWH's covenant justice system, not outside it. Iyov's friends argue that suffering proves guilt — YHWH ultimately rejects this theology (42:7). Suffering within the covenant is not proof of wrongdoing. The covenant people's suffering under domination is addressed in the War Scroll (1QM) and the Damascus Document (CD) — both describe bounded periods of affliction within YHWH's plan."
+    },
+    {
+      "question": "Why is the Qumran Job Targum (11QtgJob) significant?",
+      "answer": "The 11QtgJob is an Aramaic translation of Iyov found in Qumran Cave 11. It shows how the text was read in Aramaic-speaking covenant communities before the Masoretic standardization. Aramaic and Hebrew are both Afro-Asiatic Semitic languages — sister languages within the same family as Ge'ez, Amharic, and ancient Egyptian. The Targum preserves pronunciation and interpretation that the consonantal Hebrew text alone does not convey — similar to how the Ge'ez Fidel (abugida) preserves unambiguous pronunciation through its vowel system, while the Hebrew abjad was vulnerable to the Masoretic vowel-pointing intervention of the 7th-10th centuries CE."
+    }
+  ]
+}
