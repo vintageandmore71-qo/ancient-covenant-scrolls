@@ -1,0 +1,37 @@
+{
+  "id": "file_27",
+  "label": "Shemu'el Aleph (1 Samuel) — Part 2 — Chapters 11–17",
+  "volume": 12,
+  "content_version": 1,
+  "summary_plain": "Sha'ul defeats the Ammonites at Yavesh-Gil'ad and is confirmed as king. Shemu'el rebukes the people: you have asked for a king, but YHWH is your true king. Sha'ul disobeys YHWH's command against Amaleq — he spares King Agag and the best of the livestock. Shemu'el declares: to obey is better than sacrifice. YHWH rejects Sha'ul as king. YHWH sends Shemu'el to the house of Yishai in Beit-Lehem. YHWH does not look at outward appearance — he looks at the heart. Dawid, the youngest son, is anointed. The spirit of YHWH comes upon Dawid. Golyat the Philistine defies the armies of the living Creator. Dawid declares: I come to you in the name of YHWH of hosts. He strikes Golyat with a sling and a stone.",
+  "summary_scholarly": "The ACR reads from 4QSam-a, 4QSam-b, and 4QSam-c alongside the Orit Ge'ez. 4QSam-a preserves a full paragraph before chapter 11 — absent from the Masoretic — describing the Ammonite king Nahash gouging out the right eyes of the men of Gad and Re'uven. This passage, confirmed by Josephus, demonstrates that the Masoretic is incomplete. Sha'ul's rejection (ch 15) establishes the covenant principle: obedience to YHWH's word supersedes all institutional ritual. Dawid's anointing (ch 16) introduces the Davidic line — YHWH's selection based on the heart, not on birth order or appearance. The Golyat narrative (ch 17) establishes victory through YHWH's name, not human military power — the same framework preserved in the Qumran War Scroll (1QM).",
+  "key_terms": [
+    { "term": "Dawid", "phonetic": "Dah-VEED", "definition": "Youngest son of Yishai, from the tribe of Yehudah, born in Beit-Lehem. Anointed by Shemu'el when YHWH rejects Sha'ul. A shepherd boy chosen because YHWH looks at the heart. Anglicized as David." },
+    { "term": "Golyat", "phonetic": "Gol-YAHT", "definition": "Philistine warrior from Gat, described as six cubits and a span (approximately 9 feet 9 inches in the Masoretic — but 4QSam-a and the Septuagint read four cubits and a span, approximately 6 feet 9 inches). Defeated by Dawid with a sling and a stone. Anglicized as Goliath." },
+    { "term": "Amaleq", "phonetic": "Ah-mah-LEK", "definition": "The nation YHWH commanded Sha'ul to destroy completely (ch 15). Sha'ul's disobedience — sparing King Agag and the best livestock — leads to YHWH's rejection of him as king." }
+  ],
+  "fill_blank": [
+    { "ref": "15:22", "prompt": "And Shemu'el said: Has YHWH as great delight in burnt offerings and sacrifices, as in obeying the voice of YHWH? Behold, to ______ is better than sacrifice.", "answer": "obey", "source_quote": "Has YHWH as great delight in burnt offerings and sacrifices, as in obeying the voice of YHWH? Behold, to obey is better than sacrifice, and to listen than the fat of rams." },
+    { "ref": "16:7", "prompt": "For YHWH sees not as man sees: man looks on the outward appearance, but YHWH looks on the ______.", "answer": "heart", "source_quote": "For YHWH sees not as man sees: man looks on the outward appearance, but YHWH looks on the heart." },
+    { "ref": "17:45", "prompt": "Then Dawid said to the Philistine: You come to me with a sword and with a spear and with a javelin, but I come to you in the ______ of YHWH of hosts.", "answer": "name", "source_quote": "You come to me with a sword and with a spear and with a javelin, but I come to you in the name of YHWH of hosts, The Creator of the armies of Yisra'EL, whom you have defied." }
+  ],
+  "multiple_choice": [
+    { "ref": "16:7", "question": "What does YHWH tell Shemu'el about how he chooses?", "options": ["He chooses the firstborn", "He chooses the tallest", "He looks at the heart, not outward appearance", "He chooses the strongest warrior"], "correct": 2, "source_quote": "For YHWH sees not as man sees: man looks on the outward appearance, but YHWH looks on the heart." },
+    { "ref": "15:22-23", "question": "Why does YHWH reject Sha'ul as king?", "options": ["He lost a battle", "He disobeyed YHWH's command and spared Agag", "He worshiped idols", "He refused to fight"], "correct": 1, "source_quote": "Because you have rejected the word of YHWH, he has also rejected you from being king." },
+    { "ref": "17:45", "question": "What weapon did Dawid declare he was bringing against Golyat?", "options": ["A sword", "A spear", "The name of YHWH of hosts", "A shield"], "correct": 2, "source_quote": "I come to you in the name of YHWH of hosts, The Creator of the armies of Yisra'EL." }
+  ],
+  "faq": [
+    {
+      "question": "What does 4QSam-a reveal about the missing Nahash passage?",
+      "answer": "4QSam-a preserves a full paragraph before chapter 11 that is entirely absent from the Masoretic Text. It describes the Ammonite king Nahash gouging out the right eyes of the men of Gad and Re'uven. Josephus independently confirms this passage existed in his Hebrew sources (Antiquities 6.68-71). The Masoretic editors removed it. This is not a minor variant — it is an entire narrative unit the Masoretic tradition deleted. Frank Moore Cross documented this in his analysis of the Qumran Samuel manuscripts. The DSS preserve what the Masoretic cut. When scholars treat the Masoretic as the 'original' and the DSS as 'variants,' they invert the actual textual history. The DSS are older. The Masoretic is the edited version."
+    },
+    {
+      "question": "How does Dawid's anointing connect to African identity erasure?",
+      "answer": "Dawid is from Beit-Lehem in Yehudah — territory on the African tectonic plate (Nubian Plate). His great-grandmother is Ruth the Mo'avite — from the Transjordan region within the same Afro-Asiatic corridor. Dawid is described as admoni — ruddy, reddish-brown complexion — with beautiful eyes (16:12). Western art systematically depicted Dawid as a pale European from the Renaissance onward — Michelangelo's David (1504), Donatello's David (1440s), Bernini's David (1623). Every major Western artistic representation erased the phenotype of a man from the Afro-Asiatic corridor and replaced it with a European face. This is the Great Eraser at work: not denying Dawid existed, but replacing what he looked like so thoroughly that the original is forgotten."
+    },
+    {
+      "question": "What does 'to obey is better than sacrifice' mean for institutional religion?",
+      "answer": "Shemu'el's declaration (15:22) — 'to obey is better than sacrifice' — is a direct challenge to every religious system that substitutes ritual performance for obedience to YHWH's actual commands. Sha'ul kept the best livestock 'to sacrifice to YHWH' (15:15). He used religious language to justify disobedience. The Qumran community recognized this pattern: the Jerusalem Temple institution performed sacrifices while violating the covenant calendar, the sabbatical laws, and the Torah's purity standards. Ritual without obedience is rebellion dressed in religious clothing. The DSS community withdrew from the Temple precisely because they saw this — institutional religion performing sacrifices while disobeying YHWH's word."
+    }
+  ]
+}

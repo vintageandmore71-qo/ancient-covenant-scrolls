@@ -1,0 +1,38 @@
+{
+  "id": "file_41",
+  "label": "Melakhim Bet (2 Kings) — Part 4 — Chapters 20–25",
+  "volume": 15,
+  "content_version": 1,
+  "summary_plain": "Hizqiyahu falls sick and YHWH adds fifteen years to his life. He shows all his treasures to the Babylonian envoys — Yesha'yahu warns that everything will be carried to Babylon. Menasheh reigns and does evil — fills Yerushalayim with innocent blood. Yoshiyahu becomes king at age eight. During Temple repairs, Hilkiyahu the priest finds the scroll of the Torah. Yoshiyahu reads it, tears his robes, and launches the greatest reform in the history of Yehudah. He removes the idols, destroys the high places, keeps the Pesah. But YHWH's anger remains because of Menasheh. Nebukhadnezzar besieges Yerushalayim. In 586 BCE the Temple is burned, the walls broken, the people exiled to Babylon.",
+  "summary_scholarly": "The ACR reads from DSS Kings fragments (4QKgs) and the Orit Ge'ez. Yoshiyahu's discovery of the Torah scroll (ch 22-23) raises a critical question: how had the written Torah been lost within the Temple itself? The reform demonstrates that institutional religion can exist for generations without the actual text of the covenant. The Babylonian destruction of 586 BCE — Temple burned, walls broken, vessels taken, population exiled — is the defining catastrophe of the covenant history. The Qumran community understood their own situation as continuous with this exile. The Damascus Document describes YHWH remembering the covenant 390 years after Nebukhadnezzar — and from the exiles raising a remnant.",
+  "key_terms": [
+    { "term": "Yoshiyahu", "phonetic": "Yo-shi-YAH-hoo", "definition": "King of Yehudah at age eight. After the Torah scroll was found in the Temple, he launched the most comprehensive covenant reform in the history of the kingdom — destroying idols, removing priests of Baal, keeping Pesah. Anglicized as Josiah." },
+    { "term": "Hilkiyahu", "phonetic": "Hil-qi-YAH-hoo", "definition": "The high priest who found the scroll of the Torah during Temple repairs (22:8). His discovery reveals that the written Torah had been lost within the Temple itself for an unknown period. Anglicized as Hilkiah." },
+    { "term": "Nebukhadnezzar", "phonetic": "Neh-vu-khad-NEH-tsahr", "definition": "King of Babylon who besieged and destroyed Yerushalayim in 586 BCE. He burned the Temple, broke down the walls, and carried the people into exile. The Babylonian exile begins." },
+    { "term": "Golah (Exile)", "phonetic": "Go-LAH", "definition": "The exile of Yehudah to Babylon in 586 BCE. The Temple destroyed, the dynasty ended, the people removed from the land. The prophets said YHWH would restore — but the exile defines the covenant people's condition from this point forward." }
+  ],
+  "fill_blank": [
+    { "ref": "22:8", "prompt": "And Hilkiyahu the high priest said to Shaphan the secretary: I have found the scroll of the ______ in the house of YHWH.", "answer": "Torah", "source_quote": "And Hilkiyahu the high priest said to Shaphan the secretary: I have found the scroll of the Torah in the house of YHWH." },
+    { "ref": "25:9", "prompt": "He burned the house of YHWH and the king's house and all the houses of ______ — every great house he burned down.", "answer": "Yerushalayim", "source_quote": "He burned the house of YHWH and the king's house and all the houses of Yerushalayim — every great house he burned down." },
+    { "ref": "23:25", "prompt": "Before him there was no king like him, who turned to YHWH with all his heart and with all his soul and with all his ______.", "answer": "might", "source_quote": "Before him there was no king like him, who turned to YHWH with all his heart and with all his soul and with all his might, according to all the Torah of Moshe." }
+  ],
+  "multiple_choice": [
+    { "ref": "22:8", "question": "What did Hilkiyahu find during Temple repairs?", "options": ["A golden vessel", "The Ark of the Covenant", "The scroll of the Torah", "A letter from Moshe"], "correct": 2, "source_quote": "I have found the scroll of the Torah in the house of YHWH." },
+    { "ref": "25:8-9", "question": "In what year BCE was the Temple of Yerushalayim destroyed by Babylon?", "options": ["722 BCE", "701 BCE", "586 BCE", "539 BCE"], "correct": 2, "source_quote": "Nebuzaradan the captain of the guard burned the house of YHWH." },
+    { "ref": "23:21-23", "question": "What did Yoshiyahu command the people to keep?", "options": ["The Sabbath only", "The Pesah as written in the scroll of the covenant", "A seven-day feast for Baal", "A fast for forty days"], "correct": 1, "source_quote": "The king commanded all the people: Keep the Pesah to YHWH your Creator, as it is written in this scroll of the covenant." }
+  ],
+  "faq": [
+    {
+      "question": "What does Yoshiyahu's discovery of the Torah scroll prove about institutional religion?",
+      "answer": "The Temple was functioning for generations — priests serving, sacrifices offered, rituals performed — while the actual written Torah was lost inside the building (22:8). The institution operated without the text. When Yoshiyahu heard the words of the Torah read aloud, he tore his robes — recognizing that the entire religious establishment had been operating outside the covenant. This pattern repeats: the Qumran community withdrew from the Temple because it had been corrupted by an illegitimate priesthood operating on a wrong calendar. The DSS community preserved the texts in caves because they did not trust the institution. Institutions claim continuity with the covenant; the written text exposes whether that claim is true."
+    },
+    {
+      "question": "How does the Babylonian destruction of 586 BCE begin the exile pattern?",
+      "answer": "In 586 BCE, Nebukhadnezzar burned the Temple, broke the walls of Yerushalayim, and deported the population to Babylon (25:8-12). This is the first complete destruction of the covenant center. The Damascus Document (CD 1:5-6) at Qumran states that YHWH remembered the covenant '390 years after he had given them into the hand of Nebukhadnezzar king of Babylon' — and from the exiles raised a root of planting. The exile is not a one-time event. It is a condition. The covenant people have been in exile — scattered, displaced, institutionally dispossessed — from 586 BCE through the present. The return under Cyrus was partial. The Second Temple was destroyed in 70 CE. The Qumran community was destroyed in 68 CE. The scattering continued."
+    },
+    {
+      "question": "What was systematically erased about the Babylonian exile's African connections?",
+      "answer": "When Yerushalayim fell in 586 BCE, not all of Yehudah went to Babylon. Yirmeyahu 43-44 documents that a significant population fled to Mitsrayim (Egypt) — including to Pathros in Upper Egypt, deep into the African continent. The Elephantine papyri (5th century BCE) confirm a Judean military colony at the first cataract of the Nile in southern Egypt — complete with a temple to YHWH. The covenant community's exile flowed south into Africa as much as east into Babylon. The Western academic tradition focuses exclusively on the Babylonian exile and the return under Cyrus, systematically ignoring the African diaspora communities that existed for centuries along the Nile. The tectonic reality — Africa and the Levant share the same plate boundary — underscores that the African diaspora was not foreign territory but contiguous homeland."
+    }
+  ]
+}

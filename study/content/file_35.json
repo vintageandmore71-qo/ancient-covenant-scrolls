@@ -1,0 +1,33 @@
+{
+  "id": "file_35",
+  "label": "Melakhim Aleph (1 Kings) — Part 2 — Chapters 7–12",
+  "volume": 14,
+  "content_version": 1,
+  "summary_plain": "Shelomoh completes the Temple and his own palace. The Ark of the Covenant is brought into the Most Holy Place. The cloud of YHWH's glory fills the house — the priests cannot stand to minister. Shelomoh's dedication prayer: YHWH, there is no one like you in heaven above or on earth beneath. If your people sin and turn back to you, hear from heaven. The Queen of Sheva comes to test Shelomoh with hard questions — she declares: the half was not told me. Shelomoh's heart turns after other gods. YHWH raises up adversaries. Yerov'am son of Nevat receives the prophecy of Achiyah: ten tribes will be torn from Shelomoh's son. Rechav'am rejects the people's plea — the kingdom splits. Yisra'EL to the north. Yehudah to the south.",
+  "summary_scholarly": "The ACR reads from DSS Kings fragments (4QKgs, 5QKgs) and the Orit Ge'ez. Shelomoh's Temple dedication (ch 8) is the theological center — YHWH's kavod (glory-weight) fills the house. The Queen of Sheva narrative (ch 10) connects Yisra'EL to the Horn of Africa trade networks. The Kebra Nagast — preserved in Ge'ez — identifies her as Makeda, queen of Aksum. The kingdom split (ch 12) is YHWH's judgment on Shelomoh's idolatry. The ten northern tribes form a separate kingdom under Yerov'am. The Temple Scroll (11QT) provides the Qumran community's alternative understanding of how the Temple should have been built and operated.",
+  "key_terms": [
+    { "term": "Queen of Sheva", "phonetic": "Sheh-VAH", "definition": "Queen who comes to Yerushalayim with spices, gold, and precious stones to test Shelomoh with hard questions (ch 10). She declares: 'The half was not told me — your wisdom and prosperity surpass the report.' The Kebra Nagast identifies her as Makeda, queen of Aksum. Anglicized as Queen of Sheba." },
+    { "term": "Rechav'am", "phonetic": "Reh-khav-AHM", "definition": "Son of Shelomoh. Rejects the people's plea for lighter burdens: 'My father disciplined you with whips — I will discipline you with scorpions' (12:14). Ten tribes revolt under Yerov'am. Rechav'am retains only Yehudah and Binyamin. Anglicized as Rehoboam." },
+    { "term": "Yerov'am", "phonetic": "Yeh-rov-AHM", "definition": "Son of Nevat, from the tribe of Efrayim. Receives the prophecy of Achiyah the Shilonite: YHWH will tear ten tribes from Shelomoh's son and give them to Yerov'am (11:31). First king of the northern kingdom of Yisra'EL. Anglicized as Jeroboam." }
+  ],
+  "fill_blank": [
+    { "ref": "8:11", "prompt": "The priests could not stand to minister because of the cloud, for the ______ of YHWH filled the house of YHWH.", "answer": "glory", "source_quote": "The priests could not stand to minister because of the cloud, for the glory of YHWH filled the house of YHWH." },
+    { "ref": "10:7", "prompt": "And she said to the king: The report was true that I heard in my own land of your words and of your wisdom, but I did not believe the reports until I came and my own eyes had seen it. And behold, the ______ was not told me.", "answer": "half", "source_quote": "Behold, the half was not told me. Your wisdom and prosperity surpass the report that I heard." },
+    { "ref": "12:14", "prompt": "My father disciplined you with whips, but I will discipline you with ______.", "answer": "scorpions", "source_quote": "My father disciplined you with whips, but I will discipline you with scorpions." }
+  ],
+  "multiple_choice": [
+    { "ref": "8:10-11", "question": "What happened when the Ark was placed in the Temple?", "options": ["Thunder and lightning struck", "The glory of YHWH filled the house as a cloud", "Fire fell from heaven", "An earthquake shook the building"], "correct": 1, "source_quote": "The glory of YHWH filled the house of YHWH." },
+    { "ref": "12:16-17", "question": "What caused the kingdom to split?", "options": ["A foreign invasion", "Rechav'am rejected the people's plea for lighter burdens", "A plague from YHWH", "The priests rebelled"], "correct": 1, "source_quote": "When all Yisra'EL saw that the king did not listen to them, the people answered the king: What portion do we have in Dawid?" },
+    { "ref": "11:1-4", "question": "Why did YHWH raise up adversaries against Shelomoh?", "options": ["He built the Temple wrong", "His heart turned after other gods", "He refused to pay tribute", "He mistreated the prophets"], "correct": 1, "source_quote": "When Shelomoh was old his wives turned away his heart after other gods, and his heart was not wholly true to YHWH his Creator." }
+  ],
+  "faq": [
+    {
+      "question": "What does the Kebra Nagast say about the Queen of Sheva?",
+      "answer": "The Kebra Nagast — preserved in Ge'ez, the liturgical language of the Ethiopian Orthodox Tewahedo Church — identifies the Queen of Sheva as Makeda, queen of Aksum. The text records that she bore Shelomoh a son, Menelik I, who later traveled to Yerushalayim and brought the Ark of the Covenant to Aksum. Whether one accepts the Kebra Nagast's historical claims or not, the text preserves an African kingdom's self-understanding as directly connected to the Solomonic covenant line. The Beta Yisra'EL (Ethiopian Jewish community) maintained Torah observance, Shabbat, purity laws, and animal sacrifice for millennia — independent of both Rabbinic Judaism and Christianity. Western scholarship classified them as 'converts' or 'imitators' rather than acknowledging an independent African covenant tradition. The Great Eraser requires that authentic covenant identity be European. The Kebra Nagast and the Beta Yisra'EL's existence contradict this."
+    },
+    {
+      "question": "What does the kingdom split reveal about institutional power and covenant faithfulness?",
+      "answer": "The kingdom splits because Rechav'am chooses domination over justice. The people ask for lighter burdens. He responds: 'My father disciplined you with whips — I will discipline you with scorpions' (12:14). The young advisors counsel tyranny. The elder advisors counsel service. Rechav'am follows the young. Ten tribes depart. YHWH's own text declares: 'This thing is from me' (12:24). YHWH uses the split as judgment on Shelomoh's idolatry. The institution fragments when it prioritizes power over covenant faithfulness. Every imperial system — Roman, European colonial, American — that used Solomonic imagery to legitimize its power ignored this chapter. The Great Eraser selectively quotes the glory chapters (8-10) while burying the judgment chapters (11-12). The same text that describes the Temple's glory describes its cause of destruction."
+    }
+  ]
+}

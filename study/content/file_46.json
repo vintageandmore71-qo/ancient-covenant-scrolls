@@ -1,0 +1,38 @@
+{
+  "id": "file_46",
+  "label": "Yesha'yahu (Isaiah) — 1QIsa-a — Part 5 — Chapters 55–66",
+  "volume": 16,
+  "content_version": 1,
+  "summary_plain": "Come, everyone who thirsts — come to the waters. You who have no money — come, buy, and eat. YHWH's word goes out and does not return empty. The mountains and hills break forth into singing. YHWH's house shall be called a house of prayer for all peoples. The watchmen are blind, they are all dumb dogs that cannot bark. Is not this the fast that I choose — to loose the bonds of wickedness, to let the oppressed go free? Arise, shine, for your light has come. The Spirit of YHWH is upon me because he has anointed me to bring good news to the afflicted. YHWH creates new heavens and a new earth. The wolf and the lamb shall feed together.",
+  "summary_scholarly": "The ACR reads from the Great Isaiah Scroll (1QIsa-a) and the Orit Ge'ez. Yesha'yahu 18 (covered in Part 2) resonates through these final chapters — the nations beyond the rivers of Cush are addressed in YHWH's universal restoration plan. Chapter 56:7 declares YHWH's house a 'house of prayer for all peoples' — not for one nation or institution. The fast YHWH chooses (58:6) is justice: releasing the oppressed, feeding the hungry, sheltering the homeless. Chapter 61's anointing passage was read at Qumran (11QMelch) as referring to a mortal herald, not a divine figure. The new heavens and new earth (65:17) is the eschatological hope preserved in the oldest prophetic manuscript.",
+  "key_terms": [
+    { "term": "New Heavens and New Earth", "phonetic": "", "definition": "YHWH declares: 'I create new heavens and a new earth, and the former things shall not be remembered' (65:17). The eschatological restoration of all creation. Preserved in 1QIsa-a without any intermediary figure — YHWH creates directly." },
+    { "term": "House of Prayer for All Peoples", "phonetic": "", "definition": "YHWH declares: 'My house shall be called a house of prayer for all peoples' (56:7). The covenant is not exclusive to one ethnic group or one institution — YHWH's house is open to all who hold the covenant." },
+    { "term": "The Fast YHWH Chooses", "phonetic": "", "definition": "YHWH defines true fasting as justice: 'to loose the bonds of wickedness, to undo the straps of the yoke, to let the oppressed go free, and to break every yoke' (58:6). Religious ritual without justice is rejected." },
+    { "term": "11QMelchizedek", "phonetic": "", "definition": "A Qumran text from Cave 11 that interprets Yesha'yahu 61:1 — 'the Spirit of YHWH is upon me because he has anointed me' — as referring to a mortal herald who announces the jubilee year of release. Not a divine incarnation." }
+  ],
+  "fill_blank": [
+    { "ref": "55:1", "prompt": "Come, everyone who thirsts — come to the ______. You who have no money — come, buy, and eat.", "answer": "waters", "source_quote": "Come, everyone who thirsts — come to the waters. You who have no money — come, buy, and eat." },
+    { "ref": "65:17", "prompt": "For behold, I create new ______ and a new earth, and the former things shall not be remembered.", "answer": "heavens", "source_quote": "For behold, I create new heavens and a new earth, and the former things shall not be remembered or come to mind." },
+    { "ref": "58:6", "prompt": "Is not this the fast that I choose — to loose the bonds of wickedness, to let the ______ go free?", "answer": "oppressed", "source_quote": "Is not this the fast that I choose — to loose the bonds of wickedness, to undo the straps of the yoke, to let the oppressed go free, and to break every yoke?" }
+  ],
+  "multiple_choice": [
+    { "ref": "56:7", "question": "What does YHWH call his house?", "options": ["A house of sacrifice", "A house of judgment", "A house of prayer for all peoples", "A house of the priests"], "correct": 2, "source_quote": "My house shall be called a house of prayer for all peoples." },
+    { "ref": "58:6", "question": "What fast does YHWH choose?", "options": ["Abstaining from food for seven days", "Wearing sackcloth and ashes", "Loosing the bonds of wickedness and letting the oppressed go free", "Silent prayer in the Temple"], "correct": 2, "source_quote": "Is not this the fast that I choose — to loose the bonds of wickedness, to let the oppressed go free?" },
+    { "ref": "65:17", "question": "What does YHWH promise to create?", "options": ["A new temple", "A new kingdom", "New heavens and a new earth", "A new priesthood"], "correct": 2, "source_quote": "For behold, I create new heavens and a new earth." }
+  ],
+  "faq": [
+    {
+      "question": "How does Yesha'yahu 18 connect to chapters 55-66?",
+      "answer": "Yesha'yahu 18:1-2 describes 'the land shadowing with wings beyond the rivers of Ethiopia' — a land that sends ambassadors by sea to 'a nation scattered and peeled.' The final chapters of Yesha'yahu (55-66) describe YHWH's universal restoration: 'my house shall be a house of prayer for all peoples' (56:7), 'I create new heavens and a new earth' (65:17), 'from one new moon to another, all flesh shall come to worship before me' (66:23). The scattered people described in chapter 18 are included in this restoration. The covenant is not finished when the people are scattered — the scattering is a stage, and the ingathering is the end. 1QIsa-a preserves both the scattering (ch 18) and the restoration (ch 55-66) on the same scroll, in the same hand. The text was written to be read as a unified narrative from exile to restoration."
+    },
+    {
+      "question": "How did 11QMelchizedek interpret the anointing of Yesha'yahu 61?",
+      "answer": "11QMelchizedek (11Q13), found in Qumran Cave 11, interprets Yesha'yahu 61:1 — 'the Spirit of YHWH is upon me because he has anointed me to bring good news to the afflicted' — as referring to a mortal herald who announces the eschatological jubilee. The Qumran text connects this passage to the jubilee legislation of Vayikra 25 — the year of release, the year debts are canceled and slaves freed. The anointed herald is a human messenger, not a divine being. Roman Christianity later claimed this passage was fulfilled by a divine incarnation — a reading absent from the DSS community that preserved the oldest copy of the text. The Qumran interpretation is jubilee justice: release for the captive, liberty for the oppressed. The Roman interpretation is theological: divine salvation through belief in a God-man."
+    },
+    {
+      "question": "What does Yesha'yahu's 'dumb dogs' oracle reveal about institutional failure?",
+      "answer": "Yesha'yahu 56:10-11 in 1QIsa-a: 'His watchmen are blind — they are all without knowledge. They are all dumb dogs that cannot bark — dreaming, lying down, loving to slumber. The dogs have a mighty appetite — they never have enough. The shepherds also have no understanding — they have all turned to their own way, each to his own gain.' The prophetic condemnation is directed at the covenant community's own leadership — the watchmen, the shepherds, the religious authorities who are supposed to guard the people. They are blind, silent, self-serving. This is not a condemnation of outsiders. It is a condemnation of the institution that claims to represent YHWH. The Qumran community's withdrawal from the Jerusalem Temple was based on exactly this prophetic pattern: the institutional leadership had failed, and the remnant had to preserve the covenant outside the corrupted center."
+    }
+  ]
+}

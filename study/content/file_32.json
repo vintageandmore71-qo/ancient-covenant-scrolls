@@ -1,0 +1,31 @@
+{
+  "id": "file_32",
+  "label": "Shemu'el Bet (2 Samuel) — Part 3 — Chapters 13–18",
+  "volume": 13,
+  "content_version": 1,
+  "summary_plain": "Amnon rapes his half-sister Tamar. Dawid is angry but does nothing. Avshalom waits two years, then kills Amnon. Avshalom flees to Geshur for three years. Yo'av arranges his return through the wise woman of Teqo'a. Avshalom conspires to take the throne — he steals the hearts of the men of Yisra'EL. Avshalom declares himself king at Hevron. Dawid flees Yerushalayim on foot, weeping, head covered. Chushai the Arkite defeats the counsel of Achitofel. Avshalom pursues Dawid across the Yarden. In the forest of Efrayim, Avshalom's hair catches in a terebinth tree. Yo'av kills Avshalom against Dawid's explicit orders. Dawid weeps: O my son Avshalom, my son, my son Avshalom! Would I had died instead of you!",
+  "summary_scholarly": "The ACR reads from 4QSam-a and the Orit Ge'ez. The Avshalom rebellion (chs 13-18) is the direct consequence of Natan's prophecy: 'the sword shall never depart from your house' (12:10). YHWH's word operates through cause and effect — Dawid's sin with Bat-Sheva produces generational consequences. The rape of Tamar (ch 13) exposes the failure of patriarchal power: Dawid is angry but does nothing, leaving Avshalom to take justice into his own hands. 4QSam-a preserves textual variants in the Avshalom narrative. The Orit Ge'ez provides independent witness to the account. Avshalom's rebellion follows the pattern of contested kingship — he goes to Hevron, the same city where Dawid was first anointed, to declare his own kingship.",
+  "key_terms": [
+    { "term": "Avshalom", "phonetic": "Av-shah-LOHM", "definition": "Son of Dawid. Kills Amnon for raping Tamar. Rebels against Dawid and declares himself king at Hevron. Dies when his hair catches in a tree and Yo'av strikes him. His name means 'father of peace' — an ironic name for a man whose life is defined by violence and rebellion. Anglicized as Absalom." },
+    { "term": "Tamar", "phonetic": "Tah-MAHR", "definition": "Daughter of Dawid, sister of Avshalom. Raped by her half-brother Amnon (ch 13). She tears her long-sleeved robe — the garment of royal virgin daughters — and puts ashes on her head. Dawid is angry but takes no action. Her name means 'date palm.'" },
+    { "term": "Yo'av", "phonetic": "Yo-AHV", "definition": "Commander of Dawid's army. Arranges Avshalom's return from exile through the wise woman of Teqo'a. Later kills Avshalom in the forest of Efrayim against Dawid's orders. Anglicized as Joab." }
+  ],
+  "fill_blank": [
+    { "ref": "18:33", "prompt": "And the king was deeply moved and went up to the chamber over the gate and wept. And as he went, he said: O my son Avshalom, my son, my son Avshalom! Would I had died instead of ______!", "answer": "you", "source_quote": "O my son Avshalom, my son, my son Avshalom! Would I had died instead of you, O Avshalom, my son, my son!" },
+    { "ref": "15:6", "prompt": "So Avshalom stole the ______ of the men of Yisra'EL.", "answer": "hearts", "source_quote": "So Avshalom stole the hearts of the men of Yisra'EL." }
+  ],
+  "multiple_choice": [
+    { "ref": "13:28-29", "question": "Why did Avshalom kill Amnon?", "options": ["For the throne", "Because Amnon raped Tamar and Dawid did nothing", "Over a land dispute", "YHWH commanded it"], "correct": 1, "source_quote": "Avshalom commanded his servants: Mark when Amnon's heart is merry with wine, and when I say to you, strike Amnon, then kill him." },
+    { "ref": "18:9-15", "question": "How did Avshalom die?", "options": ["He fell in battle", "His hair caught in a tree and Yo'av struck him", "He was captured and executed", "He drowned in the Yarden"], "correct": 1, "source_quote": "Avshalom's head caught fast in the oak, and he was suspended between heaven and earth, while the mule that was under him went on. And Yo'av took three darts in his hand and thrust them into the heart of Avshalom." }
+  ],
+  "faq": [
+    {
+      "question": "What does the rape of Tamar reveal about justice systems and institutional failure?",
+      "answer": "Amnon rapes Tamar. Dawid — the king, the father, the covenant leader — is angry but does nothing (13:21). The institution of the monarchy fails to deliver justice for the violated woman. Avshalom takes justice into his own hands after two years of waiting. The pattern: when the institution charged with justice fails to act, individuals resort to vigilante justice, which produces further cycles of violence. The Qumran community documented this same pattern in the Jerusalem priesthood — institutional corruption that went unaddressed, leading to the community's withdrawal. The Great Eraser operates within this dynamic: institutional systems that fail to deliver justice also control the narrative. Tamar's rape is in the text, but how many sermons, church studies, or academic curricula address it? The institution decides which parts of the text are taught and which are silenced."
+    },
+    {
+      "question": "How does Avshalom's rebellion connect to the African and Indigenous experience of contested sovereignty?",
+      "answer": "Avshalom goes to Hevron — the city where Dawid was first anointed — to declare his counter-kingship. He uses the language of justice: 'If only I were made judge in the land, then every man who has a dispute could come to me, and I would give him justice' (15:4). He critiques the ruling power's failure to deliver justice — and uses that critique to seize power for himself. This is the pattern of every colonial and neo-colonial power that claimed to bring 'civilization' and 'justice' to African and Indigenous peoples while actually extracting resources and consolidating control. The language of justice used to seize unjust power is one of the Great Eraser's primary tools. Avshalom's rebellion fails because YHWH's covenant choice — Dawid — cannot be overturned by human political manipulation."
+    }
+  ]
+}

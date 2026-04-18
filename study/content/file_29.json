@@ -1,0 +1,31 @@
+{
+  "id": "file_29",
+  "label": "Shemu'el Aleph (1 Samuel) — Part 4 — Chapters 25–31",
+  "volume": 12,
+  "content_version": 1,
+  "summary_plain": "Shemu'el dies. All Yisra'EL mourns. Dawid encounters Naval the fool and Avigayil the wise — she prevents Dawid from shedding blood in anger. Dawid marries Avigayil. Dawid again spares Sha'ul's life — taking his spear and water jug while Sha'ul sleeps. Dawid flees to the Philistines and lives in Tziqlag. Sha'ul, desperate and abandoned by YHWH, consults the medium at Ein-Dor. She raises the spirit of Shemu'el, who declares: YHWH has torn the kingdom from you and given it to Dawid. The Philistines attack at Gilboa. Sha'ul and his three sons — including Yonatan — fall in battle. Sha'ul falls on his own sword.",
+  "summary_scholarly": "The ACR reads from 4QSam-a and the Orit Ge'ez. 4QSam-a preserves variant readings in the Avigayil narrative and the Ein-Dor account. The death of Sha'ul (ch 31) ends YHWH's experiment with a king chosen by the people's criteria — tall, impressive, from Binyamin. Naval's name means 'fool' — his narrative (ch 25) contrasts human folly with Avigayil's covenant wisdom. The Ein-Dor episode (ch 28) is significant: YHWH has stopped answering Sha'ul through dreams, Urim, or prophets. Sha'ul turns to necromancy — prohibited in Torah — confirming the totality of his rejection. The battle of Gilboa destroys the Saulide dynasty and clears the path for YHWH's chosen — Dawid ben Yishai.",
+  "key_terms": [
+    { "term": "Avigayil", "phonetic": "Ah-vee-GAH-yil", "definition": "Wife of Naval, then wife of Dawid. Described as intelligent and beautiful. She intercepts Dawid with provisions and a prophetic speech, preventing him from shedding blood in vengeance. Her name means 'my father's joy.' Anglicized as Abigail." },
+    { "term": "Ein-Dor", "phonetic": "Ayn-DOR", "definition": "Location where Sha'ul consults a medium to raise the spirit of the dead Shemu'el (ch 28). The act violates Torah prohibition against necromancy (Devarim 18:10-11). Sha'ul's desperation drives him to the very practices YHWH forbids." },
+    { "term": "Gilboa", "phonetic": "Gil-BOH-ah", "definition": "Mountain where Sha'ul and his three sons fall in battle against the Philistines. Sha'ul falls on his own sword rather than be captured. The end of the Saulide dynasty." }
+  ],
+  "fill_blank": [
+    { "ref": "25:3", "prompt": "Now the name of the man was Naval, and the name of his wife ______. The woman was discerning and beautiful, but the man was harsh and badly behaved.", "answer": "Avigayil", "source_quote": "Now the name of the man was Naval, and the name of his wife Avigayil. The woman was discerning and beautiful, but the man was harsh and badly behaved." },
+    { "ref": "28:16", "prompt": "And Shemu'el said: Why do you ask me, since YHWH has turned from you and become your ______?", "answer": "enemy", "source_quote": "Then Shemu'el said: Why do you ask me, since YHWH has turned from you and become your enemy?" }
+  ],
+  "multiple_choice": [
+    { "ref": "28:6-7", "question": "Why did Sha'ul consult the medium at Ein-Dor?", "options": ["YHWH told him to", "YHWH had stopped answering him through dreams, Urim, or prophets", "Shemu'el was still alive and told him to go", "The Philistines recommended it"], "correct": 1, "source_quote": "And when Sha'ul inquired of YHWH, YHWH did not answer him, either by dreams, or by Urim, or by prophets." },
+    { "ref": "31:4", "question": "How did Sha'ul die?", "options": ["A Philistine struck him down", "He fell on his own sword", "He was struck by lightning", "He died of illness"], "correct": 1, "source_quote": "Then Sha'ul took his own sword and fell upon it." }
+  ],
+  "faq": [
+    {
+      "question": "What does Avigayil's role reveal about women's authority in the covenant framework?",
+      "answer": "Avigayil acts as a prophet-intercessor. She delivers a prophetic speech to Dawid (25:28-31) — predicting YHWH will make him a sure house and declaring that his life will be bound in the bundle of the living with YHWH. She stops the future king of Yisra'EL from committing bloodshed through her words alone. No male prophet intervenes — Avigayil does. Western theological frameworks — both Christian and Rabbinic — systematically minimized women's prophetic authority. The DSS and Orit Ge'ez preserve texts where women function as prophets, judges, and covenant actors. Devorah judged Yisra'EL. Miriam was called a prophet. Chuldah the prophet authenticated the Torah scroll found in the Temple (2 Kings 22:14). The erasure of women's prophetic authority is part of the same Great Eraser system that erased African identity — institutional power rewriting the record to consolidate male, European, institutional control."
+    },
+    {
+      "question": "How does Sha'ul's trajectory illustrate the consequences of replacing YHWH's authority with human institutional power?",
+      "answer": "Sha'ul begins as YHWH's anointed and ends consulting a necromancer. The trajectory: YHWH's spirit comes upon him (10:6), YHWH's spirit departs (16:14), YHWH stops answering him (28:6), he turns to the dead for guidance (28:7). Every step away from obedience to YHWH leads further into spiritual darkness. The Qumran community documented this same pattern in the Jerusalem priesthood: the Wicked Priest began in truth but fell into corruption. Institutional power without obedience to YHWH's word is a death spiral. The Great Eraser operates the same way — institutions begin by receiving the covenant texts, then gradually replace YHWH's authority with their own editorial control, until the original voice is unrecognizable."
+    }
+  ]
+}

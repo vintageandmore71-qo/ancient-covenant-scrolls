@@ -1,0 +1,38 @@
+{
+  "id": "file_40",
+  "label": "Melakhim Bet (2 Kings) — Part 3 — Chapters 14–19",
+  "volume": 15,
+  "content_version": 1,
+  "summary_plain": "The northern kingdom of Yisra'EL falls. Shalmaneser king of Ashur besieges Shomron for three years. In 722 BCE Ashur conquers the northern kingdom and deports the people to Halah, Habor, the river Gozan, and the cities of the Medes. Foreign peoples are resettled in Shomron. Hizqiyahu reigns in Yehudah — he removes the high places and breaks the bronze serpent Moshe had made. Sanheriv king of Ashur invades Yehudah and besieges Yerushalayim. Taharqa king of Cush comes out against Sanheriv. The messenger of YHWH strikes 185,000 in the Assyrian camp. Yerushalayim survives.",
+  "summary_scholarly": "The ACR reads from DSS Kings fragments (4QKgs) and the Orit Ge'ez. The fall of the northern kingdom (722 BCE) and the Assyrian siege of Yerushalayim (701 BCE) are the two pivotal events of this section. Taharqa (Tirhakah) of the Cushite 25th Dynasty — whose statues were excavated at Kerma by the University of Geneva — brought his army to relieve Yerushalayim. Without this African military intervention, Yehudah would have been destroyed 130 years before the Babylonian exile. The entire prophetic corpus from Yesha'yahu onward depends on the survival of Yehudah, which was secured by a Cushite pharaoh. The Assyrian deportation of 722 BCE scattered the northern tribes across the empire — the first mass scattering of the covenant people.",
+  "key_terms": [
+    { "term": "Taharqa", "phonetic": "Tah-HAR-kah", "definition": "Cushite pharaoh of the 25th Dynasty. He marched against Sanheriv to relieve the Assyrian siege of Yerushalayim in 701 BCE (19:9). His monumental statues, excavated at Kerma by the University of Geneva, depict African royal portraiture. Anglicized as Tirhakah." },
+    { "term": "Hizqiyahu", "phonetic": "Hiz-qi-YAH-hoo", "definition": "King of Yehudah who trusted in YHWH. He removed the high places, broke the pillars, cut down the Asherah, and broke in pieces the bronze serpent that Moshe had made (18:4). Anglicized as Hezekiah." },
+    { "term": "Shomron", "phonetic": "Shom-RON", "definition": "Capital of the northern kingdom of Yisra'EL. Besieged by Ashur for three years and conquered in 722 BCE. Its population was deported and replaced with foreign peoples. Anglicized as Samaria." },
+    { "term": "Sanheriv", "phonetic": "San-heh-REEV", "definition": "King of Ashur (Assyria). He invaded Yehudah and besieged Yerushalayim but was defeated when the messenger of YHWH struck his camp. Anglicized as Sennacherib." }
+  ],
+  "fill_blank": [
+    { "ref": "19:9", "prompt": "And when he heard it said of ______ king of Cush: Behold, he has come out to fight against you — he sent messengers again to Hizqiyahu.", "answer": "Taharqa", "source_quote": "And when he heard it said of Taharqa king of Cush: Behold, he has come out to fight against you — he sent messengers again to Hizqiyahu." },
+    { "ref": "17:6", "prompt": "In the ninth year of Hoshea, the king of Ashur captured ______ and carried Yisra'EL away to Ashur.", "answer": "Shomron", "source_quote": "In the ninth year of Hoshea, the king of Ashur captured Shomron and carried Yisra'EL away to Ashur and placed them in Halah, and on the Habor, the river of Gozan, and in the cities of the Medes." },
+    { "ref": "19:35", "prompt": "And that night the messenger of YHWH went out and struck down ______ thousand in the camp of Ashur.", "answer": "185,000", "source_quote": "And that night the messenger of YHWH went out and struck down 185,000 in the camp of Ashur." }
+  ],
+  "multiple_choice": [
+    { "ref": "19:9", "question": "Who came out against Sanheriv to relieve Yerushalayim?", "options": ["Pharaoh Nekho of Egypt", "Taharqa king of Cush", "The king of Babylon", "Nebukhadnezzar"], "correct": 1, "source_quote": "And when he heard it said of Taharqa king of Cush: Behold, he has come out to fight against you." },
+    { "ref": "17:6", "question": "In what year BCE did the northern kingdom of Yisra'EL fall to Ashur?", "options": ["586 BCE", "701 BCE", "722 BCE", "612 BCE"], "correct": 2, "source_quote": "In the ninth year of Hoshea, the king of Ashur captured Shomron and carried Yisra'EL away." },
+    { "ref": "18:4", "question": "What did Hizqiyahu break in pieces?", "options": ["The golden calf", "The bronze serpent that Moshe had made", "The altar of Baal", "The Ark of the Covenant"], "correct": 1, "source_quote": "He broke in pieces the bronze serpent that Moshe had made, for until those days the people of Yisra'EL had been making offerings to it." }
+  ],
+  "faq": [
+    {
+      "question": "Why is the Taharqa-Hizqiyahu alliance the most suppressed event in covenant history?",
+      "answer": "In 701 BCE, Sanheriv's Assyrian army besieged Yerushalayim. Taharqa, pharaoh of the Cushite 25th Dynasty, marched his African army north to confront Ashur (19:9). Without this intervention, the kingdom of Yehudah would have been destroyed — 130 years before the Babylonian exile. Every prophetic book from Yesha'yahu through Malakhi, and every DSS manuscript written during the Second Temple period, depends on the survival of Yehudah in 701 BCE. Taharqa's statues, excavated at Kerma (modern Sudan) by the University of Geneva, are masterworks of African royal portraiture — unmistakably African faces. The Western scholarly tradition consistently minimizes this event: the divine messenger's strike on the Assyrian camp receives attention, but Taharqa's military intervention is treated as a footnote. An African king saved the covenant community, and the historical record has been systematically de-emphasized."
+    },
+    {
+      "question": "What does the Assyrian deportation of 722 BCE reveal about the scattering of the covenant people?",
+      "answer": "The fall of Shomron in 722 BCE is the first documented mass deportation of the covenant people. Ashur scattered the northern tribes to Halah, Habor, the river Gozan, and the cities of the Medes (17:6). Foreign peoples were resettled in the land (17:24). This is the beginning of the 'lost tribes' phenomenon — but the scattering was not random. The Assyrians placed deportees along trade routes and border regions across the empire, from Mesopotamia to Media. The Kerma excavations and Nubian archaeological sites demonstrate that populations moved along the Nile corridor during this same period. The scattering of Yisra'EL followed Afro-Asiatic trade and migration routes that connected the Levant to the African interior — routes that existed for millennia before Ashur."
+    },
+    {
+      "question": "How do the Kerma statues connect to 2 Melakhim 19?",
+      "answer": "The University of Geneva's excavations at Kerma (modern Sudan) recovered monumental statues of Taharqa and other 25th Dynasty pharaohs. These statues — standing over two meters tall — depict unmistakably African faces, broad features, and dark granite chosen to represent dark skin. These are the faces of the kings who controlled Egypt and projected military power into the Levant. When 2 Melakhim 19:9 names Taharqa king of Cush, this is not an abstract reference. The Kerma statues are the physical evidence of who this king was — an African sovereign whose intervention preserved the covenant community. The cartographic erasure that separates 'Egypt' from 'Africa' in modern maps obscures the fact that the 25th Dynasty ruled from Napata in Nubia, deep within the African continent."
+    }
+  ]
+}

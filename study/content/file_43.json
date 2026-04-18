@@ -1,0 +1,37 @@
+{
+  "id": "file_43",
+  "label": "Yesha'yahu (Isaiah) — 1QIsa-a — Part 2 — Chapters 13–27",
+  "volume": 16,
+  "content_version": 1,
+  "summary_plain": "Yesha'yahu delivers oracles against the nations. The burden against Babylon — YHWH musters the host for battle. The burden against Moav. The burden against Dameshek. The burden against Cush — the land shadowing with wings beyond the rivers of Ethiopia sends ambassadors by sea. The burden against Mitsrayim. The burden against the desert of the sea. The burden against Tsor. Yesha'yahu's apocalypse: YHWH will punish the host of heaven on high and the kings of the earth. On this mountain he will swallow up death forever and wipe away tears from all faces.",
+  "summary_scholarly": "The ACR reads from the Great Isaiah Scroll (1QIsa-a) and the Orit Ge'ez. The oracle cycle (chapters 13-23) positions YHWH as sovereign over all nations — not a tribal deity but the judge of the entire earth. Yesha'yahu 18 is critical: the 'land shadowing with wings beyond the rivers of Ethiopia' that sends ambassadors by sea to 'a nation scattered and peeled' is a geographic description with no parallel in the ancient Near Eastern prophetic corpus. The apocalyptic section (chapters 24-27) describes universal judgment and the swallowing of death — language the Qumran community read as eschatological but not as a divine incarnation event.",
+  "key_terms": [
+    { "term": "Massa (Burden/Oracle)", "phonetic": "Mah-SAH", "definition": "The Hebrew term for the prophetic oracle against a nation. Each massa is a judgment pronouncement from YHWH against a specific people. Chapters 13-23 contain the massa cycle." },
+    { "term": "Yesha'yahu 18", "phonetic": "", "definition": "The oracle concerning the land beyond the rivers of Cush — a land shadowing with wings that sends ambassadors by sea to a nation scattered and peeled, a people terrible from their beginning. This chapter describes a geographic location and a scattered people using language found nowhere else in the prophetic literature." },
+    { "term": "Tsor (Tyre)", "phonetic": "TSOR", "definition": "Phoenician coastal city whose oracle appears in chapter 23. Tsor controlled Mediterranean trade routes and was allied with Yisra'EL under Shelomoh. YHWH pronounces judgment on its commercial empire." }
+  ],
+  "fill_blank": [
+    { "ref": "18:1", "prompt": "Woe to the land shadowing with wings, which is beyond the rivers of ______.", "answer": "Ethiopia", "source_quote": "Woe to the land shadowing with wings, which is beyond the rivers of Ethiopia." },
+    { "ref": "25:8", "prompt": "He will swallow up ______ forever, and YHWH will wipe away tears from all faces.", "answer": "death", "source_quote": "He will swallow up death forever, and YHWH will wipe away tears from all faces." },
+    { "ref": "18:2", "prompt": "Go, swift messengers, to a nation scattered and ______, to a people terrible from their beginning onward.", "answer": "peeled", "source_quote": "Go, swift messengers, to a nation scattered and peeled, to a people terrible from their beginning onward, a nation meted out and trodden down." }
+  ],
+  "multiple_choice": [
+    { "ref": "18:1-2", "question": "How does Yesha'yahu 18 describe the land beyond the rivers of Cush?", "options": ["A land of milk and honey", "A land shadowing with wings that sends ambassadors by sea", "A land of darkness and deep shadow", "A land of gold and incense"], "correct": 1, "source_quote": "Woe to the land shadowing with wings, which is beyond the rivers of Ethiopia, that sends ambassadors by the sea." },
+    { "ref": "25:8", "question": "What does YHWH promise in the apocalyptic section?", "options": ["A new temple will be built", "He will swallow up death forever", "The nations will bring tribute", "A new king will arise"], "correct": 1, "source_quote": "He will swallow up death forever, and YHWH will wipe away tears from all faces." },
+    { "ref": "13:1", "question": "Which nation receives the first burden oracle in this section?", "options": ["Mitsrayim", "Moav", "Babylon", "Cush"], "correct": 2, "source_quote": "The burden of Babylon which Yesha'yahu the son of Amots saw." }
+  ],
+  "faq": [
+    {
+      "question": "What does Yesha'yahu 18 reveal about the covenant people's geography?",
+      "answer": "Yesha'yahu 18:1-2 in 1QIsa-a: 'Woe to the land shadowing with wings which is beyond the rivers of Ethiopia — that sends ambassadors by the sea — go swift messengers to a nation scattered and peeled — to a people terrible from their beginning onward — a nation meted out and trodden down.' The directional reference 'beyond the rivers of Ethiopia' means further than the rivers of Cush — beyond the African interior. From the ancient Near Eastern geographic perspective, this direction points west across the Atlantic. 'A nation scattered and peeled' — scattered (dispersed from their homeland) and peeled (stripped of identity, language, name). 'Meted out and trodden down' — measured for labor and trampled. This is in the oldest complete prophetic manuscript on earth, written centuries before the Common Era."
+    },
+    {
+      "question": "How does the 1QIsa-a text of chapters 13-27 differ from the Masoretic?",
+      "answer": "The Great Isaiah Scroll (1QIsa-a) preserves multiple variant readings in the oracle cycle that differ from the Masoretic text standardized centuries later. The 1QIsa-a scribes wrote YHWH in Paleo-Hebrew script (𐤉𐤄𐤅𐤄) within the square-script text — visually marking the Name as distinct. The Masoretic tradition later introduced vowel pointing for Adonai over the YHWH consonants, training readers to say a substitute. The 1QIsa-a shows no evidence of this substitution practice. The Name was written to be read as written. The entire 'LORD' substitution tradition — which governs every major English translation — has no basis in the oldest complete Isaiah manuscript."
+    },
+    {
+      "question": "Why do Western maps erase the geographic unity between Africa and the Levant?",
+      "answer": "Modern cartography places the Levant in the 'Middle East' — a category invented by European colonial geography. The tectonic reality: the Arabian Plate separated from the African Plate along the Red Sea rift, but the Sinai Peninsula remains the land bridge connecting the African and Levantine landmasses. Mitsrayim (Egypt) is in Africa. The Nile corridor runs from the Great Lakes of central Africa to the Mediterranean coast. The 25th Dynasty ruled from Napata in Nubia to the Nile Delta. Yesha'yahu's oracle cycle treats Cush, Mitsrayim, Ashur, Babylon, Moav, and Tsor as a continuous geographic system — not as separate 'continents.' The modern division of this region into 'Africa' and 'the Middle East' is a cartographic erasure that severs the covenant people from their African geographic context."
+    }
+  ]
+}

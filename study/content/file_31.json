@@ -1,0 +1,32 @@
+{
+  "id": "file_31",
+  "label": "Shemu'el Bet (2 Samuel) — Part 2 — Chapters 7–12",
+  "volume": 13,
+  "content_version": 1,
+  "summary_plain": "Dawid wants to build a house for YHWH. YHWH sends Natan the prophet with a different word: YHWH will build Dawid a house — a dynasty. YHWH's promise: your throne will be established forever. Dawid's prayer of gratitude. Dawid defeats the surrounding nations — Moav, Aram, Ammon, Edom, Philistines. Dawid shows chesed to Mefiboshet, son of Yonatan. Dawid sins with Bat-Sheva — he takes her while her husband Uriyah the Hittite fights in battle. Natan confronts Dawid with the parable of the poor man's lamb. Dawid confesses: I have sinned against YHWH. The child born of the adultery dies.",
+  "summary_scholarly": "The ACR reads from 4QSam-a, 4QSam-b, and the Orit Ge'ez. The Davidic covenant (ch 7) is one of the foundational covenant texts in the Hebrew canon — YHWH promises Dawid an enduring dynasty. The DSS community read this text as pointing toward a mortal Davidic messiah — a human king from Dawid's line, not a divine incarnation. 4Q174 (Florilegium) quotes 2 Shemu'el 7:10-14 explicitly: 'I will be to him a father, and he will be to me a son.' The Qumran interpretation is clear: this refers to the Branch of Dawid who will arise in the last days — a human descendent. The Bat-Sheva narrative (ch 11-12) demonstrates YHWH's justice: even the covenant king is held to the Torah's standard. No one is above YHWH's law.",
+  "key_terms": [
+    { "term": "Davidic Covenant", "phonetic": "", "definition": "YHWH's promise through Natan the prophet (ch 7): YHWH will build Dawid a house — an enduring dynasty. 'Your throne shall be established forever' (7:16). The DSS community read this as the promise of a future mortal Davidic king — the Branch of Dawid." },
+    { "term": "Natan", "phonetic": "Nah-TAHN", "definition": "Prophet who delivers YHWH's covenant promise to Dawid (ch 7) and later confronts Dawid over the sin with Bat-Sheva using the parable of the poor man's lamb (ch 12). Anglicized as Nathan." },
+    { "term": "Mefiboshet", "phonetic": "Meh-fee-BOH-shet", "definition": "Son of Yonatan, grandson of Sha'ul. Crippled in both feet. Dawid shows him chesed (covenant loyalty) for Yonatan's sake, restoring Sha'ul's land and giving him a permanent seat at the king's table (ch 9). Anglicized as Mephibosheth." }
+  ],
+  "fill_blank": [
+    { "ref": "7:16", "prompt": "And your house and your kingdom shall be made sure forever before me. Your ______ shall be established forever.", "answer": "throne", "source_quote": "And your house and your kingdom shall be made sure forever before me. Your throne shall be established forever." },
+    { "ref": "12:13", "prompt": "Dawid said to Natan: I have ______ against YHWH. And Natan said to Dawid: YHWH has also put away your sin — you shall not die.", "answer": "sinned", "source_quote": "Dawid said to Natan: I have sinned against YHWH. And Natan said to Dawid: YHWH has also put away your sin; you shall not die." }
+  ],
+  "multiple_choice": [
+    { "ref": "7:5-7", "question": "What did YHWH say when Dawid wanted to build a temple?", "options": ["Build it immediately", "YHWH would build Dawid a house — a dynasty — instead", "Wait until your son is born", "YHWH rejected the idea completely"], "correct": 1, "source_quote": "YHWH declares to you that YHWH will make you a house." },
+    { "ref": "12:7", "question": "How did Natan confront Dawid about Bat-Sheva?", "options": ["He publicly denounced him before the army", "He used the parable of the poor man's lamb", "He sent a written letter", "He refused to speak to Dawid"], "correct": 1, "source_quote": "Natan said to Dawid: You are the man!" },
+    { "ref": "9:7", "question": "Why did Dawid show chesed to Mefiboshet?", "options": ["He feared Sha'ul's family", "For the sake of his covenant with Yonatan", "Mefiboshet was a great warrior", "YHWH commanded it through a prophet"], "correct": 1, "source_quote": "Dawid said to him: Do not fear, for I will show you chesed for the sake of Yonatan your father." }
+  ],
+  "faq": [
+    {
+      "question": "How does the DSS community interpret the Davidic covenant differently from Christian theology?",
+      "answer": "4Q174 (Florilegium) quotes 2 Shemu'el 7:10-14 directly: 'I will be to him a father, and he will be to me a son.' The Qumran community interprets this as the Branch of Dawid — a mortal human king from Dawid's lineage who will arise in the last days. This is not a divine incarnation. The DSS messianic expectation is documented in 4Q252 (Commentary on Bereshit), 4Q285 (Sefer ha-Milchamah), and the Community Rule — all describing a human Davidic descendant who will rule in righteousness. Christian theology reframed this as a prophecy of divine incarnation — a theological move that has no basis in the DSS or the Orit Ge'ez. The original covenant framework expected a righteous mortal king, not a second person of a trinity."
+    },
+    {
+      "question": "What does the Bat-Sheva narrative reveal about covenant justice and power?",
+      "answer": "Dawid — the covenant king, YHWH's anointed — takes another man's wife and arranges her husband's death. YHWH sends Natan to confront him. Dawid is not above the Torah. The child of the adultery dies. The sword will not depart from Dawid's house (12:10). Covenant justice applies to the king. This is the opposite of every imperial theological system that placed the ruler above the law — the Egyptian Pharaoh as a god, the Roman Emperor as divine, the European doctrine of divine right of kings. YHWH's covenant framework holds the king accountable to the same Torah as the poorest person in Yisra'EL. Uriyah the Hittite — a non-Israelite fighting for Yisra'EL — is the righteous one in the narrative. The covenant king is the sinner. YHWH's justice does not respect institutional rank."
+    }
+  ]
+}

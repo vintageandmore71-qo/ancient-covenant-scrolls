@@ -1,0 +1,37 @@
+{
+  "id": "file_44",
+  "label": "Yesha'yahu (Isaiah) — 1QIsa-a — Part 3 — Chapters 28–41",
+  "volume": 16,
+  "content_version": 1,
+  "summary_plain": "Yesha'yahu pronounces woe upon Ephrayim and the drunkards of Shomron. YHWH lays in Tsiyon a stone, a tested stone, a precious cornerstone, a sure foundation — whoever believes will not be in haste. Woe to those who go down to Mitsrayim for help and rely on horses. A king will reign in righteousness. The wilderness will become a fruitful field. Comfort, comfort my people, says your Creator. Every valley shall be lifted up and every mountain brought low. The nations are like a drop from a bucket. YHWH gives power to the faint and strengthens the powerless. Those who wait upon YHWH shall renew their strength — they shall mount up with wings as eagles.",
+  "summary_scholarly": "The ACR reads from the Great Isaiah Scroll (1QIsa-a) and the Orit Ge'ez. The cornerstone passage (28:16) is read by the Qumran community in the Community Rule (1QS 8:7) as referring to the community itself — the tested foundation laid by YHWH. The comfort oracle beginning in chapter 40 marks the transition in tone from judgment to restoration. 1QIsa-a preserves this transition as a continuous scroll — the same scribe, the same manuscript. The artificial division of 'First Isaiah' and 'Second Isaiah' by Western scholarship has no basis in the Qumran manuscript evidence. The scroll is one document.",
+  "key_terms": [
+    { "term": "Cornerstone (Even Bohan)", "phonetic": "EH-ven BO-hahn", "definition": "YHWH lays in Tsiyon a tested stone, a precious cornerstone, a sure foundation (28:16). The Qumran community read this as the foundation of the covenant community — not an individual figure." },
+    { "term": "Comfort (Nahamu)", "phonetic": "Nah-hah-MOO", "definition": "The opening word of chapter 40: 'Comfort, comfort my people, says your Creator.' This begins the restoration oracles. In Hebrew, nahamu is the intensive plural imperative — a doubled command to comfort." },
+    { "term": "Wings as Eagles", "phonetic": "", "definition": "Those who wait upon YHWH shall renew their strength — they shall mount up with wings as eagles, they shall run and not be weary, they shall walk and not faint (40:31). The covenant promise of restored power to the exhausted." }
+  ],
+  "fill_blank": [
+    { "ref": "28:16", "prompt": "Behold, I am the one who has laid as a foundation in Tsiyon a stone, a tested stone, a precious ______, a sure foundation.", "answer": "cornerstone", "source_quote": "Behold, I am the one who has laid as a foundation in Tsiyon a stone, a tested stone, a precious cornerstone, a sure foundation." },
+    { "ref": "40:31", "prompt": "Those who wait upon YHWH shall renew their strength — they shall mount up with wings as ______.", "answer": "eagles", "source_quote": "Those who wait upon YHWH shall renew their strength — they shall mount up with wings as eagles, they shall run and not be weary, they shall walk and not faint." },
+    { "ref": "40:1", "prompt": "______, ______ my people, says your Creator.", "answer": "Comfort, comfort", "source_quote": "Comfort, comfort my people, says your Creator." }
+  ],
+  "multiple_choice": [
+    { "ref": "28:16", "question": "How did the Qumran community interpret the cornerstone passage?", "options": ["As referring to a future divine incarnation", "As the foundation of the covenant community itself", "As referring to the Temple of Shelomoh", "As referring to a political alliance"], "correct": 1, "source_quote": "The Community Rule (1QS 8:7) interprets the cornerstone as the foundation of the covenant community." },
+    { "ref": "40:31", "question": "What happens to those who wait upon YHWH?", "options": ["They receive riches", "They are given kingdoms", "They renew their strength and mount up with wings as eagles", "They see visions of the throne"], "correct": 2, "source_quote": "Those who wait upon YHWH shall renew their strength — they shall mount up with wings as eagles." },
+    { "ref": "40:15", "question": "How does Yesha'yahu describe the nations before YHWH?", "options": ["As mighty empires", "As a drop from a bucket", "As raging fires", "As tall cedars"], "correct": 1, "source_quote": "Behold, the nations are like a drop from a bucket, and are accounted as the dust on the scales." }
+  ],
+  "faq": [
+    {
+      "question": "Why does the 1QIsa-a scroll disprove the 'two Isaiahs' theory?",
+      "answer": "Western scholarship since the 18th century has divided Yesha'yahu into 'First Isaiah' (ch 1-39) and 'Second Isaiah' (ch 40-66), attributing them to different authors from different centuries. The Great Isaiah Scroll (1QIsa-a) — written in a continuous hand on a single scroll — preserves all 66 chapters as one document. There is no physical break, no scribal mark, no change of hand at chapter 40. The Qumran community treated the entire scroll as the work of Yesha'yahu. The 'two Isaiahs' theory was developed by European scholars who did not have access to the DSS — it is a product of post-Enlightenment source criticism, not manuscript evidence. The oldest complete manuscript treats the text as unified."
+    },
+    {
+      "question": "What does the cornerstone passage reveal about Qumran messianic interpretation?",
+      "answer": "Yesha'yahu 28:16 describes YHWH laying a tested stone, a precious cornerstone in Tsiyon. Roman Christianity later interpreted this as referring to a divine messiah. The Qumran community's own interpretation, preserved in the Community Rule (1QS 8:7), reads the cornerstone as the covenant community itself — the 'council of the community shall be established in truth as an eternal planting, a holy house for Israel and a foundation of the holy of holies for Aaron.' The DSS interpretation is communal, not individual. It refers to the covenant people as the foundation — not a divine individual. The oldest interpreters of this text read it differently than the Roman Church would centuries later."
+    },
+    {
+      "question": "How does Yesha'yahu 40 speak to the condition of the scattered covenant people?",
+      "answer": "Chapter 40 opens: 'Comfort, comfort my people, says your Creator. Speak tenderly to Yerushalayim and cry to her that her warfare is ended, that her iniquity is pardoned.' This is addressed to a people in exile — scattered, exhausted, despairing. 'He gives power to the faint and to him who has no might he increases strength' (40:29). 'Those who wait upon YHWH shall renew their strength — they shall mount up with wings as eagles' (40:31). The text is written to people whose identity has been denied, whose history has been erased, whose power has been stripped. The promise is not institutional restoration — it is direct empowerment from YHWH to the scattered, weakened, trodden-down covenant community. This language was preserved in the oldest complete prophetic manuscript because it was written for a people who would need it."
+    }
+  ]
+}

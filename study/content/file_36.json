@@ -1,0 +1,31 @@
+{
+  "id": "file_36",
+  "label": "Melakhim Aleph (1 Kings) — Part 3 — Chapters 13–18",
+  "volume": 14,
+  "content_version": 1,
+  "summary_plain": "A man of The Creator from Yehudah prophesies against Yerov'am's altar at Beit-El — the altar splits apart. Yerov'am's hand withers when he stretches it out against the prophet. The man of The Creator is deceived by an old prophet and killed by a lion. Yerov'am's dynasty is condemned. The kings of Yisra'EL and Yehudah cycle through faithfulness and idolatry. Ach'av son of Omri becomes king of Yisra'EL and marries Izevel the Tsidonian. He serves Ba'al and builds a Ba'al temple in Shomron. Eliyahu the prophet declares: As YHWH the Creator of Yisra'EL lives, there shall be no dew or rain except by my word. The drought lasts three years. Eliyahu confronts the 450 prophets of Ba'al on Har Karmel. He challenges Yisra'EL: How long will you limp between two opinions? If YHWH is The Creator, follow him — if Ba'al, follow him. Fire from YHWH falls and consumes the offering. The people fall on their faces: YHWH — he is The Creator! YHWH — he is The Creator!",
+  "summary_scholarly": "The ACR reads from DSS Kings fragments (4QKgs) and the Orit Ge'ez. The Har Karmel confrontation (ch 18) is the definitive contest between YHWH and Ba'al worship. Eliyahu's challenge — 'How long will you limp between two opinions?' — addresses religious syncretism: the mixing of YHWH worship with foreign deity practices. The Ba'al prophets cut themselves and cry out — no fire falls. Eliyahu repairs the altar of YHWH with twelve stones for the twelve tribes, drenches the offering with water, and prays once. Fire from YHWH consumes everything. The contest is not presented as a theological debate — it is an empirical demonstration. YHWH acts. Ba'al does not.",
+  "key_terms": [
+    { "term": "Eliyahu", "phonetic": "Eh-lee-YAH-hoo", "definition": "Prophet of YHWH from Tishbe in Gil'ad. Declares a drought on the land. Fed by ravens at Nahal Kerit. Raises the widow's son at Tzarefat. Confronts the 450 prophets of Ba'al on Har Karmel. His name means 'my Creator is YHWH.' Anglicized as Elijah." },
+    { "term": "Izevel", "phonetic": "Ee-ZEH-vel", "definition": "Daughter of Etba'al king of the Tsidonians. Wife of Ach'av. She promotes Ba'al worship in Yisra'EL, kills YHWH's prophets, and uses the throne to enforce idolatry. Anglicized as Jezebel." },
+    { "term": "Har Karmel", "phonetic": "Har Kar-MEL", "definition": "Mountain where Eliyahu confronts the 450 prophets of Ba'al (ch 18). The contest: each side prepares a sacrifice. The deity who answers by fire is The Creator. Ba'al sends no fire. YHWH sends fire that consumes the offering, the wood, the stones, and the water. Anglicized as Mount Carmel." }
+  ],
+  "fill_blank": [
+    { "ref": "18:21", "prompt": "And Eliyahu came near to all the people and said: How long will you limp between two ______? If YHWH is The Creator, follow him — but if Ba'al, then follow him.", "answer": "opinions", "source_quote": "How long will you limp between two opinions? If YHWH is The Creator, follow him — but if Ba'al, then follow him." },
+    { "ref": "18:39", "prompt": "And when all the people saw it, they fell on their faces and said: YHWH, he is The Creator! YHWH, he is The ______!", "answer": "Creator", "source_quote": "YHWH, he is The Creator! YHWH, he is The Creator!" }
+  ],
+  "multiple_choice": [
+    { "ref": "18:38", "question": "What happened when Eliyahu prayed on Har Karmel?", "options": ["Thunder and lightning struck the Ba'al altar", "Fire from YHWH fell and consumed the offering, the wood, the stones, and the water", "Rain immediately fell", "The ground split open"], "correct": 1, "source_quote": "Then the fire of YHWH fell and consumed the burnt offering and the wood and the stones and the dust, and licked up the water that was in the trench." },
+    { "ref": "16:30-31", "question": "What did Ach'av do that was worse than all the kings before him?", "options": ["He attacked Yehudah", "He served Ba'al and married Izevel the Tsidonian", "He destroyed the Temple", "He made an alliance with Mitzrayim"], "correct": 1, "source_quote": "Ach'av did more to provoke YHWH, The Creator of Yisra'EL, to anger than all the kings of Yisra'EL who were before him." }
+  ],
+  "faq": [
+    {
+      "question": "How does Eliyahu's confrontation on Har Karmel connect to the DSS framework?",
+      "answer": "Eliyahu's challenge — 'How long will you limp between two opinions?' (18:21) — confronts syncretism: mixing YHWH worship with foreign religious practices. The Qumran community faced the same issue. The Hellenized priesthood in Yerushalayim had blended YHWH worship with Greek cultural practices — adopting the Greek calendar, Greek names, Greek philosophical frameworks. The Damascus Document (CD) describes the community's withdrawal as a response to the 'seekers of smooth things' — those who accommodated foreign frameworks into YHWH's covenant. The same syncretism operates today. Western Christianity blended YHWH's covenant texts with Greek philosophy (Plato's immortal soul, Aristotle's categories), Roman imperial theology (the emperor-god model reframed as Christology), and European cultural assumptions. Eliyahu's demand remains: choose. YHWH or the syncretized version."
+    },
+    {
+      "question": "What does Izevel represent in the Great Eraser framework?",
+      "answer": "Izevel is not simply a wicked queen. She represents the use of state power to enforce a replacement religion. She kills YHWH's prophets (18:4). She installs 450 prophets of Ba'al and 400 prophets of Asherah at the royal table (18:19). She uses the king's seal to frame Navot and steal his vineyard (ch 21). The pattern: state power eliminates the authentic covenant voices, installs replacement religious authorities, and uses legal systems to dispossess the faithful. The colonial-era missions in Africa followed the same pattern: indigenous spiritual leaders were killed or marginalized, European clergy were installed, and legal systems were used to dispossess African peoples of their land and cultural heritage. The Great Eraser does not simply forget — it actively replaces. Izevel did not ignore YHWH — she installed Ba'al in his place."
+    }
+  ]
+}

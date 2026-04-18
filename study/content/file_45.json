@@ -1,0 +1,38 @@
+{
+  "id": "file_45",
+  "label": "Yesha'yahu (Isaiah) — 1QIsa-a — Part 4 — Chapters 42–54",
+  "volume": 16,
+  "content_version": 1,
+  "summary_plain": "YHWH presents his servant: Behold my servant whom I uphold, my chosen in whom my soul delights — I have put my spirit upon him, he will bring forth justice to the nations. He will not cry aloud or lift up his voice. A bruised reed he will not break. YHWH calls the servant from the womb. The servant gives his back to those who strike him, his cheeks to those who pull out the beard. He is despised and rejected, a man of sorrows acquainted with grief. He was wounded for our transgressions, crushed for our iniquities. By his stripes we are healed. He was cut off from the land of the living. YHWH's will was to crush him. He makes himself an offering for guilt.",
+  "summary_scholarly": "The ACR reads from the Great Isaiah Scroll (1QIsa-a) and the Orit Ge'ez. The four servant songs (42:1-4, 49:1-6, 50:4-9, 52:13-53:12) are the most contested passages in the entire covenant literature. The DSS read the servant as a mortal figure — either collective Yisra'EL or an individual human prophet. 1QIsa-a column 44, line 14 reads 'he will see light' after the servant's suffering — a reading absent from the Masoretic but confirmed by the Septuagint. The Qumran community never identifies the servant as divine. The Roman Church's reading of these passages as predictions of a divine incarnation is absent from every pre-Roman Hebrew source.",
+  "key_terms": [
+    { "term": "Eved YHWH (Servant of YHWH)", "phonetic": "EH-ved YHWH", "definition": "The figure described in the four servant songs (42:1-4, 49:1-6, 50:4-9, 52:13-53:12). In the DSS and Orit Ge'ez, this is a mortal figure — either collective Yisra'EL or a human prophet. Not divine." },
+    { "term": "Man of Sorrows", "phonetic": "", "definition": "The servant is described as 'despised and rejected, a man of sorrows and acquainted with grief' (53:3). In 1QIsa-a this describes human suffering — not a divine being choosing to suffer." },
+    { "term": "1QIsa-a Column 44", "phonetic": "", "definition": "The column of the Great Isaiah Scroll containing chapter 53. Line 14 reads 'he will see light' after the suffering — a reading confirmed by the Septuagint but absent from the Masoretic. The oldest manuscripts agree against the later standardized text." },
+    { "term": "Asham (Guilt Offering)", "phonetic": "Ah-SHAHM", "definition": "The servant makes himself an asham — a guilt offering (53:10). In the Torah, the asham is an animal sacrifice. The servant-as-asham is a mortal who bears the consequence of the people's transgression — a sacrificial metaphor applied to a human figure." }
+  ],
+  "fill_blank": [
+    { "ref": "42:1", "prompt": "Behold my ______ whom I uphold, my chosen in whom my soul delights — I have put my spirit upon him.", "answer": "servant", "source_quote": "Behold my servant whom I uphold, my chosen in whom my soul delights — I have put my spirit upon him, he will bring forth justice to the nations." },
+    { "ref": "53:5", "prompt": "He was wounded for our transgressions, he was crushed for our iniquities — the chastisement that brought us peace was upon him, and by his ______ we are healed.", "answer": "stripes", "source_quote": "He was wounded for our transgressions, he was crushed for our iniquities — the chastisement that brought us peace was upon him, and by his stripes we are healed." },
+    { "ref": "42:3", "prompt": "A bruised ______ he will not break, and a faintly burning wick he will not quench.", "answer": "reed", "source_quote": "A bruised reed he will not break, and a faintly burning wick he will not quench." }
+  ],
+  "multiple_choice": [
+    { "ref": "53:3", "question": "How is the servant described in chapter 53?", "options": ["A mighty warrior king", "Despised and rejected, a man of sorrows acquainted with grief", "A priest in the temple", "A divine being from heaven"], "correct": 1, "source_quote": "He was despised and rejected by men, a man of sorrows and acquainted with grief." },
+    { "ref": "1QIsa-a col 44", "question": "What does 1QIsa-a read in 53:11 that the Masoretic omits?", "options": ["He will see glory", "He will see light", "He will see the nations", "He will see the Temple"], "correct": 1, "source_quote": "After his suffering he will see light and be satisfied by his knowledge." },
+    { "ref": "42:1-4", "question": "What does YHWH say the servant will bring to the nations?", "options": ["Worship", "Justice", "Sacrifice", "War"], "correct": 1, "source_quote": "I have put my spirit upon him, he will bring forth justice to the nations." }
+  ],
+  "faq": [
+    {
+      "question": "Is the servant of Yesha'yahu 53 a divine figure?",
+      "answer": "No. The DSS messianic texts — 1QS, 1QSa, 4Q521, the Damascus Document — describe two mortal messiahs: a Messiah of Aaron (priestly) and a Messiah of Israel (kingly). Neither is divine. Neither is an object of worship. The Qumran community read Yesha'yahu 53 as describing a mortal servant — either collective Yisra'EL suffering among the nations or an individual human prophet who suffers on behalf of the people. 1QIsa-a column 44 preserves the text without any divine identification. The Roman Church's interpretation of these passages as predicting a divine incarnation — fully God and fully man — was formalized at the Council of Nicaea (325 CE) under Roman imperial authority. This reading is absent from the DSS, the Orit Ge'ez, and every pre-Roman Hebrew source. The oldest manuscripts describe a mortal servant. The divine incarnation is a Roman theological construction."
+    },
+    {
+      "question": "What does 1QIsa-a 53:11 reveal about textual manipulation?",
+      "answer": "1QIsa-a column 44, line 14 reads: 'After his suffering he will see light and be satisfied.' The Masoretic text — standardized centuries later — omits the word 'light' (or). The Septuagint, translated before the Masoretic standardization, also reads 'light.' The DSS and the Septuagint agree against the Masoretic. When the two oldest witnesses agree and the later standardized text disagrees, the later text is the alteration. The removal of 'light' from the Masoretic may reflect theological editing — the servant seeing light after suffering implies a mortal vindication narrative, while the Masoretic omission creates ambiguity that enabled the Roman divine-resurrection reading. The oldest manuscripts tell a different story than the standardized text."
+    },
+    {
+      "question": "How were the servant songs used to erase African identity from the covenant?",
+      "answer": "The servant songs describe a figure who is 'despised and rejected' (53:3), whose 'appearance was marred beyond human semblance' (52:14), who is 'cut off from the land of the living' (53:8). Roman Christianity universalized these passages into a theology of divine suffering that replaced the specific covenant community with a generic 'humanity.' The servant became a European-depicted divine figure — systematically whitened in art from the Byzantine period onward. The actual covenant community described in these texts — an Afro-Asiatic population whose phenotype is documented across the DSS, the Orit Ge'ez, and the archaeological record — was replaced by a European theological abstraction. The specific became universal. The African became European. The mortal became divine. Each transformation served the erasure."
+    }
+  ]
+}

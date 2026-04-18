@@ -1,0 +1,31 @@
+{
+  "id": "file_28",
+  "label": "Shemu'el Aleph (1 Samuel) — Part 3 — Chapters 18–24",
+  "volume": 12,
+  "content_version": 1,
+  "summary_plain": "Yonatan and Dawid make a covenant — Yonatan loves Dawid as his own soul. Sha'ul becomes jealous and tries to kill Dawid with a spear. Dawid flees. Sha'ul pursues Dawid through the wilderness. Dawid spares Sha'ul's life in the cave at Ein-Gedi — he cuts the corner of Sha'ul's robe but refuses to strike YHWH's anointed. Dawid gathers men around him in the wilderness. The priest Achimelekh gives Dawid the showbread and the sword of Golyat. Sha'ul massacres the priests of Nov.",
+  "summary_scholarly": "The ACR reads from 4QSam-a and the Orit Ge'ez. The Dawid-Yonatan covenant (ch 18, 20) uses the Hebrew brit — the same covenant terminology used for YHWH's covenants with Avraham, Yisra'EL, and Dawid. Sha'ul's pursuit of Dawid through the Judean wilderness (chs 23-24) takes place in the same terrain where the Qumran community later established their settlement. The Ein-Gedi cave where Dawid spares Sha'ul is approximately 20 kilometers south of Qumran. Dawid's refusal to strike YHWH's anointed (24:6) establishes the principle: even a rejected king retains YHWH's anointing until YHWH himself removes it. The massacre of the priests at Nov (ch 22) demonstrates the danger of state power wielded against YHWH's servants.",
+  "key_terms": [
+    { "term": "Yonatan", "phonetic": "Yo-nah-TAHN", "definition": "Son of Sha'ul. Makes a covenant with Dawid — loves him as his own soul. Protects Dawid from Sha'ul's murderous intent. His loyalty to Dawid costs him the succession. Anglicized as Jonathan." },
+    { "term": "Ein-Gedi", "phonetic": "Ayn-GEH-dee", "definition": "Oasis in the Judean wilderness near the Dead Sea where Dawid hides from Sha'ul. Dawid spares Sha'ul's life in a cave there. Located approximately 20 kilometers south of Qumran." },
+    { "term": "Nov", "phonetic": "NOHV", "definition": "Priestly city where Achimelekh the priest gives Dawid the showbread and the sword of Golyat. Sha'ul orders the massacre of 85 priests of Nov (22:18) — Do'eg the Edomite carries out the slaughter." }
+  ],
+  "fill_blank": [
+    { "ref": "18:1", "prompt": "The soul of Yonatan was knit to the soul of Dawid, and Yonatan loved him as his own ______.", "answer": "soul", "source_quote": "The soul of Yonatan was knit to the soul of Dawid, and Yonatan loved him as his own soul." },
+    { "ref": "24:6", "prompt": "And Dawid said to his men: YHWH forbid that I should do this thing to my master, YHWH's ______, to put out my hand against him, seeing he is the anointed of YHWH.", "answer": "anointed", "source_quote": "YHWH forbid that I should do this thing to my master, YHWH's anointed, to put out my hand against him, seeing he is the anointed of YHWH." }
+  ],
+  "multiple_choice": [
+    { "ref": "22:18", "question": "What happened to the priests of Nov?", "options": ["They were exiled", "Sha'ul had 85 of them killed by Do'eg the Edomite", "They joined Dawid voluntarily", "They were taken captive by the Philistines"], "correct": 1, "source_quote": "And Do'eg the Edomite turned and struck down the priests, and he killed on that day eighty-five persons who wore the linen ephod." },
+    { "ref": "24:4-6", "question": "What did Dawid do when he found Sha'ul in the cave at Ein-Gedi?", "options": ["He killed Sha'ul", "He cut the corner of Sha'ul's robe but refused to strike him", "He captured Sha'ul", "He fled from the cave"], "correct": 1, "source_quote": "He said to his men: YHWH forbid that I should put out my hand against YHWH's anointed." }
+  ],
+  "faq": [
+    {
+      "question": "Why does Dawid's wilderness period matter for understanding the Qumran community?",
+      "answer": "Dawid flees to the Judean wilderness — the same desert terrain where the Qumran community established their settlement centuries later. Ein-Gedi, where Dawid spares Sha'ul, is approximately 20 kilometers south of Qumran. The cave systems Dawid used for refuge are the same geological formations where the Dead Sea Scrolls were hidden. The pattern is identical: a righteous remnant driven into the wilderness by a corrupt ruling authority, gathering a community of the faithful outside institutional power. Dawid gathers 400 men (22:2) — 'everyone who was in distress, everyone who was in debt, everyone who was bitter in soul.' The Qumran community gathered the same way: those who recognized the corruption of the institutional system and withdrew to the wilderness to await YHWH's justice."
+    },
+    {
+      "question": "How does the massacre at Nov connect to the Great Eraser pattern of state violence against covenant keepers?",
+      "answer": "Sha'ul orders the massacre of 85 priests at Nov because Achimelekh helped Dawid (22:18-19). No Israelite soldier would carry out the order — Do'eg the Edomite, a foreigner, does the killing. State power turns against YHWH's own priests. This pattern repeats throughout covenant history: the Seleucids killing Torah-faithful priests under Antiochus IV, the Hasmonean dynasty executing their opponents, the Roman destruction of Yerushalayim and its priesthood. The Great Eraser operates through state violence against covenant keepers — destroying the people, then controlling the narrative about who they were. When the priests are dead, the state writes the history. Every colonial power that destroyed African and Indigenous religious leaders followed this same pattern: kill the knowledge-keepers, then rewrite the story."
+    }
+  ]
+}

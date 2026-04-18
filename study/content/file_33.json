@@ -1,0 +1,31 @@
+{
+  "id": "file_33",
+  "label": "Shemu'el Bet (2 Samuel) — Part 4 — Chapters 19–24",
+  "volume": 13,
+  "content_version": 1,
+  "summary_plain": "Dawid returns to Yerushalayim after Avshalom's death. Sheva ben Bikhri leads a rebellion — every man to his tents, O Yisra'EL! Yo'av crushes the revolt. The Giv'onites demand justice for Sha'ul's violation of the covenant with them — Dawid delivers seven of Sha'ul's descendants. Ritzpah guards their bodies on the rock. YHWH sends a three-year famine because Sha'ul broke the covenant with the Giv'onites. Dawid's mighty warriors are listed — the thirty and the three. Dawid's census angers YHWH — a pestilence strikes Yisra'EL. Dawid purchases the threshing floor of Aravnah the Yevusite and builds an altar. YHWH relents from the plague. Dawid's song of praise: YHWH is my rock, my fortress, my deliverer.",
+  "summary_scholarly": "The ACR reads from 4QSam-a and the Orit Ge'ez. Dawid's song (ch 22) parallels Tehillim 18 — the DSS Psalms scroll (11QPsa) preserves independent witness to the psalm tradition. The Giv'onite episode (ch 21) demonstrates YHWH's commitment to covenant justice across generations — a covenant made with non-Israelites (Yehoshua 9) is enforced by YHWH against Yisra'EL's own king. The census (ch 24) establishes the site of the future Temple — the threshing floor of Aravnah the Yevusite. 4QSam-a preserves variant readings in the warrior lists (ch 23) that differ from the Masoretic and the parallel account in 1 Divre ha-Yamim 11.",
+  "key_terms": [
+    { "term": "Aravnah", "phonetic": "Ah-rav-NAH", "definition": "Yevusite (Jebusite) owner of the threshing floor that Dawid purchases to build an altar after the pestilence (ch 24). This site becomes the location of Shelomoh's Temple. Dawid insists on paying full price: 'I will not offer burnt offerings to YHWH that cost me nothing.' Also called Ornan in Divre ha-Yamim." },
+    { "term": "Ritzpah", "phonetic": "Ritz-PAH", "definition": "Concubine of Sha'ul. When seven of Sha'ul's descendants are executed for the Giv'onite covenant violation, Ritzpah guards their bodies on the rock from the beginning of harvest until the rains fall — protecting them from birds and beasts. Her vigil moves Dawid to bury Sha'ul and Yonatan properly." },
+    { "term": "Giv'onites", "phonetic": "Giv-oh-NEEM", "definition": "Non-Israelite people who made a covenant with Yehoshua (Yehoshua 9). Sha'ul violated this covenant by attempting to destroy them. YHWH sends a three-year famine because of Sha'ul's breach. Even a covenant with non-Israelites carries YHWH's enforcement." }
+  ],
+  "fill_blank": [
+    { "ref": "22:2", "prompt": "YHWH is my rock and my fortress and my ______.", "answer": "deliverer", "source_quote": "YHWH is my rock and my fortress and my deliverer." },
+    { "ref": "24:24", "prompt": "Dawid said: No, but I will buy it from you for a price. I will not offer burnt offerings to YHWH my Creator that cost me ______.", "answer": "nothing", "source_quote": "I will not offer burnt offerings to YHWH my Creator that cost me nothing." }
+  ],
+  "multiple_choice": [
+    { "ref": "21:1", "question": "Why did YHWH send a three-year famine during Dawid's reign?", "options": ["Because of Dawid's census", "Because Sha'ul broke the covenant with the Giv'onites", "Because Yisra'EL worshiped idols", "Because of Avshalom's rebellion"], "correct": 1, "source_quote": "There is bloodguilt on Sha'ul and on his house, because he put the Giv'onites to death." },
+    { "ref": "24:18-25", "question": "What did Dawid purchase from Aravnah the Yevusite?", "options": ["A palace", "The threshing floor where he built an altar", "A vineyard", "Weapons for his army"], "correct": 1, "source_quote": "So Dawid bought the threshing floor and the oxen for fifty shekels of silver." }
+  ],
+  "faq": [
+    {
+      "question": "What does the Giv'onite covenant episode reveal about YHWH's justice toward non-Israelite peoples?",
+      "answer": "YHWH sends a three-year famine because Sha'ul violated the covenant Yehoshua made with the Giv'onites — a non-Israelite people (21:1-2). YHWH enforces covenant justice on behalf of non-Israelites against an Israelite king. The covenant framework is not ethnic exclusivism — it is covenant fidelity. A promise made to anyone under YHWH's name carries YHWH's enforcement. This dismantles every theological system that claims YHWH's justice applies only to one ethnic group. The same principle applies to the African and Indigenous peoples who received covenant knowledge: YHWH's justice operates for all peoples who are within covenant relationship, regardless of ethnic origin. The Great Eraser framed the covenant as European Christianity's exclusive property. YHWH's own text says otherwise."
+    },
+    {
+      "question": "Why does Dawid insist on paying full price for Aravnah's threshing floor?",
+      "answer": "Aravnah offers the threshing floor as a gift. Dawid refuses: 'I will not offer burnt offerings to YHWH that cost me nothing' (24:24). This principle — that authentic covenant worship requires genuine sacrifice, not costless gestures — stands against every institutional system that profits from other people's offerings while contributing nothing of its own. The threshing floor of Aravnah the Yevusite becomes the Temple site. A Yevusite — an indigenous Canaanite — owns the ground where YHWH's house will stand. The Yevusites were the original inhabitants of Yerushalayim. The covenant people purchased, not conquered, the Temple site. The land has indigenous roots that predate Yisra'EL's arrival. Recognizing indigenous claims — paying full price rather than taking — is embedded in the covenant tradition itself."
+    }
+  ]
+}
