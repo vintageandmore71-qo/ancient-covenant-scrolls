@@ -1,0 +1,30 @@
+{
+  "id": "file_100",
+  "label": "Rule of Blessings 1QSb (Serekh HaBerakhot) \u2014 Complete",
+  "volume": 38,
+  "content_version": 1,
+  "summary_plain": "The Rule of Blessings contains blessings to be spoken over members of the covenant community. The first blessing is for the faithful members of the covenant: may YHWH bless you from his holy habitation and open for you the eternal fountain. The second blessing is for the high priest: may YHWH lift his countenance upon you and make you holy among his people and set you as a crown of glory. The third blessing is for the sons of Tzadok, the priests: may YHWH bless you and keep you, may he renew the covenant of eternal priesthood for you. The fourth blessing is for the Prince of the Congregation (Nasi HaEdah): may YHWH raise you to everlasting heights and make you as a fortified tower.",
+  "summary_scholarly": "1QSb (Serekh HaBerakhot) was found appended to 1QS and 1QSa in Cave 1. It is a liturgical text containing a series of blessings structured hierarchically: the covenant community, the high priest, the priestly line, and the Prince of the Congregation (a royal-messianic figure). The blessings draw heavily on the Birkat Kohanim (priestly blessing) of Bamidbar 6:24-26 but expand it significantly. The blessing for the Prince of the Congregation (Col V) uses royal-messianic language: he strikes the earth with his mouth, he slays the wicked with the breath of his lips \u2014 language that echoes Yesha\u2019yahu 11:4. The text preserves a liturgical theology in which YHWH\u2019s blessing flows through established channels: community, priest, priesthood, prince.",
+  "key_terms": [
+    { "term": "Serekh HaBerakhot", "phonetic": "SEH-rekh Ha-Beh-rah-KHOT", "definition": "Hebrew for \u2018Rule of Blessings.\u2019 A liturgical scroll containing blessings for the covenant community, the high priest, the priestly sons of Tzadok, and the Prince of the Congregation." },
+    { "term": "Nasi HaEdah", "phonetic": "Nah-SEE Ha-Eh-DAH", "definition": "The \u2018Prince of the Congregation\u2019 \u2014 a royal-messianic figure blessed in 1QSb. He is distinguished from the priestly Mashiach. The blessing uses language from Yesha\u2019yahu 11 about striking the earth and judging the poor with righteousness." }
+  ],
+  "fill_blank": [
+    { "ref": "Col III:1-2", "prompt": "May YHWH lift his countenance upon you and open for you the eternal ______.", "answer": "fountain", "source_quote": "May YHWH lift his countenance upon you and open for you the eternal fountain." },
+    { "ref": "Col V:24-25", "prompt": "May he make your horns of iron and your hooves of bronze; may you gore like a bull and trample the peoples like the mire of the ______.", "answer": "streets", "source_quote": "May he make your horns of iron and your hooves of bronze; may you gore like a bull and trample the peoples like the mire of the streets." }
+  ],
+  "multiple_choice": [
+    { "ref": "Col I-V", "question": "In what order does 1QSb bless the community?", "options": ["Prince first, then priests, then community", "Community, then high priest, then sons of Tzadok, then Prince of the Congregation", "High priest only", "Each tribe individually"], "correct": 1, "source_quote": "The blessings are structured hierarchically: the faithful, the high priest, the sons of Tzadok, and the Prince of the Congregation." },
+    { "ref": "Col V:21-26", "question": "What messianic language does the blessing for the Prince of the Congregation use?", "options": ["He will build the Third Temple", "He strikes the earth with his mouth and slays the wicked with the breath of his lips", "He will gather the exiles from Egypt", "He will restore the Ark of the Covenant"], "correct": 1, "source_quote": "He shall strike the earth with the rod of his mouth, and with the breath of his lips he shall slay the wicked." }
+  ],
+  "faq": [
+    {
+      "question": "What does the Rule of Blessings reveal about Qumran liturgical practice?",
+      "answer": "1QSb preserves a formal liturgy of blessing structured around the covenant hierarchy. The blessings flow from the community upward through the priesthood to the royal-messianic Prince. Each blessing draws on Torah language \u2014 the Birkat Kohanim of Bamidbar 6:24-26, the promises to the seed of Aharon, and the royal imagery of Yesha\u2019yahu 11. This liturgy was not spontaneous. It was scripted, hierarchical, and Torah-based. The Great Eraser has suppressed the knowledge that Second Temple communities had detailed liturgical practices grounded in the written Torah rather than in later rabbinic or church liturgical traditions. The Rule of Blessings demonstrates that the covenant community\u2019s worship was text-derived, priest-mediated, and community-centered \u2014 a practice with no dependency on the Jerusalem Temple establishment."
+    },
+    {
+      "question": "Why is the Prince of the Congregation significant in the Qumran messianic framework?",
+      "answer": "The Nasi HaEdah (Prince of the Congregation) in 1QSb is a royal-messianic figure distinct from the priestly Mashiach. His blessing uses language from Yesha\u2019yahu 11:4: striking the earth with his mouth, slaying the wicked with the breath of his lips. This dual-messianic expectation \u2014 a priestly Mashiach and a royal Prince \u2014 is unique to the Qumran texts and has no parallel in either the later rabbinic tradition (which collapses both into one) or the Christian tradition (which identifies both with a single figure). The Great Eraser operates by collapsing this complexity into a simpler framework. The Qumran texts preserve the original structure: the priestly function and the royal function are distinct roles with distinct blessings, both serving under YHWH\u2019s sovereignty."
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "id": "file_99",
+  "label": "Rule of the Congregation 1QSa (Serekh HaEdah) \u2014 Complete",
+  "volume": 37,
+  "content_version": 1,
+  "summary_plain": "The Rule of the Congregation describes the assembly of the entire congregation of Yisra\u2019el in the last days. All Yisra\u2019el shall be instructed in the statutes of the covenant from youth. At age twenty a man takes his place among the clans. At age twenty-five he takes a role in the service of the congregation. At thirty he may serve as a judge. The text describes the messianic banquet: when YHWH begets the Mashiach among them, the priest shall enter first, then the Mashiach of Yisra\u2019el, then the congregation by rank. No one shall extend his hand to the bread before the priest blesses it.",
+  "summary_scholarly": "1QSa (Serekh HaEdah \u2014 Rule of the Congregation) was found appended to the Community Rule (1QS) in Cave 1. It legislates not for the present sectarian community but for \u2018all the congregation of Yisra\u2019el in the last days\u2019 \u2014 an eschatological document describing the restored covenant assembly. The age-graded system (youth instruction, age 20 enrollment, age 25 service, age 30 judicial authority) mirrors Bamidbar (Numbers). The messianic banquet (Col II:11-22) is the most explicit description of the Mashiach at a communal meal found in any Dead Sea Scroll. The text presupposes a dual-messianic expectation: the priestly Mashiach takes precedence over the Mashiach of Yisra\u2019el (the royal Mashiach). The meal is the covenant meal \u2014 bread and wine blessed by the priest first.",
+  "key_terms": [
+    { "term": "Serekh HaEdah", "phonetic": "SEH-rekh Ha-Eh-DAH", "definition": "Hebrew for \u2018Rule of the Congregation.\u2019 An eschatological document legislating for the restored assembly of all Yisra\u2019el in the last days, found appended to 1QS in Cave 1." },
+    { "term": "Messianic Banquet", "phonetic": "", "definition": "The communal meal described in 1QSa Col II where the priestly Mashiach and the Mashiach of Yisra\u2019el sit together. The priest blesses the bread and wine first. No one eats before the priestly blessing. This is the most detailed messianic meal description in the Dead Sea Scrolls." }
+  ],
+  "fill_blank": [
+    { "ref": "Col II:11-12", "prompt": "When YHWH begets the Mashiach among them, the ______ shall enter at the head of all the congregation of Yisra\u2019el.", "answer": "priest", "source_quote": "When YHWH begets the Mashiach among them, the priest shall enter at the head of all the congregation of Yisra\u2019el." },
+    { "ref": "Col I:6-8", "prompt": "From his youth they shall instruct him in the book of ______ and shall teach him the statutes of the covenant.", "answer": "Haguy", "source_quote": "From his youth they shall instruct him in the book of Haguy and shall teach him according to his age the statutes of the covenant." }
+  ],
+  "multiple_choice": [
+    { "ref": "Col II:17-21", "question": "Who blesses the bread and wine at the messianic banquet?", "options": ["The Mashiach of Yisra\u2019el", "The Teacher of Righteousness", "The priest (priestly Mashiach)", "The overseer (mevaqqer)"], "correct": 2, "source_quote": "The priest shall bless the first fruits of bread and wine and shall stretch out his hand to the bread first." },
+    { "ref": "Col I:8-12", "question": "At what age may a man serve as a judge in the congregation?", "options": ["Twenty", "Twenty-five", "Thirty", "Forty"], "correct": 2, "source_quote": "At the age of thirty years he may take his place among the judges." }
+  ],
+  "faq": [
+    {
+      "question": "What does the Rule of the Congregation reveal about the restoration of all Yisra\u2019el?",
+      "answer": "1QSa legislates not for the small Qumran sect alone but for \u2018all the congregation of Yisra\u2019el in the last days.\u2019 This is an eschatological document \u2014 it envisions the full restoration of the covenant people, organized by tribes and clans, instructed in the Torah from youth, and gathered around the messianic table. The Qumran community did not believe they were the final form of the covenant people. They believed they were the remnant preserving the blueprint for restoration. The Great Eraser operates by convincing scattered covenant people that restoration is impossible \u2014 that the scattering is permanent, that the tribal identities are lost forever, that the covenant community can never be reassembled. 1QSa says the opposite: there is a rule already written for the day when all Yisra\u2019el gathers again."
+    },
+    {
+      "question": "Why does the priestly Mashiach take precedence over the royal Mashiach in this text?",
+      "answer": "In 1QSa, the priest enters first, blesses the bread and wine first, and sits at the head of the assembly. The Mashiach of Yisra\u2019el (the royal figure) comes second. This priestly precedence reflects the Qumran community\u2019s conviction that the covenant is fundamentally a priestly institution \u2014 the restored community requires correct worship before it requires political authority. The Great Eraser has systematically inverted this priority. Both Christian and rabbinic traditions elevated either the royal-messianic or the scholarly-interpretive role above the priestly function. The Qumran texts preserve an older model where the priesthood \u2014 direct service to YHWH according to the Torah \u2014 takes precedence over all other communal functions."
+    }
+  ]
+}

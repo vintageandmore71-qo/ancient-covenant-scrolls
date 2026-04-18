@@ -1,0 +1,30 @@
+{
+  "id": "file_104",
+  "label": "Hodayot (Thanksgiving Hymns) \u2014 Part 2 \u2014 Col 5\u20138",
+  "volume": 41,
+  "content_version": 1,
+  "summary_plain": "The Hodayot continue with hymns praising YHWH for sustaining the speaker through trial. The speaker describes rivers of Belial that overwhelm like fire, consuming every green and dry tree. Yet YHWH is a refuge and a fortress. The speaker has been like a sailor on raging seas \u2014 the gates of death opened, and Sheol was upon his bed. But YHWH delivered him. The community hymns praise YHWH for planting a tree of life beside the eternal spring \u2014 its branches reach to the heavens, its roots go down to the deep. YHWH\u2019s truth is the foundation of all things.",
+  "summary_scholarly": "Hodayot columns 5-8 contain some of the most poetically powerful compositions from Qumran. The \u2018rivers of Belial\u2019 passage (Col V) uses flood imagery reminiscent of Tehillim 18 and Yonah 2. The \u2018tree of life\u2019 passage (Col VI-VIII) describes the community as a planting by YHWH \u2014 rooted in the eternal spring, with branches reaching to heaven. The imagery draws on Bereshit 2 (the tree of life), Yehezkel 47 (the river from the Temple), and Tehillim 1 (the tree planted by streams of water). The hymns in these columns express the community\u2019s self-understanding as YHWH\u2019s planting in the wilderness \u2014 a living tree sustained by the water of Torah while the surrounding world is consumed by the rivers of Belial.",
+  "key_terms": [
+    { "term": "Nakhalei Belial", "phonetic": "Nakh-ah-LEI Beh-lee-AHL", "definition": "The \u2018Rivers of Belial\u2019 \u2014 a metaphor for the overwhelming forces of destruction and deception that threaten the covenant community. The floods consume every tree, but YHWH sustains the speaker through them." },
+    { "term": "Etz Khayyim", "phonetic": "Etz Khah-YEEM", "definition": "The \u2018Tree of Life\u2019 \u2014 used in the Hodayot to describe the covenant community planted by YHWH. Its roots reach to the deep, its branches to the heavens. It is nourished by the eternal spring \u2014 the water of YHWH\u2019s Torah." }
+  ],
+  "fill_blank": [
+    { "ref": "Col V:5-6", "prompt": "The rivers of Belial shall overflow all high banks like a fire that devours all the ______ and dry trees.", "answer": "green", "source_quote": "The rivers of Belial shall overflow all high banks like a fire that devours all the green and dry trees." },
+    { "ref": "Col VI:15-16", "prompt": "You have planted a tree of life beside the eternal ______, and by its waters all the trees of the garden grow.", "answer": "spring", "source_quote": "You have planted a tree of life beside the eternal spring." }
+  ],
+  "multiple_choice": [
+    { "ref": "Col V:5-12", "question": "What are the \u2018rivers of Belial\u2019 in the Hodayot?", "options": ["Literal rivers flooding Qumran", "A metaphor for the overwhelming forces of deception and destruction", "The Tigris and Euphrates", "The rivers of Mitzrayim"], "correct": 1, "source_quote": "The rivers of Belial shall overflow all high banks like a fire that devours all the green and dry trees." },
+    { "ref": "Col VI:15-17", "question": "What does the \u2018tree of life\u2019 planted by the eternal spring represent?", "options": ["The Temple in Yerushalayim", "The covenant community sustained by YHWH\u2019s Torah", "A literal tree at Qumran", "The tree of knowledge in Bereshit"], "correct": 1, "source_quote": "You have planted a tree of life beside the eternal spring." }
+  ],
+  "faq": [
+    {
+      "question": "How does the tree of life imagery in the Hodayot connect to the covenant community\u2019s self-understanding?",
+      "answer": "The Hodayot describe YHWH planting a \u2018tree of life beside the eternal spring.\u2019 This tree is the covenant community \u2014 rooted in YHWH\u2019s Torah (the spring), reaching from the depths to the heavens. The imagery draws on Bereshit 2 (the original tree of life), Yehezkel 47 (the river from the restored Temple), and Tehillim 1 (the righteous person as a tree by streams of water). The community understood itself as YHWH\u2019s planting in the wilderness \u2014 alive because it draws from the eternal spring, not because of institutional support. The Great Eraser can cut down visible institutions, but it cannot dry up the eternal spring. The tree can be hidden, buried, scattered \u2014 but the water source is YHWH\u2019s Torah, which survives every attempt at destruction."
+    },
+    {
+      "question": "What does the Hodayot\u2019s flood imagery reveal about spiritual warfare?",
+      "answer": "The \u2018rivers of Belial\u2019 in Hodayot Col V describe a cosmic flood \u2014 not water but fire and deception \u2014 that overwhelms the land and consumes every tree. The speaker is like a sailor on raging seas, with the gates of death opening around him. Yet YHWH is a fortress in the flood. This imagery connects to Bereshit 6-9 (the flood of Noakh), Tehillim 18 (the torrents of Belial), and the Qumran War Scroll (the cosmic battle). The Hodayot\u2019s contribution is personal: the speaker experiences the cosmic battle within his own life. The Great Eraser operates as rivers of Belial \u2014 overwhelming the covenant people with wave after wave of institutional pressure, cultural erasure, and identity suppression. The Hodayot\u2019s answer is the same as Noakh\u2019s: YHWH preserves a remnant through the flood."
+    }
+  ]
+}

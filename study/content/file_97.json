@@ -1,0 +1,30 @@
+{
+  "id": "file_97",
+  "label": "Damascus Document (Brit Damesek) \u2014 Part 2 \u2014 Columns 9\u201316",
+  "volume": 35,
+  "content_version": 1,
+  "summary_plain": "The second half of the Damascus Document contains the Laws section \u2014 detailed legal rulings governing community life. Rules for judges: ten judges shall be elected, four from the tribe of Levi and Aharon and six from Yisra\u2019el. Rules about oaths, witnesses, and restitution. Shabbat laws are strict: do not carry, do not kindle fire, do not walk beyond the prescribed distance. Rules for the assembly of the camps: families arranged by tribes. Rules for the overseer (mevaqqer) who instructs the community. The document concludes with warnings about the final visitation and the coming of the Mashiach of Aharon and Yisra\u2019el.",
+  "summary_scholarly": "Columns 9-16 of the Damascus Document constitute the Laws section (Serekh), providing the most detailed halakhic code from Qumran outside the Temple Scroll. The laws govern a community organized in \u2018camps\u2019 (makhanot) \u2014 not a single monastic settlement but a network of scattered communities. The Shabbat code is stricter than later rabbinic halakhah in several respects. The judicial system requires tribal representation (Levi and Yisra\u2019el). The overseer (mevaqqer) functions as an instructor and pastoral leader. The reference to the \u2018Mashiach of Aharon and Yisra\u2019el\u2019 indicates a dual-messianic expectation: one priestly, one royal. The Qumran legal material preserves a pre-rabbinic legal tradition independent of the Mishnah and Talmud.",
+  "key_terms": [
+    { "term": "Mevaqqer", "phonetic": "Meh-vah-KEHR", "definition": "The \u2018Overseer\u2019 or \u2018Inspector\u2019 of the community. He examines those who seek to join, instructs the community in the works of YHWH, and ensures observance of the covenant laws. A pastoral and administrative leader." },
+    { "term": "Makhanot", "phonetic": "Mah-khah-NOHT", "definition": "The \u2018camps\u2019 \u2014 the organizational units of the Damascus covenant community. Members lived in scattered camps, not a single location. The camp structure mirrors the wilderness encampment of Yisra\u2019el under Moshe." }
+  ],
+  "fill_blank": [
+    { "ref": "Col X:4-6", "prompt": "No man shall do work on the sixth day from the time when the sun\u2019s orb is distant from the gate by its own ______.", "answer": "fullness", "source_quote": "No man shall do work on the sixth day from the time when the sun\u2019s orb is distant from the gate by its own fullness." },
+    { "ref": "Col XII:23 - XIII:1", "prompt": "Until the coming of the Mashiach of Aharon and ______.", "answer": "Yisra\u2019el", "source_quote": "Until the coming of the Mashiach of Aharon and Yisra\u2019el." }
+  ],
+  "multiple_choice": [
+    { "ref": "Col X:1-3", "question": "How many judges does the Damascus Document require for the community?", "options": ["Seven judges, all from Levi", "Twelve judges, one per tribe", "Ten judges: four from Levi and Aharon, six from Yisra\u2019el", "Three judges chosen by the Teacher of Righteousness"], "correct": 2, "source_quote": "Ten men shall be elected as judges for the congregation \u2014 four from the tribe of Levi and Aharon and six from Yisra\u2019el." },
+    { "ref": "Col XIII:7-9", "question": "What is the role of the Mevaqqer (Overseer)?", "options": ["He serves as high priest", "He commands the army", "He examines newcomers and instructs the community in the works of YHWH", "He collects taxes for the Temple"], "correct": 2, "source_quote": "He shall examine every man who joins the community regarding his deeds, his understanding, his strength, his courage, and his wealth." }
+  ],
+  "faq": [
+    {
+      "question": "What does the camp structure in the Damascus Document reveal about scattered covenant communities?",
+      "answer": "The Damascus Document legislates for \u2018camps\u2019 (makhanot) \u2014 not a single settlement at Qumran but a network of communities scattered across different locations. This is critical: the covenant community was never limited to one geographic site. The camp structure mirrors the wilderness encampment of Yisra\u2019el under Moshe \u2014 organized by families and tribes, with overseers, judges, and priests. The Great Eraser tries to confine the Dead Sea Scrolls to a single eccentric sect at a single site. The Damascus Document proves the opposite: this was a movement with communities in multiple locations, governed by a detailed legal code that assumed geographic dispersion. The model of scattered camps maintaining covenant identity through shared law and shared calendar is the template for every subsequent diaspora community."
+    },
+    {
+      "question": "Why does the Damascus Document preserve a legal tradition independent of the Mishnah?",
+      "answer": "The Laws section of the Damascus Document (columns 9-16) contains halakhic rulings that predate the Mishnah by at least 200 years. These rulings are often stricter than later rabbinic law \u2014 the Shabbat code, for instance, prohibits actions that the Mishnah permits. This proves that the rabbinic tradition was not the only heir to Moshe\u2019s Torah. There was a pre-rabbinic legal tradition preserved at Qumran that derived its authority directly from the written Torah rather than from oral tradition transmitted through rabbinic chains. The Great Eraser operates by presenting the rabbinic tradition as the sole legitimate successor to biblical law. The Damascus Document demonstrates that an alternative legal tradition existed, was practiced by covenant communities, and was deliberately excluded from the post-70 CE rabbinic canon."
+    }
+  ]
+}

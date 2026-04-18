@@ -1,0 +1,30 @@
+{
+  "id": "file_95",
+  "label": "4QMMT (Some Works of the Torah) \u2014 Complete",
+  "volume": 34,
+  "content_version": 1,
+  "summary_plain": "4QMMT is a letter from the Qumran community to the Jerusalem establishment listing specific legal disagreements. The letter begins with a calendar section establishing a 364-day solar calendar. It then lists approximately twenty halakhic rulings where the community disagrees with the Temple authorities \u2014 matters of purity, sacrifice, and priestly conduct. The letter concludes with a plea: we have separated ourselves from the majority of the people because of these matters. Consider the blessings and curses that came upon the kings of Yisra\u2019el. We have written to you so that you may understand the book of Moshe.",
+  "summary_scholarly": "4QMMT (Miqtsat Ma\u2019ase HaTorah \u2014 \u2018Some Works of the Torah\u2019) was reconstructed from six Cave 4 manuscripts (4Q394-4Q399). It is a sectarian halakhic letter \u2014 the only known direct correspondence from the Qumran community to the Jerusalem religious establishment. The text is divided into three sections: a 364-day solar calendar (Section A), a list of approximately twenty legal disputes (Section B), and an exhortation citing the blessings and curses of the Torah (Section C). The halakhic disputes concern purity laws, sacrifice, and calendar. The letter documents the moment of sectarian separation: the community separated because the Temple authorities followed incorrect rulings. This text is critical for understanding that the Qumran sect did not separate over abstract theology but over specific Torah observance.",
+  "key_terms": [
+    { "term": "Miqtsat Ma\u2019ase HaTorah", "phonetic": "Mik-TZAT Ma-ah-SEH Ha-Toh-RAH", "definition": "Hebrew for \u2018Some Works of the Torah\u2019 \u2014 the formal title of 4QMMT. The phrase refers to specific legal rulings derived from the Torah of Moshe that the Qumran community considered binding." },
+    { "term": "364-Day Solar Calendar", "phonetic": "", "definition": "The calendar used by the Qumran community, attested in 4QMMT, Yovelim (Jubilees), and 1 Chanokh. It divides the year into four seasons of 91 days each. Festivals always fall on the same day of the week. This calendar was the primary dispute between Qumran and the Jerusalem Temple authorities who used a lunar calendar." }
+  ],
+  "fill_blank": [
+    { "ref": "Section C", "prompt": "We have separated ourselves from the majority of the people and from all their ______.", "answer": "impurity", "source_quote": "We have separated ourselves from the majority of the people and from all their impurity." },
+    { "ref": "Section C", "prompt": "Consider the kings of Yisra\u2019el and reflect on their deeds \u2014 whoever among them feared the ______ was delivered from troubles.", "answer": "Torah", "source_quote": "Consider the kings of Yisra\u2019el and reflect on their deeds \u2014 whoever among them feared the Torah was delivered from troubles." }
+  ],
+  "multiple_choice": [
+    { "ref": "Section A", "question": "What calendar does 4QMMT establish?", "options": ["A 354-day lunar calendar", "A 364-day solar calendar", "A 360-day Egyptian calendar", "A 365.25-day Roman calendar"], "correct": 1, "source_quote": "The calendar section establishes a 364-day solar calendar with festivals falling on fixed days of the week." },
+    { "ref": "Section B-C", "question": "Why did the Qumran community separate from the Jerusalem establishment?", "options": ["Because of political disagreement with the Roman governor", "Because of specific halakhic disputes about purity, sacrifice, and calendar", "Because they rejected the Torah of Moshe entirely", "Because they wanted to build a new Temple in the wilderness"], "correct": 1, "source_quote": "We have separated ourselves from the majority of the people because of these matters." }
+  ],
+  "faq": [
+    {
+      "question": "What does the calendar dispute in 4QMMT reveal about the Great Eraser?",
+      "answer": "4QMMT documents that the Qumran community observed a 364-day solar calendar \u2014 the same calendar prescribed in Yovelim (Jubilees) and 1 Chanokh. The Jerusalem Temple authorities used a different (lunar-based) calendar. This meant the two groups celebrated the festivals on different days. The community did not consider this a minor disagreement \u2014 they separated over it. The solar calendar was eventually suppressed entirely. The rabbinic tradition that survived after 70 CE adopted the lunar calendar exclusively. The 364-day calendar preserved at Qumran, in Jubilees, and in Chanokh was erased from mainstream Jewish practice. The Great Eraser operates through calendar substitution: change when a people worship and you change who they are. The Qumran calendar dispute is the earliest documented case of this mechanism within the covenant community itself."
+    },
+    {
+      "question": "Why is 4QMMT significant for understanding sectarian separation?",
+      "answer": "4QMMT is the only known letter from the Qumran community to the Jerusalem establishment. It does not argue theology in the abstract. It lists specific legal rulings \u2014 approximately twenty \u2014 where the community disagrees with the Temple authorities. These are concrete disputes: how to handle purity of liquid streams, which animals may be sacrificed, how the red heifer ashes are prepared, whether certain grain offerings are permissible. The letter concludes by citing the blessings and curses of the Torah, warning the Jerusalem leaders to reconsider. This is a community that separated not because of foreign persecution but because the institutional gatekeepers of the Temple were, in their judgment, violating the Torah. The Great Eraser does not always come from outside. Sometimes the institution meant to preserve the covenant becomes the mechanism of its corruption."
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "id": "file_103",
+  "label": "Hodayot (Thanksgiving Hymns) \u2014 Part 1 \u2014 Col 1\u20134",
+  "volume": 41,
+  "content_version": 1,
+  "summary_plain": "The Hodayot are thanksgiving hymns praising YHWH for his mercy and election. The speaker gives thanks: I thank you, YHWH, for you have placed my soul in the bundle of the living. You have redeemed me from the pit. The hymns confess human weakness: what is flesh that you should do marvelous things with it? A creature of clay, kneaded with water \u2014 what counsel can it understand? Yet YHWH has chosen this creature of clay and placed his truth in the speaker\u2019s heart. The hymns describe persecution by enemies and deliverance by YHWH. The speaker was rejected by his community but sustained by YHWH\u2019s covenant.",
+  "summary_scholarly": "The Hodayot (1QH \u2014 Thanksgiving Hymns) were among the first seven scrolls discovered in Cave 1. Columns 1-4 contain both \u2018Teacher Hymns\u2019 (attributed to the Teacher of Righteousness) and \u2018Community Hymns\u2019 (expressing collective piety). The hymns are structured on the formula \u2018I thank you, YHWH\u2019 (odekha adonai) or \u2018Blessed are you, YHWH\u2019 (barukh attah adonai). The theology is radically theocentric: human beings are \u2018creatures of clay\u2019 with no merit, and all knowledge, righteousness, and election come from YHWH alone. This predestinarian theology parallels the Two Spirits doctrine of 1QS. The persecution language suggests a leader who was expelled from the establishment and found refuge in YHWH\u2019s direct guidance. Additional copies were found in Cave 4 (4Q427-432).",
+  "key_terms": [
+    { "term": "Hodayot", "phonetic": "Hoh-dah-YOHT", "definition": "Hebrew for \u2018Thanksgivings.\u2019 A collection of hymns from Qumran expressing gratitude to YHWH for election, deliverance, and revelation. The hymns emphasize human unworthiness and YHWH\u2019s sovereign grace." },
+    { "term": "Yetzer Khomer", "phonetic": "YEH-tzer KHOH-mer", "definition": "Hebrew for \u2018creature of clay.\u2019 The Hodayot repeatedly describe the speaker as a creature of clay, kneaded with water, formed from dust \u2014 emphasizing that all righteousness comes from YHWH, not from human merit." }
+  ],
+  "fill_blank": [
+    { "ref": "Col II:20-21", "prompt": "I thank you, YHWH, for you have placed my soul in the bundle of the ______.", "answer": "living", "source_quote": "I thank you, YHWH, for you have placed my soul in the bundle of the living." },
+    { "ref": "Col III:23-24", "prompt": "What is flesh that you should do marvelous things with it? A creature of ______, kneaded with water.", "answer": "clay", "source_quote": "What is flesh that you should do marvelous things with it? A creature of clay, kneaded with water." }
+  ],
+  "multiple_choice": [
+    { "ref": "Col II-III", "question": "How does the speaker of the Hodayot describe human beings?", "options": ["As co-creators with YHWH", "As creatures of clay with no merit, entirely dependent on YHWH\u2019s grace", "As powerful warriors of the covenant", "As equals to the angels"], "correct": 1, "source_quote": "What is flesh that you should do marvelous things with it? A creature of clay, kneaded with water." },
+    { "ref": "Col II:20", "question": "What formula opens many of the Hodayot hymns?", "options": ["Hear, O Yisra\u2019el", "I thank you, YHWH", "Thus says YHWH", "Blessed is the man"], "correct": 1, "source_quote": "I thank you, YHWH, for you have placed my soul in the bundle of the living." }
+  ],
+  "faq": [
+    {
+      "question": "What do the Hodayot reveal about election preceding institutions?",
+      "answer": "The Hodayot express a theology where YHWH\u2019s election of the individual precedes all institutional affiliation. The speaker is a \u2018creature of clay\u2019 with no inherent merit. YHWH placed truth in his heart, sustained him when he was persecuted, and redeemed him from the pit \u2014 not because of institutional standing but because of YHWH\u2019s sovereign choice. The Teacher Hymns suggest that the Teacher of Righteousness was expelled from the institutional priesthood but was sustained by YHWH\u2019s direct election. This is the Great Eraser\u2019s deepest challenge: if election comes from YHWH alone and not from institutional gatekeepers, then no institution can erase what YHWH has chosen. The Hodayot ground covenant identity in YHWH\u2019s sovereign act, not in human organizational membership."
+    },
+    {
+      "question": "How do the Hodayot connect to the Great Eraser framework?",
+      "answer": "The Hodayot describe a speaker who was rejected by the establishment, persecuted by enemies, and cut off from the community \u2014 yet sustained by YHWH. The hymns were sealed in a cave in 68 CE and not read again for 1,900 years. The prayers of a covenant community were physically erased from human access for nearly two millennia. When they were found in 1947, the publication monopoly kept them restricted for another 40+ years. The Hodayot are a case study in multi-layered erasure: the community was destroyed, the texts were hidden, and when found, they were institutionally gatekept. Yet YHWH preserved them. The clay jars in the cave did what the institutions could not \u2014 they kept the words intact until the appointed time."
+    }
+  ]
+}

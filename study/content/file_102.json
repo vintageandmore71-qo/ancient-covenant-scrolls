@@ -1,0 +1,30 @@
+{
+  "id": "file_102",
+  "label": "Pesher Nahum (Commentary on Nahum) \u2014 Complete",
+  "volume": 40,
+  "content_version": 1,
+  "summary_plain": "Pesher Nahum is a commentary on the prophetic book of Nahum, applying its words to events in the community\u2019s recent history. The commentary identifies the \u2018lion\u2019 as a historical ruler who invited foreign armies into the land. It speaks of the \u2018seekers of smooth things\u2019 who led the people astray in Yerushalayim. The Kittim are the foreign power from the west. The pesher interprets the fall of Nineveh as a prophecy of the fall of the corrupt Jerusalem establishment. YHWH\u2019s judgment against Nineveh is YHWH\u2019s judgment against every institution that oppresses his covenant people.",
+  "summary_scholarly": "4QpNah (4Q169 \u2014 Pesher Nahum) is a continuous commentary (pesher) on Nahum 1-3, found in Qumran Cave 4. The text is historically significant because it contains some of the most explicit historical references in the Dead Sea Scrolls, mentioning identifiable figures and events. The \u2018seekers of smooth things\u2019 (dorshei hakhalaqot) are likely the Pharisaic movement. The \u2018lion of wrath\u2019 who \u2018hangs men alive\u2019 is generally identified with Alexander Jannaeus (103-76 BCE), who crucified 800 Pharisees. The Kittim are the Romans. The pesher method reads the prophetic text as a cipher for contemporary events \u2014 every verse of Nahum has a current referent. This hermeneutical approach is unique to Qumran and differs from both later rabbinic midrash and Christian typology.",
+  "key_terms": [
+    { "term": "Pesher", "phonetic": "PEH-sher", "definition": "Hebrew for \u2018interpretation.\u2019 The Qumran method of reading prophetic texts as coded references to contemporary events. Each verse is quoted and then decoded: \u2018its pesher concerns...\u2019 The method assumes the prophets wrote about the community\u2019s own time." },
+    { "term": "Dorshei HaKhalaqot", "phonetic": "Dor-SHEI Ha-Khah-lah-KOHT", "definition": "The \u2018Seekers of Smooth Things\u2019 \u2014 a Qumran term for a rival group (likely the Pharisees) who offered easy interpretations of the Torah that the Qumran community considered false. They led the people astray in Yerushalayim." }
+  ],
+  "fill_blank": [
+    { "ref": "3-4 I:2", "prompt": "Its pesher concerns the Seekers of Smooth Things, whose counsel will perish in the end of ______.", "answer": "days", "source_quote": "Its pesher concerns the Seekers of Smooth Things, whose counsel will perish at the end of days." },
+    { "ref": "3-4 I:7", "prompt": "The lion of wrath who would hang men ______.", "answer": "alive", "source_quote": "The lion of wrath who would hang men alive." }
+  ],
+  "multiple_choice": [
+    { "ref": "3-4 I:2-4", "question": "Who are the \u2018Seekers of Smooth Things\u2019 in Pesher Nahum?", "options": ["The Qumran community itself", "A rival group (likely the Pharisees) that offered easy Torah interpretations", "The Roman commanders", "The Babylonian priests"], "correct": 1, "source_quote": "Its pesher concerns the Seekers of Smooth Things whose counsel will perish." },
+    { "ref": "3-4 I:3", "question": "Who are the Kittim in the Dead Sea Scrolls?", "options": ["The Persians", "The Egyptians", "The Romans", "The Babylonians"], "correct": 2, "source_quote": "The Kittim are identified as the foreign power from the west." }
+  ],
+  "faq": [
+    {
+      "question": "What does Pesher Nahum reveal about the pesher method of interpretation?",
+      "answer": "Pesher Nahum demonstrates the Qumran hermeneutical method: prophetic scripture is a code to be decoded by the community. Every verse of Nahum \u2014 originally addressing ancient Nineveh \u2014 is reinterpreted as a prophecy about the community\u2019s own time. The lions are specific rulers, the city is Yerushalayim, the Kittim are the Romans. This is not allegory or metaphor. The community believed the prophets wrote about the \u2018end of days\u2019 and that the community lived in those days. The Great Eraser operates by controlling interpretation: when only one tradition (rabbinic or Christian) is permitted to interpret the prophets, alternative readings are suppressed. The pesher method preserved at Qumran is a third interpretive tradition \u2014 neither rabbinic nor Christian \u2014 that reads the prophets as direct commentary on historical events the covenant people experienced."
+    },
+    {
+      "question": "Why does Pesher Nahum name historical figures when most Dead Sea Scrolls use code names?",
+      "answer": "Pesher Nahum is unusual among the scrolls because it contains identifiable historical references rather than purely coded language. The mention of \u2018hanging men alive\u2019 corresponds to the documented actions of Alexander Jannaeus, who crucified opponents. The \u2018Seekers of Smooth Things\u2019 can be correlated with the Pharisaic movement. This historical specificity makes Pesher Nahum one of the most important texts for dating and contextualizing the Qumran community. It proves that the scrolls are not timeless spiritual literature \u2014 they are the records of a real community responding to real events. The Great Eraser benefits from treating the scrolls as abstract theology. Pesher Nahum anchors them in documented history and demonstrates that the covenant community was an active participant in Second Temple political and religious conflicts."
+    }
+  ]
+}

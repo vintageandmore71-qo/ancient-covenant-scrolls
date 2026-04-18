@@ -1,0 +1,31 @@
+{
+  "id": "file_108",
+  "label": "11QMelchizedek (Melchizedek Scroll) \u2014 Complete",
+  "volume": 45,
+  "content_version": 1,
+  "summary_plain": "The Melchizedek Scroll describes a Jubilee judgment at the end of days. Melchizedek is an exalted heavenly figure who executes YHWH\u2019s judgment against Belial and the spirits of his lot. In the year of the last Jubilee, Melchizedek will proclaim liberty to the captives and release to the prisoners. He will atone for the sons of light and execute judgment on the spirits of Belial\u2019s lot. The herald of good tidings (mevasser) announces peace and salvation: your Elohim reigns. The text applies Yesha\u2019yahu 61:1-2 and Vayikra 25 to the eschatological Jubilee when all debts are canceled and all captives are freed.",
+  "summary_scholarly": "11Q13 (11QMelchizedek) was found in Qumran Cave 11. It is a thematic pesher combining texts from Vayikra 25 (the Jubilee laws), Devarim 15 (the release of debts), Yesha\u2019yahu 61:1-2 (the herald of good tidings), Tehillim 82:1-2 (Elohim judges among the elohim), and Tehillim 7:8-9 (YHWH judges the peoples). Melchizedek is presented as a heavenly figure \u2014 an angel or exalted being who stands in YHWH\u2019s council and executes the final judgment. The text reinterprets the Jubilee legislation of Vayikra 25 eschatologically: the tenth Jubilee is the end of days, when all debts are released, all captives freed, and all the spirits of Belial\u2019s lot are judged. The mevasser (herald) of Yesha\u2019yahu 52:7 is identified with the anointed of the spirit mentioned in Daniyel 9:25.",
+  "key_terms": [
+    { "term": "Malki-Tzedeq", "phonetic": "Mal-kee-TZEH-dek", "definition": "In 11Q13, Melchizedek is not merely the priest-king of Bereshit 14. He is an exalted heavenly figure who executes YHWH\u2019s final judgment, atones for the sons of light, and defeats Belial. His name means \u2018my king is righteousness.\u2019" },
+    { "term": "Yovel", "phonetic": "Yoh-VEL", "definition": "The Jubilee \u2014 the fiftieth year when all debts are released and all land returns to its original owners (Vayikra 25). In 11QMelchizedek, the tenth Jubilee (the 490th year) is the eschatological Jubilee when Melchizedek executes final judgment." },
+    { "term": "Mevasser", "phonetic": "Meh-vah-SEHR", "definition": "The \u2018herald of good tidings\u2019 from Yesha\u2019yahu 52:7 who announces peace and salvation: \u2018Your Elohim reigns.\u2019 In 11QMelchizedek, the mevasser is identified with the anointed of the spirit." }
+  ],
+  "fill_blank": [
+    { "ref": "Col II:6", "prompt": "Melchizedek will proclaim liberty to the captives and release to the ______.", "answer": "prisoners", "source_quote": "He will proclaim liberty to the captives and release to the prisoners." },
+    { "ref": "Col II:9-10", "prompt": "The tenth ______ is the end of days when Melchizedek will atone for the sons of light.", "answer": "Jubilee", "source_quote": "The tenth Jubilee is the end of days when Melchizedek will atone for the sons of light and execute judgment on the spirits of Belial\u2019s lot." }
+  ],
+  "multiple_choice": [
+    { "ref": "Col II:6-13", "question": "What does Melchizedek do in the Melchizedek Scroll?", "options": ["He serves bread and wine to Avram", "He builds a Temple in Yerushalayim", "He executes YHWH\u2019s judgment, atones for the sons of light, and defeats Belial", "He writes a new Torah for the community"], "correct": 2, "source_quote": "Melchizedek will atone for the sons of light and execute judgment on the spirits of Belial\u2019s lot." },
+    { "ref": "Col II:15-18", "question": "What does the mevasser (herald) announce in 11QMelchizedek?", "options": ["A new king in Yerushalayim", "War against the Kittim", "Peace and salvation: your Elohim reigns", "The destruction of the Temple"], "correct": 2, "source_quote": "The herald of good tidings announces peace and salvation: your Elohim reigns." }
+  ],
+  "faq": [
+    {
+      "question": "What does 11QMelchizedek reveal about Jubilee judgment?",
+      "answer": "11QMelchizedek takes the Jubilee legislation of Vayikra 25 \u2014 which commands the release of debts and the return of land every fiftieth year \u2014 and applies it eschatologically. The tenth Jubilee (490 years \u2014 the same number as Daniyel 9\u2019s \u2018seventy weeks\u2019) is the end of days when all captives are freed, all debts canceled, and Belial\u2019s dominion is destroyed. The Jubilee was never merely an economic regulation. It was a theological statement: YHWH owns the land, YHWH frees the captives, and no human system of debt or bondage is permanent. The Great Eraser operates through permanent debt \u2014 economic, cultural, and spiritual bondage that never releases. The Jubilee principle says: there is a fixed expiration date on every form of captivity. YHWH has set the time, and Melchizedek will execute it."
+    },
+    {
+      "question": "Why does 11QMelchizedek combine so many different scriptural texts?",
+      "answer": "11QMelchizedek is a thematic pesher \u2014 it does not comment on a single book but weaves together Vayikra 25, Devarim 15, Yesha\u2019yahu 52 and 61, Tehillim 7 and 82, and Daniyel 9 into a single eschatological narrative. This method of reading scripture \u2014 combining texts across books to reveal a unified theological pattern \u2014 demonstrates that the Qumran community read the Torah, Prophets, and Writings as a single coherent revelation. The Great Eraser has fragmented scripture: the Torah is studied separately from the Prophets, the Psalms are read as devotional poetry rather than as prophetic texts, and the Jubilee laws are treated as ancient economic legislation rather than as eschatological prophecy. 11QMelchizedek reassembles the fragments and reveals the unified pattern that the Great Eraser has worked to obscure."
+    }
+  ]
+}

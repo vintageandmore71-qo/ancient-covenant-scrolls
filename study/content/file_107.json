@@ -1,0 +1,30 @@
+{
+  "id": "file_107",
+  "label": "Genesis Apocryphon (Bereshit Apocryphon) \u2014 Complete",
+  "volume": 44,
+  "content_version": 1,
+  "summary_plain": "The Genesis Apocryphon retells stories from Bereshit in Aramaic with expanded narrative detail. Lamekh fears that his wife Bitenosh has conceived by one of the Watchers \u2014 he questions her, and she swears the child is his. The child is Noakh. The flood narrative is retold with additional detail. Avram\u2019s journey is expanded: he travels through the land and sees it in a vision from YHWH. Sarah\u2019s beauty is described in extraordinary detail when she enters Mitzrayim. Avram prays to YHWH and Pharaoh is struck with plagues. YHWH delivers Sarah and Avram departs with great wealth.",
+  "summary_scholarly": "The Genesis Apocryphon (1QapGen \u2014 1Q20) was among the first seven scrolls found in Cave 1 in 1947 but was the last to be unrolled due to severe deterioration. Written in Aramaic, it is a narrative expansion (rewritten Bible) of Bereshit, covering portions of chapters 5-15. The text is related to the Chanokh literature (the Watchers tradition) and to Yovelim (Jubilees). Lamekh\u2019s fear that Noakh was fathered by a Watcher directly connects to 1 Chanokh 106. The expanded account of Avram\u2019s journey provides geographic detail absent from the canonical text. The description of Sarah\u2019s beauty (Col XX) is the most detailed physical description of any biblical figure in Second Temple literature. The text demonstrates that Aramaic narrative expansion of the Torah was a well-established literary practice in the Second Temple period.",
+  "key_terms": [
+    { "term": "Bereshit Apocryphon", "phonetic": "Beh-reh-SHEET Ah-POK-ree-fon", "definition": "An Aramaic retelling of Bereshit found among the first Cave 1 scrolls. It expands the patriarchal narratives with additional dialogue, geographic detail, and connections to the Watchers tradition of Chanokh." },
+    { "term": "Bitenosh", "phonetic": "Bee-teh-NOHSH", "definition": "The wife of Lamekh and mother of Noakh in the Genesis Apocryphon. Lamekh fears she conceived by a Watcher, but she swears the child is his. Her name means \u2018daughter of man\u2019 (bat-enosh)." }
+  ],
+  "fill_blank": [
+    { "ref": "Col II:1-3", "prompt": "Lamekh said to Bitenosh his wife: I have had a thought of dread. I suspect that the conception is from one of the ______.", "answer": "Watchers", "source_quote": "Lamekh said to Bitenosh his wife: Behold, I have had a thought of dread, that the conception is from one of the Watchers, from one of the holy ones." },
+    { "ref": "Col XX:2-8", "prompt": "How beautiful is the form of her face, and how lovely the ______ of her hair.", "answer": "luster", "source_quote": "How beautiful is the form of her face, and how lovely the luster of her hair." }
+  ],
+  "multiple_choice": [
+    { "ref": "Col II", "question": "Why does Lamekh fear when his son Noakh is born?", "options": ["Because Noakh is born during a famine", "Because he suspects the child was conceived by one of the Watchers", "Because a prophet told him the child would die", "Because the child was born on Shabbat"], "correct": 1, "source_quote": "I suspect that the conception is from one of the Watchers, from one of the holy ones." },
+    { "ref": "Col XX", "question": "What happens when Pharaoh takes Sarah into his house?", "options": ["Avram fights Pharaoh\u2019s army", "Avram prays to YHWH and Pharaoh is struck with plagues until Sarah is returned", "Sarah refuses to enter", "Pharaoh converts to the worship of YHWH"], "correct": 1, "source_quote": "Avram prayed to YHWH, and YHWH sent a spirit of pestilence upon Pharaoh and upon all his household." }
+  ],
+  "faq": [
+    {
+      "question": "What does the Genesis Apocryphon reveal about the Aramaic Bereshit witness?",
+      "answer": "The Genesis Apocryphon is written in Aramaic \u2014 the everyday language of Second Temple Yisra\u2019el \u2014 and retells Bereshit with expanded narrative detail. This is significant because it demonstrates that the Torah was actively retold and expanded in the vernacular language, not only preserved in formal Hebrew. The Aramaic retelling connects the patriarchal narratives to the Watchers tradition (1 Chanokh) and to Yovelim (Jubilees), showing that these texts were read as a unified tradition, not as separate compositions. The Great Eraser separated these texts: Bereshit was canonized, Chanokh was excluded, Jubilees was marginalized, and the Aramaic retellings were forgotten. The Genesis Apocryphon proves they were all part of one coherent scriptural tradition at Qumran."
+    },
+    {
+      "question": "Why was the Genesis Apocryphon the last of the original seven scrolls to be published?",
+      "answer": "The Genesis Apocryphon was severely deteriorated when discovered in 1947 \u2014 the scroll was fused together and extremely fragile. It was the last of the first seven Cave 1 scrolls to be unrolled and read. The physical difficulty of opening the scroll delayed publication. But the delay also reflects a broader pattern: even when primary texts are physically available, institutional and technical barriers can prevent access for decades. The Genesis Apocryphon sat in a museum while its contents were unknown. This mirrors the Great Eraser\u2019s mechanism of practical inaccessibility \u2014 the text exists but cannot be read. The Orit Ge\u2019ez manuscripts sat in Ethiopian monasteries for centuries in the same condition: physically extant, practically inaccessible to the scholarly world that debated their contents."
+    }
+  ]
+}

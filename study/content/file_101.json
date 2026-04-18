@@ -1,0 +1,30 @@
+{
+  "id": "file_101",
+  "label": "Words of the Luminaries (Divrei HaMe\u2019orot) \u2014 Complete",
+  "volume": 39,
+  "content_version": 1,
+  "summary_plain": "The Words of the Luminaries is a collection of prayers assigned to specific days of the week. Each prayer recalls YHWH\u2019s mighty acts in the history of Yisra\u2019el. The prayers for the Shabbat and for the weekdays invoke YHWH\u2019s covenant with Avraham, the deliverance from Mitzrayim, the giving of the Torah, and the promise of the land. The community confesses its sins and asks for YHWH\u2019s mercy. Remember your wonders of old. You chose Yisra\u2019el from all peoples. You established your covenant with our fathers. Do not abandon us among the nations.",
+  "summary_scholarly": "4QDibHam (4Q504-506 \u2014 Divrei HaMe\u2019orot, \u2018Words of the Luminaries\u2019) is a liturgical collection from Qumran Cave 4 assigning specific prayers to each day of the week. The title \u2018Luminaries\u2019 (me\u2019orot) likely refers to the celestial bodies that mark the days \u2014 connecting the prayer cycle to the creation calendar of Bereshit 1:14-18. The prayers are liturgical compositions that recite the salvation history of Yisra\u2019el: creation, the patriarchal promises, the exodus, Sinai, the conquest, and the exile. They include confession of communal sin and petitions for restoration. The prayers presuppose a community that understands itself as the continuation of the covenant people in exile, praying daily for the same restoration that the prophets promised.",
+  "key_terms": [
+    { "term": "Divrei HaMe\u2019orot", "phonetic": "Div-REI Ha-Meh-oh-ROHT", "definition": "Hebrew for \u2018Words of the Luminaries.\u2019 A Qumran prayer collection organized by the days of the week, each prayer recalling YHWH\u2019s covenant acts in the history of Yisra\u2019el. The \u2018luminaries\u2019 are the celestial bodies that mark time." },
+    { "term": "Me\u2019orot", "phonetic": "Meh-oh-ROHT", "definition": "Hebrew for \u2018luminaries\u2019 or \u2018lights.\u2019 In Bereshit 1:14-16, YHWH created the me\u2019orot to divide day from night and to mark seasons, days, and years. The prayer collection is named for these lights because the prayers follow the daily cycle they govern." }
+  ],
+  "fill_blank": [
+    { "ref": "Fragment 1-2, Col V", "prompt": "Remember your wonders of old, and the signs and portents that you performed in ______.", "answer": "Mitzrayim", "source_quote": "Remember your wonders of old, and the signs and portents that you performed in Mitzrayim." },
+    { "ref": "Fragment 1-2, Col VI", "prompt": "You chose Yisra\u2019el from all ______ and established your covenant with our fathers.", "answer": "peoples", "source_quote": "You chose Yisra\u2019el from all peoples and established your covenant with our fathers." }
+  ],
+  "multiple_choice": [
+    { "ref": "4Q504", "question": "How are the prayers in the Words of the Luminaries organized?", "options": ["By the festivals of the year", "By the days of the week", "By the months of the year", "By the jubilee cycles"], "correct": 1, "source_quote": "The Words of the Luminaries assigns specific prayers to specific days of the week." },
+    { "ref": "4Q504 Fragment 1-2", "question": "What historical events do the prayers of the Luminaries recall?", "options": ["Only the creation account", "The covenant with Avraham, the deliverance from Mitzrayim, and the giving of the Torah", "Only the destruction of the Temple", "Events from the Greek period only"], "correct": 1, "source_quote": "The prayers recite the salvation history of Yisra\u2019el: creation, the patriarchal promises, the exodus, Sinai, the conquest, and the exile." }
+  ],
+  "faq": [
+    {
+      "question": "What does the daily prayer cycle in the Words of the Luminaries reveal about Qumran practice?",
+      "answer": "The Words of the Luminaries assigns specific prayers to each day of the week, tied to the celestial luminaries that YHWH created to mark time (Bereshit 1:14). This is not spontaneous prayer \u2014 it is a structured liturgical cycle embedded in the creation calendar. The community prayed specific words on specific days, reciting the history of YHWH\u2019s covenant acts. This practice predates and is independent of the later rabbinic prayer cycle (the Amidah and its daily structure). The Great Eraser has presented rabbinic liturgy as the sole heir to Second Temple worship. The Words of the Luminaries proves that an alternative prayer tradition existed \u2014 one rooted directly in the creation calendar rather than in post-destruction rabbinic reconstruction."
+    },
+    {
+      "question": "Why does this prayer collection petition YHWH not to abandon Yisra\u2019el among the nations?",
+      "answer": "The petition \u2018do not abandon us among the nations\u2019 reveals a community that understood itself as already scattered. They prayed this prayer daily \u2014 not as a hypothetical fear but as a present reality. The covenant people were among the nations. The prayer asks YHWH to remember the covenant with Avraham, the deliverance from Mitzrayim, and the giving of the Torah \u2014 precisely because these memories are what the scattering threatens to erase. The Great Eraser operates through the passage of time: each generation in exile is further from the primary events, and the prayer of remembrance is the countermeasure. The Words of the Luminaries is a daily act of resistance against forgetting \u2014 a structured recitation of identity that prevents the exile from becoming permanent."
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "id": "file_93",
+  "label": "4Q246 (Aramaic Apocalypse) \u2014 Complete",
+  "volume": 32,
+  "content_version": 1,
+  "summary_plain": "The Aramaic Apocalypse (4Q246) describes a vision presented before a king. A seer falls before the throne and interprets distress coming upon the land. Nations will trample nations and provinces will trample provinces until the people of the Most High arise. A figure is called \u2018Son of the Most High\u2019 and \u2018Son of El.\u2019 His kingdom is an everlasting kingdom. All peoples will serve him. His sovereignty is an everlasting sovereignty. War and slaughter will cease from the earth. All nations will make peace.",
+  "summary_scholarly": "4Q246 was discovered in Qumran Cave 4 and is written in Aramaic. The text closely parallels the vision structure of Daniyel 7 \u2014 a seer before a throne, oppressive kingdoms, and the rise of a figure whose kingdom is eternal. The titles \u2018Son of the Most High\u2019 (bar elyon) and \u2018Son of El\u2019 (bar el) are unique in Second Temple literature and have generated extensive scholarly debate. The text may describe a future deliverer, a collective representation of the covenant people, or a royal figure. The ACR reads this text as a pre-sectarian Aramaic apocalyptic witness to the same tradition preserved in Daniyel: YHWH\u2019s kingdom replaces all human empires. The fragment is damaged but the surviving text is sufficient to establish the theological framework.",
+  "key_terms": [
+    { "term": "Bar Elyon", "phonetic": "Bar El-YOHN", "definition": "Aramaic for \u2018Son of the Most High.\u2019 A title applied to the figure in 4Q246 whose kingdom is everlasting. \u2018Elyon\u2019 (Most High) is one of the oldest titles for YHWH in the Hebrew and Aramaic traditions." },
+    { "term": "Aramaic Apocalypse", "phonetic": "", "definition": "A text from Qumran Cave 4 (4Q246) written in Aramaic describing a vision of future deliverance. It parallels Daniyel 7 and uses the titles \u2018Son of El\u2019 and \u2018Son of the Most High\u2019 for a figure whose dominion is eternal." }
+  ],
+  "fill_blank": [
+    { "ref": "Col II:1", "prompt": "He shall be called Son of the Most High, and they shall call him Son of ______.", "answer": "El", "source_quote": "He shall be called Son of the Most High, and they shall call him Son of El." },
+    { "ref": "Col II:5", "prompt": "His kingdom is an ______ kingdom, and all his ways are truth.", "answer": "everlasting", "source_quote": "His kingdom is an everlasting kingdom, and all his ways are truth." }
+  ],
+  "multiple_choice": [
+    { "ref": "Col II:1-2", "question": "What titles are given to the figure in 4Q246?", "options": ["King of Babylon and Lord of Nations", "Son of the Most High and Son of El", "Teacher of Righteousness and Interpreter of the Law", "Prince of Light and Angel of Truth"], "correct": 1, "source_quote": "He shall be called Son of the Most High, and they shall call him Son of El." },
+    { "ref": "Col II:5-9", "question": "What is said about the kingdom of the figure in 4Q246?", "options": ["It will last for seventy years", "It is an everlasting kingdom and all nations will serve him", "It will be divided among twelve tribes", "It will be conquered by the Kittim"], "correct": 1, "source_quote": "His kingdom is an everlasting kingdom, and all his ways are truth. He will judge the earth in righteousness, and all will make peace." }
+  ],
+  "faq": [
+    {
+      "question": "How does 4Q246 relate to the Daniyel tradition?",
+      "answer": "4Q246 parallels Daniyel 7 structurally: a seer before a throne, a succession of oppressive kingdoms, and the rise of a figure whose kingdom is everlasting. The title \u2018Son of the Most High\u2019 (bar elyon) echoes Daniyel 7:27 where the kingdom is given to \u2018the people of the holy ones of the Most High.\u2019 Both texts share the Aramaic language. Both describe the end of human empires and the establishment of YHWH\u2019s sovereignty. The existence of 4Q246 at Qumran proves that the Daniyel tradition was not an isolated composition but part of a broader Aramaic apocalyptic stream. The Great Eraser pattern treats Daniyel as a standalone late composition. 4Q246 demonstrates that the tradition had multiple witnesses."
+    },
+    {
+      "question": "Why was 4Q246 suppressed from public knowledge for decades after its discovery?",
+      "answer": "4Q246 was discovered in the 1950s but not fully published until the 1990s. The scroll team that controlled the Dead Sea Scrolls maintained a monopoly on publication for nearly 40 years. During this period, only a small circle of scholars had access to the texts. The Aramaic Apocalypse was among the most controversial fragments because its language \u2014 \u2018Son of the Most High,\u2019 \u2018Son of El,\u2019 \u2018everlasting kingdom\u2019 \u2014 disrupted established academic categories about the development of these titles in Second Temple Judaism. The publication monopoly was broken in 1991 when the Huntington Library made photographs available to all scholars. This is a documented case of the Great Eraser operating through academic gatekeeping: primary texts were physically available but institutionally inaccessible for decades."
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "id": "file_109",
+  "label": "Temple Scroll 11Q19 (Megillat HaMikdash) \u2014 Part 1 \u2014 Col 1\u201322",
+  "volume": 46,
+  "content_version": 1,
+  "summary_plain": "The Temple Scroll is the longest of the Dead Sea Scrolls. YHWH speaks in the first person \u2014 I will consecrate my Temple, I will dwell among them forever. The scroll describes an ideal Temple with three concentric courts: the inner court for priests, the middle court for males over twenty, and the outer court for all Yisra\u2019el. Detailed instructions are given for the altar, the laver, the stairhouse, and the chambers. The festival calendar prescribes additional festivals not found in the Masoretic Torah: a Festival of New Wine, a Festival of New Oil, and a Festival of Wood Offering. The text rewrites Devarim as direct divine speech.",
+  "summary_scholarly": "The Temple Scroll (11Q19 \u2014 Megillat HaMikdash) was acquired from Bethlehem antiquities dealers and is the longest Dead Sea Scroll at over 8 meters. It was edited by Yigael Yadin and published in 1977. Columns 1-22 cover the festival calendar and the inner Temple architecture. The scroll\u2019s most distinctive feature is its first-person divine voice: where the Torah reports YHWH\u2019s speech through Moshe (\u2018YHWH said to Moshe\u2019), the Temple Scroll presents YHWH speaking directly (\u2018I will dwell among them\u2019). The additional festivals (New Wine, New Oil, Wood Offering) are attested in Yovelim (Jubilees) and the 364-day calendar texts, confirming the Temple Scroll\u2019s connection to the broader Qumran calendar tradition. The three-court Temple design differs significantly from both the Solomonic Temple and the Second Temple.",
+  "key_terms": [
+    { "term": "Megillat HaMikdash", "phonetic": "Meh-gee-LAHT Ha-Mik-DAHSH", "definition": "Hebrew for \u2018Scroll of the Temple.\u2019 The longest Dead Sea Scroll, presenting YHWH\u2019s direct instructions for an ideal Temple with three concentric courts and an expanded festival calendar." },
+    { "term": "Three Courts", "phonetic": "", "definition": "The Temple Scroll prescribes three concentric courts: the inner court for priests and Levites, the middle court for males of Yisra\u2019el over twenty years old, and the outer court for all Yisra\u2019el including women and children. This design has no parallel in other Temple descriptions." }
+  ],
+  "fill_blank": [
+    { "ref": "Col XXIX:8-10", "prompt": "I will consecrate my Temple with my glory, for I will cause my ______ to dwell upon it until the day of creation.", "answer": "glory", "source_quote": "I will consecrate my Temple with my glory, for I will cause my glory to dwell upon it until the day of creation." },
+    { "ref": "Col XIX-XXI", "prompt": "The Temple Scroll prescribes additional festivals not in the Masoretic Torah: a Festival of New Wine, a Festival of New Oil, and a Festival of ______.", "answer": "Wood Offering", "source_quote": "The festival calendar prescribes a Festival of New Wine, a Festival of New Oil, and a Festival of Wood Offering." }
+  ],
+  "multiple_choice": [
+    { "ref": "Col XXIX", "question": "How does YHWH speak in the Temple Scroll?", "options": ["Through Moshe as intermediary", "Through angels", "In the first person directly: \u2018I will dwell among them\u2019", "Through the Teacher of Righteousness"], "correct": 2, "source_quote": "YHWH speaks in the first person: I will consecrate my Temple, I will dwell among them forever." },
+    { "ref": "Col XIX-XXI", "question": "What festivals does the Temple Scroll add beyond the Masoretic Torah?", "options": ["Purim and Hanukkah", "Festival of New Wine, Festival of New Oil, and Festival of Wood Offering", "Festival of Lights and Festival of Lots", "No additional festivals"], "correct": 1, "source_quote": "The festival calendar prescribes additional festivals: a Festival of New Wine, a Festival of New Oil, and a Festival of Wood Offering." }
+  ],
+  "faq": [
+    {
+      "question": "Why does the Temple Scroll present an alternative Temple design?",
+      "answer": "The Temple Scroll describes a Temple that differs from both the Solomonic Temple and the Second Temple that stood in Yerushalayim. It has three concentric courts instead of two, an expanded festival calendar, and additional architectural features. The scroll presents this design as YHWH\u2019s direct command \u2014 spoken in the first person, not mediated through Moshe. The implication is that the existing Temple in Yerushalayim was not built according to YHWH\u2019s actual instructions. The Great Eraser has presented the Second Temple (and later the synagogue and church) as the definitive worship structures. The Temple Scroll preserves an alternative architectural vision that claims direct divine authority. It raises the question: if the institution deviates from the original blueprint, is it the institution or the blueprint that has authority?"
+    },
+    {
+      "question": "What does the Temple Scroll\u2019s first-person divine voice reveal about Torah authority?",
+      "answer": "The Temple Scroll rewrites portions of Devarim so that YHWH speaks directly rather than through Moshe. Where the Masoretic text says \u2018YHWH said to Moshe, say to the children of Yisra\u2019el,\u2019 the Temple Scroll says \u2018I say to you.\u2019 This editorial decision removes the intermediary. The scroll claims to be YHWH\u2019s unmediated instruction. The Great Eraser operates through mediation \u2014 every institution that stands between the covenant people and the primary text is a potential mechanism of distortion. The Temple Scroll\u2019s first-person voice is a radical claim: YHWH speaks directly, and the text that records his speech is the highest authority. No institution, no priesthood, no scholarly consensus can override the direct voice."
+    }
+  ]
+}

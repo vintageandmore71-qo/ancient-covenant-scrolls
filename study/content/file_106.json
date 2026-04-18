@@ -1,0 +1,30 @@
+{
+  "id": "file_106",
+  "label": "Songs of Sabbath Sacrifice (Shirot Olat HaShabbat) \u2014 Complete",
+  "volume": 43,
+  "content_version": 1,
+  "summary_plain": "The Songs of Sabbath Sacrifice are thirteen songs for the first thirteen Shabbatot of the year. Each song describes the angelic worship in the heavenly Temple. The angels praise YHWH in the holy of holies above. The merkavah \u2014 the divine chariot-throne \u2014 is described with voices of blessing and the sound of divine silence. The angels of the presence serve before YHWH. Seven angelic priesthoods minister in the seven sanctuaries. The songs progress from the outer courts to the innermost chamber of the heavenly Temple, where the kavod (glory) of YHWH dwells.",
+  "summary_scholarly": "4Q400-407 and 11Q17 (Shirot Olat HaShabbat \u2014 Songs of Sabbath Sacrifice) were found in multiple copies across Caves 4 and 11 at Qumran and also at Masada (Mas1k). The presence at Masada proves the text circulated beyond the Qumran community. The thirteen songs correspond to the first thirteen Shabbatot of the year (one quarter). The songs describe angelic liturgy in the heavenly Temple \u2014 a Temple not built with hands. The text is the earliest Jewish mystical composition, predating the later Hekhalot literature by centuries. The merkavah imagery draws on Yehezkel 1 and 10 but expands it significantly. The seven angelic priesthoods serving in seven sanctuaries suggest a heavenly architecture that mirrors and transcends the earthly Temple. The community\u2019s Shabbat worship was understood as participation in the angelic liturgy.",
+  "key_terms": [
+    { "term": "Shirot Olat HaShabbat", "phonetic": "Shee-ROHT Oh-LAHT Ha-Shah-BAHT", "definition": "Hebrew for \u2018Songs of the Sabbath Sacrifice.\u2019 Thirteen liturgical compositions for the first thirteen Shabbatot of the year, describing the angelic worship in the heavenly Temple." },
+    { "term": "Merkavah", "phonetic": "Mer-kah-VAH", "definition": "The divine chariot-throne described in Yehezkel 1 and 10 and elaborated in the Songs of Sabbath Sacrifice. The angelic hosts surround the merkavah, and the kavod (glory) of YHWH is enthroned above it." }
+  ],
+  "fill_blank": [
+    { "ref": "4Q403 1 I:30-35", "prompt": "The angels of the presence praise YHWH in the seven ______.", "answer": "sanctuaries", "source_quote": "Seven angelic priesthoods minister before YHWH in the seven sanctuaries of the heavenly Temple." },
+    { "ref": "4Q405 20-22", "prompt": "The chariot-throne of YHWH is surrounded by the sound of divine ______.", "answer": "silence", "source_quote": "The merkavah is surrounded by the sound of divine silence and the blessing of the angels of the presence." }
+  ],
+  "multiple_choice": [
+    { "ref": "4Q400-407", "question": "How many songs make up the Songs of Sabbath Sacrifice?", "options": ["Seven, one for each day of creation", "Twelve, one for each tribe", "Thirteen, one for each of the first thirteen Shabbatot", "Fifty-two, one for each Shabbat of the year"], "correct": 2, "source_quote": "Thirteen songs for the first thirteen Shabbatot of the year." },
+    { "ref": "Masada copy", "question": "What is significant about the Songs of Sabbath Sacrifice being found at Masada?", "options": ["It proves the text was written at Masada", "It proves the text circulated beyond the Qumran community", "It proves the text was rejected at Qumran", "It proves the text was written by the Zealots"], "correct": 1, "source_quote": "The presence at Masada proves the text circulated beyond the Qumran community." }
+  ],
+  "faq": [
+    {
+      "question": "What does the angelic liturgy in the Songs of Sabbath Sacrifice reveal about Qumran worship?",
+      "answer": "The Songs of Sabbath Sacrifice describe the community\u2019s Shabbat worship as participation in the angelic liturgy of the heavenly Temple. When the community sang these songs on Shabbat, they understood themselves as joining the angels before YHWH\u2019s throne. This is critical: the community had no access to the earthly Temple in Yerushalayim (they considered its priesthood corrupt), yet they did not consider themselves without a Temple. The heavenly Temple was their sanctuary. Their worship connected them directly to YHWH\u2019s presence without institutional mediation. The Great Eraser operates by convincing the covenant people that worship requires an institution \u2014 a physical Temple, a recognized priesthood, an authorized denomination. The Songs of Sabbath Sacrifice demonstrate that the Qumran community worshipped YHWH in a Temple not built with hands, accessible through Torah-prescribed Shabbat observance."
+    },
+    {
+      "question": "Why is the presence of this text at both Qumran and Masada significant?",
+      "answer": "The Songs of Sabbath Sacrifice were found in multiple copies at Qumran (Caves 4 and 11) and in one copy at Masada. Masada was a Zealot stronghold, not a Qumran community site. The presence of the same liturgical text at both locations proves that the Songs circulated among different groups of covenant-observant communities in the first century CE. This destroys the Great Eraser\u2019s narrative that the Dead Sea Scrolls represent a single isolated sect. The angelic liturgy was shared across communities with different political positions \u2014 the pacifist Qumranites and the militant Masada defenders both sang the same Shabbat songs. The texts belonged to a broader movement of Torah-faithful communities, not to an eccentric fringe."
+    }
+  ]
+}
