@@ -901,32 +901,33 @@ function initNav() {
   var vrOpen = false, npOpen = false, nvOpen = false;
 
   updateSB = function () {
-    if (window.innerWidth <= 768) {
-      if (sbOpen) {
+    sb.classList.remove('h', 'm');
+    if (sbOpen) {
+      if (window.innerWidth <= 768) {
         sb.classList.add('m');
-        sb.classList.remove('h');
-      } else {
-        sb.classList.remove('m');
-        sb.classList.add('h');
       }
-      main.classList.add('x');
+      main.classList.remove('x');
     } else {
-      sb.classList.remove('m');
-      if (sbOpen) {
-        sb.classList.remove('h');
-        main.classList.remove('x');
-      } else {
-        sb.classList.add('h');
-        main.classList.add('x');
-      }
+      sb.classList.add('h');
+      main.classList.add('x');
     }
     document.getElementById('b-sb').setAttribute('aria-expanded', sbOpen ? 'true' : 'false');
   }
 
-  // Sidebar toggle
+  // Sidebar toggle — only open if there's content in sidebar
   document.getElementById('b-sb').addEventListener('click', function () {
+    var sb = document.getElementById('sb');
+    if (!sbOpen && (!sb.innerHTML || sb.innerHTML.trim() === '')) return;
     sbOpen = !sbOpen;
     updateSB();
+  });
+
+  // Close sidebar when tapping main content on mobile
+  document.getElementById('main').addEventListener('click', function () {
+    if (sbOpen && window.innerWidth <= 768) {
+      sbOpen = false;
+      updateSB();
+    }
   });
 
   // Home button
@@ -1083,13 +1084,13 @@ function initNav() {
   if (window.innerWidth <= 768) sbOpen = false;
   updateSB();
 
-  // Start at library or resume last book
+  // Start at library or resume last book at last chapter
   var lastBook = localStorage.getItem('attain_last_book');
   var lastCh = parseInt(localStorage.getItem('attain_last_ch') || '0');
   if (lastBook && getBook(lastBook)) {
     setActiveBook(lastBook).then(function () {
       buildSidebar(lastBook);
-      showArchitecture(lastBook);
+      showChapterActivities(lastBook, lastCh);
     });
   } else {
     showLibrary();
