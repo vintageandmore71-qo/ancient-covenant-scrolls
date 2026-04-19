@@ -34,7 +34,12 @@ function showIntro(page) {
     document.getElementById('b-intro-start').addEventListener('click', function (e) {
       e.stopPropagation();
       localStorage.setItem('attain_intro_seen', '1');
-      showLibrary();
+      var lib = getLibrary();
+      if (lib.length > 0) {
+        showLibrary();
+      } else {
+        showUpload();
+      }
     });
   }
 }
@@ -48,9 +53,13 @@ function showLibrary() {
   var lvl = getLevel(stats.xp || 0);
   var streak = stats.streak || 0;
 
-  // Show intro when library is empty
+  // Show intro when library is empty and not seen yet
   if (lib.length === 0) {
-    showIntro(1);
+    if (!localStorage.getItem('attain_intro_seen')) {
+      showIntro(1);
+    } else {
+      showUpload();
+    }
     return;
   }
 
