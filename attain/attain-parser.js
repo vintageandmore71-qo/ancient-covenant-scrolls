@@ -13,31 +13,38 @@ function parsePDF(file) {
     reader.onload = function (ev) {
       var typedArray = new Uint8Array(ev.target.result);
       pdfjsLib.getDocument({ data: typedArray }).promise.then(function (pdf) {
-        var pages = [];
         var total = pdf.numPages;
-        var processed = 0;
+        var pages = [];
 
         function processPage(num) {
+          if (num > total) {
+            var fullText = pages.join('\n\n');
+            if (!fullText.trim()) {
+              reject(new Error('No text extracted from PDF — it may be image-based'));
+              return;
+            }
+            resolve(fullText);
+            return;
+          }
+          // Update status if element exists
+          var statusEl = document.getElementById('upload-status');
+          if (statusEl) statusEl.textContent = '\u23F3 Reading page ' + num + ' of ' + total + '...';
+
           pdf.getPage(num).then(function (page) {
-            page.getTextContent().then(function (content) {
-              var text = content.items.map(function (item) {
-                return item.str;
-              }).join(' ');
-              pages.push({ pageNum: num, text: text.trim() });
-              processed++;
-              if (processed === total) {
-                var fullText = pages.sort(function (a, b) {
-                  return a.pageNum - b.pageNum;
-                }).map(function (p) { return p.text; }).join('\n\n');
-                resolve(fullText);
-              }
-            });
+            return page.getTextContent();
+          }).then(function (content) {
+            var text = content.items.map(function (item) {
+              return item.str;
+            }).join(' ').trim();
+            pages.push(text);
+            processPage(num + 1);
+          }).catch(function () {
+            pages.push('');
+            processPage(num + 1);
           });
         }
 
-        for (var i = 1; i <= total; i++) {
-          processPage(i);
-        }
+        processPage(1);
       }).catch(function (err) {
         reject(new Error('PDF parse error: ' + err.message));
       });
