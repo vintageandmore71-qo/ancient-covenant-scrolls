@@ -1268,6 +1268,51 @@ function verifyStorage() {
   }
 }
 
+// ---- Install Prompt ----
+function showInstallPrompt() {
+  if (localStorage.getItem('attain_install_dismissed')) return;
+  if (window.navigator.standalone) return; // already installed
+  if (window.matchMedia('(display-mode: standalone)').matches) return;
+
+  var banner = document.createElement('div');
+  banner.id = 'install-banner';
+  banner.style.cssText = 'position:fixed;bottom:70px;left:16px;right:16px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;padding:16px 20px;border-radius:16px;z-index:1200;box-shadow:0 8px 32px rgba(0,0,0,.3);font-family:var(--font-main);display:flex;align-items:center;gap:12px;flex-wrap:wrap';
+  banner.innerHTML =
+    '<div style="flex:1;min-width:200px">' +
+    '<div style="font-weight:700;font-size:1.05em">\u{1F4F2} Install Attain</div>' +
+    '<div style="font-size:.85em;opacity:.9;margin-top:4px">Add to Home Screen for permanent storage. Your books and progress will be saved.</div>' +
+    '</div>' +
+    '<button id="b-install-how" style="background:#fff;color:#7c3aed;border:none;padding:10px 18px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;font-family:var(--font-main);white-space:nowrap">How to Install</button>' +
+    '<button id="b-install-dismiss" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:8px;opacity:.7" aria-label="Dismiss">\u2715</button>';
+  document.body.appendChild(banner);
+
+  document.getElementById('b-install-dismiss').addEventListener('click', function () {
+    banner.remove();
+    localStorage.setItem('attain_install_dismissed', '1');
+  });
+
+  document.getElementById('b-install-how').addEventListener('click', function () {
+    banner.innerHTML =
+      '<div style="width:100%">' +
+      '<div style="font-weight:700;font-size:1.05em;margin-bottom:10px">\u{1F4F2} How to Install Attain</div>' +
+      '<div style="font-size:.95em;line-height:1.7">' +
+      '<strong>Safari (iPhone/iPad):</strong><br>' +
+      '1. Tap the <strong>Share</strong> button (square with arrow)<br>' +
+      '2. Scroll down and tap <strong>"Add to Home Screen"</strong><br>' +
+      '3. Tap <strong>Add</strong><br><br>' +
+      '<strong>Chrome (Android):</strong><br>' +
+      '1. Tap the <strong>\u22EE menu</strong> (three dots)<br>' +
+      '2. Tap <strong>"Add to Home Screen"</strong> or <strong>"Install App"</strong><br><br>' +
+      '<strong>Why?</strong> Your books and progress are saved permanently only when installed. Without installing, your browser may delete your data.</div>' +
+      '<button id="b-install-ok" style="background:#fff;color:#7c3aed;border:none;padding:10px 24px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;font-family:var(--font-main);margin-top:12px">Got it</button>' +
+      '</div>';
+    document.getElementById('b-install-ok').addEventListener('click', function () {
+      banner.remove();
+      localStorage.setItem('attain_install_dismissed', '1');
+    });
+  });
+}
+
 // ---- Boot ----
 document.addEventListener('DOMContentLoaded', function () {
   var storageOk = verifyStorage();
@@ -1282,6 +1327,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   initNav();
   addDyslexicToggle();
+  setTimeout(showInstallPrompt, 3000);
 });
 if (document.readyState !== 'loading') initNav();
 
