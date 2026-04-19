@@ -488,11 +488,15 @@ function showChapterPreview(title, chapters, rawText) {
   // Re-split options (hidden initially)
   h += '<div id="resplit-panel" style="display:none;margin-top:16px;text-align:center">';
   h += '<div style="font-weight:700;margin-bottom:10px;color:var(--text-main)">Split into how many sections?</div>';
-  h += '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">';
+  h += '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;align-items:center">';
   var splitOptions = [5, 10, 15, 20, 30];
   for (var so = 0; so < splitOptions.length; so++) {
     h += '<button class="study-btn resplit-btn" data-n="' + splitOptions[so] + '" aria-label="Split into ' + splitOptions[so] + ' sections" style="min-width:60px">' + splitOptions[so] + '</button>';
   }
+  h += '</div>';
+  h += '<div style="display:flex;gap:8px;justify-content:center;align-items:center;margin-top:12px">';
+  h += '<input type="number" id="resplit-custom" min="2" max="200" placeholder="Custom #" style="width:100px;padding:10px;border-radius:8px;border:2px solid #ddd;font-family:var(--font-main);font-size:16px;font-weight:700;text-align:center;background:var(--bg-card);color:var(--text-main)" aria-label="Custom number of sections">';
+  h += '<button class="study-btn sb-pri" id="b-resplit-custom" aria-label="Apply custom split">Split</button>';
   h += '</div>';
   h += '<div class="upload-or" style="margin:12px 0">\u2014 or split by \u2014</div>';
   h += '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">';
@@ -599,6 +603,26 @@ function showChapterPreview(title, chapters, rawText) {
       showChapterPreview(title, newChapters, rawText);
     });
   }
+
+  // Custom number split
+  document.getElementById('b-resplit-custom').addEventListener('click', function () {
+    var n = parseInt(document.getElementById('resplit-custom').value);
+    if (!n || n < 2 || n > 200) {
+      document.getElementById('preview-status').textContent = '\u274C Enter a number between 2 and 200';
+      return;
+    }
+    var allText = rawText.split(/\n/).filter(function (l) { return l.trim().length > 10; });
+    var chunkSize = Math.max(1, Math.ceil(allText.length / n));
+    var newChapters = [];
+    for (var i = 0; i < allText.length; i += chunkSize) {
+      var slice = allText.slice(i, i + chunkSize);
+      newChapters.push({
+        title: 'Chapter ' + (newChapters.length + 1),
+        paragraphs: slice.map(function (l) { return l.trim(); })
+      });
+    }
+    showChapterPreview(title, newChapters, rawText);
+  });
 
   // Cancel
   document.getElementById('b-preview-cancel').addEventListener('click', function () { showUpload(); });
