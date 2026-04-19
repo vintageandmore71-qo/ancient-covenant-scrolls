@@ -11,18 +11,37 @@ function saveLibrary(lib) {
 function getBook(bookId) {
   var lib = getLibrary();
   for (var i = 0; i < lib.length; i++) {
-    if (lib[i].id === bookId) return lib[i];
+    if (lib[i].id === bookId) {
+      var book = lib[i];
+      if (book.hasTerms && (!book.keyTerms || !book.keyTerms.length)) {
+        book.keyTerms = getBookTerms(bookId);
+      }
+      return book;
+    }
   }
   return null;
 }
 function saveBook(book) {
+  // Store key terms separately to keep library small
+  if (book.keyTerms && book.keyTerms.length > 0) {
+    try { localStorage.setItem('attain_terms_' + book.id, JSON.stringify(book.keyTerms)); } catch (e) {}
+  }
+  // Save a lightweight version to the library
+  var lightweight = {};
+  for (var k in book) {
+    if (k !== 'keyTerms') lightweight[k] = book[k];
+  }
+  lightweight.hasTerms = !!(book.keyTerms && book.keyTerms.length > 0);
   var lib = getLibrary();
   var found = false;
   for (var i = 0; i < lib.length; i++) {
-    if (lib[i].id === book.id) { lib[i] = book; found = true; break; }
+    if (lib[i].id === book.id) { lib[i] = lightweight; found = true; break; }
   }
-  if (!found) lib.push(book);
+  if (!found) lib.push(lightweight);
   saveLibrary(lib);
+}
+function getBookTerms(bookId) {
+  try { return JSON.parse(localStorage.getItem('attain_terms_' + bookId) || '[]'); } catch (e) { return []; }
 }
 function deleteBook(bookId) {
   var lib = getLibrary().filter(function (b) { return b.id !== bookId; });
@@ -79,12 +98,10 @@ function openDB() {
 }
 
 function saveChaptersDB(bookId, chapters) {
+  // Always save to localStorage as reliable backup
+  try { localStorage.setItem('attain_ch_' + bookId, JSON.stringify(chapters)); } catch (e) {}
   return openDB().then(function (db) {
-    if (!db) {
-      // Fallback to localStorage
-      try { localStorage.setItem('attain_ch_' + bookId, JSON.stringify(chapters)); } catch (e) {}
-      return;
-    }
+    if (!db) return;
     return new Promise(function (resolve) {
       var tx = db.transaction('chapters', 'readwrite');
       var store = tx.objectStore('chapters');
@@ -92,15 +109,21 @@ function saveChaptersDB(bookId, chapters) {
       tx.oncomplete = function () { resolve(); };
       tx.onerror = function () { resolve(); };
     });
-  });
+  }).catch(function () {});
 }
 
 function loadChaptersDB(bookId) {
-  return openDB().then(function (db) {
-    if (!db) {
-      // Fallback to localStorage
-      try { return JSON.parse(localStorage.getItem('attain_ch_' + bookId) || '[]'); } catch (e) { return []; }
+  // Try localStorage first — it's the most reliable on Safari/iOS
+  try {
+    var lsData = localStorage.getItem('attain_ch_' + bookId);
+    if (lsData) {
+      var parsed = JSON.parse(lsData);
+      if (parsed && parsed.length > 0) return Promise.resolve(parsed);
     }
+  } catch (e) {}
+  // Then try IndexedDB
+  return openDB().then(function (db) {
+    if (!db) return [];
     return new Promise(function (resolve) {
       var tx = db.transaction('chapters', 'readonly');
       var store = tx.objectStore('chapters');
