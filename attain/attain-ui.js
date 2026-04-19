@@ -808,7 +808,6 @@ function showChapterActivities(bookId, chIdx) {
   h += actCard('\u{1F527}', 'Verse Builder', '#be185d', 'versebuild');
   h += actCard('\u{1F517}', 'Word Match', '#4338ca', 'wordmatch');
   h += actCard('\u2694\uFE0F', 'Challenge', '#b45309', 'challenge');
-  h += actCard('\u2694\uFE0F', 'Challenge', '#b91c1c', 'challenge');
   h += '</div>';
 
   // Navigation
