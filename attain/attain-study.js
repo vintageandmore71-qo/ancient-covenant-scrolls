@@ -295,7 +295,7 @@ function showFillBlank(bookId, chIdx) {
   var keyTerms = book.keyTerms || [];
   var tier = getDifficultyTier(bookId, chIdx);
 
-  var questions = generateFillBlanks(paras, keyTerms, tier === 'hard' ? 15 : 10);
+  var questions = generateFillBlanks(paras, keyTerms, tier === 'hard' ? 30 : 20);
 
   // Hard tier: pull cross-chapter questions
   if (tier === 'hard') {
@@ -311,7 +311,7 @@ function showFillBlank(bookId, chIdx) {
   }
 
   if (!questions.length) { showNoContent(bookId, chIdx, 'Fill in the Blank'); return; }
-  questions = shuffle(questions).slice(0, tier === 'hard' ? 15 : 10);
+  questions = shuffle(questions).slice(0, tier === 'hard' ? 30 : 20);
 
   // Build distractor pool from all answers
   var allAns = questions.map(function (q) { return q.answer; });
@@ -487,7 +487,7 @@ function showMC(bookId, chIdx) {
   }
 
   if (!questions.length) { showNoContent(bookId, chIdx, 'Multiple Choice'); return; }
-  questions = shuffle(questions).slice(0, tier === 'hard' ? 15 : 10);
+  questions = shuffle(questions).slice(0, tier === 'hard' ? 30 : 20);
 
   var qi = 0, score = 0, mcFirstAttempt = true;
   var mcColors = ['#dc2626', '#2563eb', '#059669', '#d97706'];
@@ -1347,7 +1347,7 @@ function showChallenge(bookId, chIdx) {
     }
 
     if (allQ.length < 3) { showNoContent(bookId, chIdx, 'Challenge'); return; }
-    allQ = shuffle(allQ).slice(0, Math.max(10, playerNames.length * 3));
+    allQ = shuffle(allQ).slice(0, Math.max(50, playerNames.length * 10));
     runGame(playerNames, allQ);
   }
 
@@ -1471,6 +1471,60 @@ function showChallenge(bookId, chIdx) {
   }
 
   setupScreen();
+}
+
+// ---- Read Mode — full chapter text, dyslexic-friendly digital reader ----
+
+function showReadMode(bookId, chIdx) {
+  var book = getBook(bookId);
+  if (!book || !activeChapters[chIdx]) { showNoContent(bookId, chIdx, 'Read'); return; }
+  var ch = activeChapters[chIdx];
+  var paras = ch.paragraphs || [];
+  var chTitle = ch.title || 'Chapter ' + (chIdx + 1);
+
+  var h = '<div class="study-view" style="max-width:700px;margin:0 auto">';
+  h += '<div class="sv-title" style="border-left-color:' + (book.color || 'var(--vol1)') + '">' + chTitle + '</div>';
+
+  // Read controls
+  h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">';
+  h += '<button class="cloze-audio" id="b-read-play" aria-label="Read aloud">\u{1F50A} Read Aloud</button>';
+  h += '<button class="study-btn" id="b-read-stop" style="background:#6b7280" aria-label="Stop reading">\u25A0 Stop</button>';
+  h += '</div>';
+
+  // Paragraph-by-paragraph display
+  for (var i = 0; i < paras.length; i++) {
+    h += '<p class="sv-text" style="margin-bottom:14px;padding:12px 16px;background:var(--bg-card);border-radius:10px;box-shadow:var(--shadow);line-height:2.0;font-size:1.05em">' + paras[i] + '</p>';
+  }
+
+  // Navigation
+  h += '<div style="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap">';
+  if (chIdx > 0) {
+    h += '<button class="study-btn" id="b-read-prev" aria-label="Previous chapter">\u25C0 Previous Chapter</button>';
+  }
+  if (chIdx < activeChapters.length - 1) {
+    h += '<button class="study-btn sb-pri" id="b-read-next" aria-label="Next chapter">Next Chapter \u25B6</button>';
+  }
+  h += '</div>';
+
+  h += '<button class="study-btn" id="b-read-back" style="margin-top:16px" aria-label="Return to activities">Back to activities</button>';
+  h += '</div>';
+
+  document.getElementById('content').innerHTML = h;
+  document.getElementById('tb').textContent = chTitle;
+
+  document.getElementById('b-read-play').addEventListener('click', function () {
+    var fullText = paras.join('. ');
+    speakText(fullText);
+  });
+  document.getElementById('b-read-stop').addEventListener('click', function () { stopSpeech(); });
+
+  var prevBtn = document.getElementById('b-read-prev');
+  if (prevBtn) prevBtn.addEventListener('click', function () { showReadMode(bookId, chIdx - 1); });
+  var nextBtn = document.getElementById('b-read-next');
+  if (nextBtn) nextBtn.addEventListener('click', function () { showReadMode(bookId, chIdx + 1); });
+  document.getElementById('b-read-back').addEventListener('click', function () { showChapterActivities(bookId, chIdx); });
+
+  window.scrollTo(0, 0);
 }
 
 console.log('attain-study.js loaded (all study modes)');

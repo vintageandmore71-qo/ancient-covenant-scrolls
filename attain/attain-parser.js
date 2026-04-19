@@ -235,6 +235,24 @@ function generateSubtitle(paragraphs) {
   return words.length > 3 ? words + '...' : '';
 }
 
+var FRONT_MATTER_PATTERNS = [
+  /^copyright/i, /^all rights reserved/i, /^isbn/i,
+  /^table of contents/i, /^contents$/i, /^dedication$/i,
+  /^acknowledgments?$/i, /^about the author/i, /^preface$/i,
+  /^foreword$/i, /^introduction$/i, /^published by/i,
+  /^printed in/i, /^library of congress/i, /^first edition/i,
+  /^cover design/i, /^editing by/i, /^\u00a9\s*\d{4}/
+];
+
+function isFrontMatter(text) {
+  if (!text || text.length < 10) return true;
+  var lower = text.toLowerCase().trim();
+  for (var i = 0; i < FRONT_MATTER_PATTERNS.length; i++) {
+    if (FRONT_MATTER_PATTERNS[i].test(lower)) return true;
+  }
+  return false;
+}
+
 function detectChapters(rawText) {
   var lines = rawText.split('\n');
   var chapters = [];
@@ -297,6 +315,20 @@ function detectChapters(rawText) {
       paragraphs: linesToParagraphs(currentLines)
     });
   }
+
+  // Remove front matter chapters (copyright, TOC, dedication, etc.)
+  chapters = chapters.filter(function (ch) {
+    if (ch.paragraphs.length === 0) return false;
+    var firstPara = ch.paragraphs[0] || '';
+    var titleAndContent = ch.title + ' ' + firstPara;
+    return !isFrontMatter(titleAndContent);
+  });
+
+  // Remove chapters with very little content (likely blank pages)
+  chapters = chapters.filter(function (ch) {
+    var totalText = ch.paragraphs.join(' ');
+    return totalText.length > 50;
+  });
 
   // If no chapters detected, split by paragraph count
   if (chapters.length <= 1 && rawText.length > 3000) {

@@ -6,7 +6,7 @@
 function showIntro(page) {
   page = page || 1;
   var imgSrc = page === 1 ? 'splash.PNG' : 'splash%202.PNG';
-  var h = '<div id="home" style="padding:0;justify-content:flex-start">';
+  var h = '<div id="home" style="justify-content:flex-start;padding:0 0 30px 0">';
   h += '<img src="' + imgSrc + '" alt="Attain" style="width:100%;max-width:600px;height:auto;display:block;margin:0 auto" onerror="this.style.display=\'none\'">';
   h += '<div class="btns" style="margin:0;padding:20px 16px">';
   h += '<button id="b-intro-upload" style="background:linear-gradient(135deg,#7c3aed,#2563eb);font-size:17px;padding:18px 40px" aria-label="Upload a book">\u2795 Upload a Book</button>';
@@ -765,7 +765,8 @@ function showChapterActivities(bookId, chIdx) {
 
   // Activity grid
   h += '<div class="activity-grid">';
-  h += actCard('\u{1F4D6}', 'Breakdown', book.color || '#2563eb', 'breakdown');
+  h += actCard('\u{1F4D6}', 'Read', book.color || '#2563eb', 'read');
+  h += actCard('\u{1F4CB}', 'Breakdown', '#0891b2', 'breakdown');
   h += actCard('\u{1F9E9}', 'Fill in Blank', '#059669', 'filblank');
   h += actCard('\u270F\uFE0F', 'Multiple Choice', '#7c3aed', 'mc');
   h += actCard('\u{1F0CF}', 'Flashcards', '#d97706', 'flash');
@@ -819,6 +820,7 @@ function actCard(icon, label, color, mode) {
 }
 
 function openStudyMode(bookId, chIdx, mode) {
+  if (mode === 'read') { showReadMode(bookId, chIdx); return; }
   if (mode === 'breakdown') { showBreakdown(bookId, chIdx); return; }
   if (mode === 'filblank') { showFillBlank(bookId, chIdx); return; }
   if (mode === 'mc') { showMC(bookId, chIdx); return; }
@@ -1093,8 +1095,9 @@ function initNav() {
     });
   }
 
-  // Notes toggle
+  // Notes toggle — close all-notes if open first
   document.getElementById('b-nt').addEventListener('click', function () {
+    if (nvOpen) { nvOpen = false; nv.classList.remove('on'); document.getElementById('b-nv').classList.remove('on'); }
     npOpen = !npOpen;
     np.classList.toggle('on', npOpen);
     this.classList.toggle('on', npOpen);
@@ -1169,8 +1172,14 @@ function initNav() {
   var lastCh = parseInt(localStorage.getItem('attain_last_ch') || '0');
   if (lastBook && getBook(lastBook)) {
     setActiveBook(lastBook).then(function () {
-      buildSidebar(lastBook);
-      showChapterActivities(lastBook, lastCh);
+      if (activeChapters && activeChapters.length > 0) {
+        buildSidebar(lastBook);
+        showChapterActivities(lastBook, Math.min(lastCh, activeChapters.length - 1));
+      } else {
+        showLibrary();
+      }
+    }).catch(function () {
+      showLibrary();
     });
   } else {
     showLibrary();
@@ -1181,7 +1190,8 @@ function initNav() {
 document.addEventListener('click', function (e) {
   var target = e.target;
   if (!target || target.tagName === 'BUTTON' || target.tagName === 'SELECT' ||
-      target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'A') return;
+      target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'A' ||
+      target.id === 'b-dy-float' || target.classList.contains('font-toggle-btn')) return;
   var inContent = target.closest('.ll-card, .cloze-prompt, .mc-question, .sv-text, .sv-td, .sv-fa, .fc-front, .fc-back, .sv-fq, .ch-question');
   if (!inContent) return;
   var sel = window.getSelection();

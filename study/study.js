@@ -981,7 +981,7 @@ function showFillBlank(fid) {
         }).catch(function(){if(!questions.length) openActivity('stub',fid);});
         if (!questions.length) return;
       }
-      var smartQ = generateSmartQuestions(fid, tier === 'hard' ? 15 : 10);
+      var smartQ = generateSmartQuestions(fid, tier === 'hard' ? 30 : 20);
       for (var sq = 0; sq < smartQ.length; sq++) {
         questions.push(smartQ[sq]);
         if (allAns.indexOf(smartQ[sq].answer) < 0) allAns.push(smartQ[sq].answer);
@@ -998,7 +998,7 @@ function showFillBlank(fid) {
     }
 
     if (!questions.length) { openActivity('stub', fid); return; }
-    questions = shuffle(questions).slice(0, tier === 'hard' ? 15 : 10);
+    questions = shuffle(questions).slice(0, tier === 'hard' ? 30 : 20);
     var qi = 0, score = 0, firstAttempt = true;
 
     function renderQ() {
@@ -1164,7 +1164,7 @@ function showMC(fid) {
     }
 
     if (!questions.length) { openActivity('stub', fid); return; }
-    questions = shuffle(questions).slice(0, tier === 'hard' ? 15 : 10);
+    questions = shuffle(questions).slice(0, tier === 'hard' ? 30 : 20);
     var qi = 0, score = 0, mcFirstAttempt = true;
     var mcColors = ['#dc2626', '#2563eb', '#059669', '#d97706'];
 
@@ -2164,7 +2164,7 @@ function showChallenge(fid) {
         }
       }
       if (allQ.length < 2) { openActivity('stub', fid); return; }
-      allQ = shuffle(allQ).slice(0, Math.max(10, playerNames.length * 3));
+      allQ = shuffle(allQ).slice(0, Math.max(50, playerNames.length * 10));
       runGame(playerNames, allQ);
     });
   }
