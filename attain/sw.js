@@ -1,7 +1,7 @@
 // Attain Universal — Service Worker
-// Offline-first caching for the app shell
+// Network-first for everything so updates always take effect
 
-var CACHE = 'attain-v12';
+var CACHE = 'attain-v13';
 
 var SHELL = [
   './',
@@ -36,37 +36,16 @@ self.addEventListener('activate', function (e) {
 self.addEventListener('fetch', function (e) {
   var req = e.request;
   if (req.method !== 'GET') return;
-  var url = new URL(req.url);
 
-  // Network-first for HTML shell so updates always take effect
-  if (
-    req.mode === 'navigate' ||
-    url.pathname.endsWith('/') ||
-    url.pathname.endsWith('/index.html') ||
-    url.pathname.endsWith('/sw.js')
-  ) {
-    e.respondWith(
-      fetch(req).then(function (res) {
-        var clone = res.clone();
-        caches.open(CACHE).then(function (c) { c.put(req, clone); }).catch(function () {});
-        return res;
-      }).catch(function () {
-        return caches.match(req).then(function (r) { return r || caches.match('index.html'); });
-      })
-    );
-    return;
-  }
-
-  // Cache-first for static assets (JS, CSS, images)
+  // Network-first for EVERYTHING — cache is only for offline fallback
   e.respondWith(
-    caches.match(req).then(function (r) {
-      if (r) return r;
-      return fetch(req).then(function (res) {
-        if (res.ok && url.origin === self.location.origin) {
-          var clone = res.clone();
-          caches.open(CACHE).then(function (c) { c.put(req, clone); }).catch(function () {});
-        }
-        return res;
+    fetch(req).then(function (res) {
+      var clone = res.clone();
+      caches.open(CACHE).then(function (c) { c.put(req, clone); }).catch(function () {});
+      return res;
+    }).catch(function () {
+      return caches.match(req).then(function (r) {
+        return r || caches.match('index.html');
       });
     })
   );
