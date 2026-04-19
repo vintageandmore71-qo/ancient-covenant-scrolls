@@ -190,11 +190,16 @@ var CHAPTER_PATTERNS = [
   /^ch\.\s*\d+/i,
   /^ch\s+\d+/i,
   /^ch\.\d+/i,
+  /^act\s+\w+/i,
   /^part\s+\w+/i,
   /^section\s+\d+/i,
   /^book\s+\d+/i,
   /^volume\s+\w+/i,
+  /^interlude/i,
+  /^prologue/i,
+  /^epilogue/i,
   /^\d+\.\s+[A-Z]/,
+  /^\d+$/,
   /^[IVXLC]+\.\s/,
   /^---CHAPTER_BREAK---$/
 ];
@@ -278,6 +283,13 @@ function detectChapters(rawText) {
           isChapterBreak = true;
           break;
         }
+      }
+    }
+
+    // Also check if a short line (< 60 chars) contains "chapter" anywhere
+    if (!isChapterBreak && line.length < 60) {
+      if (/chapter\s+\d+/i.test(line) || /act\s+(one|two|three|four|five|\d+)/i.test(line) || /^interlude$/i.test(line)) {
+        isChapterBreak = true;
       }
     }
 
