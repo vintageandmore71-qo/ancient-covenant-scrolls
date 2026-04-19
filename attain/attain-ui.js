@@ -69,9 +69,12 @@ function showLibrary() {
     html += '</div>';
   }
 
-  // Primary action buttons — always visible
+  // Primary action buttons
   html += '<div class="btns" style="margin-top:24px">';
-  html += '<button id="b-lib-new-hero" style="background:linear-gradient(135deg,#7c3aed,#2563eb);font-size:18px;padding:20px 40px">\u2795 Upload a Book</button>';
+  if (lib.length > 0) {
+    html += '<button id="b-lib-start" style="background:linear-gradient(135deg,#059669,#0891b2);font-size:18px;padding:20px 40px">\u{1F4D6} Get Started</button>';
+  }
+  html += '<button id="b-lib-new-hero" style="background:linear-gradient(135deg,#7c3aed,#2563eb);font-size:16px;padding:16px 32px">\u2795 Upload a Book</button>';
   if (totalDue > 0) {
     html += '<button id="b-lib-review" style="background:linear-gradient(135deg,#059669,#0891b2)">\u{1F4DA} Review All Due (' + totalDue + ' cards)</button>';
   }
@@ -125,6 +128,26 @@ function showLibrary() {
   // Wire events
   var logo = document.getElementById('lib-logo');
   if (logo) logo.addEventListener('click', function () { showIntro(1); });
+
+  var startBtn = document.getElementById('b-lib-start');
+  if (startBtn) {
+    startBtn.addEventListener('click', function () {
+      var lastBook = localStorage.getItem('attain_last_book');
+      var lastCh = parseInt(localStorage.getItem('attain_last_ch') || '0');
+      if (lastBook && getBook(lastBook)) {
+        setActiveBook(lastBook).then(function () {
+          buildSidebar(lastBook);
+          showChapterActivities(lastBook, lastCh);
+        });
+      } else if (lib.length > 0) {
+        var bid = lib[0].id;
+        setActiveBook(bid).then(function () {
+          buildSidebar(bid);
+          showArchitecture(bid);
+        });
+      }
+    });
+  }
 
   var heroBtn = document.getElementById('b-lib-new-hero');
   if (heroBtn) heroBtn.addEventListener('click', function () { showUpload(); });
