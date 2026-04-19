@@ -1112,8 +1112,24 @@ document.addEventListener('click', function (e) {
   if (word && word.length > 1 && word.length < 40) speakText(word);
 });
 
+// ---- Floating Dyslexic Font Toggle ----
+function addDyslexicToggle() {
+  if (document.getElementById('b-dy-float')) return;
+  var btn = document.createElement('button');
+  btn.id = 'b-dy-float';
+  btn.className = 'font-toggle-btn';
+  btn.setAttribute('aria-label', 'Toggle OpenDyslexic font');
+  btn.textContent = 'Dy';
+  btn.addEventListener('click', function () {
+    var on = !document.body.classList.contains('font-dyslexic');
+    document.body.classList.toggle('font-dyslexic', on);
+    localStorage.setItem('attain_dyslexic', on ? '1' : '');
+  });
+  document.body.appendChild(btn);
+}
+
 // ---- Boot ----
-document.addEventListener('DOMContentLoaded', function () { initNav(); });
+document.addEventListener('DOMContentLoaded', function () { initNav(); addDyslexicToggle(); });
 if (document.readyState !== 'loading') initNav();
 
 // ---- Progress Screen — XP, streaks, levels, session history, export/import ----
