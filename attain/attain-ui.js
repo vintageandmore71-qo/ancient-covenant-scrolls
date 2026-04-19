@@ -56,8 +56,7 @@ function showLibrary() {
 
   var html = '<div id="home">';
 
-  html += '<img src="splash.PNG" alt="Attain" style="max-width:160px;width:40%;border-radius:16px;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,.2);cursor:pointer" id="lib-logo" onerror="this.style.display=\'none\'">';
-  html += '<h1>ATTAIN</h1>';
+  html += '<img src="splash.PNG" alt="Attain" style="width:100%;max-width:600px;height:auto;display:block;margin:0 auto 16px" id="lib-logo" onerror="this.style.display=\'none\'">';
   html += '<p class="tag">Universal Study Engine\u2003\u00B7\u2003Read it. Study it. Attain it.</p>';
 
   // Stats bar
