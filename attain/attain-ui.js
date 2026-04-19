@@ -9,14 +9,16 @@ function showIntro(page) {
 
   if (page === 1) {
     h += '<img src="splash.png" alt="Attain — Page 1" style="max-width:420px;width:92%;border-radius:20px;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,.3)" onerror="this.style.display=\'none\'">';
-    h += '<div style="margin-top:16px">';
-    h += '<button class="study-btn sb-pri" id="b-intro-next" style="font-size:17px;padding:18px 50px" aria-label="Next page">Next \u25B6</button>';
+    h += '<div class="btns" style="margin-top:20px">';
+    h += '<button id="b-intro-upload" style="background:linear-gradient(135deg,#7c3aed,#2563eb);font-size:17px;padding:18px 40px" aria-label="Upload a book">\u2795 Upload a Book</button>';
+    h += '<button id="b-intro-next" style="background:linear-gradient(135deg,#059669,#0891b2);font-size:16px;padding:16px 40px" aria-label="Next page">Next Page \u25B6</button>';
     h += '</div>';
     h += '<p class="small" style="margin-top:16px;opacity:.6">Page 1 of 2</p>';
   } else {
     h += '<img src="splash%202.png" alt="Attain — Page 2" style="max-width:420px;width:92%;border-radius:20px;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,.3)" onerror="this.style.display=\'none\'">';
-    h += '<div style="margin-top:16px">';
-    h += '<button class="study-btn sb-pri" id="b-intro-start" style="font-size:17px;padding:18px 50px;background:linear-gradient(135deg,#7c3aed,#2563eb)" aria-label="Get started">Get Started \u{1F680}</button>';
+    h += '<div class="btns" style="margin-top:20px">';
+    h += '<button id="b-intro-upload2" style="background:linear-gradient(135deg,#7c3aed,#2563eb);font-size:17px;padding:18px 40px" aria-label="Upload a book">\u2795 Upload a Book</button>';
+    h += '<button id="b-intro-start" style="background:linear-gradient(135deg,#059669,#0891b2);font-size:16px;padding:16px 40px" aria-label="Get started">Get Started \u{1F680}</button>';
     h += '</div>';
     h += '<p class="small" style="margin-top:16px;opacity:.6">Page 2 of 2</p>';
   }
@@ -26,11 +28,19 @@ function showIntro(page) {
   document.getElementById('tb').textContent = 'Attain';
 
   if (page === 1) {
+    document.getElementById('b-intro-upload').addEventListener('click', function (e) {
+      e.stopPropagation();
+      showUpload();
+    });
     document.getElementById('b-intro-next').addEventListener('click', function (e) {
       e.stopPropagation();
       showIntro(2);
     });
   } else {
+    document.getElementById('b-intro-upload2').addEventListener('click', function (e) {
+      e.stopPropagation();
+      showUpload();
+    });
     document.getElementById('b-intro-start').addEventListener('click', function (e) {
       e.stopPropagation();
       localStorage.setItem('attain_intro_seen', '1');
