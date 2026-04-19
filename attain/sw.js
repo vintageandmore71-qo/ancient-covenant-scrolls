@@ -1,7 +1,7 @@
 // Attain Universal — Service Worker
 // Network-first for everything so updates always take effect
 
-var CACHE = 'attain-v20';
+var CACHE = 'attain-v21';
 
 var SHELL = [
   './',
@@ -26,7 +26,7 @@ self.addEventListener('activate', function (e) {
   e.waitUntil(
     caches.keys().then(function (ks) {
       return Promise.all(
-        ks.filter(function (k) { return k.indexOf('attain-') === 0 && k !== CACHE; })
+        ks.filter(function (k) { return k.indexOf('attain-') === 0 && k !== CACHE && k !== 'attain-books-data'; })
           .map(function (k) { return caches.delete(k); })
       );
     }).then(function () { return self.clients.claim(); })

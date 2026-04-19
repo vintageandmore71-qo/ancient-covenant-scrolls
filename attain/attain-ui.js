@@ -1394,8 +1394,11 @@ document.addEventListener('DOMContentLoaded', function () {
       'On Safari: Settings \u2192 Safari \u2192 turn off "Prevent Cross-Site Tracking" for this site.</p></div>';
     return;
   }
-  // Load built-in books from content/ folder before showing UI
-  loadBuiltInBooks().then(function () {
+  // Recover library from Cache Storage if localStorage was purged
+  getLibraryAsync().then(function () {
+    // Load built-in books from content/ folder
+    return loadBuiltInBooks();
+  }).then(function () {
     initNav();
     addDyslexicToggle();
     setTimeout(showInstallPrompt, 3000);

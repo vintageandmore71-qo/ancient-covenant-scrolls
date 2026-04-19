@@ -2,21 +2,50 @@
 // State management, localStorage, SM-2 algorithm, utilities
 
 // ---- Book Library ----
-function getLibrary() {
-  try { return JSON.parse(localStorage.getItem('attain_library') || '[]'); } catch (e) { return []; }
-}
 function saveLibrary(lib) {
+  var json = JSON.stringify(lib);
+  // Layer 3: localStorage
   try {
-    var json = JSON.stringify(lib);
     localStorage.setItem('attain_library', json);
-    // Verify it saved
-    var check = localStorage.getItem('attain_library');
-    if (!check || check.length < 3) {
-      alert('Warning: Book library failed to save. Your browser may be in Private Browsing mode or storage is full.');
-    }
-  } catch (e) {
-    alert('Storage error: ' + e.message + '. Books cannot be saved in Private Browsing mode.');
+  } catch (e) {}
+  // Layer 1: Cache Storage backup
+  if (window.caches) {
+    caches.open(BOOKS_CACHE).then(function (cache) {
+      cache.put('attain-library', new Response(json, { headers: { 'Content-Type': 'application/json' } }));
+    }).catch(function () {});
   }
+}
+
+function getLibrary() {
+  // Try localStorage first
+  try {
+    var data = localStorage.getItem('attain_library');
+    if (data) {
+      var parsed = JSON.parse(data);
+      if (parsed && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+  return [];
+}
+
+function getLibraryAsync() {
+  var lib = getLibrary();
+  if (lib.length > 0) return Promise.resolve(lib);
+  // Fallback: try Cache Storage
+  if (!window.caches) return Promise.resolve([]);
+  return caches.open(BOOKS_CACHE).then(function (cache) {
+    return cache.match('attain-library');
+  }).then(function (response) {
+    if (!response) return [];
+    return response.json().then(function (data) {
+      if (data && data.length > 0) {
+        // Restore to localStorage
+        try { localStorage.setItem('attain_library', JSON.stringify(data)); } catch (e) {}
+        return data;
+      }
+      return [];
+    });
+  }).catch(function () { return []; });
 }
 function getBook(bookId) {
   var lib = getLibrary();
@@ -85,9 +114,70 @@ function generateBookId() {
 //   totalParagraphs: number
 // }
 
-// ---- Chapter Content Storage (IndexedDB for large books) ----
+// ---- Chapter Content Storage (Multi-layer persistence) ----
+// Layer 1: Cache Storage (large quota, survives Safari purges for installed PWAs)
+// Layer 2: IndexedDB (structured, good persistence)
+// Layer 3: localStorage (small, fast metadata backup)
+// Layer 4: Static content/ folder (permanent, deployed files)
+
 var ATTAIN_DB_NAME = 'attain_books';
 var ATTAIN_DB_VERSION = 1;
+var BOOKS_CACHE = 'attain-books-data';
+var MAX_CACHED_BOOKS = 2;
+
+// Request persistent storage on first use
+function requestPersistence() {
+  if (navigator.storage && navigator.storage.persist) {
+    navigator.storage.persist().then(function (granted) {
+      if (granted) console.log('Attain: Persistent storage granted');
+    });
+  }
+}
+requestPersistence();
+
+// Check available storage
+function checkStorageQuota() {
+  if (navigator.storage && navigator.storage.estimate) {
+    return navigator.storage.estimate().then(function (est) {
+      return { used: est.usage || 0, total: est.quota || 0, available: (est.quota || 0) - (est.usage || 0) };
+    });
+  }
+  return Promise.resolve({ used: 0, total: 0, available: 5000000 });
+}
+
+// ---- Cache Storage for book content ----
+function saveBookToCache(bookId, chapters) {
+  if (!window.caches) return Promise.resolve();
+  return caches.open(BOOKS_CACHE).then(function (cache) {
+    var data = JSON.stringify(chapters);
+    var response = new Response(data, {
+      headers: { 'Content-Type': 'application/json', 'X-Book-Id': bookId, 'X-Saved': new Date().toISOString() }
+    });
+    return cache.put('book/' + bookId, response);
+  }).catch(function () {});
+}
+
+function loadBookFromCache(bookId) {
+  if (!window.caches) return Promise.resolve(null);
+  return caches.open(BOOKS_CACHE).then(function (cache) {
+    return cache.match('book/' + bookId);
+  }).then(function (response) {
+    if (!response) return null;
+    return response.json();
+  }).catch(function () { return null; });
+}
+
+function evictOldBooksFromCache() {
+  if (!window.caches) return Promise.resolve();
+  return caches.open(BOOKS_CACHE).then(function (cache) {
+    return cache.keys().then(function (keys) {
+      if (keys.length <= MAX_CACHED_BOOKS) return;
+      // Evict oldest entries beyond the limit
+      var toDelete = keys.slice(0, keys.length - MAX_CACHED_BOOKS);
+      return Promise.all(toDelete.map(function (key) { return cache.delete(key); }));
+    });
+  }).catch(function () {});
+}
 
 function openDB() {
   return new Promise(function (resolve, reject) {
@@ -108,22 +198,26 @@ function openDB() {
 }
 
 function saveChaptersDB(bookId, chapters) {
-  // Always save to localStorage as reliable backup
-  try { localStorage.setItem('attain_ch_' + bookId, JSON.stringify(chapters)); } catch (e) {}
-  return openDB().then(function (db) {
+  // Layer 1: Cache Storage (largest, most persistent for PWAs)
+  saveBookToCache(bookId, chapters).then(function () {
+    evictOldBooksFromCache();
+  });
+  // Layer 2: IndexedDB
+  openDB().then(function (db) {
     if (!db) return;
-    return new Promise(function (resolve) {
+    try {
       var tx = db.transaction('chapters', 'readwrite');
       var store = tx.objectStore('chapters');
       store.put({ id: bookId, chapters: chapters });
-      tx.oncomplete = function () { resolve(); };
-      tx.onerror = function () { resolve(); };
-    });
+    } catch (e) {}
   }).catch(function () {});
+  // Layer 3: localStorage (may fail on large books — that's ok)
+  try { localStorage.setItem('attain_ch_' + bookId, JSON.stringify(chapters)); } catch (e) {}
+  return Promise.resolve();
 }
 
 function loadChaptersDB(bookId) {
-  // Try localStorage first — it's the most reliable on Safari/iOS
+  // Try Layer 3 first (localStorage — fastest)
   try {
     var lsData = localStorage.getItem('attain_ch_' + bookId);
     if (lsData) {
@@ -131,34 +225,52 @@ function loadChaptersDB(bookId) {
       if (parsed && parsed.length > 0) return Promise.resolve(parsed);
     }
   } catch (e) {}
-  // Then try IndexedDB
-  return openDB().then(function (db) {
-    if (!db) return [];
-    return new Promise(function (resolve) {
-      var tx = db.transaction('chapters', 'readonly');
-      var store = tx.objectStore('chapters');
-      var req = store.get(bookId);
-      req.onsuccess = function () {
-        resolve(req.result ? req.result.chapters : []);
-      };
-      req.onerror = function () { resolve([]); };
+
+  // Try Layer 1 (Cache Storage — largest, most persistent)
+  return loadBookFromCache(bookId).then(function (cached) {
+    if (cached && cached.length > 0) {
+      // Restore to localStorage for faster next load
+      try { localStorage.setItem('attain_ch_' + bookId, JSON.stringify(cached)); } catch (e) {}
+      return cached;
+    }
+    // Try Layer 2 (IndexedDB)
+    return openDB().then(function (db) {
+      if (!db) return [];
+      return new Promise(function (resolve) {
+        var tx = db.transaction('chapters', 'readonly');
+        var store = tx.objectStore('chapters');
+        var req = store.get(bookId);
+        req.onsuccess = function () {
+          var result = req.result ? req.result.chapters : [];
+          if (result.length > 0) {
+            // Restore to other layers
+            saveBookToCache(bookId, result);
+            try { localStorage.setItem('attain_ch_' + bookId, JSON.stringify(result)); } catch (e) {}
+          }
+          resolve(result);
+        };
+        req.onerror = function () { resolve([]); };
+      });
     });
-  });
+  }).catch(function () { return []; });
 }
 
 function deleteChaptersDB(bookId) {
+  // Clean all layers
+  try { localStorage.removeItem('attain_ch_' + bookId); } catch (e) {}
+  try { localStorage.removeItem('attain_terms_' + bookId); } catch (e) {}
+  if (window.caches) {
+    caches.open(BOOKS_CACHE).then(function (cache) {
+      cache.delete('book/' + bookId);
+    }).catch(function () {});
+  }
   return openDB().then(function (db) {
-    if (!db) {
-      try { localStorage.removeItem('attain_ch_' + bookId); } catch (e) {}
-      return;
-    }
-    return new Promise(function (resolve) {
+    if (!db) return;
+    try {
       var tx = db.transaction('chapters', 'readwrite');
       tx.objectStore('chapters').delete(bookId);
-      tx.oncomplete = function () { resolve(); };
-      tx.onerror = function () { resolve(); };
-    });
-  });
+    } catch (e) {}
+  }).catch(function () {});
 }
 
 // ---- Active Book State ----
