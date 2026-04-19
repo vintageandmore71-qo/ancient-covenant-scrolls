@@ -182,9 +182,11 @@ var CHAPTER_PATTERNS = [
   /^chapter\s+\d+/i,
   /^ch\.\s*\d+/i,
   /^ch\s+\d+/i,
-  /^part\s+\d+/i,
+  /^ch\.\d+/i,
+  /^part\s+\w+/i,
   /^section\s+\d+/i,
   /^book\s+\d+/i,
+  /^volume\s+\w+/i,
   /^\d+\.\s+[A-Z]/,
   /^[IVXLC]+\.\s/,
   /^---CHAPTER_BREAK---$/
@@ -192,8 +194,27 @@ var CHAPTER_PATTERNS = [
 
 var HEADING_PATTERNS = [
   /^[A-Z][A-Z\s]{4,}$/,
-  /^[A-Z][A-Z\s\-:]{8,}$/
+  /^[A-Z][A-Z\s\-:]{8,}$/,
+  /^[A-Z][A-Z\s\-—:,.']{4,80}$/
 ];
+
+function cleanTitle(raw, chapterNum) {
+  if (!raw || !raw.trim()) return 'Chapter ' + chapterNum;
+  var title = raw.trim();
+  // If title is too long, truncate at a natural break
+  if (title.length > 80) {
+    // Try to find a sentence break or dash
+    var cut = title.indexOf(' — ');
+    if (cut > 10 && cut < 80) { title = title.slice(0, cut); }
+    else if (title.indexOf('. ') > 10 && title.indexOf('. ') < 80) { title = title.slice(0, title.indexOf('. ')); }
+    else { title = title.slice(0, 77) + '...'; }
+  }
+  // If it's all lowercase junk or a full paragraph, use a generic title
+  if (title.length > 60 && title.split(/\s+/).length > 12) {
+    return 'Chapter ' + chapterNum;
+  }
+  return title;
+}
 
 function detectChapters(rawText) {
   var lines = rawText.split('\n');
@@ -236,7 +257,7 @@ function detectChapters(rawText) {
     if (isChapterBreak && currentLines.length > 0) {
       chapterCount++;
       chapters.push({
-        title: currentTitle,
+        title: cleanTitle(currentTitle, chapterCount),
         paragraphs: linesToParagraphs(currentLines)
       });
       currentTitle = line === '---CHAPTER_BREAK---' ? 'Chapter ' + (chapterCount + 1) : line;
@@ -253,7 +274,7 @@ function detectChapters(rawText) {
   // Push final chapter
   if (currentLines.length > 0) {
     chapters.push({
-      title: currentTitle,
+      title: cleanTitle(currentTitle, chapters.length + 1),
       paragraphs: linesToParagraphs(currentLines)
     });
   }

@@ -5,42 +5,33 @@
 
 function showIntro(page) {
   page = page || 1;
-  var h = '<div id="home" style="cursor:pointer">';
+  var h = '<div id="home" style="cursor:pointer;padding:20px 16px">';
 
+  var imgSrc = page === 1 ? 'splash.PNG' : 'splash%202.PNG';
+  h += '<img src="' + imgSrc + '" alt="Attain" style="max-width:100%;max-height:70vh;width:auto;height:auto;object-fit:contain;margin-bottom:16px" onerror="this.style.display=\'none\'">';
+  h += '<div class="btns" style="margin-top:12px">';
+  h += '<button id="b-intro-upload" style="background:linear-gradient(135deg,#7c3aed,#2563eb);font-size:17px;padding:18px 40px" aria-label="Upload a book">\u2795 Upload a Book</button>';
   if (page === 1) {
-    h += '<img src="splash.PNG" alt="Attain — Page 1" style="max-width:420px;width:92%;border-radius:20px;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,.3)" onerror="this.style.display=\'none\'">';
-    h += '<div class="btns" style="margin-top:20px">';
-    h += '<button id="b-intro-upload" style="background:linear-gradient(135deg,#7c3aed,#2563eb);font-size:17px;padding:18px 40px" aria-label="Upload a book">\u2795 Upload a Book</button>';
     h += '<button id="b-intro-next" style="background:linear-gradient(135deg,#059669,#0891b2);font-size:16px;padding:16px 40px" aria-label="Next page">Next Page \u25B6</button>';
-    h += '</div>';
-    h += '<p class="small" style="margin-top:16px;opacity:.6">Page 1 of 2</p>';
   } else {
-    h += '<img src="splash%202.PNG" alt="Attain — Page 2" style="max-width:420px;width:92%;border-radius:20px;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,.3)" onerror="this.style.display=\'none\'">';
-    h += '<div class="btns" style="margin-top:20px">';
-    h += '<button id="b-intro-upload2" style="background:linear-gradient(135deg,#7c3aed,#2563eb);font-size:17px;padding:18px 40px" aria-label="Upload a book">\u2795 Upload a Book</button>';
     h += '<button id="b-intro-start" style="background:linear-gradient(135deg,#059669,#0891b2);font-size:16px;padding:16px 40px" aria-label="Get started">Get Started \u{1F680}</button>';
-    h += '</div>';
-    h += '<p class="small" style="margin-top:16px;opacity:.6">Page 2 of 2</p>';
   }
+  h += '</div>';
 
   h += '</div>';
   document.getElementById('content').innerHTML = h;
   document.getElementById('tb').textContent = 'Attain';
 
+  document.getElementById('b-intro-upload').addEventListener('click', function (e) {
+    e.stopPropagation();
+    showUpload();
+  });
   if (page === 1) {
-    document.getElementById('b-intro-upload').addEventListener('click', function (e) {
-      e.stopPropagation();
-      showUpload();
-    });
     document.getElementById('b-intro-next').addEventListener('click', function (e) {
       e.stopPropagation();
       showIntro(2);
     });
   } else {
-    document.getElementById('b-intro-upload2').addEventListener('click', function (e) {
-      e.stopPropagation();
-      showUpload();
-    });
     document.getElementById('b-intro-start').addEventListener('click', function (e) {
       e.stopPropagation();
       localStorage.setItem('attain_intro_seen', '1');
@@ -864,8 +855,9 @@ function buildSidebar(bookId) {
     s.setAttribute('data-ch', String(i));
     s.setAttribute('role', 'button');
     s.setAttribute('tabindex', '0');
+    var displayTitle = chapters[i].title.length > 50 ? chapters[i].title.slice(0, 47) + '...' : chapters[i].title;
     s.setAttribute('aria-label', 'Chapter ' + (i + 1) + ': ' + chapters[i].title);
-    s.textContent = chapters[i].title;
+    s.textContent = displayTitle;
 
     // Mastery dot
     var mastery = getChapterMastery(bookId, i);
