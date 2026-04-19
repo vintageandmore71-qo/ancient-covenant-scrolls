@@ -203,8 +203,8 @@ p.sp{background:#fff3cd;border-radius:6px;padding:2px 4px}
   color:#f0f0ff;
   margin:-28px -40px -60px -40px;
   min-height:calc(100vh - 54px);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:50px 24px;text-align:center;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  padding:0;text-align:center;
 }
 #home .logo{font-size:5em;margin-bottom:24px;line-height:1;
   background:linear-gradient(135deg,var(--vol1),var(--vol5),var(--vol6));
@@ -913,8 +913,9 @@ body.beeline-on .ch-question{
 @media(max-width:768px){
   #main{margin-left:0;padding:16px 14px 60px}
   #sb{transform:translateX(-290px)}
-  #sb.m{transform:translateX(0)}
-  #home{margin:-16px -14px -60px -14px}
+  #sb.m{transform:translateX(0) !important}
+  #sb.h{transform:translateX(-290px) !important}
+  #home{margin:-16px -14px -60px -14px;padding:0}
   #home .logo{font-size:3.5em}
   #home h1{font-size:1.5em}
   #topnav a.lnk span.hide-mobile{display:none}
