@@ -8,14 +8,14 @@ function showIntro(page) {
   var h = '<div id="home" style="cursor:pointer">';
 
   if (page === 1) {
-    h += '<img src="splash.png" alt="Attain — Page 1" style="max-width:420px;width:92%;border-radius:20px;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,.3)" onerror="this.style.display=\'none\'">';
+    h += '<img src="splash.PNG" alt="Attain — Page 1" style="max-width:420px;width:92%;border-radius:20px;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,.3)" onerror="this.style.display=\'none\'">';
     h += '<div class="btns" style="margin-top:20px">';
     h += '<button id="b-intro-upload" style="background:linear-gradient(135deg,#7c3aed,#2563eb);font-size:17px;padding:18px 40px" aria-label="Upload a book">\u2795 Upload a Book</button>';
     h += '<button id="b-intro-next" style="background:linear-gradient(135deg,#059669,#0891b2);font-size:16px;padding:16px 40px" aria-label="Next page">Next Page \u25B6</button>';
     h += '</div>';
     h += '<p class="small" style="margin-top:16px;opacity:.6">Page 1 of 2</p>';
   } else {
-    h += '<img src="splash%202.png" alt="Attain — Page 2" style="max-width:420px;width:92%;border-radius:20px;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,.3)" onerror="this.style.display=\'none\'">';
+    h += '<img src="splash%202.PNG" alt="Attain — Page 2" style="max-width:420px;width:92%;border-radius:20px;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,.3)" onerror="this.style.display=\'none\'">';
     h += '<div class="btns" style="margin-top:20px">';
     h += '<button id="b-intro-upload2" style="background:linear-gradient(135deg,#7c3aed,#2563eb);font-size:17px;padding:18px 40px" aria-label="Upload a book">\u2795 Upload a Book</button>';
     h += '<button id="b-intro-start" style="background:linear-gradient(135deg,#059669,#0891b2);font-size:16px;padding:16px 40px" aria-label="Get started">Get Started \u{1F680}</button>';
@@ -66,7 +66,7 @@ function showLibrary() {
 
   var html = '<div id="home">';
 
-  html += '<img src="splash.png" alt="Attain" style="max-width:160px;width:40%;border-radius:16px;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,.2);cursor:pointer" id="lib-logo" onerror="this.style.display=\'none\'">';
+  html += '<img src="splash.PNG" alt="Attain" style="max-width:160px;width:40%;border-radius:16px;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,.2);cursor:pointer" id="lib-logo" onerror="this.style.display=\'none\'">';
   html += '<h1>ATTAIN</h1>';
   html += '<p class="tag">Build mental architecture that content slots into permanently.</p>';
 
@@ -124,6 +124,11 @@ function showLibrary() {
 
   document.getElementById('content').innerHTML = html;
   document.getElementById('tb').textContent = 'Attain';
+
+  // Hide sidebar on library screen
+  document.getElementById('sb').innerHTML = '';
+  sbOpen = false;
+  updateSB();
 
   // Clear sidebar active states
   var secs = document.querySelectorAll('.sec');
