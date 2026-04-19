@@ -19,7 +19,7 @@ function showIntro(page) {
 
   h += '</div>';
   document.getElementById('content').innerHTML = h;
-  document.getElementById('tb').textContent = 'Attain';
+  var tbEl = document.getElementById('tb'); if (tbEl) tbEl.textContent = 'Attain';
 
   document.getElementById('b-intro-upload').addEventListener('click', function (e) {
     e.stopPropagation();
@@ -122,7 +122,7 @@ function showLibrary() {
   html += '</div></div>';
 
   document.getElementById('content').innerHTML = html;
-  document.getElementById('tb').textContent = 'Attain';
+  var tbEl = document.getElementById('tb'); if (tbEl) tbEl.textContent = 'Attain';
 
   // Hide sidebar on library screen
   document.getElementById('sb').innerHTML = '';
@@ -351,7 +351,7 @@ function showUpload() {
   h += '</div>';
 
   document.getElementById('content').innerHTML = h;
-  document.getElementById('tb').textContent = 'New Book';
+  var tbEl = document.getElementById('tb'); if (tbEl) tbEl.textContent = 'New Book';
 
   var selectedFile = null;
   var dropZone = document.getElementById('upload-drop');
@@ -517,7 +517,7 @@ function showChapterPreview(title, chapters, rawText) {
   h += '</div>';
 
   document.getElementById('content').innerHTML = h;
-  document.getElementById('tb').textContent = 'Preview: ' + title;
+  var tbEl = document.getElementById('tb'); if (tbEl) tbEl.textContent = 'Preview: ' + title;
 
   // Confirm button — save book
   document.getElementById('b-preview-confirm').addEventListener('click', function () {
@@ -712,7 +712,7 @@ function showArchitecture(bookId) {
     h += '</div>';
 
     document.getElementById('content').innerHTML = h;
-    document.getElementById('tb').textContent = book.title;
+    var tbEl = document.getElementById('tb'); if (tbEl) tbEl.textContent = book.title;
 
     // Wire chapter nodes
     var nodes = document.querySelectorAll('.arch-node');
@@ -823,7 +823,7 @@ function showChapterActivities(bookId, chIdx) {
   h += '</div>';
 
   document.getElementById('content').innerHTML = h;
-  document.getElementById('tb').textContent = chTitle;
+  var tbEl = document.getElementById('tb'); if (tbEl) tbEl.textContent = chTitle;
 
   // Wire activity cards
   var cards = document.querySelectorAll('.act-card');
@@ -1048,7 +1048,7 @@ function initNav() {
   document.getElementById('b-home').addEventListener('click', function () { showLibrary(); });
 
   // Title bar click
-  document.getElementById('tb').addEventListener('click', function () { showLibrary(); });
+  var tbEl2 = document.getElementById('tb'); if (tbEl2) tbEl2.addEventListener('click', function () { showLibrary(); });
 
   // Font size
   var fontSize = parseInt(localStorage.getItem('attain_fontsize') || '12');
@@ -1399,7 +1399,7 @@ function showProgress() {
   h += '</div>';
 
   document.getElementById('content').innerHTML = h;
-  document.getElementById('tb').textContent = 'Progress';
+  var tbEl = document.getElementById('tb'); if (tbEl) tbEl.textContent = 'Progress';
 
   // Wire export
   document.getElementById('b-prog-export').addEventListener('click', function () {
