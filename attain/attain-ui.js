@@ -6,9 +6,9 @@
 function showIntro(page) {
   page = page || 1;
   var imgSrc = page === 1 ? 'splash.PNG' : 'splash%202.PNG';
-  var h = '<div id="home" style="padding:20px 16px;justify-content:flex-start">';
-  h += '<img src="' + imgSrc + '" alt="Attain" style="max-width:100%;width:100%;height:auto;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.3);margin-bottom:20px" onerror="this.style.display=\'none\'">';
-  h += '<div class="btns" style="margin:0">';
+  var h = '<div id="home" style="padding:0;justify-content:flex-start">';
+  h += '<img src="' + imgSrc + '" alt="Attain" style="width:100%;max-width:600px;height:auto;display:block;margin:0 auto" onerror="this.style.display=\'none\'">';
+  h += '<div class="btns" style="margin:0;padding:20px 16px">';
   h += '<button id="b-intro-upload" style="background:linear-gradient(135deg,#7c3aed,#2563eb);font-size:17px;padding:18px 40px" aria-label="Upload a book">\u2795 Upload a Book</button>';
   if (page === 1) {
     h += '<button id="b-intro-next" style="background:linear-gradient(135deg,#059669,#0891b2);font-size:16px;padding:16px 40px" aria-label="Next page">Next Page \u25B6</button>';
@@ -77,11 +77,9 @@ function showLibrary() {
   }
   html += '</div>';
 
-  html += '</div>';
-
-  // Book grid
-  html += '<div style="padding:20px 24px 60px;max-width:900px;margin:0 auto">';
-  html += '<div class="activity-grid-header">My Library</div>';
+  // Book grid — inside the dark home div, no white break
+  html += '<div style="padding:20px 24px 60px;max-width:900px;margin:0 auto;width:100%">';
+  html += '<div class="activity-grid-header" style="color:#c8c8e8">My Library</div>';
   html += '<div class="lib-grid">';
 
   // Existing books
@@ -105,12 +103,12 @@ function showLibrary() {
   html += '</div>';
 
   // Settings row
-  html += '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:20px">';
+  html += '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:20px;padding-bottom:30px">';
   html += '<button class="study-btn" id="b-lib-progress" aria-label="View progress and stats">\u{1F4CA} Progress</button>';
   html += '<button class="study-btn" id="b-lib-settings" aria-label="Settings" style="background:#6b7280">\u2699\uFE0F Settings</button>';
   html += '</div>';
 
-  html += '</div>';
+  html += '</div></div>';
 
   document.getElementById('content').innerHTML = html;
   document.getElementById('tb').textContent = 'Attain';
