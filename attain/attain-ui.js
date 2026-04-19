@@ -8,13 +8,13 @@ function showIntro(page) {
   var h = '<div id="home" style="cursor:pointer">';
 
   if (page === 1) {
-    h += '<img src="splash1.png" alt="Attain — Page 1" style="max-width:420px;width:92%;border-radius:20px;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,.3)" onerror="this.style.display=\'none\'">';
+    h += '<img src="splash.png" alt="Attain — Page 1" style="max-width:420px;width:92%;border-radius:20px;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,.3)" onerror="this.style.display=\'none\'">';
     h += '<div style="margin-top:16px">';
     h += '<button class="study-btn sb-pri" id="b-intro-next" style="font-size:17px;padding:18px 50px" aria-label="Next page">Next \u25B6</button>';
     h += '</div>';
     h += '<p class="small" style="margin-top:16px;opacity:.6">Page 1 of 2</p>';
   } else {
-    h += '<img src="splash2.png" alt="Attain — Page 2" style="max-width:420px;width:92%;border-radius:20px;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,.3)" onerror="this.style.display=\'none\'">';
+    h += '<img src="splash%202.png" alt="Attain — Page 2" style="max-width:420px;width:92%;border-radius:20px;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,.3)" onerror="this.style.display=\'none\'">';
     h += '<div style="margin-top:16px">';
     h += '<button class="study-btn sb-pri" id="b-intro-start" style="font-size:17px;padding:18px 50px;background:linear-gradient(135deg,#7c3aed,#2563eb)" aria-label="Get started">Get Started \u{1F680}</button>';
     h += '</div>';
@@ -56,7 +56,7 @@ function showLibrary() {
 
   var html = '<div id="home">';
 
-  html += '<img src="splash1.png" alt="Attain" style="max-width:160px;width:40%;border-radius:16px;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,.2);cursor:pointer" id="lib-logo" onerror="this.style.display=\'none\'">';
+  html += '<img src="splash.png" alt="Attain" style="max-width:160px;width:40%;border-radius:16px;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,.2);cursor:pointer" id="lib-logo" onerror="this.style.display=\'none\'">';
   html += '<h1>ATTAIN</h1>';
   html += '<p class="tag">Build mental architecture that content slots into permanently.</p>';
 
@@ -810,18 +810,27 @@ function buildSidebar(bookId) {
 
   if (!book) return;
 
-  // Sidebar header
+  var bookColor = book.color || '#2563eb';
+
+  // Sidebar intro label
   var intro = document.createElement('div');
   intro.className = 'sb-intro';
-  intro.textContent = '\u{1F4D6} ' + book.title;
-  intro.style.cursor = 'pointer';
-  intro.addEventListener('click', function () { showArchitecture(bookId); });
+  intro.textContent = '\u{1F4D6} ATTAIN';
   sb.appendChild(intro);
+
+  // Volume header — book title with color
+  var volHdr = document.createElement('div');
+  volHdr.className = 'vol-hdr';
+  volHdr.style.color = bookColor;
+  volHdr.innerHTML = book.title + '<span class="vol-eng" style="color:#8888cc">' + (book.chapterCount || 0) + ' Chapters</span>';
+  volHdr.style.cursor = 'pointer';
+  volHdr.addEventListener('click', function () { showArchitecture(bookId); });
+  sb.appendChild(volHdr);
 
   // Library link
   var libLink = document.createElement('div');
   libLink.className = 'sec';
-  libLink.textContent = '\u{1F4DA} All Books';
+  libLink.innerHTML = '\u{1F4DA} All Books';
   libLink.style.color = '#8888cc';
   libLink.style.fontWeight = '700';
   libLink.setAttribute('role', 'button');
@@ -842,7 +851,6 @@ function buildSidebar(bookId) {
     s.setAttribute('tabindex', '0');
     s.setAttribute('aria-label', 'Chapter ' + (i + 1) + ': ' + chapters[i].title);
     s.textContent = chapters[i].title;
-    s.style.borderLeft = '3px solid transparent';
 
     // Mastery dot
     var mastery = getChapterMastery(bookId, i);
