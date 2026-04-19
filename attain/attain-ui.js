@@ -48,8 +48,8 @@ function showLibrary() {
   var lvl = getLevel(stats.xp || 0);
   var streak = stats.streak || 0;
 
-  // Show intro on first visit
-  if (!localStorage.getItem('attain_intro_seen') && lib.length === 0) {
+  // Show intro when library is empty
+  if (lib.length === 0) {
     showIntro(1);
     return;
   }
