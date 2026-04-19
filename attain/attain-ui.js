@@ -514,11 +514,21 @@ function showChapterPreview(title, chapters, rawText) {
     };
 
     saveBook(book);
+    // Store chapters in memory immediately as fallback
+    activeBookId = bookId;
+    activeChapters = chapters;
+    activeChapterIdx = 0;
+    localStorage.setItem('attain_active_book', bookId);
+    localStorage.setItem('attain_last_book', bookId);
+    localStorage.setItem('attain_last_ch', '0');
+
     saveChaptersDB(bookId, chapters).then(function () {
-      setActiveBook(bookId).then(function () {
-        buildSidebar(bookId);
-        showArchitecture(bookId);
-      });
+      buildSidebar(bookId);
+      showArchitecture(bookId);
+    }).catch(function () {
+      // IndexedDB failed — chapters already in memory, proceed anyway
+      buildSidebar(bookId);
+      showArchitecture(bookId);
     });
   });
 
