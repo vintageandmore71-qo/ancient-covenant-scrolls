@@ -203,17 +203,29 @@ function cleanTitle(raw, chapterNum) {
   var title = raw.trim();
   // If title is too long, truncate at a natural break
   if (title.length > 80) {
-    // Try to find a sentence break or dash
     var cut = title.indexOf(' — ');
     if (cut > 10 && cut < 80) { title = title.slice(0, cut); }
     else if (title.indexOf('. ') > 10 && title.indexOf('. ') < 80) { title = title.slice(0, title.indexOf('. ')); }
     else { title = title.slice(0, 77) + '...'; }
   }
-  // If it's all lowercase junk or a full paragraph, use a generic title
+  // If it's a full paragraph, use a generic title
   if (title.length > 60 && title.split(/\s+/).length > 12) {
     return 'Chapter ' + chapterNum;
   }
   return title;
+}
+
+function generateSubtitle(paragraphs) {
+  if (!paragraphs || !paragraphs.length) return '';
+  var first = paragraphs[0].trim();
+  // Look for a short opening line that could be a heading
+  if (first.length < 80 && first.length > 3) return first;
+  // Extract first sentence
+  var sentEnd = first.indexOf('. ');
+  if (sentEnd > 5 && sentEnd < 80) return first.slice(0, sentEnd);
+  // First few words
+  var words = first.split(/\s+/).slice(0, 8).join(' ');
+  return words.length > 3 ? words + '...' : '';
 }
 
 function detectChapters(rawText) {

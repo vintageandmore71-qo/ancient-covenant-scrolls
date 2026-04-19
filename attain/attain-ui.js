@@ -699,9 +699,12 @@ function showChapterActivities(bookId, chIdx) {
   var dueCount = getDueCards(bookId).length;
 
   // Update sidebar active state
-  var secs = document.querySelectorAll('.sec');
+  var secs = document.querySelectorAll('.vol-hdr[data-ch]');
   for (var s = 0; s < secs.length; s++) {
-    secs[s].classList.toggle('on', parseInt(secs[s].getAttribute('data-ch')) === chIdx);
+    var isActive = parseInt(secs[s].getAttribute('data-ch')) === chIdx;
+    secs[s].style.background = isActive ? 'rgba(255,255,255,.1)' : '';
+    secs[s].style.borderLeft = isActive ? '4px solid #8888cc' : '';
+    secs[s].style.paddingLeft = isActive ? '12px' : '';
   }
 
   // Save last position
@@ -844,38 +847,85 @@ function buildSidebar(bookId) {
   libLink.addEventListener('click', function () { showLibrary(); });
   sb.appendChild(libLink);
 
-  // Chapter list
+  var chapterColors = [
+    '#2563eb', '#dc2626', '#059669', '#d97706',
+    '#7c3aed', '#0891b2', '#ea580c', '#b8860b',
+    '#e91e90', '#16a34a', '#6d28d9', '#0ea5e9'
+  ];
+
+  // Chapter list with color-coded headers and subtitles
   var chapters = activeChapters;
   if (!chapters || !chapters.length) return;
 
   for (var i = 0; i < chapters.length; i++) {
-    var s = document.createElement('div');
-    s.className = 'sec';
-    s.setAttribute('data-ch', String(i));
-    s.setAttribute('role', 'button');
-    s.setAttribute('tabindex', '0');
-    var displayTitle = chapters[i].title.length > 50 ? chapters[i].title.slice(0, 47) + '...' : chapters[i].title;
-    s.setAttribute('aria-label', 'Chapter ' + (i + 1) + ': ' + chapters[i].title);
-    s.textContent = displayTitle;
+    var chColor = chapterColors[i % chapterColors.length];
 
-    // Mastery dot
-    var mastery = getChapterMastery(bookId, i);
-    if (mastery.pct > 0) {
-      var dot = document.createElement('span');
-      dot.style.cssText = 'display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:6px;vertical-align:middle;';
-      dot.style.background = mastery.pct >= 80 ? '#059669' : mastery.pct >= 40 ? '#d97706' : '#2563eb';
-      s.appendChild(dot);
+    // Color-coded chapter header
+    var hdr = document.createElement('div');
+    hdr.className = 'vol-hdr';
+    hdr.setAttribute('data-ch', String(i));
+    hdr.style.color = chColor;
+    hdr.style.cursor = 'pointer';
+
+    var chNum = document.createElement('span');
+    chNum.textContent = 'Ch ' + (i + 1);
+    hdr.appendChild(chNum);
+
+    // Subtitle — use title if it's descriptive, otherwise generate from content
+    var chTitle = chapters[i].title || '';
+    var isGeneric = /^(Chapter|Section|Part)\s+\d+$/i.test(chTitle);
+    var subtitle = '';
+    if (!isGeneric && chTitle.length > 0) {
+      subtitle = chTitle.length > 45 ? chTitle.slice(0, 42) + '...' : chTitle;
+    }
+    if (subtitle) {
+      var sub = document.createElement('span');
+      sub.className = 'vol-eng';
+      sub.style.color = '#8888cc';
+      sub.textContent = subtitle;
+      hdr.appendChild(sub);
+    }
+
+    // Content preview — always show first line as context
+    if (chapters[i].paragraphs && chapters[i].paragraphs.length > 0) {
+      var preview = '';
+      // Find the first meaningful line
+      for (var pi = 0; pi < Math.min(3, chapters[i].paragraphs.length); pi++) {
+        var candidate = chapters[i].paragraphs[pi].trim();
+        if (candidate.length > 10 && candidate !== subtitle) {
+          preview = candidate;
+          break;
+        }
+      }
+      if (preview) {
+        if (preview.length > 55) preview = preview.slice(0, 52) + '...';
+        var prev = document.createElement('span');
+        prev.className = 'vol-eng';
+        prev.style.color = '#6666aa';
+        prev.style.fontSize = '0.9em';
+        prev.textContent = preview;
+        hdr.appendChild(prev);
+      }
     }
 
     (function (idx) {
-      s.addEventListener('click', function () {
+      hdr.addEventListener('click', function () {
         activeChapterIdx = idx;
         if (window.innerWidth <= 768) { sbOpen = false; updateSB(); }
         showChapterActivities(bookId, idx);
       });
     })(i);
 
-    sb.appendChild(s);
+    // Mastery badge
+    var mastery = getChapterMastery(bookId, i);
+    if (mastery.pct > 0) {
+      var badge = document.createElement('span');
+      badge.className = 'vol-badge';
+      badge.textContent = mastery.badge || '';
+      if (mastery.badge) hdr.appendChild(badge);
+    }
+
+    sb.appendChild(hdr);
   }
 }
 
