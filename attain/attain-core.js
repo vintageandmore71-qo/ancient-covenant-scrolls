@@ -1,19 +1,43 @@
 // Attain Universal — Core Module
 // State management, localStorage, SM-2 algorithm, utilities
 
+// ---- Cookie Persistence Layer ----
+function setCookie(name, value, days) {
+  var d = new Date();
+  d.setTime(d.getTime() + (days * 86400000));
+  document.cookie = name + '=' + encodeURIComponent(value) + ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
+}
+function getCookie(name) {
+  var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : null;
+}
+function saveLibraryToCookies(lib) {
+  var slim = lib.map(function (b) {
+    return { id: b.id, title: b.title, color: b.color, chapterCount: b.chapterCount, hasTerms: b.hasTerms };
+  });
+  try { setCookie('attain_lib', JSON.stringify(slim), 365); } catch (e) {}
+}
+function getLibraryFromCookies() {
+  try {
+    var data = getCookie('attain_lib');
+    if (data) return JSON.parse(data);
+  } catch (e) {}
+  return [];
+}
+
 // ---- Book Library ----
 function saveLibrary(lib) {
   var json = JSON.stringify(lib);
   // Layer 3: localStorage
-  try {
-    localStorage.setItem('attain_library', json);
-  } catch (e) {}
+  try { localStorage.setItem('attain_library', json); } catch (e) {}
   // Layer 1: Cache Storage backup
   if (window.caches) {
     caches.open(BOOKS_CACHE).then(function (cache) {
       cache.put('attain-library', new Response(json, { headers: { 'Content-Type': 'application/json' } }));
     }).catch(function () {});
   }
+  // Layer 4: Cookies (survives Safari ITP purges for up to 1 year)
+  saveLibraryToCookies(lib);
 }
 
 function getLibrary() {
@@ -31,7 +55,15 @@ function getLibrary() {
 function getLibraryAsync() {
   var lib = getLibrary();
   if (lib.length > 0) return Promise.resolve(lib);
-  // Fallback: try Cache Storage
+
+  // Try cookies (survives Safari purges)
+  var cookieLib = getLibraryFromCookies();
+  if (cookieLib.length > 0) {
+    try { localStorage.setItem('attain_library', JSON.stringify(cookieLib)); } catch (e) {}
+    return Promise.resolve(cookieLib);
+  }
+
+  // Try Cache Storage
   if (!window.caches) return Promise.resolve([]);
   return caches.open(BOOKS_CACHE).then(function (cache) {
     return cache.match('attain-library');
@@ -39,8 +71,8 @@ function getLibraryAsync() {
     if (!response) return [];
     return response.json().then(function (data) {
       if (data && data.length > 0) {
-        // Restore to localStorage
         try { localStorage.setItem('attain_library', JSON.stringify(data)); } catch (e) {}
+        saveLibraryToCookies(data);
         return data;
       }
       return [];

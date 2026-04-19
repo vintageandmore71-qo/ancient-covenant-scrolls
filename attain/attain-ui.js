@@ -554,7 +554,7 @@ function showChapterPreview(title, chapters, rawText) {
     activeChapters = chapters;
     activeChapterIdx = 0;
     localStorage.setItem('attain_active_book', bookId);
-    localStorage.setItem('attain_last_book', bookId);
+    localStorage.setItem('attain_last_book', bookId); setCookie('attain_last_book', bookId, 365);
     localStorage.setItem('attain_last_ch', '0');
 
     saveChaptersDB(bookId, chapters).then(function () {
@@ -775,8 +775,8 @@ function showChapterActivities(bookId, chIdx) {
   }
 
   // Save last position
-  localStorage.setItem('attain_last_book', bookId);
-  localStorage.setItem('attain_last_ch', String(chIdx));
+  localStorage.setItem('attain_last_book', bookId); setCookie('attain_last_book', bookId, 365);
+  localStorage.setItem('attain_last_ch', String(chIdx)); setCookie('attain_last_ch', String(chIdx), 365);
 
   var h = '';
 
@@ -1208,8 +1208,8 @@ function initNav() {
   updateSB();
 
   // Start at library or resume last book at last chapter
-  var lastBook = localStorage.getItem('attain_last_book');
-  var lastCh = parseInt(localStorage.getItem('attain_last_ch') || '0');
+  var lastBook = localStorage.getItem('attain_last_book') || getCookie('attain_last_book');
+  var lastCh = parseInt(localStorage.getItem('attain_last_ch') || getCookie('attain_last_ch') || '0');
   if (lastBook && getBook(lastBook)) {
     setActiveBook(lastBook).then(function () {
       if (activeChapters && activeChapters.length > 0) {
@@ -1394,11 +1394,8 @@ document.addEventListener('DOMContentLoaded', function () {
       'On Safari: Settings \u2192 Safari \u2192 turn off "Prevent Cross-Site Tracking" for this site.</p></div>';
     return;
   }
-  // Recover library from Cache Storage if localStorage was purged
+  // Recover library from Cache Storage/Cookies if localStorage was purged
   getLibraryAsync().then(function () {
-    // Load built-in books from content/ folder
-    return loadBuiltInBooks();
-  }).then(function () {
     initNav();
     addDyslexicToggle();
     setTimeout(showInstallPrompt, 3000);
