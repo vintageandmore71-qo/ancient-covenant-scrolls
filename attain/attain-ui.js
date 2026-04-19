@@ -6,8 +6,8 @@
 function showIntro(page) {
   page = page || 1;
   var imgSrc = page === 1 ? 'splash.PNG' : 'splash%202.PNG';
-  var h = '<div id="home" style="padding:0;margin:-28px -40px -60px -40px;min-height:calc(100vh - 54px);background:url(' + imgSrc + ') center top/cover no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:flex-end">';
-  h += '<div style="width:100%;padding:30px 20px 40px;background:linear-gradient(to top,rgba(15,15,46,.95) 0%,rgba(15,15,46,.7) 60%,transparent 100%);display:flex;flex-direction:column;align-items:center">';
+  var h = '<div id="home" style="padding:20px 16px;justify-content:flex-start">';
+  h += '<img src="' + imgSrc + '" alt="Attain" style="max-width:100%;width:100%;height:auto;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.3);margin-bottom:20px" onerror="this.style.display=\'none\'">';
   h += '<div class="btns" style="margin:0">';
   h += '<button id="b-intro-upload" style="background:linear-gradient(135deg,#7c3aed,#2563eb);font-size:17px;padding:18px 40px" aria-label="Upload a book">\u2795 Upload a Book</button>';
   if (page === 1) {
@@ -15,7 +15,7 @@ function showIntro(page) {
   } else {
     h += '<button id="b-intro-start" style="background:linear-gradient(135deg,#059669,#0891b2);font-size:16px;padding:16px 40px" aria-label="Get started">Get Started \u{1F680}</button>';
   }
-  h += '</div></div>';
+  h += '</div>';
 
   h += '</div>';
   document.getElementById('content').innerHTML = h;
