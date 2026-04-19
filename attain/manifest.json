@@ -1,0 +1,12 @@
+{
+  "name": "Attain Universal",
+  "short_name": "Attain",
+  "description": "Build mental architecture that content slots into permanently — reducing cognitive load at every stage.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#1a1a2e",
+  "icons": [
+    { "src": "icon.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Attain">
+<meta name="description" content="Build mental architecture that content slots into permanently.">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=OpenDyslexic:wght@400;700&display=swap" rel="stylesheet">
+<title>Attain</title>
+<link rel="stylesheet" href="attain.css">
+</head>
+<body>
+
+<div id="topnav" role="navigation" aria-label="Main navigation">
+  <button id="b-sb" title="Toggle sidebar" aria-label="Toggle sidebar" aria-expanded="false">&#9776;</button>
+  <button id="b-home" title="Home" aria-label="Go to home screen">&#8962;</button>
+  <div id="tb" role="button" tabindex="0" title="Go to home screen" aria-label="Current section">Attain</div>
+  <div id="fc" role="group" aria-label="Font size controls">
+    <button id="b-fs-" aria-label="Decrease font size">A&#8722;</button>
+    <button id="b-fs+" aria-label="Increase font size">A&#43;</button>
+  </div>
+  <button id="b-theme" aria-label="Switch color theme">&#9680;</button>
+  <button id="b-beeline" aria-label="Toggle BeeLine reading gradient">&#127752;</button>
+  <button id="b-linefocus" aria-label="Toggle line focus overlay">&#128065;</button>
+  <button id="b-nt" aria-label="Open notes">&#128221;</button>
+  <button id="b-nv" aria-label="View all notes">&#128196;</button>
+  <button id="b-vt" aria-label="Toggle voice reader">&#128266;</button>
+</div>
+
+<div id="sb" role="navigation" aria-label="Book and chapter navigation"></div>
+
+<div id="main" role="main">
+  <div id="content" aria-live="polite"></div>
+</div>
+
+<!-- Voice reader panel -->
+<div id="vr" role="region" aria-label="Voice reader controls">
+  <button id="b-pl" aria-label="Play">&#9654;</button>
+  <button id="b-pa" style="display:none" aria-label="Pause">&#9646;&#9646;</button>
+  <button id="b-st" aria-label="Stop">&#9632;</button>
+  <select id="vs" aria-label="Reading speed">
+    <option value="0.7">0.7x</option><option value="0.85">0.85x</option>
+    <option value="1" selected>1x</option><option value="1.2">1.2x</option><option value="1.5">1.5x</option>
+  </select>
+  <select id="vc" aria-label="Select voice"><option value="">Loading...</option></select>
+  <select id="vm" aria-label="Reading mode">
+    <option value="all">All</option><option value="paragraphs">Paragraphs</option>
+  </select>
+  <span id="vst" role="status" aria-live="polite">Ready</span>
+</div>
+
+<!-- Notes panel -->
+<div id="np" role="region" aria-label="Section notes">
+  <div id="np-head">
+    <span id="np-lbl">Notes</span>
+    <button id="np-save" aria-label="Save notes">&#10003; Save</button>
+    <button id="np-clr" aria-label="Clear notes">Clear</button>
+    <button id="np-cls" aria-label="Close notes">&#10005;</button>
+  </div>
+  <textarea id="np-ta" placeholder="Write your notes..." aria-label="Notes text area"></textarea>
+</div>
+
+<!-- All-notes viewer -->
+<div id="nv" role="region" aria-label="All saved notes">
+  <h2>&#128221; All Notes</h2>
+  <div id="nv-list"></div>
+</div>
+
+<!-- PDF.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<!-- epub.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/epubjs@0.3.93/dist/epub.min.js"></script>
+
+<script src="attain-core.js"></script>
+<script src="attain-parser.js"></script>
+<script src="attain-study.js"></script>
+<script src="attain-ui.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
+    .catch(function () {});
+}
+</script>
+</body>
+</html>
