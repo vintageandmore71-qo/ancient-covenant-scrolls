@@ -6,7 +6,17 @@ function getLibrary() {
   try { return JSON.parse(localStorage.getItem('attain_library') || '[]'); } catch (e) { return []; }
 }
 function saveLibrary(lib) {
-  try { localStorage.setItem('attain_library', JSON.stringify(lib)); } catch (e) {}
+  try {
+    var json = JSON.stringify(lib);
+    localStorage.setItem('attain_library', json);
+    // Verify it saved
+    var check = localStorage.getItem('attain_library');
+    if (!check || check.length < 3) {
+      alert('Warning: Book library failed to save. Your browser may be in Private Browsing mode or storage is full.');
+    }
+  } catch (e) {
+    alert('Storage error: ' + e.message + '. Books cannot be saved in Private Browsing mode.');
+  }
 }
 function getBook(bookId) {
   var lib = getLibrary();

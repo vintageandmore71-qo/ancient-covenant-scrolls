@@ -1030,10 +1030,8 @@ function initNav() {
     document.getElementById('b-sb').setAttribute('aria-expanded', sbOpen ? 'true' : 'false');
   }
 
-  // Sidebar toggle — only open if there's content in sidebar
+  // Sidebar toggle
   document.getElementById('b-sb').addEventListener('click', function () {
-    var sb = document.getElementById('sb');
-    if (!sbOpen && (!sb.innerHTML || sb.innerHTML.trim() === '')) return;
     sbOpen = !sbOpen;
     updateSB();
   });
