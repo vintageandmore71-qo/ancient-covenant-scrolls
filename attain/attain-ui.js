@@ -789,15 +789,16 @@ function showChapterActivities(bookId, chIdx) {
 
   // Activity grid
   h += '<div class="activity-grid">';
-  h += actCard('\u{1F4D6}', 'Read', book.color || '#2563eb', 'read');
+  h += actCard('\u{1F4D6}', 'Read', '#1d4ed8', 'read');
   h += actCard('\u{1F4CB}', 'Breakdown', '#0891b2', 'breakdown');
   h += actCard('\u{1F9E9}', 'Fill in Blank', '#059669', 'filblank');
   h += actCard('\u270F\uFE0F', 'Multiple Choice', '#7c3aed', 'mc');
   h += actCard('\u{1F0CF}', 'Flashcards', '#d97706', 'flash');
   h += actCard('\u{1F9E0}', 'Memory Match', '#dc2626', 'memory');
-  h += actCard('\u{1F50A}', 'Listen & Learn', '#4f46e5', 'listen');
-  h += actCard('\u{1F9E9}', 'Verse Builder', '#e91e90', 'versebuild');
-  h += actCard('\u{1F517}', 'Word Match', '#6d28d9', 'wordmatch');
+  h += actCard('\u{1F50A}', 'Listen & Learn', '#0d9488', 'listen');
+  h += actCard('\u{1F527}', 'Verse Builder', '#be185d', 'versebuild');
+  h += actCard('\u{1F517}', 'Word Match', '#4338ca', 'wordmatch');
+  h += actCard('\u2694\uFE0F', 'Challenge', '#b45309', 'challenge');
   h += actCard('\u2694\uFE0F', 'Challenge', '#b91c1c', 'challenge');
   h += '</div>';
 
