@@ -1,7 +1,7 @@
 // Attain Universal — Service Worker
 // Offline-first caching for the app shell
 
-var CACHE = 'attain-v1';
+var CACHE = 'attain-v10';
 
 var SHELL = [
   './',
