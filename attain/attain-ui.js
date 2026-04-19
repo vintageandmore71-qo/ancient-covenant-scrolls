@@ -59,7 +59,7 @@ function showLibrary() {
 
   html += '<img src="splash.PNG" alt="Attain" style="max-width:160px;width:40%;border-radius:16px;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,.2);cursor:pointer" id="lib-logo" onerror="this.style.display=\'none\'">';
   html += '<h1>ATTAIN</h1>';
-  html += '<p class="tag">Build mental architecture that content slots into permanently.</p>';
+  html += '<p class="tag">Universal Study Engine\u2003\u00B7\u2003Read it. Study it. Attain it.</p>';
 
   // Stats bar
   if (totalDue > 0 || streak > 0 || (stats.xp || 0) > 0) {
