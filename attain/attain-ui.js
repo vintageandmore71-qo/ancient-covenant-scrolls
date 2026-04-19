@@ -706,6 +706,7 @@ function showArchitecture(bookId) {
     // Bottom actions
     h += '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:24px">';
     h += '<button class="study-btn" id="b-arch-library" aria-label="Return to library">\u{1F4DA} Library</button>';
+    h += '<button class="study-btn" id="b-arch-save" style="background:#059669" aria-label="Save as built-in content file">\u{1F4BE} Save as Content File</button>';
     h += '<button class="study-btn" id="b-arch-delete" style="background:#dc2626" aria-label="Delete this book">\u{1F5D1} Delete Book</button>';
     h += '</div>';
 
@@ -735,6 +736,9 @@ function showArchitecture(bookId) {
     }
 
     document.getElementById('b-arch-library').addEventListener('click', function () { showLibrary(); });
+    document.getElementById('b-arch-save').addEventListener('click', function () {
+      exportAsBuiltIn(bookId);
+    });
     document.getElementById('b-arch-delete').addEventListener('click', function () { confirmDeleteBook(bookId); });
 
     window.scrollTo(0, 0);
@@ -1390,9 +1394,16 @@ document.addEventListener('DOMContentLoaded', function () {
       'On Safari: Settings \u2192 Safari \u2192 turn off "Prevent Cross-Site Tracking" for this site.</p></div>';
     return;
   }
-  initNav();
-  addDyslexicToggle();
-  setTimeout(showInstallPrompt, 3000);
+  // Load built-in books from content/ folder before showing UI
+  loadBuiltInBooks().then(function () {
+    initNav();
+    addDyslexicToggle();
+    setTimeout(showInstallPrompt, 3000);
+  }).catch(function () {
+    initNav();
+    addDyslexicToggle();
+    setTimeout(showInstallPrompt, 3000);
+  });
 });
 if (document.readyState !== 'loading') initNav();
 

@@ -642,4 +642,69 @@ function stopSpeech() {
   }
 }
 
-console.log('attain-core.js loaded');
+// ---- Built-in Books (from content/ folder) ----
+function loadBuiltInBooks() {
+  return fetch('content/index.json').then(function (r) {
+    if (!r.ok) return [];
+    return r.json();
+  }).then(function (fileList) {
+    if (!fileList || !fileList.length) return [];
+    var loaded = [];
+    var promises = fileList.map(function (filename) {
+      return fetch('content/' + filename).then(function (r) {
+        if (!r.ok) return null;
+        return r.json();
+      }).then(function (bookData) {
+        if (!bookData || !bookData.id) return;
+        // Check if this book is already in the library
+        var existing = getBook(bookData.id);
+        if (existing) return;
+        // Save the book to library
+        var book = {
+          id: bookData.id,
+          title: bookData.title || filename,
+          color: bookData.color || assignBookColor(getLibrary().length),
+          dateAdded: bookData.dateAdded || new Date().toISOString(),
+          chapterCount: bookData.chapters ? bookData.chapters.length : 0,
+          keyTerms: bookData.keyTerms || [],
+          totalParagraphs: bookData.totalParagraphs || 0,
+          builtIn: true
+        };
+        saveBook(book);
+        // Save chapters
+        if (bookData.chapters && bookData.chapters.length > 0) {
+          try { localStorage.setItem('attain_ch_' + book.id, JSON.stringify(bookData.chapters)); } catch (e) {}
+          saveChaptersDB(book.id, bookData.chapters);
+        }
+        loaded.push(book.title);
+      }).catch(function () {});
+    });
+    return Promise.all(promises).then(function () { return loaded; });
+  }).catch(function () { return []; });
+}
+
+function exportAsBuiltIn(bookId) {
+  var book = getBook(bookId);
+  if (!book) return;
+  return loadChaptersDB(bookId).then(function (chapters) {
+    var data = {
+      id: bookId,
+      title: book.title,
+      color: book.color,
+      dateAdded: book.dateAdded,
+      chapters: chapters,
+      keyTerms: book.keyTerms || getBookTerms(bookId),
+      totalParagraphs: book.totalParagraphs || 0
+    };
+    var blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    var safeName = book.title.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+    a.download = safeName + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+}
