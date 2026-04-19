@@ -1,6 +1,44 @@
 // Attain Universal — UI Module
 // Screen navigation, library, upload, architecture, activities, settings, gamification
 
+// ---- Intro Splash Pages (first visit or tap logo) ----
+
+function showIntro(page) {
+  page = page || 1;
+  var h = '<div id="home" style="cursor:pointer">';
+
+  if (page === 1) {
+    h += '<img src="splash1.png" alt="Attain — Page 1" style="max-width:420px;width:92%;border-radius:20px;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,.3)" onerror="this.style.display=\'none\'">';
+    h += '<div style="margin-top:16px">';
+    h += '<button class="study-btn sb-pri" id="b-intro-next" style="font-size:17px;padding:18px 50px" aria-label="Next page">Next \u25B6</button>';
+    h += '</div>';
+    h += '<p class="small" style="margin-top:16px;opacity:.6">Page 1 of 2</p>';
+  } else {
+    h += '<img src="splash2.png" alt="Attain — Page 2" style="max-width:420px;width:92%;border-radius:20px;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,.3)" onerror="this.style.display=\'none\'">';
+    h += '<div style="margin-top:16px">';
+    h += '<button class="study-btn sb-pri" id="b-intro-start" style="font-size:17px;padding:18px 50px;background:linear-gradient(135deg,#7c3aed,#2563eb)" aria-label="Get started">Get Started \u{1F680}</button>';
+    h += '</div>';
+    h += '<p class="small" style="margin-top:16px;opacity:.6">Page 2 of 2</p>';
+  }
+
+  h += '</div>';
+  document.getElementById('content').innerHTML = h;
+  document.getElementById('tb').textContent = 'Attain';
+
+  if (page === 1) {
+    document.getElementById('b-intro-next').addEventListener('click', function (e) {
+      e.stopPropagation();
+      showIntro(2);
+    });
+  } else {
+    document.getElementById('b-intro-start').addEventListener('click', function (e) {
+      e.stopPropagation();
+      localStorage.setItem('attain_intro_seen', '1');
+      showLibrary();
+    });
+  }
+}
+
 // ---- Library Screen — book grid with "New Book" card ----
 
 function showLibrary() {
@@ -10,10 +48,15 @@ function showLibrary() {
   var lvl = getLevel(stats.xp || 0);
   var streak = stats.streak || 0;
 
+  // Show intro on first visit
+  if (!localStorage.getItem('attain_intro_seen') && lib.length === 0) {
+    showIntro(1);
+    return;
+  }
+
   var html = '<div id="home">';
 
-  // Splash image (replace splash.png with your cover image)
-  html += '<img src="splash.png" alt="Attain Universal Study Engine" style="max-width:320px;width:90%;border-radius:20px;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,.3)" onerror="this.style.display=\'none\'">';
+  html += '<img src="splash1.png" alt="Attain" style="max-width:160px;width:40%;border-radius:16px;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,.2);cursor:pointer" id="lib-logo" onerror="this.style.display=\'none\'">';
   html += '<h1>ATTAIN</h1>';
   html += '<p class="tag">Build mental architecture that content slots into permanently.</p>';
 
@@ -77,6 +120,9 @@ function showLibrary() {
   for (var s = 0; s < secs.length; s++) secs[s].classList.remove('on');
 
   // Wire events
+  var logo = document.getElementById('lib-logo');
+  if (logo) logo.addEventListener('click', function () { showIntro(1); });
+
   var heroBtn = document.getElementById('b-lib-new-hero');
   if (heroBtn) heroBtn.addEventListener('click', function () { showUpload(); });
 
