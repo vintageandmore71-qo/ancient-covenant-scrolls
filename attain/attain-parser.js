@@ -271,7 +271,7 @@ function detectChapters(rawText) {
       isChapterBreak = true;
     }
 
-    // Check chapter patterns
+    // Check chapter patterns (Chapter N, CH.N, Part N, Volume N, etc.)
     if (!isChapterBreak) {
       for (var p = 0; p < CHAPTER_PATTERNS.length; p++) {
         if (CHAPTER_PATTERNS[p].test(line)) {
@@ -281,8 +281,10 @@ function detectChapters(rawText) {
       }
     }
 
-    // Check all-caps headings (likely chapter titles)
-    if (!isChapterBreak && line.length > 4 && line.length < 100) {
+    // Only use ALL-CAPS heading patterns if we have enough content
+    // before them (at least 20 lines) — prevents splitting on
+    // every section header within a chapter
+    if (!isChapterBreak && line.length > 4 && line.length < 100 && currentLines.length >= 20) {
       for (var h = 0; h < HEADING_PATTERNS.length; h++) {
         if (HEADING_PATTERNS[h].test(line)) {
           isChapterBreak = true;
@@ -315,6 +317,18 @@ function detectChapters(rawText) {
       paragraphs: linesToParagraphs(currentLines)
     });
   }
+
+  // Merge tiny chapters (< 3 paragraphs) into previous chapter
+  var merged = [];
+  for (var m = 0; m < chapters.length; m++) {
+    if (chapters[m].paragraphs.length < 3 && merged.length > 0) {
+      var prev = merged[merged.length - 1];
+      prev.paragraphs = prev.paragraphs.concat(chapters[m].paragraphs);
+    } else {
+      merged.push(chapters[m]);
+    }
+  }
+  chapters = merged;
 
   // Remove front matter chapters (copyright, TOC, dedication, etc.)
   chapters = chapters.filter(function (ch) {
