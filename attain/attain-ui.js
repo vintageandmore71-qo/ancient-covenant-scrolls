@@ -1103,6 +1103,11 @@ function initNav() {
     if (vrOpen) loadVoiceSelect();
   });
 
+  // Sync button
+  document.getElementById('b-sync').addEventListener('click', function () {
+    showSyncScreen();
+  });
+
   // Voice reader controls
   document.getElementById('b-pl').addEventListener('click', function () {
     speakText(document.getElementById('content').textContent.slice(0, 3000));
@@ -1248,6 +1253,66 @@ function addDyslexicToggle() {
     localStorage.setItem('attain_dyslexic', on ? '1' : '');
   });
   document.body.appendChild(btn);
+}
+
+// ---- Sync Screen ----
+function showSyncScreen() {
+  var lib = getLibrary();
+  var h = '<div class="prog-view">';
+  h += '<div class="sv-title" style="border-left-color:#7c3aed">\u{1F504} Sync Between Devices</div>';
+
+  h += '<div class="prog-card">';
+  h += '<h3 class="prog-h3">How It Works</h3>';
+  h += '<div style="font-size:.95em;line-height:1.7;color:var(--text-main)">';
+  h += '<strong>1.</strong> Tap <strong>Export Everything</strong> to download your books, progress, and scores as one file.<br>';
+  h += '<strong>2.</strong> Transfer the file to your other device (email, AirDrop, iCloud, Google Drive).<br>';
+  h += '<strong>3.</strong> On the other device, open Attain and tap <strong>Import</strong> to restore everything.';
+  h += '</div></div>';
+
+  h += '<div class="prog-card">';
+  h += '<h3 class="prog-h3">Export</h3>';
+  h += '<div style="font-size:.9em;color:var(--text-muted);margin-bottom:12px">' + lib.length + ' books, all progress, scores, and notes will be included.</div>';
+  h += '<button class="study-btn sb-pri" id="b-sync-export" aria-label="Export everything" style="width:100%">\u{1F4E5} Export Everything</button>';
+  h += '</div>';
+
+  h += '<div class="prog-card">';
+  h += '<h3 class="prog-h3">Import</h3>';
+  h += '<div style="font-size:.9em;color:var(--text-muted);margin-bottom:12px">Upload a sync file from another device. Your existing data will be merged — nothing is overwritten.</div>';
+  h += '<button class="study-btn" id="b-sync-import" aria-label="Import from file" style="width:100%;background:#059669">\u{1F4E4} Import from File</button>';
+  h += '<input type="file" id="sync-file" accept=".json" style="display:none">';
+  h += '<div id="sync-msg" role="status" aria-live="polite" style="margin-top:10px;font-size:14px;font-weight:700;color:var(--text-muted);text-align:center"></div>';
+  h += '</div>';
+
+  h += '<button class="study-btn" id="b-sync-back" style="margin-top:16px" aria-label="Return to library">Back to Library</button>';
+  h += '</div>';
+
+  document.getElementById('content').innerHTML = h;
+
+  document.getElementById('b-sync-export').addEventListener('click', function () {
+    exportFullSync();
+    document.getElementById('sync-msg').textContent = '\u2705 Sync file downloaded — transfer it to your other device';
+    document.getElementById('sync-msg').style.color = '#059669';
+  });
+
+  document.getElementById('b-sync-import').addEventListener('click', function () {
+    document.getElementById('sync-file').click();
+  });
+
+  document.getElementById('sync-file').addEventListener('change', function (e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    document.getElementById('sync-msg').textContent = '\u23F3 Importing...';
+    importFullSync(file).then(function (msg) {
+      document.getElementById('sync-msg').textContent = '\u2705 ' + msg;
+      document.getElementById('sync-msg').style.color = '#059669';
+      setTimeout(function () { showLibrary(); }, 2000);
+    }).catch(function (err) {
+      document.getElementById('sync-msg').textContent = '\u274C ' + err.message;
+      document.getElementById('sync-msg').style.color = '#dc2626';
+    });
+  });
+
+  document.getElementById('b-sync-back').addEventListener('click', function () { showLibrary(); });
 }
 
 // ---- Persistence Verification ----

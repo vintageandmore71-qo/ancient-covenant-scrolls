@@ -374,7 +374,139 @@ function saveNote(bookId, chIdx, text) {
   try { localStorage.setItem('attain_notes', JSON.stringify(n)); } catch (e) {}
 }
 
-// ---- Progress Export/Import ----
+// ---- Full Sync Export/Import (includes book content) ----
+function exportFullSync() {
+  var lib = getLibrary();
+  var chaptersData = {};
+  var termsData = {};
+
+  for (var i = 0; i < lib.length; i++) {
+    var bookId = lib[i].id;
+    try {
+      var ch = localStorage.getItem('attain_ch_' + bookId);
+      if (ch) chaptersData[bookId] = JSON.parse(ch);
+    } catch (e) {}
+    try {
+      var terms = localStorage.getItem('attain_terms_' + bookId);
+      if (terms) termsData[bookId] = JSON.parse(terms);
+    } catch (e) {}
+  }
+
+  var data = {
+    version: 2,
+    app: 'attain-full-sync',
+    exportDate: new Date().toISOString(),
+    library: lib,
+    chapters: chaptersData,
+    keyTerms: termsData,
+    stats: getStats(),
+    cards: getCards(),
+    quizMastery: getQuizMastery(),
+    notes: getNotes()
+  };
+
+  var blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'attain-sync-' + new Date().toISOString().slice(0, 10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  return data;
+}
+
+function importFullSync(file) {
+  return new Promise(function (resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function (ev) {
+      try {
+        var data = JSON.parse(ev.target.result);
+        if (!data.app || (data.app !== 'attain-full-sync' && data.app !== 'attain')) {
+          reject(new Error('Not a valid Attain sync file'));
+          return;
+        }
+
+        // Restore library
+        if (data.library && data.library.length > 0) {
+          var currentLib = getLibrary();
+          var existingIds = currentLib.map(function (b) { return b.id; });
+          for (var i = 0; i < data.library.length; i++) {
+            if (existingIds.indexOf(data.library[i].id) < 0) {
+              currentLib.push(data.library[i]);
+            }
+          }
+          saveLibrary(currentLib);
+        }
+
+        // Restore chapters
+        if (data.chapters) {
+          for (var bookId in data.chapters) {
+            try {
+              localStorage.setItem('attain_ch_' + bookId, JSON.stringify(data.chapters[bookId]));
+            } catch (e) {}
+            // Also save to IndexedDB
+            saveChaptersDB(bookId, data.chapters[bookId]);
+          }
+        }
+
+        // Restore key terms
+        if (data.keyTerms) {
+          for (var tid in data.keyTerms) {
+            try {
+              localStorage.setItem('attain_terms_' + tid, JSON.stringify(data.keyTerms[tid]));
+            } catch (e) {}
+          }
+        }
+
+        // Restore stats (merge — keep higher values)
+        if (data.stats) {
+          var current = getStats();
+          data.stats.xp = Math.max(current.xp || 0, data.stats.xp || 0);
+          data.stats.bestStreak = Math.max(current.bestStreak || 0, data.stats.bestStreak || 0);
+          var cs = current.sessions || [];
+          var is = data.stats.sessions || [];
+          data.stats.sessions = cs.concat(is).slice(-200);
+          saveStats(data.stats);
+        }
+
+        // Restore cards (keep more practiced version)
+        if (data.cards) {
+          var cc = getCards();
+          for (var cid in data.cards) {
+            if (!cc[cid] || data.cards[cid].reps > (cc[cid].reps || 0)) cc[cid] = data.cards[cid];
+          }
+          saveCards(cc);
+        }
+
+        // Restore mastery
+        if (data.quizMastery) {
+          var cm = getQuizMastery();
+          for (var key in data.quizMastery) {
+            if (!cm[key] || data.quizMastery[key].correct > (cm[key].correct || 0)) cm[key] = data.quizMastery[key];
+          }
+          saveQuizMastery(cm);
+        }
+
+        // Restore notes
+        if (data.notes) {
+          var cn = getNotes();
+          for (var nk in data.notes) {
+            if (!cn[nk]) cn[nk] = data.notes[nk];
+          }
+          try { localStorage.setItem('attain_notes', JSON.stringify(cn)); } catch (e) {}
+        }
+
+        var bookCount = data.library ? data.library.length : 0;
+        resolve('Synced ' + bookCount + ' books with all progress');
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.readAsText(file);
+  });
+}
 function exportProgress() {
   var data = {
     version: 1,
