@@ -1253,8 +1253,39 @@ function addDyslexicToggle() {
   document.body.appendChild(btn);
 }
 
+// ---- Persistence Verification ----
+function verifyStorage() {
+  try {
+    localStorage.setItem('attain_test', 'ok');
+    var test = localStorage.getItem('attain_test');
+    localStorage.removeItem('attain_test');
+    if (test !== 'ok') {
+      console.error('Attain: localStorage read/write failed');
+      return false;
+    }
+    localStorage.setItem('attain_heartbeat', new Date().toISOString());
+    return true;
+  } catch (e) {
+    console.error('Attain: localStorage not available', e);
+    return false;
+  }
+}
+
 // ---- Boot ----
-document.addEventListener('DOMContentLoaded', function () { initNav(); addDyslexicToggle(); });
+document.addEventListener('DOMContentLoaded', function () {
+  var storageOk = verifyStorage();
+  if (!storageOk) {
+    document.getElementById('content').innerHTML =
+      '<div style="padding:40px;text-align:center;color:#dc2626;font-weight:700">' +
+      '<p style="font-size:1.3em">\u26A0\uFE0F Storage Not Available</p>' +
+      '<p style="color:var(--text-muted);margin-top:10px">Attain needs localStorage to save your books and progress.<br>' +
+      'Make sure you are not in Private Browsing mode.<br>' +
+      'On Safari: Settings \u2192 Safari \u2192 turn off "Prevent Cross-Site Tracking" for this site.</p></div>';
+    return;
+  }
+  initNav();
+  addDyslexicToggle();
+});
 if (document.readyState !== 'loading') initNav();
 
 // ---- Progress Screen — XP, streaks, levels, session history, export/import ----
