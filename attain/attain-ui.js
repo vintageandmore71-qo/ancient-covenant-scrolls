@@ -77,6 +77,24 @@ function showLibrary() {
     html += '</div>';
   }
 
+  // Backup reminder — your books live only in this browser. Safari ITP and
+  // "Clear website data" both wipe localStorage/IndexedDB/Cache Storage,
+  // so without an exported file there's no way to recover.
+  var daysSince = daysSinceLastBackup();
+  if (daysSince === Infinity) {
+    html += '<div class="backup-warn backup-warn-urgent" role="alert">';
+    html += '<div class="backup-warn-title">\u26A0\uFE0F Back up your library</div>';
+    html += '<div class="backup-warn-body">Your books live only in this browser. If you clear Safari data or the browser wipes them, they are gone. Export a sync file now.</div>';
+    html += '<button id="b-backup-now" class="backup-warn-btn">\u{1F4E5} Export now</button>';
+    html += '</div>';
+  } else if (daysSince > 14) {
+    html += '<div class="backup-warn" role="status">';
+    html += '<div class="backup-warn-title">\u{1F4BE} Backup is ' + Math.round(daysSince) + ' days old</div>';
+    html += '<div class="backup-warn-body">Export a fresh sync file before clearing browser data.</div>';
+    html += '<button id="b-backup-now" class="backup-warn-btn">\u{1F4E5} Export now</button>';
+    html += '</div>';
+  }
+
   // Primary action buttons
   html += '<div class="btns" style="margin-top:24px">';
   if (lib.length > 0) {
@@ -165,6 +183,9 @@ function showLibrary() {
 
   var reviewBtn = document.getElementById('b-lib-review');
   if (reviewBtn) reviewBtn.addEventListener('click', function () { showCrossReview(); });
+
+  var backupBtn = document.getElementById('b-backup-now');
+  if (backupBtn) backupBtn.addEventListener('click', function () { showSyncScreen(); });
 
   var progBtn = document.getElementById('b-lib-progress');
   if (progBtn) progBtn.addEventListener('click', function () { showProgress(); });

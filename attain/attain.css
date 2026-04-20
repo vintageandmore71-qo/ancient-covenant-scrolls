@@ -545,6 +545,24 @@ body.font-dyslexic .cloze-prompt{font-family:var(--font-dyslexic);line-height:2.
   box-shadow:0 3px 12px rgba(168,85,247,.28);
 }
 
+/* Backup reminder banner on library screen */
+.backup-warn{
+  margin:14px auto 6px auto;padding:14px 16px;border-radius:14px;
+  max-width:680px;background:#fef3c7;border:2px solid #f59e0b;
+  color:#7c2d12;text-align:center;
+}
+.backup-warn-urgent{background:#fee2e2;border-color:#dc2626;color:#7f1d1d}
+.backup-warn-title{font-weight:800;font-size:1.05em;margin-bottom:4px}
+.backup-warn-body{font-size:.9em;line-height:1.5;margin-bottom:10px}
+.backup-warn-btn{
+  background:#ea580c;color:#fff;border:none;
+  padding:10px 22px;border-radius:10px;font-weight:800;font-size:.95em;
+  cursor:pointer;min-height:44px;transition:transform .15s;
+}
+.backup-warn-urgent .backup-warn-btn{background:#dc2626}
+.backup-warn-btn:hover{transform:scale(1.04)}
+.backup-warn-btn:active{transform:scale(.97)}
+
 /* Syllable Tap */
 .syll-banner{
   background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;

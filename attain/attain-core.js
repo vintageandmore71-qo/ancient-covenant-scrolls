@@ -913,7 +913,21 @@ function exportFullSync() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+  // Record backup timestamp so the library banner can stop nagging
+  try { localStorage.setItem('attain_last_backup', new Date().toISOString()); } catch (e) {}
+  try { setCookie('attain_last_backup', new Date().toISOString(), 365); } catch (e) {}
   return data;
+}
+
+// Days since last full-sync export. Returns Infinity if never exported.
+function daysSinceLastBackup() {
+  var raw = null;
+  try { raw = localStorage.getItem('attain_last_backup'); } catch (e) {}
+  if (!raw) { try { raw = getCookie('attain_last_backup'); } catch (e) {} }
+  if (!raw) return Infinity;
+  var then = new Date(raw).getTime();
+  if (isNaN(then)) return Infinity;
+  return (Date.now() - then) / 86400000;
 }
 
 function importFullSync(file) {
