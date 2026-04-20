@@ -231,6 +231,77 @@ All curated content must follow these rules without exception:
 
 ---
 
+## QUESTION GENERATION RULES (Locked In)
+
+Applies to every quiz item in every `study/content/file_N.json` and to
+the Attain reader's in-app generator. All rules must be satisfied —
+no exceptions.
+
+### Content Rules
+- Generate questions ONLY from the body text of the chapter provided.
+- Do NOT use content from: titles, subtitles, headers, introductions,
+  table of contents, prefaces, author bios, footnotes, or index pages.
+- Every question must be directly answerable from a specific passage
+  within the chapter body text.
+- Do not infer, assume, or introduce external knowledge not present
+  in the provided text.
+
+### Quality Rules
+- Questions must test genuine comprehension, not surface scanning.
+- Avoid questions answerable by spotting a single keyword.
+- At least 60% of questions should require the learner to understand
+  meaning, cause/effect, sequence, or character/concept relationships.
+- Do not generate trick questions or questions designed to confuse.
+- Each correct answer must be unambiguous and directly supported by
+  the text.
+- Wrong answer choices (distractors) must be plausible but clearly
+  incorrect to someone who read the chapter — not random or absurd.
+
+### Format Rules
+- Return ONLY valid JSON. No markdown, no explanation, no preamble.
+- Each question object must include:
+
+```
+{
+  "question": "string",
+  "options": ["A", "B", "C", "D"],
+  "correct": "A",
+  "hint": "string referencing where in the text the answer is found",
+  "source_passage": "brief quote or paraphrase from the chapter that supports the answer"
+}
+```
+
+### Difficulty Balance (per batch of 10)
+- 3 recall questions (who, what, where)
+- 4 comprehension questions (why, how, what does this mean)
+- 3 application/analysis questions (what would happen if, what is the
+  relationship between)
+
+### Dyslexia-Friendly Language
+- Keep question sentences under 20 words where possible.
+- Use plain, direct language.
+- Avoid double negatives entirely.
+- Avoid jargon unless the jargon itself is the learning target.
+
+### Scope & Cost Constraint
+- These rules apply to **chat-time curation only**.
+- No AI, no API calls, no paid services may be introduced into the
+  deployed app — the app stays 100% free, fully static, GitHub Pages
+  only. All question content is either hand-authored in chat under
+  the existing plan (for `study/content/`) or generated client-side
+  by the Attain parser's algorithmic generator.
+
+### Reconciliation Note
+The existing `study/content/file_N.json` files use `source_quote` (not
+`source_passage`), integer `correct` index (not letter), and no `hint`
+field. Before regenerating any existing file, decide: migrate old
+files to this new schema, or keep the old schema and map the new
+fields (`source_passage` → `source_quote`, letter `correct` →
+numeric index, add `hint` as an optional field). Do not mix schemas
+in a single file.
+
+---
+
 ## TECHNICAL CONSTRAINTS (Locked In)
 
 - No AI dependencies in the deployed app
