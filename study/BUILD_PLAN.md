@@ -302,6 +302,131 @@ in a single file.
 
 ---
 
+## FREE STACK (Locked In)
+
+Every current and future feature must use ONLY these — no paid APIs,
+no subscription services, no keys.
+
+- **Web Speech API** (built-in browser) — all TTS and voice recognition
+- **MediaRecorder API** (built-in browser) — audio capture for Dictation
+  Challenge and any record-and-compare modes
+- **HTML5 drag-and-drop** — native browser DnD for simple reorder/match
+- **SortableJS** (MIT licensed, free) — richer drag interactions; vendor
+  into `study/lib/` (no CDN dependency)
+- **vis.js** or **Cytoscape.js** (MIT/Apache, free) — Mind Map Builder,
+  Concept Web, Chapter Timeline; vendor into `study/lib/`
+- **GitHub Pages** — hosting (free tier, static only)
+- **localStorage / IndexedDB / Cache Storage / cookies** — all persistence
+- **JSON files** — all content
+
+Forbidden even if free-tier exists:
+- OpenAI / Anthropic / Gemini / any hosted LLM API
+- Firebase, Supabase, any hosted DB
+- Google Analytics, Mixpanel, any tracker
+- Paid fonts (use Google Fonts only)
+- Any service that could introduce a future paywall
+
+Why vendor instead of CDN: CDNs can go down, rate-limit, or start
+charging. Vendoring a 30-50KB library into `study/lib/` is free, offline,
+and permanent.
+
+---
+
+## PENDING INSTRUCTIONS BACKLOG (Locked In)
+
+The following were handed down in session and must not be lost. Build
+order is flexible; none should silently disappear.
+
+### #3 — Question Validation
+Eleven per-question checks + one batch-level difficulty-balance check.
+Target file: `study/validate-questions.js` (standalone, NOT shipped to
+the app, run in chat during curation).
+
+Checks required:
+1. `checkRequiredFields` — question, options, correct, hint,
+   source_passage all present and non-empty
+2. `checkQuestionLength` — question sentence ≤ 20 words where possible
+3. `checkNoDoubleNegative` — reject double negatives outright
+4. `checkAnswerIsUnambiguous` — only one option can be the correct answer
+5. `checkDistractorsNotAbsurd` — distractors must be plausible wrong
+   answers, not nonsense
+6. `checkAnswerInOptions` — the `correct` value must match one of the
+   `options`
+7. `checkSourcePassageExists` — `source_passage` text must appear in
+   the provided `bodyText`
+8. `checkNotFromFrontMatter` — question must not reference titles,
+   TOC, prefaces, author bios, footnotes, or index
+9. `checkNoJargonDump` — avoid jargon unless jargon IS the learning
+   target
+10. `checkDistractorsArePlausible` — distractors belong to the same
+    category/domain as the answer
+11. `checkAnswerNotKeywordOnly` — answer can't be spotted by scanning
+    a single keyword without comprehension
+
+Batch-level:
+- `checkDifficultyBalance` — per batch of 10: 3 recall / 4 comprehension
+  / 3 application-analysis (20–40% / 30–50% / 20–40% ratios)
+
+Wrappers: `validateQuestion(q, bodyText)` returns
+`{valid, reasons[]}`. `validateBatch(questions, bodyText)` filters to
+passing questions and warns on failures.
+
+### #4 — Remix Round
+Track every question a user misses during any game mode in the
+current session. At round end, resurface those questions in a
+**different** game format — e.g. missed a Fill-in-Blank → reappears
+as Multiple Choice → then as Flashcard. Prevents the user from
+failing the exact same experience twice.
+
+Storage: localStorage key `acr_study_remix_queue` with schema
+`[{chapterId, questionRef, missedInMode, missedAt}]`. Cleared when
+the remixed version is answered correctly, or at session end if
+the user quits.
+
+UI: appears as a new card at the end of every round titled
+"Remix Round" — same visual weight as other activity cards.
+
+### #5 — Hint Ladder
+Three progressive hint levels on any question:
+1. **Letter hint** — reveal starting letter + word length (e.g.
+   "Starts with D, 7 letters")
+2. **Passage hint** — pull the source passage from the chapter
+3. **Blanked reveal** — show the answer with middle letters blanked
+   (e.g. `D _ _ _ _ _ M`)
+
+Full answer only appears after all three hints exhausted AND the
+user submits a final guess.
+
+UI: a single `<button class="hint-btn">` component that updates its
+own label each stage: "💡 Hint" → "📖 Show passage" → "🔡 Reveal pattern"
+→ (disabled after 3). Consumed hints reduce XP reward for that
+question (e.g. 10 XP → 7 → 4 → 1).
+
+### #6 — Game Modes Backlog
+Sixteen suggested modes. Some overlap with existing cards — those
+are marked `equiv`. Build order is not fixed; pick one at a time.
+
+| Mode | Status | Notes |
+|------|--------|-------|
+| Fill the Gap | `equiv` | Existing Fill in the Blank |
+| Streak Rewards | `equiv` | Existing XP + daily streak |
+| Echo Read | `equiv` | Existing Listen & Learn + tap-any-word |
+| Chapter Timeline | backlog | Already Priority 7 |
+| Mind Map Builder | backlog | Already Priority 7 |
+| Concept Web | backlog | Already Priority 7 |
+| Remix Round | backlog | See #4 above |
+| Syllable Tap | new | Tap syllable boundaries in chapter words — dyslexia aid |
+| Rhyme Chain | new | Chain rhyming words drawn from the chapter |
+| Word Morph | new | Change one letter at a time between two chapter words |
+| Story Sequence | new | Reorder chapter events in correct order |
+| True or False with Why | new | T/F statement + tap the passage that proves it |
+| Who Said It | new | Match a quote to the speaker/character |
+| Cause and Effect Match | new | Pair cause paragraph to effect paragraph |
+| Audio Fill the Gap | new | TTS reads passage with a bleep; user taps missing word |
+| Dictation Challenge | new | Hear a verse, type it back; compare |
+
+---
+
 ## TECHNICAL CONSTRAINTS (Locked In)
 
 - No AI dependencies in the deployed app
