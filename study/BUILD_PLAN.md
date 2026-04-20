@@ -412,7 +412,7 @@ are marked `equiv`. Build order is not fixed; pick one at a time.
 | Streak Rewards | `equiv` | Existing XP + daily streak |
 | Echo Read | `equiv` | Existing Listen & Learn + tap-any-word |
 | Chapter Timeline | backlog | Already Priority 7 |
-| Mind Map Builder | backlog | Already Priority 7 |
+| Mind Map Builder | done | Force-directed SVG graph, no library vendor. Nodes = top 14 key terms; edges = co-occurrence in source_quote/FAQ answers; tap node -> context sentence + connected-terms list. 0.3 points (3 XP) per view |
 | Concept Web | backlog | Already Priority 7 |
 | Remix Round | backlog | See #4 above |
 | Syllable Tap | done | Vowel-group heuristic (y-between-vowels as consonant, silent-e except -le endings). 4 count options; correct reveals word in colored syllable chunks; Remix integration. Accuracy >85% on names like Qayin=2, Jerusalem=4, Chanokh=2 |

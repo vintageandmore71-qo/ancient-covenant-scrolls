@@ -745,6 +745,7 @@ function go(fid) {
   h += actCard('\u{1F500}', 'Word Morph', '#4338ca', 'morph', fid);
   h += actCard('\u{1F441}\uFE0F', 'Syllable Tap', '#f59e0b', 'syllable', fid);
   h += actCard('\u{1F3B6}', 'Rhyme Chain', '#0891b2', 'rhyme', fid);
+  h += actCard('\u{1F9E0}', 'Mind Map', '#7c3aed', 'mindmap', fid);
   h += actCard('\u{1F0CF}', 'Flashcards', '#d97706', 'flash', fid);
   h += actCard('\u{1F4DA}', 'Key Terms', '#0891b2', 'terms', fid);
   h += actCard('\u2753', 'FAQ', '#ea580c', 'faq', fid);
@@ -817,6 +818,7 @@ function openActivity(mode, fid) {
   if (mode === 'morph') { showWordMorph(fid); return; }
   if (mode === 'syllable') { showSyllableTap(fid); return; }
   if (mode === 'rhyme') { showRhymeChain(fid); return; }
+  if (mode === 'mindmap') { showMindMap(fid); return; }
   if (mode === 'remix') { showRemix(fid); return; }
   // Fallback: mode-specific "not enough content" message
   var modeLabels = {
@@ -3647,6 +3649,147 @@ function showRhymeChain(fid) {
     }
 
     renderQ();
+  });
+}
+
+// ---- Mind Map Builder — force-directed graph of key-term co-occurrence ----
+function showMindMap(fid) {
+  loadContent(fid).then(function (data) {
+    if (!data || !data.key_terms || data.key_terms.length < 4) { openActivity('stub', fid); return; }
+    var keyTerms = data.key_terms.slice(0, 14);
+    // Co-occurrence pool: all source_quote strings plus faq answers
+    var pool = [];
+    if (data.fill_blank) data.fill_blank.forEach(function (q) { if (q.source_quote) pool.push(q.source_quote); });
+    if (data.multiple_choice) data.multiple_choice.forEach(function (q) { if (q.source_quote) pool.push(q.source_quote); });
+    if (data.faq) data.faq.forEach(function (q) { if (q.answer) pool.push(q.answer); });
+
+    var idx = IDS.indexOf(fid);
+    var secLabel = idx >= 0 ? LBL[idx].split(' \u2014 ')[0] : fid;
+
+    var nodes = keyTerms.map(function (t, i) { return { id: i, label: t.term, freq: 0, selected: false }; });
+    var edges = [];
+    var edgeMap = {};
+    for (var p = 0; p < pool.length; p++) {
+      var lower = pool[p].toLowerCase();
+      var present = [];
+      for (var n = 0; n < nodes.length; n++) {
+        var re = new RegExp('\\b' + nodes[n].label.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b');
+        if (re.test(lower)) { present.push(n); nodes[n].freq++; }
+      }
+      for (var a = 0; a < present.length; a++) {
+        for (var b = a + 1; b < present.length; b++) {
+          var key = present[a] + ',' + present[b];
+          if (!edgeMap[key]) { edgeMap[key] = { source: present[a], target: present[b], weight: 0 }; edges.push(edgeMap[key]); }
+          edgeMap[key].weight++;
+        }
+      }
+    }
+    var connected = {};
+    edges.forEach(function (e) { connected[e.source] = true; connected[e.target] = true; });
+    nodes = nodes.filter(function (n) { return connected[n.id]; });
+    if (nodes.length < 3) { openActivity('stub', fid); return; }
+    var idRemap = {};
+    nodes.forEach(function (n, i) { idRemap[n.id] = i; n.id = i; });
+    edges = edges.map(function (e) { return { source: idRemap[e.source], target: idRemap[e.target], weight: e.weight }; }).filter(function (e) { return e.source !== undefined && e.target !== undefined; });
+
+    var W = 640, H = 460;
+    nodes.forEach(function (n, i) {
+      var angle = (i / nodes.length) * Math.PI * 2;
+      n.x = W / 2 + Math.cos(angle) * 140;
+      n.y = H / 2 + Math.sin(angle) * 140;
+      n.vx = 0; n.vy = 0;
+    });
+
+    for (var step = 0; step < 200; step++) {
+      for (var i = 0; i < nodes.length; i++) {
+        for (var j = i + 1; j < nodes.length; j++) {
+          var dx = nodes[j].x - nodes[i].x;
+          var dy = nodes[j].y - nodes[i].y;
+          var dist = Math.sqrt(dx * dx + dy * dy) || 0.01;
+          var force = 2200 / (dist * dist);
+          var fx = (dx / dist) * force;
+          var fy = (dy / dist) * force;
+          nodes[i].vx -= fx; nodes[i].vy -= fy;
+          nodes[j].vx += fx; nodes[j].vy += fy;
+        }
+      }
+      for (var e = 0; e < edges.length; e++) {
+        var s = nodes[edges[e].source], t = nodes[edges[e].target];
+        var dx2 = t.x - s.x, dy2 = t.y - s.y;
+        var dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2) || 0.01;
+        var springK = 0.02 * Math.min(3, edges[e].weight);
+        s.vx += dx2 * springK; s.vy += dy2 * springK;
+        t.vx -= dx2 * springK; t.vy -= dy2 * springK;
+      }
+      for (var k = 0; k < nodes.length; k++) {
+        var n = nodes[k];
+        n.vx += (W / 2 - n.x) * 0.003;
+        n.vy += (H / 2 - n.y) * 0.003;
+        n.vx *= 0.82; n.vy *= 0.82;
+        n.x += n.vx; n.y += n.vy;
+        var pad = 40;
+        if (n.x < pad) n.x = pad; if (n.x > W - pad) n.x = W - pad;
+        if (n.y < pad) n.y = pad; if (n.y > H - pad) n.y = H - pad;
+      }
+    }
+
+    var selectedNodeId = -1;
+
+    function render() {
+      var h = '<div class="cloze-view">';
+      h += '<div class="mind-banner">\u{1F9E0} Mind Map \u2014 tap a term to see its context</div>';
+      h += '<div class="cloze-ref">' + secLabel + '</div>';
+      h += '<div class="mind-wrap">';
+      h += '<svg viewBox="0 0 ' + W + ' ' + H + '" class="mind-svg" role="img" aria-label="Concept mind map">';
+      for (var e = 0; e < edges.length; e++) {
+        var s = nodes[edges[e].source], t = nodes[edges[e].target];
+        var op = Math.min(0.6, 0.15 + edges[e].weight * 0.12);
+        var sw = Math.min(4, 1 + edges[e].weight * 0.4);
+        h += '<line x1="' + s.x.toFixed(1) + '" y1="' + s.y.toFixed(1) + '" x2="' + t.x.toFixed(1) + '" y2="' + t.y.toFixed(1) + '" stroke="#7c3aed" stroke-opacity="' + op.toFixed(2) + '" stroke-width="' + sw.toFixed(1) + '" />';
+      }
+      var colors = ['#2563eb', '#059669', '#7c3aed', '#dc2626', '#ea580c', '#0891b2', '#be185d', '#ca8a04'];
+      for (var nn = 0; nn < nodes.length; nn++) {
+        var node = nodes[nn];
+        var r = 10 + Math.min(18, Math.sqrt(node.freq + 1) * 3);
+        var color = colors[nn % colors.length];
+        var sel = (selectedNodeId === nn) ? ' class="mind-node mind-node-selected"' : ' class="mind-node"';
+        h += '<g data-node="' + nn + '"' + sel + ' role="button" tabindex="0" aria-label="' + node.label + '">';
+        h += '<circle cx="' + node.x.toFixed(1) + '" cy="' + node.y.toFixed(1) + '" r="' + r + '" fill="' + color + '" stroke="#fff" stroke-width="2" />';
+        h += '<text x="' + node.x.toFixed(1) + '" y="' + (node.y + r + 14).toFixed(1) + '" text-anchor="middle" class="mind-label">' + node.label + '</text>';
+        h += '</g>';
+      }
+      h += '</svg>';
+      h += '</div>';
+      if (selectedNodeId >= 0) {
+        var sel2 = nodes[selectedNodeId];
+        var kt = keyTerms.find(function (k) { return k.term === sel2.label; });
+        var context = findTermContextInCuratedData(sel2.label, data);
+        h += '<div class="mind-detail">';
+        h += '<div class="mind-detail-term">' + sel2.label + (kt && kt.phonetic ? ' <span style="font-weight:400;font-size:.85em">(' + kt.phonetic + ')</span>' : '') + '</div>';
+        if (kt && kt.definition) h += '<div class="mind-detail-ctx">' + kt.definition + '</div>';
+        if (context && (!kt || context !== kt.definition)) h += '<div class="mind-detail-ctx" style="font-style:italic">"' + context + '"</div>';
+        var conn = [];
+        edges.forEach(function (ed) {
+          if (ed.source === selectedNodeId) conn.push(nodes[ed.target].label);
+          else if (ed.target === selectedNodeId) conn.push(nodes[ed.source].label);
+        });
+        if (conn.length) h += '<div class="mind-detail-conn"><strong>Connected to:</strong> ' + conn.join(', ') + '</div>';
+        h += '</div>';
+      }
+      h += '<button class="study-btn" id="b-mind-quit" style="margin-top:14px">Back to activities</button>';
+      h += '</div>';
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-mind-quit').addEventListener('click', function () { go(fid); });
+      var nodeEls = document.querySelectorAll('.mind-node');
+      for (var ni = 0; ni < nodeEls.length; ni++) {
+        nodeEls[ni].addEventListener('click', function () {
+          selectedNodeId = parseInt(this.getAttribute('data-node'));
+          render();
+        });
+      }
+    }
+    render();
+    recordSession(fid, 'mindmap', 0.3, 1);
   });
 }
 
