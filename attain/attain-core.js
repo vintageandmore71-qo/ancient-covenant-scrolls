@@ -539,6 +539,72 @@ function dictationCompareHtml(typed, target) {
   return parts.join(' ');
 }
 
+// ---- Word Morph helpers ----
+// Generate 3 "one-letter-off" variants of a word: substitution, insertion,
+// deletion. Used by Word Morph to test exact spelling recall of unfamiliar
+// names and domain vocabulary.
+
+function wordMorphVariants(word) {
+  var w = String(word || '');
+  if (w.length < 3) return [];
+  var isCap = w[0] === w[0].toUpperCase() && w[0] !== w[0].toLowerCase();
+  var lowers = 'abcdefghijklmnopqrstuvwxyz';
+
+  // Preserve casing: compute on lowercase body then re-cap first letter
+  var body = w.slice(1).toLowerCase();
+  var firstLower = w[0].toLowerCase();
+
+  function restore(variant) {
+    if (!variant) return '';
+    return (isCap ? variant[0].toUpperCase() : variant[0]) + variant.slice(1);
+  }
+
+  // Pick a substitution letter that isn't already in the word at that index
+  function randLetterNot(ch) {
+    var c = lowers[Math.floor(Math.random() * lowers.length)];
+    var guard = 0;
+    while (c === ch && guard < 10) { c = lowers[Math.floor(Math.random() * lowers.length)]; guard++; }
+    return c;
+  }
+
+  var variants = [];
+  // Substitution: swap one letter in the body
+  var subIdx = Math.floor(Math.random() * (body.length || 1));
+  var subVariant = firstLower + body.slice(0, subIdx) + randLetterNot(body[subIdx] || 'e') + body.slice(subIdx + 1);
+  variants.push(restore(subVariant));
+
+  // Insertion: add a letter somewhere in the body
+  var insIdx = Math.floor(Math.random() * (body.length + 1));
+  var insLetter = lowers[Math.floor(Math.random() * lowers.length)];
+  var insVariant = firstLower + body.slice(0, insIdx) + insLetter + body.slice(insIdx);
+  variants.push(restore(insVariant));
+
+  // Deletion: remove one letter from the body (only if body is long enough)
+  if (body.length >= 3) {
+    var delIdx = Math.floor(Math.random() * body.length);
+    var delVariant = firstLower + body.slice(0, delIdx) + body.slice(delIdx + 1);
+    variants.push(restore(delVariant));
+  } else {
+    // Fallback: another substitution with a different index
+    var altIdx = (subIdx + 1) % (body.length || 1);
+    var altVariant = firstLower + body.slice(0, altIdx) + randLetterNot(body[altIdx] || 'a') + body.slice(altIdx + 1);
+    variants.push(restore(altVariant));
+  }
+
+  // Dedup against original and each other; return unique non-matching variants
+  var out = [];
+  var seen = {};
+  seen[w.toLowerCase()] = true;
+  for (var i = 0; i < variants.length; i++) {
+    var v = variants[i];
+    var key = v.toLowerCase();
+    if (seen[key]) continue;
+    seen[key] = true;
+    out.push(v);
+  }
+  return out;
+}
+
 // ---- Remix Queue ----
 // Tracks every question a user misses. At round end, the Remix card
 // resurfaces each item in the OPPOSITE game format so the user gets

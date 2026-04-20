@@ -2138,6 +2138,100 @@ function showDictation(bookId, chIdx) {
   renderQ();
 }
 
+// ---- Word Morph — which spelling is real? ----
+function showWordMorph(bookId, chIdx) {
+  var book = getBook(bookId);
+  if (!book || !activeChapters) { showNoContent(bookId, chIdx, 'Word Morph'); return; }
+  var ch = activeChapters[chIdx];
+  if (!ch) { showNoContent(bookId, chIdx, 'Word Morph'); return; }
+  var chTitle = ch.title || 'Chapter ' + (chIdx + 1);
+  var keyTerms = book.keyTerms || [];
+  // Prefer key terms that are long enough to generate good variants
+  var usable = keyTerms.filter(function (kt) { return kt.term && kt.term.length >= 5; });
+  if (usable.length < 3) { showNoContent(bookId, chIdx, 'Word Morph'); return; }
+  var rounds = shuffle(usable.slice()).slice(0, 8);
+
+  var qi = 0, score = 0, points = 0;
+
+  function renderQ() {
+    if (qi >= rounds.length) { showResults(); return; }
+    var kt = rounds[qi];
+    var variants = wordMorphVariants(kt.term);
+    if (variants.length < 2) { qi++; renderQ(); return; }
+    var opts = shuffle([kt.term].concat(variants.slice(0, 3)));
+    var correctIdx = opts.indexOf(kt.term);
+    var context = findContextSentence(kt.term, activeChapters, chIdx);
+    var morphColors = ['#4338ca', '#0891b2', '#be185d', '#ea580c'];
+
+    var h = '<div class="mc-view">';
+    h += '<div class="morph-banner">\u{1F500} Word Morph \u2014 which spelling is real?</div>';
+    h += '<div class="cloze-ref">' + chTitle + '</div>';
+    h += '<div class="dict-progress">' + (qi + 1) + ' of ' + rounds.length + '</div>';
+    h += '<div class="morph-grid">';
+    for (var o = 0; o < opts.length; o++) {
+      h += '<button class="morph-opt" data-idx="' + o + '" style="background:' + morphColors[o % 4] + '">' + opts[o] + '</button>';
+    }
+    h += '</div>';
+    h += '<div class="mc-feedback" id="morph-fb" role="status" aria-live="polite"></div>';
+    h += '<button class="study-btn" id="b-morph-quit" style="margin-top:18px">Back to activities</button>';
+    h += '</div>';
+    document.getElementById('content').innerHTML = h;
+
+    document.getElementById('b-morph-quit').addEventListener('click', function () { showChapterActivities(bookId, chIdx); });
+    var firstAttempt = true;
+    var btns = document.querySelectorAll('.morph-opt');
+    for (var b = 0; b < btns.length; b++) {
+      btns[b].addEventListener('click', function () {
+        var idx = parseInt(this.getAttribute('data-idx'));
+        var fb = document.getElementById('morph-fb');
+        if (idx === correctIdx) {
+          this.classList.add('mc-correct');
+          var contextBlock = context ? '<div class="morph-context">"' + context + '"</div>' : '';
+          fb.innerHTML = '<div class="fb-correct">\u2714 ' + kt.term + ' is the correct spelling.</div>' + contextBlock;
+          if (firstAttempt) { score++; points += 1.0; }
+          var all = document.querySelectorAll('.morph-opt');
+          for (var x = 0; x < all.length; x++) all[x].disabled = true;
+          setTimeout(function () { qi++; renderQ(); }, 2400);
+        } else {
+          if (firstAttempt) {
+            pushToRemixQueue({
+              bookId: bookId, chIdx: chIdx, missedInMode: 'morph',
+              qIndex: qi, ref: '', question: 'Which is the real spelling?',
+              options: opts.slice(), correct: correctIdx,
+              source: context || '', answer: kt.term
+            });
+            firstAttempt = false;
+          }
+          this.classList.add('mc-wrong');
+          this.disabled = true;
+          fb.innerHTML = '<div class="fb-try">Not quite \u2014 look again at the letters.</div>';
+        }
+      });
+    }
+  }
+
+  function showResults() {
+    var pct = Math.round(score / rounds.length * 100);
+    var xpEarned = recordSession(bookId, chIdx, 'morph', points, rounds.length);
+    var emoji = pct >= 80 ? '\u{1F3C6}' : pct >= 60 ? '\u{1F31F}' : '\u{1F4AA}';
+    var msg = pct >= 80 ? 'Outstanding!' : pct >= 60 ? 'Good work!' : 'Notice the letter shapes.';
+    var h = '<div class="cloze-results">';
+    h += '<div class="cr-emoji">' + emoji + '</div>';
+    h += '<div class="cr-score">' + score + ' / ' + rounds.length + '</div>';
+    h += '<div class="cr-pct">' + pct + '%</div>';
+    h += '<div class="cr-xp">+' + xpEarned + ' XP earned</div>';
+    h += '<div class="cr-msg">' + msg + '</div>';
+    h += '<button class="study-btn sb-pri" id="b-morph-retry">\u{1F504} Try Again</button>';
+    h += '<button class="study-btn" id="b-morph-back">Back to activities</button>';
+    h += '</div>';
+    document.getElementById('content').innerHTML = h;
+    document.getElementById('b-morph-retry').addEventListener('click', function () { showWordMorph(bookId, chIdx); });
+    document.getElementById('b-morph-back').addEventListener('click', function () { showChapterActivities(bookId, chIdx); });
+  }
+
+  renderQ();
+}
+
 // ---- Remix Round — resurface missed questions in a different format ----
 function showRemix(bookId, chIdx) {
   var items = getRemixQueue().filter(function (it) {
