@@ -185,8 +185,17 @@ function parseFile(file) {
 // ---- Chapter Detection ----
 // Detects chapter breaks from raw text using multiple heuristics
 
+// Written-out numbers 1-99 for "Chapter Ten", "Chapter Twenty-Two" style
+// books. Anchored to avoid matching "Chapter title ..." with "title" being
+// a non-number word.
+var WORD_NUM_RE = '(?:one|two|three|four|five|six|seven|eight|nine|ten|' +
+  'eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|' +
+  'twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)' +
+  '(?:[\\s-](?:one|two|three|four|five|six|seven|eight|nine))?';
+
 var CHAPTER_PATTERNS = [
   /^chapter\s+\d+/i,
+  new RegExp('^chapter\\s+' + WORD_NUM_RE + '\\b', 'i'),
   /^ch\.\s*\d+/i,
   /^ch\s+\d+/i,
   /^ch\.\d+/i,
@@ -284,6 +293,29 @@ function isFrontMatterChapter(ch) {
   return isFrontMatter(probe);
 }
 
+// Detects title-page / cover-page paragraphs: short lines that are
+// mostly uppercase (>= 55% of letters) and contain at least two words
+// in ALL-CAPS. Used ONLY on the first detected chapter to remove cover
+// dumps without touching real dialogue or content elsewhere.
+function isTitlePageParagraph(text) {
+  if (!text) return false;
+  var t = String(text).trim();
+  if (t.length > 200) return false; // real paragraphs are longer
+  if (t.length < 3) return false;
+  var letters = t.replace(/[^A-Za-z]/g, '');
+  if (letters.length < 6) return false;
+  var uppers = letters.replace(/[^A-Z]/g, '').length;
+  var upperRatio = uppers / letters.length;
+  // Count ALL-CAPS words of 2+ letters
+  var words = t.split(/\s+/);
+  var allCapWords = 0;
+  for (var i = 0; i < words.length; i++) {
+    var w = words[i].replace(/[^A-Za-z]/g, '');
+    if (w.length >= 2 && w === w.toUpperCase()) allCapWords++;
+  }
+  return upperRatio >= 0.55 && allCapWords >= 2;
+}
+
 function detectChapters(rawText) {
   var lines = rawText.split('\n');
   var chapters = [];
@@ -312,9 +344,13 @@ function detectChapters(rawText) {
       }
     }
 
-    // Also check if a short line (< 60 chars) contains "chapter" anywhere
+    // Also check if a short line (< 60 chars) starts with a chapter marker.
+    // Handles "Chapter 10", "Chapter Ten", "Chapter Twenty-Two" equivalently.
     if (!isChapterBreak && line.length < 60) {
-      if (/chapter\s+\d+/i.test(line) || /act\s+(one|two|three|four|five|\d+)/i.test(line) || /^interlude$/i.test(line)) {
+      if (/^chapter\s+\d+/i.test(line)
+          || new RegExp('^chapter\\s+' + WORD_NUM_RE + '\\b', 'i').test(line)
+          || /^act\s+(one|two|three|four|five|six|seven|eight|nine|ten|\d+)/i.test(line)
+          || /^interlude$/i.test(line)) {
         isChapterBreak = true;
       }
     }
@@ -369,13 +405,22 @@ function detectChapters(rawText) {
   chapters = merged;
 
   // Remove front-matter chapters (copyright page, TOC, publisher data,
-  // etc.) only when the signal is strong. Previously we also scrubbed
-  // individual paragraphs inside surviving chapters — that deleted
-  // legitimate short paragraphs and shrank real chapters below the
-  // length threshold below, which caused them to disappear entirely.
+  // etc.) only when the signal is strong.
   chapters = chapters.filter(function (ch) {
     return !isFrontMatterChapter(ch);
   });
+
+  // Strip title-page style paragraphs from the FIRST chapter only. These
+  // are the "BRITE STAR / THE AMERICAN ANTHEM VOLUMES / The Letters"
+  // cover-page dumps that PDF extraction mashes into chapter 1 when the
+  // book has no explicit front-matter signals. Narrowly scoped to chapter 1
+  // to avoid eating legitimate all-caps content (dialogue yelling, signs,
+  // section headings) elsewhere in the book.
+  if (chapters.length > 0) {
+    chapters[0].paragraphs = chapters[0].paragraphs.filter(function (p) {
+      return !isTitlePageParagraph(p);
+    });
+  }
 
   // Remove chapters with very little content (likely blank pages)
   chapters = chapters.filter(function (ch) {
