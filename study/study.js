@@ -843,6 +843,14 @@ function openActivity(mode, fid) {
   if (mode === 'mindmap') { showMindMap(fid); return; }
   if (mode === 'remix') { showRemix(fid); return; }
   // Fallback: mode-specific "not enough content" message
+  showStubForMode(fid, mode);
+}
+
+// Shared per-mode stub renderer. Every mode renderer that can't run
+// (not enough dialogue, too few key terms, no cause-effect prose, etc.)
+// calls showStubForMode(fid, 'modeName') instead of openActivity('stub',
+// fid) so the user sees the real mode name + a specific reason.
+function showStubForMode(fid, mode) {
   var modeLabels = {
     stub: 'This section',
     whosaidit: 'Who Said It',
@@ -852,6 +860,8 @@ function openActivity(mode, fid) {
     dictation: 'Dictation',
     morph: 'Word Morph',
     syllable: 'Syllable Tap',
+    rhyme: 'Rhyme Chain',
+    mindmap: 'Mind Map',
     filblank: 'Fill in the Blank',
     mc: 'Multiple Choice',
     flash: 'Flashcards',
@@ -859,24 +869,30 @@ function openActivity(mode, fid) {
     wordmatch: 'Word Match',
     versebuild: 'Verse Builder',
     challenge: 'Challenge',
+    terms: 'Key Terms',
+    faq: 'FAQ',
     'audio-filblank': 'Audio Fill the Gap'
   };
   var modeReasons = {
-    whosaidit: 'needs at least 4 lines of quoted dialogue with a named speaker.',
-    truefalse: 'needs sentences containing a proper-noun key term.',
+    whosaidit: 'needs at least 2 lines of attributed dialogue (X said: ...).',
+    truefalse: 'needs sentences containing a key-term word.',
     sequence: 'needs at least 3 ordered source quotes.',
-    causeeffect: 'needs at least 3 cause/effect sentences (because, so, led to).',
+    causeeffect: 'needs at least 2 cause-effect sentences (because, so, led to, when).',
     dictation: 'needs source quotes between 30 and 160 characters.',
     morph: 'needs at least 3 key terms of 5+ letters.',
     syllable: 'needs at least 3 key terms of 5+ letters with 2+ syllables.',
-    filblank: 'needs more fill-in-blank items.',
-    mc: 'needs more multiple-choice questions.',
-    flash: 'needs key terms or source verses.',
+    rhyme: 'needs at least 3 rhyme groups of 2+ words in the source quotes.',
+    mindmap: 'needs at least 4 key terms with co-occurrence across source quotes.',
+    filblank: 'needs more fill-in-blank items in this section.',
+    mc: 'needs more multiple-choice questions in this section.',
+    flash: 'needs key terms or source verses in this section.',
     memory: 'needs at least 4 key terms with definitions.',
     wordmatch: 'needs at least 4 terms with definitions.',
     versebuild: 'needs source verses to reconstruct.',
     challenge: 'needs fill-in-blank or multiple-choice items.',
-    'audio-filblank': 'needs fill-in-blank items.'
+    terms: 'does not list key terms for this section yet.',
+    faq: 'does not have FAQ entries for this section yet.',
+    'audio-filblank': 'needs fill-in-blank items in this section.'
   };
   var friendly = modeLabels[mode] || (mode.charAt(0).toUpperCase() + mode.slice(1));
   var reason = modeReasons[mode] || 'does not have enough content in this section yet.';
@@ -899,8 +915,8 @@ function showTermsMode(fid) {
       var verses = getVerses(fid);
       if (!verses.length) {
         fetch('../data/'+fid+'.json').then(function(r){return r.ok?r.json():null;}).then(function(d){
-          if(d){CHAPTER_CACHE[fid]=d;showTermsMode(fid);}else{openActivity('stub',fid);}
-        }).catch(function(){openActivity('stub',fid);}); return;
+          if(d){CHAPTER_CACHE[fid]=d;showTermsMode(fid);}else{showStubForMode(fid,'terms');}
+        }).catch(function(){showStubForMode(fid,'stub');}); return;
       }
       var allText = verses.join(' ');
       var nameSet = {};
@@ -1241,8 +1257,8 @@ function showFillBlank(fid, audioMode) {
       var verses = getVerses(fid);
       if (!verses.length) {
         fetch('../data/' + fid + '.json').then(function(r){return r.ok?r.json():null;}).then(function(d){
-          if(d){CHAPTER_CACHE[fid]=d;showFillBlank(fid, audioMode);}else if(!questions.length){openActivity('stub',fid);}
-        }).catch(function(){if(!questions.length) openActivity('stub',fid);});
+          if(d){CHAPTER_CACHE[fid]=d;showFillBlank(fid, audioMode);}else if(!questions.length){showStubForMode(fid,'filblank');}
+        }).catch(function(){if(!questions.length) showStubForMode(fid,'stub');});
         if (!questions.length) return;
       }
       var smartQ = generateSmartQuestions(fid, tier === 'hard' ? 30 : 20);
@@ -1261,7 +1277,7 @@ function showFillBlank(fid, audioMode) {
       }
     }
 
-    if (!questions.length) { openActivity('stub', fid); return; }
+    if (!questions.length) { showStubForMode(fid, audioMode ? 'audio-filblank' : 'filblank'); return; }
     questions = shuffle(questions).slice(0, tier === 'hard' ? 30 : 20);
     var qi = 0, score = 0, points = 0, firstAttempt = true, hintsUsed = 0;
 
@@ -1423,8 +1439,8 @@ function showMC(fid) {
       var verses = getVerses(fid);
       if (!verses.length) {
         fetch('../data/'+fid+'.json').then(function(r){return r.ok?r.json():null;}).then(function(d){
-          if(d){CHAPTER_CACHE[fid]=d;showMC(fid);}else if(!questions.length){openActivity('stub',fid);}
-        }).catch(function(){if(!questions.length) openActivity('stub',fid);});
+          if(d){CHAPTER_CACHE[fid]=d;showMC(fid);}else if(!questions.length){showStubForMode(fid,'mc');}
+        }).catch(function(){if(!questions.length) showStubForMode(fid,'stub');});
         if (!questions.length) return;
       }
       var smartMC = generateSmartMC(fid, tier === 'hard' ? 10 : 8);
@@ -1447,7 +1463,7 @@ function showMC(fid) {
       }
     }
 
-    if (!questions.length) { openActivity('stub', fid); return; }
+    if (!questions.length) { showStubForMode(fid, 'mc'); return; }
     questions = shuffle(questions).slice(0, tier === 'hard' ? 30 : 20);
     var qi = 0, score = 0, points = 0, mcFirstAttempt = true, mcHintsUsed = 0;
     var mcColors = ['#dc2626', '#2563eb', '#059669', '#d97706'];
@@ -1602,8 +1618,8 @@ function showFlashcards(fid) {
       if (!verses.length) {
         // Try fetching chapter data first
         fetch('../data/' + fid + '.json').then(function(r){return r.ok?r.json():null;}).then(function(d){
-          if(d){CHAPTER_CACHE[fid]=d;showFlashcards(fid);}else{openActivity('stub',fid);}
-        }).catch(function(){openActivity('stub',fid);});
+          if(d){CHAPTER_CACHE[fid]=d;showFlashcards(fid);}else{showStubForMode(fid,'flash');}
+        }).catch(function(){showStubForMode(fid,'stub');});
         return;
       }
       var usable = verses.filter(function(v){return v.length > 20 && v.length < 300;});
@@ -1614,7 +1630,7 @@ function showFlashcards(fid) {
         cards.push({ front: front, back: usable[v], type: 'verse' });
       }
     }
-    if (!cards.length) { openActivity('stub', fid); return; }
+    if (!cards.length) { showStubForMode(fid, 'flash'); return; }
     // Sort due cards first, then shuffle the rest
     var today = new Date().toISOString().slice(0, 10);
     var dueCards = [], otherCards = [];
@@ -1734,12 +1750,12 @@ function showMemoryMatch(fid) {
       var verses = getVerses(fid);
       if (!verses.length) {
         fetch('../data/'+fid+'.json').then(function(r){return r.ok?r.json():null;}).then(function(d){
-          if(d){CHAPTER_CACHE[fid]=d;showMemoryMatch(fid);}else{openActivity('stub',fid);}
-        }).catch(function(){openActivity('stub',fid);}); return;
+          if(d){CHAPTER_CACHE[fid]=d;showMemoryMatch(fid);}else{showStubForMode(fid,'memory');}
+        }).catch(function(){showStubForMode(fid,'stub');}); return;
       }
       var usable = verses.filter(function(v){return v.length>30&&v.length<150;});
       usable = shuffle(usable).slice(0, 6);
-      if (usable.length < 4) { openActivity('stub', fid); return; }
+      if (usable.length < 4) { showStubForMode(fid, 'memory'); return; }
       // Create fake key_terms from verse halves
       data = { key_terms: usable.map(function(v) {
         var words = v.split(/\s+/);
@@ -1888,8 +1904,8 @@ function showListenLearn(fid) {
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         if (d) { CHAPTER_CACHE[fid] = d; showListenLearn(fid); }
-        else { openActivity('stub', fid); }
-      }).catch(function () { openActivity('stub', fid); });
+        else { showStubForMode(fid, 'listen'); }
+      }).catch(function () { showStubForMode(fid, 'listen'); });
     return;
   }
 
@@ -2187,12 +2203,12 @@ function showVerseBuild(fid) {
       var rawVerses = getVerses(fid);
       if (!rawVerses.length) {
         fetch('../data/'+fid+'.json').then(function(r){return r.ok?r.json():null;}).then(function(d){
-          if(d){CHAPTER_CACHE[fid]=d;showVerseBuild(fid);}else{openActivity('stub',fid);}
-        }).catch(function(){openActivity('stub',fid);}); return;
+          if(d){CHAPTER_CACHE[fid]=d;showVerseBuild(fid);}else{showStubForMode(fid,'versebuild');}
+        }).catch(function(){showStubForMode(fid,'stub');}); return;
       }
       var usable = rawVerses.filter(function(v){return v.split(/\s+/).length>=5&&v.split(/\s+/).length<=15;});
       usable = shuffle(usable).slice(0, 5);
-      if (!usable.length) { openActivity('stub', fid); return; }
+      if (!usable.length) { showStubForMode(fid, 'versebuild'); return; }
       verses = usable.map(function(v){ return { ref: '', text: v }; });
     }
     verses = shuffle(verses);
@@ -2306,12 +2322,12 @@ function showWordMatch(fid) {
       var rawV = getVerses(fid);
       if (!rawV.length) {
         fetch('../data/'+fid+'.json').then(function(r){return r.ok?r.json():null;}).then(function(d){
-          if(d){CHAPTER_CACHE[fid]=d;showWordMatch(fid);}else{openActivity('stub',fid);}
-        }).catch(function(){openActivity('stub',fid);}); return;
+          if(d){CHAPTER_CACHE[fid]=d;showWordMatch(fid);}else{showStubForMode(fid,'wordmatch');}
+        }).catch(function(){showStubForMode(fid,'stub');}); return;
       }
       var us = rawV.filter(function(v){return v.length>30&&v.length<150;});
       us = shuffle(us).slice(0, 6);
-      if (us.length < 4) { openActivity('stub', fid); return; }
+      if (us.length < 4) { showStubForMode(fid, 'wordmatch'); return; }
       terms = us.map(function(v) {
         var w = v.split(/\s+/);
         var h = Math.ceil(w.length / 2);
@@ -2452,8 +2468,8 @@ function showChallenge(fid) {
         var verses = getVerses(fid);
         if (!verses.length) {
           fetch('../data/' + fid + '.json').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
-            if (d) { CHAPTER_CACHE[fid] = d; showChallenge(fid); } else { openActivity('stub', fid); }
-          }).catch(function () { openActivity('stub', fid); }); return;
+            if (d) { CHAPTER_CACHE[fid] = d; showChallenge(fid); } else { showStubForMode(fid, 'challenge'); }
+          }).catch(function () { showStubForMode(fid, 'challenge'); }); return;
         }
         var usable = verses.filter(function (v) { return v.length > 30 && v.length < 200; });
         usable = shuffle(usable).slice(0, 10);
@@ -2471,7 +2487,7 @@ function showChallenge(fid) {
           allQ.push({ question: prompt, options: dOpts, correct: dOpts.indexOf(ans), source: usable[vi] });
         }
       }
-      if (allQ.length < 2) { openActivity('stub', fid); return; }
+      if (allQ.length < 2) { showStubForMode(fid, 'challenge'); return; }
       allQ = shuffle(allQ).slice(0, Math.max(50, playerNames.length * 10));
       runGame(playerNames, allQ);
     });
@@ -2603,7 +2619,7 @@ function showChallenge(fid) {
 function showWhoSaidIt(fid) {
   loadContent(fid).then(function (data) {
     var quotes = extractSpeakerQuotesFromCurated(data);
-    if (quotes.length < 2) { openActivity('stub', fid); return; }
+    if (quotes.length < 2) { showStubForMode(fid, 'whosaidit'); return; }
     var idx = IDS.indexOf(fid);
     var secLabel = idx >= 0 ? LBL[idx].split(' \u2014 ')[0] : fid;
     var speakerPool = [];
@@ -2782,7 +2798,7 @@ function generateTrueFalseFromCurated(data, count) {
 function showTrueFalse(fid) {
   loadContent(fid).then(function (data) {
     var questions = generateTrueFalseFromCurated(data, 12);
-    if (questions.length < 2) { openActivity('stub', fid); return; }
+    if (questions.length < 2) { showStubForMode(fid, 'truefalse'); return; }
     var idx = IDS.indexOf(fid);
     var secLabel = idx >= 0 ? LBL[idx].split(' \u2014 ')[0] : fid;
     var qi = 0, score = 0, points = 0, firstAttempt = true;
@@ -2918,7 +2934,7 @@ function parseRef(ref) {
 function showStorySequence(fid) {
   loadContent(fid).then(function (data) {
     var events = generateSequenceFromCurated(data, 6);
-    if (events.length < 3) { openActivity('stub', fid); return; }
+    if (events.length < 3) { showStubForMode(fid, 'sequence'); return; }
     var idx = IDS.indexOf(fid);
     var secLabel = idx >= 0 ? LBL[idx].split(' \u2014 ')[0] : fid;
     var shuffled = shuffle(events.slice());
@@ -3063,7 +3079,7 @@ function extractCauseEffectFromCurated(data) {
 function showCauseEffect(fid) {
   loadContent(fid).then(function (data) {
     var pairs = extractCauseEffectFromCurated(data);
-    if (pairs.length < 2) { openActivity('stub', fid); return; }
+    if (pairs.length < 2) { showStubForMode(fid, 'causeeffect'); return; }
     pairs = shuffle(pairs.slice()).slice(0, 5);
     var effectOrder = shuffle(pairs.map(function (_, i) { return i; }));
     var idx = IDS.indexOf(fid);
@@ -3228,7 +3244,7 @@ function dictationCompareHtml(typed, target) {
 function showDictation(fid) {
   loadContent(fid).then(function (data) {
     var sentences = pickDictationFromCurated(data, 8);
-    if (sentences.length < 3) { openActivity('stub', fid); return; }
+    if (sentences.length < 3) { showStubForMode(fid, 'dictation'); return; }
     var idx = IDS.indexOf(fid);
     var secLabel = idx >= 0 ? LBL[idx].split(' \u2014 ')[0] : fid;
     var qi = 0, totalPoints = 0, plays = 0;
@@ -3351,9 +3367,9 @@ function wordMorphVariants(word) {
 
 function showWordMorph(fid) {
   loadContent(fid).then(function (data) {
-    if (!data || !data.key_terms) { openActivity('stub', fid); return; }
+    if (!data || !data.key_terms) { showStubForMode(fid, 'morph'); return; }
     var usable = data.key_terms.filter(function (t) { return t.term && t.term.length >= 5; });
-    if (usable.length < 3) { openActivity('stub', fid); return; }
+    if (usable.length < 3) { showStubForMode(fid, 'morph'); return; }
     var rounds = shuffle(usable.slice()).slice(0, 8);
     var idx = IDS.indexOf(fid);
     var secLabel = idx >= 0 ? LBL[idx].split(' \u2014 ')[0] : fid;
@@ -3484,9 +3500,9 @@ function splitSyllables(word) {
 
 function showSyllableTap(fid) {
   loadContent(fid).then(function (data) {
-    if (!data || !data.key_terms) { openActivity('stub', fid); return; }
+    if (!data || !data.key_terms) { showStubForMode(fid, 'syllable'); return; }
     var usable = data.key_terms.filter(function (t) { return t.term && t.term.length >= 5 && countSyllables(t.term) >= 2; });
-    if (usable.length < 3) { openActivity('stub', fid); return; }
+    if (usable.length < 3) { showStubForMode(fid, 'syllable'); return; }
     var rounds = shuffle(usable.slice()).slice(0, 8);
     var idx = IDS.indexOf(fid);
     var secLabel = idx >= 0 ? LBL[idx].split(' \u2014 ')[0] : fid;
@@ -3633,7 +3649,7 @@ function showRhymeChain(fid) {
       if (groups[keys[k]].length >= 2) usable.push(keys[k]);
       for (var wi = 0; wi < groups[keys[k]].length; wi++) allWords.push({ word: groups[keys[k]][wi], key: keys[k] });
     }
-    if (usable.length < 3) { openActivity('stub', fid); return; }
+    if (usable.length < 3) { showStubForMode(fid, 'rhyme'); return; }
     usable = shuffle(usable.slice()).slice(0, 8);
     var idx = IDS.indexOf(fid);
     var secLabel = idx >= 0 ? LBL[idx].split(' \u2014 ')[0] : fid;
@@ -3728,7 +3744,7 @@ function showRhymeChain(fid) {
 // ---- Mind Map Builder — force-directed graph of key-term co-occurrence ----
 function showMindMap(fid) {
   loadContent(fid).then(function (data) {
-    if (!data || !data.key_terms || data.key_terms.length < 4) { openActivity('stub', fid); return; }
+    if (!data || !data.key_terms || data.key_terms.length < 4) { showStubForMode(fid, 'mindmap'); return; }
     var keyTerms = data.key_terms.slice(0, 14);
     // Co-occurrence pool: all source_quote strings plus faq answers
     var pool = [];
@@ -3760,7 +3776,7 @@ function showMindMap(fid) {
     var connected = {};
     edges.forEach(function (e) { connected[e.source] = true; connected[e.target] = true; });
     nodes = nodes.filter(function (n) { return connected[n.id]; });
-    if (nodes.length < 3) { openActivity('stub', fid); return; }
+    if (nodes.length < 3) { showStubForMode(fid, 'mindmap'); return; }
     var idRemap = {};
     nodes.forEach(function (n, i) { idRemap[n.id] = i; n.id = i; });
     edges = edges.map(function (e) { return { source: idRemap[e.source], target: idRemap[e.target], weight: e.weight }; }).filter(function (e) { return e.source !== undefined && e.target !== undefined; });
@@ -4228,8 +4244,8 @@ function showStudyMode(fid) {
       var verses = getVerses(fid);
       if (!verses.length) {
         fetch('../data/'+fid+'.json').then(function(r){return r.ok?r.json():null;}).then(function(d){
-          if(d){CHAPTER_CACHE[fid]=d;showStudyMode(fid);}else{openActivity('stub',fid);}
-        }).catch(function(){openActivity('stub',fid);}); return;
+          if(d){CHAPTER_CACHE[fid]=d;showStudyMode(fid);}else{showStubForMode(fid,'summary');}
+        }).catch(function(){showStubForMode(fid,'stub');}); return;
       }
       var secLabel = i >= 0 ? LBL[i] : fid;
       var preview = verses.slice(0, Math.min(5, verses.length)).join(' ');
@@ -4265,7 +4281,7 @@ function showStudyMode(fid) {
     h += '<div class="sv-sec sv-actions"><h3>Practice</h3>';
     h += '<button class="study-btn sb-pri" disabled>Fill in the blank (' + data.fill_blank.length + ')</button>';
     h += '<button class="study-btn sb-pri" disabled>Multiple choice (' + data.multiple_choice.length + ')</button>';
-    h += '<button class="study-btn sb-pri" disabled>Flashcards (coming soon)</button>';
+    h += '<button class="study-btn sb-pri" disabled>Flashcards (' + ((data.key_terms || []).length + (data.fill_blank || []).length) + ')</button>';
     h += '</div>';
     h += '<button class="study-btn" id="b-back-read">Back to activities</button>';
     h += '</div>';
