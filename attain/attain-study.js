@@ -2646,6 +2646,102 @@ function showMindMap(bookId, chIdx) {
   recordSession(bookId, chIdx, 'mindmap', 0.3, 1);
 }
 
+// ---- Chapter Timeline — horizontal sequence of events ----
+function showChapterTimeline(bookId, chIdx) {
+  var book = getBook(bookId);
+  if (!book || !activeChapters) { showNoContent(bookId, chIdx, 'Chapter Timeline'); return; }
+  var ch = activeChapters[chIdx];
+  if (!ch) { showNoContent(bookId, chIdx, 'Chapter Timeline'); return; }
+  var chTitle = ch.title || 'Chapter ' + (chIdx + 1);
+  var paras = (ch.paragraphs || []).filter(function (p) { return p && p.length > 20; });
+  if (paras.length < 3) { showNoContent(bookId, chIdx, 'Chapter Timeline'); return; }
+
+  // Down-sample to ~12 evenly-spaced events across the chapter
+  var maxEvents = 12;
+  var events = [];
+  var step = Math.max(1, Math.floor(paras.length / maxEvents));
+  for (var i = 0; i < paras.length && events.length < maxEvents; i += step) {
+    events.push({
+      idx: i,
+      text: paras[i],
+      preview: paras[i].length > 140 ? paras[i].slice(0, 137) + '...' : paras[i]
+    });
+  }
+
+  var W = 560, H = 280;
+  var lineY = H / 2;
+  var pad = 40;
+  var lineStart = pad, lineEnd = W - pad;
+  var spacing = (lineEnd - lineStart) / Math.max(1, events.length - 1);
+  var selectedIdx = -1;
+
+  function render() {
+    var h = '<div class="cloze-view">';
+    h += '<div class="tl-banner">\u{1F4C5} Chapter Timeline — tap a dot to see the event</div>';
+    h += '<div class="cloze-ref">' + chTitle + '</div>';
+    h += '<div class="tl-wrap">';
+    h += '<svg viewBox="0 0 ' + W + ' ' + H + '" class="tl-svg" role="img" aria-label="Chapter timeline">';
+    // Spine
+    h += '<line x1="' + lineStart + '" y1="' + lineY + '" x2="' + lineEnd + '" y2="' + lineY + '" stroke="#7c3aed" stroke-width="3" stroke-linecap="round" />';
+    // "Start" / "End" markers
+    h += '<text x="' + lineStart + '" y="' + (lineY + 40) + '" text-anchor="start" class="tl-endlabel">Start</text>';
+    h += '<text x="' + lineEnd + '" y="' + (lineY + 40) + '" text-anchor="end" class="tl-endlabel">End</text>';
+    // Dots
+    var dotColors = ['#2563eb', '#059669', '#7c3aed', '#dc2626', '#ea580c', '#0891b2', '#be185d', '#ca8a04'];
+    for (var i = 0; i < events.length; i++) {
+      var cx = events.length === 1 ? (lineStart + lineEnd) / 2 : (lineStart + spacing * i);
+      var cy = lineY;
+      var r = 10 + Math.min(10, Math.sqrt(events[i].text.length / 40));
+      var color = dotColors[i % dotColors.length];
+      var sel = (selectedIdx === i) ? ' tl-dot-selected' : '';
+      // Alternate label above/below so short labels can fit
+      var labelAbove = (i % 2 === 0);
+      var labelY = labelAbove ? (cy - r - 10) : (cy + r + 22);
+      h += '<g data-evt="' + i + '" class="tl-dot' + sel + '" role="button" tabindex="0" aria-label="Event ' + (i + 1) + '">';
+      h += '<circle cx="' + cx.toFixed(1) + '" cy="' + cy + '" r="' + r + '" fill="' + color + '" stroke="#fff" stroke-width="2" />';
+      h += '<text x="' + cx.toFixed(1) + '" y="' + labelY + '" text-anchor="middle" class="tl-idx">' + (i + 1) + '</text>';
+      h += '</g>';
+    }
+    h += '</svg>';
+    h += '</div>';
+
+    if (selectedIdx >= 0) {
+      var ev = events[selectedIdx];
+      h += '<div class="tl-detail">';
+      h += '<div class="tl-detail-head">Event ' + (selectedIdx + 1) + ' of ' + events.length + '</div>';
+      h += '<div class="tl-detail-text">' + ev.preview + '</div>';
+      h += '<div class="tl-detail-nav">';
+      if (selectedIdx > 0) h += '<button class="study-btn" id="b-tl-prev">◀ Previous</button>';
+      h += '<button class="cloze-audio" id="b-tl-hear">🔊 Listen</button>';
+      if (selectedIdx < events.length - 1) h += '<button class="study-btn" id="b-tl-next">Next ▶</button>';
+      h += '</div>';
+      h += '</div>';
+    }
+    h += '<button class="study-btn" id="b-tl-quit" style="margin-top:14px">Back to activities</button>';
+    h += '</div>';
+    document.getElementById('content').innerHTML = h;
+
+    document.getElementById('b-tl-quit').addEventListener('click', function () { showChapterActivities(bookId, chIdx); });
+    var dots = document.querySelectorAll('.tl-dot');
+    for (var d = 0; d < dots.length; d++) {
+      dots[d].addEventListener('click', function () {
+        selectedIdx = parseInt(this.getAttribute('data-evt'));
+        render();
+      });
+    }
+    var prev = document.getElementById('b-tl-prev');
+    if (prev) prev.addEventListener('click', function () { selectedIdx--; render(); });
+    var next = document.getElementById('b-tl-next');
+    if (next) next.addEventListener('click', function () { selectedIdx++; render(); });
+    var hear = document.getElementById('b-tl-hear');
+    if (hear) hear.addEventListener('click', function () {
+      if (selectedIdx >= 0) speakText(events[selectedIdx].text);
+    });
+  }
+  render();
+  recordSession(bookId, chIdx, 'timeline', 0.3, 1);
+}
+
 // ---- Remix Round — resurface missed questions in a different format ----
 function showRemix(bookId, chIdx) {
   var items = getRemixQueue().filter(function (it) {
