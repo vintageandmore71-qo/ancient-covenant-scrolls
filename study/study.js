@@ -738,6 +738,7 @@ function go(fid) {
   h += actCard('\u{1F50A}', 'Audio Fill the Gap', '#16a34a', 'audio-filblank', fid);
   h += actCard('\u270F\uFE0F', 'Multiple Choice', '#7c3aed', 'mc', fid);
   h += actCard('\u{1F4AC}', 'Who Said It', '#a855f7', 'whosaidit', fid);
+  h += actCard('\u2696\uFE0F', 'True or False', '#0ea5e9', 'truefalse', fid);
   h += actCard('\u{1F0CF}', 'Flashcards', '#d97706', 'flash', fid);
   h += actCard('\u{1F4DA}', 'Key Terms', '#0891b2', 'terms', fid);
   h += actCard('\u2753', 'FAQ', '#ea580c', 'faq', fid);
@@ -803,6 +804,7 @@ function openActivity(mode, fid) {
   if (mode === 'wordmatch') { showWordMatch(fid); return; }
   if (mode === 'challenge') { showChallenge(fid); return; }
   if (mode === 'whosaidit') { showWhoSaidIt(fid); return; }
+  if (mode === 'truefalse') { showTrueFalse(fid); return; }
   if (mode === 'remix') { showRemix(fid); return; }
   // Stub for modes not yet built
   document.getElementById('content').innerHTML =
@@ -2617,6 +2619,156 @@ function showWhoSaidIt(fid) {
       document.getElementById('content').innerHTML = h;
       document.getElementById('b-ws-retry').addEventListener('click', function () { showWhoSaidIt(fid); });
       document.getElementById('b-ws-back').addEventListener('click', function () { go(fid); });
+    }
+
+    renderQ();
+  });
+}
+
+// ---- True or False with Why ----
+function generateTrueFalseFromCurated(data, count) {
+  count = count || 10;
+  if (!data || !data.key_terms || data.key_terms.length < 3) return [];
+  var sources = [];
+  if (data.fill_blank) data.fill_blank.forEach(function (q) { if (q.source_quote) sources.push(q.source_quote); });
+  if (data.multiple_choice) data.multiple_choice.forEach(function (q) { if (q.source_quote) sources.push(q.source_quote); });
+  if (!sources.length) return [];
+
+  var termByLower = {};
+  for (var t = 0; t < data.key_terms.length; t++) {
+    termByLower[data.key_terms[t].term.toLowerCase()] = data.key_terms[t].term;
+  }
+
+  var candidates = [];
+  for (var i = 0; i < sources.length; i++) {
+    var sentences = sources[i].match(/[^.!?]+[.!?]+/g) || [sources[i]];
+    for (var s = 0; s < sentences.length; s++) {
+      var sent = sentences[s].trim();
+      if (sent.length < 20 || sent.length > 220) continue;
+      var words = sent.split(/\s+/);
+      for (var w = 0; w < words.length; w++) {
+        var clean = words[w].replace(/[^a-zA-Z\u00C0-\u024F]/g, '');
+        if (clean.length < 3) continue;
+        if (clean[0] !== clean[0].toUpperCase() || clean[0] === clean[0].toLowerCase()) continue;
+        var canonical = termByLower[clean.toLowerCase()];
+        if (canonical) {
+          candidates.push({ sentence: sent, term: canonical, source: sources[i] });
+          break;
+        }
+      }
+    }
+  }
+  if (candidates.length < 3) return [];
+  candidates = shuffle(candidates.slice());
+
+  var questions = [];
+  var used = {};
+  for (var c = 0; c < candidates.length && questions.length < count; c++) {
+    var cand = candidates[c];
+    var key = cand.sentence.slice(0, 50);
+    if (used[key]) continue;
+    used[key] = true;
+    var makeTrue = (questions.length % 2 === 0);
+    if (makeTrue) {
+      questions.push({ statement: cand.sentence, answer: true, source: cand.source, originalTerm: cand.term });
+    } else {
+      var others = data.key_terms.filter(function (kt) {
+        return kt.term.toLowerCase() !== cand.term.toLowerCase() &&
+          kt.term[0] === kt.term[0].toUpperCase() && kt.term[0] !== kt.term[0].toLowerCase();
+      });
+      if (!others.length) continue;
+      var altTerm = shuffle(others.slice())[0].term;
+      var re = new RegExp('\\b' + cand.term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b');
+      var wrong = cand.sentence.replace(re, altTerm);
+      if (wrong === cand.sentence) continue;
+      questions.push({ statement: wrong, answer: false, source: cand.source, originalTerm: cand.term, wrongTerm: altTerm });
+    }
+  }
+  return questions;
+}
+
+function showTrueFalse(fid) {
+  loadContent(fid).then(function (data) {
+    var questions = generateTrueFalseFromCurated(data, 12);
+    if (questions.length < 3) { openActivity('stub', fid); return; }
+    var idx = IDS.indexOf(fid);
+    var secLabel = idx >= 0 ? LBL[idx].split(' \u2014 ')[0] : fid;
+    var qi = 0, score = 0, points = 0, firstAttempt = true;
+
+    function renderQ() {
+      if (qi >= questions.length) { showResults(); return; }
+      var q = questions[qi];
+      firstAttempt = true;
+
+      var h = '<div class="mc-view">';
+      h += '<div class="tf-banner">\u2696\uFE0F True or False with Why \u2014 ' + (qi + 1) + ' of ' + questions.length + '</div>';
+      h += '<div class="mc-ref">' + secLabel + '</div>';
+      h += '<div class="tf-statement">' + q.statement + '</div>';
+      h += '<button class="cloze-audio" id="b-tf-hear">\u{1F50A} Listen</button>';
+      h += '<div class="tf-opts">';
+      h += '<button class="tf-opt tf-true" data-val="true">\u2714 True</button>';
+      h += '<button class="tf-opt tf-false" data-val="false">\u2718 False</button>';
+      h += '</div>';
+      h += '<div class="mc-feedback" id="tf-fb" role="status" aria-live="polite"></div>';
+      h += '<button class="study-btn" id="b-tf-quit" style="margin-top:18px">Back to activities</button>';
+      h += '</div>';
+
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-tf-quit').addEventListener('click', function () { go(fid); });
+      document.getElementById('b-tf-hear').addEventListener('click', function () { speakText(q.statement); });
+
+      var btns = document.querySelectorAll('.tf-opt');
+      for (var b = 0; b < btns.length; b++) {
+        btns[b].addEventListener('click', function () {
+          var val = this.getAttribute('data-val') === 'true';
+          var fb = document.getElementById('tf-fb');
+          if (val === q.answer) {
+            this.classList.add('mc-correct');
+            var whyHtml = '<div class="tf-why"><strong>Why:</strong> ' + q.source + '</div>';
+            if (!q.answer) {
+              whyHtml += '<div class="tf-why-note">The statement swapped <em>' + q.originalTerm + '</em> with <em>' + q.wrongTerm + '</em>.</div>';
+            }
+            fb.innerHTML = '<span class="fb-correct">\u2714 Correct!</span>' + whyHtml;
+            if (firstAttempt) { score++; points += 1.0; }
+            recordQuestionResult(fid, 'truefalse', qi, firstAttempt);
+            var all = document.querySelectorAll('.tf-opt');
+            for (var x = 0; x < all.length; x++) all[x].disabled = true;
+            setTimeout(function () { qi++; renderQ(); }, 3600);
+          } else {
+            if (firstAttempt) {
+              pushToRemixQueue({
+                fid: fid, missedInMode: 'truefalse', qIndex: qi,
+                ref: '', question: 'True or False: ' + q.statement,
+                options: ['True', 'False'], correct: q.answer ? 0 : 1,
+                answer: q.answer ? 'True' : 'False', source_quote: q.source
+              });
+            }
+            firstAttempt = false;
+            this.classList.add('mc-wrong');
+            this.disabled = true;
+            fb.innerHTML = '<span class="fb-try">Not quite \u2014 try the other one.</span>';
+          }
+        });
+      }
+    }
+
+    function showResults() {
+      var pct = Math.round(score / questions.length * 100);
+      var xpEarned = recordSession(fid, 'truefalse', points, questions.length);
+      var emoji = pct >= 80 ? '\u{1F3C6}' : pct >= 60 ? '\u{1F31F}' : '\u{1F4AA}';
+      var msg = pct >= 80 ? 'Outstanding!' : pct >= 60 ? 'Good work!' : 'Read closer!';
+      var h = '<div class="cloze-results">';
+      h += '<div class="cr-emoji">' + emoji + '</div>';
+      h += '<div class="cr-score">' + score + ' / ' + questions.length + '</div>';
+      h += '<div class="cr-pct">' + pct + '%</div>';
+      h += '<div class="cr-xp">+' + xpEarned + ' XP earned</div>';
+      h += '<div class="cr-msg">' + msg + '</div>';
+      h += '<button class="study-btn sb-pri" id="b-tf-retry">\u{1F504} Try Again</button>';
+      h += '<button class="study-btn" id="b-tf-back">Back to activities</button>';
+      h += '</div>';
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-tf-retry').addEventListener('click', function () { showTrueFalse(fid); });
+      document.getElementById('b-tf-back').addEventListener('click', function () { go(fid); });
     }
 
     renderQ();

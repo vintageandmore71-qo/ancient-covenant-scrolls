@@ -548,6 +548,42 @@ body.font-dyslexic .hint-stage-3{font-family:monospace}
   box-shadow:0 3px 12px rgba(168,85,247,.28);
 }
 
+/* True or False with Why */
+.tf-banner{
+  background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;
+  padding:10px 16px;border-radius:12px;margin:0 0 14px 0;
+  font-size:.95em;font-weight:800;text-align:center;
+  box-shadow:0 3px 12px rgba(14,165,233,.28);
+}
+.tf-statement{
+  background:#f8fafc;border:2px solid #e2e8f0;border-radius:14px;
+  padding:20px 18px;margin:0 0 18px 0;font-size:1.1em;line-height:1.7;
+  color:var(--text-main);font-family:var(--font-main);
+}
+body.font-dyslexic .tf-statement{font-family:var(--font-dyslexic);line-height:2.0}
+.tf-opts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.tf-opt{
+  color:#fff;border:none;padding:22px 16px;border-radius:16px;
+  font-size:1.25em;font-weight:800;cursor:pointer;min-height:72px;
+  box-shadow:0 4px 12px rgba(0,0,0,.18);transition:transform .15s,opacity .15s;
+  font-family:var(--font-main);
+}
+body.font-dyslexic .tf-opt{font-family:var(--font-dyslexic)}
+.tf-opt:hover:not(:disabled){transform:scale(1.04)}
+.tf-opt:active:not(:disabled){transform:scale(.96)}
+.tf-opt:disabled{opacity:.4;cursor:default;transform:none}
+.tf-true{background:#059669}
+.tf-false{background:#dc2626}
+.tf-why{
+  background:#f1f5f9;border-left:4px solid #2563eb;
+  padding:12px 14px;border-radius:8px;margin:10px 0 0 0;
+  line-height:1.7;color:#1e293b;font-style:italic;
+}
+.tf-why-note{
+  margin-top:8px;padding:8px 14px;border-radius:8px;
+  background:#fef3c7;color:#7c2d12;font-size:.95em;
+}
+
 /* Remix Round (BUILD_PLAN #4) */
 .act-card-remix{
   background:linear-gradient(135deg,#7c3aed,#ec4899);
