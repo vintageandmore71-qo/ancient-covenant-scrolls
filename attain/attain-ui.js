@@ -805,6 +805,7 @@ function showChapterActivities(bookId, chIdx) {
   h += actCard('\u{1F4D6}', 'Read', '#1d4ed8', 'read');
   h += actCard('\u{1F4CB}', 'Breakdown', '#0891b2', 'breakdown');
   h += actCard('\u{1F9E9}', 'Fill in Blank', '#059669', 'filblank');
+  h += actCard('\u{1F50A}', 'Audio Fill the Gap', '#16a34a', 'audio-filblank');
   h += actCard('\u270F\uFE0F', 'Multiple Choice', '#7c3aed', 'mc');
   h += actCard('\u{1F0CF}', 'Flashcards', '#d97706', 'flash');
   h += actCard('\u{1F9E0}', 'Memory Match', '#dc2626', 'memory');
@@ -867,6 +868,7 @@ function openStudyMode(bookId, chIdx, mode) {
   if (mode === 'read') { showReadMode(bookId, chIdx); return; }
   if (mode === 'breakdown') { showBreakdown(bookId, chIdx); return; }
   if (mode === 'filblank') { showFillBlank(bookId, chIdx); return; }
+  if (mode === 'audio-filblank') { showFillBlank(bookId, chIdx, true); return; }
   if (mode === 'mc') { showMC(bookId, chIdx); return; }
   if (mode === 'flash') { showFlashcards(bookId, chIdx); return; }
   if (mode === 'memory') { showMemoryMatch(bookId, chIdx); return; }

@@ -287,7 +287,7 @@ function showNoContent(bookId, chIdx, modeName) {
 
 // ---- Fill-in-the-Blank (Cloze Deletion) ----
 
-function showFillBlank(bookId, chIdx) {
+function showFillBlank(bookId, chIdx, audioMode) {
   var book = getBook(bookId);
   if (!book || !activeChapters[chIdx]) { showNoContent(bookId, chIdx, 'Fill in the Blank'); return; }
   var ch = activeChapters[chIdx];
@@ -359,6 +359,9 @@ function showFillBlank(bookId, chIdx) {
     h += '<div class="cloze-progress">' + (qi + 1) + ' of ' + questions.length +
       ' <span style="color:' + (tierColors[tier] || '#059669') + ';font-size:.85em">\u25CF ' + (tierNames[tier] || 'Easy') + '</span></div>';
     h += '<div class="cloze-ref">' + chTitle + '</div>';
+    if (audioMode) {
+      h += '<div class="audio-gap-banner">\u{1F50A} Listen and tap the missing word</div>';
+    }
     h += '<div class="cloze-prompt">' +
       q.prompt.replace('______', '<span class="cloze-blank">______</span>') + '</div>';
     h += '<button class="cloze-audio" id="b-cloze-hear" aria-label="Listen to this passage">\u{1F50A} Listen</button>';
@@ -381,6 +384,11 @@ function showFillBlank(bookId, chIdx) {
     document.getElementById('b-cloze-hear').addEventListener('click', function () {
       speakText(q.source || q.prompt.replace('______', correct));
     });
+    if (audioMode) {
+      setTimeout(function () {
+        speakText(q.prompt.replace('______', 'blank'));
+      }, 400);
+    }
     wireHintLadder('b-cloze-hint', 'cloze-hint-display', correct, q.source, function (n) { hintsUsed = n; });
     var btns = document.querySelectorAll('.cloze-opt');
     for (var b = 0; b < btns.length; b++) {
