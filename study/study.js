@@ -768,6 +768,7 @@ function go(fid) {
   h += actCard('\u{1F441}\uFE0F', 'Syllable Tap', '#f59e0b', 'syllable', fid);
   h += actCard('\u{1F3B6}', 'Rhyme Chain', '#0891b2', 'rhyme', fid);
   h += actCard('\u{1F9E0}', 'Mind Map', '#7c3aed', 'mindmap', fid);
+  h += actCard('\u{1F4C5}', 'Timeline', '#0284c7', 'timeline', fid);
   h += actCard('\u{1F0CF}', 'Flashcards', '#d97706', 'flash', fid);
   h += actCard('\u{1F4DA}', 'Key Terms', '#0891b2', 'terms', fid);
   h += actCard('\u2753', 'FAQ', '#ea580c', 'faq', fid);
@@ -841,6 +842,7 @@ function openActivity(mode, fid) {
   if (mode === 'syllable') { showSyllableTap(fid); return; }
   if (mode === 'rhyme') { showRhymeChain(fid); return; }
   if (mode === 'mindmap') { showMindMap(fid); return; }
+  if (mode === 'timeline') { showChapterTimeline(fid); return; }
   if (mode === 'remix') { showRemix(fid); return; }
   // Fallback: mode-specific "not enough content" message
   showStubForMode(fid, mode);
@@ -3920,6 +3922,115 @@ function showMindMap(fid) {
     }
     render();
     recordSession(fid, 'mindmap', 0.3, 1);
+  });
+}
+
+// ---- Chapter Timeline — horizontal sequence of source quotes ----
+function showChapterTimeline(fid) {
+  loadContent(fid).then(function (data) {
+    if (!data) { showStubForMode(fid, 'timeline'); return; }
+    // Pool + dedup
+    var items = [];
+    var seen = {};
+    function addItem(ref, quote) {
+      if (!quote || quote.length < 20) return;
+      var key = quote.slice(0, 60);
+      if (seen[key]) return;
+      seen[key] = true;
+      items.push({ ref: ref || '', quote: quote });
+    }
+    if (data.fill_blank) data.fill_blank.forEach(function (q) { addItem(q.ref, q.source_quote); });
+    if (data.multiple_choice) data.multiple_choice.forEach(function (q) { addItem(q.ref, q.source_quote); });
+    if (items.length < 3) { showStubForMode(fid, 'timeline'); return; }
+    // Sort by parseable ref (chapter:verse), keeping undefined at end
+    items.sort(function (a, b) {
+      var ar = parseRef(a.ref), br = parseRef(b.ref);
+      if (ar === null && br === null) return 0;
+      if (ar === null) return 1;
+      if (br === null) return -1;
+      return ar - br;
+    });
+    // Downsample to 12
+    var maxEvents = 12;
+    var events = [];
+    var step = Math.max(1, Math.floor(items.length / maxEvents));
+    for (var i = 0; i < items.length && events.length < maxEvents; i += step) {
+      events.push({
+        ref: items[i].ref,
+        text: items[i].quote,
+        preview: items[i].quote.length > 200 ? items[i].quote.slice(0, 197) + '...' : items[i].quote
+      });
+    }
+    var idx = IDS.indexOf(fid);
+    var secLabel = idx >= 0 ? LBL[idx].split(' — ')[0] : fid;
+
+    var W = 560, H = 280;
+    var lineY = H / 2;
+    var pad = 40;
+    var lineStart = pad, lineEnd = W - pad;
+    var spacing = (lineEnd - lineStart) / Math.max(1, events.length - 1);
+    var selectedIdx = -1;
+
+    function render() {
+      var h = '<div class="cloze-view">';
+      h += '<div class="tl-banner">\u{1F4C5} Chapter Timeline — tap a dot to see the passage</div>';
+      h += '<div class="cloze-ref">' + secLabel + '</div>';
+      h += '<div class="tl-wrap">';
+      h += '<svg viewBox="0 0 ' + W + ' ' + H + '" class="tl-svg" role="img" aria-label="Chapter timeline">';
+      h += '<line x1="' + lineStart + '" y1="' + lineY + '" x2="' + lineEnd + '" y2="' + lineY + '" stroke="#7c3aed" stroke-width="3" stroke-linecap="round" />';
+      h += '<text x="' + lineStart + '" y="' + (lineY + 40) + '" text-anchor="start" class="tl-endlabel">Start</text>';
+      h += '<text x="' + lineEnd + '" y="' + (lineY + 40) + '" text-anchor="end" class="tl-endlabel">End</text>';
+      var dotColors = ['#2563eb', '#059669', '#7c3aed', '#dc2626', '#ea580c', '#0891b2', '#be185d', '#ca8a04'];
+      for (var i = 0; i < events.length; i++) {
+        var cx = events.length === 1 ? (lineStart + lineEnd) / 2 : (lineStart + spacing * i);
+        var cy = lineY;
+        var r = 10 + Math.min(10, Math.sqrt(events[i].text.length / 40));
+        var color = dotColors[i % dotColors.length];
+        var sel = (selectedIdx === i) ? ' tl-dot-selected' : '';
+        var labelAbove = (i % 2 === 0);
+        var labelY = labelAbove ? (cy - r - 10) : (cy + r + 22);
+        h += '<g data-evt="' + i + '" class="tl-dot' + sel + '" role="button" tabindex="0" aria-label="Event ' + (i + 1) + '">';
+        h += '<circle cx="' + cx.toFixed(1) + '" cy="' + cy + '" r="' + r + '" fill="' + color + '" stroke="#fff" stroke-width="2" />';
+        var idxLabel = events[i].ref || String(i + 1);
+        h += '<text x="' + cx.toFixed(1) + '" y="' + labelY + '" text-anchor="middle" class="tl-idx">' + idxLabel + '</text>';
+        h += '</g>';
+      }
+      h += '</svg>';
+      h += '</div>';
+      if (selectedIdx >= 0) {
+        var ev = events[selectedIdx];
+        h += '<div class="tl-detail">';
+        h += '<div class="tl-detail-head">' + (ev.ref ? ev.ref + '  —  ' : '') + 'Event ' + (selectedIdx + 1) + ' of ' + events.length + '</div>';
+        h += '<div class="tl-detail-text">' + ev.preview + '</div>';
+        h += '<div class="tl-detail-nav">';
+        if (selectedIdx > 0) h += '<button class="study-btn" id="b-tl-prev">◀ Previous</button>';
+        h += '<button class="cloze-audio" id="b-tl-hear">\u{1F50A} Listen</button>';
+        if (selectedIdx < events.length - 1) h += '<button class="study-btn" id="b-tl-next">Next ▶</button>';
+        h += '</div>';
+        h += '</div>';
+      }
+      h += '<button class="study-btn" id="b-tl-quit" style="margin-top:14px">Back to activities</button>';
+      h += '</div>';
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-tl-quit').addEventListener('click', function () { go(fid); });
+      var dots = document.querySelectorAll('.tl-dot');
+      for (var d = 0; d < dots.length; d++) {
+        dots[d].addEventListener('click', function () {
+          selectedIdx = parseInt(this.getAttribute('data-evt'));
+          render();
+        });
+      }
+      var prev = document.getElementById('b-tl-prev');
+      if (prev) prev.addEventListener('click', function () { selectedIdx--; render(); });
+      var next = document.getElementById('b-tl-next');
+      if (next) next.addEventListener('click', function () { selectedIdx++; render(); });
+      var hear = document.getElementById('b-tl-hear');
+      if (hear) hear.addEventListener('click', function () {
+        if (selectedIdx >= 0) speakText(events[selectedIdx].text);
+      });
+    }
+    render();
+    recordSession(fid, 'timeline', 0.3, 1);
   });
 }
 

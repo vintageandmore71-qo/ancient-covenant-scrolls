@@ -411,7 +411,7 @@ are marked `equiv`. Build order is not fixed; pick one at a time.
 | Fill the Gap | `equiv` | Existing Fill in the Blank |
 | Streak Rewards | `equiv` | Existing XP + daily streak |
 | Echo Read | `equiv` | Existing Listen & Learn + tap-any-word |
-| Chapter Timeline | backlog | Already Priority 7 |
+| Chapter Timeline | done | Horizontal spine with up to 12 dots sampled from fill_blank + multiple_choice source_quotes, sorted by ref. Tap dot → detail panel with Prev/Listen/Next. Ref labels under dots |
 | Mind Map Builder | done | Force-directed SVG graph, no library vendor. Nodes = top 14 key terms; edges = co-occurrence in source_quote/FAQ answers; tap node -> context sentence + connected-terms list. 0.3 points (3 XP) per view |
 | Concept Web | backlog | Already Priority 7 |
 | Remix Round | backlog | See #4 above |

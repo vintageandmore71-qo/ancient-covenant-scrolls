@@ -554,6 +554,39 @@ body.font-dyslexic .hint-stage-3{font-family:monospace}
 .stub-view h3{color:#7c3aed;margin-bottom:12px}
 .stub-hint{color:var(--text-muted);font-size:.95em;margin:10px 0 20px 0}
 
+/* Chapter Timeline */
+.tl-banner{
+  background:linear-gradient(135deg,#0284c7,#0369a1);color:#fff;
+  padding:10px 16px;border-radius:12px;margin:0 0 14px 0;
+  font-size:.95em;font-weight:800;text-align:center;
+  box-shadow:0 3px 12px rgba(2,132,199,.28);
+}
+.tl-wrap{
+  background:#f8fafc;border:1px solid #cbd5e1;border-radius:14px;
+  padding:6px;overflow:hidden;
+}
+.tl-svg{width:100%;height:auto;display:block;touch-action:manipulation}
+.tl-dot{cursor:pointer;transition:transform .15s}
+.tl-dot:hover{transform:scale(1.1);transform-origin:center}
+.tl-dot-selected circle{stroke:#111;stroke-width:3}
+.tl-idx{
+  font-size:13px;font-weight:700;fill:var(--text-main);
+  font-family:var(--font-main);pointer-events:none;
+}
+.tl-endlabel{
+  font-size:12px;font-weight:600;fill:var(--text-muted);
+  font-family:var(--font-main);pointer-events:none;
+}
+body.font-dyslexic .tl-idx,body.font-dyslexic .tl-endlabel{font-family:var(--font-dyslexic)}
+.tl-detail{
+  margin-top:12px;background:#e0f2fe;border-left:4px solid #0284c7;
+  padding:14px 16px;border-radius:12px;line-height:1.7;color:#082f49;
+}
+.tl-detail-head{font-weight:800;margin-bottom:6px;color:#0369a1}
+.tl-detail-text{margin-bottom:10px}
+.tl-detail-nav{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tl-detail-nav .study-btn,.tl-detail-nav .cloze-audio{flex:1;min-width:100px;margin:0}
+
 /* Mind Map Builder */
 .mind-banner{
   background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;
