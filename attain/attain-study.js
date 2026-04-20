@@ -1613,6 +1613,119 @@ function showReadMode(bookId, chIdx) {
   window.scrollTo(0, 0);
 }
 
+// ---- Who Said It — match dialogue to speaker ----
+function showWhoSaidIt(bookId, chIdx) {
+  var book = getBook(bookId);
+  if (!book || !activeChapters) { showNoContent(bookId, chIdx, 'Who Said It'); return; }
+  var ch = activeChapters[chIdx];
+  if (!ch) { showNoContent(bookId, chIdx, 'Who Said It'); return; }
+  var chTitle = ch.title || 'Chapter ' + (chIdx + 1);
+
+  // Prefer current-chapter dialogue; fall back to whole book if too sparse
+  var quotes = extractSpeakerQuotes([ch]);
+  if (quotes.length < 4) {
+    quotes = extractSpeakerQuotes(activeChapters);
+  }
+  if (quotes.length < 4) {
+    showNoContent(bookId, chIdx, 'Who Said It');
+    return;
+  }
+
+  // Unique speakers for distractors
+  var speakerPool = [];
+  quotes.forEach(function (q) {
+    if (speakerPool.indexOf(q.speaker) === -1) speakerPool.push(q.speaker);
+  });
+
+  var questions = shuffle(quotes.slice()).slice(0, 15);
+  var qi = 0, score = 0, points = 0, firstAttempt = true, hintsUsed = 0;
+  var mcColors = ['#dc2626', '#2563eb', '#059669', '#d97706'];
+
+  function renderQ() {
+    if (qi >= questions.length) { showResults(); return; }
+    var q = questions[qi];
+    firstAttempt = true;
+    hintsUsed = 0;
+    // Build 4 options: correct speaker + 3 distractors
+    var distractors = shuffle(speakerPool.filter(function (s) { return s !== q.speaker; })).slice(0, 3);
+    while (distractors.length < 3) distractors.push('\u2014');
+    var opts = shuffle([q.speaker].concat(distractors));
+    var correctIdx = opts.indexOf(q.speaker);
+
+    var h = '<div class="mc-view">';
+    h += '<div class="whosaidit-banner">\u{1F4AC} Who Said It</div>';
+    h += '<div class="mc-ref">' + chTitle + '</div>';
+    h += '<div class="mc-question">Who said: <em>"' + q.quote + '"</em></div>';
+    h += '<button class="cloze-audio" id="b-ws-hear">\u{1F50A} Listen</button>';
+    h += '<button class="hint-btn" id="b-ws-hint" aria-label="Get a hint">\u{1F4A1} Hint</button>';
+    h += '<div class="hint-display" id="ws-hint-display" role="status" aria-live="polite"></div>';
+    h += '<div class="mc-opts">';
+    for (var o = 0; o < opts.length; o++) {
+      h += '<button class="mc-opt" data-idx="' + o + '" style="background:' + mcColors[o % 4] + '" aria-label="Option ' + (o + 1) + ': ' + opts[o] + '">' + opts[o] + '</button>';
+    }
+    h += '</div>';
+    h += '<div class="mc-feedback" id="ws-fb" role="status" aria-live="polite"></div>';
+    h += '<button class="study-btn" id="b-ws-quit" style="margin-top:18px" aria-label="Return to activities">Back to activities</button>';
+    h += '</div>';
+
+    document.getElementById('content').innerHTML = h;
+    document.getElementById('b-ws-quit').addEventListener('click', function () { showChapterActivities(bookId, chIdx); });
+    document.getElementById('b-ws-hear').addEventListener('click', function () { speakText(q.quote); });
+    wireHintLadder('b-ws-hint', 'ws-hint-display', q.speaker, q.quote, function (n) { hintsUsed = n; });
+    var btns = document.querySelectorAll('.mc-opt');
+    for (var b = 0; b < btns.length; b++) {
+      btns[b].addEventListener('click', function () {
+        var idx = parseInt(this.getAttribute('data-idx'));
+        var fb = document.getElementById('ws-fb');
+        if (idx === correctIdx) {
+          this.classList.add('mc-correct');
+          fb.innerHTML = '<span class="fb-correct">\u2714 Correct!</span>' +
+            '<div class="cloze-source">\u201C' + q.quote + '\u201D \u2014 ' + q.speaker + '</div>';
+          if (firstAttempt) { score++; points += hintMultiplier(hintsUsed); }
+          recordQuestionResult(bookId, chIdx, 'whosaidit', qi, firstAttempt);
+          var all = document.querySelectorAll('.mc-opt');
+          for (var x = 0; x < all.length; x++) all[x].disabled = true;
+          setTimeout(function () { qi++; renderQ(); }, 2200);
+        } else {
+          if (firstAttempt) {
+            pushToRemixQueue({
+              bookId: bookId, chIdx: chIdx, missedInMode: 'whosaidit',
+              qIndex: qi, ref: '', question: 'Who said: "' + q.quote + '"?',
+              options: opts.slice(), correct: correctIdx,
+              source: q.quote, answer: q.speaker
+            });
+          }
+          firstAttempt = false;
+          this.classList.add('mc-wrong');
+          this.disabled = true;
+          fb.innerHTML = '<span class="fb-try">Not quite \u2014 try another \u2192</span>';
+        }
+      });
+    }
+  }
+
+  function showResults() {
+    var pct = Math.round(score / questions.length * 100);
+    var xpEarned = recordSession(bookId, chIdx, 'whosaidit', points, questions.length);
+    var emoji = pct >= 80 ? '\u{1F3C6}' : pct >= 60 ? '\u{1F31F}' : '\u{1F4AA}';
+    var msg = pct >= 80 ? 'Outstanding!' : pct >= 60 ? 'Good work!' : 'Listen closer!';
+    var h = '<div class="cloze-results">';
+    h += '<div class="cr-emoji">' + emoji + '</div>';
+    h += '<div class="cr-score">' + score + ' / ' + questions.length + '</div>';
+    h += '<div class="cr-pct">' + pct + '%</div>';
+    h += '<div class="cr-xp">+' + xpEarned + ' XP earned</div>';
+    h += '<div class="cr-msg">' + msg + '</div>';
+    h += '<button class="study-btn sb-pri" id="b-ws-retry">\u{1F504} Try Again</button>';
+    h += '<button class="study-btn" id="b-ws-back">Back to activities</button>';
+    h += '</div>';
+    document.getElementById('content').innerHTML = h;
+    document.getElementById('b-ws-retry').addEventListener('click', function () { showWhoSaidIt(bookId, chIdx); });
+    document.getElementById('b-ws-back').addEventListener('click', function () { showChapterActivities(bookId, chIdx); });
+  }
+
+  renderQ();
+}
+
 // ---- Remix Round — resurface missed questions in a different format ----
 function showRemix(bookId, chIdx) {
   var items = getRemixQueue().filter(function (it) {

@@ -887,6 +887,57 @@ function generateMCQuestions(paragraphs, keyTerms, count) {
   return questions;
 }
 
+// ---- Speaker-quote extraction (for Who Said It mode) ----
+// Scans paragraphs for dialogue with attribution. Handles three patterns:
+//   "quote," Name said.
+//   "quote," said Name.
+//   Name said, "quote."
+// Returns { quote, speaker, chapter } records.
+
+var ATTRIB_VERBS = 'said|replied|answered|asked|shouted|whispered|muttered|' +
+  'exclaimed|cried|declared|announced|murmured|called|responded|stated|' +
+  'insisted|continued|added|explained|admitted|agreed|spoke|argued|noted|' +
+  'observed|remarked|told';
+var NAME_PAT = '[A-Z][a-z]+(?:\\s+[A-Z][a-z]+)?';
+
+function extractSpeakerQuotes(chapters) {
+  if (!chapters || !chapters.length) return [];
+  // Pattern 1: "quote..." Name said
+  var p1 = new RegExp('[\u201C"]([^\u201C\u201D"]{10,200})[.?!,]?[\u201D"]\\s*(' + NAME_PAT + ')\\s+(?:' + ATTRIB_VERBS + ')\\b', 'g');
+  // Pattern 2: "quote..." said Name
+  var p2 = new RegExp('[\u201C"]([^\u201C\u201D"]{10,200})[.?!,]?[\u201D"]\\s*(?:' + ATTRIB_VERBS + ')\\s+(' + NAME_PAT + ')\\b', 'g');
+  // Pattern 3: Name said, "quote"  (direct attribution)
+  var p3 = new RegExp('\\b(' + NAME_PAT + ')\\s+(?:' + ATTRIB_VERBS + ')[,:]?\\s*[\u201C"]([^\u201C\u201D"]{10,200})[\u201D"]', 'g');
+  // Pattern 4: Name said to [someone], "quote"  (biblical / narrative)
+  var p4 = new RegExp('\\b(' + NAME_PAT + ')\\s+(?:' + ATTRIB_VERBS + ')\\s+to\\s+[^,"\u201C\u201D]{1,40}[,:]\\s*[\u201C"]([^\u201C\u201D"]{10,200})[\u201D"]', 'g');
+
+  var results = [];
+  var seenQuotes = {};
+  function add(quote, speaker, c) {
+    var key = quote.toLowerCase().slice(0, 60);
+    if (seenQuotes[key]) return;
+    seenQuotes[key] = true;
+    // Skip speakers that look like stop words or single short words
+    var s = speaker.trim();
+    if (s.length < 2) return;
+    results.push({ quote: quote.trim(), speaker: s, chapter: c });
+  }
+
+  for (var c = 0; c < chapters.length; c++) {
+    var text = (chapters[c].paragraphs || []).join(' ');
+    var m;
+    p1.lastIndex = 0;
+    while ((m = p1.exec(text)) !== null) add(m[1], m[2], c);
+    p2.lastIndex = 0;
+    while ((m = p2.exec(text)) !== null) add(m[1], m[2], c);
+    p3.lastIndex = 0;
+    while ((m = p3.exec(text)) !== null) add(m[2], m[1], c);
+    p4.lastIndex = 0;
+    while ((m = p4.exec(text)) !== null) add(m[2], m[1], c);
+  }
+  return results;
+}
+
 // ---- Full Book Import Pipeline ----
 function importBook(title, rawText) {
   var chapters = detectChapters(rawText);
