@@ -1049,6 +1049,8 @@ function initNav() {
 
   // Home button
   document.getElementById('b-home').addEventListener('click', function () { showLibrary(); });
+  var homeBtnEl = document.getElementById('b-attain-home');
+  if (homeBtnEl) homeBtnEl.addEventListener('click', function () { showLibrary(); });
 
   // Title bar click
   var tbEl2 = document.getElementById('tb'); if (tbEl2) tbEl2.addEventListener('click', function () { showLibrary(); });
