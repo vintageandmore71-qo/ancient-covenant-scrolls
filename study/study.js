@@ -575,21 +575,42 @@ var SPEAKER_NAME = '[A-Z][a-zA-Z\u2019\']+(?:\\s+[A-Z][a-zA-Z\u2019\']+)?';
 function extractSpeakerQuotesFromCurated(data) {
   if (!data) return [];
   var sources = [];
+  if (data.summary_plain) sources.push(data.summary_plain);
+  if (data.summary_scholarly) sources.push(data.summary_scholarly);
   if (data.fill_blank) data.fill_blank.forEach(function (q) { if (q.source_quote) sources.push(q.source_quote); });
   if (data.multiple_choice) data.multiple_choice.forEach(function (q) { if (q.source_quote) sources.push(q.source_quote); });
+  if (data.faq) data.faq.forEach(function (q) { if (q.answer) sources.push(q.answer); });
 
+  // Existing curly/straight-quote patterns
   var p1 = new RegExp('[\u201C"]([^\u201C\u201D"]{10,240})[.?!,]?[\u201D"]\\s*(' + SPEAKER_NAME + ')\\s+(?:' + SPEAKER_VERBS + ')\\b', 'g');
   var p2 = new RegExp('[\u201C"]([^\u201C\u201D"]{10,240})[.?!,]?[\u201D"]\\s*(?:' + SPEAKER_VERBS + ')\\s+(' + SPEAKER_NAME + ')\\b', 'g');
   var p3 = new RegExp('\\b(' + SPEAKER_NAME + ')\\s+(?:' + SPEAKER_VERBS + ')[,:]?\\s*[\u201C"]([^\u201C\u201D"]{10,240})[\u201D"]', 'g');
   var p4 = new RegExp('\\b(' + SPEAKER_NAME + ')\\s+(?:' + SPEAKER_VERBS + ')\\s+(?:to|unto)\\s+[^,"\u201C\u201D]{1,50}[,:]\\s*[\u201C"]([^\u201C\u201D"]{10,240})[\u201D"]', 'g');
+  // NEW: colon-introduced unquoted speech — the ACR style.
+  // "YHWH said to Qayin: Where is Hevel your brother?"
+  // "Mosheh said: Remember this day."
+  // Capture name group, then everything after the colon up to sentence end.
+  var p5 = new RegExp('\\b(' + SPEAKER_NAME + ')\\s+(?:' + SPEAKER_VERBS + ')(?:\\s+(?:to|unto)\\s+[^:,\u201C\u201D"]{1,50})?[,:]\\s+([^.!?]{10,240}[.!?])', 'g');
 
   var results = [];
   var seen = {};
+  // Strip leading conjunctions so "And YHWH" becomes "YHWH".
+  function cleanSpeaker(s) {
+    var leadWords = /^(?:And|Then|So|But|Now|Yet|For|Therefore|Behold|When|After|Before|Because|If|Though|While|Until|As|Since)\s+/;
+    var cleaned = String(s || '').trim();
+    while (leadWords.test(cleaned)) cleaned = cleaned.replace(leadWords, '');
+    return cleaned;
+  }
   function add(quote, speaker) {
-    var key = quote.toLowerCase().slice(0, 60);
+    var q = String(quote || '').trim();
+    var s = cleanSpeaker(speaker);
+    if (q.length < 10 || s.length < 2) return;
+    // Reject speaker-candidates that are still a single function word
+    if (/^(The|This|That|These|Those|He|She|They|It|We|You)$/.test(s)) return;
+    var key = q.toLowerCase().slice(0, 60);
     if (seen[key]) return;
     seen[key] = true;
-    results.push({ quote: quote.trim(), speaker: speaker.trim() });
+    results.push({ quote: q, speaker: s });
   }
   for (var i = 0; i < sources.length; i++) {
     var text = sources[i];
@@ -598,6 +619,7 @@ function extractSpeakerQuotesFromCurated(data) {
     p2.lastIndex = 0; while ((m = p2.exec(text)) !== null) add(m[1], m[2]);
     p3.lastIndex = 0; while ((m = p3.exec(text)) !== null) add(m[2], m[1]);
     p4.lastIndex = 0; while ((m = p4.exec(text)) !== null) add(m[2], m[1]);
+    p5.lastIndex = 0; while ((m = p5.exec(text)) !== null) add(m[2], m[1]);
   }
   return results;
 }
@@ -2581,7 +2603,7 @@ function showChallenge(fid) {
 function showWhoSaidIt(fid) {
   loadContent(fid).then(function (data) {
     var quotes = extractSpeakerQuotesFromCurated(data);
-    if (quotes.length < 4) { openActivity('stub', fid); return; }
+    if (quotes.length < 2) { openActivity('stub', fid); return; }
     var idx = IDS.indexOf(fid);
     var secLabel = idx >= 0 ? LBL[idx].split(' \u2014 ')[0] : fid;
     var speakerPool = [];
@@ -2682,36 +2704,48 @@ function showWhoSaidIt(fid) {
 function generateTrueFalseFromCurated(data, count) {
   count = count || 10;
   if (!data || !data.key_terms || data.key_terms.length < 3) return [];
+  // Pool sources broadly — summary + faq + source_quotes. Previously we
+  // only used source_quotes, so sections whose verses don't contain a
+  // proper-noun key term (laws, genealogies) yielded 0 questions.
   var sources = [];
+  if (data.summary_plain) sources.push(data.summary_plain);
+  if (data.summary_scholarly) sources.push(data.summary_scholarly);
   if (data.fill_blank) data.fill_blank.forEach(function (q) { if (q.source_quote) sources.push(q.source_quote); });
   if (data.multiple_choice) data.multiple_choice.forEach(function (q) { if (q.source_quote) sources.push(q.source_quote); });
+  if (data.faq) data.faq.forEach(function (q) { if (q.answer) sources.push(q.answer); });
   if (!sources.length) return [];
 
+  // Accept ANY key term, not just proper nouns. Previously the swap
+  // pool was proper-noun-only, which failed on thematic content
+  // (covenant, sanctuary, holiness, sacrifice).
   var termByLower = {};
   for (var t = 0; t < data.key_terms.length; t++) {
-    termByLower[data.key_terms[t].term.toLowerCase()] = data.key_terms[t].term;
+    if (data.key_terms[t].term && data.key_terms[t].term.length >= 3) {
+      termByLower[data.key_terms[t].term.toLowerCase()] = data.key_terms[t].term;
+    }
   }
 
+  // Match key terms against the full sentence via word-boundary regex,
+  // so compound terms like "Qayin and Hevel" and "Tohu va-Vohu" match
+  // even though splitting by whitespace would miss them.
+  var terms = data.key_terms.filter(function (t) { return t.term && t.term.length >= 3; });
   var candidates = [];
   for (var i = 0; i < sources.length; i++) {
     var sentences = sources[i].match(/[^.!?]+[.!?]+/g) || [sources[i]];
     for (var s = 0; s < sentences.length; s++) {
       var sent = sentences[s].trim();
-      if (sent.length < 20 || sent.length > 220) continue;
-      var words = sent.split(/\s+/);
-      for (var w = 0; w < words.length; w++) {
-        var clean = words[w].replace(/[^a-zA-Z\u00C0-\u024F]/g, '');
-        if (clean.length < 3) continue;
-        if (clean[0] !== clean[0].toUpperCase() || clean[0] === clean[0].toLowerCase()) continue;
-        var canonical = termByLower[clean.toLowerCase()];
-        if (canonical) {
-          candidates.push({ sentence: sent, term: canonical, source: sources[i] });
+      if (sent.length < 20 || sent.length > 260) continue;
+      for (var k = 0; k < terms.length; k++) {
+        var tterm = terms[k].term;
+        var re = new RegExp('\\b' + tterm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+        if (re.test(sent)) {
+          candidates.push({ sentence: sent, term: tterm, source: sources[i] });
           break;
         }
       }
     }
   }
-  if (candidates.length < 3) return [];
+  if (candidates.length < 2) return [];
   candidates = shuffle(candidates.slice());
 
   var questions = [];
@@ -2725,13 +2759,18 @@ function generateTrueFalseFromCurated(data, count) {
     if (makeTrue) {
       questions.push({ statement: cand.sentence, answer: true, source: cand.source, originalTerm: cand.term });
     } else {
+      // Prefer a swap term of similar capitalization so the sentence still
+      // reads grammatically ("Qayin killed Hevel" -> "Noakh killed Hevel"
+      // not "covenant killed Hevel")
+      var origIsCap = cand.term[0] === cand.term[0].toUpperCase() && cand.term[0] !== cand.term[0].toLowerCase();
       var others = data.key_terms.filter(function (kt) {
-        return kt.term.toLowerCase() !== cand.term.toLowerCase() &&
-          kt.term[0] === kt.term[0].toUpperCase() && kt.term[0] !== kt.term[0].toLowerCase();
+        if (!kt.term || kt.term.toLowerCase() === cand.term.toLowerCase()) return false;
+        var kc = kt.term[0] === kt.term[0].toUpperCase() && kt.term[0] !== kt.term[0].toLowerCase();
+        return kc === origIsCap;
       });
       if (!others.length) continue;
       var altTerm = shuffle(others.slice())[0].term;
-      var re = new RegExp('\\b' + cand.term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b');
+      var re = new RegExp('\\b' + cand.term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
       var wrong = cand.sentence.replace(re, altTerm);
       if (wrong === cand.sentence) continue;
       questions.push({ statement: wrong, answer: false, source: cand.source, originalTerm: cand.term, wrongTerm: altTerm });
@@ -2743,7 +2782,7 @@ function generateTrueFalseFromCurated(data, count) {
 function showTrueFalse(fid) {
   loadContent(fid).then(function (data) {
     var questions = generateTrueFalseFromCurated(data, 12);
-    if (questions.length < 3) { openActivity('stub', fid); return; }
+    if (questions.length < 2) { openActivity('stub', fid); return; }
     var idx = IDS.indexOf(fid);
     var secLabel = idx >= 0 ? LBL[idx].split(' \u2014 ')[0] : fid;
     var qi = 0, score = 0, points = 0, firstAttempt = true;
@@ -2831,17 +2870,34 @@ function showTrueFalse(fid) {
 // ---- Story Sequence — reorder scrambled curated events ----
 function generateSequenceFromCurated(data, count) {
   count = count || 6;
-  if (!data || !data.fill_blank || data.fill_blank.length < 3) return [];
-  // fill_blank items already carry ref (e.g. "1:3") so we can order by
-  // numeric ref when available, otherwise keep authored order.
-  var items = data.fill_blank.slice().filter(function (q) { return q.source_quote && q.source_quote.length > 20; });
+  if (!data) return [];
+  // Pool source_quotes from fill_blank AND multiple_choice so sparse
+  // sections (short chapters, prophecy-heavy) still yield enough events.
+  var items = [];
+  if (data.fill_blank) {
+    data.fill_blank.forEach(function (q) {
+      if (q.source_quote && q.source_quote.length > 20) items.push({ ref: q.ref || '', source_quote: q.source_quote });
+    });
+  }
+  if (data.multiple_choice) {
+    data.multiple_choice.forEach(function (q) {
+      if (q.source_quote && q.source_quote.length > 20) items.push({ ref: q.ref || '', source_quote: q.source_quote });
+    });
+  }
+  // Dedup on first 60 chars of quote
+  var seen = {};
+  items = items.filter(function (it) {
+    var k = it.source_quote.slice(0, 60);
+    if (seen[k]) return false;
+    seen[k] = true;
+    return true;
+  });
   if (items.length < 3) return [];
   items.sort(function (a, b) {
     var ar = parseRef(a.ref), br = parseRef(b.ref);
     if (ar === null || br === null) return 0;
     return ar - br;
   });
-  // Downsample to `count`, keeping original order
   var step = Math.max(1, Math.floor(items.length / count));
   var events = [];
   for (var i = 0; i < items.length && events.length < count; i += step) {
@@ -2951,16 +3007,29 @@ function showStorySequence(fid) {
 // ---- Cause and Effect Match ----
 function extractCauseEffectFromCurated(data) {
   if (!data) return [];
+  // Pool summary + faq + source_quotes. Sections whose verses are
+  // simple declaratives (laws, genealogies, prophecy) still have
+  // cause-effect prose in summaries and FAQ answers.
   var sources = [];
+  if (data.summary_plain) sources.push(data.summary_plain);
+  if (data.summary_scholarly) sources.push(data.summary_scholarly);
   if (data.fill_blank) data.fill_blank.forEach(function (q) { if (q.source_quote) sources.push(q.source_quote); });
   if (data.multiple_choice) data.multiple_choice.forEach(function (q) { if (q.source_quote) sources.push(q.source_quote); });
   if (data.faq) data.faq.forEach(function (q) { if (q.answer && q.answer.length > 40) sources.push(q.answer); });
   if (!sources.length) return [];
 
+  // Expanded connective patterns
   var p1 = /([A-Z][^.!?]{15,140})\s+because\s+([^.!?]{10,140})[.!?]/g;
-  var p2 = /([A-Z][^.!?]{15,140}),?\s+(?:so|therefore|thus|hence)\s+([^.!?]{10,140})[.!?]/g;
-  var p3 = /([A-Z][^.!?]{15,140})\s+(?:led to|caused|brought about|resulted in)\s+([^.!?]{10,140})[.!?]/g;
+  var p2 = /([A-Z][^.!?]{15,140}),?\s+(?:so|therefore|thus|hence|consequently|thereby)\s+([^.!?]{10,140})[.!?]/g;
+  var p3 = /([A-Z][^.!?]{15,140})\s+(?:led to|caused|brought about|resulted in|produces?|produced|gives rise to|gave rise to)\s+([^.!?]{10,140})[.!?]/g;
   var p4 = /Because\s+([^,]{10,140}),\s+([^.!?]{10,140})[.!?]/g;
+  // New: "When X, Y" / "Since X, Y" / "If X, then Y" — conditional causation
+  var p5 = /(?:When|Since)\s+([^,]{10,140}),\s+([^.!?]{10,140})[.!?]/g;
+  var p6 = /If\s+([^,]{10,140}),?\s+(?:then\s+)?([^.!?]{10,140})[.!?]/g;
+  // New: "X, which [led|resulted|caused|meant|made] Y"
+  var p7 = /([A-Z][^.!?,]{15,140}),\s+which\s+(?:led to|caused|resulted in|meant|made|brought about)\s+([^.!?]{10,140})[.!?]/g;
+  // New: "As a result of X, Y" / "Due to X, Y"
+  var p8 = /(?:As a result of|Due to|Owing to|Thanks to|Because of)\s+([^,]{10,140}),\s+([^.!?]{10,140})[.!?]/g;
 
   var pairs = [];
   var seen = {};
@@ -2983,6 +3052,10 @@ function extractCauseEffectFromCurated(data) {
     p2.lastIndex = 0; while ((m = p2.exec(text)) !== null) add(m[1], m[2], text);
     p3.lastIndex = 0; while ((m = p3.exec(text)) !== null) add(m[1], m[2], text);
     p4.lastIndex = 0; while ((m = p4.exec(text)) !== null) add(m[1], m[2], text);
+    p5.lastIndex = 0; while ((m = p5.exec(text)) !== null) add(m[1], m[2], text);
+    p6.lastIndex = 0; while ((m = p6.exec(text)) !== null) add(m[1], m[2], text);
+    p7.lastIndex = 0; while ((m = p7.exec(text)) !== null) add(m[1], m[2], text);
+    p8.lastIndex = 0; while ((m = p8.exec(text)) !== null) add(m[1], m[2], text);
   }
   return pairs;
 }
@@ -2990,7 +3063,7 @@ function extractCauseEffectFromCurated(data) {
 function showCauseEffect(fid) {
   loadContent(fid).then(function (data) {
     var pairs = extractCauseEffectFromCurated(data);
-    if (pairs.length < 3) { openActivity('stub', fid); return; }
+    if (pairs.length < 2) { openActivity('stub', fid); return; }
     pairs = shuffle(pairs.slice()).slice(0, 5);
     var effectOrder = shuffle(pairs.map(function (_, i) { return i; }));
     var idx = IDS.indexOf(fid);
