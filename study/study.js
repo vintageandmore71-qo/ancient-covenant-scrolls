@@ -566,6 +566,42 @@ function termUsagePrompt(term, isProperNoun) {
   return 'What does "' + term + '" mean in this passage, and why is it important?';
 }
 
+// ---- Speaker-quote extraction (for Who Said It mode) ----
+var SPEAKER_VERBS = 'said|replied|answered|asked|spoke|declared|announced|' +
+  'called|responded|commanded|charged|proclaimed|blessed|cursed|prayed|' +
+  'swore|vowed|wept|cried|told';
+var SPEAKER_NAME = '[A-Z][a-zA-Z\u2019\']+(?:\\s+[A-Z][a-zA-Z\u2019\']+)?';
+
+function extractSpeakerQuotesFromCurated(data) {
+  if (!data) return [];
+  var sources = [];
+  if (data.fill_blank) data.fill_blank.forEach(function (q) { if (q.source_quote) sources.push(q.source_quote); });
+  if (data.multiple_choice) data.multiple_choice.forEach(function (q) { if (q.source_quote) sources.push(q.source_quote); });
+
+  var p1 = new RegExp('[\u201C"]([^\u201C\u201D"]{10,240})[.?!,]?[\u201D"]\\s*(' + SPEAKER_NAME + ')\\s+(?:' + SPEAKER_VERBS + ')\\b', 'g');
+  var p2 = new RegExp('[\u201C"]([^\u201C\u201D"]{10,240})[.?!,]?[\u201D"]\\s*(?:' + SPEAKER_VERBS + ')\\s+(' + SPEAKER_NAME + ')\\b', 'g');
+  var p3 = new RegExp('\\b(' + SPEAKER_NAME + ')\\s+(?:' + SPEAKER_VERBS + ')[,:]?\\s*[\u201C"]([^\u201C\u201D"]{10,240})[\u201D"]', 'g');
+  var p4 = new RegExp('\\b(' + SPEAKER_NAME + ')\\s+(?:' + SPEAKER_VERBS + ')\\s+(?:to|unto)\\s+[^,"\u201C\u201D]{1,50}[,:]\\s*[\u201C"]([^\u201C\u201D"]{10,240})[\u201D"]', 'g');
+
+  var results = [];
+  var seen = {};
+  function add(quote, speaker) {
+    var key = quote.toLowerCase().slice(0, 60);
+    if (seen[key]) return;
+    seen[key] = true;
+    results.push({ quote: quote.trim(), speaker: speaker.trim() });
+  }
+  for (var i = 0; i < sources.length; i++) {
+    var text = sources[i];
+    var m;
+    p1.lastIndex = 0; while ((m = p1.exec(text)) !== null) add(m[1], m[2]);
+    p2.lastIndex = 0; while ((m = p2.exec(text)) !== null) add(m[1], m[2]);
+    p3.lastIndex = 0; while ((m = p3.exec(text)) !== null) add(m[2], m[1]);
+    p4.lastIndex = 0; while ((m = p4.exec(text)) !== null) add(m[2], m[1]);
+  }
+  return results;
+}
+
 function saveStats(s) {
   try { localStorage.setItem('acr_study_stats', JSON.stringify(s)); } catch (e) {}
 }
@@ -701,6 +737,7 @@ function go(fid) {
   h += actCard('\u{1F9E9}', 'Fill in the Blank', '#059669', 'filblank', fid);
   h += actCard('\u{1F50A}', 'Audio Fill the Gap', '#16a34a', 'audio-filblank', fid);
   h += actCard('\u270F\uFE0F', 'Multiple Choice', '#7c3aed', 'mc', fid);
+  h += actCard('\u{1F4AC}', 'Who Said It', '#a855f7', 'whosaidit', fid);
   h += actCard('\u{1F0CF}', 'Flashcards', '#d97706', 'flash', fid);
   h += actCard('\u{1F4DA}', 'Key Terms', '#0891b2', 'terms', fid);
   h += actCard('\u2753', 'FAQ', '#ea580c', 'faq', fid);
@@ -765,6 +802,7 @@ function openActivity(mode, fid) {
   if (mode === 'versebuild') { showVerseBuild(fid); return; }
   if (mode === 'wordmatch') { showWordMatch(fid); return; }
   if (mode === 'challenge') { showChallenge(fid); return; }
+  if (mode === 'whosaidit') { showWhoSaidIt(fid); return; }
   if (mode === 'remix') { showRemix(fid); return; }
   // Stub for modes not yet built
   document.getElementById('content').innerHTML =
@@ -2482,6 +2520,107 @@ function showChallenge(fid) {
   }
 
   setupScreen();
+}
+
+// ---- Who Said It — match curated dialogue to speaker ----
+function showWhoSaidIt(fid) {
+  loadContent(fid).then(function (data) {
+    var quotes = extractSpeakerQuotesFromCurated(data);
+    if (quotes.length < 4) { openActivity('stub', fid); return; }
+    var idx = IDS.indexOf(fid);
+    var secLabel = idx >= 0 ? LBL[idx].split(' \u2014 ')[0] : fid;
+    var speakerPool = [];
+    quotes.forEach(function (q) {
+      if (speakerPool.indexOf(q.speaker) === -1) speakerPool.push(q.speaker);
+    });
+
+    var questions = shuffle(quotes.slice()).slice(0, 15);
+    var qi = 0, score = 0, points = 0, firstAttempt = true, hintsUsed = 0;
+    var mcColors = ['#dc2626', '#2563eb', '#059669', '#d97706'];
+
+    function renderQ() {
+      if (qi >= questions.length) { showResults(); return; }
+      var q = questions[qi];
+      firstAttempt = true;
+      hintsUsed = 0;
+      var distractors = shuffle(speakerPool.filter(function (s) { return s !== q.speaker; })).slice(0, 3);
+      while (distractors.length < 3) distractors.push('\u2014');
+      var opts = shuffle([q.speaker].concat(distractors));
+      var correctIdx = opts.indexOf(q.speaker);
+
+      var h = '<div class="mc-view">';
+      h += '<div class="whosaidit-banner">\u{1F4AC} Who Said It</div>';
+      h += '<div class="mc-ref">' + secLabel + '</div>';
+      h += '<div class="mc-question">Who said: <em>"' + q.quote + '"</em></div>';
+      h += '<button class="cloze-audio" id="b-ws-hear">\u{1F50A} Listen</button>';
+      h += '<button class="hint-btn" id="b-ws-hint" aria-label="Get a hint">\u{1F4A1} Hint</button>';
+      h += '<div class="hint-display" id="ws-hint-display" role="status" aria-live="polite"></div>';
+      h += '<div class="mc-opts">';
+      for (var o = 0; o < opts.length; o++) {
+        h += '<button class="mc-opt" data-idx="' + o + '" style="background:' + mcColors[o % 4] + '" aria-label="Option ' + (o + 1) + ': ' + opts[o] + '">' + opts[o] + '</button>';
+      }
+      h += '</div>';
+      h += '<div class="mc-feedback" id="ws-fb" role="status" aria-live="polite"></div>';
+      h += '<button class="study-btn" id="b-ws-quit" style="margin-top:18px">Back to activities</button>';
+      h += '</div>';
+
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-ws-quit').addEventListener('click', function () { go(fid); });
+      document.getElementById('b-ws-hear').addEventListener('click', function () { speakText(q.quote); });
+      wireHintLadder('b-ws-hint', 'ws-hint-display', q.speaker, q.quote, function (n) { hintsUsed = n; });
+      var btns = document.querySelectorAll('.mc-opt');
+      for (var b = 0; b < btns.length; b++) {
+        btns[b].addEventListener('click', function () {
+          var idx2 = parseInt(this.getAttribute('data-idx'));
+          var fb = document.getElementById('ws-fb');
+          if (idx2 === correctIdx) {
+            this.classList.add('mc-correct');
+            fb.innerHTML = '<span class="fb-correct">\u2714 Correct!</span>' +
+              '<div class="cloze-source">\u201C' + q.quote + '\u201D \u2014 ' + q.speaker + '</div>';
+            if (firstAttempt) { score++; points += hintMultiplier(hintsUsed); }
+            recordQuestionResult(fid, 'whosaidit', qi, firstAttempt);
+            var all = document.querySelectorAll('.mc-opt');
+            for (var x = 0; x < all.length; x++) all[x].disabled = true;
+            setTimeout(function () { qi++; renderQ(); }, 2200);
+          } else {
+            if (firstAttempt) {
+              pushToRemixQueue({
+                fid: fid, missedInMode: 'whosaidit', qIndex: qi,
+                ref: '', question: 'Who said: "' + q.quote + '"?',
+                options: opts.slice(), correct: correctIdx,
+                answer: q.speaker, source_quote: q.quote
+              });
+            }
+            firstAttempt = false;
+            this.classList.add('mc-wrong');
+            this.disabled = true;
+            fb.innerHTML = '<span class="fb-try">Not quite \u2014 try another \u2192</span>';
+          }
+        });
+      }
+    }
+
+    function showResults() {
+      var pct = Math.round(score / questions.length * 100);
+      var xpEarned = recordSession(fid, 'whosaidit', points, questions.length);
+      var emoji = pct >= 80 ? '\u{1F3C6}' : pct >= 60 ? '\u{1F31F}' : '\u{1F4AA}';
+      var msg = pct >= 80 ? 'Outstanding!' : pct >= 60 ? 'Good work!' : 'Listen closer!';
+      var h = '<div class="cloze-results">';
+      h += '<div class="cr-emoji">' + emoji + '</div>';
+      h += '<div class="cr-score">' + score + ' / ' + questions.length + '</div>';
+      h += '<div class="cr-pct">' + pct + '%</div>';
+      h += '<div class="cr-xp">+' + xpEarned + ' XP earned</div>';
+      h += '<div class="cr-msg">' + msg + '</div>';
+      h += '<button class="study-btn sb-pri" id="b-ws-retry">\u{1F504} Try Again</button>';
+      h += '<button class="study-btn" id="b-ws-back">Back to activities</button>';
+      h += '</div>';
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-ws-retry').addEventListener('click', function () { showWhoSaidIt(fid); });
+      document.getElementById('b-ws-back').addEventListener('click', function () { go(fid); });
+    }
+
+    renderQ();
+  });
 }
 
 // ---- Remix Round — resurface missed questions in a different format ----

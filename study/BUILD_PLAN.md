@@ -420,7 +420,7 @@ are marked `equiv`. Build order is not fixed; pick one at a time.
 | Word Morph | new | Change one letter at a time between two chapter words |
 | Story Sequence | new | Reorder chapter events in correct order |
 | True or False with Why | new | T/F statement + tap the passage that proves it |
-| Who Said It | new | Match a quote to the speaker/character |
+| Who Said It | done | Scans source_quotes (Study) / chapter paragraphs (Attain) for dialogue attribution patterns; MC-style picks speaker from 4 options; Hint Ladder + Remix integration |
 | Cause and Effect Match | new | Pair cause paragraph to effect paragraph |
 | Audio Fill the Gap | done | TTS auto-plays prompt with "blank" spoken at the missing word; reuses FB engine + Hint Ladder; green banner distinguishes mode |
 | Dictation Challenge | new | Hear a verse, type it back; compare |
