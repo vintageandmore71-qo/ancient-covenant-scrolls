@@ -548,6 +548,34 @@ body.font-dyslexic .hint-stage-3{font-family:monospace}
   box-shadow:0 3px 12px rgba(168,85,247,.28);
 }
 
+/* Word Morph */
+.morph-banner{
+  background:linear-gradient(135deg,#4338ca,#3730a3);color:#fff;
+  padding:10px 16px;border-radius:12px;margin:0 0 14px 0;
+  font-size:.95em;font-weight:800;text-align:center;
+  box-shadow:0 3px 12px rgba(67,56,202,.28);
+}
+.morph-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 0 14px 0}
+.morph-opt{
+  color:#fff;border:none;padding:22px 14px;border-radius:16px;
+  font-size:1.3em;font-weight:800;letter-spacing:.02em;
+  cursor:pointer;min-height:80px;
+  box-shadow:0 4px 12px rgba(0,0,0,.18);
+  transition:transform .15s,opacity .15s;
+  font-family:monospace;
+}
+body.font-dyslexic .morph-opt{font-family:var(--font-dyslexic);letter-spacing:.06em}
+.morph-opt:hover:not(:disabled){transform:scale(1.04)}
+.morph-opt:active:not(:disabled){transform:scale(.96)}
+.morph-opt:disabled{opacity:.4;cursor:default;transform:none}
+.morph-opt.mc-correct{background:#16a34a!important}
+.morph-opt.mc-wrong{background:#dc2626!important}
+.morph-context{
+  margin-top:10px;background:#e0e7ff;border-left:4px solid #4338ca;
+  padding:10px 14px;border-radius:8px;font-style:italic;
+  color:#1e1b4b;line-height:1.6;
+}
+
 /* Dictation Challenge */
 .dict-banner{
   background:linear-gradient(135deg,#0891b2,#0e7490);color:#fff;

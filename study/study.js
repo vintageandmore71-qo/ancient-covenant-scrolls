@@ -742,6 +742,7 @@ function go(fid) {
   h += actCard('\u{1F501}', 'Story Sequence', '#ea580c', 'sequence', fid);
   h += actCard('\u21AA', 'Cause & Effect', '#be185d', 'causeeffect', fid);
   h += actCard('\u{1F3A7}', 'Dictation', '#0891b2', 'dictation', fid);
+  h += actCard('\u{1F500}', 'Word Morph', '#4338ca', 'morph', fid);
   h += actCard('\u{1F0CF}', 'Flashcards', '#d97706', 'flash', fid);
   h += actCard('\u{1F4DA}', 'Key Terms', '#0891b2', 'terms', fid);
   h += actCard('\u2753', 'FAQ', '#ea580c', 'faq', fid);
@@ -811,6 +812,7 @@ function openActivity(mode, fid) {
   if (mode === 'sequence') { showStorySequence(fid); return; }
   if (mode === 'causeeffect') { showCauseEffect(fid); return; }
   if (mode === 'dictation') { showDictation(fid); return; }
+  if (mode === 'morph') { showWordMorph(fid); return; }
   if (mode === 'remix') { showRemix(fid); return; }
   // Stub for modes not yet built
   document.getElementById('content').innerHTML =
@@ -3180,6 +3182,138 @@ function showDictation(fid) {
       document.getElementById('content').innerHTML = h;
       document.getElementById('b-dict-retry').addEventListener('click', function () { showDictation(fid); });
       document.getElementById('b-dict-back').addEventListener('click', function () { go(fid); });
+    }
+
+    renderQ();
+  });
+}
+
+// ---- Word Morph — which spelling is real? ----
+function wordMorphVariants(word) {
+  var w = String(word || '');
+  if (w.length < 3) return [];
+  var isCap = w[0] === w[0].toUpperCase() && w[0] !== w[0].toLowerCase();
+  var lowers = 'abcdefghijklmnopqrstuvwxyz';
+  var body = w.slice(1).toLowerCase();
+  var firstLower = w[0].toLowerCase();
+  function restore(v) {
+    if (!v) return '';
+    return (isCap ? v[0].toUpperCase() : v[0]) + v.slice(1);
+  }
+  function randLetterNot(ch) {
+    var c = lowers[Math.floor(Math.random() * lowers.length)];
+    var g = 0;
+    while (c === ch && g < 10) { c = lowers[Math.floor(Math.random() * lowers.length)]; g++; }
+    return c;
+  }
+  var variants = [];
+  var subIdx = Math.floor(Math.random() * (body.length || 1));
+  variants.push(restore(firstLower + body.slice(0, subIdx) + randLetterNot(body[subIdx] || 'e') + body.slice(subIdx + 1)));
+  var insIdx = Math.floor(Math.random() * (body.length + 1));
+  var insLetter = lowers[Math.floor(Math.random() * lowers.length)];
+  variants.push(restore(firstLower + body.slice(0, insIdx) + insLetter + body.slice(insIdx)));
+  if (body.length >= 3) {
+    var delIdx = Math.floor(Math.random() * body.length);
+    variants.push(restore(firstLower + body.slice(0, delIdx) + body.slice(delIdx + 1)));
+  } else {
+    var altIdx = (subIdx + 1) % (body.length || 1);
+    variants.push(restore(firstLower + body.slice(0, altIdx) + randLetterNot(body[altIdx] || 'a') + body.slice(altIdx + 1)));
+  }
+  var out = [];
+  var seen = {};
+  seen[w.toLowerCase()] = true;
+  for (var i = 0; i < variants.length; i++) {
+    var v = variants[i];
+    if (!v || seen[v.toLowerCase()]) continue;
+    seen[v.toLowerCase()] = true;
+    out.push(v);
+  }
+  return out;
+}
+
+function showWordMorph(fid) {
+  loadContent(fid).then(function (data) {
+    if (!data || !data.key_terms) { openActivity('stub', fid); return; }
+    var usable = data.key_terms.filter(function (t) { return t.term && t.term.length >= 5; });
+    if (usable.length < 3) { openActivity('stub', fid); return; }
+    var rounds = shuffle(usable.slice()).slice(0, 8);
+    var idx = IDS.indexOf(fid);
+    var secLabel = idx >= 0 ? LBL[idx].split(' \u2014 ')[0] : fid;
+    var qi = 0, score = 0, points = 0;
+
+    function renderQ() {
+      if (qi >= rounds.length) { showResults(); return; }
+      var kt = rounds[qi];
+      var variants = wordMorphVariants(kt.term);
+      if (variants.length < 2) { qi++; renderQ(); return; }
+      var opts = shuffle([kt.term].concat(variants.slice(0, 3)));
+      var correctIdx = opts.indexOf(kt.term);
+      var context = findTermContextInCuratedData(kt.term, data);
+      var morphColors = ['#4338ca', '#0891b2', '#be185d', '#ea580c'];
+
+      var h = '<div class="mc-view">';
+      h += '<div class="morph-banner">\u{1F500} Word Morph \u2014 which spelling is real?</div>';
+      h += '<div class="cloze-ref">' + secLabel + '</div>';
+      h += '<div class="dict-progress">' + (qi + 1) + ' of ' + rounds.length + '</div>';
+      h += '<div class="morph-grid">';
+      for (var o = 0; o < opts.length; o++) {
+        h += '<button class="morph-opt" data-idx="' + o + '" style="background:' + morphColors[o % 4] + '">' + opts[o] + '</button>';
+      }
+      h += '</div>';
+      h += '<div class="mc-feedback" id="morph-fb" role="status" aria-live="polite"></div>';
+      h += '<button class="study-btn" id="b-morph-quit" style="margin-top:18px">Back to activities</button>';
+      h += '</div>';
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-morph-quit').addEventListener('click', function () { go(fid); });
+      var firstAttempt = true;
+      var btns = document.querySelectorAll('.morph-opt');
+      for (var b = 0; b < btns.length; b++) {
+        btns[b].addEventListener('click', function () {
+          var i2 = parseInt(this.getAttribute('data-idx'));
+          var fb = document.getElementById('morph-fb');
+          if (i2 === correctIdx) {
+            this.classList.add('mc-correct');
+            var ctx = context ? '<div class="morph-context">"' + context + '"</div>' : '';
+            fb.innerHTML = '<div class="fb-correct">\u2714 ' + kt.term + ' is the correct spelling.</div>' + ctx;
+            if (firstAttempt) { score++; points += 1.0; }
+            var all = document.querySelectorAll('.morph-opt');
+            for (var x = 0; x < all.length; x++) all[x].disabled = true;
+            setTimeout(function () { qi++; renderQ(); }, 2400);
+          } else {
+            if (firstAttempt) {
+              pushToRemixQueue({
+                fid: fid, missedInMode: 'morph', qIndex: qi, ref: '',
+                question: 'Which is the real spelling?',
+                options: opts.slice(), correct: correctIdx,
+                answer: kt.term, source_quote: context || ''
+              });
+              firstAttempt = false;
+            }
+            this.classList.add('mc-wrong');
+            this.disabled = true;
+            fb.innerHTML = '<div class="fb-try">Not quite \u2014 look again at the letters.</div>';
+          }
+        });
+      }
+    }
+
+    function showResults() {
+      var pct = Math.round(score / rounds.length * 100);
+      var xpEarned = recordSession(fid, 'morph', points, rounds.length);
+      var emoji = pct >= 80 ? '\u{1F3C6}' : pct >= 60 ? '\u{1F31F}' : '\u{1F4AA}';
+      var msg = pct >= 80 ? 'Outstanding!' : pct >= 60 ? 'Good work!' : 'Notice the letter shapes.';
+      var h = '<div class="cloze-results">';
+      h += '<div class="cr-emoji">' + emoji + '</div>';
+      h += '<div class="cr-score">' + score + ' / ' + rounds.length + '</div>';
+      h += '<div class="cr-pct">' + pct + '%</div>';
+      h += '<div class="cr-xp">+' + xpEarned + ' XP earned</div>';
+      h += '<div class="cr-msg">' + msg + '</div>';
+      h += '<button class="study-btn sb-pri" id="b-morph-retry">\u{1F504} Try Again</button>';
+      h += '<button class="study-btn" id="b-morph-back">Back to activities</button>';
+      h += '</div>';
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-morph-retry').addEventListener('click', function () { showWordMorph(fid); });
+      document.getElementById('b-morph-back').addEventListener('click', function () { go(fid); });
     }
 
     renderQ();

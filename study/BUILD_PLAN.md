@@ -417,7 +417,7 @@ are marked `equiv`. Build order is not fixed; pick one at a time.
 | Remix Round | backlog | See #4 above |
 | Syllable Tap | new | Tap syllable boundaries in chapter words — dyslexia aid |
 | Rhyme Chain | new | Chain rhyming words drawn from the chapter |
-| Word Morph | new | Change one letter at a time between two chapter words |
+| Word Morph | done | Adapted to "which spelling is real?" (dictionary-free). 3 one-letter-off distractors per term (substitution/insertion/deletion); 4-option tap; correct unlocks context sentence; Remix integration. Note: original word-ladder intent preserved via the letter-change mechanism |
 | Story Sequence | done | Tap-to-pick UI (iPad-friendly, no DnD). 6 events per round sampled evenly across chapter; scoring 1.0/0.7/0.4 by attempt count; partial-credit feedback allows retry without reset; Remix integration |
 | True or False with Why | done | TRUE = verbatim sentence from source; FALSE = key-term proper noun swapped. Correct answer reveals source paragraph ("Why:" block) + swap note when applicable. Remix integration |
 | Who Said It | done | Scans source_quotes (Study) / chapter paragraphs (Attain) for dialogue attribution patterns; MC-style picks speaker from 4 options; Hint Ladder + Remix integration |
