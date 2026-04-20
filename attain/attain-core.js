@@ -463,6 +463,82 @@ function getStats() {
 function saveStats(s) {
   try { localStorage.setItem('attain_stats', JSON.stringify(s)); } catch (e) {}
 }
+// ---- Dictation Challenge helpers ----
+
+// Pull N readable sentences (30-140 chars) from chapter paragraphs.
+function pickDictationSentences(paragraphs, count) {
+  count = count || 8;
+  if (!paragraphs || !paragraphs.length) return [];
+  var out = [];
+  for (var p = 0; p < paragraphs.length && out.length < count * 3; p++) {
+    var sents = paragraphs[p].match(/[^.!?]+[.!?]+/g) || [];
+    for (var s = 0; s < sents.length; s++) {
+      var t = sents[s].trim();
+      if (t.length < 30 || t.length > 140) continue;
+      // Avoid sentences that are mostly quoted dialogue (hard to dictate)
+      if ((t.match(/["\u201C\u201D]/g) || []).length > 2) continue;
+      out.push(t);
+    }
+  }
+  // Shuffle and downsample to `count`
+  for (var i = out.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = out[i]; out[i] = out[j]; out[j] = tmp;
+  }
+  return out.slice(0, count);
+}
+
+// Normalize for comparison: lowercase, strip punctuation, collapse whitespace
+function dictationNormalize(s) {
+  return String(s || '')
+    .toLowerCase()
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[\u2013\u2014]/g, '-')
+    .replace(/[^a-z0-9\s']/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Compute a 0..1 similarity score between typed text and target.
+// Perfect match after normalization = 1.0; otherwise word-overlap ratio.
+function dictationScore(typed, target) {
+  var a = dictationNormalize(typed);
+  var b = dictationNormalize(target);
+  if (!a || !b) return 0;
+  if (a === b) return 1.0;
+  var wa = a.split(' ');
+  var wb = b.split(' ');
+  var setB = {};
+  for (var i = 0; i < wb.length; i++) setB[wb[i]] = (setB[wb[i]] || 0) + 1;
+  var matched = 0;
+  for (var k = 0; k < wa.length; k++) {
+    if (setB[wa[k]] > 0) { matched++; setB[wa[k]]--; }
+  }
+  var maxLen = Math.max(wa.length, wb.length);
+  return maxLen === 0 ? 0 : matched / maxLen;
+}
+
+// Render highlighted comparison: correct words green, missing words red.
+function dictationCompareHtml(typed, target) {
+  var wa = dictationNormalize(typed).split(' ').filter(Boolean);
+  var wbOriginal = target.split(/\s+/);
+  var wbNorm = wbOriginal.map(dictationNormalize);
+  var typedSet = {};
+  for (var i = 0; i < wa.length; i++) typedSet[wa[i]] = (typedSet[wa[i]] || 0) + 1;
+  var parts = [];
+  for (var j = 0; j < wbOriginal.length; j++) {
+    var nw = wbNorm[j];
+    if (nw && typedSet[nw] > 0) {
+      parts.push('<span class="dict-hit">' + wbOriginal[j] + '</span>');
+      typedSet[nw]--;
+    } else {
+      parts.push('<span class="dict-miss">' + wbOriginal[j] + '</span>');
+    }
+  }
+  return parts.join(' ');
+}
+
 // ---- Remix Queue ----
 // Tracks every question a user misses. At round end, the Remix card
 // resurfaces each item in the OPPOSITE game format so the user gets

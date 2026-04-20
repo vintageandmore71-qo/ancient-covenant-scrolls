@@ -2045,6 +2045,99 @@ function showCauseEffect(bookId, chIdx) {
   render();
 }
 
+// ---- Dictation Challenge ----
+function showDictation(bookId, chIdx) {
+  var book = getBook(bookId);
+  if (!book || !activeChapters) { showNoContent(bookId, chIdx, 'Dictation'); return; }
+  var ch = activeChapters[chIdx];
+  if (!ch) { showNoContent(bookId, chIdx, 'Dictation'); return; }
+  var chTitle = ch.title || 'Chapter ' + (chIdx + 1);
+
+  var sentences = pickDictationSentences(ch.paragraphs || [], 8);
+  if (sentences.length < 3) { showNoContent(bookId, chIdx, 'Dictation'); return; }
+
+  var qi = 0, totalPoints = 0, plays = 0;
+
+  function renderQ() {
+    if (qi >= sentences.length) { showResults(); return; }
+    var target = sentences[qi];
+    plays = 0;
+
+    var h = '<div class="cloze-view">';
+    h += '<div class="dict-banner">\u{1F3A7} Dictation \u2014 listen, then type what you heard</div>';
+    h += '<div class="cloze-ref">' + chTitle + '</div>';
+    h += '<div class="dict-progress">' + (qi + 1) + ' of ' + sentences.length + '</div>';
+    h += '<button class="cloze-audio dict-play" id="b-dict-play">\u{1F50A} Play sentence</button>';
+    h += '<textarea class="dict-input" id="dict-input" placeholder="Type what you heard..." aria-label="Dictation answer" autocomplete="off" autocapitalize="sentences"></textarea>';
+    h += '<div class="dict-actions">';
+    h += '<button class="study-btn sb-pri" id="b-dict-check">\u2714 Check</button>';
+    h += '<button class="study-btn" id="b-dict-skip">Skip \u27A1</button>';
+    h += '</div>';
+    h += '<div class="dict-feedback" id="dict-fb" role="status" aria-live="polite"></div>';
+    h += '<button class="study-btn" id="b-dict-quit" style="margin-top:18px">Back to activities</button>';
+    h += '</div>';
+    document.getElementById('content').innerHTML = h;
+
+    // Auto-play on render for a beat
+    setTimeout(function () { speakText(target); plays++; }, 350);
+
+    document.getElementById('b-dict-play').addEventListener('click', function () {
+      speakText(target); plays++;
+    });
+    document.getElementById('b-dict-quit').addEventListener('click', function () { showChapterActivities(bookId, chIdx); });
+    document.getElementById('b-dict-skip').addEventListener('click', function () {
+      qi++; renderQ();
+    });
+
+    document.getElementById('b-dict-check').addEventListener('click', function () {
+      var typed = document.getElementById('dict-input').value;
+      var score = dictationScore(typed, target);
+      var penalty = Math.max(0, plays - 1) * 0.05;
+      var points = Math.max(0, score - penalty);
+      totalPoints += points;
+      var fb = document.getElementById('dict-fb');
+      var emoji = score >= 0.95 ? '\u{1F3C6}' : score >= 0.75 ? '\u2714' : score >= 0.4 ? '\u{1F4AA}' : '\u{1F914}';
+      var label = score >= 0.95 ? 'Perfect!' : score >= 0.75 ? 'Very close' : score >= 0.4 ? 'Partial' : 'Keep listening';
+      fb.innerHTML =
+        '<div class="dict-score">' + emoji + ' ' + label + ' \u2014 ' + Math.round(score * 100) + '%</div>' +
+        '<div class="dict-compare">' + dictationCompareHtml(typed, target) + '</div>' +
+        '<button class="study-btn sb-pri" id="b-dict-next" style="margin-top:12px">Next \u27A1</button>';
+      if (score < 0.7) {
+        pushToRemixQueue({
+          bookId: bookId, chIdx: chIdx, missedInMode: 'dictation',
+          qIndex: qi, ref: '', question: 'Dictate: "' + target + '"',
+          options: [], correct: 0, source: target, answer: target
+        });
+      }
+      document.getElementById('b-dict-check').disabled = true;
+      document.getElementById('b-dict-skip').disabled = true;
+      document.getElementById('b-dict-next').addEventListener('click', function () {
+        qi++; renderQ();
+      });
+    });
+  }
+
+  function showResults() {
+    var pct = Math.round((totalPoints / sentences.length) * 100);
+    var xpEarned = recordSession(bookId, chIdx, 'dictation', totalPoints, sentences.length);
+    var emoji = pct >= 80 ? '\u{1F3C6}' : pct >= 60 ? '\u{1F31F}' : '\u{1F4AA}';
+    var msg = pct >= 80 ? 'Outstanding!' : pct >= 60 ? 'Good work!' : 'Try more listens next time.';
+    var h = '<div class="cloze-results">';
+    h += '<div class="cr-emoji">' + emoji + '</div>';
+    h += '<div class="cr-score">' + pct + '% accuracy</div>';
+    h += '<div class="cr-xp">+' + xpEarned + ' XP earned</div>';
+    h += '<div class="cr-msg">' + msg + '</div>';
+    h += '<button class="study-btn sb-pri" id="b-dict-retry">\u{1F504} Try Again</button>';
+    h += '<button class="study-btn" id="b-dict-back">Back to activities</button>';
+    h += '</div>';
+    document.getElementById('content').innerHTML = h;
+    document.getElementById('b-dict-retry').addEventListener('click', function () { showDictation(bookId, chIdx); });
+    document.getElementById('b-dict-back').addEventListener('click', function () { showChapterActivities(bookId, chIdx); });
+  }
+
+  renderQ();
+}
+
 // ---- Remix Round — resurface missed questions in a different format ----
 function showRemix(bookId, chIdx) {
   var items = getRemixQueue().filter(function (it) {
