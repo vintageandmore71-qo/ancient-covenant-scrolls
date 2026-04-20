@@ -427,6 +427,68 @@ function getStats() {
   catch (e) { return {}; }
 }
 
+// ---- Hint Ladder (BUILD_PLAN #5) ----
+// Three progressive hints per question. XP multiplier reduces as hints
+// are used: 0 hints = 1.0 (10 XP), 1 = 0.7 (7 XP), 2 = 0.4 (4 XP),
+// 3 = 0.1 (1 XP). Full answer never auto-revealed; user must still
+// submit a final guess.
+
+function blankedReveal(answer) {
+  if (!answer) return '';
+  var a = String(answer);
+  if (a.length <= 2) return a.toUpperCase();
+  var out = a[0].toUpperCase();
+  for (var i = 1; i < a.length - 1; i++) {
+    out += (a[i] === ' ' ? '  ' : ' _');
+  }
+  out += ' ' + a[a.length - 1].toUpperCase();
+  return out;
+}
+
+function buildHintLadder(answer, passage) {
+  var a = String(answer || '').trim();
+  var wordCount = a ? a.split(/\s+/).length : 0;
+  var lenLabel = wordCount > 1
+    ? (wordCount + ' words, starts with "' + a.charAt(0).toUpperCase() + '"')
+    : ('Starts with "' + a.charAt(0).toUpperCase() + '", ' + a.length + ' letters');
+  var stage1 = '\u{1F4A1} ' + lenLabel;
+  var stage2 = passage ? '\u{1F4D6} "' + String(passage).trim() + '"' : '\u{1F4D6} No passage available for this question.';
+  var stage3 = '\u{1F521} ' + blankedReveal(a);
+  return [stage1, stage2, stage3];
+}
+
+function hintMultiplier(hintsUsed) {
+  if (hintsUsed <= 0) return 1.0;
+  if (hintsUsed === 1) return 0.7;
+  if (hintsUsed === 2) return 0.4;
+  return 0.1;
+}
+
+// Wires up a hint button + display element already present in the DOM.
+// Caller provides element IDs, the answer, the passage, and a callback
+// invoked each time a hint is consumed (to increment its hintsUsed
+// counter for scoring).
+function wireHintLadder(btnId, displayId, answer, passage, onUse) {
+  var btn = document.getElementById(btnId);
+  var disp = document.getElementById(displayId);
+  if (!btn || !disp) return;
+  var stages = buildHintLadder(answer, passage);
+  var labels = ['\u{1F4A1} Hint', '\u{1F4D6} Show passage', '\u{1F521} Reveal pattern'];
+  var used = 0;
+  btn.addEventListener('click', function () {
+    if (used >= 3) return;
+    disp.innerHTML = '<div class="hint-stage hint-stage-' + (used + 1) + '">' + stages[used] + '</div>';
+    used++;
+    if (used < 3) {
+      btn.innerHTML = labels[used];
+    } else {
+      btn.innerHTML = '\u2714 Hints used';
+      btn.disabled = true;
+    }
+    if (typeof onUse === 'function') onUse(used);
+  });
+}
+
 function saveStats(s) {
   try { localStorage.setItem('acr_study_stats', JSON.stringify(s)); } catch (e) {}
 }
@@ -999,13 +1061,14 @@ function showFillBlank(fid) {
 
     if (!questions.length) { openActivity('stub', fid); return; }
     questions = shuffle(questions).slice(0, tier === 'hard' ? 30 : 20);
-    var qi = 0, score = 0, firstAttempt = true;
+    var qi = 0, score = 0, points = 0, firstAttempt = true, hintsUsed = 0;
 
     function renderQ() {
       if (qi >= questions.length) { showResults(); return; }
       var q = questions[qi];
       var correct = q.answer;
       firstAttempt = true;
+      hintsUsed = 0;
       // Pick distractors similar to the correct answer (same length range, alphabetic proximity)
       var candidates = allAns.filter(function (a) {
         return a.toLowerCase() !== correct.toLowerCase();
@@ -1041,6 +1104,8 @@ function showFillBlank(fid) {
       h += '<div class="cloze-prompt">' +
         q.prompt.replace('______', '<span class="cloze-blank">______</span>') + '</div>';
       h += '<button class="cloze-audio" id="b-cloze-hear">\u{1F50A} Listen</button>';
+      h += '<button class="hint-btn" id="b-cloze-hint" aria-label="Get a hint">\u{1F4A1} Hint</button>';
+      h += '<div class="hint-display" id="cloze-hint-display" role="status" aria-live="polite"></div>';
       h += '<div class="cloze-opts">';
       for (var o = 0; o < opts.length; o++) {
         h += '<button class="cloze-opt" data-val="' + opts[o] +
@@ -1056,6 +1121,7 @@ function showFillBlank(fid) {
       document.getElementById('b-cloze-hear').addEventListener('click', function () {
         speakText(q.source_quote || q.prompt.replace('______', correct));
       });
+      wireHintLadder('b-cloze-hint', 'cloze-hint-display', correct, q.source_quote, function (n) { hintsUsed = n; });
       var btns = document.querySelectorAll('.cloze-opt');
       for (var b = 0; b < btns.length; b++) {
         btns[b].addEventListener('click', function () {
@@ -1065,7 +1131,7 @@ function showFillBlank(fid) {
             this.classList.add('cloze-correct');
             fb.innerHTML = '<span class="fb-correct">\u2714 Correct!</span>' +
               '<div class="cloze-source">' + (q.source_quote || '') + '</div>';
-            if (firstAttempt) score++;
+            if (firstAttempt) { score++; points += hintMultiplier(hintsUsed); }
             recordQuestionResult(fid, 'filblank', qi, firstAttempt);
             var all = document.querySelectorAll('.cloze-opt');
             for (var x = 0; x < all.length; x++) all[x].disabled = true;
@@ -1082,7 +1148,7 @@ function showFillBlank(fid) {
 
     function showResults() {
       var pct = Math.round(score / questions.length * 100);
-      var xpEarned = recordSession(fid, 'filblank', score, questions.length);
+      var xpEarned = recordSession(fid, 'filblank', points, questions.length);
       var stats = getStats();
       var lvl = getLevel(stats.xp || 0);
       var mastery = getSectionMastery(fid);
@@ -1165,13 +1231,14 @@ function showMC(fid) {
 
     if (!questions.length) { openActivity('stub', fid); return; }
     questions = shuffle(questions).slice(0, tier === 'hard' ? 30 : 20);
-    var qi = 0, score = 0, mcFirstAttempt = true;
+    var qi = 0, score = 0, points = 0, mcFirstAttempt = true, mcHintsUsed = 0;
     var mcColors = ['#dc2626', '#2563eb', '#059669', '#d97706'];
 
     function renderQ() {
       if (qi >= questions.length) { showResults(); return; }
       var q = questions[qi];
       mcFirstAttempt = true;
+      mcHintsUsed = 0;
 
       var h = '<div class="mc-view">';
       var tierNames = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
@@ -1183,6 +1250,8 @@ function showMC(fid) {
       h += '<div class="mc-ref">' + mcLabel + (q.ref ? ' ' + q.ref : '') + '</div>';
       h += '<div class="mc-question">' + q.question + '</div>';
       h += '<button class="cloze-audio" id="b-mc-hear">\u{1F50A} Listen</button>';
+      h += '<button class="hint-btn" id="b-mc-hint" aria-label="Get a hint">\u{1F4A1} Hint</button>';
+      h += '<div class="hint-display" id="mc-hint-display" role="status" aria-live="polite"></div>';
       h += '<div class="mc-opts">';
       // Child mode: show only 3 options (correct + 2 distractors)
       var mcOpts = q.options.slice();
@@ -1209,6 +1278,9 @@ function showMC(fid) {
       document.getElementById('b-mc-hear').addEventListener('click', function () {
         speakText(q.question);
       });
+      var mcCorrectIdx = (q._childCorrect !== undefined) ? q._childCorrect : q.correct;
+      var mcCorrectText = mcOpts[mcCorrectIdx];
+      wireHintLadder('b-mc-hint', 'mc-hint-display', mcCorrectText, q.source_quote, function (n) { mcHintsUsed = n; });
       var btns = document.querySelectorAll('.mc-opt');
       for (var b = 0; b < btns.length; b++) {
         btns[b].addEventListener('click', function () {
@@ -1219,7 +1291,7 @@ function showMC(fid) {
             this.classList.add('mc-correct');
             fb.innerHTML = '<span class="fb-correct">' + (childMode ? '\u{1F31F} Great job!' : '\u2714 Correct!') + '</span>' +
               '<div class="cloze-source">' + (q.source_quote || '') + '</div>';
-            if (mcFirstAttempt) score++;
+            if (mcFirstAttempt) { score++; points += hintMultiplier(mcHintsUsed); }
             recordQuestionResult(fid, 'mc', qi, mcFirstAttempt);
             var all = document.querySelectorAll('.mc-opt');
             for (var x = 0; x < all.length; x++) all[x].disabled = true;
@@ -1236,7 +1308,7 @@ function showMC(fid) {
 
     function showResults() {
       var pct = Math.round(score / questions.length * 100);
-      var xpEarned = recordSession(fid, 'mc', score, questions.length);
+      var xpEarned = recordSession(fid, 'mc', points, questions.length);
       var stats = getStats();
       var lvl = getLevel(stats.xp || 0);
       var mastery = getSectionMastery(fid);
