@@ -554,6 +554,21 @@ body.font-dyslexic .hint-stage-3{font-family:monospace}
 .stub-view h3{color:#7c3aed;margin-bottom:12px}
 .stub-hint{color:var(--text-muted);font-size:.95em;margin:10px 0 20px 0}
 
+/* Rhyme Chain */
+.rhyme-banner{
+  background:linear-gradient(135deg,#0891b2,#0e7490);color:#fff;
+  padding:10px 16px;border-radius:12px;margin:0 0 14px 0;
+  font-size:.95em;font-weight:800;text-align:center;
+  box-shadow:0 3px 12px rgba(8,145,178,.28);
+}
+.rhyme-seed{
+  font-size:2.4em;font-weight:800;text-align:center;
+  padding:20px;margin:10px 0 14px 0;color:#0e7490;
+  font-family:var(--font-main);letter-spacing:.02em;
+  background:#cffafe;border-radius:16px;
+}
+body.font-dyslexic .rhyme-seed{font-family:var(--font-dyslexic);letter-spacing:.06em}
+
 /* Syllable Tap */
 .syll-banner{
   background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;

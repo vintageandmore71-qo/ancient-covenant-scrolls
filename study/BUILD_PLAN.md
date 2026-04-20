@@ -416,7 +416,7 @@ are marked `equiv`. Build order is not fixed; pick one at a time.
 | Concept Web | backlog | Already Priority 7 |
 | Remix Round | backlog | See #4 above |
 | Syllable Tap | done | Vowel-group heuristic (y-between-vowels as consonant, silent-e except -le endings). 4 count options; correct reveals word in colored syllable chunks; Remix integration. Accuracy >85% on names like Qayin=2, Jerusalem=4, Chanokh=2 |
-| Rhyme Chain | new | Chain rhyming words drawn from the chapter |
+| Rhyme Chain | done | Rime-suffix heuristic (last vowel group + tail) groups chapter words; MC-style "which word rhymes with X?"; correct reveals shared rime suffix; Remix integration |
 | Word Morph | done | Adapted to "which spelling is real?" (dictionary-free). 3 one-letter-off distractors per term (substitution/insertion/deletion); 4-option tap; correct unlocks context sentence; Remix integration. Note: original word-ladder intent preserved via the letter-change mechanism |
 | Story Sequence | done | Tap-to-pick UI (iPad-friendly, no DnD). 6 events per round sampled evenly across chapter; scoring 1.0/0.7/0.4 by attempt count; partial-credit feedback allows retry without reset; Remix integration |
 | True or False with Why | done | TRUE = verbatim sentence from source; FALSE = key-term proper noun swapped. Correct answer reveals source paragraph ("Why:" block) + swap note when applicable. Remix integration |

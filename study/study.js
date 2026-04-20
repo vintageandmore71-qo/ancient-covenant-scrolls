@@ -744,6 +744,7 @@ function go(fid) {
   h += actCard('\u{1F3A7}', 'Dictation', '#0891b2', 'dictation', fid);
   h += actCard('\u{1F500}', 'Word Morph', '#4338ca', 'morph', fid);
   h += actCard('\u{1F441}\uFE0F', 'Syllable Tap', '#f59e0b', 'syllable', fid);
+  h += actCard('\u{1F3B6}', 'Rhyme Chain', '#0891b2', 'rhyme', fid);
   h += actCard('\u{1F0CF}', 'Flashcards', '#d97706', 'flash', fid);
   h += actCard('\u{1F4DA}', 'Key Terms', '#0891b2', 'terms', fid);
   h += actCard('\u2753', 'FAQ', '#ea580c', 'faq', fid);
@@ -815,6 +816,7 @@ function openActivity(mode, fid) {
   if (mode === 'dictation') { showDictation(fid); return; }
   if (mode === 'morph') { showWordMorph(fid); return; }
   if (mode === 'syllable') { showSyllableTap(fid); return; }
+  if (mode === 'rhyme') { showRhymeChain(fid); return; }
   if (mode === 'remix') { showRemix(fid); return; }
   // Fallback: mode-specific "not enough content" message
   var modeLabels = {
@@ -3498,6 +3500,150 @@ function showSyllableTap(fid) {
       document.getElementById('content').innerHTML = h;
       document.getElementById('b-syll-retry').addEventListener('click', function () { showSyllableTap(fid); });
       document.getElementById('b-syll-back').addEventListener('click', function () { go(fid); });
+    }
+
+    renderQ();
+  });
+}
+
+// ---- Rhyme Chain — which word rhymes? ----
+function rhymeKeyStudy(word) {
+  var w = String(word || '').toLowerCase().replace(/[^a-z]/g, '');
+  if (w.length < 3) return '';
+  if (w[w.length - 1] === 'e' && w.length > 3 && !/[^aeiouy]le$/.test(w)) w = w.slice(0, -1);
+  var lastVowelIdx = -1;
+  for (var i = w.length - 1; i >= 0; i--) {
+    if (/[aeiouy]/.test(w[i])) { lastVowelIdx = i; break; }
+  }
+  if (lastVowelIdx < 0) return w;
+  while (lastVowelIdx > 0 && /[aeiouy]/.test(w[lastVowelIdx - 1])) lastVowelIdx--;
+  return w.slice(lastVowelIdx);
+}
+
+function buildRhymeGroupsFromCurated(data) {
+  if (!data) return {};
+  var sources = [];
+  if (data.fill_blank) data.fill_blank.forEach(function (q) { if (q.source_quote) sources.push(q.source_quote); });
+  if (data.multiple_choice) data.multiple_choice.forEach(function (q) { if (q.source_quote) sources.push(q.source_quote); });
+  if (data.faq) data.faq.forEach(function (q) { if (q.answer) sources.push(q.answer); });
+
+  var groups = {};
+  var seen = {};
+  // Basic stop-word skim so "because" / "through" don't pollute groups
+  var stops = {the:1,and:1,for:1,but:1,with:1,from:1,that:1,this:1,have:1,been:1,were:1,will:1,would:1,could:1,should:1,when:1,where:1,which:1,their:1,there:1,they:1,then:1,than:1,into:1,your:1,what:1,been:1,some:1,does:1,unto:1,upon:1};
+  for (var s = 0; s < sources.length; s++) {
+    var words = sources[s].split(/[\s,;:!?.()"\u201C\u201D\[\]{}]+/);
+    for (var w = 0; w < words.length; w++) {
+      var word = words[w].replace(/^[^a-zA-Z]+|[^a-zA-Z]+$/g, '');
+      if (word.length < 4) continue;
+      var lower = word.toLowerCase();
+      if (seen[lower] || stops[lower]) continue;
+      seen[lower] = true;
+      var key = rhymeKeyStudy(word);
+      if (!key || key.length < 2) continue;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(word);
+    }
+  }
+  return groups;
+}
+
+function showRhymeChain(fid) {
+  loadContent(fid).then(function (data) {
+    var groups = buildRhymeGroupsFromCurated(data);
+    var usable = [];
+    var allWords = [];
+    var keys = Object.keys(groups);
+    for (var k = 0; k < keys.length; k++) {
+      if (groups[keys[k]].length >= 2) usable.push(keys[k]);
+      for (var wi = 0; wi < groups[keys[k]].length; wi++) allWords.push({ word: groups[keys[k]][wi], key: keys[k] });
+    }
+    if (usable.length < 3) { openActivity('stub', fid); return; }
+    usable = shuffle(usable.slice()).slice(0, 8);
+    var idx = IDS.indexOf(fid);
+    var secLabel = idx >= 0 ? LBL[idx].split(' \u2014 ')[0] : fid;
+    var qi = 0, score = 0, points = 0;
+
+    function renderQ() {
+      if (qi >= usable.length) { showResults(); return; }
+      var key = usable[qi];
+      var members = groups[key].slice();
+      var seed = shuffle(members)[0];
+      var rhymer = shuffle(members.filter(function (x) { return x !== seed; }))[0];
+      if (!rhymer) { qi++; renderQ(); return; }
+      var nonRhymers = allWords.filter(function (x) { return x.key !== key; });
+      var distractors = shuffle(nonRhymers).slice(0, 3).map(function (x) { return x.word; });
+      while (distractors.length < 3) distractors.push('\u2014');
+      var opts = shuffle([rhymer].concat(distractors));
+      var correctIdx = opts.indexOf(rhymer);
+      var firstAttempt = true;
+      var rhymeColors = ['#0891b2', '#059669', '#7c3aed', '#d97706'];
+
+      var h = '<div class="mc-view">';
+      h += '<div class="rhyme-banner">\u{1F3B6} Rhyme Chain \u2014 which word rhymes?</div>';
+      h += '<div class="cloze-ref">' + secLabel + '</div>';
+      h += '<div class="dict-progress">' + (qi + 1) + ' of ' + usable.length + '</div>';
+      h += '<div class="rhyme-seed">' + seed + '</div>';
+      h += '<button class="cloze-audio" id="b-rhy-hear">\u{1F50A} Listen</button>';
+      h += '<div class="mc-opts">';
+      for (var o = 0; o < opts.length; o++) {
+        h += '<button class="mc-opt rhyme-opt" data-idx="' + o + '" style="background:' + rhymeColors[o % 4] + '">' + opts[o] + '</button>';
+      }
+      h += '</div>';
+      h += '<div class="mc-feedback" id="rhy-fb" role="status" aria-live="polite"></div>';
+      h += '<button class="study-btn" id="b-rhy-quit" style="margin-top:18px">Back to activities</button>';
+      h += '</div>';
+      document.getElementById('content').innerHTML = h;
+
+      document.getElementById('b-rhy-quit').addEventListener('click', function () { go(fid); });
+      document.getElementById('b-rhy-hear').addEventListener('click', function () { speakText(seed); });
+      var btns = document.querySelectorAll('.rhyme-opt');
+      for (var b = 0; b < btns.length; b++) {
+        btns[b].addEventListener('click', function () {
+          var i2 = parseInt(this.getAttribute('data-idx'));
+          var fb = document.getElementById('rhy-fb');
+          if (i2 === correctIdx) {
+            this.classList.add('mc-correct');
+            fb.innerHTML = '<div class="fb-correct">\u2714 ' + seed + ' and ' + rhymer + ' rhyme. (\u2026' + key + ')</div>';
+            if (firstAttempt) { score++; points += 1.0; }
+            var all = document.querySelectorAll('.rhyme-opt');
+            for (var x = 0; x < all.length; x++) all[x].disabled = true;
+            setTimeout(function () { qi++; renderQ(); }, 2200);
+          } else {
+            if (firstAttempt) {
+              pushToRemixQueue({
+                fid: fid, missedInMode: 'rhyme', qIndex: qi, ref: '',
+                question: 'Which word rhymes with "' + seed + '"?',
+                options: opts.slice(), correct: correctIdx,
+                answer: rhymer, source_quote: ''
+              });
+              firstAttempt = false;
+            }
+            this.classList.add('mc-wrong');
+            this.disabled = true;
+            fb.innerHTML = '<div class="fb-try">Not that one \u2014 try another.</div>';
+          }
+        });
+      }
+    }
+
+    function showResults() {
+      var pct = Math.round(score / usable.length * 100);
+      var xpEarned = recordSession(fid, 'rhyme', points, usable.length);
+      var emoji = pct >= 80 ? '\u{1F3C6}' : pct >= 60 ? '\u{1F31F}' : '\u{1F4AA}';
+      var msg = pct >= 80 ? 'Outstanding!' : pct >= 60 ? 'Good work!' : 'Say them aloud.';
+      var h = '<div class="cloze-results">';
+      h += '<div class="cr-emoji">' + emoji + '</div>';
+      h += '<div class="cr-score">' + score + ' / ' + usable.length + '</div>';
+      h += '<div class="cr-pct">' + pct + '%</div>';
+      h += '<div class="cr-xp">+' + xpEarned + ' XP earned</div>';
+      h += '<div class="cr-msg">' + msg + '</div>';
+      h += '<button class="study-btn sb-pri" id="b-rhy-retry">\u{1F504} Try Again</button>';
+      h += '<button class="study-btn" id="b-rhy-back">Back to activities</button>';
+      h += '</div>';
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-rhy-retry').addEventListener('click', function () { showRhymeChain(fid); });
+      document.getElementById('b-rhy-back').addEventListener('click', function () { go(fid); });
     }
 
     renderQ();
