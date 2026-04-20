@@ -816,12 +816,51 @@ function openActivity(mode, fid) {
   if (mode === 'morph') { showWordMorph(fid); return; }
   if (mode === 'syllable') { showSyllableTap(fid); return; }
   if (mode === 'remix') { showRemix(fid); return; }
-  // Stub for modes not yet built
+  // Fallback: mode-specific "not enough content" message
+  var modeLabels = {
+    stub: 'This section',
+    whosaidit: 'Who Said It',
+    truefalse: 'True or False',
+    sequence: 'Story Sequence',
+    causeeffect: 'Cause & Effect',
+    dictation: 'Dictation',
+    morph: 'Word Morph',
+    syllable: 'Syllable Tap',
+    filblank: 'Fill in the Blank',
+    mc: 'Multiple Choice',
+    flash: 'Flashcards',
+    memory: 'Memory Match',
+    wordmatch: 'Word Match',
+    versebuild: 'Verse Builder',
+    challenge: 'Challenge',
+    'audio-filblank': 'Audio Fill the Gap'
+  };
+  var modeReasons = {
+    whosaidit: 'needs at least 4 lines of quoted dialogue with a named speaker.',
+    truefalse: 'needs sentences containing a proper-noun key term.',
+    sequence: 'needs at least 3 ordered source quotes.',
+    causeeffect: 'needs at least 3 cause/effect sentences (because, so, led to).',
+    dictation: 'needs source quotes between 30 and 160 characters.',
+    morph: 'needs at least 3 key terms of 5+ letters.',
+    syllable: 'needs at least 3 key terms of 5+ letters with 2+ syllables.',
+    filblank: 'needs more fill-in-blank items.',
+    mc: 'needs more multiple-choice questions.',
+    flash: 'needs key terms or source verses.',
+    memory: 'needs at least 4 key terms with definitions.',
+    wordmatch: 'needs at least 4 terms with definitions.',
+    versebuild: 'needs source verses to reconstruct.',
+    challenge: 'needs fill-in-blank or multiple-choice items.',
+    'audio-filblank': 'needs fill-in-blank items.'
+  };
+  var friendly = modeLabels[mode] || (mode.charAt(0).toUpperCase() + mode.slice(1));
+  var reason = modeReasons[mode] || 'does not have enough content in this section yet.';
   document.getElementById('content').innerHTML =
-    '<div class="study-view"><div class="sv-sec">' +
-    '<h3>' + mode.charAt(0).toUpperCase() + mode.slice(1) + ' Mode</h3>' +
-    '<p class="study-na">This activity is coming soon.</p>' +
-    '<button class="study-btn" id="b-back-grid">Back to activities</button>' +
+    '<div class="study-view"><div class="sv-sec stub-view">' +
+    '<div class="stub-emoji" aria-hidden="true">\u{1F4ED}</div>' +
+    '<h3>' + friendly + '</h3>' +
+    '<p class="study-na">This activity ' + reason + '</p>' +
+    '<p class="stub-hint">Try a different section, or pick another activity in this one.</p>' +
+    '<button class="study-btn sb-pri" id="b-back-grid">Back to activities</button>' +
     '</div></div>';
   document.getElementById('b-back-grid').addEventListener('click', function () { go(fid); });
 }

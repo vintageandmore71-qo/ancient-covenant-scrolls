@@ -548,6 +548,12 @@ body.font-dyslexic .hint-stage-3{font-family:monospace}
   box-shadow:0 3px 12px rgba(168,85,247,.28);
 }
 
+/* Stub / not-enough-content screen */
+.stub-view{text-align:center;padding:40px 24px}
+.stub-emoji{font-size:3em;margin-bottom:10px}
+.stub-view h3{color:#7c3aed;margin-bottom:12px}
+.stub-hint{color:var(--text-muted);font-size:.95em;margin:10px 0 20px 0}
+
 /* Syllable Tap */
 .syll-banner{
   background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;
