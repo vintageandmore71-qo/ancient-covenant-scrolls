@@ -2464,13 +2464,22 @@ function showMindMap(bookId, chIdx) {
   var keyTerms = (book.keyTerms || []).slice(0, 10);
   if (keyTerms.length < 4) { showNoContent(bookId, chIdx, 'Mind Map'); return; }
 
-  // Build co-occurrence edges: two terms share an edge if they appear
-  // together in any paragraph. Edge weight = number of shared paragraphs.
+  // Build co-occurrence edges. Tiered to avoid empty mind maps on short
+  // chapters where key terms don't share a single paragraph:
+  //   Tier 1: paragraph-level co-occurrence (strong signal)
+  //   Tier 2: 3-paragraph sliding window (mid signal)
+  //   Tier 3: whole-chapter co-occurrence (weak but guarantees edges)
   var nodes = keyTerms.map(function (t, i) {
     return { id: i, label: t.term, count: t.frequency || 1, selected: false };
   });
   var edges = [];
   var edgeMap = {};
+  function addEdge(a, b, weight) {
+    var key = Math.min(a, b) + ',' + Math.max(a, b);
+    if (!edgeMap[key]) { edgeMap[key] = { source: Math.min(a, b), target: Math.max(a, b), weight: 0 }; edges.push(edgeMap[key]); }
+    edgeMap[key].weight += weight;
+  }
+  // Tier 1: same paragraph
   for (var p = 0; p < paras.length; p++) {
     var lower = paras[p].toLowerCase();
     var present = [];
@@ -2479,17 +2488,49 @@ function showMindMap(bookId, chIdx) {
       if (re.test(lower)) present.push(n);
     }
     for (var a = 0; a < present.length; a++) {
-      for (var b = a + 1; b < present.length; b++) {
-        var key = present[a] + ',' + present[b];
-        if (!edgeMap[key]) { edgeMap[key] = { source: present[a], target: present[b], weight: 0 }; edges.push(edgeMap[key]); }
-        edgeMap[key].weight++;
+      for (var b = a + 1; b < present.length; b++) addEdge(present[a], present[b], 2);
+    }
+  }
+
+  function connectedCount() {
+    var connected = {};
+    edges.forEach(function (e) { connected[e.source] = true; connected[e.target] = true; });
+    return Object.keys(connected).length;
+  }
+
+  // Tier 2: 3-paragraph sliding window if tier 1 isn't enough
+  if (connectedCount() < 3 && paras.length >= 2) {
+    for (var wStart = 0; wStart < paras.length; wStart++) {
+      var windowText = paras.slice(wStart, wStart + 3).join(' ').toLowerCase();
+      var presentW = [];
+      for (var nw = 0; nw < nodes.length; nw++) {
+        var rew = new RegExp('\\b' + nodes[nw].label.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b');
+        if (rew.test(windowText)) presentW.push(nw);
+      }
+      for (var aw = 0; aw < presentW.length; aw++) {
+        for (var bw = aw + 1; bw < presentW.length; bw++) addEdge(presentW[aw], presentW[bw], 1);
       }
     }
   }
-  // Drop nodes that have no edges at all (visually isolated)
-  var connected = {};
-  edges.forEach(function (e) { connected[e.source] = true; connected[e.target] = true; });
-  nodes = nodes.filter(function (n) { return connected[n.id]; });
+
+  // Tier 3: whole-chapter fallback so mind map always renders when there
+  // are >=3 key terms in the chapter, even if they're scattered
+  if (connectedCount() < 3) {
+    var chapterText = paras.join(' ').toLowerCase();
+    var presentC = [];
+    for (var nc = 0; nc < nodes.length; nc++) {
+      var rec = new RegExp('\\b' + nodes[nc].label.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b');
+      if (rec.test(chapterText)) presentC.push(nc);
+    }
+    for (var ac = 0; ac < presentC.length; ac++) {
+      for (var bc = ac + 1; bc < presentC.length; bc++) addEdge(presentC[ac], presentC[bc], 1);
+    }
+  }
+
+  // Drop nodes that STILL have no edges (truly isolated)
+  var finalConnected = {};
+  edges.forEach(function (e) { finalConnected[e.source] = true; finalConnected[e.target] = true; });
+  nodes = nodes.filter(function (n) { return finalConnected[n.id]; });
   if (nodes.length < 3) { showNoContent(bookId, chIdx, 'Mind Map'); return; }
   // Remap IDs since we filtered
   var idRemap = {};
