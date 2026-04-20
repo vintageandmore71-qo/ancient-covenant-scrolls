@@ -1623,10 +1623,10 @@ function showWhoSaidIt(bookId, chIdx) {
 
   // Prefer current-chapter dialogue; fall back to whole book if too sparse
   var quotes = extractSpeakerQuotes([ch]);
-  if (quotes.length < 4) {
+  if (quotes.length < 3) {
     quotes = extractSpeakerQuotes(activeChapters);
   }
-  if (quotes.length < 4) {
+  if (quotes.length < 2) {
     showNoContent(bookId, chIdx, 'Who Said It');
     return;
   }
@@ -1735,7 +1735,7 @@ function showTrueFalse(bookId, chIdx) {
   var chTitle = ch.title || 'Chapter ' + (chIdx + 1);
 
   var questions = generateTrueFalseQuestions(ch.paragraphs || [], book.keyTerms || [], 12);
-  if (questions.length < 3) { showNoContent(bookId, chIdx, 'True or False'); return; }
+  if (questions.length < 2) { showNoContent(bookId, chIdx, 'True or False'); return; }
 
   var qi = 0, score = 0, points = 0, firstAttempt = true;
 
@@ -1941,7 +1941,7 @@ function showCauseEffect(bookId, chIdx) {
     }
     pairs = extractCauseEffectPairs(all);
   }
-  if (pairs.length < 3) { showNoContent(bookId, chIdx, 'Cause and Effect'); return; }
+  if (pairs.length < 2) { showNoContent(bookId, chIdx, 'Cause and Effect'); return; }
   pairs = shuffle(pairs.slice()).slice(0, 5);
   // Independent shuffle of the effect column so the match is not trivial
   var effectOrder = shuffle(pairs.map(function (_, i) { return i; }));

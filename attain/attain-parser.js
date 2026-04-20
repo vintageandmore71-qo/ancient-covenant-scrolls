@@ -910,30 +910,38 @@ function extractSpeakerQuotes(chapters) {
   var p3 = new RegExp('\\b(' + NAME_PAT + ')\\s+(?:' + ATTRIB_VERBS + ')[,:]?\\s*[\u201C"]([^\u201C\u201D"]{10,200})[\u201D"]', 'g');
   // Pattern 4: Name said to [someone], "quote"  (biblical / narrative)
   var p4 = new RegExp('\\b(' + NAME_PAT + ')\\s+(?:' + ATTRIB_VERBS + ')\\s+to\\s+[^,"\u201C\u201D]{1,40}[,:]\\s*[\u201C"]([^\u201C\u201D"]{10,200})[\u201D"]', 'g');
+  // Pattern 5: Name said[:] unquoted-speech-until-sentence-end
+  //   Covers biblical / scholarly text that uses colon-introduced speech
+  //   without quote marks: "YHWH said to Qayin: Where is Hevel?"
+  var p5 = new RegExp('\\b(' + NAME_PAT + ')\\s+(?:' + ATTRIB_VERBS + ')(?:\\s+(?:to|unto)\\s+[^:,\u201C\u201D"]{1,50})?[,:]\\s+([^.!?]{10,240}[.!?])', 'g');
 
   var results = [];
   var seenQuotes = {};
+  function cleanSpeaker(s) {
+    var leadWords = /^(?:And|Then|So|But|Now|Yet|For|Therefore|Behold|When|After|Before|Because|If|Though|While|Until|As|Since)\s+/;
+    var cleaned = String(s || '').trim();
+    while (leadWords.test(cleaned)) cleaned = cleaned.replace(leadWords, '');
+    return cleaned;
+  }
   function add(quote, speaker, c) {
-    var key = quote.toLowerCase().slice(0, 60);
+    var q = String(quote || '').trim();
+    var s = cleanSpeaker(speaker);
+    if (q.length < 10 || s.length < 2) return;
+    if (/^(The|This|That|These|Those|He|She|They|It|We|You)$/.test(s)) return;
+    var key = q.toLowerCase().slice(0, 60);
     if (seenQuotes[key]) return;
     seenQuotes[key] = true;
-    // Skip speakers that look like stop words or single short words
-    var s = speaker.trim();
-    if (s.length < 2) return;
-    results.push({ quote: quote.trim(), speaker: s, chapter: c });
+    results.push({ quote: q, speaker: s, chapter: c });
   }
 
   for (var c = 0; c < chapters.length; c++) {
     var text = (chapters[c].paragraphs || []).join(' ');
     var m;
-    p1.lastIndex = 0;
-    while ((m = p1.exec(text)) !== null) add(m[1], m[2], c);
-    p2.lastIndex = 0;
-    while ((m = p2.exec(text)) !== null) add(m[1], m[2], c);
-    p3.lastIndex = 0;
-    while ((m = p3.exec(text)) !== null) add(m[2], m[1], c);
-    p4.lastIndex = 0;
-    while ((m = p4.exec(text)) !== null) add(m[2], m[1], c);
+    p1.lastIndex = 0; while ((m = p1.exec(text)) !== null) add(m[1], m[2], c);
+    p2.lastIndex = 0; while ((m = p2.exec(text)) !== null) add(m[1], m[2], c);
+    p3.lastIndex = 0; while ((m = p3.exec(text)) !== null) add(m[2], m[1], c);
+    p4.lastIndex = 0; while ((m = p4.exec(text)) !== null) add(m[2], m[1], c);
+    p5.lastIndex = 0; while ((m = p5.exec(text)) !== null) add(m[2], m[1], c);
   }
   return results;
 }
@@ -947,31 +955,28 @@ function extractSpeakerQuotes(chapters) {
 function generateTrueFalseQuestions(paragraphs, keyTerms, count) {
   count = count || 10;
   if (!keyTerms || keyTerms.length < 3) return [];
-  var termByLower = {};
-  for (var t = 0; t < keyTerms.length; t++) {
-    termByLower[keyTerms[t].term.toLowerCase()] = keyTerms[t].term;
-  }
-  // Candidate sentences: must contain a key-term proper noun, 20-200 chars
+  // Match key terms against sentences via word-boundary regex, so
+  // compound terms (multi-word) match even though whitespace-split
+  // word iteration would miss them. Accept ANY key term, not just
+  // proper nouns — thematic terms (covenant, sanctuary) qualify.
+  var terms = keyTerms.filter(function (t) { return t.term && t.term.length >= 3; });
   var candidates = [];
   for (var p = 0; p < paragraphs.length; p++) {
     var sentences = paragraphs[p].match(/[^.!?]+[.!?]+/g) || [];
     for (var s = 0; s < sentences.length; s++) {
       var sent = sentences[s].trim();
-      if (sent.length < 20 || sent.length > 200) continue;
-      var words = sent.split(/\s+/);
-      for (var w = 0; w < words.length; w++) {
-        var clean = words[w].replace(/[^a-zA-Z\u00C0-\u024F]/g, '');
-        if (clean.length < 3) continue;
-        if (clean[0] !== clean[0].toUpperCase() || clean[0] === clean[0].toLowerCase()) continue;
-        var canonical = termByLower[clean.toLowerCase()];
-        if (canonical) {
-          candidates.push({ sentence: sent, term: canonical, paragraph: paragraphs[p] });
+      if (sent.length < 20 || sent.length > 260) continue;
+      for (var k = 0; k < terms.length; k++) {
+        var tterm = terms[k].term;
+        var re = new RegExp('\\b' + tterm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+        if (re.test(sent)) {
+          candidates.push({ sentence: sent, term: tterm, paragraph: paragraphs[p] });
           break;
         }
       }
     }
   }
-  if (candidates.length < 3) return [];
+  if (candidates.length < 2) return [];
   candidates = shuffle(candidates.slice());
 
   var questions = [];
@@ -990,13 +995,17 @@ function generateTrueFalseQuestions(paragraphs, keyTerms, count) {
         originalTerm: cand.term
       });
     } else {
+      // Prefer a swap of matching capitalization so the sentence still
+      // reads right ("Qayin" <-> "Noakh", not "Qayin" <-> "covenant").
+      var origIsCap = cand.term[0] === cand.term[0].toUpperCase() && cand.term[0] !== cand.term[0].toLowerCase();
       var others = keyTerms.filter(function (kt) {
-        return kt.term.toLowerCase() !== cand.term.toLowerCase() &&
-          kt.term[0] === kt.term[0].toUpperCase() && kt.term[0] !== kt.term[0].toLowerCase();
+        if (!kt.term || kt.term.toLowerCase() === cand.term.toLowerCase()) return false;
+        var kc = kt.term[0] === kt.term[0].toUpperCase() && kt.term[0] !== kt.term[0].toLowerCase();
+        return kc === origIsCap;
       });
       if (!others.length) continue;
       var altTerm = shuffle(others.slice())[0].term;
-      var re = new RegExp('\\b' + cand.term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b');
+      var re = new RegExp('\\b' + cand.term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
       var wrongSentence = cand.sentence.replace(re, altTerm);
       if (wrongSentence === cand.sentence) continue;
       questions.push({
@@ -1048,12 +1057,20 @@ function extractCauseEffectPairs(paragraphs) {
   if (!paragraphs || !paragraphs.length) return [];
   // Pattern 1: "<effect> because <cause>."
   var p1 = /([A-Z][^.!?]{15,140})\s+because\s+([^.!?]{10,140})[.!?]/g;
-  // Pattern 2: "<cause>, (so|therefore|thus|hence) <effect>."
-  var p2 = /([A-Z][^.!?]{15,140}),?\s+(?:so|therefore|thus|hence)\s+([^.!?]{10,140})[.!?]/g;
-  // Pattern 3: "<cause> (led to|caused|brought about|resulted in) <effect>."
-  var p3 = /([A-Z][^.!?]{15,140})\s+(?:led to|caused|brought about|resulted in)\s+([^.!?]{10,140})[.!?]/g;
+  // Pattern 2: "<cause>, (so|therefore|thus|hence|consequently|thereby) <effect>."
+  var p2 = /([A-Z][^.!?]{15,140}),?\s+(?:so|therefore|thus|hence|consequently|thereby)\s+([^.!?]{10,140})[.!?]/g;
+  // Pattern 3: "<cause> (led to|caused|brought about|resulted in|produced|gave rise to) <effect>."
+  var p3 = /([A-Z][^.!?]{15,140})\s+(?:led to|caused|brought about|resulted in|produces?|produced|gives rise to|gave rise to)\s+([^.!?]{10,140})[.!?]/g;
   // Pattern 4: "Because <cause>, <effect>."
   var p4 = /Because\s+([^,]{10,140}),\s+([^.!?]{10,140})[.!?]/g;
+  // Pattern 5: "When/Since <cause>, <effect>."
+  var p5 = /(?:When|Since)\s+([^,]{10,140}),\s+([^.!?]{10,140})[.!?]/g;
+  // Pattern 6: "If <cause>, [then] <effect>."
+  var p6 = /If\s+([^,]{10,140}),?\s+(?:then\s+)?([^.!?]{10,140})[.!?]/g;
+  // Pattern 7: "<cause>, which [verb] <effect>."
+  var p7 = /([A-Z][^.!?,]{15,140}),\s+which\s+(?:led to|caused|resulted in|meant|made|brought about)\s+([^.!?]{10,140})[.!?]/g;
+  // Pattern 8: "As a result of / Due to / Owing to <cause>, <effect>."
+  var p8 = /(?:As a result of|Due to|Owing to|Thanks to|Because of)\s+([^,]{10,140}),\s+([^.!?]{10,140})[.!?]/g;
 
   var pairs = [];
   var seen = {};
@@ -1077,6 +1094,10 @@ function extractCauseEffectPairs(paragraphs) {
     p2.lastIndex = 0; while ((m = p2.exec(text)) !== null) add(m[1], m[2], text);
     p3.lastIndex = 0; while ((m = p3.exec(text)) !== null) add(m[1], m[2], text);
     p4.lastIndex = 0; while ((m = p4.exec(text)) !== null) add(m[1], m[2], text);
+    p5.lastIndex = 0; while ((m = p5.exec(text)) !== null) add(m[1], m[2], text);
+    p6.lastIndex = 0; while ((m = p6.exec(text)) !== null) add(m[1], m[2], text);
+    p7.lastIndex = 0; while ((m = p7.exec(text)) !== null) add(m[1], m[2], text);
+    p8.lastIndex = 0; while ((m = p8.exec(text)) !== null) add(m[1], m[2], text);
   }
   return pairs;
 }
