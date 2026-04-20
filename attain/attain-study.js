@@ -2450,6 +2450,168 @@ function showRhymeChain(bookId, chIdx) {
   renderQ();
 }
 
+// ---- Mind Map Builder — force-directed graph of key-term co-occurrence ----
+// Pure SVG + a tiny force simulation. No library; stays under the free
+// stack constraint and adds ~0 KB to the cached shell.
+function showMindMap(bookId, chIdx) {
+  var book = getBook(bookId);
+  if (!book || !activeChapters) { showNoContent(bookId, chIdx, 'Mind Map'); return; }
+  var ch = activeChapters[chIdx];
+  if (!ch) { showNoContent(bookId, chIdx, 'Mind Map'); return; }
+  var chTitle = ch.title || 'Chapter ' + (chIdx + 1);
+  var paras = ch.paragraphs || [];
+  var keyTerms = (book.keyTerms || []).slice(0, 14);
+  if (keyTerms.length < 4) { showNoContent(bookId, chIdx, 'Mind Map'); return; }
+
+  // Build co-occurrence edges: two terms share an edge if they appear
+  // together in any paragraph. Edge weight = number of shared paragraphs.
+  var nodes = keyTerms.map(function (t, i) {
+    return { id: i, label: t.term, count: t.frequency || 1, selected: false };
+  });
+  var edges = [];
+  var edgeMap = {};
+  for (var p = 0; p < paras.length; p++) {
+    var lower = paras[p].toLowerCase();
+    var present = [];
+    for (var n = 0; n < nodes.length; n++) {
+      var re = new RegExp('\\b' + nodes[n].label.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b');
+      if (re.test(lower)) present.push(n);
+    }
+    for (var a = 0; a < present.length; a++) {
+      for (var b = a + 1; b < present.length; b++) {
+        var key = present[a] + ',' + present[b];
+        if (!edgeMap[key]) { edgeMap[key] = { source: present[a], target: present[b], weight: 0 }; edges.push(edgeMap[key]); }
+        edgeMap[key].weight++;
+      }
+    }
+  }
+  // Drop nodes that have no edges at all (visually isolated)
+  var connected = {};
+  edges.forEach(function (e) { connected[e.source] = true; connected[e.target] = true; });
+  nodes = nodes.filter(function (n) { return connected[n.id]; });
+  if (nodes.length < 3) { showNoContent(bookId, chIdx, 'Mind Map'); return; }
+  // Remap IDs since we filtered
+  var idRemap = {};
+  nodes.forEach(function (n, i) { idRemap[n.id] = i; n.id = i; });
+  edges = edges.map(function (e) { return { source: idRemap[e.source], target: idRemap[e.target], weight: e.weight }; }).filter(function (e) { return e.source !== undefined && e.target !== undefined; });
+
+  var W = 640, H = 460;
+  // Initial positions — place on a circle so the simulation starts clean
+  nodes.forEach(function (n, i) {
+    var angle = (i / nodes.length) * Math.PI * 2;
+    n.x = W / 2 + Math.cos(angle) * 140;
+    n.y = H / 2 + Math.sin(angle) * 140;
+    n.vx = 0; n.vy = 0;
+  });
+
+  // Force simulation: spring attraction along edges, Coulomb repulsion
+  // between all pairs, weak centering force toward the middle.
+  function simulate(iterations) {
+    iterations = iterations || 180;
+    for (var step = 0; step < iterations; step++) {
+      // Repulsion
+      for (var i = 0; i < nodes.length; i++) {
+        for (var j = i + 1; j < nodes.length; j++) {
+          var dx = nodes[j].x - nodes[i].x;
+          var dy = nodes[j].y - nodes[i].y;
+          var dist = Math.sqrt(dx * dx + dy * dy) || 0.01;
+          var force = 2200 / (dist * dist);
+          var fx = (dx / dist) * force;
+          var fy = (dy / dist) * force;
+          nodes[i].vx -= fx; nodes[i].vy -= fy;
+          nodes[j].vx += fx; nodes[j].vy += fy;
+        }
+      }
+      // Spring attraction along edges
+      for (var e = 0; e < edges.length; e++) {
+        var s = nodes[edges[e].source], t = nodes[edges[e].target];
+        var dx2 = t.x - s.x, dy2 = t.y - s.y;
+        var dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2) || 0.01;
+        var springK = 0.02 * Math.min(3, edges[e].weight);
+        var fx2 = dx2 * springK, fy2 = dy2 * springK;
+        s.vx += fx2; s.vy += fy2;
+        t.vx -= fx2; t.vy -= fy2;
+      }
+      // Centering + damping + integrate
+      for (var k = 0; k < nodes.length; k++) {
+        var n = nodes[k];
+        n.vx += (W / 2 - n.x) * 0.003;
+        n.vy += (H / 2 - n.y) * 0.003;
+        n.vx *= 0.82; n.vy *= 0.82;
+        n.x += n.vx; n.y += n.vy;
+        // Clamp inside bounds
+        var pad = 40;
+        if (n.x < pad) n.x = pad; if (n.x > W - pad) n.x = W - pad;
+        if (n.y < pad) n.y = pad; if (n.y > H - pad) n.y = H - pad;
+      }
+    }
+  }
+  simulate(200);
+
+  var selectedNodeId = -1;
+
+  function render() {
+    var h = '<div class="cloze-view">';
+    h += '<div class="mind-banner">\u{1F9E0} Mind Map \u2014 tap a term to see its context</div>';
+    h += '<div class="cloze-ref">' + chTitle + '</div>';
+    h += '<div class="mind-wrap">';
+    h += '<svg viewBox="0 0 ' + W + ' ' + H + '" class="mind-svg" role="img" aria-label="Concept mind map">';
+    // Edges first
+    for (var e = 0; e < edges.length; e++) {
+      var s = nodes[edges[e].source], t = nodes[edges[e].target];
+      var op = Math.min(0.6, 0.15 + edges[e].weight * 0.12);
+      var sw = Math.min(4, 1 + edges[e].weight * 0.4);
+      h += '<line x1="' + s.x.toFixed(1) + '" y1="' + s.y.toFixed(1) + '" x2="' + t.x.toFixed(1) + '" y2="' + t.y.toFixed(1) + '" stroke="#7c3aed" stroke-opacity="' + op.toFixed(2) + '" stroke-width="' + sw.toFixed(1) + '" />';
+    }
+    // Nodes + labels
+    var colors = ['#2563eb', '#059669', '#7c3aed', '#dc2626', '#ea580c', '#0891b2', '#be185d', '#ca8a04'];
+    for (var n = 0; n < nodes.length; n++) {
+      var nn = nodes[n];
+      var r = 10 + Math.min(18, Math.sqrt(nn.count));
+      var color = colors[n % colors.length];
+      var sel = (selectedNodeId === n) ? ' class="mind-node-selected"' : '';
+      h += '<g data-node="' + n + '" class="mind-node"' + sel + ' role="button" tabindex="0" aria-label="' + nn.label + '">';
+      h += '<circle cx="' + nn.x.toFixed(1) + '" cy="' + nn.y.toFixed(1) + '" r="' + r + '" fill="' + color + '" stroke="#fff" stroke-width="2" />';
+      h += '<text x="' + nn.x.toFixed(1) + '" y="' + (nn.y + r + 14).toFixed(1) + '" text-anchor="middle" class="mind-label">' + nn.label + '</text>';
+      h += '</g>';
+    }
+    h += '</svg>';
+    h += '</div>';
+    // Detail panel for selected node
+    if (selectedNodeId >= 0) {
+      var sel2 = nodes[selectedNodeId];
+      var kt = keyTerms.find(function (k) { return k.term === sel2.label; });
+      var context = findContextSentence(sel2.label, activeChapters, chIdx);
+      h += '<div class="mind-detail">';
+      h += '<div class="mind-detail-term">' + sel2.label + '</div>';
+      if (kt) h += '<div class="mind-detail-meta">Appears ' + (kt.frequency || '?') + ' times \u00B7 ' + (kt.spread || 0) + '% of chapters</div>';
+      if (context) h += '<div class="mind-detail-ctx">"' + context + '"</div>';
+      // Connected terms
+      var conn = [];
+      edges.forEach(function (ed) {
+        if (ed.source === selectedNodeId) conn.push(nodes[ed.target].label);
+        else if (ed.target === selectedNodeId) conn.push(nodes[ed.source].label);
+      });
+      if (conn.length) h += '<div class="mind-detail-conn"><strong>Connected to:</strong> ' + conn.join(', ') + '</div>';
+      h += '</div>';
+    }
+    h += '<button class="study-btn" id="b-mind-quit" style="margin-top:14px">Back to activities</button>';
+    h += '</div>';
+    document.getElementById('content').innerHTML = h;
+    document.getElementById('b-mind-quit').addEventListener('click', function () { showChapterActivities(bookId, chIdx); });
+    var nodeEls = document.querySelectorAll('.mind-node');
+    for (var ni = 0; ni < nodeEls.length; ni++) {
+      nodeEls[ni].addEventListener('click', function () {
+        selectedNodeId = parseInt(this.getAttribute('data-node'));
+        render();
+      });
+    }
+  }
+  render();
+  // Award a small XP just for engaging with the map (this is a view, not a quiz)
+  recordSession(bookId, chIdx, 'mindmap', 0.3, 1);
+}
+
 // ---- Remix Round — resurface missed questions in a different format ----
 function showRemix(bookId, chIdx) {
   var items = getRemixQueue().filter(function (it) {

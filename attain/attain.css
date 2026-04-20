@@ -578,6 +578,38 @@ body.font-dyslexic .cloze-prompt{font-family:var(--font-dyslexic);line-height:2.
 .backup-warn-btn:hover{transform:scale(1.04)}
 .backup-warn-btn:active{transform:scale(.97)}
 
+/* Mind Map Builder */
+.mind-banner{
+  background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;
+  padding:10px 16px;border-radius:12px;margin:0 0 14px 0;
+  font-size:.95em;font-weight:800;text-align:center;
+  box-shadow:0 3px 12px rgba(124,58,237,.28);
+}
+.mind-wrap{
+  background:#f8fafc;border:1px solid #cbd5e1;border-radius:14px;
+  padding:6px;overflow:hidden;
+}
+.mind-svg{width:100%;height:auto;display:block;touch-action:manipulation}
+.mind-node{cursor:pointer;transition:transform .15s}
+.mind-node:hover{transform:scale(1.04);transform-origin:center}
+.mind-node-selected circle{stroke:#111;stroke-width:3}
+.mind-label{
+  font-size:13px;font-weight:700;fill:var(--text-main);
+  font-family:var(--font-main);pointer-events:none;
+}
+body.font-dyslexic .mind-label{font-family:var(--font-dyslexic)}
+.mind-detail{
+  margin-top:12px;background:#ede9fe;border-left:4px solid #7c3aed;
+  padding:14px 16px;border-radius:12px;line-height:1.6;
+}
+.mind-detail-term{font-size:1.2em;font-weight:800;color:#4c1d95;margin-bottom:6px}
+.mind-detail-meta{font-size:.85em;color:var(--text-muted);margin-bottom:8px}
+.mind-detail-ctx{
+  font-style:italic;padding:8px 12px;background:#fff;border-radius:8px;
+  margin-bottom:8px;color:#1e1b4b;
+}
+.mind-detail-conn{font-size:.9em;color:#4c1d95}
+
 /* Rhyme Chain */
 .rhyme-banner{
   background:linear-gradient(135deg,#0891b2,#0e7490);color:#fff;
