@@ -702,15 +702,45 @@ function extractKeyTerms(chapters, maxTerms) {
     });
   }
 
-  // Identify candidate terms (pass the frequency + proper-noun gate)
+  // Identify candidate terms. Gate is adaptive: a large book with many
+  // repetitions can afford a strict gate (only filler words survive if
+  // we let everything through). A small / short book has fewer
+  // repetitions per word, so the strict gate leaves nothing.
+  //
+  //   Large book  (>= 15 chapters):  strict gate
+  //     - proper noun: count >= 3
+  //     - other noun:  length >= 7 AND count >= 5
+  //
+  //   Medium book (5..14 chapters):  mid gate
+  //     - proper noun: count >= 2
+  //     - other noun:  length >= 6 AND count >= 4
+  //
+  //   Small book  (< 5 chapters):    loose gate
+  //     - proper noun: count >= 2
+  //     - other noun:  length >= 5 AND count >= 3
+  //
+  //   Plus: at any size, drop terms that appear in EVERY chapter
+  //   (spread = 100%) — that's almost certainly generic English.
+  var strict = totalChapters >= 15;
+  var small = totalChapters < 5;
+  var minProperCount = strict ? 3 : 2;
+  var minOtherCount = strict ? 5 : small ? 3 : 4;
+  var minOtherLen = strict ? 7 : small ? 5 : 6;
+
   var candidates = {};
   for (var term in freq) {
     var f = freq[term];
-    if (f.count < 3) continue;
-    if (!f.isProperNoun) {
-      if (f.original.length < 7) continue;
-      if (f.count < 5) continue;
+    var presence = (chapterIndices[term] || []).length;
+    if (f.isProperNoun) {
+      if (f.count < minProperCount) continue;
+    } else {
+      if (f.original.length < minOtherLen) continue;
+      if (f.count < minOtherCount) continue;
     }
+    // Drop terms present in every chapter (generic connectors).
+    // Only apply when the book has enough chapters for spread to mean
+    // something (>= 6 chapters).
+    if (totalChapters >= 6 && presence === totalChapters && !f.isProperNoun) continue;
     candidates[term] = true;
   }
 
