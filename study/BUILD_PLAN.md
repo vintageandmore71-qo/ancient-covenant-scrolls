@@ -413,8 +413,8 @@ are marked `equiv`. Build order is not fixed; pick one at a time.
 | Echo Read | `equiv` | Existing Listen & Learn + tap-any-word |
 | Chapter Timeline | done | Horizontal spine with up to 12 dots sampled from fill_blank + multiple_choice source_quotes, sorted by ref. Tap dot → detail panel with Prev/Listen/Next. Ref labels under dots |
 | Mind Map Builder | done | Force-directed SVG graph, no library vendor. Nodes = top 14 key terms; edges = co-occurrence in source_quote/FAQ answers; tap node -> context sentence + connected-terms list. 0.3 points (3 XP) per view |
-| Concept Web | backlog | Already Priority 7 |
-| Remix Round | backlog | See #4 above |
+| Concept Web | backlog | Radial/hub-and-spoke alternative to Mind Map — tap a term to move it to the centre, its neighbours arrange in a ring around it. Vanilla SVG, no new library needed. Est ~150 lines |
+| Remix Round | done | See #4 above |
 | Syllable Tap | done | Vowel-group heuristic (y-between-vowels as consonant, silent-e except -le endings). 4 count options; correct reveals word in colored syllable chunks; Remix integration. Accuracy >85% on names like Qayin=2, Jerusalem=4, Chanokh=2 |
 | Rhyme Chain | done | Rime-suffix heuristic (last vowel group + tail) groups chapter words; MC-style "which word rhymes with X?"; correct reveals shared rime suffix; Remix integration |
 | Word Morph | done | Adapted to "which spelling is real?" (dictionary-free). 3 one-letter-off distractors per term (substitution/insertion/deletion); 4-option tap; correct unlocks context sentence; Remix integration. Note: original word-ladder intent preserved via the letter-change mechanism |
@@ -427,7 +427,51 @@ are marked `equiv`. Build order is not fixed; pick one at a time.
 
 ---
 
-## TECHNICAL CONSTRAINTS (Locked In)
+## SESSION CHECKPOINT — 2026-04-21
+
+Session ended at `main` @ `c90bf62`. Everything committed and pushed.
+Both PWAs live and clean. SW caches: `attain-v51` / `acr-study-v71`.
+
+### Still open (pick up whenever)
+
+**Game Modes Backlog:**
+  - **Concept Web** — radial Mind Map variant. Small build (~150 lines).
+
+**From earlier architecture discussion:**
+  - **Expiry + auto-remove + extend** — stamp uploadedAt / expiresAt
+    on every Attain book, 90-day default, warn 14 days before,
+    "extend 90 days" button resets clock, user can set threshold in
+    settings. Small build, fits locked rules.
+  - **URL-paste import** — let users paste a URL (Project Gutenberg
+    works; Google Drive / Dropbox typically CORS-blocked). Build
+    with honest error messaging. Small but low-value.
+  - **In-app validator on algorithmic questions** — run the 11-check
+    validator (see `study/validate-questions.js`) at question
+    generation time, not just chat-time curation. Medium build.
+
+**Future-session tasks (locked in HANDOFF.md):**
+  - **TASK A** — split Attain into its own standalone repo on
+    different GitHub account. Fully self-describing in HANDOFF.md.
+  - Separate child-mode app (user will build as its own project).
+
+### Known limitations (not bugs)
+
+  - Cause & Effect stubs in ~58/111 Study sections because curated
+    ACR summaries don't carry cause-effect prose in bulk. Content
+    reality, not code. Either accept or hand-curate per-section.
+  - Mind Map enrichment includes every key term present in the
+    section (Option A). Weak links render as thin gray lines;
+    strong links dark/thick. If this becomes too dense on any
+    section, switch back to Option B (strong-only) by re-guarding
+    the Tier-2 pass with `if (connectedCount() < 3)`.
+
+### To resume
+Open this file in a fresh session. Say "continue from checkpoint"
+or name a specific next item (e.g. "build Concept Web", "build
+expiry", "extract Attain").
+
+---
+
 
 - No AI dependencies in the deployed app
 - No external APIs at runtime
