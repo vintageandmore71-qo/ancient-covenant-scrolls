@@ -423,7 +423,7 @@ are marked `equiv`. Build order is not fixed; pick one at a time.
 | Who Said It | done | Scans source_quotes (Study) / chapter paragraphs (Attain) for dialogue attribution patterns; MC-style picks speaker from 4 options; Hint Ladder + Remix integration |
 | Cause and Effect Match | done | Scans source_quotes / faq answers for 4 connective patterns (because / so-therefore-thus-hence / led to-caused / Because X, Y). 5 pairs per round, effects independently shuffled, tap-to-match; Remix integration |
 | Audio Fill the Gap | done | TTS auto-plays prompt with "blank" spoken at the missing word; reuses FB engine + Hint Ladder; green banner distinguishes mode |
-| Dictation Challenge | new | Hear a verse, type it back; compare |
+| Dictation Challenge | done | TTS auto-plays a sentence; user types it back; word-overlap scored 0..1 with a -0.05 penalty per extra replay; per-word green/red comparison; sentences under 70% push to Remix; perfect/close/partial/keep-listening tiers |
 
 ---
 

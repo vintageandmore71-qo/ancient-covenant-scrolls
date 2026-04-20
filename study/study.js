@@ -741,6 +741,7 @@ function go(fid) {
   h += actCard('\u2696\uFE0F', 'True or False', '#0ea5e9', 'truefalse', fid);
   h += actCard('\u{1F501}', 'Story Sequence', '#ea580c', 'sequence', fid);
   h += actCard('\u21AA', 'Cause & Effect', '#be185d', 'causeeffect', fid);
+  h += actCard('\u{1F3A7}', 'Dictation', '#0891b2', 'dictation', fid);
   h += actCard('\u{1F0CF}', 'Flashcards', '#d97706', 'flash', fid);
   h += actCard('\u{1F4DA}', 'Key Terms', '#0891b2', 'terms', fid);
   h += actCard('\u2753', 'FAQ', '#ea580c', 'faq', fid);
@@ -809,6 +810,7 @@ function openActivity(mode, fid) {
   if (mode === 'truefalse') { showTrueFalse(fid); return; }
   if (mode === 'sequence') { showStorySequence(fid); return; }
   if (mode === 'causeeffect') { showCauseEffect(fid); return; }
+  if (mode === 'dictation') { showDictation(fid); return; }
   if (mode === 'remix') { showRemix(fid); return; }
   // Stub for modes not yet built
   document.getElementById('content').innerHTML =
@@ -3035,6 +3037,152 @@ function showCauseEffect(fid) {
     }
 
     render();
+  });
+}
+
+// ---- Dictation Challenge ----
+function pickDictationFromCurated(data, count) {
+  count = count || 8;
+  if (!data) return [];
+  var pool = [];
+  if (data.fill_blank) data.fill_blank.forEach(function (q) { if (q.source_quote) pool.push(q.source_quote); });
+  if (data.multiple_choice) data.multiple_choice.forEach(function (q) { if (q.source_quote && pool.indexOf(q.source_quote) === -1) pool.push(q.source_quote); });
+  var out = [];
+  for (var i = 0; i < pool.length; i++) {
+    var sents = pool[i].match(/[^.!?]+[.!?]+/g) || [pool[i]];
+    for (var s = 0; s < sents.length; s++) {
+      var t = sents[s].trim();
+      if (t.length < 30 || t.length > 160) continue;
+      if ((t.match(/["\u201C\u201D]/g) || []).length > 2) continue;
+      if (out.indexOf(t) === -1) out.push(t);
+    }
+  }
+  return shuffle(out.slice()).slice(0, count);
+}
+
+function dictationNormalize(s) {
+  return String(s || '')
+    .toLowerCase()
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[\u2013\u2014]/g, '-')
+    .replace(/[^a-z0-9\s']/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+function dictationScore(typed, target) {
+  var a = dictationNormalize(typed);
+  var b = dictationNormalize(target);
+  if (!a || !b) return 0;
+  if (a === b) return 1.0;
+  var wa = a.split(' ');
+  var wb = b.split(' ');
+  var setB = {};
+  for (var i = 0; i < wb.length; i++) setB[wb[i]] = (setB[wb[i]] || 0) + 1;
+  var matched = 0;
+  for (var k = 0; k < wa.length; k++) {
+    if (setB[wa[k]] > 0) { matched++; setB[wa[k]]--; }
+  }
+  var maxLen = Math.max(wa.length, wb.length);
+  return maxLen === 0 ? 0 : matched / maxLen;
+}
+function dictationCompareHtml(typed, target) {
+  var wa = dictationNormalize(typed).split(' ').filter(Boolean);
+  var wbOriginal = target.split(/\s+/);
+  var wbNorm = wbOriginal.map(dictationNormalize);
+  var typedSet = {};
+  for (var i = 0; i < wa.length; i++) typedSet[wa[i]] = (typedSet[wa[i]] || 0) + 1;
+  var parts = [];
+  for (var j = 0; j < wbOriginal.length; j++) {
+    var nw = wbNorm[j];
+    if (nw && typedSet[nw] > 0) {
+      parts.push('<span class="dict-hit">' + wbOriginal[j] + '</span>');
+      typedSet[nw]--;
+    } else {
+      parts.push('<span class="dict-miss">' + wbOriginal[j] + '</span>');
+    }
+  }
+  return parts.join(' ');
+}
+
+function showDictation(fid) {
+  loadContent(fid).then(function (data) {
+    var sentences = pickDictationFromCurated(data, 8);
+    if (sentences.length < 3) { openActivity('stub', fid); return; }
+    var idx = IDS.indexOf(fid);
+    var secLabel = idx >= 0 ? LBL[idx].split(' \u2014 ')[0] : fid;
+    var qi = 0, totalPoints = 0, plays = 0;
+
+    function renderQ() {
+      if (qi >= sentences.length) { showResults(); return; }
+      var target = sentences[qi];
+      plays = 0;
+
+      var h = '<div class="cloze-view">';
+      h += '<div class="dict-banner">\u{1F3A7} Dictation \u2014 listen, then type what you heard</div>';
+      h += '<div class="cloze-ref">' + secLabel + '</div>';
+      h += '<div class="dict-progress">' + (qi + 1) + ' of ' + sentences.length + '</div>';
+      h += '<button class="cloze-audio dict-play" id="b-dict-play">\u{1F50A} Play sentence</button>';
+      h += '<textarea class="dict-input" id="dict-input" placeholder="Type what you heard..." aria-label="Dictation answer" autocomplete="off" autocapitalize="sentences"></textarea>';
+      h += '<div class="dict-actions">';
+      h += '<button class="study-btn sb-pri" id="b-dict-check">\u2714 Check</button>';
+      h += '<button class="study-btn" id="b-dict-skip">Skip \u27A1</button>';
+      h += '</div>';
+      h += '<div class="dict-feedback" id="dict-fb" role="status" aria-live="polite"></div>';
+      h += '<button class="study-btn" id="b-dict-quit" style="margin-top:18px">Back to activities</button>';
+      h += '</div>';
+      document.getElementById('content').innerHTML = h;
+
+      setTimeout(function () { speakText(target); plays++; }, 350);
+
+      document.getElementById('b-dict-play').addEventListener('click', function () { speakText(target); plays++; });
+      document.getElementById('b-dict-quit').addEventListener('click', function () { go(fid); });
+      document.getElementById('b-dict-skip').addEventListener('click', function () { qi++; renderQ(); });
+      document.getElementById('b-dict-check').addEventListener('click', function () {
+        var typed = document.getElementById('dict-input').value;
+        var score = dictationScore(typed, target);
+        var penalty = Math.max(0, plays - 1) * 0.05;
+        var points = Math.max(0, score - penalty);
+        totalPoints += points;
+        var fb = document.getElementById('dict-fb');
+        var emoji = score >= 0.95 ? '\u{1F3C6}' : score >= 0.75 ? '\u2714' : score >= 0.4 ? '\u{1F4AA}' : '\u{1F914}';
+        var label = score >= 0.95 ? 'Perfect!' : score >= 0.75 ? 'Very close' : score >= 0.4 ? 'Partial' : 'Keep listening';
+        fb.innerHTML =
+          '<div class="dict-score">' + emoji + ' ' + label + ' \u2014 ' + Math.round(score * 100) + '%</div>' +
+          '<div class="dict-compare">' + dictationCompareHtml(typed, target) + '</div>' +
+          '<button class="study-btn sb-pri" id="b-dict-next" style="margin-top:12px">Next \u27A1</button>';
+        if (score < 0.7) {
+          pushToRemixQueue({
+            fid: fid, missedInMode: 'dictation', qIndex: qi,
+            ref: '', question: 'Dictate: "' + target + '"',
+            options: [], correct: 0, answer: target, source_quote: target
+          });
+        }
+        document.getElementById('b-dict-check').disabled = true;
+        document.getElementById('b-dict-skip').disabled = true;
+        document.getElementById('b-dict-next').addEventListener('click', function () { qi++; renderQ(); });
+      });
+    }
+
+    function showResults() {
+      var pct = Math.round((totalPoints / sentences.length) * 100);
+      var xpEarned = recordSession(fid, 'dictation', totalPoints, sentences.length);
+      var emoji = pct >= 80 ? '\u{1F3C6}' : pct >= 60 ? '\u{1F31F}' : '\u{1F4AA}';
+      var msg = pct >= 80 ? 'Outstanding!' : pct >= 60 ? 'Good work!' : 'Try more listens next time.';
+      var h = '<div class="cloze-results">';
+      h += '<div class="cr-emoji">' + emoji + '</div>';
+      h += '<div class="cr-score">' + pct + '% accuracy</div>';
+      h += '<div class="cr-xp">+' + xpEarned + ' XP earned</div>';
+      h += '<div class="cr-msg">' + msg + '</div>';
+      h += '<button class="study-btn sb-pri" id="b-dict-retry">\u{1F504} Try Again</button>';
+      h += '<button class="study-btn" id="b-dict-back">Back to activities</button>';
+      h += '</div>';
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-dict-retry').addEventListener('click', function () { showDictation(fid); });
+      document.getElementById('b-dict-back').addEventListener('click', function () { go(fid); });
+    }
+
+    renderQ();
   });
 }
 

@@ -548,6 +548,40 @@ body.font-dyslexic .hint-stage-3{font-family:monospace}
   box-shadow:0 3px 12px rgba(168,85,247,.28);
 }
 
+/* Dictation Challenge */
+.dict-banner{
+  background:linear-gradient(135deg,#0891b2,#0e7490);color:#fff;
+  padding:10px 16px;border-radius:12px;margin:0 0 14px 0;
+  font-size:.95em;font-weight:800;text-align:center;
+  box-shadow:0 3px 12px rgba(8,145,178,.28);
+}
+.dict-progress{
+  text-align:center;color:var(--text-muted);font-weight:700;
+  margin:0 0 14px 0;font-size:.95em;
+}
+.dict-play{display:block;width:100%;max-width:320px;margin:0 auto 14px auto}
+.dict-input{
+  width:100%;min-height:120px;padding:16px 18px;
+  border-radius:14px;border:2px solid #0891b2;
+  font-size:1.05em;line-height:1.7;font-family:var(--font-main);
+  color:var(--text-main);background:#fff;resize:vertical;
+  box-sizing:border-box;
+}
+body.font-dyslexic .dict-input{font-family:var(--font-dyslexic);line-height:2.0}
+.dict-input:focus{outline:3px solid #67e8f9;outline-offset:2px}
+.dict-actions{display:flex;gap:10px;margin:12px 0 0 0;flex-wrap:wrap}
+.dict-actions .study-btn{flex:1;min-width:120px}
+.dict-feedback{margin-top:14px}
+.dict-score{font-weight:800;font-size:1.05em;margin-bottom:10px;color:var(--text-main)}
+.dict-compare{
+  background:#f8fafc;border:1px solid #cbd5e1;border-radius:12px;
+  padding:12px 14px;line-height:1.9;font-size:1em;
+  font-family:var(--font-main);
+}
+body.font-dyslexic .dict-compare{font-family:var(--font-dyslexic)}
+.dict-hit{color:#166534;font-weight:700}
+.dict-miss{color:#991b1b;text-decoration:underline;text-decoration-color:#dc2626;text-decoration-thickness:2px}
+
 /* Cause and Effect Match */
 .ce-banner{
   background:linear-gradient(135deg,#be185d,#9d174d);color:#fff;
