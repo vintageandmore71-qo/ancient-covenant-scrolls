@@ -537,6 +537,35 @@ function wireHintLadder(btnId, displayId, answer, passage, onUse) {
   });
 }
 
+// ---- Flashcard context enrichment ----
+// Find the shortest sentence in the curated content that contains the
+// term, so the flashcard back can teach the word in its real context.
+function findTermContextInCuratedData(term, data) {
+  if (!term || !data) return '';
+  var re = new RegExp('\\b' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+  var sources = [];
+  if (data.fill_blank) data.fill_blank.forEach(function (q) { if (q.source_quote) sources.push(q.source_quote); });
+  if (data.multiple_choice) data.multiple_choice.forEach(function (q) { if (q.source_quote) sources.push(q.source_quote); });
+  var best = null;
+  for (var i = 0; i < sources.length; i++) {
+    var sentences = sources[i].match(/[^.!?]+[.!?]+/g) || [sources[i]];
+    for (var s = 0; s < sentences.length; s++) {
+      var sent = sentences[s].trim();
+      if (sent.length < 20 || sent.length > 240) continue;
+      if (!re.test(sent)) continue;
+      if (!best || sent.length < best.length) best = sent;
+    }
+  }
+  return best || '';
+}
+
+function termUsagePrompt(term, isProperNoun) {
+  if (isProperNoun) {
+    return 'Who or what is ' + term + ', and what role do they play here?';
+  }
+  return 'What does "' + term + '" mean in this passage, and why is it important?';
+}
+
 function saveStats(s) {
   try { localStorage.setItem('acr_study_stats', JSON.stringify(s)); } catch (e) {}
 }
@@ -1433,7 +1462,17 @@ function showFlashcards(fid) {
     var secLabel = idx >= 0 ? LBL[idx] : fid;
     if (data && data.key_terms) {
       data.key_terms.forEach(function (t) {
-        cards.push({ front: t.term + (t.phonetic ? ' (' + t.phonetic + ')' : ''), back: t.definition, type: 'term' });
+        var context = findTermContextInCuratedData(t.term, data);
+        var isProper = t.term && t.term[0] === t.term[0].toUpperCase() && t.term[0] !== t.term[0].toLowerCase();
+        var backHtml = '';
+        if (context) backHtml += '<div class="fc-context">"' + context + '"</div>';
+        if (t.definition) backHtml += '<div class="fc-def">' + t.definition + '</div>';
+        backHtml += '<div class="fc-prompt">' + termUsagePrompt(t.term, isProper) + '</div>';
+        cards.push({
+          front: t.term + (t.phonetic ? ' (' + t.phonetic + ')' : ''),
+          back: backHtml,
+          type: 'term'
+        });
       });
     }
     if (data && data.fill_blank) {
