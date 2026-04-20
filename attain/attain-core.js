@@ -666,6 +666,53 @@ function splitSyllables(word) {
   return syllables.filter(function (s) { return s.length > 0; });
 }
 
+// ---- Rhyme helpers ----
+// English rhyme matching without a pronunciation dictionary is fuzzy.
+// We use the "rime" approximation: take the last vowel group and
+// everything after. Words sharing this suffix usually rhyme
+// ("night"/"fight"/"bright" -> "ight"; "sing"/"bring"/"king" -> "ing").
+
+function rhymeKey(word) {
+  var w = String(word || '').toLowerCase().replace(/[^a-z]/g, '');
+  if (w.length < 3) return '';
+  // Strip silent terminal 'e' (but keep "-le")
+  if (w[w.length - 1] === 'e' && w.length > 3 && !/[^aeiouy]le$/.test(w)) {
+    w = w.slice(0, -1);
+  }
+  // Find the last vowel group; rime = that group + rest of word
+  var lastVowelIdx = -1;
+  for (var i = w.length - 1; i >= 0; i--) {
+    if (/[aeiouy]/.test(w[i])) { lastVowelIdx = i; break; }
+  }
+  if (lastVowelIdx < 0) return w;
+  // Expand back through the vowel group
+  while (lastVowelIdx > 0 && /[aeiouy]/.test(w[lastVowelIdx - 1])) lastVowelIdx--;
+  return w.slice(lastVowelIdx);
+}
+
+function buildRhymeGroups(paragraphs) {
+  if (!paragraphs || !paragraphs.length) return {};
+  var groups = {};
+  var seenWords = {};
+  for (var p = 0; p < paragraphs.length; p++) {
+    var words = paragraphs[p].split(/[\s,;:!?.()"\[\]{}]+/);
+    for (var w = 0; w < words.length; w++) {
+      var word = words[w].replace(/^[^a-zA-Z]+|[^a-zA-Z]+$/g, '');
+      if (word.length < 4) continue;
+      var lower = word.toLowerCase();
+      if (seenWords[lower]) continue;
+      seenWords[lower] = true;
+      // Skip obvious stop words
+      if (typeof STOP_WORDS !== 'undefined' && STOP_WORDS.has(lower)) continue;
+      var key = rhymeKey(word);
+      if (!key || key.length < 2) continue;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(word);
+    }
+  }
+  return groups;
+}
+
 // ---- Remix Queue ----
 // Tracks every question a user misses. At round end, the Remix card
 // resurfaces each item in the OPPOSITE game format so the user gets
