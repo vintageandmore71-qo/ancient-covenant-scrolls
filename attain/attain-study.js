@@ -319,7 +319,7 @@ function showFillBlank(bookId, chIdx) {
     if (allAns.indexOf(keyTerms[kt].term) < 0) allAns.push(keyTerms[kt].term);
   }
 
-  var qi = 0, score = 0, firstAttempt = true;
+  var qi = 0, score = 0, points = 0, firstAttempt = true, hintsUsed = 0;
   var chTitle = ch.title || 'Chapter ' + (chIdx + 1);
 
   function renderQ() {
@@ -327,6 +327,7 @@ function showFillBlank(bookId, chIdx) {
     var q = questions[qi];
     var correct = q.answer;
     firstAttempt = true;
+    hintsUsed = 0;
 
     // Pick distractors
     var candidates = allAns.filter(function (a) {
@@ -361,6 +362,8 @@ function showFillBlank(bookId, chIdx) {
     h += '<div class="cloze-prompt">' +
       q.prompt.replace('______', '<span class="cloze-blank">______</span>') + '</div>';
     h += '<button class="cloze-audio" id="b-cloze-hear" aria-label="Listen to this passage">\u{1F50A} Listen</button>';
+    h += '<button class="hint-btn" id="b-cloze-hint" aria-label="Get a hint">\u{1F4A1} Hint</button>';
+    h += '<div class="hint-display" id="cloze-hint-display" role="status" aria-live="polite"></div>';
     h += '<div class="cloze-opts">';
     for (var o = 0; o < opts.length; o++) {
       h += '<button class="cloze-opt" data-val="' + opts[o] +
@@ -378,6 +381,7 @@ function showFillBlank(bookId, chIdx) {
     document.getElementById('b-cloze-hear').addEventListener('click', function () {
       speakText(q.source || q.prompt.replace('______', correct));
     });
+    wireHintLadder('b-cloze-hint', 'cloze-hint-display', correct, q.source, function (n) { hintsUsed = n; });
     var btns = document.querySelectorAll('.cloze-opt');
     for (var b = 0; b < btns.length; b++) {
       btns[b].addEventListener('click', function () {
@@ -387,7 +391,7 @@ function showFillBlank(bookId, chIdx) {
           this.classList.add('cloze-correct');
           fb.innerHTML = '<span class="fb-correct">\u2714 Correct!</span>' +
             '<div class="cloze-source">' + (q.source || '') + '</div>';
-          if (firstAttempt) score++;
+          if (firstAttempt) { score++; points += hintMultiplier(hintsUsed); }
           recordQuestionResult(bookId, chIdx, 'filblank', qi, firstAttempt);
           var all = document.querySelectorAll('.cloze-opt');
           for (var x = 0; x < all.length; x++) all[x].disabled = true;
@@ -404,7 +408,7 @@ function showFillBlank(bookId, chIdx) {
 
   function showFBResults() {
     var pct = Math.round(score / questions.length * 100);
-    var xpEarned = recordSession(bookId, chIdx, 'filblank', score, questions.length);
+    var xpEarned = recordSession(bookId, chIdx, 'filblank', points, questions.length);
     var stats = getStats();
     var lvl = getLevel(stats.xp || 0);
     var mastery = getChapterMastery(bookId, chIdx);
@@ -489,13 +493,14 @@ function showMC(bookId, chIdx) {
   if (!questions.length) { showNoContent(bookId, chIdx, 'Multiple Choice'); return; }
   questions = shuffle(questions).slice(0, tier === 'hard' ? 30 : 20);
 
-  var qi = 0, score = 0, mcFirstAttempt = true;
+  var qi = 0, score = 0, points = 0, mcFirstAttempt = true, mcHintsUsed = 0;
   var mcColors = ['#dc2626', '#2563eb', '#059669', '#d97706'];
 
   function renderQ() {
     if (qi >= questions.length) { showMCResults(); return; }
     var q = questions[qi];
     mcFirstAttempt = true;
+    mcHintsUsed = 0;
 
     var tierNames = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
     var tierColors = { easy: '#059669', medium: '#d97706', hard: '#dc2626' };
@@ -506,6 +511,8 @@ function showMC(bookId, chIdx) {
     h += '<div class="mc-ref">' + chTitle + '</div>';
     h += '<div class="mc-question">' + q.question + '</div>';
     h += '<button class="cloze-audio" id="b-mc-hear" aria-label="Listen to question">\u{1F50A} Listen</button>';
+    h += '<button class="hint-btn" id="b-mc-hint" aria-label="Get a hint">\u{1F4A1} Hint</button>';
+    h += '<div class="hint-display" id="mc-hint-display" role="status" aria-live="polite"></div>';
     h += '<div class="mc-opts">';
     for (var o = 0; o < q.options.length; o++) {
       h += '<button class="mc-opt" data-idx="' + o +
@@ -524,6 +531,8 @@ function showMC(bookId, chIdx) {
     document.getElementById('b-mc-hear').addEventListener('click', function () {
       speakText(q.question);
     });
+    var mcAnswer = q.options[q.correct];
+    wireHintLadder('b-mc-hint', 'mc-hint-display', mcAnswer, q.source, function (n) { mcHintsUsed = n; });
     var btns = document.querySelectorAll('.mc-opt');
     for (var b = 0; b < btns.length; b++) {
       btns[b].addEventListener('click', function () {
@@ -533,7 +542,7 @@ function showMC(bookId, chIdx) {
           this.classList.add('mc-correct');
           fb.innerHTML = '<span class="fb-correct">\u2714 Correct!</span>' +
             '<div class="cloze-source">' + (q.source || '') + '</div>';
-          if (mcFirstAttempt) score++;
+          if (mcFirstAttempt) { score++; points += hintMultiplier(mcHintsUsed); }
           recordQuestionResult(bookId, chIdx, 'mc', qi, mcFirstAttempt);
           var all = document.querySelectorAll('.mc-opt');
           for (var x = 0; x < all.length; x++) all[x].disabled = true;
@@ -550,7 +559,7 @@ function showMC(bookId, chIdx) {
 
   function showMCResults() {
     var pct = Math.round(score / questions.length * 100);
-    var xpEarned = recordSession(bookId, chIdx, 'mc', score, questions.length);
+    var xpEarned = recordSession(bookId, chIdx, 'mc', points, questions.length);
     var stats = getStats();
     var lvl = getLevel(stats.xp || 0);
     var mastery = getChapterMastery(bookId, chIdx);

@@ -463,6 +463,60 @@ function getStats() {
 function saveStats(s) {
   try { localStorage.setItem('attain_stats', JSON.stringify(s)); } catch (e) {}
 }
+// ---- Hint Ladder ----
+// Three progressive hints per question. XP multiplier reduces as hints
+// are used: 0 hints = 1.0, 1 = 0.7, 2 = 0.4, 3 = 0.1. Full answer is
+// never auto-revealed — user must still submit a final guess.
+
+function blankedReveal(answer) {
+  if (!answer) return '';
+  var a = String(answer);
+  if (a.length <= 2) return a.toUpperCase();
+  var out = a[0].toUpperCase();
+  for (var i = 1; i < a.length - 1; i++) {
+    out += (a[i] === ' ' ? '  ' : ' _');
+  }
+  out += ' ' + a[a.length - 1].toUpperCase();
+  return out;
+}
+
+function buildHintLadder(answer, passage) {
+  var a = String(answer || '').trim();
+  var wordCount = a ? a.split(/\s+/).length : 0;
+  var lenLabel = wordCount > 1
+    ? (wordCount + ' words, starts with "' + a.charAt(0).toUpperCase() + '"')
+    : ('Starts with "' + a.charAt(0).toUpperCase() + '", ' + a.length + ' letters');
+  return [
+    '\u{1F4A1} ' + lenLabel,
+    passage ? '\u{1F4D6} "' + String(passage).trim() + '"' : '\u{1F4D6} No passage available for this question.',
+    '\u{1F521} ' + blankedReveal(a)
+  ];
+}
+
+function hintMultiplier(hintsUsed) {
+  if (hintsUsed <= 0) return 1.0;
+  if (hintsUsed === 1) return 0.7;
+  if (hintsUsed === 2) return 0.4;
+  return 0.1;
+}
+
+function wireHintLadder(btnId, displayId, answer, passage, onUse) {
+  var btn = document.getElementById(btnId);
+  var disp = document.getElementById(displayId);
+  if (!btn || !disp) return;
+  var stages = buildHintLadder(answer, passage);
+  var labels = ['\u{1F4A1} Hint', '\u{1F4D6} Show passage', '\u{1F521} Reveal pattern'];
+  var used = 0;
+  btn.addEventListener('click', function () {
+    if (used >= 3) return;
+    disp.innerHTML = '<div class="hint-stage hint-stage-' + (used + 1) + '">' + stages[used] + '</div>';
+    used++;
+    if (used < 3) { btn.innerHTML = labels[used]; }
+    else { btn.innerHTML = '\u2714 Hints used'; btn.disabled = true; }
+    if (typeof onUse === 'function') onUse(used);
+  });
+}
+
 function recordSession(bookId, chIdx, mode, score, total) {
   var s = getStats();
   if (!s.sessions) s.sessions = [];
