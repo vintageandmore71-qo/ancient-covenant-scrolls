@@ -502,27 +502,152 @@ function splitByParagraphCount(rawText) {
 // ---- Key Term Extraction (Frequency Analysis) ----
 
 var STOP_WORDS = new Set([
+  // Articles, conjunctions, prepositions
   'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
-  'of', 'with', 'by', 'from', 'is', 'was', 'are', 'were', 'be', 'been',
-  'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would',
-  'could', 'should', 'may', 'might', 'shall', 'can', 'not', 'no', 'nor',
-  'so', 'if', 'then', 'than', 'that', 'this', 'these', 'those', 'it',
-  'its', 'he', 'she', 'him', 'her', 'his', 'they', 'them', 'their',
-  'we', 'us', 'our', 'you', 'your', 'i', 'me', 'my', 'who', 'whom',
-  'which', 'what', 'when', 'where', 'how', 'why', 'all', 'each',
-  'every', 'both', 'few', 'more', 'most', 'other', 'some', 'such',
-  'only', 'own', 'same', 'also', 'just', 'about', 'above', 'after',
-  'again', 'any', 'because', 'before', 'between', 'down', 'during',
-  'into', 'out', 'over', 'through', 'under', 'until', 'up', 'very',
-  'there', 'here', 'as', 'said', 'says', 'upon', 'unto', 'one', 'two',
-  'three', 'four', 'five', 'like', 'even', 'still', 'well', 'back',
-  'much', 'many', 'now', 'then', 'too', 'yet', 'made', 'make', 'came',
-  'come', 'went', 'go', 'let', 'see', 'saw', 'know', 'knew', 'take',
-  'took', 'give', 'gave', 'tell', 'told', 'put', 'set', 'get', 'got',
-  'say', 'day', 'days', 'man', 'men', 'way', 'new', 'old', 'great',
-  'shall', 'will', 'among', 'against', 'according', 'without', 'within',
-  'though', 'while', 'since', 'whether', 'however', 'therefore',
-  'chapter', 'page', 'part', 'section', 'book', 'volume'
+  'of', 'with', 'by', 'from', 'as', 'upon', 'unto', 'about', 'above',
+  'after', 'again', 'against', 'among', 'around', 'before', 'behind',
+  'below', 'beneath', 'beside', 'between', 'beyond', 'during', 'down',
+  'except', 'inside', 'into', 'near', 'off', 'onto', 'out', 'outside',
+  'over', 'past', 'since', 'through', 'throughout', 'till', 'toward',
+  'towards', 'under', 'underneath', 'until', 'up', 'upon', 'versus',
+  'via', 'within', 'without',
+  // Pronouns
+  'i', 'me', 'my', 'mine', 'myself', 'we', 'us', 'our', 'ours',
+  'ourselves', 'you', 'your', 'yours', 'yourself', 'yourselves',
+  'he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself',
+  'it', 'its', 'itself', 'they', 'them', 'their', 'theirs',
+  'themselves', 'who', 'whom', 'whose', 'which', 'what', 'where',
+  'when', 'why', 'how', 'this', 'that', 'these', 'those', 'someone',
+  'somebody', 'anyone', 'anybody', 'everyone', 'everybody', 'nobody',
+  'none', 'nothing', 'something', 'anything', 'everything',
+  // Be / have / do
+  'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+  'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'done',
+  // Modals
+  'will', 'would', 'could', 'should', 'may', 'might', 'shall',
+  'can', 'must', 'ought',
+  // Negation
+  'not', 'no', 'nor', 'never', 'neither', 'none',
+  // Common verbs (base + conjugations)
+  'get', 'got', 'gotten', 'getting', 'make', 'made', 'makes', 'making',
+  'take', 'took', 'taken', 'taking', 'takes', 'come', 'came', 'comes',
+  'coming', 'go', 'went', 'gone', 'going', 'goes', 'say', 'said',
+  'says', 'saying', 'see', 'saw', 'seen', 'sees', 'seeing', 'know',
+  'knew', 'known', 'knows', 'knowing', 'think', 'thought', 'thinks',
+  'thinking', 'look', 'looked', 'looking', 'looks', 'want', 'wanted',
+  'wanting', 'wants', 'give', 'gave', 'given', 'giving', 'gives',
+  'use', 'used', 'using', 'uses', 'find', 'found', 'finding', 'finds',
+  'tell', 'told', 'telling', 'tells', 'ask', 'asked', 'asking', 'asks',
+  'work', 'worked', 'working', 'works', 'seem', 'seemed', 'seeming',
+  'seems', 'feel', 'felt', 'feeling', 'feels', 'try', 'tried', 'trying',
+  'tries', 'leave', 'left', 'leaving', 'leaves', 'call', 'called',
+  'calling', 'calls', 'need', 'needed', 'needing', 'needs', 'become',
+  'became', 'becoming', 'becomes', 'mean', 'meant', 'meaning', 'means',
+  'keep', 'kept', 'keeping', 'keeps', 'hold', 'held', 'holding',
+  'holds', 'bring', 'brought', 'bringing', 'brings', 'begin', 'began',
+  'begun', 'beginning', 'begins', 'happen', 'happened', 'happening',
+  'happens', 'write', 'wrote', 'written', 'writing', 'writes',
+  'provide', 'provided', 'providing', 'provides', 'sit', 'sat',
+  'sitting', 'sits', 'stand', 'stood', 'standing', 'stands', 'lose',
+  'lost', 'losing', 'loses', 'pay', 'paid', 'paying', 'pays', 'meet',
+  'met', 'meeting', 'meets', 'include', 'included', 'including',
+  'includes', 'continue', 'continued', 'continuing', 'continues',
+  'set', 'sets', 'setting', 'learn', 'learned', 'learnt', 'learning',
+  'learns', 'change', 'changed', 'changing', 'changes', 'lead', 'led',
+  'leading', 'leads', 'understand', 'understood', 'understanding',
+  'understands', 'watch', 'watched', 'watching', 'watches', 'follow',
+  'followed', 'following', 'follows', 'stop', 'stopped', 'stopping',
+  'stops', 'create', 'created', 'creating', 'creates', 'speak', 'spoke',
+  'spoken', 'speaking', 'speaks', 'read', 'reading', 'reads', 'allow',
+  'allowed', 'allowing', 'allows', 'add', 'added', 'adding', 'adds',
+  'require', 'required', 'requires', 'requiring', 'spend', 'spent',
+  'spending', 'spends', 'grow', 'grew', 'grown', 'growing', 'grows',
+  'open', 'opened', 'opening', 'opens', 'walk', 'walked', 'walking',
+  'walks', 'win', 'won', 'winning', 'wins', 'offer', 'offered',
+  'offering', 'offers', 'remember', 'remembered', 'remembering',
+  'remembers', 'love', 'loved', 'loving', 'loves', 'consider',
+  'considered', 'considering', 'considers', 'appear', 'appeared',
+  'appearing', 'appears', 'wait', 'waited', 'waiting', 'waits',
+  'serve', 'served', 'serving', 'serves', 'die', 'died', 'dying',
+  'dies', 'send', 'sent', 'sending', 'sends', 'expect', 'expected',
+  'expecting', 'expects', 'build', 'built', 'building', 'builds',
+  'stay', 'stayed', 'staying', 'stays', 'fall', 'fell', 'fallen',
+  'falling', 'falls', 'reach', 'reached', 'reaching', 'reaches',
+  'remain', 'remained', 'remaining', 'remains', 'suggest', 'suggested',
+  'suggesting', 'suggests', 'raise', 'raised', 'raising', 'raises',
+  'pass', 'passed', 'passing', 'passes', 'sell', 'sold', 'selling',
+  'sells', 'report', 'reported', 'reporting', 'reports', 'decide',
+  'decided', 'deciding', 'decides', 'pull', 'pulled', 'pulling',
+  'pulls', 'carry', 'carried', 'carrying', 'carries', 'break', 'broke',
+  'broken', 'breaking', 'breaks', 'receive', 'received', 'receiving',
+  'receives', 'agree', 'agreed', 'agreeing', 'agrees', 'support',
+  'supported', 'supporting', 'supports', 'hit', 'hits', 'hitting',
+  'produce', 'produced', 'producing', 'produces', 'eat', 'ate', 'eaten',
+  'eating', 'eats', 'cover', 'covered', 'covering', 'covers', 'catch',
+  'caught', 'catching', 'catches', 'draw', 'drew', 'drawn', 'drawing',
+  'draws', 'choose', 'chose', 'chosen', 'choosing', 'chooses', 'cause',
+  'caused', 'causing', 'causes', 'help', 'helped', 'helping', 'helps',
+  'move', 'moved', 'moving', 'moves', 'play', 'played', 'playing',
+  'plays', 'run', 'ran', 'running', 'runs', 'live', 'lived', 'living',
+  'lives', 'show', 'showed', 'shown', 'showing', 'shows', 'hear',
+  'heard', 'hearing', 'hears', 'let', 'lets', 'letting', 'put', 'puts',
+  'putting', 'say', 'talk', 'talked', 'talking', 'talks', 'turn',
+  'turned', 'turning', 'turns', 'seem', 'try', 'wish', 'wished',
+  'wishing', 'wishes', 'want', 'attempt', 'attempted', 'attempting',
+  'attempts',
+  // Common adjectives / adverbs (non-domain-specific)
+  'good', 'bad', 'big', 'small', 'large', 'little', 'long', 'short',
+  'high', 'low', 'new', 'old', 'young', 'early', 'late', 'first',
+  'last', 'next', 'previous', 'other', 'another', 'same', 'different',
+  'own', 'able', 'available', 'various', 'several', 'possible',
+  'impossible', 'necessary', 'certain', 'sure', 'true', 'false',
+  'real', 'whole', 'full', 'empty', 'hard', 'easy', 'difficult',
+  'simple', 'complex', 'quick', 'slow', 'fast', 'right', 'wrong',
+  'poor', 'rich', 'cold', 'hot', 'warm', 'cool', 'nice', 'best',
+  'better', 'worse', 'worst', 'great', 'important', 'major', 'minor',
+  'really', 'actually', 'basically', 'suddenly', 'quickly', 'slowly',
+  'always', 'often', 'sometimes', 'usually', 'rarely', 'probably',
+  'perhaps', 'certainly', 'definitely', 'together', 'almost', 'nearly',
+  'quite', 'rather', 'somewhat', 'absolutely', 'literally', 'simply',
+  'just', 'only', 'ever', 'yet', 'already', 'still', 'anyway',
+  'however', 'therefore', 'thus', 'hence', 'indeed', 'instead',
+  'otherwise', 'moreover', 'furthermore', 'meanwhile', 'nevertheless',
+  'besides', 'finally', 'soon', 'far', 'well', 'back', 'forward',
+  'much', 'many', 'few', 'fewer', 'fewest', 'less', 'least', 'more',
+  'most', 'such', 'very', 'so', 'too', 'either', 'neither', 'enough',
+  'also', 'even', 'now', 'then', 'today', 'tomorrow', 'yesterday',
+  'here', 'there', 'anywhere', 'somewhere', 'everywhere', 'nowhere',
+  // Conjunctions / discourse
+  'if', 'unless', 'whether', 'whereas', 'because', 'though', 'although',
+  'while', 'until', 'when', 'whenever', 'wherever', 'once', 'either',
+  'both', 'each', 'every', 'all', 'any', 'some', 'none', 'above',
+  'like', 'unlike', 'according',
+  // Narrative filler
+  'says', 'said', 'asked', 'replied', 'answered', 'spoke', 'thought',
+  'felt', 'looked', 'seemed', 'appeared', 'smiled', 'laughed', 'cried',
+  'nodded', 'shrugged', 'sighed',
+  // Numbers (written)
+  'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight',
+  'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen',
+  'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty', 'thirty',
+  'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety', 'hundred',
+  'thousand', 'million', 'billion',
+  // Generic nouns (time, place, quantity)
+  'way', 'ways', 'time', 'times', 'day', 'days', 'night', 'nights',
+  'year', 'years', 'month', 'months', 'week', 'weeks', 'hour', 'hours',
+  'minute', 'minutes', 'moment', 'moments', 'thing', 'things', 'stuff',
+  'place', 'places', 'part', 'parts', 'side', 'sides', 'kind', 'kinds',
+  'sort', 'sorts', 'type', 'types', 'lot', 'lots', 'bit', 'bits',
+  'piece', 'pieces', 'man', 'men', 'woman', 'women', 'boy', 'boys',
+  'girl', 'girls', 'person', 'people', 'someone', 'anyone', 'everyone',
+  'folks', 'guys', 'anybody', 'everybody', 'nobody', 'end', 'ends',
+  'beginning', 'middle', 'top', 'bottom', 'area', 'areas', 'point',
+  'points', 'case', 'cases', 'fact', 'facts', 'reason', 'reasons',
+  'idea', 'ideas', 'word', 'words',
+  // Book-structure words
+  'chapter', 'chapters', 'page', 'pages', 'section', 'sections',
+  'part', 'parts', 'book', 'books', 'volume', 'volumes', 'story',
+  'stories', 'note', 'notes'
 ]);
 
 function extractKeyTerms(chapters, maxTerms) {
@@ -563,29 +688,41 @@ function extractKeyTerms(chapters, maxTerms) {
     });
   }
 
-  // Score terms: frequency * chapter spread, boost proper nouns
+  // Score terms: frequency * chapter spread, boost proper nouns.
+  // Generic common words (verbs/adjectives/adverbs) that slip past
+  // STOP_WORDS are rejected by a length + proper-noun gate so "required",
+  // "thought", "looked", etc. never surface as key terms.
   var scored = [];
   var firstIdx = 0;
   var lastIdx = Math.max(0, totalChapters - 1);
   for (var term in freq) {
     var f = freq[term];
     if (f.count < 3) continue;
+
+    // Gate: accept only proper nouns OR non-proper nouns with length >= 7
+    // and a higher frequency threshold. This keeps "Eleanor", "Mastema",
+    // "Qumran", "covenant", "sanctuary" and rejects "required", "thought",
+    // "chapter", "really".
+    if (!f.isProperNoun) {
+      if (f.original.length < 7) continue;
+      if (f.count < 5) continue;
+    }
+
     var presentIn = chapterIndices[term] || [];
     var presence = presentIn.length;
     var spread = presence / totalChapters;
 
-    // Drop terms confined to a single edge chapter — strong signal
-    // that the term is a front-matter or back-matter artifact (author
-    // name on a title page, "about the author" bio, dedication, etc.)
-    // that survived chapter-level filtering.
+    // Drop terms confined to a single edge chapter — author-name leak
+    // guard (title page / back-matter bio that survived chapter-level
+    // filtering).
     if (totalChapters >= 4 && presence === 1) {
       var onlyIdx = presentIn[0];
       if (onlyIdx === firstIdx || onlyIdx === lastIdx) continue;
     }
 
     var score = f.count * (0.5 + spread);
-    if (f.isProperNoun) score *= 1.5;
-    if (f.original.length >= 6) score *= 1.2;
+    if (f.isProperNoun) score *= 1.8;
+    if (f.original.length >= 7) score *= 1.3;
     scored.push({
       term: f.isProperNoun ? f.original : f.original.toLowerCase(),
       frequency: f.count,
@@ -622,14 +759,17 @@ function generateFillBlanks(paragraphs, keyTerms, count) {
 
     for (var w = 1; w < words.length - 1; w++) {
       var clean = words[w].replace(/[.,;:!?"'()]/g, '');
-      if (clean.length < 3) continue;
+      if (clean.length < 4) continue;
       var lower = clean.toLowerCase();
       if (usedAnswers[lower]) continue;
+      // Never blank a stop word — "the", "said", "required", etc.
+      if (STOP_WORDS.has(lower)) continue;
 
       var score = 0;
       if (termSet[lower]) score += 10;
-      if (clean[0] === clean[0].toUpperCase() && clean[0] !== clean[0].toLowerCase()) score += 5;
-      if (clean.length >= 5) score += 2;
+      var isCap = (clean[0] === clean[0].toUpperCase() && clean[0] !== clean[0].toLowerCase());
+      if (isCap) score += 5;
+      if (clean.length >= 6) score += 2;
       if (/\d/.test(clean)) score += 3;
 
       if (score > bestScore) {
@@ -638,7 +778,10 @@ function generateFillBlanks(paragraphs, keyTerms, count) {
       }
     }
 
-    if (bestTarget && bestScore > 0) {
+    // Only accept a target that is a known key term (score >= 10) or a
+    // proper noun (score >= 5). Otherwise the blank is filler and the
+    // question fails the Question Generation Rules.
+    if (bestTarget && bestScore >= 5) {
       var prompt = para.replace(
         new RegExp('\\b' + bestTarget.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b'),
         '______'
