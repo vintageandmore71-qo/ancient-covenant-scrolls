@@ -808,6 +808,7 @@ function showChapterActivities(bookId, chIdx) {
   h += actCard('\u{1F50A}', 'Audio Fill the Gap', '#16a34a', 'audio-filblank');
   h += actCard('\u270F\uFE0F', 'Multiple Choice', '#7c3aed', 'mc');
   h += actCard('\u{1F4AC}', 'Who Said It', '#a855f7', 'whosaidit');
+  h += actCard('\u2696\uFE0F', 'True or False', '#0ea5e9', 'truefalse');
   h += actCard('\u{1F0CF}', 'Flashcards', '#d97706', 'flash');
   h += actCard('\u{1F9E0}', 'Memory Match', '#dc2626', 'memory');
   h += actCard('\u{1F50A}', 'Listen & Learn', '#0d9488', 'listen');
@@ -878,6 +879,7 @@ function openStudyMode(bookId, chIdx, mode) {
   if (mode === 'wordmatch') { showWordMatch(bookId, chIdx); return; }
   if (mode === 'challenge') { showChallenge(bookId, chIdx); return; }
   if (mode === 'whosaidit') { showWhoSaidIt(bookId, chIdx); return; }
+  if (mode === 'truefalse') { showTrueFalse(bookId, chIdx); return; }
   if (mode === 'remix') { showRemix(bookId, chIdx); return; }
   showNoContent(bookId, chIdx, mode);
 }

@@ -938,6 +938,79 @@ function extractSpeakerQuotes(chapters) {
   return results;
 }
 
+// ---- True/False with Why — generate statements with source paragraph ----
+// Scans paragraphs for sentences containing a key-term proper noun.
+// Builds TRUE questions from the sentence verbatim, FALSE questions by
+// swapping the proper noun with another key term from the list.
+// Every question carries the source paragraph so the answer screen can
+// show the proof.
+function generateTrueFalseQuestions(paragraphs, keyTerms, count) {
+  count = count || 10;
+  if (!keyTerms || keyTerms.length < 3) return [];
+  var termByLower = {};
+  for (var t = 0; t < keyTerms.length; t++) {
+    termByLower[keyTerms[t].term.toLowerCase()] = keyTerms[t].term;
+  }
+  // Candidate sentences: must contain a key-term proper noun, 20-200 chars
+  var candidates = [];
+  for (var p = 0; p < paragraphs.length; p++) {
+    var sentences = paragraphs[p].match(/[^.!?]+[.!?]+/g) || [];
+    for (var s = 0; s < sentences.length; s++) {
+      var sent = sentences[s].trim();
+      if (sent.length < 20 || sent.length > 200) continue;
+      var words = sent.split(/\s+/);
+      for (var w = 0; w < words.length; w++) {
+        var clean = words[w].replace(/[^a-zA-Z\u00C0-\u024F]/g, '');
+        if (clean.length < 3) continue;
+        if (clean[0] !== clean[0].toUpperCase() || clean[0] === clean[0].toLowerCase()) continue;
+        var canonical = termByLower[clean.toLowerCase()];
+        if (canonical) {
+          candidates.push({ sentence: sent, term: canonical, paragraph: paragraphs[p] });
+          break;
+        }
+      }
+    }
+  }
+  if (candidates.length < 3) return [];
+  candidates = shuffle(candidates.slice());
+
+  var questions = [];
+  var usedSentences = {};
+  for (var c = 0; c < candidates.length && questions.length < count; c++) {
+    var cand = candidates[c];
+    var key = cand.sentence.slice(0, 50);
+    if (usedSentences[key]) continue;
+    usedSentences[key] = true;
+    var makeTrue = (questions.length % 2 === 0);
+    if (makeTrue) {
+      questions.push({
+        statement: cand.sentence,
+        answer: true,
+        source: cand.paragraph,
+        originalTerm: cand.term
+      });
+    } else {
+      var others = keyTerms.filter(function (kt) {
+        return kt.term.toLowerCase() !== cand.term.toLowerCase() &&
+          kt.term[0] === kt.term[0].toUpperCase() && kt.term[0] !== kt.term[0].toLowerCase();
+      });
+      if (!others.length) continue;
+      var altTerm = shuffle(others.slice())[0].term;
+      var re = new RegExp('\\b' + cand.term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b');
+      var wrongSentence = cand.sentence.replace(re, altTerm);
+      if (wrongSentence === cand.sentence) continue;
+      questions.push({
+        statement: wrongSentence,
+        answer: false,
+        source: cand.paragraph,
+        originalTerm: cand.term,
+        wrongTerm: altTerm
+      });
+    }
+  }
+  return questions;
+}
+
 // ---- Full Book Import Pipeline ----
 function importBook(title, rawText) {
   var chapters = detectChapters(rawText);

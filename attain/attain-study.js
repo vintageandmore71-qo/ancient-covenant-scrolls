@@ -1726,6 +1726,98 @@ function showWhoSaidIt(bookId, chIdx) {
   renderQ();
 }
 
+// ---- True or False with Why ----
+function showTrueFalse(bookId, chIdx) {
+  var book = getBook(bookId);
+  if (!book || !activeChapters) { showNoContent(bookId, chIdx, 'True or False'); return; }
+  var ch = activeChapters[chIdx];
+  if (!ch) { showNoContent(bookId, chIdx, 'True or False'); return; }
+  var chTitle = ch.title || 'Chapter ' + (chIdx + 1);
+
+  var questions = generateTrueFalseQuestions(ch.paragraphs || [], book.keyTerms || [], 12);
+  if (questions.length < 3) { showNoContent(bookId, chIdx, 'True or False'); return; }
+
+  var qi = 0, score = 0, points = 0, firstAttempt = true;
+
+  function renderQ() {
+    if (qi >= questions.length) { showResults(); return; }
+    var q = questions[qi];
+    firstAttempt = true;
+
+    var h = '<div class="mc-view">';
+    h += '<div class="tf-banner">\u2696\uFE0F True or False with Why \u2014 ' + (qi + 1) + ' of ' + questions.length + '</div>';
+    h += '<div class="mc-ref">' + chTitle + '</div>';
+    h += '<div class="tf-statement">' + q.statement + '</div>';
+    h += '<button class="cloze-audio" id="b-tf-hear">\u{1F50A} Listen</button>';
+    h += '<div class="tf-opts">';
+    h += '<button class="tf-opt tf-true" data-val="true">\u2714 True</button>';
+    h += '<button class="tf-opt tf-false" data-val="false">\u2718 False</button>';
+    h += '</div>';
+    h += '<div class="mc-feedback" id="tf-fb" role="status" aria-live="polite"></div>';
+    h += '<button class="study-btn" id="b-tf-quit" style="margin-top:18px">Back to activities</button>';
+    h += '</div>';
+
+    document.getElementById('content').innerHTML = h;
+    document.getElementById('b-tf-quit').addEventListener('click', function () { showChapterActivities(bookId, chIdx); });
+    document.getElementById('b-tf-hear').addEventListener('click', function () { speakText(q.statement); });
+
+    var btns = document.querySelectorAll('.tf-opt');
+    for (var b = 0; b < btns.length; b++) {
+      btns[b].addEventListener('click', function () {
+        var val = this.getAttribute('data-val') === 'true';
+        var fb = document.getElementById('tf-fb');
+        if (val === q.answer) {
+          this.classList.add('mc-correct');
+          var whyHtml = '<div class="tf-why"><strong>Why:</strong> ' + q.source + '</div>';
+          if (!q.answer) {
+            whyHtml += '<div class="tf-why-note">The statement swapped <em>' + q.originalTerm + '</em> with <em>' + q.wrongTerm + '</em>.</div>';
+          }
+          fb.innerHTML = '<span class="fb-correct">\u2714 Correct!</span>' + whyHtml;
+          if (firstAttempt) { score++; points += 1.0; }
+          recordQuestionResult(bookId, chIdx, 'truefalse', qi, firstAttempt);
+          var all = document.querySelectorAll('.tf-opt');
+          for (var x = 0; x < all.length; x++) all[x].disabled = true;
+          setTimeout(function () { qi++; renderQ(); }, 3600);
+        } else {
+          if (firstAttempt) {
+            pushToRemixQueue({
+              bookId: bookId, chIdx: chIdx, missedInMode: 'truefalse',
+              qIndex: qi, ref: '', question: 'True or False: ' + q.statement,
+              options: ['True', 'False'], correct: q.answer ? 0 : 1,
+              source: q.source, answer: q.answer ? 'True' : 'False'
+            });
+          }
+          firstAttempt = false;
+          this.classList.add('mc-wrong');
+          this.disabled = true;
+          fb.innerHTML = '<span class="fb-try">Not quite \u2014 try the other one.</span>';
+        }
+      });
+    }
+  }
+
+  function showResults() {
+    var pct = Math.round(score / questions.length * 100);
+    var xpEarned = recordSession(bookId, chIdx, 'truefalse', points, questions.length);
+    var emoji = pct >= 80 ? '\u{1F3C6}' : pct >= 60 ? '\u{1F31F}' : '\u{1F4AA}';
+    var msg = pct >= 80 ? 'Outstanding!' : pct >= 60 ? 'Good work!' : 'Read closer!';
+    var h = '<div class="cloze-results">';
+    h += '<div class="cr-emoji">' + emoji + '</div>';
+    h += '<div class="cr-score">' + score + ' / ' + questions.length + '</div>';
+    h += '<div class="cr-pct">' + pct + '%</div>';
+    h += '<div class="cr-xp">+' + xpEarned + ' XP earned</div>';
+    h += '<div class="cr-msg">' + msg + '</div>';
+    h += '<button class="study-btn sb-pri" id="b-tf-retry">\u{1F504} Try Again</button>';
+    h += '<button class="study-btn" id="b-tf-back">Back to activities</button>';
+    h += '</div>';
+    document.getElementById('content').innerHTML = h;
+    document.getElementById('b-tf-retry').addEventListener('click', function () { showTrueFalse(bookId, chIdx); });
+    document.getElementById('b-tf-back').addEventListener('click', function () { showChapterActivities(bookId, chIdx); });
+  }
+
+  renderQ();
+}
+
 // ---- Remix Round — resurface missed questions in a different format ----
 function showRemix(bookId, chIdx) {
   var items = getRemixQueue().filter(function (it) {
