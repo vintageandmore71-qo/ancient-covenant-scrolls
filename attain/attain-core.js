@@ -605,6 +605,67 @@ function wordMorphVariants(word) {
   return out;
 }
 
+// ---- Syllable helpers ----
+// Heuristic syllable counting + splitting. Not perfect — English
+// syllabification needs a dictionary for full accuracy — but the
+// vowel-group rule is right >85% of the time and plenty good enough
+// for a learning game.
+
+function countSyllables(word) {
+  var w = String(word || '').toLowerCase().replace(/[^a-z]/g, '');
+  if (!w) return 0;
+  // "y" between two vowels is a consonant — break the group so "Qayin"
+  // counts as Qa-yin (2), not qayin (1)
+  var prepped = w.replace(/([aeiou])y([aeiou])/g, '$1 y$2');
+  var groups = prepped.match(/[aeiouy]+/g) || [];
+  var count = groups.length;
+  // Silent terminal 'e' (except "-le" endings which KEEP their syllable)
+  var isLeEnding = /[^aeiouy]le$/.test(w);
+  if (w.length > 3 && w[w.length - 1] === 'e' && !isLeEnding && count > 1) count--;
+  return Math.max(1, count);
+}
+
+// Split the word into approximate syllables. Keeps original casing.
+function splitSyllables(word) {
+  var orig = String(word || '');
+  var w = orig.toLowerCase().replace(/[^a-z]/g, '');
+  if (w.length < 3) return [orig];
+  // Find vowel-group positions in the lowercased stripped word
+  var groups = [];
+  var re = /[aeiouy]+/g;
+  var m;
+  while ((m = re.exec(w)) !== null) groups.push({ start: m.index, end: m.index + m[0].length });
+  if (groups.length <= 1) return [orig];
+
+  // Build a mapping from stripped-index back to original-index so we
+  // slice the original (casing + any diacritics preserved)
+  var mapBack = [];
+  for (var i = 0; i < orig.length; i++) {
+    if (/[a-zA-Z]/.test(orig[i])) mapBack.push(i);
+  }
+
+  var splitPoints = [];
+  for (var g = 0; g < groups.length - 1; g++) {
+    var clusterStart = groups[g].end;
+    var clusterEnd = groups[g + 1].start;
+    var clusterLen = clusterEnd - clusterStart;
+    var splitAt;
+    if (clusterLen >= 2) splitAt = clusterStart + 1; // VC | CV
+    else if (clusterLen === 1) splitAt = clusterStart; // V | CV
+    else splitAt = clusterEnd; // V | V (rare)
+    splitPoints.push(mapBack[splitAt] !== undefined ? mapBack[splitAt] : orig.length);
+  }
+
+  var syllables = [];
+  var cursor = 0;
+  for (var sp = 0; sp < splitPoints.length; sp++) {
+    syllables.push(orig.slice(cursor, splitPoints[sp]));
+    cursor = splitPoints[sp];
+  }
+  syllables.push(orig.slice(cursor));
+  return syllables.filter(function (s) { return s.length > 0; });
+}
+
 // ---- Remix Queue ----
 // Tracks every question a user misses. At round end, the Remix card
 // resurfaces each item in the OPPOSITE game format so the user gets

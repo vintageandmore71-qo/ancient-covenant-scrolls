@@ -545,6 +545,42 @@ body.font-dyslexic .cloze-prompt{font-family:var(--font-dyslexic);line-height:2.
   box-shadow:0 3px 12px rgba(168,85,247,.28);
 }
 
+/* Syllable Tap */
+.syll-banner{
+  background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;
+  padding:10px 16px;border-radius:12px;margin:0 0 14px 0;
+  font-size:.95em;font-weight:800;text-align:center;
+  box-shadow:0 3px 12px rgba(245,158,11,.28);
+}
+.syll-word{
+  font-size:2.6em;font-weight:800;text-align:center;
+  padding:20px;margin:10px 0;color:var(--text-main);
+  font-family:var(--font-main);letter-spacing:.03em;
+  background:#fef3c7;border-radius:16px;
+}
+body.font-dyslexic .syll-word{font-family:var(--font-dyslexic);letter-spacing:.08em}
+.syll-opts{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0;
+}
+.syll-opt{
+  color:#fff;background:#f59e0b;border:none;padding:24px 8px;border-radius:16px;
+  font-size:2em;font-weight:800;cursor:pointer;min-height:84px;
+  box-shadow:0 4px 12px rgba(245,158,11,.28);
+  transition:transform .15s,opacity .15s;
+}
+.syll-opt:hover:not(:disabled){transform:scale(1.04)}
+.syll-opt:active:not(:disabled){transform:scale(.96)}
+.syll-opt:disabled{opacity:.4;cursor:default;transform:none}
+.syll-opt.mc-correct{background:#16a34a!important}
+.syll-opt.mc-wrong{background:#dc2626!important}
+.syll-reveal{
+  font-size:1.8em;text-align:center;padding:14px;margin-top:10px;
+  background:#f8fafc;border-radius:12px;letter-spacing:.04em;
+  font-family:var(--font-main);
+}
+body.font-dyslexic .syll-reveal{font-family:var(--font-dyslexic)}
+.syll-sep{color:#94a3b8;margin:0 4px}
+
 /* Word Morph */
 .morph-banner{
   background:linear-gradient(135deg,#4338ca,#3730a3);color:#fff;
