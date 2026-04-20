@@ -621,7 +621,7 @@ var STOP_WORDS = new Set([
   'if', 'unless', 'whether', 'whereas', 'because', 'though', 'although',
   'while', 'until', 'when', 'whenever', 'wherever', 'once', 'either',
   'both', 'each', 'every', 'all', 'any', 'some', 'none', 'above',
-  'like', 'unlike', 'according',
+  'like', 'unlike', 'according', 'than',
   // Narrative filler
   'says', 'said', 'asked', 'replied', 'answered', 'spoke', 'thought',
   'felt', 'looked', 'seemed', 'appeared', 'smiled', 'laughed', 'cried',
@@ -654,78 +654,121 @@ function extractKeyTerms(chapters, maxTerms) {
   maxTerms = maxTerms || 50;
   var freq = {};
   var chapterIndices = {};
+  // Per-term: paragraph occurrences flagged as first-15% or last-15% of
+  // their chapter. These edge positions signal setup / payoff words.
+  var edgeHits = {};
+  // Per-term: which paragraphs (absolute index across all chapters) it
+  // appears in. Used for proximity scoring below.
+  var paraPresence = {};
   var totalChapters = chapters.length;
+  var absParaIdx = 0;
 
   for (var c = 0; c < chapters.length; c++) {
+    var paras = chapters[c].paragraphs || [];
+    var edgeSize = Math.max(1, Math.ceil(paras.length * 0.15));
     var chapterWords = new Set();
-    var text = chapters[c].paragraphs.join(' ');
-    var words = text.split(/[\s,;:!?.()"\[\]{}]+/);
 
-    for (var w = 0; w < words.length; w++) {
-      var word = words[w].replace(/^[^a-zA-Z\u00C0-\u024F]+|[^a-zA-Z\u00C0-\u024F]+$/g, '');
-      if (word.length < 3) continue;
-      var lower = word.toLowerCase();
-      if (STOP_WORDS.has(lower)) continue;
+    for (var p = 0; p < paras.length; p++) {
+      var isEdge = (p < edgeSize) || (p >= paras.length - edgeSize);
+      var words = paras[p].split(/[\s,;:!?.()"\[\]{}]+/);
 
-      // Preserve original casing for proper nouns
-      var key = lower;
-      if (!freq[key]) {
-        freq[key] = { count: 0, original: word, isProperNoun: false };
+      for (var w = 0; w < words.length; w++) {
+        var word = words[w].replace(/^[^a-zA-Z\u00C0-\u024F]+|[^a-zA-Z\u00C0-\u024F]+$/g, '');
+        if (word.length < 3) continue;
+        var lower = word.toLowerCase();
+        if (STOP_WORDS.has(lower)) continue;
+
+        var key = lower;
+        if (!freq[key]) {
+          freq[key] = { count: 0, original: word, isProperNoun: false };
+          edgeHits[key] = 0;
+          paraPresence[key] = new Set();
+        }
+        freq[key].count++;
+        if (word[0] === word[0].toUpperCase() && word[0] !== word[0].toLowerCase()) {
+          freq[key].isProperNoun = true;
+          freq[key].original = word;
+        }
+        chapterWords.add(key);
+        if (isEdge) edgeHits[key]++;
+        paraPresence[key].add(absParaIdx);
       }
-      freq[key].count++;
-      // Detect proper nouns (capitalized and not at sentence start)
-      if (word[0] === word[0].toUpperCase() && word[0] !== word[0].toLowerCase()) {
-        freq[key].isProperNoun = true;
-        freq[key].original = word;
-      }
-      chapterWords.add(key);
+      absParaIdx++;
     }
 
-    // Track which chapters each term appears in
     chapterWords.forEach(function (w) {
       if (!chapterIndices[w]) chapterIndices[w] = [];
       chapterIndices[w].push(c);
     });
   }
 
-  // Score terms: frequency * chapter spread, boost proper nouns.
-  // Generic common words (verbs/adjectives/adverbs) that slip past
-  // STOP_WORDS are rejected by a length + proper-noun gate so "required",
-  // "thought", "looked", etc. never surface as key terms.
-  var scored = [];
-  var firstIdx = 0;
-  var lastIdx = Math.max(0, totalChapters - 1);
+  // Identify candidate terms (pass the frequency + proper-noun gate)
+  var candidates = {};
   for (var term in freq) {
     var f = freq[term];
     if (f.count < 3) continue;
-
-    // Gate: accept only proper nouns OR non-proper nouns with length >= 7
-    // and a higher frequency threshold. This keeps "Eleanor", "Mastema",
-    // "Qumran", "covenant", "sanctuary" and rejects "required", "thought",
-    // "chapter", "really".
     if (!f.isProperNoun) {
       if (f.original.length < 7) continue;
       if (f.count < 5) continue;
     }
+    candidates[term] = true;
+  }
 
-    var presentIn = chapterIndices[term] || [];
+  // Proximity: per candidate, count how many OTHER candidate terms share
+  // at least one paragraph with it. A term that co-occurs with many
+  // other key terms is part of a clustered important idea.
+  var proximity = {};
+  var candidateList = Object.keys(candidates);
+  for (var i = 0; i < candidateList.length; i++) {
+    var mine = paraPresence[candidateList[i]];
+    var n = 0;
+    for (var j = 0; j < candidateList.length; j++) {
+      if (i === j) continue;
+      var theirs = paraPresence[candidateList[j]];
+      // Does any paragraph overlap?
+      var shared = false;
+      theirs.forEach(function (pi) {
+        if (!shared && mine.has(pi)) shared = true;
+      });
+      if (shared) n++;
+    }
+    proximity[candidateList[i]] = n;
+  }
+
+  // Score terms: frequency * chapter spread, proper-noun boost, length
+  // boost, edge-position boost, proximity boost.
+  var scored = [];
+  var firstIdx = 0;
+  var lastIdx = Math.max(0, totalChapters - 1);
+  for (var k = 0; k < candidateList.length; k++) {
+    var ck = candidateList[k];
+    var cf = freq[ck];
+    var presentIn = chapterIndices[ck] || [];
     var presence = presentIn.length;
     var spread = presence / totalChapters;
 
     // Drop terms confined to a single edge chapter — author-name leak
-    // guard (title page / back-matter bio that survived chapter-level
-    // filtering).
+    // guard (title page / back-matter bio).
     if (totalChapters >= 4 && presence === 1) {
       var onlyIdx = presentIn[0];
       if (onlyIdx === firstIdx || onlyIdx === lastIdx) continue;
     }
 
-    var score = f.count * (0.5 + spread);
-    if (f.isProperNoun) score *= 1.8;
-    if (f.original.length >= 7) score *= 1.3;
+    var score = cf.count * (0.5 + spread);
+    if (cf.isProperNoun) score *= 1.8;
+    if (cf.original.length >= 7) score *= 1.3;
+    // Edge-position boost: up to 1.4x when many occurrences are in a
+    // chapter's first/last 15% of paragraphs.
+    var edgeRatio = cf.count > 0 ? edgeHits[ck] / cf.count : 0;
+    if (edgeRatio > 0) score *= (1 + edgeRatio * 0.4);
+    // Proximity boost: up to 1.5x when the term co-occurs (shares a
+    // paragraph) with many other candidate terms.
+    var proxNorm = Math.min(proximity[ck] / Math.max(1, candidateList.length * 0.2), 1);
+    score *= (1 + proxNorm * 0.5);
+
     scored.push({
-      term: f.isProperNoun ? f.original : f.original.toLowerCase(),
-      frequency: f.count,
+      term: cf.isProperNoun ? cf.original : cf.original.toLowerCase(),
+      frequency: cf.count,
       score: score,
       spread: Math.round(spread * 100),
       definition: ''
