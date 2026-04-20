@@ -3900,6 +3900,17 @@ function showRemix(fid) {
       }
       return 'flash';
     }
+    // Dictation — the correct answer is a full sentence; an MC with
+    // one long option and three short distractors is trivial. Remix
+    // as a flashcard: show the sentence, let the user rate whether
+    // they remember it.
+    if (item.missedInMode === 'dictation') return 'flash';
+    // Story Sequence — an MC of N events is ugly. Show as flashcard
+    // with the sequence as the "answer" reveal.
+    if (item.missedInMode === 'sequence') return 'flash';
+    // Cause & Effect — cause column is long prose; an MC of cause +
+    // random distractor effects reads weird. Flashcard-reveal works.
+    if (item.missedInMode === 'causeeffect') return 'flash';
     return 'mc';
   }
 

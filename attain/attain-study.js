@@ -2635,6 +2635,11 @@ function showRemix(bookId, chIdx) {
       }
       return 'flash';
     }
+    // Full-sentence / multi-event answers don't fit MC remix well;
+    // flashcard reveal matches the content shape.
+    if (item.missedInMode === 'dictation') return 'flash';
+    if (item.missedInMode === 'sequence') return 'flash';
+    if (item.missedInMode === 'causeeffect') return 'flash';
     return 'mc';
   }
 
