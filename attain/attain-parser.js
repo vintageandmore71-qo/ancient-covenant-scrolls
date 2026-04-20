@@ -246,8 +246,64 @@ var FRONT_MATTER_PATTERNS = [
   /^acknowledgments?$/i, /^about the author/i, /^preface$/i,
   /^foreword$/i, /^introduction$/i, /^published by/i,
   /^printed in/i, /^library of congress/i, /^first edition/i,
-  /^cover design/i, /^editing by/i, /^\u00a9\s*\d{4}/
+  /^cover design/i, /^editing by/i, /^\u00a9\s*\d{4}/,
+  /^by\s+[A-Z][a-z]+\s+[A-Z][a-z]+/,
+  /^a\s+novel\s+by/i, /^a\s+memoir\s+by/i, /^a\s+(book|story)\s+by/i,
+  /^translated\s+by/i, /^edited\s+by/i, /^illustrated\s+by/i,
+  /^foreword\s+by/i, /^introduction\s+by/i, /^preface\s+by/i,
+  /^no\s+part\s+of\s+this/i, /^this\s+book\s+is\s+a\s+work\s+of/i,
+  /^names:\s*characters/i, /^first\s+published/i,
+  /^cataloging[-\s]in[-\s]publication/i,
+  /^the\s+author\s+(has|hereby|asserts)/i,
+  /^(also|other\s+books)\s+by\s+the\s+author/i,
+  /^also\s+by\s+[A-Z]/,
+  /^to\s+my\s+(wife|husband|mother|father|family|children|parents|daughter|son)/i,
+  /^for\s+my\s+(wife|husband|mother|father|family|children|parents|daughter|son)/i,
+  /^praise\s+for/i, /^advance\s+praise/i, /^what\s+readers\s+are\s+saying/i,
+  /^epigraph$/i, /^colophon$/i, /^imprint$/i, /^half\s+title$/i,
+  /^trademark/i, /^the\s+scanning,\s+uploading/i,
+  /^this\s+title\s+is\s+also\s+available/i,
+  /^appendix\s+[a-z]?$/i, /^glossary$/i, /^bibliography$/i,
+  /^notes$/i, /^endnotes$/i, /^index$/i, /^works\s+cited/i,
+  /^about\s+the\s+(author|publisher|type|book|editor|translator)/i,
+  /^\d{4}\s+by\s+[A-Z]/,
+  /^manufactured\s+in/i, /^typeset\s+(by|in)/i
 ];
+
+var ATTRIBUTION_PATTERNS = [
+  /\u00a9\s*\d{4}/,
+  /copyright\s*\u00a9?\s*\d{4}/i,
+  /\ball\s+rights\s+reserved\b/i,
+  /\bisbn[-\s]?(?:10|13)?[:\s]/i,
+  /\blibrary\s+of\s+congress\b/i,
+  /\bprinted\s+in\s+the\s+[a-z\s]+$/i,
+  /\bfirst\s+(?:edition|printing|published)\b/i,
+  /\bpublished\s+by\b/i,
+  /\bpublication\s+data\b/i,
+  /\bno\s+part\s+of\s+this\s+(?:book|publication)\b/i,
+  /\bmay\s+not\s+be\s+reproduced\b/i,
+  /\ba\s+cip\s+catalogue\b/i,
+  /\bthis\s+book\s+is\s+a\s+work\s+of\s+fiction\b/i,
+  /\bnames,\s+characters\b/i,
+  /\bwww\.[a-z0-9\-]+\.[a-z]{2,}/i,
+  /\bhttps?:\/\//i,
+  /\bp\.?\s?cm\b/i
+];
+
+function isAttributionParagraph(text) {
+  if (!text) return false;
+  if (text.length < 10) return true;
+  // Very short paragraphs that are mostly a proper name
+  // (title pages and bylines) — e.g. "by John Smith" or just a name line.
+  if (text.length < 60) {
+    if (/^by\s+[A-Z]/.test(text)) return true;
+    if (/^[A-Z][a-z]+(\s+[A-Z]\.?)?\s+[A-Z][a-z]+$/.test(text)) return true;
+  }
+  for (var i = 0; i < ATTRIBUTION_PATTERNS.length; i++) {
+    if (ATTRIBUTION_PATTERNS[i].test(text)) return true;
+  }
+  return false;
+}
 
 function isFrontMatter(text) {
   if (!text || text.length < 10) return true;
@@ -255,6 +311,26 @@ function isFrontMatter(text) {
   for (var i = 0; i < FRONT_MATTER_PATTERNS.length; i++) {
     if (FRONT_MATTER_PATTERNS[i].test(lower)) return true;
   }
+  // Any attribution/copyright/ISBN marker in the opening block
+  if (isAttributionParagraph(text)) return true;
+  return false;
+}
+
+function isFrontMatterChapter(ch) {
+  if (!ch || !ch.paragraphs || ch.paragraphs.length === 0) return true;
+  // Join title + first few paragraphs so front-matter scans deeper than
+  // the opening line — title pages often have a blank line before the
+  // author attribution.
+  var scanParas = ch.paragraphs.slice(0, 3).join(' \n ');
+  var probe = (ch.title || '') + ' \n ' + scanParas;
+  if (isFrontMatter(probe)) return true;
+  // If most of the chapter is short attribution-style paragraphs, drop it.
+  var attribCount = 0;
+  var checkN = Math.min(ch.paragraphs.length, 6);
+  for (var i = 0; i < checkN; i++) {
+    if (isAttributionParagraph(ch.paragraphs[i])) attribCount++;
+  }
+  if (checkN > 0 && attribCount / checkN >= 0.5) return true;
   return false;
 }
 
@@ -342,13 +418,19 @@ function detectChapters(rawText) {
   }
   chapters = merged;
 
-  // Remove front matter chapters (copyright, TOC, dedication, etc.)
+  // Remove front matter / back matter chapters (copyright, TOC,
+  // dedication, about the author, "also by" ads, etc.)
   chapters = chapters.filter(function (ch) {
-    if (ch.paragraphs.length === 0) return false;
-    var firstPara = ch.paragraphs[0] || '';
-    var titleAndContent = ch.title + ' ' + firstPara;
-    return !isFrontMatter(titleAndContent);
+    return !isFrontMatterChapter(ch);
   });
+
+  // Scrub stray front-matter lines (copyright, ISBN, "by Author",
+  // bare-name bylines) that survived inside otherwise-valid chapters.
+  for (var sc = 0; sc < chapters.length; sc++) {
+    chapters[sc].paragraphs = chapters[sc].paragraphs.filter(function (p) {
+      return !isAttributionParagraph(p);
+    });
+  }
 
   // Remove chapters with very little content (likely blank pages)
   chapters = chapters.filter(function (ch) {
@@ -456,7 +538,7 @@ var STOP_WORDS = new Set([
 function extractKeyTerms(chapters, maxTerms) {
   maxTerms = maxTerms || 50;
   var freq = {};
-  var chapterPresence = {};
+  var chapterIndices = {};
   var totalChapters = chapters.length;
 
   for (var c = 0; c < chapters.length; c++) {
@@ -486,17 +568,31 @@ function extractKeyTerms(chapters, maxTerms) {
 
     // Track which chapters each term appears in
     chapterWords.forEach(function (w) {
-      if (!chapterPresence[w]) chapterPresence[w] = 0;
-      chapterPresence[w]++;
+      if (!chapterIndices[w]) chapterIndices[w] = [];
+      chapterIndices[w].push(c);
     });
   }
 
   // Score terms: frequency * chapter spread, boost proper nouns
   var scored = [];
+  var firstIdx = 0;
+  var lastIdx = Math.max(0, totalChapters - 1);
   for (var term in freq) {
     var f = freq[term];
     if (f.count < 3) continue;
-    var spread = chapterPresence[term] / totalChapters;
+    var presentIn = chapterIndices[term] || [];
+    var presence = presentIn.length;
+    var spread = presence / totalChapters;
+
+    // Drop terms confined to a single edge chapter — strong signal
+    // that the term is a front-matter or back-matter artifact (author
+    // name on a title page, "about the author" bio, dedication, etc.)
+    // that survived chapter-level filtering.
+    if (totalChapters >= 4 && presence === 1) {
+      var onlyIdx = presentIn[0];
+      if (onlyIdx === firstIdx || onlyIdx === lastIdx) continue;
+    }
+
     var score = f.count * (0.5 + spread);
     if (f.isProperNoun) score *= 1.5;
     if (f.original.length >= 6) score *= 1.2;
