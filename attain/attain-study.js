@@ -2547,25 +2547,24 @@ function showMindMap(bookId, chIdx) {
     n.vx = 0; n.vy = 0;
   });
 
-  // Force simulation: spring attraction along edges, Coulomb repulsion
-  // between all pairs, hard collision to prevent overlap, weak
-  // centering force toward the middle.
+  // Force simulation with stronger repulsion, bigger collision radius,
+  // and stronger centering so 8-10 labeled nodes fit without overlap
+  // and the cluster doesn't drift to one side.
   function simulate(iterations) {
-    iterations = iterations || 300;
+    iterations = iterations || 400;
     for (var step = 0; step < iterations; step++) {
       for (var i = 0; i < nodes.length; i++) {
         for (var j = i + 1; j < nodes.length; j++) {
           var dx = nodes[j].x - nodes[i].x;
           var dy = nodes[j].y - nodes[i].y;
           var dist = Math.sqrt(dx * dx + dy * dy) || 0.01;
-          var force = 3500 / (dist * dist);
+          var force = 5000 / (dist * dist);
           var fx = (dx / dist) * force;
           var fy = (dy / dist) * force;
           nodes[i].vx -= fx; nodes[i].vy -= fy;
           nodes[j].vx += fx; nodes[j].vy += fy;
-          // Hard collision to keep labels legible
-          if (dist < 95) {
-            var push = (95 - dist) * 0.5;
+          if (dist < 130) {
+            var push = (130 - dist) * 0.5;
             var pdx = (dx / dist) * push;
             var pdy = (dy / dist) * push;
             nodes[i].x -= pdx; nodes[i].y -= pdy;
@@ -2577,24 +2576,24 @@ function showMindMap(bookId, chIdx) {
         var s = nodes[edges[e].source], t = nodes[edges[e].target];
         var dx2 = t.x - s.x, dy2 = t.y - s.y;
         var dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2) || 0.01;
-        var springK = 0.015 * Math.min(3, edges[e].weight);
+        var springK = 0.010 * Math.min(3, edges[e].weight);
         var fx2 = dx2 * springK, fy2 = dy2 * springK;
         s.vx += fx2; s.vy += fy2;
         t.vx -= fx2; t.vy -= fy2;
       }
       for (var k = 0; k < nodes.length; k++) {
         var n = nodes[k];
-        n.vx += (W / 2 - n.x) * 0.0025;
-        n.vy += (H / 2 - n.y) * 0.0025;
+        n.vx += (W / 2 - n.x) * 0.006;
+        n.vy += (H / 2 - n.y) * 0.006;
         n.vx *= 0.82; n.vy *= 0.82;
         n.x += n.vx; n.y += n.vy;
-        var pad = 60;
+        var pad = 70;
         if (n.x < pad) n.x = pad; if (n.x > W - pad) n.x = W - pad;
         if (n.y < pad) n.y = pad; if (n.y > H - pad) n.y = H - pad;
       }
     }
   }
-  simulate(300);
+  simulate(400);
 
   var selectedNodeId = -1;
 
@@ -2620,9 +2619,9 @@ function showMindMap(bookId, chIdx) {
       var sel = (selectedNodeId === n) ? ' mind-node-selected' : '';
       h += '<g data-node="' + n + '" class="mind-node' + sel + '" role="button" tabindex="0" aria-label="' + nn.label + '">';
       h += '<circle cx="' + nn.x.toFixed(1) + '" cy="' + nn.y.toFixed(1) + '" r="' + r + '" fill="' + color + '" stroke="#fff" stroke-width="2" />';
-      // Stagger labels above/below node based on which half it's in
-      var labelAbove = nn.y > H / 2;
-      var labelY = labelAbove ? (nn.y - r - 8) : (nn.y + r + 16);
+      // Alternate labels by index so adjacent nodes never share a side
+      var labelAbove = (n % 2 === 1);
+      var labelY = labelAbove ? (nn.y - r - 8) : (nn.y + r + 18);
       h += '<text x="' + nn.x.toFixed(1) + '" y="' + labelY.toFixed(1) + '" text-anchor="middle" class="mind-label">' + nn.label + '</text>';
       h += '</g>';
     }

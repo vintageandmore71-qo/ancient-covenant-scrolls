@@ -3815,22 +3815,23 @@ function showMindMap(fid) {
       n.vx = 0; n.vy = 0;
     });
 
-    // 300 iterations + stronger repulsion + hard collision so nodes
-    // stay visibly separated and labels don't overlap.
-    for (var step = 0; step < 300; step++) {
+    // Stronger repulsion + bigger collision radius so 8-10 labeled nodes
+    // actually fit without visual overlap on mobile.
+    for (var step = 0; step < 400; step++) {
       for (var i = 0; i < nodes.length; i++) {
         for (var j = i + 1; j < nodes.length; j++) {
           var dx = nodes[j].x - nodes[i].x;
           var dy = nodes[j].y - nodes[i].y;
           var dist = Math.sqrt(dx * dx + dy * dy) || 0.01;
-          var force = 3500 / (dist * dist);
+          var force = 5000 / (dist * dist);
           var fx = (dx / dist) * force;
           var fy = (dy / dist) * force;
           nodes[i].vx -= fx; nodes[i].vy -= fy;
           nodes[j].vx += fx; nodes[j].vy += fy;
-          // Hard collision: shove any pair whose centers are closer than 95px
-          if (dist < 95) {
-            var push = (95 - dist) * 0.5;
+          // Hard collision: keep centers at least 130px apart so labels
+          // don't overlap even when one sits above and another below
+          if (dist < 130) {
+            var push = (130 - dist) * 0.5;
             var pdx = (dx / dist) * push;
             var pdy = (dy / dist) * push;
             nodes[i].x -= pdx; nodes[i].y -= pdy;
@@ -3842,17 +3843,19 @@ function showMindMap(fid) {
         var s = nodes[edges[e].source], t = nodes[edges[e].target];
         var dx2 = t.x - s.x, dy2 = t.y - s.y;
         var dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2) || 0.01;
-        var springK = 0.015 * Math.min(3, edges[e].weight);
+        var springK = 0.010 * Math.min(3, edges[e].weight);
         s.vx += dx2 * springK; s.vy += dy2 * springK;
         t.vx -= dx2 * springK; t.vy -= dy2 * springK;
       }
       for (var k = 0; k < nodes.length; k++) {
         var n = nodes[k];
-        n.vx += (W / 2 - n.x) * 0.0025;
-        n.vy += (H / 2 - n.y) * 0.0025;
+        // Stronger centering prevents the drift-to-one-side local
+        // minimum seen on dense graphs
+        n.vx += (W / 2 - n.x) * 0.006;
+        n.vy += (H / 2 - n.y) * 0.006;
         n.vx *= 0.82; n.vy *= 0.82;
         n.x += n.vx; n.y += n.vy;
-        var pad = 60; // bigger padding so labels fit
+        var pad = 70;
         if (n.x < pad) n.x = pad; if (n.x > W - pad) n.x = W - pad;
         if (n.y < pad) n.y = pad; if (n.y > H - pad) n.y = H - pad;
       }
@@ -3880,10 +3883,11 @@ function showMindMap(fid) {
         var sel = (selectedNodeId === nn) ? ' class="mind-node mind-node-selected"' : ' class="mind-node"';
         h += '<g data-node="' + nn + '"' + sel + ' role="button" tabindex="0" aria-label="' + node.label + '">';
         h += '<circle cx="' + node.x.toFixed(1) + '" cy="' + node.y.toFixed(1) + '" r="' + r + '" fill="' + color + '" stroke="#fff" stroke-width="2" />';
-        // Place label above node if it's in the bottom half, below if top —
-        // halves label-on-label collisions between neighbouring nodes.
-        var labelAbove = node.y > H / 2;
-        var labelY = labelAbove ? (node.y - r - 8) : (node.y + r + 16);
+        // Alternate labels above/below by node index so any two adjacent
+        // nodes in the layout ring always get opposite placement, even
+        // when they end up in the same half of the viewBox.
+        var labelAbove = (nn % 2 === 1);
+        var labelY = labelAbove ? (node.y - r - 8) : (node.y + r + 18);
         h += '<text x="' + node.x.toFixed(1) + '" y="' + labelY.toFixed(1) + '" text-anchor="middle" class="mind-label">' + node.label + '</text>';
         h += '</g>';
       }
