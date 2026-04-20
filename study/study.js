@@ -670,6 +670,7 @@ function go(fid) {
   h += '<div class="activity-grid">';
   h += actCard('\u{1F4D6}', 'Chapter Summary', '#2563eb', 'summary', fid);
   h += actCard('\u{1F9E9}', 'Fill in the Blank', '#059669', 'filblank', fid);
+  h += actCard('\u{1F50A}', 'Audio Fill the Gap', '#16a34a', 'audio-filblank', fid);
   h += actCard('\u270F\uFE0F', 'Multiple Choice', '#7c3aed', 'mc', fid);
   h += actCard('\u{1F0CF}', 'Flashcards', '#d97706', 'flash', fid);
   h += actCard('\u{1F4DA}', 'Key Terms', '#0891b2', 'terms', fid);
@@ -726,6 +727,7 @@ function openActivity(mode, fid) {
   if (mode === 'terms') { showTermsMode(fid); return; }
   if (mode === 'faq') { showFaqMode(fid); return; }
   if (mode === 'filblank') { showFillBlank(fid); return; }
+  if (mode === 'audio-filblank') { showFillBlank(fid, true); return; }
   if (mode === 'mc') { showMC(fid); return; }
   if (mode === 'flash') { showFlashcards(fid); return; }
   if (mode === 'memory') { showMemoryMatch(fid); return; }
@@ -1073,7 +1075,7 @@ function shuffle(arr) {
   return arr;
 }
 
-function showFillBlank(fid) {
+function showFillBlank(fid, audioMode) {
   loadContent(fid).then(function (data) {
     var questions = [], allAns = [];
     var tier = getDifficultyTier(fid);
@@ -1095,7 +1097,7 @@ function showFillBlank(fid) {
       var verses = getVerses(fid);
       if (!verses.length) {
         fetch('../data/' + fid + '.json').then(function(r){return r.ok?r.json():null;}).then(function(d){
-          if(d){CHAPTER_CACHE[fid]=d;showFillBlank(fid);}else if(!questions.length){openActivity('stub',fid);}
+          if(d){CHAPTER_CACHE[fid]=d;showFillBlank(fid, audioMode);}else if(!questions.length){openActivity('stub',fid);}
         }).catch(function(){if(!questions.length) openActivity('stub',fid);});
         if (!questions.length) return;
       }
@@ -1157,6 +1159,9 @@ function showFillBlank(fid) {
       var clozeIdx = IDS.indexOf(fid);
       var clozeLabel = clozeIdx >= 0 ? LBL[clozeIdx].split(' \u2014 ')[0] : fid;
       h += '<div class="cloze-ref">' + clozeLabel + (q.ref ? ' ' + q.ref : '') + '</div>';
+      if (audioMode) {
+        h += '<div class="audio-gap-banner">\u{1F50A} Listen and tap the missing word</div>';
+      }
       h += '<div class="cloze-prompt">' +
         q.prompt.replace('______', '<span class="cloze-blank">______</span>') + '</div>';
       h += '<button class="cloze-audio" id="b-cloze-hear">\u{1F50A} Listen</button>';
@@ -1177,6 +1182,12 @@ function showFillBlank(fid) {
       document.getElementById('b-cloze-hear').addEventListener('click', function () {
         speakText(q.source_quote || q.prompt.replace('______', correct));
       });
+      if (audioMode) {
+        // Auto-play the passage with "blank" spoken at the missing word
+        setTimeout(function () {
+          speakText(q.prompt.replace('______', 'blank'));
+        }, 400);
+      }
       wireHintLadder('b-cloze-hint', 'cloze-hint-display', correct, q.source_quote, function (n) { hintsUsed = n; });
       var btns = document.querySelectorAll('.cloze-opt');
       for (var b = 0; b < btns.length; b++) {

@@ -422,7 +422,7 @@ are marked `equiv`. Build order is not fixed; pick one at a time.
 | True or False with Why | new | T/F statement + tap the passage that proves it |
 | Who Said It | new | Match a quote to the speaker/character |
 | Cause and Effect Match | new | Pair cause paragraph to effect paragraph |
-| Audio Fill the Gap | new | TTS reads passage with a bleep; user taps missing word |
+| Audio Fill the Gap | done | TTS auto-plays prompt with "blank" spoken at the missing word; reuses FB engine + Hint Ladder; green banner distinguishes mode |
 | Dictation Challenge | new | Hear a verse, type it back; compare |
 
 ---

@@ -532,6 +532,14 @@ body.font-dyslexic .hint-btn{font-family:var(--font-dyslexic)}
 body.font-dyslexic .hint-stage{font-family:var(--font-dyslexic)}
 body.font-dyslexic .hint-stage-3{font-family:monospace}
 
+/* Audio Fill the Gap */
+.audio-gap-banner{
+  background:linear-gradient(135deg,#16a34a,#059669);color:#fff;
+  padding:10px 16px;border-radius:12px;margin:0 0 14px 0;
+  font-size:.95em;font-weight:800;text-align:center;
+  box-shadow:0 3px 12px rgba(22,163,74,.28);
+}
+
 /* Remix Round (BUILD_PLAN #4) */
 .act-card-remix{
   background:linear-gradient(135deg,#7c3aed,#ec4899);
