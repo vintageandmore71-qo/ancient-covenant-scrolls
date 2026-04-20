@@ -812,6 +812,13 @@ function showChapterActivities(bookId, chIdx) {
   h += actCard('\u{1F527}', 'Verse Builder', '#be185d', 'versebuild');
   h += actCard('\u{1F517}', 'Word Match', '#4338ca', 'wordmatch');
   h += actCard('\u2694\uFE0F', 'Challenge', '#b45309', 'challenge');
+  var remixN = getRemixCount(bookId, chIdx);
+  if (remixN > 0) {
+    h += '<div class="act-card act-card-remix" data-mode="remix" role="button" tabindex="0" aria-label="Remix Round activity, ' + remixN + ' due">' +
+      '<div class="act-icon" aria-hidden="true">\u{1F504}</div>' +
+      '<div class="act-label">Remix Round<br><span class="act-remix-badge">' + remixN + ' due</span></div>' +
+      '</div>';
+  }
   h += '</div>';
 
   // Navigation
@@ -867,6 +874,7 @@ function openStudyMode(bookId, chIdx, mode) {
   if (mode === 'versebuild') { showVerseBuilder(bookId, chIdx); return; }
   if (mode === 'wordmatch') { showWordMatch(bookId, chIdx); return; }
   if (mode === 'challenge') { showChallenge(bookId, chIdx); return; }
+  if (mode === 'remix') { showRemix(bookId, chIdx); return; }
   showNoContent(bookId, chIdx, mode);
 }
 

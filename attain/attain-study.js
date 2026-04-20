@@ -397,6 +397,13 @@ function showFillBlank(bookId, chIdx) {
           for (var x = 0; x < all.length; x++) all[x].disabled = true;
           setTimeout(function () { qi++; renderQ(); }, 2200);
         } else {
+          if (firstAttempt) {
+            pushToRemixQueue({
+              bookId: bookId, chIdx: chIdx, missedInMode: 'filblank',
+              qIndex: qi, ref: q.ref || '', prompt: q.prompt,
+              answer: correct, source: q.source || ''
+            });
+          }
           firstAttempt = false;
           this.classList.add('cloze-wrong');
           this.disabled = true;
@@ -548,6 +555,14 @@ function showMC(bookId, chIdx) {
           for (var x = 0; x < all.length; x++) all[x].disabled = true;
           setTimeout(function () { qi++; renderQ(); }, 2200);
         } else {
+          if (mcFirstAttempt) {
+            pushToRemixQueue({
+              bookId: bookId, chIdx: chIdx, missedInMode: 'mc',
+              qIndex: qi, ref: q.ref || '', question: q.question,
+              options: q.options.slice(), correct: q.correct,
+              source: q.source || ''
+            });
+          }
           mcFirstAttempt = false;
           this.classList.add('mc-wrong');
           this.disabled = true;
@@ -1534,6 +1549,212 @@ function showReadMode(bookId, chIdx) {
   document.getElementById('b-read-back').addEventListener('click', function () { showChapterActivities(bookId, chIdx); });
 
   window.scrollTo(0, 0);
+}
+
+// ---- Remix Round — resurface missed questions in a different format ----
+function showRemix(bookId, chIdx) {
+  var items = getRemixQueue().filter(function (it) {
+    return it.bookId === bookId && it.chIdx === chIdx;
+  });
+  if (items.length === 0) { showChapterActivities(bookId, chIdx); return; }
+  items = shuffle(items.slice());
+  var qi = 0, score = 0, points = 0, firstAttempt = true, hintsUsed = 0;
+  var chapters = activeChapters;
+  var ch = chapters && chapters[chIdx];
+  var chTitle = (ch && ch.title) || 'Chapter ' + (chIdx + 1);
+
+  function pickRemixMode(item) {
+    if (item.missedInMode === 'filblank') return 'mc';
+    if (item.missedInMode === 'mc') {
+      if (item.options && typeof item.correct === 'number') {
+        var ans = item.options[item.correct];
+        if (ans && item.source && item.source.toLowerCase().indexOf(ans.toLowerCase()) !== -1) {
+          return 'cloze';
+        }
+      }
+      return 'flash';
+    }
+    return 'mc';
+  }
+
+  function otherAnswerPool() {
+    var q = getRemixQueue();
+    var pool = [];
+    for (var i = 0; i < q.length; i++) {
+      var it = q[i];
+      if (it.answer && pool.indexOf(it.answer) === -1) pool.push(it.answer);
+      if (it.options && typeof it.correct === 'number' && it.options[it.correct]) {
+        var o = it.options[it.correct];
+        if (pool.indexOf(o) === -1) pool.push(o);
+      }
+    }
+    return pool;
+  }
+
+  function renderNext() {
+    if (qi >= items.length) { showRemixResults(); return; }
+    var item = items[qi];
+    firstAttempt = true;
+    hintsUsed = 0;
+    var mode = pickRemixMode(item);
+    var h = '<div class="cloze-view remix-view">';
+    h += '<div class="remix-banner">\u{1F504} Remix Round \u2014 ' + (qi + 1) + ' of ' + items.length + '</div>';
+    h += '<div class="cloze-ref">' + chTitle + (item.ref ? ' ' + item.ref : '') + '</div>';
+
+    if (mode === 'mc') {
+      var answer = item.answer || (item.options && item.options[item.correct]);
+      var otherAns = otherAnswerPool().filter(function (a) { return a && a.toLowerCase() !== String(answer).toLowerCase(); });
+      var distractors = shuffle(otherAns).slice(0, 3);
+      while (distractors.length < 3) distractors.push('\u2014');
+      var opts = shuffle([answer].concat(distractors));
+      var correctIdx = opts.indexOf(answer);
+      var question = item.prompt ? ('Which word fills the blank? ' + item.prompt) : (item.question || 'Choose the best answer.');
+      h += '<div class="mc-question">' + question + '</div>';
+      h += '<button class="cloze-audio" id="b-rx-hear">\u{1F50A} Listen</button>';
+      h += '<button class="hint-btn" id="b-rx-hint" aria-label="Get a hint">\u{1F4A1} Hint</button>';
+      h += '<div class="hint-display" id="rx-hint-display" role="status" aria-live="polite"></div>';
+      h += '<div class="mc-opts">';
+      var mcColors = ['#dc2626', '#2563eb', '#059669', '#d97706'];
+      for (var o = 0; o < opts.length; o++) {
+        h += '<button class="mc-opt" data-idx="' + o + '" style="background:' + mcColors[o % 4] + '" aria-label="Option ' + (o + 1) + ': ' + opts[o] + '">' + opts[o] + '</button>';
+      }
+      h += '</div>';
+      h += '<div class="mc-feedback" id="rx-fb" role="status" aria-live="polite"></div>';
+      h += '<button class="study-btn" id="b-rx-quit" style="margin-top:18px">Leave remix round</button>';
+      h += '</div>';
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-rx-quit').addEventListener('click', function () { showChapterActivities(bookId, chIdx); });
+      document.getElementById('b-rx-hear').addEventListener('click', function () { speakText(question); });
+      wireHintLadder('b-rx-hint', 'rx-hint-display', answer, item.source, function (n) { hintsUsed = n; });
+      var btns = document.querySelectorAll('.mc-opt');
+      for (var b = 0; b < btns.length; b++) {
+        btns[b].addEventListener('click', function () {
+          var idx = parseInt(this.getAttribute('data-idx'));
+          var fb = document.getElementById('rx-fb');
+          if (idx === correctIdx) {
+            this.classList.add('mc-correct');
+            fb.innerHTML = '<span class="fb-correct">\u2714 Remixed!</span>' +
+              '<div class="cloze-source">' + (item.source || '') + '</div>';
+            if (firstAttempt) { score++; points += hintMultiplier(hintsUsed); }
+            removeFromRemixQueue(item);
+            var all = document.querySelectorAll('.mc-opt');
+            for (var x = 0; x < all.length; x++) all[x].disabled = true;
+            setTimeout(function () { qi++; renderNext(); }, 2200);
+          } else {
+            firstAttempt = false;
+            this.classList.add('mc-wrong');
+            this.disabled = true;
+            fb.innerHTML = '<span class="fb-try">Not quite \u2014 try another \u2192</span>';
+          }
+        });
+      }
+      return;
+    }
+
+    if (mode === 'cloze') {
+      var answer2 = item.options[item.correct];
+      var quote = item.source;
+      var re = new RegExp('\\b' + String(answer2).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+      var prompt = quote.replace(re, '______');
+      if (prompt === quote) { prompt = quote + ' \u2014 what word is missing?'; }
+      var otherAns2 = otherAnswerPool().filter(function (a) { return a && a.toLowerCase() !== String(answer2).toLowerCase(); });
+      var distractors2 = shuffle(otherAns2).slice(0, 3);
+      while (distractors2.length < 3) distractors2.push('\u2014');
+      var opts2 = shuffle([answer2].concat(distractors2));
+      var colors2 = ['#2563eb', '#059669', '#7c3aed', '#d97706'];
+      h += '<div class="cloze-prompt">' + prompt.replace('______', '<span class="cloze-blank">______</span>') + '</div>';
+      h += '<button class="cloze-audio" id="b-rx-hear">\u{1F50A} Listen</button>';
+      h += '<button class="hint-btn" id="b-rx-hint" aria-label="Get a hint">\u{1F4A1} Hint</button>';
+      h += '<div class="hint-display" id="rx-hint-display" role="status" aria-live="polite"></div>';
+      h += '<div class="cloze-opts">';
+      for (var o2 = 0; o2 < opts2.length; o2++) {
+        h += '<button class="cloze-opt" data-val="' + opts2[o2] + '" style="background:' + colors2[o2 % 4] + '" aria-label="Answer option: ' + opts2[o2] + '">' + opts2[o2] + '</button>';
+      }
+      h += '</div>';
+      h += '<div class="cloze-feedback" id="rx-fb" role="status" aria-live="polite"></div>';
+      h += '<button class="study-btn" id="b-rx-quit" style="margin-top:18px">Leave remix round</button>';
+      h += '</div>';
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-rx-quit').addEventListener('click', function () { showChapterActivities(bookId, chIdx); });
+      document.getElementById('b-rx-hear').addEventListener('click', function () { speakText(quote); });
+      wireHintLadder('b-rx-hint', 'rx-hint-display', answer2, quote, function (n) { hintsUsed = n; });
+      var btns2 = document.querySelectorAll('.cloze-opt');
+      for (var b2 = 0; b2 < btns2.length; b2++) {
+        btns2[b2].addEventListener('click', function () {
+          var val = this.getAttribute('data-val');
+          var fb = document.getElementById('rx-fb');
+          if (val.toLowerCase() === String(answer2).toLowerCase()) {
+            this.classList.add('cloze-correct');
+            fb.innerHTML = '<span class="fb-correct">\u2714 Remixed!</span><div class="cloze-source">' + quote + '</div>';
+            if (firstAttempt) { score++; points += hintMultiplier(hintsUsed); }
+            removeFromRemixQueue(item);
+            var all = document.querySelectorAll('.cloze-opt');
+            for (var x = 0; x < all.length; x++) all[x].disabled = true;
+            setTimeout(function () { qi++; renderNext(); }, 2200);
+          } else {
+            firstAttempt = false;
+            this.classList.add('cloze-wrong');
+            this.disabled = true;
+            fb.innerHTML = '<span class="fb-try">Try another \u2192</span>';
+          }
+        });
+      }
+      return;
+    }
+
+    // Flashcard fallback
+    var answer3 = (item.options && item.options[item.correct]) || item.answer || '';
+    var front = item.question || item.prompt || 'Remember this:';
+    var revealed = false;
+    h += '<div class="cloze-prompt">' + front + '</div>';
+    h += '<button class="cloze-audio" id="b-rx-hear">\u{1F50A} Listen</button>';
+    h += '<div class="remix-flash" id="rx-flash">Tap to reveal answer</div>';
+    h += '<div class="mc-opts remix-confidence" id="rx-confidence" style="display:none">';
+    h += '<button class="mc-opt" data-rx="yes" style="background:#059669">I knew it</button>';
+    h += '<button class="mc-opt" data-rx="no" style="background:#dc2626">Still unsure</button>';
+    h += '</div>';
+    h += '<button class="study-btn" id="b-rx-quit" style="margin-top:18px">Leave remix round</button>';
+    h += '</div>';
+    document.getElementById('content').innerHTML = h;
+    document.getElementById('b-rx-quit').addEventListener('click', function () { showChapterActivities(bookId, chIdx); });
+    document.getElementById('b-rx-hear').addEventListener('click', function () { speakText(front); });
+    document.getElementById('rx-flash').addEventListener('click', function () {
+      if (revealed) return;
+      revealed = true;
+      this.innerHTML = '<strong>' + answer3 + '</strong>' + (item.source ? '<div class="cloze-source">' + item.source + '</div>' : '');
+      document.getElementById('rx-confidence').style.display = 'grid';
+    });
+    var cBtns = document.querySelectorAll('#rx-confidence .mc-opt');
+    for (var cb = 0; cb < cBtns.length; cb++) {
+      cBtns[cb].addEventListener('click', function () {
+        var knew = this.getAttribute('data-rx') === 'yes';
+        if (knew) { score++; points += 0.7; removeFromRemixQueue(item); }
+        qi++; renderNext();
+      });
+    }
+  }
+
+  function showRemixResults() {
+    var pct = items.length ? Math.round(score / items.length * 100) : 0;
+    var xpEarned = recordSession(bookId, chIdx, 'remix', points, items.length);
+    var remaining = getRemixCount(bookId, chIdx);
+    var h = '<div class="cloze-results">';
+    h += '<div class="cr-emoji">\u{1F504}</div>';
+    h += '<div class="cr-score">' + score + ' / ' + items.length + '</div>';
+    h += '<div class="cr-pct">' + pct + '% remixed</div>';
+    h += '<div class="cr-xp">+' + xpEarned + ' XP earned</div>';
+    if (remaining > 0) {
+      h += '<p class="cr-hint">' + remaining + ' still in your remix queue \u2014 try again later.</p>';
+    } else {
+      h += '<p class="cr-hint">Queue cleared for this chapter. Nice work.</p>';
+    }
+    h += '<button class="study-btn sb-pri" id="b-rx-again">Back to activities</button>';
+    h += '</div>';
+    document.getElementById('content').innerHTML = h;
+    document.getElementById('b-rx-again').addEventListener('click', function () { showChapterActivities(bookId, chIdx); });
+  }
+
+  renderNext();
 }
 
 console.log('attain-study.js loaded (all study modes)');

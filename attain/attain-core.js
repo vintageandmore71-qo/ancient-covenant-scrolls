@@ -463,6 +463,57 @@ function getStats() {
 function saveStats(s) {
   try { localStorage.setItem('attain_stats', JSON.stringify(s)); } catch (e) {}
 }
+// ---- Remix Queue ----
+// Tracks every question a user misses. At round end, the Remix card
+// resurfaces each item in the OPPOSITE game format so the user gets
+// another chance without repeating the exact same experience. Cleared
+// only when the remixed version is answered correctly.
+
+function getRemixQueue() {
+  try { return JSON.parse(localStorage.getItem('attain_remix_queue') || '[]'); }
+  catch (e) { return []; }
+}
+function saveRemixQueue(q) {
+  try { localStorage.setItem('attain_remix_queue', JSON.stringify(q || [])); }
+  catch (e) {}
+}
+function remixKey(item) {
+  return item.bookId + ':' + item.chIdx + '|' + item.missedInMode +
+    '|' + (item.ref || '') + '|' + ((item.prompt || item.question || '').slice(0, 60));
+}
+function pushToRemixQueue(item) {
+  if (!item || !item.bookId || !item.missedInMode) return;
+  var q = getRemixQueue();
+  var key = remixKey(item);
+  for (var i = 0; i < q.length; i++) {
+    if (remixKey(q[i]) === key) return;
+  }
+  item.missedAt = new Date().toISOString();
+  q.push(item);
+  if (q.length > 200) q = q.slice(-200);
+  saveRemixQueue(q);
+}
+function removeFromRemixQueue(item) {
+  var q = getRemixQueue();
+  var key = remixKey(item);
+  var out = [];
+  for (var i = 0; i < q.length; i++) {
+    if (remixKey(q[i]) !== key) out.push(q[i]);
+  }
+  saveRemixQueue(out);
+}
+function getRemixCount(bookId, chIdx) {
+  var q = getRemixQueue();
+  if (!bookId) return q.length;
+  var n = 0;
+  for (var i = 0; i < q.length; i++) {
+    if (q[i].bookId !== bookId) continue;
+    if (chIdx !== undefined && chIdx !== null && q[i].chIdx !== chIdx) continue;
+    n++;
+  }
+  return n;
+}
+
 // ---- Hint Ladder ----
 // Three progressive hints per question. XP multiplier reduces as hints
 // are used: 0 hints = 1.0, 1 = 0.7, 2 = 0.4, 3 = 0.1. Full answer is
