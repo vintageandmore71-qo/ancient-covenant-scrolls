@@ -3776,25 +3776,22 @@ function showMindMap(fid) {
         for (var b = a + 1; b < present.length; b++) addEdge(present[a], present[b], 2);
       }
     }
-    function connectedCountStudy() {
-      var cc = {};
-      edges.forEach(function (e) { cc[e.source] = true; cc[e.target] = true; });
-      return Object.keys(cc).length;
+    // Tier 2: whole curated-content enrichment. Runs ALWAYS (not just
+    // as a rescue) so every key term that appears anywhere in the
+    // section gets at least thin edges to the others — no term ends
+    // up isolated while the strong co-occurrence edges still
+    // dominate visually (weight 2 vs weight 1 drives opacity + width
+    // in the SVG render).
+    var allText = pool.join(' ').toLowerCase();
+    if (data.summary_plain) allText += ' ' + data.summary_plain.toLowerCase();
+    if (data.summary_scholarly) allText += ' ' + data.summary_scholarly.toLowerCase();
+    var presentAll = [];
+    for (var na = 0; na < nodes.length; na++) {
+      var rea = new RegExp('\\b' + nodes[na].label.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b');
+      if (rea.test(allText)) presentAll.push(na);
     }
-    // Tier 2: whole curated-content fallback so small/sparse sections
-    // still produce edges
-    if (connectedCountStudy() < 3) {
-      var allText = pool.join(' ').toLowerCase();
-      if (data.summary_plain) allText += ' ' + data.summary_plain.toLowerCase();
-      if (data.summary_scholarly) allText += ' ' + data.summary_scholarly.toLowerCase();
-      var presentAll = [];
-      for (var na = 0; na < nodes.length; na++) {
-        var rea = new RegExp('\\b' + nodes[na].label.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b');
-        if (rea.test(allText)) presentAll.push(na);
-      }
-      for (var aa = 0; aa < presentAll.length; aa++) {
-        for (var ba = aa + 1; ba < presentAll.length; ba++) addEdge(presentAll[aa], presentAll[ba], 1);
-      }
+    for (var aa = 0; aa < presentAll.length; aa++) {
+      for (var ba = aa + 1; ba < presentAll.length; ba++) addEdge(presentAll[aa], presentAll[ba], 1);
     }
     var connected = {};
     edges.forEach(function (e) { connected[e.source] = true; connected[e.target] = true; });

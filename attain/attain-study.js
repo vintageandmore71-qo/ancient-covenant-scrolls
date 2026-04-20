@@ -2492,30 +2492,14 @@ function showMindMap(bookId, chIdx) {
     }
   }
 
-  function connectedCount() {
-    var connected = {};
-    edges.forEach(function (e) { connected[e.source] = true; connected[e.target] = true; });
-    return Object.keys(connected).length;
-  }
-
-  // Tier 2: 3-paragraph sliding window if tier 1 isn't enough
-  if (connectedCount() < 3 && paras.length >= 2) {
-    for (var wStart = 0; wStart < paras.length; wStart++) {
-      var windowText = paras.slice(wStart, wStart + 3).join(' ').toLowerCase();
-      var presentW = [];
-      for (var nw = 0; nw < nodes.length; nw++) {
-        var rew = new RegExp('\\b' + nodes[nw].label.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b');
-        if (rew.test(windowText)) presentW.push(nw);
-      }
-      for (var aw = 0; aw < presentW.length; aw++) {
-        for (var bw = aw + 1; bw < presentW.length; bw++) addEdge(presentW[aw], presentW[bw], 1);
-      }
-    }
-  }
-
-  // Tier 3: whole-chapter fallback so mind map always renders when there
-  // are >=3 key terms in the chapter, even if they're scattered
-  if (connectedCount() < 3) {
+  // Tier 2: whole-chapter enrichment. Runs ALWAYS — every key term
+  // that appears in the chapter gets linked to every other term that
+  // appears in the chapter with a weak (weight 1) edge. Tier 1
+  // paragraph-level co-occurrence edges (weight 2) still dominate
+  // the visual rendering (thicker, darker lines) so the real
+  // clusters stand out; this pass just prevents any term from
+  // ending up isolated.
+  if (paras.length >= 1) {
     var chapterText = paras.join(' ').toLowerCase();
     var presentC = [];
     for (var nc = 0; nc < nodes.length; nc++) {
