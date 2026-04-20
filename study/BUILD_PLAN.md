@@ -421,7 +421,7 @@ are marked `equiv`. Build order is not fixed; pick one at a time.
 | Story Sequence | done | Tap-to-pick UI (iPad-friendly, no DnD). 6 events per round sampled evenly across chapter; scoring 1.0/0.7/0.4 by attempt count; partial-credit feedback allows retry without reset; Remix integration |
 | True or False with Why | done | TRUE = verbatim sentence from source; FALSE = key-term proper noun swapped. Correct answer reveals source paragraph ("Why:" block) + swap note when applicable. Remix integration |
 | Who Said It | done | Scans source_quotes (Study) / chapter paragraphs (Attain) for dialogue attribution patterns; MC-style picks speaker from 4 options; Hint Ladder + Remix integration |
-| Cause and Effect Match | new | Pair cause paragraph to effect paragraph |
+| Cause and Effect Match | done | Scans source_quotes / faq answers for 4 connective patterns (because / so-therefore-thus-hence / led to-caused / Because X, Y). 5 pairs per round, effects independently shuffled, tap-to-match; Remix integration |
 | Audio Fill the Gap | done | TTS auto-plays prompt with "blank" spoken at the missing word; reuses FB engine + Hint Ladder; green banner distinguishes mode |
 | Dictation Challenge | new | Hear a verse, type it back; compare |
 

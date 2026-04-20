@@ -740,6 +740,7 @@ function go(fid) {
   h += actCard('\u{1F4AC}', 'Who Said It', '#a855f7', 'whosaidit', fid);
   h += actCard('\u2696\uFE0F', 'True or False', '#0ea5e9', 'truefalse', fid);
   h += actCard('\u{1F501}', 'Story Sequence', '#ea580c', 'sequence', fid);
+  h += actCard('\u21AA', 'Cause & Effect', '#be185d', 'causeeffect', fid);
   h += actCard('\u{1F0CF}', 'Flashcards', '#d97706', 'flash', fid);
   h += actCard('\u{1F4DA}', 'Key Terms', '#0891b2', 'terms', fid);
   h += actCard('\u2753', 'FAQ', '#ea580c', 'faq', fid);
@@ -807,6 +808,7 @@ function openActivity(mode, fid) {
   if (mode === 'whosaidit') { showWhoSaidIt(fid); return; }
   if (mode === 'truefalse') { showTrueFalse(fid); return; }
   if (mode === 'sequence') { showStorySequence(fid); return; }
+  if (mode === 'causeeffect') { showCauseEffect(fid); return; }
   if (mode === 'remix') { showRemix(fid); return; }
   // Stub for modes not yet built
   document.getElementById('content').innerHTML =
@@ -2893,6 +2895,145 @@ function showStorySequence(fid) {
         });
       }
     }
+    render();
+  });
+}
+
+// ---- Cause and Effect Match ----
+function extractCauseEffectFromCurated(data) {
+  if (!data) return [];
+  var sources = [];
+  if (data.fill_blank) data.fill_blank.forEach(function (q) { if (q.source_quote) sources.push(q.source_quote); });
+  if (data.multiple_choice) data.multiple_choice.forEach(function (q) { if (q.source_quote) sources.push(q.source_quote); });
+  if (data.faq) data.faq.forEach(function (q) { if (q.answer && q.answer.length > 40) sources.push(q.answer); });
+  if (!sources.length) return [];
+
+  var p1 = /([A-Z][^.!?]{15,140})\s+because\s+([^.!?]{10,140})[.!?]/g;
+  var p2 = /([A-Z][^.!?]{15,140}),?\s+(?:so|therefore|thus|hence)\s+([^.!?]{10,140})[.!?]/g;
+  var p3 = /([A-Z][^.!?]{15,140})\s+(?:led to|caused|brought about|resulted in)\s+([^.!?]{10,140})[.!?]/g;
+  var p4 = /Because\s+([^,]{10,140}),\s+([^.!?]{10,140})[.!?]/g;
+
+  var pairs = [];
+  var seen = {};
+  function trim(s) { return s.replace(/\s+/g, ' ').trim(); }
+  function add(cause, effect, source) {
+    cause = trim(cause);
+    effect = trim(effect);
+    if (cause.length < 10 || effect.length < 10) return;
+    if (cause.length > 120) cause = cause.slice(0, 117) + '...';
+    if (effect.length > 120) effect = effect.slice(0, 117) + '...';
+    var key = (cause + '|' + effect).toLowerCase().slice(0, 80);
+    if (seen[key]) return;
+    seen[key] = true;
+    pairs.push({ cause: cause, effect: effect, source: source });
+  }
+  for (var s = 0; s < sources.length; s++) {
+    var text = sources[s];
+    var m;
+    p1.lastIndex = 0; while ((m = p1.exec(text)) !== null) add(m[2], m[1], text);
+    p2.lastIndex = 0; while ((m = p2.exec(text)) !== null) add(m[1], m[2], text);
+    p3.lastIndex = 0; while ((m = p3.exec(text)) !== null) add(m[1], m[2], text);
+    p4.lastIndex = 0; while ((m = p4.exec(text)) !== null) add(m[1], m[2], text);
+  }
+  return pairs;
+}
+
+function showCauseEffect(fid) {
+  loadContent(fid).then(function (data) {
+    var pairs = extractCauseEffectFromCurated(data);
+    if (pairs.length < 3) { openActivity('stub', fid); return; }
+    pairs = shuffle(pairs.slice()).slice(0, 5);
+    var effectOrder = shuffle(pairs.map(function (_, i) { return i; }));
+    var idx = IDS.indexOf(fid);
+    var secLabel = idx >= 0 ? LBL[idx].split(' \u2014 ')[0] : fid;
+    var selectedCause = null;
+    var matched = 0;
+    var attempts = 0;
+
+    function render() {
+      var h = '<div class="cloze-view">';
+      h += '<div class="ce-banner">\u21AA Cause and Effect \u2014 tap a cause, then tap its effect</div>';
+      h += '<div class="cloze-ref">' + secLabel + '</div>';
+      h += '<div class="ce-grid">';
+      h += '<div class="ce-col"><div class="ce-col-label">Causes</div>';
+      for (var i = 0; i < pairs.length; i++) {
+        var matchedClass = pairs[i].solved ? ' ce-solved' : '';
+        var selectedClass = (selectedCause === i && !pairs[i].solved) ? ' ce-selected' : '';
+        h += '<button class="ce-item ce-cause' + matchedClass + selectedClass + '" data-cause="' + i + '"' + (pairs[i].solved ? ' disabled' : '') + '>' + pairs[i].cause + '</button>';
+      }
+      h += '</div>';
+      h += '<div class="ce-col"><div class="ce-col-label">Effects</div>';
+      for (var j = 0; j < effectOrder.length; j++) {
+        var pairIdx = effectOrder[j];
+        var solvedClass = pairs[pairIdx].solved ? ' ce-solved' : '';
+        h += '<button class="ce-item ce-effect' + solvedClass + '" data-effect="' + pairIdx + '"' + (pairs[pairIdx].solved ? ' disabled' : '') + '>' + pairs[pairIdx].effect + '</button>';
+      }
+      h += '</div></div>';
+      h += '<div class="mc-feedback" id="ce-fb" role="status" aria-live="polite"></div>';
+      h += '<button class="study-btn" id="b-ce-quit" style="margin-top:18px">Back to activities</button>';
+      h += '</div>';
+      document.getElementById('content').innerHTML = h;
+
+      document.getElementById('b-ce-quit').addEventListener('click', function () { go(fid); });
+      var causeBtns = document.querySelectorAll('.ce-cause');
+      for (var cb = 0; cb < causeBtns.length; cb++) {
+        causeBtns[cb].addEventListener('click', function () {
+          selectedCause = parseInt(this.getAttribute('data-cause'));
+          render();
+        });
+      }
+      var effectBtns = document.querySelectorAll('.ce-effect');
+      for (var eb = 0; eb < effectBtns.length; eb++) {
+        effectBtns[eb].addEventListener('click', function () {
+          if (selectedCause === null) {
+            document.getElementById('ce-fb').innerHTML = '<div class="fb-try">Tap a cause first.</div>';
+            return;
+          }
+          attempts++;
+          var pairIdx = parseInt(this.getAttribute('data-effect'));
+          var fb = document.getElementById('ce-fb');
+          if (pairIdx === selectedCause) {
+            pairs[selectedCause].solved = true;
+            matched++;
+            selectedCause = null;
+            fb.innerHTML = '<div class="fb-correct">\u2714 Matched!</div>';
+            if (matched === pairs.length) setTimeout(showResults, 1200);
+            else render();
+          } else {
+            if (attempts <= 1) {
+              pushToRemixQueue({
+                fid: fid, missedInMode: 'causeeffect', qIndex: selectedCause,
+                ref: '', question: 'Match cause to effect: ' + pairs[selectedCause].cause,
+                options: pairs.map(function (p) { return p.effect; }),
+                correct: selectedCause,
+                answer: pairs[selectedCause].effect,
+                source_quote: pairs[selectedCause].source
+              });
+            }
+            selectedCause = null;
+            fb.innerHTML = '<div class="fb-try">Not that one. Try again.</div>';
+            render();
+          }
+        });
+      }
+    }
+
+    function showResults() {
+      var points = attempts <= pairs.length ? pairs.length : Math.max(1, pairs.length * 2 - attempts);
+      var xpEarned = recordSession(fid, 'causeeffect', points, pairs.length);
+      var h = '<div class="cloze-results">';
+      h += '<div class="cr-emoji">\u21AA</div>';
+      h += '<div class="cr-score">' + matched + ' / ' + pairs.length + ' matched</div>';
+      h += '<div class="cr-xp">+' + xpEarned + ' XP earned</div>';
+      h += '<div class="cr-msg">' + (attempts <= pairs.length ? 'Clean sweep!' : 'All matched \u2014 took ' + attempts + ' tries.') + '</div>';
+      h += '<button class="study-btn sb-pri" id="b-ce-retry">\u{1F504} Try Again</button>';
+      h += '<button class="study-btn" id="b-ce-back">Back to activities</button>';
+      h += '</div>';
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-ce-retry').addEventListener('click', function () { showCauseEffect(fid); });
+      document.getElementById('b-ce-back').addEventListener('click', function () { go(fid); });
+    }
+
     render();
   });
 }
