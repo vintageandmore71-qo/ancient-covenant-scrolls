@@ -2336,6 +2336,120 @@ function showSyllableTap(bookId, chIdx) {
   renderQ();
 }
 
+// ---- Rhyme Chain — which word rhymes? ----
+function showRhymeChain(bookId, chIdx) {
+  var book = getBook(bookId);
+  if (!book || !activeChapters) { showNoContent(bookId, chIdx, 'Rhyme Chain'); return; }
+  var ch = activeChapters[chIdx];
+  if (!ch) { showNoContent(bookId, chIdx, 'Rhyme Chain'); return; }
+  var chTitle = ch.title || 'Chapter ' + (chIdx + 1);
+
+  var groups = buildRhymeGroups(ch.paragraphs || []);
+  // Keep only groups with 2+ members (seed word + at least one rhymer)
+  var usableKeys = [];
+  var keys = Object.keys(groups);
+  for (var i = 0; i < keys.length; i++) {
+    if (groups[keys[i]].length >= 2) usableKeys.push(keys[i]);
+  }
+  if (usableKeys.length < 3) { showNoContent(bookId, chIdx, 'Rhyme Chain'); return; }
+
+  // Flat word pool from all groups (for distractor selection)
+  var allWords = [];
+  for (var k = 0; k < keys.length; k++) {
+    for (var w = 0; w < groups[keys[k]].length; w++) allWords.push({ word: groups[keys[k]][w], key: keys[k] });
+  }
+
+  usableKeys = shuffle(usableKeys.slice()).slice(0, 8);
+  var qi = 0, score = 0, points = 0;
+
+  function renderQ() {
+    if (qi >= usableKeys.length) { showResults(); return; }
+    var key = usableKeys[qi];
+    var members = groups[key].slice();
+    var seed = shuffle(members)[0];
+    var rhymer = shuffle(members.filter(function (w) { return w !== seed; }))[0];
+    if (!rhymer) { qi++; renderQ(); return; }
+    // 3 distractors from OTHER rhyme groups
+    var nonRhymers = allWords.filter(function (x) { return x.key !== key; });
+    var distractors = shuffle(nonRhymers).slice(0, 3).map(function (x) { return x.word; });
+    while (distractors.length < 3) distractors.push('\u2014');
+    var opts = shuffle([rhymer].concat(distractors));
+    var correctIdx = opts.indexOf(rhymer);
+    var firstAttempt = true;
+    var rhymeColors = ['#0891b2', '#059669', '#7c3aed', '#d97706'];
+
+    var h = '<div class="mc-view">';
+    h += '<div class="rhyme-banner">\u{1F3B6} Rhyme Chain \u2014 which word rhymes?</div>';
+    h += '<div class="cloze-ref">' + chTitle + '</div>';
+    h += '<div class="dict-progress">' + (qi + 1) + ' of ' + usableKeys.length + '</div>';
+    h += '<div class="rhyme-seed">' + seed + '</div>';
+    h += '<button class="cloze-audio" id="b-rhy-hear">\u{1F50A} Listen</button>';
+    h += '<div class="mc-opts">';
+    for (var o = 0; o < opts.length; o++) {
+      h += '<button class="mc-opt rhyme-opt" data-idx="' + o + '" style="background:' + rhymeColors[o % 4] + '">' + opts[o] + '</button>';
+    }
+    h += '</div>';
+    h += '<div class="mc-feedback" id="rhy-fb" role="status" aria-live="polite"></div>';
+    h += '<button class="study-btn" id="b-rhy-quit" style="margin-top:18px">Back to activities</button>';
+    h += '</div>';
+    document.getElementById('content').innerHTML = h;
+
+    document.getElementById('b-rhy-quit').addEventListener('click', function () { showChapterActivities(bookId, chIdx); });
+    document.getElementById('b-rhy-hear').addEventListener('click', function () { speakText(seed); });
+
+    var btns = document.querySelectorAll('.rhyme-opt');
+    for (var b = 0; b < btns.length; b++) {
+      btns[b].addEventListener('click', function () {
+        var idx = parseInt(this.getAttribute('data-idx'));
+        var fb = document.getElementById('rhy-fb');
+        if (idx === correctIdx) {
+          this.classList.add('mc-correct');
+          fb.innerHTML = '<div class="fb-correct">\u2714 ' + seed + ' and ' + rhymer + ' rhyme. (\u2026' + key + ')</div>';
+          if (firstAttempt) { score++; points += 1.0; }
+          var all = document.querySelectorAll('.rhyme-opt');
+          for (var x = 0; x < all.length; x++) all[x].disabled = true;
+          setTimeout(function () { qi++; renderQ(); }, 2200);
+        } else {
+          if (firstAttempt) {
+            pushToRemixQueue({
+              bookId: bookId, chIdx: chIdx, missedInMode: 'rhyme',
+              qIndex: qi, ref: '',
+              question: 'Which word rhymes with "' + seed + '"?',
+              options: opts.slice(), correct: correctIdx,
+              source: '', answer: rhymer
+            });
+            firstAttempt = false;
+          }
+          this.classList.add('mc-wrong');
+          this.disabled = true;
+          fb.innerHTML = '<div class="fb-try">Not that one \u2014 try another.</div>';
+        }
+      });
+    }
+  }
+
+  function showResults() {
+    var pct = Math.round(score / usableKeys.length * 100);
+    var xpEarned = recordSession(bookId, chIdx, 'rhyme', points, usableKeys.length);
+    var emoji = pct >= 80 ? '\u{1F3C6}' : pct >= 60 ? '\u{1F31F}' : '\u{1F4AA}';
+    var msg = pct >= 80 ? 'Outstanding!' : pct >= 60 ? 'Good work!' : 'Say them aloud.';
+    var h = '<div class="cloze-results">';
+    h += '<div class="cr-emoji">' + emoji + '</div>';
+    h += '<div class="cr-score">' + score + ' / ' + usableKeys.length + '</div>';
+    h += '<div class="cr-pct">' + pct + '%</div>';
+    h += '<div class="cr-xp">+' + xpEarned + ' XP earned</div>';
+    h += '<div class="cr-msg">' + msg + '</div>';
+    h += '<button class="study-btn sb-pri" id="b-rhy-retry">\u{1F504} Try Again</button>';
+    h += '<button class="study-btn" id="b-rhy-back">Back to activities</button>';
+    h += '</div>';
+    document.getElementById('content').innerHTML = h;
+    document.getElementById('b-rhy-retry').addEventListener('click', function () { showRhymeChain(bookId, chIdx); });
+    document.getElementById('b-rhy-back').addEventListener('click', function () { showChapterActivities(bookId, chIdx); });
+  }
+
+  renderQ();
+}
+
 // ---- Remix Round — resurface missed questions in a different format ----
 function showRemix(bookId, chIdx) {
   var items = getRemixQueue().filter(function (it) {
