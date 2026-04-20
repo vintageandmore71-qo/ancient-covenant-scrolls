@@ -545,6 +545,53 @@ body.font-dyslexic .cloze-prompt{font-family:var(--font-dyslexic);line-height:2.
   box-shadow:0 3px 12px rgba(168,85,247,.28);
 }
 
+/* Story Sequence */
+.seq-banner{
+  background:linear-gradient(135deg,#ea580c,#c2410c);color:#fff;
+  padding:10px 16px;border-radius:12px;margin:0 0 14px 0;
+  font-size:.95em;font-weight:800;text-align:center;
+  box-shadow:0 3px 12px rgba(234,88,12,.28);
+}
+.seq-slots{display:flex;flex-direction:column;gap:10px;margin:0 0 18px 0}
+.seq-slot{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:12px 14px;border-radius:12px;min-height:56px;
+  font-family:var(--font-main);line-height:1.6;
+}
+body.font-dyslexic .seq-slot{font-family:var(--font-dyslexic)}
+.seq-slot-empty{
+  background:#f1f5f9;border:2px dashed #94a3b8;color:#64748b;
+}
+.seq-slot-filled{
+  background:#fed7aa;border:2px solid #ea580c;color:#7c2d12;
+}
+.seq-num{
+  flex:0 0 auto;background:#ea580c;color:#fff;
+  width:28px;height:28px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:.95em;
+}
+.seq-slot-empty .seq-num{background:#94a3b8}
+.seq-text{flex:1;font-size:.95em}
+.seq-placeholder{flex:1;font-style:italic;font-size:.9em}
+.seq-remove{
+  flex:0 0 auto;background:#dc2626;color:#fff;border:none;
+  width:28px;height:28px;border-radius:50%;font-weight:800;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.seq-pool-label{font-weight:700;color:var(--text-muted);margin:14px 0 8px 0}
+.seq-pool{display:flex;flex-direction:column;gap:8px;margin:0 0 14px 0}
+.seq-pool-item{
+  background:#fff;border:2px solid #ea580c;color:#7c2d12;
+  padding:12px 14px;border-radius:12px;text-align:left;
+  font-size:.95em;line-height:1.6;cursor:pointer;min-height:48px;
+  font-family:var(--font-main);transition:transform .15s,background .15s;
+}
+body.font-dyslexic .seq-pool-item{font-family:var(--font-dyslexic)}
+.seq-pool-item:hover{background:#fed7aa;transform:scale(1.01)}
+.seq-pool-item:active{transform:scale(.99)}
+.seq-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+
 /* True or False with Why */
 .tf-banner{
   background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;

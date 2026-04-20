@@ -1818,6 +1818,112 @@ function showTrueFalse(bookId, chIdx) {
   renderQ();
 }
 
+// ---- Story Sequence — reorder scrambled chapter events ----
+function showStorySequence(bookId, chIdx) {
+  var book = getBook(bookId);
+  if (!book || !activeChapters) { showNoContent(bookId, chIdx, 'Story Sequence'); return; }
+  var ch = activeChapters[chIdx];
+  if (!ch) { showNoContent(bookId, chIdx, 'Story Sequence'); return; }
+  var chTitle = ch.title || 'Chapter ' + (chIdx + 1);
+
+  var events = generateStorySequence(ch.paragraphs || [], 6);
+  if (events.length < 3) { showNoContent(bookId, chIdx, 'Story Sequence'); return; }
+
+  // Shuffle for display; the user will tap in intended order
+  var shuffled = shuffle(events.slice());
+  var picked = []; // array of event.order values in user's chosen order
+  var attempts = 0;
+  var score = 0, points = 0;
+  var finished = false;
+
+  function render() {
+    var h = '<div class="cloze-view">';
+    h += '<div class="seq-banner">\u{1F501} Story Sequence \u2014 tap events in the order they happen</div>';
+    h += '<div class="cloze-ref">' + chTitle + '</div>';
+    // Picked slots
+    h += '<div class="seq-slots">';
+    for (var i = 0; i < events.length; i++) {
+      var slotNum = i + 1;
+      if (i < picked.length) {
+        var ev = events.find(function (e) { return e.order === picked[i]; });
+        h += '<div class="seq-slot seq-slot-filled" data-slot="' + i + '"><span class="seq-num">' + slotNum + '</span><span class="seq-text">' + ev.text + '</span><button class="seq-remove" data-slot="' + i + '" aria-label="Remove">\u2715</button></div>';
+      } else {
+        h += '<div class="seq-slot seq-slot-empty"><span class="seq-num">' + slotNum + '</span><span class="seq-placeholder">Tap an event below</span></div>';
+      }
+    }
+    h += '</div>';
+    // Pool
+    h += '<div class="seq-pool-label">Available events:</div>';
+    h += '<div class="seq-pool">';
+    for (var p = 0; p < shuffled.length; p++) {
+      var isPicked = picked.indexOf(shuffled[p].order) !== -1;
+      if (isPicked) continue;
+      h += '<button class="seq-pool-item" data-order="' + shuffled[p].order + '">' + shuffled[p].text + '</button>';
+    }
+    h += '</div>';
+    h += '<div class="seq-actions">';
+    if (picked.length === events.length && !finished) {
+      h += '<button class="study-btn sb-pri" id="b-seq-check">\u2714 Check order</button>';
+    }
+    h += '<button class="study-btn" id="b-seq-quit">Back to activities</button>';
+    h += '</div>';
+    h += '<div class="mc-feedback" id="seq-fb" role="status" aria-live="polite"></div>';
+    h += '</div>';
+    document.getElementById('content').innerHTML = h;
+
+    document.getElementById('b-seq-quit').addEventListener('click', function () { showChapterActivities(bookId, chIdx); });
+
+    var poolBtns = document.querySelectorAll('.seq-pool-item');
+    for (var pb = 0; pb < poolBtns.length; pb++) {
+      poolBtns[pb].addEventListener('click', function () {
+        var ord = parseInt(this.getAttribute('data-order'));
+        picked.push(ord);
+        render();
+      });
+    }
+    var removeBtns = document.querySelectorAll('.seq-remove');
+    for (var rb = 0; rb < removeBtns.length; rb++) {
+      removeBtns[rb].addEventListener('click', function (e) {
+        e.stopPropagation();
+        var slot = parseInt(this.getAttribute('data-slot'));
+        picked.splice(slot, 1);
+        render();
+      });
+    }
+    var checkBtn = document.getElementById('b-seq-check');
+    if (checkBtn) {
+      checkBtn.addEventListener('click', function () {
+        attempts++;
+        var correct = 0;
+        for (var i = 0; i < picked.length; i++) {
+          if (picked[i] === i) correct++;
+        }
+        var fb = document.getElementById('seq-fb');
+        if (correct === events.length) {
+          finished = true;
+          score = 1;
+          points = attempts === 1 ? 1.0 : attempts === 2 ? 0.7 : 0.4;
+          var xpEarned = recordSession(bookId, chIdx, 'sequence', points, 1);
+          fb.innerHTML = '<div class="fb-correct">\u{1F389} Perfect order! (+' + Math.round(points * 10) + ' XP)</div>';
+          setTimeout(function () { showChapterActivities(bookId, chIdx); }, 2800);
+        } else {
+          if (attempts === 1) {
+            pushToRemixQueue({
+              bookId: bookId, chIdx: chIdx, missedInMode: 'sequence',
+              qIndex: 0, ref: '', question: 'Put these ' + events.length + ' events in order',
+              options: events.map(function (e) { return e.text; }), correct: 0,
+              source: '', answer: events[0].text
+            });
+          }
+          fb.innerHTML = '<div class="fb-try">' + correct + ' of ' + events.length + ' in the right spot. Move the wrong ones and check again.</div>';
+        }
+      });
+    }
+  }
+
+  render();
+}
+
 // ---- Remix Round — resurface missed questions in a different format ----
 function showRemix(bookId, chIdx) {
   var items = getRemixQueue().filter(function (it) {

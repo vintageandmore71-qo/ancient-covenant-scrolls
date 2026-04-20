@@ -1011,6 +1011,35 @@ function generateTrueFalseQuestions(paragraphs, keyTerms, count) {
   return questions;
 }
 
+// ---- Story Sequence — pick the first clear sentence of each paragraph ----
+// so the user can reorder scrambled events from a chapter.
+function generateStorySequence(paragraphs, count) {
+  count = count || 6;
+  if (!paragraphs || paragraphs.length < 3) return [];
+  // Sample evenly-spaced paragraphs through the chapter so we get
+  // beginning -> middle -> end coverage, not 6 events from the opening.
+  var usable = [];
+  for (var p = 0; p < paragraphs.length; p++) {
+    var para = paragraphs[p];
+    if (!para || para.length < 40) continue;
+    var sentences = para.match(/[^.!?]+[.!?]+/g) || [para];
+    for (var s = 0; s < sentences.length; s++) {
+      var sent = sentences[s].trim();
+      if (sent.length < 25 || sent.length > 180) continue;
+      usable.push({ sentence: sent, order: usable.length, paraIdx: p });
+      break;
+    }
+  }
+  if (usable.length < 3) return [];
+  // Downsample to `count` keeping original order
+  var step = Math.max(1, Math.floor(usable.length / count));
+  var events = [];
+  for (var i = 0; i < usable.length && events.length < count; i += step) {
+    events.push({ order: events.length, text: usable[i].sentence });
+  }
+  return events;
+}
+
 // ---- Full Book Import Pipeline ----
 function importBook(title, rawText) {
   var chapters = detectChapters(rawText);
