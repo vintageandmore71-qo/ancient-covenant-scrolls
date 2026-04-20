@@ -2460,7 +2460,8 @@ function showMindMap(bookId, chIdx) {
   if (!ch) { showNoContent(bookId, chIdx, 'Mind Map'); return; }
   var chTitle = ch.title || 'Chapter ' + (chIdx + 1);
   var paras = ch.paragraphs || [];
-  var keyTerms = (book.keyTerms || []).slice(0, 14);
+  // Cap at 10 nodes — 14 was overcrowding the mobile SVG
+  var keyTerms = (book.keyTerms || []).slice(0, 10);
   if (keyTerms.length < 4) { showNoContent(bookId, chIdx, 'Mind Map'); return; }
 
   // Build co-occurrence edges: two terms share an edge if they appear
@@ -2495,58 +2496,64 @@ function showMindMap(bookId, chIdx) {
   nodes.forEach(function (n, i) { idRemap[n.id] = i; n.id = i; });
   edges = edges.map(function (e) { return { source: idRemap[e.source], target: idRemap[e.target], weight: e.weight }; }).filter(function (e) { return e.source !== undefined && e.target !== undefined; });
 
-  var W = 640, H = 460;
-  // Initial positions — place on a circle so the simulation starts clean
+  // Square viewBox works better on portrait-mode iPad than 640x460.
+  var W = 560, H = 560;
+  var startRadius = Math.min(W, H) * 0.36;
   nodes.forEach(function (n, i) {
     var angle = (i / nodes.length) * Math.PI * 2;
-    n.x = W / 2 + Math.cos(angle) * 140;
-    n.y = H / 2 + Math.sin(angle) * 140;
+    n.x = W / 2 + Math.cos(angle) * startRadius;
+    n.y = H / 2 + Math.sin(angle) * startRadius;
     n.vx = 0; n.vy = 0;
   });
 
   // Force simulation: spring attraction along edges, Coulomb repulsion
-  // between all pairs, weak centering force toward the middle.
+  // between all pairs, hard collision to prevent overlap, weak
+  // centering force toward the middle.
   function simulate(iterations) {
-    iterations = iterations || 180;
+    iterations = iterations || 300;
     for (var step = 0; step < iterations; step++) {
-      // Repulsion
       for (var i = 0; i < nodes.length; i++) {
         for (var j = i + 1; j < nodes.length; j++) {
           var dx = nodes[j].x - nodes[i].x;
           var dy = nodes[j].y - nodes[i].y;
           var dist = Math.sqrt(dx * dx + dy * dy) || 0.01;
-          var force = 2200 / (dist * dist);
+          var force = 3500 / (dist * dist);
           var fx = (dx / dist) * force;
           var fy = (dy / dist) * force;
           nodes[i].vx -= fx; nodes[i].vy -= fy;
           nodes[j].vx += fx; nodes[j].vy += fy;
+          // Hard collision to keep labels legible
+          if (dist < 95) {
+            var push = (95 - dist) * 0.5;
+            var pdx = (dx / dist) * push;
+            var pdy = (dy / dist) * push;
+            nodes[i].x -= pdx; nodes[i].y -= pdy;
+            nodes[j].x += pdx; nodes[j].y += pdy;
+          }
         }
       }
-      // Spring attraction along edges
       for (var e = 0; e < edges.length; e++) {
         var s = nodes[edges[e].source], t = nodes[edges[e].target];
         var dx2 = t.x - s.x, dy2 = t.y - s.y;
         var dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2) || 0.01;
-        var springK = 0.02 * Math.min(3, edges[e].weight);
+        var springK = 0.015 * Math.min(3, edges[e].weight);
         var fx2 = dx2 * springK, fy2 = dy2 * springK;
         s.vx += fx2; s.vy += fy2;
         t.vx -= fx2; t.vy -= fy2;
       }
-      // Centering + damping + integrate
       for (var k = 0; k < nodes.length; k++) {
         var n = nodes[k];
-        n.vx += (W / 2 - n.x) * 0.003;
-        n.vy += (H / 2 - n.y) * 0.003;
+        n.vx += (W / 2 - n.x) * 0.0025;
+        n.vy += (H / 2 - n.y) * 0.0025;
         n.vx *= 0.82; n.vy *= 0.82;
         n.x += n.vx; n.y += n.vy;
-        // Clamp inside bounds
-        var pad = 40;
+        var pad = 60;
         if (n.x < pad) n.x = pad; if (n.x > W - pad) n.x = W - pad;
         if (n.y < pad) n.y = pad; if (n.y > H - pad) n.y = H - pad;
       }
     }
   }
-  simulate(200);
+  simulate(300);
 
   var selectedNodeId = -1;
 
@@ -2567,12 +2574,15 @@ function showMindMap(bookId, chIdx) {
     var colors = ['#2563eb', '#059669', '#7c3aed', '#dc2626', '#ea580c', '#0891b2', '#be185d', '#ca8a04'];
     for (var n = 0; n < nodes.length; n++) {
       var nn = nodes[n];
-      var r = 10 + Math.min(18, Math.sqrt(nn.count));
+      var r = 12 + Math.min(16, Math.sqrt(nn.count) * 2);
       var color = colors[n % colors.length];
-      var sel = (selectedNodeId === n) ? ' class="mind-node-selected"' : '';
-      h += '<g data-node="' + n + '" class="mind-node"' + sel + ' role="button" tabindex="0" aria-label="' + nn.label + '">';
+      var sel = (selectedNodeId === n) ? ' mind-node-selected' : '';
+      h += '<g data-node="' + n + '" class="mind-node' + sel + '" role="button" tabindex="0" aria-label="' + nn.label + '">';
       h += '<circle cx="' + nn.x.toFixed(1) + '" cy="' + nn.y.toFixed(1) + '" r="' + r + '" fill="' + color + '" stroke="#fff" stroke-width="2" />';
-      h += '<text x="' + nn.x.toFixed(1) + '" y="' + (nn.y + r + 14).toFixed(1) + '" text-anchor="middle" class="mind-label">' + nn.label + '</text>';
+      // Stagger labels above/below node based on which half it's in
+      var labelAbove = nn.y > H / 2;
+      var labelY = labelAbove ? (nn.y - r - 8) : (nn.y + r + 16);
+      h += '<text x="' + nn.x.toFixed(1) + '" y="' + labelY.toFixed(1) + '" text-anchor="middle" class="mind-label">' + nn.label + '</text>';
       h += '</g>';
     }
     h += '</svg>';

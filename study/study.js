@@ -3745,7 +3745,8 @@ function showRhymeChain(fid) {
 function showMindMap(fid) {
   loadContent(fid).then(function (data) {
     if (!data || !data.key_terms || data.key_terms.length < 4) { showStubForMode(fid, 'mindmap'); return; }
-    var keyTerms = data.key_terms.slice(0, 14);
+    // Cap at 10 nodes — 14 was overcrowding the mobile SVG
+    var keyTerms = data.key_terms.slice(0, 10);
     // Co-occurrence pool: all source_quote strings plus faq answers
     var pool = [];
     if (data.fill_blank) data.fill_blank.forEach(function (q) { if (q.source_quote) pool.push(q.source_quote); });
@@ -3781,42 +3782,55 @@ function showMindMap(fid) {
     nodes.forEach(function (n, i) { idRemap[n.id] = i; n.id = i; });
     edges = edges.map(function (e) { return { source: idRemap[e.source], target: idRemap[e.target], weight: e.weight }; }).filter(function (e) { return e.source !== undefined && e.target !== undefined; });
 
-    var W = 640, H = 460;
+    // Square viewBox works better on portrait-mode iPad than 640x460
+    // (which compressed vertically and clumped nodes).
+    var W = 560, H = 560;
+    var startRadius = Math.min(W, H) * 0.36;
     nodes.forEach(function (n, i) {
       var angle = (i / nodes.length) * Math.PI * 2;
-      n.x = W / 2 + Math.cos(angle) * 140;
-      n.y = H / 2 + Math.sin(angle) * 140;
+      n.x = W / 2 + Math.cos(angle) * startRadius;
+      n.y = H / 2 + Math.sin(angle) * startRadius;
       n.vx = 0; n.vy = 0;
     });
 
-    for (var step = 0; step < 200; step++) {
+    // 300 iterations + stronger repulsion + hard collision so nodes
+    // stay visibly separated and labels don't overlap.
+    for (var step = 0; step < 300; step++) {
       for (var i = 0; i < nodes.length; i++) {
         for (var j = i + 1; j < nodes.length; j++) {
           var dx = nodes[j].x - nodes[i].x;
           var dy = nodes[j].y - nodes[i].y;
           var dist = Math.sqrt(dx * dx + dy * dy) || 0.01;
-          var force = 2200 / (dist * dist);
+          var force = 3500 / (dist * dist);
           var fx = (dx / dist) * force;
           var fy = (dy / dist) * force;
           nodes[i].vx -= fx; nodes[i].vy -= fy;
           nodes[j].vx += fx; nodes[j].vy += fy;
+          // Hard collision: shove any pair whose centers are closer than 95px
+          if (dist < 95) {
+            var push = (95 - dist) * 0.5;
+            var pdx = (dx / dist) * push;
+            var pdy = (dy / dist) * push;
+            nodes[i].x -= pdx; nodes[i].y -= pdy;
+            nodes[j].x += pdx; nodes[j].y += pdy;
+          }
         }
       }
       for (var e = 0; e < edges.length; e++) {
         var s = nodes[edges[e].source], t = nodes[edges[e].target];
         var dx2 = t.x - s.x, dy2 = t.y - s.y;
         var dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2) || 0.01;
-        var springK = 0.02 * Math.min(3, edges[e].weight);
+        var springK = 0.015 * Math.min(3, edges[e].weight);
         s.vx += dx2 * springK; s.vy += dy2 * springK;
         t.vx -= dx2 * springK; t.vy -= dy2 * springK;
       }
       for (var k = 0; k < nodes.length; k++) {
         var n = nodes[k];
-        n.vx += (W / 2 - n.x) * 0.003;
-        n.vy += (H / 2 - n.y) * 0.003;
+        n.vx += (W / 2 - n.x) * 0.0025;
+        n.vy += (H / 2 - n.y) * 0.0025;
         n.vx *= 0.82; n.vy *= 0.82;
         n.x += n.vx; n.y += n.vy;
-        var pad = 40;
+        var pad = 60; // bigger padding so labels fit
         if (n.x < pad) n.x = pad; if (n.x > W - pad) n.x = W - pad;
         if (n.y < pad) n.y = pad; if (n.y > H - pad) n.y = H - pad;
       }
@@ -3839,12 +3853,16 @@ function showMindMap(fid) {
       var colors = ['#2563eb', '#059669', '#7c3aed', '#dc2626', '#ea580c', '#0891b2', '#be185d', '#ca8a04'];
       for (var nn = 0; nn < nodes.length; nn++) {
         var node = nodes[nn];
-        var r = 10 + Math.min(18, Math.sqrt(node.freq + 1) * 3);
+        var r = 12 + Math.min(16, Math.sqrt(node.freq + 1) * 2.5);
         var color = colors[nn % colors.length];
         var sel = (selectedNodeId === nn) ? ' class="mind-node mind-node-selected"' : ' class="mind-node"';
         h += '<g data-node="' + nn + '"' + sel + ' role="button" tabindex="0" aria-label="' + node.label + '">';
         h += '<circle cx="' + node.x.toFixed(1) + '" cy="' + node.y.toFixed(1) + '" r="' + r + '" fill="' + color + '" stroke="#fff" stroke-width="2" />';
-        h += '<text x="' + node.x.toFixed(1) + '" y="' + (node.y + r + 14).toFixed(1) + '" text-anchor="middle" class="mind-label">' + node.label + '</text>';
+        // Place label above node if it's in the bottom half, below if top —
+        // halves label-on-label collisions between neighbouring nodes.
+        var labelAbove = node.y > H / 2;
+        var labelY = labelAbove ? (node.y - r - 8) : (node.y + r + 16);
+        h += '<text x="' + node.x.toFixed(1) + '" y="' + labelY.toFixed(1) + '" text-anchor="middle" class="mind-label">' + node.label + '</text>';
         h += '</g>';
       }
       h += '</svg>';
