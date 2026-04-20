@@ -1,7 +1,7 @@
 // Attain Universal — Service Worker
 // Network-first for everything so updates always take effect
 
-var CACHE = 'attain-v23';
+var CACHE = 'attain-v24';
 
 var SHELL = [
   './',
