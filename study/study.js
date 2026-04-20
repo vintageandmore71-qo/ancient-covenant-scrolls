@@ -743,6 +743,7 @@ function go(fid) {
   h += actCard('\u21AA', 'Cause & Effect', '#be185d', 'causeeffect', fid);
   h += actCard('\u{1F3A7}', 'Dictation', '#0891b2', 'dictation', fid);
   h += actCard('\u{1F500}', 'Word Morph', '#4338ca', 'morph', fid);
+  h += actCard('\u{1F441}\uFE0F', 'Syllable Tap', '#f59e0b', 'syllable', fid);
   h += actCard('\u{1F0CF}', 'Flashcards', '#d97706', 'flash', fid);
   h += actCard('\u{1F4DA}', 'Key Terms', '#0891b2', 'terms', fid);
   h += actCard('\u2753', 'FAQ', '#ea580c', 'faq', fid);
@@ -813,6 +814,7 @@ function openActivity(mode, fid) {
   if (mode === 'causeeffect') { showCauseEffect(fid); return; }
   if (mode === 'dictation') { showDictation(fid); return; }
   if (mode === 'morph') { showWordMorph(fid); return; }
+  if (mode === 'syllable') { showSyllableTap(fid); return; }
   if (mode === 'remix') { showRemix(fid); return; }
   // Stub for modes not yet built
   document.getElementById('content').innerHTML =
@@ -3314,6 +3316,149 @@ function showWordMorph(fid) {
       document.getElementById('content').innerHTML = h;
       document.getElementById('b-morph-retry').addEventListener('click', function () { showWordMorph(fid); });
       document.getElementById('b-morph-back').addEventListener('click', function () { go(fid); });
+    }
+
+    renderQ();
+  });
+}
+
+// ---- Syllable Tap — how many syllables? ----
+function countSyllables(word) {
+  var w = String(word || '').toLowerCase().replace(/[^a-z]/g, '');
+  if (!w) return 0;
+  var prepped = w.replace(/([aeiou])y([aeiou])/g, '$1 y$2');
+  var groups = prepped.match(/[aeiouy]+/g) || [];
+  var count = groups.length;
+  var isLeEnding = /[^aeiouy]le$/.test(w);
+  if (w.length > 3 && w[w.length - 1] === 'e' && !isLeEnding && count > 1) count--;
+  return Math.max(1, count);
+}
+
+function splitSyllables(word) {
+  var orig = String(word || '');
+  var w = orig.toLowerCase().replace(/[^a-z]/g, '');
+  if (w.length < 3) return [orig];
+  var groups = [];
+  var re = /[aeiouy]+/g;
+  var m;
+  while ((m = re.exec(w)) !== null) groups.push({ start: m.index, end: m.index + m[0].length });
+  if (groups.length <= 1) return [orig];
+  var mapBack = [];
+  for (var i = 0; i < orig.length; i++) if (/[a-zA-Z]/.test(orig[i])) mapBack.push(i);
+  var splitPoints = [];
+  for (var g = 0; g < groups.length - 1; g++) {
+    var clusterStart = groups[g].end;
+    var clusterEnd = groups[g + 1].start;
+    var clusterLen = clusterEnd - clusterStart;
+    var splitAt;
+    if (clusterLen >= 2) splitAt = clusterStart + 1;
+    else if (clusterLen === 1) splitAt = clusterStart;
+    else splitAt = clusterEnd;
+    splitPoints.push(mapBack[splitAt] !== undefined ? mapBack[splitAt] : orig.length);
+  }
+  var out = [];
+  var cursor = 0;
+  for (var sp = 0; sp < splitPoints.length; sp++) {
+    out.push(orig.slice(cursor, splitPoints[sp]));
+    cursor = splitPoints[sp];
+  }
+  out.push(orig.slice(cursor));
+  return out.filter(function (s) { return s.length > 0; });
+}
+
+function showSyllableTap(fid) {
+  loadContent(fid).then(function (data) {
+    if (!data || !data.key_terms) { openActivity('stub', fid); return; }
+    var usable = data.key_terms.filter(function (t) { return t.term && t.term.length >= 5 && countSyllables(t.term) >= 2; });
+    if (usable.length < 3) { openActivity('stub', fid); return; }
+    var rounds = shuffle(usable.slice()).slice(0, 8);
+    var idx = IDS.indexOf(fid);
+    var secLabel = idx >= 0 ? LBL[idx].split(' \u2014 ')[0] : fid;
+    var qi = 0, score = 0, points = 0;
+
+    function renderQ() {
+      if (qi >= rounds.length) { showResults(); return; }
+      var kt = rounds[qi];
+      var correctCount = countSyllables(kt.term);
+      var candidates = [correctCount - 2, correctCount - 1, correctCount, correctCount + 1, correctCount + 2].filter(function (n) { return n >= 1 && n <= 8; });
+      var opts = shuffle(candidates.slice()).slice(0, 4);
+      if (opts.indexOf(correctCount) === -1) opts[0] = correctCount;
+      opts = shuffle(opts);
+      var correctIdx = opts.indexOf(correctCount);
+      var firstAttempt = true;
+
+      var h = '<div class="mc-view">';
+      h += '<div class="syll-banner">\u{1F441}\uFE0F\u200D\u{1F5E8}\uFE0F Syllable Tap \u2014 how many syllables?</div>';
+      h += '<div class="cloze-ref">' + secLabel + '</div>';
+      h += '<div class="dict-progress">' + (qi + 1) + ' of ' + rounds.length + '</div>';
+      h += '<div class="syll-word">' + kt.term + '</div>';
+      h += '<button class="cloze-audio" id="b-syll-hear">\u{1F50A} Listen</button>';
+      h += '<div class="syll-opts">';
+      for (var o = 0; o < opts.length; o++) {
+        h += '<button class="syll-opt" data-idx="' + o + '">' + opts[o] + '</button>';
+      }
+      h += '</div>';
+      h += '<div class="mc-feedback" id="syll-fb" role="status" aria-live="polite"></div>';
+      h += '<button class="study-btn" id="b-syll-quit" style="margin-top:18px">Back to activities</button>';
+      h += '</div>';
+      document.getElementById('content').innerHTML = h;
+
+      document.getElementById('b-syll-quit').addEventListener('click', function () { go(fid); });
+      document.getElementById('b-syll-hear').addEventListener('click', function () { speakText(kt.term); });
+
+      var btns = document.querySelectorAll('.syll-opt');
+      for (var b = 0; b < btns.length; b++) {
+        btns[b].addEventListener('click', function () {
+          var i2 = parseInt(this.getAttribute('data-idx'));
+          var fb = document.getElementById('syll-fb');
+          if (i2 === correctIdx) {
+            this.classList.add('mc-correct');
+            var parts = splitSyllables(kt.term);
+            var colors = ['#2563eb', '#059669', '#7c3aed', '#d97706', '#dc2626'];
+            var coloredHtml = parts.map(function (p, k) {
+              return '<span style="color:' + colors[k % colors.length] + ';font-weight:800">' + p + '</span>';
+            }).join('<span class="syll-sep">\u00B7</span>');
+            fb.innerHTML = '<div class="fb-correct">\u2714 ' + correctCount + ' syllable' + (correctCount === 1 ? '' : 's') + '</div>' +
+              '<div class="syll-reveal">' + coloredHtml + '</div>';
+            if (firstAttempt) { score++; points += 1.0; }
+            var all = document.querySelectorAll('.syll-opt');
+            for (var x = 0; x < all.length; x++) all[x].disabled = true;
+            setTimeout(function () { qi++; renderQ(); }, 2400);
+          } else {
+            if (firstAttempt) {
+              pushToRemixQueue({
+                fid: fid, missedInMode: 'syllable', qIndex: qi, ref: '',
+                question: 'How many syllables in "' + kt.term + '"?',
+                options: opts.map(String), correct: correctIdx,
+                answer: String(correctCount), source_quote: ''
+              });
+              firstAttempt = false;
+            }
+            this.classList.add('mc-wrong');
+            this.disabled = true;
+            fb.innerHTML = '<div class="fb-try">Not quite \u2014 say the word aloud and count each beat.</div>';
+          }
+        });
+      }
+    }
+
+    function showResults() {
+      var pct = Math.round(score / rounds.length * 100);
+      var xpEarned = recordSession(fid, 'syllable', points, rounds.length);
+      var emoji = pct >= 80 ? '\u{1F3C6}' : pct >= 60 ? '\u{1F31F}' : '\u{1F4AA}';
+      var msg = pct >= 80 ? 'Outstanding!' : pct >= 60 ? 'Good work!' : 'Say them aloud.';
+      var h = '<div class="cloze-results">';
+      h += '<div class="cr-emoji">' + emoji + '</div>';
+      h += '<div class="cr-score">' + score + ' / ' + rounds.length + '</div>';
+      h += '<div class="cr-pct">' + pct + '%</div>';
+      h += '<div class="cr-xp">+' + xpEarned + ' XP earned</div>';
+      h += '<div class="cr-msg">' + msg + '</div>';
+      h += '<button class="study-btn sb-pri" id="b-syll-retry">\u{1F504} Try Again</button>';
+      h += '<button class="study-btn" id="b-syll-back">Back to activities</button>';
+      h += '</div>';
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-syll-retry').addEventListener('click', function () { showSyllableTap(fid); });
+      document.getElementById('b-syll-back').addEventListener('click', function () { go(fid); });
     }
 
     renderQ();
