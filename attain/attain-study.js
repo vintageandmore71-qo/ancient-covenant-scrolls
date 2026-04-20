@@ -3,6 +3,42 @@
 
 // ---- Flashcards with SM-2 Spaced Repetition ----
 
+// Find the shortest sentence in `chapters` that contains the given term.
+// Prefers sentences under 200 chars so the flashcard back stays readable.
+function findContextSentence(term, chapters, preferredChapterIdx) {
+  if (!term || !chapters || !chapters.length) return '';
+  var re = new RegExp('\\b' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+  // Search preferred chapter first, then any chapter
+  var order = [];
+  if (typeof preferredChapterIdx === 'number' && preferredChapterIdx >= 0 && preferredChapterIdx < chapters.length) {
+    order.push(preferredChapterIdx);
+  }
+  for (var i = 0; i < chapters.length; i++) if (order.indexOf(i) === -1) order.push(i);
+
+  for (var oi = 0; oi < order.length; oi++) {
+    var paras = chapters[order[oi]].paragraphs || [];
+    for (var p = 0; p < paras.length; p++) {
+      var sentences = paras[p].match(/[^.!?]+[.!?]+/g) || [paras[p]];
+      var best = null;
+      for (var s = 0; s < sentences.length; s++) {
+        var sent = sentences[s].trim();
+        if (sent.length < 20 || sent.length > 240) continue;
+        if (!re.test(sent)) continue;
+        if (!best || sent.length < best.length) best = sent;
+      }
+      if (best) return best;
+    }
+  }
+  return '';
+}
+
+function usagePrompt(term, isProperNoun) {
+  if (isProperNoun) {
+    return 'Who or what is ' + term + ', and what role do they play here?';
+  }
+  return 'What does "' + term + '" mean in this passage, and why is it important?';
+}
+
 function buildFlashcardDeck(bookId, chIdx) {
   var book = getBook(bookId);
   if (!book) return [];
@@ -11,19 +47,37 @@ function buildFlashcardDeck(bookId, chIdx) {
   var ch = chapters[chIdx];
   var cards = [];
 
-  // Key term cards
+  // Key term cards — front = term, back = context sentence + optional
+  // definition + usage prompt. Falls back to stats only if no sentence
+  // can be found anywhere in the book.
   if (book.keyTerms && book.keyTerms.length) {
     for (var t = 0; t < book.keyTerms.length; t++) {
       var kt = book.keyTerms[t];
+      var isProper = kt.term && kt.term[0] === kt.term[0].toUpperCase() && kt.term[0] !== kt.term[0].toLowerCase();
+      var context = findContextSentence(kt.term, chapters, chIdx);
+      var backHtml = '';
+      if (context) {
+        backHtml += '<div class="fc-context">"' + context + '"</div>';
+      }
+      if (kt.definition) {
+        backHtml += '<div class="fc-def">' + kt.definition + '</div>';
+      }
+      backHtml += '<div class="fc-prompt">' + usagePrompt(kt.term, isProper) + '</div>';
+      if (!context && !kt.definition) {
+        // Fallback stats when no sentence found (rare — term must be in text
+        // because it was extracted from it).
+        backHtml = '<div class="fc-def">Appears ' + kt.frequency + ' times across the book, in ' + kt.spread + '% of chapters.</div>' + backHtml;
+      }
       cards.push({
         front: kt.term,
-        back: kt.definition || 'Appears ' + kt.frequency + ' times across the book. Found in ' + kt.spread + '% of chapters.',
+        back: backHtml,
         type: 'term'
       });
     }
   }
 
-  // Paragraph cards from the current chapter
+  // Paragraph cards from the current chapter — recall the full paragraph
+  // from its opening 6 words
   var paras = ch.paragraphs || [];
   var usable = paras.filter(function (p) { return p.length > 20 && p.length < 300; });
   usable = shuffle(usable.slice()).slice(0, 15);
