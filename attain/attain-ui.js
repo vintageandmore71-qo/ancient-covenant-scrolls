@@ -810,6 +810,7 @@ function showChapterActivities(bookId, chIdx) {
   h += actCard('\u{1F4AC}', 'Who Said It', '#a855f7', 'whosaidit');
   h += actCard('\u2696\uFE0F', 'True or False', '#0ea5e9', 'truefalse');
   h += actCard('\u{1F501}', 'Story Sequence', '#ea580c', 'sequence');
+  h += actCard('\u21AA', 'Cause & Effect', '#be185d', 'causeeffect');
   h += actCard('\u{1F0CF}', 'Flashcards', '#d97706', 'flash');
   h += actCard('\u{1F9E0}', 'Memory Match', '#dc2626', 'memory');
   h += actCard('\u{1F50A}', 'Listen & Learn', '#0d9488', 'listen');
@@ -882,6 +883,7 @@ function openStudyMode(bookId, chIdx, mode) {
   if (mode === 'whosaidit') { showWhoSaidIt(bookId, chIdx); return; }
   if (mode === 'truefalse') { showTrueFalse(bookId, chIdx); return; }
   if (mode === 'sequence') { showStorySequence(bookId, chIdx); return; }
+  if (mode === 'causeeffect') { showCauseEffect(bookId, chIdx); return; }
   if (mode === 'remix') { showRemix(bookId, chIdx); return; }
   showNoContent(bookId, chIdx, mode);
 }

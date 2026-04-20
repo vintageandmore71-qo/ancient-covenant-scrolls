@@ -1924,6 +1924,127 @@ function showStorySequence(bookId, chIdx) {
   render();
 }
 
+// ---- Cause and Effect Match ----
+function showCauseEffect(bookId, chIdx) {
+  var book = getBook(bookId);
+  if (!book || !activeChapters) { showNoContent(bookId, chIdx, 'Cause and Effect'); return; }
+  var ch = activeChapters[chIdx];
+  if (!ch) { showNoContent(bookId, chIdx, 'Cause and Effect'); return; }
+  var chTitle = ch.title || 'Chapter ' + (chIdx + 1);
+
+  // Prefer current chapter; fall back to whole book if sparse
+  var pairs = extractCauseEffectPairs(ch.paragraphs || []);
+  if (pairs.length < 3) {
+    var all = [];
+    for (var ci = 0; ci < activeChapters.length; ci++) {
+      all = all.concat(activeChapters[ci].paragraphs || []);
+    }
+    pairs = extractCauseEffectPairs(all);
+  }
+  if (pairs.length < 3) { showNoContent(bookId, chIdx, 'Cause and Effect'); return; }
+  pairs = shuffle(pairs.slice()).slice(0, 5);
+  // Independent shuffle of the effect column so the match is not trivial
+  var effectOrder = shuffle(pairs.map(function (_, i) { return i; }));
+
+  var selectedCause = null;
+  var matched = 0;
+  var attempts = 0;
+
+  function render() {
+    var h = '<div class="cloze-view">';
+    h += '<div class="ce-banner">\u21AA Cause and Effect \u2014 tap a cause, then tap its effect</div>';
+    h += '<div class="cloze-ref">' + chTitle + '</div>';
+    h += '<div class="ce-grid">';
+    h += '<div class="ce-col"><div class="ce-col-label">Causes</div>';
+    // Cause items (stable order: original pair index)
+    for (var i = 0; i < pairs.length; i++) {
+      var matchedClass = pairs[i].solved ? ' ce-solved' : '';
+      var selectedClass = (selectedCause === i && !pairs[i].solved) ? ' ce-selected' : '';
+      h += '<button class="ce-item ce-cause' + matchedClass + selectedClass + '" data-cause="' + i + '"' + (pairs[i].solved ? ' disabled' : '') + '>' + pairs[i].cause + '</button>';
+    }
+    h += '</div>';
+    // Effect items (independently shuffled via effectOrder)
+    h += '<div class="ce-col"><div class="ce-col-label">Effects</div>';
+    for (var j = 0; j < effectOrder.length; j++) {
+      var pairIdx = effectOrder[j];
+      var solvedClass = pairs[pairIdx].solved ? ' ce-solved' : '';
+      h += '<button class="ce-item ce-effect' + solvedClass + '" data-effect="' + pairIdx + '"' + (pairs[pairIdx].solved ? ' disabled' : '') + '>' + pairs[pairIdx].effect + '</button>';
+    }
+    h += '</div></div>';
+    h += '<div class="mc-feedback" id="ce-fb" role="status" aria-live="polite"></div>';
+    h += '<button class="study-btn" id="b-ce-quit" style="margin-top:18px">Back to activities</button>';
+    h += '</div>';
+    document.getElementById('content').innerHTML = h;
+
+    document.getElementById('b-ce-quit').addEventListener('click', function () { showChapterActivities(bookId, chIdx); });
+
+    var causeBtns = document.querySelectorAll('.ce-cause');
+    for (var cb = 0; cb < causeBtns.length; cb++) {
+      causeBtns[cb].addEventListener('click', function () {
+        selectedCause = parseInt(this.getAttribute('data-cause'));
+        render();
+      });
+    }
+    var effectBtns = document.querySelectorAll('.ce-effect');
+    for (var eb = 0; eb < effectBtns.length; eb++) {
+      effectBtns[eb].addEventListener('click', function () {
+        if (selectedCause === null) {
+          document.getElementById('ce-fb').innerHTML = '<div class="fb-try">Tap a cause first.</div>';
+          return;
+        }
+        attempts++;
+        var pairIdx = parseInt(this.getAttribute('data-effect'));
+        var fb = document.getElementById('ce-fb');
+        if (pairIdx === selectedCause) {
+          pairs[selectedCause].solved = true;
+          matched++;
+          selectedCause = null;
+          fb.innerHTML = '<div class="fb-correct">\u2714 Matched!</div>';
+          if (matched === pairs.length) {
+            setTimeout(showResults, 1200);
+          } else {
+            render();
+          }
+        } else {
+          if (attempts <= 1) {
+            pushToRemixQueue({
+              bookId: bookId, chIdx: chIdx, missedInMode: 'causeeffect',
+              qIndex: selectedCause, ref: '',
+              question: 'Match cause to effect: ' + pairs[selectedCause].cause,
+              options: pairs.map(function (p) { return p.effect; }),
+              correct: selectedCause,
+              source: pairs[selectedCause].source,
+              answer: pairs[selectedCause].effect
+            });
+          }
+          selectedCause = null;
+          fb.innerHTML = '<div class="fb-try">Not that one. Try again.</div>';
+          render();
+        }
+      });
+    }
+  }
+
+  function showResults() {
+    var pct = matched / pairs.length;
+    var points = attempts <= pairs.length ? pairs.length : Math.max(1, pairs.length * 2 - attempts);
+    var xpEarned = recordSession(bookId, chIdx, 'causeeffect', points, pairs.length);
+    var h = '<div class="cloze-results">';
+    h += '<div class="cr-emoji">\u21AA</div>';
+    h += '<div class="cr-score">' + matched + ' / ' + pairs.length + ' matched</div>';
+    h += '<div class="cr-xp">+' + xpEarned + ' XP earned</div>';
+    h += '<div class="cr-msg">' + (attempts <= pairs.length ? 'Clean sweep!' : 'All matched \u2014 took ' + attempts + ' tries.') + '</div>';
+    h += '<button class="study-btn sb-pri" id="b-ce-retry">\u{1F504} Try Again</button>';
+    h += '<button class="study-btn" id="b-ce-back">Back to activities</button>';
+    h += '</div>';
+    document.getElementById('content').innerHTML = h;
+    document.getElementById('b-ce-retry').addEventListener('click', function () { showCauseEffect(bookId, chIdx); });
+    document.getElementById('b-ce-back').addEventListener('click', function () { showChapterActivities(bookId, chIdx); });
+  }
+
+  render();
+}
+
 // ---- Remix Round — resurface missed questions in a different format ----
 function showRemix(bookId, chIdx) {
   var items = getRemixQueue().filter(function (it) {

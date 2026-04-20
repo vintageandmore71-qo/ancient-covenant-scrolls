@@ -1040,6 +1040,47 @@ function generateStorySequence(paragraphs, count) {
   return events;
 }
 
+// ---- Cause and Effect extraction ----
+// Scans paragraphs for three connective patterns and returns a list of
+// { cause, effect, source } pairs. Trims each side to <= 120 chars so
+// the match-pair UI stays readable.
+function extractCauseEffectPairs(paragraphs) {
+  if (!paragraphs || !paragraphs.length) return [];
+  // Pattern 1: "<effect> because <cause>."
+  var p1 = /([A-Z][^.!?]{15,140})\s+because\s+([^.!?]{10,140})[.!?]/g;
+  // Pattern 2: "<cause>, (so|therefore|thus|hence) <effect>."
+  var p2 = /([A-Z][^.!?]{15,140}),?\s+(?:so|therefore|thus|hence)\s+([^.!?]{10,140})[.!?]/g;
+  // Pattern 3: "<cause> (led to|caused|brought about|resulted in) <effect>."
+  var p3 = /([A-Z][^.!?]{15,140})\s+(?:led to|caused|brought about|resulted in)\s+([^.!?]{10,140})[.!?]/g;
+  // Pattern 4: "Because <cause>, <effect>."
+  var p4 = /Because\s+([^,]{10,140}),\s+([^.!?]{10,140})[.!?]/g;
+
+  var pairs = [];
+  var seen = {};
+  function trim(s) { return s.replace(/\s+/g, ' ').trim(); }
+  function add(cause, effect, source) {
+    cause = trim(cause);
+    effect = trim(effect);
+    if (cause.length < 10 || effect.length < 10) return;
+    if (cause.length > 120) cause = cause.slice(0, 117) + '...';
+    if (effect.length > 120) effect = effect.slice(0, 117) + '...';
+    var key = (cause + '|' + effect).toLowerCase().slice(0, 80);
+    if (seen[key]) return;
+    seen[key] = true;
+    pairs.push({ cause: cause, effect: effect, source: source });
+  }
+
+  for (var p = 0; p < paragraphs.length; p++) {
+    var text = paragraphs[p];
+    var m;
+    p1.lastIndex = 0; while ((m = p1.exec(text)) !== null) add(m[2], m[1], text);
+    p2.lastIndex = 0; while ((m = p2.exec(text)) !== null) add(m[1], m[2], text);
+    p3.lastIndex = 0; while ((m = p3.exec(text)) !== null) add(m[1], m[2], text);
+    p4.lastIndex = 0; while ((m = p4.exec(text)) !== null) add(m[1], m[2], text);
+  }
+  return pairs;
+}
+
 // ---- Full Book Import Pipeline ----
 function importBook(title, rawText) {
   var chapters = detectChapters(rawText);
