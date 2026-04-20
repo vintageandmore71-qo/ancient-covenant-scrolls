@@ -77,9 +77,18 @@ function showLibrary() {
     html += '</div>';
   }
 
-  // Backup reminder — your books live only in this browser. Safari ITP and
-  // "Clear website data" both wipe localStorage/IndexedDB/Cache Storage,
-  // so without an exported file there's no way to recover.
+  // Storage-protection banner — THE fix for "my library is empty when I
+  // return". Safari ITP wipes non-persistent web storage after 7 days
+  // of no interaction; the only protection is (a) installing as a PWA
+  // or (b) getting navigator.storage.persist() granted.
+  var standalone = isStandalone();
+  html += '<div id="storage-status" class="storage-status" role="status">';
+  html += standalone
+    ? '<span class="storage-ok">\u2705 Storage protected \u2014 installed to home screen</span>'
+    : '<span class="storage-check">\u23F3 Checking storage protection...</span>';
+  html += '</div>';
+
+  // Backup reminder — secondary safety net
   var daysSince = daysSinceLastBackup();
   if (daysSince === Infinity) {
     html += '<div class="backup-warn backup-warn-urgent" role="alert">';
@@ -186,6 +195,25 @@ function showLibrary() {
 
   var backupBtn = document.getElementById('b-backup-now');
   if (backupBtn) backupBtn.addEventListener('click', function () { showSyncScreen(); });
+
+  // Async-fill the storage-protection status when not already installed
+  var statusEl = document.getElementById('storage-status');
+  if (statusEl && !isStandalone()) {
+    isPersistentStorage().then(function (persistent) {
+      if (persistent) {
+        statusEl.innerHTML = '<span class="storage-ok">\u2705 Storage protected \u2014 browser granted persistent access</span>';
+      } else {
+        statusEl.innerHTML =
+          '<span class="storage-warn">\u26A0\uFE0F Not installed \u2014 Safari may delete your books after 7 days of inactivity. ' +
+          '<button id="b-install-how-inline" class="storage-install-btn">Install to Home Screen</button></span>';
+        var btn = document.getElementById('b-install-how-inline');
+        if (btn) btn.addEventListener('click', function () {
+          try { localStorage.removeItem('attain_install_dismissed'); } catch (e) {}
+          showInstallPrompt();
+        });
+      }
+    });
+  }
 
   var progBtn = document.getElementById('b-lib-progress');
   if (progBtn) progBtn.addEventListener('click', function () { showProgress(); });
@@ -1386,7 +1414,14 @@ function verifyStorage() {
 
 // ---- Install Prompt ----
 function showInstallPrompt() {
-  if (localStorage.getItem('attain_install_dismissed')) return;
+  // Dismiss is a 14-day snooze, not permanent — so the user keeps seeing
+  // the install reminder if they dismissed it once but never installed.
+  var dismissed = null;
+  try { dismissed = localStorage.getItem('attain_install_dismissed'); } catch (e) {}
+  if (dismissed) {
+    var then = new Date(dismissed).getTime();
+    if (!isNaN(then) && (Date.now() - then) < 14 * 86400000) return;
+  }
   if (window.navigator.standalone) return; // already installed
   if (window.matchMedia('(display-mode: standalone)').matches) return;
 
@@ -1404,7 +1439,7 @@ function showInstallPrompt() {
 
   document.getElementById('b-install-dismiss').addEventListener('click', function () {
     banner.remove();
-    localStorage.setItem('attain_install_dismissed', '1');
+    try { localStorage.setItem('attain_install_dismissed', new Date().toISOString()); } catch (e) {}
   });
 
   document.getElementById('b-install-how').addEventListener('click', function () {
@@ -1424,7 +1459,7 @@ function showInstallPrompt() {
       '</div>';
     document.getElementById('b-install-ok').addEventListener('click', function () {
       banner.remove();
-      localStorage.setItem('attain_install_dismissed', '1');
+      try { localStorage.setItem('attain_install_dismissed', new Date().toISOString()); } catch (e) {}
     });
   });
 }

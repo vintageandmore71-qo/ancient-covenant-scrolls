@@ -157,15 +157,32 @@ var ATTAIN_DB_VERSION = 1;
 var BOOKS_CACHE = 'attain-books-data';
 var MAX_CACHED_BOOKS = 2;
 
-// Request persistent storage on first use
+// Request persistent storage on first use. Persistent storage survives
+// Safari ITP purges after 7 days of no interaction — the primary cause
+// of "my library is empty when I return" complaints.
 function requestPersistence() {
   if (navigator.storage && navigator.storage.persist) {
     navigator.storage.persist().then(function (granted) {
       if (granted) console.log('Attain: Persistent storage granted');
-    });
+    }).catch(function () {});
   }
 }
 requestPersistence();
+
+// Promise<boolean> — are we currently in persistent-storage mode?
+function isPersistentStorage() {
+  if (!navigator.storage || !navigator.storage.persisted) return Promise.resolve(false);
+  return navigator.storage.persisted().catch(function () { return false; });
+}
+
+// Detect PWA install state (iOS Safari and other browsers)
+function isStandalone() {
+  try {
+    if (window.navigator.standalone === true) return true;
+    if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true;
+  } catch (e) {}
+  return false;
+}
 
 // Check available storage
 function checkStorageQuota() {

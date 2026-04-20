@@ -545,6 +545,21 @@ body.font-dyslexic .cloze-prompt{font-family:var(--font-dyslexic);line-height:2.
   box-shadow:0 3px 12px rgba(168,85,247,.28);
 }
 
+/* Storage protection status on library screen */
+.storage-status{
+  margin:14px auto 6px auto;max-width:680px;text-align:center;
+  padding:10px 16px;border-radius:10px;font-weight:700;font-size:.95em;
+}
+.storage-ok{color:#166534}
+.storage-warn{color:#991b1b;display:inline-block;line-height:1.6}
+.storage-check{color:var(--text-muted)}
+.storage-install-btn{
+  display:inline-block;margin-left:8px;background:#dc2626;color:#fff;
+  border:none;padding:8px 14px;border-radius:10px;font-weight:800;
+  font-size:.85em;cursor:pointer;min-height:36px;
+}
+.storage-install-btn:hover{transform:scale(1.04)}
+
 /* Backup reminder banner on library screen */
 .backup-warn{
   margin:14px auto 6px auto;padding:14px 16px;border-radius:14px;
