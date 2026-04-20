@@ -739,6 +739,7 @@ function go(fid) {
   h += actCard('\u270F\uFE0F', 'Multiple Choice', '#7c3aed', 'mc', fid);
   h += actCard('\u{1F4AC}', 'Who Said It', '#a855f7', 'whosaidit', fid);
   h += actCard('\u2696\uFE0F', 'True or False', '#0ea5e9', 'truefalse', fid);
+  h += actCard('\u{1F501}', 'Story Sequence', '#ea580c', 'sequence', fid);
   h += actCard('\u{1F0CF}', 'Flashcards', '#d97706', 'flash', fid);
   h += actCard('\u{1F4DA}', 'Key Terms', '#0891b2', 'terms', fid);
   h += actCard('\u2753', 'FAQ', '#ea580c', 'faq', fid);
@@ -805,6 +806,7 @@ function openActivity(mode, fid) {
   if (mode === 'challenge') { showChallenge(fid); return; }
   if (mode === 'whosaidit') { showWhoSaidIt(fid); return; }
   if (mode === 'truefalse') { showTrueFalse(fid); return; }
+  if (mode === 'sequence') { showStorySequence(fid); return; }
   if (mode === 'remix') { showRemix(fid); return; }
   // Stub for modes not yet built
   document.getElementById('content').innerHTML =
@@ -2772,6 +2774,126 @@ function showTrueFalse(fid) {
     }
 
     renderQ();
+  });
+}
+
+// ---- Story Sequence — reorder scrambled curated events ----
+function generateSequenceFromCurated(data, count) {
+  count = count || 6;
+  if (!data || !data.fill_blank || data.fill_blank.length < 3) return [];
+  // fill_blank items already carry ref (e.g. "1:3") so we can order by
+  // numeric ref when available, otherwise keep authored order.
+  var items = data.fill_blank.slice().filter(function (q) { return q.source_quote && q.source_quote.length > 20; });
+  if (items.length < 3) return [];
+  items.sort(function (a, b) {
+    var ar = parseRef(a.ref), br = parseRef(b.ref);
+    if (ar === null || br === null) return 0;
+    return ar - br;
+  });
+  // Downsample to `count`, keeping original order
+  var step = Math.max(1, Math.floor(items.length / count));
+  var events = [];
+  for (var i = 0; i < items.length && events.length < count; i += step) {
+    var text = items[i].source_quote;
+    if (text.length > 200) text = text.slice(0, 197) + '...';
+    events.push({ order: events.length, text: text, ref: items[i].ref || '' });
+  }
+  return events;
+}
+
+function parseRef(ref) {
+  if (!ref) return null;
+  var m = ref.match(/(\d+)(?::(\d+))?/);
+  if (!m) return null;
+  return parseInt(m[1]) * 1000 + (m[2] ? parseInt(m[2]) : 0);
+}
+
+function showStorySequence(fid) {
+  loadContent(fid).then(function (data) {
+    var events = generateSequenceFromCurated(data, 6);
+    if (events.length < 3) { openActivity('stub', fid); return; }
+    var idx = IDS.indexOf(fid);
+    var secLabel = idx >= 0 ? LBL[idx].split(' \u2014 ')[0] : fid;
+    var shuffled = shuffle(events.slice());
+    var picked = [];
+    var attempts = 0, finished = false;
+
+    function render() {
+      var h = '<div class="cloze-view">';
+      h += '<div class="seq-banner">\u{1F501} Story Sequence \u2014 tap events in the order they happen</div>';
+      h += '<div class="cloze-ref">' + secLabel + '</div>';
+      h += '<div class="seq-slots">';
+      for (var i = 0; i < events.length; i++) {
+        var slotNum = i + 1;
+        if (i < picked.length) {
+          var ev = events.find(function (e) { return e.order === picked[i]; });
+          h += '<div class="seq-slot seq-slot-filled" data-slot="' + i + '"><span class="seq-num">' + slotNum + '</span><span class="seq-text">' + ev.text + '</span><button class="seq-remove" data-slot="' + i + '" aria-label="Remove">\u2715</button></div>';
+        } else {
+          h += '<div class="seq-slot seq-slot-empty"><span class="seq-num">' + slotNum + '</span><span class="seq-placeholder">Tap an event below</span></div>';
+        }
+      }
+      h += '</div>';
+      h += '<div class="seq-pool-label">Available events:</div>';
+      h += '<div class="seq-pool">';
+      for (var p = 0; p < shuffled.length; p++) {
+        if (picked.indexOf(shuffled[p].order) !== -1) continue;
+        h += '<button class="seq-pool-item" data-order="' + shuffled[p].order + '">' + shuffled[p].text + '</button>';
+      }
+      h += '</div>';
+      h += '<div class="seq-actions">';
+      if (picked.length === events.length && !finished) {
+        h += '<button class="study-btn sb-pri" id="b-seq-check">\u2714 Check order</button>';
+      }
+      h += '<button class="study-btn" id="b-seq-quit">Back to activities</button>';
+      h += '</div>';
+      h += '<div class="mc-feedback" id="seq-fb" role="status" aria-live="polite"></div>';
+      h += '</div>';
+      document.getElementById('content').innerHTML = h;
+
+      document.getElementById('b-seq-quit').addEventListener('click', function () { go(fid); });
+      var poolBtns = document.querySelectorAll('.seq-pool-item');
+      for (var pb = 0; pb < poolBtns.length; pb++) {
+        poolBtns[pb].addEventListener('click', function () {
+          picked.push(parseInt(this.getAttribute('data-order')));
+          render();
+        });
+      }
+      var removeBtns = document.querySelectorAll('.seq-remove');
+      for (var rb = 0; rb < removeBtns.length; rb++) {
+        removeBtns[rb].addEventListener('click', function (e) {
+          e.stopPropagation();
+          picked.splice(parseInt(this.getAttribute('data-slot')), 1);
+          render();
+        });
+      }
+      var checkBtn = document.getElementById('b-seq-check');
+      if (checkBtn) {
+        checkBtn.addEventListener('click', function () {
+          attempts++;
+          var correct = 0;
+          for (var i = 0; i < picked.length; i++) if (picked[i] === i) correct++;
+          var fb = document.getElementById('seq-fb');
+          if (correct === events.length) {
+            finished = true;
+            var pts = attempts === 1 ? 1.0 : attempts === 2 ? 0.7 : 0.4;
+            var xpEarned = recordSession(fid, 'sequence', pts, 1);
+            fb.innerHTML = '<div class="fb-correct">\u{1F389} Perfect order! (+' + Math.round(pts * 10) + ' XP)</div>';
+            setTimeout(function () { go(fid); }, 2800);
+          } else {
+            if (attempts === 1) {
+              pushToRemixQueue({
+                fid: fid, missedInMode: 'sequence', qIndex: 0, ref: '',
+                question: 'Put these ' + events.length + ' events in order',
+                options: events.map(function (e) { return e.text; }), correct: 0,
+                answer: events[0].text, source_quote: ''
+              });
+            }
+            fb.innerHTML = '<div class="fb-try">' + correct + ' of ' + events.length + ' in the right spot. Move the wrong ones and check again.</div>';
+          }
+        });
+      }
+    }
+    render();
   });
 }
 

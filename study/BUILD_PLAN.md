@@ -418,7 +418,7 @@ are marked `equiv`. Build order is not fixed; pick one at a time.
 | Syllable Tap | new | Tap syllable boundaries in chapter words — dyslexia aid |
 | Rhyme Chain | new | Chain rhyming words drawn from the chapter |
 | Word Morph | new | Change one letter at a time between two chapter words |
-| Story Sequence | new | Reorder chapter events in correct order |
+| Story Sequence | done | Tap-to-pick UI (iPad-friendly, no DnD). 6 events per round sampled evenly across chapter; scoring 1.0/0.7/0.4 by attempt count; partial-credit feedback allows retry without reset; Remix integration |
 | True or False with Why | done | TRUE = verbatim sentence from source; FALSE = key-term proper noun swapped. Correct answer reveals source paragraph ("Why:" block) + swap note when applicable. Remix integration |
 | Who Said It | done | Scans source_quotes (Study) / chapter paragraphs (Attain) for dialogue attribution patterns; MC-style picks speaker from 4 options; Hint Ladder + Remix integration |
 | Cause and Effect Match | new | Pair cause paragraph to effect paragraph |
