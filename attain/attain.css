@@ -1417,7 +1417,21 @@ body.beeline-on .ch-question{
 .upload-drop-icon{font-size:3em;margin-bottom:12px}
 .upload-drop-text{font-size:1.1em;font-weight:700;color:var(--text-main)}
 .upload-drop-sub{font-size:.85em;color:var(--text-muted);margin-top:8px}
-.upload-or{font-size:.9em;color:var(--text-muted);margin:16px 0;font-weight:700}
+.upload-or{font-size:.9em;color:var(--text-muted);margin:16px 0;font-weight:700;text-align:center}
+.upload-url-wrap{display:flex;gap:8px;align-items:stretch}
+.upload-url{
+  flex:1;padding:12px 14px;border:2px solid #ddd;border-radius:var(--radius);
+  font-family:var(--font-main);font-size:14px;
+  background:var(--bg-card);color:var(--text-main);
+  box-sizing:border-box;
+}
+body.font-dyslexic .upload-url{font-family:var(--font-dyslexic)}
+.upload-url:focus{outline:3px solid #a78bfa;outline-offset:2px;border-color:#7c3aed}
+.upload-url-wrap .study-btn{margin:0;flex:0 0 auto;min-width:100px}
+.upload-url-hint{
+  font-size:.82em;color:var(--text-muted);line-height:1.5;
+  margin:8px 0 0 0;text-align:center;font-style:italic;
+}
 .upload-paste{width:100%;min-height:120px;border:2px solid #ddd;border-radius:var(--radius);
   padding:14px;font-family:var(--font-main);font-size:14px;resize:vertical;
   background:var(--bg-card);color:var(--text-main)}

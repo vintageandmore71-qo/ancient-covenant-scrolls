@@ -469,6 +469,14 @@ function showUpload() {
   h += '</div>';
   h += '<input type="file" id="upload-file" accept=".pdf,.epub,.docx,.txt,.md,.html,.htm" style="display:none">';
 
+  // OR divider — URL paste
+  h += '<div class="upload-or">\u2014 or paste a URL \u2014</div>';
+  h += '<div class="upload-url-wrap">';
+  h += '<input type="url" id="upload-url" class="upload-url" placeholder="https://www.gutenberg.org/cache/epub/.../pg....txt" aria-label="Public URL to a text file">';
+  h += '<button class="study-btn" id="b-upload-url-fetch" aria-label="Fetch from URL">\u{1F310} Fetch</button>';
+  h += '</div>';
+  h += '<div class="upload-url-hint">Project Gutenberg plain-text URLs work. Most other sites block cross-browser fetching \u2014 if so, download the file and use the drop zone above.</div>';
+
   // OR divider
   h += '<div class="upload-or">\u2014 or paste text directly \u2014</div>';
 
@@ -586,6 +594,68 @@ function showUpload() {
   // Cancel button
   document.getElementById('b-upload-cancel').addEventListener('click', function () {
     showLibrary();
+  });
+
+  // URL fetch button — pulls a public URL and drops the text into the
+  // paste area. Honest about CORS: most URLs will fail with a clear
+  // message rather than a silent/weird error.
+  var urlFetchBtn = document.getElementById('b-upload-url-fetch');
+  if (urlFetchBtn) urlFetchBtn.addEventListener('click', function () {
+    var urlInput = document.getElementById('upload-url');
+    var url = urlInput ? urlInput.value.trim() : '';
+    var statusEl = document.getElementById('upload-status');
+    if (!url) {
+      statusEl.textContent = '❌ Paste a URL first';
+      statusEl.style.color = '#dc2626';
+      return;
+    }
+    if (!/^https?:\/\//i.test(url)) {
+      statusEl.textContent = '❌ URL must start with http:// or https://';
+      statusEl.style.color = '#dc2626';
+      return;
+    }
+    statusEl.textContent = '⏳ Fetching from URL...';
+    statusEl.style.color = 'var(--vol1)';
+    fetch(url, { mode: 'cors' }).then(function (res) {
+      if (!res.ok) throw new Error('Server returned ' + res.status);
+      var contentType = res.headers.get('content-type') || '';
+      if (/pdf|epub/i.test(contentType)) {
+        return res.blob().then(function (blob) {
+          // Treat fetched blob as a dropped file
+          selectedFile = new File([blob], 'fetched-from-url', { type: contentType });
+          statusEl.textContent = '✅ File fetched (' + Math.round(blob.size / 1024) + ' KB). Click Import Book to continue.';
+          statusEl.style.color = '#059669';
+          return null;
+        });
+      }
+      return res.text().then(function (text) {
+        if (!text || text.trim().length < 50) {
+          throw new Error('URL returned an empty or very short response');
+        }
+        var pasteEl = document.getElementById('upload-paste');
+        if (pasteEl) pasteEl.value = text;
+        // Best-effort auto-fill the title from a <title> tag if present
+        var titleEl = document.getElementById('upload-title');
+        if (titleEl && !titleEl.value.trim()) {
+          var m = text.match(/<title[^>]*>([^<]{3,120})<\/title>/i);
+          if (m) titleEl.value = m[1].trim();
+        }
+        statusEl.textContent = '✅ Text loaded (' + Math.round(text.length / 1024) + ' KB). Click Import Book to continue.';
+        statusEl.style.color = '#059669';
+      });
+    }).catch(function (err) {
+      // Most fetches will land here with a TypeError/"Failed to fetch"
+      // due to CORS blocking. Rather than confuse the user, explain
+      // what actually happened.
+      var msg = err && err.message ? err.message : 'fetch failed';
+      var isCors = /CORS|fetch|NetworkError|cross-origin/i.test(msg) || msg === 'Failed to fetch';
+      if (isCors) {
+        statusEl.innerHTML = '❌ This site blocks cross-browser fetching (CORS).<br>Download the file and use the drop zone above instead.';
+      } else {
+        statusEl.textContent = '❌ Could not fetch: ' + msg;
+      }
+      statusEl.style.color = '#dc2626';
+    });
   });
 }
 
