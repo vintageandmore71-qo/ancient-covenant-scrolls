@@ -554,6 +554,40 @@ body.font-dyslexic .hint-stage-3{font-family:monospace}
 .stub-view h3{color:#7c3aed;margin-bottom:12px}
 .stub-hint{color:var(--text-muted);font-size:.95em;margin:10px 0 20px 0}
 
+/* Concept Web */
+.cweb-banner{
+  background:linear-gradient(135deg,#9333ea,#7c3aed);color:#fff;
+  padding:10px 16px;border-radius:12px;margin:0 0 14px 0;
+  font-size:.95em;font-weight:800;text-align:center;
+  box-shadow:0 3px 12px rgba(147,51,234,.28);
+}
+.cweb-wrap{
+  background:#f8fafc;border:1px solid #cbd5e1;border-radius:14px;
+  padding:6px;overflow:hidden;
+}
+.cweb-svg{width:100%;height:auto;display:block;touch-action:manipulation}
+.cweb-node{cursor:pointer;transition:transform .15s;transform-origin:center}
+.cweb-node:hover{transform:scale(1.06)}
+.cweb-center-label{
+  font-size:14px;font-weight:800;fill:#fff;
+  font-family:var(--font-main);pointer-events:none;
+}
+.cweb-label{
+  font-size:13px;font-weight:700;fill:var(--text-main);
+  font-family:var(--font-main);pointer-events:none;
+}
+body.font-dyslexic .cweb-center-label,body.font-dyslexic .cweb-label{font-family:var(--font-dyslexic)}
+.cweb-detail{
+  margin-top:12px;background:#f3e8ff;border-left:4px solid #9333ea;
+  padding:14px 16px;border-radius:12px;line-height:1.6;color:#4c1d95;
+}
+.cweb-detail-term{font-size:1.2em;font-weight:800;color:#6d28d9;margin-bottom:6px}
+.cweb-detail-def{
+  background:#fff;padding:10px 14px;border-radius:8px;margin-bottom:8px;
+  color:#1e1b4b;
+}
+.cweb-detail-hint{font-size:.88em;color:#6b21a8;font-style:italic}
+
 /* Chapter Timeline */
 .tl-banner{
   background:linear-gradient(135deg,#0284c7,#0369a1);color:#fff;

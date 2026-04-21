@@ -413,7 +413,7 @@ are marked `equiv`. Build order is not fixed; pick one at a time.
 | Echo Read | `equiv` | Existing Listen & Learn + tap-any-word |
 | Chapter Timeline | done | Horizontal spine with up to 12 dots sampled from fill_blank + multiple_choice source_quotes, sorted by ref. Tap dot → detail panel with Prev/Listen/Next. Ref labels under dots |
 | Mind Map Builder | done | Force-directed SVG graph, no library vendor. Nodes = top 14 key terms; edges = co-occurrence in source_quote/FAQ answers; tap node -> context sentence + connected-terms list. 0.3 points (3 XP) per view |
-| Concept Web | backlog | Radial/hub-and-spoke alternative to Mind Map — tap a term to move it to the centre, its neighbours arrange in a ring around it. Vanilla SVG, no new library needed. Est ~150 lines |
+| Concept Web | done | Radial hub-and-spoke. Selected term sits in centre (violet); all terms it shares content with arrange in a ring around it. Tap any ring term to make IT the new centre. Uses same two-tier edge weights as Mind Map. Vanilla SVG, no physics needed — purely geometric |
 | Remix Round | done | See #4 above |
 | Syllable Tap | done | Vowel-group heuristic (y-between-vowels as consonant, silent-e except -le endings). 4 count options; correct reveals word in colored syllable chunks; Remix integration. Accuracy >85% on names like Qayin=2, Jerusalem=4, Chanokh=2 |
 | Rhyme Chain | done | Rime-suffix heuristic (last vowel group + tail) groups chapter words; MC-style "which word rhymes with X?"; correct reveals shared rime suffix; Remix integration |

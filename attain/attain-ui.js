@@ -952,6 +952,7 @@ function showChapterActivities(bookId, chIdx) {
   h += actCard('\u{1F441}\uFE0F', 'Syllable Tap', '#f59e0b', 'syllable');
   h += actCard('\u{1F3B6}', 'Rhyme Chain', '#0891b2', 'rhyme');
   h += actCard('\u{1F9E0}', 'Mind Map', '#7c3aed', 'mindmap');
+  h += actCard('\u{1F578}️', 'Concept Web', '#9333ea', 'conceptweb');
   h += actCard('\u{1F4C5}', 'Timeline', '#0284c7', 'timeline');
   h += actCard('\u{1F0CF}', 'Flashcards', '#d97706', 'flash');
   h += actCard('\u{1F9E0}', 'Memory Match', '#dc2626', 'memory');
@@ -1031,6 +1032,7 @@ function openStudyMode(bookId, chIdx, mode) {
   if (mode === 'syllable') { showSyllableTap(bookId, chIdx); return; }
   if (mode === 'rhyme') { showRhymeChain(bookId, chIdx); return; }
   if (mode === 'mindmap') { showMindMap(bookId, chIdx); return; }
+  if (mode === 'conceptweb') { showConceptWeb(bookId, chIdx); return; }
   if (mode === 'timeline') { showChapterTimeline(bookId, chIdx); return; }
   if (mode === 'remix') { showRemix(bookId, chIdx); return; }
   showNoContent(bookId, chIdx, mode);

@@ -768,6 +768,7 @@ function go(fid) {
   h += actCard('\u{1F441}\uFE0F', 'Syllable Tap', '#f59e0b', 'syllable', fid);
   h += actCard('\u{1F3B6}', 'Rhyme Chain', '#0891b2', 'rhyme', fid);
   h += actCard('\u{1F9E0}', 'Mind Map', '#7c3aed', 'mindmap', fid);
+  h += actCard('\u{1F578}️', 'Concept Web', '#9333ea', 'conceptweb', fid);
   h += actCard('\u{1F4C5}', 'Timeline', '#0284c7', 'timeline', fid);
   h += actCard('\u{1F0CF}', 'Flashcards', '#d97706', 'flash', fid);
   h += actCard('\u{1F4DA}', 'Key Terms', '#0891b2', 'terms', fid);
@@ -842,6 +843,7 @@ function openActivity(mode, fid) {
   if (mode === 'syllable') { showSyllableTap(fid); return; }
   if (mode === 'rhyme') { showRhymeChain(fid); return; }
   if (mode === 'mindmap') { showMindMap(fid); return; }
+  if (mode === 'conceptweb') { showConceptWeb(fid); return; }
   if (mode === 'timeline') { showChapterTimeline(fid); return; }
   if (mode === 'remix') { showRemix(fid); return; }
   // Fallback: mode-specific "not enough content" message
@@ -864,6 +866,8 @@ function showStubForMode(fid, mode) {
     syllable: 'Syllable Tap',
     rhyme: 'Rhyme Chain',
     mindmap: 'Mind Map',
+    conceptweb: 'Concept Web',
+    timeline: 'Chapter Timeline',
     filblank: 'Fill in the Blank',
     mc: 'Multiple Choice',
     flash: 'Flashcards',
@@ -885,6 +889,8 @@ function showStubForMode(fid, mode) {
     syllable: 'needs at least 3 key terms of 5+ letters with 2+ syllables.',
     rhyme: 'needs at least 3 rhyme groups of 2+ words in the source quotes.',
     mindmap: 'needs at least 4 key terms with co-occurrence across source quotes.',
+    conceptweb: 'needs at least 4 key terms with co-occurrence across source quotes.',
+    timeline: 'needs at least 3 source quotes in this section.',
     filblank: 'needs more fill-in-blank items in this section.',
     mc: 'needs more multiple-choice questions in this section.',
     flash: 'needs key terms or source verses in this section.',
@@ -3922,6 +3928,140 @@ function showMindMap(fid) {
     }
     render();
     recordSession(fid, 'mindmap', 0.3, 1);
+  });
+}
+
+// ---- Concept Web — radial hub-and-spoke; tap a ring term to re-center ----
+function showConceptWeb(fid) {
+  loadContent(fid).then(function (data) {
+    if (!data || !data.key_terms || data.key_terms.length < 4) { showStubForMode(fid, 'conceptweb'); return; }
+    var keyTerms = data.key_terms.slice(0, 10);
+    var idx = IDS.indexOf(fid);
+    var secLabel = idx >= 0 ? LBL[idx].split(' — ')[0] : fid;
+
+    // Build weighted edges — a map of term -> neighbour -> weight.
+    // Same two-tier approach as Mind Map: paragraph-level matches get
+    // weight 2, whole-section co-occurrence gets weight 1 enrichment.
+    var pool = [];
+    if (data.fill_blank) data.fill_blank.forEach(function (q) { if (q.source_quote) pool.push(q.source_quote); });
+    if (data.multiple_choice) data.multiple_choice.forEach(function (q) { if (q.source_quote) pool.push(q.source_quote); });
+    if (data.faq) data.faq.forEach(function (q) { if (q.answer) pool.push(q.answer); });
+    var weights = {};
+    keyTerms.forEach(function (t) { weights[t.term] = {}; });
+    function addWeight(a, b, w) {
+      weights[a][b] = (weights[a][b] || 0) + w;
+      weights[b][a] = (weights[b][a] || 0) + w;
+    }
+    for (var p = 0; p < pool.length; p++) {
+      var lower = pool[p].toLowerCase();
+      var present = [];
+      for (var n = 0; n < keyTerms.length; n++) {
+        var re = new RegExp('\\b' + keyTerms[n].term.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b');
+        if (re.test(lower)) present.push(keyTerms[n].term);
+      }
+      for (var a = 0; a < present.length; a++) {
+        for (var b = a + 1; b < present.length; b++) addWeight(present[a], present[b], 2);
+      }
+    }
+    // Tier 2 enrichment — whole curated content
+    var allText = pool.join(' ').toLowerCase();
+    if (data.summary_plain) allText += ' ' + data.summary_plain.toLowerCase();
+    if (data.summary_scholarly) allText += ' ' + data.summary_scholarly.toLowerCase();
+    var presentAll = [];
+    for (var na = 0; na < keyTerms.length; na++) {
+      var rea = new RegExp('\\b' + keyTerms[na].term.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b');
+      if (rea.test(allText)) presentAll.push(keyTerms[na].term);
+    }
+    for (var aa = 0; aa < presentAll.length; aa++) {
+      for (var ba = aa + 1; ba < presentAll.length; ba++) addWeight(presentAll[aa], presentAll[ba], 1);
+    }
+
+    // Drop terms that aren't connected to anything
+    keyTerms = keyTerms.filter(function (t) { return Object.keys(weights[t.term]).length > 0; });
+    if (keyTerms.length < 3) { showStubForMode(fid, 'conceptweb'); return; }
+
+    // Start centered on the first term (usually the highest-frequency)
+    var centerIdx = 0;
+
+    function render() {
+      var center = keyTerms[centerIdx];
+      // Neighbours = every other term with a non-zero edge to center,
+      // sorted by edge weight descending
+      var neighbours = [];
+      for (var i = 0; i < keyTerms.length; i++) {
+        if (i === centerIdx) continue;
+        var w = weights[center.term][keyTerms[i].term] || 0;
+        if (w > 0) neighbours.push({ idx: i, term: keyTerms[i].term, weight: w });
+      }
+      neighbours.sort(function (a, b) { return b.weight - a.weight; });
+
+      var W = 560, H = 560;
+      var cx = W / 2, cy = H / 2;
+      var ringR = 200;
+
+      var h = '<div class="cloze-view">';
+      h += '<div class="cweb-banner">\u{1F578}️ Concept Web — tap a term to make it the centre</div>';
+      h += '<div class="cloze-ref">' + secLabel + '</div>';
+      h += '<div class="cweb-wrap">';
+      h += '<svg viewBox="0 0 ' + W + ' ' + H + '" class="cweb-svg" role="img" aria-label="Concept Web">';
+
+      // Edges from centre to each neighbour
+      neighbours.forEach(function (nb, i) {
+        var angle = (i / neighbours.length) * Math.PI * 2 - Math.PI / 2;
+        var nx = cx + Math.cos(angle) * ringR;
+        var ny = cy + Math.sin(angle) * ringR;
+        var op = Math.min(0.7, 0.2 + nb.weight * 0.15);
+        var sw = Math.min(5, 1 + nb.weight * 0.4);
+        h += '<line x1="' + cx + '" y1="' + cy + '" x2="' + nx.toFixed(1) + '" y2="' + ny.toFixed(1) + '" stroke="#7c3aed" stroke-opacity="' + op.toFixed(2) + '" stroke-width="' + sw.toFixed(1) + '" />';
+      });
+
+      // Centre node
+      h += '<g class="cweb-center">';
+      h += '<circle cx="' + cx + '" cy="' + cy + '" r="48" fill="#7c3aed" stroke="#fff" stroke-width="3" />';
+      h += '<text x="' + cx + '" y="' + (cy + 6) + '" text-anchor="middle" class="cweb-center-label">' + center.term + '</text>';
+      h += '</g>';
+
+      // Ring nodes (tappable)
+      var colors = ['#2563eb', '#059669', '#dc2626', '#ea580c', '#0891b2', '#be185d', '#ca8a04', '#16a34a'];
+      neighbours.forEach(function (nb, i) {
+        var angle = (i / neighbours.length) * Math.PI * 2 - Math.PI / 2;
+        var nx = cx + Math.cos(angle) * ringR;
+        var ny = cy + Math.sin(angle) * ringR;
+        var color = colors[i % colors.length];
+        h += '<g data-idx="' + nb.idx + '" class="cweb-node" role="button" tabindex="0" aria-label="Re-center on ' + nb.term + '">';
+        h += '<circle cx="' + nx.toFixed(1) + '" cy="' + ny.toFixed(1) + '" r="30" fill="' + color + '" stroke="#fff" stroke-width="2" />';
+        // Label radially outward from centre
+        var labelDist = 48;
+        var lx = cx + Math.cos(angle) * (ringR + labelDist);
+        var ly = cy + Math.sin(angle) * (ringR + labelDist) + 4;
+        h += '<text x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '" text-anchor="middle" class="cweb-label">' + nb.term + '</text>';
+        h += '</g>';
+      });
+
+      h += '</svg>';
+      h += '</div>';
+
+      // Detail panel for the centre term
+      h += '<div class="cweb-detail">';
+      h += '<div class="cweb-detail-term">' + center.term + (center.phonetic ? ' <span style="font-weight:400;font-size:.85em">(' + center.phonetic + ')</span>' : '') + '</div>';
+      if (center.definition) h += '<div class="cweb-detail-def">' + center.definition + '</div>';
+      h += '<div class="cweb-detail-hint">Tap any of the ' + neighbours.length + ' ring term' + (neighbours.length === 1 ? '' : 's') + ' to make it the new centre.</div>';
+      h += '</div>';
+
+      h += '<button class="study-btn" id="b-cweb-quit" style="margin-top:14px">Back to activities</button>';
+      h += '</div>';
+      document.getElementById('content').innerHTML = h;
+      document.getElementById('b-cweb-quit').addEventListener('click', function () { go(fid); });
+      var nodeEls = document.querySelectorAll('.cweb-node');
+      for (var ne = 0; ne < nodeEls.length; ne++) {
+        nodeEls[ne].addEventListener('click', function () {
+          centerIdx = parseInt(this.getAttribute('data-idx'));
+          render();
+        });
+      }
+    }
+    render();
+    recordSession(fid, 'conceptweb', 0.3, 1);
   });
 }
 

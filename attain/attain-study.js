@@ -2646,6 +2646,128 @@ function showMindMap(bookId, chIdx) {
   recordSession(bookId, chIdx, 'mindmap', 0.3, 1);
 }
 
+// ---- Concept Web — radial hub-and-spoke; tap a ring term to re-centre ----
+function showConceptWeb(bookId, chIdx) {
+  var book = getBook(bookId);
+  if (!book || !activeChapters) { showNoContent(bookId, chIdx, 'Concept Web'); return; }
+  var ch = activeChapters[chIdx];
+  if (!ch) { showNoContent(bookId, chIdx, 'Concept Web'); return; }
+  var chTitle = ch.title || 'Chapter ' + (chIdx + 1);
+  var paras = ch.paragraphs || [];
+  var keyTerms = (book.keyTerms || []).slice(0, 10);
+  if (keyTerms.length < 4) { showNoContent(bookId, chIdx, 'Concept Web'); return; }
+
+  // Build weighted co-occurrence (two-tier, same as Mind Map)
+  var weights = {};
+  keyTerms.forEach(function (t) { weights[t.term] = {}; });
+  function addWeight(a, b, w) {
+    weights[a][b] = (weights[a][b] || 0) + w;
+    weights[b][a] = (weights[b][a] || 0) + w;
+  }
+  // Tier 1: paragraph-level (weight 2)
+  for (var p = 0; p < paras.length; p++) {
+    var lower = paras[p].toLowerCase();
+    var present = [];
+    for (var n = 0; n < keyTerms.length; n++) {
+      var re = new RegExp('\\b' + keyTerms[n].term.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b');
+      if (re.test(lower)) present.push(keyTerms[n].term);
+    }
+    for (var a = 0; a < present.length; a++) {
+      for (var b = a + 1; b < present.length; b++) addWeight(present[a], present[b], 2);
+    }
+  }
+  // Tier 2: whole-chapter enrichment (weight 1)
+  var chapterText = paras.join(' ').toLowerCase();
+  var presentC = [];
+  for (var nc = 0; nc < keyTerms.length; nc++) {
+    var rec = new RegExp('\\b' + keyTerms[nc].term.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b');
+    if (rec.test(chapterText)) presentC.push(keyTerms[nc].term);
+  }
+  for (var ac = 0; ac < presentC.length; ac++) {
+    for (var bc = ac + 1; bc < presentC.length; bc++) addWeight(presentC[ac], presentC[bc], 1);
+  }
+
+  // Drop unconnected
+  keyTerms = keyTerms.filter(function (t) { return Object.keys(weights[t.term]).length > 0; });
+  if (keyTerms.length < 3) { showNoContent(bookId, chIdx, 'Concept Web'); return; }
+
+  var centerIdx = 0;
+
+  function render() {
+    var center = keyTerms[centerIdx];
+    var neighbours = [];
+    for (var i = 0; i < keyTerms.length; i++) {
+      if (i === centerIdx) continue;
+      var w = weights[center.term][keyTerms[i].term] || 0;
+      if (w > 0) neighbours.push({ idx: i, term: keyTerms[i].term, weight: w });
+    }
+    neighbours.sort(function (a, b) { return b.weight - a.weight; });
+
+    var W = 560, H = 560;
+    var cx = W / 2, cy = H / 2;
+    var ringR = 200;
+
+    var h = '<div class="cloze-view">';
+    h += '<div class="cweb-banner">\u{1F578}️ Concept Web — tap a term to make it the centre</div>';
+    h += '<div class="cloze-ref">' + chTitle + '</div>';
+    h += '<div class="cweb-wrap">';
+    h += '<svg viewBox="0 0 ' + W + ' ' + H + '" class="cweb-svg" role="img" aria-label="Concept Web">';
+
+    neighbours.forEach(function (nb, i) {
+      var angle = (i / neighbours.length) * Math.PI * 2 - Math.PI / 2;
+      var nx = cx + Math.cos(angle) * ringR;
+      var ny = cy + Math.sin(angle) * ringR;
+      var op = Math.min(0.7, 0.2 + nb.weight * 0.15);
+      var sw = Math.min(5, 1 + nb.weight * 0.4);
+      h += '<line x1="' + cx + '" y1="' + cy + '" x2="' + nx.toFixed(1) + '" y2="' + ny.toFixed(1) + '" stroke="#7c3aed" stroke-opacity="' + op.toFixed(2) + '" stroke-width="' + sw.toFixed(1) + '" />';
+    });
+
+    h += '<g class="cweb-center">';
+    h += '<circle cx="' + cx + '" cy="' + cy + '" r="48" fill="#7c3aed" stroke="#fff" stroke-width="3" />';
+    h += '<text x="' + cx + '" y="' + (cy + 6) + '" text-anchor="middle" class="cweb-center-label">' + center.term + '</text>';
+    h += '</g>';
+
+    var colors = ['#2563eb', '#059669', '#dc2626', '#ea580c', '#0891b2', '#be185d', '#ca8a04', '#16a34a'];
+    neighbours.forEach(function (nb, i) {
+      var angle = (i / neighbours.length) * Math.PI * 2 - Math.PI / 2;
+      var nx = cx + Math.cos(angle) * ringR;
+      var ny = cy + Math.sin(angle) * ringR;
+      var color = colors[i % colors.length];
+      h += '<g data-idx="' + nb.idx + '" class="cweb-node" role="button" tabindex="0" aria-label="Re-center on ' + nb.term + '">';
+      h += '<circle cx="' + nx.toFixed(1) + '" cy="' + ny.toFixed(1) + '" r="30" fill="' + color + '" stroke="#fff" stroke-width="2" />';
+      var labelDist = 48;
+      var lx = cx + Math.cos(angle) * (ringR + labelDist);
+      var ly = cy + Math.sin(angle) * (ringR + labelDist) + 4;
+      h += '<text x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '" text-anchor="middle" class="cweb-label">' + nb.term + '</text>';
+      h += '</g>';
+    });
+    h += '</svg>';
+    h += '</div>';
+
+    // Detail panel: uses findContextSentence from this file
+    var context = findContextSentence(center.term, activeChapters, chIdx);
+    h += '<div class="cweb-detail">';
+    h += '<div class="cweb-detail-term">' + center.term + '</div>';
+    if (context) h += '<div class="cweb-detail-def">"' + context + '"</div>';
+    h += '<div class="cweb-detail-hint">Tap any of the ' + neighbours.length + ' ring term' + (neighbours.length === 1 ? '' : 's') + ' to re-centre.</div>';
+    h += '</div>';
+
+    h += '<button class="study-btn" id="b-cweb-quit" style="margin-top:14px">Back to activities</button>';
+    h += '</div>';
+    document.getElementById('content').innerHTML = h;
+    document.getElementById('b-cweb-quit').addEventListener('click', function () { showChapterActivities(bookId, chIdx); });
+    var nodeEls = document.querySelectorAll('.cweb-node');
+    for (var ne = 0; ne < nodeEls.length; ne++) {
+      nodeEls[ne].addEventListener('click', function () {
+        centerIdx = parseInt(this.getAttribute('data-idx'));
+        render();
+      });
+    }
+  }
+  render();
+  recordSession(bookId, chIdx, 'conceptweb', 0.3, 1);
+}
+
 // ---- Chapter Timeline — horizontal sequence of events ----
 function showChapterTimeline(bookId, chIdx) {
   var book = getBook(bookId);
