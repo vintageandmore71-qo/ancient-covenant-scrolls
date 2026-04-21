@@ -120,15 +120,30 @@ function showLibrary() {
   html += '<div class="activity-grid-header" style="color:#c8c8e8">My Library</div>';
   html += '<div class="lib-grid">';
 
-  // Existing books
-  for (var i = 0; i < lib.length; i++) {
-    var b = lib[i];
+  // Partition books by expiry status (Settings -> Storage Management)
+  var activeBooks = [];
+  var expiredBooks = [];
+  for (var pi = 0; pi < lib.length; pi++) {
+    var days = daysUntilExpiry(lib[pi]);
+    if (days <= 0) expiredBooks.push({ book: lib[pi], days: days });
+    else activeBooks.push({ book: lib[pi], days: days });
+  }
+
+  // Active books
+  for (var i = 0; i < activeBooks.length; i++) {
+    var b = activeBooks[i].book;
     var bookDue = getDueCards(b.id).length;
     var dueBadge = bookDue > 0 ? ' \u00B7 ' + bookDue + ' due' : '';
+    var expiryBadge = '';
+    if (activeBooks[i].days <= 14 && activeBooks[i].days !== Infinity) {
+      var dd = Math.ceil(activeBooks[i].days);
+      expiryBadge = '<div class="lib-expiry-soon">\u23F0 Expires in ' + dd + ' day' + (dd === 1 ? '' : 's') + '</div>';
+    }
     html += '<div class="lib-card" data-book="' + b.id + '" style="background:' + (b.color || '#2563eb') + '" role="button" tabindex="0" aria-label="Open book: ' + b.title + '">';
     html += '<div class="lib-icon">\u{1F4D6}</div>';
     html += '<div class="lib-title">' + b.title + '</div>';
     html += '<div class="lib-meta">' + (b.chapterCount || 0) + ' chapters' + dueBadge + '</div>';
+    html += expiryBadge;
     html += '</div>';
   }
 
@@ -139,6 +154,28 @@ function showLibrary() {
   html += '</div>';
 
   html += '</div>';
+
+  // Expired section — books that passed the user's freshness threshold.
+  // Never auto-deleted; user taps Extend or Delete on each card.
+  if (expiredBooks.length > 0) {
+    html += '<div class="activity-grid-header" style="color:#fca5a5;margin-top:32px">\u{1F4C1} Expired \u2014 ' + expiredBooks.length + ' book' + (expiredBooks.length === 1 ? '' : 's') + '</div>';
+    html += '<p style="color:#fca5a5;font-size:.85em;margin:0 0 12px 0;line-height:1.6">These haven\'t been opened since the threshold you set in Settings. Extend to restore, or delete permanently to free space.</p>';
+    html += '<div class="lib-grid">';
+    for (var ei = 0; ei < expiredBooks.length; ei++) {
+      var eb = expiredBooks[ei].book;
+      var daysOver = -Math.floor(expiredBooks[ei].days);
+      html += '<div class="lib-card lib-card-expired" style="background:#7f1d1d" aria-label="Expired book: ' + eb.title + '">';
+      html += '<div class="lib-icon">\u{1F5C3}\uFE0F</div>';
+      html += '<div class="lib-title">' + eb.title + '</div>';
+      html += '<div class="lib-meta">Expired ' + daysOver + ' day' + (daysOver === 1 ? '' : 's') + ' ago</div>';
+      html += '<div class="lib-expired-actions">';
+      html += '<button class="lib-expired-btn lib-extend" data-extend="' + eb.id + '">\u{1F504} Extend</button>';
+      html += '<button class="lib-expired-btn lib-delete" data-delete="' + eb.id + '">\u{1F5D1}\uFE0F Delete</button>';
+      html += '</div>';
+      html += '</div>';
+    }
+    html += '</div>';
+  }
 
   // Settings row
   html += '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:20px;padding-bottom:30px">';
@@ -221,8 +258,8 @@ function showLibrary() {
   var settBtn = document.getElementById('b-lib-settings');
   if (settBtn) settBtn.addEventListener('click', function () { showSettings(); });
 
-  // Wire book cards
-  var bookCards = document.querySelectorAll('.lib-card[data-book]');
+  // Wire active book cards (not expired ones — those have their own buttons)
+  var bookCards = document.querySelectorAll('.lib-card[data-book]:not(.lib-card-expired)');
   for (var bc = 0; bc < bookCards.length; bc++) {
     bookCards[bc].addEventListener('click', function () {
       var bid = this.getAttribute('data-book');
@@ -230,6 +267,31 @@ function showLibrary() {
         buildSidebar(bid);
         showArchitecture(bid);
       });
+    });
+  }
+
+  // Wire Extend buttons on expired cards
+  var extendBtns = document.querySelectorAll('[data-extend]');
+  for (var ex = 0; ex < extendBtns.length; ex++) {
+    extendBtns[ex].addEventListener('click', function (e) {
+      e.stopPropagation();
+      var bid = this.getAttribute('data-extend');
+      extendBook(bid);
+      showLibrary();
+    });
+  }
+
+  // Wire Delete buttons on expired cards
+  var delBtns = document.querySelectorAll('[data-delete]');
+  for (var dl = 0; dl < delBtns.length; dl++) {
+    delBtns[dl].addEventListener('click', function (e) {
+      e.stopPropagation();
+      var bid = this.getAttribute('data-delete');
+      var bk = getBook(bid);
+      if (confirm('Delete "' + (bk ? bk.title : 'this book') + '" permanently? This cannot be undone.')) {
+        deleteBook(bid);
+        showLibrary();
+      }
     });
   }
 }
@@ -305,6 +367,26 @@ function showSettings() {
   }
   h += '</select></div>';
 
+  // Storage management — book expiry
+  h += '<div class="prog-card">';
+  h += '<h3 class="prog-h3">Storage Management</h3>';
+  h += '<p style="margin:0 0 12px 0;font-size:.9em;color:var(--text-muted);line-height:1.6">Optional. Set a freshness window — books you haven\'t opened for this long get marked as expired and moved to a separate section at the bottom of your library. Expired books are never auto-deleted; you choose when to extend or remove them.</p>';
+  var curExpiry = getExpirySetting();
+  var expiryOpts = [
+    { v: 0, l: 'Off (never expire)' },
+    { v: 30, l: '30 days' },
+    { v: 60, l: '60 days' },
+    { v: 90, l: '90 days' },
+    { v: 180, l: '180 days' },
+    { v: 365, l: '365 days' }
+  ];
+  h += '<select id="set-expiry" style="width:100%;padding:12px;border-radius:var(--radius);border:2px solid #ddd;font-family:var(--font-main);font-size:14px;background:var(--bg-card);color:var(--text-main)" aria-label="Book expiry threshold">';
+  for (var ex = 0; ex < expiryOpts.length; ex++) {
+    h += '<option value="' + expiryOpts[ex].v + '"' + (expiryOpts[ex].v === curExpiry ? ' selected' : '') + '>' + expiryOpts[ex].l + '</option>';
+  }
+  h += '</select>';
+  h += '</div>';
+
   // Danger zone
   h += '<div class="prog-card" style="border-left:4px solid #dc2626">';
   h += '<h3 class="prog-h3" style="color:#dc2626">Danger Zone</h3>';
@@ -342,6 +424,11 @@ function showSettings() {
 
   document.getElementById('set-voice').addEventListener('change', function () {
     localStorage.setItem('attain_voice', this.value);
+  });
+
+  var expirySel = document.getElementById('set-expiry');
+  if (expirySel) expirySel.addEventListener('change', function () {
+    setExpirySetting(parseInt(this.value, 10));
   });
 
   document.getElementById('b-set-reset').addEventListener('click', function () {

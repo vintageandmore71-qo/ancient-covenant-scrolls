@@ -578,6 +578,28 @@ body.font-dyslexic .cloze-prompt{font-family:var(--font-dyslexic);line-height:2.
 .backup-warn-btn:hover{transform:scale(1.04)}
 .backup-warn-btn:active{transform:scale(.97)}
 
+/* Expiry badges and expired book cards */
+.lib-expiry-soon{
+  background:rgba(255,255,255,.22);color:#fff;
+  padding:4px 10px;border-radius:10px;margin-top:6px;
+  font-size:.78em;font-weight:800;letter-spacing:.02em;
+  display:inline-block;
+}
+.lib-card-expired{opacity:.85;position:relative}
+.lib-expired-actions{
+  display:flex;gap:6px;margin-top:10px;
+}
+.lib-expired-btn{
+  flex:1;padding:8px 10px;border:none;border-radius:10px;
+  font-size:.82em;font-weight:800;cursor:pointer;min-height:36px;
+  font-family:var(--font-main);color:#fff;
+}
+body.font-dyslexic .lib-expired-btn{font-family:var(--font-dyslexic)}
+.lib-extend{background:#059669}
+.lib-extend:hover{background:#047857}
+.lib-delete{background:#dc2626}
+.lib-delete:hover{background:#b91c1c}
+
 /* Chapter Timeline */
 .tl-banner{
   background:linear-gradient(135deg,#0284c7,#0369a1);color:#fff;

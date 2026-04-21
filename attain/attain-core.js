@@ -947,6 +947,59 @@ function daysSinceLastBackup() {
   return (Date.now() - then) / 86400000;
 }
 
+// ---- Book expiry (optional storage management) ----
+// User sets a threshold in Settings: off / 30 / 60 / 90 / 180 / 365 days.
+// Default is 0 (off) so existing users see no change until they opt in.
+// Expired books are NEVER auto-deleted — they're moved to an "Expired"
+// section in the library where the user can Restore (extend) or Delete
+// permanently.
+function getExpirySetting() {
+  try {
+    var raw = localStorage.getItem('attain_expiry_days');
+    if (!raw) return 0;
+    var n = parseInt(raw, 10);
+    return isNaN(n) ? 0 : n;
+  } catch (e) { return 0; }
+}
+function setExpirySetting(days) {
+  try { localStorage.setItem('attain_expiry_days', String(days)); } catch (e) {}
+}
+
+// Base time for a book's expiry clock: extendedAt if present, else dateAdded.
+// Books saved before this feature shipped still have dateAdded, so the
+// clock starts from their original upload date — nothing is retroactively
+// "grandfathered in" as expired.
+function getBookExpiryBase(book) {
+  var raw = book && (book.extendedAt || book.dateAdded);
+  if (!raw) return null;
+  var t = new Date(raw).getTime();
+  return isNaN(t) ? null : t;
+}
+
+// Days until this book expires. Returns Infinity if expiry is disabled,
+// positive if approaching, 0 or negative if expired.
+function daysUntilExpiry(book) {
+  var days = getExpirySetting();
+  if (!days) return Infinity;
+  var base = getBookExpiryBase(book);
+  if (base === null) return Infinity;
+  var expiresAt = base + days * 86400000;
+  return (expiresAt - Date.now()) / 86400000;
+}
+
+// Extend a book's clock by resetting extendedAt to now.
+function extendBook(bookId) {
+  var lib = getLibrary();
+  for (var i = 0; i < lib.length; i++) {
+    if (lib[i].id === bookId) {
+      lib[i].extendedAt = new Date().toISOString();
+      saveLibrary(lib);
+      return true;
+    }
+  }
+  return false;
+}
+
 function importFullSync(file) {
   return new Promise(function (resolve, reject) {
     var reader = new FileReader();
