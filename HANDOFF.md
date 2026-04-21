@@ -6,6 +6,27 @@ execute without asking the user to re-explain.
 
 ---
 
+## LOCKED DELIVERABLE COMMITMENT
+
+**Attain and Attain Jr will both ultimately be delivered as
+standalone PWA zip files.** Each zip is a self-contained folder
+(index.html + JS + CSS + sw.js + manifest + icons + README +
+.nojekyll + .gitignore) that the user can unpack into a new private
+GitHub repo, deploy via Cloudflare Pages free tier, and eventually
+wrap as a native app via Capacitor for App Store distribution.
+
+Rules:
+- Each app ships as its own zip. Never combined, never
+  interdependent.
+- Zips are produced only after the user confirms the app is tested
+  and complete — not mid-build.
+- Packaging procedure for either app lives in TASK A (Attain)
+  and TASK B (Attain Jr). Same pattern, different source folder.
+- Free stack (see `study/BUILD_PLAN.md` FREE STACK section) applies
+  to every zip — no paid services, no Netlify, no hosted LLMs.
+
+---
+
 ## TASK A — Split Attain into a Standalone Repo
 
 **Goal:** Extract the Attain PWA from this repo into its own repo that
@@ -168,10 +189,80 @@ Do NOT propose Netlify.
 
 ---
 
+## TASK B — Build Attain Jr as a sibling PWA
+
+**Goal:** Build a child-focused variant of Attain as a new
+`attain-jr/` folder in this repo, then eventually deliver it as a
+standalone PWA zip (same packaging procedure as TASK A).
+
+**Trigger to execute:** Starting in a fresh Claude chat. The user
+plans to open a new session and paste in a handoff prompt to pick up
+the build.
+
+**Relationship to Attain:** Jr is a fork-in-place scoped-down
+variant. Start by duplicating Attain scaffolding, then strip and
+retune. Divergence is expected; when drift becomes painful, extract
+shared bits in a follow-up refactor.
+
+**Scope (locked):**
+- Location: `attain-jr/` (sibling to `attain/` and `study/` in this
+  repo).
+- Service-worker cache namespace: `attain-jr-vNN` (starts at v1).
+- Independent manifest, icons, start_url, scope — must not collide
+  with Attain.
+- Content intake: paste-text and upload only. Drop PDF parsing
+  (PDFs aren't the child-book format; EPUB + plain text cover it).
+- Game modes (8, child-age-appropriate subset):
+  Flashcards, Fill in the Blank, Rhyme Chain, Syllable Tap,
+  Who Said It, Audio Fill the Gap, Story Sequence, Dictation
+  (short sentences only).
+- Modes dropped from Jr: Mind Map, Concept Web, Chapter Timeline,
+  Word Morph, Multiple Choice, True/False with Why, Cause and
+  Effect Match.
+- UI: larger touch targets, brighter palette, simpler navigation,
+  bigger default font. Same dyslexia-friendly font stack.
+- Stricter vocabulary gate: shorter syllable limit on key terms,
+  shorter question sentences, simpler stop-word list tuning.
+- More positive reinforcement on wrong answers.
+- COPPA posture — no tracking, no analytics, no network calls
+  beyond initial asset load. Publish a parent-readable privacy note
+  in the app.
+
+**Before building, the session should ask the user three questions:**
+1. Age target — 6–9 or 10–12 (affects reading-level thresholds).
+2. Final 8-mode list — is the locked list above correct or adjust?
+3. Shared library with Attain, or separate kid-safe library?
+
+**Build order:**
+1. Snapshot first (pre-tool-use snapshot hook).
+2. Scaffold `attain-jr/` by duplicating Attain files, stripping the
+   dropped modes, renaming identifiers that would collide.
+3. Retune thresholds per the age target the user confirms.
+4. Rebuild UI for larger touch targets + brighter palette.
+5. Verify locally with `python3 -m http.server 8000` — upload a
+   sample children's text, confirm all 8 modes work.
+6. Commit each scaffold / retune / UI / mode-wiring step as a
+   separate commit — do not bundle unrelated changes.
+
+**Delivery (when user confirms tested and complete):**
+Package `attain-jr/` the same way TASK A packages `attain/`:
+strip the `attain-jr/` prefix from internal paths, add .nojekyll +
+.gitignore + README, regenerate manifest paths, zip the result.
+User unpacks into a new private repo on a different GitHub account.
+
+**Free-stack constraint (LOCKED, same as Attain):**
+- No paid services, no hosted LLMs, no analytics, no Netlify.
+- Cloudflare Pages is the approved free host for eventual private
+  deployment. Vercel hobby is the only fallback.
+- Vanilla ES5-compatible JavaScript (no arrow fns, template
+  literals, destructuring) for iPad Safari compatibility.
+
+---
+
 ## Notes for future sessions
 
 - This file is the source of truth for cross-session handoffs.
-- Add new handoff tasks as `## TASK B`, `## TASK C`, etc.
+- Add new handoff tasks as `## TASK C`, `## TASK D`, etc.
 - Mark a task `## TASK A — DONE (commit <sha>, date)` when complete;
   don't delete — keeps the audit trail.
 - The `study/BUILD_PLAN.md` is the source of truth for the Study PWA's
