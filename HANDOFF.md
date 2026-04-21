@@ -259,6 +259,283 @@ User unpacks into a new private repo on a different GitHub account.
 
 ---
 
+## TASK B — Design Update (2026-04-21)
+
+This section supersedes the mode list and age bands in the original
+TASK B above. The rest of TASK B (free-stack constraints, COPPA
+posture, sibling-folder layout, independent cache namespace, eventual
+standalone zip packaging) is UNCHANGED.
+
+**Session status:** Design captured, NOT built. Build will happen in
+a later session. Scaffold goes on branch
+`claude/build-attain-jr-pzbDF` (already created).
+
+### Decisions locked in this session
+
+1. **Library:** Separate kid-safe library. Own IndexedDB namespace
+   (`attain_jr_books`). Nothing Attain uploads appears in Jr and vice
+   versa — parent curates Jr library explicitly.
+2. **Age handling:** TWO modes covering BOTH bands, selected via a
+   parent-gated profile picker on first launch and changeable in
+   Settings. Choice persisted in localStorage under the Jr namespace.
+   - **Younger:** Ages 6–11 (was 6–9 in original TASK B — widened).
+   - **Older:** Ages 12–16 (was 10–12 in original TASK B — widened).
+3. **Initial location:** `attain-jr/` sibling folder in this repo for
+   testing/building (same pattern as `attain/`). Standalone PWA zip is
+   produced only after the user confirms testing is complete.
+4. **Mode list:** STILL OPEN. Original TASK B locked 8 modes; user has
+   proposed a new 18-mode design (8 younger + 10 older). Reconciliation
+   and final v1 mode list are a pre-build question — see "Open
+   questions for next session" below.
+
+### Attain Jr core design principle (locked)
+
+The game must never punish slow processing. It rewards pattern
+recognition, memory linking, audio support, sequencing, logic, and
+meaning-building over speed-based reading.
+
+Feels like:
+- read less, understand more
+- hear it, see it, move it
+- chunk everything
+- one task per screen
+- large wins from small steps
+- no shame mechanics
+- no red-X overload
+- always allow audio, replay, hint, and "show me another way"
+
+### Age Level 1 — Younger (6–11)
+
+Visual tone: bright, warm, playful, low-pressure. Child is exploring,
+not being tested.
+
+Best mechanics: drag-and-drop (with tap-to-pick fallback — iPad Safari
+drag is unreliable; tap-to-pick is the default in Jr), matching,
+picture-supported reading, audio-first prompts, tap-to-hear,
+sequencing, rhythm and repetition, story-based memory, visual
+chunking, rewards through collection/pets/badges/worlds.
+
+Proposed modes for this band:
+
+1. **Word Builder Island** — phonics/decoding adventure. Build
+   bridges/houses/boats/treasure paths by assembling
+   beginning-middle-ending sounds, syllable blocks, or rhyme families.
+   Every letter chunk speaks on tap; color-coded syllables; optional
+   picture clues; no timer; persistent "read to me" button.
+2. **Sound Quest** — audio-first. Hear a word / sentence / short-story
+   clue / sound pattern; pick matching answer via images, word chunks,
+   or actions. Examples: "tap the picture that starts with /b/",
+   "which two words rhyme?", "order the story events after listening",
+   "which word has the same ending sound?".
+3. **Story Path Adventures** — story comprehension as a journey.
+   Listen to and read tiny chunks; after each chunk, one light task
+   (what happened first / character-to-action match / emotion pick /
+   finish the scene / beginning-middle-end sort). Toggle between
+   listen-only / read-and-listen / read-alone.
+4. **Memory Garden** — gentle recall + spaced repetition disguised as
+   garden care. Correct answers grow flowers / fruit trees /
+   butterflies / glowing stones / learning creatures. Makes review
+   emotionally safe.
+5. **Sequence Detective** — sequencing and logic. Arrange story events
+   / morning routines / science steps / historical order / math
+   procedures by dragging tiles. No written responses.
+6. **Picture-to-Meaning Match** — vocabulary and concept building via
+   image association. Image-to-word, word-to-meaning, sound-to-image,
+   sentence-to-image, category-to-item. Meaning before label.
+7. **Glow Trace** — multisensory letter/blend/sight-word tracing.
+   Magical/mission-framed (constellations lit, doors activated, rocket
+   powered, animal trails unlocked). Not babyish.
+8. **Rhyme Rescue** — rhyme / chunking / pattern game. Characters
+   find the right rhyme to solve a challenge; progresses into
+   syllable matching, onset-rime chunking, word-family grouping.
+
+### Age Level 2 — Older (12–16)
+
+Visual tone: sleek, cool, game-like, strategy-oriented,
+identity-building, less cartoon / more premium. Must NOT feel
+childish — teens may still need support but want dignity, skill,
+challenge, mastery, status, relevance.
+
+Best mechanics: missions, problem solving, strategy progression,
+narrative quests, challenge towers, evidence boards, interactive note
+systems, logic and sequencing, mastery streaks, leveling systems.
+
+Proposed modes for this band:
+
+1. **Decode the World** — mystery + evidence-solving. Read/listen to
+   chunks, sort evidence into fact / clue / theme / definition /
+   cause / effect. Missions: solve a historical mystery, uncover a
+   science-lab error, decode an ancient text, identify main argument.
+2. **Skill Forge** — mastery hub. Pick areas to strengthen:
+   vocabulary, comprehension, sequencing, memory, summarizing, note
+   decoding, logic, academic reading stamina. Each is a forge /
+   chamber / tower / arena with progressive levels.
+3. **Audio Sync Quest** — advanced read-along. Text highlights in sync
+   with audio (Web Speech API — no "professional audio" bundle; free-
+   stack rule). Slow playback, isolate chunks, replay phrases, tap
+   words for definitions, quick meaning-questions after each section.
+   "Lock in" mastery via summary cards / fill-in chunks / key idea
+   capture / evidence pickers.
+4. **Concept Builder Lab** — build mental architecture. Turn messy
+   info into concept maps, idea chains, timelines, cause/effect
+   ladders, compare/contrast boards. Break chapter into idea blocks,
+   connect who-what-why-consequence, answer from the map.
+5. **Battle of Meaning** — comprehension; pick the strongest
+   interpretation (best summary, strongest main idea, best supporting
+   evidence, likely author purpose, best inference).
+6. **Memory Vault** — smarter spaced repetition for older learners.
+   Recover vaults of vocab / concepts / definitions / formulas /
+   timeline events / reading themes. Modes: match / explain / order /
+   choose evidence / connect terms / audio response.
+7. **Sequence & Systems** — reconstruct historical timelines,
+   scientific processes, plot arcs, argument flow, legal/policy
+   steps, grammar logic.
+8. **Survival Notes** — note-taking and summarization. Extract main
+   idea / 3 key facts / 1 pattern / 1 question / 1 connection.
+   Scored on clarity, completeness, overload vs concise thinking,
+   retention strength.
+9. **Vocabulary in Motion** — context-based word learning. Hear it,
+   see it in a sentence, match it to a visual, contrast with an
+   opposite, place it into a mini story.
+10. **The Mastery Path** — personal progression across subject
+    pathways: reading power / school success / memory upgrade / exam
+    prep / confidence rebuild / Bible or religious study / STEM
+    concepts / life skills. Missions, streaks, levels, unlockables.
+
+### Cross-age features (locked for both bands)
+
+1. Always-on audio — every important element tappable + speakable.
+2. Dyslexia-friendly fonts (Atkinson Hyperlegible + OpenDyslexic).
+3. Chunk mode — one bite of content per screen.
+4. Color-coded meaning — color groups concepts, never decorative.
+5. No speed pressure by default. Challenge mode later, if ever.
+6. Multiple pathways to correct: audio, visual, sequence, meaning,
+   inference all count.
+7. Confidence-safe correction copy: "try another path", "almost
+   there", "let's break it down", "want a clue?", "hear it again?".
+   No bare "Wrong".
+8. Progress shown visually — mastery bars, badges, maps, worlds,
+   growth systems.
+9. Short session design — 3-min / 5-min / 10-min task sizes; stop
+   and save instantly.
+10. Parent/teacher insight without shame — exportable JSON showing
+    strengths, preferred learning mode, retention gains, skill
+    growth. No raw error counts, no social leaderboards (COPPA).
+
+### Theme ideas (optional, for v1+ polish)
+
+- Younger (6–11): island worlds, garden worlds, star maps, jungle
+  missions, book kingdoms, animal helpers.
+- Older (12–16): digital missions, mastery towers, mystery boards,
+  achievement maps, elite skill labs, scholar leagues (LOCAL only —
+  no network / no social).
+
+### User's strongest product-idea shortlist
+
+If building exactly one v1 mode per band from the list:
+- **Younger (6–11):** Story Path + Sound Quest + Word Builder Island
+- **Older (12–16):** Decode the World + Concept Builder Lab +
+  Skill Forge
+
+Positioning (user's directive): **"the first dyslexia-centered mental
+architecture game system for children and teens — decode, understand,
+organize, remember, apply."** Not a generic phonics app.
+
+### Monetizable expansion-pack backlog
+
+Later, ship bundled content packs (no new engines needed — Attain's
+paste-text + EPUB + plain-text intake already supports them):
+Bible & religious study (ACR content is a candidate first pack),
+history detective, science-lab challenges, vocabulary vault, exam
+prep missions, life skills & money basics, writing & storytelling,
+homeschool pack, dyslexia confidence builder pack.
+
+### Engineering notes from the design review (apply during build)
+
+1. **Folder / manifest name = `attain-jr`** (no period). "Attain Jr."
+   with a trailing period breaks TTS, filenames, and PWA manifest
+   `name`. Display as "Attain Jr" everywhere.
+2. **Mode overlaps — inherit, don't rebuild.** Memory Vault ≈ existing
+   SM-2 flashcard engine (`study/study.js`). Sequence & Systems +
+   Story Path sequencing ≈ existing Story Sequence. Concept Builder
+   Lab ≈ existing Mind Map + Concept Web. Audio Sync Quest ≈ existing
+   Listen & Learn with word-boundary highlighting. Rhyme Rescue ≈
+   existing Rhyme Chain. Battle of Meaning ≈ existing Multiple Choice
+   with meaning-picker framing. Genuinely new engines: Word Builder
+   Island (phonics), Sound Quest, Picture-to-Meaning Match, Glow
+   Trace, Decode the World, Skill Forge, Survival Notes, Mastery
+   Path, Memory Garden. Roughly ~6 new engines, the rest reskins.
+3. **Imagery under the free stack.** Default to emoji + CSS/SVG
+   vector scenes for Story Path / Picture-to-Meaning / Word Builder.
+   Option to surface embedded EPUB images from uploaded books.
+   Vendoring a Wikimedia public-domain set is the fallback. NO paid
+   asset packs.
+4. **Audio.** Web Speech API only. No pre-recorded "professional
+   audio" ships. Reuse Attain's voice picker + onboundary word
+   highlighting.
+5. **Input.** Tap-to-pick is the default for all Jr modes. Drag is an
+   optional enhancement where it works. iPad Safari drag has been
+   flaky — Attain's Story Sequence already ships tap-to-pick as the
+   primary interaction for this reason.
+6. **No social / no network.** "Scholar league" and any multi-user
+   mechanic is local-only (personal bests, streaks, badges). Parent
+   export is a JSON download (reuse Study's export pattern). COPPA
+   posture is preserved.
+7. **Glow Trace is a new engine (pointer capture + SVG path match).**
+   Highest new-code cost, lowest overlap with existing code. Park
+   for v2 unless user overrides.
+8. **ES5-compatible JS only** (no arrow fns, template literals,
+   destructuring, const/let only where necessary) — iPad Safari
+   compatibility is locked.
+
+### Proposed reconciled v1 scope (awaiting user approval)
+
+- `attain-jr/` sibling folder, `attain-jr-v1` cache namespace,
+  separate kid-safe IndexedDB library.
+- Parent-gated profile picker with Younger (6–11) and Older (12–16)
+  modes; thresholds and font sizing swap per profile.
+- **Six v1 modes:** Story Path, Sound Quest, Word Builder Island
+  (Younger) + Decode the World, Concept Builder Lab, Skill Forge
+  (Older). Matches the user's strongest-idea shortlist.
+- Tap-to-pick everywhere, emoji/SVG-only imagery, Web Speech API
+  audio, local-only progression, JSON export for parents.
+- v2 backlog (build one commit at a time after v1 ships): Memory
+  Garden, Glow Trace, Rhyme Rescue, Battle of Meaning, Memory Vault,
+  Survival Notes, Vocabulary in Motion, Mastery Path, Sequence &
+  Systems, Picture-to-Meaning Match, Audio Sync Quest, Sequence
+  Detective.
+
+### Session-review callouts (for product awareness, not code)
+
+- **12–16 band overlaps Attain's primary audience.** Worth deciding
+  later whether a "Teen Mode" toggle inside Attain proper is a better
+  home for the older band than Jr. Not blocking v1; flag if scope
+  drifts.
+- **18 modes vs. original "scoped-down sibling" framing.** 6-mode v1
+  keeps the original framing intact; the full 18 becomes a multi-
+  session backlog instead of a single build.
+- **ACR content is a natural first expansion pack** once Jr ships —
+  ties the kid app back to this repo's content without mixing
+  libraries.
+
+### Open questions for next session (pre-build)
+
+1. Approve the **six-mode v1 scope** above, OR override with a
+   different subset of the 18, OR commit to building all 18 up front?
+2. Approve the **age-band widening** (6–11 / 12–16) as an update to
+   the original TASK B lock, OR pull the older band out of Jr and put
+   it in Attain proper as a "Teen Mode"?
+3. Approve **emoji + CSS/SVG** as the default imagery strategy for
+   v1, or pick the Wikimedia-vendor / EPUB-embedded-image path?
+
+### Resume instruction for next session
+
+Open a fresh chat and say: "Read HANDOFF.md TASK B — Design Update
+(2026-04-21). Answer the three open questions, then snapshot and
+scaffold `attain-jr/` on branch `claude/build-attain-jr-pzbDF`."
+
+---
+
 ## Notes for future sessions
 
 - This file is the source of truth for cross-session handoffs.
