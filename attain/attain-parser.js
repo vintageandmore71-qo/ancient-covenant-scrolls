@@ -816,6 +816,157 @@ function extractKeyTerms(chapters, maxTerms) {
 }
 
 // ---- Smart Question Generation from Parsed Content ----
+//
+// Every generated question runs through validateGenerated() before being
+// accepted, so algorithmically-authored questions meet the same quality
+// bar as the hand-curated ACR content. This is a subset of the 11 checks
+// in study/validate-questions.js — the chat-time tool covers schema
+// fields the runtime doesn't produce (hint / source_passage / difficulty),
+// so those checks are skipped here.
+//
+// Applied checks, per shape:
+//   fill_blank : length, double-negative, jargon-dump, front-matter
+//   multiple_choice : length, double-negative, jargon-dump, front-matter,
+//                     duplicate-option, absurd-option, distractor-length
+//   true_false : length, double-negative, jargon-dump, front-matter
+//
+// A rejected candidate is skipped silently — the generator moves on to
+// the next paragraph, so bad inputs never block content.
+var FRONT_MATTER_REFS = [
+  /\btable of contents\b/i, /\bcopyright\b/i, /\bisbn\b/i,
+  /\bpreface\b/i, /\bforeword\b/i,
+  /\bindex\b\s*(?:page|section)/i, /\babout the author\b/i,
+  /\bauthor\s+bio(?:graphy)?\b/i, /\bdedication\s+page\b/i,
+  /\btitle page\b/i
+];
+
+var DOUBLE_NEG_PATTERNS = [
+  /\bnot\s+\w+\s+(?:no|never|none|neither|nothing|nobody|nowhere)\b/,
+  /\bnever\s+\w+\s+(?:no|not|none|nothing)\b/,
+  /\bno\s+\w+\s+(?:not|never|without)\b/,
+  /\bwithout\s+\w+\s+(?:not|no|never)\b/,
+  /\bn[o']t\s+\w+\s+(?:n[o']t|never|none)\b/
+];
+
+var ABSURD_OPTION_PATTERNS = [
+  /^none of the above$/i,
+  /^all of the above$/i,
+  /^(lorem|ipsum|foo|bar|baz|xxx|todo|tbd)$/i,
+  /^(n\/a|na|\?+|\.+|-+)$/i
+];
+
+function checkLength(text) {
+  if (!text) return true;
+  var words = text.trim().split(/\s+/).filter(Boolean);
+  return words.length <= 20;
+}
+
+function checkNoDoubleNegative(text) {
+  if (!text) return true;
+  var lower = text.toLowerCase();
+  for (var i = 0; i < DOUBLE_NEG_PATTERNS.length; i++) {
+    if (DOUBLE_NEG_PATTERNS[i].test(lower)) return false;
+  }
+  return true;
+}
+
+function checkNoJargonDump(text) {
+  if (!text) return true;
+  var words = text.split(/\s+/).filter(Boolean);
+  if (words.length === 0) return true;
+  var longWords = 0;
+  var letterCount = 0;
+  for (var i = 0; i < words.length; i++) {
+    var w = words[i].replace(/[^\w'-]/g, '');
+    if (w.length >= 13) longWords++;
+    letterCount += w.length;
+  }
+  if (longWords > 2) return false;
+  if (letterCount / words.length > 8) return false;
+  return true;
+}
+
+function checkNotFromFrontMatter(text) {
+  if (!text) return true;
+  for (var i = 0; i < FRONT_MATTER_REFS.length; i++) {
+    if (FRONT_MATTER_REFS[i].test(text)) return false;
+  }
+  return true;
+}
+
+function checkOptionsUnambiguous(options) {
+  if (!Array.isArray(options)) return true;
+  var seen = {};
+  for (var i = 0; i < options.length; i++) {
+    var key = String(options[i]).trim().toLowerCase();
+    if (!key) return false;
+    if (seen[key]) return false;
+    seen[key] = true;
+  }
+  return true;
+}
+
+function checkOptionsNotAbsurd(options) {
+  if (!Array.isArray(options)) return true;
+  for (var i = 0; i < options.length; i++) {
+    var opt = String(options[i]).trim();
+    if (!opt) return false;
+    for (var m = 0; m < ABSURD_OPTION_PATTERNS.length; m++) {
+      if (ABSURD_OPTION_PATTERNS[m].test(opt)) return false;
+    }
+  }
+  return true;
+}
+
+function checkDistractorsPlausible(options, correctValue) {
+  if (!Array.isArray(options) || options.length < 3) return true;
+  if (!correctValue || typeof correctValue !== 'string') return true;
+  var correctLen = correctValue.trim().length;
+  if (correctLen < 3) return true;
+  for (var i = 0; i < options.length; i++) {
+    var opt = String(options[i]).trim();
+    if (opt === String(correctValue).trim()) continue;
+    if (opt.length < 2) return false;
+    var ratio = Math.max(opt.length, correctLen) / Math.min(opt.length, correctLen);
+    if (ratio > 6) return false;
+  }
+  return true;
+}
+
+// Shape-aware gate used by the generators. Returns true if the candidate
+// is safe to surface, false to drop it.
+function validateGenerated(kind, q) {
+  if (kind === 'fill_blank') {
+    var joined = (q.prompt || '') + ' ' + (q.source || '');
+    if (!checkLength(q.prompt)) return false;
+    if (!checkNoDoubleNegative(q.prompt)) return false;
+    if (!checkNoJargonDump(q.prompt)) return false;
+    if (!checkNotFromFrontMatter(joined)) return false;
+    return true;
+  }
+  if (kind === 'multiple_choice') {
+    var mcJoined = (q.question || '') + ' ' + (q.source || '');
+    if (!checkLength(q.question)) return false;
+    if (!checkNoDoubleNegative(q.question)) return false;
+    if (!checkNoJargonDump(q.question)) return false;
+    if (!checkNotFromFrontMatter(mcJoined)) return false;
+    if (!checkOptionsUnambiguous(q.options)) return false;
+    if (!checkOptionsNotAbsurd(q.options)) return false;
+    var correctVal = (typeof q.correct === 'number' && Array.isArray(q.options))
+      ? q.options[q.correct] : q.correct;
+    if (!checkDistractorsPlausible(q.options, correctVal)) return false;
+    return true;
+  }
+  if (kind === 'true_false') {
+    var tfJoined = (q.statement || '') + ' ' + (q.source || '');
+    if (!checkLength(q.statement)) return false;
+    if (!checkNoDoubleNegative(q.statement)) return false;
+    if (!checkNoJargonDump(q.statement)) return false;
+    if (!checkNotFromFrontMatter(tfJoined)) return false;
+    return true;
+  }
+  return true;
+}
 
 function generateFillBlanks(paragraphs, keyTerms, count) {
   count = count || 10;
@@ -866,12 +1017,15 @@ function generateFillBlanks(paragraphs, keyTerms, count) {
         '______'
       );
       if (prompt !== para) {
-        questions.push({
+        var fbCandidate = {
           prompt: prompt,
           answer: bestTarget.word,
           source: para
-        });
-        usedAnswers[bestTarget.word.toLowerCase()] = true;
+        };
+        if (validateGenerated('fill_blank', fbCandidate)) {
+          questions.push(fbCandidate);
+          usedAnswers[bestTarget.word.toLowerCase()] = true;
+        }
       }
     }
   }
@@ -910,12 +1064,15 @@ function generateMCQuestions(paragraphs, keyTerms, count) {
 
       if (distractors.length >= 2) {
         var opts = shuffle([found.term].concat(distractors));
-        questions.push({
+        var mcCandidate = {
           question: 'Which term appears in: "' + snippet + '"?',
           options: opts,
           correct: opts.indexOf(found.term),
           source: para
-        });
+        };
+        if (validateGenerated('multiple_choice', mcCandidate)) {
+          questions.push(mcCandidate);
+        }
       }
     }
   }
@@ -1024,12 +1181,13 @@ function generateTrueFalseQuestions(paragraphs, keyTerms, count) {
     usedSentences[key] = true;
     var makeTrue = (questions.length % 2 === 0);
     if (makeTrue) {
-      questions.push({
+      var tfTrue = {
         statement: cand.sentence,
         answer: true,
         source: cand.paragraph,
         originalTerm: cand.term
-      });
+      };
+      if (validateGenerated('true_false', tfTrue)) questions.push(tfTrue);
     } else {
       // Prefer a swap of matching capitalization so the sentence still
       // reads right ("Qayin" <-> "Noakh", not "Qayin" <-> "covenant").
@@ -1044,13 +1202,14 @@ function generateTrueFalseQuestions(paragraphs, keyTerms, count) {
       var re = new RegExp('\\b' + cand.term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
       var wrongSentence = cand.sentence.replace(re, altTerm);
       if (wrongSentence === cand.sentence) continue;
-      questions.push({
+      var tfFalse = {
         statement: wrongSentence,
         answer: false,
         source: cand.paragraph,
         originalTerm: cand.term,
         wrongTerm: altTerm
-      });
+      };
+      if (validateGenerated('true_false', tfFalse)) questions.push(tfFalse);
     }
   }
   return questions;

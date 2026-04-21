@@ -438,16 +438,17 @@ Both PWAs live and clean. SW caches: `attain-v51` / `acr-study-v71`.
   - **Concept Web** — radial Mind Map variant. Small build (~150 lines).
 
 **From earlier architecture discussion:**
-  - **Expiry + auto-remove + extend** — stamp uploadedAt / expiresAt
-    on every Attain book, 90-day default, warn 14 days before,
-    "extend 90 days" button resets clock, user can set threshold in
-    settings. Small build, fits locked rules.
-  - **URL-paste import** — let users paste a URL (Project Gutenberg
-    works; Google Drive / Dropbox typically CORS-blocked). Build
-    with honest error messaging. Small but low-value.
-  - **In-app validator on algorithmic questions** — run the 11-check
-    validator (see `study/validate-questions.js`) at question
-    generation time, not just chat-time curation. Medium build.
+  - **Expiry + auto-remove + extend** — done (commit `be9c857`).
+  - **URL-paste import** — done (commit `764c60c`).
+  - **In-app validator on algorithmic questions** — done. Subset of
+    validate-questions.js checks ported into `attain-parser.js` as
+    `validateGenerated(kind, q)` and wired into `generateFillBlanks`,
+    `generateMCQuestions`, `generateTrueFalseQuestions`. Checks:
+    length, double-negative, jargon-dump, front-matter, plus
+    options-unambiguous / options-not-absurd / distractor-length on
+    MC. Schema-only checks (required fields, source_passage exists,
+    answer-in-options) stay chat-time since the generators guarantee
+    those by construction.
 
 **Future-session tasks (locked in HANDOFF.md):**
   - **TASK A** — split Attain into its own standalone repo on
