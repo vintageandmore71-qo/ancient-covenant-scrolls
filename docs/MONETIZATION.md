@@ -5,7 +5,8 @@ sell this — what are my options?"
 
 Written assuming the Attain / Attain Jr code has been moved to a
 **private repo** on a different GitHub account and deployed to a free
-host (Netlify / Cloudflare / Vercel) — see `HANDOFF.md` TASK A.
+host (Cloudflare Pages, or Vercel hobby as a fallback — **Netlify is
+out per user directive**) — see `HANDOFF.md` TASK A.
 
 ---
 
@@ -68,10 +69,11 @@ the app for their account.
   password reset + account management).
 - Requires a small backend — Stripe webhooks need a server to verify
   subscription status. Options:
-  - Cloudflare Workers (free tier) + KV store for user state
-  - Netlify Functions (free tier) + Fauna / Supabase
+  - Cloudflare Workers (free tier) + KV store for user state —
+    preferred, pairs with Cloudflare Pages hosting
   - Firebase Auth + Firestore (free tier; be aware of Firebase's
     free-stack-violation risk — see `study/BUILD_PLAN.md`)
+  - (Netlify Functions intentionally excluded per user directive.)
 - Users don't expect to pay for "a website" the same way they pay for
   "an app" — conversion can be lower.
 
@@ -201,7 +203,7 @@ educational tools price points are typically:
 | Phase | Do | Don't |
 |---|---|---|
 | Still in public repo testing | Use `PROTECTION_GUIDE.md` tier 1 steps | Don't market the app yet |
-| Ready to share with early users | Move to private repo + Netlify (TASK A) | Don't skip the 2FA step |
+| Ready to share with early users | Move to private repo + Cloudflare Pages (TASK A) | Don't skip the 2FA step |
 | Getting first paying customers | Pick Model A or B. Start with one price. | Don't offer too many pricing tiers |
 | Scaling past 100 users | Add the other model; hire an attorney for a trademark filing if still growing | Don't over-engineer the auth system |
 | School/district deals | Model C — build a proper landing page with demo video | Don't try to compete on price with free apps |
@@ -212,7 +214,7 @@ educational tools price points are typically:
 
 When ready to execute, the order is:
 
-1. **TASK A** (HANDOFF.md) — private repo + Netlify migration
+1. **TASK A** (HANDOFF.md) — private repo + Cloudflare Pages migration
 2. **Minify pipeline** — use `tools/minify.mjs` on every production build
 3. **Capacitor wrap** — new task, can be added to HANDOFF.md when needed
 4. **Stripe payment link** — small change to the PWA's entry screen

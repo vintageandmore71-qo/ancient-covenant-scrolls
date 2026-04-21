@@ -123,39 +123,38 @@ Attain must stay zero-cost on the new account too. Same rules as
 
 Because the user plans to **sell** Attain eventually, the new repo
 should be **private**. GitHub Pages on private repos requires GitHub
-Pro ($4/month) — but several other hosts support private-repo
-deployments for free. Pick one at execution time:
+Pro ($4/month). Two hosts deploy private repos for free without any
+paid upsell path and are the ONLY approved options — **Netlify is
+explicitly out** per user directive.
 
-### Option 1 — Netlify free tier (recommended)
-- Sign in with GitHub on `https://netlify.com`
-- Connect the new private Attain repo
-- Auto-builds on every push; deploys to `yourapp.netlify.app`
-- Free tier: 100 GB bandwidth/month, 300 build minutes/month,
-  unlimited personal sites. Plenty for a small PWA.
-- Custom domain free (bring your own domain name).
-
-### Option 2 — Cloudflare Pages free tier
+### Option 1 — Cloudflare Pages free tier (recommended default)
 - Sign in on `https://pages.cloudflare.com`
-- Connect private repo; deploys to `yourapp.pages.dev`
-- Free tier: unlimited bandwidth, 500 builds/month. Better for higher
-  traffic.
+- Connect the private Attain repo
+- Auto-builds on every push; deploys to `yourapp.pages.dev`
+- Free tier: unlimited bandwidth, 500 builds/month, unlimited sites.
+- Custom domain free (bring your own domain name).
+- No credit card required.
 
-### Option 3 — Vercel hobby tier
-- Similar: private repo deploy, free tier, `yourapp.vercel.app`.
+### Option 2 — Vercel hobby tier
+- Sign in on `https://vercel.com`
+- Connect private repo; deploys to `yourapp.vercel.app`
+- Free hobby tier supports personal/non-commercial projects — check
+  Vercel's current terms before any paid rollout; if ambiguous,
+  default to Cloudflare.
+- No credit card required.
 
-All three give production-grade CDN, HTTPS, and auto-deploy on push.
-No credit card required for the free tiers.
+Both give production-grade CDN, HTTPS, and auto-deploy on push.
 
 ### Decision point during TASK A execution
-Before migrating, user confirms which host. If unclear, default to
-**Netlify** — simplest UI, clearest free-tier terms.
+Default to **Cloudflare Pages** unless the user specifies otherwise.
+Do NOT propose Netlify.
 
 ### Migration specifics for private + free hosting
 1. Create new private GitHub repo (don't init with README).
 2. Copy current `attain/` contents as the new repo's root.
 3. Strip any commit history that shouldn't travel (or fresh-init).
 4. Push to the new private repo.
-5. On chosen host (Netlify/Cloudflare/Vercel): connect the repo.
+5. On chosen host (Cloudflare Pages or Vercel): connect the repo.
 6. Build command: empty (static PWA, no build step needed).
 7. Publish directory: repo root (or `/` if the host asks).
 8. Verify the live URL loads; verify service worker registers; verify

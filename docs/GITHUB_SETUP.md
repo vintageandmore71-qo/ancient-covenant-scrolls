@@ -108,5 +108,5 @@ Now your code lives on three services. Unrealistic for all three to fail at once
 ## After this is done
 
 - Tier 1 from `PROTECTION_GUIDE.md` is complete.
-- Move on to Tier 2 (private repo + Netlify) whenever you're getting close to launch.
+- Move on to Tier 2 (private repo + Cloudflare Pages) whenever you're getting close to launch.
 - See `HANDOFF.md` TASK A for the Attain-split execution plan.

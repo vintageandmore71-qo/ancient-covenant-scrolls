@@ -54,7 +54,7 @@ This is a fundamental property of client-side code. No crypto technique changes 
 
 | Mechanism | Protection level | Cost |
 |---|---|---|
-| Private repo (GitHub) + **Netlify / Cloudflare Pages** free tier for hosting | Full — source is invisible to everyone except you | **Free** |
+| Private repo (GitHub) + **Cloudflare Pages** free tier for hosting | Full — source is invisible to everyone except you | **Free** |
 | GitHub Pro private-repo Pages | Full — same as above, stays on GitHub | $4/mo |
 | Minify + obfuscate JS before deploy | Speed bump — makes casual copying harder, not impossible | Free |
 | Copyright + LICENSE file | Legal recourse after theft | Free |
@@ -64,7 +64,7 @@ This is a fundamental property of client-side code. No crypto technique changes 
 
 **For Attain specifically**, the realistic path is:
 1. **Now (testing):** keep developing in the current public repo
-2. **Before marketing/launching:** move to a **private GitHub repo** and host via Netlify / Cloudflare (free tier includes private-repo deploys)
+2. **Before marketing/launching:** move to a **private GitHub repo** and host via **Cloudflare Pages** free tier (private-repo deploys, no credit card). Netlify is explicitly out per user directive.
 3. **When selling:** wrap as a native app via **Capacitor** and distribute through the App Store, OR gate access behind a Stripe paywall on a web deployment
 
 ---
@@ -82,7 +82,7 @@ This is a fundamental property of client-side code. No crypto technique changes 
 
 1. Create a **new private GitHub repo** for Attain (and a separate one for Attain Jr, when that exists).
 2. Migrate the `attain/` folder there (HANDOFF.md TASK A has the execution plan).
-3. Connect the private repo to **Netlify** or **Cloudflare Pages** (both free, both support private repos). Get a free `yourapp.netlify.app` or `yourapp.pages.dev` URL.
+3. Connect the private repo to **Cloudflare Pages** (free, supports private repos, no credit card). Get a free `yourapp.pages.dev` URL. Netlify is excluded per user directive.
 4. Keep `dssorit/ancient-covenant-scrolls` as the public ACR content repo.
 
 ### Tier 3 — when you're ready to sell
@@ -123,7 +123,7 @@ Trade-off applies to any DRM: you can raise the bar but not eliminate the risk.
 |---|---|
 | Enable 2FA on GitHub | Rely on encryption to protect Attain source code (it can't) |
 | Add LICENSE + copyright headers | Publish unreleased drafts to a public repo |
-| Move to private repo + Netlify before marketing | Wait until you've already promoted the app to think about this |
+| Move to private repo + Cloudflare Pages before marketing | Wait until you've already promoted the app to think about this |
 | Keep local git-clone backups | Trust that GitHub will never lose your data |
 | Enable branch protection on main | Add collaborators without strong 2FA themselves |
 
@@ -134,7 +134,7 @@ Trade-off applies to any DRM: you can raise the bar but not eliminate the risk.
 - `LICENSE` — All Rights Reserved wording (root)
 - Copyright headers in `attain/*.js`, `attain/*.css`, `study/study.js`, `study/study.css`, `study/validate-questions.js`
 - `docs/GITHUB_SETUP.md` — step-by-step iPad-Safari walkthrough for 2FA and branch protection
-- `HANDOFF.md` TASK A — updated with free-private-hosting migration plan (Netlify / Cloudflare / Vercel)
+- `HANDOFF.md` TASK A — updated with free-private-hosting migration plan (Cloudflare Pages default, Vercel fallback; Netlify excluded)
 
 This guide itself is `PROTECTION_GUIDE.md` at the repo root.
 
@@ -143,7 +143,6 @@ This guide itself is `PROTECTION_GUIDE.md` at the repo root.
 ## Further reading / references
 
 - GitHub Pages free vs Pro: https://docs.github.com/en/pages/getting-started-with-github-pages/about-github-pages
-- Netlify free tier limits: https://www.netlify.com/pricing/
 - Cloudflare Pages free tier: https://pages.cloudflare.com/
 - Capacitor (PWA → native): https://capacitorjs.com/
 - Stripe pricing: https://stripe.com/pricing
