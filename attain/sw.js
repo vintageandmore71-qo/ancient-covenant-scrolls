@@ -1,3 +1,9 @@
+// Attain — Universal Study PWA
+// Copyright (c) 2026 DssOrit. All Rights Reserved.
+// Unauthorized reproduction, modification, distribution, or
+// commercial use is strictly prohibited. See LICENSE at the
+// repository root for the full terms.
+//
 // Attain Universal — Service Worker
 // Network-first for everything so updates always take effect
 

@@ -119,6 +119,56 @@ Attain must stay zero-cost on the new account too. Same rules as
 
 ---
 
+## Free private hosting options (chosen during execution)
+
+Because the user plans to **sell** Attain eventually, the new repo
+should be **private**. GitHub Pages on private repos requires GitHub
+Pro ($4/month) — but several other hosts support private-repo
+deployments for free. Pick one at execution time:
+
+### Option 1 — Netlify free tier (recommended)
+- Sign in with GitHub on `https://netlify.com`
+- Connect the new private Attain repo
+- Auto-builds on every push; deploys to `yourapp.netlify.app`
+- Free tier: 100 GB bandwidth/month, 300 build minutes/month,
+  unlimited personal sites. Plenty for a small PWA.
+- Custom domain free (bring your own domain name).
+
+### Option 2 — Cloudflare Pages free tier
+- Sign in on `https://pages.cloudflare.com`
+- Connect private repo; deploys to `yourapp.pages.dev`
+- Free tier: unlimited bandwidth, 500 builds/month. Better for higher
+  traffic.
+
+### Option 3 — Vercel hobby tier
+- Similar: private repo deploy, free tier, `yourapp.vercel.app`.
+
+All three give production-grade CDN, HTTPS, and auto-deploy on push.
+No credit card required for the free tiers.
+
+### Decision point during TASK A execution
+Before migrating, user confirms which host. If unclear, default to
+**Netlify** — simplest UI, clearest free-tier terms.
+
+### Migration specifics for private + free hosting
+1. Create new private GitHub repo (don't init with README).
+2. Copy current `attain/` contents as the new repo's root.
+3. Strip any commit history that shouldn't travel (or fresh-init).
+4. Push to the new private repo.
+5. On chosen host (Netlify/Cloudflare/Vercel): connect the repo.
+6. Build command: empty (static PWA, no build step needed).
+7. Publish directory: repo root (or `/` if the host asks).
+8. Verify the live URL loads; verify service worker registers; verify
+   file upload + all activities work.
+9. Add the host's free subdomain to `manifest.json` `start_url` and
+   `scope` so PWA install works.
+10. Leave `dssorit/ancient-covenant-scrolls` public with `attain/`
+    intact until the new deployment is confirmed working — then the
+    `attain/` folder in this repo can be deleted in a follow-up
+    commit.
+
+---
+
 ## Notes for future sessions
 
 - This file is the source of truth for cross-session handoffs.

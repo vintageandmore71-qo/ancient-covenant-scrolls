@@ -1,3 +1,9 @@
+// Attain — Universal Study PWA
+// Copyright (c) 2026 DssOrit. All Rights Reserved.
+// Unauthorized reproduction, modification, distribution, or
+// commercial use is strictly prohibited. See LICENSE at the
+// repository root for the full terms.
+//
 // Attain Universal — Parser Module
 // PDF.js ingestion, EPUB parsing, text parsing, chapter detection, key term extraction
 // Client-side only — no server required

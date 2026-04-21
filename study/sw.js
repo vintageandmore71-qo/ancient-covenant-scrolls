@@ -1,3 +1,9 @@
+// ACR Study — Spaced repetition companion for the Ancient Covenant Record
+// Copyright (c) 2026 DssOrit. All Rights Reserved.
+// Unauthorized reproduction, modification, distribution, or
+// commercial use is strictly prohibited. See LICENSE at the
+// repository root for the full terms.
+//
 // DSS Orit Study — service worker
 // Scope: /ancient-covenant-scrolls/study/
 // Own cache namespace so it never touches the reader's cache.

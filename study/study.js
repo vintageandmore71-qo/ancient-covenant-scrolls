@@ -1,3 +1,9 @@
+// ACR Study — Spaced repetition companion for the Ancient Covenant Record
+// Copyright (c) 2026 DssOrit. All Rights Reserved.
+// Unauthorized reproduction, modification, distribution, or
+// commercial use is strictly prohibited. See LICENSE at the
+// repository root for the full terms.
+//
 // ACR Study — Phase 1.5 stub
 // Shell + navigation + TOC + font controls.
 // Voice reader and notes panels are wired up to empty handlers here;

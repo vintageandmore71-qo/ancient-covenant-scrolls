@@ -1,3 +1,9 @@
+// Attain — Universal Study PWA
+// Copyright (c) 2026 DssOrit. All Rights Reserved.
+// Unauthorized reproduction, modification, distribution, or
+// commercial use is strictly prohibited. See LICENSE at the
+// repository root for the full terms.
+//
 // Attain Universal — Study Module
 // Study modes added incrementally. This file starts with flashcards only.
 
