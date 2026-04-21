@@ -443,12 +443,17 @@ Both PWAs live and clean. SW caches: `attain-v51` / `acr-study-v71`.
   - **In-app validator on algorithmic questions** — done. Subset of
     validate-questions.js checks ported into `attain-parser.js` as
     `validateGenerated(kind, q)` and wired into `generateFillBlanks`,
-    `generateMCQuestions`, `generateTrueFalseQuestions`. Checks:
-    length, double-negative, jargon-dump, front-matter, plus
-    options-unambiguous / options-not-absurd / distractor-length on
-    MC. Schema-only checks (required fields, source_passage exists,
-    answer-in-options) stay chat-time since the generators guarantee
-    those by construction.
+    `generateMCQuestions`, `generateTrueFalseQuestions`.
+    - Fill-blank / true-false: double-negative + front-matter only.
+      Length and jargon-density checks are skipped here because the
+      "question" slot is a source paragraph or sentence, not a short
+      wrapper question — the MC thresholds would reject most
+      candidates from dense text.
+    - Multiple choice: all of the above plus length, jargon-dump,
+      options-unambiguous, options-not-absurd, distractor-length.
+    - Schema-only checks (required fields, source_passage exists,
+      answer-in-options) stay chat-time since the generators
+      guarantee those by construction.
 
 **Future-session tasks (locked in HANDOFF.md):**
   - **TASK A** — split Attain into its own standalone repo on

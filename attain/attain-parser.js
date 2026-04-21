@@ -825,10 +825,16 @@ function extractKeyTerms(chapters, maxTerms) {
 // so those checks are skipped here.
 //
 // Applied checks, per shape:
-//   fill_blank : length, double-negative, jargon-dump, front-matter
-//   multiple_choice : length, double-negative, jargon-dump, front-matter,
-//                     duplicate-option, absurd-option, distractor-length
-//   true_false : length, double-negative, jargon-dump, front-matter
+//   fill_blank       : double-negative, front-matter
+//   multiple_choice  : length, double-negative, jargon-dump, front-matter,
+//                      duplicate-option, absurd-option, distractor-length
+//   true_false       : double-negative, front-matter
+//
+// Length and jargon-density checks run only on `multiple_choice` because
+// the MC question is short wrapper text. Fill blanks and true/false
+// statements hold a full source paragraph or sentence in the "question"
+// slot — applying the 20-word / jargon thresholds there would silently
+// reject most candidates from dense source material.
 //
 // A rejected candidate is skipped silently — the generator moves on to
 // the next paragraph, so bad inputs never block content.
@@ -935,12 +941,20 @@ function checkDistractorsPlausible(options, correctValue) {
 
 // Shape-aware gate used by the generators. Returns true if the candidate
 // is safe to surface, false to drop it.
+//
+// Length and jargon-density checks apply only to `multiple_choice`
+// candidates, because that shape is the only one where the question text
+// is a short stand-alone wrapper ("Which term appears in: ...?"). Fill
+// blanks and true/false statements carry a full source paragraph or
+// sentence in the question slot — the 20-word / jargon thresholds from
+// the chat-time MC spec don't translate and would reject most candidates
+// from dense source material. Double-negative and front-matter checks
+// still run on every shape, since those signal genuine unfit content
+// regardless of length.
 function validateGenerated(kind, q) {
   if (kind === 'fill_blank') {
     var joined = (q.prompt || '') + ' ' + (q.source || '');
-    if (!checkLength(q.prompt)) return false;
     if (!checkNoDoubleNegative(q.prompt)) return false;
-    if (!checkNoJargonDump(q.prompt)) return false;
     if (!checkNotFromFrontMatter(joined)) return false;
     return true;
   }
@@ -959,9 +973,7 @@ function validateGenerated(kind, q) {
   }
   if (kind === 'true_false') {
     var tfJoined = (q.statement || '') + ' ' + (q.source || '');
-    if (!checkLength(q.statement)) return false;
     if (!checkNoDoubleNegative(q.statement)) return false;
-    if (!checkNoJargonDump(q.statement)) return false;
     if (!checkNotFromFrontMatter(tfJoined)) return false;
     return true;
   }
