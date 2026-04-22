@@ -24,48 +24,106 @@
 </head>
 <body>
 
-<!-- Splash screen — covers everything for ~1.5s on launch, then fades. -->
-<div id="splash-screen" class="splash">
-  <div class="splash-inner">
-    <!-- If /load/splash.png exists, it shows as the background image
-         via CSS (#splash-screen.has-image). Otherwise the CSS-only
-         default shows the Load wordmark. -->
-    <div class="splash-brand">
+<!-- Home screen — no password, always visible, splash image stays as backdrop -->
+<div id="home-screen" class="screen on">
+  <!-- Consistent topbar (same one appears on library and viewer screens) -->
+  <header class="app-topbar">
+    <button class="nav-btn active" data-nav="home" aria-label="Home">
+      <span class="nav-icon">&#127968;</span><span class="nav-label">Home</span>
+    </button>
+    <button class="nav-btn" data-nav="library" aria-label="Library">
+      <span class="nav-icon">&#128218;</span><span class="nav-label">Library</span>
+    </button>
+    <button class="nav-btn" data-nav="import" aria-label="Import">
+      <span class="nav-icon">&#8682;</span><span class="nav-label">Import</span>
+    </button>
+    <div class="spacer"></div>
+    <button class="nav-btn" data-nav="settings" aria-label="Settings">
+      <span class="nav-icon">&#9881;</span><span class="nav-label">Aa</span>
+    </button>
+  </header>
+
+  <div class="home-hero">
+    <div class="home-hero-fallback">
       <div class="splash-arrow" aria-hidden="true">&#8595;</div>
       <h1 class="splash-title">Load</h1>
       <p class="splash-tag">Run Web Apps on iPad</p>
     </div>
   </div>
-</div>
 
-
-<!-- Login screen -->
-<div id="login-screen" class="screen on">
-  <div class="login-wrap">
-    <!-- Hero splash image. If /load/splash.png is present, it shows here.
-         If not, the CSS fallback shows the Load wordmark in gradient text. -->
-    <div class="login-hero">
-      <div class="login-hero-fallback">
-        <div class="splash-arrow" aria-hidden="true">&#8595;</div>
-        <h1 class="splash-title">Load</h1>
-        <p class="splash-tag">Run Web Apps on iPad</p>
-      </div>
-    </div>
-    <div class="login-box">
-      <input id="pw-input" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Password">
-      <button id="pw-btn">Unlock</button>
-      <div id="login-err" class="err"></div>
+  <div class="home-actions">
+    <h2 class="home-heading">Run web apps and books — offline, on your iPad.</h2>
+    <div class="home-btn-row">
+      <button id="home-get-started" class="big-btn primary">
+        <span class="big-btn-icon">&#8682;</span>
+        <span class="big-btn-text">
+          <span class="big-btn-label">Get Started</span>
+          <span class="big-btn-sub">Import an HTML, ZIP, PDF, or EPUB</span>
+        </span>
+      </button>
+      <button id="home-library" class="big-btn">
+        <span class="big-btn-icon">&#128218;</span>
+        <span class="big-btn-text">
+          <span class="big-btn-label">Open Library</span>
+          <span class="big-btn-sub" id="home-library-count">Browse what you've imported</span>
+        </span>
+      </button>
     </div>
   </div>
+
+  <!-- Browse by type - colored file-type cards -->
+  <section class="home-types">
+    <h3 class="home-section-title">Browse by type</h3>
+    <div class="type-grid">
+      <button class="type-card type-html" data-type="html">
+        <span class="type-icon">&#128196;</span>
+        <span class="type-label">HTML</span>
+        <span class="type-sub">Single-file web apps</span>
+        <span class="type-count" data-count="html">0</span>
+      </button>
+      <button class="type-card type-zip" data-type="zip">
+        <span class="type-icon">&#128230;</span>
+        <span class="type-label">Web apps</span>
+        <span class="type-sub">ZIP bundles &amp; folders</span>
+        <span class="type-count" data-count="zip">0</span>
+      </button>
+      <button class="type-card type-pdf" data-type="pdf">
+        <span class="type-icon">&#128462;</span>
+        <span class="type-label">PDFs</span>
+        <span class="type-sub">Documents</span>
+        <span class="type-count" data-count="pdf">0</span>
+      </button>
+      <button class="type-card type-epub" data-type="epub">
+        <span class="type-icon">&#128214;</span>
+        <span class="type-label">Books</span>
+        <span class="type-sub">EPUB digital books</span>
+        <span class="type-count" data-count="epub">0</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Recent items strip, shown only if there are any -->
+  <section id="home-recent" class="home-recent" style="display:none;">
+    <h3 class="home-section-title">Recently opened</h3>
+    <div id="home-recent-row" class="home-recent-row"></div>
+  </section>
 </div>
 
 <!-- Library screen -->
 <div id="library-screen" class="screen">
-  <header class="topbar">
-    <h2>Load</h2>
+  <header class="app-topbar">
+    <button class="nav-btn" data-nav="home" aria-label="Home">
+      <span class="nav-icon">&#127968;</span><span class="nav-label">Home</span>
+    </button>
+    <button class="nav-btn active" data-nav="library" aria-label="Library">
+      <span class="nav-icon">&#128218;</span><span class="nav-label">Library</span>
+    </button>
+    <button id="add-btn" class="nav-btn" data-nav="import" aria-label="Import">
+      <span class="nav-icon">&#8682;</span><span class="nav-label">Import</span>
+    </button>
     <div class="spacer"></div>
-    <button id="add-btn" class="primary-btn" aria-label="Add a web app">
-      <span class="icon">+</span><span class="btn-label">Add</span>
+    <button class="nav-btn" data-nav="settings" aria-label="Settings">
+      <span class="nav-icon">&#9881;</span><span class="nav-label">Aa</span>
     </button>
   </header>
 
@@ -183,6 +241,73 @@
     </div>
   </div>
 </div>
+
+<!-- Settings panel — slides in from the right when the gear button is tapped -->
+<div id="settings-panel" class="side-panel" role="dialog" aria-label="Reading settings">
+  <div class="panel-head">
+    <h3>Reading settings</h3>
+    <button id="settings-close" class="icon-btn" aria-label="Close">&times;</button>
+  </div>
+
+  <div class="panel-section">
+    <h4>Font</h4>
+    <p class="panel-hint">Pick the typeface that feels easiest to read.</p>
+    <div class="seg-btns">
+      <button class="seg-btn active" data-font="atkinson">Atkinson Hyperlegible</button>
+      <button class="seg-btn" data-font="opendyslexic">OpenDyslexic</button>
+    </div>
+  </div>
+
+  <div class="panel-section">
+    <h4>Theme</h4>
+    <p class="panel-hint">Overlay tint for the whole app.</p>
+    <div class="seg-btns wrap">
+      <button class="seg-btn active" data-theme="dark">Dark</button>
+      <button class="seg-btn" data-theme="cream" style="background:#f4eadc;color:#3a2e1e;">Cream</button>
+      <button class="seg-btn" data-theme="sepia" style="background:#f0dab7;color:#4a361c;">Sepia</button>
+      <button class="seg-btn" data-theme="blue" style="background:#d4e8f8;color:#1a3a52;">Soft Blue</button>
+      <button class="seg-btn" data-theme="contrast" style="background:#000;color:#ffec00;">High Contrast</button>
+    </div>
+  </div>
+
+  <div class="panel-section">
+    <h4>Text size</h4>
+    <div class="seg-btns">
+      <button class="seg-btn" data-size="down">A&#8722;</button>
+      <button class="seg-btn" data-size="reset">Reset</button>
+      <button class="seg-btn" data-size="up">A&#43;</button>
+    </div>
+  </div>
+
+  <div class="panel-section">
+    <h4>Line spacing</h4>
+    <div class="seg-btns">
+      <button class="seg-btn" data-line="down">&darr;</button>
+      <button class="seg-btn" data-line="reset">Reset</button>
+      <button class="seg-btn" data-line="up">&uarr;</button>
+    </div>
+  </div>
+
+  <div class="panel-section">
+    <h4>Letter spacing</h4>
+    <div class="seg-btns">
+      <button class="seg-btn" data-letter="down">&darr;</button>
+      <button class="seg-btn" data-letter="reset">Reset</button>
+      <button class="seg-btn" data-letter="up">&uarr;</button>
+    </div>
+  </div>
+
+  <div class="panel-section">
+    <h4>Reduce motion</h4>
+    <p class="panel-hint">Turn off subtle transitions and animations.</p>
+    <button id="settings-motion" class="seg-btn full">Off</button>
+  </div>
+
+  <div class="panel-footer">
+    <p>Copyright &copy; 2026 DssOrit. All Rights Reserved.</p>
+  </div>
+</div>
+<div id="settings-scrim" class="scrim"></div>
 
 <!-- Add to Home Screen modal -->
 <div id="home-modal" class="modal" role="dialog" aria-label="Add to Home Screen">

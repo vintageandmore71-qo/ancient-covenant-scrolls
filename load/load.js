@@ -5,21 +5,23 @@
 (function () {
   'use strict';
 
-  /* =========================================================
-   * PASSWORD — change the value below. Default: "acr2026".
-   * ========================================================= */
-  var PASSWORD = 'acr2026';
+  /* Password removed for personal-use offline build. All data stays on
+   * the device; no auth layer needed. If you ever want to re-lock the
+   * app, we can add an optional setting for it. */
 
   var DB_NAME = 'load-db';
   var DB_VERSION = 1;
   var STORE_APPS = 'apps';
   var LS_AIDS = 'load_reading_aids_v1';
+  var LS_SETTINGS = 'load_settings_v1';
 
   var db = null;
   var apps = [];
   var currentApp = null;
   var currentBlobUrl = null;
+  var currentTypeFilter = 'all';   // all | html | zip | pdf | epub
   var aids = loadAids();
+  var settings = loadSettings();
 
   function $(id) { return document.getElementById(id); }
   function esc(s) {
@@ -28,13 +30,46 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
   function show(screenId) {
-    var screens = ['login-screen', 'library-screen', 'viewer-screen'];
+    var screens = ['home-screen', 'library-screen', 'viewer-screen'];
     for (var i = 0; i < screens.length; i++) {
       var el = $(screens[i]);
       if (!el) continue;
       if (screens[i] === screenId) el.classList.add('on');
       else el.classList.remove('on');
     }
+  }
+
+  /* ---------- Settings (font / theme / motion) ---------- */
+  function defaultSettings() {
+    return { font: 'atkinson', theme: 'dark', reduceMotion: false,
+             fontSizeStep: 0, lineStep: 0, letterStep: 0 };
+  }
+  function loadSettings() {
+    try {
+      var raw = localStorage.getItem(LS_SETTINGS);
+      if (!raw) return defaultSettings();
+      var obj = JSON.parse(raw);
+      var base = defaultSettings();
+      for (var k in base) if (obj[k] != null) base[k] = obj[k];
+      return base;
+    } catch (e) { return defaultSettings(); }
+  }
+  function saveSettings() {
+    try { localStorage.setItem(LS_SETTINGS, JSON.stringify(settings)); } catch (e) {}
+  }
+  function applySettings() {
+    document.body.classList.toggle('dyslexic-font', settings.font === 'opendyslexic');
+    ['dark', 'cream', 'sepia', 'blue', 'contrast'].forEach(function (t) {
+      document.body.classList.toggle('theme-' + t, settings.theme === t);
+    });
+    document.body.classList.toggle('reduce-motion', !!settings.reduceMotion);
+    // Per-step size / spacing adjustments applied to :root font-size
+    var rootFS = 17 + (settings.fontSizeStep || 0) * 1.5;   // px
+    var rootLine = 1.75 + (settings.lineStep || 0) * 0.1;
+    var rootLetter = 0.015 + (settings.letterStep || 0) * 0.015;
+    document.documentElement.style.fontSize = rootFS + 'px';
+    document.body.style.lineHeight = rootLine;
+    document.body.style.letterSpacing = rootLetter + 'em';
   }
 
   /* ---------- IndexedDB ---------- */
@@ -107,48 +142,177 @@
     try { localStorage.setItem(LS_AIDS, JSON.stringify(aids)); } catch (e) {}
   }
 
-  /* ---------- Login ---------- */
+  /* ---------- Boot sequence ---------- */
+  async function boot() {
+    try {
+      applySettings();
+      db = await openDB();
+      apps = await listAll();
+      updateHomeCounts();
+      wireNavButtons();
+      wireHomeActions();
+      wireSettingsPanel();
+      renderRecent();
 
-  $('pw-btn').addEventListener('click', tryLogin);
-  $('pw-input').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') tryLogin();
-  });
-  function tryLogin() {
-    var v = $('pw-input').value;
-    if (v === PASSWORD) {
-      $('login-err').textContent = '';
-      bootLibrary();
-    } else {
-      $('login-err').textContent = 'Incorrect password.';
-      $('pw-input').select();
+      // Deep-link: if the URL has ?app=<id>, open that app directly.
+      // Used by home-screen icons created via "Add to Home Screen".
+      var params = new URLSearchParams(window.location.search);
+      var autoId = params.get('app');
+      if (autoId) {
+        var target = apps.find(function (x) { return x.id === autoId; });
+        if (target) {
+          show('viewer-screen');
+          openApp(target);
+          return;
+        }
+      }
+      // Otherwise show home by default
+      show('home-screen');
+    } catch (e) {
+      alert('Failed to start Load: ' + (e && e.message ? e.message : e));
     }
   }
 
-  async function bootLibrary() {
-    try {
-      db = await openDB();
-      apps = await listAll();
-      renderLibrary();
-      show('library-screen');
-
-      // Deep-link: if the URL has ?app=<id>, auto-open that app.
-      // This is how Home-Screen-added tiles land straight on their
-      // content instead of the library.
-      try {
-        var params = new URLSearchParams(window.location.search);
-        var autoId = params.get('app');
-        if (autoId) {
-          var target = apps.find(function (x) { return x.id === autoId; });
-          if (target) {
-            // Small delay so the library is painted first (for a
-            // back-tap to have somewhere to return to).
-            setTimeout(function () { openApp(target); }, 50);
-          }
-        }
-      } catch (e) {}
-    } catch (e) {
-      $('login-err').textContent = 'Storage error: ' + (e && e.message ? e.message : e);
+  /* ---------- Home screen ---------- */
+  function updateHomeCounts() {
+    var counts = { html: 0, zip: 0, pdf: 0, epub: 0 };
+    for (var i = 0; i < apps.length; i++) {
+      var k = apps[i].kind || 'html';
+      if (counts[k] != null) counts[k]++;
     }
+    document.querySelectorAll('[data-count]').forEach(function (el) {
+      var k = el.getAttribute('data-count');
+      el.textContent = counts[k] || 0;
+    });
+    var total = apps.length;
+    var sub = document.getElementById('home-library-count');
+    if (sub) sub.textContent = total
+      ? 'Browse all ' + total + ' item' + (total === 1 ? '' : 's')
+      : "Nothing imported yet";
+  }
+
+  function renderRecent() {
+    var section = $('home-recent');
+    var row = $('home-recent-row');
+    if (!row || !section) return;
+    var recent = apps.filter(function (a) { return a.lastOpened; })
+                     .sort(function (a, b) { return (b.lastOpened || 0) - (a.lastOpened || 0); })
+                     .slice(0, 6);
+    if (!recent.length) { section.style.display = 'none'; return; }
+    section.style.display = 'block';
+    var html = '';
+    for (var i = 0; i < recent.length; i++) {
+      var a = recent[i];
+      html += '<button class="mini-tile" data-open="' + esc(a.id) + '">' +
+        '<div class="mini-tile-name">' + esc(a.name) + '</div>' +
+        '<div class="mini-tile-meta">' + esc(relTime(a.lastOpened)) + '</div>' +
+        '</button>';
+    }
+    row.innerHTML = html;
+    row.querySelectorAll('[data-open]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var id = b.getAttribute('data-open');
+        var app = apps.find(function (x) { return x.id === id; });
+        if (app) openApp(app);
+      });
+    });
+  }
+
+  function wireNavButtons() {
+    // All nav buttons (Home / Library / Import / Settings) across all screens
+    document.querySelectorAll('.nav-btn[data-nav]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var target = btn.getAttribute('data-nav');
+        if (target === 'home') show('home-screen');
+        else if (target === 'library') { currentTypeFilter = 'all'; show('library-screen'); renderLibrary(); }
+        else if (target === 'import') { $('file-picker').click(); }
+        else if (target === 'settings') openSettingsPanel();
+      });
+    });
+  }
+
+  function wireHomeActions() {
+    $('home-get-started').addEventListener('click', function () { $('file-picker').click(); });
+    $('home-library').addEventListener('click', function () {
+      currentTypeFilter = 'all'; show('library-screen'); renderLibrary();
+    });
+    document.querySelectorAll('.type-card').forEach(function (card) {
+      card.addEventListener('click', function () {
+        var t = card.getAttribute('data-type');
+        if (!t) return;
+        currentTypeFilter = t;
+        show('library-screen');
+        renderLibrary();
+      });
+    });
+  }
+
+  /* ---------- Settings panel ---------- */
+  function openSettingsPanel() {
+    refreshSettingsPanel();
+    $('settings-panel').classList.add('on');
+    $('settings-scrim').classList.add('on');
+  }
+  function closeSettingsPanel() {
+    $('settings-panel').classList.remove('on');
+    $('settings-scrim').classList.remove('on');
+  }
+  function refreshSettingsPanel() {
+    document.querySelectorAll('[data-font]').forEach(function (b) {
+      b.classList.toggle('active', b.getAttribute('data-font') === settings.font);
+    });
+    document.querySelectorAll('[data-theme]').forEach(function (b) {
+      b.classList.toggle('active', b.getAttribute('data-theme') === settings.theme);
+    });
+    var m = $('settings-motion');
+    if (m) { m.textContent = settings.reduceMotion ? 'On' : 'Off'; m.classList.toggle('active', settings.reduceMotion); }
+  }
+  function wireSettingsPanel() {
+    $('settings-close').addEventListener('click', closeSettingsPanel);
+    $('settings-scrim').addEventListener('click', closeSettingsPanel);
+    document.querySelectorAll('[data-font]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        settings.font = b.getAttribute('data-font');
+        saveSettings(); applySettings(); refreshSettingsPanel();
+      });
+    });
+    document.querySelectorAll('[data-theme]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        settings.theme = b.getAttribute('data-theme');
+        saveSettings(); applySettings(); refreshSettingsPanel();
+      });
+    });
+    document.querySelectorAll('[data-size]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var a = b.getAttribute('data-size');
+        if (a === 'up') settings.fontSizeStep = Math.min(6, (settings.fontSizeStep || 0) + 1);
+        else if (a === 'down') settings.fontSizeStep = Math.max(-2, (settings.fontSizeStep || 0) - 1);
+        else settings.fontSizeStep = 0;
+        saveSettings(); applySettings();
+      });
+    });
+    document.querySelectorAll('[data-line]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var a = b.getAttribute('data-line');
+        if (a === 'up') settings.lineStep = Math.min(4, (settings.lineStep || 0) + 1);
+        else if (a === 'down') settings.lineStep = Math.max(-2, (settings.lineStep || 0) - 1);
+        else settings.lineStep = 0;
+        saveSettings(); applySettings();
+      });
+    });
+    document.querySelectorAll('[data-letter]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var a = b.getAttribute('data-letter');
+        if (a === 'up') settings.letterStep = Math.min(4, (settings.letterStep || 0) + 1);
+        else if (a === 'down') settings.letterStep = Math.max(-2, (settings.letterStep || 0) - 1);
+        else settings.letterStep = 0;
+        saveSettings(); applySettings();
+      });
+    });
+    $('settings-motion').addEventListener('click', function () {
+      settings.reduceMotion = !settings.reduceMotion;
+      saveSettings(); applySettings(); refreshSettingsPanel();
+    });
   }
 
   /* ---------- Library ---------- */
@@ -156,20 +320,24 @@
   function renderLibrary() {
     var grid = $('library-grid');
     var empty = $('library-empty');
-    if (!apps.length) {
+    var filtered = (currentTypeFilter === 'all')
+      ? apps.slice()
+      : apps.filter(function (a) { return (a.kind || 'html') === currentTypeFilter; });
+    if (!filtered.length) {
       grid.innerHTML = '';
       empty.style.display = 'flex';
       return;
     }
     empty.style.display = 'none';
-    apps.sort(function (a, b) {
+    filtered.sort(function (a, b) {
       var la = a.lastOpened || a.dateAdded || 0;
       var lb = b.lastOpened || b.dateAdded || 0;
       return lb - la;
     });
+    var apps_to_render = filtered;
     var parts = [];
-    for (var i = 0; i < apps.length; i++) {
-      var a = apps[i];
+    for (var i = 0; i < apps_to_render.length; i++) {
+      var a = apps_to_render[i];
       var last = a.lastOpened ? 'Opened ' + relTime(a.lastOpened) : 'Not opened yet';
       var iconChar = '&#128196;'; // generic doc
       var kindLabel = '';
@@ -304,6 +472,8 @@
     hideProgress();
     e.target.value = '';
     renderLibrary();
+    updateHomeCounts();
+    renderRecent();
   });
 
   function hasHtmlEntry(fileList) {
@@ -807,6 +977,8 @@
       await deleteApp(id);
       apps = apps.filter(function (x) { return x.id !== id; });
       renderLibrary();
+      updateHomeCounts();
+      renderRecent();
       closeConfirm();
     };
     $('confirm-cancel').onclick = closeConfirm;
@@ -1015,15 +1187,6 @@
     try { root.normalize(); } catch (e) {}
   }
 
-  /* ---------- Splash screen timing ---------- */
-  // CSS runs the fade-out animation at 1.5s. Remove the element from
-  // the DOM after the animation completes so taps go through.
-  setTimeout(function () {
-    var s = $('splash-screen');
-    if (s) s.classList.add('hidden');
-  }, 2000);
-
   /* ---------- Boot ---------- */
-  // Autofocus password input (after splash clears)
-  setTimeout(function () { var p = $('pw-input'); if (p) p.focus(); }, 2100);
+  boot();
 }());
