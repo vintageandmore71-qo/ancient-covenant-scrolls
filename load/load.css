@@ -2,6 +2,75 @@
    Copyright (c) 2026 DssOrit. All Rights Reserved. */
 
 * { box-sizing: border-box; }
+
+/* ------------- Splash ------------- */
+.splash {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  background:
+    radial-gradient(circle at 30% 20%, #3a3a88 0%, transparent 50%),
+    radial-gradient(circle at 70% 80%, #7c2ea8 0%, transparent 55%),
+    linear-gradient(180deg, #1a1a2e 0%, #14142a 100%);
+  /* Optional: if /load/splash.png is present in this folder, it shows
+     as a centered background image. Falls back cleanly if missing. */
+  background-image:
+    url("splash.png"),
+    radial-gradient(circle at 30% 20%, #3a3a88 0%, transparent 50%),
+    radial-gradient(circle at 70% 80%, #7c2ea8 0%, transparent 55%),
+    linear-gradient(180deg, #1a1a2e 0%, #14142a 100%);
+  background-size: contain, auto, auto, auto;
+  background-repeat: no-repeat;
+  background-position: center;
+  animation: splashFade 0.4s ease-in 1.5s forwards;
+  opacity: 1;
+}
+.splash.hidden { display: none; }
+.splash-inner {
+  text-align: center; color: #fff;
+  padding: 40px; max-width: 420px;
+}
+.splash-brand {
+  /* Hide the CSS wordmark when splash.png is provided (user's image
+     is complete — our wordmark would stack on top). We can't detect
+     image load state in pure CSS reliably, so we keep the wordmark
+     and let splash.png's own text overlay it with its own branding.
+     If the PNG has its own "Load" text, our CSS wordmark will be
+     hidden behind it naturally; if there's no PNG, our wordmark
+     shows. */
+  background: rgba(20, 20, 42, 0.35);
+  border-radius: 24px;
+  padding: 36px 44px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: inline-block;
+}
+.splash-arrow {
+  font-size: 56px; line-height: 1;
+  color: #7c7cff;
+  margin-bottom: 10px;
+  animation: splashArrow 0.8s ease-out both;
+}
+.splash-title {
+  margin: 0; font-size: 48px; font-weight: 800;
+  letter-spacing: 3px; color: #fff;
+  background: linear-gradient(135deg, #7c7cff 0%, #b8b8ff 50%, #7c7cff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.splash-tag {
+  margin: 6px 0 0; font-size: 13px; color: #a8a8c4;
+  letter-spacing: 2px; text-transform: uppercase;
+}
+@keyframes splashFade {
+  from { opacity: 1; }
+  to { opacity: 0; visibility: hidden; pointer-events: none; }
+}
+@keyframes splashArrow {
+  0% { transform: translateY(-20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
 html, body {
   margin: 0; padding: 0; height: 100%; width: 100%;
   background: #14142a; color: #e8e8ee;

@@ -15,10 +15,29 @@
 <meta name="description" content="Offline launcher for your local web apps and HTML readers on iPad.">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.png">
+<!-- iPad Add-to-Home launch images. Drop splash.png into this folder
+     and iOS will use it on app launch. Safe to leave missing; falls
+     back to the in-app CSS splash below. -->
+<link rel="apple-touch-startup-image" href="splash.png">
 <title>Load</title>
 <link rel="stylesheet" href="load.css">
 </head>
 <body>
+
+<!-- Splash screen — covers everything for ~1.5s on launch, then fades. -->
+<div id="splash-screen" class="splash">
+  <div class="splash-inner">
+    <!-- If /load/splash.png exists, it shows as the background image
+         via CSS (#splash-screen.has-image). Otherwise the CSS-only
+         default shows the Load wordmark. -->
+    <div class="splash-brand">
+      <div class="splash-arrow" aria-hidden="true">&#8595;</div>
+      <h1 class="splash-title">Load</h1>
+      <p class="splash-tag">Run Web Apps on iPad</p>
+    </div>
+  </div>
+</div>
+
 
 <!-- Login screen -->
 <div id="login-screen" class="screen on">

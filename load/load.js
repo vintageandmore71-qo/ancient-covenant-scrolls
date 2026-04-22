@@ -511,7 +511,15 @@
     try { root.normalize(); } catch (e) {}
   }
 
+  /* ---------- Splash screen timing ---------- */
+  // CSS runs the fade-out animation at 1.5s. Remove the element from
+  // the DOM after the animation completes so taps go through.
+  setTimeout(function () {
+    var s = $('splash-screen');
+    if (s) s.classList.add('hidden');
+  }, 2000);
+
   /* ---------- Boot ---------- */
-  // Autofocus password input
-  setTimeout(function () { var p = $('pw-input'); if (p) p.focus(); }, 60);
+  // Autofocus password input (after splash clears)
+  setTimeout(function () { var p = $('pw-input'); if (p) p.focus(); }, 2100);
 }());

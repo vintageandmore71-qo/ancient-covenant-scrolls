@@ -2,7 +2,7 @@
 // Copyright (c) 2026 DssOrit. All Rights Reserved.
 // Service worker: offline shell caching only. No user data is fetched.
 
-var CACHE = 'load-v1';
+var CACHE = 'load-v2';
 
 var SHELL = [
   './',
