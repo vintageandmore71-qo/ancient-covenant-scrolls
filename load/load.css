@@ -8,7 +8,8 @@
   position: fixed; inset: 0; z-index: 9999;
   display: flex; align-items: center; justify-content: center;
   background-color: #14142a;
-  background-image: url("splash.png");
+  /* Tries both splash.png and splash%20.png (the space variant). */
+  background-image: url("splash.png"), url("splash%20.png");
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -94,7 +95,11 @@ button:focus-visible { outline: 2px solid #7c7cff; outline-offset: 2px; }
   width: 100%; max-height: 56vh;
   aspect-ratio: 1 / 1;
   max-width: 420px;
-  background-image: url("splash.png");
+  /* Tries both filenames — splash.png (preferred) and splash%20.png
+     (fallback, the one with a literal space before .png that can
+     happen when saving from iPad Files). Browsers try the first; if
+     missing, the second shows. */
+  background-image: url("splash.png"), url("splash%20.png");
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -339,3 +344,28 @@ button:focus-visible { outline: 2px solid #7c7cff; outline-offset: 2px; }
   -webkit-appearance: none;
 }
 .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+.modal-box .steps {
+  list-style: none; counter-reset: step;
+  margin: 0 0 16px; padding: 0;
+}
+.modal-box .steps li {
+  counter-increment: step;
+  position: relative;
+  padding: 10px 12px 10px 44px;
+  background: #1a1a2e;
+  border: 1px solid #2a2a42;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  color: #e8e8ee;
+  font-size: 14px; line-height: 1.5;
+}
+.modal-box .steps li::before {
+  content: counter(step);
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  width: 24px; height: 24px; border-radius: 12px;
+  background: #7c7cff; color: #14142a;
+  font-weight: 700; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-box .steps .emoji { font-size: 18px; vertical-align: middle; }
+.modal-box .hint { font-size: 12px; color: #8a8aa6; margin-bottom: 20px; }

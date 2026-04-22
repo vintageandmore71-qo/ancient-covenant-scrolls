@@ -130,6 +130,22 @@
       apps = await listAll();
       renderLibrary();
       show('library-screen');
+
+      // Deep-link: if the URL has ?app=<id>, auto-open that app.
+      // This is how Home-Screen-added tiles land straight on their
+      // content instead of the library.
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var autoId = params.get('app');
+        if (autoId) {
+          var target = apps.find(function (x) { return x.id === autoId; });
+          if (target) {
+            // Small delay so the library is painted first (for a
+            // back-tap to have somewhere to return to).
+            setTimeout(function () { openApp(target); }, 50);
+          }
+        }
+      } catch (e) {}
     } catch (e) {
       $('login-err').textContent = 'Storage error: ' + (e && e.message ? e.message : e);
     }
@@ -214,6 +230,7 @@
     var menu = document.createElement('div');
     menu.className = 'context-menu';
     menu.innerHTML =
+      '<button data-act="home">Add to Home Screen</button>' +
       '<button data-act="rename">Rename</button>' +
       '<button data-act="delete" class="danger">Delete</button>';
     tile.appendChild(menu);
@@ -223,6 +240,7 @@
       menu.remove();
       if (act === 'rename') promptRename(id);
       else if (act === 'delete') promptDelete(id);
+      else if (act === 'home') promptAddToHome(id);
     });
     // Close when tapping outside
     setTimeout(function () {
@@ -232,6 +250,29 @@
       });
     }, 0);
   }
+
+  /* ---------- Add to Home Screen flow ---------- */
+  // When the user taps "Add to Home Screen" on a tile, we (1) rewrite
+  // the current URL to include ?app=<id>, and (2) show an explainer
+  // modal. After the user taps Safari Share -> Add to Home Screen, iOS
+  // bookmarks the URL with the ?app= param intact. Tapping the icon
+  // launches Load, and the auto-open handler jumps straight into that
+  // app after the password unlock.
+  function promptAddToHome(id) {
+    var app = apps.find(function (x) { return x.id === id; });
+    if (!app) return;
+    var base = window.location.pathname.replace(/[^/]*$/, '');
+    var newUrl = base + '?app=' + encodeURIComponent(id);
+    // Update the URL without navigating.
+    try { history.replaceState(null, '', newUrl); } catch (e) {}
+    // Populate + show the explainer modal.
+    $('home-modal-title').textContent = 'Save "' + app.name + '" to Home Screen';
+    $('home-modal-app').textContent = app.name;
+    $('home-modal').classList.add('on');
+  }
+  $('home-modal-close').addEventListener('click', function () {
+    $('home-modal').classList.remove('on');
+  });
 
   /* ---------- Add / import ---------- */
 
