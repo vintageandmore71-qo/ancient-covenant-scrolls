@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<!--
+  Load — Run Web Apps on iPad (PWA build)
+  Copyright (c) 2026 DssOrit. All Rights Reserved.
+  Proprietary. See LICENSE at the repository root.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=yes">
+<meta name="theme-color" content="#14142a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Load">
+<meta name="description" content="Offline launcher for your local web apps and HTML readers on iPad.">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<title>Load</title>
+<link rel="stylesheet" href="load.css">
+</head>
+<body>
+
+<!-- Login screen -->
+<div id="login-screen" class="screen on">
+  <div class="login-box">
+    <h1>Load</h1>
+    <p class="tag">Run Web Apps on iPad</p>
+    <input id="pw-input" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Password">
+    <button id="pw-btn">Unlock</button>
+    <div id="login-err" class="err"></div>
+  </div>
+</div>
+
+<!-- Library screen -->
+<div id="library-screen" class="screen">
+  <header class="topbar">
+    <h2>Load</h2>
+    <div class="spacer"></div>
+    <button id="add-btn" class="primary-btn" aria-label="Add a web app">
+      <span class="icon">+</span><span class="btn-label">Add</span>
+    </button>
+  </header>
+
+  <div id="library-empty" class="empty-state">
+    <div class="empty-icon">&#128230;</div>
+    <h3>No web apps yet</h3>
+    <p>Tap <strong>Add</strong> to import a self-contained <code>.html</code> file from Files.</p>
+    <p class="hint">PDF, EPUB, DOCX? Use Attain. This launcher is for HTML web apps.</p>
+  </div>
+
+  <div id="library-grid" class="grid"></div>
+
+  <input id="file-picker" type="file" accept=".html,.htm,text/html" multiple style="display:none;">
+</div>
+
+<!-- Viewer screen -->
+<div id="viewer-screen" class="screen">
+  <header id="viewer-topbar" class="topbar viewer-topbar">
+    <button id="back-btn" class="icon-btn" aria-label="Back to library">&larr;</button>
+    <span id="viewer-title" class="title"></span>
+    <button id="reload-btn" class="icon-btn" aria-label="Reload">&#8634;</button>
+    <button id="aids-btn" class="icon-btn" aria-label="Reading aids">Aa</button>
+    <button id="hide-ui-btn" class="icon-btn" aria-label="Hide controls" title="Hide controls">&#9776;</button>
+  </header>
+  <iframe id="viewer-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-storage-access-by-user-activation"></iframe>
+  <button id="show-ui-btn" class="floating-show" aria-label="Show controls">&#9776;</button>
+</div>
+
+<!-- Reading aids panel -->
+<div id="aids-panel" class="aids-panel" role="dialog" aria-label="Reading aids">
+  <div class="aids-head">
+    <h3>Reading aids</h3>
+    <button id="aids-close" class="icon-btn" aria-label="Close">&times;</button>
+  </div>
+
+  <div class="aid-row">
+    <label class="aid-label">Font size</label>
+    <div class="aid-buttons">
+      <button class="aid-btn" data-act="fs-down">A-</button>
+      <button class="aid-btn" data-act="fs-reset">Reset</button>
+      <button class="aid-btn" data-act="fs-up">A+</button>
+    </div>
+  </div>
+
+  <div class="aid-row">
+    <label class="aid-label">Line spacing</label>
+    <div class="aid-buttons">
+      <button class="aid-btn" data-act="line-down">&darr;</button>
+      <button class="aid-btn" data-act="line-reset">Reset</button>
+      <button class="aid-btn" data-act="line-up">&uarr;</button>
+    </div>
+  </div>
+
+  <div class="aid-row">
+    <label class="aid-label">Letter spacing</label>
+    <div class="aid-buttons">
+      <button class="aid-btn" data-act="ls-down">&darr;</button>
+      <button class="aid-btn" data-act="ls-reset">Reset</button>
+      <button class="aid-btn" data-act="ls-up">&uarr;</button>
+    </div>
+  </div>
+
+  <div class="aid-row">
+    <label class="aid-label">Overlay color</label>
+    <div class="aid-buttons wrap">
+      <button class="aid-btn color-btn" data-act="color" data-color="none">None</button>
+      <button class="aid-btn color-btn" data-act="color" data-color="cream" style="background:#f4eadc;color:#333;">Cream</button>
+      <button class="aid-btn color-btn" data-act="color" data-color="yellow" style="background:#fff4b8;color:#333;">Yellow</button>
+      <button class="aid-btn color-btn" data-act="color" data-color="blue" style="background:#d4e8f8;color:#333;">Blue</button>
+    </div>
+  </div>
+
+  <div class="aid-row">
+    <label class="aid-label">Dyslexia font</label>
+    <div class="aid-buttons">
+      <button class="aid-btn" data-act="font-toggle">Toggle</button>
+    </div>
+  </div>
+
+  <div class="aid-row">
+    <label class="aid-label">Bionic reading</label>
+    <div class="aid-buttons">
+      <button class="aid-btn" data-act="bionic-toggle">Toggle</button>
+    </div>
+  </div>
+
+  <div class="aid-row">
+    <label class="aid-label">Focus line</label>
+    <div class="aid-buttons">
+      <button class="aid-btn" data-act="focus-toggle">Toggle</button>
+    </div>
+  </div>
+</div>
+<div id="aids-scrim" class="scrim"></div>
+
+<!-- Floating focus line (rendered in parent over iframe) -->
+<div id="focus-line"></div>
+
+<!-- Confirmation modal -->
+<div id="confirm-modal" class="modal" role="dialog" aria-label="Confirm delete">
+  <div class="modal-box">
+    <h3 id="confirm-title">Delete this web app?</h3>
+    <p id="confirm-body">This cannot be undone.</p>
+    <div class="modal-actions">
+      <button id="confirm-cancel" class="secondary-btn">Cancel</button>
+      <button id="confirm-ok" class="danger-btn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Rename modal -->
+<div id="rename-modal" class="modal" role="dialog" aria-label="Rename web app">
+  <div class="modal-box">
+    <h3>Rename</h3>
+    <input id="rename-input" type="text" autocapitalize="words" spellcheck="false">
+    <div class="modal-actions">
+      <button id="rename-cancel" class="secondary-btn">Cancel</button>
+      <button id="rename-ok" class="primary-btn">Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="load.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(function () {});
+}
+</script>
+</body>
+</html>

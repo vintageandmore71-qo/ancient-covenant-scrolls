@@ -1,0 +1,14 @@
+{
+  "name": "Load — Run Web Apps on iPad",
+  "short_name": "Load",
+  "description": "Offline launcher for your local web apps and HTML readers on iPad. Runs entirely from the device.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#14142a",
+  "theme_color": "#14142a",
+  "icons": [
+    { "src": "icon.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
