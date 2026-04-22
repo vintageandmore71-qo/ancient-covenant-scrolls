@@ -96,7 +96,10 @@ button, .tap, [role="button"] { min-height: 48px; }
 #home-screen::before {
   content: '';
   position: fixed; inset: 0;
-  background-image: url("bg.png");
+  /* Tries bg.jpg first (what the user uploaded), falls back to bg.png,
+     then bg%20.png (space-variant). Whichever exists shows; missing
+     ones are silently ignored. */
+  background-image: url("bg.jpg"), url("bg.png"), url("bg%20.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
