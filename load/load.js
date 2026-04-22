@@ -370,6 +370,228 @@
     }
   }
 
+  /* ---------- Load Helper — Copilot-style assistant ----------
+   * Not real AI. No downloads. Instead: a curated knowledge base of
+   * Load-usage answers (extracted from the Help FAQ) plus pattern
+   * matching for "create a X" requests that hand off to the Create
+   * screen pre-filled. Responses can include an action button that
+   * navigates or prefills UI, same way Copilot Chat has "Insert" /
+   * "Apply" buttons on its responses.
+   */
+  var LOAD_KB = [
+    { id:'import', keywords:['import','upload','add file','bring in','where do files come from','file picker'],
+      answer:'Tap <strong>Get Started</strong> on the Home screen. Pick which kind of file you have (HTML / PWA / PDF / Book / Media). The iPad file picker opens so you can choose from iCloud Drive, On My iPad, Dropbox, Google Drive, and more.',
+      actionLabel:'Open Import', actionFn:function(){ show('import-screen'); } },
+    { id:'pwa-import', keywords:['pwa','web app','zip','folder','multi-file','bundle'],
+      answer:'For a multi-file web app, either <strong>zip the folder first</strong> in Files (long-press &rarr; Compress) and import that zip, OR tap Select in Files, check every file, and import the whole selection.',
+      actionLabel:'Open Import', actionFn:function(){ show('import-screen'); } },
+    { id:'home-screen', keywords:['home screen','install','icon','add to home','make it an app','standalone'],
+      answer:'In Safari, tap the <strong>Share</strong> icon &rarr; <strong>Add to Home Screen</strong> &rarr; <strong>Add</strong>. Load will then open like a native app, fully offline.',
+      actionLabel:null, actionFn:null },
+    { id:'per-app-home', keywords:['icon for book','icon for app','home screen this','home screen item'],
+      answer:'In the Library, tap the <strong>&hellip;</strong> on any tile &rarr; <strong>Add to Home Screen</strong>. Follow the three steps shown. Each item gets its own iPad icon that opens Load directly into it.',
+      actionLabel:'Open Library', actionFn:function(){ show('library-screen'); renderLibrary(); } },
+    { id:'tts', keywords:['read aloud','speak','voice','audio','tts','hear it','listen'],
+      answer:'Open any item in the viewer. Tap the <strong>&#128266; speaker icon</strong> in the top bar. Pick <strong>Play</strong>. For smoother voices, go to iPad <strong>Settings &rarr; Accessibility &rarr; Spoken Content &rarr; Voices</strong> and download any &#9733; enhanced voice.',
+      actionLabel:'Open Audio Settings', actionFn:function(){ openAudioSettings(); } },
+    { id:'notes', keywords:['notes','take note','write note','jot','pad'],
+      answer:'For a <strong>free-form note</strong>, tap the <strong>&#128221;</strong> icon in the top bar &rarr; <strong>+ New Note</strong>. For a note <strong>attached to an item</strong>, open that item and tap the notes icon in the viewer.',
+      actionLabel:'Open Notes', actionFn:function(){ openNotesScreen(); } },
+    { id:'bookmarks', keywords:['bookmark','save place','chapter','remember spot','page'],
+      answer:'In the viewer, tap the <strong>&#9733; star</strong> in the top bar, scroll to the spot you want, then tap <strong>+ Add bookmark here</strong> and give it a name like "Chapter 3" or "Page 48". Tap Jump on any saved bookmark to return.',
+      actionLabel:null, actionFn:null },
+    { id:'resume', keywords:['resume','continue','where i left off','pick up','last place'],
+      answer:'Load auto-saves your scroll position every 1.5 seconds. Just reopen the item &mdash; you land where you left off. On the Home screen, a green <strong>Continue: &lt;name&gt;</strong> button shows your most recent reading.',
+      actionLabel:'Go Home', actionFn:function(){ show('home-screen'); } },
+    { id:'reading-aids', keywords:['dyslexia','font','bigger','smaller','spacing','overlay','bionic','focus','color','theme'],
+      answer:'In the viewer, tap <strong>Aa</strong>. You can change font size, line spacing, letter spacing, color overlay (cream / yellow / soft blue), switch to OpenDyslexic font, turn on <strong>Bionic reading</strong> (bolds the first part of each word), or show a <strong>focus line</strong> ruler.',
+      actionLabel:null, actionFn:null },
+    { id:'theme', keywords:['dark mode','light mode','sepia','cream','theme','high contrast'],
+      answer:'Tap the <strong>&#9681;</strong> icon in any top bar to cycle themes: Dark &rarr; Cream &rarr; Sepia &rarr; Soft Blue &rarr; High Contrast &rarr; back. Or go to Settings and pick explicitly.',
+      actionLabel:'Open Settings', actionFn:function(){ openSettingsPanel(); } },
+    { id:'font-size', keywords:['bigger text','larger text','text too small','zoom','enlarge'],
+      answer:'Tap <strong>A+</strong> in the top bar to increase size, <strong>A&minus;</strong> to decrease. Applies app-wide. For fine-tuning inside a specific app, open it and use the Aa reading-aids panel.',
+      actionLabel:null, actionFn:null },
+    { id:'settings', keywords:['settings','preferences','config','where is settings'],
+      answer:'Tap the <strong>&#9881; gear</strong> icon (far right of the top bar on every screen). Panel slides in from the right with font, theme, spacing, audio, folders, and backup controls.',
+      actionLabel:'Open Settings', actionFn:function(){ openSettingsPanel(); } },
+    { id:'share', keywords:['share','send','family','airdrop','email','text','message'],
+      answer:'From the Library, tap the <strong>&hellip;</strong> on any tile &rarr; <strong>Share (Text, Email, AirDrop)</strong>. iPad\'s share sheet opens &mdash; pick AirDrop, Mail, Messages, or Save to Files. The exported file is a self-contained HTML anyone can open.',
+      actionLabel:'Open Library', actionFn:function(){ show('library-screen'); renderLibrary(); } },
+    { id:'create', keywords:['create','make','build','write','new page','new document','new file'],
+      answer:'Tap <strong>Create New</strong> on the Home screen. Pick a template (Article / Note / Letter / Recipe / Checklist), type a title and content, then Save to Library or Save &amp; Share. No coding needed.',
+      actionLabel:'Open Create', actionFn:function(){ show('create-screen'); } },
+    { id:'folders', keywords:['folder','collection','group','organize','sort'],
+      answer:'Open Settings &rarr; <strong>Folders</strong> section. Type a name and tap Add. In the Library, tap the <strong>&hellip;</strong> on a tile &rarr; <strong>Move to folder...</strong>. Filter chips above the grid let you see just one folder at a time.',
+      actionLabel:'Open Settings', actionFn:function(){ openSettingsPanel(); } },
+    { id:'search', keywords:['search','find','look for'],
+      answer:'In the Library, tap the <strong>&#128269;</strong> magnifying-glass icon. Search matches by name and notes content.',
+      actionLabel:'Open Library', actionFn:function(){ show('library-screen'); renderLibrary(); } },
+    { id:'backup', keywords:['backup','export','restore','save library','new ipad','transfer'],
+      answer:'Open <strong>Settings &rarr; Library Backup</strong>. Tap <strong>Export library to file</strong> to save everything as one JSON file (iCloud Drive is a good spot). Tap <strong>Import library from file</strong> to restore later. Back up before iPad updates.',
+      actionLabel:'Open Settings', actionFn:function(){ openSettingsPanel(); } },
+    { id:'delete', keywords:['delete','remove','get rid','trash','erase'],
+      answer:'In the Library, tap the <strong>&hellip;</strong> on a tile &rarr; <strong>&#128465; Delete</strong> (red at the bottom of the menu). The original file on your iPad is NOT touched &mdash; only Load\'s copy is removed.',
+      actionLabel:'Open Library', actionFn:function(){ show('library-screen'); renderLibrary(); } },
+    { id:'edit', keywords:['edit html','change','modify'],
+      answer:'In the Library, tap the <strong>&hellip;</strong> on a tile &rarr; <strong>Edit HTML</strong>. A source editor opens so you can change the stored HTML. Save writes your changes to Load only; your original file isn\'t touched.',
+      actionLabel:null, actionFn:null },
+    { id:'offline', keywords:['offline','no internet','airplane mode','without wifi'],
+      answer:'Load is offline-first. After you open it in Safari once (or add it to the Home Screen), everything runs locally. Test: turn on Airplane Mode, tap Load\'s icon &mdash; it opens and works normally.',
+      actionLabel:null, actionFn:null },
+    { id:'safe', keywords:['privacy','safe','secure','tracking','account','login','password'],
+      answer:'Nothing you do in Load ever leaves your iPad. No account. No login. No analytics. No tracking. All files, notes, and bookmarks are stored in Safari\'s private storage for this app only.',
+      actionLabel:null, actionFn:null },
+    { id:'kindle', keywords:['kindle','azw','mobi','kfx','amazon'],
+      answer:'Kindle files are DRM-locked by Amazon and can\'t be opened by Load (or any other third-party app). On a computer (not iPad), install the free <strong>Calibre</strong> tool, convert your Kindle file to EPUB, then import the EPUB into Load.',
+      actionLabel:null, actionFn:null },
+    { id:'media', keywords:['video','audio','mp3','mp4','image','photo','picture'],
+      answer:'Tap Get Started &rarr; the orange <strong>Media</strong> card. Works with MP4/MOV/WebM video, MP3/M4A/WAV audio, JPG/PNG/GIF/WebP/HEIC images.',
+      actionLabel:'Open Import', actionFn:function(){ show('import-screen'); } },
+    { id:'help', keywords:['help','how to','confused','lost','stuck','what does'],
+      answer:'Tap the <strong>?</strong> icon in the top bar for the full Help window with 30+ plain-language answers. Or keep asking me here &mdash; I\'ll search the same info faster.',
+      actionLabel:'Open Help', actionFn:function(){ openHelp(); } }
+  ];
+
+  function wireHelper() {
+    var panel = $('helper-panel');
+    var scrim = $('helper-scrim');
+    if (!panel) return;
+    document.querySelectorAll('[data-tool="helper"]').forEach(function (b) {
+      b.addEventListener('click', openHelperPanel);
+    });
+    $('helper-close').addEventListener('click', closeHelperPanel);
+    $('helper-scrim').addEventListener('click', closeHelperPanel);
+    $('helper-send').addEventListener('click', submitHelperQuestion);
+    $('helper-input').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') submitHelperQuestion();
+    });
+    document.querySelectorAll('[data-helper-ask]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var q = b.getAttribute('data-helper-ask');
+        $('helper-input').value = q;
+        submitHelperQuestion();
+      });
+    });
+  }
+  function openHelperPanel() {
+    $('helper-panel').classList.add('on');
+    $('helper-scrim').classList.add('on');
+    setTimeout(function () { $('helper-input').focus(); }, 120);
+  }
+  function closeHelperPanel() {
+    $('helper-panel').classList.remove('on');
+    $('helper-scrim').classList.remove('on');
+  }
+  function addHelperMessage(role, html, action) {
+    // Hide the intro after the first message; quick chips fold away too
+    var intro = $('helper-intro'); if (intro) intro.style.display = 'none';
+    var quick = $('helper-quick'); if (quick) quick.classList.add('hidden');
+    var msgs = $('helper-messages');
+    var div = document.createElement('div');
+    div.className = 'helper-msg ' + role;
+    div.innerHTML = html;
+    if (action && action.label) {
+      var btn = document.createElement('button');
+      btn.className = 'helper-action';
+      btn.innerHTML = '&#10148; ' + action.label;
+      btn.addEventListener('click', function () {
+        if (typeof action.fn === 'function') action.fn();
+        closeHelperPanel();
+      });
+      div.appendChild(document.createElement('br'));
+      div.appendChild(btn);
+    }
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+  function submitHelperQuestion() {
+    var input = $('helper-input');
+    var q = (input.value || '').trim();
+    if (!q) return;
+    addHelperMessage('user', escHtml(q));
+    input.value = '';
+    // 1. Check for "create a X" intent
+    var createMatch = matchCreateIntent(q);
+    if (createMatch) {
+      addHelperMessage('assistant',
+        'I can set that up for you! I\'ll open the Create screen with the <strong>' + createMatch.template + '</strong> template' +
+        (createMatch.topic ? ' and pre-fill the title as <strong>' + escHtml(createMatch.topic) + '</strong>.' : '.') +
+        ' You just type the content and save.',
+        { label: 'Open Create screen', fn: function () { openCreateWithHelper(createMatch); } }
+      );
+      return;
+    }
+    // 2. Match knowledge base
+    var hit = scoreKnowledgeBase(q);
+    if (hit) {
+      addHelperMessage('assistant', hit.answer, hit.actionLabel ? { label: hit.actionLabel, fn: hit.actionFn } : null);
+      return;
+    }
+    // 3. Fallback for content-specific questions
+    addHelperMessage('assistant',
+      'I\'m focused on helping you <strong>use Load</strong> and <strong>create content</strong>. ' +
+      'If your question is about the <em>content inside</em> an item (like summarizing a PDF or explaining a passage), ' +
+      'open that item and tap the <strong>&#129302;</strong> icon in the viewer to ask a free AI site (ChatGPT / Claude / Gemini) with your text copied for you.',
+      null
+    );
+  }
+  function matchCreateIntent(q) {
+    var s = q.toLowerCase();
+    // Direct patterns: "make a checklist for trip", "create a recipe for soup"
+    var m = s.match(/(?:make|create|write|build|new)\s+(?:me\s+)?(?:a|an|some)?\s*(checklist|recipe|letter|article|note|story|essay|paragraph|to-?do|shopping\s*list|grocery\s*list)\s*(?:for|about|of|to)?\s*(.*)/i);
+    if (m) {
+      var tpl = m[1].toLowerCase();
+      if (/shopping|grocery|to-?do/.test(tpl)) tpl = 'checklist';
+      if (/story|essay|paragraph/.test(tpl)) tpl = 'article';
+      if (!['checklist','recipe','letter','article','note'].includes(tpl)) tpl = 'article';
+      return { template: tpl, topic: (m[2] || '').trim() };
+    }
+    // Phrase-initial: "recipe for X", "checklist for X"
+    m = s.match(/^(checklist|recipe|letter|article|note|shopping\s*list|grocery\s*list|to-?do)\s+(?:for|of|about|to)\s+(.+)/i);
+    if (m) {
+      var tpl2 = m[1].toLowerCase();
+      if (/shopping|grocery|to-?do/.test(tpl2)) tpl2 = 'checklist';
+      return { template: tpl2, topic: m[2].trim() };
+    }
+    return null;
+  }
+  function openCreateWithHelper(match) {
+    show('create-screen');
+    setTimeout(function () {
+      var titleInput = $('create-title');
+      if (titleInput && match.topic) {
+        titleInput.value = match.topic.charAt(0).toUpperCase() + match.topic.slice(1);
+      }
+      currentTemplate = match.template;
+      document.querySelectorAll('[data-template]').forEach(function (b) {
+        b.classList.toggle('active', b.getAttribute('data-template') === match.template);
+      });
+      var bodyInput = $('create-body');
+      if (bodyInput) bodyInput.focus();
+    }, 100);
+  }
+  function scoreKnowledgeBase(q) {
+    var qLower = ' ' + q.toLowerCase() + ' ';
+    var tokens = qLower.split(/\s+/).filter(function (t) { return t.length > 2; });
+    var best = null;
+    for (var i = 0; i < LOAD_KB.length; i++) {
+      var entry = LOAD_KB[i];
+      var score = 0;
+      entry.keywords.forEach(function (k) {
+        if (qLower.indexOf(' ' + k + ' ') >= 0) score += 5;
+        else if (qLower.indexOf(k) >= 0) score += 3;
+        var kTokens = k.toLowerCase().split(/\s+/);
+        kTokens.forEach(function (kt) {
+          if (kt.length > 2 && tokens.indexOf(kt) >= 0) score += 1;
+        });
+      });
+      if (!best || score > best.score) best = { score: score, entry: entry };
+    }
+    if (best && best.score >= 3) return best.entry;
+    return null;
+  }
+
   /* ---------- Boot sequence ----------
    * Each wire* step is wrapped in its own try so one missing element
    * (e.g. after a DOM change in a future refactor) can't stop the app
@@ -396,6 +618,7 @@
       safe('wireBackup', wireBackup);
       safe('wireCreateScreen', wireCreateScreen);
       safe('wireAiHelper', wireAiHelper);
+      safe('wireHelper', wireHelper);
       safe('renderFolderList', renderFolderList);
       safe('renderLibraryChips', renderLibraryChips);
       safe('updateResumeCard', updateResumeCard);
@@ -478,6 +701,7 @@
         else if (tool === 'font') toggleDyslexiaFont();
         else if (tool === 'notes') openNotesScreen();
         else if (tool === 'audio') openAudioSettings();
+        else if (tool === 'helper') openHelperPanel();
         else if (tool === 'help') openHelp();
       });
     });

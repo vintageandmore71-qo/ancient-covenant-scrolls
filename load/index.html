@@ -49,6 +49,7 @@
     <button class="nav-btn icon-only" data-tool="font" aria-label="Toggle dyslexia font" title="Dyslexia font">&#127752;</button>
     <button class="nav-btn icon-only" data-tool="notes" aria-label="Notes" title="Notes">&#128221;</button>
     <button class="nav-btn icon-only" data-tool="audio" aria-label="Audio / Read Aloud" title="Audio / Read Aloud">&#128266;</button>
+    <button class="nav-btn icon-only" data-tool="helper" aria-label="Ask Load" title="Ask Load assistant">&#128172;</button>
     <button class="nav-btn icon-only" data-tool="help" aria-label="Help" title="Help">?</button>
     <div class="spacer"></div>
     <button class="nav-btn" data-nav="settings" aria-label="Settings" title="Settings">
@@ -111,6 +112,7 @@
     </button>
     <span class="title-inline">Create a new page</span>
     <div class="spacer"></div>
+    <button class="nav-btn icon-only" data-tool="helper" aria-label="Ask Load" title="Ask Load assistant">&#128172;</button>
     <button class="nav-btn icon-only" data-tool="help" aria-label="Help" title="Help">?</button>
     <button class="nav-btn" data-nav="settings" aria-label="Settings" title="Settings">
       <span class="nav-icon">&#9881;</span><span class="nav-label">Aa</span>
@@ -158,6 +160,7 @@
     </button>
     <div class="spacer"></div>
     <button class="nav-btn icon-only" data-tool="audio" aria-label="Audio / Read Aloud" title="Audio / Read Aloud">&#128266;</button>
+    <button class="nav-btn icon-only" data-tool="helper" aria-label="Ask Load" title="Ask Load assistant">&#128172;</button>
     <button class="nav-btn icon-only" data-tool="help" aria-label="Help" title="Help">?</button>
     <button class="nav-btn" data-nav="settings" aria-label="Settings" title="Settings">
       <span class="nav-icon">&#9881;</span><span class="nav-label">Aa</span>
@@ -220,6 +223,7 @@
     <button class="nav-btn icon-only" data-tool="audio" aria-label="Audio / Read Aloud" title="Audio / Read Aloud">&#128266;</button>
     <div class="spacer"></div>
     <button id="library-search-btn" class="nav-btn icon-only" aria-label="Search" title="Search library">&#128269;</button>
+    <button class="nav-btn icon-only" data-tool="helper" aria-label="Ask Load" title="Ask Load assistant">&#128172;</button>
     <button class="nav-btn icon-only" data-tool="help" aria-label="Help" title="Help">?</button>
     <button class="nav-btn" data-nav="settings" aria-label="Settings" title="Settings">
       <span class="nav-icon">&#9881;</span><span class="nav-label">Aa</span>
@@ -1066,6 +1070,39 @@
 
 <!-- Toast notifications for quick feedback (upload success, saves, etc.) -->
 <div id="toast" class="toast"></div>
+
+<!-- Load Helper — Copilot-style chat panel for Load-usage + build help -->
+<div id="helper-panel" class="helper-panel" role="dialog" aria-label="Ask Load">
+  <div class="helper-head">
+    <h3><span class="helper-icon">&#128172;</span> Ask Load</h3>
+    <button id="helper-close" class="icon-btn" aria-label="Close">&times;</button>
+  </div>
+  <div class="helper-intro" id="helper-intro">
+    <p><strong>Hi!</strong> I can help you use Load or create new files for you. Try asking:</p>
+    <ul>
+      <li><em>"How do I import a PDF?"</em></li>
+      <li><em>"Make a grocery checklist"</em></li>
+      <li><em>"Write a recipe for pasta"</em></li>
+      <li><em>"How do I add to my home screen?"</em></li>
+    </ul>
+  </div>
+  <div id="helper-messages" class="helper-messages"></div>
+  <div class="helper-quick" id="helper-quick">
+    <button class="helper-chip" data-helper-ask="How do I import files?">How do I import?</button>
+    <button class="helper-chip" data-helper-ask="Make me a to-do checklist">Make a checklist</button>
+    <button class="helper-chip" data-helper-ask="How do I save to my home screen?">Home screen</button>
+    <button class="helper-chip" data-helper-ask="How do I make the app read aloud?">Read aloud</button>
+    <button class="helper-chip" data-helper-ask="Where do I find settings?">Settings</button>
+    <button class="helper-chip" data-helper-ask="How do I share a file?">Share files</button>
+    <button class="helper-chip" data-helper-ask="What can I create here?">What can I create?</button>
+    <button class="helper-chip" data-helper-ask="How do I back up my library?">Backup</button>
+  </div>
+  <div class="helper-input-row">
+    <input id="helper-input" type="text" placeholder="Ask me anything about Load..." autocomplete="off" autocapitalize="sentences" spellcheck="true">
+    <button id="helper-send" class="primary-btn" aria-label="Send">&#10148;</button>
+  </div>
+</div>
+<div id="helper-scrim" class="scrim"></div>
 
 <!-- AI helper modal — no downloads, no AI in Load. Copies your text
      and opens a free AI website in a new tab so you can paste and ask. -->
