@@ -46,7 +46,7 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
   function show(screenId) {
-    var screens = ['home-screen', 'library-screen', 'viewer-screen', 'editor-screen', 'notes-screen', 'note-editor'];
+    var screens = ['home-screen', 'library-screen', 'viewer-screen', 'editor-screen', 'notes-screen', 'note-editor', 'import-screen'];
     for (var i = 0; i < screens.length; i++) {
       var el = $(screens[i]);
       if (!el) continue;
@@ -58,7 +58,8 @@
   /* ---------- Settings (font / theme / motion) ---------- */
   function defaultSettings() {
     return { font: 'atkinson', theme: 'dark', reduceMotion: false,
-             fontSizeStep: 0, lineStep: 0, letterStep: 0 };
+             fontSizeStep: 0, lineStep: 0, letterStep: 0,
+             ttsVoiceIndex: '', ttsSpeed: '1' };
   }
   function loadSettings() {
     try {
@@ -241,7 +242,7 @@
         var target = btn.getAttribute('data-nav');
         if (target === 'home') show('home-screen');
         else if (target === 'library') { currentTypeFilter = 'all'; show('library-screen'); renderLibrary(); }
-        else if (target === 'import') { $('file-picker').click(); }
+        else if (target === 'import') { show('import-screen'); }
         else if (target === 'settings') openSettingsPanel();
       });
     });
@@ -415,24 +416,44 @@
   }
 
   function wireHomeActions() {
-    var gs = $('home-get-started'); if (gs) gs.addEventListener('click', function () { $('file-picker').click(); });
+    var gs = $('home-get-started'); if (gs) gs.addEventListener('click', function () {
+      show('import-screen');
+    });
     var lib = $('home-library'); if (lib) lib.addEventListener('click', function () {
       currentTypeFilter = 'all'; show('library-screen'); renderLibrary();
     });
-    // Optional PWA-help modal is still in the DOM; if removed, skip
-    var pwa = $('home-pwa');
-    if (pwa) pwa.addEventListener('click', function () { $('pwa-modal').classList.add('on'); });
+    // Optional PWA-help modal kept wired (used when user picks Web Apps card)
     var pc = $('pwa-modal-cancel'); if (pc) pc.addEventListener('click', function () { $('pwa-modal').classList.remove('on'); });
     var pp = $('pwa-modal-pick'); if (pp) pp.addEventListener('click', function () {
       $('pwa-modal').classList.remove('on'); $('file-picker').click();
     });
-    document.querySelectorAll('.type-card').forEach(function (card) {
+    // Type cards on the Library screen = filter cards
+    document.querySelectorAll('[data-type]').forEach(function (card) {
       card.addEventListener('click', function () {
         var t = card.getAttribute('data-type');
         if (!t) return;
         currentTypeFilter = t;
         show('library-screen');
         renderLibrary();
+      });
+    });
+    // Type cards on the Import screen = import with accept filter
+    document.querySelectorAll('[data-import-type]').forEach(function (card) {
+      card.addEventListener('click', function () {
+        var t = card.getAttribute('data-import-type');
+        var picker = $('file-picker');
+        if (t === 'html') picker.setAttribute('accept', '.html,.htm,text/html');
+        else if (t === 'pdf') picker.setAttribute('accept', '.pdf,application/pdf');
+        else if (t === 'epub') picker.setAttribute('accept', '.epub,application/epub+zip');
+        else if (t === 'zip') {
+          // Web apps card: show the PWA help modal first; modal's "Pick" button opens picker
+          picker.setAttribute('accept', '.zip,.html,.htm,application/zip,text/html');
+          $('pwa-modal').classList.add('on');
+          return;
+        } else {
+          picker.setAttribute('accept', '.html,.htm,.zip,.pdf,.epub');
+        }
+        picker.click();
       });
     });
   }
@@ -638,8 +659,6 @@
   function populateTtsVoices() {
     if (!window.speechSynthesis) return;
     ttsVoices = speechSynthesis.getVoices() || [];
-    var sel = $('tts-voice');
-    if (!sel) return;
     // Sort enhanced/local voices to the top; they sound much better.
     var sorted = ttsVoices.slice().sort(function (a, b) {
       var aEnh = /enhanced|premium|neural/i.test(a.name) ? 1 : 0;
@@ -648,21 +667,29 @@
       if (!!a.localService !== !!b.localService) return (b.localService ? 1 : 0) - (a.localService ? 1 : 0);
       return a.name.localeCompare(b.name);
     });
-    sel.innerHTML = '';
-    var defaultOpt = document.createElement('option');
-    defaultOpt.value = '';
-    defaultOpt.textContent = 'System default';
-    sel.appendChild(defaultOpt);
-    // Mark high-quality voices with a star so users can spot them
-    sorted.forEach(function (v) {
-      var o = document.createElement('option');
-      // store original index in ttsVoices (unchanged) so we can look it up on play
-      o.value = String(ttsVoices.indexOf(v));
-      var isEnhanced = /enhanced|premium|neural/i.test(v.name);
-      var qualityBadge = isEnhanced ? '★ ' : (v.localService ? '• ' : '');
-      o.textContent = qualityBadge + v.name + ' (' + v.lang + ')';
-      sel.appendChild(o);
-    });
+    function fillVoiceSelect(sel) {
+      if (!sel) return;
+      sel.innerHTML = '';
+      var defaultOpt = document.createElement('option');
+      defaultOpt.value = '';
+      defaultOpt.textContent = 'System default';
+      sel.appendChild(defaultOpt);
+      sorted.forEach(function (v) {
+        var o = document.createElement('option');
+        o.value = String(ttsVoices.indexOf(v));
+        var isEnhanced = /enhanced|premium|neural/i.test(v.name);
+        var qualityBadge = isEnhanced ? '★ ' : (v.localService ? '• ' : '');
+        o.textContent = qualityBadge + v.name + ' (' + v.lang + ')';
+        sel.appendChild(o);
+      });
+    }
+    fillVoiceSelect($('tts-voice'));
+    fillVoiceSelect($('settings-tts-voice'));
+    // Restore saved selections
+    if ($('tts-voice') && settings.ttsVoiceIndex) $('tts-voice').value = settings.ttsVoiceIndex;
+    if ($('settings-tts-voice') && settings.ttsVoiceIndex) $('settings-tts-voice').value = settings.ttsVoiceIndex;
+    if ($('tts-speed') && settings.ttsSpeed) $('tts-speed').value = settings.ttsSpeed;
+    if ($('settings-tts-speed') && settings.ttsSpeed) $('settings-tts-speed').value = settings.ttsSpeed;
     // Tiny hint row below the dropdown to guide users
     var status = $('tts-status');
     if (status && !status.dataset.hintAdded) {
@@ -695,9 +722,11 @@
     if (!text) { $('tts-status').textContent = 'No text to read on this page.'; return; }
     speechSynthesis.cancel();
     ttsUtterance = new SpeechSynthesisUtterance(text.slice(0, 32000)); // keep it safe
-    var speed = parseFloat($('tts-speed').value) || 1;
+    // Prefer the viewer drawer's current selection; fall back to the
+    // Settings default (settings.ttsSpeed / settings.ttsVoiceIndex).
+    var speed = parseFloat($('tts-speed').value) || parseFloat(settings.ttsSpeed || '1') || 1;
     ttsUtterance.rate = speed;
-    var voiceIdx = $('tts-voice').value;
+    var voiceIdx = $('tts-voice').value || settings.ttsVoiceIndex || '';
     if (voiceIdx !== '' && ttsVoices[parseInt(voiceIdx, 10)]) {
       ttsUtterance.voice = ttsVoices[parseInt(voiceIdx, 10)];
     }
@@ -856,6 +885,32 @@
     $('settings-motion').addEventListener('click', function () {
       settings.reduceMotion = !settings.reduceMotion;
       saveSettings(); applySettings(); refreshSettingsPanel();
+    });
+    // TTS defaults (voice + speed) — persist and sync with the viewer drawer
+    var sv = $('settings-tts-voice');
+    if (sv) sv.addEventListener('change', function () {
+      settings.ttsVoiceIndex = sv.value;
+      saveSettings();
+      if ($('tts-voice')) $('tts-voice').value = sv.value;
+    });
+    var ss = $('settings-tts-speed');
+    if (ss) ss.addEventListener('change', function () {
+      settings.ttsSpeed = ss.value;
+      saveSettings();
+      if ($('tts-speed')) $('tts-speed').value = ss.value;
+    });
+    // Test Voice — speak a sample phrase so the user can audition
+    var st = $('settings-tts-test');
+    if (st) st.addEventListener('click', function () {
+      if (!window.speechSynthesis) {
+        alert('Speech synthesis is not supported on this device.'); return;
+      }
+      try { speechSynthesis.cancel(); } catch (e) {}
+      var u = new SpeechSynthesisUtterance('This is how the selected voice sounds. Every word you read can be spoken aloud.');
+      var idx = settings.ttsVoiceIndex;
+      if (idx !== '' && ttsVoices[parseInt(idx, 10)]) u.voice = ttsVoices[parseInt(idx, 10)];
+      u.rate = parseFloat(settings.ttsSpeed || '1') || 1;
+      speechSynthesis.speak(u);
     });
   }
 

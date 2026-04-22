@@ -75,44 +75,10 @@
       <button id="home-get-started" class="big-action primary" aria-label="Get started">
         <span class="ba-icon">&#43;</span><span class="ba-text">Get Started</span>
       </button>
-      <button id="home-pwa" class="big-action pwa-solid" aria-label="Import a PWA">
-        <span class="ba-icon">&#128230;</span><span class="ba-text">Import a PWA</span>
-      </button>
       <button id="home-library" class="big-action secondary" aria-label="Open library">
         <span class="ba-text">Open Library</span><span class="ba-icon">&#9654;</span>
       </button>
     </div>
-
-    <!-- Browse by type — colored file-type filter cards, back from earlier versions -->
-    <section class="home-types">
-      <h3 class="home-section-title">Browse by type</h3>
-      <div class="type-grid">
-        <button class="type-card type-html" data-type="html">
-          <span class="type-icon">&#128196;</span>
-          <span class="type-label">HTML</span>
-          <span class="type-sub">Single-file web apps</span>
-          <span class="type-count" data-count="html">0</span>
-        </button>
-        <button class="type-card type-zip" data-type="zip">
-          <span class="type-icon">&#128230;</span>
-          <span class="type-label">Web apps</span>
-          <span class="type-sub">ZIP bundles &amp; folders</span>
-          <span class="type-count" data-count="zip">0</span>
-        </button>
-        <button class="type-card type-pdf" data-type="pdf">
-          <span class="type-icon">&#128462;</span>
-          <span class="type-label">PDFs</span>
-          <span class="type-sub">Documents</span>
-          <span class="type-count" data-count="pdf">0</span>
-        </button>
-        <button class="type-card type-epub" data-type="epub">
-          <span class="type-icon">&#128214;</span>
-          <span class="type-label">Books</span>
-          <span class="type-sub">EPUB digital books</span>
-          <span class="type-count" data-count="epub">0</span>
-        </button>
-      </div>
-    </section>
 
     <!-- Recently opened strip, shown only when you have recent items -->
     <section id="home-recent" class="home-recent" style="display:none;">
@@ -124,6 +90,57 @@
       Copyright &copy; 2026 DssOrit. All Rights Reserved.<br>
       Runs entirely on your iPad. No tracking, no accounts, no network.
     </footer>
+  </div>
+</div>
+
+<!-- Import screen — colored type cards side-by-side, no splash -->
+<div id="import-screen" class="screen import-screen">
+  <header class="app-topbar">
+    <button class="nav-btn" data-nav="home" aria-label="Home" title="Home">
+      <span class="nav-icon">&#127968;</span><span class="nav-label">Home</span>
+    </button>
+    <button class="nav-btn" data-nav="library" aria-label="Library" title="Library">
+      <span class="nav-icon">&#128218;</span><span class="nav-label">Library</span>
+    </button>
+    <button class="nav-btn active" data-nav="import" aria-label="Import" title="Import">
+      <span class="nav-icon">&#8682;</span><span class="nav-label">Import</span>
+    </button>
+    <div class="spacer"></div>
+    <button class="nav-btn icon-only" data-tool="help" aria-label="Help" title="Help">?</button>
+    <button class="nav-btn" data-nav="settings" aria-label="Settings" title="Settings">
+      <span class="nav-icon">&#9881;</span><span class="nav-label">Aa</span>
+    </button>
+  </header>
+
+  <div class="import-body">
+    <h2 class="import-heading">Import a file</h2>
+    <p class="import-sub">Pick the kind of file you have. Each opens the iPad file picker set to the right filter.</p>
+
+    <div class="import-grid">
+      <button class="type-card type-html" data-import-type="html">
+        <span class="type-icon">&#128196;</span>
+        <span class="type-label">HTML</span>
+        <span class="type-sub">Single-file web apps (.html)</span>
+      </button>
+      <button class="type-card type-zip" data-import-type="zip">
+        <span class="type-icon">&#128230;</span>
+        <span class="type-label">Web apps</span>
+        <span class="type-sub">ZIP bundles &amp; full PWAs</span>
+      </button>
+      <button class="type-card type-pdf" data-import-type="pdf">
+        <span class="type-icon">&#128462;</span>
+        <span class="type-label">PDFs</span>
+        <span class="type-sub">Documents (.pdf)</span>
+      </button>
+      <button class="type-card type-epub" data-import-type="epub">
+        <span class="type-icon">&#128214;</span>
+        <span class="type-label">Books</span>
+        <span class="type-sub">EPUB digital books (.epub)</span>
+      </button>
+    </div>
+
+    <p class="import-hint">Tip: the file picker lets you pick from <strong>On My iPad</strong>, <strong>iCloud Drive</strong>, <strong>Dropbox</strong>, <strong>Google Drive</strong>, <strong>OneDrive</strong> (if those apps are installed), connected USB drives, and Recents.</p>
+    <p class="import-hint kindle">Kindle books (<code>.azw</code>, <code>.mobi</code>, <code>.kfx</code>) are DRM-locked. Convert to EPUB with <a href="https://calibre-ebook.com" target="_blank" rel="noopener" class="link">Calibre</a> first.</p>
   </div>
 </div>
 
@@ -570,6 +587,24 @@
       <button class="seg-btn" data-letter="reset">Reset</button>
       <button class="seg-btn" data-letter="up">&uarr;</button>
     </div>
+  </div>
+
+  <div class="panel-section">
+    <h4>Read Aloud (TTS)</h4>
+    <p class="panel-hint">Defaults used when you tap the speaker in the viewer. Enhanced voices sound much better — install more in iPad <strong>Settings → Accessibility → Spoken Content → Voices</strong>.</p>
+    <label class="aid-label" style="margin-top:8px;">Default voice</label>
+    <select id="settings-tts-voice" class="tts-select" style="margin-bottom:10px;"><option>Loading voices...</option></select>
+    <label class="aid-label">Default speed</label>
+    <select id="settings-tts-speed" class="tts-select" style="margin-bottom:12px;">
+      <option value="0.7">0.7x</option>
+      <option value="0.85">0.85x</option>
+      <option value="1" selected>1x normal</option>
+      <option value="1.15">1.15x</option>
+      <option value="1.3">1.3x</option>
+      <option value="1.5">1.5x</option>
+      <option value="1.8">1.8x</option>
+    </select>
+    <button id="settings-tts-test" class="seg-btn full" style="margin-top:4px;">&#128266; Test voice</button>
   </div>
 
   <div class="panel-section">
