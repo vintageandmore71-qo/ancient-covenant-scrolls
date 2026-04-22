@@ -86,31 +86,7 @@ button, .tap, [role="button"] { min-height: 48px; }
 }
 .screen.on { display: block; }
 
-/* Background watermark image. If /load/bg.png is uploaded, it shows
-   as a faded watermark behind the library and viewer. If the file
-   is missing, the dark solid background of .screen shows through —
-   no broken image, no error. Text stays readable because of the
-   dark overlay on top. */
-#library-screen::before,
-#viewer-screen::before,
-#home-screen::before {
-  content: '';
-  position: fixed; inset: 0;
-  /* Tries bg.jpg first (what the user uploaded), falls back to bg.png,
-     then bg%20.png (space-variant). Whichever exists shows; missing
-     ones are silently ignored. */
-  background-image: url("bg.jpg"), url("bg.png"), url("bg%20.png");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  opacity: 0.22;
-  z-index: 0;
-  pointer-events: none;
-}
-/* Keep real content above the background watermark */
-#library-screen > *,
-#viewer-screen > *,
-#home-screen > * { position: relative; z-index: 1; }
+/* No background watermark — the screens stay solid dark per user preference. */
 
 /* ------------- Home screen (splash + actions + type-boxes) ------------- */
 #home-screen {
@@ -143,31 +119,41 @@ button, .tap, [role="button"] { min-height: 48px; }
 .nav-btn.active {
   background: var(--bg-3); color: var(--ink-hi);
 }
+.nav-btn.icon-only {
+  padding: 10px 10px; min-width: 44px;
+  font-size: 17px;
+}
+/* On narrower iPads, hide the text labels so the icons still fit */
+@media (max-width: 820px) {
+  .nav-btn .nav-label { display: none; }
+  .nav-btn { padding: 10px 10px; gap: 0; }
+}
 
-/* The splash hero — always visible on the home screen, no fade.
-   Uses <img> so the whole picture (text + design) is shown at its
-   natural aspect ratio, never cropped. */
+/* The splash hero — Attain-style: image covers full content width
+   edge-to-edge, no padding, no rounded corners. Scrolls naturally
+   with the page so the entire image (including all its text and
+   design) is visible. */
 .home-hero {
   width: 100%;
-  padding: 20px 20px 10px;
-  background-color: var(--bg-1);
-  display: flex; align-items: center; justify-content: center;
+  padding: 0;
+  margin: 0;
+  background-color: var(--bg-0);
+  display: block;
   position: relative;
 }
 .splash-img {
-  max-width: 100%;
-  width: auto;
-  height: auto;
-  max-height: 60vh;
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   display: block;
+  width: 100%;
+  height: auto;
+  max-height: none;
+  border-radius: 0;
+  box-shadow: none;
 }
 /* Fallback shown when splash image fails to load. Only visible if
    no splash.png or splash%20.png exists in /load/. */
 .home-hero-fallback {
   display: none; text-align: center; color: var(--ink-hi);
-  padding: 40px; max-width: 500px;
+  padding: 60px 30px; max-width: 500px; margin: 0 auto;
 }
 .home-hero.fallback .splash-img { display: none; }
 .home-hero.fallback .home-hero-fallback { display: block; }

@@ -232,6 +232,39 @@
         else if (target === 'settings') openSettingsPanel();
       });
     });
+    // Inline topbar tool buttons: font size, theme, dyslexia font, notes
+    document.querySelectorAll('.nav-btn[data-tool]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var tool = btn.getAttribute('data-tool');
+        if (tool === 'size-up') { settings.fontSizeStep = Math.min(6, (settings.fontSizeStep || 0) + 1); saveSettings(); applySettings(); }
+        else if (tool === 'size-down') { settings.fontSizeStep = Math.max(-2, (settings.fontSizeStep || 0) - 1); saveSettings(); applySettings(); }
+        else if (tool === 'theme') cycleTheme();
+        else if (tool === 'font') toggleDyslexiaFont();
+        else if (tool === 'notes') openNotesIndex();
+      });
+    });
+  }
+  function cycleTheme() {
+    var order = ['dark', 'cream', 'sepia', 'blue', 'contrast'];
+    var idx = order.indexOf(settings.theme);
+    settings.theme = order[(idx + 1) % order.length];
+    saveSettings(); applySettings();
+  }
+  function toggleDyslexiaFont() {
+    settings.font = (settings.font === 'opendyslexic') ? 'atkinson' : 'opendyslexic';
+    saveSettings(); applySettings();
+  }
+  function openNotesIndex() {
+    // Show a simple modal listing all apps that have notes attached
+    var withNotes = apps.filter(function (a) { return a.notes && a.notes.trim(); });
+    if (!withNotes.length) {
+      alert('No notes yet. Open a library item and tap the notes icon to start one.');
+      return;
+    }
+    var list = withNotes.map(function (a, i) {
+      return (i + 1) + '. ' + a.name + '\n    ' + String(a.notes).slice(0, 120).replace(/\n/g, ' ');
+    }).join('\n\n');
+    alert('Your notes:\n\n' + list);
   }
 
   function wireHomeActions() {
