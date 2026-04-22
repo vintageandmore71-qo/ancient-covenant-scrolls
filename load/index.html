@@ -2,7 +2,14 @@
 <!--
   Load — Run Web Apps on iPad (PWA build)
   Copyright (c) 2026 DssOrit. All Rights Reserved.
-  Proprietary. See LICENSE at the repository root.
+
+  Unauthorized reproduction, modification, distribution, or
+  commercial use is strictly prohibited. See LICENSE at the
+  repository root for the full terms.
+
+  Dyslexia-friendly, offline-only launcher for HTML web apps,
+  PDFs, and EPUB digital books. Built for personal iPad use with
+  zero network dependency once installed.
 -->
 <html lang="en">
 <head>
@@ -40,7 +47,8 @@
     <button class="nav-btn icon-only" data-tool="size-up" aria-label="Larger text" title="Larger text">A&#43;</button>
     <button class="nav-btn icon-only" data-tool="theme" aria-label="Toggle theme" title="Toggle theme">&#9680;</button>
     <button class="nav-btn icon-only" data-tool="font" aria-label="Toggle dyslexia font" title="Dyslexia font">&#127752;</button>
-    <button class="nav-btn icon-only" data-tool="notes" aria-label="All notes" title="Notes index">&#128221;</button>
+    <button class="nav-btn icon-only" data-tool="notes" aria-label="Notes" title="Notes">&#128221;</button>
+    <button class="nav-btn icon-only" data-tool="help" aria-label="Help" title="Help">?</button>
     <div class="spacer"></div>
     <button class="nav-btn" data-nav="settings" aria-label="Settings" title="Settings">
       <span class="nav-icon">&#9881;</span><span class="nav-label">Aa</span>
@@ -64,13 +72,58 @@
       <span class="ba-text" id="home-resume-text">Continue reading</span>
     </button>
     <div class="home-buttons">
-      <button id="home-get-started" class="big-action primary" aria-label="Import a file">
-        <span class="ba-icon">&#43;</span><span class="ba-text">Import a File</span>
+      <button id="home-get-started" class="big-action primary" aria-label="Get started">
+        <span class="ba-icon">&#43;</span><span class="ba-text">Get Started</span>
+      </button>
+      <button id="home-pwa" class="big-action pwa-solid" aria-label="Import a PWA">
+        <span class="ba-icon">&#128230;</span><span class="ba-text">Import a PWA</span>
       </button>
       <button id="home-library" class="big-action secondary" aria-label="Open library">
         <span class="ba-text">Open Library</span><span class="ba-icon">&#9654;</span>
       </button>
     </div>
+
+    <!-- Browse by type — colored file-type filter cards, back from earlier versions -->
+    <section class="home-types">
+      <h3 class="home-section-title">Browse by type</h3>
+      <div class="type-grid">
+        <button class="type-card type-html" data-type="html">
+          <span class="type-icon">&#128196;</span>
+          <span class="type-label">HTML</span>
+          <span class="type-sub">Single-file web apps</span>
+          <span class="type-count" data-count="html">0</span>
+        </button>
+        <button class="type-card type-zip" data-type="zip">
+          <span class="type-icon">&#128230;</span>
+          <span class="type-label">Web apps</span>
+          <span class="type-sub">ZIP bundles &amp; folders</span>
+          <span class="type-count" data-count="zip">0</span>
+        </button>
+        <button class="type-card type-pdf" data-type="pdf">
+          <span class="type-icon">&#128462;</span>
+          <span class="type-label">PDFs</span>
+          <span class="type-sub">Documents</span>
+          <span class="type-count" data-count="pdf">0</span>
+        </button>
+        <button class="type-card type-epub" data-type="epub">
+          <span class="type-icon">&#128214;</span>
+          <span class="type-label">Books</span>
+          <span class="type-sub">EPUB digital books</span>
+          <span class="type-count" data-count="epub">0</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Recently opened strip, shown only when you have recent items -->
+    <section id="home-recent" class="home-recent" style="display:none;">
+      <h3 class="home-section-title">Recently opened</h3>
+      <div id="home-recent-row" class="home-recent-row"></div>
+    </section>
+
+    <footer class="home-copyright">
+      Copyright &copy; 2026 DssOrit. All Rights Reserved.<br>
+      Runs entirely on your iPad. No tracking, no accounts, no network.
+    </footer>
   </div>
 </div>
 
@@ -92,6 +145,7 @@
     <button class="nav-btn icon-only" data-tool="font" aria-label="Toggle dyslexia font" title="Dyslexia font">&#127752;</button>
     <div class="spacer"></div>
     <button id="library-search-btn" class="nav-btn icon-only" aria-label="Search" title="Search library">&#128269;</button>
+    <button class="nav-btn icon-only" data-tool="help" aria-label="Help" title="Help">?</button>
     <button class="nav-btn" data-nav="settings" aria-label="Settings" title="Settings">
       <span class="nav-icon">&#9881;</span><span class="nav-label">Aa</span>
     </button>
@@ -324,6 +378,142 @@
   <div class="editor-body">
     <p class="editor-hint">Edit the HTML source. Changes save to Load's local storage only — your original file on iPad is untouched.</p>
     <textarea id="editor-textarea" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off"></textarea>
+  </div>
+</div>
+
+<!-- Notes screen — full screen, browse + create notes (standalone + per-app) -->
+<div id="notes-screen" class="screen">
+  <header class="app-topbar">
+    <button class="nav-btn" data-nav="home" aria-label="Home" title="Home">
+      <span class="nav-icon">&#127968;</span><span class="nav-label">Home</span>
+    </button>
+    <span class="title-inline">Notes</span>
+    <div class="spacer"></div>
+    <button id="notes-new-btn" class="primary-btn">
+      <span class="icon">&#43;</span><span class="btn-label">New Note</span>
+    </button>
+    <button class="nav-btn" data-nav="settings" aria-label="Settings" title="Settings">
+      <span class="nav-icon">&#9881;</span><span class="nav-label">Aa</span>
+    </button>
+  </header>
+  <div id="notes-screen-body" class="notes-screen-body">
+    <div id="notes-empty" class="empty-state" style="display:none;">
+      <div class="empty-icon">&#128221;</div>
+      <h3>No notes yet</h3>
+      <p>Tap <strong>+ New Note</strong> to write a standalone note, or open a library item and tap the notes icon there to attach a note to it.</p>
+    </div>
+    <div id="notes-screen-list" class="notes-grid"></div>
+  </div>
+</div>
+
+<!-- Note editor modal (used for both standalone and per-app notes) -->
+<div id="note-editor" class="screen note-editor">
+  <header class="app-topbar">
+    <button id="note-editor-back" class="nav-btn" aria-label="Back">
+      <span class="nav-icon">&larr;</span><span class="nav-label">Back</span>
+    </button>
+    <span class="title-inline" id="note-editor-context"></span>
+    <div class="spacer"></div>
+    <button id="note-editor-delete" class="nav-btn" aria-label="Delete note" style="color:#ff8a8a;">
+      <span class="nav-icon">&#128465;</span><span class="nav-label">Delete</span>
+    </button>
+    <button id="note-editor-save" class="primary-btn">
+      <span class="icon">&#10003;</span><span class="btn-label">Save</span>
+    </button>
+  </header>
+  <div class="note-editor-body">
+    <input id="note-editor-title" type="text" placeholder="Title" autocomplete="off" autocapitalize="sentences" spellcheck="true" class="note-title-input">
+    <textarea id="note-editor-body-text" placeholder="Write your note here..." spellcheck="true"></textarea>
+  </div>
+</div>
+
+<!-- Help screen — FAQ + feature guide, accessible from the ? button in topbar -->
+<div id="help-modal" class="modal help-modal" role="dialog" aria-label="Help">
+  <div class="modal-box help-box">
+    <h3>Help &amp; FAQ</h3>
+    <div class="help-content">
+      <details>
+        <summary>How do I import a file?</summary>
+        <p>Tap <strong>Get Started</strong> or <strong>Import</strong> in the topbar. iPad's file picker opens, letting you pick from:</p>
+        <ul>
+          <li><strong>On My iPad</strong> — files saved locally</li>
+          <li><strong>iCloud Drive</strong> — synced across your Apple devices</li>
+          <li><strong>Dropbox, Google Drive, OneDrive</strong>, or any other cloud you've signed into in the Files app</li>
+          <li><strong>Recents</strong> — files you touched recently</li>
+          <li><strong>Connected drives</strong> — USB drives via adapter, external storage</li>
+        </ul>
+        <p>Supported: <code>.html</code>, <code>.zip</code>, <code>.pdf</code>, <code>.epub</code>.</p>
+      </details>
+
+      <details>
+        <summary>How do I import a PWA?</summary>
+        <p>Tap <strong>Import a PWA</strong> on the home screen. Two ways that work on iPad:</p>
+        <ol>
+          <li><strong>Zip the folder first.</strong> In Files, long-press the folder &rarr; Compress. Pick the resulting .zip.</li>
+          <li><strong>Multi-select files.</strong> Open the folder, tap Select, check every file, pass to Load.</li>
+        </ol>
+      </details>
+
+      <details>
+        <summary>How do I use Read Aloud (TTS)?</summary>
+        <p>Open any imported app. In the viewer top bar, tap the <strong>&#128266; speaker icon</strong>. A drawer slides up with Play/Pause/Stop, speed, and a voice picker.</p>
+        <p>Enhanced (high-quality) voices are marked with <strong>&#9733;</strong> in the dropdown. To install more, open iPad <strong>Settings &rarr; Accessibility &rarr; Spoken Content &rarr; Voices</strong> and tap the &darr; icon next to any voice to download it.</p>
+      </details>
+
+      <details>
+        <summary>How do I save my place (bookmarks)?</summary>
+        <p>In the viewer, tap the <strong>&#9733; star icon</strong>. Tap "Add bookmark here" and give it a name (like "Chapter 3" or "Page 48"). Later, open the same bookmarks drawer and tap Jump next to any entry to return to that spot.</p>
+        <p>Your <strong>last scroll position</strong> is saved automatically even without a named bookmark — Load always re-opens where you left off, and the home screen shows a green <strong>"Continue: &lt;app name&gt;"</strong> button when you can pick up where you stopped.</p>
+      </details>
+
+      <details>
+        <summary>How do I use the reading aids?</summary>
+        <p>In the viewer, tap <strong>Aa</strong>. You get:</p>
+        <ul>
+          <li>Font size / line spacing / letter spacing adjusters</li>
+          <li>Color overlays (cream / yellow / soft blue) to cut glare</li>
+          <li>Dyslexia font toggle (OpenDyslexic)</li>
+          <li>Bionic reading (bolds the first ~40% of each word)</li>
+          <li>Focus line (reading ruler)</li>
+          <li>Per-app theme override (stays with just that app)</li>
+        </ul>
+        <p>Global settings live behind the <strong>&#9881; gear</strong> icon in the topbar.</p>
+      </details>
+
+      <details>
+        <summary>How do I attach a note to an app?</summary>
+        <p>Two ways:</p>
+        <ol>
+          <li><strong>While viewing</strong> — tap the <strong>&#128221; notes icon</strong> in the viewer top bar and write your note.</li>
+          <li><strong>From the library</strong> — tap the <strong>&hellip;</strong> on any tile &rarr; Notes.</li>
+        </ol>
+        <p>For a standalone note not tied to any app, tap the <strong>&#128221; notes icon</strong> in the home topbar &rarr; <strong>+ New Note</strong>.</p>
+      </details>
+
+      <details>
+        <summary>How do I add an app to my iPad home screen?</summary>
+        <p>In the library, tap the <strong>&hellip;</strong> on any tile &rarr; <strong>Add to Home Screen</strong>. Follow the three steps in the modal (Safari Share &rarr; Add to Home Screen). Each app gets its own dedicated icon that opens Load straight into that app.</p>
+      </details>
+
+      <details>
+        <summary>Is this really offline?</summary>
+        <p>Yes. Once Load is installed (either opened once in Safari or added to Home Screen), it runs entirely from your iPad. No internet is needed to open Load or any imported file. No data ever leaves your device.</p>
+        <p>Test it yourself: turn on Airplane Mode, tap the Load icon &mdash; it works.</p>
+      </details>
+
+      <details>
+        <summary>Can I edit an imported app?</summary>
+        <p>Yes. In the library, tap <strong>&hellip;</strong> on any tile &rarr; <strong>Edit HTML</strong>. A full-screen editor opens with the raw HTML. Save writes the changes to Load's local storage; your original file on iPad stays untouched.</p>
+      </details>
+
+      <details>
+        <summary>My Kindle books won't open</summary>
+        <p>Amazon Kindle files (<code>.azw</code>, <code>.azw3</code>, <code>.mobi</code>, <code>.kfx</code>) are DRM-locked and can only open in Amazon's apps. Convert them to EPUB first using <strong>Calibre</strong> (free desktop tool, <a href="https://calibre-ebook.com" target="_blank" rel="noopener" class="link">calibre-ebook.com</a>) on a computer, then import the EPUB here.</p>
+      </details>
+    </div>
+    <div class="modal-actions">
+      <button id="help-close" class="primary-btn">Got it</button>
+    </div>
   </div>
 </div>
 

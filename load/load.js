@@ -1,6 +1,22 @@
 // Load — Run Web Apps on iPad (PWA)
 // Copyright (c) 2026 DssOrit. All Rights Reserved.
-// Proprietary. See LICENSE at the repository root.
+//
+// Unauthorized reproduction, modification, distribution, or
+// commercial use is strictly prohibited. See LICENSE at the
+// repository root for the full terms.
+//
+// Load is an offline, dyslexia-friendly launcher for imported HTML
+// apps, PDFs, and EPUB books. All features run locally on the
+// device — no network calls, no analytics, no accounts.
+//
+// Main subsystems in this file:
+//   - IndexedDB storage (apps, notes, settings)
+//   - File import routing (HTML / ZIP / PDF / EPUB)
+//   - WKWebView-equivalent iframe viewer
+//   - Reading aids (font, spacing, overlays, bionic, focus line)
+//   - Bookmarks, per-app notes, reading position, timer, theme
+//   - TTS via Web Speech API, with enhanced-voice sorting
+//   - Help screen + standalone notes screen
 
 (function () {
   'use strict';
@@ -30,7 +46,7 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
   function show(screenId) {
-    var screens = ['home-screen', 'library-screen', 'viewer-screen', 'editor-screen'];
+    var screens = ['home-screen', 'library-screen', 'viewer-screen', 'editor-screen', 'notes-screen', 'note-editor'];
     for (var i = 0; i < screens.length; i++) {
       var el = $(screens[i]);
       if (!el) continue;
@@ -157,6 +173,8 @@
       wireTts();
       wireBookmarks();
       wirePerAppTheme();
+      wireNotesScreen();
+      wireHelp();
       updateResumeCard();
       renderRecent();
 
@@ -181,11 +199,39 @@
 
   /* ---------- Home screen ---------- */
   function updateHomeCounts() {
-    // Type-box counts were removed from home in v10a to match Attain's
-    // minimal home pattern. Keep this as a no-op so callers don't break.
+    var counts = { html: 0, zip: 0, pdf: 0, epub: 0 };
+    for (var i = 0; i < apps.length; i++) {
+      var k = apps[i].kind || 'html';
+      if (counts[k] != null) counts[k]++;
+    }
+    document.querySelectorAll('[data-count]').forEach(function (el) {
+      var k = el.getAttribute('data-count');
+      el.textContent = counts[k] || 0;
+    });
   }
+
   function renderRecent() {
-    // Recent strip also removed from home; kept on library via sort order.
+    var section = $('home-recent');
+    var row = $('home-recent-row');
+    if (!row || !section) return;
+    var recent = apps.filter(function (a) { return a.lastOpened; })
+                     .sort(function (a, b) { return (b.lastOpened || 0) - (a.lastOpened || 0); })
+                     .slice(0, 6);
+    if (!recent.length) { section.style.display = 'none'; return; }
+    section.style.display = 'block';
+    row.innerHTML = recent.map(function (a) {
+      return '<button class="mini-tile" data-open="' + esc(a.id) + '">' +
+        '<div class="mini-tile-name">' + esc(a.name) + '</div>' +
+        '<div class="mini-tile-meta">' + esc(relTime(a.lastOpened || 0)) + '</div>' +
+      '</button>';
+    }).join('');
+    row.querySelectorAll('[data-open]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var id = b.getAttribute('data-open');
+        var app = apps.find(function (x) { return x.id === id; });
+        if (app) openApp(app);
+      });
+    });
   }
 
   function wireNavButtons() {
@@ -207,7 +253,8 @@
         else if (tool === 'size-down') { settings.fontSizeStep = Math.max(-2, (settings.fontSizeStep || 0) - 1); saveSettings(); applySettings(); }
         else if (tool === 'theme') cycleTheme();
         else if (tool === 'font') toggleDyslexiaFont();
-        else if (tool === 'notes') openNotesIndex();
+        else if (tool === 'notes') openNotesScreen();
+        else if (tool === 'help') openHelp();
       });
     });
   }
@@ -221,17 +268,150 @@
     settings.font = (settings.font === 'opendyslexic') ? 'atkinson' : 'opendyslexic';
     saveSettings(); applySettings();
   }
-  function openNotesIndex() {
-    // Show a simple modal listing all apps that have notes attached
-    var withNotes = apps.filter(function (a) { return a.notes && a.notes.trim(); });
-    if (!withNotes.length) {
-      alert('No notes yet. Open a library item and tap the notes icon to start one.');
+  /* ---------- Notes screen (browse + create) ---------- */
+  // Standalone notes are stored in localStorage under LS_NOTES as an array
+  // of {id, title, content, ts}. Per-app notes continue to live on each
+  // Project record. The Notes screen shows both in one list.
+  var LS_NOTES = 'load_standalone_notes_v1';
+  function loadStandaloneNotes() {
+    try { var raw = localStorage.getItem(LS_NOTES); return raw ? JSON.parse(raw) : []; }
+    catch (e) { return []; }
+  }
+  function saveStandaloneNotes(arr) {
+    try { localStorage.setItem(LS_NOTES, JSON.stringify(arr)); } catch (e) {}
+  }
+
+  function openNotesScreen() {
+    renderNotesScreen();
+    show('notes-screen');
+  }
+  function renderNotesScreen() {
+    var standalone = loadStandaloneNotes().map(function (n) {
+      return { kind: 'standalone', id: n.id, title: n.title, content: n.content, ts: n.ts };
+    });
+    var linked = apps.filter(function (a) { return a.notes && a.notes.trim(); })
+      .map(function (a) {
+        return { kind: 'linked', appId: a.id, id: 'app:' + a.id, title: a.name, content: a.notes, ts: a.lastOpened || a.dateAdded };
+      });
+    var all = standalone.concat(linked).sort(function (a, b) { return (b.ts || 0) - (a.ts || 0); });
+
+    var grid = $('notes-screen-list');
+    var empty = $('notes-empty');
+    if (!all.length) {
+      grid.innerHTML = '';
+      empty.style.display = 'flex';
       return;
     }
-    var list = withNotes.map(function (a, i) {
-      return (i + 1) + '. ' + a.name + '\n    ' + String(a.notes).slice(0, 120).replace(/\n/g, ' ');
-    }).join('\n\n');
-    alert('Your notes:\n\n' + list);
+    empty.style.display = 'none';
+    grid.innerHTML = all.map(function (n) {
+      var preview = String(n.content || '').slice(0, 140).replace(/\n/g, ' ');
+      var when = n.ts ? relTime(n.ts) : '';
+      var badge = n.kind === 'linked'
+        ? '<span class="nc-badge linked">Linked</span>'
+        : '<span class="nc-badge">Note</span>';
+      return '<button class="note-card" data-note-id="' + esc(n.id) + '">' +
+        badge +
+        '<div class="nc-title">' + esc(n.title || 'Untitled') + '</div>' +
+        '<div class="nc-preview">' + esc(preview) + '</div>' +
+        '<div class="nc-meta">' + esc(when) + '</div>' +
+      '</button>';
+    }).join('');
+    grid.querySelectorAll('[data-note-id]').forEach(function (card) {
+      card.addEventListener('click', function () {
+        var id = card.getAttribute('data-note-id');
+        openNoteEditor(id);
+      });
+    });
+  }
+
+  var noteEditorTarget = null;    // {kind, id, appId?}
+  function openNoteEditor(noteId) {
+    var title = '', content = '', ctxLabel = '';
+    if (noteId && noteId.indexOf('app:') === 0) {
+      var appId = noteId.slice(4);
+      var app = apps.find(function (x) { return x.id === appId; });
+      if (!app) return;
+      noteEditorTarget = { kind: 'linked', id: noteId, appId: appId };
+      title = app.name; content = app.notes || '';
+      ctxLabel = 'Note attached to "' + app.name + '"';
+    } else if (noteId) {
+      var arr = loadStandaloneNotes();
+      var n = arr.find(function (x) { return x.id === noteId; });
+      if (!n) return;
+      noteEditorTarget = { kind: 'standalone', id: noteId };
+      title = n.title; content = n.content; ctxLabel = 'Standalone note';
+    } else {
+      // New standalone note
+      var newId = 'note-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+      noteEditorTarget = { kind: 'standalone', id: newId, isNew: true };
+      title = ''; content = ''; ctxLabel = 'New note';
+    }
+    $('note-editor-title').value = title;
+    $('note-editor-body-text').value = content;
+    $('note-editor-context').textContent = ctxLabel;
+    show('note-editor');
+    setTimeout(function () {
+      if (noteEditorTarget.isNew) $('note-editor-title').focus();
+    }, 30);
+  }
+
+  function saveCurrentNote() {
+    if (!noteEditorTarget) return;
+    var title = $('note-editor-title').value.trim() || 'Untitled';
+    var content = $('note-editor-body-text').value;
+    if (noteEditorTarget.kind === 'linked') {
+      var app = apps.find(function (x) { return x.id === noteEditorTarget.appId; });
+      if (!app) return;
+      app.notes = content;
+      putApp(app);
+    } else {
+      var arr = loadStandaloneNotes();
+      var idx = arr.findIndex(function (x) { return x.id === noteEditorTarget.id; });
+      var rec = { id: noteEditorTarget.id, title: title, content: content, ts: Date.now() };
+      if (idx >= 0) arr[idx] = rec;
+      else arr.push(rec);
+      saveStandaloneNotes(arr);
+    }
+  }
+
+  function deleteCurrentNote() {
+    if (!noteEditorTarget) return;
+    if (!confirm('Delete this note?')) return;
+    if (noteEditorTarget.kind === 'linked') {
+      var app = apps.find(function (x) { return x.id === noteEditorTarget.appId; });
+      if (app) { app.notes = ''; putApp(app); }
+    } else {
+      var arr = loadStandaloneNotes().filter(function (x) { return x.id !== noteEditorTarget.id; });
+      saveStandaloneNotes(arr);
+    }
+    noteEditorTarget = null;
+    show('notes-screen');
+    renderNotesScreen();
+  }
+
+  function wireNotesScreen() {
+    $('notes-new-btn').addEventListener('click', function () { openNoteEditor(null); });
+    $('note-editor-back').addEventListener('click', function () {
+      saveCurrentNote();
+      noteEditorTarget = null;
+      show('notes-screen'); renderNotesScreen();
+    });
+    $('note-editor-save').addEventListener('click', function () {
+      saveCurrentNote();
+      noteEditorTarget = null;
+      show('notes-screen'); renderNotesScreen();
+    });
+    $('note-editor-delete').addEventListener('click', deleteCurrentNote);
+  }
+
+  /* ---------- Help modal ---------- */
+  function wireHelp() {
+    $('help-close').addEventListener('click', function () {
+      $('help-modal').classList.remove('on');
+    });
+  }
+  function openHelp() {
+    $('help-modal').classList.add('on');
   }
 
   function wireHomeActions() {

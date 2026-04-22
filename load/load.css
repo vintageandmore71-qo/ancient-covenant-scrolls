@@ -1,5 +1,9 @@
 /* Load — Run Web Apps on iPad (PWA)
-   Copyright (c) 2026 DssOrit. All Rights Reserved. */
+   Copyright (c) 2026 DssOrit. All Rights Reserved.
+
+   Unauthorized reproduction, modification, distribution, or
+   commercial use is strictly prohibited. See LICENSE at the
+   repository root for the full terms. */
 
 /* ------------- Dyslexia-friendly fonts (bundled locally) ------------- */
 @font-face {
@@ -179,6 +183,10 @@ button, .tap, [role="button"] { min-height: 48px; }
 .big-action.secondary {
   background: linear-gradient(135deg, #059669, #0891b2);
   box-shadow: 0 4px 16px rgba(8, 145, 178, 0.25);
+}
+.big-action.pwa-solid {
+  background: linear-gradient(135deg, #8b1f99, #4a1866);
+  box-shadow: 0 4px 16px rgba(139, 31, 153, 0.3);
 }
 .big-action .ba-icon { font-size: 22px; line-height: 1; }
 .big-action .ba-text { }
@@ -475,6 +483,105 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
 }
 .per-theme-btn.active { outline: 3px solid var(--accent); outline-offset: 2px; }
 
+/* ------------- Notes screen ------------- */
+.title-inline { font-size: 16px; color: var(--ink-hi); font-weight: 700; letter-spacing: 0.5px; }
+.notes-screen-body { padding: 20px 24px 60px; max-width: 900px; margin: 0 auto; }
+.notes-grid {
+  display: grid; gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  margin-top: 10px;
+}
+.note-card {
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: 14px; padding: 16px;
+  min-height: 120px; cursor: pointer;
+  display: flex; flex-direction: column; gap: 8px;
+  text-align: left;
+}
+.note-card:active { transform: scale(0.98); }
+.note-card .nc-badge {
+  display: inline-block; font-size: 11px;
+  padding: 3px 8px; border-radius: 8px;
+  background: var(--bg-3); color: var(--ink-mid);
+  letter-spacing: 0.5px; text-transform: uppercase; font-weight: 700;
+  align-self: flex-start;
+}
+.note-card .nc-badge.linked { background: rgba(124, 124, 255, 0.2); color: var(--accent-hi); }
+.note-card .nc-title {
+  font-size: 16px; font-weight: 700; color: var(--ink-hi);
+  line-height: 1.3;
+  overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.note-card .nc-preview {
+  font-size: 13px; color: var(--ink-mid); line-height: 1.5;
+  overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+}
+.note-card .nc-meta { font-size: 11px; color: var(--ink-low); margin-top: auto; }
+
+/* ------------- Note editor (full-screen) ------------- */
+.note-editor { display: none; flex-direction: column; }
+.note-editor.on { display: flex; }
+.note-editor-body {
+  flex: 1; display: flex; flex-direction: column; gap: 12px;
+  padding: 14px 18px max(18px, env(safe-area-inset-bottom));
+  min-height: 0; max-width: 900px; width: 100%; margin: 0 auto;
+}
+.note-title-input {
+  width: 100%; padding: 14px 18px;
+  background: var(--bg-2); color: var(--ink-hi);
+  border: 2px solid var(--border); border-radius: 10px;
+  font-size: 20px; font-weight: 700;
+  font-family: inherit; letter-spacing: inherit;
+  -webkit-appearance: none;
+}
+.note-title-input:focus { outline: none; border-color: var(--accent); }
+#note-editor-body-text {
+  flex: 1; min-height: 0;
+  width: 100%;
+  background: var(--bg-0); color: var(--ink-hi);
+  border: 2px solid var(--border); border-radius: 10px;
+  padding: 16px;
+  font-size: 17px; line-height: 1.75;
+  font-family: inherit; letter-spacing: inherit;
+  resize: none; -webkit-appearance: none;
+}
+#note-editor-body-text:focus { outline: none; border-color: var(--accent); }
+
+/* ------------- Help modal ------------- */
+.help-modal .help-box {
+  max-width: 680px; max-height: 85vh;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.help-content {
+  overflow-y: auto; padding: 4px 2px 10px;
+  flex: 1;
+}
+.help-content details {
+  background: var(--bg-1); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 14px; margin-bottom: 8px;
+}
+.help-content details[open] { background: var(--bg-2); }
+.help-content summary {
+  cursor: pointer; font-weight: 700; font-size: 15px;
+  padding: 8px 0; color: var(--ink-hi); list-style: none;
+  outline: none;
+}
+.help-content summary::-webkit-details-marker { display: none; }
+.help-content summary::before { content: '+ '; color: var(--accent); font-weight: 700; }
+.help-content details[open] summary::before { content: '− '; }
+.help-content p, .help-content ul, .help-content ol {
+  margin: 10px 0; line-height: 1.7; color: var(--ink-hi);
+  padding-left: 20px;
+}
+.help-content p { padding-left: 0; }
+.help-content li { margin-bottom: 6px; }
+.help-content code {
+  background: var(--bg-3); padding: 1px 6px; border-radius: 4px;
+  font-size: 0.9em; color: var(--accent-hi);
+}
+.help-content strong { color: var(--ink-hi); }
+
 /* Home resume card — appears above the two main buttons when there's
    an app with a saved reading position. Green gradient so it's clearly
    distinct from "Import" (purple) and "Library" (teal). */
@@ -486,6 +593,16 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
   max-width: 500px;
   width: calc(100% - 32px);
   justify-content: center;
+}
+
+.home-copyright {
+  margin: 32px auto 0;
+  padding: 20px;
+  font-size: 12px;
+  color: #8a8ac0;
+  text-align: center;
+  line-height: 1.7;
+  max-width: 500px;
 }
 
 /* ------------- Library ------------- */

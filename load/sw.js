@@ -1,8 +1,15 @@
 // Load — Run Web Apps on iPad (PWA)
 // Copyright (c) 2026 DssOrit. All Rights Reserved.
-// Service worker: offline shell caching only. No user data is fetched.
+//
+// Unauthorized reproduction, modification, distribution, or
+// commercial use is strictly prohibited. See LICENSE at the
+// repository root for the full terms.
+//
+// Service worker: offline shell caching only. No user data is
+// fetched or transmitted. Imported apps live in IndexedDB on the
+// user's device and are never sent anywhere.
 
-var CACHE = 'load-v11';
+var CACHE = 'load-v12';
 
 var SHELL = [
   './',
