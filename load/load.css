@@ -994,6 +994,15 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
 .install-modal-box { max-width: 520px; }
 .install-steps { margin: 16px 0; }
 
+.panel-hint-list {
+  margin: 6px 0 8px;
+  padding-left: 20px;
+  font-size: 13px;
+  color: var(--ink-mid);
+  line-height: 1.7;
+}
+.panel-hint-list li { margin-bottom: 4px; }
+
 /* ------------- Toast notifications ------------- */
 .toast {
   position: fixed;
