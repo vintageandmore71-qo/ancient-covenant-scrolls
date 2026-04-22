@@ -702,6 +702,39 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
 }
 .import-hint strong { color: var(--ink-hi); }
 
+/* ------------- Toast notifications ------------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--accent);
+  color: var(--bg-0);
+  padding: 14px 20px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: 0 8px 32px rgba(124, 124, 255, 0.4);
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  max-width: 90vw;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.toast.on {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+.toast.error {
+  background: var(--danger);
+  color: #fff;
+  box-shadow: 0 8px 32px rgba(204, 63, 85, 0.4);
+}
+
 .home-copyright {
   margin: 32px auto 0;
   padding: 20px;
@@ -836,7 +869,15 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
   border: none; text-align: left; font-size: 14px; min-height: 40px;
 }
 .context-menu button:active { background: #3a3a5a; }
-.context-menu button.danger { color: #ff8a8a; }
+.context-menu button.danger {
+  color: #ff8a8a;
+  font-weight: 700;
+}
+.context-menu .menu-sep {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
 
 /* ------------- Viewer ------------- */
 .viewer-topbar {

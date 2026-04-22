@@ -45,6 +45,18 @@
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
+  /* ---------- Toast notification ---------- */
+  var toastTimer = null;
+  function toast(msg, isError) {
+    var el = $('toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.toggle('error', !!isError);
+    el.classList.add('on');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove('on'); }, 3000);
+  }
+
   function show(screenId) {
     var screens = ['home-screen', 'library-screen', 'viewer-screen', 'editor-screen', 'notes-screen', 'note-editor', 'import-screen'];
     for (var i = 0; i < screens.length; i++) {
@@ -159,29 +171,34 @@
     try { localStorage.setItem(LS_AIDS, JSON.stringify(aids)); } catch (e) {}
   }
 
-  /* ---------- Boot sequence ---------- */
+  /* ---------- Boot sequence ----------
+   * Each wire* step is wrapped in its own try so one missing element
+   * (e.g. after a DOM change in a future refactor) can't stop the app
+   * from booting. Errors are logged to console but never surface to
+   * the user as a broken home screen. */
+  function safe(label, fn) { try { fn(); } catch (e) { try { console.warn('Load boot:', label, e); } catch (_) {} } }
   async function boot() {
     try {
-      applySettings();
-      db = await openDB();
-      apps = await listAll();
-      updateHomeCounts();
-      wireNavButtons();
-      wireHomeActions();
-      wireSettingsPanel();
-      wireLibrarySearch();
-      wireNotes();
-      wireTts();
-      wireBookmarks();
-      wirePerAppTheme();
-      wireNotesScreen();
-      wireHelp();
-      wireFolders();
-      wireBackup();
-      renderFolderList();
-      renderLibraryChips();
-      updateResumeCard();
-      renderRecent();
+      safe('applySettings', applySettings);
+      try { db = await openDB(); apps = await listAll(); }
+      catch (e) { console.warn('IndexedDB open failed', e); apps = []; }
+      safe('updateHomeCounts', updateHomeCounts);
+      safe('wireNavButtons', wireNavButtons);
+      safe('wireHomeActions', wireHomeActions);
+      safe('wireSettingsPanel', wireSettingsPanel);
+      safe('wireLibrarySearch', wireLibrarySearch);
+      safe('wireNotes', wireNotes);
+      safe('wireTts', wireTts);
+      safe('wireBookmarks', wireBookmarks);
+      safe('wirePerAppTheme', wirePerAppTheme);
+      safe('wireNotesScreen', wireNotesScreen);
+      safe('wireHelp', wireHelp);
+      safe('wireFolders', wireFolders);
+      safe('wireBackup', wireBackup);
+      safe('renderFolderList', renderFolderList);
+      safe('renderLibraryChips', renderLibraryChips);
+      safe('updateResumeCard', updateResumeCard);
+      safe('renderRecent', renderRecent);
 
       // Deep-link: if the URL has ?app=<id>, open that app directly.
       // Used by home-screen icons created via "Add to Home Screen".
@@ -681,6 +698,58 @@
     renderLibraryChips();
     alert('Restore complete.');
   }
+  /* ---------- Share / Export one app as a standalone HTML file ----------
+   * For HTML / ZIP / PDF / EPUB apps the stored app.html is already a
+   * fully self-contained document, so we write it straight out.
+   * For media apps we inline the binary as a base64 data URL so the
+   * resulting HTML is one file someone else can open with no extras.
+   * The Web Share API (iPad Safari 16+) opens the native share sheet so
+   * the user can AirDrop, email, save to Files, or message the file. */
+  async function shareAsStandaloneHtml(app) {
+    var html = '';
+    if (app.kind === 'media' && app.binary) {
+      toast('Preparing media file...');
+      var buf = await app.binary.arrayBuffer();
+      var b64 = arrayBufferToBase64(buf);
+      var dataUrl = 'data:' + (app.mime || 'application/octet-stream') + ';base64,' + b64;
+      html = buildStandaloneMediaPage(app, dataUrl);
+    } else if (app.html) {
+      html = app.html;
+    } else {
+      toast('Nothing to share for this item.', true); return;
+    }
+    var safeName = String(app.name || 'load-item').replace(/[^a-zA-Z0-9 _\-]/g, '').trim() || 'load-item';
+    var fileName = safeName + '.html';
+    var blob = new Blob([html], { type: 'text/html; charset=utf-8' });
+    var file;
+    try { file = new File([blob], fileName, { type: 'text/html' }); } catch (e) {}
+    // Prefer the Web Share API — on iPad it opens the native share sheet
+    // so the user can AirDrop, message, email, or Save to Files in one tap.
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ title: app.name, files: [file] });
+        toast('Shared.');
+        return;
+      } catch (e) { /* user canceled or API refused; fall back */ }
+    }
+    var url = URL.createObjectURL(blob);
+    triggerAnchorDownload(url, fileName);
+    toast('Exported as ' + fileName);
+  }
+  function buildStandaloneMediaPage(app, dataUrl) {
+    var safeName = escHtml(app.name || 'Media');
+    var body = '';
+    if (app.subKind === 'video') body = '<video src="' + dataUrl + '" controls playsinline></video>';
+    else if (app.subKind === 'audio') body = '<audio src="' + dataUrl + '" controls></audio>';
+    else body = '<img src="' + dataUrl + '" alt="' + safeName + '">';
+    return '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+      '<title>' + safeName + '</title><style>html,body{margin:0;padding:0;background:#000;color:#fff;min-height:100vh;font-family:-apple-system,sans-serif;}' +
+      '.holder{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px;}' +
+      '.title{font-size:14px;color:#bbb;letter-spacing:1px;text-transform:uppercase;}' +
+      'video,audio,img{max-width:100%;max-height:85vh;border-radius:10px;}audio{width:100%;max-width:480px;}</style></head>' +
+      '<body><div class="holder"><div class="title">' + safeName + '</div>' + body + '</div></body></html>';
+  }
+
   function promptMoveToFolder(app) {
     var folders = loadFolders();
     if (!folders.length) {
@@ -1315,13 +1384,15 @@
     var menu = document.createElement('div');
     menu.className = 'context-menu';
     menu.innerHTML =
-      '<button data-act="open">View</button>' +
-      '<button data-act="notes">Notes</button>' +
-      '<button data-act="folder">Move to folder...</button>' +
-      '<button data-act="edit">Edit HTML</button>' +
-      '<button data-act="home">Add to Home Screen</button>' +
-      '<button data-act="rename">Rename</button>' +
-      '<button data-act="delete" class="danger">Delete</button>';
+      '<button data-act="open">&#128065; View</button>' +
+      '<button data-act="notes">&#128221; Notes</button>' +
+      '<button data-act="folder">&#128193; Move to folder...</button>' +
+      '<button data-act="share">&#10150; Share / Export as HTML</button>' +
+      '<button data-act="edit">&#9998; Edit HTML</button>' +
+      '<button data-act="home">&#127968; Add to Home Screen</button>' +
+      '<button data-act="rename">&#9999; Rename</button>' +
+      '<div class="menu-sep"></div>' +
+      '<button data-act="delete" class="danger">&#128465; Delete</button>';
     tile.appendChild(menu);
     menu.addEventListener('click', function (ev) {
       ev.stopPropagation();
@@ -1332,6 +1403,7 @@
       if (act === 'open') openApp(app);
       else if (act === 'notes') openNotesFor(app);
       else if (act === 'folder') promptMoveToFolder(app);
+      else if (act === 'share') shareAsStandaloneHtml(app);
       else if (act === 'edit') openEditor(app);
       else if (act === 'rename') promptRename(id);
       else if (act === 'delete') promptDelete(id);
@@ -1375,6 +1447,8 @@
   $('file-picker').addEventListener('change', async function (e) {
     var files = e.target.files;
     if (!files || !files.length) return;
+    var imported = 0;
+    var failed = 0;
     try {
       // Multi-file bundle detection: if the user picked several files AND
       // one of them is HTML, treat the selection as a "folder-like" web
@@ -1383,18 +1457,20 @@
       // folder in the Files app and Load bundles them together.
       if (files.length > 1 && hasHtmlEntry(files)) {
         await importMultiFileBundle(files);
+        imported = 1;
       } else {
         for (var i = 0; i < files.length; i++) {
-          try { await importFile(files[i]); }
+          try { await importFile(files[i]); imported++; }
           catch (err) {
+            failed++;
             hideProgress();
-            alert('Could not import ' + files[i].name + ': ' + (err && err.message ? err.message : err));
+            toast('✗ ' + files[i].name + ' failed: ' + (err && err.message ? err.message : err), true);
           }
         }
       }
     } catch (err) {
       hideProgress();
-      alert('Import failed: ' + (err && err.message ? err.message : err));
+      toast('Import failed: ' + (err && err.message ? err.message : err), true);
     }
     hideProgress();
     e.target.value = '';
@@ -1403,6 +1479,14 @@
     renderRecent();
     updateResumeCard();
     renderLibraryChips();
+    // Confirmation toast — green check, auto-dismisses after 3s
+    if (imported > 0) {
+      var label = imported === 1
+        ? '✓ Imported — now in your Library'
+        : '✓ Imported ' + imported + ' files — now in your Library';
+      if (failed > 0) label += ' (' + failed + ' failed)';
+      toast(label);
+    }
   });
 
   function hasHtmlEntry(fileList) {
@@ -1970,6 +2054,7 @@
     $('confirm-body').textContent = 'This removes it from Load. The original file on your iPad is not touched.';
     $('confirm-modal').classList.add('on');
     $('confirm-ok').onclick = async function () {
+      var deletedName = app.name;
       await deleteApp(id);
       apps = apps.filter(function (x) { return x.id !== id; });
       renderLibrary();
@@ -1978,6 +2063,7 @@
       renderLibraryChips();
       renderFolderList();
       closeConfirm();
+      toast('✓ Deleted "' + deletedName + '"');
     };
     $('confirm-cancel').onclick = closeConfirm;
   }
