@@ -255,9 +255,27 @@
         else if (tool === 'theme') cycleTheme();
         else if (tool === 'font') toggleDyslexiaFont();
         else if (tool === 'notes') openNotesScreen();
+        else if (tool === 'audio') openAudioSettings();
         else if (tool === 'help') openHelp();
       });
     });
+  }
+  function openAudioSettings() {
+    openSettingsPanel();
+    // Scroll the TTS section into view so the user doesn't hunt for it
+    setTimeout(function () {
+      var panel = $('settings-panel');
+      var heading = panel && panel.querySelector('h4');
+      var sections = panel ? panel.querySelectorAll('.panel-section') : [];
+      // Find the "Read Aloud (TTS)" section by its heading text
+      for (var i = 0; i < sections.length; i++) {
+        var h = sections[i].querySelector('h4');
+        if (h && /read aloud|tts/i.test(h.textContent)) {
+          sections[i].scrollIntoView({ block: 'start', behavior: 'smooth' });
+          break;
+        }
+      }
+    }, 120);
   }
   function cycleTheme() {
     var order = ['dark', 'cream', 'sepia', 'blue', 'contrast'];
