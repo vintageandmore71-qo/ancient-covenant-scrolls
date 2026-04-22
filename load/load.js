@@ -370,6 +370,113 @@
     }
   }
 
+  /* ---------- Developer Console (v14g) ----------
+   * Captures console.log/info/warn/error and window.error from the
+   * loaded iframe and mirrors them into a readable drawer. Also lets
+   * the user evaluate one-line expressions in the iframe's context —
+   * great for trying bits of JS while building. Built for dyslexic /
+   * disabled developers: large mono font, generous spacing, colored
+   * by severity, never scrolls off the top. */
+  var consoleEntries = [];
+  function wireConsole() {
+    var drawer = $('console-drawer');
+    if (!drawer) return;
+    document.getElementById('console-btn-viewer').addEventListener('click', function () {
+      drawer.classList.toggle('on');
+    });
+    $('console-close').addEventListener('click', function () { drawer.classList.remove('on'); });
+    $('console-clear').addEventListener('click', function () {
+      consoleEntries.length = 0;
+      renderConsole();
+    });
+    $('console-copy').addEventListener('click', function () {
+      var txt = consoleEntries.map(function (e) {
+        return '[' + e.level + '] ' + e.msg;
+      }).join('\n');
+      copyToClipboard(txt);
+      toast('✓ Console copied to clipboard');
+    });
+    $('console-run').addEventListener('click', runConsoleEval);
+    $('console-eval').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') runConsoleEval();
+    });
+  }
+  function renderConsole() {
+    var box = $('console-log');
+    if (!box) return;
+    box.innerHTML = consoleEntries.map(function (e) {
+      return '<div class="console-entry ' + e.level + '">' +
+        '<span class="tag">' + e.level + '</span>' +
+        escHtml(e.msg) + '</div>';
+    }).join('');
+    box.scrollTop = box.scrollHeight;
+  }
+  function addConsoleEntry(level, msg) {
+    consoleEntries.push({ level: level, msg: msg, ts: Date.now() });
+    if (consoleEntries.length > 500) consoleEntries.shift();
+    renderConsole();
+  }
+  function runConsoleEval() {
+    var input = $('console-eval');
+    var expr = (input.value || '').trim();
+    if (!expr) return;
+    addConsoleEntry('log', '> ' + expr);
+    try {
+      var frame = $('viewer-frame');
+      var win = frame && frame.contentWindow;
+      if (!win) { addConsoleEntry('error', 'No app is currently open.'); return; }
+      // Use the iframe's eval so the expression runs in the loaded app's
+      // scope (can see the app's variables/functions).
+      var result;
+      try { result = win.eval(expr); }
+      catch (err) { addConsoleEntry('error', String(err && err.stack || err)); input.value = ''; return; }
+      var stringified;
+      try { stringified = typeof result === 'string' ? result : JSON.stringify(result, null, 2); }
+      catch (_) { stringified = String(result); }
+      addConsoleEntry('info', stringified == null ? 'undefined' : stringified);
+      input.value = '';
+    } catch (e) {
+      addConsoleEntry('error', String(e));
+    }
+  }
+  /* Injected into every loaded iframe after load to forward console +
+   * error events up to the parent Load page. */
+  function installIframeConsoleBridge() {
+    var frame = $('viewer-frame');
+    if (!frame) return;
+    try {
+      var win = frame.contentWindow;
+      var doc = frame.contentDocument;
+      if (!win || !doc) return;
+      ['log','info','warn','error'].forEach(function (level) {
+        var original = win.console ? win.console[level] : null;
+        if (!win.console) win.console = {};
+        win.console[level] = function () {
+          try {
+            var parts = Array.prototype.slice.call(arguments).map(function (a) {
+              if (a === null) return 'null';
+              if (a === undefined) return 'undefined';
+              if (typeof a === 'string') return a;
+              try { return JSON.stringify(a); } catch (_) { return String(a); }
+            });
+            addConsoleEntry(level, parts.join(' '));
+          } catch (e) {}
+          if (typeof original === 'function') {
+            try { original.apply(win.console, arguments); } catch (_) {}
+          }
+        };
+      });
+      win.onerror = function (msg, src, line, col, err) {
+        var loc = src ? (' @ ' + src.replace(/^blob:[^\/]+\/\//, '')) : '';
+        addConsoleEntry('error', String(msg) + loc + (line ? ' (line ' + line + ')' : ''));
+        return false;
+      };
+      win.addEventListener('unhandledrejection', function (ev) {
+        addConsoleEntry('error', 'Unhandled promise rejection: ' + (ev.reason && ev.reason.message || ev.reason));
+      });
+    } catch (e) {}
+  }
+
   /* ---------- Load Helper — Copilot-style assistant ----------
    * Not real AI. No downloads. Instead: a curated knowledge base of
    * Load-usage answers (extracted from the Help FAQ) plus pattern
@@ -450,7 +557,53 @@
       actionLabel:'Open Import', actionFn:function(){ show('import-screen'); } },
     { id:'help', keywords:['help','how to','confused','lost','stuck','what does'],
       answer:'Tap the <strong>?</strong> icon in the top bar for the full Help window with 30+ plain-language answers. Or keep asking me here &mdash; I\'ll search the same info faster.',
-      actionLabel:'Open Help', actionFn:function(){ openHelp(); } }
+      actionLabel:'Open Help', actionFn:function(){ openHelp(); } },
+
+    /* Developer topics — for disabled / dyslexic developers who use Load
+     * as a build environment. Everything is plain-language, focused on
+     * what Load itself supports. */
+    { id:'dev-console', keywords:['console','log','error','debug','inspect','devtools'],
+      answer:'Open any item in the viewer. Tap the <strong>&#128187; laptop icon</strong> in the top bar. A console drawer slides up showing everything the loaded app prints (console.log, warn, error) plus any JavaScript errors. You can also type one-line expressions to run in the app\'s context.',
+      actionLabel:null, actionFn:null },
+    { id:'dev-edit', keywords:['edit source','edit code','change html','modify html','code editor'],
+      answer:'In the Library, tap the <strong>&hellip;</strong> on any tile &rarr; <strong>&#9998; Edit HTML</strong>. A full-screen source editor opens with the stored HTML. Change anything, tap Save &mdash; your changes stick to Load only. Tap Reload in the viewer to run the new version.',
+      actionLabel:null, actionFn:null },
+    { id:'dev-css', keywords:['center','css','style','color','background','class','selector','flex'],
+      answer:'Centering in CSS (copy-paste examples): <br><code>display: flex; align-items: center; justify-content: center;</code> inside a parent centers child horizontally + vertically. <br>For text: <code>text-align: center;</code>. <br>For a single item in a block: <code>margin: 0 auto;</code> (works with a set width).',
+      actionLabel:null, actionFn:null },
+    { id:'dev-div', keywords:['div','what is div','what is html','tag','element'],
+      answer:'A <code>&lt;div&gt;</code> is an HTML box with no meaning — it groups other elements so you can style or position them. Use <code>&lt;section&gt;</code>, <code>&lt;article&gt;</code>, <code>&lt;header&gt;</code>, <code>&lt;nav&gt;</code> for meaningful groups; <code>&lt;div&gt;</code> only when nothing more specific fits.',
+      actionLabel:null, actionFn:null },
+    { id:'dev-button', keywords:['button','make button','submit','click'],
+      answer:'Basic button: <code>&lt;button onclick="alert(\'hi\')"&gt;Click me&lt;/button&gt;</code>. Styled: add <code>class="primary"</code> and CSS. For a link that looks like a button: <code>&lt;a class="primary-btn" href="..."&gt;Label&lt;/a&gt;</code>.',
+      actionLabel:null, actionFn:null },
+    { id:'dev-link', keywords:['link','anchor','hyperlink','href','open in new tab'],
+      answer:'Link: <code>&lt;a href="https://example.com"&gt;Text&lt;/a&gt;</code>. Open in new tab: add <code>target="_blank" rel="noopener"</code>. For a link that calls JavaScript: use a <code>&lt;button&gt;</code> instead of <code>&lt;a&gt;</code>.',
+      actionLabel:null, actionFn:null },
+    { id:'dev-image', keywords:['image','img','photo','picture','show image'],
+      answer:'Basic image: <code>&lt;img src="cat.jpg" alt="a cat"&gt;</code>. The <code>alt</code> text is for screen readers &mdash; always include it. Responsive: add <code>style="max-width:100%;height:auto;"</code> so it never overflows.',
+      actionLabel:null, actionFn:null },
+    { id:'dev-form', keywords:['form','input','submit','text field'],
+      answer:'Minimal form: <pre><code>&lt;form onsubmit="event.preventDefault(); handle(this);"&gt;\n  &lt;label&gt;Name &lt;input name="n"&gt;&lt;/label&gt;\n  &lt;button&gt;Submit&lt;/button&gt;\n&lt;/form&gt;</code></pre>Every input should have a <code>&lt;label&gt;</code> for screen readers.',
+      actionLabel:null, actionFn:null },
+    { id:'dev-js-basics', keywords:['javascript','js','variable','function','if','loop'],
+      answer:'Basics: <br>Variable: <code>let x = 5;</code> or <code>const x = 5;</code> (const = can\'t change). <br>Function: <code>function say(name) { console.log("Hi " + name); }</code>. <br>If: <code>if (x &gt; 3) { ... } else { ... }</code>. <br>Use the Developer Console drawer to try small expressions.',
+      actionLabel:null, actionFn:null },
+    { id:'dev-dom', keywords:['getelementbyid','queryselector','dom','find element','change text'],
+      answer:'Get an element: <code>document.getElementById("hello")</code> or <code>document.querySelector(".myclass")</code>. Change its text: <code>el.textContent = "Hi";</code>. Change a style: <code>el.style.color = "red";</code>. Add a class: <code>el.classList.add("active");</code>.',
+      actionLabel:null, actionFn:null },
+    { id:'dev-accessibility', keywords:['accessibility','a11y','screen reader','aria','tab order'],
+      answer:'Accessibility basics: (1) Always use labels — <code>&lt;label&gt;</code> around inputs, <code>alt="..."</code> on images. (2) Use buttons for actions, links for navigation. (3) Check contrast (Load\'s dark theme with white text is AAA). (4) Don\'t disable zoom. (5) Keyboard-test: press Tab to cycle through controls and see that focus is visible.',
+      actionLabel:null, actionFn:null },
+    { id:'dev-dyslexia-friendly-css', keywords:['dyslexia friendly css','readable','opendyslexic','atkinson'],
+      answer:'Dyslexia-friendly CSS defaults: <code>font-family: "Atkinson Hyperlegible", sans-serif;</code><br><code>font-size: 17px;</code><br><code>line-height: 1.75;</code><br><code>letter-spacing: 0.02em;</code><br><code>word-spacing: 0.1em;</code><br>Avoid italic; use bold for emphasis. Avoid justified text (use <code>text-align: left;</code>).',
+      actionLabel:null, actionFn:null },
+    { id:'dev-test-workflow', keywords:['test my app','try my app','workflow','iterate','reload'],
+      answer:'Load is a small iPad dev environment: <br>(1) Use <strong>Create New</strong> or edit an imported file via <strong>Edit HTML</strong>. <br>(2) Save. <br>(3) Open it in the viewer. <br>(4) Tap the <strong>&#128187; console</strong> icon to watch logs/errors. <br>(5) Make a change, tap Reload. <br>Full rebuild cycle in 30 seconds, no computer needed.',
+      actionLabel:null, actionFn:null },
+    { id:'dev-when-need-mac', keywords:['web inspector','mac','safari inspector','breakpoints','full devtools'],
+      answer:'Load\'s built-in Developer Console handles logs, errors, and one-liner evaluation. For <strong>breakpoints</strong>, <strong>network inspection</strong>, <strong>CSS live-editing</strong>, or <strong>DOM inspector</strong>, you need Safari Web Inspector: plug your iPad into a Mac via USB, open Safari on the Mac &rarr; Develop &rarr; [your iPad] &rarr; Load. It\'s free.',
+      actionLabel:null, actionFn:null }
   ];
 
   function wireHelper() {
@@ -619,6 +772,7 @@
       safe('wireCreateScreen', wireCreateScreen);
       safe('wireAiHelper', wireAiHelper);
       safe('wireHelper', wireHelper);
+      safe('wireConsole', wireConsole);
       safe('renderFolderList', renderFolderList);
       safe('renderLibraryChips', renderLibraryChips);
       safe('updateResumeCard', updateResumeCard);
@@ -2678,6 +2832,9 @@
 
   function onFrameLoaded() {
     applyAidsToFrame();
+    // Install the dev-console bridge so the loaded app's logs and
+    // errors flow into our Developer Console drawer.
+    installIframeConsoleBridge();
     // Restore reading position if we have one (option 6)
     if (currentApp && currentApp.readingPosition > 0) {
       try {

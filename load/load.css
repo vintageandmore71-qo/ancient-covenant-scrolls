@@ -493,6 +493,65 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
   text-align: center; margin-top: 6px;
 }
 
+/* ------------- Developer Console drawer ------------- */
+.console-drawer {
+  position: fixed; bottom: -440px; left: 0; right: 0;
+  max-height: 60vh; height: 440px;
+  background: var(--bg-1); border-top: 2px solid var(--accent);
+  z-index: 75; display: flex; flex-direction: column;
+  transition: bottom 0.25s ease;
+  box-shadow: 0 -12px 40px rgba(0,0,0,0.5);
+}
+.console-drawer.on { bottom: 0; }
+.console-head {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.console-head h3 {
+  flex: 1; margin: 0; font-size: 14px; color: var(--accent);
+  text-transform: uppercase; letter-spacing: 1.5px;
+}
+.console-log {
+  flex: 1; overflow-y: auto;
+  padding: 8px 14px;
+  font-family: "SFMono-Regular", Menlo, "DejaVu Sans Mono", monospace;
+  font-size: 14px; line-height: 1.6;
+  letter-spacing: 0.02em;
+  background: #0e0e22;
+}
+.console-log:empty::before {
+  content: "No output yet. Logs and errors from your app will appear here.";
+  color: var(--ink-low); font-family: inherit;
+}
+.console-entry {
+  padding: 6px 10px; margin-bottom: 4px;
+  border-radius: 6px; word-break: break-word;
+  white-space: pre-wrap;
+}
+.console-entry.log   { background: rgba(124, 124, 255, 0.08); color: var(--ink-hi); border-left: 3px solid var(--accent); }
+.console-entry.info  { background: rgba(8, 145, 178, 0.10); color: var(--ink-hi); border-left: 3px solid #0891b2; }
+.console-entry.warn  { background: rgba(224, 160, 64, 0.12); color: #f0d090; border-left: 3px solid #e0a040; }
+.console-entry.error { background: rgba(204, 63, 85, 0.15); color: #ffb0b8; border-left: 3px solid var(--danger); }
+.console-entry .tag {
+  font-size: 11px; opacity: 0.7; text-transform: uppercase;
+  letter-spacing: 1px; margin-right: 8px; font-weight: 700;
+}
+.console-input-row {
+  display: flex; gap: 8px;
+  padding: 10px 14px max(10px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border);
+}
+.console-input-row input {
+  flex: 1; padding: 10px 12px;
+  background: var(--bg-0); color: var(--ink-hi);
+  border: 2px solid var(--border); border-radius: 8px;
+  font-family: "SFMono-Regular", Menlo, monospace;
+  font-size: 14px; -webkit-appearance: none;
+}
+.console-input-row input:focus { outline: none; border-color: var(--accent); }
+.console-input-row button { min-height: 44px; padding: 8px 16px; }
+
 /* ------------- Notes drawer ------------- */
 .notes-drawer {
   position: fixed; top: 0; bottom: 0; right: -520px;

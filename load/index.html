@@ -268,12 +268,30 @@
     <button id="notes-btn" class="icon-btn" aria-label="Notes" title="Notes">&#128221;</button>
     <button id="share-btn-viewer" class="icon-btn" aria-label="Share by text, email, AirDrop..." title="Share (text, email, AirDrop...)">&#10150;</button>
     <button id="ai-btn-viewer" class="icon-btn" aria-label="Ask AI about this" title="Ask AI">&#129302;</button>
+    <button id="console-btn-viewer" class="icon-btn" aria-label="Developer console" title="Developer console (logs, errors)">&#128187;</button>
     <button id="reload-btn" class="icon-btn" aria-label="Reload">&#8634;</button>
     <button id="aids-btn" class="icon-btn" aria-label="Reading aids">Aa</button>
     <button id="hide-ui-btn" class="icon-btn" aria-label="Hide controls" title="Hide controls">&#9776;</button>
   </header>
   <iframe id="viewer-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-storage-access-by-user-activation"></iframe>
   <button id="show-ui-btn" class="floating-show" aria-label="Show controls">&#9776;</button>
+
+  <!-- Developer console drawer — captures the loaded app's console output
+       and JS errors, shown in a dyslexia-friendly readable list. No Mac
+       needed. Slide-up panel at the bottom of the viewer. -->
+  <div id="console-drawer" class="console-drawer">
+    <div class="console-head">
+      <h3><span class="helper-icon">&#128187;</span> Developer Console</h3>
+      <button id="console-clear" class="seg-btn">Clear</button>
+      <button id="console-copy" class="seg-btn">Copy All</button>
+      <button id="console-close" class="icon-btn" aria-label="Close console">&times;</button>
+    </div>
+    <div id="console-log" class="console-log"></div>
+    <div class="console-input-row">
+      <input id="console-eval" type="text" placeholder="Try: 1 + 1 (runs in the loaded app)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <button id="console-run" class="primary-btn">Run</button>
+    </div>
+  </div>
 
   <!-- TTS control drawer — slides up from the bottom when Read Aloud is tapped -->
   <div id="tts-drawer" class="tts-drawer">
