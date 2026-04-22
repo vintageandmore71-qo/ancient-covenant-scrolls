@@ -155,12 +155,18 @@
     for (var i = 0; i < apps.length; i++) {
       var a = apps[i];
       var last = a.lastOpened ? 'Opened ' + relTime(a.lastOpened) : 'Not opened yet';
+      var iconChar = '&#128196;'; // generic doc
+      var kindLabel = '';
+      if (a.kind === 'zip') { iconChar = '&#128230;'; kindLabel = 'Web app'; }
+      else if (a.kind === 'pdf') { iconChar = '&#128462;'; kindLabel = 'PDF'; }
+      else if (a.kind === 'epub') { iconChar = '&#128214;'; kindLabel = 'EPUB'; }
+      else if (a.kind === 'html') { iconChar = '&#128196;'; kindLabel = 'HTML'; }
       parts.push(
         '<div class="tile" data-id="' + esc(a.id) + '">' +
           '<button class="tile-menu-btn" data-menu="' + esc(a.id) + '" aria-label="Options">&#8230;</button>' +
-          '<div class="tile-icon">&#128196;</div>' +
+          '<div class="tile-icon">' + iconChar + '</div>' +
           '<div class="tile-name">' + esc(a.name) + '</div>' +
-          '<div class="tile-meta">' + esc(last) + '</div>' +
+          '<div class="tile-meta">' + (kindLabel ? kindLabel + ' &middot; ' : '') + esc(last) + '</div>' +
         '</div>'
       );
     }
@@ -234,31 +240,382 @@
     var files = e.target.files;
     if (!files || !files.length) return;
     for (var i = 0; i < files.length; i++) {
-      try { await importFile(files[i]); } catch (err) {
+      try { await importFile(files[i]); }
+      catch (err) {
+        hideProgress();
         alert('Could not import ' + files[i].name + ': ' + (err && err.message ? err.message : err));
       }
     }
+    hideProgress();
     e.target.value = '';
     renderLibrary();
   });
 
+  function showProgress(msg) {
+    var el = $('import-progress');
+    $('import-progress-msg').textContent = msg || 'Importing...';
+    el.classList.add('on');
+  }
+  function hideProgress() { $('import-progress').classList.remove('on'); }
+
+  /* File-type router. Routes on extension; on unknown types we try the
+   * MIME type. Each handler returns a Project record ready to save. */
   async function importFile(file) {
+    var name = file.name || 'untitled';
+    var lower = name.toLowerCase();
+    var baseName = name.replace(/\.[^.]+$/, '');
+
+    // Kindle formats - DRM-locked or unsupported. Friendly error.
+    if (/\.(azw3?|kfx|mobi|prc)$/.test(lower)) {
+      throw new Error(
+        'Kindle file format detected. Amazon-purchased books are DRM-locked ' +
+        'and cannot be opened in third-party apps. Convert to EPUB with Calibre ' +
+        '(free desktop tool) first, then import the EPUB.'
+      );
+    }
+
+    showProgress('Reading ' + name + '...');
+
+    var app;
+    if (/\.(html?|xhtml)$/.test(lower)) {
+      app = await handleHtml(file, baseName);
+    } else if (/\.zip$/.test(lower)) {
+      app = await handleZip(file, baseName);
+    } else if (/\.pdf$/.test(lower)) {
+      app = await handlePdf(file, baseName);
+    } else if (/\.epub$/.test(lower)) {
+      app = await handleEpub(file, baseName);
+    } else {
+      // Fall back on MIME type if extension is unclear
+      if (file.type === 'text/html') app = await handleHtml(file, baseName);
+      else if (file.type === 'application/pdf') app = await handlePdf(file, baseName);
+      else if (file.type === 'application/epub+zip') app = await handleEpub(file, baseName);
+      else if (file.type === 'application/zip') app = await handleZip(file, baseName);
+      else throw new Error('Unsupported file type. Load accepts HTML, ZIP, PDF, and EPUB.');
+    }
+
+    await putApp(app);
+    apps.push(app);
+  }
+
+  /* ----- HTML: store as-is ----- */
+  async function handleHtml(file, baseName) {
     var text = await readAsText(file);
-    var guessTitle = null;
+    var titleGuess = null;
     try {
       var m = /<title[^>]*>([^<]+)<\/title>/i.exec(text);
-      if (m) guessTitle = m[1].trim();
+      if (m) titleGuess = m[1].trim();
     } catch (e) {}
-    var app = {
-      id: 'app-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8),
-      name: guessTitle || file.name.replace(/\.[^.]+$/, ''),
+    return {
+      id: newId(),
+      name: titleGuess || baseName,
+      kind: 'html',
       html: text,
       dateAdded: Date.now(),
       lastOpened: null,
       sizeBytes: text.length
     };
-    await putApp(app);
-    apps.push(app);
+  }
+
+  /* ----- ZIP: extract + inline everything into one HTML ----- */
+  async function handleZip(file, baseName) {
+    if (typeof JSZip === 'undefined') throw new Error('JSZip not loaded.');
+    showProgress('Unpacking ZIP archive...');
+    var buf = await readAsArrayBuffer(file);
+    var zip = await JSZip.loadAsync(buf);
+
+    // Find the entry HTML. Prefer index.html / start_url from manifest.
+    var files = Object.keys(zip.files).filter(function (k) { return !zip.files[k].dir; });
+    var htmlCandidates = files.filter(function (k) { return /\.html?$/i.test(k); });
+    if (!htmlCandidates.length) throw new Error('No HTML file found in the ZIP.');
+
+    // Look for manifest.json to learn the canonical entry, if present.
+    var manifestPath = files.find(function (k) { return /(^|\/)manifest\.json$/i.test(k); });
+    var startPath = null;
+    if (manifestPath) {
+      try {
+        var manifestText = await zip.file(manifestPath).async('string');
+        var manifest = JSON.parse(manifestText);
+        var base = manifestPath.replace(/[^/]+$/, '');
+        if (manifest.start_url) {
+          startPath = base + manifest.start_url.replace(/^\.?\/?/, '');
+          if (!files.includes(startPath)) startPath = null;
+        }
+      } catch (e) {}
+    }
+    if (!startPath) {
+      // Prefer the shortest-path index.html
+      startPath = htmlCandidates
+        .filter(function (k) { return /index\.html?$/i.test(k); })
+        .sort(function (a, b) { return a.length - b.length; })[0]
+        || htmlCandidates.sort(function (a, b) { return a.length - b.length; })[0];
+    }
+
+    showProgress('Inlining web app assets...');
+    var baseDir = startPath.replace(/[^/]+$/, '');
+
+    // Build a map of path -> {type, content} for all referenced assets.
+    // Load every file as either text (for CSS/JS/HTML) or as data URL
+    // (for images, fonts, binary).
+    var assetCache = {};
+    async function loadAsset(relPath) {
+      var full = resolveInZip(baseDir, relPath);
+      if (!full || !zip.file(full)) return null;
+      if (assetCache[full]) return assetCache[full];
+      var ext = full.split('.').pop().toLowerCase();
+      var entry = zip.file(full);
+      var item;
+      if (/^(css|js|html|htm|json|svg|txt|xml)$/.test(ext)) {
+        item = { type: 'text', content: await entry.async('string'), path: full, ext: ext };
+      } else {
+        var mime = mimeFor(ext);
+        var b64 = await entry.async('base64');
+        item = { type: 'dataurl', content: 'data:' + mime + ';base64,' + b64, path: full, ext: ext };
+      }
+      assetCache[full] = item;
+      return item;
+    }
+
+    var indexHtml = await zip.file(startPath).async('string');
+    indexHtml = await inlineHtmlAssets(indexHtml, baseDir, loadAsset);
+
+    var titleGuess = null;
+    try {
+      var m2 = /<title[^>]*>([^<]+)<\/title>/i.exec(indexHtml);
+      if (m2) titleGuess = m2[1].trim();
+    } catch (e) {}
+
+    return {
+      id: newId(),
+      name: titleGuess || baseName,
+      kind: 'zip',
+      html: indexHtml,
+      dateAdded: Date.now(),
+      lastOpened: null,
+      sizeBytes: indexHtml.length
+    };
+  }
+
+  function resolveInZip(baseDir, rel) {
+    if (!rel) return null;
+    if (/^(data|blob|https?|mailto|tel):/.test(rel)) return null; // external, skip
+    // strip querystring / hash for lookup
+    var cleaned = rel.split('#')[0].split('?')[0];
+    var parts = (baseDir + cleaned).split('/');
+    var stack = [];
+    for (var i = 0; i < parts.length; i++) {
+      if (!parts[i] || parts[i] === '.') continue;
+      if (parts[i] === '..') stack.pop();
+      else stack.push(parts[i]);
+    }
+    return stack.join('/');
+  }
+
+  function mimeFor(ext) {
+    var map = {
+      png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif',
+      webp: 'image/webp', svg: 'image/svg+xml', ico: 'image/x-icon',
+      woff: 'font/woff', woff2: 'font/woff2', ttf: 'font/ttf', otf: 'font/otf',
+      mp3: 'audio/mpeg', mp4: 'video/mp4', webm: 'video/webm', ogg: 'audio/ogg',
+      wasm: 'application/wasm', json: 'application/json'
+    };
+    return map[ext] || 'application/octet-stream';
+  }
+
+  async function inlineHtmlAssets(html, baseDir, loadAsset) {
+    // 1. Inline <link rel="stylesheet" href="...">
+    var linkRe = /<link\b[^>]*\brel=["']?stylesheet["']?[^>]*>/gi;
+    var links = []; var m;
+    while ((m = linkRe.exec(html)) !== null) links.push({ tag: m[0], index: m.index });
+    for (var i = 0; i < links.length; i++) {
+      var hrefMatch = /\bhref=["']([^"']+)["']/i.exec(links[i].tag);
+      if (!hrefMatch) continue;
+      var asset = await loadAsset(hrefMatch[1]);
+      if (!asset || asset.type !== 'text') continue;
+      var inlinedCss = await inlineCssUrls(asset.content, asset.path.replace(/[^/]+$/, ''), loadAsset);
+      html = html.replace(links[i].tag, '<style>\n' + inlinedCss + '\n</style>');
+    }
+
+    // 2. Inline <script src="...">
+    var scriptRe = /<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>\s*<\/script>/gi;
+    var scripts = [];
+    while ((m = scriptRe.exec(html)) !== null) scripts.push({ tag: m[0], src: m[1] });
+    for (var s = 0; s < scripts.length; s++) {
+      var aa = await loadAsset(scripts[s].src);
+      if (!aa || aa.type !== 'text') continue;
+      html = html.replace(scripts[s].tag, '<script>\n' + aa.content.replace(/<\/script/gi, '<\\/script') + '\n</script>');
+    }
+
+    // 3. Inline <img src="...">, <source src="...">, <video src>, <audio src>
+    var mediaRe = /<(img|source|video|audio)\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi;
+    var toReplace = [];
+    while ((m = mediaRe.exec(html)) !== null) toReplace.push({ tag: m[0], src: m[2] });
+    for (var r = 0; r < toReplace.length; r++) {
+      var ad = await loadAsset(toReplace[r].src);
+      if (!ad) continue;
+      var newTag = toReplace[r].tag.replace(toReplace[r].src, ad.type === 'dataurl' ? ad.content : toReplace[r].src);
+      html = html.replace(toReplace[r].tag, newTag);
+    }
+
+    return html;
+  }
+
+  async function inlineCssUrls(css, baseDir, loadAsset) {
+    // Replace url(...) references in CSS with data URLs where possible.
+    var urlRe = /url\(\s*(['"]?)([^'")]+)\1\s*\)/g;
+    var replacements = [];
+    var m;
+    while ((m = urlRe.exec(css)) !== null) replacements.push({ full: m[0], url: m[2] });
+    for (var i = 0; i < replacements.length; i++) {
+      var cleanUrl = replacements[i].url.split('#')[0].split('?')[0];
+      var asset = await loadAsset(cleanUrl);
+      if (asset && asset.type === 'dataurl') {
+        css = css.split(replacements[i].full).join('url(' + asset.content + ')');
+      }
+    }
+    return css;
+  }
+
+  /* ----- PDF: pdf.js text extraction -> HTML with pages ----- */
+  async function handlePdf(file, baseName) {
+    if (typeof pdfjsLib === 'undefined') throw new Error('pdf.js not loaded.');
+    showProgress('Parsing PDF...');
+    var buf = await readAsArrayBuffer(file);
+    var loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(buf) });
+    var pdf = await loadingTask.promise;
+    var pageCount = pdf.numPages;
+    var metaName = baseName;
+    try {
+      var meta = await pdf.getMetadata();
+      if (meta && meta.info && meta.info.Title) metaName = meta.info.Title.trim();
+    } catch (e) {}
+
+    var pagesHtml = [];
+    for (var p = 1; p <= pageCount; p++) {
+      showProgress('Parsing PDF... page ' + p + ' of ' + pageCount);
+      var page = await pdf.getPage(p);
+      var textContent = await page.getTextContent();
+      var pageText = '';
+      var lastY = null;
+      for (var i = 0; i < textContent.items.length; i++) {
+        var it = textContent.items[i];
+        var y = it.transform[5];
+        if (lastY !== null && Math.abs(y - lastY) > 2) pageText += '\n';
+        pageText += it.str + ' ';
+        lastY = y;
+      }
+      pagesHtml.push(
+        '<section class="pdf-page" data-page="' + p + '">' +
+        '<h2 class="pdf-page-num">Page ' + p + '</h2>' +
+        pageText.split(/\n+/).map(function (line) {
+          line = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').trim();
+          if (!line) return '';
+          return '<p>' + line + '</p>';
+        }).join('') +
+        '</section>'
+      );
+    }
+
+    var html =
+      '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+      '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+      '<title>' + escHtml(metaName) + '</title>' +
+      '<style>' +
+      'body{font-family:-apple-system,"Segoe UI",sans-serif;line-height:1.7;color:#222;background:#fff;padding:30px 20px;max-width:820px;margin:0 auto;}' +
+      'h1{font-size:22px;color:#333;margin:0 0 20px;}' +
+      '.pdf-page{border-bottom:1px solid #ddd;padding:20px 0;}' +
+      '.pdf-page:last-child{border-bottom:none;}' +
+      '.pdf-page-num{font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;}' +
+      '.pdf-page p{margin:0 0 10px;}' +
+      '</style></head><body>' +
+      '<h1>' + escHtml(metaName) + '</h1>' +
+      pagesHtml.join('') +
+      '</body></html>';
+
+    return {
+      id: newId(),
+      name: metaName,
+      kind: 'pdf',
+      html: html,
+      dateAdded: Date.now(),
+      lastOpened: null,
+      sizeBytes: html.length,
+      pageCount: pageCount
+    };
+  }
+
+  /* ----- EPUB: epub.js chapter extraction -> HTML ----- */
+  async function handleEpub(file, baseName) {
+    if (typeof ePub === 'undefined') throw new Error('epub.js not loaded.');
+    showProgress('Parsing EPUB...');
+    var buf = await readAsArrayBuffer(file);
+    var book = ePub(buf);
+    await book.ready;
+
+    // Try to get title from package metadata
+    var metaName = baseName;
+    try {
+      var md = await book.loaded.metadata;
+      if (md && md.title) metaName = md.title.trim();
+    } catch (e) {}
+
+    // Load every chapter's HTML, concatenate
+    var spineItems = book.spine && book.spine.items ? book.spine.items : [];
+    var chapters = [];
+    for (var i = 0; i < spineItems.length; i++) {
+      showProgress('Parsing EPUB... chapter ' + (i + 1) + ' of ' + spineItems.length);
+      var item = spineItems[i];
+      try {
+        var section = book.spine.get(item.index);
+        await section.load(book.load.bind(book));
+        var dom = section.document;
+        var bodyHtml = dom && dom.body ? dom.body.innerHTML : '';
+        // Clean up epub-specific attributes that don't make sense standalone
+        bodyHtml = bodyHtml.replace(/\s(xmlns|epub|id|class)=["'][^"']*["']/g, function (m, attr) {
+          // Keep id and class, strip xmlns and epub namespaces
+          return (attr === 'id' || attr === 'class') ? m : '';
+        });
+        chapters.push('<section class="epub-chapter">' + bodyHtml + '</section>');
+      } catch (e) {
+        chapters.push('<section class="epub-chapter"><p><em>Chapter could not be loaded.</em></p></section>');
+      }
+    }
+
+    var html =
+      '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+      '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+      '<title>' + escHtml(metaName) + '</title>' +
+      '<style>' +
+      'body{font-family:-apple-system,"Segoe UI",sans-serif;line-height:1.7;color:#222;background:#fff;padding:30px 20px;max-width:820px;margin:0 auto;}' +
+      'h1.book-title{font-size:22px;color:#333;margin:0 0 20px;}' +
+      '.epub-chapter{padding:30px 0;border-bottom:1px solid #eee;}' +
+      '.epub-chapter:last-child{border-bottom:none;}' +
+      '.epub-chapter img{max-width:100%;height:auto;}' +
+      '</style></head><body>' +
+      '<h1 class="book-title">' + escHtml(metaName) + '</h1>' +
+      chapters.join('') +
+      '</body></html>';
+
+    return {
+      id: newId(),
+      name: metaName,
+      kind: 'epub',
+      html: html,
+      dateAdded: Date.now(),
+      lastOpened: null,
+      sizeBytes: html.length,
+      chapterCount: chapters.length
+    };
+  }
+
+  function escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function newId() {
+    return 'app-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
   }
 
   function readAsText(file) {
@@ -267,6 +624,14 @@
       r.onload = function () { resolve(r.result || ''); };
       r.onerror = function () { reject(r.error); };
       r.readAsText(file);
+    });
+  }
+  function readAsArrayBuffer(file) {
+    return new Promise(function (resolve, reject) {
+      var r = new FileReader();
+      r.onload = function () { resolve(r.result); };
+      r.onerror = function () { reject(r.error); };
+      r.readAsArrayBuffer(file);
     });
   }
 

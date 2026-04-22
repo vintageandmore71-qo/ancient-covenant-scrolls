@@ -277,6 +277,25 @@ button:focus-visible { outline: 2px solid #7c7cff; outline-offset: 2px; }
 }
 #focus-line.on { display: block; }
 
+/* ------------- Import progress ------------- */
+.import-progress {
+  position: fixed; inset: 0; background: rgba(20, 20, 42, 0.85);
+  display: none; align-items: center; justify-content: center; flex-direction: column;
+  z-index: 250; color: #fff; gap: 18px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.import-progress.on { display: flex; }
+.import-progress .spinner {
+  width: 48px; height: 48px; border: 4px solid #2d2d55;
+  border-top-color: #7c7cff; border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+.import-progress .msg {
+  font-size: 15px; color: #e8e8ee; max-width: 320px; text-align: center; padding: 0 20px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
 /* ------------- Modal ------------- */
 .modal {
   position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200;

@@ -62,14 +62,21 @@
 
   <div id="library-empty" class="empty-state">
     <div class="empty-icon">&#128230;</div>
-    <h3>No web apps yet</h3>
-    <p>Tap <strong>Add</strong> to import a self-contained <code>.html</code> file from Files.</p>
-    <p class="hint">PDF, EPUB, DOCX? Use Attain. This launcher is for HTML web apps.</p>
+    <h3>Nothing imported yet</h3>
+    <p>Tap <strong>Add</strong> to import files from your iPad.</p>
+    <p class="hint">Works with: <code>.html</code> (web apps) &middot; <code>.zip</code> (web app bundles) &middot; <code>.pdf</code> (documents) &middot; <code>.epub</code> (books)</p>
+    <p class="hint">Kindle files (<code>.azw</code>/<code>.mobi</code>/<code>.kfx</code>) are DRM-locked by Amazon. Convert to EPUB with Calibre first.</p>
   </div>
 
   <div id="library-grid" class="grid"></div>
 
-  <input id="file-picker" type="file" accept=".html,.htm,text/html" multiple style="display:none;">
+  <input id="file-picker" type="file" accept=".html,.htm,.zip,.pdf,.epub,text/html,application/zip,application/pdf,application/epub+zip" multiple style="display:none;">
+
+  <!-- Progress indicator shown during import (PDF/EPUB parsing can take a moment) -->
+  <div id="import-progress" class="import-progress">
+    <div class="spinner"></div>
+    <div class="msg" id="import-progress-msg">Importing...</div>
+  </div>
 </div>
 
 <!-- Viewer screen -->
@@ -179,6 +186,19 @@
   </div>
 </div>
 
+<!-- Bundled libraries for importing web-app ZIPs, PDFs, and EPUBs.
+     All three are served from the Load folder itself — no CDN, no
+     network. Cached by the service worker for offline use after the
+     first load. -->
+<script src="lib-jszip.min.js"></script>
+<script src="lib-pdf.min.js"></script>
+<script src="lib-epub.min.js"></script>
+<script>
+/* Configure pdf.js worker from our locally-served worker file. */
+if (window.pdfjsLib) {
+  try { pdfjsLib.GlobalWorkerOptions.workerSrc = 'lib-pdf-worker.min.js'; } catch (e) {}
+}
+</script>
 <script src="load.js"></script>
 <script>
 if ('serviceWorker' in navigator) {

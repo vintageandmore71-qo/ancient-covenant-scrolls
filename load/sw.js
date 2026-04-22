@@ -2,7 +2,7 @@
 // Copyright (c) 2026 DssOrit. All Rights Reserved.
 // Service worker: offline shell caching only. No user data is fetched.
 
-var CACHE = 'load-v2';
+var CACHE = 'load-v3';
 
 var SHELL = [
   './',
@@ -10,7 +10,11 @@ var SHELL = [
   'load.css',
   'load.js',
   'manifest.json',
-  'icon.png'
+  'icon.png',
+  'lib-jszip.min.js',
+  'lib-pdf.min.js',
+  'lib-pdf-worker.min.js',
+  'lib-epub.min.js'
 ];
 
 self.addEventListener('install', function (e) {

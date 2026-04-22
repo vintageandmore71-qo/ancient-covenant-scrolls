@@ -56,15 +56,31 @@ var PASSWORD = 'acr2026';
 - `manifest.json` — PWA manifest for Add to Home Screen.
 - `icon.png` — placeholder; replace with the Load brand icon.
 
-## Limits (v1)
+## Supported formats (v2)
 
-- HTML only. PDF, EPUB, DOCX are not supported here — use Attain.
-- No ZIP import yet. Upload single-file HTMLs like the ones in
-  the repo root (ACR-Records-Standalone.html, ACR-Study-Standalone
-  .html, Attain-Standalone.html).
-- TTS not in v1. Use the host app's TTS if it has one, or v2 will
-  inject a TTS overlay.
-- Bookmarks / search within app: deferred to v2.
+| Format | How it's handled |
+|---|---|
+| `.html` / `.htm` | stored as-is |
+| `.zip` | extracted and inlined into one HTML via JSZip (multi-file web apps become single-file after import) |
+| `.pdf` | parsed by pdf.js, extracted as text, rendered as readable HTML with page markers |
+| `.epub` | parsed by epub.js, chapters concatenated into one readable HTML |
+| `.azw` / `.azw3` / `.kfx` / `.mobi` | Kindle formats — friendly error on import; convert to EPUB with Calibre first |
+
+Libraries are bundled locally (no CDN) at:
+- `lib-jszip.min.js` (~96 KB)
+- `lib-pdf.min.js` + `lib-pdf-worker.min.js` (~1.4 MB together)
+- `lib-epub.min.js` (~219 KB)
+
+Cached by the service worker on first load; offline after that.
+
+## Backlog for later
+
+- TTS with speed control inside the viewer
+- Bookmarks with notes
+- Search within a loaded project
+- Reading position save + Resume
+- Adjustable column width
+- Per-project sepia / night mode toggle
 
 ## Related
 
