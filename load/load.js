@@ -239,17 +239,38 @@
   $('file-picker').addEventListener('change', async function (e) {
     var files = e.target.files;
     if (!files || !files.length) return;
-    for (var i = 0; i < files.length; i++) {
-      try { await importFile(files[i]); }
-      catch (err) {
-        hideProgress();
-        alert('Could not import ' + files[i].name + ': ' + (err && err.message ? err.message : err));
+    try {
+      // Multi-file bundle detection: if the user picked several files AND
+      // one of them is HTML, treat the selection as a "folder-like" web
+      // app bundle. iOS Safari cannot pick folders directly, so this is
+      // the closest equivalent — tap-select multiple files from the same
+      // folder in the Files app and Load bundles them together.
+      if (files.length > 1 && hasHtmlEntry(files)) {
+        await importMultiFileBundle(files);
+      } else {
+        for (var i = 0; i < files.length; i++) {
+          try { await importFile(files[i]); }
+          catch (err) {
+            hideProgress();
+            alert('Could not import ' + files[i].name + ': ' + (err && err.message ? err.message : err));
+          }
+        }
       }
+    } catch (err) {
+      hideProgress();
+      alert('Import failed: ' + (err && err.message ? err.message : err));
     }
     hideProgress();
     e.target.value = '';
     renderLibrary();
   });
+
+  function hasHtmlEntry(fileList) {
+    for (var i = 0; i < fileList.length; i++) {
+      if (/\.(html?|xhtml)$/i.test(fileList[i].name)) return true;
+    }
+    return false;
+  }
 
   function showProgress(msg) {
     var el = $('import-progress');
@@ -268,9 +289,12 @@
     // Kindle formats - DRM-locked or unsupported. Friendly error.
     if (/\.(azw3?|kfx|mobi|prc)$/.test(lower)) {
       throw new Error(
-        'Kindle file format detected. Amazon-purchased books are DRM-locked ' +
-        'and cannot be opened in third-party apps. Convert to EPUB with Calibre ' +
-        '(free desktop tool) first, then import the EPUB.'
+        'Kindle file format (' + name + '). Amazon-purchased books are ' +
+        'DRM-locked and cannot be opened in Load or any other third-party app.\n\n' +
+        'Fix: on a computer (Mac / Windows / Linux), use Calibre — a free desktop ' +
+        'tool — to convert the Kindle file to EPUB. Save the EPUB to iCloud, ' +
+        'then import the EPUB here.\n\n' +
+        'Download Calibre: https://calibre-ebook.com (free, open source).'
       );
     }
 
@@ -296,6 +320,80 @@
 
     await putApp(app);
     apps.push(app);
+  }
+
+  /* ----- Multi-file bundle (folder-like) import ----- */
+  // iPad Safari can't pick a whole folder, but it DOES support multi-file
+  // selection. Users can tap-select every file in a folder from Files.app
+  // and pass them in together. We look for the index.html among them and
+  // inline every other selected file as an asset.
+  async function importMultiFileBundle(files) {
+    showProgress('Unpacking ' + files.length + ' files...');
+    var fileMap = {};   // lookup by lowercased basename
+    var htmlEntry = null;
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i];
+      var key = f.name;
+      fileMap[key.toLowerCase()] = f;
+      if (!htmlEntry && /^index\.html?$/i.test(f.name)) htmlEntry = f;
+    }
+    // No "index.html" exactly? Pick any HTML file.
+    if (!htmlEntry) {
+      for (var j = 0; j < files.length; j++) {
+        if (/\.(html?|xhtml)$/i.test(files[j].name)) { htmlEntry = files[j]; break; }
+      }
+    }
+    if (!htmlEntry) throw new Error('No HTML file found in the selection.');
+
+    showProgress('Inlining ' + (files.length - 1) + ' asset file(s)...');
+    var indexHtml = await readAsText(htmlEntry);
+
+    async function loadAsset(relPath) {
+      if (!relPath) return null;
+      if (/^(data|blob|https?|mailto|tel):/.test(relPath)) return null;
+      var cleaned = relPath.split('#')[0].split('?')[0];
+      var base = cleaned.split('/').pop();
+      var f = fileMap[base.toLowerCase()];
+      if (!f) return null;
+      var ext = base.split('.').pop().toLowerCase();
+      if (/^(css|js|html?|xhtml|json|svg|txt|xml)$/.test(ext)) {
+        return { type: 'text', content: await readAsText(f), path: base, ext: ext };
+      }
+      var mime = mimeFor(ext);
+      var buf = await readAsArrayBuffer(f);
+      var b64 = arrayBufferToBase64(buf);
+      return { type: 'dataurl', content: 'data:' + mime + ';base64,' + b64, path: base, ext: ext };
+    }
+
+    indexHtml = await inlineHtmlAssets(indexHtml, '', loadAsset);
+
+    var titleGuess = null;
+    try {
+      var m = /<title[^>]*>([^<]+)<\/title>/i.exec(indexHtml);
+      if (m) titleGuess = m[1].trim();
+    } catch (e) {}
+
+    var app = {
+      id: newId(),
+      name: titleGuess || htmlEntry.name.replace(/\.[^.]+$/, ''),
+      kind: 'zip',
+      html: indexHtml,
+      dateAdded: Date.now(),
+      lastOpened: null,
+      sizeBytes: indexHtml.length
+    };
+    await putApp(app);
+    apps.push(app);
+  }
+
+  function arrayBufferToBase64(buffer) {
+    var bytes = new Uint8Array(buffer);
+    var CHUNK = 0x8000;
+    var binary = '';
+    for (var i = 0; i < bytes.length; i += CHUNK) {
+      binary += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + CHUNK, bytes.length)));
+    }
+    return btoa(binary);
   }
 
   /* ----- HTML: store as-is ----- */

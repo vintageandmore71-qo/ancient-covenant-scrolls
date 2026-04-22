@@ -3,22 +3,13 @@
 
 * { box-sizing: border-box; }
 
-/* ------------- Splash ------------- */
+/* ------------- Splash (1.5s launch intro) ------------- */
 .splash {
   position: fixed; inset: 0; z-index: 9999;
   display: flex; align-items: center; justify-content: center;
-  background:
-    radial-gradient(circle at 30% 20%, #3a3a88 0%, transparent 50%),
-    radial-gradient(circle at 70% 80%, #7c2ea8 0%, transparent 55%),
-    linear-gradient(180deg, #1a1a2e 0%, #14142a 100%);
-  /* Optional: if /load/splash.png is present in this folder, it shows
-     as a centered background image. Falls back cleanly if missing. */
-  background-image:
-    url("splash.png"),
-    radial-gradient(circle at 30% 20%, #3a3a88 0%, transparent 50%),
-    radial-gradient(circle at 70% 80%, #7c2ea8 0%, transparent 55%),
-    linear-gradient(180deg, #1a1a2e 0%, #14142a 100%);
-  background-size: contain, auto, auto, auto;
+  background-color: #14142a;
+  background-image: url("splash.png");
+  background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
   animation: splashFade 0.4s ease-in 1.5s forwards;
@@ -28,39 +19,18 @@
 .splash-inner {
   text-align: center; color: #fff;
   padding: 40px; max-width: 420px;
+  /* Only shows when splash.png is missing — the dark solid background
+     behind it (from .splash) will show through transparently and our
+     fallback wordmark is visible. When splash.png loads, it covers
+     the area visually; our fallback is behind it. */
 }
 .splash-brand {
-  /* Hide the CSS wordmark when splash.png is provided (user's image
-     is complete — our wordmark would stack on top). We can't detect
-     image load state in pure CSS reliably, so we keep the wordmark
-     and let splash.png's own text overlay it with its own branding.
-     If the PNG has its own "Load" text, our CSS wordmark will be
-     hidden behind it naturally; if there's no PNG, our wordmark
-     shows. */
   background: rgba(20, 20, 42, 0.35);
   border-radius: 24px;
   padding: 36px 44px;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   display: inline-block;
-}
-.splash-arrow {
-  font-size: 56px; line-height: 1;
-  color: #7c7cff;
-  margin-bottom: 10px;
-  animation: splashArrow 0.8s ease-out both;
-}
-.splash-title {
-  margin: 0; font-size: 48px; font-weight: 800;
-  letter-spacing: 3px; color: #fff;
-  background: linear-gradient(135deg, #7c7cff 0%, #b8b8ff 50%, #7c7cff 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-.splash-tag {
-  margin: 6px 0 0; font-size: 13px; color: #a8a8c4;
-  letter-spacing: 2px; text-transform: uppercase;
 }
 @keyframes splashFade {
   from { opacity: 1; }
@@ -90,17 +60,62 @@ button:focus-visible { outline: 2px solid #7c7cff; outline-offset: 2px; }
 }
 .screen.on { display: block; }
 
+/* Background watermark image. If /load/bg.png is uploaded, it shows
+   as a faded watermark behind the library and viewer. If the file
+   is missing, the dark solid background of .screen shows through —
+   no broken image, no error. Text stays readable because of the
+   dark overlay on top. */
+#library-screen::before,
+#viewer-screen::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("bg.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.12;
+  z-index: 0;
+  pointer-events: none;
+}
+#library-screen > *,
+#viewer-screen > * { position: relative; z-index: 1; }
+
 /* ------------- Login ------------- */
-#login-screen { display: flex; align-items: center; justify-content: center; padding: 20px; }
+#login-screen {
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.login-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 32px; max-width: 540px; width: 100%;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.login-hero {
+  width: 100%; max-height: 56vh;
+  aspect-ratio: 1 / 1;
+  max-width: 420px;
+  background-image: url("splash.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+}
+/* Fallback content visible only when splash.png is missing (no image means
+   the container has no background to cover the fallback). */
+.login-hero-fallback {
+  text-align: center; color: #fff; padding: 30px;
+  background: rgba(20, 20, 42, 0.2);
+  border-radius: 14px;
+  /* Hide fallback if the background image loads successfully by
+     using a negative margin trick: when splash.png loads, the
+     container's background will visually cover the fallback
+     because z-index isn't set. */
+}
 .login-box {
-  background: #222238; padding: 40px 30px; border-radius: 14px;
-  max-width: 360px; width: 100%; text-align: center; border: 1px solid #2a2a42;
+  background: #222238; padding: 32px 28px; border-radius: 14px;
+  max-width: 400px; width: 100%; text-align: center; border: 1px solid #2a2a42;
 }
-.login-box h1 {
-  margin: 0 0 4px; font-size: 24px; color: #7c7cff;
-  letter-spacing: 2px; text-transform: uppercase;
-}
-.login-box .tag { margin: 0 0 24px; font-size: 12px; color: #8a8aa6; letter-spacing: 1px; }
 .login-box input[type=password] {
   width: 100%; padding: 14px; border: 1px solid #3a3a5a; background: #1a1a2e;
   color: #fff; font-size: 16px; border-radius: 8px; margin-bottom: 14px;
@@ -112,6 +127,16 @@ button:focus-visible { outline: 2px solid #7c7cff; outline-offset: 2px; }
 }
 .login-box button:active { background: #5a5ae0; }
 .err { color: #ff8a8a; font-size: 13px; margin-top: 10px; min-height: 16px; }
+.splash-title {
+  margin: 0; font-size: 42px; font-weight: 800; letter-spacing: 3px;
+  background: linear-gradient(135deg, #7c7cff 0%, #b8b8ff 50%, #7c7cff 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.splash-tag { margin: 6px 0 0; font-size: 13px; color: #a8a8c4; letter-spacing: 2px; text-transform: uppercase; }
+.splash-arrow { font-size: 56px; line-height: 1; color: #7c7cff; margin-bottom: 10px; }
+.link { color: #7c7cff; text-decoration: none; }
+.link:hover { text-decoration: underline; }
 
 /* ------------- Library ------------- */
 .topbar {
