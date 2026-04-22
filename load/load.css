@@ -483,6 +483,59 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
 }
 .per-theme-btn.active { outline: 3px solid var(--accent); outline-offset: 2px; }
 
+/* ------------- Folders list (in settings panel) ------------- */
+.folder-list { display: flex; flex-direction: column; gap: 8px; }
+.folder-row {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg-2); border: 1px solid var(--border);
+  padding: 10px 12px; border-radius: 10px;
+}
+.folder-row .f-color {
+  width: 18px; height: 18px; border-radius: 6px; flex-shrink: 0;
+}
+.folder-row .f-name {
+  flex: 1; color: var(--ink-hi); font-size: 14px; font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.folder-row .f-count {
+  font-size: 12px; color: var(--ink-mid);
+  padding: 2px 8px; background: var(--bg-3); border-radius: 8px;
+}
+.folder-row button {
+  background: none; color: var(--ink-mid); border: none;
+  font-size: 15px; padding: 6px 8px; min-height: 38px; min-width: 38px;
+}
+.folder-row button.danger { color: #ff8a8a; }
+
+/* ------------- Library filter chips ------------- */
+.library-chips {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  background: var(--bg-0);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.chip {
+  background: var(--bg-2); color: var(--ink-mid);
+  border: 1px solid var(--border); border-radius: 999px;
+  padding: 8px 14px; font-size: 13px; font-weight: 600;
+  min-height: 36px;
+  white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.chip:active { transform: scale(0.95); }
+.chip.active {
+  background: var(--accent); color: var(--bg-0);
+  border-color: var(--accent);
+}
+.chip .chip-count {
+  font-size: 11px; opacity: 0.8; padding: 1px 6px;
+  background: rgba(0, 0, 0, 0.2); border-radius: 10px;
+}
+.chip.active .chip-count {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 /* ------------- Notes screen ------------- */
 .title-inline { font-size: 16px; color: var(--ink-hi); font-weight: 700; letter-spacing: 0.5px; }
 .notes-screen-body { padding: 20px 24px 60px; max-width: 900px; margin: 0 auto; }

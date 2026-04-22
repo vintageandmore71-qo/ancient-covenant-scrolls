@@ -176,6 +176,9 @@
     <button id="library-search-clear" class="icon-btn" aria-label="Clear search">&times;</button>
   </div>
 
+  <!-- Filter chips — file types + folders. Tap to filter the grid. -->
+  <div id="library-chips" class="library-chips"></div>
+
   <div id="library-empty" class="empty-state">
     <div class="empty-icon">&#128230;</div>
     <h3>Nothing imported yet</h3>
@@ -609,6 +612,24 @@
       <option value="1.8">1.8x</option>
     </select>
     <button id="settings-tts-test" class="seg-btn full" style="margin-top:4px;">&#128266; Test voice</button>
+  </div>
+
+  <div class="panel-section">
+    <h4>Folders</h4>
+    <p class="panel-hint">Group imported items into collections like "Books", "Work tools", or "Reference". Folders show as filter chips on the Library screen.</p>
+    <div id="folder-list" class="folder-list"></div>
+    <div class="seg-btns" style="margin-top:10px;">
+      <input id="folder-new-input" type="text" placeholder="New folder name" autocomplete="off" spellcheck="false" style="flex:1;padding:10px 12px;background:var(--bg-0);color:var(--ink-hi);border:2px solid var(--border);border-radius:8px;font-size:14px;-webkit-appearance:none;font-family:inherit;">
+      <button id="folder-new-btn" class="seg-btn">&#43; Add</button>
+    </div>
+  </div>
+
+  <div class="panel-section">
+    <h4>Library Backup</h4>
+    <p class="panel-hint">Save your whole Load library (imported apps, notes, bookmarks, folders) as one file you can restore later — useful before iOS updates or when moving to a new iPad.</p>
+    <button id="export-library-btn" class="seg-btn full" style="margin-bottom:8px;">&#128229; Export library to file</button>
+    <button id="import-library-btn" class="seg-btn full">&#128230; Import library from file</button>
+    <input id="library-restore-picker" type="file" accept=".json,application/json" style="display:none;">
   </div>
 
   <div class="panel-section">

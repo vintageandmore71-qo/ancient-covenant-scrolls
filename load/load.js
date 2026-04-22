@@ -176,6 +176,10 @@
       wirePerAppTheme();
       wireNotesScreen();
       wireHelp();
+      wireFolders();
+      wireBackup();
+      renderFolderList();
+      renderLibraryChips();
       updateResumeCard();
       renderRecent();
 
@@ -431,6 +435,285 @@
   }
   function openHelp() {
     $('help-modal').classList.add('on');
+  }
+
+  /* ---------- Folders / Collections (option 5) ---------- */
+  var LS_FOLDERS = 'load_folders_v1';
+  var currentFolderFilter = '';  // '' = all folders
+  var FOLDER_COLORS = ['#7c7cff', '#4aa04a', '#e0a040', '#cc3f55', '#8b1f99', '#0891b2'];
+  function loadFolders() {
+    try { var raw = localStorage.getItem(LS_FOLDERS); return raw ? JSON.parse(raw) : []; }
+    catch (e) { return []; }
+  }
+  function saveFolders(arr) {
+    try { localStorage.setItem(LS_FOLDERS, JSON.stringify(arr)); } catch (e) {}
+  }
+  function countInFolder(folderId) {
+    var n = 0;
+    for (var i = 0; i < apps.length; i++) if (apps[i].folderId === folderId) n++;
+    return n;
+  }
+  function renderFolderList() {
+    var list = $('folder-list');
+    if (!list) return;
+    var folders = loadFolders();
+    if (!folders.length) {
+      list.innerHTML = '<p class="panel-hint" style="margin:0;">No folders yet. Name one below and tap Add.</p>';
+      return;
+    }
+    list.innerHTML = folders.map(function (f) {
+      return '<div class="folder-row" data-folder="' + esc(f.id) + '">' +
+        '<span class="f-color" style="background:' + esc(f.color || '#7c7cff') + ';"></span>' +
+        '<span class="f-name">' + esc(f.name) + '</span>' +
+        '<span class="f-count">' + countInFolder(f.id) + '</span>' +
+        '<button data-folder-act="rename" aria-label="Rename folder">&#9998;</button>' +
+        '<button data-folder-act="delete" class="danger" aria-label="Delete folder">&#128465;</button>' +
+      '</div>';
+    }).join('');
+    list.querySelectorAll('[data-folder]').forEach(function (row) {
+      var id = row.getAttribute('data-folder');
+      row.querySelector('[data-folder-act="rename"]').addEventListener('click', function () {
+        var arr = loadFolders();
+        var folder = arr.find(function (x) { return x.id === id; });
+        if (!folder) return;
+        var name = prompt('New folder name:', folder.name);
+        if (name == null) return;
+        folder.name = name.trim() || folder.name;
+        saveFolders(arr);
+        renderFolderList();
+        renderLibraryChips();
+      });
+      row.querySelector('[data-folder-act="delete"]').addEventListener('click', function () {
+        if (!confirm('Delete this folder? Items inside will not be deleted, just unassigned.')) return;
+        var arr = loadFolders().filter(function (x) { return x.id !== id; });
+        saveFolders(arr);
+        // Unassign from apps that were in this folder
+        apps.forEach(function (a) { if (a.folderId === id) { a.folderId = null; putApp(a); } });
+        renderFolderList();
+        renderLibraryChips();
+        renderLibrary();
+      });
+    });
+  }
+  function wireFolders() {
+    $('folder-new-btn').addEventListener('click', function () {
+      var name = ($('folder-new-input').value || '').trim();
+      if (!name) { $('folder-new-input').focus(); return; }
+      var arr = loadFolders();
+      arr.push({
+        id: 'f-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+        name: name,
+        color: FOLDER_COLORS[arr.length % FOLDER_COLORS.length],
+        dateCreated: Date.now()
+      });
+      saveFolders(arr);
+      $('folder-new-input').value = '';
+      renderFolderList();
+      renderLibraryChips();
+    });
+    $('folder-new-input').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') $('folder-new-btn').click();
+    });
+  }
+
+  function renderLibraryChips() {
+    var wrap = $('library-chips');
+    if (!wrap) return;
+    var counts = { all: apps.length, html: 0, zip: 0, pdf: 0, epub: 0 };
+    for (var i = 0; i < apps.length; i++) {
+      var k = apps[i].kind || 'html';
+      if (counts[k] != null) counts[k]++;
+    }
+    var folders = loadFolders();
+    var html = '';
+    // File-type chips
+    html += renderChip('all', 'All', counts.all, currentTypeFilter === 'all' && !currentFolderFilter);
+    html += renderChip('html', 'HTML', counts.html, currentTypeFilter === 'html');
+    html += renderChip('zip', 'PWA / Web apps', counts.zip, currentTypeFilter === 'zip');
+    html += renderChip('pdf', 'PDFs', counts.pdf, currentTypeFilter === 'pdf');
+    html += renderChip('epub', 'Books', counts.epub, currentTypeFilter === 'epub');
+    // Folder chips
+    folders.forEach(function (f) {
+      var count = countInFolder(f.id);
+      if (count === 0) return;
+      var active = (currentFolderFilter === f.id);
+      html += '<button class="chip' + (active ? ' active' : '') + '" data-folder-chip="' + esc(f.id) + '" style="border-color:' + esc(f.color) + ';">' +
+        '<span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:' + esc(f.color) + ';"></span>' +
+        esc(f.name) + ' <span class="chip-count">' + count + '</span>' +
+      '</button>';
+    });
+    wrap.innerHTML = html;
+    wrap.querySelectorAll('[data-chip]').forEach(function (c) {
+      c.addEventListener('click', function () {
+        currentTypeFilter = c.getAttribute('data-chip');
+        currentFolderFilter = '';
+        renderLibraryChips();
+        renderLibrary();
+      });
+    });
+    wrap.querySelectorAll('[data-folder-chip]').forEach(function (c) {
+      c.addEventListener('click', function () {
+        var id = c.getAttribute('data-folder-chip');
+        currentFolderFilter = (currentFolderFilter === id) ? '' : id;
+        currentTypeFilter = 'all';
+        renderLibraryChips();
+        renderLibrary();
+      });
+    });
+  }
+  function renderChip(val, label, count, active) {
+    return '<button class="chip' + (active ? ' active' : '') + '" data-chip="' + esc(val) + '">' +
+      esc(label) + ' <span class="chip-count">' + count + '</span>' +
+    '</button>';
+  }
+
+  /* ---------- Export / Import library (option 2) ---------- */
+  function buildBackup() {
+    return {
+      load_backup_version: 1,
+      generated: new Date().toISOString(),
+      apps: apps,
+      notes: loadStandaloneNotes(),
+      folders: loadFolders(),
+      settings: settings
+    };
+  }
+  function downloadBackup() {
+    var payload = JSON.stringify(buildBackup(), null, 2);
+    var blob = new Blob([payload], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var stamp = new Date().toISOString().slice(0, 10);
+    var name = 'load-library-backup-' + stamp + '.json';
+    // Prefer Web Share API (iPad Safari 16+) so the user gets the native
+    // share/save sheet and can pick "Save to Files".
+    try {
+      var file = new File([blob], name, { type: 'application/json' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ title: 'Load library backup', files: [file] })
+          .catch(function () { triggerAnchorDownload(url, name); });
+        return;
+      }
+    } catch (e) {}
+    triggerAnchorDownload(url, name);
+  }
+  function triggerAnchorDownload(url, name) {
+    var a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 500);
+  }
+  async function restoreBackup(file) {
+    var text = '';
+    try { text = await readAsText(file); }
+    catch (e) { alert('Could not read file: ' + (e && e.message || e)); return; }
+    var payload;
+    try { payload = JSON.parse(text); }
+    catch (e) { alert('File is not valid JSON.'); return; }
+    if (!payload || typeof payload !== 'object' || payload.load_backup_version == null) {
+      alert('File does not look like a Load backup.');
+      return;
+    }
+    var choice = prompt(
+      'Backup has ' + (payload.apps || []).length + ' apps and ' + (payload.notes || []).length + ' notes.\n\n' +
+      'Type REPLACE to wipe your current library and restore the backup.\n' +
+      'Type MERGE to add backup items alongside your current ones.\n' +
+      'Anything else cancels.',
+      'MERGE'
+    );
+    if (choice !== 'REPLACE' && choice !== 'MERGE') return;
+
+    if (choice === 'REPLACE') {
+      // Wipe apps store
+      for (var i = 0; i < apps.length; i++) {
+        try { await deleteApp(apps[i].id); } catch (e) {}
+      }
+      apps = [];
+      try { localStorage.removeItem(LS_NOTES); } catch (e) {}
+      try { localStorage.removeItem(LS_FOLDERS); } catch (e) {}
+    }
+    // Write backup apps into IndexedDB
+    var incoming = payload.apps || [];
+    for (var j = 0; j < incoming.length; j++) {
+      var app = incoming[j];
+      if (choice === 'MERGE') {
+        // Assign a fresh id on collision so nothing gets overwritten
+        if (apps.find(function (x) { return x.id === app.id; })) {
+          app = Object.assign({}, app, { id: newId() });
+        }
+      }
+      try { await putApp(app); apps.push(app); } catch (e) {}
+    }
+    // Notes
+    var notesBackup = payload.notes || [];
+    if (choice === 'REPLACE') {
+      saveStandaloneNotes(notesBackup);
+    } else {
+      var merged = loadStandaloneNotes().concat(notesBackup);
+      saveStandaloneNotes(merged);
+    }
+    // Folders
+    var foldersBackup = payload.folders || [];
+    if (choice === 'REPLACE') {
+      saveFolders(foldersBackup);
+    } else {
+      var cur = loadFolders();
+      foldersBackup.forEach(function (f) {
+        if (!cur.find(function (x) { return x.id === f.id; })) cur.push(f);
+      });
+      saveFolders(cur);
+    }
+    // Settings — only on REPLACE so MERGE doesn't blow away the user's prefs
+    if (choice === 'REPLACE' && payload.settings) {
+      Object.assign(settings, payload.settings);
+      saveSettings();
+      applySettings();
+    }
+    renderLibrary();
+    updateHomeCounts();
+    renderRecent();
+    updateResumeCard();
+    renderFolderList();
+    renderLibraryChips();
+    alert('Restore complete.');
+  }
+  function promptMoveToFolder(app) {
+    var folders = loadFolders();
+    if (!folders.length) {
+      alert('Create a folder first in Settings → Folders.');
+      return;
+    }
+    var lines = ['Move "' + app.name + '" to which folder?', ''];
+    lines.push('0 — (no folder / unassign)');
+    folders.forEach(function (f, i) { lines.push((i + 1) + ' — ' + f.name); });
+    lines.push('', 'Enter a number:');
+    var raw = prompt(lines.join('\n'), '1');
+    if (raw == null) return;
+    var n = parseInt(String(raw).trim(), 10);
+    if (isNaN(n)) return;
+    if (n === 0) { app.folderId = null; }
+    else if (n > 0 && n <= folders.length) { app.folderId = folders[n - 1].id; }
+    else return;
+    putApp(app);
+    renderLibrary();
+    renderFolderList();
+    renderLibraryChips();
+  }
+
+  function wireBackup() {
+    $('export-library-btn').addEventListener('click', downloadBackup);
+    $('import-library-btn').addEventListener('click', function () {
+      $('library-restore-picker').click();
+    });
+    $('library-restore-picker').addEventListener('change', async function (e) {
+      var file = e.target.files && e.target.files[0];
+      if (!file) return;
+      await restoreBackup(file);
+      e.target.value = '';
+    });
   }
 
   function wireHomeActions() {
@@ -940,6 +1223,9 @@
     var filtered = (currentTypeFilter === 'all')
       ? apps.slice()
       : apps.filter(function (a) { return (a.kind || 'html') === currentTypeFilter; });
+    if (currentFolderFilter) {
+      filtered = filtered.filter(function (a) { return a.folderId === currentFolderFilter; });
+    }
     if (searchQuery) {
       filtered = filtered.filter(function (a) {
         var hay = ((a.name || '') + ' ' + (a.notes || '')).toLowerCase();
@@ -1024,6 +1310,7 @@
     menu.innerHTML =
       '<button data-act="open">View</button>' +
       '<button data-act="notes">Notes</button>' +
+      '<button data-act="folder">Move to folder...</button>' +
       '<button data-act="edit">Edit HTML</button>' +
       '<button data-act="home">Add to Home Screen</button>' +
       '<button data-act="rename">Rename</button>' +
@@ -1037,6 +1324,7 @@
       if (!app) return;
       if (act === 'open') openApp(app);
       else if (act === 'notes') openNotesFor(app);
+      else if (act === 'folder') promptMoveToFolder(app);
       else if (act === 'edit') openEditor(app);
       else if (act === 'rename') promptRename(id);
       else if (act === 'delete') promptDelete(id);
@@ -1107,6 +1395,7 @@
     updateHomeCounts();
     renderRecent();
     updateResumeCard();
+    renderLibraryChips();
   });
 
   function hasHtmlEntry(fileList) {
@@ -1612,6 +1901,8 @@
       renderLibrary();
       updateHomeCounts();
       renderRecent();
+      renderLibraryChips();
+      renderFolderList();
       closeConfirm();
     };
     $('confirm-cancel').onclick = closeConfirm;
