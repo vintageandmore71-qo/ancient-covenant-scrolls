@@ -30,7 +30,7 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
   function show(screenId) {
-    var screens = ['home-screen', 'library-screen', 'viewer-screen'];
+    var screens = ['home-screen', 'library-screen', 'viewer-screen', 'editor-screen'];
     for (var i = 0; i < screens.length; i++) {
       var el = $(screens[i]);
       if (!el) continue;
@@ -236,6 +236,16 @@
     $('home-library').addEventListener('click', function () {
       currentTypeFilter = 'all'; show('library-screen'); renderLibrary();
     });
+    $('home-pwa').addEventListener('click', function () {
+      $('pwa-modal').classList.add('on');
+    });
+    $('pwa-modal-cancel').addEventListener('click', function () {
+      $('pwa-modal').classList.remove('on');
+    });
+    $('pwa-modal-pick').addEventListener('click', function () {
+      $('pwa-modal').classList.remove('on');
+      $('file-picker').click();
+    });
     document.querySelectorAll('.type-card').forEach(function (card) {
       card.addEventListener('click', function () {
         var t = card.getAttribute('data-type');
@@ -246,6 +256,35 @@
       });
     });
   }
+
+  /* ---------- HTML source editor ---------- */
+  var editingApp = null;
+  function openEditor(app) {
+    editingApp = app;
+    $('editor-title').textContent = 'Editing: ' + app.name;
+    $('editor-textarea').value = app.html || '';
+    show('editor-screen');
+  }
+  $('editor-back').addEventListener('click', function () {
+    editingApp = null;
+    show('library-screen');
+    renderLibrary();
+  });
+  $('editor-save').addEventListener('click', async function () {
+    if (!editingApp) return;
+    var newHtml = $('editor-textarea').value;
+    editingApp.html = newHtml;
+    editingApp.sizeBytes = newHtml.length;
+    try {
+      await putApp(editingApp);
+      // Update in-memory apps array
+      var idx = apps.findIndex(function (x) { return x.id === editingApp.id; });
+      if (idx >= 0) apps[idx] = editingApp;
+      alert('Saved.');
+    } catch (e) {
+      alert('Save failed: ' + (e && e.message ? e.message : e));
+    }
+  });
 
   /* ---------- Settings panel ---------- */
   function openSettingsPanel() {
@@ -398,6 +437,8 @@
     var menu = document.createElement('div');
     menu.className = 'context-menu';
     menu.innerHTML =
+      '<button data-act="open">View</button>' +
+      '<button data-act="edit">Edit HTML</button>' +
       '<button data-act="home">Add to Home Screen</button>' +
       '<button data-act="rename">Rename</button>' +
       '<button data-act="delete" class="danger">Delete</button>';
@@ -406,7 +447,11 @@
       ev.stopPropagation();
       var act = ev.target.getAttribute('data-act');
       menu.remove();
-      if (act === 'rename') promptRename(id);
+      var app = apps.find(function (x) { return x.id === id; });
+      if (!app) return;
+      if (act === 'open') openApp(app);
+      else if (act === 'edit') openEditor(app);
+      else if (act === 'rename') promptRename(id);
       else if (act === 'delete') promptDelete(id);
       else if (act === 'home') promptAddToHome(id);
     });

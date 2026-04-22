@@ -57,8 +57,15 @@
       <button id="home-get-started" class="big-btn primary">
         <span class="big-btn-icon">&#8682;</span>
         <span class="big-btn-text">
-          <span class="big-btn-label">Get Started</span>
-          <span class="big-btn-sub">Import an HTML, ZIP, PDF, or EPUB</span>
+          <span class="big-btn-label">Import a File</span>
+          <span class="big-btn-sub">HTML, PDF, EPUB, or ZIP</span>
+        </span>
+      </button>
+      <button id="home-pwa" class="big-btn pwa-btn">
+        <span class="big-btn-icon">&#128230;</span>
+        <span class="big-btn-text">
+          <span class="big-btn-label">Import a PWA</span>
+          <span class="big-btn-sub">Full web app folder or ZIP</span>
         </span>
       </button>
       <button id="home-library" class="big-btn">
@@ -239,6 +246,41 @@
       <button id="confirm-cancel" class="secondary-btn">Cancel</button>
       <button id="confirm-ok" class="danger-btn">Delete</button>
     </div>
+  </div>
+</div>
+
+<!-- PWA import help modal -->
+<div id="pwa-modal" class="modal" role="dialog" aria-label="Import a PWA">
+  <div class="modal-box">
+    <h3>Import a PWA</h3>
+    <p>A PWA is a folder of web-app files (HTML + CSS + JS + images, etc.). iPad Safari can't pick a folder directly, so here are the two ways that work:</p>
+    <ol class="steps">
+      <li><strong>Easiest — zip the folder first.</strong> In the Files app, long-press the folder, tap <strong>Compress</strong>. That creates a <code>.zip</code>. Then come back here and import that zip.</li>
+      <li><strong>Or — multi-select every file.</strong> Open the folder in Files, tap <strong>Select</strong>, check every file (index.html plus all assets), and pass them to Load. Load stitches them together automatically.</li>
+    </ol>
+    <p class="hint">After import you can <strong>View</strong> the PWA (default) or <strong>Edit</strong> its HTML source in a simple text editor, then save your changes back.</p>
+    <div class="modal-actions">
+      <button id="pwa-modal-cancel" class="secondary-btn">Cancel</button>
+      <button id="pwa-modal-pick" class="primary-btn">Pick file(s) now</button>
+    </div>
+  </div>
+</div>
+
+<!-- HTML source editor modal — for the "Edit" option on library tiles -->
+<div id="editor-screen" class="screen editor-screen">
+  <header class="app-topbar">
+    <button id="editor-back" class="nav-btn" aria-label="Back">
+      <span class="nav-icon">&larr;</span><span class="nav-label">Back</span>
+    </button>
+    <span class="editor-title" id="editor-title">Editing</span>
+    <div class="spacer"></div>
+    <button id="editor-save" class="primary-btn">
+      <span class="icon">&#10003;</span><span class="btn-label">Save</span>
+    </button>
+  </header>
+  <div class="editor-body">
+    <p class="editor-hint">Edit the HTML source. Changes save to Load's local storage only — your original file on iPad is untouched.</p>
+    <textarea id="editor-textarea" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off"></textarea>
   </div>
 </div>
 

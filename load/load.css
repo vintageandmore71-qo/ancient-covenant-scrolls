@@ -92,19 +92,22 @@ button, .tap, [role="button"] { min-height: 48px; }
    no broken image, no error. Text stays readable because of the
    dark overlay on top. */
 #library-screen::before,
-#viewer-screen::before {
+#viewer-screen::before,
+#home-screen::before {
   content: '';
   position: fixed; inset: 0;
   background-image: url("bg.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  opacity: 0.12;
+  opacity: 0.22;
   z-index: 0;
   pointer-events: none;
 }
+/* Keep real content above the background watermark */
 #library-screen > *,
-#viewer-screen > * { position: relative; z-index: 1; }
+#viewer-screen > *,
+#home-screen > * { position: relative; z-index: 1; }
 
 /* ------------- Home screen (splash + actions + type-boxes) ------------- */
 #home-screen {
@@ -139,13 +142,11 @@ button, .tap, [role="button"] { min-height: 48px; }
 }
 
 /* The splash hero — always visible on the home screen, no fade.
-   The image shows bright with no overlay. Text wordmark fallback
-   is hidden by default and shown only if JS detects missing image. */
+   The image shows bright with no overlay. */
 .home-hero {
   width: 100%;
-  min-height: 320px;
-  aspect-ratio: 16 / 9;
-  max-height: 70vh;
+  min-height: 55vh;           /* generous height so the image is prominent */
+  padding: 16px;
   background-color: var(--bg-1);
   background-image: url("splash.png"), url("splash%20.png");
   background-size: contain;
@@ -153,6 +154,9 @@ button, .tap, [role="button"] { min-height: 48px; }
   background-position: center;
   display: flex; align-items: center; justify-content: center;
   position: relative;
+}
+@media (min-width: 900px) {
+  .home-hero { min-height: 50vh; }
 }
 .home-hero-fallback {
   display: none; text-align: center; color: var(--ink-hi);
@@ -201,6 +205,11 @@ button, .tap, [role="button"] { min-height: 48px; }
   background: linear-gradient(135deg, var(--accent), #5a5ae0);
   color: var(--bg-0);
   border-color: transparent;
+}
+.big-btn.pwa-btn {
+  background: linear-gradient(135deg, #4a2466, #2a1244);
+  color: #fff;
+  border-color: #5a2e7a;
 }
 .big-btn-icon { font-size: 36px; line-height: 1; flex-shrink: 0; }
 .big-btn-text { display: flex; flex-direction: column; gap: 4px; }
@@ -307,6 +316,39 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
   transition: none !important;
   animation-duration: 0.001ms !important;
 }
+
+/* ------------- Editor screen (HTML source editor) ------------- */
+.editor-screen { display: none; flex-direction: column; }
+.editor-screen.on { display: flex; }
+.editor-title {
+  flex: 1; font-size: 14px; color: var(--ink-hi); text-align: center;
+  padding: 0 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-weight: 600;
+}
+.editor-body {
+  flex: 1; display: flex; flex-direction: column; gap: 12px;
+  padding: 14px 16px max(16px, env(safe-area-inset-bottom));
+  min-height: 0;
+}
+.editor-hint {
+  background: rgba(124, 124, 255, 0.10);
+  border-left: 3px solid var(--accent);
+  padding: 10px 14px; border-radius: 6px;
+  font-size: 14px; color: var(--ink-mid); line-height: 1.6;
+  margin: 0;
+}
+#editor-textarea {
+  flex: 1; min-height: 0;
+  width: 100%;
+  background: #0e0e22; color: var(--ink-hi);
+  border: 2px solid var(--border); border-radius: 10px;
+  padding: 14px;
+  font-family: "SFMono-Regular", Menlo, "DejaVu Sans Mono", monospace;
+  font-size: 14px; line-height: 1.6;
+  resize: none;
+  -webkit-appearance: none;
+}
+#editor-textarea:focus { outline: none; border-color: var(--accent); }
 
 /* ------------- Library ------------- */
 .topbar {
