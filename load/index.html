@@ -139,6 +139,11 @@
         <span class="type-label">Books</span>
         <span class="type-sub">EPUB digital books (.epub)</span>
       </button>
+      <button class="type-card type-media" data-import-type="media">
+        <span class="type-icon">&#127916;</span>
+        <span class="type-label">Media</span>
+        <span class="type-sub">Videos, audio, images</span>
+      </button>
     </div>
 
     <p class="import-hint">Tip: the file picker lets you pick from <strong>On My iPad</strong>, <strong>iCloud Drive</strong>, <strong>Dropbox</strong>, <strong>Google Drive</strong>, <strong>OneDrive</strong> (if those apps are installed), connected USB drives, and Recents.</p>
@@ -190,7 +195,7 @@
 
   <div id="library-grid" class="grid"></div>
 
-  <input id="file-picker" type="file" accept=".html,.htm,.zip,.pdf,.epub,text/html,application/zip,application/pdf,application/epub+zip" multiple style="display:none;">
+  <input id="file-picker" type="file" accept=".html,.htm,.zip,.pdf,.epub,.mp4,.mov,.m4v,.webm,.mp3,.m4a,.wav,.ogg,.aac,.jpg,.jpeg,.png,.gif,.webp,text/html,application/zip,application/pdf,application/epub+zip,video/*,audio/*,image/*" multiple style="display:none;">
 
   <!-- Progress indicator shown during import (PDF/EPUB parsing can take a moment) -->
   <div id="import-progress" class="import-progress">

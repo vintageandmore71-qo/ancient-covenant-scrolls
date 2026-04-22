@@ -519,7 +519,7 @@
   function renderLibraryChips() {
     var wrap = $('library-chips');
     if (!wrap) return;
-    var counts = { all: apps.length, html: 0, zip: 0, pdf: 0, epub: 0 };
+    var counts = { all: apps.length, html: 0, zip: 0, pdf: 0, epub: 0, media: 0 };
     for (var i = 0; i < apps.length; i++) {
       var k = apps[i].kind || 'html';
       if (counts[k] != null) counts[k]++;
@@ -532,6 +532,7 @@
     html += renderChip('zip', 'PWA / Web apps', counts.zip, currentTypeFilter === 'zip');
     html += renderChip('pdf', 'PDFs', counts.pdf, currentTypeFilter === 'pdf');
     html += renderChip('epub', 'Books', counts.epub, currentTypeFilter === 'epub');
+    html += renderChip('media', 'Media', counts.media, currentTypeFilter === 'media');
     // Folder chips
     folders.forEach(function (f) {
       var count = countInFolder(f.id);
@@ -746,13 +747,14 @@
         if (t === 'html') picker.setAttribute('accept', '.html,.htm,text/html');
         else if (t === 'pdf') picker.setAttribute('accept', '.pdf,application/pdf');
         else if (t === 'epub') picker.setAttribute('accept', '.epub,application/epub+zip');
+        else if (t === 'media') picker.setAttribute('accept', 'video/*,audio/*,image/*,.mp4,.mov,.m4v,.webm,.mp3,.m4a,.wav,.ogg,.aac,.jpg,.jpeg,.png,.gif,.webp');
         else if (t === 'zip') {
           // Web apps card: show the PWA help modal first; modal's "Pick" button opens picker
           picker.setAttribute('accept', '.zip,.html,.htm,application/zip,text/html');
           $('pwa-modal').classList.add('on');
           return;
         } else {
-          picker.setAttribute('accept', '.html,.htm,.zip,.pdf,.epub');
+          picker.setAttribute('accept', '.html,.htm,.zip,.pdf,.epub,.mp4,.mov,.mp3,.m4a,.jpg,.png,.gif,.webp');
         }
         picker.click();
       });
@@ -1254,6 +1256,11 @@
       else if (a.kind === 'pdf') { iconChar = '&#128462;'; kindLabel = 'PDF'; }
       else if (a.kind === 'epub') { iconChar = '&#128214;'; kindLabel = 'EPUB'; }
       else if (a.kind === 'html') { iconChar = '&#128196;'; kindLabel = 'HTML'; }
+      else if (a.kind === 'media') {
+        if (a.subKind === 'video') { iconChar = '&#127916;'; kindLabel = 'Video'; }
+        else if (a.subKind === 'audio') { iconChar = '&#127925;'; kindLabel = 'Audio'; }
+        else { iconChar = '&#128444;'; kindLabel = 'Image'; }
+      }
       var notesIcon = a.notes && a.notes.trim() ? ' <span class="tile-has-notes" title="Has notes">&#128221;</span>' : '';
       parts.push(
         '<div class="tile" data-id="' + esc(a.id) + '">' +
@@ -1442,13 +1449,16 @@
       app = await handlePdf(file, baseName);
     } else if (/\.epub$/.test(lower)) {
       app = await handleEpub(file, baseName);
+    } else if (/\.(mp4|mov|m4v|webm|mkv|mp3|m4a|wav|ogg|aac|flac|jpe?g|png|gif|webp|bmp|svg|heic|heif)$/.test(lower)) {
+      app = await handleMedia(file, baseName);
     } else {
       // Fall back on MIME type if extension is unclear
       if (file.type === 'text/html') app = await handleHtml(file, baseName);
       else if (file.type === 'application/pdf') app = await handlePdf(file, baseName);
       else if (file.type === 'application/epub+zip') app = await handleEpub(file, baseName);
       else if (file.type === 'application/zip') app = await handleZip(file, baseName);
-      else throw new Error('Unsupported file type. Load accepts HTML, ZIP, PDF, and EPUB.');
+      else if (/^(video|audio|image)\//.test(file.type || '')) app = await handleMedia(file, baseName);
+      else throw new Error('Unsupported file type. Load accepts HTML, ZIP, PDF, EPUB, and media (video / audio / image).');
     }
 
     await putApp(app);
@@ -1839,6 +1849,70 @@
     };
   }
 
+  /* ----- Media: videos / audio / images — stored as raw Blob ----- */
+  async function handleMedia(file, baseName) {
+    showProgress('Saving ' + file.name + '...');
+    var buf = await readAsArrayBuffer(file);
+    var lower = (file.name || '').toLowerCase();
+    var subKind =
+      /\.(mp4|mov|m4v|webm|mkv)$/i.test(lower) || /^video\//.test(file.type || '') ? 'video' :
+      /\.(mp3|m4a|wav|ogg|aac|flac)$/i.test(lower) || /^audio\//.test(file.type || '') ? 'audio' :
+      /\.(jpe?g|png|gif|webp|heic|heif|svg|bmp)$/i.test(lower) || /^image\//.test(file.type || '') ? 'image' :
+      'media';
+    var mime = file.type || mimeForMedia(lower, subKind);
+    // Store as a Blob directly; IndexedDB handles that natively without
+    // the ~33% bloat that base64 would add.
+    var blob = new Blob([buf], { type: mime });
+    return {
+      id: newId(),
+      name: baseName,
+      kind: 'media',
+      subKind: subKind,
+      mime: mime,
+      binary: blob,
+      dateAdded: Date.now(),
+      lastOpened: null,
+      sizeBytes: buf.byteLength
+    };
+  }
+
+  function mimeForMedia(lower, subKind) {
+    var ext = (lower.split('.').pop() || '').toLowerCase();
+    var map = {
+      mp4: 'video/mp4', mov: 'video/quicktime', m4v: 'video/x-m4v',
+      webm: 'video/webm', mkv: 'video/x-matroska',
+      mp3: 'audio/mpeg', m4a: 'audio/mp4', wav: 'audio/wav',
+      ogg: 'audio/ogg', aac: 'audio/aac', flac: 'audio/flac',
+      jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
+      gif: 'image/gif', webp: 'image/webp', svg: 'image/svg+xml',
+      bmp: 'image/bmp', heic: 'image/heic', heif: 'image/heif'
+    };
+    return map[ext] || (subKind === 'video' ? 'video/mp4' : subKind === 'audio' ? 'audio/mpeg' : 'image/jpeg');
+  }
+
+  /* Build the HTML wrapper that plays a media file inside the viewer
+     iframe. Takes a Blob URL (created just-in-time in openApp). */
+  function buildMediaWrapper(app, blobUrl) {
+    var esc = escHtml;
+    var css = 'html,body{margin:0;padding:0;background:#000;color:#fff;height:100%;font-family:-apple-system,sans-serif;}' +
+      '.holder{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px;box-sizing:border-box;text-align:center;}' +
+      '.title{font-size:14px;color:#bbb;letter-spacing:1px;text-transform:uppercase;}' +
+      'video,audio,img{max-width:100%;max-height:85vh;display:block;background:#000;border-radius:10px;}' +
+      'audio{width:100%;max-width:480px;}';
+    var body;
+    if (app.subKind === 'video') {
+      body = '<video src="' + blobUrl + '" controls playsinline></video>';
+    } else if (app.subKind === 'audio') {
+      body = '<audio src="' + blobUrl + '" controls></audio>';
+    } else {
+      body = '<img src="' + blobUrl + '" alt="' + esc(app.name) + '">';
+    }
+    return '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
+      '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">' +
+      '<title>' + esc(app.name) + '</title><style>' + css + '</style></head>' +
+      '<body><div class="holder"><div class="title">' + esc(app.name) + '</div>' + body + '</div></body></html>';
+  }
+
   function escHtml(s) {
     return String(s == null ? '' : s)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -1916,6 +1990,7 @@
   var timerInterval = null;
   var positionSaveTimer = null;
   var overrideThemeBeforeOpen = null;
+  var currentMediaUrl = null;   // Blob URL for the raw media binary
 
   async function openApp(app) {
     currentApp = app;
@@ -1927,9 +2002,20 @@
       applyThemeClasses(tmp);
     }
     try { await putApp(app); } catch (e) {}
-    var blob = new Blob([app.html], { type: 'text/html; charset=utf-8' });
+    // Media apps store a raw Blob and need a wrapper HTML; everything
+    // else stores ready-to-display HTML.
+    var htmlBlob;
+    if (app.kind === 'media' && app.binary) {
+      // Two Blob URLs: one for the media binary, one for the wrapper HTML
+      if (currentMediaUrl) { try { URL.revokeObjectURL(currentMediaUrl); } catch (e) {} }
+      currentMediaUrl = URL.createObjectURL(app.binary);
+      var wrapperHtml = buildMediaWrapper(app, currentMediaUrl);
+      htmlBlob = new Blob([wrapperHtml], { type: 'text/html; charset=utf-8' });
+    } else {
+      htmlBlob = new Blob([app.html], { type: 'text/html; charset=utf-8' });
+    }
     if (currentBlobUrl) { try { URL.revokeObjectURL(currentBlobUrl); } catch (e) {} }
-    currentBlobUrl = URL.createObjectURL(blob);
+    currentBlobUrl = URL.createObjectURL(htmlBlob);
     $('viewer-title').textContent = app.name;
     var frame = $('viewer-frame');
     frame.src = currentBlobUrl;
@@ -1984,6 +2070,7 @@
     var frame = $('viewer-frame');
     frame.src = 'about:blank';
     if (currentBlobUrl) { try { URL.revokeObjectURL(currentBlobUrl); } catch (e) {} currentBlobUrl = null; }
+    if (currentMediaUrl) { try { URL.revokeObjectURL(currentMediaUrl); } catch (e) {} currentMediaUrl = null; }
     currentApp = null;
     $('viewer-topbar').classList.remove('hidden');
     $('show-ui-btn').classList.remove('on');
