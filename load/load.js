@@ -477,7 +477,7 @@
     } catch (e) {}
   }
 
-  /* ---------- Load Helper — Copilot-style assistant ----------
+  /* ---------- Load AI — Copilot-style assistant ----------
    * Not real AI. No downloads. Instead: a curated knowledge base of
    * Load-usage answers (extracted from the Help FAQ) plus pattern
    * matching for "create a X" requests that hand off to the Create
@@ -1123,19 +1123,53 @@
       if (bodyInput) bodyInput.focus();
     }, 100);
   }
+  /* Synonym + stem expansion so Load AI matches many phrasings of the
+   * same question. Hand-curated — no external NLP library needed. */
+  var SYNONYMS = {
+    ipad:['tablet','device'], save:['store','keep','remember','persist'],
+    delete:['remove','erase','trash','get rid','destroy'],
+    make:['create','build','write','generate','produce','new'],
+    show:['display','see','view','open'], change:['edit','modify','update','alter','switch'],
+    find:['search','look','locate','where'], share:['send','email','text','airdrop','give'],
+    listen:['hear','audio','sound','voice','read aloud','speak'],
+    fast:['quick','rapid','speedy'], slow:['laggy','sluggish','stuck','freezing','hang'],
+    color:['colour','theme','tint'], page:['document','file','article','doc'],
+    big:['large','larger','bigger','enlarge','bigger'], small:['little','tiny','smaller'],
+    font:['typeface','letters','type'], book:['epub','novel','volume','reading material'],
+    app:['program','tool','application'], folder:['collection','group','category'],
+    help:['stuck','confused','lost','understand','how','what','why'],
+    start:['begin','initiate','launch'], error:['broken','crash','fail','problem','bug','issue'],
+    note:['notes','annotation','memo'], video:['clip','movie','recording'],
+    image:['picture','photo','pic'], backup:['backup','copy','save all']
+  };
+  function expandTokens(q) {
+    var out = {};
+    q.toLowerCase().split(/[^a-z0-9]+/).forEach(function (t) {
+      if (!t || t.length < 2) return;
+      out[t] = true;
+      var stem = t.replace(/(ies|es|s|ing|ed)$/i, '');
+      if (stem && stem.length > 2 && stem !== t) out[stem] = true;
+      if (SYNONYMS[t]) SYNONYMS[t].forEach(function (s) { out[s] = true; });
+      if (SYNONYMS[stem]) SYNONYMS[stem].forEach(function (s) { out[s] = true; });
+    });
+    return Object.keys(out);
+  }
   function scoreKnowledgeBase(q) {
     var qLower = ' ' + q.toLowerCase() + ' ';
-    var tokens = qLower.split(/\s+/).filter(function (t) { return t.length > 2; });
+    var expanded = expandTokens(q);
     var best = null;
     for (var i = 0; i < LOAD_KB.length; i++) {
       var entry = LOAD_KB[i];
       var score = 0;
       entry.keywords.forEach(function (k) {
-        if (qLower.indexOf(' ' + k + ' ') >= 0) score += 5;
-        else if (qLower.indexOf(k) >= 0) score += 3;
-        var kTokens = k.toLowerCase().split(/\s+/);
-        kTokens.forEach(function (kt) {
-          if (kt.length > 2 && tokens.indexOf(kt) >= 0) score += 1;
+        var kLower = k.toLowerCase();
+        if (qLower.indexOf(' ' + kLower + ' ') >= 0) score += 6;
+        else if (qLower.indexOf(kLower) >= 0) score += 4;
+        kLower.split(/\s+/).forEach(function (kt) {
+          if (kt.length < 3) return;
+          if (expanded.indexOf(kt) >= 0) score += 1.5;
+          var kStem = kt.replace(/(ies|es|s|ing|ed)$/i, '');
+          if (kStem && kStem !== kt && expanded.indexOf(kStem) >= 0) score += 1;
         });
       });
       if (!best || score > best.score) best = { score: score, entry: entry };

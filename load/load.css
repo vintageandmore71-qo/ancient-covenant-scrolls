@@ -830,7 +830,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
 }
 .import-hint strong { color: var(--ink-hi); }
 
-/* ------------- Load Helper chat panel ------------- */
+/* ------------- Load AI chat panel ------------- */
 .helper-panel {
   position: fixed; right: -440px; top: 0; bottom: 0;
   width: min(440px, 92vw);
