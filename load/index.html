@@ -57,6 +57,12 @@
       <h1 class="splash-title">Load</h1>
       <p class="splash-tag">Run Web Apps on iPad</p>
     </div>
+    <!-- Resume reading — appears only when there's an app with a saved
+         reading position. Tapping opens that app and jumps to the spot. -->
+    <button id="home-resume" class="big-action resume" style="display:none;" aria-label="Resume reading">
+      <span class="ba-icon">&#9654;</span>
+      <span class="ba-text" id="home-resume-text">Continue reading</span>
+    </button>
     <div class="home-buttons">
       <button id="home-get-started" class="big-action primary" aria-label="Import a file">
         <span class="ba-icon">&#43;</span><span class="ba-text">Import a File</span>
@@ -122,6 +128,7 @@
     <button id="back-btn" class="icon-btn" aria-label="Back to library">&larr;</button>
     <span id="viewer-title" class="title"></span>
     <button id="tts-btn" class="icon-btn" aria-label="Read aloud" title="Read aloud">&#128266;</button>
+    <button id="bookmarks-btn" class="icon-btn" aria-label="Bookmarks" title="Bookmarks">&#9733;</button>
     <button id="notes-btn" class="icon-btn" aria-label="Notes" title="Notes">&#128221;</button>
     <button id="reload-btn" class="icon-btn" aria-label="Reload">&#8634;</button>
     <button id="aids-btn" class="icon-btn" aria-label="Reading aids">Aa</button>
@@ -156,6 +163,20 @@
     </div>
     <div class="tts-status" id="tts-status">Ready</div>
   </div>
+</div>
+
+<!-- Bookmarks drawer — per-app named positions you can jump to -->
+<div id="bookmarks-drawer" class="notes-drawer" role="dialog" aria-label="Bookmarks">
+  <div class="notes-head">
+    <h3>Bookmarks</h3>
+    <span class="notes-app-name" id="bookmarks-app-name"></span>
+    <button id="bookmarks-close" class="icon-btn" aria-label="Close">&times;</button>
+  </div>
+  <button id="bookmarks-add" class="primary-btn" style="margin-bottom:12px;align-self:flex-start;">
+    <span class="icon">&#43;</span><span class="btn-label">Add bookmark here</span>
+  </button>
+  <div id="bookmarks-list" class="bookmarks-list"></div>
+  <p class="hint">Bookmarks save your place in the current app. Tap any bookmark to jump back to it.</p>
 </div>
 
 <!-- Notes drawer — slides up with a textarea per-app -->
@@ -233,6 +254,24 @@
     <label class="aid-label">Focus line</label>
     <div class="aid-buttons">
       <button class="aid-btn" data-act="focus-toggle">Toggle</button>
+    </div>
+  </div>
+
+  <div class="aid-row">
+    <label class="aid-label">This app's theme</label>
+    <div class="aid-buttons wrap">
+      <button class="aid-btn per-theme-btn" data-per-theme="">Default</button>
+      <button class="aid-btn per-theme-btn" data-per-theme="dark">Dark</button>
+      <button class="aid-btn per-theme-btn" data-per-theme="cream" style="background:#f4eadc;color:#3a2e1e;">Cream</button>
+      <button class="aid-btn per-theme-btn" data-per-theme="sepia" style="background:#f0dab7;color:#4a361c;">Sepia</button>
+      <button class="aid-btn per-theme-btn" data-per-theme="blue" style="background:#d4e8f8;color:#1a3a52;">Blue</button>
+    </div>
+  </div>
+
+  <div class="aid-row">
+    <label class="aid-label">Reading time</label>
+    <div class="aid-buttons">
+      <span class="aid-metric" id="aid-time-spent">0 min</span>
     </div>
   </div>
 </div>

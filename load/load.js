@@ -155,6 +155,9 @@
       wireLibrarySearch();
       wireNotes();
       wireTts();
+      wireBookmarks();
+      wirePerAppTheme();
+      updateResumeCard();
       renderRecent();
 
       // Deep-link: if the URL has ?app=<id>, open that app directly.
@@ -315,6 +318,139 @@
     });
   }
 
+  /* ---------- Bookmarks (option 1) ---------- */
+  function openBookmarksFor(app) {
+    $('bookmarks-app-name').textContent = app.name;
+    renderBookmarks(app);
+    $('bookmarks-drawer').classList.add('on');
+  }
+  function renderBookmarks(app) {
+    var list = $('bookmarks-list');
+    var marks = app.bookmarks || [];
+    if (!marks.length) {
+      list.innerHTML = '<p class="hint">No bookmarks yet. Scroll to any spot and tap "Add bookmark here".</p>';
+      return;
+    }
+    list.innerHTML = marks.map(function (m, i) {
+      return '<div class="bookmark-row" data-bm="' + esc(m.id) + '">' +
+        '<div style="flex:1;">' +
+          '<div class="bm-label">' + esc(m.label) + '</div>' +
+          '<div class="bm-time">Saved ' + new Date(m.ts).toLocaleString() + '</div>' +
+        '</div>' +
+        '<button data-bm-act="jump">Jump</button>' +
+        '<button data-bm-act="delete" class="danger">Delete</button>' +
+      '</div>';
+    }).join('');
+    list.querySelectorAll('[data-bm]').forEach(function (row) {
+      var id = row.getAttribute('data-bm');
+      row.querySelector('[data-bm-act="jump"]').addEventListener('click', function () {
+        var bm = (app.bookmarks || []).find(function (x) { return x.id === id; });
+        if (!bm) return;
+        try {
+          var doc = $('viewer-frame').contentDocument;
+          if (doc && doc.scrollingElement) doc.scrollingElement.scrollTop = bm.scrollY;
+        } catch (e) {}
+        $('bookmarks-drawer').classList.remove('on');
+      });
+      row.querySelector('[data-bm-act="delete"]').addEventListener('click', function () {
+        app.bookmarks = (app.bookmarks || []).filter(function (x) { return x.id !== id; });
+        putApp(app);
+        renderBookmarks(app);
+      });
+    });
+  }
+  function wireBookmarks() {
+    $('bookmarks-btn').addEventListener('click', function () {
+      if (currentApp) openBookmarksFor(currentApp);
+    });
+    $('bookmarks-close').addEventListener('click', function () {
+      $('bookmarks-drawer').classList.remove('on');
+    });
+    $('bookmarks-add').addEventListener('click', function () {
+      if (!currentApp) return;
+      var defaultLabel = 'Page position';
+      try {
+        var doc = $('viewer-frame').contentDocument;
+        if (doc) {
+          // Try to pick a heading or first line visible at current scrollY
+          var y = doc.scrollingElement ? doc.scrollingElement.scrollTop : 0;
+          var els = doc.querySelectorAll('h1, h2, h3, p');
+          for (var i = 0; i < els.length; i++) {
+            if (els[i].offsetTop >= y) {
+              defaultLabel = String(els[i].textContent || '').trim().slice(0, 60);
+              break;
+            }
+          }
+        }
+      } catch (e) {}
+      var label = prompt('Label for this bookmark:', defaultLabel);
+      if (label == null) return;
+      label = label.trim() || 'Bookmark';
+      var sy = 0;
+      try {
+        var d2 = $('viewer-frame').contentDocument;
+        if (d2 && d2.scrollingElement) sy = d2.scrollingElement.scrollTop;
+      } catch (e) {}
+      currentApp.bookmarks = currentApp.bookmarks || [];
+      currentApp.bookmarks.push({
+        id: 'bm-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+        label: label,
+        scrollY: sy,
+        ts: Date.now()
+      });
+      putApp(currentApp);
+      renderBookmarks(currentApp);
+    });
+  }
+
+  /* ---------- Resume reading (option 6) ---------- */
+  function updateResumeCard() {
+    var btn = $('home-resume');
+    var text = $('home-resume-text');
+    if (!btn || !text) return;
+    var candidates = apps.filter(function (a) {
+      return a.readingPosition && a.readingPosition > 100;
+    }).sort(function (a, b) { return (b.lastOpened || 0) - (a.lastOpened || 0); });
+    if (!candidates.length) { btn.style.display = 'none'; return; }
+    var top = candidates[0];
+    btn.style.display = 'inline-flex';
+    text.textContent = 'Continue: ' + top.name;
+    btn.onclick = function () { openApp(top); };
+  }
+
+  /* ---------- Per-app theme override (option 3) ---------- */
+  function wirePerAppTheme() {
+    document.querySelectorAll('.per-theme-btn').forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (!currentApp) return;
+        var t = b.getAttribute('data-per-theme');
+        currentApp.preferredTheme = t || null;
+        putApp(currentApp);
+        // Apply immediately
+        if (t) {
+          overrideThemeBeforeOpen = overrideThemeBeforeOpen == null ? settings.theme : overrideThemeBeforeOpen;
+          applyThemeClasses({ theme: t });
+        } else {
+          applyThemeClasses(settings);
+          overrideThemeBeforeOpen = null;
+        }
+        refreshPerAppThemeButtons();
+      });
+    });
+  }
+  function refreshPerAppThemeButtons() {
+    var pref = (currentApp && currentApp.preferredTheme) || '';
+    document.querySelectorAll('.per-theme-btn').forEach(function (b) {
+      b.classList.toggle('active', b.getAttribute('data-per-theme') === pref);
+    });
+  }
+  function updateReadingTimeDisplay() {
+    var el = $('aid-time-spent'); if (!el) return;
+    var secs = (currentApp && currentApp.timeSeconds) || 0;
+    var mins = Math.floor(secs / 60);
+    el.textContent = mins + ' min' + (mins === 1 ? '' : 's');
+  }
+
   /* ---------- TTS (Read Aloud) ---------- */
   var ttsUtterance = null;
   var ttsVoices = [];
@@ -324,17 +460,35 @@
     ttsVoices = speechSynthesis.getVoices() || [];
     var sel = $('tts-voice');
     if (!sel) return;
+    // Sort enhanced/local voices to the top; they sound much better.
+    var sorted = ttsVoices.slice().sort(function (a, b) {
+      var aEnh = /enhanced|premium|neural/i.test(a.name) ? 1 : 0;
+      var bEnh = /enhanced|premium|neural/i.test(b.name) ? 1 : 0;
+      if (aEnh !== bEnh) return bEnh - aEnh;
+      if (!!a.localService !== !!b.localService) return (b.localService ? 1 : 0) - (a.localService ? 1 : 0);
+      return a.name.localeCompare(b.name);
+    });
     sel.innerHTML = '';
     var defaultOpt = document.createElement('option');
     defaultOpt.value = '';
     defaultOpt.textContent = 'System default';
     sel.appendChild(defaultOpt);
-    ttsVoices.forEach(function (v, i) {
+    // Mark high-quality voices with a star so users can spot them
+    sorted.forEach(function (v) {
       var o = document.createElement('option');
-      o.value = String(i);
-      o.textContent = v.name + ' (' + v.lang + ')';
+      // store original index in ttsVoices (unchanged) so we can look it up on play
+      o.value = String(ttsVoices.indexOf(v));
+      var isEnhanced = /enhanced|premium|neural/i.test(v.name);
+      var qualityBadge = isEnhanced ? '★ ' : (v.localService ? '• ' : '');
+      o.textContent = qualityBadge + v.name + ' (' + v.lang + ')';
       sel.appendChild(o);
     });
+    // Tiny hint row below the dropdown to guide users
+    var status = $('tts-status');
+    if (status && !status.dataset.hintAdded) {
+      status.dataset.hintAdded = '1';
+      status.textContent = '★ = enhanced voice (higher quality). Add more in iPad Settings → Accessibility → Spoken Content → Voices.';
+    }
   }
   function getFrameText() {
     var frame = $('viewer-frame');
@@ -699,6 +853,7 @@
     renderLibrary();
     updateHomeCounts();
     renderRecent();
+    updateResumeCard();
   });
 
   function hasHtmlEntry(fileList) {
@@ -1212,9 +1367,21 @@
 
   /* ---------- Viewer ---------- */
 
+  /* ---- Reading position + timer state (per-app tracking) ---- */
+  var viewerOpenTs = 0;
+  var timerInterval = null;
+  var positionSaveTimer = null;
+  var overrideThemeBeforeOpen = null;
+
   async function openApp(app) {
     currentApp = app;
     app.lastOpened = Date.now();
+    // Apply per-app theme override (option 3) without persisting to settings
+    if (app.preferredTheme && app.preferredTheme !== settings.theme) {
+      overrideThemeBeforeOpen = settings.theme;
+      var tmp = Object.assign({}, settings, { theme: app.preferredTheme });
+      applyThemeClasses(tmp);
+    }
     try { await putApp(app); } catch (e) {}
     var blob = new Blob([app.html], { type: 'text/html; charset=utf-8' });
     if (currentBlobUrl) { try { URL.revokeObjectURL(currentBlobUrl); } catch (e) {} }
@@ -1224,9 +1391,49 @@
     frame.src = currentBlobUrl;
     show('viewer-screen');
     frame.addEventListener('load', onFrameLoaded, { once: true });
+    // Start reading timer (option 4)
+    viewerOpenTs = Date.now();
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(tickTimer, 10000);  // flush every 10s
+  }
+
+  function tickTimer() {
+    if (!currentApp || !viewerOpenTs) return;
+    var delta = Math.floor((Date.now() - viewerOpenTs) / 1000);
+    viewerOpenTs = Date.now();
+    currentApp.timeSeconds = (currentApp.timeSeconds || 0) + delta;
+    putApp(currentApp).catch(function () {});
+  }
+
+  function saveScrollPosition() {
+    if (!currentApp) return;
+    try {
+      var doc = $('viewer-frame').contentDocument;
+      if (!doc) return;
+      var y = doc.scrollingElement ? doc.scrollingElement.scrollTop : 0;
+      currentApp.readingPosition = y;
+      putApp(currentApp).catch(function () {});
+    } catch (e) {}
+  }
+
+  function scheduleScrollSave() {
+    if (positionSaveTimer) clearTimeout(positionSaveTimer);
+    positionSaveTimer = setTimeout(saveScrollPosition, 1500);
   }
 
   function closeViewer() {
+    // Flush timer + position one last time before unmounting
+    tickTimer();
+    saveScrollPosition();
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    viewerOpenTs = 0;
+
+    // Restore app-wide theme if a per-app override was active
+    if (overrideThemeBeforeOpen != null) {
+      applyThemeClasses(settings);
+      overrideThemeBeforeOpen = null;
+    }
+
     try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) {}
     ttsState = 'idle';
     show('library-screen');
@@ -1241,7 +1448,16 @@
     $('aids-scrim').classList.remove('on');
     $('tts-drawer').classList.remove('on');
     $('notes-drawer').classList.remove('on');
+    $('bookmarks-drawer').classList.remove('on');
     renderLibrary();
+  }
+
+  /* Extract theme-only class logic so we can override per-app without
+   * clobbering saved settings.theme. */
+  function applyThemeClasses(s) {
+    ['dark', 'cream', 'sepia', 'blue', 'contrast'].forEach(function (t) {
+      document.body.classList.toggle('theme-' + t, s.theme === t);
+    });
   }
 
   $('back-btn').addEventListener('click', closeViewer);
@@ -1267,6 +1483,8 @@
     $('aids-panel').classList.add('on');
     $('aids-scrim').classList.add('on');
     refreshAidButtonStates();
+    refreshPerAppThemeButtons();
+    updateReadingTimeDisplay();
   }
   function closeAids() {
     $('aids-panel').classList.remove('on');
@@ -1316,7 +1534,23 @@
     if (el) el.classList.toggle('active', on);
   }
 
-  function onFrameLoaded() { applyAidsToFrame(); }
+  function onFrameLoaded() {
+    applyAidsToFrame();
+    // Restore reading position if we have one (option 6)
+    if (currentApp && currentApp.readingPosition > 0) {
+      try {
+        var doc = $('viewer-frame').contentDocument;
+        if (doc && doc.scrollingElement) {
+          doc.scrollingElement.scrollTop = currentApp.readingPosition;
+        }
+      } catch (e) {}
+    }
+    // Hook scroll listener so we can save the position as it changes
+    try {
+      var doc2 = $('viewer-frame').contentDocument;
+      if (doc2) doc2.addEventListener('scroll', scheduleScrollSave, { passive: true });
+    } catch (e) {}
+  }
 
   function applyAidsToFrame() {
     var frame = $('viewer-frame');
