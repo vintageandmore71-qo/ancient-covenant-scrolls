@@ -1,6 +1,46 @@
 /* Load — Run Web Apps on iPad (PWA)
    Copyright (c) 2026 DssOrit. All Rights Reserved. */
 
+/* ------------- Dyslexia-friendly fonts (bundled locally) ------------- */
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-weight: 400; font-style: normal; font-display: swap;
+  src: url("fonts/atkinson-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-weight: 700; font-style: normal; font-display: swap;
+  src: url("fonts/atkinson-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "OpenDyslexic";
+  font-weight: 400; font-style: normal; font-display: swap;
+  src: url("fonts/opendyslexic-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "OpenDyslexic";
+  font-weight: 700; font-style: normal; font-display: swap;
+  src: url("fonts/opendyslexic-700.woff2") format("woff2");
+}
+
+:root {
+  /* Dyslexia-friendly defaults. Larger base size, generous line and
+     letter spacing, high-contrast neutrals, violet accent. Applied
+     everywhere unless overridden. */
+  --bg-0: #14142a;
+  --bg-1: #1a1a2e;
+  --bg-2: #222238;
+  --bg-3: #2d2d55;
+  --border: #2a2a42;
+  --ink-hi: #f5f5f8;    /* brighter than the old #e8e8ee for legibility */
+  --ink-mid: #c8c8dc;
+  --ink-low: #8a8aa6;
+  --accent: #7c7cff;
+  --accent-hi: #9c9cff;
+  --good: #4aa04a;
+  --danger: #cc3f55;
+}
+
 * { box-sizing: border-box; }
 
 /* ------------- Splash (1.5s launch intro) ------------- */
@@ -44,14 +84,36 @@
 
 html, body {
   margin: 0; padding: 0; height: 100%; width: 100%;
-  background: #14142a; color: #e8e8ee;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
-               "Atkinson Hyperlegible", Arial, sans-serif;
+  background: var(--bg-0); color: var(--ink-hi);
+  /* Atkinson Hyperlegible is the default — designed by the Braille
+     Institute specifically for low-vision and dyslexia users.
+     OpenDyslexic is available too and can be switched on in settings.
+     System fonts as the ultimate fallback. */
+  font-family: "Atkinson Hyperlegible", -apple-system, BlinkMacSystemFont,
+               "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 17px;                  /* larger baseline than iOS 14-16px */
+  line-height: 1.75;                /* generous leading */
+  letter-spacing: 0.015em;          /* slight tracking helps crowding */
+  word-spacing: 0.1em;               /* separates words clearly */
   -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
   overflow: hidden;
 }
-button { font-family: inherit; cursor: pointer; }
-button:focus-visible { outline: 2px solid #7c7cff; outline-offset: 2px; }
+body.dyslexic-font {
+  /* Toggle available in settings to swap to OpenDyslexic across the
+     entire UI. Not the default because some users prefer Atkinson. */
+  font-family: "OpenDyslexic", "Atkinson Hyperlegible", -apple-system, sans-serif;
+}
+button { font-family: inherit; cursor: pointer; font-size: inherit; }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* Italic is hard to read with dyslexia — avoid by default. Bold for emphasis. */
+em, i { font-style: normal; font-weight: 700; color: var(--ink-hi); }
+
+h1, h2, h3, h4 { line-height: 1.3; letter-spacing: 0.01em; }
+
+/* Explicit minimum tap targets — all interactive elements >= 48px. */
+button, .tap, [role="button"] { min-height: 48px; }
 
 /* ------------- Screens ------------- */
 .screen {
@@ -81,85 +143,112 @@ button:focus-visible { outline: 2px solid #7c7cff; outline-offset: 2px; }
 #library-screen > *,
 #viewer-screen > * { position: relative; z-index: 1; }
 
-/* ------------- Login ------------- */
+/* ------------- Login — full-screen splash with floating card ------------- */
 #login-screen {
-  display: flex; align-items: center; justify-content: center; padding: 20px;
+  display: block;
+  background-color: var(--bg-0);
+  /* Full-screen splash image. Comma-stacked for filename variance
+     (splash.png vs splash%20.png with a space). */
+  background-image: url("splash.png"), url("splash%20.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: auto;
+}
+/* Dark gradient vignette on top of the splash so the password card
+   stays readable regardless of image content. */
+#login-screen::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: linear-gradient(to bottom,
+    rgba(20, 20, 42, 0.35) 0%,
+    rgba(20, 20, 42, 0.55) 60%,
+    rgba(20, 20, 42, 0.85) 100%);
+  z-index: 1;
 }
 .login-wrap {
-  display: flex; flex-direction: column; align-items: center;
-  gap: 32px; max-width: 540px; width: 100%;
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
+  position: relative; z-index: 2;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-end;
+  padding: 20px 20px max(40px, env(safe-area-inset-bottom));
+  gap: 24px;
 }
+/* Fallback wordmark shown when splash.png isn't uploaded yet. Sits
+   at the top of the screen. When the image loads, the wordmark is
+   visually behind it (below in document order, above in z-index
+   because of the ::before vignette) so we hide the .login-hero
+   entirely when splash.png is present via a CSS trick below. */
 .login-hero {
-  width: 100%; max-height: 56vh;
-  aspect-ratio: 1 / 1;
-  max-width: 420px;
-  /* Tries both filenames — splash.png (preferred) and splash%20.png
-     (fallback, the one with a literal space before .png that can
-     happen when saving from iPad Files). Browsers try the first; if
-     missing, the second shows. */
-  background-image: url("splash.png"), url("splash%20.png");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  border-radius: 20px;
+  flex: 1; width: 100%;
   display: flex; align-items: center; justify-content: center;
+  min-height: 200px;
 }
-/* Fallback content visible only when splash.png is missing (no image means
-   the container has no background to cover the fallback). */
 .login-hero-fallback {
-  text-align: center; color: #fff; padding: 30px;
-  background: rgba(20, 20, 42, 0.2);
-  border-radius: 14px;
-  /* Hide fallback if the background image loads successfully by
-     using a negative margin trick: when splash.png loads, the
-     container's background will visually cover the fallback
-     because z-index isn't set. */
+  text-align: center; color: #fff; padding: 24px;
+  display: none;                         /* hidden by default */
 }
+/* Only show the CSS fallback wordmark when splash is missing. We
+   detect "missing" via a separate class that JS adds if the image
+   failed to load. Simpler approach: leave the fallback hidden by
+   default; if the user wants it back they can toggle a class. */
 .login-box {
-  background: #222238; padding: 32px 28px; border-radius: 14px;
-  max-width: 400px; width: 100%; text-align: center; border: 1px solid #2a2a42;
+  background: rgba(20, 20, 42, 0.80);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  padding: 28px 24px; border-radius: 18px;
+  width: 100%; max-width: 380px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
 }
 .login-box input[type=password] {
-  width: 100%; padding: 14px; border: 1px solid #3a3a5a; background: #1a1a2e;
-  color: #fff; font-size: 16px; border-radius: 8px; margin-bottom: 14px;
+  width: 100%; padding: 16px; border: 2px solid var(--bg-3);
+  background: var(--bg-1); color: var(--ink-hi);
+  font-size: 18px; border-radius: 10px; margin-bottom: 14px;
   -webkit-appearance: none;
+  font-family: inherit; letter-spacing: inherit;
+}
+.login-box input[type=password]:focus {
+  outline: none; border-color: var(--accent);
 }
 .login-box button {
-  width: 100%; padding: 14px; background: #7c7cff; color: #14142a;
-  border: none; border-radius: 8px; font-size: 16px; font-weight: 700; min-height: 48px;
+  width: 100%; padding: 16px; background: var(--accent); color: var(--bg-0);
+  border: none; border-radius: 10px;
+  font-size: 17px; font-weight: 700; min-height: 52px;
+  letter-spacing: 0.5px;
 }
-.login-box button:active { background: #5a5ae0; }
-.err { color: #ff8a8a; font-size: 13px; margin-top: 10px; min-height: 16px; }
+.login-box button:active { background: var(--accent-hi); }
+.err { color: #ff8a8a; font-size: 14px; margin-top: 12px; min-height: 18px; }
 .splash-title {
-  margin: 0; font-size: 42px; font-weight: 800; letter-spacing: 3px;
-  background: linear-gradient(135deg, #7c7cff 0%, #b8b8ff 50%, #7c7cff 100%);
+  margin: 0; font-size: 48px; font-weight: 800; letter-spacing: 3px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hi) 50%, var(--accent) 100%);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-.splash-tag { margin: 6px 0 0; font-size: 13px; color: #a8a8c4; letter-spacing: 2px; text-transform: uppercase; }
-.splash-arrow { font-size: 56px; line-height: 1; color: #7c7cff; margin-bottom: 10px; }
-.link { color: #7c7cff; text-decoration: none; }
-.link:hover { text-decoration: underline; }
+.splash-tag { margin: 8px 0 0; font-size: 14px; color: var(--ink-mid); letter-spacing: 2px; text-transform: uppercase; }
+.splash-arrow { font-size: 56px; line-height: 1; color: var(--accent); margin-bottom: 12px; }
+.link { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent); }
+.link:hover { color: var(--accent-hi); border-color: var(--accent-hi); }
 
 /* ------------- Library ------------- */
 .topbar {
-  position: sticky; top: 0; background: #14142a; z-index: 5;
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px 16px; border-bottom: 1px solid #2a2a42;
-  padding-top: max(12px, env(safe-area-inset-top));
+  position: sticky; top: 0; background: var(--bg-0); z-index: 5;
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+  padding-top: max(14px, env(safe-area-inset-top));
 }
 .topbar h2 {
-  margin: 0; font-size: 16px; color: #7c7cff;
-  letter-spacing: 2px; text-transform: uppercase;
+  margin: 0; font-size: 18px; color: var(--accent);
+  letter-spacing: 2px; text-transform: uppercase; font-weight: 700;
 }
 .spacer { flex: 1; }
 
 .primary-btn {
-  background: #7c7cff; color: #14142a; border: none;
-  padding: 10px 18px; border-radius: 8px; font-size: 15px; font-weight: 700;
-  min-height: 44px; display: inline-flex; align-items: center; gap: 6px;
+  background: var(--accent); color: var(--bg-0); border: none;
+  padding: 12px 20px; border-radius: 10px; font-size: 16px; font-weight: 700;
+  min-height: 48px; display: inline-flex; align-items: center; gap: 8px;
+  letter-spacing: 0.5px;
 }
 .primary-btn:active { background: #5a5ae0; }
 .primary-btn .icon { font-size: 20px; line-height: 1; }
@@ -185,13 +274,35 @@ button:focus-visible { outline: 2px solid #7c7cff; outline-offset: 2px; }
 
 .empty-state {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 80px 20px; text-align: center; color: #a8a8c4;
+  padding: 60px 24px; text-align: left;
+  color: var(--ink-mid);
+  max-width: 640px; margin: 0 auto;
 }
-.empty-icon { font-size: 60px; margin-bottom: 16px; opacity: 0.7; }
-.empty-state h3 { margin: 0 0 10px; color: #e8e8ee; }
-.empty-state p { margin: 4px 0; line-height: 1.6; max-width: 460px; }
-.empty-state .hint { font-size: 13px; color: #6a6a86; margin-top: 12px; }
-.empty-state code { background: #1a1a2e; padding: 1px 6px; border-radius: 4px; font-size: 0.9em; }
+.empty-icon { font-size: 72px; margin-bottom: 20px; opacity: 0.8; align-self: center; }
+.empty-state h3 {
+  margin: 0 0 16px; color: var(--ink-hi);
+  font-size: 22px; font-weight: 700; letter-spacing: 0.5px;
+  align-self: center;
+}
+.empty-state p {
+  margin: 10px 0; line-height: 1.8;
+  max-width: 600px; width: 100%;
+  font-size: 16px; color: var(--ink-hi);
+}
+.empty-state .hint {
+  font-size: 15px; color: var(--ink-mid); margin-top: 16px;
+  padding: 14px 18px;
+  background: rgba(124, 124, 255, 0.08);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  line-height: 1.7;
+}
+.empty-state code {
+  background: var(--bg-2); padding: 2px 8px; border-radius: 4px;
+  font-size: 0.95em; color: var(--accent-hi);
+  font-family: "SFMono-Regular", Menlo, monospace;
+}
+.empty-state strong { color: var(--ink-hi); font-weight: 700; }
 
 .grid {
   display: grid; gap: 16px; padding: 16px;
@@ -200,27 +311,30 @@ button:focus-visible { outline: 2px solid #7c7cff; outline-offset: 2px; }
 .grid:empty { display: none; }
 
 .tile {
-  background: linear-gradient(135deg, #2d2d55, #1a1a2e);
-  border: 1px solid #2a2a42;
-  border-radius: 14px;
-  padding: 16px;
-  min-height: 170px;
-  display: flex; flex-direction: column; gap: 8px;
+  background: linear-gradient(135deg, var(--bg-3), var(--bg-1));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+  min-height: 180px;
+  display: flex; flex-direction: column; gap: 10px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  transition: transform 0.1s ease, border-color 0.15s ease;
 }
-.tile:active { transform: scale(0.98); }
+.tile:active { transform: scale(0.97); }
+.tile:focus-visible { border-color: var(--accent); }
 .tile .tile-icon {
-  font-size: 40px; color: #7c7cff; align-self: center; margin: 10px 0 14px;
+  font-size: 44px; color: var(--accent); align-self: center; margin: 10px 0 14px;
 }
 .tile .tile-name {
-  font-weight: 700; color: #fff; font-size: 15px;
-  line-height: 1.3; overflow-wrap: anywhere;
+  font-weight: 700; color: var(--ink-hi); font-size: 17px;
+  line-height: 1.4; overflow-wrap: anywhere;
+  letter-spacing: 0.01em;
 }
 .tile .tile-meta {
-  font-size: 11px; color: #a8a8c4;
-  margin-top: auto;
+  font-size: 13px; color: var(--ink-mid);
+  margin-top: auto; line-height: 1.5;
 }
 .tile-menu-btn {
   position: absolute; top: 8px; right: 8px;
