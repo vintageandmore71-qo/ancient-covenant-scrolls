@@ -57,6 +57,21 @@
     </button>
   </header>
 
+  <!-- "Install Load as an app" banner — shown only when Load is running
+       in Safari (not yet added to the home screen). Hidden once the user
+       is in standalone mode, since Load is then already their app. -->
+  <div id="install-banner" class="install-banner" style="display:none;">
+    <div class="ib-left">
+      <div class="ib-icon" aria-hidden="true">&#128241;</div>
+      <div>
+        <strong>Install Load as an app on your iPad.</strong>
+        <span class="ib-sub">Own icon, opens fullscreen, works offline. Like HTMLq, but it IS your Load.</span>
+      </div>
+    </div>
+    <button id="install-show-steps" class="install-btn">Show me how</button>
+    <button id="install-dismiss" class="icon-btn" aria-label="Dismiss">&times;</button>
+  </div>
+
   <!-- Attain-style home: centered splash image + two big buttons. Nothing
        else cluttering the screen. Type filters and recent items live on
        the Library screen where they belong. -->
@@ -613,6 +628,21 @@
         <p>To add more voices, open your iPad's <strong>Settings app</strong> &rarr; <strong>Accessibility</strong> &rarr; <strong>Spoken Content</strong> &rarr; <strong>Voices</strong>. Pick any voice and tap the download button next to it.</p>
       </details>
 
+      <details>
+        <summary>Is Load a real app? How is it different from HTMLq?</summary>
+        <p><strong>Yes, Load is a real iPad app</strong> once you Add to Home Screen. Both Load and HTMLq use the same iOS mechanisms:</p>
+        <ul>
+          <li>Own icon on home screen ✓</li>
+          <li>Opens fullscreen without Safari ✓</li>
+          <li>Works offline ✓</li>
+          <li>Own storage that persists ✓</li>
+          <li>Appears in iPad App Library / dock ✓</li>
+        </ul>
+        <p><strong>What Load has that HTMLq doesn't</strong>: reading aids, Load AI, TTS / Read Aloud, dyslexia fonts, color themes, bookmarks, notes, folders, library, content-aware Helper, share feature, backup / restore, Create new pages, HTML editor, developer console, ZIP / PDF / EPUB / Media import.</p>
+        <p><strong>What HTMLq has that Load doesn't</strong>: an App Store listing (HTMLq is a native Swift app). That matters if you want to distribute Load to other people via the App Store, but for personal use on your iPad there's zero functional difference after Add to Home Screen.</p>
+        <p>If App Store distribution matters to you, the Swift Playgrounds path is open &mdash; see <code>/load-ios/</code> in the repo where we started that build (paused at Step 4.5).</p>
+      </details>
+
       <details open>
         <summary>How do I add Load to my iPad home screen?</summary>
         <p>Make Load itself a home-screen icon so it opens like a native app (no Safari chrome, works offline):</p>
@@ -1063,6 +1093,13 @@
   </div>
 
   <div class="panel-section">
+    <h4>Install Load as an app</h4>
+    <p class="panel-hint">This IS your Load app, not a website &mdash; once added to the home screen, it runs fullscreen, works offline, has its own icon, and doesn't need Safari.</p>
+    <p id="install-status" class="install-status">Checking install status...</p>
+    <button id="settings-install-btn" class="seg-btn full" style="margin-top:8px;">&#128229; Show install steps</button>
+  </div>
+
+  <div class="panel-section">
     <h4>Folders</h4>
     <p class="panel-hint">Group imported items into collections like "Books", "Work tools", or "Reference". Folders show as filter chips on the Library screen.</p>
     <div id="folder-list" class="folder-list"></div>
@@ -1094,6 +1131,29 @@
 
 <!-- Toast notifications for quick feedback (upload success, saves, etc.) -->
 <div id="toast" class="toast"></div>
+
+<!-- Install Load as app — shows in a modal from the banner or Settings -->
+<div id="install-modal" class="modal" role="dialog" aria-label="Install Load as an app">
+  <div class="modal-box install-modal-box">
+    <h3>Install Load on your iPad</h3>
+    <p style="color:var(--ink-mid);font-size:14px;line-height:1.7;">Same idea as HTMLq &mdash; tap an icon on your home screen, Load opens fullscreen. No App Store needed.</p>
+    <ol class="steps install-steps">
+      <li>If you're in Safari right now, tap the <strong>Share</strong> icon (square with arrow pointing up) at the top of the screen.</li>
+      <li>Scroll down the share sheet.</li>
+      <li>Tap <strong>Add to Home Screen</strong>.</li>
+      <li>Keep the name as "Load" (or change it), then tap <strong>Add</strong>.</li>
+    </ol>
+    <p style="color:var(--ink-mid);font-size:13px;background:rgba(124,124,255,0.08);padding:12px;border-radius:8px;border-left:3px solid var(--accent);line-height:1.7;">
+      <strong>After that</strong>: tap the Load icon on your home screen, and it opens like any other app. Works with Airplane Mode on. Own storage. Never needs the web browser again.
+    </p>
+    <p style="color:var(--ink-low);font-size:12px;line-height:1.6;">
+      Want Load truly in the App Store? That needs Apple's native app path (Swift). Load's Swift Playgrounds project is in the repo at <code>/load-ios/</code> &mdash; you paused at Step 4.5 earlier. Resume anytime.
+    </p>
+    <div class="modal-actions">
+      <button id="install-modal-close" class="primary-btn">Got it</button>
+    </div>
+  </div>
+</div>
 
 <!-- Load AI — Copilot-style chat panel for Load-usage + build help -->
 <div id="helper-panel" class="helper-panel" role="dialog" aria-label="Load AI">

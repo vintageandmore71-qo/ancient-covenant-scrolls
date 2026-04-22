@@ -477,6 +477,51 @@
     } catch (e) {}
   }
 
+  /* ---------- Install-as-app detection + UI ----------
+   * iOS Safari sets navigator.standalone === true when a PWA was added
+   * to the home screen and launched from there. We use that to hide the
+   * 'install Load as app' banner when the user is already running Load
+   * as an app, and to show a status pill in Settings. */
+  function isStandalone() {
+    try {
+      return (navigator.standalone === true) ||
+             (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+    } catch (e) { return false; }
+  }
+  function updateInstallUi() {
+    var installed = isStandalone();
+    var banner = $('install-banner');
+    if (banner) {
+      var dismissed = false;
+      try { dismissed = localStorage.getItem('load_install_dismissed') === '1'; } catch (e) {}
+      banner.style.display = (installed || dismissed) ? 'none' : 'flex';
+    }
+    var status = $('install-status');
+    if (status) {
+      status.classList.remove('installed', 'not-installed');
+      if (installed) {
+        status.classList.add('installed');
+        status.innerHTML = '&#10003; <strong>Load is installed as an app.</strong> You\'re running fullscreen from the home screen.';
+      } else {
+        status.classList.add('not-installed');
+        status.innerHTML = '&#9432; You\'re viewing Load in Safari. Tap "Show install steps" below to turn it into a real iPad app.';
+      }
+    }
+  }
+  function wireInstallFlow() {
+    var show = $('install-show-steps');
+    if (show) show.addEventListener('click', function () { $('install-modal').classList.add('on'); });
+    var dismiss = $('install-dismiss');
+    if (dismiss) dismiss.addEventListener('click', function () {
+      var banner = $('install-banner'); if (banner) banner.style.display = 'none';
+      try { localStorage.setItem('load_install_dismissed', '1'); } catch (e) {}
+    });
+    var sb = $('settings-install-btn');
+    if (sb) sb.addEventListener('click', function () { $('install-modal').classList.add('on'); });
+    var close = $('install-modal-close');
+    if (close) close.addEventListener('click', function () { $('install-modal').classList.remove('on'); });
+  }
+
   /* ---------- Load AI — Copilot-style assistant ----------
    * Not real AI. No downloads. Instead: a curated knowledge base of
    * Load-usage answers (extracted from the Help FAQ) plus pattern
@@ -1207,6 +1252,8 @@
       safe('wireHelper', wireHelper);
       safe('wireConsole', wireConsole);
       safe('wireEditorControls', wireEditorControls);
+      safe('wireInstallFlow', wireInstallFlow);
+      safe('updateInstallUi', updateInstallUi);
       safe('renderFolderList', renderFolderList);
       safe('renderLibraryChips', renderLibraryChips);
       safe('updateResumeCard', updateResumeCard);
@@ -2237,6 +2284,7 @@
   /* ---------- Settings panel ---------- */
   function openSettingsPanel() {
     refreshSettingsPanel();
+    try { updateInstallUi(); } catch (e) {}
     $('settings-panel').classList.add('on');
     $('settings-scrim').classList.add('on');
   }

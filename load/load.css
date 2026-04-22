@@ -932,6 +932,68 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
 .helper-input-row input:focus { outline: none; border-color: var(--accent); }
 .helper-input-row button { min-width: 52px; padding: 12px; font-size: 20px; }
 
+/* ------------- Install-as-app banner ------------- */
+.install-banner {
+  display: flex; align-items: center; gap: 12px;
+  margin: 16px 14px 0;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(124,124,255,0.15), rgba(37,99,235,0.12));
+  border: 1px solid var(--accent);
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(124,124,255,0.15);
+}
+.install-banner .ib-left {
+  flex: 1;
+  display: flex; gap: 12px; align-items: center;
+  color: var(--ink-hi);
+  line-height: 1.5;
+}
+.install-banner .ib-icon {
+  font-size: 32px; line-height: 1;
+  color: var(--accent);
+}
+.install-banner strong {
+  display: block;
+  font-size: 15px;
+  color: var(--ink-hi);
+  margin-bottom: 2px;
+}
+.install-banner .ib-sub {
+  display: block;
+  font-size: 13px;
+  color: var(--ink-mid);
+}
+.install-btn {
+  background: var(--accent); color: var(--bg-0);
+  border: none; padding: 10px 16px; border-radius: 8px;
+  font-size: 14px; font-weight: 700; min-height: 40px;
+  white-space: nowrap;
+}
+.install-btn:active { background: var(--accent-hi); }
+
+.install-status {
+  display: inline-block;
+  background: var(--bg-2);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--ink-mid);
+  margin: 8px 0 0;
+}
+.install-status.installed {
+  background: rgba(74, 160, 74, 0.15);
+  color: var(--good);
+  border: 1px solid var(--good);
+}
+.install-status.not-installed {
+  background: rgba(124, 124, 255, 0.12);
+  color: var(--accent-hi);
+  border: 1px solid var(--accent);
+}
+
+.install-modal-box { max-width: 520px; }
+.install-steps { margin: 16px 0; }
+
 /* ------------- Toast notifications ------------- */
 .toast {
   position: fixed;
