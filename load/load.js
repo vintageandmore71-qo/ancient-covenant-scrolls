@@ -603,6 +603,141 @@
       actionLabel:null, actionFn:null },
     { id:'dev-when-need-mac', keywords:['web inspector','mac','safari inspector','breakpoints','full devtools'],
       answer:'Load\'s built-in Developer Console handles logs, errors, and one-liner evaluation. For <strong>breakpoints</strong>, <strong>network inspection</strong>, <strong>CSS live-editing</strong>, or <strong>DOM inspector</strong>, you need Safari Web Inspector: plug your iPad into a Mac via USB, open Safari on the Mac &rarr; Develop &rarr; [your iPad] &rarr; Load. It\'s free.',
+      actionLabel:null, actionFn:null },
+
+    /* ============ Troubleshooting ============ */
+    { id:'trouble-slow', keywords:['slow','lag','laggy','freezing','hang','sluggish'],
+      answer:'First-visit is always a bit slow — Load downloads 2 MB of fonts + PDF/EPUB libraries. After that it\'s instant. If it stays slow: pull down in Safari to refresh, or force-close Safari from the iPad app switcher and reopen Load.',
+      actionLabel:null, actionFn:null },
+    { id:'trouble-stuck', keywords:['stuck','frozen','not responding','won\'t move'],
+      answer:'Try: (1) pull down to refresh Safari, (2) close Load from the iPad app switcher and reopen, (3) restart your iPad. Your imported files and notes always stay safe through these steps.',
+      actionLabel:null, actionFn:null },
+    { id:'trouble-blank', keywords:['blank','white screen','empty','nothing happens','crashed'],
+      answer:'If Load opens to a blank screen: pull down to refresh. If still blank, go to iPad <strong>Settings &rarr; Safari &rarr; Advanced &rarr; Website Data</strong>, swipe left on Load\'s entry, Delete, then reopen Load. (Your imported files will be gone after this — back up first if you can.)',
+      actionLabel:null, actionFn:null },
+    { id:'trouble-no-image', keywords:['image not loading','picture missing','broken image','no photo'],
+      answer:'A broken image icon means the file it points to can\'t be found. In an imported app: open Edit HTML and check that the <code>src="..."</code> path is correct. In your own Create content: URLs to external images only work online; save images to your iPad and import them via the Media card for offline use.',
+      actionLabel:null, actionFn:null },
+    { id:'trouble-no-video', keywords:['video won\'t play','video not playing','black video','media error'],
+      answer:'iPad Safari supports MP4 / MOV / WebM natively. If a video won\'t play: (1) confirm the file plays in the Files app, (2) check the file isn\'t oversized (Safari may struggle above 500 MB), (3) try tapping the fullscreen icon inside the video controls.',
+      actionLabel:null, actionFn:null },
+    { id:'trouble-no-audio', keywords:['can\'t hear','no sound','silent','mute','audio not working','tts silent'],
+      answer:'Check: (1) iPad is not muted (side switch or volume), (2) the volume slider on the TTS drawer or video is up, (3) for TTS, try a different voice in Settings &rarr; Read Aloud, (4) confirm your iPad has at least one Spoken Content voice installed.',
+      actionLabel:null, actionFn:null },
+    { id:'trouble-upload', keywords:['upload failed','import failed','import error','couldn\'t import'],
+      answer:'Common reasons: (1) the file is a format Load doesn\'t support (Kindle AZW is DRM-locked), (2) the file is corrupted, (3) you ran out of iPad storage. Try a small HTML file first to confirm imports work, then retry the failing file.',
+      actionLabel:null, actionFn:null },
+    { id:'trouble-storage-full', keywords:['out of space','storage full','low storage','no space left'],
+      answer:'Each imported file is copied into Load to work offline, so big PDFs and EPUBs eat space. Free space by: Library &rarr; tap 🗑 Delete on items you don\'t need anymore. Export a backup first if you want to keep them for later.',
+      actionLabel:null, actionFn:null },
+
+    /* ============ Privacy & security ============ */
+    { id:'is-free', keywords:['free','cost','price','pay','subscription','fee'],
+      answer:'Yes. Load is 100% free. No subscription, no in-app purchases, no ads. You own your files. It runs entirely on your iPad.',
+      actionLabel:null, actionFn:null },
+    { id:'who-sees', keywords:['who sees','can others see','visible','private'],
+      answer:'Only you. Nothing in Load is sent to any server. There is no account, no cloud sync, no sharing unless you explicitly hit the Share button for one specific file.',
+      actionLabel:null, actionFn:null },
+    { id:'cookies', keywords:['cookies','tracking','analytics','spy'],
+      answer:'No tracking cookies, no analytics, no fingerprinting. Load uses IndexedDB and localStorage purely for your data, never to identify or track you.',
+      actionLabel:null, actionFn:null },
+
+    /* ============ Dyslexia-specific ============ */
+    { id:'dys-letters-swap', keywords:['letters swap','letters flip','b and d','p and q','mixed up'],
+      answer:'Try turning on <strong>OpenDyslexic font</strong> (top bar &rarr; 🌈 rainbow icon, or Settings &rarr; Font). Its weighted bottoms make b/d and p/q easier to distinguish. Also bump <strong>letter spacing</strong> up one notch in Settings.',
+      actionLabel:'Open Settings', actionFn:function(){ openSettingsPanel(); } },
+    { id:'dys-crowding', keywords:['crowded text','cramped','lines too close','squishy','squashed'],
+      answer:'Increase <strong>line spacing</strong> in Settings (or in the viewer Aa panel). Also try a soft-color theme (Cream or Soft Blue) &mdash; reducing glare helps reading stamina.',
+      actionLabel:'Open Settings', actionFn:function(){ openSettingsPanel(); } },
+    { id:'dys-ruler', keywords:['ruler','focus line','follow line','losing my place','lose place'],
+      answer:'In the viewer, tap <strong>Aa &rarr; Focus line</strong> toggle. A horizontal highlighted band stays on your screen. Move your eyes to keep text inside the band.',
+      actionLabel:null, actionFn:null },
+    { id:'dys-bionic', keywords:['bionic','bold start','first letters','skim'],
+      answer:'Bionic Reading bolds the first ~40% of each word to help your eyes latch on. Turn it on in the viewer Aa panel. Many dyslexic readers read faster with it on.',
+      actionLabel:null, actionFn:null },
+    { id:'dys-tired', keywords:['reading tiring','eye strain','hard to focus','can\'t concentrate'],
+      answer:'Try this combo: Cream theme + bigger font (A+) + more line spacing + Read Aloud on at 1x while you follow along visually. Multi-sensory input is proven to reduce dyslexia reading fatigue.',
+      actionLabel:null, actionFn:null },
+
+    /* ============ Accessibility beyond dyslexia ============ */
+    { id:'a11y-low-vision', keywords:['low vision','blurry','vision','see better'],
+      answer:'Combine several: (1) Settings &rarr; A+ repeatedly for base font, (2) Theme &rarr; High Contrast (yellow on black, maximum contrast), (3) pinch-zoom still works in any viewer. For videos and images, the iframe respects iPad\'s system zoom.',
+      actionLabel:'Open Settings', actionFn:function(){ openSettingsPanel(); } },
+    { id:'a11y-voiceover', keywords:['voiceover','screen reader','blind','vision impaired'],
+      answer:'Load\'s topbar buttons, tiles, and menus have proper <code>aria-label</code> attributes so VoiceOver reads them correctly. Turn on VoiceOver in iPad <strong>Settings &rarr; Accessibility &rarr; VoiceOver</strong> (or triple-click the side button if you\'ve set that shortcut).',
+      actionLabel:null, actionFn:null },
+    { id:'a11y-color-blind', keywords:['color blind','colorblind','can\'t tell colors','colors same'],
+      answer:'Load\'s violet accent on dark stays readable for all common types of color blindness. For maximum clarity, use the High Contrast theme (yellow on black). File-type colored boxes also have icons and labels so color isn\'t the only cue.',
+      actionLabel:null, actionFn:null },
+
+    /* ============ Sharing scenarios ============ */
+    { id:'share-family-no-ipad', keywords:['family without ipad','android','windows','mac','pc'],
+      answer:'The exported HTML works in any modern browser &mdash; Chrome, Firefox, Edge, Safari, Brave &mdash; on any OS. AirDrop for Apple devices, email or Dropbox for everyone else. Tell them to double-tap the file to open.',
+      actionLabel:null, actionFn:null },
+    { id:'share-opens-how', keywords:['how do they open','recipient','what do they do'],
+      answer:'The recipient double-taps the HTML file. It opens in their default browser. To save it for offline, they tap Share (or File &rarr; Save As). On iPad they can tap Share &rarr; Add to Home Screen for a standalone icon.',
+      actionLabel:null, actionFn:null },
+
+    /* ============ Coding questions (expanded) ============ */
+    { id:'dev-center-text', keywords:['center text','align text','text center','middle'],
+      answer:'Center one line of text: <code>text-align: center;</code> on the parent. Center a whole block: <code>margin: 0 auto;</code> with a set <code>max-width</code>. Center everything in a box: <code>display: flex; align-items: center; justify-content: center;</code> on the parent.',
+      actionLabel:null, actionFn:null },
+    { id:'dev-color', keywords:['color','change color','text color','red','blue','green','colour'],
+      answer:'Text color: <code>color: red;</code> or <code>color: #cc3f55;</code>. Background: <code>background: #f4eadc;</code>. Hex codes like <code>#rrggbb</code> give any color. For named colors: red, blue, green, goldenrod, tomato, coral, etc.',
+      actionLabel:null, actionFn:null },
+    { id:'dev-background', keywords:['background','background color','bg','behind'],
+      answer:'Color background: <code>body { background: #1a1a2e; }</code>. Image background: <code>body { background: url("picture.jpg") center/cover no-repeat; }</code>. Gradient: <code>background: linear-gradient(135deg, red, orange);</code>.',
+      actionLabel:null, actionFn:null },
+    { id:'dev-responsive', keywords:['responsive','mobile','phone','different sizes','fit screen'],
+      answer:'Add this inside <code>&lt;head&gt;</code>: <code>&lt;meta name="viewport" content="width=device-width,initial-scale=1"&gt;</code>. Then use <code>max-width</code> instead of fixed widths, and test with the iPad in portrait + landscape.',
+      actionLabel:null, actionFn:null },
+    { id:'dev-click', keywords:['click handler','onclick','button click','when tapped'],
+      answer:'Inline: <code>&lt;button onclick="doSomething()"&gt;Go&lt;/button&gt;</code>. Separated: <code>document.querySelector("button").addEventListener("click", doSomething);</code>. Either works. The addEventListener form is cleaner for multiple handlers.',
+      actionLabel:null, actionFn:null },
+    { id:'dev-storage', keywords:['localstorage','save locally','persist','remember'],
+      answer:'Save: <code>localStorage.setItem("key", "value")</code>. Load: <code>localStorage.getItem("key")</code> — returns null if not set. Works offline, stays between visits, ~5 MB limit. For bigger data use IndexedDB.',
+      actionLabel:null, actionFn:null },
+    { id:'dev-animation', keywords:['animation','animate','move','fade','transition'],
+      answer:'Smooth change: <code>.box { transition: all 0.3s; } .box:hover { transform: scale(1.1); }</code>. Keyframes: <code>@keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} } .ball { animation: bounce 1s infinite; }</code>.',
+      actionLabel:null, actionFn:null },
+
+    /* ============ App creation ideas ============ */
+    { id:'ideas', keywords:['what should i make','app idea','what to build','examples','suggestions'],
+      answer:'Some low-code wins: a family recipe book (Checklist template, one ingredient per line), a trip packing list, a letter to mail, a personal FAQ, a daily affirmation page, a study flashcard set, a shopping list. All doable in the Create screen in minutes.',
+      actionLabel:'Open Create', actionFn:function(){ show('create-screen'); } },
+    { id:'flashcards', keywords:['flashcards','flash cards','study cards','memorize'],
+      answer:'For a simple offline flashcard deck: use the Article template, put one question per line followed by its answer. Or import an EPUB and use the built-in reader + bookmarks to mark cards. For a flip-style card deck, Edit HTML and I can walk you through the code.',
+      actionLabel:null, actionFn:null },
+    { id:'quiz', keywords:['quiz','test','exam','questions','multiple choice'],
+      answer:'Simple quiz HTML: each question gets a <code>&lt;form&gt;</code> with radio buttons, a submit button, and a small script to count right answers. Ask me "make me a quiz about X" and I\'ll pre-fill the Create screen with a working template.',
+      actionLabel:null, actionFn:null },
+    { id:'timer', keywords:['timer','countdown','stopwatch','alarm'],
+      answer:'Classic HTML timer pattern: a <code>&lt;div id="count"&gt;&lt;/div&gt;</code>, a Start button, and <code>setInterval()</code> in a script. I can generate a starter for you &mdash; ask "make me a countdown timer" and pick a duration.',
+      actionLabel:null, actionFn:null },
+    { id:'calculator', keywords:['calculator','math','add','multiply'],
+      answer:'Simplest: two <code>&lt;input type="number"&gt;</code> fields + a button whose onclick does <code>document.getElementById("out").textContent = Number(a.value) + Number(b.value)</code>. For a full calculator, Edit HTML and ask the helper for a button-grid template.',
+      actionLabel:null, actionFn:null },
+
+    /* ============ Misc platform ============ */
+    { id:'offline-forever', keywords:['work forever offline','always offline','no internet ever'],
+      answer:'Yes. After first visit (or Add to Home Screen), Load needs zero internet forever. Everything is cached. You could delete your internet connection tomorrow and Load would still open tomorrow, and next year.',
+      actionLabel:null, actionFn:null },
+    { id:'multiple-devices', keywords:['other ipad','sync','two devices','multiple devices','another device'],
+      answer:'Load stays on one device at a time &mdash; no cloud sync. To move your library: Settings &rarr; Library Backup &rarr; Export library to file &rarr; Save to iCloud Drive. On the other iPad, open Load &rarr; Settings &rarr; Library Backup &rarr; Import. Your notes, bookmarks, and files are restored.',
+      actionLabel:'Open Settings', actionFn:function(){ openSettingsPanel(); } },
+    { id:'print', keywords:['print','printer','physical copy','print out'],
+      answer:'Open the item in the viewer. iPad Safari\'s Share sheet has <strong>Print</strong> as an option — tap the hide-ui button first to remove Load\'s topbar, then use the Share icon. Or export as HTML, open in Safari, and print from there.',
+      actionLabel:null, actionFn:null },
+    { id:'save-as-pdf', keywords:['save as pdf','convert to pdf','make pdf','export pdf'],
+      answer:'iPad can save any web page as PDF: tap Safari\'s Share &rarr; scroll down &rarr; <strong>Save to Files</strong> &rarr; change format to PDF in the dropdown at top. Works for any Load viewer page too.',
+      actionLabel:null, actionFn:null },
+
+    /* ============ Editor-specific ============ */
+    { id:'editor-bigger', keywords:['editor font','code too small','editor bigger','bigger code'],
+      answer:'In the HTML editor, tap <strong>A+</strong> / <strong>A&minus;</strong> in the top bar. For a lighter background (easier on dyslexic readers), tap the <strong>&#9689; circle icon</strong> to switch to cream theme.',
+      actionLabel:null, actionFn:null },
+    { id:'editor-lost-changes', keywords:['lost changes','didn\'t save','undo','revert'],
+      answer:'Load has no undo history once you tap Back. Always tap <strong>Save</strong> before leaving the editor. If you haven\'t saved: tap Back to library, tap the tile and Edit HTML again — your old content is still there.',
       actionLabel:null, actionFn:null }
   ];
 
@@ -741,7 +876,7 @@
       });
       if (!best || score > best.score) best = { score: score, entry: entry };
     }
-    if (best && best.score >= 3) return best.entry;
+    if (best && best.score >= 2) return best.entry;
     return null;
   }
 
@@ -773,6 +908,7 @@
       safe('wireAiHelper', wireAiHelper);
       safe('wireHelper', wireHelper);
       safe('wireConsole', wireConsole);
+      safe('wireEditorControls', wireEditorControls);
       safe('renderFolderList', renderFolderList);
       safe('renderLibraryChips', renderLibraryChips);
       safe('updateResumeCard', updateResumeCard);
@@ -1744,10 +1880,39 @@
 
   /* ---------- HTML source editor ---------- */
   var editingApp = null;
+  /* Editor accessibility — font size + theme, dyslexia-friendly defaults */
+  var editorFontStep = 0;       // 0 = base 16px; each step = +2px
+  var editorTheme = 'dark';     // dark | cream | high
+  function applyEditorPrefs() {
+    var ta = $('editor-textarea');
+    if (!ta) return;
+    ta.style.fontSize = (16 + editorFontStep * 2) + 'px';
+    ta.classList.remove('editor-theme-cream', 'editor-theme-high');
+    if (editorTheme === 'cream') ta.classList.add('editor-theme-cream');
+    else if (editorTheme === 'high') ta.classList.add('editor-theme-high');
+  }
+  function wireEditorControls() {
+    document.querySelectorAll('[data-editor-fs]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var dir = b.getAttribute('data-editor-fs');
+        if (dir === 'up') editorFontStep = Math.min(8, editorFontStep + 1);
+        else if (dir === 'down') editorFontStep = Math.max(-2, editorFontStep - 1);
+        applyEditorPrefs();
+      });
+    });
+    document.querySelectorAll('[data-editor-theme]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        editorTheme = b.getAttribute('data-editor-theme') || 'dark';
+        applyEditorPrefs();
+      });
+    });
+  }
+
   function openEditor(app) {
     editingApp = app;
     $('editor-title').textContent = 'Editing: ' + app.name;
     $('editor-textarea').value = app.html || '';
+    applyEditorPrefs();
     show('editor-screen');
   }
   $('editor-back').addEventListener('click', function () {

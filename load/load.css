@@ -434,13 +434,18 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
   width: 100%;
   background: #0e0e22; color: var(--ink-hi);
   border: 2px solid var(--border); border-radius: 10px;
-  padding: 14px;
+  padding: 16px;
   font-family: "SFMono-Regular", Menlo, "DejaVu Sans Mono", monospace;
-  font-size: 14px; line-height: 1.6;
+  font-size: 16px; line-height: 1.8;
+  letter-spacing: 0.03em;
   resize: none;
   -webkit-appearance: none;
+  tab-size: 2;
 }
 #editor-textarea:focus { outline: none; border-color: var(--accent); }
+/* Theme variants for the editor (toggled via data-editor-theme buttons) */
+#editor-textarea.editor-theme-cream { background: #f5efe3; color: #2a2218; border-color: #d9ceb8; }
+#editor-textarea.editor-theme-high  { background: #000; color: #ffec00; border-color: #444; }
 
 /* ------------- Library search bar ------------- */
 .search-bar {

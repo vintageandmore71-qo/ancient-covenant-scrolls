@@ -473,13 +473,19 @@
     </button>
     <span class="editor-title" id="editor-title">Editing</span>
     <div class="spacer"></div>
+    <!-- Editor accessibility controls: font size + theme -->
+    <button class="nav-btn icon-only" data-editor-fs="down" aria-label="Smaller code font" title="Smaller code">A&minus;</button>
+    <button class="nav-btn icon-only" data-editor-fs="up" aria-label="Larger code font" title="Larger code">A&#43;</button>
+    <button class="nav-btn icon-only" data-editor-theme="dark" aria-label="Dark theme" title="Dark theme">&#9680;</button>
+    <button class="nav-btn icon-only" data-editor-theme="cream" aria-label="Cream theme" title="Cream theme">&#9689;</button>
+    <button class="nav-btn icon-only" data-tool="helper" aria-label="Ask Load for help" title="Ask Load">&#128172;</button>
     <button id="editor-save" class="primary-btn">
       <span class="icon">&#10003;</span><span class="btn-label">Save</span>
     </button>
   </header>
   <div class="editor-body">
-    <p class="editor-hint">Edit the HTML source. Changes save to Load's local storage only — your original file on iPad is untouched.</p>
-    <textarea id="editor-textarea" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off"></textarea>
+    <p class="editor-hint"><strong>You're editing the HTML source.</strong> Changes save only in Load — your original file on iPad is untouched. Stuck? Tap the <strong>&#128172; speech bubble</strong> icon to ask Load for help.</p>
+    <textarea id="editor-textarea" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" wrap="soft"></textarea>
   </div>
 </div>
 
