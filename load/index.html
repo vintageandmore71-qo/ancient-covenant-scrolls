@@ -44,6 +44,9 @@
   </header>
 
   <div class="home-hero">
+    <!-- Full splash image shown as <img> so the whole picture (text,
+         features, design) is visible top-to-bottom without cropping. -->
+    <img id="home-splash-img" class="splash-img" src="splash.png" alt="Load — Run Web Apps on iPad" onerror="this.onerror=null; this.src='splash%20.png';">
     <div class="home-hero-fallback">
       <div class="splash-arrow" aria-hidden="true">&#8595;</div>
       <h1 class="splash-title">Load</h1>
@@ -129,10 +132,18 @@
       <span class="nav-icon">&#8682;</span><span class="nav-label">Import</span>
     </button>
     <div class="spacer"></div>
+    <button id="library-search-btn" class="nav-btn" aria-label="Search">
+      <span class="nav-icon">&#128269;</span><span class="nav-label">Search</span>
+    </button>
     <button class="nav-btn" data-nav="settings" aria-label="Settings">
       <span class="nav-icon">&#9881;</span><span class="nav-label">Aa</span>
     </button>
   </header>
+  <!-- Search bar, hidden by default, toggled by Search button -->
+  <div id="library-search" class="search-bar">
+    <input id="library-search-input" type="search" placeholder="Search your library..." autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+    <button id="library-search-clear" class="icon-btn" aria-label="Clear search">&times;</button>
+  </div>
 
   <div id="library-empty" class="empty-state">
     <div class="empty-icon">&#128230;</div>
@@ -159,12 +170,54 @@
   <header id="viewer-topbar" class="topbar viewer-topbar">
     <button id="back-btn" class="icon-btn" aria-label="Back to library">&larr;</button>
     <span id="viewer-title" class="title"></span>
+    <button id="tts-btn" class="icon-btn" aria-label="Read aloud" title="Read aloud">&#128266;</button>
+    <button id="notes-btn" class="icon-btn" aria-label="Notes" title="Notes">&#128221;</button>
     <button id="reload-btn" class="icon-btn" aria-label="Reload">&#8634;</button>
     <button id="aids-btn" class="icon-btn" aria-label="Reading aids">Aa</button>
     <button id="hide-ui-btn" class="icon-btn" aria-label="Hide controls" title="Hide controls">&#9776;</button>
   </header>
   <iframe id="viewer-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-storage-access-by-user-activation"></iframe>
   <button id="show-ui-btn" class="floating-show" aria-label="Show controls">&#9776;</button>
+
+  <!-- TTS control drawer — slides up from the bottom when Read Aloud is tapped -->
+  <div id="tts-drawer" class="tts-drawer">
+    <div class="tts-row">
+      <button id="tts-play" class="tts-btn primary" aria-label="Play">&#9654; Play</button>
+      <button id="tts-pause" class="tts-btn" aria-label="Pause" style="display:none;">&#9646;&#9646; Pause</button>
+      <button id="tts-stop" class="tts-btn" aria-label="Stop">&#9632; Stop</button>
+      <button id="tts-close" class="icon-btn" aria-label="Close reader">&times;</button>
+    </div>
+    <div class="tts-row">
+      <label class="tts-label">Speed</label>
+      <select id="tts-speed" class="tts-select">
+        <option value="0.7">0.7x</option>
+        <option value="0.85">0.85x</option>
+        <option value="1" selected>1x normal</option>
+        <option value="1.15">1.15x</option>
+        <option value="1.3">1.3x</option>
+        <option value="1.5">1.5x</option>
+        <option value="1.8">1.8x</option>
+      </select>
+    </div>
+    <div class="tts-row">
+      <label class="tts-label">Voice</label>
+      <select id="tts-voice" class="tts-select"><option>System default</option></select>
+    </div>
+    <div class="tts-status" id="tts-status">Ready</div>
+  </div>
+</div>
+
+<!-- Notes drawer — slides up with a textarea per-app -->
+<div id="notes-drawer" class="notes-drawer" role="dialog" aria-label="Notes">
+  <div class="notes-head">
+    <h3>Notes</h3>
+    <span class="notes-app-name" id="notes-app-name"></span>
+    <button id="notes-close" class="icon-btn" aria-label="Close">&times;</button>
+  </div>
+  <textarea id="notes-textarea" placeholder="Your notes for this app..." spellcheck="true"></textarea>
+  <div class="notes-actions">
+    <button id="notes-save" class="primary-btn">Save</button>
+  </div>
 </div>
 
 <!-- Reading aids panel -->

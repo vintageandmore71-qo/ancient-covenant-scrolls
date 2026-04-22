@@ -142,26 +142,31 @@ button, .tap, [role="button"] { min-height: 48px; }
 }
 
 /* The splash hero — always visible on the home screen, no fade.
-   The image shows bright with no overlay. */
+   Uses <img> so the whole picture (text + design) is shown at its
+   natural aspect ratio, never cropped. */
 .home-hero {
   width: 100%;
-  min-height: 55vh;           /* generous height so the image is prominent */
-  padding: 16px;
+  padding: 20px 20px 10px;
   background-color: var(--bg-1);
-  background-image: url("splash.png"), url("splash%20.png");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
   display: flex; align-items: center; justify-content: center;
   position: relative;
 }
-@media (min-width: 900px) {
-  .home-hero { min-height: 50vh; }
+.splash-img {
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  max-height: 60vh;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  display: block;
 }
+/* Fallback shown when splash image fails to load. Only visible if
+   no splash.png or splash%20.png exists in /load/. */
 .home-hero-fallback {
   display: none; text-align: center; color: var(--ink-hi);
   padding: 40px; max-width: 500px;
 }
+.home-hero.fallback .splash-img { display: none; }
 .home-hero.fallback .home-hero-fallback { display: block; }
 
 .splash-title {
@@ -349,6 +354,88 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
   -webkit-appearance: none;
 }
 #editor-textarea:focus { outline: none; border-color: var(--accent); }
+
+/* ------------- Library search bar ------------- */
+.search-bar {
+  display: none;
+  align-items: center; gap: 10px;
+  padding: 12px 16px;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--border);
+}
+.search-bar.on { display: flex; }
+.search-bar input[type=search] {
+  flex: 1; padding: 12px 14px;
+  background: var(--bg-0); color: var(--ink-hi);
+  border: 2px solid var(--border); border-radius: 10px;
+  font-size: 16px; -webkit-appearance: none;
+  font-family: inherit; letter-spacing: inherit;
+}
+.search-bar input[type=search]:focus { outline: none; border-color: var(--accent); }
+
+/* ------------- TTS drawer (read aloud controls in viewer) ------------- */
+.tts-drawer {
+  position: fixed; bottom: -280px; left: 0; right: 0;
+  background: var(--bg-1); border-top: 1px solid var(--border);
+  padding: 16px 18px max(18px, env(safe-area-inset-bottom));
+  z-index: 70; transition: bottom 0.25s ease;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
+}
+.tts-drawer.on { bottom: 0; }
+.tts-row { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+.tts-row:last-child { margin-bottom: 0; }
+.tts-label {
+  font-size: 14px; color: var(--ink-mid); min-width: 60px; font-weight: 600;
+}
+.tts-btn {
+  background: var(--bg-3); color: var(--ink-hi); border: none;
+  padding: 12px 18px; border-radius: 10px; font-size: 15px; font-weight: 600;
+  min-height: 48px;
+}
+.tts-btn.primary { background: var(--accent); color: var(--bg-0); }
+.tts-btn:active { transform: scale(0.97); }
+.tts-select {
+  flex: 1; padding: 10px 12px;
+  background: var(--bg-0); color: var(--ink-hi);
+  border: 2px solid var(--border); border-radius: 8px;
+  font-size: 15px; font-family: inherit;
+  -webkit-appearance: none; appearance: none;
+}
+.tts-status {
+  font-size: 13px; color: var(--ink-mid);
+  text-align: center; margin-top: 6px;
+}
+
+/* ------------- Notes drawer ------------- */
+.notes-drawer {
+  position: fixed; top: 0; bottom: 0; right: -520px;
+  width: min(520px, 92vw);
+  background: var(--bg-1); border-left: 1px solid var(--border);
+  z-index: 120; padding: 18px 20px;
+  display: flex; flex-direction: column;
+  transition: right 0.25s ease;
+  padding-top: max(18px, env(safe-area-inset-top));
+}
+.notes-drawer.on { right: 0; }
+.notes-head {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+}
+.notes-head h3 { margin: 0; color: var(--accent); font-size: 18px; }
+.notes-app-name { flex: 1; font-size: 14px; color: var(--ink-mid); }
+.notes-drawer textarea {
+  flex: 1; width: 100%;
+  background: var(--bg-0); color: var(--ink-hi);
+  border: 2px solid var(--border); border-radius: 10px;
+  padding: 14px;
+  font-size: 16px; line-height: 1.7;
+  font-family: inherit; letter-spacing: inherit;
+  resize: none; -webkit-appearance: none;
+  min-height: 200px;
+}
+.notes-drawer textarea:focus { outline: none; border-color: var(--accent); }
+.notes-actions {
+  margin-top: 12px; display: flex; gap: 10px; justify-content: flex-end;
+}
 
 /* ------------- Library ------------- */
 .topbar {

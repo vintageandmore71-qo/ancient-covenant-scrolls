@@ -152,6 +152,9 @@
       wireNavButtons();
       wireHomeActions();
       wireSettingsPanel();
+      wireLibrarySearch();
+      wireNotes();
+      wireTts();
       renderRecent();
 
       // Deep-link: if the URL has ?app=<id>, open that app directly.
@@ -255,6 +258,180 @@
         renderLibrary();
       });
     });
+  }
+
+  /* ---------- Library search ---------- */
+  var searchQuery = '';
+  var searchBarEl = null;
+  var searchInputEl = null;
+  function toggleLibrarySearch() {
+    searchBarEl = searchBarEl || $('library-search');
+    searchBarEl.classList.toggle('on');
+    if (searchBarEl.classList.contains('on')) {
+      setTimeout(function () { $('library-search-input').focus(); }, 30);
+    } else {
+      searchQuery = '';
+      $('library-search-input').value = '';
+      renderLibrary();
+    }
+  }
+  function wireLibrarySearch() {
+    $('library-search-btn').addEventListener('click', toggleLibrarySearch);
+    $('library-search-clear').addEventListener('click', function () {
+      $('library-search-input').value = '';
+      searchQuery = '';
+      renderLibrary();
+      $('library-search-input').focus();
+    });
+    $('library-search-input').addEventListener('input', function (e) {
+      searchQuery = String(e.target.value || '').trim().toLowerCase();
+      renderLibrary();
+    });
+  }
+
+  /* ---------- Notes per imported app ---------- */
+  var notesApp = null;
+  function openNotesFor(app) {
+    notesApp = app;
+    $('notes-app-name').textContent = app.name;
+    $('notes-textarea').value = app.notes || '';
+    $('notes-drawer').classList.add('on');
+  }
+  function closeNotes() {
+    $('notes-drawer').classList.remove('on');
+    notesApp = null;
+  }
+  function wireNotes() {
+    $('notes-close').addEventListener('click', closeNotes);
+    $('notes-save').addEventListener('click', async function () {
+      if (!notesApp) return;
+      notesApp.notes = $('notes-textarea').value;
+      try {
+        await putApp(notesApp);
+        var idx = apps.findIndex(function (x) { return x.id === notesApp.id; });
+        if (idx >= 0) apps[idx] = notesApp;
+        closeNotes();
+        renderLibrary();
+      } catch (e) {
+        alert('Save failed: ' + (e && e.message ? e.message : e));
+      }
+    });
+    $('notes-btn').addEventListener('click', function () {
+      if (currentApp) openNotesFor(currentApp);
+    });
+  }
+
+  /* ---------- TTS (Read Aloud) ---------- */
+  var ttsUtterance = null;
+  var ttsVoices = [];
+  var ttsState = 'idle'; // idle | playing | paused
+  function populateTtsVoices() {
+    if (!window.speechSynthesis) return;
+    ttsVoices = speechSynthesis.getVoices() || [];
+    var sel = $('tts-voice');
+    if (!sel) return;
+    sel.innerHTML = '';
+    var defaultOpt = document.createElement('option');
+    defaultOpt.value = '';
+    defaultOpt.textContent = 'System default';
+    sel.appendChild(defaultOpt);
+    ttsVoices.forEach(function (v, i) {
+      var o = document.createElement('option');
+      o.value = String(i);
+      o.textContent = v.name + ' (' + v.lang + ')';
+      sel.appendChild(o);
+    });
+  }
+  function getFrameText() {
+    var frame = $('viewer-frame');
+    try {
+      var doc = frame.contentDocument;
+      if (!doc || !doc.body) return '';
+      return String(doc.body.innerText || doc.body.textContent || '').trim();
+    } catch (e) { return ''; }
+  }
+  function ttsPlay() {
+    if (!window.speechSynthesis) {
+      $('tts-status').textContent = 'Speech not supported on this device.';
+      return;
+    }
+    if (ttsState === 'paused') {
+      speechSynthesis.resume();
+      ttsState = 'playing';
+      $('tts-play').style.display = 'none';
+      $('tts-pause').style.display = '';
+      $('tts-status').textContent = 'Playing...';
+      return;
+    }
+    var text = getFrameText();
+    if (!text) { $('tts-status').textContent = 'No text to read on this page.'; return; }
+    speechSynthesis.cancel();
+    ttsUtterance = new SpeechSynthesisUtterance(text.slice(0, 32000)); // keep it safe
+    var speed = parseFloat($('tts-speed').value) || 1;
+    ttsUtterance.rate = speed;
+    var voiceIdx = $('tts-voice').value;
+    if (voiceIdx !== '' && ttsVoices[parseInt(voiceIdx, 10)]) {
+      ttsUtterance.voice = ttsVoices[parseInt(voiceIdx, 10)];
+    }
+    ttsUtterance.onend = function () {
+      ttsState = 'idle';
+      $('tts-play').style.display = '';
+      $('tts-pause').style.display = 'none';
+      $('tts-status').textContent = 'Finished.';
+    };
+    ttsUtterance.onerror = function (e) {
+      ttsState = 'idle';
+      $('tts-play').style.display = '';
+      $('tts-pause').style.display = 'none';
+      $('tts-status').textContent = 'Playback error.';
+    };
+    speechSynthesis.speak(ttsUtterance);
+    ttsState = 'playing';
+    $('tts-play').style.display = 'none';
+    $('tts-pause').style.display = '';
+    $('tts-status').textContent = 'Playing...';
+  }
+  function ttsPause() {
+    if (!window.speechSynthesis) return;
+    if (ttsState === 'playing') {
+      speechSynthesis.pause();
+      ttsState = 'paused';
+      $('tts-play').style.display = '';
+      $('tts-pause').style.display = 'none';
+      $('tts-status').textContent = 'Paused.';
+    }
+  }
+  function ttsStop() {
+    if (!window.speechSynthesis) return;
+    speechSynthesis.cancel();
+    ttsState = 'idle';
+    $('tts-play').style.display = '';
+    $('tts-pause').style.display = 'none';
+    $('tts-status').textContent = 'Stopped.';
+  }
+  function wireTts() {
+    $('tts-btn').addEventListener('click', function () {
+      $('tts-drawer').classList.toggle('on');
+      if ($('tts-drawer').classList.contains('on') && ttsVoices.length === 0) {
+        populateTtsVoices();
+      }
+    });
+    $('tts-close').addEventListener('click', function () {
+      ttsStop();
+      $('tts-drawer').classList.remove('on');
+    });
+    $('tts-play').addEventListener('click', ttsPlay);
+    $('tts-pause').addEventListener('click', ttsPause);
+    $('tts-stop').addEventListener('click', ttsStop);
+    $('tts-speed').addEventListener('change', function () {
+      // Re-start with new speed if currently playing
+      if (ttsState === 'playing') { ttsStop(); ttsPlay(); }
+    });
+    if (window.speechSynthesis) {
+      // Voice list may load async
+      populateTtsVoices();
+      speechSynthesis.onvoiceschanged = populateTtsVoices;
+    }
   }
 
   /* ---------- HTML source editor ---------- */
@@ -362,6 +539,12 @@
     var filtered = (currentTypeFilter === 'all')
       ? apps.slice()
       : apps.filter(function (a) { return (a.kind || 'html') === currentTypeFilter; });
+    if (searchQuery) {
+      filtered = filtered.filter(function (a) {
+        var hay = ((a.name || '') + ' ' + (a.notes || '')).toLowerCase();
+        return hay.indexOf(searchQuery) >= 0;
+      });
+    }
     if (!filtered.length) {
       grid.innerHTML = '';
       empty.style.display = 'flex';
@@ -384,11 +567,12 @@
       else if (a.kind === 'pdf') { iconChar = '&#128462;'; kindLabel = 'PDF'; }
       else if (a.kind === 'epub') { iconChar = '&#128214;'; kindLabel = 'EPUB'; }
       else if (a.kind === 'html') { iconChar = '&#128196;'; kindLabel = 'HTML'; }
+      var notesIcon = a.notes && a.notes.trim() ? ' <span class="tile-has-notes" title="Has notes">&#128221;</span>' : '';
       parts.push(
         '<div class="tile" data-id="' + esc(a.id) + '">' +
           '<button class="tile-menu-btn" data-menu="' + esc(a.id) + '" aria-label="Options">&#8230;</button>' +
           '<div class="tile-icon">' + iconChar + '</div>' +
-          '<div class="tile-name">' + esc(a.name) + '</div>' +
+          '<div class="tile-name">' + esc(a.name) + notesIcon + '</div>' +
           '<div class="tile-meta">' + (kindLabel ? kindLabel + ' &middot; ' : '') + esc(last) + '</div>' +
         '</div>'
       );
@@ -438,6 +622,7 @@
     menu.className = 'context-menu';
     menu.innerHTML =
       '<button data-act="open">View</button>' +
+      '<button data-act="notes">Notes</button>' +
       '<button data-act="edit">Edit HTML</button>' +
       '<button data-act="home">Add to Home Screen</button>' +
       '<button data-act="rename">Rename</button>' +
@@ -450,6 +635,7 @@
       var app = apps.find(function (x) { return x.id === id; });
       if (!app) return;
       if (act === 'open') openApp(app);
+      else if (act === 'notes') openNotesFor(app);
       else if (act === 'edit') openEditor(app);
       else if (act === 'rename') promptRename(id);
       else if (act === 'delete') promptDelete(id);
@@ -1047,6 +1233,8 @@
   }
 
   function closeViewer() {
+    try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) {}
+    ttsState = 'idle';
     show('library-screen');
     var frame = $('viewer-frame');
     frame.src = 'about:blank';
@@ -1057,6 +1245,8 @@
     $('focus-line').classList.remove('on');
     $('aids-panel').classList.remove('on');
     $('aids-scrim').classList.remove('on');
+    $('tts-drawer').classList.remove('on');
+    $('notes-drawer').classList.remove('on');
     renderLibrary();
   }
 
