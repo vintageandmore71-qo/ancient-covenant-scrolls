@@ -188,6 +188,70 @@ button, .tap, [role="button"] { min-height: 48px; }
   background: linear-gradient(135deg, #8b1f99, #4a1866);
   box-shadow: 0 4px 16px rgba(139, 31, 153, 0.3);
 }
+.big-action.create {
+  background: linear-gradient(135deg, #d9551a, #8f3710);
+  box-shadow: 0 4px 16px rgba(217, 85, 26, 0.3);
+}
+
+/* ------------- Create screen ------------- */
+#create-screen {
+  display: none;
+  background: linear-gradient(160deg, #0f0f2e 0%, #1a1a3e 40%, #2a1a3e 100%);
+  color: #f0f0ff;
+  overflow-y: auto;
+}
+#create-screen.on { display: block; }
+.create-body {
+  max-width: 760px; margin: 0 auto;
+  padding: 24px 20px 40px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.create-intro {
+  font-size: 15px; line-height: 1.7; color: var(--ink-mid);
+  padding: 12px 16px;
+  background: rgba(124, 124, 255, 0.08);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  margin: 0 0 20px;
+}
+.create-label {
+  display: block; margin: 16px 0 6px;
+  font-size: 13px; color: var(--ink-mid);
+  text-transform: uppercase; letter-spacing: 1px; font-weight: 700;
+}
+.create-hint {
+  font-size: 13px; color: var(--ink-low); line-height: 1.6;
+  margin: 0 0 8px;
+}
+.create-hint code {
+  background: var(--bg-3); padding: 1px 6px; border-radius: 4px;
+  font-size: 12px; color: var(--accent-hi);
+}
+.create-templates { margin-bottom: 8px; }
+.create-title-input {
+  width: 100%; padding: 14px 16px;
+  background: var(--bg-2); color: var(--ink-hi);
+  border: 2px solid var(--border); border-radius: 10px;
+  font-size: 18px; font-weight: 700;
+  font-family: inherit; letter-spacing: inherit;
+  -webkit-appearance: none;
+}
+.create-title-input:focus { outline: none; border-color: var(--accent); }
+.create-body-input {
+  width: 100%; min-height: 300px;
+  background: var(--bg-0); color: var(--ink-hi);
+  border: 2px solid var(--border); border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 16px; line-height: 1.75;
+  font-family: inherit; letter-spacing: inherit;
+  resize: vertical; -webkit-appearance: none;
+}
+.create-body-input:focus { outline: none; border-color: var(--accent); }
+.create-actions {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px;
+  justify-content: flex-end;
+}
+.create-actions button { min-height: 48px; padding: 12px 20px; }
 .big-action .ba-icon { font-size: 22px; line-height: 1; }
 .big-action .ba-text { }
 

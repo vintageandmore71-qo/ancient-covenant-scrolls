@@ -60,7 +60,10 @@
        else cluttering the screen. Type filters and recent items live on
        the Library screen where they belong. -->
   <div id="home-body">
-    <img id="home-splash-img" class="splash-img" src="splash.png" alt="Load — Run Web Apps on iPad" onerror="this.onerror=null; this.src='splash%20.png'; this.parentElement.classList.add('img-err-1'); if(this.parentElement.classList.contains('img-err-2')) this.style.display='none';" onload="this.parentElement.classList.remove('fallback');">
+    <!-- Tries the canonical name, then common typos/legacy names the user
+         may have uploaded. If every source fails, we mark the parent as
+         fallback so the CSS wordmark shows in place of a broken-image icon. -->
+    <img id="home-splash-img" class="splash-img" alt="Load — Run Web Apps on iPad" src="splash.png" data-src-chain="splash.png|slash.png|splash%20.png|splash.PNG" onerror="(function(el){var chain=(el.dataset.srcChain||'').split('|');var next=chain.slice(chain.indexOf(el.getAttribute('src'))+1)[0];if(next){el.setAttribute('src',next);}else{el.style.display='none';el.parentElement.classList.add('fallback');}})(this)" onload="this.parentElement.classList.remove('fallback');">
     <div class="home-hero-fallback">
       <div class="splash-arrow" aria-hidden="true">&#8595;</div>
       <h1 class="splash-title">Load</h1>
@@ -75,6 +78,9 @@
     <div class="home-buttons">
       <button id="home-get-started" class="big-action primary" aria-label="Get started">
         <span class="ba-icon">&#43;</span><span class="ba-text">Get Started</span>
+      </button>
+      <button id="home-create" class="big-action create" aria-label="Create a new page">
+        <span class="ba-icon">&#10000;</span><span class="ba-text">Create New</span>
       </button>
       <button id="home-library" class="big-action secondary" aria-label="Open library">
         <span class="ba-text">Open Library</span><span class="ba-icon">&#9654;</span>
@@ -91,6 +97,50 @@
       Copyright &copy; 2026 DssOrit. All Rights Reserved.<br>
       Runs entirely on your iPad. No tracking, no accounts, no network.
     </footer>
+  </div>
+</div>
+
+<!-- Create screen — make a new standalone HTML / PWA without coding -->
+<div id="create-screen" class="screen create-screen">
+  <header class="app-topbar">
+    <button class="nav-btn" data-nav="home" aria-label="Home" title="Home">
+      <span class="nav-icon">&#127968;</span><span class="nav-label">Home</span>
+    </button>
+    <button class="nav-btn" data-nav="library" aria-label="Library" title="Library">
+      <span class="nav-icon">&#128218;</span><span class="nav-label">Library</span>
+    </button>
+    <span class="title-inline">Create a new page</span>
+    <div class="spacer"></div>
+    <button class="nav-btn icon-only" data-tool="help" aria-label="Help" title="Help">?</button>
+    <button class="nav-btn" data-nav="settings" aria-label="Settings" title="Settings">
+      <span class="nav-icon">&#9881;</span><span class="nav-label">Aa</span>
+    </button>
+  </header>
+
+  <div class="create-body">
+    <p class="create-intro">Type what you want to share. Load turns it into a nice, offline-ready web page you can save to your Library, share with family, or add to your home screen.</p>
+
+    <label class="create-label">Template</label>
+    <div class="seg-btns wrap create-templates">
+      <button class="seg-btn active" data-template="article">&#128240; Article</button>
+      <button class="seg-btn" data-template="note">&#128221; Simple Note</button>
+      <button class="seg-btn" data-template="letter">&#9993; Letter</button>
+      <button class="seg-btn" data-template="recipe">&#127860; Recipe / Steps</button>
+      <button class="seg-btn" data-template="checklist">&#9989; Checklist</button>
+    </div>
+
+    <label class="create-label" for="create-title">Title</label>
+    <input id="create-title" type="text" class="create-title-input" placeholder="Give it a title" autocapitalize="sentences" autocomplete="off">
+
+    <label class="create-label" for="create-body">Content</label>
+    <p class="create-hint">Just type. Blank lines make new paragraphs. For <strong>Checklist</strong>, type one item per line. Links like <code>https://example.com</code> become clickable automatically.</p>
+    <textarea id="create-body" class="create-body-input" placeholder="Write your content here..." spellcheck="true" autocapitalize="sentences"></textarea>
+
+    <div class="create-actions">
+      <button id="create-preview-btn" class="secondary-btn">&#128065; Preview</button>
+      <button id="create-save-btn" class="primary-btn">&#128190; Save to Library</button>
+      <button id="create-share-btn" class="primary-btn" style="background:#0891b2;">&#10150; Save &amp; Share</button>
+    </div>
   </div>
 </div>
 
@@ -212,6 +262,8 @@
     <button id="tts-btn" class="icon-btn" aria-label="Read aloud" title="Read aloud">&#128266;</button>
     <button id="bookmarks-btn" class="icon-btn" aria-label="Bookmarks" title="Bookmarks">&#9733;</button>
     <button id="notes-btn" class="icon-btn" aria-label="Notes" title="Notes">&#128221;</button>
+    <button id="share-btn-viewer" class="icon-btn" aria-label="Share by text, email, AirDrop..." title="Share (text, email, AirDrop...)">&#10150;</button>
+    <button id="ai-btn-viewer" class="icon-btn" aria-label="Ask AI about this" title="Ask AI">&#129302;</button>
     <button id="reload-btn" class="icon-btn" aria-label="Reload">&#8634;</button>
     <button id="aids-btn" class="icon-btn" aria-label="Reading aids">Aa</button>
     <button id="hide-ui-btn" class="icon-btn" aria-label="Hide controls" title="Hide controls">&#9776;</button>
@@ -1014,6 +1066,34 @@
 
 <!-- Toast notifications for quick feedback (upload success, saves, etc.) -->
 <div id="toast" class="toast"></div>
+
+<!-- AI helper modal — no downloads, no AI in Load. Copies your text
+     and opens a free AI website in a new tab so you can paste and ask. -->
+<div id="ai-modal" class="modal" role="dialog" aria-label="Ask AI">
+  <div class="modal-box">
+    <h3>Ask AI about this</h3>
+    <p style="color:var(--ink-mid);font-size:14px;line-height:1.6;">Load stays small and offline — it has no AI built in. Instead it copies what's on your screen and opens a free AI website so you can paste and ask a question.</p>
+    <label class="aid-label" style="margin-top:12px;">What should AI help with?</label>
+    <div class="seg-btns wrap" style="margin-bottom:16px;">
+      <button class="seg-btn" data-ai-preset="summarize">Summarize</button>
+      <button class="seg-btn" data-ai-preset="explain">Explain simply</button>
+      <button class="seg-btn" data-ai-preset="translate">Translate</button>
+      <button class="seg-btn" data-ai-preset="keypoints">Key points</button>
+      <button class="seg-btn" data-ai-preset="define">Define words</button>
+    </div>
+    <p style="color:var(--ink-mid);font-size:13px;">Then pick which free AI site to open. Your text is already copied — paste it in the first message.</p>
+    <div class="seg-btns wrap" style="margin-top:10px;">
+      <button class="seg-btn" data-ai-site="chatgpt">ChatGPT</button>
+      <button class="seg-btn" data-ai-site="claude">Claude</button>
+      <button class="seg-btn" data-ai-site="gemini">Gemini</button>
+      <button class="seg-btn" data-ai-site="perplexity">Perplexity</button>
+    </div>
+    <p id="ai-modal-status" style="font-size:12px;color:var(--ink-low);margin-top:14px;min-height:16px;"></p>
+    <div class="modal-actions">
+      <button id="ai-modal-close" class="secondary-btn">Close</button>
+    </div>
+  </div>
+</div>
 
 <!-- Add to Home Screen modal -->
 <div id="home-modal" class="modal" role="dialog" aria-label="Add to Home Screen">

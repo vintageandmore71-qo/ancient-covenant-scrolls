@@ -58,7 +58,7 @@
   }
 
   function show(screenId) {
-    var screens = ['home-screen', 'library-screen', 'viewer-screen', 'editor-screen', 'notes-screen', 'note-editor', 'import-screen'];
+    var screens = ['home-screen', 'library-screen', 'viewer-screen', 'editor-screen', 'notes-screen', 'note-editor', 'import-screen', 'create-screen'];
     for (var i = 0; i < screens.length; i++) {
       var el = $(screens[i]);
       if (!el) continue;
@@ -171,6 +171,205 @@
     try { localStorage.setItem(LS_AIDS, JSON.stringify(aids)); } catch (e) {}
   }
 
+  /* ---------- Create — simple page builder for non-coders ----------
+   * The user picks a template, types a title + body, Load wraps it in
+   * a clean, offline-ready HTML document and saves it to the Library.
+   * No HTML knowledge needed. Templates control the look; content is
+   * plain text that becomes paragraphs, list items, or sections. */
+  var currentTemplate = 'article';
+  function wireCreateScreen() {
+    var home = $('home-create');
+    if (home) home.addEventListener('click', function () {
+      show('create-screen');
+      $('create-title').value = '';
+      $('create-body').value = '';
+      currentTemplate = 'article';
+      document.querySelectorAll('[data-template]').forEach(function (b) {
+        b.classList.toggle('active', b.getAttribute('data-template') === 'article');
+      });
+    });
+    document.querySelectorAll('[data-template]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        currentTemplate = b.getAttribute('data-template');
+        document.querySelectorAll('[data-template]').forEach(function (x) { x.classList.remove('active'); });
+        b.classList.add('active');
+      });
+    });
+    $('create-preview-btn').addEventListener('click', function () {
+      var html = buildFromTemplate();
+      if (!html) { toast('Add a title or some content first.', true); return; }
+      var blob = new Blob([html], { type: 'text/html' });
+      var url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    });
+    $('create-save-btn').addEventListener('click', async function () {
+      var app = await saveCreated();
+      if (app) {
+        toast('✓ Saved to your Library');
+        show('library-screen'); renderLibrary();
+      }
+    });
+    $('create-share-btn').addEventListener('click', async function () {
+      var app = await saveCreated();
+      if (app) await shareAsStandaloneHtml(app);
+    });
+  }
+
+  async function saveCreated() {
+    var title = $('create-title').value.trim();
+    var body = $('create-body').value;
+    if (!title && !body.trim()) { toast('Add a title or some content first.', true); return null; }
+    if (!title) title = 'Untitled';
+    var html = buildFromTemplate();
+    var app = {
+      id: newId(),
+      name: title,
+      kind: 'html',
+      html: html,
+      dateAdded: Date.now(),
+      lastOpened: null,
+      sizeBytes: html.length,
+      createdHere: true      // marker so we know this was built inside Load
+    };
+    try {
+      await putApp(app);
+      apps.push(app);
+      renderLibrary();
+      updateHomeCounts();
+      renderLibraryChips();
+      return app;
+    } catch (e) {
+      toast('Save failed: ' + (e && e.message || e), true);
+      return null;
+    }
+  }
+
+  function buildFromTemplate() {
+    var title = $('create-title').value.trim() || 'Untitled';
+    var body = $('create-body').value;
+    var tpl = currentTemplate || 'article';
+    var styleBase = 'body{font-family:-apple-system,BlinkMacSystemFont,"Atkinson Hyperlegible",Arial,sans-serif;line-height:1.75;color:#1a1a2e;background:#f7f7fa;max-width:720px;margin:0 auto;padding:30px 20px;}h1{color:#2a1a3e;font-size:28px;margin:0 0 10px;}.sub{color:#666;font-size:13px;margin:0 0 26px;text-transform:uppercase;letter-spacing:1px;}p{margin:0 0 14px;font-size:17px;}ul,ol{font-size:17px;padding-left:22px;}li{margin:6px 0;}a{color:#4a4aaa;}a:hover{color:#2a2a8a;}';
+    var esc = escHtml;
+    function linkify(text) {
+      return esc(text).replace(/(https?:\/\/[^\s<)"']+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+    }
+    function paragraphs(text) {
+      // Split on blank lines; inside paragraphs keep single line breaks
+      var paras = String(text || '').split(/\n\s*\n+/).map(function (p) { return p.trim(); }).filter(Boolean);
+      return paras.map(function (p) {
+        return '<p>' + linkify(p).replace(/\n/g, '<br>') + '</p>';
+      }).join('\n');
+    }
+    function lines(text) {
+      return String(text || '').split(/\n+/).map(function (l) { return l.trim(); }).filter(Boolean);
+    }
+    var content = '';
+    var extraStyle = '';
+    if (tpl === 'article') {
+      content = '<h1>' + esc(title) + '</h1><p class="sub">Article &middot; created in Load</p>' + paragraphs(body);
+    } else if (tpl === 'note') {
+      content = '<h1>' + esc(title) + '</h1>' + paragraphs(body);
+    } else if (tpl === 'letter') {
+      extraStyle = 'body{max-width:640px;}h1{font-size:22px;text-align:center;}.sub{text-align:center;}';
+      content = '<h1>' + esc(title) + '</h1><p class="sub">A letter</p>' + paragraphs(body);
+    } else if (tpl === 'recipe') {
+      extraStyle = 'ol{background:#fff5e6;border-left:4px solid #d9551a;padding:14px 14px 14px 44px;border-radius:8px;}li{padding:3px 0;}';
+      content = '<h1>' + esc(title) + '</h1><p class="sub">Recipe / Steps</p><ol>' +
+        lines(body).map(function (l) { return '<li>' + linkify(l) + '</li>'; }).join('') + '</ol>';
+    } else if (tpl === 'checklist') {
+      extraStyle = '.check{list-style:none;padding-left:0;}.check li{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #eee;}.check input{transform:scale(1.4);}';
+      content = '<h1>' + esc(title) + '</h1><p class="sub">Checklist</p><ul class="check">' +
+        lines(body).map(function (l) { return '<li><input type="checkbox">' + linkify(l) + '</li>'; }).join('') + '</ul>';
+    }
+    return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+      '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">' +
+      '<title>' + esc(title) + '</title>' +
+      '<style>' + styleBase + extraStyle + '</style></head>' +
+      '<body>' + content + '</body></html>';
+  }
+
+  /* ---------- Ask AI — no-download, user-friendly workaround ----------
+   * Opens a free AI site in a new tab with the current content copied to
+   * the clipboard and a preset question about what to do with it. */
+  function wireAiHelper() {
+    var shareBtnViewer = $('share-btn-viewer');
+    if (shareBtnViewer) shareBtnViewer.addEventListener('click', function () {
+      if (currentApp) shareAsStandaloneHtml(currentApp);
+    });
+    var aiBtn = $('ai-btn-viewer');
+    if (aiBtn) aiBtn.addEventListener('click', openAiHelper);
+    var aiClose = $('ai-modal-close');
+    if (aiClose) aiClose.addEventListener('click', function () { $('ai-modal').classList.remove('on'); });
+    var currentPreset = 'summarize';
+    document.querySelectorAll('[data-ai-preset]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        currentPreset = b.getAttribute('data-ai-preset');
+        document.querySelectorAll('[data-ai-preset]').forEach(function (x) { x.classList.remove('active'); });
+        b.classList.add('active');
+        $('ai-modal-status').textContent = 'Ready. Pick an AI site below.';
+      });
+    });
+    document.querySelectorAll('[data-ai-site]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var text = extractFrameText();
+        if (!text) { $('ai-modal-status').textContent = 'No text available on this page to copy.'; return; }
+        var question = aiPrompt(currentPreset);
+        var fullPayload = question + '\n\n---\n\n' + text.slice(0, 6000);
+        copyToClipboard(fullPayload);
+        var url = aiSiteUrl(b.getAttribute('data-ai-site'));
+        window.open(url, '_blank');
+        $('ai-modal-status').textContent = 'Text copied. Paste (tap + hold → Paste) in the AI chat.';
+      });
+    });
+  }
+  function openAiHelper() {
+    $('ai-modal').classList.add('on');
+    $('ai-modal-status').textContent = 'Pick what you want AI to help with, then choose a site.';
+    // default preset
+    document.querySelectorAll('[data-ai-preset]').forEach(function (x) { x.classList.remove('active'); });
+    var first = document.querySelector('[data-ai-preset="summarize"]');
+    if (first) first.classList.add('active');
+  }
+  function aiPrompt(kind) {
+    switch (kind) {
+      case 'summarize': return 'Please summarize the following in plain language, 3-5 bullet points.';
+      case 'explain': return 'Please explain the following simply, like I have dyslexia and want it in short clear sentences.';
+      case 'translate': return 'Please translate the following to plain English (or ask me which language if unclear).';
+      case 'keypoints': return 'Please list the key points from the following, each as a short bullet.';
+      case 'define': return 'Please define any hard or technical words in the following passage.';
+    }
+    return 'Please help me with the following:';
+  }
+  function aiSiteUrl(key) {
+    switch (key) {
+      case 'chatgpt': return 'https://chat.openai.com/';
+      case 'claude': return 'https://claude.ai/';
+      case 'gemini': return 'https://gemini.google.com/app';
+      case 'perplexity': return 'https://www.perplexity.ai/';
+    }
+    return 'https://chat.openai.com/';
+  }
+  function extractFrameText() {
+    try {
+      var doc = $('viewer-frame') && $('viewer-frame').contentDocument;
+      if (doc && doc.body) return String(doc.body.innerText || doc.body.textContent || '').trim();
+    } catch (e) {}
+    return '';
+  }
+  function copyToClipboard(text) {
+    try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text); }
+    catch (e) {
+      // Fallback: write into a hidden textarea and execCommand('copy')
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e2) {}
+      document.body.removeChild(ta);
+    }
+  }
+
   /* ---------- Boot sequence ----------
    * Each wire* step is wrapped in its own try so one missing element
    * (e.g. after a DOM change in a future refactor) can't stop the app
@@ -195,6 +394,8 @@
       safe('wireHelp', wireHelp);
       safe('wireFolders', wireFolders);
       safe('wireBackup', wireBackup);
+      safe('wireCreateScreen', wireCreateScreen);
+      safe('wireAiHelper', wireAiHelper);
       safe('renderFolderList', renderFolderList);
       safe('renderLibraryChips', renderLibraryChips);
       safe('updateResumeCard', updateResumeCard);
@@ -1387,7 +1588,7 @@
       '<button data-act="open">&#128065; View</button>' +
       '<button data-act="notes">&#128221; Notes</button>' +
       '<button data-act="folder">&#128193; Move to folder...</button>' +
-      '<button data-act="share">&#10150; Share / Export as HTML</button>' +
+      '<button data-act="share">&#10150; Share (Text, Email, AirDrop)</button>' +
       '<button data-act="edit">&#9998; Edit HTML</button>' +
       '<button data-act="home">&#127968; Add to Home Screen</button>' +
       '<button data-act="rename">&#9999; Rename</button>' +
