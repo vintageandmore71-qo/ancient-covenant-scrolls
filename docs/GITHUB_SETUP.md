@@ -4,7 +4,55 @@ Two free protections that prevent the realistic attack vectors on an
 unpopular public repo: account takeover, and accidental force-pushes
 rewriting history.
 
-Do both today. Takes about five minutes.
+---
+
+## EASIEST PATH (accessibility-friendly — 2 taps each, no typing)
+
+If the full walkthrough below is too much, do just these two things.
+Both use Face ID — no codes, no apps, no typing.
+
+### Tap 1 — Add a passkey to lock your account
+
+1. On iPad Safari, tap this link: **`https://github.com/settings/passkeys`**
+2. Tap **Add a passkey** → confirm with Face ID.
+
+That's it. Face ID is now required to sign in. Anyone who learns
+your password still can't get in. Passkeys are phishing-proof.
+
+*(A passkey counts as 2FA. You do NOT need the authenticator-app
+steps below if you do this.)*
+
+### Tap 2 — Lock the `main` branch so nothing can corrupt it
+
+1. On iPad Safari, tap this link:
+   **`https://github.com/dssorit/ancient-covenant-scrolls/settings/branches`**
+2. Tap **Add classic branch protection rule** (or **Add branch ruleset**).
+3. In the pattern box, type: `main`
+4. Check these three boxes (scroll if needed):
+   - Restrict deletions
+   - Require linear history
+   - Block force pushes
+5. Scroll down and tap **Create** (or **Save changes**).
+
+That's it. No one — not even you by accident — can rewrite or
+delete `main` anymore. If a push tries to rewrite history, GitHub
+silently rejects it.
+
+### What this session already did for you automatically
+
+- **Safety backup branch** `safety/stable-2026-04-22` is on GitHub
+  pointing at the current stable state. If anything ever goes wrong
+  with `main`, you (or a future Claude session) can recover to this
+  exact commit.
+- **Secret scan** of the entire codebase — clean. No API keys,
+  tokens, or credentials leaked.
+- **LICENSE + copyright headers** on every source file. Legal
+  recourse if someone copies the code.
+- **No Netlify, no analytics, no tracking, no paid services** in
+  the stack. Nothing to compromise or leak.
+
+You genuinely only need the two taps above. Everything else is
+optional.
 
 ---
 
