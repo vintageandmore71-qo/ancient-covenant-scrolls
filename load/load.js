@@ -178,47 +178,11 @@
 
   /* ---------- Home screen ---------- */
   function updateHomeCounts() {
-    var counts = { html: 0, zip: 0, pdf: 0, epub: 0 };
-    for (var i = 0; i < apps.length; i++) {
-      var k = apps[i].kind || 'html';
-      if (counts[k] != null) counts[k]++;
-    }
-    document.querySelectorAll('[data-count]').forEach(function (el) {
-      var k = el.getAttribute('data-count');
-      el.textContent = counts[k] || 0;
-    });
-    var total = apps.length;
-    var sub = document.getElementById('home-library-count');
-    if (sub) sub.textContent = total
-      ? 'Browse all ' + total + ' item' + (total === 1 ? '' : 's')
-      : "Nothing imported yet";
+    // Type-box counts were removed from home in v10a to match Attain's
+    // minimal home pattern. Keep this as a no-op so callers don't break.
   }
-
   function renderRecent() {
-    var section = $('home-recent');
-    var row = $('home-recent-row');
-    if (!row || !section) return;
-    var recent = apps.filter(function (a) { return a.lastOpened; })
-                     .sort(function (a, b) { return (b.lastOpened || 0) - (a.lastOpened || 0); })
-                     .slice(0, 6);
-    if (!recent.length) { section.style.display = 'none'; return; }
-    section.style.display = 'block';
-    var html = '';
-    for (var i = 0; i < recent.length; i++) {
-      var a = recent[i];
-      html += '<button class="mini-tile" data-open="' + esc(a.id) + '">' +
-        '<div class="mini-tile-name">' + esc(a.name) + '</div>' +
-        '<div class="mini-tile-meta">' + esc(relTime(a.lastOpened)) + '</div>' +
-        '</button>';
-    }
-    row.innerHTML = html;
-    row.querySelectorAll('[data-open]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        var id = b.getAttribute('data-open');
-        var app = apps.find(function (x) { return x.id === id; });
-        if (app) openApp(app);
-      });
-    });
+    // Recent strip also removed from home; kept on library via sort order.
   }
 
   function wireNavButtons() {
@@ -268,19 +232,16 @@
   }
 
   function wireHomeActions() {
-    $('home-get-started').addEventListener('click', function () { $('file-picker').click(); });
-    $('home-library').addEventListener('click', function () {
+    var gs = $('home-get-started'); if (gs) gs.addEventListener('click', function () { $('file-picker').click(); });
+    var lib = $('home-library'); if (lib) lib.addEventListener('click', function () {
       currentTypeFilter = 'all'; show('library-screen'); renderLibrary();
     });
-    $('home-pwa').addEventListener('click', function () {
-      $('pwa-modal').classList.add('on');
-    });
-    $('pwa-modal-cancel').addEventListener('click', function () {
-      $('pwa-modal').classList.remove('on');
-    });
-    $('pwa-modal-pick').addEventListener('click', function () {
-      $('pwa-modal').classList.remove('on');
-      $('file-picker').click();
+    // Optional PWA-help modal is still in the DOM; if removed, skip
+    var pwa = $('home-pwa');
+    if (pwa) pwa.addEventListener('click', function () { $('pwa-modal').classList.add('on'); });
+    var pc = $('pwa-modal-cancel'); if (pc) pc.addEventListener('click', function () { $('pwa-modal').classList.remove('on'); });
+    var pp = $('pwa-modal-pick'); if (pp) pp.addEventListener('click', function () {
+      $('pwa-modal').classList.remove('on'); $('file-picker').click();
     });
     document.querySelectorAll('.type-card').forEach(function (card) {
       card.addEventListener('click', function () {

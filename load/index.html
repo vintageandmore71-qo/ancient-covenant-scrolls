@@ -47,80 +47,25 @@
     </button>
   </header>
 
-  <div class="home-hero">
-    <!-- Full splash image shown as <img> so the whole picture (text,
-         features, design) is visible top-to-bottom without cropping. -->
-    <img id="home-splash-img" class="splash-img" src="splash.png" alt="Load — Run Web Apps on iPad" onerror="this.onerror=null; this.src='splash%20.png';">
+  <!-- Attain-style home: centered splash image + two big buttons. Nothing
+       else cluttering the screen. Type filters and recent items live on
+       the Library screen where they belong. -->
+  <div id="home-body">
+    <img id="home-splash-img" class="splash-img" src="splash.png" alt="Load — Run Web Apps on iPad" onerror="this.onerror=null; this.src='splash%20.png'; this.parentElement.classList.add('img-err-1'); if(this.parentElement.classList.contains('img-err-2')) this.style.display='none';" onload="this.parentElement.classList.remove('fallback');">
     <div class="home-hero-fallback">
       <div class="splash-arrow" aria-hidden="true">&#8595;</div>
       <h1 class="splash-title">Load</h1>
       <p class="splash-tag">Run Web Apps on iPad</p>
     </div>
-  </div>
-
-  <div class="home-actions">
-    <h2 class="home-heading">Run web apps and books — offline, on your iPad.</h2>
-    <div class="home-btn-row">
-      <button id="home-get-started" class="big-btn primary">
-        <span class="big-btn-icon">&#8682;</span>
-        <span class="big-btn-text">
-          <span class="big-btn-label">Import a File</span>
-          <span class="big-btn-sub">HTML, PDF, EPUB, or ZIP</span>
-        </span>
+    <div class="home-buttons">
+      <button id="home-get-started" class="big-action primary" aria-label="Import a file">
+        <span class="ba-icon">&#43;</span><span class="ba-text">Import a File</span>
       </button>
-      <button id="home-pwa" class="big-btn pwa-btn">
-        <span class="big-btn-icon">&#128230;</span>
-        <span class="big-btn-text">
-          <span class="big-btn-label">Import a PWA</span>
-          <span class="big-btn-sub">Full web app folder or ZIP</span>
-        </span>
-      </button>
-      <button id="home-library" class="big-btn">
-        <span class="big-btn-icon">&#128218;</span>
-        <span class="big-btn-text">
-          <span class="big-btn-label">Open Library</span>
-          <span class="big-btn-sub" id="home-library-count">Browse what you've imported</span>
-        </span>
+      <button id="home-library" class="big-action secondary" aria-label="Open library">
+        <span class="ba-text">Open Library</span><span class="ba-icon">&#9654;</span>
       </button>
     </div>
   </div>
-
-  <!-- Browse by type - colored file-type cards -->
-  <section class="home-types">
-    <h3 class="home-section-title">Browse by type</h3>
-    <div class="type-grid">
-      <button class="type-card type-html" data-type="html">
-        <span class="type-icon">&#128196;</span>
-        <span class="type-label">HTML</span>
-        <span class="type-sub">Single-file web apps</span>
-        <span class="type-count" data-count="html">0</span>
-      </button>
-      <button class="type-card type-zip" data-type="zip">
-        <span class="type-icon">&#128230;</span>
-        <span class="type-label">Web apps</span>
-        <span class="type-sub">ZIP bundles &amp; folders</span>
-        <span class="type-count" data-count="zip">0</span>
-      </button>
-      <button class="type-card type-pdf" data-type="pdf">
-        <span class="type-icon">&#128462;</span>
-        <span class="type-label">PDFs</span>
-        <span class="type-sub">Documents</span>
-        <span class="type-count" data-count="pdf">0</span>
-      </button>
-      <button class="type-card type-epub" data-type="epub">
-        <span class="type-icon">&#128214;</span>
-        <span class="type-label">Books</span>
-        <span class="type-sub">EPUB digital books</span>
-        <span class="type-count" data-count="epub">0</span>
-      </button>
-    </div>
-  </section>
-
-  <!-- Recent items strip, shown only if there are any -->
-  <section id="home-recent" class="home-recent" style="display:none;">
-    <h3 class="home-section-title">Recently opened</h3>
-    <div id="home-recent-row" class="home-recent-row"></div>
-  </section>
 </div>
 
 <!-- Library screen -->

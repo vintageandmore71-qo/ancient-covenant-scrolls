@@ -88,10 +88,22 @@ button, .tap, [role="button"] { min-height: 48px; }
 
 /* No background watermark — the screens stay solid dark per user preference. */
 
-/* ------------- Home screen (splash + actions + type-boxes) ------------- */
+/* ------------- Home screen (Attain-style: splash + two buttons) ------------- */
 #home-screen {
-  display: block; overflow-y: auto;
-  background-color: var(--bg-0);
+  display: block;
+  overflow-y: auto;
+  background: linear-gradient(160deg, #0f0f2e 0%, #1a1a3e 40%, #2a1a3e 100%);
+  color: #f0f0ff;
+  min-height: 100vh;
+}
+#home-body {
+  min-height: calc(100vh - 56px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 0 40px;
+  text-align: center;
 }
 
 /* Shared top navigation bar — shown on every main screen so the user
@@ -129,34 +141,47 @@ button, .tap, [role="button"] { min-height: 48px; }
   .nav-btn { padding: 10px 10px; gap: 0; }
 }
 
-/* The splash hero — Attain-style: image covers full content width
-   edge-to-edge, no padding, no rounded corners. Scrolls naturally
-   with the page so the entire image (including all its text and
-   design) is visible. */
-.home-hero {
-  width: 100%;
-  padding: 0;
-  margin: 0;
-  background-color: var(--bg-0);
-  display: block;
-  position: relative;
-}
+/* Splash image — Attain pattern: 100% of content width up to 600px,
+   centered, natural aspect ratio. Nothing cropped. */
 .splash-img {
-  display: block;
   width: 100%;
+  max-width: 600px;
   height: auto;
-  max-height: none;
-  border-radius: 0;
-  box-shadow: none;
+  display: block;
+  margin: 0 auto;
 }
-/* Fallback shown when splash image fails to load. Only visible if
-   no splash.png or splash%20.png exists in /load/. */
 .home-hero-fallback {
-  display: none; text-align: center; color: var(--ink-hi);
-  padding: 60px 30px; max-width: 500px; margin: 0 auto;
+  display: none; text-align: center; color: #f0f0ff;
+  padding: 60px 30px; max-width: 500px; margin: 40px auto 0;
 }
-.home-hero.fallback .splash-img { display: none; }
-.home-hero.fallback .home-hero-fallback { display: block; }
+
+/* Big gradient action buttons underneath the splash, like Attain's
+   "Upload a Book" / "Next Page" pair. */
+.home-buttons {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 24px 16px;
+  width: 100%;
+}
+.big-action {
+  background: linear-gradient(135deg, #7c3aed, #2563eb);
+  color: #fff; border: none;
+  padding: 18px 36px; border-radius: 12px;
+  font-size: 17px; font-weight: 700;
+  display: inline-flex; align-items: center; gap: 10px;
+  min-height: 56px;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.25);
+  letter-spacing: 0.3px;
+}
+.big-action:active { transform: scale(0.97); }
+.big-action.secondary {
+  background: linear-gradient(135deg, #059669, #0891b2);
+  box-shadow: 0 4px 16px rgba(8, 145, 178, 0.25);
+}
+.big-action .ba-icon { font-size: 22px; line-height: 1; }
+.big-action .ba-text { }
 
 .splash-title {
   margin: 0; font-size: 56px; font-weight: 800; letter-spacing: 3px;
