@@ -762,9 +762,106 @@
       });
     });
   }
+  /* ---- Context awareness ----
+   * When the helper opens we grab whatever the user is currently
+   * looking at so follow-up questions like "summarize this" or
+   * "find the word Rome" can operate on that content. Refreshed
+   * every time the panel opens so the context is always current. */
+  var helperContext = { kind: 'home', app: null, text: '' };
+  function captureHelperContext() {
+    var ctx = { kind: 'home', app: null, text: '' };
+    // Which screen is currently visible?
+    var onScreen = function (id) {
+      var el = document.getElementById(id);
+      return el && el.classList.contains('on');
+    };
+    if (onScreen('viewer-screen')) {
+      ctx.kind = 'viewer';
+      ctx.app = currentApp;
+      ctx.text = extractFrameText();
+    } else if (onScreen('library-screen')) ctx.kind = 'library';
+    else if (onScreen('import-screen')) ctx.kind = 'import';
+    else if (onScreen('create-screen')) ctx.kind = 'create';
+    else if (onScreen('editor-screen')) ctx.kind = 'editor';
+    else if (onScreen('notes-screen')) ctx.kind = 'notes';
+    return ctx;
+  }
+  function refreshHelperQuickChips() {
+    // Swap the quick-reply chips to match the current context so
+    // the user sees suggestions they can actually act on.
+    var wrap = document.getElementById('helper-quick');
+    if (!wrap) return;
+    var ctx = helperContext;
+    var chips = [];
+    if (ctx.kind === 'viewer' && ctx.app) {
+      chips = [
+        { q: 'Summarize this', ask: 'summarize this' },
+        { q: 'Key points', ask: 'key points of this' },
+        { q: 'Find a word', ask: 'find ' },
+        { q: 'Outline', ask: 'outline this' },
+        { q: 'Step by step', ask: 'walk me through this step by step' },
+        { q: 'Read aloud', ask: 'how do I read aloud' },
+        { q: 'Add bookmark', ask: 'how do I add a bookmark' },
+        { q: 'Ask ChatGPT', ask: 'open chatgpt with this' }
+      ];
+    } else if (ctx.kind === 'editor') {
+      chips = [
+        { q: 'Center text', ask: 'how do I center text' },
+        { q: 'Make a button', ask: 'how do I make a button' },
+        { q: 'Change color', ask: 'how do I change the color' },
+        { q: 'Add an image', ask: 'how do I add an image' },
+        { q: 'Open console', ask: 'how do I see errors' },
+        { q: 'Lost my changes?', ask: 'lost my changes' }
+      ];
+    } else if (ctx.kind === 'library') {
+      chips = [
+        { q: 'How do I search?', ask: 'how do I search' },
+        { q: 'Organize with folders', ask: 'how do I make folders' },
+        { q: 'Share a file', ask: 'how do I share' },
+        { q: 'Back up library', ask: 'how do I back up my library' },
+        { q: 'Add to Home Screen', ask: 'how do I add to home screen' }
+      ];
+    } else {
+      chips = [
+        { q: 'How do I import?', ask: 'how do I import files' },
+        { q: 'Make a checklist', ask: 'make me a checklist' },
+        { q: 'Add to home screen', ask: 'how do I save to my home screen' },
+        { q: 'Read aloud', ask: 'how do I use read aloud' },
+        { q: 'Create a page', ask: 'how do i create a new page' },
+        { q: 'Share a file', ask: 'how do i share a file' },
+        { q: 'Back up', ask: 'how do i back up my library' },
+        { q: 'Developer console', ask: 'how do i see errors' }
+      ];
+    }
+    wrap.innerHTML = chips.map(function (c) {
+      return '<button class="helper-chip" data-helper-ask="' + escHtml(c.ask) + '">' + escHtml(c.q) + '</button>';
+    }).join('');
+    wrap.querySelectorAll('[data-helper-ask]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        $('helper-input').value = b.getAttribute('data-helper-ask');
+        submitHelperQuestion();
+      });
+    });
+  }
+
   function openHelperPanel() {
+    helperContext = captureHelperContext();
+    refreshHelperQuickChips();
     $('helper-panel').classList.add('on');
     $('helper-scrim').classList.add('on');
+    // Re-show the intro and clear message history so every open is fresh
+    var intro = $('helper-intro'); if (intro) intro.style.display = '';
+    var quick = $('helper-quick'); if (quick) quick.classList.remove('hidden');
+    $('helper-messages').innerHTML = '';
+    // If there's content available, lead with a context note so the user
+    // knows the helper is looking at the current item.
+    if (helperContext.kind === 'viewer' && helperContext.app) {
+      addHelperMessage('assistant',
+        'I can see you\'re reading <strong>' + escHtml(helperContext.app.name) + '</strong>. Ask me to summarize it, find a word, outline it, or walk you through it step by step. Or ask me anything about Load.');
+    } else if (helperContext.kind === 'editor') {
+      addHelperMessage('assistant',
+        'You\'re in the HTML editor. Ask me for code snippets (buttons, links, centering text, colors), or how to use any Load feature.');
+    }
     setTimeout(function () { $('helper-input').focus(); }, 120);
   }
   function closeHelperPanel() {
@@ -799,7 +896,21 @@
     if (!q) return;
     addHelperMessage('user', escHtml(q));
     input.value = '';
-    // 1. Check for "create a X" intent
+
+    // Refresh context each turn so follow-ups work even if they opened
+    // the panel on Home and then navigated
+    helperContext = captureHelperContext();
+
+    // 1. Content-aware commands — only work when there's an app open
+    if (helperContext.kind === 'viewer' && helperContext.text) {
+      var contentResponse = handleContentCommand(q, helperContext);
+      if (contentResponse) {
+        addHelperMessage('assistant', contentResponse.answer, contentResponse.action || null);
+        return;
+      }
+    }
+
+    // 2. "Create a X" intent
     var createMatch = matchCreateIntent(q);
     if (createMatch) {
       addHelperMessage('assistant',
@@ -810,19 +921,172 @@
       );
       return;
     }
-    // 2. Match knowledge base
+
+    // 3. Match knowledge base
     var hit = scoreKnowledgeBase(q);
     if (hit) {
       addHelperMessage('assistant', hit.answer, hit.actionLabel ? { label: hit.actionLabel, fn: hit.actionFn } : null);
       return;
     }
-    // 3. Fallback for content-specific questions
-    addHelperMessage('assistant',
-      'I\'m focused on helping you <strong>use Load</strong> and <strong>create content</strong>. ' +
-      'If your question is about the <em>content inside</em> an item (like summarizing a PDF or explaining a passage), ' +
-      'open that item and tap the <strong>&#129302;</strong> icon in the viewer to ask a free AI site (ChatGPT / Claude / Gemini) with your text copied for you.',
-      null
-    );
+
+    // 4. Fallback — if we're viewing content, offer to pass the question
+    // + text to an external AI. Otherwise suggest opening an item first.
+    if (helperContext.kind === 'viewer' && helperContext.text) {
+      addHelperMessage('assistant',
+        'That\'s a deeper question about this specific content. I can copy the text + your question to the clipboard and open a free AI site so you can paste and get a real answer.',
+        { label: 'Send to ChatGPT', fn: function () { handoffToAi(q, helperContext.text, 'chatgpt'); } }
+      );
+    } else {
+      addHelperMessage('assistant',
+        'I\'m focused on helping you <strong>use Load</strong> and <strong>create content</strong>. ' +
+        'For questions <em>about the content of a specific file</em>, open that file first — then ask me to summarize it, find a word, outline it, or walk you through it step by step.',
+        null
+      );
+    }
+  }
+
+  /* ---------- Content commands over the current file ----------
+   * Simple local heuristics over the text already extracted from the
+   * iframe. No AI involved — just pattern recognition + Text.prototype
+   * basics. Good enough for summarize / find / outline / step-by-step
+   * / external-AI handoff. */
+  function handleContentCommand(q, ctx) {
+    var lower = q.toLowerCase();
+    var name = (ctx.app && ctx.app.name) || 'this item';
+    var text = ctx.text || '';
+
+    // Summarize / what is this about / key points
+    if (/\b(summari[sz]e|summary|key points?|tldr|tl;dr|gist|what is this about|what'?s this)\b/.test(lower)) {
+      var firstPara = extractFirstParagraph(text);
+      var heads = extractHeadings(text);
+      var lines = ['<strong>' + escHtml(name) + '</strong>'];
+      if (heads.length) {
+        lines.push('Covered:');
+        lines.push('<ul>' + heads.slice(0, 7).map(function (h) { return '<li>' + escHtml(h) + '</li>'; }).join('') + '</ul>');
+      }
+      if (firstPara) lines.push('Opening: <em>' + escHtml(firstPara.slice(0, 300)) + (firstPara.length > 300 ? '…' : '') + '</em>');
+      lines.push('For a real full-content summary, hand off to a free AI site:');
+      return {
+        answer: lines.join('<br>'),
+        action: { label: 'Summarize with ChatGPT', fn: function () { handoffToAi('Please summarize this in plain language, 5 bullet points.', text, 'chatgpt'); } }
+      };
+    }
+
+    // Find a word or phrase
+    var findMatch = lower.match(/^(?:find|search(?:\s+for)?|look\s+for|where\s+(?:is|does\s+it\s+say))\s+(.+?)\s*$/);
+    if (findMatch) {
+      var needle = findMatch[1].trim().replace(/^["']|["']$/g, '');
+      if (!needle) return { answer: 'Type what you want to find, like <code>find covenant</code>.' };
+      var occurrences = findOccurrences(text, needle);
+      if (!occurrences.length) {
+        return { answer: '"<strong>' + escHtml(needle) + '</strong>" isn\'t in ' + escHtml(name) + '. Check the spelling, or the word might be in an image (Load only searches text).' };
+      }
+      var showN = Math.min(5, occurrences.length);
+      var body = 'Found <strong>' + occurrences.length + '</strong> match' + (occurrences.length === 1 ? '' : 'es') + ' for "<strong>' + escHtml(needle) + '</strong>":';
+      body += '<ul>';
+      for (var i = 0; i < showN; i++) body += '<li>…' + escHtml(occurrences[i]) + '…</li>';
+      body += '</ul>';
+      if (occurrences.length > showN) body += 'Plus ' + (occurrences.length - showN) + ' more.';
+      return { answer: body };
+    }
+
+    // Outline / table of contents / headings
+    if (/\b(outline|toc|table of contents|headings?|what does it cover)\b/.test(lower)) {
+      var h = extractHeadings(text);
+      if (!h.length) {
+        return { answer: 'I don\'t see any headings in ' + escHtml(name) + '. You can still scroll through paragraph by paragraph — try "step by step".' };
+      }
+      return {
+        answer: '<strong>Outline of ' + escHtml(name) + ':</strong><ol>' +
+          h.slice(0, 25).map(function (x) { return '<li>' + escHtml(x) + '</li>'; }).join('') + '</ol>'
+      };
+    }
+
+    // Step-by-step walkthrough
+    if (/\b(step by step|walk me through|how do i use this|use this|instructions|guide me)\b/.test(lower)) {
+      var steps = extractStepsOrParagraphs(text);
+      if (!steps.length) {
+        return { answer: 'No clear steps or paragraphs detected in ' + escHtml(name) + '.' };
+      }
+      var cap = Math.min(8, steps.length);
+      return {
+        answer: '<strong>Walkthrough of ' + escHtml(name) + ' (first ' + cap + '):</strong><ol>' +
+          steps.slice(0, cap).map(function (s) { return '<li>' + escHtml(s.slice(0, 220) + (s.length > 220 ? '…' : '')) + '</li>'; }).join('') +
+          '</ol>' + (steps.length > cap ? 'Plus ' + (steps.length - cap) + ' more parts.' : '')
+      };
+    }
+
+    // Count / how long
+    if (/\b(how long|word count|how many (words|pages)|length)\b/.test(lower)) {
+      var words = (text.match(/\S+/g) || []).length;
+      var mins = Math.max(1, Math.round(words / 220));
+      return { answer: escHtml(name) + ' has about <strong>' + words.toLocaleString() + '</strong> words — roughly ' + mins + ' minute' + (mins === 1 ? '' : 's') + ' of reading.' };
+    }
+
+    // Open in external AI with content already copied
+    if (/(chatgpt|claude|gemini|perplexity|open (in )?ai|ask (chat|an?) ?ai)/i.test(lower)) {
+      var site = 'chatgpt';
+      if (/claude/i.test(q)) site = 'claude';
+      else if (/gemini/i.test(q)) site = 'gemini';
+      else if (/perplex/i.test(q)) site = 'perplexity';
+      return {
+        answer: 'I\'ll copy the text and open ' + site + ' in a new tab. Paste (tap and hold &rarr; Paste) and ask whatever you need.',
+        action: { label: 'Open ' + site, fn: function () { handoffToAi('Help me understand this passage.', text, site); } }
+      };
+    }
+
+    return null;
+  }
+
+  function extractFirstParagraph(text) {
+    if (!text) return '';
+    var paras = text.split(/\n\s*\n+/).map(function (p) { return p.trim(); }).filter(Boolean);
+    return paras[0] || '';
+  }
+  function extractHeadings(text) {
+    // Heuristic: lines that are short, capitalized, and not sentences
+    if (!text) return [];
+    var lines = text.split(/\n+/).map(function (l) { return l.trim(); }).filter(Boolean);
+    var out = [];
+    for (var i = 0; i < lines.length; i++) {
+      var l = lines[i];
+      if (l.length < 3 || l.length > 90) continue;
+      if (/[.!?]\s*$/.test(l)) continue;            // complete sentences aren't headings
+      if (l.split(/\s+/).length > 12) continue;
+      // Must have at least one capital letter or be ALL CAPS / Title Case
+      if (!/[A-Z]/.test(l)) continue;
+      out.push(l);
+    }
+    return out;
+  }
+  function extractStepsOrParagraphs(text) {
+    if (!text) return [];
+    // Prefer numbered/bulleted steps if present
+    var numberedRegex = /\n\s*(?:\d+[.)]\s+|[-*•]\s+)(.+?)(?=\n\s*(?:\d+[.)]\s+|[-*•]\s+|\n|$))/gs;
+    var m, steps = [];
+    while ((m = numberedRegex.exec('\n' + text + '\n')) !== null && steps.length < 25) {
+      steps.push(m[1].trim());
+    }
+    if (steps.length >= 3) return steps;
+    // Otherwise split on paragraph breaks
+    return text.split(/\n\s*\n+/).map(function (p) { return p.trim(); }).filter(function (p) { return p.length > 40; });
+  }
+  function findOccurrences(text, needle) {
+    if (!text || !needle) return [];
+    var rx = new RegExp('(?:.{0,40})(' + needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')(?:.{0,40})', 'gi');
+    var out = [];
+    var m;
+    while ((m = rx.exec(text)) !== null && out.length < 20) {
+      out.push(m[0].replace(/\s+/g, ' ').trim());
+    }
+    return out;
+  }
+  function handoffToAi(question, text, site) {
+    var payload = question + '\n\n---\n\n' + text.slice(0, 6000);
+    copyToClipboard(payload);
+    var url = aiSiteUrl(site);
+    window.open(url, '_blank');
+    toast('Text copied. Paste in the AI chat.');
   }
   function matchCreateIntent(q) {
     var s = q.toLowerCase();
