@@ -467,6 +467,52 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
 #editor-textarea.editor-theme-cream { background: #f5efe3; color: #2a2218; border-color: #d9ceb8; }
 #editor-textarea.editor-theme-high  { background: #000; color: #ffec00; border-color: #444; }
 
+/* Copilot-style inline suggestion strip for the editor */
+.editor-suggest {
+  display: none; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 -4px 16px rgba(0,0,0,0.3);
+}
+.editor-suggest.on { display: flex; flex-wrap: wrap; }
+.editor-suggest .suggest-main {
+  flex: 1; min-width: 200px;
+  text-align: left; padding: 10px 14px;
+  background: linear-gradient(135deg, rgba(124,124,255,0.18), rgba(64,64,180,0.12));
+  color: var(--ink-hi);
+  border: 1px dashed var(--accent); border-radius: 8px;
+  font-family: "SFMono-Regular", Menlo, monospace; font-size: 13.5px;
+  line-height: 1.5; min-height: 44px;
+  white-space: pre-wrap; word-break: break-word;
+  cursor: pointer;
+}
+.editor-suggest .suggest-main:empty::before {
+  content: 'Keep typing — suggestions appear here.';
+  font-family: inherit; font-style: italic; opacity: 0.6;
+}
+.editor-suggest .suggest-main .ghost {
+  color: var(--accent); opacity: 0.9;
+}
+.editor-suggest .suggest-main .kbd {
+  float: right; font-size: 11px; opacity: 0.7;
+  background: var(--bg-0); padding: 2px 6px; border-radius: 4px;
+  font-family: inherit; margin-left: 8px;
+}
+.editor-suggest .suggest-chips {
+  display: flex; gap: 6px; flex-wrap: wrap;
+}
+.editor-suggest .suggest-chip {
+  background: var(--bg-0); color: var(--ink-hi);
+  border: 1px solid var(--border); border-radius: 999px;
+  padding: 8px 12px; font-size: 12.5px;
+  font-family: "SFMono-Regular", Menlo, monospace;
+  min-height: 36px; cursor: pointer;
+}
+.editor-suggest .suggest-chip:active {
+  background: var(--accent); color: #fff; border-color: var(--accent);
+}
+
 /* ------------- Library search bar ------------- */
 .search-bar {
   display: none;

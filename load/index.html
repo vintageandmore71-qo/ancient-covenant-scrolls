@@ -508,6 +508,17 @@
   <div class="editor-body">
     <p class="editor-hint"><strong>You're editing the HTML source.</strong> Changes save only in Load — your original file on iPad is untouched. Stuck? Tap the <strong>&#128172; speech bubble</strong> icon to ask Load for help.</p>
     <textarea id="editor-textarea" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" wrap="soft"></textarea>
+
+    <!-- Copilot-style inline suggestion strip. Sits just above the
+         keyboard while the textarea is focused; shows the single best
+         completion for the current caret position + three context-
+         aware snippet suggestions. Tapping a chip inserts at the caret;
+         pressing Tab with physical keyboard also accepts. -->
+    <div id="editor-suggest" class="editor-suggest" aria-live="polite">
+      <button id="editor-suggest-main" class="suggest-main" aria-label="Accept suggestion"></button>
+      <div id="editor-suggest-chips" class="suggest-chips"></div>
+      <button id="editor-suggest-dismiss" class="icon-btn" aria-label="Dismiss suggestion">&times;</button>
+    </div>
   </div>
 </div>
 

@@ -1687,6 +1687,8 @@
     if (cmd === '/optimize') return slashOptimize(app, arg);
     if (cmd === '/analyze')  return slashAnalyze(app, arg);
     if (cmd === '/scan' || cmd === '/debug') return slashScan(app);
+    if (cmd === '/plan')     return slashPlan(app, arg);
+    if (cmd === '/term' || cmd === '/terminal' || cmd === '/cmd' || cmd === '/shell') return slashTerminal(arg);
 
     // Unknown slash command — surface the full list so the user can
     // discover what's available.
@@ -1703,11 +1705,121 @@
         '<li><code>/fix</code> — runs the Developer Console scan and suggests patches for every issue it finds.</li>' +
         '<li><code>/optimize</code> — suggests size, performance, and accessibility improvements.</li>' +
         '<li><code>/analyze</code> — file structure summary (tags, styles, scripts, assets, counts).</li>' +
+        '<li><code>/plan</code> — agent-style: lists a sequenced plan of steps to improve this file.</li>' +
         '<li><code>/scan</code> or <code>/debug</code> — opens the Developer Console on the Scan tab.</li>' +
+        '<li><code>/term [command]</code> — plain-language explanation of a shell / git / zip command.</li>' +
         '<li><code>/help</code> — shows this list.</li>' +
       '</ul>' +
-      '<p class="hint" style="margin:6px 0 0;">Future releases will let you turn on an optional downloadable local model (WebLLM / transformers.js) for even richer answers. For now, everything here is rule-based, private, and offline.</p>'
+      '<p class="hint" style="margin:6px 0 0;"><strong>AI modes</strong> (Settings &rarr; AI): (A) Cloud handoff to ChatGPT / Claude / Gemini / Perplexity is already on — tap the action button on any answer. (B) Local on-device model (WebLLM / transformers.js) is opt-in and downloads on first use; nothing heavy is bundled in Load itself.</p>'
     };
+  }
+  function slashPlan(app, arg) {
+    var html = app.html || '';
+    var report = { items: [], fixable: 0 };
+    scanStructural(html, report);
+    scanAssets(html, report);
+    scanManifest(app, report);
+    scanLocalRunnerCompat(html, report);
+    var s = analyzeSource(html);
+    var steps = [];
+
+    // Severity-ordered steps derived from the scan + analysis.
+    report.items.forEach(function (i) {
+      if (i.severity === 'error') steps.push({ priority: 1, text: 'Fix: ' + i.label.replace(/&lt;|&gt;/g, ''), why: i.detail.replace(/<[^>]+>/g, '').slice(0, 160) });
+    });
+    report.items.forEach(function (i) {
+      if (i.severity === 'warn') steps.push({ priority: 2, text: 'Resolve warning: ' + i.label, why: i.detail.replace(/<[^>]+>/g, '').slice(0, 160) });
+    });
+    if (s.imgNoAlt > 0) steps.push({ priority: 3, text: 'Add alt text to ' + s.imgNoAlt + ' image' + (s.imgNoAlt === 1 ? '' : 's'), why: 'VoiceOver + screen readers skip images without alt attributes.' });
+    if (html.length > 512 * 1024) steps.push({ priority: 3, text: 'Trim unused CSS/JS blocks', why: 'File is ' + humanBytes(html.length) + '; splitting or pruning will make imports faster.' });
+    if (s.scripts > 3) steps.push({ priority: 4, text: 'Consolidate ' + s.scripts + ' inline script blocks into one', why: 'Fewer script blocks = faster parse + easier debugging.' });
+    if (!/color-scheme/i.test(html) && !/prefers-color-scheme/i.test(html)) steps.push({ priority: 4, text: 'Add dark-mode support', why: 'iPad has system-wide dark mode; your page can honour it with a one-line meta tag or a CSS media query.' });
+    if (arg) steps.unshift({ priority: 0, text: 'Focus: ' + arg, why: 'User-directed objective for this plan.' });
+    if (!steps.length) return { answer: '<strong>&#9989; Nothing to plan.</strong> The file already passes every check in /fix and /optimize.' };
+    steps.sort(function (a, b) { return a.priority - b.priority; });
+    var ordered = '<ol>' + steps.slice(0, 10).map(function (s2) {
+      return '<li><strong>' + escHtml(s2.text) + '</strong><br><span style="color:var(--ink-mid);font-size:14px;">' + escHtml(s2.why) + '</span></li>';
+    }).join('') + '</ol>';
+    return {
+      answer: '<strong>&#128300; Plan for ' + escHtml(app.name) + '</strong>' + ordered +
+        'Run <code>/fix</code> to tackle the auto-fixable items first, then switch to the HTML editor for the rest.',
+      action: { label: '&#128295; Run /fix now', fn: function () { openDevConsole(); runScanCurrentApp(); closeHelperPanel(); } }
+    };
+  }
+  function slashTerminal(arg) {
+    if (!arg) {
+      return { answer:
+        '<strong>/term</strong> explains shell / git / zip / file commands in plain language. Examples:' +
+        '<ul>' +
+          '<li><code>/term git commit -m "msg"</code></li>' +
+          '<li><code>/term tar -xzvf file.tar.gz</code></li>' +
+          '<li><code>/term zip -r out.zip folder</code></li>' +
+          '<li><code>/term chmod +x script.sh</code></li>' +
+        '</ul>'
+      };
+    }
+    return { answer: explainShellCommand(arg) };
+  }
+  function explainShellCommand(cmd) {
+    cmd = cmd.trim();
+    var tokens = cmd.split(/\s+/);
+    var head = tokens[0] || '';
+    // Small built-in dictionary of common iPad-era developer commands.
+    // Not a full manual — just the ones that come up constantly.
+    var ALIAS = {
+      'git':  { desc: 'Version control. Tracks changes to files.', flags: {
+        'status': 'Show which files are changed / staged / untracked.',
+        'add': 'Stage files for the next commit.',
+        'commit': 'Record staged changes as a new snapshot. <code>-m "text"</code> sets the message.',
+        'push': 'Upload local commits to the remote (e.g. GitHub).',
+        'pull': 'Download remote commits and merge into the current branch.',
+        'fetch': 'Download remote commits without merging.',
+        'checkout': 'Switch branches or restore files.',
+        'branch': 'List / create / delete branches.',
+        'log': 'Show commit history. <code>--oneline</code> = one commit per line.',
+        'diff': 'Show line-by-line changes in files.',
+        'stash': 'Temporarily shelf uncommitted changes.',
+        'reset': 'Move the branch pointer. <code>--hard</code> discards changes (dangerous).',
+        'clone': 'Copy a remote repository to your machine.'
+      } },
+      'zip':  { desc: 'Create a zip archive.', flags: { '-r': 'Recurse into subfolders (needed for folders).' } },
+      'unzip':{ desc: 'Extract a zip archive.', flags: { '-l': 'List contents without extracting.' } },
+      'tar':  { desc: 'Create / extract tar archives.', flags: { '-x': 'Extract.', '-z': 'Use gzip.', '-v': 'Verbose (show file names).', '-f': 'Archive filename follows.', '-c': 'Create a new archive.' } },
+      'chmod':{ desc: 'Change file permissions.', flags: { '+x': 'Make file executable.' } },
+      'ls':   { desc: 'List directory contents. <code>-la</code> shows hidden + details.', flags: {} },
+      'cd':   { desc: 'Change directory.', flags: {} },
+      'rm':   { desc: 'Delete files. <code>-r</code> for folders. <strong>Not recoverable</strong> — double-check first.', flags: {} },
+      'cp':   { desc: 'Copy files. <code>-r</code> for folders.', flags: {} },
+      'mv':   { desc: 'Move (or rename) files.', flags: {} },
+      'mkdir':{ desc: 'Create a new directory.', flags: { '-p': 'Create parent directories as needed.' } },
+      'cat':  { desc: 'Print file contents to the terminal.', flags: {} },
+      'grep': { desc: 'Search files for a pattern.', flags: { '-r': 'Recurse into folders.', '-n': 'Show line numbers.', '-i': 'Case-insensitive.' } },
+      'curl': { desc: 'Download a URL from the command line.', flags: { '-o': 'Save to a named file.', '-L': 'Follow redirects.' } },
+      'npm':  { desc: 'Node package manager.', flags: { 'install': 'Install packages from package.json.', 'run': 'Run a script defined in package.json.', 'publish': 'Upload the current package.' } },
+      'python3': { desc: 'Run a Python 3 script. Example: <code>python3 build.py</code>.', flags: {} },
+      'node':    { desc: 'Run a JavaScript file with Node.js.', flags: {} }
+    };
+    if (!ALIAS[head]) {
+      return '<strong>' + escHtml(head || cmd) + '</strong> — I don\'t have a built-in explanation for this command. On iPad you likely don\'t have a shell anyway; most of these live on a Mac / Windows / Linux computer. For git commands on GitHub the web UI handles everything from a browser.';
+    }
+    var base = ALIAS[head];
+    var bits = ['<strong>' + escHtml(head) + '</strong> — ' + base.desc];
+    // Subcommand (git commit, tar -x, etc.)
+    for (var i = 1; i < tokens.length; i++) {
+      var t = tokens[i];
+      if (base.flags && base.flags[t]) bits.push('<code>' + escHtml(t) + '</code> — ' + base.flags[t]);
+      else if (/^-/.test(t)) {
+        // Multi-flag cluster like -xzvf: split into individual letters
+        var letters = t.replace(/^-+/, '').split('');
+        var expanded = letters.map(function (L) {
+          var key = '-' + L;
+          return base.flags && base.flags[key] ? '<code>' + escHtml(key) + '</code> ' + base.flags[key] : null;
+        }).filter(Boolean);
+        if (expanded.length) bits.push(expanded.join('<br>'));
+      }
+    }
+    bits.push('<em>Tip:</em> Load doesn\'t ship a terminal — this command runs on a computer. The only commands you\'ll typically use on iPad are inside Load itself (Import, Create, Dev Console).');
+    return bits.join('<br>');
   }
   function slashExplain(app, arg) {
     var html = app.html || '';
@@ -2021,6 +2133,7 @@
       safe('wireHelper', wireHelper);
       safe('wireConsole', wireConsole);
       safe('wireEditorControls', wireEditorControls);
+      safe('wireEditorAutocomplete', wireEditorAutocomplete);
       safe('wireInstallFlow', wireInstallFlow);
       safe('wireImportErrorModal', wireImportErrorModal);
       safe('updateInstallUi', updateInstallUi);
@@ -3073,6 +3186,186 @@
     $('editor-textarea').value = app.html || '';
     applyEditorPrefs();
     show('editor-screen');
+    refreshEditorSuggestions();
+  }
+  /* ---------- Copilot-style editor autocomplete ----------
+   * Rule-based, fully offline. On every input we look at the 200 chars
+   * before the caret, figure out which language mode the user is in
+   * (HTML body / CSS / JS / inside an open tag / inside an attribute),
+   * and surface the best completion plus 2–3 context-aware snippet
+   * chips. Tapping the main suggestion or pressing Tab accepts it;
+   * Escape dismisses. No network, no model download. */
+  var currentSuggestion = null;
+  function wireEditorAutocomplete() {
+    var ta = $('editor-textarea');
+    if (!ta) return;
+    var strip = $('editor-suggest');
+    var mainBtn = $('editor-suggest-main');
+    var chipsWrap = $('editor-suggest-chips');
+    var dismiss = $('editor-suggest-dismiss');
+    if (!strip || !mainBtn || !chipsWrap || !dismiss) return;
+    ta.addEventListener('input', refreshEditorSuggestions);
+    ta.addEventListener('click', refreshEditorSuggestions);
+    ta.addEventListener('keyup', function (e) {
+      if (e.key !== 'Tab' && e.key !== 'Escape') refreshEditorSuggestions();
+    });
+    ta.addEventListener('keydown', function (e) {
+      if (e.key === 'Tab' && currentSuggestion) {
+        e.preventDefault();
+        acceptEditorSuggestion();
+      } else if (e.key === 'Escape') {
+        dismissEditorSuggestions();
+      }
+    });
+    mainBtn.addEventListener('click', acceptEditorSuggestion);
+    dismiss.addEventListener('click', dismissEditorSuggestions);
+  }
+  function refreshEditorSuggestions() {
+    var ta = $('editor-textarea');
+    if (!ta) return;
+    var strip = $('editor-suggest');
+    var mainBtn = $('editor-suggest-main');
+    var chipsWrap = $('editor-suggest-chips');
+    if (!strip || !mainBtn || !chipsWrap) return;
+    var value = ta.value || '';
+    var pos = ta.selectionStart || 0;
+    var result = computeEditorSuggestion(value, pos);
+    if (!result || (!result.main && !result.chips.length)) {
+      strip.classList.remove('on');
+      currentSuggestion = null;
+      return;
+    }
+    strip.classList.add('on');
+    currentSuggestion = result.main || null;
+    mainBtn.innerHTML = result.main
+      ? '<span class="ghost">' + escHtml(result.main.display || result.main.insert) + '</span><span class="kbd">Tab</span>'
+      : '';
+    chipsWrap.innerHTML = result.chips.map(function (c, i) {
+      return '<button class="suggest-chip" data-chip="' + i + '" title="' + escHtml(c.label) + '">' + escHtml(c.label) + '</button>';
+    }).join('');
+    chipsWrap.querySelectorAll('[data-chip]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var idx = parseInt(btn.getAttribute('data-chip'), 10);
+        var chip = result.chips[idx];
+        if (chip) insertAtCaret(chip.insert, chip.caretBack || 0);
+      });
+    });
+  }
+  function dismissEditorSuggestions() {
+    var strip = $('editor-suggest');
+    if (strip) strip.classList.remove('on');
+    currentSuggestion = null;
+  }
+  function acceptEditorSuggestion() {
+    if (!currentSuggestion) return;
+    insertAtCaret(currentSuggestion.insert, currentSuggestion.caretBack || 0);
+  }
+  function insertAtCaret(text, caretBack) {
+    var ta = $('editor-textarea');
+    if (!ta) return;
+    var start = ta.selectionStart;
+    var end = ta.selectionEnd;
+    var before = ta.value.slice(0, start);
+    var after = ta.value.slice(end);
+    ta.value = before + text + after;
+    var newPos = start + text.length - (caretBack || 0);
+    ta.setSelectionRange(newPos, newPos);
+    ta.focus();
+    refreshEditorSuggestions();
+  }
+  /* Compute the best completion for the current caret. Returns
+   * { main: {display, insert, caretBack}, chips: [{label, insert, caretBack}] }
+   * Language mode detection is crude but useful:
+   *   - inside <style> / style="..." → css
+   *   - inside <script> (not an open tag) → js
+   *   - typing an open tag ("<di") → tag
+   *   - inside attribute ("<button cla") → attribute
+   *   - body text → snippet suggestions
+   */
+  function computeEditorSuggestion(text, pos) {
+    var head = text.slice(0, pos);
+    var tail = text.slice(pos);
+    var mode = detectEditorMode(head);
+    var out = { main: null, chips: [] };
+
+    // 1. Closing an unclosed tag: "<div>" followed by caret → </div>
+    var openTagMatch = /<([a-zA-Z][a-zA-Z0-9-]*)\b[^<>]*>[^<]*$/.exec(head);
+    if (openTagMatch && !/<\//.test(head.slice(-60))) {
+      var tag = openTagMatch[1];
+      if (!/^(br|hr|img|input|meta|link|source|wbr|area|base|col|embed|param|track)$/i.test(tag)) {
+        var close = '</' + tag + '>';
+        if (!tail.trim().startsWith(close)) {
+          out.main = { display: close, insert: close, caretBack: close.length };
+        }
+      }
+    }
+
+    // 2. Typing an open tag: "<di" → "<div>"
+    var partial = /<([a-z][a-z0-9-]{0,12})$/i.exec(head);
+    if (partial) {
+      var frag = partial[1].toLowerCase();
+      var candidates = ['div','span','section','article','header','footer','main','nav','aside','h1','h2','h3','h4','p','ul','ol','li','a','button','input','label','form','img','table','tr','td','th','tbody','thead','pre','code','style','script','iframe','canvas','video','audio'];
+      var hits = candidates.filter(function (c) { return c.indexOf(frag) === 0; }).slice(0, 4);
+      if (hits.length) {
+        out.main = { display: hits[0] + '>', insert: hits[0].slice(frag.length) + '></' + hits[0] + '>', caretBack: ('</' + hits[0] + '>').length };
+        out.chips = hits.slice(1).map(function (h) {
+          return { label: '<' + h + '>', insert: h.slice(frag.length) + '></' + h + '>', caretBack: ('</' + h + '>').length };
+        });
+        return out;
+      }
+    }
+
+    // 3. Mode-specific context chips
+    if (mode === 'css') {
+      out.chips = [
+        { label: 'color: #…', insert: 'color: #333;\n' },
+        { label: 'flex center', insert: 'display: flex;\nalign-items: center;\njustify-content: center;\n' },
+        { label: 'grid auto-fill', insert: 'display: grid;\ngrid-template-columns: repeat(auto-fill, minmax(180px, 1fr));\ngap: 16px;\n' },
+        { label: 'rounded card', insert: 'border-radius: 12px;\nbox-shadow: 0 4px 16px rgba(0,0,0,0.08);\npadding: 18px;\n' }
+      ];
+    } else if (mode === 'js') {
+      out.chips = [
+        { label: 'console.log()', insert: 'console.log(', caretBack: 1 },
+        { label: 'querySelector', insert: 'document.querySelector(\'\')', caretBack: 2 },
+        { label: 'addEventListener', insert: '.addEventListener(\'click\', function (e) {\n  \n});\n', caretBack: 5 },
+        { label: 'for loop', insert: 'for (var i = 0; i < arr.length; i++) {\n  \n}\n', caretBack: 3 }
+      ];
+    } else if (mode === 'html') {
+      out.chips = [
+        { label: '<p>…</p>', insert: '<p></p>', caretBack: 4 },
+        { label: '<a href="…">', insert: '<a href=""></a>', caretBack: 5 },
+        { label: '<img alt>', insert: '<img src="" alt="">', caretBack: 8 },
+        { label: '<button>', insert: '<button type="button"></button>', caretBack: 9 }
+      ];
+    }
+
+    // 4. Boilerplate: empty doc / no <body>
+    if (head.trim().length < 40 && !/<body/i.test(text)) {
+      out.chips.unshift({
+        label: 'HTML5 skeleton',
+        insert: '<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width,initial-scale=1">\n  <title>Untitled</title>\n</head>\n<body>\n  \n</body>\n</html>\n',
+        caretBack: 17
+      });
+    }
+
+    return out;
+  }
+  function detectEditorMode(head) {
+    // Last opening <script> without a closing </script> after it = in JS
+    var lastScript = head.lastIndexOf('<script');
+    var lastScriptEnd = head.lastIndexOf('</script>');
+    if (lastScript > -1 && lastScript > lastScriptEnd) {
+      // But only when past the closing ">" of the opening tag
+      var gt = head.indexOf('>', lastScript);
+      if (gt > -1 && gt < head.length) return 'js';
+    }
+    var lastStyle = head.lastIndexOf('<style');
+    var lastStyleEnd = head.lastIndexOf('</style>');
+    if (lastStyle > -1 && lastStyle > lastStyleEnd) {
+      var gt2 = head.indexOf('>', lastStyle);
+      if (gt2 > -1 && gt2 < head.length) return 'css';
+    }
+    return 'html';
   }
   $('editor-back').addEventListener('click', function () {
     editingApp = null;
