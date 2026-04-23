@@ -7,7 +7,7 @@
 // Attain Universal — Service Worker
 // Network-first for everything so updates always take effect
 
-var CACHE = 'attain-v57';
+var CACHE = 'attain-v56';
 
 var SHELL = [
   './',
@@ -17,8 +17,6 @@ var SHELL = [
   'attain-parser.js',
   'attain-study.js',
   'attain-ui.js',
-  'piper-voices.js',
-  'piper-panel.js',
   'manifest.json',
   'icon.png'
 ];

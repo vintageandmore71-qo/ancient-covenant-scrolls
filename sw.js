@@ -5,8 +5,8 @@
 //   is available offline, not just the ones the user already visited.
 // - Leaves the /study/ sub-app's SW and cache alone.
 
-const CACHE = 'acr-v4';
-const SHELL = ['./', 'index.html', 'manifest.json', 'icon.png', 'piper-voices.js', 'piper-panel.js'];
+const CACHE = 'acr-v3';
+const SHELL = ['./', 'index.html', 'manifest.json', 'icon.png'];
 
 // All expected chapter files. file_65 and file_85 have historical
 // space-prefixed filenames in the repo and will 404 here; the individual

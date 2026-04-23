@@ -371,15 +371,7 @@ function showSettings() {
   for (var v = 0; v < ttsVoices.length; v++) {
     h += '<option value="' + ttsVoices[v].name + '"' + (ttsVoices[v].name === savedVoice ? ' selected' : '') + '>' + ttsVoices[v].name + '</option>';
   }
-  h += '</select>';
-  // Neural voices (Piper) — opens shared panel from piper-panel.js.
-  // Install/remove/use is handled there; preferred voice lives under
-  // attain_piper_voice and is picked up by playParagraph() in
-  // attain-study.js whenever it's set.
-  var curPiper = '';
-  try { curPiper = localStorage.getItem('attain_piper_voice') || ''; } catch (e) {}
-  h += '<button id="set-piper-btn" style="margin-top:10px;width:100%;padding:12px;border-radius:var(--radius);border:2px solid var(--accent);background:var(--bg-card);color:var(--accent);font-family:var(--font-main);font-size:14px;font-weight:600;cursor:pointer">🧠 Neural voices (Piper' + (curPiper ? ' — active' : '') + ')</button>';
-  h += '</div>';
+  h += '</select></div>';
 
   // Storage management — book expiry
   h += '<div class="prog-card">';
@@ -438,12 +430,6 @@ function showSettings() {
 
   document.getElementById('set-voice').addEventListener('change', function () {
     localStorage.setItem('attain_voice', this.value);
-  });
-
-  var piperBtn = document.getElementById('set-piper-btn');
-  if (piperBtn) piperBtn.addEventListener('click', function () {
-    if (window.PiperPanel) window.PiperPanel.open('attain_piper_voice');
-    else alert('Neural voices module not loaded. Refresh the app and try again.');
   });
 
   var expirySel = document.getElementById('set-expiry');

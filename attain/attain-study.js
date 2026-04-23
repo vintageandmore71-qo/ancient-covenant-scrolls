@@ -1168,39 +1168,6 @@ function showListenLearn(bookId, chIdx) {
   }
 
   function playParagraph() {
-    // Piper neural-voice path — when the user has installed and
-    // selected a Piper voice, route through PiperVoices.speak().
-    // Word-by-word highlighting is skipped in Piper mode (neural
-    // voices don't fire boundary events) but the paragraph still
-    // auto-advances on end.
-    var piperVoice = '';
-    try { piperVoice = localStorage.getItem('attain_piper_voice') || ''; } catch (e) {}
-    if (piperVoice && window.PiperVoices && window.PiperVoices.isSupported()) {
-      stopLL();
-      playing = true;
-      var card0 = document.getElementById('ll-card');
-      if (card0) card0.classList.add('ll-speaking');
-      try {
-        window.PiperVoices.speak(paras[vi], piperVoice, {
-          rate: 1, volume: 1,
-          onend: function () {
-            playing = false;
-            if (card0) card0.classList.remove('ll-speaking');
-            var autoCheck = document.getElementById('ll-autoplay');
-            if (autoCheck && autoCheck.checked && vi < paras.length - 1) {
-              vi++;
-              renderParagraph();
-              setTimeout(function () { playParagraph(); }, 500);
-            }
-          },
-          onerror: function () {
-            playing = false;
-            if (card0) card0.classList.remove('ll-speaking');
-          }
-        });
-        return;
-      } catch (e) { /* fall through to Web Speech */ }
-    }
     if (!window.speechSynthesis) return;
     stopLL();
     playing = true;
@@ -1262,7 +1229,6 @@ function showListenLearn(bookId, chIdx) {
     if (window.speechSynthesis) {
       try { window.speechSynthesis.cancel(); } catch (e) {}
     }
-    if (window.PiperVoices) { try { window.PiperVoices.cancel(); } catch (e) {} }
     var card = document.getElementById('ll-card');
     if (card) card.classList.remove('ll-speaking');
     var wordSpans = document.querySelectorAll('.ll-word');
