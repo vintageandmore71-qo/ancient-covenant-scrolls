@@ -1473,7 +1473,7 @@
     $('helper-panel').classList.remove('on');
     $('helper-scrim').classList.remove('on');
   }
-  function addHelperMessage(role, html, action) {
+  function addHelperMessage(role, html, action, providerBadge) {
     // Hide the intro after the first message; quick chips fold away too
     var intro = $('helper-intro'); if (intro) intro.style.display = 'none';
     var quick = $('helper-quick'); if (quick) quick.classList.add('hidden');
@@ -1481,6 +1481,13 @@
     var div = document.createElement('div');
     div.className = 'helper-msg ' + role;
     div.innerHTML = html;
+    if (providerBadge && role === 'assistant') {
+      var badge = document.createElement('span');
+      badge.className = 'prov-badge ' + (providerBadge.tier || 'offline');
+      badge.textContent = providerBadge.label;
+      div.appendChild(document.createElement('br'));
+      div.appendChild(badge);
+    }
     if (action && action.label) {
       var btn = document.createElement('button');
       btn.className = 'helper-action';
@@ -1494,7 +1501,30 @@
     }
     msgs.appendChild(div);
     msgs.scrollTop = msgs.scrollHeight;
+    return div;
   }
+  /* Render a "Thinking…" placeholder that a provider call can replace. */
+  function addThinkingMessage(providerLabel) {
+    var msgs = $('helper-messages');
+    var div = document.createElement('div');
+    div.className = 'helper-msg assistant';
+    div.innerHTML = '<span class="helper-thinking"><span>Asking ' + escHtml(providerLabel) + '</span><span class="dots"></span></span>';
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+    return div;
+  }
+  function replaceMessage(div, html, providerBadge) {
+    if (!div) return;
+    div.innerHTML = html;
+    if (providerBadge) {
+      var badge = document.createElement('span');
+      badge.className = 'prov-badge ' + (providerBadge.tier || 'offline');
+      badge.textContent = providerBadge.label;
+      div.appendChild(document.createElement('br'));
+      div.appendChild(badge);
+    }
+  }
+  var BADGE_BUILTIN = { tier: 'offline', label: 'via built-in (rule-based)' };
   function submitHelperQuestion() {
     var input = $('helper-input');
     var q = (input.value || '').trim();
@@ -1513,7 +1543,7 @@
     if (/^\s*\//.test(q)) {
       var slashResponse = handleSlashCommand(q);
       if (slashResponse) {
-        addHelperMessage('assistant', slashResponse.answer, slashResponse.action || null);
+        addHelperMessage('assistant', slashResponse.answer, slashResponse.action || null, BADGE_BUILTIN);
         return;
       }
     }
@@ -1522,7 +1552,7 @@
     if (helperContext.kind === 'viewer' && helperContext.text) {
       var contentResponse = handleContentCommand(q, helperContext);
       if (contentResponse) {
-        addHelperMessage('assistant', contentResponse.answer, contentResponse.action || null);
+        addHelperMessage('assistant', contentResponse.answer, contentResponse.action || null, BADGE_BUILTIN);
         return;
       }
     }
@@ -1534,7 +1564,8 @@
         'I can set that up for you! I\'ll open the Create screen with the <strong>' + createMatch.template + '</strong> template' +
         (createMatch.topic ? ' and pre-fill the title as <strong>' + escHtml(createMatch.topic) + '</strong>.' : '.') +
         ' You just type the content and save.',
-        { label: 'Open Create screen', fn: function () { openCreateWithHelper(createMatch); } }
+        { label: 'Open Create screen', fn: function () { openCreateWithHelper(createMatch); } },
+        BADGE_BUILTIN
       );
       return;
     }
@@ -1542,23 +1573,337 @@
     // 3. Match knowledge base
     var hit = scoreKnowledgeBase(q);
     if (hit) {
-      addHelperMessage('assistant', hit.answer, hit.actionLabel ? { label: hit.actionLabel, fn: hit.actionFn } : null);
+      addHelperMessage('assistant', hit.answer, hit.actionLabel ? { label: hit.actionLabel, fn: hit.actionFn } : null, BADGE_BUILTIN);
       return;
     }
 
-    // 4. Fallback — if we're viewing content, offer to pass the question
-    // + text to an external AI. Otherwise suggest opening an item first.
+    // 4. Route to the cloud provider chain (Pollinations → AI Horde →
+    //    local model). Each provider is attempted in order; the first
+    //    that succeeds wins. If none work, fall back to the original
+    //    offline behaviour (hand-off modal).
+    askProviderChain(q, helperContext).then(function (result) {
+      if (result && result.answer) {
+        addHelperMessage('assistant', result.answer, null, result.badge);
+        return;
+      }
+      fallbackToOffline(q, helperContext);
+    }).catch(function (err) {
+      console.warn('Provider chain failed', err);
+      fallbackToOffline(q, helperContext);
+    });
+    return;
+  }
+  function fallbackToOffline(q, helperContext) {
     if (helperContext.kind === 'viewer' && helperContext.text) {
       addHelperMessage('assistant',
-        'That\'s a deeper question about this specific content. I can copy the text + your question to the clipboard and open a free AI site so you can paste and get a real answer.',
-        { label: 'Send to ChatGPT', fn: function () { handoffToAi(q, helperContext.text, 'chatgpt'); } }
+        'Every free AI provider is unavailable right now (rate-limited or offline). I can copy the text + your question to the clipboard and open a public AI site instead.',
+        { label: 'Send to ChatGPT', fn: function () { handoffToAi(q, helperContext.text, 'chatgpt'); } },
+        { tier: 'offline', label: 'all providers unavailable' }
       );
     } else {
       addHelperMessage('assistant',
-        'I\'m focused on helping you <strong>use Load</strong> and <strong>create content</strong>. ' +
+        'Every free AI provider is unavailable right now (rate-limited or offline). I\'m focused on helping you <strong>use Load</strong> and <strong>create content</strong>. ' +
         'For questions <em>about the content of a specific file</em>, open that file first — then ask me to summarize it, find a word, outline it, or walk you through it step by step.',
-        null
+        null,
+        { tier: 'offline', label: 'all providers unavailable' }
       );
+    }
+  }
+
+  /* ---------- Load AI provider chain ----------
+   * Routes every non-matched question through a sequence of free,
+   * no-signup providers until one returns a usable answer. Each
+   * provider exposes { name, label, tier, available(), ask(prompt, ctx) }.
+   * The chain is ordered by provider ordering in LOAD_PROVIDERS; a
+   * user can disable any provider in Settings (except built-in).
+   *
+   * Nothing in this file requires an API key. All providers advertise
+   * free anonymous access. Rate limits may apply — those get translated
+   * into "try the next provider" not "fail". */
+  var providerPrefs = loadProviderPrefs();
+  var providerStatus = {};   // name -> 'ok' | 'rate-limited' | 'error' | 'busy'
+  var LS_PROVIDERS = 'load_ai_providers_v1';
+  function defaultProviderPrefs() {
+    return {
+      pollinations: { enabled: true },
+      aihorde:      { enabled: true },
+      local:        { enabled: false, installed: false },
+      builtin:      { enabled: true }
+    };
+  }
+  function loadProviderPrefs() {
+    try {
+      var raw = localStorage.getItem(LS_PROVIDERS);
+      var saved = raw ? JSON.parse(raw) : {};
+      var base = defaultProviderPrefs();
+      Object.keys(saved).forEach(function (k) { if (base[k]) Object.assign(base[k], saved[k]); });
+      return base;
+    } catch (e) { return defaultProviderPrefs(); }
+  }
+  function saveProviderPrefs() {
+    try { localStorage.setItem(LS_PROVIDERS, JSON.stringify(providerPrefs)); } catch (e) {}
+  }
+  function setProviderStatus(name, state, detail) {
+    providerStatus[name] = state;
+    var el = document.getElementById('ai-prov-' + name + '-status');
+    if (!el) return;
+    el.className = 'ai-prov-status ' + (state === 'ok' ? 'ok' : state === 'busy' ? 'busy' : state === 'rate-limited' ? 'warn' : state === 'error' ? 'error' : '');
+    el.textContent = detail || ({
+      ok: 'Ready',
+      busy: 'Working…',
+      'rate-limited': 'Rate-limited (will retry later)',
+      error: 'Unavailable',
+      'not-installed': 'Not installed'
+    })[state] || state;
+  }
+  /* Build a context string from the file the user is currently looking
+   * at. Keeps the prompt small enough that free-tier providers don't
+   * reject it: trims the inlined page text to ~6 KB. */
+  function buildProviderContext(ctx) {
+    if (!ctx) return '';
+    if (ctx.kind === 'viewer' && ctx.app) {
+      var t = ctx.text || '';
+      var head = '[Current file: ' + ctx.app.name + '. Kind: ' + (ctx.app.kind || 'html') + '.]\n\n';
+      return head + t.slice(0, 6000);
+    }
+    if (ctx.kind === 'editor' && currentApp) {
+      var src = (currentApp.html || '').slice(0, 6000);
+      return '[User is editing HTML source of ' + currentApp.name + '.]\n\n' + src;
+    }
+    return '';
+  }
+  function buildSystemPrompt() {
+    return 'You are Load AI, a helpful offline-first coding and reading assistant embedded in an iPad PWA called Load. Answer in plain language. Prefer short, direct replies. If asked about code, produce minimal self-contained HTML/CSS/JS snippets. Never request that the user sign up for anything.';
+  }
+  var LOAD_PROVIDERS = [
+    {
+      name: 'pollinations',
+      label: 'via Pollinations.ai',
+      tier: 'cloud',
+      available: function () { return providerPrefs.pollinations.enabled && providerStatus.pollinations !== 'rate-limited-hard'; },
+      ask: async function (question, contextText) {
+        setProviderStatus('pollinations', 'busy');
+        var sys = buildSystemPrompt();
+        var body = {
+          messages: [
+            { role: 'system', content: sys },
+            contextText ? { role: 'user', content: 'Context:\n' + contextText } : null,
+            { role: 'user', content: question }
+          ].filter(Boolean),
+          model: 'openai',
+          private: true
+        };
+        var url = 'https://text.pollinations.ai/openai';
+        var resp = await fetchWithTimeout(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        }, 45000);
+        if (resp.status === 429 || resp.status === 503) {
+          setProviderStatus('pollinations', 'rate-limited');
+          throw new Error('rate-limited');
+        }
+        if (!resp.ok) {
+          setProviderStatus('pollinations', 'error', 'HTTP ' + resp.status);
+          throw new Error('http ' + resp.status);
+        }
+        var data = await resp.json().catch(function () { return null; });
+        var text = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+        if (!text) {
+          // Some Pollinations endpoints return plain text
+          text = await resp.text().catch(function () { return ''; });
+        }
+        if (!text) { setProviderStatus('pollinations', 'error'); throw new Error('empty response'); }
+        setProviderStatus('pollinations', 'ok');
+        return text;
+      }
+    },
+    {
+      name: 'aihorde',
+      label: 'via AI Horde',
+      tier: 'fallback',
+      available: function () { return providerPrefs.aihorde.enabled; },
+      ask: async function (question, contextText) {
+        setProviderStatus('aihorde', 'busy', 'Queued…');
+        // AI Horde text generation — anonymous key "0000000000" lowers
+        // priority but still works. Queue can be slow on peak hours.
+        var sys = buildSystemPrompt();
+        var prompt = sys + '\n\n' + (contextText ? 'Context:\n' + contextText + '\n\n' : '') + 'User: ' + question + '\nAssistant:';
+        var submit = await fetchWithTimeout('https://stablehorde.net/api/v2/generate/text/async', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': '0000000000',
+            'Client-Agent': 'Load:v14n:github.com/dssorit/ancient-covenant-scrolls'
+          },
+          body: JSON.stringify({
+            prompt: prompt.slice(0, 6000),
+            params: { max_length: 300, temperature: 0.6 },
+            models: ['koboldcpp/L3-8B-Stheno-v3.2', 'koboldcpp/llama-3-8b-instruct', 'koboldcpp/mistral-7b-instruct-v0.3']
+          })
+        }, 20000);
+        if (!submit.ok) { setProviderStatus('aihorde', 'error', 'HTTP ' + submit.status); throw new Error('horde submit ' + submit.status); }
+        var submitJson = await submit.json();
+        var id = submitJson.id;
+        if (!id) { setProviderStatus('aihorde', 'error'); throw new Error('no job id'); }
+        // Poll. Cap at ~45s so we give up and let the next provider try.
+        var deadline = Date.now() + 45000;
+        while (Date.now() < deadline) {
+          await new Promise(function (r) { setTimeout(r, 2500); });
+          var st = await fetchWithTimeout('https://stablehorde.net/api/v2/generate/text/status/' + encodeURIComponent(id), {
+            headers: { 'apikey': '0000000000' }
+          }, 10000).catch(function () { return null; });
+          if (!st || !st.ok) continue;
+          var stJson = await st.json().catch(function () { return null; });
+          if (!stJson) continue;
+          if (stJson.done && stJson.generations && stJson.generations.length) {
+            setProviderStatus('aihorde', 'ok');
+            return String(stJson.generations[0].text || '').trim();
+          }
+          setProviderStatus('aihorde', 'busy', 'Queue: ' + (stJson.queue_position != null ? '#' + stJson.queue_position : 'waiting') + ', ETA ' + (stJson.wait_time || '?') + 's');
+        }
+        setProviderStatus('aihorde', 'error', 'Timed out');
+        throw new Error('horde timeout');
+      }
+    },
+    {
+      name: 'local',
+      label: 'via on-device model',
+      tier: 'local',
+      available: function () { return providerPrefs.local.enabled && providerPrefs.local.installed && typeof window.__LOAD_LOCAL_AI === 'function'; },
+      ask: async function (question, contextText) {
+        setProviderStatus('local', 'busy', 'Running on-device…');
+        var sys = buildSystemPrompt();
+        var prompt = sys + '\n\n' + (contextText ? 'Context:\n' + contextText + '\n\n' : '') + 'User: ' + question + '\nAssistant:';
+        var out = await window.__LOAD_LOCAL_AI(prompt);
+        setProviderStatus('local', 'ok');
+        return out;
+      }
+    }
+  ];
+  async function fetchWithTimeout(url, opts, timeout) {
+    var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, timeout || 30000) : null;
+    try {
+      return await fetch(url, Object.assign({}, opts || {}, ctrl ? { signal: ctrl.signal } : {}));
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+  }
+  async function askProviderChain(question, ctx) {
+    var context = buildProviderContext(ctx);
+    var anyEnabled = false;
+    for (var i = 0; i < LOAD_PROVIDERS.length; i++) {
+      var p = LOAD_PROVIDERS[i];
+      if (!p.available || !p.available()) continue;
+      anyEnabled = true;
+      // Render a thinking placeholder for THIS provider so the UI
+      // tracks exactly which one is active. Replaced when it answers
+      // or when we move to the next in the chain.
+      var placeholder = addThinkingMessage(p.label.replace(/^via\s+/, ''));
+      try {
+        var text = await p.ask(question, context);
+        if (text && text.trim().length > 1) {
+          var html = markdownToHtml(text.trim());
+          replaceMessage(placeholder, html, { tier: p.tier, label: p.label });
+          return { answer: html, badge: { tier: p.tier, label: p.label } };
+        }
+        // Empty/no-op — move on and drop the placeholder
+        placeholder.remove();
+      } catch (e) {
+        placeholder.remove();
+        console.warn('Provider ' + p.name + ' failed:', e);
+        // keep iterating
+      }
+    }
+    if (!anyEnabled) return null;
+    return null;
+  }
+  /* Tiny Markdown → HTML for provider output. Handles the common bits
+   * (paragraphs, code spans, bullet lists, **bold**, *italic*) without
+   * pulling in a full markdown library. */
+  function markdownToHtml(md) {
+    if (!md) return '';
+    // Escape HTML first
+    var s = String(md).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    // Code blocks ```…```
+    s = s.replace(/```([\s\S]*?)```/g, function (_, code) { return '<pre class="code-block">' + code.trim() + '</pre>'; });
+    // Inline code
+    s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+    // Bold / italic
+    s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/(?:^|[^*])\*([^*]+)\*/g, function (m, inner) { return m.charAt(0) === '*' ? '<em>' + inner + '</em>' : m.charAt(0) + '<em>' + inner + '</em>'; });
+    // Bullet lists
+    s = s.replace(/(^|\n)((?:[-*] [^\n]+\n?)+)/g, function (_, pre, block) {
+      var items = block.trim().split(/\n/).map(function (l) { return '<li>' + l.replace(/^[-*] /, '') + '</li>'; }).join('');
+      return pre + '<ul>' + items + '</ul>';
+    });
+    // Paragraphs
+    s = s.split(/\n{2,}/).map(function (p) {
+      if (/^<(ul|ol|pre|h\d|blockquote)/.test(p.trim())) return p;
+      return '<p>' + p.replace(/\n/g, '<br>') + '</p>';
+    }).join('\n');
+    return s;
+  }
+  /* ---------- On-device model loader (opt-in, no bundle) ----------
+   * Lazy-imports transformers.js from jsDelivr + pulls a small Qwen
+   * model on first use. Cached via the browser's HTTP cache + IndexedDB
+   * so the heavy download happens exactly once, then every future
+   * answer is fully offline. Sets window.__LOAD_LOCAL_AI(prompt) once
+   * ready. Progress is surfaced through setProviderStatus. */
+  async function installLocalAiModel() {
+    if (providerPrefs.local.installed && typeof window.__LOAD_LOCAL_AI === 'function') {
+      toast('Local model already installed.');
+      return;
+    }
+    setProviderStatus('local', 'busy', 'Loading transformers.js…');
+    try {
+      var mod = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
+      setProviderStatus('local', 'busy', 'Downloading model (~400 MB)…');
+      var pipeline = mod.pipeline;
+      mod.env.allowLocalModels = false;
+      mod.env.useBrowserCache = true;
+      var gen = await pipeline('text-generation', 'Xenova/Qwen1.5-0.5B-Chat', {
+        progress_callback: function (p) {
+          if (p && p.status === 'progress' && p.progress != null) {
+            setProviderStatus('local', 'busy', 'Downloading ' + p.file + ' — ' + Math.round(p.progress) + '%');
+          }
+        }
+      });
+      window.__LOAD_LOCAL_AI = async function (prompt) {
+        var out = await gen(prompt, { max_new_tokens: 240, temperature: 0.6, do_sample: true, return_full_text: false });
+        return out && out[0] && (out[0].generated_text || '') || '';
+      };
+      providerPrefs.local.installed = true;
+      providerPrefs.local.enabled = true;
+      saveProviderPrefs();
+      setProviderStatus('local', 'ok', 'Installed, ready offline');
+      toast('✓ Local model installed. Ready for offline use.');
+      var cb = document.getElementById('ai-prov-local');
+      if (cb) cb.checked = true;
+      var btn = document.getElementById('ai-prov-local-install');
+      if (btn) { btn.disabled = true; btn.textContent = '✓ Installed'; }
+    } catch (e) {
+      console.warn('Local AI install failed', e);
+      setProviderStatus('local', 'error', 'Install failed: ' + (e && e.message || e));
+      toast('Local model install failed. See settings for details.', true);
+    }
+  }
+  function wireAiProviderSettings() {
+    // Restore persisted toggles
+    ['pollinations', 'aihorde', 'local'].forEach(function (name) {
+      var cb = document.getElementById('ai-prov-' + name);
+      if (!cb) return;
+      cb.checked = !!providerPrefs[name].enabled;
+      cb.addEventListener('change', function () {
+        providerPrefs[name].enabled = cb.checked;
+        saveProviderPrefs();
+      });
+    });
+    var install = document.getElementById('ai-prov-local-install');
+    if (install) install.addEventListener('click', installLocalAiModel);
+    if (providerPrefs.local.installed) {
+      setProviderStatus('local', 'ok', 'Installed, ready offline');
+      if (install) { install.disabled = true; install.textContent = '✓ Installed'; }
     }
   }
 
@@ -2136,6 +2481,7 @@
       safe('wireEditorAutocomplete', wireEditorAutocomplete);
       safe('wireInstallFlow', wireInstallFlow);
       safe('wireImportErrorModal', wireImportErrorModal);
+      safe('wireAiProviderSettings', wireAiProviderSettings);
       safe('updateInstallUi', updateInstallUi);
       safe('renderFolderList', renderFolderList);
       safe('renderLibraryChips', renderLibraryChips);

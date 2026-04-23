@@ -1187,18 +1187,50 @@
   </div>
 
   <div class="panel-section">
-    <h4>Load AI</h4>
-    <p class="panel-hint">Load AI is <strong>built-in</strong> to Load &mdash; no download, no account, no network. Tap the <strong>&#128172;</strong> bubble icon in any top bar to ask it anything.</p>
-    <p class="install-status installed">&#10003; <strong>Load AI is built-in.</strong> Always available in every top bar.</p>
-    <p class="panel-hint" style="margin-top:12px;">Covers:</p>
-    <ul class="panel-hint-list">
-      <li>64 Load-usage topics (synonym-aware phrasing)</li>
-      <li>Scan your open file: summarize, find a word, outline, step-by-step</li>
-      <li>Recognize "create a X" intents and pre-fill the Create screen</li>
-      <li>13 code-snippet answers for dyslexic developers</li>
-      <li>One-tap hand-off to free public AI (ChatGPT / Claude / Gemini / Perplexity) for deeper questions, with your text pre-copied</li>
-    </ul>
-    <p class="panel-hint" style="font-size:12px;margin-top:10px;">A downloadable local LLM ("Enhanced AI") is possible but adds ~46&nbsp;MB, is 5&ndash;15&nbsp;sec per answer on iPad, and its quality is below free ChatGPT. Load AI + the one-tap hand-off is the faster, smarter path for most users.</p>
+    <h4>Load AI &mdash; provider chain</h4>
+    <p class="panel-hint">Load tries each provider in order until one answers. <strong>All are free and require no sign-up / no API key.</strong> Disable any you don't want. The built-in rule-based assistant is always the final fallback.</p>
+
+    <div class="ai-provider" data-provider="pollinations">
+      <label class="ai-prov-head">
+        <input type="checkbox" id="ai-prov-pollinations" checked>
+        <strong>Pollinations.ai</strong>
+        <span class="ai-prov-badge">Primary &middot; no key</span>
+      </label>
+      <p class="ai-prov-desc">Anonymous REST endpoint backed by rotating open-weight models. Fast, free, no sign-up. May be rate-limited during peak hours.</p>
+      <p class="ai-prov-status" id="ai-prov-pollinations-status">Ready</p>
+    </div>
+
+    <div class="ai-provider" data-provider="aihorde">
+      <label class="ai-prov-head">
+        <input type="checkbox" id="ai-prov-aihorde" checked>
+        <strong>AI Horde</strong>
+        <span class="ai-prov-badge">Fallback &middot; no key</span>
+      </label>
+      <p class="ai-prov-desc">Community-pooled volunteer GPUs. Anonymous, open source, no sign-up. Queue-based &mdash; can take 5&ndash;30 seconds when Pollinations is rate-limited.</p>
+      <p class="ai-prov-status" id="ai-prov-aihorde-status">Ready</p>
+    </div>
+
+    <div class="ai-provider" data-provider="local">
+      <label class="ai-prov-head">
+        <input type="checkbox" id="ai-prov-local">
+        <strong>On-device model</strong>
+        <span class="ai-prov-badge">Offline fallback &middot; opt-in</span>
+      </label>
+      <p class="ai-prov-desc">Runs a small open-weight model (Qwen2.5 0.5B, ~400 MB) in your browser via <code>transformers.js</code>. Nothing is bundled in Load &mdash; the model downloads once on first use and is cached for offline use. Slow on iPad (5&ndash;20 sec per reply) but works with no internet, ever.</p>
+      <p class="ai-prov-status" id="ai-prov-local-status">Not installed</p>
+      <button id="ai-prov-local-install" class="seg-btn full" style="margin-top:6px;">&#128229; Install local model (~400 MB)</button>
+    </div>
+
+    <div class="ai-provider" data-provider="builtin">
+      <label class="ai-prov-head">
+        <input type="checkbox" id="ai-prov-builtin" checked disabled>
+        <strong>Built-in rule-based</strong>
+        <span class="ai-prov-badge">Always on</span>
+      </label>
+      <p class="ai-prov-desc">Curated knowledge base + slash commands (<code>/explain</code>, <code>/fix</code>, <code>/optimize</code>, <code>/analyze</code>, <code>/plan</code>, <code>/term</code>). No network, no download, instant answers. This layer always runs first when the question matches a known topic or slash command.</p>
+    </div>
+
+    <p class="panel-hint" style="font-size:12px;margin-top:14px;">Each answer shows which provider handled it so you can see what's working. If every cloud option fails, Load still answers from the built-in layer.</p>
   </div>
 
   <div class="panel-section">
@@ -1343,7 +1375,7 @@
       <li><code>/scan</code> — open the Developer Console and run a full scan.</li>
       <li><code>/help</code> — list every slash command.</li>
     </ul>
-    <p style="font-size:12px;color:var(--ink-low);margin:0;">For deeper content questions, I can also hand off to a free AI site (ChatGPT / Claude / Gemini / Perplexity) with one tap. Future option: download a local on-device model (WebLLM / transformers.js) for even richer answers &mdash; off by default.</p>
+    <p style="font-size:12px;color:var(--ink-low);margin:0;"><strong>For everything else</strong>, I automatically route through a chain of <strong>free, no-sign-up AI providers</strong> &mdash; Pollinations.ai first, then AI Horde, then an optional on-device model you can install later. Each answer shows which provider handled it. Open Settings &rarr; Load AI to toggle any provider off. Nothing is bundled, no accounts, no keys.</p>
   </div>
   <div id="helper-messages" class="helper-messages"></div>
   <div class="helper-quick" id="helper-quick">

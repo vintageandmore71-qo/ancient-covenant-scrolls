@@ -1062,6 +1062,87 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
 .helper-input-row input:focus { outline: none; border-color: var(--accent); }
 .helper-input-row button { min-width: 52px; padding: 12px; font-size: 20px; }
 
+/* AI provider cards in Settings (multi-provider chain) */
+.ai-provider {
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 14px;
+  margin: 8px 0;
+}
+.ai-prov-head {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 15px; cursor: pointer; margin-bottom: 4px;
+}
+.ai-prov-head input[type="checkbox"] {
+  width: 18px; height: 18px; accent-color: var(--accent);
+}
+.ai-prov-head strong { color: var(--ink-hi); }
+.ai-prov-badge {
+  margin-left: auto; font-size: 11px;
+  padding: 3px 8px; border-radius: 999px;
+  background: rgba(124,124,255,0.18); color: var(--accent-hi);
+  letter-spacing: 0.5px; text-transform: uppercase;
+}
+.ai-prov-desc {
+  font-size: 13px; line-height: 1.55;
+  color: var(--ink-mid); margin: 4px 0 6px;
+}
+.ai-prov-desc code {
+  background: var(--bg-0); padding: 1px 5px; border-radius: 4px;
+  font-size: 12px;
+}
+.ai-prov-status {
+  font-size: 12px; margin: 0;
+  padding: 4px 8px; border-radius: 4px;
+  background: var(--bg-0); color: var(--ink-mid);
+  display: inline-block;
+}
+.ai-prov-status.ok    { color: #2bb673; }
+.ai-prov-status.warn  { color: #e0a040; }
+.ai-prov-status.error { color: var(--danger); }
+.ai-prov-status.busy  { color: var(--accent); }
+
+/* Per-message provider badge in the Load AI chat */
+.helper-msg .prov-badge {
+  display: inline-block;
+  margin-top: 8px; padding: 3px 8px;
+  font-size: 11px; letter-spacing: 0.5px;
+  background: var(--bg-0); color: var(--ink-mid);
+  border-radius: 999px;
+  border: 1px solid var(--border);
+}
+.helper-msg .prov-badge.cloud    { color: var(--accent-hi); border-color: var(--accent); }
+.helper-msg .prov-badge.fallback { color: #e0a040; border-color: #e0a040; }
+.helper-msg .prov-badge.local    { color: #2bb673; border-color: #2bb673; }
+.helper-msg .prov-badge.offline  { color: var(--ink-low); }
+.helper-thinking {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border-radius: 8px;
+  background: var(--bg-2); border: 1px solid var(--border);
+  font-size: 14px; color: var(--ink-mid); font-style: italic;
+}
+.helper-thinking .dots::after {
+  content: '…'; display: inline-block;
+  animation: thinking-dots 1.4s infinite steps(4, end);
+}
+@keyframes thinking-dots {
+  0%   { content: ''; }
+  25%  { content: '.'; }
+  50%  { content: '..'; }
+  75%  { content: '...'; }
+  100% { content: ''; }
+}
+
+.helper-msg .code-block {
+  background: var(--bg-0); color: var(--ink-hi);
+  padding: 10px 12px; border-radius: 8px;
+  font-family: "SFMono-Regular", Menlo, monospace;
+  font-size: 13px; line-height: 1.55;
+  white-space: pre-wrap; word-break: break-word;
+  border-left: 3px solid var(--accent);
+  margin: 8px 0;
+  overflow-x: auto;
+}
+
 /* Key-value table used by Load AI /analyze output */
 .helper-kv {
   width: 100%; border-collapse: collapse; margin: 8px 0;
