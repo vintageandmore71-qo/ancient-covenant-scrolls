@@ -606,6 +606,8 @@
           <li><strong>&#127752;</strong> — turn OpenDyslexic font on or off</li>
           <li><strong>&#128221;</strong> — go to your notes</li>
           <li><strong>&#128266;</strong> — audio / Read Aloud settings</li>
+          <li><strong>&#128172;</strong> — Load AI (chat + slash commands)</li>
+          <li><strong>&#128295;</strong> — Developer Console (Scan &amp; Fix for uploads)</li>
           <li><strong>?</strong> — this help window</li>
           <li><strong>&#9881; Aa</strong> — all settings</li>
         </ul>
@@ -1011,6 +1013,80 @@
           <li>The iframe has <code>allow-scripts allow-same-origin allow-forms allow-popups</code>, so most apps run unrestricted</li>
         </ul>
         <p>What Load doesn't have: a built-in JavaScript console, network inspector, or live-reload watcher. Safari's <strong>Web Inspector</strong> (connected from a Mac via USB) gives you those for free on any PWA including Load itself. For iPad-only development, <strong>Inspect Browser</strong> and <strong>Kodex</strong> are paid apps that add dev tools.</p>
+      </details>
+
+      <details>
+        <summary>How do I install Load as a real app on my iPad?</summary>
+        <p><strong>Three taps, once:</strong></p>
+        <ol>
+          <li>Open Load in Safari.</li>
+          <li>Tap the Safari <strong>Share</strong> icon (square with arrow pointing up, bottom-center of Safari on iPad).</li>
+          <li>Scroll the share sheet down &rarr; tap <strong>Add to Home Screen</strong> &rarr; tap <strong>Add</strong>.</li>
+        </ol>
+        <p>Now Load lives on your home screen with its own icon. Tap it and it opens fullscreen, no Safari bar, fully offline. Same storage, same Library &mdash; nothing re-downloads.</p>
+        <p>To uninstall: long-press the Load icon on your home screen &rarr; <strong>Remove App</strong>. That also clears Load's storage, so export your Library first if you want to keep your imports.</p>
+      </details>
+
+      <details>
+        <summary>How do I import different kinds of files? What works and what doesn't?</summary>
+        <p><strong>Works:</strong></p>
+        <ul>
+          <li><strong>.html</strong> &mdash; a single HTML file (like one exported from a word processor, a saved webpage, or a custom page someone sent you). Tap Import, pick the file. That's it.</li>
+          <li><strong>.zip</strong> &mdash; a whole folder zipped up (an exported PWA, a multi-page web reader, the ACR offline bundle, HTMLq exports, etc.). Load unpacks it, inlines every asset, and installs the runtime shim so fetch/XHR calls against bundled files still work offline.</li>
+          <li><strong>.pdf</strong> &mdash; Load extracts the text and renders it with real reflowing, so dyslexia fonts / TTS work over it. Scanned-image PDFs without OCR won't have selectable text.</li>
+          <li><strong>.epub</strong> &mdash; chapters are concatenated into one readable HTML page with a clean dark/cream/sepia theme.</li>
+          <li><strong>Media</strong> &mdash; .mp4, .mov, .mp3, .m4a, .jpg, .png, .gif, .webp, etc. Each becomes a single-item viewer.</li>
+          <li><strong>Folders:</strong> iPad Safari can't pick a whole folder directly, so either zip the folder first (Files &rarr; long-press folder &rarr; Compress) or use multi-select in Files to pick every file in the folder at once. Load detects the index.html and bundles everything else around it.</li>
+        </ul>
+        <p><strong>Doesn't work:</strong> Kindle formats (.azw, .mobi, .kfx, .prc) are DRM-locked and can't be opened in Load or any third-party app. Convert to EPUB first using <a href="https://calibre-ebook.com" target="_blank" rel="noopener" class="link">Calibre</a> on a computer, then import the EPUB.</p>
+        <p><strong>If something fails:</strong> Load shows a full-screen modal with the exact reason (empty file, oversized, encrypted PDF, corrupted zip, EPUB missing container.xml, &hellip;) and a <strong>Open Scan &amp; Fix</strong> button that jumps you into the Developer Console. There is no silent failure.</p>
+      </details>
+
+      <details>
+        <summary>What does the Developer Console do? When should I use it?</summary>
+        <p>The <strong>&#128295; wrench icon</strong> in the top bar opens the Developer Console. It has two tabs:</p>
+        <ul>
+          <li><strong>Scan</strong> &mdash; runs a plain-language health check on whatever file you have open. It looks for broken asset references, missing meta tags, missing PWA manifest fields, service-worker issues, absolute-path paths that won't work offline, external hard-coded URLs, JS errors captured while you used the app, and whether the rendered body actually has visible text. Each finding explains <em>what</em> is wrong, <em>why</em> it matters, and (when possible) offers an <strong>Auto-fix issues</strong> button that rewrites the HTML in place.</li>
+          <li><strong>Log</strong> &mdash; mirrors the loaded app's console.log / console.warn / console.error plus any uncaught JavaScript errors. Type any JS expression at the bottom and tap Run to evaluate it in the loaded app's scope.</li>
+        </ul>
+        <p><strong>Use it when:</strong> an imported file shows blank, a PDF doesn't render, a zip loads the sidebar but not the content (the ACR reader freeze!), a page looks wrong, or a script in your own Create page throws an error. The Scan tab will usually tell you exactly what's missing in one sentence.</p>
+      </details>
+
+      <details>
+        <summary>What is Load AI? Does it send my data anywhere?</summary>
+        <p><strong>Load AI is the built-in &#128172; chat assistant.</strong> Fully offline. No downloads. No accounts. No API keys. Nothing leaves your iPad.</p>
+        <p>It does <em>two</em> things:</p>
+        <ol>
+          <li><strong>Answers questions about Load</strong> using a curated knowledge base of ~60 topics, with synonym matching so many phrasings work ("how do I bookmark something?", "bookmark", "save my place", etc.).</li>
+          <li><strong>Runs Copilot-style slash commands</strong> against the file you're looking at:
+            <ul>
+              <li><code>/explain</code> &mdash; plain-language walkthrough of the file.</li>
+              <li><code>/fix</code> &mdash; runs the Scan and lists fixable issues.</li>
+              <li><code>/optimize</code> &mdash; size / performance / accessibility suggestions.</li>
+              <li><code>/analyze</code> &mdash; structure summary (tags, scripts, styles, assets, manifest).</li>
+              <li><code>/scan</code> or <code>/debug</code> &mdash; jumps to the Dev Console.</li>
+              <li><code>/help</code> &mdash; lists every command.</li>
+            </ul>
+          </li>
+        </ol>
+        <p>For deeper content answers you can one-tap hand off to a free AI site (ChatGPT, Claude, Gemini, Perplexity) &mdash; Load copies the current text + your question to the clipboard and opens the site in a new tab. You can choose to skip that step.</p>
+        <p><em>Optional, future phase:</em> downloadable on-device model (WebLLM / transformers.js) for richer answers. Off by default; will always be opt-in.</p>
+      </details>
+
+      <details>
+        <summary>How do I create my own pages? What's the ACR Reader template?</summary>
+        <p>Tap <strong>Create New</strong> on Home (or use the &#128172; assistant and say "make a recipe for pasta"). Pick a template:</p>
+        <ul>
+          <li><strong>&#128240; Article</strong>, <strong>&#128221; Simple Note</strong>, <strong>&#9993; Letter</strong>, <strong>&#127860; Recipe</strong>, <strong>&#9989; Checklist</strong> &mdash; single-page layouts optimised for quick jotting.</li>
+          <li><strong>&#128218; ACR Reader Book</strong> &mdash; a fully self-contained book with chapter sidebar, in-page search, font + theme controls, dyslexia font toggle, TTS, per-chapter bookmarks, and an optional reading-progress bar. Toggle each feature on or off; unchecked features are dropped from the output so the saved page stays small. Use <code>## Chapter title</code> on its own line to start a new chapter.</li>
+        </ul>
+        <p>Tap <strong>&#128196; Save as Template</strong> to reuse any page you've built. Your templates appear as buttons above the body editor. Each has a &times; to remove it. Up to 30.</p>
+      </details>
+
+      <details>
+        <summary>How do I delete something from my Library?</summary>
+        <p>Tap the <strong>&#8230;</strong> button in the top-right corner of any Library tile. The menu that opens has a red <strong>&#128465; Delete from Library</strong> option at the bottom. Tap it, confirm, and that item is removed from Load's storage.</p>
+        <p>Deleting only affects Load &mdash; the original file in Files / iCloud / wherever you imported from is untouched.</p>
       </details>
 
       <details>
