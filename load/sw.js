@@ -9,7 +9,7 @@
 // fetched or transmitted. Imported apps live in IndexedDB on the
 // user's device and are never sent anywhere.
 
-var CACHE = 'load-v14o';
+var CACHE = 'load-v14p';
 
 var SHELL = [
   './',
@@ -51,7 +51,16 @@ self.addEventListener('fetch', function (e) {
   if (req.method !== 'GET') return;
   // Never intercept blob: — those are user-loaded web apps.
   if (req.url.indexOf('blob:') === 0) return;
-  // Network-first for everything so updates always take effect.
+  // Cross-origin: pass through with no caching. Important for the on-device
+  // model install path — transformers.js pulls ~400 MB of weights from
+  // huggingface.co + cdn.jsdelivr; letting the SW cache those would
+  // blow iOS's Cache Storage quota. The model's own IndexedDB cache
+  // handles persistence for those weights, not us.
+  try {
+    var u = new URL(req.url);
+    if (u.origin !== self.location.origin) return;
+  } catch (err) { return; }
+  // Same-origin: network-first for everything so updates always take effect.
   e.respondWith(
     fetch(req).then(function (res) {
       var clone = res.clone();

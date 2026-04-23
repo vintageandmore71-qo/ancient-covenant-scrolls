@@ -2001,33 +2001,62 @@
   }
   /* ---------- On-device model loader (opt-in, no bundle) ----------
    * Lazy-imports transformers.js from jsDelivr + pulls a small Qwen
-   * model on first use. Cached via the browser's HTTP cache + IndexedDB
-   * so the heavy download happens exactly once, then every future
-   * answer is fully offline. Sets window.__LOAD_LOCAL_AI(prompt) once
-   * ready. Progress is surfaced through setProviderStatus. */
+   * model on first use. Weights are cached in IndexedDB by transformers.js
+   * itself (via @huggingface/hub's browser cache), so the ~400 MB download
+   * happens exactly once. On subsequent visits we re-create the pipeline
+   * from the cached weights — fast, fully offline, no network.
+   *
+   * Sets window.__LOAD_LOCAL_AI(prompt) when ready. Two entry points:
+   *   - installLocalAiModel()  : user-triggered, shows full progress
+   *   - autoInitLocalAi()      : startup, silent; only runs when already installed
+   */
+  var localAiInitPromise = null;
+
+  async function initLocalAiPipeline(opts) {
+    opts = opts || {};
+    var firstInstall = !!opts.firstInstall;
+    if (firstInstall) {
+      setProviderStatus('local', 'busy', 'Loading transformers.js…');
+    } else {
+      setProviderStatus('local', 'busy', 'Warming up on-device model…');
+    }
+    var mod = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
+    if (firstInstall) {
+      setProviderStatus('local', 'busy', 'Downloading model (~400 MB)…');
+    }
+    var pipeline = mod.pipeline;
+    mod.env.allowLocalModels = false;
+    mod.env.useBrowserCache = true;
+    var gen = await pipeline('text-generation', 'Xenova/Qwen1.5-0.5B-Chat', {
+      progress_callback: function (p) {
+        if (!p) return;
+        if (p.status === 'progress' && p.progress != null) {
+          setProviderStatus('local', 'busy', 'Downloading ' + p.file + ' — ' + Math.round(p.progress) + '%');
+        } else if (p.status === 'done' && firstInstall) {
+          setProviderStatus('local', 'busy', 'Finalizing ' + p.file + '…');
+        }
+      }
+    });
+    window.__LOAD_LOCAL_AI = async function (prompt) {
+      var out = await gen(prompt, { max_new_tokens: 240, temperature: 0.6, do_sample: true, return_full_text: false });
+      return (out && out[0] && (out[0].generated_text || '')) || '';
+    };
+    return gen;
+  }
+
   async function installLocalAiModel() {
-    if (providerPrefs.local.installed && typeof window.__LOAD_LOCAL_AI === 'function') {
-      toast('Local model already installed.');
+    if (typeof window.__LOAD_LOCAL_AI === 'function') {
+      toast('Local model already loaded and ready.');
+      setProviderStatus('local', 'ok', 'Ready offline');
       return;
     }
-    setProviderStatus('local', 'busy', 'Loading transformers.js…');
+    if (localAiInitPromise) {
+      toast('Already installing — please wait.');
+      return;
+    }
+    localAiInitPromise = initLocalAiPipeline({ firstInstall: true });
     try {
-      var mod = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
-      setProviderStatus('local', 'busy', 'Downloading model (~400 MB)…');
-      var pipeline = mod.pipeline;
-      mod.env.allowLocalModels = false;
-      mod.env.useBrowserCache = true;
-      var gen = await pipeline('text-generation', 'Xenova/Qwen1.5-0.5B-Chat', {
-        progress_callback: function (p) {
-          if (p && p.status === 'progress' && p.progress != null) {
-            setProviderStatus('local', 'busy', 'Downloading ' + p.file + ' — ' + Math.round(p.progress) + '%');
-          }
-        }
-      });
-      window.__LOAD_LOCAL_AI = async function (prompt) {
-        var out = await gen(prompt, { max_new_tokens: 240, temperature: 0.6, do_sample: true, return_full_text: false });
-        return out && out[0] && (out[0].generated_text || '') || '';
-      };
+      await localAiInitPromise;
       providerPrefs.local.installed = true;
       providerPrefs.local.enabled = true;
       saveProviderPrefs();
@@ -2039,9 +2068,31 @@
       if (btn) { btn.disabled = true; btn.textContent = '✓ Installed'; }
     } catch (e) {
       console.warn('Local AI install failed', e);
-      setProviderStatus('local', 'error', 'Install failed: ' + (e && e.message || e));
+      setProviderStatus('local', 'error', 'Install failed: ' + ((e && e.message) || e));
       toast('Local model install failed. See settings for details.', true);
+    } finally {
+      localAiInitPromise = null;
     }
+  }
+
+  // Auto re-init on startup when the user has already done the one-time
+  // install. Silent; uses the cached weights from IndexedDB, no network
+  // required once cached. Skipped on cold page loads if the user disabled
+  // the local provider in settings.
+  function autoInitLocalAi() {
+    if (!providerPrefs.local.installed || !providerPrefs.local.enabled) return;
+    if (typeof window.__LOAD_LOCAL_AI === 'function') return;
+    if (localAiInitPromise) return;
+    setProviderStatus('local', 'busy', 'Reloading cached model…');
+    localAiInitPromise = initLocalAiPipeline({ firstInstall: false })
+      .then(function () {
+        setProviderStatus('local', 'ok', 'Ready offline');
+      })
+      .catch(function (e) {
+        console.warn('Local AI auto-init failed', e);
+        setProviderStatus('local', 'error', 'Re-init failed — tap Install to retry');
+      })
+      .finally(function () { localAiInitPromise = null; });
   }
   function wireAiProviderSettings() {
     var CLOUD_PROVIDERS = ['gemini', 'groq', 'openrouter', 'huggingface'];
@@ -2057,8 +2108,29 @@
     var install = document.getElementById('ai-prov-local-install');
     if (install) install.addEventListener('click', installLocalAiModel);
     if (providerPrefs.local.installed) {
-      setProviderStatus('local', 'ok', 'Installed, ready offline');
-      if (install) { install.disabled = true; install.textContent = '✓ Installed'; }
+      if (typeof window.__LOAD_LOCAL_AI === 'function') {
+        setProviderStatus('local', 'ok', 'Ready offline');
+        if (install) { install.disabled = true; install.textContent = '✓ Installed'; }
+      } else {
+        // Installed on a previous visit — weights live in IndexedDB;
+        // rehydrate in the background so the first question after reload
+        // still runs on-device.
+        setProviderStatus('local', 'busy', 'Reloading cached model…');
+        if (install) { install.disabled = true; install.textContent = 'Reloading…'; }
+        autoInitLocalAi();
+        // Re-enable the button once ready (or failed) so the user can
+        // retry if IndexedDB was purged.
+        var tick = setInterval(function () {
+          if (typeof window.__LOAD_LOCAL_AI === 'function') {
+            if (install) { install.disabled = true; install.textContent = '✓ Installed'; }
+            setProviderStatus('local', 'ok', 'Ready offline');
+            clearInterval(tick);
+          } else if (!localAiInitPromise) {
+            if (install) { install.disabled = false; install.textContent = '↻ Reinstall (cache may be gone)'; }
+            clearInterval(tick);
+          }
+        }, 1500);
+      }
     }
     // Cloud providers: checkbox + API key input per provider
     CLOUD_PROVIDERS.forEach(function (name) {
@@ -2706,6 +2778,10 @@
       safe('wireInstallFlow', wireInstallFlow);
       safe('wireImportErrorModal', wireImportErrorModal);
       safe('wireAiProviderSettings', wireAiProviderSettings);
+      // Rehydrate the on-device model if the user installed it on a
+      // previous visit, so the first question after launch actually
+      // runs on-device instead of cycling to a cloud/handoff fallback.
+      safe('autoInitLocalAi', autoInitLocalAi);
       safe('wirePatchPreview', wirePatchPreview);
       safe('updateInstallUi', updateInstallUi);
       safe('renderFolderList', renderFolderList);
