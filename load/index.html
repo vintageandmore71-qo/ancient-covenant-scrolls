@@ -139,13 +139,34 @@
     <p class="create-intro">Type what you want to share. Load turns it into a nice, offline-ready web page you can save to your Library, share with family, or add to your home screen.</p>
 
     <label class="create-label">Template</label>
-    <div class="seg-btns wrap create-templates">
+    <div class="seg-btns wrap create-templates" id="create-templates">
       <button class="seg-btn active" data-template="article">&#128240; Article</button>
       <button class="seg-btn" data-template="note">&#128221; Simple Note</button>
       <button class="seg-btn" data-template="letter">&#9993; Letter</button>
       <button class="seg-btn" data-template="recipe">&#127860; Recipe / Steps</button>
       <button class="seg-btn" data-template="checklist">&#9989; Checklist</button>
+      <button class="seg-btn" data-template="acr">&#128218; ACR Reader Book</button>
     </div>
+
+    <!-- Options that apply to the ACR Reader Book template. Hidden for
+         other templates. Users can toggle reading aids / features on
+         and off so the saved page matches the ACR reader's layout. -->
+    <div id="acr-template-options" class="acr-template-options" style="display:none;">
+      <p class="create-hint" style="margin-top:8px;"><strong>ACR Reader features</strong> (toggle what you want):</p>
+      <label class="tpl-opt"><input type="checkbox" id="acr-opt-toc" checked> &#128220; Chapter sidebar / table of contents</label>
+      <label class="tpl-opt"><input type="checkbox" id="acr-opt-search" checked> &#128269; In-page search</label>
+      <label class="tpl-opt"><input type="checkbox" id="acr-opt-font-controls" checked> Aa Font-size + theme controls</label>
+      <label class="tpl-opt"><input type="checkbox" id="acr-opt-dyslexic" checked> &#127752; Dyslexia font toggle (Atkinson / OpenDyslexic)</label>
+      <label class="tpl-opt"><input type="checkbox" id="acr-opt-tts" checked> &#128266; Read-aloud (browser TTS)</label>
+      <label class="tpl-opt"><input type="checkbox" id="acr-opt-bookmarks" checked> &#11088; Per-section bookmarks</label>
+      <label class="tpl-opt"><input type="checkbox" id="acr-opt-progress"> &#9203; Reading progress bar</label>
+      <p class="create-hint" style="margin-top:6px;">Put <code>## Chapter title</code> at the start of a line to start a new chapter. Everything underneath becomes that chapter's body.</p>
+    </div>
+
+    <!-- User-saved custom templates appear here. Populated from
+         localStorage; add/remove via the "Save as Template" button. -->
+    <label class="create-label" id="user-templates-label" style="display:none;">Your saved templates</label>
+    <div class="seg-btns wrap create-templates" id="create-user-templates" style="display:none;"></div>
 
     <label class="create-label" for="create-title">Title</label>
     <input id="create-title" type="text" class="create-title-input" placeholder="Give it a title" autocapitalize="sentences" autocomplete="off">
@@ -158,6 +179,7 @@
       <button id="create-preview-btn" class="secondary-btn">&#128065; Preview</button>
       <button id="create-save-btn" class="primary-btn">&#128190; Save to Library</button>
       <button id="create-share-btn" class="primary-btn" style="background:#0891b2;">&#10150; Save &amp; Share</button>
+      <button id="create-save-template-btn" class="secondary-btn">&#128196; Save as Template</button>
     </div>
   </div>
 </div>

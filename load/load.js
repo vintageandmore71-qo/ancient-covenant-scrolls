@@ -177,6 +177,81 @@
    * No HTML knowledge needed. Templates control the look; content is
    * plain text that becomes paragraphs, list items, or sections. */
   var currentTemplate = 'article';
+  /* ---------- Templates ----------
+   * Built-in: article, note, letter, recipe, checklist, acr (ACR Reader
+   * Book layout with chapter sidebar, TTS, dyslexia font, etc.).
+   * User-saved: any page created in Load can be saved as a template.
+   * Templates live in localStorage; the Create screen lists them as
+   * buttons. Selecting one pre-fills the editor. */
+  var LS_TEMPLATES = 'load_user_templates_v1';
+  function loadUserTemplates() {
+    try { return JSON.parse(localStorage.getItem(LS_TEMPLATES) || '[]') || []; }
+    catch (e) { return []; }
+  }
+  function saveUserTemplates(list) {
+    try { localStorage.setItem(LS_TEMPLATES, JSON.stringify(list)); } catch (e) {}
+  }
+  function renderUserTemplateButtons() {
+    var wrap = $('create-user-templates');
+    var label = $('user-templates-label');
+    if (!wrap) return;
+    var list = loadUserTemplates();
+    if (!list.length) {
+      wrap.style.display = 'none';
+      if (label) label.style.display = 'none';
+      wrap.innerHTML = '';
+      return;
+    }
+    wrap.style.display = '';
+    if (label) label.style.display = '';
+    wrap.innerHTML = list.map(function (t) {
+      return '<button class="seg-btn" data-user-template="' + escHtml(t.id) + '">' +
+        '&#128196; ' + escHtml(t.name) +
+        ' <span class="remove-tpl" data-remove-tpl="' + escHtml(t.id) + '" aria-label="Remove template">&times;</span>' +
+      '</button>';
+    }).join('');
+    wrap.querySelectorAll('[data-user-template]').forEach(function (b) {
+      b.addEventListener('click', function (e) {
+        if (e.target.getAttribute('data-remove-tpl')) return;
+        loadUserTemplateInto(b.getAttribute('data-user-template'));
+      });
+    });
+    wrap.querySelectorAll('[data-remove-tpl]').forEach(function (x) {
+      x.addEventListener('click', function (e) {
+        e.stopPropagation();
+        removeUserTemplate(x.getAttribute('data-remove-tpl'));
+      });
+    });
+  }
+  function loadUserTemplateInto(id) {
+    var list = loadUserTemplates();
+    var t = list.find(function (x) { return x.id === id; });
+    if (!t) return;
+    currentTemplate = t.basedOn || 'article';
+    $('create-title').value = t.title || '';
+    $('create-body').value = t.body || '';
+    document.querySelectorAll('[data-template]').forEach(function (x) {
+      x.classList.toggle('active', x.getAttribute('data-template') === currentTemplate);
+    });
+    toggleAcrTemplateOptions(currentTemplate === 'acr');
+    if (t.acrOptions) {
+      Object.keys(t.acrOptions).forEach(function (k) {
+        var el = $('acr-opt-' + k);
+        if (el) el.checked = !!t.acrOptions[k];
+      });
+    }
+    toast('Loaded template: ' + t.name);
+  }
+  function removeUserTemplate(id) {
+    var list = loadUserTemplates().filter(function (t) { return t.id !== id; });
+    saveUserTemplates(list);
+    renderUserTemplateButtons();
+    toast('Template removed');
+  }
+  function toggleAcrTemplateOptions(on) {
+    var box = $('acr-template-options');
+    if (box) box.style.display = on ? '' : 'none';
+  }
   function wireCreateScreen() {
     var home = $('home-create');
     if (home) home.addEventListener('click', function () {
@@ -187,12 +262,15 @@
       document.querySelectorAll('[data-template]').forEach(function (b) {
         b.classList.toggle('active', b.getAttribute('data-template') === 'article');
       });
+      toggleAcrTemplateOptions(false);
+      renderUserTemplateButtons();
     });
     document.querySelectorAll('[data-template]').forEach(function (b) {
       b.addEventListener('click', function () {
         currentTemplate = b.getAttribute('data-template');
         document.querySelectorAll('[data-template]').forEach(function (x) { x.classList.remove('active'); });
         b.classList.add('active');
+        toggleAcrTemplateOptions(currentTemplate === 'acr');
       });
     });
     $('create-preview-btn').addEventListener('click', function () {
@@ -213,6 +291,41 @@
       var app = await saveCreated();
       if (app) await shareAsStandaloneHtml(app);
     });
+    var tplBtn = $('create-save-template-btn');
+    if (tplBtn) tplBtn.addEventListener('click', saveCurrentAsTemplate);
+  }
+  function saveCurrentAsTemplate() {
+    var title = ($('create-title').value || '').trim();
+    var body = ($('create-body').value || '').trim();
+    if (!title && !body) {
+      toast('Add a title or content first — there\'s nothing to save as a template.', true);
+      return;
+    }
+    var name = (prompt('Name this template (so you can reuse it):', title || 'My template') || '').trim();
+    if (!name) return;
+    var tpl = {
+      id: newId(),
+      name: name.slice(0, 60),
+      basedOn: currentTemplate,
+      title: title,
+      body: body,
+      acrOptions: collectAcrOptions(),
+      createdAt: Date.now()
+    };
+    var list = loadUserTemplates();
+    list.unshift(tpl);
+    saveUserTemplates(list.slice(0, 30));   // cap at 30 so localStorage stays small
+    renderUserTemplateButtons();
+    toast('✓ Template saved — it\'ll appear here next time you create.');
+  }
+  function collectAcrOptions() {
+    var keys = ['toc','search','font-controls','dyslexic','tts','bookmarks','progress'];
+    var out = {};
+    keys.forEach(function (k) {
+      var el = $('acr-opt-' + k);
+      if (el) out[k] = !!el.checked;
+    });
+    return out;
   }
 
   async function saveCreated() {
@@ -280,12 +393,138 @@
       extraStyle = '.check{list-style:none;padding-left:0;}.check li{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #eee;}.check input{transform:scale(1.4);}';
       content = '<h1>' + esc(title) + '</h1><p class="sub">Checklist</p><ul class="check">' +
         lines(body).map(function (l) { return '<li><input type="checkbox">' + linkify(l) + '</li>'; }).join('') + '</ul>';
+    } else if (tpl === 'acr') {
+      return buildAcrTemplate(title, body, collectAcrOptions());
     }
     return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
       '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">' +
       '<title>' + esc(title) + '</title>' +
       '<style>' + styleBase + extraStyle + '</style></head>' +
       '<body>' + content + '</body></html>';
+  }
+  /* ---------- ACR Reader Book template ----------
+   * Produces a fully self-contained HTML page modelled on the ACR study
+   * reader layout: chapter sidebar, search, font/theme controls,
+   * dyslexia font toggle, TTS, bookmarks, optional progress bar. User
+   * opts in/out per feature; any unchecked feature is omitted from the
+   * output so the saved page stays as small as possible.
+   *
+   * Content format:
+   *   ## Chapter title       — starts a new chapter
+   *   Everything until the next ## is that chapter's body text.
+   *   Blank lines become paragraph breaks.
+   */
+  function buildAcrTemplate(title, body, opts) {
+    opts = opts || {};
+    var esc = escHtml;
+    // Split into chapters by "## Heading" lines
+    var chapters = [];
+    var cur = { title: 'Introduction', paras: [] };
+    (String(body || '').split(/\r?\n/)).forEach(function (line) {
+      var m = /^##\s+(.+)/.exec(line);
+      if (m) {
+        if (cur.paras.length || cur.title !== 'Introduction') chapters.push(cur);
+        cur = { title: m[1].trim(), paras: [] };
+      } else {
+        cur.paras.push(line);
+      }
+    });
+    chapters.push(cur);
+    // Discard leading empty intro
+    chapters = chapters.filter(function (c) {
+      return c.title !== 'Introduction' || c.paras.some(function (p) { return p.trim(); });
+    });
+    if (!chapters.length) chapters = [{ title: title || 'Untitled', paras: [''] }];
+
+    var style = [
+      ':root{--bg:#14142a;--fg:#e8e8ee;--mid:#b0b0c8;--accent:#7c7cff;--panel:#1a1a36;--border:#2a2a4a;}',
+      '*{box-sizing:border-box;}',
+      'body{margin:0;font-family:"Atkinson Hyperlegible",-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--fg);line-height:1.75;font-size:17px;}',
+      'body.dyslexic{font-family:"OpenDyslexic","Atkinson Hyperlegible",sans-serif;}',
+      'body.theme-cream{--bg:#fbf4e4;--fg:#2a2418;--mid:#6a5a3a;--panel:#f3e8c7;--border:#ddd0a4;}',
+      'body.theme-sepia{--bg:#f4ecd8;--fg:#3a2f1a;--mid:#6a5a3a;--panel:#ebe0bf;--border:#ccb98a;}',
+      'body.theme-light{--bg:#ffffff;--fg:#1a1a2e;--mid:#5a5a6a;--panel:#f4f4f8;--border:#d0d0dc;}',
+      '.layout{display:flex;min-height:100vh;}',
+      (opts.toc ? '.sidebar{width:260px;background:var(--panel);border-right:1px solid var(--border);padding:20px 16px;overflow-y:auto;position:sticky;top:0;height:100vh;}' +
+         '.sidebar h2{font-size:15px;margin:0 0 12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--mid);}' +
+         '.sidebar a{display:block;padding:8px 10px;color:var(--fg);text-decoration:none;border-radius:6px;font-size:15px;margin-bottom:2px;}' +
+         '.sidebar a:hover,.sidebar a.active{background:var(--accent);color:#fff;}' : '.sidebar{display:none;}'),
+      '.main{flex:1;max-width:820px;margin:0 auto;padding:30px 24px 80px;}',
+      'h1{font-size:28px;margin:0 0 8px;color:var(--accent);}',
+      '.sub{color:var(--mid);font-size:13px;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 24px;}',
+      'section.chapter{border-top:1px solid var(--border);padding-top:24px;margin-top:28px;}',
+      'section.chapter:first-of-type{border-top:none;margin-top:0;}',
+      'h2.chapter-title{font-size:22px;color:var(--fg);margin:0 0 14px;}',
+      'p{margin:0 0 14px;}',
+      '.controls{position:fixed;top:0;right:0;left:0;background:var(--panel);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px;z-index:5;}',
+      '.controls button,.controls input{background:var(--bg);color:var(--fg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:14px;cursor:pointer;}',
+      '.controls input[type=search]{flex:1;min-width:140px;}',
+      '.controls button:active{background:var(--accent);color:#fff;}',
+      'body.has-controls .main{padding-top:74px;}',
+      (opts.progress ? '.progress{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:10;}' +
+         '.progress>span{display:block;height:100%;background:var(--accent);width:0%;transition:width 0.2s;}' : ''),
+      (opts.bookmarks ? '.bm-btn{float:right;background:none;border:none;color:var(--mid);font-size:22px;cursor:pointer;}' +
+         '.bm-btn.on{color:#e0a040;}' : ''),
+      'mark{background:rgba(255,230,0,0.45);color:inherit;border-radius:3px;padding:0 2px;}'
+    ].join('');
+
+    var tocHtml = opts.toc
+      ? '<nav class="sidebar"><h2>Chapters</h2>' +
+        chapters.map(function (c, i) { return '<a href="#ch-' + i + '" data-ch="' + i + '">' + esc(c.title) + '</a>'; }).join('') +
+        '</nav>'
+      : '';
+
+    var hasControls = !!(opts.search || opts['font-controls'] || opts.dyslexic || opts.tts);
+    var controlsHtml = hasControls ? '<div class="controls">' +
+      (opts.search ? '<input type="search" id="acr-q" placeholder="Search in this book…" aria-label="Search">' : '') +
+      (opts['font-controls'] ? '<button id="acr-font-down" aria-label="Smaller text">A−</button><button id="acr-font-up" aria-label="Larger text">A+</button><button id="acr-theme" aria-label="Theme">◐</button>' : '') +
+      (opts.dyslexic ? '<button id="acr-dyslexic" aria-label="Dyslexia font">🌈 Dyslexia</button>' : '') +
+      (opts.tts ? '<button id="acr-tts" aria-label="Read aloud">🔊 Read</button>' : '') +
+      '</div>' : '';
+
+    var chaptersHtml = chapters.map(function (c, i) {
+      var paras = c.paras.join('\n').split(/\n\s*\n+/).map(function (p) { return p.trim(); }).filter(Boolean);
+      return '<section class="chapter" id="ch-' + i + '">' +
+        (opts.bookmarks ? '<button class="bm-btn" data-ch="' + i + '" aria-label="Bookmark">★</button>' : '') +
+        '<h2 class="chapter-title">' + esc(c.title) + '</h2>' +
+        paras.map(function (p) { return '<p>' + esc(p).replace(/\n/g, '<br>') + '</p>'; }).join('') +
+      '</section>';
+    }).join('');
+
+    var progressHtml = opts.progress ? '<div class="progress"><span id="acr-progress"></span></div>' : '';
+
+    var script = [
+      '(function(){',
+      (opts['font-controls'] ? 'var step=parseFloat(localStorage.getItem("acr_font")||"0");document.body.style.fontSize=(17+step*1.5)+"px";' : ''),
+      (opts['font-controls'] ? 'var themes=["","theme-cream","theme-sepia","theme-light"];var ti=parseInt(localStorage.getItem("acr_theme")||"0",10);document.body.classList.add(themes[ti]);' : ''),
+      (opts.dyslexic ? 'if(localStorage.getItem("acr_dys")==="1")document.body.classList.add("dyslexic");' : ''),
+      hasControls ? 'document.body.classList.add("has-controls");' : '',
+      (opts['font-controls'] ? 'var fu=document.getElementById("acr-font-up");if(fu)fu.onclick=function(){step=Math.min(6,step+1);localStorage.setItem("acr_font",step);document.body.style.fontSize=(17+step*1.5)+"px";};' : ''),
+      (opts['font-controls'] ? 'var fd=document.getElementById("acr-font-down");if(fd)fd.onclick=function(){step=Math.max(-2,step-1);localStorage.setItem("acr_font",step);document.body.style.fontSize=(17+step*1.5)+"px";};' : ''),
+      (opts['font-controls'] ? 'var th=document.getElementById("acr-theme");if(th)th.onclick=function(){document.body.classList.remove(themes[ti]);ti=(ti+1)%themes.length;document.body.classList.add(themes[ti]);localStorage.setItem("acr_theme",ti);};' : ''),
+      (opts.dyslexic ? 'var dy=document.getElementById("acr-dyslexic");if(dy)dy.onclick=function(){document.body.classList.toggle("dyslexic");localStorage.setItem("acr_dys",document.body.classList.contains("dyslexic")?"1":"0");};' : ''),
+      (opts.search ? 'var q=document.getElementById("acr-q");if(q)q.addEventListener("input",function(e){var needle=e.target.value.trim().toLowerCase();document.querySelectorAll("section.chapter").forEach(function(s){s.querySelectorAll("mark").forEach(function(m){m.replaceWith(document.createTextNode(m.textContent));});s.normalize();if(!needle){s.style.display="";return;}var text=s.textContent.toLowerCase();if(text.indexOf(needle)<0){s.style.display="none";return;}s.style.display="";s.querySelectorAll("p").forEach(function(p){var idx=p.textContent.toLowerCase().indexOf(needle);if(idx<0)return;var t=p.textContent;p.innerHTML="";var before=document.createTextNode(t.slice(0,idx));var hit=document.createElement("mark");hit.textContent=t.slice(idx,idx+needle.length);var after=document.createTextNode(t.slice(idx+needle.length));p.appendChild(before);p.appendChild(hit);p.appendChild(after);});});});' : ''),
+      (opts.tts ? 'var tts=document.getElementById("acr-tts");var utter=null;if(tts)tts.onclick=function(){if(speechSynthesis.speaking){speechSynthesis.cancel();tts.textContent="🔊 Read";return;}var vis=Array.from(document.querySelectorAll("section.chapter")).filter(function(s){return s.style.display!=="none";});var text=vis.map(function(s){return s.textContent;}).join("\\n\\n");utter=new SpeechSynthesisUtterance(text);utter.rate=1;speechSynthesis.speak(utter);tts.textContent="⏹ Stop";utter.onend=function(){tts.textContent="🔊 Read";};};' : ''),
+      (opts.bookmarks ? 'var saved=JSON.parse(localStorage.getItem("acr_bm")||"[]");document.querySelectorAll(".bm-btn").forEach(function(b){var ch=b.getAttribute("data-ch");if(saved.indexOf(ch)>=0)b.classList.add("on");b.onclick=function(){b.classList.toggle("on");var list=JSON.parse(localStorage.getItem("acr_bm")||"[]");if(b.classList.contains("on")){if(list.indexOf(ch)<0)list.push(ch);}else{list=list.filter(function(x){return x!==ch;});}localStorage.setItem("acr_bm",JSON.stringify(list));};});' : ''),
+      (opts.toc ? 'var links=document.querySelectorAll(".sidebar a");var sections=document.querySelectorAll("section.chapter");function update(){var top=window.scrollY+120;var active=0;sections.forEach(function(s,i){if(s.offsetTop<=top)active=i;});links.forEach(function(a,i){a.classList.toggle("active",i===active);});}window.addEventListener("scroll",update);update();' : ''),
+      (opts.progress ? 'function prog(){var h=document.documentElement.scrollHeight-window.innerHeight;var p=h>0?Math.min(100,(window.scrollY/h)*100):0;var el=document.getElementById("acr-progress");if(el)el.style.width=p+"%";}window.addEventListener("scroll",prog);prog();' : ''),
+      '})();'
+    ].filter(Boolean).join('\n');
+
+    return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+      '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">' +
+      '<meta name="color-scheme" content="light dark">' +
+      '<title>' + esc(title || 'ACR Reader') + '</title>' +
+      '<style>' + style + '</style></head>' +
+      '<body>' + progressHtml + controlsHtml +
+      '<div class="layout">' + tocHtml +
+      '<main class="main">' +
+        '<h1>' + esc(title || 'ACR Reader Book') + '</h1>' +
+        '<p class="sub">ACR Reader Book &middot; created in Load</p>' +
+        chaptersHtml +
+      '</main></div>' +
+      '<script>' + script + '</script>' +
+      '</body></html>';
   }
 
   /* ---------- Ask AI — no-download, user-friendly workaround ----------
@@ -1662,19 +1901,21 @@
   function matchCreateIntent(q) {
     var s = q.toLowerCase();
     // Direct patterns: "make a checklist for trip", "create a recipe for soup"
-    var m = s.match(/(?:make|create|write|build|new)\s+(?:me\s+)?(?:a|an|some)?\s*(checklist|recipe|letter|article|note|story|essay|paragraph|to-?do|shopping\s*list|grocery\s*list)\s*(?:for|about|of|to)?\s*(.*)/i);
+    var m = s.match(/(?:make|create|write|build|new)\s+(?:me\s+)?(?:a|an|some)?\s*(checklist|recipe|letter|article|note|story|essay|paragraph|to-?do|shopping\s*list|grocery\s*list|book|reader|acr)\s*(?:for|about|of|to)?\s*(.*)/i);
     if (m) {
       var tpl = m[1].toLowerCase();
       if (/shopping|grocery|to-?do/.test(tpl)) tpl = 'checklist';
       if (/story|essay|paragraph/.test(tpl)) tpl = 'article';
-      if (!['checklist','recipe','letter','article','note'].includes(tpl)) tpl = 'article';
+      if (/book|reader|acr/.test(tpl)) tpl = 'acr';
+      if (!['checklist','recipe','letter','article','note','acr'].includes(tpl)) tpl = 'article';
       return { template: tpl, topic: (m[2] || '').trim() };
     }
-    // Phrase-initial: "recipe for X", "checklist for X"
-    m = s.match(/^(checklist|recipe|letter|article|note|shopping\s*list|grocery\s*list|to-?do)\s+(?:for|of|about|to)\s+(.+)/i);
+    // Phrase-initial: "recipe for X", "checklist for X", "book about X"
+    m = s.match(/^(checklist|recipe|letter|article|note|shopping\s*list|grocery\s*list|to-?do|book|reader)\s+(?:for|of|about|to)\s+(.+)/i);
     if (m) {
       var tpl2 = m[1].toLowerCase();
       if (/shopping|grocery|to-?do/.test(tpl2)) tpl2 = 'checklist';
+      if (/book|reader/.test(tpl2)) tpl2 = 'acr';
       return { template: tpl2, topic: m[2].trim() };
     }
     return null;
@@ -1690,6 +1931,8 @@
       document.querySelectorAll('[data-template]').forEach(function (b) {
         b.classList.toggle('active', b.getAttribute('data-template') === match.template);
       });
+      toggleAcrTemplateOptions(match.template === 'acr');
+      renderUserTemplateButtons();
       var bodyInput = $('create-body');
       if (bodyInput) bodyInput.focus();
     }, 100);

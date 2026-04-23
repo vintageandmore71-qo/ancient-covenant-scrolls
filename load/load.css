@@ -228,6 +228,26 @@ button, .tap, [role="button"] { min-height: 48px; }
   font-size: 12px; color: var(--accent-hi);
 }
 .create-templates { margin-bottom: 8px; }
+
+/* ACR Reader template feature toggles */
+.acr-template-options {
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px 16px; margin: 8px 0 16px;
+}
+.acr-template-options .tpl-opt {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 0; font-size: 15px; color: var(--ink-hi);
+  cursor: pointer;
+}
+.acr-template-options input[type="checkbox"] {
+  width: 18px; height: 18px; accent-color: var(--accent);
+}
+#create-user-templates:empty { display: none !important; }
+#create-user-templates .seg-btn .remove-tpl {
+  margin-left: 8px; opacity: 0.6; padding: 2px 6px;
+  border-radius: 4px; background: rgba(204,63,85,0.20);
+  color: #ff8a8a; border: none; font-size: 12px;
+}
 .create-title-input {
   width: 100%; padding: 14px 16px;
   background: var(--bg-2); color: var(--ink-hi);
