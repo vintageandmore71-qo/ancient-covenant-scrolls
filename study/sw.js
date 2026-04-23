@@ -10,7 +10,7 @@
 // Pre-caches the shell AND every chapter JSON the study app references,
 // so every section works offline after the first online install.
 
-const CACHE = 'acr-study-v72';
+const CACHE = 'acr-study-v74';
 
 const SHELL = [
   './',
@@ -77,11 +77,16 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
-  // Network-first for the HTML shell so future updates always take effect.
+  // Network-first for HTML, study.js, study.css, and sw.js so future
+  // updates always take effect. Cache is the fallback when offline.
+  // Historical lesson: when a bad JS build gets cached-first, users
+  // stay stuck on the broken copy even after the server is fixed.
   if (
     req.mode === 'navigate' ||
     url.pathname.endsWith('/study/') ||
     url.pathname.endsWith('/study/index.html') ||
+    url.pathname.endsWith('/study/study.js') ||
+    url.pathname.endsWith('/study/study.css') ||
     url.pathname.endsWith('/study/sw.js')
   ) {
     e.respondWith(
