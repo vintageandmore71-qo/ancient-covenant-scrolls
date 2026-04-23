@@ -1188,49 +1188,74 @@
 
   <div class="panel-section">
     <h4>Load AI &mdash; provider chain</h4>
-    <p class="panel-hint">Load tries each provider in order until one answers. <strong>All are free and require no sign-up / no API key.</strong> Disable any you don't want. The built-in rule-based assistant is always the final fallback.</p>
+    <p class="panel-hint">Load cycles through providers in the order below. The built-in rule-based assistant always runs first; cloud providers only get used for questions it can't answer. <strong>No anonymous relays</strong> &mdash; every cloud provider uses <em>your</em> free-tier API key, stored only on this device. Sign up once at the provider's site, paste the key, done.</p>
+    <p class="panel-hint" style="font-size:12px;color:var(--ink-low);"><strong>Privacy:</strong> your browser talks directly to each provider. Load never proxies, never sees your keys or your prompts. Keys live in <code>localStorage</code> &mdash; clearing Safari data removes them.</p>
 
-    <div class="ai-provider" data-provider="pollinations">
+    <div class="ai-provider" data-provider="builtin">
       <label class="ai-prov-head">
-        <input type="checkbox" id="ai-prov-pollinations" checked>
-        <strong>Pollinations.ai</strong>
-        <span class="ai-prov-badge">Primary &middot; no key</span>
+        <input type="checkbox" id="ai-prov-builtin" checked disabled>
+        <strong>Built-in rule-based</strong>
+        <span class="ai-prov-badge">Always on &middot; 100% local</span>
       </label>
-      <p class="ai-prov-desc">Anonymous REST endpoint backed by rotating open-weight models. Fast, free, no sign-up. May be rate-limited during peak hours.</p>
-      <p class="ai-prov-status" id="ai-prov-pollinations-status">Ready</p>
-    </div>
-
-    <div class="ai-provider" data-provider="aihorde">
-      <label class="ai-prov-head">
-        <input type="checkbox" id="ai-prov-aihorde" checked>
-        <strong>AI Horde</strong>
-        <span class="ai-prov-badge">Fallback &middot; no key</span>
-      </label>
-      <p class="ai-prov-desc">Community-pooled volunteer GPUs. Anonymous, open source, no sign-up. Queue-based &mdash; can take 5&ndash;30 seconds when Pollinations is rate-limited.</p>
-      <p class="ai-prov-status" id="ai-prov-aihorde-status">Ready</p>
+      <p class="ai-prov-desc">Curated knowledge base + slash commands (<code>/explain</code>, <code>/fix</code>, <code>/optimize</code>, <code>/analyze</code>, <code>/plan</code>, <code>/term</code>). No network, no download, instant answers. Always tried first.</p>
     </div>
 
     <div class="ai-provider" data-provider="local">
       <label class="ai-prov-head">
         <input type="checkbox" id="ai-prov-local">
         <strong>On-device model</strong>
-        <span class="ai-prov-badge">Offline fallback &middot; opt-in</span>
+        <span class="ai-prov-badge">Private &middot; no sign-up</span>
       </label>
-      <p class="ai-prov-desc">Runs a small open-weight model (Qwen2.5 0.5B, ~400 MB) in your browser via <code>transformers.js</code>. Nothing is bundled in Load &mdash; the model downloads once on first use and is cached for offline use. Slow on iPad (5&ndash;20 sec per reply) but works with no internet, ever.</p>
+      <p class="ai-prov-desc">Runs Qwen1.5 0.5B in your browser via <code>transformers.js</code>. <strong>100% private</strong> &mdash; no prompts ever leave your device. One-time ~400 MB download, then works offline forever. Slow on iPad (5&ndash;20 sec per reply).</p>
       <p class="ai-prov-status" id="ai-prov-local-status">Not installed</p>
       <button id="ai-prov-local-install" class="seg-btn full" style="margin-top:6px;">&#128229; Install local model (~400 MB)</button>
     </div>
 
-    <div class="ai-provider" data-provider="builtin">
+    <div class="ai-provider" data-provider="gemini">
       <label class="ai-prov-head">
-        <input type="checkbox" id="ai-prov-builtin" checked disabled>
-        <strong>Built-in rule-based</strong>
-        <span class="ai-prov-badge">Always on</span>
+        <input type="checkbox" id="ai-prov-gemini">
+        <strong>Google Gemini</strong>
+        <span class="ai-prov-badge">Free tier &middot; your key</span>
       </label>
-      <p class="ai-prov-desc">Curated knowledge base + slash commands (<code>/explain</code>, <code>/fix</code>, <code>/optimize</code>, <code>/analyze</code>, <code>/plan</code>, <code>/term</code>). No network, no download, instant answers. This layer always runs first when the question matches a known topic or slash command.</p>
+      <p class="ai-prov-desc">Gemini 2.0 Flash. Free tier: ~1,500 requests/day, no card needed. Sign up at <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="link">aistudio.google.com/app/apikey</a> &rarr; <strong>Create API key</strong>.</p>
+      <input type="password" id="ai-prov-gemini-key" class="ai-prov-key" placeholder="Paste Gemini API key (stored on this device only)" autocomplete="off" spellcheck="false">
+      <p class="ai-prov-status" id="ai-prov-gemini-status">No key</p>
     </div>
 
-    <p class="panel-hint" style="font-size:12px;margin-top:14px;">Each answer shows which provider handled it so you can see what's working. If every cloud option fails, Load still answers from the built-in layer.</p>
+    <div class="ai-provider" data-provider="groq">
+      <label class="ai-prov-head">
+        <input type="checkbox" id="ai-prov-groq">
+        <strong>Groq</strong>
+        <span class="ai-prov-badge">Free tier &middot; your key</span>
+      </label>
+      <p class="ai-prov-desc">Runs Llama 3.3 70B &mdash; extremely fast (sub-second). Free tier with generous daily limit, no card. Sign up at <a href="https://console.groq.com/keys" target="_blank" rel="noopener" class="link">console.groq.com/keys</a>.</p>
+      <input type="password" id="ai-prov-groq-key" class="ai-prov-key" placeholder="Paste Groq API key (stored on this device only)" autocomplete="off" spellcheck="false">
+      <p class="ai-prov-status" id="ai-prov-groq-status">No key</p>
+    </div>
+
+    <div class="ai-provider" data-provider="openrouter">
+      <label class="ai-prov-head">
+        <input type="checkbox" id="ai-prov-openrouter">
+        <strong>OpenRouter (free models)</strong>
+        <span class="ai-prov-badge">Free models &middot; your key</span>
+      </label>
+      <p class="ai-prov-desc">Router that lets you call many free open-source models through one key. Sign up at <a href="https://openrouter.ai/keys" target="_blank" rel="noopener" class="link">openrouter.ai/keys</a>. Load uses only models marked <code>:free</code>, so you're never charged.</p>
+      <input type="password" id="ai-prov-openrouter-key" class="ai-prov-key" placeholder="Paste OpenRouter API key (stored on this device only)" autocomplete="off" spellcheck="false">
+      <p class="ai-prov-status" id="ai-prov-openrouter-status">No key</p>
+    </div>
+
+    <div class="ai-provider" data-provider="huggingface">
+      <label class="ai-prov-head">
+        <input type="checkbox" id="ai-prov-huggingface">
+        <strong>Hugging Face Inference</strong>
+        <span class="ai-prov-badge">Free tier &middot; your token</span>
+      </label>
+      <p class="ai-prov-desc">Runs open-source models hosted by HuggingFace. Free tier, no card. Create a read-only token at <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener" class="link">huggingface.co/settings/tokens</a>.</p>
+      <input type="password" id="ai-prov-huggingface-key" class="ai-prov-key" placeholder="Paste HF token (stored on this device only)" autocomplete="off" spellcheck="false">
+      <p class="ai-prov-status" id="ai-prov-huggingface-status">No token</p>
+    </div>
+
+    <p class="panel-hint" style="font-size:12px;margin-top:14px;">Each answer shows which provider handled it. When one hits its rate limit, Load silently cycles to the next enabled provider. If every cloud option is unavailable and you haven't installed the on-device model, Load still answers from the built-in layer.</p>
   </div>
 
   <div class="panel-section">
@@ -1375,7 +1400,7 @@
       <li><code>/scan</code> — open the Developer Console and run a full scan.</li>
       <li><code>/help</code> — list every slash command.</li>
     </ul>
-    <p style="font-size:12px;color:var(--ink-low);margin:0;"><strong>For everything else</strong>, I automatically route through a chain of <strong>free, no-sign-up AI providers</strong> &mdash; Pollinations.ai first, then AI Horde, then an optional on-device model you can install later. Each answer shows which provider handled it. Open Settings &rarr; Load AI to toggle any provider off. Nothing is bundled, no accounts, no keys.</p>
+    <p style="font-size:12px;color:var(--ink-low);margin:0;"><strong>For everything else</strong>, I can route to free cloud providers &mdash; Gemini, Groq, OpenRouter, Hugging Face &mdash; each using <strong>your own free-tier key</strong> (stored only on this device; Load never proxies or sees it). Or install a small on-device model for 100% private offline answers. Open Settings &rarr; Load AI to set up whichever you trust. Cloud providers are off by default.</p>
   </div>
   <div id="helper-messages" class="helper-messages"></div>
   <div class="helper-quick" id="helper-quick">

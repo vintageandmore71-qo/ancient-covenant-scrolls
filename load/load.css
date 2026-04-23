@@ -1090,6 +1090,18 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
   background: var(--bg-0); padding: 1px 5px; border-radius: 4px;
   font-size: 12px;
 }
+.ai-prov-key {
+  width: 100%; padding: 10px 12px;
+  background: var(--bg-0); color: var(--ink-hi);
+  border: 2px solid var(--border); border-radius: 8px;
+  font-family: "SFMono-Regular", Menlo, monospace;
+  font-size: 13px; -webkit-appearance: none;
+  margin: 6px 0;
+}
+.ai-prov-key:focus { outline: none; border-color: var(--accent); }
+.ai-provider a.link {
+  color: var(--accent-hi); text-decoration: underline;
+}
 .ai-prov-status {
   font-size: 12px; margin: 0;
   padding: 4px 8px; border-radius: 4px;

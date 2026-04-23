@@ -1622,13 +1622,18 @@
    * into "try the next provider" not "fail". */
   var providerPrefs = loadProviderPrefs();
   var providerStatus = {};   // name -> 'ok' | 'rate-limited' | 'error' | 'busy'
-  var LS_PROVIDERS = 'load_ai_providers_v1';
+  var LS_PROVIDERS = 'load_ai_providers_v2';
   function defaultProviderPrefs() {
+    // All cloud providers default to OFF. User explicitly enables each
+    // one by pasting their own key. Built-in is always on. On-device
+    // is an opt-in install.
     return {
-      pollinations: { enabled: true },
-      aihorde:      { enabled: true },
-      local:        { enabled: false, installed: false },
-      builtin:      { enabled: true }
+      builtin:     { enabled: true },
+      local:       { enabled: false, installed: false },
+      gemini:      { enabled: false, apiKey: '' },
+      groq:        { enabled: false, apiKey: '' },
+      openrouter:  { enabled: false, apiKey: '' },
+      huggingface: { enabled: false, apiKey: '' }
     };
   }
   function loadProviderPrefs() {
@@ -1676,96 +1681,7 @@
     return 'You are Load AI, a helpful offline-first coding and reading assistant embedded in an iPad PWA called Load. Answer in plain language. Prefer short, direct replies. If asked about code, produce minimal self-contained HTML/CSS/JS snippets. Never request that the user sign up for anything.';
   }
   var LOAD_PROVIDERS = [
-    {
-      name: 'pollinations',
-      label: 'via Pollinations.ai',
-      tier: 'cloud',
-      available: function () { return providerPrefs.pollinations.enabled && providerStatus.pollinations !== 'rate-limited-hard'; },
-      ask: async function (question, contextText) {
-        setProviderStatus('pollinations', 'busy');
-        var sys = buildSystemPrompt();
-        var body = {
-          messages: [
-            { role: 'system', content: sys },
-            contextText ? { role: 'user', content: 'Context:\n' + contextText } : null,
-            { role: 'user', content: question }
-          ].filter(Boolean),
-          model: 'openai',
-          private: true
-        };
-        var url = 'https://text.pollinations.ai/openai';
-        var resp = await fetchWithTimeout(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        }, 45000);
-        if (resp.status === 429 || resp.status === 503) {
-          setProviderStatus('pollinations', 'rate-limited');
-          throw new Error('rate-limited');
-        }
-        if (!resp.ok) {
-          setProviderStatus('pollinations', 'error', 'HTTP ' + resp.status);
-          throw new Error('http ' + resp.status);
-        }
-        var data = await resp.json().catch(function () { return null; });
-        var text = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
-        if (!text) {
-          // Some Pollinations endpoints return plain text
-          text = await resp.text().catch(function () { return ''; });
-        }
-        if (!text) { setProviderStatus('pollinations', 'error'); throw new Error('empty response'); }
-        setProviderStatus('pollinations', 'ok');
-        return text;
-      }
-    },
-    {
-      name: 'aihorde',
-      label: 'via AI Horde',
-      tier: 'fallback',
-      available: function () { return providerPrefs.aihorde.enabled; },
-      ask: async function (question, contextText) {
-        setProviderStatus('aihorde', 'busy', 'Queued…');
-        // AI Horde text generation — anonymous key "0000000000" lowers
-        // priority but still works. Queue can be slow on peak hours.
-        var sys = buildSystemPrompt();
-        var prompt = sys + '\n\n' + (contextText ? 'Context:\n' + contextText + '\n\n' : '') + 'User: ' + question + '\nAssistant:';
-        var submit = await fetchWithTimeout('https://stablehorde.net/api/v2/generate/text/async', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': '0000000000',
-            'Client-Agent': 'Load:v14n:github.com/dssorit/ancient-covenant-scrolls'
-          },
-          body: JSON.stringify({
-            prompt: prompt.slice(0, 6000),
-            params: { max_length: 300, temperature: 0.6 },
-            models: ['koboldcpp/L3-8B-Stheno-v3.2', 'koboldcpp/llama-3-8b-instruct', 'koboldcpp/mistral-7b-instruct-v0.3']
-          })
-        }, 20000);
-        if (!submit.ok) { setProviderStatus('aihorde', 'error', 'HTTP ' + submit.status); throw new Error('horde submit ' + submit.status); }
-        var submitJson = await submit.json();
-        var id = submitJson.id;
-        if (!id) { setProviderStatus('aihorde', 'error'); throw new Error('no job id'); }
-        // Poll. Cap at ~45s so we give up and let the next provider try.
-        var deadline = Date.now() + 45000;
-        while (Date.now() < deadline) {
-          await new Promise(function (r) { setTimeout(r, 2500); });
-          var st = await fetchWithTimeout('https://stablehorde.net/api/v2/generate/text/status/' + encodeURIComponent(id), {
-            headers: { 'apikey': '0000000000' }
-          }, 10000).catch(function () { return null; });
-          if (!st || !st.ok) continue;
-          var stJson = await st.json().catch(function () { return null; });
-          if (!stJson) continue;
-          if (stJson.done && stJson.generations && stJson.generations.length) {
-            setProviderStatus('aihorde', 'ok');
-            return String(stJson.generations[0].text || '').trim();
-          }
-          setProviderStatus('aihorde', 'busy', 'Queue: ' + (stJson.queue_position != null ? '#' + stJson.queue_position : 'waiting') + ', ETA ' + (stJson.wait_time || '?') + 's');
-        }
-        setProviderStatus('aihorde', 'error', 'Timed out');
-        throw new Error('horde timeout');
-      }
-    },
+    // On-device first among the opt-in layers — private by design.
     {
       name: 'local',
       label: 'via on-device model',
@@ -1778,6 +1694,158 @@
         var out = await window.__LOAD_LOCAL_AI(prompt);
         setProviderStatus('local', 'ok');
         return out;
+      }
+    },
+    // Google Gemini — free tier via AI Studio API key
+    {
+      name: 'gemini',
+      label: 'via Gemini (your key)',
+      tier: 'cloud',
+      available: function () { return providerPrefs.gemini.enabled && !!providerPrefs.gemini.apiKey; },
+      ask: async function (question, contextText) {
+        setProviderStatus('gemini', 'busy', 'Thinking…');
+        var key = providerPrefs.gemini.apiKey;
+        var sys = buildSystemPrompt();
+        var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=' + encodeURIComponent(key);
+        var body = {
+          systemInstruction: { parts: [{ text: sys }] },
+          contents: [{
+            role: 'user',
+            parts: [{ text: (contextText ? 'Context:\n' + contextText + '\n\n' : '') + question }]
+          }],
+          generationConfig: { temperature: 0.6, maxOutputTokens: 512 }
+        };
+        var resp = await fetchWithTimeout(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        }, 30000);
+        if (resp.status === 429) { setProviderStatus('gemini', 'rate-limited'); throw new Error('rate-limited'); }
+        if (resp.status === 401 || resp.status === 403) { setProviderStatus('gemini', 'error', 'Bad API key'); throw new Error('bad key'); }
+        if (!resp.ok) { setProviderStatus('gemini', 'error', 'HTTP ' + resp.status); throw new Error('http ' + resp.status); }
+        var data = await resp.json();
+        var text = data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text;
+        if (!text) { setProviderStatus('gemini', 'error', 'Empty response'); throw new Error('empty'); }
+        setProviderStatus('gemini', 'ok', 'Ready');
+        return text;
+      }
+    },
+    // Groq — free tier, ultra-fast Llama inference
+    {
+      name: 'groq',
+      label: 'via Groq (your key)',
+      tier: 'cloud',
+      available: function () { return providerPrefs.groq.enabled && !!providerPrefs.groq.apiKey; },
+      ask: async function (question, contextText) {
+        setProviderStatus('groq', 'busy', 'Thinking…');
+        var key = providerPrefs.groq.apiKey;
+        var body = {
+          model: 'llama-3.3-70b-versatile',
+          messages: [
+            { role: 'system', content: buildSystemPrompt() },
+            contextText ? { role: 'user', content: 'Context:\n' + contextText } : null,
+            { role: 'user', content: question }
+          ].filter(Boolean),
+          temperature: 0.6,
+          max_tokens: 512
+        };
+        var resp = await fetchWithTimeout('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + key
+          },
+          body: JSON.stringify(body)
+        }, 30000);
+        if (resp.status === 429) { setProviderStatus('groq', 'rate-limited'); throw new Error('rate-limited'); }
+        if (resp.status === 401 || resp.status === 403) { setProviderStatus('groq', 'error', 'Bad API key'); throw new Error('bad key'); }
+        if (!resp.ok) { setProviderStatus('groq', 'error', 'HTTP ' + resp.status); throw new Error('http ' + resp.status); }
+        var data = await resp.json();
+        var text = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+        if (!text) { setProviderStatus('groq', 'error', 'Empty response'); throw new Error('empty'); }
+        setProviderStatus('groq', 'ok', 'Ready');
+        return text;
+      }
+    },
+    // OpenRouter — routed access to many free models with user's key
+    {
+      name: 'openrouter',
+      label: 'via OpenRouter (your key)',
+      tier: 'cloud',
+      available: function () { return providerPrefs.openrouter.enabled && !!providerPrefs.openrouter.apiKey; },
+      ask: async function (question, contextText) {
+        setProviderStatus('openrouter', 'busy', 'Thinking…');
+        var key = providerPrefs.openrouter.apiKey;
+        var body = {
+          // Load explicitly pins the :free suffix so the user is never
+          // charged — OpenRouter blocks paid models when this suffix
+          // is present.
+          model: 'meta-llama/llama-3.3-70b-instruct:free',
+          messages: [
+            { role: 'system', content: buildSystemPrompt() },
+            contextText ? { role: 'user', content: 'Context:\n' + contextText } : null,
+            { role: 'user', content: question }
+          ].filter(Boolean),
+          temperature: 0.6,
+          max_tokens: 512
+        };
+        var resp = await fetchWithTimeout('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + key,
+            'HTTP-Referer': 'https://dssorit.github.io/ancient-covenant-scrolls/load/',
+            'X-Title': 'Load (ACR)'
+          },
+          body: JSON.stringify(body)
+        }, 30000);
+        if (resp.status === 429) { setProviderStatus('openrouter', 'rate-limited'); throw new Error('rate-limited'); }
+        if (resp.status === 401 || resp.status === 403) { setProviderStatus('openrouter', 'error', 'Bad API key'); throw new Error('bad key'); }
+        if (!resp.ok) { setProviderStatus('openrouter', 'error', 'HTTP ' + resp.status); throw new Error('http ' + resp.status); }
+        var data = await resp.json();
+        var text = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+        if (!text) { setProviderStatus('openrouter', 'error', 'Empty response'); throw new Error('empty'); }
+        setProviderStatus('openrouter', 'ok', 'Ready');
+        return text;
+      }
+    },
+    // Hugging Face Inference — free tier with HF token
+    {
+      name: 'huggingface',
+      label: 'via Hugging Face (your token)',
+      tier: 'cloud',
+      available: function () { return providerPrefs.huggingface.enabled && !!providerPrefs.huggingface.apiKey; },
+      ask: async function (question, contextText) {
+        setProviderStatus('huggingface', 'busy', 'Thinking…');
+        var key = providerPrefs.huggingface.apiKey;
+        var model = 'meta-llama/Llama-3.2-3B-Instruct';
+        // HF Inference OpenAI-compatible chat endpoint
+        var body = {
+          model: model,
+          messages: [
+            { role: 'system', content: buildSystemPrompt() },
+            contextText ? { role: 'user', content: 'Context:\n' + contextText } : null,
+            { role: 'user', content: question }
+          ].filter(Boolean),
+          max_tokens: 512,
+          temperature: 0.6
+        };
+        var resp = await fetchWithTimeout('https://router.huggingface.co/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + key
+          },
+          body: JSON.stringify(body)
+        }, 45000);
+        if (resp.status === 429) { setProviderStatus('huggingface', 'rate-limited'); throw new Error('rate-limited'); }
+        if (resp.status === 401 || resp.status === 403) { setProviderStatus('huggingface', 'error', 'Bad token'); throw new Error('bad key'); }
+        if (!resp.ok) { setProviderStatus('huggingface', 'error', 'HTTP ' + resp.status); throw new Error('http ' + resp.status); }
+        var data = await resp.json();
+        var text = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+        if (!text) { setProviderStatus('huggingface', 'error', 'Empty response'); throw new Error('empty'); }
+        setProviderStatus('huggingface', 'ok', 'Ready');
+        return text;
       }
     }
   ];
@@ -1889,22 +1957,57 @@
     }
   }
   function wireAiProviderSettings() {
-    // Restore persisted toggles
-    ['pollinations', 'aihorde', 'local'].forEach(function (name) {
-      var cb = document.getElementById('ai-prov-' + name);
-      if (!cb) return;
-      cb.checked = !!providerPrefs[name].enabled;
-      cb.addEventListener('change', function () {
-        providerPrefs[name].enabled = cb.checked;
+    var CLOUD_PROVIDERS = ['gemini', 'groq', 'openrouter', 'huggingface'];
+    // On-device toggle + install
+    var localCb = document.getElementById('ai-prov-local');
+    if (localCb) {
+      localCb.checked = !!providerPrefs.local.enabled;
+      localCb.addEventListener('change', function () {
+        providerPrefs.local.enabled = localCb.checked;
         saveProviderPrefs();
       });
-    });
+    }
     var install = document.getElementById('ai-prov-local-install');
     if (install) install.addEventListener('click', installLocalAiModel);
     if (providerPrefs.local.installed) {
       setProviderStatus('local', 'ok', 'Installed, ready offline');
       if (install) { install.disabled = true; install.textContent = '✓ Installed'; }
     }
+    // Cloud providers: checkbox + API key input per provider
+    CLOUD_PROVIDERS.forEach(function (name) {
+      var cb = document.getElementById('ai-prov-' + name);
+      var keyInput = document.getElementById('ai-prov-' + name + '-key');
+      if (!cb || !keyInput) return;
+      cb.checked = !!providerPrefs[name].enabled;
+      keyInput.value = providerPrefs[name].apiKey || '';
+      // Initial status reflects whether a key exists
+      if (providerPrefs[name].apiKey) setProviderStatus(name, 'ok', 'Ready (key saved)');
+      else setProviderStatus(name, '', name === 'huggingface' ? 'No token' : 'No key');
+      cb.addEventListener('change', function () {
+        if (cb.checked && !providerPrefs[name].apiKey) {
+          toast('Paste a ' + name + ' API key first — otherwise it can\'t run.', true);
+          cb.checked = false;
+          return;
+        }
+        providerPrefs[name].enabled = cb.checked;
+        saveProviderPrefs();
+      });
+      keyInput.addEventListener('change', function () {
+        var v = (keyInput.value || '').trim();
+        providerPrefs[name].apiKey = v;
+        if (v) {
+          // Auto-enable when a valid-looking key is pasted.
+          providerPrefs[name].enabled = true;
+          cb.checked = true;
+          setProviderStatus(name, 'ok', 'Ready (key saved)');
+        } else {
+          providerPrefs[name].enabled = false;
+          cb.checked = false;
+          setProviderStatus(name, '', name === 'huggingface' ? 'No token' : 'No key');
+        }
+        saveProviderPrefs();
+      });
+    });
   }
 
   /* ---------- Content commands over the current file ----------
