@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<!--
+  Install Local AI — Dyslexia-friendly checklist
+  Copyright (c) 2026 LBond. All Rights Reserved.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>Install Local AI — Step by Step</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=OpenDyslexic:wght@400;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a1a2e;
+    --card: #222238;
+    --card-2: #2a2a44;
+    --ink: #f0f0f8;
+    --ink-mid: #c8c8d8;
+    --accent: #8a7dff;
+    --ok: #5ed6a4;
+    --warn: #ffd27a;
+    --border: #3a3a5a;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'OpenDyslexic', 'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 22px;
+    line-height: 1.8;
+    letter-spacing: 0.02em;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 20px 18px 80px;
+  }
+  header {
+    text-align: center;
+    padding: 24px 0 16px;
+  }
+  h1 {
+    font-size: 32px;
+    margin: 0 0 6px;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+  .sub {
+    color: var(--ink-mid);
+    font-size: 20px;
+    margin: 0;
+  }
+  .font-toggle {
+    display: flex; gap: 10px; justify-content: center;
+    margin: 18px 0 24px;
+    flex-wrap: wrap;
+  }
+  .font-toggle button {
+    background: var(--card);
+    color: var(--ink);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-size: 18px;
+    font-family: inherit;
+    cursor: pointer;
+    min-height: 48px;
+  }
+  .font-toggle button.on {
+    border-color: var(--accent);
+    background: var(--card-2);
+  }
+  body.f-atkinson, body.f-atkinson .wrap, body.f-atkinson * {
+    font-family: 'Atkinson Hyperlegible', -apple-system, sans-serif !important;
+  }
+  body.f-system, body.f-system .wrap, body.f-system * {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
+  }
+
+  .progress-wrap {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 24px;
+  }
+  .progress-label {
+    font-size: 18px;
+    color: var(--ink-mid);
+    margin: 0 0 10px;
+  }
+  .progress-bar {
+    height: 14px;
+    background: #141422;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--ok));
+    width: 0%;
+    transition: width 0.3s;
+  }
+  .progress-count {
+    font-size: 18px;
+    color: var(--ink);
+    font-weight: bold;
+    margin-top: 10px;
+    text-align: right;
+  }
+
+  .before {
+    background: #3a2a22;
+    border: 2px solid #7a5a42;
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 24px;
+  }
+  .before h2 {
+    margin: 0 0 10px;
+    font-size: 22px;
+    color: var(--warn);
+  }
+  .before ul {
+    margin: 0; padding: 0;
+    list-style: none;
+  }
+  .before li {
+    padding: 6px 0;
+    padding-left: 32px;
+    position: relative;
+  }
+  .before li::before {
+    content: '✓';
+    position: absolute;
+    left: 0; top: 6px;
+    color: var(--warn);
+    font-size: 22px;
+    font-weight: bold;
+  }
+
+  .step {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 18px 20px;
+    margin-bottom: 16px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .step.done {
+    background: #1a2a1a;
+    border-color: var(--ok);
+  }
+  .step-check {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    border: 3px solid var(--border);
+    background: #141422;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    color: var(--ok);
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+  }
+  .step-check.on {
+    background: var(--ok);
+    border-color: var(--ok);
+    color: #0a1a0a;
+  }
+  .step-body { flex: 1; min-width: 0; }
+  .step-num {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-weight: bold;
+    padding: 2px 12px;
+    border-radius: 20px;
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+  .step-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0 0 10px;
+    line-height: 1.3;
+  }
+  .step-icon {
+    font-size: 28px;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  .step p {
+    margin: 8px 0;
+    font-size: 20px;
+    line-height: 1.7;
+  }
+  .step .do {
+    background: var(--card-2);
+    border-left: 4px solid var(--accent);
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin: 10px 0;
+  }
+  .step .do strong {
+    color: var(--accent);
+  }
+  .step .warn {
+    color: var(--warn);
+    font-weight: bold;
+  }
+
+  .done-banner {
+    background: linear-gradient(135deg, #1a4a3a, #2a6a4a);
+    border: 3px solid var(--ok);
+    border-radius: 14px;
+    padding: 24px;
+    margin: 24px 0;
+    text-align: center;
+    display: none;
+  }
+  .done-banner.on { display: block; }
+  .done-banner h2 {
+    margin: 0 0 10px;
+    color: #fff;
+    font-size: 28px;
+  }
+  .done-banner p {
+    margin: 6px 0;
+    font-size: 20px;
+  }
+
+  .reset-wrap {
+    text-align: center;
+    margin-top: 30px;
+  }
+  .reset-wrap button {
+    background: transparent;
+    color: var(--ink-mid);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 22px;
+    font-size: 18px;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  .tip {
+    background: #2a2a44;
+    border-left: 4px solid var(--accent);
+    padding: 14px 16px;
+    border-radius: 8px;
+    margin: 18px 0;
+    font-size: 19px;
+  }
+  .tip strong { color: var(--accent); }
+
+  @media (max-width: 500px) {
+    body { font-size: 20px; }
+    h1 { font-size: 26px; }
+    .step-title { font-size: 20px; }
+    .step p { font-size: 18px; }
+    .step { padding: 14px; gap: 12px; }
+    .step-check { width: 40px; height: 40px; font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Install Load AI on iPad</h1>
+    <p class="sub">A simple, step-by-step guide</p>
+  </header>
+
+  <div class="font-toggle" role="group" aria-label="Choose font">
+    <button data-font="dys" class="on">OpenDyslexic</button>
+    <button data-font="atk">Atkinson</button>
+    <button data-font="sys">System</button>
+  </div>
+
+  <div class="progress-wrap">
+    <p class="progress-label">Your progress</p>
+    <div class="progress-bar"><div class="progress-fill" id="fill"></div></div>
+    <p class="progress-count"><span id="count">0</span> of 6 steps done</p>
+  </div>
+
+  <div class="before">
+    <h2>Before you start</h2>
+    <ul>
+      <li>iPad on Wi-Fi (not cell data)</li>
+      <li>iPad plugged in to charge</li>
+      <li>About 15 minutes of time</li>
+      <li>~400 MB of free space</li>
+    </ul>
+  </div>
+
+  <div class="step" data-step="1">
+    <div class="step-check" role="checkbox" aria-checked="false" tabindex="0" aria-label="Mark step 1 done"></div>
+    <div class="step-body">
+      <span class="step-num">Step 1</span>
+      <h2 class="step-title"><span class="step-icon">🔄</span>Close Load all the way</h2>
+      <p>Swipe up from the bottom of the iPad.</p>
+      <p>You will see all your open apps.</p>
+      <div class="do"><strong>Do this:</strong> flick the <strong>Load</strong> card up and off the screen.</div>
+      <p>Then tap the Load icon to open it fresh.</p>
+    </div>
+  </div>
+
+  <div class="step" data-step="2">
+    <div class="step-check" role="checkbox" aria-checked="false" tabindex="0" aria-label="Mark step 2 done"></div>
+    <div class="step-body">
+      <span class="step-num">Step 2</span>
+      <h2 class="step-title"><span class="step-icon">⚙️</span>Open Settings</h2>
+      <p>Inside Load, find the <strong>gear icon</strong>.</p>
+      <div class="do"><strong>Do this:</strong> tap the <strong>⚙ gear</strong>.</div>
+      <p>Scroll down until you see big words that say <strong>"Load AI"</strong>.</p>
+    </div>
+  </div>
+
+  <div class="step" data-step="3">
+    <div class="step-check" role="checkbox" aria-checked="false" tabindex="0" aria-label="Mark step 3 done"></div>
+    <div class="step-body">
+      <span class="step-num">Step 3</span>
+      <h2 class="step-title"><span class="step-icon">📦</span>Find the model card</h2>
+      <p>Look for a box called <strong>"On-device model"</strong>.</p>
+      <p>Inside that box there is a purple button.</p>
+      <div class="do"><strong>Do this:</strong> tap the button that says <strong>📥 Install local model (~400 MB)</strong>.</div>
+    </div>
+  </div>
+
+  <div class="step" data-step="4">
+    <div class="step-check" role="checkbox" aria-checked="false" tabindex="0" aria-label="Mark step 4 done"></div>
+    <div class="step-body">
+      <span class="step-num">Step 4</span>
+      <h2 class="step-title"><span class="step-icon">⏳</span>Wait — it takes a while</h2>
+      <p>You will see words under the button change:</p>
+      <p>• Loading…</p>
+      <p>• Downloading 5%</p>
+      <p>• Downloading 40%</p>
+      <p>• Downloading 100%</p>
+      <p class="warn">Do NOT close Load.</p>
+      <p class="warn">Do NOT close Settings.</p>
+      <p>This takes about <strong>5 to 15 minutes</strong>. Keep the iPad awake.</p>
+    </div>
+  </div>
+
+  <div class="step" data-step="5">
+    <div class="step-check" role="checkbox" aria-checked="false" tabindex="0" aria-label="Mark step 5 done"></div>
+    <div class="step-body">
+      <span class="step-num">Step 5</span>
+      <h2 class="step-title"><span class="step-icon">✅</span>Done — you'll see a green check</h2>
+      <p>When you see <strong>✓ Installed</strong>, it's ready.</p>
+      <p>A small checkbox turns on by itself.</p>
+      <div class="tip"><strong>Tip:</strong> the button will say "Installed" and turn grey. That means you don't need to do it again.</div>
+    </div>
+  </div>
+
+  <div class="step" data-step="6">
+    <div class="step-check" role="checkbox" aria-checked="false" tabindex="0" aria-label="Mark step 6 done"></div>
+    <div class="step-body">
+      <span class="step-num">Step 6</span>
+      <h2 class="step-title"><span class="step-icon">💬</span>Ask it something</h2>
+      <p>Tap the <strong>💬 speech bubble</strong> in the top bar.</p>
+      <p>Type a question. Like:</p>
+      <p>• <em>"Help me fix this code."</em></p>
+      <p>• <em>"Write me a simple web page."</em></p>
+      <p>• <em>"Explain what this file does."</em></p>
+      <p>The first answer takes about <strong>10 to 25 seconds</strong>. That's normal — it's thinking on your iPad.</p>
+    </div>
+  </div>
+
+  <div class="done-banner" id="done-banner">
+    <h2>🎉 You did it!</h2>
+    <p>Load AI is now on your iPad.</p>
+    <p>It works offline. Nothing leaves your device.</p>
+    <p>Next time you open Load, it will remember.</p>
+  </div>
+
+  <div class="tip">
+    <strong>Next time you open Load:</strong><br>
+    You do NOT install again. You will see "Reloading cached model…" for a few seconds. Then it's ready.
+  </div>
+
+  <div class="reset-wrap">
+    <button id="reset">↺ Reset checklist</button>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  var LS = 'load_install_checklist_v1';
+  var LS_FONT = 'load_install_font_v1';
+  var checks = document.querySelectorAll('.step-check');
+  var count = document.getElementById('count');
+  var fill = document.getElementById('fill');
+  var banner = document.getElementById('done-banner');
+  var total = checks.length;
+
+  function state() {
+    try { return JSON.parse(localStorage.getItem(LS) || '{}'); }
+    catch (e) { return {}; }
+  }
+  function save(s) {
+    try { localStorage.setItem(LS, JSON.stringify(s)); } catch (e) {}
+  }
+  function refresh() {
+    var s = state();
+    var done = 0;
+    for (var i = 0; i < checks.length; i++) {
+      var step = checks[i].closest('.step');
+      var key = step.getAttribute('data-step');
+      if (s[key]) {
+        checks[i].classList.add('on');
+        checks[i].setAttribute('aria-checked', 'true');
+        checks[i].textContent = '✓';
+        step.classList.add('done');
+        done++;
+      } else {
+        checks[i].classList.remove('on');
+        checks[i].setAttribute('aria-checked', 'false');
+        checks[i].textContent = '';
+        step.classList.remove('done');
+      }
+    }
+    count.textContent = done;
+    fill.style.width = Math.round(done / total * 100) + '%';
+    banner.classList.toggle('on', done === total);
+  }
+  function toggle(cb) {
+    var step = cb.closest('.step');
+    var key = step.getAttribute('data-step');
+    var s = state();
+    s[key] = !s[key];
+    save(s);
+    refresh();
+  }
+  for (var i = 0; i < checks.length; i++) {
+    checks[i].addEventListener('click', function (e) { toggle(e.currentTarget); });
+    checks[i].addEventListener('keydown', function (e) {
+      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle(e.currentTarget); }
+    });
+  }
+  document.getElementById('reset').addEventListener('click', function () {
+    save({}); refresh();
+  });
+
+  // Font toggle
+  var btns = document.querySelectorAll('.font-toggle button');
+  function applyFont(f) {
+    document.body.classList.remove('f-atkinson', 'f-system');
+    if (f === 'atk') document.body.classList.add('f-atkinson');
+    else if (f === 'sys') document.body.classList.add('f-system');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.toggle('on', btns[i].getAttribute('data-font') === f);
+    }
+    try { localStorage.setItem(LS_FONT, f); } catch (e) {}
+  }
+  for (var j = 0; j < btns.length; j++) {
+    btns[j].addEventListener('click', function (e) {
+      applyFont(e.currentTarget.getAttribute('data-font'));
+    });
+  }
+  try {
+    var saved = localStorage.getItem(LS_FONT);
+    if (saved) applyFont(saved);
+  } catch (e) {}
+
+  refresh();
+})();
+</script>
+
+</body>
+</html>
