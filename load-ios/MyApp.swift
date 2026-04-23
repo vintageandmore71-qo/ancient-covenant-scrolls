@@ -1,5 +1,5 @@
 // Load — Run Web Apps on iPad
-// Copyright (c) 2026 DssOrit. All Rights Reserved.
+// Copyright (c) 2026 LBond. All Rights Reserved.
 //
 // App entry point. Sets the app-wide dark theme and brand accent color
 // so every screen inherits the look without repeating it per-view.

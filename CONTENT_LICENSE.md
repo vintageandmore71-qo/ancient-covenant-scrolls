@@ -1,6 +1,6 @@
 # Content License — The Ancient Covenant Record (ACR)
 
-Copyright (c) 2026 DssOrit. **All Rights Reserved.**
+Copyright (c) 2026 LBond. **All Rights Reserved.**
 
 This document asserts ownership of the content compilation that lives
 in this repository, distinct from the source-code license in
@@ -67,7 +67,7 @@ creative decisions, is itself protected.
 
 ## What is NOT permitted
 
-Without prior written permission from DssOrit:
+Without prior written permission from LBond:
 
 - Copying the compiled ACR records (the JSON content files) or any
   substantial portion of them into another app, website, book,

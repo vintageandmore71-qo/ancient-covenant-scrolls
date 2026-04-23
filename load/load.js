@@ -1,5 +1,5 @@
 // Load — Run Web Apps on iPad (PWA)
-// Copyright (c) 2026 DssOrit. All Rights Reserved.
+// Copyright (c) 2026 LBond. All Rights Reserved.
 //
 // Unauthorized reproduction, modification, distribution, or
 // commercial use is strictly prohibited. See LICENSE at the

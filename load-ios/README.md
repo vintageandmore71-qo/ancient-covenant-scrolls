@@ -5,7 +5,7 @@ bundles / single-file readers) offline. Built in Swift Playgrounds
 4+ on iPad. Free Apple Developer account tier is enough for
 personal install; App Store distribution is a later phase.
 
-Copyright (c) 2026 DssOrit. All Rights Reserved.
+Copyright (c) 2026 LBond. All Rights Reserved.
 
 ## Constraints (locked)
 

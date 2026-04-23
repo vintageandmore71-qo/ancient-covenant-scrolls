@@ -1,5 +1,5 @@
 // Attain — Universal Study PWA
-// Copyright (c) 2026 DssOrit. All Rights Reserved.
+// Copyright (c) 2026 LBond. All Rights Reserved.
 // See LICENSE at the repository root.
 //
 // Optional minification pass for deployment builds.

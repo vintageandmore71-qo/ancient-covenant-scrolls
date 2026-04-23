@@ -1,5 +1,5 @@
 // Load — Run Web Apps on iPad
-// Copyright (c) 2026 DssOrit. All Rights Reserved.
+// Copyright (c) 2026 LBond. All Rights Reserved.
 //
 // Project model. One Project per imported web app. The `folderName`
 // is the name of the on-disk directory inside the app's Documents

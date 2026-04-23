@@ -4,7 +4,7 @@ A free, offline, dyslexia-friendly reader for web apps, HTML files,
 PDFs, EPUB books, and any other HTML-based content, designed for
 iPad.
 
-Copyright (c) 2026 DssOrit. All Rights Reserved.
+Copyright (c) 2026 LBond. All Rights Reserved.
 
 ---
 
@@ -345,7 +345,7 @@ Delete. Reopen Load.
 
 All Rights Reserved. See `LICENSE` at the repository root.
 
-The Load application code is the original work of DssOrit.
+The Load application code is the original work of LBond.
 Unauthorized reproduction, modification, distribution, or
 use for machine-learning training is prohibited.
 

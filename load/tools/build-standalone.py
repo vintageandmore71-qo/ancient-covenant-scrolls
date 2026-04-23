@@ -28,7 +28,7 @@ Every dependency is inlined:
 The output file opens directly from the iPad Files app in Safari or HTMLq
 and runs 100% offline, with zero dependency on dssorit.github.io.
 
-Copyright (c) 2026 DssOrit. All Rights Reserved.
+Copyright (c) 2026 LBond. All Rights Reserved.
 """
 
 import base64
@@ -178,7 +178,7 @@ def main() -> int:
     banner = (
         '<!--\n'
         '  Load — Run Web Apps on iPad (standalone offline build)\n'
-        '  Copyright (c) 2026 DssOrit. All Rights Reserved.\n'
+        '  Copyright (c) 2026 LBond. All Rights Reserved.\n'
         '\n'
         '  This file contains every piece of Load inlined into a single\n'
         '  HTML document — the entire app, fonts, libraries, splash,\n'

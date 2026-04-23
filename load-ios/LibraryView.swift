@@ -1,5 +1,5 @@
 // Load — Run Web Apps on iPad
-// Copyright (c) 2026 DssOrit. All Rights Reserved.
+// Copyright (c) 2026 LBond. All Rights Reserved.
 //
 // Library grid. Part 1: layout + empty state only; the + button and
 // project tiles are wired to no-ops. Part 2 adds file import and
