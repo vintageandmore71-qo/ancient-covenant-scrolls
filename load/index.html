@@ -1225,7 +1225,16 @@
       <li>Write code snippets (<em>"how do I center text?"</em>, <em>"make a button"</em>)</li>
       <li>Troubleshoot problems (<em>"image not showing"</em>, <em>"app is slow"</em>)</li>
     </ul>
-    <p style="font-size:12px;color:var(--ink-low);margin:0;">For deeper content questions, I can also hand off to a free AI site (ChatGPT / Claude / Gemini / Perplexity) with one tap.</p>
+    <p><strong>Copilot-style slash commands</strong> run against the file you're looking at:</p>
+    <ul>
+      <li><code>/explain</code> — plain-language walkthrough of the file.</li>
+      <li><code>/fix</code> — find broken assets, missing meta, JS errors &mdash; with auto-fix.</li>
+      <li><code>/optimize</code> — size, performance, accessibility suggestions.</li>
+      <li><code>/analyze</code> — full structure breakdown (tags, scripts, styles, assets).</li>
+      <li><code>/scan</code> — open the Developer Console and run a full scan.</li>
+      <li><code>/help</code> — list every slash command.</li>
+    </ul>
+    <p style="font-size:12px;color:var(--ink-low);margin:0;">For deeper content questions, I can also hand off to a free AI site (ChatGPT / Claude / Gemini / Perplexity) with one tap. Future option: download a local on-device model (WebLLM / transformers.js) for even richer answers &mdash; off by default.</p>
   </div>
   <div id="helper-messages" class="helper-messages"></div>
   <div class="helper-quick" id="helper-quick">
@@ -1239,7 +1248,7 @@
     <button class="helper-chip" data-helper-ask="How do I back up my library?">Backup</button>
   </div>
   <div class="helper-input-row">
-    <input id="helper-input" type="text" placeholder="Ask me anything about Load..." autocomplete="off" autocapitalize="sentences" spellcheck="true">
+    <input id="helper-input" type="text" placeholder="Ask a question or try /explain, /fix, /optimize..." autocomplete="off" autocapitalize="sentences" spellcheck="true">
     <button id="helper-send" class="primary-btn" aria-label="Send">&#10148;</button>
   </div>
 </div>

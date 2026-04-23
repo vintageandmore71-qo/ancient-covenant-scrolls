@@ -996,6 +996,20 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
 .helper-input-row input:focus { outline: none; border-color: var(--accent); }
 .helper-input-row button { min-width: 52px; padding: 12px; font-size: 20px; }
 
+/* Key-value table used by Load AI /analyze output */
+.helper-kv {
+  width: 100%; border-collapse: collapse; margin: 8px 0;
+  font-size: 14px; line-height: 1.6;
+}
+.helper-kv td {
+  padding: 6px 10px; border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.helper-kv td:first-child {
+  color: var(--ink-mid); font-weight: 600; width: 40%;
+}
+.helper-kv td:last-child { color: var(--ink-hi); word-break: break-word; }
+
 /* ------------- Install-as-app banner ------------- */
 .install-banner {
   display: flex; align-items: center; gap: 12px;

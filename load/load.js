@@ -1157,23 +1157,27 @@
     var chips = [];
     if (ctx.kind === 'viewer' && ctx.app) {
       chips = [
+        { q: '/explain', ask: '/explain' },
+        { q: '/fix', ask: '/fix' },
+        { q: '/optimize', ask: '/optimize' },
+        { q: '/analyze', ask: '/analyze' },
         { q: 'Summarize this', ask: 'summarize this' },
-        { q: 'Key points', ask: 'key points of this' },
         { q: 'Find a word', ask: 'find ' },
         { q: 'Outline', ask: 'outline this' },
         { q: 'Step by step', ask: 'walk me through this step by step' },
-        { q: 'Read aloud', ask: 'how do I read aloud' },
-        { q: 'Add bookmark', ask: 'how do I add a bookmark' },
         { q: 'Ask ChatGPT', ask: 'open chatgpt with this' }
       ];
     } else if (ctx.kind === 'editor') {
       chips = [
+        { q: '/explain', ask: '/explain' },
+        { q: '/fix', ask: '/fix' },
+        { q: '/optimize', ask: '/optimize' },
+        { q: '/analyze', ask: '/analyze' },
         { q: 'Center text', ask: 'how do I center text' },
         { q: 'Make a button', ask: 'how do I make a button' },
         { q: 'Change color', ask: 'how do I change the color' },
         { q: 'Add an image', ask: 'how do I add an image' },
-        { q: 'Open console', ask: 'how do I see errors' },
-        { q: 'Lost my changes?', ask: 'lost my changes' }
+        { q: 'Open console', ask: 'how do I see errors' }
       ];
     } else if (ctx.kind === 'library') {
       chips = [
@@ -1262,6 +1266,18 @@
     // Refresh context each turn so follow-ups work even if they opened
     // the panel on Home and then navigated
     helperContext = captureHelperContext();
+
+    // 0. Copilot-style slash commands — operate on the current file's
+    //    SOURCE (not just extracted text). /explain /fix /optimize
+    //    /analyze /scan all work when an app is open in the viewer
+    //    or the HTML editor. Fully offline, no API calls.
+    if (/^\s*\//.test(q)) {
+      var slashResponse = handleSlashCommand(q);
+      if (slashResponse) {
+        addHelperMessage('assistant', slashResponse.answer, slashResponse.action || null);
+        return;
+      }
+    }
 
     // 1. Content-aware commands — only work when there's an app open
     if (helperContext.kind === 'viewer' && helperContext.text) {
@@ -1398,6 +1414,199 @@
     }
 
     return null;
+  }
+
+  /* ---------- Copilot-style slash commands ----------
+   * Offline, free, no API keys. Implemented with static analysis of
+   * the current file's HTML + stored JS/CSS fragments. Each command
+   * returns { answer, action? } exactly like handleContentCommand.
+   *
+   * Supported: /explain /fix /optimize /analyze /scan /debug /help
+   *
+   * Future (behind flags, optional): WebLLM local model, transformers.js
+   * on-device inference, cloud-tier handoff to ChatGPT/Claude/Gemini.
+   */
+  function handleSlashCommand(q) {
+    var raw = q.trim();
+    var space = raw.indexOf(' ');
+    var cmd = (space > 0 ? raw.slice(0, space) : raw).toLowerCase();
+    var arg = (space > 0 ? raw.slice(space + 1).trim() : '');
+
+    if (cmd === '/help' || cmd === '/?') return slashHelp();
+
+    var ctx = helperContext || captureHelperContext();
+    var app = (ctx.kind === 'viewer' || ctx.kind === 'editor') ? currentApp : null;
+    if (!app && (cmd === '/explain' || cmd === '/fix' || cmd === '/optimize' || cmd === '/analyze' || cmd === '/scan' || cmd === '/debug')) {
+      return {
+        answer: '<strong>' + escHtml(cmd) + '</strong> needs an open file to work on. Open an item from the Library first, then come back and run it.',
+        action: { label: 'Open Library', fn: function () { show('library-screen'); closeHelperPanel(); } }
+      };
+    }
+
+    if (cmd === '/explain')  return slashExplain(app, arg);
+    if (cmd === '/fix')      return slashFix(app, arg);
+    if (cmd === '/optimize') return slashOptimize(app, arg);
+    if (cmd === '/analyze')  return slashAnalyze(app, arg);
+    if (cmd === '/scan' || cmd === '/debug') return slashScan(app);
+
+    // Unknown slash command — surface the full list so the user can
+    // discover what's available.
+    return slashHelp(cmd);
+  }
+  function slashHelp(unknown) {
+    var intro = unknown
+      ? 'I don\'t recognize <code>' + escHtml(unknown) + '</code>. These are the slash commands Load AI understands:'
+      : '<strong>Slash commands</strong> run offline analysis on the file you\'re looking at:';
+    return { answer:
+      intro +
+      '<ul>' +
+        '<li><code>/explain [topic]</code> — plain-language walkthrough of the current file (structure, what it does, how it renders).</li>' +
+        '<li><code>/fix</code> — runs the Developer Console scan and suggests patches for every issue it finds.</li>' +
+        '<li><code>/optimize</code> — suggests size, performance, and accessibility improvements.</li>' +
+        '<li><code>/analyze</code> — file structure summary (tags, styles, scripts, assets, counts).</li>' +
+        '<li><code>/scan</code> or <code>/debug</code> — opens the Developer Console on the Scan tab.</li>' +
+        '<li><code>/help</code> — shows this list.</li>' +
+      '</ul>' +
+      '<p class="hint" style="margin:6px 0 0;">Future releases will let you turn on an optional downloadable local model (WebLLM / transformers.js) for even richer answers. For now, everything here is rule-based, private, and offline.</p>'
+    };
+  }
+  function slashExplain(app, arg) {
+    var html = app.html || '';
+    var s = analyzeSource(html);
+    var parts = ['<strong>What this file does</strong>'];
+    if (s.title) parts.push('Title: <strong>' + escHtml(s.title) + '</strong>');
+    parts.push('Kind: ' + (app.kind || 'html'));
+    parts.push('Size: ' + humanBytes((html || '').length));
+    parts.push('DOM roughly contains: <code>' + s.tagCount + '</code> tags (' + s.images + ' images, ' + s.links + ' links, ' + s.scripts + ' scripts, ' + s.styles + ' inline style blocks).');
+    if (s.headings.length) parts.push('Main sections:<ul>' + s.headings.slice(0, 8).map(function (h) { return '<li>' + escHtml(h) + '</li>'; }).join('') + '</ul>');
+    if (s.hasForm) parts.push('It contains at least one <code>&lt;form&gt;</code>, so it expects user input somewhere.');
+    if (s.hasCanvas) parts.push('It uses <code>&lt;canvas&gt;</code>, typically for drawing/games/charts.');
+    if (s.hasIframe) parts.push('It embeds another page via <code>&lt;iframe&gt;</code>.');
+    if (s.scripts > 0) parts.push('JavaScript is responsible for behavior: ' + (s.scriptChars > 0 ? 'roughly ' + humanBytes(s.scriptChars) + ' of inline script.' : 'external scripts only.'));
+    if (arg) {
+      parts.push('<strong>About "' + escHtml(arg) + '":</strong>');
+      var needle = arg.toLowerCase();
+      var matches = findOccurrences(html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' '), needle);
+      if (matches.length) parts.push('Mentioned ' + matches.length + ' time' + (matches.length === 1 ? '' : 's') + '. First mention: <em>…' + escHtml(matches[0]) + '…</em>');
+      else parts.push('I don\'t see "<strong>' + escHtml(arg) + '</strong>" in the rendered text.');
+    }
+    parts.push('<em>Tip:</em> run <code>/analyze</code> for a full structure breakdown, or <code>/fix</code> to check for broken assets.');
+    return { answer: parts.join('<br>') };
+  }
+  function slashFix(app) {
+    // Run the scanner directly and feed the summary into the chat.
+    // Offer to open the drawer for the full report + auto-fix.
+    currentApp = app;
+    var report = { items: [], fixable: 0 };
+    currentScanReport = report;
+    scanStructural(app.html || '', report);
+    scanAssets(app.html || '', report);
+    scanManifest(app, report);
+    scanLocalRunnerCompat(app.html || '', report);
+    scanCapturedErrors(report);
+    var errs = report.items.filter(function (i) { return i.severity === 'error'; });
+    var warns = report.items.filter(function (i) { return i.severity === 'warn'; });
+    var headline;
+    if (!errs.length && !warns.length) {
+      headline = '<strong>&#9989; No issues found.</strong> The file looks healthy.';
+    } else {
+      headline = '<strong>Found ' +
+        (errs.length ? errs.length + ' error' + (errs.length === 1 ? '' : 's') : '') +
+        (errs.length && warns.length ? ' and ' : '') +
+        (warns.length ? warns.length + ' warning' + (warns.length === 1 ? '' : 's') : '') +
+        '.</strong> ' + (report.fixable ? report.fixable + ' of these are auto-fixable.' : '');
+    }
+    var first = errs.concat(warns).slice(0, 3);
+    var list = first.length
+      ? '<ul>' + first.map(function (i) { return '<li><strong>' + i.label + ':</strong> ' + i.detail.replace(/<[^>]+>/g, '').slice(0, 180) + '</li>'; }).join('') + '</ul>'
+      : '';
+    return {
+      answer: headline + list + 'Open the Developer Console for the full report and one-tap auto-fix.',
+      action: { label: '&#128295; Open Developer Console', fn: function () { openDevConsole(); runScanCurrentApp(); closeHelperPanel(); } }
+    };
+  }
+  function slashOptimize(app) {
+    var html = app.html || '';
+    var s = analyzeSource(html);
+    var tips = [];
+    if (html.length > 1024 * 512) tips.push('<strong>File is ' + humanBytes(html.length) + '.</strong> Consider splitting very large pages or removing unused <code>&lt;script&gt;</code> / <code>&lt;style&gt;</code> blocks.');
+    if (s.imgNoAlt > 0) tips.push('<strong>' + s.imgNoAlt + ' image' + (s.imgNoAlt === 1 ? '' : 's') + ' without <code>alt</code>.</strong> Screen readers (and iPad VoiceOver) skip them silently. Add descriptive alt text so the page stays readable.');
+    if (s.styleBlocksOver2k > 0) tips.push('<strong>Large inline style block(s) found.</strong> Moving repeated styles into CSS classes makes the file smaller and more consistent.');
+    if (s.scripts > 3) tips.push('<strong>' + s.scripts + ' script blocks.</strong> Consolidating into one block can speed up initial render on iPad.');
+    if (!/color-scheme/i.test(html) && !/prefers-color-scheme/i.test(html)) tips.push('No dark-mode support detected. Adding <code>&lt;meta name="color-scheme" content="light dark"&gt;</code> makes the page respect iPad appearance settings.');
+    if (!/viewport/i.test(html)) tips.push('No <code>&lt;meta name="viewport"&gt;</code>. On iPad the page will render too wide. Add <code>&lt;meta name="viewport" content="width=device-width,initial-scale=1"&gt;</code>.');
+    if (s.hardcodedColor > 8) tips.push('<strong>Many hard-coded colors.</strong> Using CSS variables (<code>--primary</code>, <code>--bg</code>) makes theme switches and dyslexia overlays work better.');
+    if (!tips.length) tips.push('The file is already compact and readable. If you want to go further, run <code>/analyze</code> for a full structure map.');
+    return { answer: '<strong>Optimization suggestions:</strong><ul>' + tips.map(function (t) { return '<li>' + t + '</li>'; }).join('') + '</ul>' };
+  }
+  function slashAnalyze(app) {
+    var html = app.html || '';
+    var s = analyzeSource(html);
+    var rows = [
+      ['Name', escHtml(app.name || '')],
+      ['Kind', app.kind || 'html'],
+      ['Size', humanBytes(html.length)],
+      ['Title tag', s.title ? escHtml(s.title) : '<em>missing</em>'],
+      ['Viewport meta', s.viewport ? '&#10003; present' : '<em>missing</em>'],
+      ['Doctype', /^<!doctype/i.test(html.trim()) ? '&#10003; html5' : '<em>missing</em>'],
+      ['Tags (approx)', s.tagCount],
+      ['Headings', s.headings.length],
+      ['Images', s.images + (s.imgNoAlt ? ' (' + s.imgNoAlt + ' without alt)' : '')],
+      ['Links', s.links + (s.externalLinks ? ' (' + s.externalLinks + ' external)' : '')],
+      ['Script blocks', s.scripts + (s.scriptChars ? ' (' + humanBytes(s.scriptChars) + ' inline)' : '')],
+      ['Style blocks', s.styles + (s.styleChars ? ' (' + humanBytes(s.styleChars) + ' inline)' : '')],
+      ['Forms', s.hasForm ? 'yes' : 'no'],
+      ['Canvas', s.hasCanvas ? 'yes' : 'no'],
+      ['Iframes', s.hasIframe ? 'yes' : 'no'],
+      ['Service worker', /navigator\.serviceWorker/.test(html) ? '<em>registered (won\'t run from blob URL)</em>' : 'no']
+    ];
+    var table = '<table class="helper-kv">' + rows.map(function (r) {
+      return '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>';
+    }).join('') + '</table>';
+    return { answer: '<strong>File analysis:</strong>' + table + 'Run <code>/fix</code> for a health check or <code>/optimize</code> for improvement tips.' };
+  }
+  function slashScan(app) {
+    return {
+      answer: 'Opening the Developer Console and running a scan on <strong>' + escHtml(app.name) + '</strong>.',
+      action: { label: '&#128295; Open Developer Console', fn: function () { openDevConsole(); runScanCurrentApp(); closeHelperPanel(); } }
+    };
+  }
+  function analyzeSource(html) {
+    html = html || '';
+    var s = {
+      title: '', viewport: false,
+      tagCount: (html.match(/<[a-z!][^>]*>/gi) || []).length,
+      headings: [],
+      images: (html.match(/<img\b/gi) || []).length,
+      imgNoAlt: 0,
+      links: (html.match(/<a\b[^>]*href/gi) || []).length,
+      externalLinks: 0,
+      scripts: (html.match(/<script\b/gi) || []).length,
+      scriptChars: 0,
+      styles: (html.match(/<style\b/gi) || []).length,
+      styleChars: 0,
+      hasForm: /<form\b/i.test(html),
+      hasCanvas: /<canvas\b/i.test(html),
+      hasIframe: /<iframe\b/i.test(html),
+      styleBlocksOver2k: 0,
+      hardcodedColor: 0
+    };
+    var titleMatch = /<title[^>]*>([^<]+)<\/title>/i.exec(html);
+    if (titleMatch) s.title = titleMatch[1].trim();
+    if (/<meta[^>]+name=["']viewport/i.test(html)) s.viewport = true;
+    var hr = /<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi;
+    var m;
+    while ((m = hr.exec(html)) !== null) s.headings.push(m[2].replace(/<[^>]+>/g, '').trim());
+    var imgRe = /<img\b[^>]*>/gi;
+    while ((m = imgRe.exec(html)) !== null) if (!/\balt\s*=/.test(m[0])) s.imgNoAlt++;
+    var extRe = /<a\b[^>]*href=["']https?:\/\//gi;
+    while ((m = extRe.exec(html)) !== null) s.externalLinks++;
+    var sRe = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
+    while ((m = sRe.exec(html)) !== null) s.scriptChars += m[1].length;
+    var stRe = /<style\b[^>]*>([\s\S]*?)<\/style>/gi;
+    while ((m = stRe.exec(html)) !== null) { s.styleChars += m[1].length; if (m[1].length > 2048) s.styleBlocksOver2k++; }
+    s.hardcodedColor = (html.match(/#[0-9a-f]{3,8}\b/gi) || []).length + (html.match(/\brgba?\s*\(/gi) || []).length;
+    return s;
   }
 
   function extractFirstParagraph(text) {
