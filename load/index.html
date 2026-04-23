@@ -1332,6 +1332,22 @@
   </div>
 </div>
 
+<!-- Patch-preview modal — shown before Auto-fix applies anything. Lists
+     every fix with before/after snippets so the user can review and
+     confirm (or cancel) the changes. -->
+<div id="patch-preview-modal" class="modal" role="dialog" aria-label="Preview fixes">
+  <div class="modal-box patch-preview-box">
+    <h3>Preview fixes before applying</h3>
+    <p class="hint" id="patch-preview-meta" style="margin:0 0 14px;"></p>
+    <div id="patch-preview-list" class="patch-preview-list"></div>
+    <p class="hint" style="margin-top:14px;">Each fix is applied in order. You can always undo by re-importing the original file or by editing the HTML source.</p>
+    <div class="modal-actions">
+      <button id="patch-preview-cancel" class="seg-btn">Cancel</button>
+      <button id="patch-preview-apply" class="primary-btn">&#10003; Apply all fixes</button>
+    </div>
+  </div>
+</div>
+
 <!-- Import-error modal — fills the screen with the plain-language
      reason an upload couldn't be processed. Replaces the old truncated
      toast so multi-line reasons ("file was 0 bytes", "EPUB missing

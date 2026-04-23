@@ -942,6 +942,67 @@
     if (!currentScanReport || !currentApp) return;
     var fixable = currentScanReport.items.filter(function (i) { return typeof i.fix === 'function'; });
     if (!fixable.length) { toast('Nothing to fix.'); return; }
+    // Preview step: show the user exactly what's about to change — the
+    // list of fixes, size before/after, and a diff-ish snippet per fix.
+    // Only apply when they explicitly confirm.
+    showPatchPreview(fixable);
+  }
+  function showPatchPreview(fixable) {
+    var html = currentApp.html || '';
+    // Simulate each fix in sequence against a working copy so size
+    // + changed-byte counts match exactly what "Apply" would produce.
+    var working = html;
+    var rows = fixable.map(function (item) {
+      var before = working;
+      var after;
+      try { after = item.fix(working); } catch (e) { after = null; }
+      if (typeof after !== 'string') after = before;
+      var delta = after.length - before.length;
+      // Build a compact snippet showing the first changed region.
+      var snippet = diffSnippet(before, after);
+      working = after;
+      return {
+        label: item.label,
+        detail: item.detail.replace(/<[^>]+>/g, '').slice(0, 200),
+        delta: delta,
+        snippet: snippet
+      };
+    });
+    var finalSize = working.length;
+    var modal = $('patch-preview-modal');
+    if (!modal) return applyPatchesDirect(fixable);   // fallback if modal missing
+    var listEl = $('patch-preview-list');
+    var metaEl = $('patch-preview-meta');
+    metaEl.innerHTML = '<strong>' + fixable.length + '</strong> fix' + (fixable.length === 1 ? '' : 'es') +
+      ' &middot; ' + humanBytes(html.length) + ' &rarr; ' + humanBytes(finalSize) +
+      ' (' + (finalSize - html.length >= 0 ? '+' : '') + (finalSize - html.length) + ' bytes)';
+    listEl.innerHTML = rows.map(function (r) {
+      return '<div class="patch-row">' +
+        '<div class="patch-label">' + r.label + '</div>' +
+        '<div class="patch-detail">' + escHtml(r.detail) + '</div>' +
+        (r.snippet
+          ? '<div class="patch-diff"><div class="diff-before"><span>BEFORE</span><pre>' + escHtml(r.snippet.before) + '</pre></div>' +
+            '<div class="diff-after"><span>AFTER</span><pre>' + escHtml(r.snippet.after) + '</pre></div></div>'
+          : '<div class="patch-diff-none">No text diff to show (fix operates on structure).</div>') +
+      '</div>';
+    }).join('');
+    modal.classList.add('on');
+  }
+  function diffSnippet(before, after) {
+    if (before === after) return null;
+    // Find the first character that differs, grab ~80 chars of context
+    // on each side. Good enough for the common "insert a tag" patches.
+    var len = Math.min(before.length, after.length);
+    var i = 0;
+    while (i < len && before[i] === after[i]) i++;
+    var start = Math.max(0, i - 40);
+    return {
+      before: before.slice(start, i + 80).replace(/\s+/g, ' '),
+      after:  after.slice(start, i + 120).replace(/\s+/g, ' ')
+    };
+  }
+  async function applyPatchesDirect(fixable) {
+    if (!fixable) fixable = currentScanReport.items.filter(function (i) { return typeof i.fix === 'function'; });
     var html = currentApp.html;
     var applied = 0;
     for (var i = 0; i < fixable.length; i++) {
@@ -951,11 +1012,20 @@
     if (!applied) { toast('No fixes applied.'); return; }
     currentApp.html = html;
     try { await putApp(currentApp); } catch (e) {}
-    // Reload the iframe with the patched HTML so the user sees the fix.
     try { openApp(currentApp); } catch (e) {}
     toast('✓ Applied ' + applied + ' fix' + (applied === 1 ? '' : 'es') + '. Re-scan to confirm.');
-    // Re-scan automatically to show updated state.
     setTimeout(runScanCurrentApp, 600);
+  }
+  function wirePatchPreview() {
+    var modal = $('patch-preview-modal');
+    if (!modal) return;
+    var cancel = $('patch-preview-cancel');
+    var apply = $('patch-preview-apply');
+    if (cancel) cancel.addEventListener('click', function () { modal.classList.remove('on'); });
+    if (apply) apply.addEventListener('click', async function () {
+      modal.classList.remove('on');
+      await applyPatchesDirect();
+    });
   }
   function renderConsole() {
     var box = $('console-log');
@@ -1669,7 +1739,24 @@
     if (ctx.kind === 'viewer' && ctx.app) {
       var t = ctx.text || '';
       var head = '[Current file: ' + ctx.app.name + '. Kind: ' + (ctx.app.kind || 'html') + '.]\n\n';
-      return head + t.slice(0, 6000);
+      // Bundle awareness: when this is a zipped multi-file app, include
+      // the file index + captured text samples (README / manifest /
+      // package.json / service-worker / shared styles/app.js) so the
+      // provider can reason about the project as a whole, not just one
+      // rendered page.
+      var bundleCtx = '';
+      if (ctx.app.bundleIndex && ctx.app.bundleIndex.length) {
+        bundleCtx += '\n\n[Project bundle — ' + ctx.app.bundleIndex.length + ' files]\n';
+        bundleCtx += ctx.app.bundleIndex.slice(0, 40).map(function (p) { return '- ' + p; }).join('\n');
+        if (ctx.app.bundleIndex.length > 40) bundleCtx += '\n…' + (ctx.app.bundleIndex.length - 40) + ' more';
+        if (ctx.app.bundleSamples) {
+          var keys = Object.keys(ctx.app.bundleSamples);
+          for (var i = 0; i < Math.min(3, keys.length); i++) {
+            bundleCtx += '\n\n[' + keys[i] + ']\n' + ctx.app.bundleSamples[keys[i]].slice(0, 2000);
+          }
+        }
+      }
+      return head + t.slice(0, 6000) + bundleCtx;
     }
     if (ctx.kind === 'editor' && currentApp) {
       var src = (currentApp.html || '').slice(0, 6000);
@@ -2283,11 +2370,33 @@
     if (s.hasIframe) parts.push('It embeds another page via <code>&lt;iframe&gt;</code>.');
     if (s.scripts > 0) parts.push('JavaScript is responsible for behavior: ' + (s.scriptChars > 0 ? 'roughly ' + humanBytes(s.scriptChars) + ' of inline script.' : 'external scripts only.'));
     if (arg) {
-      parts.push('<strong>About "' + escHtml(arg) + '":</strong>');
-      var needle = arg.toLowerCase();
-      var matches = findOccurrences(html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' '), needle);
-      if (matches.length) parts.push('Mentioned ' + matches.length + ' time' + (matches.length === 1 ? '' : 's') + '. First mention: <em>…' + escHtml(matches[0]) + '…</em>');
-      else parts.push('I don\'t see "<strong>' + escHtml(arg) + '</strong>" in the rendered text.');
+      // If the argument matches a file in the zip bundle, pull its
+      // actual content into the chat. Otherwise treat as a keyword.
+      var bundleHit = null;
+      if (app.bundleIndex) {
+        var lower = arg.toLowerCase();
+        for (var bi = 0; bi < app.bundleIndex.length; bi++) {
+          var p = app.bundleIndex[bi];
+          if (p.toLowerCase() === lower || p.toLowerCase().endsWith('/' + lower) || p.split('/').pop().toLowerCase() === lower) {
+            bundleHit = p; break;
+          }
+        }
+      }
+      if (bundleHit) {
+        var sample = app.bundleSamples && app.bundleSamples[bundleHit];
+        parts.push('<strong>Bundle file: <code>' + escHtml(bundleHit) + '</code></strong>');
+        if (sample) {
+          parts.push('<pre class="code-block">' + escHtml(sample.slice(0, 3000)) + (sample.length > 3000 ? '\n…' + (sample.length - 3000) + ' more chars' : '') + '</pre>');
+        } else {
+          parts.push('<em>File is present in the bundle but wasn\'t sampled (binary or too large to preview). It is still available at runtime via the fetch shim.</em>');
+        }
+      } else {
+        parts.push('<strong>About "' + escHtml(arg) + '":</strong>');
+        var needle = arg.toLowerCase();
+        var matches = findOccurrences(html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' '), needle);
+        if (matches.length) parts.push('Mentioned ' + matches.length + ' time' + (matches.length === 1 ? '' : 's') + '. First mention: <em>…' + escHtml(matches[0]) + '…</em>');
+        else parts.push('I don\'t see "<strong>' + escHtml(arg) + '</strong>" in the rendered text or bundle.');
+      }
     }
     parts.push('<em>Tip:</em> run <code>/analyze</code> for a full structure breakdown, or <code>/fix</code> to check for broken assets.');
     return { answer: parts.join('<br>') };
@@ -2359,10 +2468,22 @@
       ['Iframes', s.hasIframe ? 'yes' : 'no'],
       ['Service worker', /navigator\.serviceWorker/.test(html) ? '<em>registered (won\'t run from blob URL)</em>' : 'no']
     ];
+    if (app.bundleIndex && app.bundleIndex.length) {
+      rows.push(['Bundle files', app.bundleIndex.length + ' files']);
+    }
     var table = '<table class="helper-kv">' + rows.map(function (r) {
       return '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>';
     }).join('') + '</table>';
-    return { answer: '<strong>File analysis:</strong>' + table + 'Run <code>/fix</code> for a health check or <code>/optimize</code> for improvement tips.' };
+    var tree = '';
+    if (app.bundleIndex && app.bundleIndex.length) {
+      var show = app.bundleIndex.slice(0, 30);
+      tree = '<p style="margin:10px 0 4px;"><strong>Bundle tree (first 30):</strong></p>' +
+        '<ul style="font-family:SFMono-Regular,Menlo,monospace;font-size:13px;line-height:1.6;margin:0 0 8px;padding-left:20px;">' +
+        show.map(function (p) { return '<li>' + escHtml(p) + '</li>'; }).join('') + '</ul>';
+      if (app.bundleIndex.length > 30) tree += '<p class="hint">…and ' + (app.bundleIndex.length - 30) + ' more.</p>';
+      tree += '<p class="hint">Use <code>/explain &lt;filename&gt;</code> to pull that file\'s content into the chat.</p>';
+    }
+    return { answer: '<strong>File analysis:</strong>' + table + tree + 'Run <code>/fix</code> for a health check or <code>/optimize</code> for improvement tips.' };
   }
   function slashScan(app) {
     return {
@@ -2585,6 +2706,7 @@
       safe('wireInstallFlow', wireInstallFlow);
       safe('wireImportErrorModal', wireImportErrorModal);
       safe('wireAiProviderSettings', wireAiProviderSettings);
+      safe('wirePatchPreview', wirePatchPreview);
       safe('updateInstallUi', updateInstallUi);
       safe('renderFolderList', renderFolderList);
       safe('renderLibraryChips', renderLibraryChips);
@@ -4457,6 +4579,34 @@
       if (m2) titleGuess = m2[1].trim();
     } catch (e) {}
 
+    // ---- Nearby-files context for Load AI ----
+    // Keep a lightweight file index (just paths) on the app record, plus
+    // the full text of README / manifest.json / package.json when present.
+    // This lets /analyze and /explain reason over the *bundle* — not just
+    // the main HTML — without re-parsing the full inlined payload.
+    var bundleIndex = Object.keys(bundle).sort();
+    var bundleSamples = {};
+    function findBundlePath(pattern) {
+      for (var i = 0; i < bundleIndex.length; i++) {
+        if (pattern.test(bundleIndex[i])) return bundleIndex[i];
+      }
+      return null;
+    }
+    function grab(pathRe, cap) {
+      var p = findBundlePath(pathRe);
+      if (!p) return;
+      var entry = bundle[p];
+      if (entry && entry.type === 'text' && entry.body) {
+        bundleSamples[p] = entry.body.slice(0, cap || 8192);
+      }
+    }
+    grab(/(^|\/)readme\.(md|txt)$/i, 8192);
+    grab(/(^|\/)manifest\.json$/i, 4096);
+    grab(/(^|\/)package\.json$/i, 4096);
+    grab(/(^|\/)service-?worker\.js$/i, 4096);
+    grab(/(^|\/)styles?\.css$/i, 4096);
+    grab(/(^|\/)app\.js$/i, 4096);
+
     return {
       id: newId(),
       name: titleGuess || baseName,
@@ -4464,7 +4614,9 @@
       html: indexHtml,
       dateAdded: Date.now(),
       lastOpened: null,
-      sizeBytes: indexHtml.length
+      sizeBytes: indexHtml.length,
+      bundleIndex: bundleIndex,
+      bundleSamples: bundleSamples
     };
   }
   /* Inject a runtime shim that intercepts fetch / XMLHttpRequest /
