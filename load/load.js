@@ -3674,6 +3674,41 @@
     var indexHtml = await zip.file(startPath).async('string');
     indexHtml = await inlineHtmlAssets(indexHtml, baseDir, loadAsset);
 
+    // ---- Runtime bundle shim ----
+    // Inlining <script src> / <link rel=stylesheet> / <img src> covers
+    // declarative references, but real PWAs (like the ACR reader) also
+    // pull content at runtime via fetch('./data/foo.json') or
+    // XMLHttpRequest. Those calls fail inside Load's iframe because the
+    // iframe runs from a blob: URL and there is no server to ask. The
+    // symptom is exactly what the user reported on the ACR full-zip
+    // build: login + sidebar render, main area stays empty.
+    //
+    // Fix: pre-load every bundled file into an asset map and inject a
+    // tiny shim that makes fetch/XHR/Image/etc. look up paths there
+    // first. If the path isn't in the bundle we fall back to the real
+    // fetch (which will still fail offline, but at least it's honest).
+    showProgress('Building runtime bundle shim...');
+    var bundle = {};
+    for (var bi = 0; bi < files.length; bi++) {
+      var fPath = files[bi];
+      // Don't re-bundle the entry HTML — it's already in indexHtml,
+      // and the user agent never fetches "itself" at runtime.
+      if (fPath === startPath) continue;
+      var fExt = fPath.split('.').pop().toLowerCase();
+      var fEntry = zip.file(fPath);
+      if (!fEntry) continue;
+      try {
+        if (/^(css|js|html|htm|json|svg|txt|xml|md|csv)$/.test(fExt)) {
+          bundle[fPath] = { type: 'text', body: await fEntry.async('string') };
+        } else {
+          var mime2 = mimeFor(fExt);
+          var b64x = await fEntry.async('base64');
+          bundle[fPath] = { type: 'binary', mime: mime2, body: b64x };
+        }
+      } catch (e) { /* skip unreadable entries */ }
+    }
+    indexHtml = injectBundleShim(indexHtml, bundle, baseDir);
+
     var titleGuess = null;
     try {
       var m2 = /<title[^>]*>([^<]+)<\/title>/i.exec(indexHtml);
@@ -3689,6 +3724,64 @@
       lastOpened: null,
       sizeBytes: indexHtml.length
     };
+  }
+  /* Inject a runtime shim that intercepts fetch / XMLHttpRequest /
+   * Image / audio / video / scripts requesting paths inside the zip,
+   * and serves them from an embedded bundle. Also neuters service-
+   * worker registration so blob-URL apps don't spam errors trying to
+   * register a worker that can never succeed.
+   *
+   * The shim is written to be tiny and defensive — it preserves the
+   * original fetch for anything not in the bundle, so external URLs
+   * still behave normally (they'll just fail offline, same as before). */
+  function injectBundleShim(html, bundle, baseDir) {
+    var bundleJson = JSON.stringify(bundle);
+    var shim =
+      '(function(){' +
+        'try{var B=' + bundleJson + ';' +
+        'var BASE=' + JSON.stringify(baseDir || '') + ';' +
+        'function norm(p){if(!p)return "";p=String(p).split("#")[0].split("?")[0];' +
+          'if(/^[a-z]+:\\/\\//i.test(p))return null;' +
+          'if(/^data:|^blob:/i.test(p))return null;' +
+          'p=p.replace(/^\\.\\//,"");if(p.charAt(0)==="/")p=p.slice(1);' +
+          'if(BASE){var parts=(BASE+p).split("/");var stack=[];' +
+            'for(var i=0;i<parts.length;i++){if(!parts[i]||parts[i]===".")continue;if(parts[i]==="..")stack.pop();else stack.push(parts[i]);}' +
+            'return stack.join("/");}return p;}' +
+        'function get(p){var k=norm(p);if(!k)return null;if(B[k])return B[k];' +
+          'var keys=Object.keys(B);for(var i=0;i<keys.length;i++){if(keys[i].toLowerCase()===k.toLowerCase())return B[keys[i]];' +
+            'if(keys[i].split("/").pop().toLowerCase()===k.split("/").pop().toLowerCase())return B[keys[i]];}return null;}' +
+        'function makeBlob(e,p){var body;if(e.type==="text"){body=e.body;}else{var bin=atob(e.body);var u8=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);body=u8;}' +
+          'var ext=(p.split(".").pop()||"").toLowerCase();' +
+          'var mime=e.mime||({html:"text/html",htm:"text/html",css:"text/css",js:"text/javascript",json:"application/json",svg:"image/svg+xml",txt:"text/plain",xml:"text/xml",md:"text/markdown",csv:"text/csv"}[ext]||"application/octet-stream");' +
+          'return new Blob([body],{type:mime});}' +
+        'var realFetch=window.fetch?window.fetch.bind(window):null;' +
+        'window.fetch=function(input,init){var url=typeof input==="string"?input:(input&&input.url);var e=get(url);' +
+          'if(e){var blob=makeBlob(e,url);return Promise.resolve(new Response(blob,{status:200,headers:{"Content-Type":blob.type}}));}' +
+          'if(!realFetch)return Promise.reject(new Error("fetch not available and asset not bundled: "+url));' +
+          'return realFetch(input,init).catch(function(err){console.warn("Load bundle shim: fetch failed for",url,err);throw err;});};' +
+        'var RX=window.XMLHttpRequest;if(RX){var origOpen=RX.prototype.open;var origSend=RX.prototype.send;' +
+          'RX.prototype.open=function(method,url){this.__loadUrl=url;this.__loadMethod=method;return origOpen.apply(this,arguments);};' +
+          'RX.prototype.send=function(body){var self=this;var e=get(self.__loadUrl);if(e){' +
+            'setTimeout(function(){' +
+              'Object.defineProperty(self,"readyState",{value:4,configurable:true});' +
+              'Object.defineProperty(self,"status",{value:200,configurable:true});' +
+              'var text=e.type==="text"?e.body:"";' +
+              'Object.defineProperty(self,"responseText",{value:text,configurable:true});' +
+              'Object.defineProperty(self,"response",{value:text,configurable:true});' +
+              'if(typeof self.onreadystatechange==="function")self.onreadystatechange();' +
+              'if(typeof self.onload==="function")self.onload();' +
+              'self.dispatchEvent&&self.dispatchEvent(new Event("load"));' +
+            '},0);return;}return origSend.apply(this,arguments);};}' +
+        'if(navigator.serviceWorker){var r=navigator.serviceWorker.register;' +
+          'navigator.serviceWorker.register=function(){console.info("Load: service worker skipped (blob origin).");' +
+            'return Promise.resolve({scope:location.href,update:function(){return Promise.resolve();},unregister:function(){return Promise.resolve(true);}});};}' +
+        '}catch(err){console.warn("Load bundle shim init failed",err);}' +
+      '})();';
+    var shimTag = '<script>/* Load runtime bundle shim — intercepts fetch/XHR for assets bundled from the imported zip */\n' + shim + '</script>';
+    if (/<head[^>]*>/i.test(html)) {
+      return html.replace(/<head([^>]*)>/i, '<head$1>' + shimTag);
+    }
+    return shimTag + html;
   }
 
   function resolveInZip(baseDir, rel) {
