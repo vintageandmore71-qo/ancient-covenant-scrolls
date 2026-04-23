@@ -1108,6 +1108,17 @@ function prepTTS(txt) {
 }
 
 function speakText(text) {
+  // Piper neural-voice path — preferred Piper voice (if installed) lives
+  // under acr_study_piper_voice. When set, route through PiperVoices;
+  // falls back to Web Speech on any failure.
+  var piperVoice = '';
+  try { piperVoice = localStorage.getItem('acr_study_piper_voice') || ''; } catch (e) {}
+  if (piperVoice && window.PiperVoices && window.PiperVoices.isSupported()) {
+    try {
+      window.PiperVoices.speak(prepTTS(text), piperVoice, { rate: 1, volume: 1 });
+      return;
+    } catch (e) { /* fall through */ }
+  }
   if (!window.speechSynthesis) return;
   try { window.speechSynthesis.resume(); } catch (e) {}
   try { window.speechSynthesis.cancel(); } catch (e) {}
@@ -1117,6 +1128,20 @@ function speakText(text) {
   if (voice) u.voice = voice;
   window.speechSynthesis.speak(u);
 }
+
+// Open the Piper neural-voices panel. Wired to any element with
+// id "b-piper" or [data-piper-open]; added by study.html near the
+// existing TTS controls. No-op if the element isn't present.
+function wirePiperButton() {
+  var btns = document.querySelectorAll('#b-piper, [data-piper-open]');
+  btns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (window.PiperPanel) window.PiperPanel.open('acr_study_piper_voice');
+    });
+  });
+}
+if (document.readyState === 'complete' || document.readyState === 'interactive') wirePiperButton();
+else document.addEventListener('DOMContentLoaded', wirePiperButton);
 
 // ---- Smart Algorithmic Question Generator ----
 var IMPORTANT_WORDS = /\b(YHWH|Creator|covenant|Torah|Yisra.EL|holy|righteous|judgment|Sinai|Tziyon|Yerushalayim|temple|priest|prophet|angel|heaven|earth|glory|blessing|curse|commandment|Shabbat|Pesach|altar|offering|blood|fire|spirit|kingdom|throne|servant|nations|wilderness|promise|faithfulness|iniquity|transgression|sin|mercy|steadfast|everlasting|forever|inheritance|firstborn|circumcision|Pesach|jubilee|Sabbath|anointed|tabernacle|ark|sword|shield|trumpet|banner|pillar|cloud|lamp|bread|wine|oil|water|stone|mountain|river|garden|vineyard|sheep|shepherd|flock|seed|grain|harvest|tithe|vow|dream|vision|sign|wonder|plague|deliver|redeem|gather|scatter|exile|return|restore|remember|forget|forsake|seek|find|call|answer|hear|speak|write|teach|learn|obey|rebel|repent|forgive|heal|save|destroy|build|rest|rise|fall|live|die)\b/gi;

@@ -150,6 +150,8 @@ body.dark #home p{color:#888}
 #sb::-webkit-scrollbar{width:3px}
 #sb::-webkit-scrollbar-thumb{background:#555}
 </style>
+<script src="piper-voices.js"></script>
+<script src="piper-panel.js"></script>
 </head>
 <body>
 
@@ -372,6 +374,7 @@ body.dark #home p{color:#888}
 <select id="vs"><option value="0.7">0.7x</option><option value="0.85">0.85x</option><option value="1" selected>1x</option><option value="1.2">1.2x</option><option value="1.5">1.5x</option></select>
 <select id="vc"><option value="">Loading...</option></select>
 <button id="b-pv" title="Preview voice">&#9654;&#9654;</button>
+<button id="b-piper" title="Neural voices (Piper, offline)">&#129504;</button>
 <select id="vm"><option value="verses">Verses</option><option value="notes">Notes</option><option value="all">All</option></select>
 <span id="vst">Ready</span>
 </div>
@@ -671,6 +674,20 @@ document.getElementById('vst').textContent=(pi+1)+' of '+ps.length;
 try{localStorage.setItem('acr_vpos',JSON.stringify({fid:IDS[cur],pi:pi}));}catch(e){}
 var txt=prepTTS(p.textContent.trim());
 if(!txt){pi++;return speakCurrent();}
+// Piper neural-voice path — if the user picked an installed Piper voice
+// in Settings it's stored under acr_piper_voice. Route this paragraph
+// through PiperVoices.speak and chain to the next one on end/error.
+var piperVoice='';try{piperVoice=localStorage.getItem('acr_piper_voice')||'';}catch(e){}
+if(piperVoice&&window.PiperVoices&&window.PiperVoices.isSupported()){
+  try{
+    window.PiperVoices.speak(txt,piperVoice,{
+      rate:spd,volume:1,
+      onend:function(){if(!sp)return;pi++;rn();},
+      onerror:function(){if(!sp)return;pi++;rn();}
+    });
+    return true;
+  }catch(e){/* fall through to Web Speech */}
+}
 var u=new SpeechSynthesisUtterance(txt);
 u.rate=spd;u.lang='en-US';u.volume=1;u.pitch=1;
 var voice=getVoice();if(voice)u.voice=voice;
@@ -706,7 +723,8 @@ speakCurrent();
 document.getElementById('b-pa').addEventListener('click',function(){window.speechSynthesis.pause();pa=true;this.style.display='none';document.getElementById('b-pl').style.display='inline';document.getElementById('vst').textContent='Paused';});
 document.getElementById('b-st').addEventListener('click',stp);
 
-function stp(){sp=false;pa=false;if(window.speechSynthesis)window.speechSynthesis.cancel();pi=0;if(cp)cp.classList.remove('sp');cp=null;document.getElementById('b-pl').style.display='inline';document.getElementById('b-pa').style.display='none';document.getElementById('vst').textContent='Ready';}
+function stp(){sp=false;pa=false;if(window.speechSynthesis)window.speechSynthesis.cancel();if(window.PiperVoices)try{window.PiperVoices.cancel();}catch(e){}pi=0;if(cp)cp.classList.remove('sp');cp=null;document.getElementById('b-pl').style.display='inline';document.getElementById('b-pa').style.display='none';document.getElementById('vst').textContent='Ready';}
+document.getElementById('b-piper').addEventListener('click',function(){if(window.PiperPanel)window.PiperPanel.open('acr_piper_voice');});
 function dn(){sp=false;pi=0;if(cp)cp.classList.remove('sp');cp=null;document.getElementById('b-pl').style.display='inline';document.getElementById('b-pa').style.display='none';document.getElementById('vst').textContent='Done';}
 
 window.onscroll=function(){var s=window.scrollY||0,h=document.documentElement.scrollHeight-window.innerHeight;document.getElementById('pf').style.width=(h>0?Math.round(s/h*100):0)+'%';document.getElementById('tb2').style.display=s>300?'block':'none';};
