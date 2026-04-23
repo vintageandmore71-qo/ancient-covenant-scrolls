@@ -557,6 +557,70 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
 .console-input-row input:focus { outline: none; border-color: var(--accent); }
 .console-input-row button { min-height: 44px; padding: 8px 16px; }
 
+/* Scan / Log tab switcher inside the console drawer. Default: Scan on,
+   Log hidden. Switching toggles the .on class on each panel. */
+.console-scan, .console-logview {
+  flex: 1; overflow-y: auto; display: none;
+}
+.console-scan.on, .console-logview.on { display: flex; flex-direction: column; }
+.console-scan {
+  padding: 14px 16px max(14px, env(safe-area-inset-bottom));
+  gap: 12px;
+}
+.scan-row {
+  display: flex; gap: 10px; flex-wrap: wrap;
+}
+.scan-row .primary-btn, .scan-row .seg-btn {
+  min-height: 44px; padding: 10px 14px;
+}
+.scan-hint {
+  font-size: 15px; line-height: 1.6; color: var(--ink-mid);
+  margin: 0; padding: 12px 14px;
+  background: rgba(124, 124, 255, 0.08);
+  border-left: 3px solid var(--accent); border-radius: 6px;
+}
+.scan-report {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.scan-item {
+  padding: 12px 14px; border-radius: 8px;
+  background: var(--bg-0); border: 1px solid var(--border);
+  line-height: 1.6;
+}
+.scan-item.ok    { border-left: 4px solid #2bb673; }
+.scan-item.warn  { border-left: 4px solid #e0a040; background: rgba(224, 160, 64, 0.06); }
+.scan-item.error { border-left: 4px solid var(--danger); background: rgba(204, 63, 85, 0.08); }
+.scan-item.info  { border-left: 4px solid #0891b2; }
+.scan-item .label {
+  font-weight: 700; font-size: 15px;
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 4px;
+}
+.scan-item .detail {
+  font-size: 14px; color: var(--ink-mid);
+}
+.scan-item .detail code {
+  background: var(--bg-1); padding: 2px 6px; border-radius: 4px;
+  font-size: 13px;
+}
+.scan-summary {
+  padding: 14px 16px; border-radius: 8px;
+  background: linear-gradient(135deg, rgba(124,124,255,0.14), rgba(64,64,180,0.08));
+  border: 1px solid var(--accent);
+  font-size: 15px; line-height: 1.7;
+}
+.scan-summary strong { color: var(--accent); }
+.console-head .seg-btn.active {
+  background: var(--accent); color: #fff; border-color: var(--accent);
+}
+.import-error-body {
+  padding: 14px 16px; border-radius: 8px;
+  background: rgba(204, 63, 85, 0.10);
+  border-left: 4px solid var(--danger);
+  font-size: 15px; line-height: 1.7; color: var(--ink-hi);
+  margin: 6px 0 20px;
+}
+
 /* ------------- Notes drawer ------------- */
 .notes-drawer {
   position: fixed; top: 0; bottom: 0; right: -520px;
@@ -1153,11 +1217,13 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
 }
 .tile-menu-btn {
   position: absolute; top: 8px; right: 8px;
-  background: rgba(20,20,42,0.6); color: #c8c8dc; border: none;
-  width: 32px; height: 32px; border-radius: 16px; font-size: 16px;
+  background: rgba(20,20,42,0.85); color: #ffffff; border: 1px solid rgba(124,124,255,0.35);
+  width: 36px; height: 36px; border-radius: 18px;
+  font-size: 20px; font-weight: 700; line-height: 1;
   display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
 }
-.tile-menu-btn:active { background: rgba(40,40,80,0.8); }
+.tile-menu-btn:active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
 .context-menu {
   position: absolute; top: 44px; right: 8px;

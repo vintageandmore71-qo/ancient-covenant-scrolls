@@ -378,28 +378,345 @@
    * disabled developers: large mono font, generous spacing, colored
    * by severity, never scrolls off the top. */
   var consoleEntries = [];
+  var currentScanReport = null;
   function wireConsole() {
     var drawer = $('console-drawer');
     if (!drawer) return;
-    document.getElementById('console-btn-viewer').addEventListener('click', function () {
-      drawer.classList.toggle('on');
-    });
+    var viewerBtn = document.getElementById('console-btn-viewer');
+    if (viewerBtn) viewerBtn.addEventListener('click', openDevConsole);
     $('console-close').addEventListener('click', function () { drawer.classList.remove('on'); });
     $('console-clear').addEventListener('click', function () {
       consoleEntries.length = 0;
       renderConsole();
     });
     $('console-copy').addEventListener('click', function () {
-      var txt = consoleEntries.map(function (e) {
-        return '[' + e.level + '] ' + e.msg;
-      }).join('\n');
+      // Copy whichever tab the user is looking at so they can paste it
+      // into an email/note/Slack for help.
+      var scanOn = $('console-scan') && $('console-scan').classList.contains('on');
+      var txt;
+      if (scanOn && currentScanReport) {
+        txt = scanReportAsText(currentScanReport);
+      } else {
+        txt = consoleEntries.map(function (e) {
+          return '[' + e.level + '] ' + e.msg;
+        }).join('\n');
+      }
       copyToClipboard(txt);
-      toast('✓ Console copied to clipboard');
+      toast('✓ Copied to clipboard');
     });
     $('console-run').addEventListener('click', runConsoleEval);
     $('console-eval').addEventListener('keydown', function (e) {
       if (e.key === 'Enter') runConsoleEval();
     });
+    // Tab switcher — Scan vs Log. Sticky; last tab used is remembered
+    // for the current session only (no persisted setting, intentional).
+    var tabScan = $('console-tab-scan');
+    var tabLog = $('console-tab-log');
+    if (tabScan) tabScan.addEventListener('click', function () { switchConsoleTab('scan'); });
+    if (tabLog)  tabLog.addEventListener('click',  function () { switchConsoleTab('log'); });
+    // Scan + auto-fix buttons
+    var scanRun = $('console-scan-run');
+    var scanFix = $('console-scan-fix');
+    if (scanRun) scanRun.addEventListener('click', runScanCurrentApp);
+    if (scanFix) scanFix.addEventListener('click', runAutoFix);
+  }
+  function switchConsoleTab(name) {
+    var scan = $('console-scan');
+    var log = $('console-logview');
+    var tabScan = $('console-tab-scan');
+    var tabLog = $('console-tab-log');
+    if (!scan || !log) return;
+    if (name === 'scan') {
+      scan.classList.add('on'); log.classList.remove('on');
+      if (tabScan) tabScan.classList.add('active');
+      if (tabLog)  tabLog.classList.remove('active');
+    } else {
+      scan.classList.remove('on'); log.classList.add('on');
+      if (tabScan) tabScan.classList.remove('active');
+      if (tabLog)  tabLog.classList.add('active');
+    }
+  }
+  function updateScanHint() {
+    var hint = $('console-scan-hint');
+    if (!hint) return;
+    if (currentApp) {
+      hint.innerHTML = 'Open file: <strong>' + escHtml(currentApp.name) +
+        '</strong> &middot; Tap <strong>Scan current page</strong> to diagnose broken assets, JS errors, manifest problems, and render failures. Load will explain each issue in plain language.';
+    } else {
+      hint.innerHTML = 'No app open. Open any imported file in the viewer, then tap <strong>Scan current page</strong> to detect broken assets, missing manifest entries, script errors and more. Load will explain every issue in plain language and offer to fix what it can.';
+    }
+  }
+  /* ---------- Scan / diagnose / auto-fix engine ----------
+   * Given the currently open app, produce a plain-language health report:
+   *   - Broken asset references (src/href pointing to files the bundle
+   *     doesn't include, after inlining)
+   *   - Missing manifest fields (when the bundle is a PWA zip)
+   *   - JS errors already captured during the current session (from the
+   *     iframe console bridge)
+   *   - Structural issues (no <title>, no viewport meta, no <body>,
+   *     empty body, doctype missing)
+   *   - Local-runner compatibility checks (hard-coded http(s) urls,
+   *     absolute /-paths, service-worker-only assets)
+   * Each finding has a label, a detail, a severity, and an optional
+   * "fix" closure. Auto-fix runs every enabled fix closure, rebuilds
+   * the iframe from the patched HTML, and re-scans.
+   */
+  function runScanCurrentApp() {
+    var report = { items: [], fixable: 0 };
+    currentScanReport = report;
+    var box = $('console-scan-report');
+    if (!box) return;
+    if (!currentApp) {
+      box.innerHTML = '<div class="scan-item warn"><div class="label">&#9432; No app is open.</div>' +
+        '<div class="detail">Go to the Library, tap any tile to open it in the viewer, then come back here and tap <strong>Scan current page</strong>.</div></div>';
+      $('console-scan-fix').disabled = true;
+      return;
+    }
+    var html = currentApp.html || '';
+    scanStructural(html, report);
+    scanAssets(html, report);
+    scanManifest(currentApp, report);
+    scanLocalRunnerCompat(html, report);
+    scanCapturedErrors(report);
+    scanIframeRender(report);
+    renderScanReport(report);
+    $('console-scan-fix').disabled = report.fixable === 0;
+  }
+  function renderScanReport(report) {
+    var box = $('console-scan-report');
+    if (!box) return;
+    var errCount = report.items.filter(function (i) { return i.severity === 'error'; }).length;
+    var warnCount = report.items.filter(function (i) { return i.severity === 'warn'; }).length;
+    var okCount = report.items.filter(function (i) { return i.severity === 'ok'; }).length;
+    var summary;
+    if (errCount === 0 && warnCount === 0) {
+      summary = '<div class="scan-summary"><strong>&#9989; Looks healthy.</strong> ' +
+        'Ran ' + report.items.length + ' checks, found no problems. ' +
+        (okCount ? okCount + ' passed.' : '') + '</div>';
+    } else {
+      summary = '<div class="scan-summary"><strong>Scan complete.</strong> ' +
+        (errCount ? '<span style="color:var(--danger)">' + errCount + ' error' + (errCount===1?'':'s') + '</span>' : '') +
+        (errCount && warnCount ? ', ' : '') +
+        (warnCount ? '<span style="color:#e0a040">' + warnCount + ' warning' + (warnCount===1?'':'s') + '</span>' : '') +
+        (report.fixable ? ' &mdash; <strong>' + report.fixable + ' fixable.</strong> Tap <strong>Auto-fix issues</strong> to try.' : '') +
+        '</div>';
+    }
+    box.innerHTML = summary + report.items.map(function (item) {
+      return '<div class="scan-item ' + item.severity + '">' +
+        '<div class="label">' + item.icon + ' ' + escHtml(item.label) + '</div>' +
+        '<div class="detail">' + item.detail + '</div>' +
+      '</div>';
+    }).join('');
+  }
+  function scanReportAsText(report) {
+    var out = ['Load — Developer Console scan'];
+    out.push('Item: ' + (currentApp && currentApp.name ? currentApp.name : 'none open'));
+    out.push('Time: ' + new Date().toLocaleString());
+    out.push('');
+    report.items.forEach(function (item) {
+      out.push('[' + item.severity.toUpperCase() + '] ' + item.label);
+      out.push('  ' + item.detail.replace(/<[^>]+>/g, ''));
+    });
+    return out.join('\n');
+  }
+  function pushItem(report, severity, icon, label, detail, fix) {
+    var entry = { severity: severity, icon: icon, label: label, detail: detail };
+    if (typeof fix === 'function') {
+      entry.fix = fix;
+      if (severity !== 'ok') report.fixable++;
+    }
+    report.items.push(entry);
+  }
+  function scanStructural(html, report) {
+    if (!/<!doctype/i.test(html)) {
+      pushItem(report, 'warn', '&#9432;', 'No DOCTYPE declaration',
+        'The HTML is missing <code>&lt;!DOCTYPE html&gt;</code>. Some browsers fall back to quirks mode, which can break layout. Load can add the standard doctype automatically.',
+        function () { return '<!DOCTYPE html>\n' + html; });
+    } else {
+      pushItem(report, 'ok', '&#10003;', 'DOCTYPE declared', 'Standard <code>&lt;!DOCTYPE html&gt;</code> present.');
+    }
+    if (!/<title[^>]*>[^<]/i.test(html)) {
+      pushItem(report, 'warn', '&#9432;', 'No &lt;title&gt; element',
+        'Without a title, the viewer tab + bookmarks will show the filename. Load can inject a default title based on the item name.',
+        function (h) { return (h || html).replace(/<head([^>]*)>/i, '<head$1>\n<title>' + escHtml(currentApp.name || 'Untitled') + '</title>'); });
+    }
+    if (!/<meta[^>]+name=["']viewport/i.test(html)) {
+      pushItem(report, 'warn', '&#9432;', 'No viewport meta tag',
+        'On iPad the page will render at desktop width and feel zoomed out. Load can add <code>width=device-width,initial-scale=1</code>.',
+        function (h) { return (h || html).replace(/<head([^>]*)>/i, '<head$1>\n<meta name="viewport" content="width=device-width,initial-scale=1">'); });
+    }
+    if (!/<body[\s\S]*<\/body>/i.test(html)) {
+      pushItem(report, 'error', '&#10060;', 'No &lt;body&gt; element',
+        'The HTML has no body, so nothing can render. This usually means the file is a fragment, not a full page. Check the imported file in the HTML editor.');
+    } else {
+      var bodyMatch = /<body[^>]*>([\s\S]*?)<\/body>/i.exec(html);
+      if (bodyMatch && bodyMatch[1].replace(/<[^>]+>/g, '').trim().length < 3) {
+        pushItem(report, 'warn', '&#9888;', 'Body is empty',
+          'The body tag exists but has no visible content. If this file depends on JavaScript to populate it, check the Log tab for script errors.');
+      }
+    }
+  }
+  function scanAssets(html, report) {
+    // After Load's zip importer runs, external references SHOULD already
+    // be inlined. If any remain (href/src pointing to a relative path),
+    // those files weren't in the bundle and will 404 at runtime.
+    var broken = [];
+    var srcRe = /\b(?:src|href)\s*=\s*["']([^"']+)["']/gi;
+    var m;
+    var seen = {};
+    while ((m = srcRe.exec(html)) !== null) {
+      var url = m[1].trim();
+      if (!url) continue;
+      if (seen[url]) continue;
+      seen[url] = true;
+      if (/^(data|blob|about|mailto|tel|javascript|#):?/i.test(url)) continue;
+      if (/^https?:\/\//i.test(url)) continue;   // external, separate check
+      if (/^\/\//.test(url)) continue;           // protocol-relative, handled below
+      if (/^\//.test(url)) {
+        broken.push({ url: url, reason: 'absolute path — will 404 when opened from local / PWA runners' });
+      } else if (!/^[a-z]+:/i.test(url)) {
+        // relative path that survived inlining = file wasn't in the bundle
+        broken.push({ url: url, reason: 'relative path with no matching file in the bundle' });
+      }
+    }
+    if (!broken.length) {
+      pushItem(report, 'ok', '&#10003;', 'All asset references resolved', 'No stray <code>src</code> / <code>href</code> pointing to missing files.');
+    } else {
+      var list = broken.slice(0, 8).map(function (b) {
+        return '<li><code>' + escHtml(b.url) + '</code> — ' + escHtml(b.reason) + '</li>';
+      }).join('');
+      if (broken.length > 8) list += '<li>&hellip; and ' + (broken.length - 8) + ' more</li>';
+      pushItem(report, 'error', '&#10060;',
+        broken.length + ' broken asset reference' + (broken.length === 1 ? '' : 's'),
+        'These references will fail at runtime because the target file isn\'t in the bundle:<ul>' + list + '</ul>' +
+        '<strong>Fix:</strong> re-import the original folder as a <em>zip</em>, or use Files &rarr; Select multi-file, so Load can inline every asset.');
+    }
+    // External hard-coded URLs — fine online, but break offline-first PWAs.
+    var extRe = /\b(?:src|href)\s*=\s*["'](https?:\/\/[^"']+)["']/gi;
+    var externals = [];
+    while ((m = extRe.exec(html)) !== null) externals.push(m[1]);
+    if (externals.length) {
+      var uniq = Array.from(new Set(externals)).slice(0, 5);
+      pushItem(report, 'warn', '&#127760;', externals.length + ' external URL reference' + (externals.length === 1 ? '' : 's'),
+        'This file pulls resources from the internet at runtime. If you open Load offline, these will fail silently.<br>Examples: ' +
+        uniq.map(function (u) { return '<code>' + escHtml(u) + '</code>'; }).join(', ') +
+        '<br><strong>Fix:</strong> download those files into the bundle before importing, or switch to a fully self-contained version.');
+    }
+  }
+  function scanManifest(app, report) {
+    var html = app.html || '';
+    // Inline <script type="application/manifest+json"> or embedded JSON
+    // blob. Load can only validate what's in the inlined HTML since the
+    // zip has already been flattened.
+    var manifestMatch = /<script[^>]*application\/manifest\+json[^>]*>([\s\S]*?)<\/script>/i.exec(html);
+    var manifest = null;
+    if (manifestMatch) {
+      try { manifest = JSON.parse(manifestMatch[1]); } catch (e) {}
+    }
+    if (!manifest && app.kind === 'zip') {
+      pushItem(report, 'info', '&#128196;', 'No PWA manifest detected',
+        'This bundle has no inline PWA manifest. Load still runs it as an offline HTML app, but iPad will not treat it as a separate PWA if re-saved. (Optional.)');
+      return;
+    }
+    if (!manifest) return; // nothing to check
+    var required = ['name', 'start_url', 'display', 'icons'];
+    var missing = required.filter(function (k) { return !manifest[k]; });
+    if (missing.length) {
+      pushItem(report, 'warn', '&#9888;', 'Manifest missing fields',
+        'Your PWA manifest is missing: <code>' + missing.join('</code>, <code>') + '</code>. Load can still render the app; the missing fields just mean iPad won\'t give it a proper home-screen icon/title.');
+    } else {
+      pushItem(report, 'ok', '&#10003;', 'PWA manifest looks complete', 'name, start_url, display, icons all present.');
+    }
+  }
+  function scanLocalRunnerCompat(html, report) {
+    // Local runners (opening index.html from the filesystem) fail on:
+    //   - Service worker registrations (need HTTPS origin)
+    //   - Absolute "/foo" paths
+    //   - ES module scripts without a proper MIME server
+    var issues = [];
+    if (/navigator\.serviceWorker\.register/.test(html)) {
+      issues.push({
+        severity: 'info', icon: '&#128260;',
+        label: 'Service worker registration found',
+        detail: 'Service workers require an http(s) origin. Load inlines the app\'s files and runs it from a blob URL, so the service worker will silently fail to register. This is fine &mdash; Load is your offline layer now.'
+      });
+    }
+    var absPathMatches = html.match(/\b(?:src|href)\s*=\s*["']\/[^\/"'][^"']*["']/gi) || [];
+    if (absPathMatches.length) {
+      pushItem(report, 'warn', '&#9888;', 'Absolute-path references detected',
+        absPathMatches.length + ' reference' + (absPathMatches.length === 1 ? '' : 's') + ' start with <code>/</code>. Fine on a real server, but when run from a local PWA runner there is no "site root" &mdash; they resolve to nothing.<br><strong>Fix:</strong> switch to relative paths (remove the leading slash) before importing.',
+        function (h) {
+          return (h || html).replace(/(\b(?:src|href)\s*=\s*["'])\/(?!\/)/gi, '$1./');
+        });
+    }
+    issues.forEach(function (i) { pushItem(report, i.severity, i.icon, i.label, i.detail); });
+    // Root-structure expected by local PWA runners.
+    if (currentApp && currentApp.kind === 'zip') {
+      pushItem(report, 'info', '&#128193;',
+        'Expected PWA root structure',
+        'For maximum local-runner compatibility, your zip should have: <code>index.html</code>, <code>manifest.json</code>, <code>service-worker.js</code>, <code>app.js</code>, <code>styles.css</code>, <code>content.json</code>, <code>assets/</code>, <code>icons/</code>. Load does not require this layout &mdash; it inlines everything &mdash; but other PWA runners do.');
+    }
+  }
+  function scanCapturedErrors(report) {
+    var errors = consoleEntries.filter(function (e) { return e.level === 'error'; });
+    if (!errors.length) {
+      pushItem(report, 'ok', '&#10003;', 'No JavaScript errors captured',
+        'No <code>console.error</code> / uncaught exceptions since this app was opened.');
+      return;
+    }
+    var shown = errors.slice(-5).map(function (e) {
+      return '<li><code>' + escHtml(e.msg.slice(0, 240)) + '</code></li>';
+    }).join('');
+    pushItem(report, 'error', '&#10060;',
+      errors.length + ' JavaScript error' + (errors.length === 1 ? '' : 's') + ' captured',
+      'The loaded app logged errors while running. Most recent:<ul>' + shown + '</ul>' +
+      '<strong>Tip:</strong> switch to the Log tab to see every entry plus stack traces.');
+  }
+  function scanIframeRender(report) {
+    try {
+      var frame = $('viewer-frame');
+      if (!frame || !frame.contentDocument) {
+        pushItem(report, 'warn', '&#9888;', 'Viewer frame not available',
+          'The iframe isn\'t accessible right now — probably because you opened the console before the app finished loading. Tap Reload in the viewer and scan again.');
+        return;
+      }
+      var body = frame.contentDocument.body;
+      if (!body) {
+        pushItem(report, 'error', '&#10060;', 'Rendered page has no body',
+          'The iframe loaded but there is no <code>&lt;body&gt;</code> in the rendered DOM. Check the Log tab for a parse error.');
+        return;
+      }
+      var visibleText = (body.innerText || '').trim();
+      if (visibleText.length < 3) {
+        pushItem(report, 'warn', '&#9888;', 'Render looks blank',
+          'The page loaded but shows almost no text. Possible causes: (1) a CSS rule is hiding content, (2) a script error stopped the page from building itself, (3) the source file was a fragment. Check the Log tab for errors.');
+      } else {
+        pushItem(report, 'ok', '&#10003;', 'Page is rendering text',
+          Math.min(9999, visibleText.length) + ' chars of visible text in the rendered body.');
+      }
+    } catch (e) {
+      pushItem(report, 'warn', '&#9888;', 'Could not inspect the rendered DOM',
+        'Cross-origin or sandbox restrictions blocked the inspection: <code>' + escHtml(String(e.message || e)) + '</code>. This is usually safe to ignore.');
+    }
+  }
+  async function runAutoFix() {
+    if (!currentScanReport || !currentApp) return;
+    var fixable = currentScanReport.items.filter(function (i) { return typeof i.fix === 'function'; });
+    if (!fixable.length) { toast('Nothing to fix.'); return; }
+    var html = currentApp.html;
+    var applied = 0;
+    for (var i = 0; i < fixable.length; i++) {
+      try { var next = fixable[i].fix(html); if (next && typeof next === 'string') { html = next; applied++; } }
+      catch (e) { console.warn('fix failed', e); }
+    }
+    if (!applied) { toast('No fixes applied.'); return; }
+    currentApp.html = html;
+    try { await putApp(currentApp); } catch (e) {}
+    // Reload the iframe with the patched HTML so the user sees the fix.
+    try { openApp(currentApp); } catch (e) {}
+    toast('✓ Applied ' + applied + ' fix' + (applied === 1 ? '' : 'es') + '. Re-scan to confirm.');
+    // Re-scan automatically to show updated state.
+    setTimeout(runScanCurrentApp, 600);
   }
   function renderConsole() {
     var box = $('console-log');
@@ -1253,6 +1570,7 @@
       safe('wireConsole', wireConsole);
       safe('wireEditorControls', wireEditorControls);
       safe('wireInstallFlow', wireInstallFlow);
+      safe('wireImportErrorModal', wireImportErrorModal);
       safe('updateInstallUi', updateInstallUi);
       safe('renderFolderList', renderFolderList);
       safe('renderLibraryChips', renderLibraryChips);
@@ -1337,9 +1655,19 @@
         else if (tool === 'notes') openNotesScreen();
         else if (tool === 'audio') openAudioSettings();
         else if (tool === 'helper') openHelperPanel();
+        else if (tool === 'devconsole') openDevConsole();
         else if (tool === 'help') openHelp();
       });
     });
+  }
+  function openDevConsole() {
+    var drawer = $('console-drawer');
+    if (!drawer) return;
+    drawer.classList.add('on');
+    // Land on the Scan tab by default — that's the plain-language
+    // diagnose/fix view the user asked for. Log is still a tap away.
+    switchConsoleTab('scan');
+    updateScanHint();
   }
   function openAudioSettings() {
     openSettingsPanel();
@@ -1890,33 +2218,67 @@
     });
   }
 
-  /* ---------- Library search ---------- */
+  /* ---------- Library search ----------
+   * Opens a search bar when the 🔍 button is tapped. Filters tiles as
+   * you type across name, notes, kind (pdf/epub/html/zip/media), folder
+   * name, and a short preview of the inlined HTML so keyword matches
+   * inside documents also work. iPad Safari can be flaky about which
+   * input events fire, so we listen to input + keyup + change together. */
   var searchQuery = '';
   var searchBarEl = null;
-  var searchInputEl = null;
   function toggleLibrarySearch() {
     searchBarEl = searchBarEl || $('library-search');
-    searchBarEl.classList.toggle('on');
-    if (searchBarEl.classList.contains('on')) {
-      setTimeout(function () { $('library-search-input').focus(); }, 30);
-    } else {
-      searchQuery = '';
-      $('library-search-input').value = '';
-      renderLibrary();
+    if (!searchBarEl) return;
+    var isOpen = searchBarEl.classList.toggle('on');
+    var input = $('library-search-input');
+    if (isOpen) {
+      setTimeout(function () { input.focus(); input.select && input.select(); }, 30);
     }
+    // Closing the bar hides it but keeps the query so reopening resumes.
+    // If the user wants to clear, they tap the × Clear button.
+  }
+  function applySearchFromInput(el) {
+    searchQuery = String((el && el.value) || '').trim().toLowerCase();
+    renderLibrary();
   }
   function wireLibrarySearch() {
-    $('library-search-btn').addEventListener('click', toggleLibrarySearch);
-    $('library-search-clear').addEventListener('click', function () {
-      $('library-search-input').value = '';
+    var btn = $('library-search-btn');
+    var clearBtn = $('library-search-clear');
+    var input = $('library-search-input');
+    if (!btn || !clearBtn || !input) return;
+    btn.addEventListener('click', toggleLibrarySearch);
+    clearBtn.addEventListener('click', function () {
+      input.value = '';
       searchQuery = '';
       renderLibrary();
-      $('library-search-input').focus();
+      input.focus();
     });
-    $('library-search-input').addEventListener('input', function (e) {
-      searchQuery = String(e.target.value || '').trim().toLowerCase();
-      renderLibrary();
+    // Belt-and-suspenders: iPad Safari sometimes skips `input` on
+    // search-type fields when autocorrect strips characters. Listening
+    // to all three guarantees the filter runs.
+    ['input', 'keyup', 'change', 'search'].forEach(function (ev) {
+      input.addEventListener(ev, function (e) { applySearchFromInput(e.target); });
     });
+  }
+  function folderNameFor(id) {
+    try {
+      var folders = loadFolders();
+      for (var i = 0; i < folders.length; i++) if (folders[i].id === id) return folders[i].name || '';
+    } catch (e) {}
+    return '';
+  }
+  function searchHay(a) {
+    var kind = (a.kind || 'html');
+    var folderName = a.folderId ? folderNameFor(a.folderId) : '';
+    var preview = '';
+    if (typeof a.html === 'string') {
+      // Strip tags for a rough textual preview, cap length to keep it fast.
+      preview = a.html.replace(/<script[\s\S]*?<\/script>/gi, ' ')
+                      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+                      .replace(/<[^>]+>/g, ' ')
+                      .slice(0, 4000);
+    }
+    return ((a.name || '') + ' ' + (a.notes || '') + ' ' + kind + ' ' + folderName + ' ' + preview).toLowerCase();
   }
 
   /* ---------- Notes per imported app ---------- */
@@ -2388,9 +2750,15 @@
       filtered = filtered.filter(function (a) { return a.folderId === currentFolderFilter; });
     }
     if (searchQuery) {
+      // Space-separated tokens all have to match (AND), so "epub genesis"
+      // finds the EPUB containing the word "genesis".
+      var tokens = searchQuery.split(/\s+/).filter(Boolean);
       filtered = filtered.filter(function (a) {
-        var hay = ((a.name || '') + ' ' + (a.notes || '')).toLowerCase();
-        return hay.indexOf(searchQuery) >= 0;
+        var hay = searchHay(a);
+        for (var t = 0; t < tokens.length; t++) {
+          if (hay.indexOf(tokens[t]) < 0) return false;
+        }
+        return true;
       });
     }
     if (!filtered.length) {
@@ -2482,7 +2850,7 @@
       '<button data-act="home">&#127968; Add to Home Screen</button>' +
       '<button data-act="rename">&#9999; Rename</button>' +
       '<div class="menu-sep"></div>' +
-      '<button data-act="delete" class="danger">&#128465; Delete</button>';
+      '<button data-act="delete" class="danger">&#128465; Delete from Library</button>';
     tile.appendChild(menu);
     menu.addEventListener('click', function (ev) {
       ev.stopPropagation();
@@ -2554,7 +2922,9 @@
           catch (err) {
             failed++;
             hideProgress();
-            toast('✗ ' + files[i].name + ' failed: ' + (err && err.message ? err.message : err), true);
+            // Full multi-line reason: shown in a dismissible modal so the
+            // user can actually read it. The toast below is just a summary.
+            showImportError(files[i].name, err);
           }
         }
       }
@@ -2600,6 +2970,18 @@
     var lower = name.toLowerCase();
     var baseName = name.replace(/\.[^.]+$/, '');
 
+    // ---- Pre-flight validation ----
+    // Fail fast on broken uploads with a plain-language reason so the
+    // user knows what to do. Anything thrown here surfaces as a toast.
+    if (!file || typeof file.size !== 'number') {
+      throw new Error('The file handle is invalid. Retry by picking the file again from the Files app.');
+    }
+    if (file.size === 0) {
+      throw new Error(name + ' is empty (0 bytes). The upload was truncated or the file itself is a placeholder. Check the original in Files.');
+    }
+    if (file.size > 200 * 1024 * 1024) {
+      throw new Error(name + ' is ' + humanBytes(file.size) + '. iPad Safari\'s storage for a single inlined blob is roughly 200 MB. Split the file, or extract and re-upload the essentials only.');
+    }
     // Kindle formats - DRM-locked or unsupported. Friendly error.
     if (/\.(azw3?|kfx|mobi|prc)$/.test(lower)) {
       throw new Error(
@@ -2611,32 +2993,78 @@
         'Download Calibre: https://calibre-ebook.com (free, open source).'
       );
     }
+    if (/\.(exe|dmg|app|msi|deb|rpm|apk)$/.test(lower)) {
+      throw new Error(name + ' is a desktop/phone installer, not a web file. Load runs HTML/PWA/PDF/EPUB/media only.');
+    }
 
     showProgress('Reading ' + name + '...');
 
     var app;
-    if (/\.(html?|xhtml)$/.test(lower)) {
-      app = await handleHtml(file, baseName);
-    } else if (/\.zip$/.test(lower)) {
-      app = await handleZip(file, baseName);
-    } else if (/\.pdf$/.test(lower)) {
-      app = await handlePdf(file, baseName);
-    } else if (/\.epub$/.test(lower)) {
-      app = await handleEpub(file, baseName);
-    } else if (/\.(mp4|mov|m4v|webm|mkv|mp3|m4a|wav|ogg|aac|flac|jpe?g|png|gif|webp|bmp|svg|heic|heif)$/.test(lower)) {
-      app = await handleMedia(file, baseName);
-    } else {
-      // Fall back on MIME type if extension is unclear
-      if (file.type === 'text/html') app = await handleHtml(file, baseName);
-      else if (file.type === 'application/pdf') app = await handlePdf(file, baseName);
-      else if (file.type === 'application/epub+zip') app = await handleEpub(file, baseName);
-      else if (file.type === 'application/zip') app = await handleZip(file, baseName);
-      else if (/^(video|audio|image)\//.test(file.type || '')) app = await handleMedia(file, baseName);
-      else throw new Error('Unsupported file type. Load accepts HTML, ZIP, PDF, EPUB, and media (video / audio / image).');
+    try {
+      if (/\.(html?|xhtml)$/.test(lower)) {
+        app = await handleHtml(file, baseName);
+      } else if (/\.zip$/.test(lower)) {
+        app = await handleZip(file, baseName);
+      } else if (/\.pdf$/.test(lower)) {
+        app = await handlePdf(file, baseName);
+      } else if (/\.epub$/.test(lower)) {
+        app = await handleEpub(file, baseName);
+      } else if (/\.(mp4|mov|m4v|webm|mkv|mp3|m4a|wav|ogg|aac|flac|jpe?g|png|gif|webp|bmp|svg|heic|heif)$/.test(lower)) {
+        app = await handleMedia(file, baseName);
+      } else {
+        // Fall back on MIME type if extension is unclear
+        if (file.type === 'text/html') app = await handleHtml(file, baseName);
+        else if (file.type === 'application/pdf') app = await handlePdf(file, baseName);
+        else if (file.type === 'application/epub+zip') app = await handleEpub(file, baseName);
+        else if (file.type === 'application/zip') app = await handleZip(file, baseName);
+        else if (/^(video|audio|image)\//.test(file.type || '')) app = await handleMedia(file, baseName);
+        else throw new Error('Unsupported file type: "' + name + '". Load accepts .html, .zip, .pdf, .epub, and media (video/audio/image). Kindle (.azw/.mobi/.kfx) is not supported because of DRM.');
+      }
+    } catch (e) {
+      // Translate low-level parser failures into language that tells the
+      // user what to do rather than what technically broke.
+      var msg = String(e && e.message || e);
+      if (/JSZip/.test(msg)) throw new Error('Could not unpack ' + name + ' — the zip archive is either corrupted or uses an unsupported compression mode. Try re-zipping from Files (long-press the folder → Compress).');
+      if (/pdf\.js|InvalidPDF|corrupted/i.test(msg)) throw new Error('Could not read ' + name + ' as a PDF — the file may be password-protected, encrypted, or damaged. Open it in Files / Books first to confirm it opens there.');
+      if (/epub|container\.xml/i.test(msg)) throw new Error('Could not parse ' + name + ' as an EPUB — it is missing the standard <code>META-INF/container.xml</code> entry. Open it in Apple Books first to confirm the file is valid, then re-export if possible.');
+      throw e;
+    }
+    if (!app || !app.html) {
+      throw new Error('Load finished reading ' + name + ' but produced no content. The file is likely empty or corrupted. Check it in Files first.');
     }
 
     await putApp(app);
     apps.push(app);
+  }
+
+  function humanBytes(n) {
+    if (n < 1024) return n + ' B';
+    if (n < 1024*1024) return (n / 1024).toFixed(1) + ' KB';
+    if (n < 1024*1024*1024) return (n / (1024*1024)).toFixed(1) + ' MB';
+    return (n / (1024*1024*1024)).toFixed(2) + ' GB';
+  }
+  /* Full-screen import-error modal so multi-line plain-language reasons
+   * actually fit and the user can read + copy them. Falls back to toast
+   * if the modal isn't present. */
+  function showImportError(fileName, err) {
+    var modal = $('import-error-modal');
+    var msg = (err && err.message) ? err.message : String(err);
+    if (!modal) { toast('✗ ' + fileName + ' failed: ' + msg, true); return; }
+    $('import-error-title').textContent = fileName + ' could not be imported';
+    // Preserve newlines as <br> but escape everything else so we don't
+    // inject stray tags from a crafted filename/message.
+    var lines = msg.split(/\n+/).map(function (l) { return escHtml(l); });
+    $('import-error-body').innerHTML = lines.join('<br>');
+    modal.classList.add('on');
+  }
+  function wireImportErrorModal() {
+    var modal = $('import-error-modal');
+    if (!modal) return;
+    function close() { modal.classList.remove('on'); }
+    var dismiss = $('import-error-dismiss');
+    if (dismiss) dismiss.addEventListener('click', close);
+    var scan = $('import-error-scan');
+    if (scan) scan.addEventListener('click', function () { close(); openDevConsole(); });
   }
 
   /* ----- Multi-file bundle (folder-like) import ----- */

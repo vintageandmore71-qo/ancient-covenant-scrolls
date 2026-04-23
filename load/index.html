@@ -49,7 +49,8 @@
     <button class="nav-btn icon-only" data-tool="font" aria-label="Toggle dyslexia font" title="Dyslexia font">&#127752;</button>
     <button class="nav-btn icon-only" data-tool="notes" aria-label="Notes" title="Notes">&#128221;</button>
     <button class="nav-btn icon-only" data-tool="audio" aria-label="Audio / Read Aloud" title="Audio / Read Aloud">&#128266;</button>
-    <button class="nav-btn icon-only" data-tool="helper" aria-label="Load AI" title="Load AI assistant">&#128172;</button>
+    <button class="nav-btn icon-only" data-tool="helper" aria-label="Load AI" title="Load AI — built-in coding &amp; reading assistant">&#128172;</button>
+    <button class="nav-btn icon-only" data-tool="devconsole" aria-label="Developer Console" title="Developer Console — scan, diagnose &amp; fix uploads">&#128295;</button>
     <button class="nav-btn icon-only" data-tool="help" aria-label="Help" title="Help">?</button>
     <div class="spacer"></div>
     <button class="nav-btn" data-nav="settings" aria-label="Settings" title="Settings">
@@ -238,7 +239,8 @@
     <button class="nav-btn icon-only" data-tool="audio" aria-label="Audio / Read Aloud" title="Audio / Read Aloud">&#128266;</button>
     <div class="spacer"></div>
     <button id="library-search-btn" class="nav-btn icon-only" aria-label="Search" title="Search library">&#128269;</button>
-    <button class="nav-btn icon-only" data-tool="helper" aria-label="Load AI" title="Load AI assistant">&#128172;</button>
+    <button class="nav-btn icon-only" data-tool="helper" aria-label="Load AI" title="Load AI — built-in coding &amp; reading assistant">&#128172;</button>
+    <button class="nav-btn icon-only" data-tool="devconsole" aria-label="Developer Console" title="Developer Console — scan, diagnose &amp; fix uploads">&#128295;</button>
     <button class="nav-btn icon-only" data-tool="help" aria-label="Help" title="Help">?</button>
     <button class="nav-btn" data-nav="settings" aria-label="Settings" title="Settings">
       <span class="nav-icon">&#9881;</span><span class="nav-label">Aa</span>
@@ -282,31 +284,14 @@
     <button id="bookmarks-btn" class="icon-btn" aria-label="Bookmarks" title="Bookmarks">&#9733;</button>
     <button id="notes-btn" class="icon-btn" aria-label="Notes" title="Notes">&#128221;</button>
     <button id="share-btn-viewer" class="icon-btn" aria-label="Share by text, email, AirDrop..." title="Share (text, email, AirDrop...)">&#10150;</button>
-    <button id="ai-btn-viewer" class="icon-btn" aria-label="Ask AI about this" title="Ask AI">&#129302;</button>
-    <button id="console-btn-viewer" class="icon-btn" aria-label="Developer console" title="Developer console (logs, errors)">&#128187;</button>
+    <button id="ai-btn-viewer" class="icon-btn" aria-label="Built-in AI assistant" title="Load AI — explain, fix, optimize">&#128296;</button>
+    <button id="console-btn-viewer" class="icon-btn" aria-label="Developer Console" title="Developer Console — scan, diagnose &amp; fix">&#128295;</button>
     <button id="reload-btn" class="icon-btn" aria-label="Reload">&#8634;</button>
     <button id="aids-btn" class="icon-btn" aria-label="Reading aids">Aa</button>
     <button id="hide-ui-btn" class="icon-btn" aria-label="Hide controls" title="Hide controls">&#9776;</button>
   </header>
   <iframe id="viewer-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-storage-access-by-user-activation"></iframe>
   <button id="show-ui-btn" class="floating-show" aria-label="Show controls">&#9776;</button>
-
-  <!-- Developer console drawer — captures the loaded app's console output
-       and JS errors, shown in a dyslexia-friendly readable list. No Mac
-       needed. Slide-up panel at the bottom of the viewer. -->
-  <div id="console-drawer" class="console-drawer">
-    <div class="console-head">
-      <h3><span class="helper-icon">&#128187;</span> Developer Console</h3>
-      <button id="console-clear" class="seg-btn">Clear</button>
-      <button id="console-copy" class="seg-btn">Copy All</button>
-      <button id="console-close" class="icon-btn" aria-label="Close console">&times;</button>
-    </div>
-    <div id="console-log" class="console-log"></div>
-    <div class="console-input-row">
-      <input id="console-eval" type="text" placeholder="Try: 1 + 1 (runs in the loaded app)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
-      <button id="console-run" class="primary-btn">Run</button>
-    </div>
-  </div>
 
   <!-- TTS control drawer — slides up from the bottom when Read Aloud is tapped -->
   <div id="tts-drawer" class="tts-drawer">
@@ -1143,6 +1128,61 @@
   </div>
 </div>
 <div id="settings-scrim" class="scrim"></div>
+
+<!-- Developer console drawer — top-level so it's reachable from every
+     screen (home, library, viewer, editor). Captures the loaded app's
+     console output + JS errors in a dyslexia-friendly list AND runs a
+     plain-language scan/diagnose/auto-fix pass on the currently open
+     file. Slide-up panel at the bottom of the window. -->
+<div id="console-drawer" class="console-drawer">
+  <div class="console-head">
+    <h3><span class="helper-icon">&#128295;</span> Developer Console</h3>
+    <button id="console-tab-scan" class="seg-btn active" data-tab="scan">Scan</button>
+    <button id="console-tab-log" class="seg-btn" data-tab="log">Log</button>
+    <button id="console-clear" class="seg-btn">Clear</button>
+    <button id="console-copy" class="seg-btn">Copy All</button>
+    <button id="console-close" class="icon-btn" aria-label="Close console">&times;</button>
+  </div>
+
+  <div id="console-scan" class="console-scan on">
+    <div class="scan-row">
+      <button id="console-scan-run" class="primary-btn">&#128269; Scan current page</button>
+      <button id="console-scan-fix" class="seg-btn" disabled>&#128736; Auto-fix issues</button>
+    </div>
+    <p class="scan-hint" id="console-scan-hint">
+      No app open. Open any imported file in the viewer, then tap <strong>Scan current page</strong>
+      to detect broken assets, missing manifest entries, script errors and more. Load will explain
+      every issue in plain language and offer to fix what it can.
+    </p>
+    <div id="console-scan-report" class="scan-report"></div>
+  </div>
+
+  <div id="console-logview" class="console-logview">
+    <div id="console-log" class="console-log"></div>
+    <div class="console-input-row">
+      <input id="console-eval" type="text" placeholder="Try: 1 + 1 (runs in the loaded app)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <button id="console-run" class="primary-btn">Run</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import-error modal — fills the screen with the plain-language
+     reason an upload couldn't be processed. Replaces the old truncated
+     toast so multi-line reasons ("file was 0 bytes", "EPUB missing
+     container.xml" etc.) are readable and copyable. Also offers a
+     direct path into the Developer Console's Scan & Fix flow. -->
+<div id="import-error-modal" class="modal" role="dialog" aria-label="Import failed">
+  <div class="modal-box">
+    <h3 id="import-error-title">Import failed</h3>
+    <p class="hint" style="margin-top:0;"><strong>Load couldn't finish importing this file.</strong> Reason:</p>
+    <div id="import-error-body" class="import-error-body"></div>
+    <p class="hint"><strong>What to try:</strong> re-export or re-zip the file, confirm it opens in another app (Files / Books / Safari), then import again. If you already have a partially imported version in your Library, open it and tap <strong>Scan &amp; Fix</strong> below to run a full diagnosis.</p>
+    <div class="modal-actions">
+      <button id="import-error-scan" class="seg-btn">&#128295; Open Scan &amp; Fix</button>
+      <button id="import-error-dismiss" class="primary-btn">Got it</button>
+    </div>
+  </div>
+</div>
 
 <!-- Toast notifications for quick feedback (upload success, saves, etc.) -->
 <div id="toast" class="toast"></div>
