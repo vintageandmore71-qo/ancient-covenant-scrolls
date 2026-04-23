@@ -4151,10 +4151,8 @@
     e.stopPropagation();
     var btn = e.currentTarget;
     var id = btn.getAttribute('data-menu');
-    // Close any existing menus
     var existing = document.querySelectorAll('.context-menu');
     for (var i = 0; i < existing.length; i++) existing[i].remove();
-    var tile = btn.closest('.tile');
     var menu = document.createElement('div');
     menu.className = 'context-menu';
     menu.innerHTML =
@@ -4167,10 +4165,32 @@
       '<button data-act="rename">&#9999; Rename</button>' +
       '<div class="menu-sep"></div>' +
       '<button data-act="delete" class="danger">&#128465; Delete from Library</button>';
-    tile.appendChild(menu);
+    // Append to body so tile overflow:hidden can't clip it, and so the
+    // menu can extend past the tile into the viewport.
+    document.body.appendChild(menu);
+    // Position below the "…" button by default; flip up if it would
+    // overflow the viewport. Uses fixed positioning against getBoundingClientRect.
+    var rect = btn.getBoundingClientRect();
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+    var estW = Math.min(260, menu.offsetWidth || 260);
+    var estH = menu.offsetHeight || 360;
+    var left = Math.min(rect.right - estW, vw - estW - 8);
+    if (left < 8) left = 8;
+    var top;
+    if (rect.bottom + 8 + estH <= vh - 8) {
+      top = rect.bottom + 8;
+    } else if (rect.top - 8 - estH >= 8) {
+      top = rect.top - 8 - estH;
+    } else {
+      top = Math.max(8, vh - estH - 8);
+    }
+    menu.style.left = left + 'px';
+    menu.style.top = top + 'px';
     menu.addEventListener('click', function (ev) {
       ev.stopPropagation();
       var act = ev.target.getAttribute('data-act');
+      if (!act) return;
       menu.remove();
       var app = apps.find(function (x) { return x.id === id; });
       if (!app) return;
@@ -4183,7 +4203,6 @@
       else if (act === 'delete') promptDelete(id);
       else if (act === 'home') promptAddToHome(id);
     });
-    // Close when tapping outside
     setTimeout(function () {
       document.addEventListener('click', function closer() {
         menu.remove();

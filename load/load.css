@@ -1444,10 +1444,13 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
 .tile-menu-btn:active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
 .context-menu {
-  position: absolute; top: 44px; right: 8px;
+  position: fixed;
   background: #222238; border: 1px solid #3a3a5a; border-radius: 8px;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.5); z-index: 10;
-  min-width: 140px; overflow: hidden;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.5); z-index: 2000;
+  min-width: 220px; max-width: 320px;
+  max-height: calc(100vh - 24px);
+  overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 .context-menu button {
   display: block; width: 100%; padding: 10px 14px; background: none; color: #e8e8ee;
