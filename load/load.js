@@ -1790,16 +1790,48 @@
     var anyCloudKey = ['gemini', 'groq', 'openrouter', 'huggingface']
       .some(function (n) { return providerPrefs[n] && providerPrefs[n].enabled && providerPrefs[n].apiKey; });
 
+    // Highest priority: real provider errors from the last attempt.
+    // If Gemini/OpenRouter/etc. actually tried and threw, surface THOSE
+    // — the local-model state is irrelevant when the user has a working
+    // cloud key configured.
+    var failures = Object.keys(providerLastError).map(function (n) {
+      return '<li><strong>' + n + '</strong>: ' + escHtml(providerLastError[n]) + '</li>';
+    }).join('');
+    if (failures) {
+      return {
+        msg: 'The AI provider(s) I tried returned errors:<ul style="margin:6px 0 0 18px;padding:0;">' + failures + '</ul>' +
+             '<p style="margin:10px 0 0;font-size:13px;">If this is a network timeout, wait a few seconds and try again. If the key is bad, replace it in ⚙ Settings → Load AI.</p>',
+        label: 'provider error'
+      };
+    }
+
+    // No provider attempted at all — figure out why.
+    if (!local.installed && !anyCloudKey) {
+      return {
+        msg: 'No AI provider is set up yet. Open <strong>⚙ Settings → Load AI</strong> and either: <br>• Tap <strong>📥 Install local model (~400 MB)</strong> for a private offline AI, or<br>• Paste a free-tier key for Gemini / Groq / OpenRouter / Hugging Face.',
+        label: 'no provider configured'
+      };
+    }
+    // Cloud keys exist but none fired — could be the provider was disabled
+    // or the available() check was skipped. Be honest.
+    if (anyCloudKey) {
+      return {
+        msg: 'A cloud AI key is saved, but no provider was tried for this question. Open <strong>⚙ Settings → Load AI</strong> and make sure the checkbox next to your provider is ON.',
+        label: 'cloud provider not enabled'
+      };
+    }
+    // Only reach here if local is installed but not loaded and there's
+    // no cloud key — legitimately offline.
     if (local.installed && !localReady && localLoading) {
       return {
-        msg: 'The on-device model is <strong>still warming up</strong> — it takes ~10–20 seconds to load from your iPad\'s cache after the app launches. Please try your question again in a moment.',
+        msg: 'The on-device model is <strong>still warming up</strong> — it takes ~10–20 seconds to load from your iPad\'s cache. Please try your question again in a moment.',
         label: 'local model warming up'
       };
     }
     if (local.installed && !localReady && !localLoading) {
       return {
-        msg: 'The on-device model is installed but <strong>did not reload</strong> — your iPad may have cleared the browser cache. Tap <strong>⚙ Settings → Load AI → Reinstall</strong> to get it back.',
-        label: 'local model cache gone'
+        msg: 'The on-device model is installed but not running. Tap <strong>⚙ Settings → Load AI → Reinstall</strong> to load it, or add a free cloud key (Gemini / OpenRouter) for instant answers.',
+        label: 'local model not loaded'
       };
     }
     if (!local.installed && !anyCloudKey) {
@@ -2115,7 +2147,7 @@
         setProviderStatus('gemini', 'busy', 'Thinking…');
         var key = providerPrefs.gemini.apiKey;
         var sys = buildSystemPrompt();
-        var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=' + encodeURIComponent(key);
+        var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + encodeURIComponent(key);
         var body = {
           systemInstruction: { parts: [{ text: sys }] },
           contents: [{
