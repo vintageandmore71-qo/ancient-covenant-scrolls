@@ -1463,6 +1463,56 @@
       });
     });
   }
+  function applyCodeToEditor(code) {
+    // Three scenarios:
+    //   1. Editor is already open with a file — insert at the caret, or
+    //      replace the textarea contents if the file is essentially
+    //      empty (< 20 chars of non-whitespace).
+    //   2. Viewer is open on an HTML file — prompt to open that file in
+    //      the editor with the new code inserted at the top.
+    //   3. Anywhere else — create a fresh scratch app and open the
+    //      editor on it. Nothing is persisted until the user hits Save.
+    var ta = document.getElementById('editor-textarea');
+    var editorScreen = document.getElementById('editor-screen');
+    var editorActive = editorScreen && editorScreen.classList.contains('on');
+    if (editorActive && ta && editingApp) {
+      var cur = ta.value || '';
+      if (cur.trim().length < 20) {
+        ta.value = code;
+      } else {
+        var start = (typeof ta.selectionStart === 'number') ? ta.selectionStart : cur.length;
+        var end = (typeof ta.selectionEnd === 'number') ? ta.selectionEnd : cur.length;
+        ta.value = cur.slice(0, start) + code + cur.slice(end);
+        try { ta.selectionStart = ta.selectionEnd = start + code.length; } catch (_) {}
+      }
+      closeHelperPanel();
+      setTimeout(function () { ta.focus(); }, 200);
+      toast('✓ Code applied to editor');
+      return;
+    }
+    // Open a scratch file in the editor. The object matches the shape
+    // openEditor() and the editor-save handler expect; if the user
+    // decides not to keep it, closing the screen is enough — nothing
+    // has been written to IndexedDB yet.
+    var when = new Date();
+    var scratch = {
+      id: 'scratch-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8),
+      name: 'AI scratch — ' + when.toLocaleString(),
+      kind: 'html',
+      html: code,
+      sizeBytes: code.length,
+      dateAdded: Date.now()
+    };
+    try {
+      openEditor(scratch);
+      closeHelperPanel();
+      toast('✓ Opened in editor — tap Save to keep it');
+    } catch (e) {
+      console.warn('applyCodeToEditor openEditor failed', e);
+      copyToClipboard(code);
+      toast('Couldn\'t open the editor automatically. Code copied instead.');
+    }
+  }
   function resetHelperChat() {
     // Wipe the conversation + re-capture context + re-show the welcome
     // bubble. Intentionally does NOT touch providerPrefs or any saved
@@ -1681,6 +1731,29 @@
       });
       div.appendChild(document.createElement('br'));
       div.appendChild(copyBtn);
+    }
+    // Apply-to-editor button on assistant bubbles that contain a code
+    // block. One tap drops the first code block into the HTML editor —
+    // replacing an empty editor, inserting at the caret of a non-empty
+    // one, or opening a fresh scratch file from any other screen.
+    if (role === 'assistant' && !isPreamble) {
+      var codeMatch = String(html).match(/<pre class="code-block">([\s\S]*?)<\/pre>/);
+      if (codeMatch) {
+        var applyBtn = document.createElement('button');
+        applyBtn.className = 'helper-action helper-apply';
+        applyBtn.setAttribute('aria-label', 'Apply code to editor');
+        applyBtn.innerHTML = '&#128221; Apply to editor';
+        applyBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          // Decode the HTML-escaped code back to its original form.
+          var decoder = document.createElement('textarea');
+          decoder.innerHTML = codeMatch[1];
+          var code = decoder.value;
+          applyCodeToEditor(code);
+        });
+        div.appendChild(document.createElement('br'));
+        div.appendChild(applyBtn);
+      }
     }
     msgs.appendChild(div);
     msgs.scrollTop = msgs.scrollHeight;

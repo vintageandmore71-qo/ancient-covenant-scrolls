@@ -1090,6 +1090,16 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
   padding: 6px 10px; min-height: 32px;
 }
 .helper-action.helper-copy:active { background: var(--bg-2); }
+/* Apply-to-editor is a stronger affordance than Copy — it actually
+   writes to a file — so it gets a filled accent style. */
+.helper-action.helper-apply {
+  margin-left: 6px;
+  background: var(--accent); color: var(--bg-0);
+  border: 1px solid var(--accent);
+  font-size: 13px; font-weight: 600;
+  padding: 8px 12px; min-height: 36px;
+}
+.helper-action.helper-apply:active { filter: brightness(0.92); }
 
 .helper-quick {
   display: flex; flex-wrap: wrap; gap: 8px;
