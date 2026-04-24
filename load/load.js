@@ -865,6 +865,41 @@
         'On iPad the page will render at desktop width and feel zoomed out. Load can add <code>width=device-width,initial-scale=1</code>.',
         function (h) { return (h || html).replace(/<head([^>]*)>/i, '<head$1>\n<meta name="viewport" content="width=device-width,initial-scale=1">'); });
     }
+    // Character encoding — without this, browsers default to the system
+    // locale which garbles non-ASCII (smart quotes, emoji, accents).
+    if (!/<meta[^>]+charset/i.test(html)) {
+      pushItem(report, 'warn', '&#9432;', 'No charset declaration',
+        'Without <code>&lt;meta charset="UTF-8"&gt;</code> browsers guess the encoding, which can garble smart quotes, accents, and emoji.',
+        function (h) { return (h || html).replace(/<head([^>]*)>/i, '<head$1>\n<meta charset="UTF-8">'); });
+    }
+    // Images with no alt attribute — bad for screen readers and common
+    // automated-fix target. We add an empty alt="" so the image is
+    // marked decorative; user can rename it later if meaningful.
+    var noAltImgs = (html.match(/<img\b(?![^>]*\salt\s*=)[^>]*>/gi) || []).length;
+    if (noAltImgs > 0) {
+      pushItem(report, 'warn', '&#9888;', noAltImgs + ' image' + (noAltImgs === 1 ? '' : 's') + ' missing <code>alt</code>',
+        'Screen readers skip images without an alt attribute. Adding an empty <code>alt=""</code> marks them as decorative; for informative images the user should describe them in plain language.',
+        function (h) {
+          return (h || html).replace(/<img\b(?![^>]*\salt\s*=)([^>]*)>/gi, '<img alt=""$1>');
+        });
+    }
+    // Common third-party tracking / analytics scripts. These are almost
+    // never wanted in a personal book or offline PWA — strip them.
+    var trackerRe = /<script\b[^>]*\bsrc\s*=\s*["'][^"']*(?:google-analytics|googletagmanager|mixpanel|segment\.com|facebook\.net\/[^"']*fbevents|hotjar|fullstory|amplitude\.com|matomo)[^"']*["'][^>]*>\s*<\/script>/gi;
+    var trackerMatches = html.match(trackerRe) || [];
+    var inlineTrackerRe = /<script\b[^>]*>[\s\S]*?(?:gtag\(|ga\(|fbq\(|_gaq\.push|mixpanel\.|amplitude\.|hotjar\.)[\s\S]*?<\/script>/gi;
+    var inlineTrackerMatches = html.match(inlineTrackerRe) || [];
+    var totalTrackers = trackerMatches.length + inlineTrackerMatches.length;
+    if (totalTrackers > 0) {
+      pushItem(report, 'warn', '&#128274;', totalTrackers + ' tracking / analytics script' + (totalTrackers === 1 ? '' : 's'),
+        'This file includes known third-party tracking scripts (Google Analytics, Facebook Pixel, Mixpanel, etc.). They send information about the reader to outside servers — not ideal for a private book or offline PWA.',
+        function (h) {
+          var out = h || html;
+          out = out.replace(trackerRe, '');
+          out = out.replace(inlineTrackerRe, '');
+          return out;
+        });
+    }
     if (!/<body[\s\S]*<\/body>/i.test(html)) {
       pushItem(report, 'error', '&#10060;', 'No &lt;body&gt; element',
         'The HTML has no body, so nothing can render. This usually means the file is a fragment, not a full page. Check the imported file in the HTML editor.');
@@ -962,7 +997,20 @@
     var missing = required.filter(function (k) { return !manifest[k]; });
     if (missing.length) {
       pushItem(report, 'warn', '&#9888;', 'Manifest missing fields',
-        'Your PWA manifest is missing: <code>' + missing.join('</code>, <code>') + '</code>. Load can still render the app; the missing fields just mean iPad won\'t give it a proper home-screen icon/title.');
+        'Your PWA manifest is missing: <code>' + missing.join('</code>, <code>') + '</code>. Load can still render the app; the missing fields just mean iPad won\'t give it a proper home-screen icon/title. Auto-fix fills each one with a reasonable default.',
+        function (h) {
+          var cur = h || html;
+          var mm = /<script[^>]*application\/manifest\+json[^>]*>([\s\S]*?)<\/script>/i.exec(cur);
+          if (!mm) return cur;
+          var parsed;
+          try { parsed = JSON.parse(mm[1]); } catch (e) { return cur; }
+          if (!parsed.name) parsed.name = (app.name || 'Untitled');
+          if (!parsed.start_url) parsed.start_url = './';
+          if (!parsed.display) parsed.display = 'standalone';
+          if (!parsed.icons) parsed.icons = [{ src: 'icon.png', sizes: '192x192', type: 'image/png' }];
+          var nextJson = JSON.stringify(parsed, null, 2);
+          return cur.replace(mm[0], mm[0].split(mm[1]).join('\n' + nextJson + '\n'));
+        });
     } else {
       pushItem(report, 'ok', '&#10003;', 'PWA manifest looks complete', 'name, start_url, display, icons all present.');
     }
