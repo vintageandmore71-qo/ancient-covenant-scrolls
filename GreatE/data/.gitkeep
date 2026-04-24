@@ -1,0 +1,12 @@
+# GreatE / data
+
+Content files for **The Great Eraser** go in this folder.
+
+Typical contents:
+- `.json` chapter / volume files
+- `.md` or `.txt` source notes
+- Any assets the book references at `./data/...`
+
+Uploaded via GitHub's web UI. This `.gitkeep` exists only so the
+empty folder is tracked in git; replace with real data files whenever
+ready.
