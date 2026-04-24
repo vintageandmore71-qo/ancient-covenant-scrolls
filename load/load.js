@@ -1640,19 +1640,32 @@
   }
   function submitHelperQuestion() {
     var input = $('helper-input');
+    if (!input) { try { alert('Load AI: input field missing. Reload the app.'); } catch (_) {} return; }
     var q = (input.value || '').trim();
     if (!q) return;
-    addHelperMessage('user', escHtml(q));
     input.value = '';
+    // Give immediate visible feedback that the Send click fired. If any
+    // of the downstream steps crash, we still surface the error in the
+    // chat (or via alert as a last resort) instead of dying silently.
+    try {
+      addHelperMessage('user', escHtml(q));
+    } catch (e) {
+      try { alert('Load AI: couldn\'t render your message. ' + ((e && e.message) || String(e))); } catch (_) {}
+      return;
+    }
     try {
       submitHelperQuestionCore(q);
     } catch (e) {
       console.warn('submitHelperQuestion crashed', e);
-      addHelperMessage('assistant',
-        '<strong>Something went wrong.</strong> Error: <code>' + escHtml((e && e.message) || String(e)) + '</code>. Try closing and reopening Load. If it keeps happening, tell the developer exactly what you typed.',
-        null,
-        { tier: 'offline', label: 'helper error' }
-      );
+      try {
+        addHelperMessage('assistant',
+          '<strong>Something went wrong.</strong> <code>' + escHtml((e && e.message) || String(e)) + '</code>. Try closing and reopening Load.',
+          null,
+          { tier: 'offline', label: 'helper error' }
+        );
+      } catch (ee) {
+        try { alert('Load AI error: ' + ((e && e.message) || String(e))); } catch (_) {}
+      }
     }
   }
   function submitHelperQuestionCore(q) {
@@ -2437,31 +2450,15 @@
   // required once cached. Skipped on cold page loads if the user disabled
   // the local provider in settings.
   function autoInitLocalAi() {
-    // Deferred: kicking off transformers.js + a 400 MB WASM model at
-    // boot time freezes iPad Safari while WASM compiles. We delay the
-    // init until the browser is idle (or 5 seconds after boot, whichever
-    // comes first) so every button the user taps in the first few
-    // seconds stays responsive.
-    function start() {
-      if (!providerPrefs.local.installed || !providerPrefs.local.enabled) return;
-      if (typeof window.__LOAD_LOCAL_AI === 'function') return;
-      if (localAiInitPromise) return;
-      setProviderStatus('local', 'busy', 'Reloading cached model…');
-      localAiInitPromise = initLocalAiPipeline({ firstInstall: false })
-        .then(function () {
-          setProviderStatus('local', 'ok', 'Ready offline');
-        })
-        .catch(function (e) {
-          console.warn('Local AI auto-init failed', e);
-          setProviderStatus('local', 'error', 'Re-init failed — tap Install to retry');
-        })
-        .finally(function () { localAiInitPromise = null; });
-    }
-    if (typeof requestIdleCallback === 'function') {
-      requestIdleCallback(start, { timeout: 5000 });
-    } else {
-      setTimeout(start, 5000);
-    }
+    // Disabled by default: transformers.js's WASM compile can freeze
+    // the main thread on iPad Safari for tens of seconds during the
+    // reload from IDB cache, making every button feel dead. We only
+    // start the pipeline when the user actually needs on-device
+    // inference — i.e., the helper sends a question and Gemini /
+    // OpenRouter both fail. In the meantime cloud providers answer
+    // instantly on their own. If the user wants to force a warm-up
+    // they can tap "Install / Reinstall" in Settings → Load AI.
+    return;
   }
   function wireAiProviderSettings() {
     var CLOUD_PROVIDERS = ['gemini', 'groq', 'openrouter', 'huggingface'];

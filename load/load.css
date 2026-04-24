@@ -1108,7 +1108,9 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
   flex: 1; padding: 12px 14px;
   background: var(--bg-0); color: var(--ink-hi);
   border: 2px solid var(--border); border-radius: 10px;
-  font-size: 15px; -webkit-appearance: none;
+  /* 16px minimum — anything smaller and iOS Safari auto-zooms the
+     viewport on focus and doesn't unzoom when the keyboard closes. */
+  font-size: 16px; -webkit-appearance: none;
   font-family: inherit;
 }
 .helper-input-row input:focus { outline: none; border-color: var(--accent); }
