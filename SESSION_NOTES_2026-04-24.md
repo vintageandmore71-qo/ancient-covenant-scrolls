@@ -109,6 +109,26 @@ User pivoted the long-term focus. Sunday's work should serve this bigger mission
 
 - **Kindle-style book reading.** Load already handles **EPUB** and **PDF** import out of the box. Users can load books directly from Files or via share-to-Load from any reader. Dyslexia-friendly fonts, TTS, bookmarks, notes, and per-app theme memory all work on imported books.
 
+### 🌐 Domain plan (low budget)
+
+User asked whether buying domains matters if Load + Attain go App Store / Google Play only. Verdict: **necessary minimum is one domain**.
+
+Reasons: both stores **require** a privacy-policy URL to approve the app, and both **display** the developer website in the listing. A `dssorit.github.io` URL there looks like a hobby project; a custom domain looks like a real company.
+
+**Recommended cheapest workable plan:**
+- Buy **one umbrella domain** (e.g. `lbond.app`, ~$15/year, on Namecheap or Porkbun — NOT GoDaddy: 2× the cost, paid WHOIS privacy, aggressive upsells).
+- Use **subdomains for each app** (free): `load.lbond.app`, `attain.lbond.app`, `attainjr.lbond.app`.
+- Each subdomain hosts a small landing + privacy-policy page on GitHub Pages.
+
+**Defensive expansion if/when budget allows:**
+- `loadapp.io`, `attainapp.com`, `attainjr.com` — grab before squatters do.
+- Total at that point: ~$45–80/year.
+
+**Order of legal-protection spending (cheapest first):**
+1. Now — **one umbrella domain** (~$15/yr)
+2. Later — defensive domain registrations (~$30–60/yr)
+3. When revenue allows — **USPTO trademarks** Load → Attain → Attain Jr (~$250 each, one at a time)
+
 ### ⏸ Deferred (few weeks out)
 
 - **Piper TTS** — better voices than Safari's built-in. Revisit when main publishing pipeline is shipping.
