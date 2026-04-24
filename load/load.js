@@ -3016,28 +3016,45 @@
     'will':1,'would':1,'should':1,'could':1,'i':1,'you':1,'we':1,'they':1,
     'he':1,'she':1,'me':1,'us':1,'them':1,'item':1,'thing':1,'about':1
   };
+  // Domain gate for the KB: unless the question actually mentions
+  // something Load-related, the KB has no business answering. Without
+  // this, general questions like "recipe for pasta" or "capital of
+  // France" can hit a stray keyword match and get hijacked into an
+  // app-help response.
+  var KB_DOMAIN_RE = /\b(load|app|apps|pwa|html|css|javascript|js|zip|epub|pdf|file|files|folder|folders|library|page|bookmark|note|notes|share|backup|home\s*screen|offline|tts|speak|speech|read\s*aloud|theme|dark\s*mode|dyslex|font|setting|settings|create|editor|viewer|install|import|export|open\s*ai|gemini|groq|openrouter|huggingface|console|error|icon|manifest|service\s*worker|cache)\b/i;
   function scoreKnowledgeBase(q) {
+    // Domain fast-path: if the question doesn't mention Load-vocabulary,
+    // skip the KB entirely — let the AI provider handle it.
+    if (!KB_DOMAIN_RE.test(q)) return null;
     var qLower = ' ' + q.toLowerCase() + ' ';
     var expanded = expandTokens(q);
     var best = null;
     for (var i = 0; i < LOAD_KB.length; i++) {
       var entry = LOAD_KB[i];
       var score = 0;
+      var distinctHits = 0;
       entry.keywords.forEach(function (k) {
         var kLower = k.toLowerCase();
-        if (qLower.indexOf(' ' + kLower + ' ') >= 0) score += 6;
-        else if (qLower.indexOf(kLower) >= 0) score += 4;
+        var hitThisKw = false;
+        // Word-ish boundary match only — refusing raw substring stops
+        // "past" from matching "pasta" and similar false positives.
+        var esc = kLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        var phrasePattern = new RegExp('(^|[^a-z0-9])' + esc + '([^a-z0-9]|$)', 'i');
+        if (phrasePattern.test(qLower)) { score += 6; hitThisKw = true; }
         kLower.split(/\s+/).forEach(function (kt) {
           if (kt.length < 4) return;
           if (KB_STOPWORDS[kt]) return;
-          if (expanded.indexOf(kt) >= 0) score += 1.5;
+          if (expanded.indexOf(kt) >= 0) { score += 1.5; hitThisKw = true; }
           var kStem = kt.replace(/(ies|es|s|ing|ed)$/i, '');
-          if (kStem && kStem !== kt && expanded.indexOf(kStem) >= 0) score += 1;
+          if (kStem && kStem !== kt && expanded.indexOf(kStem) >= 0) { score += 1; hitThisKw = true; }
         });
+        if (hitThisKw) distinctHits++;
       });
-      if (!best || score > best.score) best = { score: score, entry: entry };
+      if (!best || score > best.score) best = { score: score, entry: entry, distinctHits: distinctHits };
     }
-    if (best && best.score >= 4) return best.entry;
+    // Require a strong score AND at least two distinct keyword hits so
+    // a single coincidental word match can't hijack the reply.
+    if (best && best.score >= 8 && best.distinctHits >= 2) return best.entry;
     return null;
   }
 
