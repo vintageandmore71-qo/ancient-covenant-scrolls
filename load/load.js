@@ -101,6 +101,34 @@
     document.body.style.letterSpacing = rootLetter + 'em';
   }
 
+  // iOS Safari auto-zooms into form inputs with font-size < 16px and
+  // won't unzoom when the keyboard closes. Once the PWA is reopened the
+  // zoom state can persist — the app appears "huge" and nothing the
+  // user taps feels right. The fix of bumping inputs to 16px prevents
+  // NEW zooms; this function attempts to clear any STUCK zoom from a
+  // previous session by briefly pinning maximum-scale=1, then restores
+  // the accessibility-friendly user-scalable viewport.
+  function fixStuckZoom() {
+    try {
+      var meta = document.querySelector('meta[name="viewport"]');
+      if (!meta) return;
+      var scale = (window.visualViewport && window.visualViewport.scale) || 1;
+      if (scale < 1.02 && scale > 0.98) return; // already at normal zoom
+      var original = meta.getAttribute('content');
+      meta.setAttribute('content', 'width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover');
+      // Force reflow so iOS picks up the new constraint
+      document.body.offsetHeight;
+      setTimeout(function () {
+        meta.setAttribute('content', original || 'width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=yes');
+        // Re-check; if still stuck, tell the user to pinch out.
+        var now = (window.visualViewport && window.visualViewport.scale) || 1;
+        if (now > 1.05) {
+          toast('iPad is stuck zoomed — pinch with two fingers to zoom out.', true);
+        }
+      }, 400);
+    } catch (e) { /* non-fatal */ }
+  }
+
   /* ---------- IndexedDB ---------- */
 
   function openDB() {
@@ -3180,6 +3208,7 @@
   async function boot() {
     try {
       safe('applySettings', applySettings);
+      safe('fixStuckZoom', fixStuckZoom);
       // Fire-and-forget: ask iOS to keep our storage. Home-screen PWAs
       // on iOS 17+ usually get granted without a prompt. If denied we
       // keep going — install UI will surface the real state later.
