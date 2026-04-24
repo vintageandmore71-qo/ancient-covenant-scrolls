@@ -1453,6 +1453,8 @@
     $('helper-input').addEventListener('keydown', function (e) {
       if (e.key === 'Enter') submitHelperQuestion();
     });
+    var newChatBtn = $('helper-newchat');
+    if (newChatBtn) newChatBtn.addEventListener('click', resetHelperChat);
     document.querySelectorAll('[data-helper-ask]').forEach(function (b) {
       b.addEventListener('click', function () {
         var q = b.getAttribute('data-helper-ask');
@@ -1460,6 +1462,25 @@
         submitHelperQuestion();
       });
     });
+  }
+  function resetHelperChat() {
+    // Wipe the conversation + re-capture context + re-show the welcome
+    // bubble. Intentionally does NOT touch providerPrefs or any saved
+    // state — just the visible chat history.
+    var msgs = $('helper-messages');
+    if (msgs) msgs.innerHTML = '';
+    var quick = $('helper-quick'); if (quick) quick.classList.remove('hidden');
+    helperContext = captureHelperContext();
+    refreshHelperQuickChips();
+    addHelperMessage('assistant', buildHelperWelcomeHtml(), null, BADGE_BUILTIN);
+    if (helperContext.kind === 'viewer' && helperContext.app) {
+      addHelperMessage('assistant',
+        'I can see you\'re reading <strong>' + escHtml(helperContext.app.name) + '</strong>. Ask me to summarize it, find a word, outline it, or walk you through it step by step.');
+    } else if (helperContext.kind === 'editor') {
+      addHelperMessage('assistant',
+        'You\'re in the HTML editor. Ask me for code snippets (buttons, links, centering text, colors), or how to use any Load feature.');
+    }
+    var input = $('helper-input'); if (input) { input.value = ''; input.focus(); }
   }
   /* ---- Context awareness ----
    * When the helper opens we grab whatever the user is currently
