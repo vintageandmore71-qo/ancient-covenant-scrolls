@@ -65,9 +65,18 @@ Load is fully working on your iPad with full AI, sharing, and scan/fix features.
 
 User pivoted the long-term focus. Sunday's work should serve this bigger mission:
 
-> **Load = a universal packaging + publishing platform for offline-first content.**
+> **Load = a mobile-first packaging + publishing platform for offline web apps.**
 >
-> Think: "Swift-like wrapper, but iPad-native." A creator opens Load, authors or imports a web app / book / PWA, and Load produces *every format anyone might want* — standalone PWA, native app bundle, EPUB for Kindle, PDF, webarchive, webloc — without ever needing a desktop, a build server, or an Apple Developer account.
+> Scope: **iOS and Android only.** Not Windows, not macOS, not Linux desktops. The point is to turn an offline web app (OWA / PWA) — something the user built or imported on their iPad — into a **fully working mobile application** the creator can hand to another phone or tablet user and have it feel native.
+>
+> Think "Swift, but iPad-native, and only for mobile." A creator opens Load, authors or imports an OWA / PWA, and Load produces every mobile format they might want:
+>   - Standalone single-file PWA (runs on any iOS/Android browser)
+>   - iOS app bundle (via PWABuilder handoff, sideload or App Store)
+>   - Android APK / AAB (via PWABuilder handoff, sideload or Play Store)
+>   - EPUB for Kindle / Apple Books / Kobo
+>   - PDF
+>
+> No desktop tools, no build server, no Apple Developer environment to learn. The whole pipeline runs on an iPad.
 >
 > The unprecedented bit: Load itself runs offline on iPad. No other tool in this space does that.
 
@@ -92,7 +101,7 @@ User pivoted the long-term focus. Sunday's work should serve this bigger mission
 
 4. **📑 PDF export** — universal fallback, needed for KDP paperback print. Use browser print API, styled carefully to produce KDP-acceptable PDF.
 
-5. **📦 App packaging walkthrough** — "PWA → native" via pwabuilder.com. Document the workflow so Load users can generate `.ipa` / `.apk` packages from any Load PWA. Needs Apple Developer account for iOS store submission but not for sideloading / TestFlight.
+5. **📦 Mobile app packaging walkthrough** — "PWA → native" via pwabuilder.com, **iOS + Android only, no Windows target**. Document the workflow so Load users can generate `.ipa` / `.apk` / `.aab` packages from any Load PWA. Apple Developer account needed for iOS App Store submission but not for sideloading / TestFlight. Android APK can be distributed without Play Store.
 
 ### ⏸ Deferred (few weeks out)
 
