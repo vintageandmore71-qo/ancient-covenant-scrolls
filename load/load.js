@@ -1712,6 +1712,17 @@
       };
     }
     // Fallback: something was enabled but every attempt failed at runtime.
+    // Surface the real errors so the user isn't flying blind.
+    var failures = Object.keys(providerLastError).map(function (n) {
+      return '<li><strong>' + n + '</strong>: ' + escHtml(providerLastError[n]) + '</li>';
+    }).join('');
+    if (failures) {
+      return {
+        msg: 'The AI provider(s) I tried returned errors:<ul style="margin:6px 0 0 18px;padding:0;">' + failures + '</ul>' +
+             '<p style="margin:10px 0 0;font-size:13px;">If the on-device model is throwing memory or WASM errors, your iPad may not have enough free memory. Reloading Load (swipe closed and reopen) often frees it up. Or use a free cloud key in Settings.</p>',
+        label: 'provider error'
+      };
+    }
     return {
       msg: 'Every enabled AI provider failed right now — either rate-limited, offline, or returned an error.',
       label: 'all providers failed'
@@ -1730,6 +1741,7 @@
    * into "try the next provider" not "fail". */
   var providerPrefs = loadProviderPrefs();
   var providerStatus = {};   // name -> 'ok' | 'rate-limited' | 'error' | 'busy'
+  var providerLastError = {}; // name -> last error message from askProviderChain
   var LS_PROVIDERS = 'load_ai_providers_v2';
   function defaultProviderPrefs() {
     // All cloud providers default to OFF. User explicitly enables each
@@ -1986,13 +1998,13 @@
   async function askProviderChain(question, ctx) {
     var context = buildProviderContext(ctx);
     var anyEnabled = false;
+    // Track the last error per provider so diagnoseNoProvider() can
+    // surface the real reason in the bubble instead of guessing.
+    providerLastError = {};
     for (var i = 0; i < LOAD_PROVIDERS.length; i++) {
       var p = LOAD_PROVIDERS[i];
       if (!p.available || !p.available()) continue;
       anyEnabled = true;
-      // Render a thinking placeholder for THIS provider so the UI
-      // tracks exactly which one is active. Replaced when it answers
-      // or when we move to the next in the chain.
       var placeholder = addThinkingMessage(p.label.replace(/^via\s+/, ''));
       try {
         var text = await p.ask(question, context);
@@ -2001,12 +2013,12 @@
           replaceMessage(placeholder, html, { tier: p.tier, label: p.label });
           return { answer: html, badge: { tier: p.tier, label: p.label } };
         }
-        // Empty/no-op — move on and drop the placeholder
+        providerLastError[p.name] = 'empty response';
         placeholder.remove();
       } catch (e) {
         placeholder.remove();
+        providerLastError[p.name] = (e && e.message) || String(e);
         console.warn('Provider ' + p.name + ' failed:', e);
-        // keep iterating
       }
     }
     if (!anyEnabled) return null;
