@@ -747,7 +747,16 @@
     scanCapturedErrors(report);
     scanIframeRender(report);
     renderScanReport(report);
-    $('console-scan-fix').disabled = report.fixable === 0;
+    // Keep the button tappable even when nothing is auto-fixable so the
+    // user gets a clear "Nothing to fix" response instead of a silent
+    // no-op. Text changes so the state is still visible.
+    var fixBtn = $('console-scan-fix');
+    if (fixBtn) {
+      fixBtn.disabled = false;
+      fixBtn.textContent = report.fixable === 0
+        ? '✓ Nothing to auto-fix'
+        : '\u{1F528} Auto-fix issues (' + report.fixable + ')';
+    }
   }
   function renderScanReport(report) {
     var box = $('console-scan-report');
