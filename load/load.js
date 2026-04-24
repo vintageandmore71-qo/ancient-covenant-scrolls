@@ -1644,7 +1644,18 @@
     if (!q) return;
     addHelperMessage('user', escHtml(q));
     input.value = '';
-
+    try {
+      submitHelperQuestionCore(q);
+    } catch (e) {
+      console.warn('submitHelperQuestion crashed', e);
+      addHelperMessage('assistant',
+        '<strong>Something went wrong.</strong> Error: <code>' + escHtml((e && e.message) || String(e)) + '</code>. Try closing and reopening Load. If it keeps happening, tell the developer exactly what you typed.',
+        null,
+        { tier: 'offline', label: 'helper error' }
+      );
+    }
+  }
+  function submitHelperQuestionCore(q) {
     // Refresh context each turn so follow-ups work even if they opened
     // the panel on Home and then navigated
     helperContext = captureHelperContext();
@@ -1727,6 +1738,11 @@
       fallbackToOffline(q, helperContext);
     }).catch(function (err) {
       console.warn('Provider chain failed', err);
+      addHelperMessage('assistant',
+        '<strong>AI call failed.</strong> <code>' + escHtml((err && err.message) || String(err)) + '</code>. Falling back to offline helpers.',
+        null,
+        { tier: 'offline', label: 'provider error' }
+      );
       fallbackToOffline(q, helperContext);
     });
     return;
