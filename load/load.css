@@ -281,6 +281,14 @@ button, .tap, [role="button"] { min-height: 48px; }
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+/* Unregistered trademark mark — small superscript so it doesn't
+   compete visually with the brand name. Visible enough for legal
+   notice; quiet enough for reading comfort. */
+.tm-mark {
+  font-size: 0.32em; font-weight: 400; letter-spacing: 0;
+  vertical-align: super; margin-left: 2px;
+  color: var(--ink-mid); -webkit-text-fill-color: currentColor;
+}
 .splash-tag { margin: 10px 0 0; font-size: 16px; color: var(--ink-mid); letter-spacing: 2px; text-transform: uppercase; }
 .splash-arrow { font-size: 64px; line-height: 1; color: var(--accent); margin-bottom: 14px; }
 
