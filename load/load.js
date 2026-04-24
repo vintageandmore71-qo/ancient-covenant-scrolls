@@ -1732,24 +1732,54 @@
       div.appendChild(document.createElement('br'));
       div.appendChild(copyBtn);
     }
-    // Apply-to-editor button on assistant bubbles that contain a code
-    // block. One tap drops the first code block into the HTML editor —
-    // replacing an empty editor, inserting at the caret of a non-empty
-    // one, or opening a fresh scratch file from any other screen.
+    // Apply-to-editor button on assistant bubbles that contain code.
+    // Preference order:
+    //   1. A fenced ```code block``` (typical AI-generated answer) —
+    //      apply exactly that.
+    //   2. Inline <code>…</code> snippets (typical built-in rule-based
+    //      answer) — apply the longest one, or join several if they're
+    //      all substantial.
     if (role === 'assistant' && !isPreamble) {
-      var codeMatch = String(html).match(/<pre class="code-block">([\s\S]*?)<\/pre>/);
-      if (codeMatch) {
+      var applyCode = null;
+      var fenceMatch = String(html).match(/<pre class="code-block">([\s\S]*?)<\/pre>/);
+      if (fenceMatch) {
+        var decoder1 = document.createElement('textarea');
+        decoder1.innerHTML = fenceMatch[1];
+        applyCode = decoder1.value;
+      } else {
+        var inlineMatches = String(html).match(/<code>([\s\S]*?)<\/code>/g) || [];
+        if (inlineMatches.length) {
+          var decoded = inlineMatches.map(function (m) {
+            var inner = m.replace(/^<code>|<\/code>$/g, '');
+            var d = document.createElement('textarea');
+            d.innerHTML = inner;
+            return d.value;
+          }).filter(function (s) { return s && s.trim().length >= 3; });
+          // Keep snippets that look like real markup/CSS/JS (contain <,
+          // { or ; or multiple words). Drop tiny fragments like "for".
+          var substantial = decoded.filter(function (s) {
+            return /[<{};]/.test(s) || s.split(/\s+/).length >= 2;
+          });
+          if (substantial.length === 1) {
+            applyCode = substantial[0];
+          } else if (substantial.length > 1) {
+            // Join multiple snippets with comment separators so the
+            // user can tell them apart in the editor.
+            applyCode = substantial.map(function (s, i) {
+              return '<!-- snippet ' + (i + 1) + ' -->\n' + s;
+            }).join('\n\n');
+          }
+        }
+      }
+      if (applyCode && applyCode.trim().length > 0) {
         var applyBtn = document.createElement('button');
         applyBtn.className = 'helper-action helper-apply';
         applyBtn.setAttribute('aria-label', 'Apply code to editor');
         applyBtn.innerHTML = '&#128221; Apply to editor';
+        var codeToApply = applyCode;
         applyBtn.addEventListener('click', function (e) {
           e.stopPropagation();
-          // Decode the HTML-escaped code back to its original form.
-          var decoder = document.createElement('textarea');
-          decoder.innerHTML = codeMatch[1];
-          var code = decoder.value;
-          applyCodeToEditor(code);
+          applyCodeToEditor(codeToApply);
         });
         div.appendChild(document.createElement('br'));
         div.appendChild(applyBtn);
