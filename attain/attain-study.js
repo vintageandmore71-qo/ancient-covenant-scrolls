@@ -1637,13 +1637,46 @@ function showWhoSaidIt(bookId, chIdx) {
     return;
   }
 
-  // Unique speakers for distractors
+  // Always build the speaker distractor pool from the WHOLE book so a
+  // chapter with only two speakers still yields 4 real answer choices.
+  // Four-option MC needs 4+ unique speakers; if the book lacks that
+  // diversity, bail with a clear message instead of padding blanks.
+  var bookQuotes = extractSpeakerQuotes(activeChapters);
   var speakerPool = [];
-  quotes.forEach(function (q) {
+  bookQuotes.forEach(function (q) {
     if (speakerPool.indexOf(q.speaker) === -1) speakerPool.push(q.speaker);
   });
+  if (speakerPool.length < 4) {
+    showNoContent(bookId, chIdx, 'Who Said It');
+    return;
+  }
 
-  var questions = shuffle(quotes.slice()).slice(0, 15);
+  // Aim for 10\u201330 questions. Drop any candidate whose distractor pool
+  // would fall short instead of padding with "\u2014" (that's what produced
+  // the blank answer bars). If the chapter alone can't field 10, pull
+  // more from the rest of the book so the activity stays substantive.
+  var candidates = shuffle(quotes.slice());
+  var questions = [];
+  for (var ci = 0; ci < candidates.length && questions.length < 30; ci++) {
+    var cq = candidates[ci];
+    if (speakerPool.filter(function (s) { return s !== cq.speaker; }).length >= 3) {
+      questions.push(cq);
+    }
+  }
+  if (questions.length < 10) {
+    var more = shuffle(bookQuotes.slice());
+    for (var mi = 0; mi < more.length && questions.length < 30; mi++) {
+      var mq = more[mi];
+      if (questions.indexOf(mq) !== -1) continue;
+      if (speakerPool.filter(function (s) { return s !== mq.speaker; }).length >= 3) {
+        questions.push(mq);
+      }
+    }
+  }
+  if (questions.length < 5) {
+    showNoContent(bookId, chIdx, 'Who Said It');
+    return;
+  }
   var qi = 0, score = 0, points = 0, firstAttempt = true, hintsUsed = 0;
   var mcColors = ['#dc2626', '#2563eb', '#059669', '#d97706'];
 
@@ -1652,9 +1685,9 @@ function showWhoSaidIt(bookId, chIdx) {
     var q = questions[qi];
     firstAttempt = true;
     hintsUsed = 0;
-    // Build 4 options: correct speaker + 3 distractors
+    // Build 4 options: correct speaker + 3 distractors (all real now \u2014
+    // the pre-filter above guarantees speakerPool \ {q.speaker} has >= 3).
     var distractors = shuffle(speakerPool.filter(function (s) { return s !== q.speaker; })).slice(0, 3);
-    while (distractors.length < 3) distractors.push('\u2014');
     var opts = shuffle([q.speaker].concat(distractors));
     var correctIdx = opts.indexOf(q.speaker);
 
@@ -2365,7 +2398,10 @@ function showRhymeChain(bookId, chIdx) {
     for (var w = 0; w < groups[keys[k]].length; w++) allWords.push({ word: groups[keys[k]][w], key: keys[k] });
   }
 
-  usableKeys = shuffle(usableKeys.slice()).slice(0, 8);
+  // Aim for 15–30 rhyme rounds per activity instead of just 8. Rounds
+  // that can't field three distractors self-skip in renderQ below so
+  // the final count is only ever real, answerable questions.
+  usableKeys = shuffle(usableKeys.slice()).slice(0, 30);
   var qi = 0, score = 0, points = 0;
 
   function renderQ() {
@@ -2375,10 +2411,11 @@ function showRhymeChain(bookId, chIdx) {
     var seed = shuffle(members)[0];
     var rhymer = shuffle(members.filter(function (w) { return w !== seed; }))[0];
     if (!rhymer) { qi++; renderQ(); return; }
-    // 3 distractors from OTHER rhyme groups
+    // 3 distractors from OTHER rhyme groups. If the pool can't field
+    // three real ones we skip this question rather than pad blanks.
     var nonRhymers = allWords.filter(function (x) { return x.key !== key; });
     var distractors = shuffle(nonRhymers).slice(0, 3).map(function (x) { return x.word; });
-    while (distractors.length < 3) distractors.push('\u2014');
+    if (distractors.length < 3) { qi++; renderQ(); return; }
     var opts = shuffle([rhymer].concat(distractors));
     var correctIdx = opts.indexOf(rhymer);
     var firstAttempt = true;
@@ -2929,7 +2966,12 @@ function showRemix(bookId, chIdx) {
       var answer = item.answer || (item.options && item.options[item.correct]);
       var otherAns = otherAnswerPool().filter(function (a) { return a && a.toLowerCase() !== String(answer).toLowerCase(); });
       var distractors = shuffle(otherAns).slice(0, 3);
-      while (distractors.length < 3) distractors.push('\u2014');
+      // If the answer pool is too thin for three real distractors,
+      // fall back to cloze (fill-in) for this round rather than
+      // show blank answer bars.
+      if (distractors.length < 3) { mode = 'cloze'; }
+    }
+    if (mode === 'mc') {
       var opts = shuffle([answer].concat(distractors));
       var correctIdx = opts.indexOf(answer);
       var question = item.prompt ? ('Which word fills the blank? ' + item.prompt) : (item.question || 'Choose the best answer.');
@@ -2983,7 +3025,9 @@ function showRemix(bookId, chIdx) {
       if (prompt === quote) { prompt = quote + ' \u2014 what word is missing?'; }
       var otherAns2 = otherAnswerPool().filter(function (a) { return a && a.toLowerCase() !== String(answer2).toLowerCase(); });
       var distractors2 = shuffle(otherAns2).slice(0, 3);
-      while (distractors2.length < 3) distractors2.push('\u2014');
+      // Can't field three real distractors \u2014 skip this round instead of
+      // showing blank bars. Next remix item will render in its place.
+      if (distractors2.length < 3) { qi++; renderNext(); return; }
       var opts2 = shuffle([answer2].concat(distractors2));
       var colors2 = ['#2563eb', '#059669', '#7c3aed', '#d97706'];
       h += '<div class="cloze-prompt">' + prompt.replace('______', '<span class="cloze-blank">______</span>') + '</div>';
