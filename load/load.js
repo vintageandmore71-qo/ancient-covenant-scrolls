@@ -4208,6 +4208,72 @@
    * resulting HTML is one file someone else can open with no extras.
    * The Web Share API (iPad Safari 16+) opens the native share sheet so
    * the user can AirDrop, email, save to Files, or message the file. */
+  // Apple's .webloc format — a one-URL plist. When tapped on iPad it
+  // always opens in Safari (not in QuickLook preview). That means if
+  // the URL is a data: URL containing the whole PWA, Safari loads it
+  // as a real page and JavaScript runs. Zero hosting, zero accounts,
+  // zero installs on the recipient's side — the file is 100% self-
+  // contained. For large apps we gzip + base64 the HTML and wrap it
+  // in a tiny decompressor launcher so the data URL stays small
+  // enough to fit iOS's data-URL size ceiling.
+  function buildWeblocXml(urlString) {
+    var escUrl = String(urlString).replace(/[&<>]/g, function (c) {
+      return c === '&' ? '&amp;' : c === '<' ? '&lt;' : '&gt;';
+    });
+    return '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n' +
+      '<plist version="1.0">\n' +
+      '<dict>\n' +
+      '\t<key>URL</key>\n' +
+      '\t<string>' + escUrl + '</string>\n' +
+      '</dict>\n' +
+      '</plist>\n';
+  }
+  async function gzipBase64(text) {
+    // Returns base64 of gzipped UTF-8 bytes. Requires CompressionStream
+    // (iOS 16.4+). Throws on older browsers so caller can fall back.
+    if (typeof CompressionStream === 'undefined') throw new Error('no CompressionStream');
+    var bytes = new TextEncoder().encode(text);
+    var stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'));
+    var gz = new Uint8Array(await new Response(stream).arrayBuffer());
+    var binary = '';
+    for (var i = 0; i < gz.length; i++) binary += String.fromCharCode(gz[i]);
+    return btoa(binary);
+  }
+  function buildDecompressorLauncher(gzBase64) {
+    // Minimal launcher HTML that Safari loads from the data URL; it
+    // inflates the payload and replaces itself with the real PWA. Uses
+    // document.open/write/close so scripts in the PWA execute normally.
+    return '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
+      '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">' +
+      '<title>Opening…</title>' +
+      '<style>html,body{margin:0;height:100%;background:#14142a;color:#f0f0f0;font-family:-apple-system,sans-serif;}.h{height:100%;display:flex;align-items:center;justify-content:center;font-size:16px;}</style>' +
+      '</head><body><div class="h">Opening book…</div><script>(async function(){try{' +
+        'var b=atob("' + gzBase64 + '");' +
+        'var u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);' +
+        'var s=new Blob([u]).stream().pipeThrough(new DecompressionStream("gzip"));' +
+        'var h=await new Response(s).text();' +
+        'document.open();document.write(h);document.close();' +
+      '}catch(e){document.body.innerHTML="<p style=padding:20px;color:#faa;>Could not open: "+(e&&e.message||e)+"</p>";}})();' +
+      '<\/script></body></html>';
+  }
+  function utf8ToBase64(text) {
+    var bytes = new TextEncoder().encode(text);
+    var binary = '';
+    for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary);
+  }
+  async function buildSelfContainedDataUrl(html) {
+    // Prefer gzipped + launcher (smaller). Fall back to raw base64
+    // when CompressionStream isn't available on the device.
+    try {
+      var gz = await gzipBase64(html);
+      var launcher = buildDecompressorLauncher(gz);
+      return 'data:text/html;base64,' + utf8ToBase64(launcher);
+    } catch (e) {
+      return 'data:text/html;base64,' + utf8ToBase64(html);
+    }
+  }
   // Apple's .webarchive format — an XML plist wrapping a full HTML
   // document. AirDropping one to another iPad opens it directly in
   // Safari (not in the QuickLook preview that blocks JavaScript) so
@@ -4488,16 +4554,20 @@
     wrap.id = '__loadSharePicker';
     wrap.style.cssText = 'position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.55);padding:20px;';
     wrap.innerHTML =
-      '<div role="dialog" aria-label="Share as" style="background:var(--bg-1,#1a1a2e);color:var(--ink-hi,#f0f0f0);border-radius:16px;padding:22px 22px 18px;max-width:520px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.55);">' +
+      '<div role="dialog" aria-label="Share as" style="background:var(--bg-1,#1a1a2e);color:var(--ink-hi,#f0f0f0);border-radius:16px;padding:22px 22px 18px;max-width:520px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.55);max-height:92vh;overflow-y:auto;">' +
         '<div style="font-size:19px;font-weight:700;margin-bottom:4px;">Share ' + escHtml(app.name || 'this') + ' as&hellip;</div>' +
-        '<div style="font-size:13px;color:var(--ink-mid,#a0a0b0);margin-bottom:16px;">Pick the format that fits what you want the recipient to do.</div>' +
-        '<button data-format="webarchive" class="seg-btn full" style="text-align:left;padding:14px 16px;margin-bottom:10px;background:var(--accent,#7b6cff);color:#12121a;border:none;border-radius:10px;font-weight:700;font-size:15px;display:block;width:100%;">' +
-          '&#128241; Safari App (.webarchive) &nbsp;&mdash; <em style="font-weight:500;">recommended for full PWAs</em>' +
-          '<div style="font-weight:400;font-size:12.5px;color:#2a2540;margin-top:3px;">Opens in Safari with full JS. Password, sidebar, audio all work. Add to Home Screen works.</div>' +
+        '<div style="font-size:13px;color:var(--ink-mid,#a0a0b0);margin-bottom:16px;">Pick how the recipient should open it. All options keep the file 100% offline &mdash; nothing uploaded anywhere.</div>' +
+        '<button data-format="webloc" class="seg-btn full" style="text-align:left;padding:14px 16px;margin-bottom:10px;background:var(--accent,#7b6cff);color:#12121a;border:none;border-radius:10px;font-weight:700;font-size:15px;display:block;width:100%;">' +
+          '&#128279; Offline Link (.webloc) &nbsp;&mdash; <em style="font-weight:500;">recommended</em>' +
+          '<div style="font-weight:400;font-size:12.5px;color:#2a2540;margin-top:3px;">Self-contained file. Recipient taps it &rarr; opens in Safari with full JS. Password, sidebar, audio, Add to Home Screen &mdash; all work. No hosting, no accounts, no installs.</div>' +
+        '</button>' +
+        '<button data-format="webarchive" class="seg-btn full" style="text-align:left;padding:14px 16px;margin-bottom:10px;background:var(--bg-2,#2a2a40);color:inherit;border:1px solid var(--border,#3a3a55);border-radius:10px;font-weight:600;font-size:15px;display:block;width:100%;">' +
+          '&#128241; Safari App (.webarchive)' +
+          '<div style="font-weight:400;font-size:12.5px;color:var(--ink-mid,#a0a0b0);margin-top:3px;">Fallback for large PWAs that don\'t fit in an Offline Link. Opens in Safari on iPad; JS support varies by iOS version.</div>' +
         '</button>' +
         '<button data-format="html" class="seg-btn full" style="text-align:left;padding:14px 16px;margin-bottom:10px;background:var(--bg-2,#2a2a40);color:inherit;border:1px solid var(--border,#3a3a55);border-radius:10px;font-weight:600;font-size:15px;display:block;width:100%;">' +
           '&#128196; Standalone HTML (.html)' +
-          '<div style="font-weight:400;font-size:12.5px;color:var(--ink-mid,#a0a0b0);margin-top:3px;">For uploading to a host (GitHub Pages, Netlify). On iPad itself, recipients hit preview restrictions &mdash; use webarchive instead.</div>' +
+          '<div style="font-weight:400;font-size:12.5px;color:var(--ink-mid,#a0a0b0);margin-top:3px;">For uploading to a host (GitHub Pages, Netlify). iPad preview blocks JS on raw .html &mdash; prefer Offline Link for direct sharing.</div>' +
         '</button>' +
         '<button data-format="cancel" class="seg-btn full" style="text-align:center;padding:10px;background:transparent;color:var(--ink-mid,#a0a0b0);border:none;font-size:14px;margin-top:4px;">Cancel</button>' +
       '</div>';
@@ -4508,9 +4578,34 @@
       if (!btn) return;
       var format = btn.getAttribute('data-format');
       wrap.remove();
-      if (format === 'webarchive') shareAsWebArchive(app);
+      if (format === 'webloc') shareAsWebloc(app);
+      else if (format === 'webarchive') shareAsWebArchive(app);
       else if (format === 'html') shareAsPlainHtml(app);
     });
+  }
+  async function shareAsWebloc(app) {
+    toast('Packaging as offline link…');
+    var html = await buildEnhancedShareHtml(app);
+    if (!html) { toast('Nothing to share for this item.', true); return; }
+    var dataUrl = await buildSelfContainedDataUrl(html);
+    // iOS Safari caps data URL navigation — not documented but ~10 MB
+    // works reliably on iOS 17+, older versions hold at ~2 MB. If the
+    // payload is too big we advise the user and offer the webarchive
+    // fallback so they're not stuck.
+    var MAX_BYTES = 9.5 * 1024 * 1024;
+    if (dataUrl.length > MAX_BYTES) {
+      var mb = (dataUrl.length / (1024 * 1024)).toFixed(1);
+      if (!confirm('This book is ' + mb + ' MB after compression — some iPads cap data URLs around 10 MB and may not open it. Try anyway? (Tap Cancel to use .webarchive instead.)')) {
+        shareAsWebArchive(app);
+        return;
+      }
+    }
+    var xml = buildWeblocXml(dataUrl);
+    var safeName = String(app.name || 'load-item').replace(/[^a-zA-Z0-9 _\-]/g, '').trim() || 'load-item';
+    var fileName = safeName + '.webloc';
+    var blob = new Blob([xml], { type: 'application/x-webloc' });
+    await shareBlobOrDownload(blob, fileName, 'application/x-webloc',
+      'Shared as ' + fileName + '. Recipient taps it → opens in Safari with full features. No install, no hosting.');
   }
   async function shareAsWebArchive(app) {
     toast('Packaging as Safari app…');
