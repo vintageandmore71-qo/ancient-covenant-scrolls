@@ -1,0 +1,14 @@
+{
+  "name": "The Great Eraser",
+  "short_name": "Great Eraser",
+  "description": "A Complete Research Manual — Ancient African-Israelite Identity, The Systematic Erasure, Primary Text Evidence",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0D0B07",
+  "theme_color": "#C9A84C",
+  "orientation": "portrait-primary",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}

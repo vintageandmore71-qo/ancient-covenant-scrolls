@@ -1,26 +1,1504 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>The Great Eraser — Coming Soon</title>
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="The Great Eraser">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <style>
-    html, body { margin:0; padding:0; background:#1a1a2e; color:#f0f0f0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; min-height:100vh; }
-    .holder { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; text-align:center; }
-    h1 { color:#a18cff; font-size:28px; margin:0 0 12px; }
-    p { color:#d0d0d8; line-height:1.6; max-width:420px; }
-    .hint { color:#9a9aa6; font-size:13px; margin-top:30px; max-width:360px; }
-    code { background:#2a2a40; padding:2px 6px; border-radius:4px; color:#a18cff; }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Great Eraser"/>
+<meta name="theme-color" content="#C9A84C"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="icon" href="icon-192.png"/>
+<link rel="apple-touch-icon" href="icon-512.png"/>
+<title>The Great Eraser</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+<style>
+/* ══════════════════════════════════════════════
+   DYSLEXIA-OPTIMISED DESIGN SYSTEM
+   Font: Atkinson Hyperlegible — designed for low vision / dyslexia
+   Fallback: Arial — clean, no serifs, even strokes
+   Body: 17px base, 1.9 line-height, no justified text
+   Max line length: 70ch — prevents tracking loss
+   High contrast — minimum 7:1 ratio on dark theme
+   ══════════════════════════════════════════════ */
+
+:root {
+  /* DARK THEME (default) */
+  --bg:         #0D0B07;
+  --bg2:        #161309;
+  --bg3:        #1E1A0F;
+  --sidebar-bg: #111109;
+  --sidebar-bdr:#2A2510;
+  --text:       #F0EAD6;
+  --text2:      #D4C89A;
+  --text3:      #9A8E72;
+  --hdr-bg:     #080704;
+  --hdr-text:   #F0EAD6;
+  --hdr-sub:    #9A8E72;
+  --bdr:        #2E2510;
+  --bdr2:       #3A3018;
+  --gold:       #C9A84C;
+  --gold-dark:  #8B6914;
+  --gold-dim:   #5C4510;
+  --btn-bg:     #1C1708;
+  --btn-bdr:    #3A3018;
+  --btn-hover:  #2A2210;
+  /* Evidence note colours — high contrast on dark */
+  --dss-txt:    #5DADE2;
+  --dss-bg:     #0C1520;
+  --dss-bdr:    #2E6DA4;
+  --orit-txt:   #58D68D;
+  --orit-bg:    #0B1A10;
+  --orit-bdr:   #1E8449;
+  --crit-txt:   #F1948A;
+  --crit-bg:    #1A0A08;
+  --crit-bdr:   #C0392B;
+  --gold-txt:   #F4D03F;
+  --gold-bg:    #1A1200;
+  --gold-bdr:   #B7950B;
+  --fact-bg:    #141008;
+  --fact-bdr:   #8B6914;
+  --src-txt:    #A9CCE3;
+  --src-bg:     #0A0F18;
+  /* Progress */
+  --prog-bg:    #2A2510;
+  --prog-fill:  #C9A84C;
+  /* Splash */
+  --splash-bg:  #080704;
+  --modal-bg:   rgba(0,0,0,0.85);
+  --modal-inner:#161309;
+  --search-hl:  #8B6914;
+  --scroll-top: #C9A84C;
+}
+
+body.light {
+  --bg:#FAFAF5; --bg2:#F2EFE4; --bg3:#E8E4D8;
+  --sidebar-bg:#F5F2E8; --sidebar-bdr:#D4C89A;
+  --text:#1A1600; --text2:#3C3010; --text3:#6E6040;
+  --hdr-bg:#1A1600; --hdr-text:#F0EAD6; --hdr-sub:#9A8E72;
+  --bdr:#D4C89A; --bdr2:#C0B080;
+  --btn-bg:#EDEADC; --btn-bdr:#C0B080; --btn-hover:#E0DACE;
+  --dss-txt:#1A5276; --dss-bg:#EBF5FB; --dss-bdr:#2E6DA4;
+  --orit-txt:#1E6B3A; --orit-bg:#EAFAF1; --orit-bdr:#1E8449;
+  --crit-txt:#7B241C; --crit-bg:#FDEDEC; --crit-bdr:#C0392B;
+  --gold-txt:#8B6914; --gold-bg:#FEF9EC; --gold-bdr:#B7950B;
+  --fact-bg:#F5F2E4; --fact-bdr:#8B6914;
+  --src-txt:#5C4020; --src-bg:#F0EDE0;
+  --prog-fill:#8B6914;
+  --modal-inner:#FAFAF5; --search-hl:#F4D03F;
+  --scroll-top:#8B6914;
+}
+
+body.sepia {
+  --bg:#F4EDD8; --bg2:#EDE4CC; --bg3:#E5DABC;
+  --sidebar-bg:#EDE4CC; --sidebar-bdr:#C8B890;
+  --text:#2C1E0A; --text2:#5C4020; --text3:#8C7050;
+  --hdr-bg:#3C2A10; --hdr-text:#F0E0B8; --hdr-sub:#A08060;
+  --bdr:#C8B890; --bdr2:#B0A070;
+  --btn-bg:#E5DABC; --btn-bdr:#B0A070; --btn-hover:#D8CCAA;
+  --dss-txt:#1A5276; --dss-bg:#E8F4FB; --dss-bdr:#2E6DA4;
+  --orit-txt:#145A32; --orit-bg:#E8F8F0; --orit-bdr:#1E8449;
+  --crit-txt:#6E2F1A; --crit-bg:#FEF0EB; --crit-bdr:#C0392B;
+  --gold-txt:#6E4E0A; --gold-bg:#FEF5DC; --gold-bdr:#B7950B;
+  --fact-bg:#EDE4CC; --fact-bdr:#8B6914;
+  --src-txt:#5C4020; --src-bg:#E8E0CC;
+  --prog-fill:#5C4020; --modal-inner:#F4EDD8;
+  --scroll-top:#5C4020;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Atkinson Hyperlegible',Arial,Helvetica,sans-serif;
+  font-size:17px;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+  transition:background .2s,color .2s;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── SPLASH SCREEN ───────────────────────────────────── */
+#splash{
+  position:fixed;inset:0;z-index:9999;
+  display:flex;align-items:flex-end;justify-content:center;
+  overflow:hidden;
+}
+#splash-cover-img{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:center top;
+}
+#splash-gradient{
+  position:absolute;inset:0;
+  background:linear-gradient(to bottom,rgba(0,0,0,0) 0%,rgba(0,0,0,0.2) 40%,rgba(0,0,0,0.82) 68%,rgba(0,0,0,0.97) 100%);
+}
+#splash .splash-inner{
+  position:relative;z-index:2;
+  display:flex;flex-direction:column;align-items:center;
+  width:100%;max-width:380px;padding:0 28px 56px;
+}
+.splash-symbol,.splash-rule,.splash-title,.splash-sub,
+.splash-tagline,.splash-auth,.splash-version{display:none;}
+.lock-label{
+  font-size:12px;color:rgba(240,234,214,0.65);
+  margin-bottom:10px;letter-spacing:0.07em;
+  text-transform:uppercase;text-align:center;
+}
+.lock-input{
+  width:100%;
+  padding:15px 18px;
+  border:1px solid rgba(201,168,76,0.45);
+  border-radius:10px;
+  background:rgba(0,0,0,0.52);
+  color:#F0EAD6;
+  font-family:inherit;font-size:16px;
+  text-align:center;letter-spacing:0.1em;
+  outline:none;
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  transition:border-color .2s;
+}
+.lock-input::placeholder{opacity:0.45;color:var(--gold);letter-spacing:0.05em;}
+.lock-input:focus{border-color:rgba(201,168,76,0.85);}
+.lock-btn{
+  width:100%;
+  padding:15px;margin-top:12px;
+  border:none;border-radius:10px;
+  background:rgba(201,168,76,0.92);
+  color:#0D0B07;
+  font-family:inherit;font-size:15px;font-weight:700;
+  letter-spacing:0.06em;
+  cursor:pointer;
+  transition:background .2s;
+}
+.lock-btn:hover{background:var(--gold);}
+.lock-err{color:#FF9999;font-size:12px;min-height:18px;
+  text-align:center;margin-top:10px;}
+
+/* ── PROGRESS BAR ────────────────────────────────────── */
+#progressBar{position:fixed;top:52px;left:0;right:0;height:3px;z-index:150;background:var(--prog-bg)}
+#progressFill{height:100%;background:var(--gold);width:0;transition:width .15s}
+
+/* ── HEADER ──────────────────────────────────────────── */
+.hdr{
+  position:fixed;top:0;left:0;right:0;z-index:200;height:52px;
+  background:var(--hdr-bg);
+  border-bottom:1px solid var(--bdr2);
+  display:flex;align-items:center;padding:0 8px;gap:6px;
+}
+.hdr-menu{
+  background:none;border:none;cursor:pointer;
+  color:var(--hdr-text);padding:8px;border-radius:6px;flex-shrink:0;
+  font-size:20px;line-height:1;transition:background .2s;
+}
+.hdr-menu:hover{background:rgba(255,255,255,.08)}
+.hdr-title{
+  flex:1;font-family:inherit;font-size:15px;font-weight:700;
+  color:var(--hdr-text);letter-spacing:0.02em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  line-height:1.3;
+}
+.hdr-title .pos{color:var(--hdr-sub);font-weight:400;font-size:12px}
+.hdr-actions{display:flex;gap:2px;flex-shrink:0}
+.icon-btn{
+  background:none;border:none;cursor:pointer;
+  color:var(--hdr-sub);padding:7px;border-radius:6px;
+  transition:all .2s;font-size:18px;line-height:1;
+}
+.icon-btn:hover{color:var(--hdr-text);background:rgba(255,255,255,.08)}
+
+/* ── LAYOUT ──────────────────────────────────────────── */
+.layout{display:flex;min-height:100vh;padding-top:55px}
+
+/* ── SIDEBAR ─────────────────────────────────────────── */
+.sidebar{
+  position:fixed;top:55px;left:0;bottom:0;width:300px;
+  background:var(--sidebar-bg);
+  border-right:1px solid var(--sidebar-bdr);
+  overflow-y:auto;z-index:100;
+  transition:transform .25s ease;
+  -webkit-overflow-scrolling:touch;
+  display:flex;flex-direction:column;
+}
+.sidebar.hidden{transform:translateX(-100%)}
+.sb-hdr{padding:10px 12px;border-bottom:1px solid var(--sidebar-bdr);flex-shrink:0}
+.sb-hdr h2{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
+.sb-tools{display:flex;gap:4px;flex-wrap:wrap}
+.sb-btn{
+  background:none;border:1px solid var(--btn-bdr);border-radius:5px;
+  cursor:pointer;color:var(--text2);padding:5px 9px;
+  font-family:inherit;font-size:12px;
+  transition:all .2s;white-space:nowrap;
+}
+.sb-btn:hover{background:var(--btn-hover);color:var(--text)}
+.sb-search-wrap{padding:8px 10px;border-bottom:1px solid var(--sidebar-bdr);flex-shrink:0}
+.sb-search{
+  width:100%;padding:8px 11px;
+  border:1px solid var(--btn-bdr);border-radius:6px;
+  background:var(--btn-bg);color:var(--text);
+  font-family:inherit;font-size:14px;outline:none;
+}
+.sb-search:focus{border-color:var(--gold)}
+.vol-item{border-bottom:1px solid var(--sidebar-bdr)}
+.vol-btn{
+  width:100%;text-align:left;background:none;border:none;cursor:pointer;
+  padding:10px 12px;display:flex;gap:8px;align-items:flex-start;
+  transition:background .2s;
+}
+.vol-btn:hover{background:var(--btn-hover)}
+.vol-btn.active{background:var(--btn-hover)}
+.vol-btn.open .v-arrow{transform:rotate(90deg)}
+.v-num{font-size:10px;font-weight:700;color:var(--text3);min-width:32px;letter-spacing:0.05em;margin-top:2px;flex-shrink:0}
+.v-txt{flex:1}
+.v-name{font-size:13px;color:var(--text);font-weight:700;line-height:1.3}
+.v-desc{font-size:11px;color:var(--text3);margin-top:2px;line-height:1.3}
+.v-arrow{margin-left:auto;color:var(--text3);font-size:14px;transition:transform .2s;flex-shrink:0;margin-top:3px}
+.ch-list{display:none}
+.ch-list.open{display:block}
+.ch-btn{
+  width:100%;text-align:left;background:none;border:none;cursor:pointer;
+  padding:7px 12px 7px 26px;
+  font-family:inherit;font-size:13px;color:var(--text2);
+  border-bottom:1px solid var(--bdr);
+  transition:background .15s;line-height:1.4;
+}
+.ch-btn:hover{background:var(--btn-hover);color:var(--text)}
+.ch-btn.active{background:var(--btn-hover);color:var(--text);font-weight:700}
+
+/* ── MAIN CONTENT ────────────────────────────────────── */
+.main{flex:1;margin-left:300px;min-width:0;transition:margin .25s}
+.main.full{margin-left:0}
+@media(max-width:720px){
+  .main{margin-left:0}
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+}
+
+/* ── OVERLAY ─────────────────────────────────────────── */
+.overlay{display:none;position:fixed;inset:0;z-index:90;background:rgba(0,0,0,0.5)}
+.overlay.visible{display:block}
+
+/* ── WELCOME ─────────────────────────────────────────── */
+.welcome{max-width:760px;margin:0 auto;padding:32px 24px 80px}
+.welcome-symbol{
+  font-size:clamp(38px,8vw,58px);color:var(--gold);
+  font-weight:700;margin-bottom:8px;letter-spacing:0.06em;
+}
+.welcome-title{
+  font-size:clamp(26px,6vw,38px);font-weight:700;
+  color:var(--text);margin-bottom:8px;line-height:1.25;
+}
+.welcome-sub{
+  font-size:clamp(15px,3.5vw,17px);color:var(--text2);
+  margin-bottom:20px;line-height:1.8;
+  max-width:60ch;
+}
+.welcome-divider{border:none;height:1px;background:var(--bdr2);margin:20px 0}
+.welcome-meta{font-size:14px;color:var(--text2);margin-bottom:6px;line-height:1.7}
+.welcome-excl{font-size:13px;color:var(--text3);font-style:italic;line-height:1.7}
+.vol-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:24px}
+.vol-card{
+  padding:16px;border:1px solid var(--bdr2);border-radius:10px;
+  cursor:pointer;transition:all .2s;background:var(--bg2);
+}
+.vol-card:hover{border-color:var(--gold);background:var(--bg3);transform:translateY(-2px)}
+.vc-num{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:0.07em;margin-bottom:4px}
+.vc-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;line-height:1.3}
+.vc-desc{font-size:12px;color:var(--text3);line-height:1.4}
+
+/* ── CHAPTER VIEW ────────────────────────────────────── */
+.chapter-view{max-width:70ch;margin:0 auto;padding:28px 24px 100px}
+@media(max-width:600px){.chapter-view{padding:20px 16px 100px}}
+
+.ch-hdr{margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid var(--gold-dim)}
+.ch-vol-label{
+  font-size:11px;font-weight:700;color:var(--text3);
+  letter-spacing:0.08em;text-transform:uppercase;margin-bottom:3px;
+}
+.ch-number{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:4px}
+.ch-title{
+  font-size:clamp(20px,5vw,26px);font-weight:700;
+  color:var(--text);line-height:1.3;
+}
+
+/* ── CONTENT BODY — DYSLEXIA OPTIMISED ──────────────── */
+.content-body{
+  font-size:17px;
+  line-height:1.9;
+  color:var(--text);
+  /* No justified text — ever */
+  text-align:left;
+  /* Generous letter spacing */
+  letter-spacing:0.01em;
+}
+
+/* Body paragraph */
+.para{
+  font-size:17px;
+  line-height:1.9;
+  color:var(--text);
+  margin-bottom:14px;
+  max-width:68ch;
+  /* Word spacing helps dyslexia */
+  word-spacing:0.05em;
+}
+
+/* Section banner */
+.section-banner{
+  font-family:inherit;
+  font-size:15px;font-weight:700;font-style:normal;
+  color:var(--gold);
+  margin:28px 0 10px;
+  padding:8px 12px;
+  border-left:4px solid var(--gold-dark);
+  background:var(--gold-bg);
+  border-radius:0 6px 6px 0;
+  letter-spacing:0.03em;
+  text-transform:uppercase;
+}
+
+/* Part banner */
+.part-banner{
+  font-size:16px;font-weight:700;
+  color:var(--hdr-text);
+  text-align:center;
+  margin:32px 0 24px;
+  padding:14px 20px;
+  background:var(--hdr-bg);
+  border-top:2px solid var(--gold);
+  border-bottom:2px solid var(--gold);
+  border-radius:4px;
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+}
+
+/* Cross-ref header */
+.xref-hdr{
+  font-size:13px;font-weight:700;
+  color:var(--text2);
+  margin:24px 0 10px;
+  padding:7px 12px;
+  background:var(--bg3);
+  border-left:3px solid var(--gold-dark);
+  border-radius:0 5px 5px 0;
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+}
+
+/* Bullet items — larger text, clear spacing */
+.bullet-item{
+  font-size:17px;
+  line-height:1.8;
+  color:var(--text);
+  margin-bottom:8px;
+  padding-left:22px;
+  position:relative;
+  max-width:66ch;
+  word-spacing:0.04em;
+}
+.bullet-item::before{
+  content:'▸';
+  position:absolute;left:0;
+  color:var(--gold);font-size:14px;
+  top:3px;
+}
+
+/* Source line */
+.source-line{
+  font-size:14px;font-style:italic;
+  color:var(--src-txt);
+  margin:4px 0 14px;
+  padding:6px 10px 6px 14px;
+  border-left:3px solid var(--bdr2);
+  background:var(--src-bg);
+  border-radius:0 5px 5px 0;
+  line-height:1.6;
+  max-width:66ch;
+}
+
+/* FACT BOX — gold bar */
+.fact-box{
+  margin:16px 0;
+  padding:14px 16px;
+  background:var(--gold-bg);
+  border-left:5px solid var(--gold);
+  border-radius:0 8px 8px 0;
+  max-width:66ch;
+}
+.fact-box .para{
+  font-weight:700;font-size:17px;
+  color:var(--gold-txt);
+  margin-bottom:0;line-height:1.8;
+}
+
+/* ── EVIDENCE NOTE BOXES — colour-coded ─────────────── */
+.note-box{
+  margin:16px 0;
+  padding:14px 16px;
+  border-left:5px solid;
+  border-radius:0 8px 8px 0;
+  max-width:66ch;
+}
+.note-label{
+  font-size:12px;font-weight:700;
+  margin-bottom:6px;letter-spacing:0.06em;
+  text-transform:uppercase;
+}
+.note-text{
+  font-size:15px;font-style:italic;
+  line-height:1.75;word-spacing:0.03em;
+}
+
+/* DSS — blue */
+.note-box.dss{
+  background:var(--dss-bg);
+  border-color:var(--dss-bdr);
+}
+.note-box.dss .note-label{color:var(--dss-txt)}
+.note-box.dss .note-text{color:var(--dss-txt)}
+
+/* Orit — green */
+.note-box.orit{
+  background:var(--orit-bg);
+  border-color:var(--orit-bdr);
+}
+.note-box.orit .note-label{color:var(--orit-txt)}
+.note-box.orit .note-text{color:var(--orit-txt)}
+
+/* Critical — red */
+.note-box.critical{
+  background:var(--crit-bg);
+  border-color:var(--crit-bdr);
+}
+.note-box.critical .note-label{color:var(--crit-txt)}
+.note-box.critical .note-text{color:var(--crit-txt);font-style:normal;font-weight:700}
+
+/* Gold / Masoretic */
+.note-box.gold,.note-box.masoretic{
+  background:var(--gold-bg);
+  border-color:var(--gold-bdr);
+}
+.note-box.gold .note-label,.note-box.masoretic .note-label{color:var(--gold-txt)}
+.note-box.gold .note-text,.note-box.masoretic .note-text{color:var(--gold-txt)}
+
+/* ── HIGHLIGHTS ──────────────────────────────────────── */
+.hl-y{background:#B7950B40;border-radius:2px}
+.hl-g{background:#1E844940;border-radius:2px}
+.hl-b{background:#2E6DA440;border-radius:2px}
+.hl-p{background:#7D3C9840;border-radius:2px}
+.hl-o{background:#CA6F1E40;border-radius:2px}
+
+/* ── HIGHLIGHT BAR ───────────────────────────────────── */
+#hlBar{
+  position:absolute;z-index:500;
+  background:var(--hdr-bg);
+  border:1px solid var(--bdr2);
+  border-radius:10px;
+  padding:6px 8px;
+  display:none;gap:4px;align-items:center;
+  box-shadow:0 4px 20px rgba(0,0,0,.5);
+}
+#hlBar.visible{display:flex}
+.hl-dot{
+  width:24px;height:24px;border-radius:50%;cursor:pointer;
+  border:2px solid transparent;transition:transform .15s;
+  flex-shrink:0;
+}
+.hl-dot:hover{transform:scale(1.25)}
+.hl-act{
+  background:none;border:1px solid var(--bdr2);border-radius:6px;
+  cursor:pointer;color:var(--text2);padding:3px 7px;
+  font-family:inherit;font-size:12px;
+}
+.hl-act:hover{background:var(--btn-hover);color:var(--text)}
+
+/* ── NAV ─────────────────────────────────────────────── */
+.ch-nav{
+  display:flex;gap:10px;margin-top:32px;padding-top:20px;
+  border-top:1px solid var(--bdr);
+}
+.nav-btn{
+  flex:1;padding:12px 10px;
+  border:1px solid var(--btn-bdr);border-radius:8px;
+  background:var(--bg2);cursor:pointer;
+  font-family:inherit;font-size:14px;color:var(--text2);
+  text-align:center;transition:all .2s;line-height:1.4;
+}
+.nav-btn:hover:not(:disabled){background:var(--btn-hover);color:var(--text);border-color:var(--gold)}
+.nav-btn:disabled{opacity:0.4;cursor:default}
+.nav-btn small{display:block;font-size:11px;color:var(--text3);margin-bottom:2px}
+
+/* ── READING BAR ─────────────────────────────────────── */
+.reading-bar{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--hdr-bg);
+  border-top:1px solid var(--bdr2);
+  padding:8px 12px;z-index:180;
+  display:none;flex-wrap:wrap;align-items:center;gap:8px;
+  font-size:13px;
+}
+.reading-bar.visible{display:flex}
+.read-btn{
+  background:none;border:1px solid #555;border-radius:6px;
+  cursor:pointer;color:#CCC;padding:5px 11px;
+  font-family:inherit;font-size:13px;transition:all .2s;
+}
+.read-btn:hover{background:#2A2A2A;color:#FFF}
+select.read-ctl{
+  background:#282828;border:1px solid #555;color:#CCC;
+  border-radius:6px;padding:4px 7px;
+  font-family:inherit;font-size:12px;
+  max-width:170px;
+}
+.read-lbl{font-size:11px;color:#888;white-space:nowrap}
+
+/* ── SCROLL TOP ──────────────────────────────────────── */
+#scrollTopBtn{
+  position:fixed;bottom:70px;right:16px;z-index:160;
+  background:var(--scroll-top);color:#0D0B07;
+  border:none;border-radius:50%;width:40px;height:40px;
+  cursor:pointer;font-size:18px;
+  display:none;align-items:center;justify-content:center;
+  box-shadow:0 2px 10px rgba(0,0,0,.35);transition:all .2s;
+}
+#scrollTopBtn.visible{display:flex}
+#scrollTopBtn:hover{transform:scale(1.1)}
+
+/* ── MODALS ──────────────────────────────────────────── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;z-index:400;
+  background:var(--modal-bg);align-items:center;justify-content:center;padding:16px;
+}
+.modal-overlay.open{display:flex}
+.modal-inner{
+  background:var(--modal-inner);
+  border:1px solid var(--bdr2);
+  border-radius:14px;
+  padding:22px;
+  max-width:420px;width:100%;
+  max-height:80vh;overflow-y:auto;
+}
+.modal-inner h2{font-size:18px;font-weight:700;color:var(--text);margin-bottom:14px}
+.modal-input{
+  width:100%;padding:10px 13px;
+  border:1px solid var(--btn-bdr);border-radius:7px;
+  background:var(--btn-bg);color:var(--text);
+  font-family:inherit;font-size:15px;outline:none;
+  margin-bottom:10px;
+}
+.modal-input:focus{border-color:var(--gold)}
+.modal-btn{
+  padding:9px 18px;border:1px solid var(--btn-bdr);border-radius:7px;
+  background:var(--btn-bg);cursor:pointer;
+  font-family:inherit;font-size:14px;color:var(--text2);
+  transition:all .2s;margin-right:6px;
+}
+.modal-btn.primary{background:var(--gold);color:#0D0B07;border-color:var(--gold);font-weight:700}
+.modal-btn:hover{background:var(--btn-hover);color:var(--text)}
+.modal-list{list-style:none;padding:0}
+.modal-list li{
+  padding:10px 12px;cursor:pointer;border-bottom:1px solid var(--bdr);
+  border-radius:6px;margin-bottom:2px;
+  font-size:14px;color:var(--text);line-height:1.4;
+  transition:background .15s;
+}
+.modal-list li:hover{background:var(--btn-hover)}
+.modal-list li small{display:block;color:var(--text3);font-size:12px;margin-top:2px}
+.modal-empty{font-size:14px;color:var(--text3);padding:12px 0}
+.modal-cancel{background:none;border:1px solid var(--btn-bdr)}
+
+/* ── SEARCH RESULTS ──────────────────────────────────── */
+.search-results{max-width:70ch;margin:0 auto;padding:24px 20px 80px}
+.search-results h2{font-size:20px;font-weight:700;color:var(--text);margin-bottom:16px}
+.result-item{
+  padding:14px;border:1px solid var(--bdr);border-radius:8px;
+  margin-bottom:10px;cursor:pointer;transition:all .2s;
+}
+.result-item:hover{border-color:var(--gold);background:var(--bg2)}
+.result-vol{font-size:11px;font-weight:700;color:var(--text3);margin-bottom:3px;letter-spacing:0.06em}
+.result-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;line-height:1.4}
+.result-snip{font-size:13px;color:var(--text2);line-height:1.6}
+.result-snip mark{background:var(--search-hl);color:var(--text);border-radius:2px;padding:0 2px}
+
+/* ── NOTES PANEL ─────────────────────────────────────── */
+#notesPanel{
+  position:fixed;right:0;top:55px;bottom:0;width:300px;
+  background:var(--modal-inner);
+  border-left:1px solid var(--bdr2);
+  z-index:190;transform:translateX(100%);
+  transition:transform .25s ease;display:flex;flex-direction:column;padding:14px;
+}
+#notesPanel.open{transform:translateX(0)}
+#notesPanelTitle{font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px}
+#notesTextarea{
+  flex:1;resize:none;
+  background:var(--btn-bg);color:var(--text);
+  border:1px solid var(--btn-bdr);border-radius:7px;
+  font-family:inherit;font-size:14px;line-height:1.7;
+  padding:10px;outline:none;width:100%;
+}
+#notesTextarea:focus{border-color:var(--gold)}
+#notesSaved{font-size:12px;color:var(--gold);margin-top:6px;text-align:right}
+
+/* ── FONT SIZE DISPLAY ───────────────────────────────── */
+.font-controls{display:flex;align-items:center;gap:6px}
+.font-btn{
+  width:32px;height:32px;
+  background:var(--btn-bg);border:1px solid var(--btn-bdr);
+  border-radius:6px;cursor:pointer;
+  font-family:inherit;font-size:16px;color:var(--text2);
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.font-btn:hover{background:var(--btn-hover);color:var(--text)}
+.font-size-label{font-size:12px;color:var(--text3);min-width:30px;text-align:center}
+
+/* ── READING MODE ────────────────────────────────────── */
+.main.reading-mode .chapter-view{max-width:58ch}
+.main.reading-mode .para{font-size:19px;line-height:2.0}
+
+/* ── TABLES (for note content) ───────────────────────── */
+.content-table{
+  width:100%;border-collapse:collapse;
+  margin:16px 0;font-size:14px;
+}
+.content-table th{
+  background:var(--hdr-bg);color:var(--hdr-text);
+  padding:9px 10px;text-align:left;font-weight:700;font-size:13px;
+  border:1px solid var(--bdr2);
+}
+.content-table td{
+  padding:8px 10px;border:1px solid var(--bdr);
+  color:var(--text);line-height:1.5;vertical-align:top;
+}
+.content-table tr:nth-child(even) td{background:var(--bg2)}
+</style>
 </head>
 <body>
-  <div class="holder">
-    <h1>📚 The Great Eraser</h1>
-    <p>This page is set up and ready for the book file.</p>
-    <p class="hint">Upload the book's <code>index.html</code> into this folder on GitHub to replace this placeholder. The URL <code>/GreatE/</code> will then serve your PWA.</p>
+
+<!-- ══ SPLASH / LOCK SCREEN ══════════════════════════════ -->
+<div id="splash">
+  <img id="splash-cover-img" src="cover.png" alt="The Great Eraser"/>
+  <div id="splash-gradient"></div>
+  <div class="splash-inner">
+    <div class="lock-label">Enter Access Code</div>
+    <input class="lock-input" id="lockInput" type="password" placeholder="Access Code" autocomplete="off" maxlength="32"/>
+    <button class="lock-btn" onclick="checkPass()">Unlock</button>
+    <div class="lock-err" id="lockErr"></div>
   </div>
+</div>
+
+<!-- ══ MAIN APP (hidden until unlocked) ══════════════════ -->
+<div id="progressBar" style="display:none"><div id="progressFill"></div></div>
+
+<header class="hdr" id="appHdr" style="display:none">
+  <button class="hdr-menu" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+  <div class="hdr-title" id="hdrTitle">The Great Eraser</div>
+  <div class="hdr-actions">
+    <button class="icon-btn" onclick="focusSearch()" title="Search">🔍</button>
+    <button class="icon-btn" onclick="openChapterJump()" title="Go to chapter">⊞</button>
+    <button class="icon-btn" onclick="bookmarkCurrent()" title="Bookmark">★</button>
+    <button class="icon-btn" onclick="toggleNotes()" title="Notes">✎</button>
+    <button class="icon-btn" onclick="toggleReadingBar()" title="Read aloud">▶</button>
+    <button class="icon-btn" id="darkBtn" onclick="cycleModes()" title="Theme">🌙</button>
+  </div>
+</header>
+
+<div class="layout" id="appLayout" style="display:none">
+  <!-- SIDEBAR -->
+  <aside class="sidebar hidden" id="sidebar">
+    <div class="sb-hdr">
+      <h2>The Great Eraser</h2>
+      <div class="sb-tools">
+        <button class="sb-btn" onclick="showWelcome()">🏠 Home</button>
+        <button class="sb-btn" onclick="openRecent()">🕐 Recent</button>
+        <button class="sb-btn" onclick="openBookmarks()">★ Saved</button>
+        <button class="sb-btn" onclick="openAllNotes()">✎ Notes</button>
+        <button class="sb-btn" onclick="toggleReadingMode()">📖 Focus Mode</button>
+        <button class="sb-btn" onclick="openFontPanel()">Aa</button>
+      </div>
+    </div>
+    <div class="sb-search-wrap">
+      <input class="sb-search" id="sidebarSearch" type="search"
+        placeholder="Search all chapters…" oninput="handleSearch(this.value)"/>
+    </div>
+    <div id="volList" style="flex:1;overflow-y:auto"></div>
+  </aside>
+
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <!-- MAIN -->
+  <main class="main full" id="main">
+    <div id="contentArea"></div>
+  </main>
+</div>
+
+<!-- NOTES PANEL -->
+<div id="notesPanel">
+  <div id="notesPanelTitle">Section Notes</div>
+  <textarea id="notesTextarea" placeholder="Your research notes…" oninput="saveNote()"></textarea>
+  <div id="notesSaved"></div>
+  <button class="modal-btn" onclick="toggleNotes()" style="margin-top:8px">Close</button>
+</div>
+
+<!-- SCROLL TOP -->
+<button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">↑</button>
+
+<!-- READING BAR -->
+<div class="reading-bar" id="readingBar">
+  <button class="read-btn" id="playBtn" onclick="startRead()">▶ Play</button>
+  <button class="read-btn" id="pauseBtn" onclick="pauseRead()" style="display:none">⏸ Pause</button>
+  <button class="read-btn" onclick="stopRead()">■ Stop</button>
+  <select class="read-ctl" id="voiceSelect"></select>
+  <span class="read-lbl">Speed</span>
+  <select class="read-ctl" id="readSpeed" style="max-width:70px" onchange="saveSettings()">
+    <option value="0.7">0.7×</option>
+    <option value="0.85">0.85×</option>
+    <option value="1" selected>1×</option>
+    <option value="1.15">1.15×</option>
+    <option value="1.3">1.3×</option>
+  </select>
+  <select class="read-ctl" id="readMode" onchange="saveSettings()">
+    <option value="all">All text</option>
+    <option value="verses">Body only</option>
+    <option value="notes">Notes only</option>
+  </select>
+  <button class="read-btn" onclick="previewVoice()">Preview</button>
+</div>
+
+<!-- HIGHLIGHT BAR -->
+<div id="hlBar">
+  <div class="hl-dot" style="background:#B7950B" onclick="applyHL('hl-y')" title="Gold"></div>
+  <div class="hl-dot" style="background:#1E8449" onclick="applyHL('hl-g')" title="Green"></div>
+  <div class="hl-dot" style="background:#2E6DA4" onclick="applyHL('hl-b')" title="Blue"></div>
+  <div class="hl-dot" style="background:#7D3C98" onclick="applyHL('hl-p')" title="Purple"></div>
+  <div class="hl-dot" style="background:#CA6F1E" onclick="applyHL('hl-o')" title="Orange"></div>
+  <button class="hl-act" onclick="copySelection()">Copy</button>
+  <button class="hl-act" onclick="removeHL()">✕</button>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="jumpModal">
+  <div class="modal-inner">
+    <h2>Go to Chapter</h2>
+    <input class="modal-input" id="jumpInput" type="number" min="1" max="57"
+      placeholder="Chapter number (1–56)" onkeydown="if(event.key==='Enter')doJump()"/>
+    <button class="modal-btn primary" onclick="doJump()">Go</button>
+    <button class="modal-btn modal-cancel" onclick="closeModal('jumpModal')">Cancel</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="recentModal">
+  <div class="modal-inner">
+    <h2>Recently Read</h2>
+    <ul class="modal-list" id="recentList"></ul>
+    <button class="modal-btn modal-cancel" onclick="closeModal('recentModal')" style="margin-top:8px">Close</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="bookmarksModal">
+  <div class="modal-inner">
+    <h2>Bookmarks</h2>
+    <ul class="modal-list" id="bookmarkList"></ul>
+    <button class="modal-btn modal-cancel" onclick="closeModal('bookmarksModal')" style="margin-top:8px">Close</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="allNotesModal">
+  <div class="modal-inner">
+    <h2>All Notes</h2>
+    <ul class="modal-list" id="allNotesList"></ul>
+    <button class="modal-btn modal-cancel" onclick="closeModal('allNotesModal')" style="margin-top:8px">Close</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="fontModal">
+  <div class="modal-inner">
+    <h2>Display Settings</h2>
+    <p style="font-size:14px;color:var(--text2);margin-bottom:14px">Adjust for your reading comfort</p>
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;color:var(--text3);margin-bottom:8px">Font Size</div>
+      <div class="font-controls">
+        <button class="font-btn" onclick="changeFontSize(-1)">A−</button>
+        <span class="font-size-label" id="fontSizeLabel">17</span>
+        <button class="font-btn" onclick="changeFontSize(1)">A+</button>
+      </div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;color:var(--text3);margin-bottom:8px">Line Spacing</div>
+      <div class="font-controls">
+        <button class="font-btn" onclick="changeLineSpacing(-0.1)">−</button>
+        <span class="font-size-label" id="lineSpacingLabel">1.9</span>
+        <button class="font-btn" onclick="changeLineSpacing(0.1)">+</button>
+      </div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;color:var(--text3);margin-bottom:8px">Theme</div>
+      <div style="display:flex;gap:8px">
+        <button class="modal-btn" onclick="setTheme('dark')">🌙 Dark</button>
+        <button class="modal-btn" onclick="setTheme('sepia')">📜 Sepia</button>
+        <button class="modal-btn" onclick="setTheme('light')">☀ Light</button>
+      </div>
+    </div>
+    <button class="modal-btn modal-cancel" onclick="closeModal('fontModal')" style="margin-top:4px">Done</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ── PASSWORD ─────────────────────────────────────────── */
+function djb2(s){
+  let h=5381;
+  for(let i=0;i<s.length;i++)h=Math.imul((h<<5)+h,1)+s.charCodeAt(i)|0;
+  return h>>>0;
+}
+function checkPass(){
+  const v=document.getElementById('lockInput').value.trim();
+  if(djb2(v)===3127023217){
+    document.getElementById('splash').style.display='none';
+    document.getElementById('progressBar').style.display='block';
+    document.getElementById('appHdr').style.display='flex';
+    document.getElementById('appLayout').style.display='flex';
+    initApp();
+  } else {
+    const e=document.getElementById('lockErr');
+    e.textContent='Incorrect password. Try again.';
+    document.getElementById('lockInput').value='';
+    setTimeout(()=>e.textContent='',3000);
+    document.getElementById('lockInput').focus();
+  }
+}
+document.getElementById('lockInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkPass();});
+
+/* ── VOL META ──────────────────────────────────────────── */
+const VOL_META=[
+  {num:1,name:'VOLUME ONE',desc:'Geography · African Civilizations · Egyptian Identity · Phenotype'},
+  {num:2,name:'VOLUME TWO',desc:'Primary Texts — DSS & Orit · YHWH The Name · Three-Witness Method'},
+  {num:3,name:'VOLUME THREE',desc:'Roman Construction of Christianity · Constantine · Nicaea · Paul'},
+  {num:4,name:'VOLUME FOUR',desc:'Similitudes Insertion · Rabbinical System · Khazar Record'},
+  {num:5,name:'VOLUME FIVE',desc:'Genetics & Haplogroups · Cartographic Evidence · Linguistic Evidence'},
+  {num:6,name:'VOLUME SIX',desc:'The 400-Year Covenant · Mystery Babylon · The Atrocity Record'},
+  {num:7,name:'VOLUME SEVEN',desc:'Plant Medicines · Satanism Origins · Archaeological Erasure · UN Resolution'},
+  {num:8,name:'VOLUME EIGHT',desc:'BHI & New Testament · Anunnaki vs Watchers · Full Unrestrained Record · Sources'},
+];
+
+let volumes={},currentVol=null,currentChIdx=0,totalChapters=57;
+let sidebarOpen=false,readingBarOpen=false,readingMode=false,notesPanelOpen=false;
+let fontAdj=0,lineSpacing=1.9,themeMode='dark';
+let synth=window.speechSynthesis,utterance=null,reading=false,paused=false,voices=[];
+let readPosKey=null,saveScrollTimer=null,hlSelection=null,noteSaveTimer=null;
+let chapterIndex=[];
+
+/* ── INIT ──────────────────────────────────────────────── */
+function initApp(){
+  loadSettings();
+  buildSidebar();
+  loadVoices();
+  window.addEventListener('scroll',onScroll);
+  document.addEventListener('mouseup',onMouseUp);
+  document.addEventListener('touchend',onMouseUp);
+  document.addEventListener('keydown',onKey);
+  showWelcome();
+  closeSidebar();
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+/* ── SETTINGS ──────────────────────────────────────────── */
+function loadSettings(){
+  const s=JSON.parse(localStorage.getItem('ge_settings')||'{}');
+  fontAdj=s.fontAdj||0;
+  lineSpacing=s.lineSpacing||1.9;
+  themeMode=s.themeMode||'dark';
+  applyFontAdj();
+  setTheme(themeMode);
+  const sp=document.getElementById('readSpeed'); if(s.readSpeed) sp.value=s.readSpeed;
+  const rm=document.getElementById('readMode'); if(s.readMode) rm.value=s.readMode;
+}
+function saveSettings(){
+  const s={fontAdj,lineSpacing,themeMode,
+    readSpeed:document.getElementById('readSpeed').value,
+    readMode:document.getElementById('readMode').value};
+  localStorage.setItem('ge_settings',JSON.stringify(s));
+}
+function applyFontAdj(){
+  const sz=17+fontAdj;
+  document.body.style.fontSize=sz+'px';
+  document.getElementById('fontSizeLabel').textContent=sz;
+  document.getElementById('lineSpacingLabel').textContent=lineSpacing.toFixed(1);
+}
+function setTheme(mode){
+  themeMode=mode;
+  document.body.classList.remove('dark','sepia','light');
+  if(mode!=='dark') document.body.classList.add(mode);
+  const btn=document.getElementById('darkBtn');
+  if(btn) btn.textContent=mode==='dark'?'☀':'🌙';
+  saveSettings();
+}
+function cycleModes(){
+  const n={dark:'light',light:'sepia',sepia:'dark'};
+  setTheme(n[themeMode]||'dark');
+}
+function openFontPanel(){
+  document.getElementById('fontSizeLabel').textContent=17+fontAdj;
+  document.getElementById('lineSpacingLabel').textContent=lineSpacing.toFixed(1);
+  document.getElementById('fontModal').classList.add('open');
+}
+
+/* ── VOICES ────────────────────────────────────────────── */
+function loadVoices(){
+  const load=()=>{
+    voices=synth.getVoices();
+    const sel=document.getElementById('voiceSelect');
+    sel.innerHTML='';
+    voices.forEach((v,i)=>{
+      const o=document.createElement('option');
+      o.value=i;
+      const star=v.name.includes('Enhanced')||v.name.includes('Neural')||v.name.includes('Premium');
+      o.textContent=(star?'★ ':'')+v.name+(v.localService?'':' ♦');
+      if(v.name.includes('Samantha')||v.name.includes('Ava')||v.name.includes('Karen')) o.selected=true;
+      sel.appendChild(o);
+    });
+  };
+  if(synth.onvoiceschanged!==undefined) synth.onvoiceschanged=load;
+  load();
+}
+
+/* ── SIDEBAR ───────────────────────────────────────────── */
+function buildSidebar(){
+  const list=document.getElementById('volList');
+  list.innerHTML='';
+  VOL_META.forEach(vm=>{
+    const item=document.createElement('div');
+    item.className='vol-item';
+    item.innerHTML=`<button class="vol-btn" id="vbtn${vm.num}" onclick="toggleVol(${vm.num})">
+      <span class="v-num">VOL ${vm.num}</span>
+      <span class="v-txt"><div class="v-name">${vm.name}</div><div class="v-desc">${vm.desc}</div></span>
+      <span class="v-arrow">›</span></button>
+      <div class="ch-list" id="chlist${vm.num}"></div>`;
+    list.appendChild(item);
+  });
+}
+function toggleVol(num){
+  const cl=document.getElementById('chlist'+num),btn=document.getElementById('vbtn'+num);
+  const was=cl.classList.contains('open');
+  document.querySelectorAll('.ch-list.open').forEach(e=>e.classList.remove('open'));
+  document.querySelectorAll('.vol-btn.open').forEach(e=>e.classList.remove('open'));
+  if(!was){btn.classList.add('open');cl.classList.add('open');loadVolSidebar(num,cl);}
+}
+async function loadVolSidebar(num,container){
+  if(container.dataset.loaded) return;
+  container.dataset.loaded='1';
+  const vol=await getVol(num); if(!vol) return;
+  container.innerHTML=vol.chapters.map((ch,i)=>
+    `<button class="ch-btn" id="chbtn${num}_${i}" onclick="loadChapter(${num},${i})">CH.${ch.num} — ${esc(ch.title)}</button>`
+  ).join('');
+}
+function toggleSidebar(){
+  sidebarOpen=!sidebarOpen;
+  document.getElementById('sidebar').classList.toggle('open',sidebarOpen);
+  document.getElementById('sidebar').classList.toggle('hidden',!sidebarOpen);
+  if(window.innerWidth>720) document.getElementById('main').classList.toggle('full',!sidebarOpen);
+  document.getElementById('overlay').classList.toggle('visible',sidebarOpen&&window.innerWidth<=720);
+}
+function closeSidebar(){
+  sidebarOpen=false;
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar').classList.add('hidden');
+  document.getElementById('main').classList.add('full');
+  document.getElementById('overlay').classList.remove('visible');
+}
+
+/* ── DATA ──────────────────────────────────────────────── */
+async function getVol(num){
+  if(volumes[num]) return volumes[num];
+  try{
+    const r=await fetch(`data/vol${num}.json`);
+    if(!r.ok) throw 0;
+    volumes[num]=await r.json();
+    buildIndex(num);
+    return volumes[num];
+  }catch(e){return null;}
+}
+function buildIndex(num){
+  const vol=volumes[num]; if(!vol) return;
+  vol.chapters.forEach((ch,i)=>{
+    chapterIndex.push({volNum:num,chIdx:i,ch,chNum:ch.num});
+  });
+  chapterIndex.sort((a,b)=>a.chNum-b.chNum);
+  totalChapters=chapterIndex.length||111;
+}
+
+/* ── WELCOME ───────────────────────────────────────────── */
+function showWelcome(){
+  closeSidebar();
+  document.getElementById('hdrTitle').innerHTML='The Great Eraser';
+  const last=localStorage.getItem('ge_last');
+  const resumeHtml=last?`<div style="margin:14px 0 4px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="sb-btn" style="padding:9px 14px;font-size:13px" onclick="resumeLastRead()">▶ Resume Reading</button>
+      <button class="sb-btn" style="padding:9px 14px;font-size:13px" onclick="openRecent()">🕘 Recent</button>
+    </div>`:'';
+  document.getElementById('contentArea').innerHTML=`<div class="welcome">
+    <div class="welcome-symbol">𐤉𐤄𐤅𐤄</div>
+    <h1 class="welcome-title">The Great Eraser</h1>
+    <p class="welcome-sub">A Complete Research Record — Eight Volumes · 57 Chapters<br/>
+    Ancient African Hebrew Identity · The Systematic Erasure · Primary Text Evidence</p>
+    <hr class="welcome-divider"/>
+    <p class="welcome-meta"><strong>Primary Authority:</strong> Dead Sea Scrolls (Qumran) · Ge'ez Orit · Elephantine Papyri · Physical Archaeology · Peer-Reviewed Genetics · Ancient Cartography</p>
+    ${resumeHtml}
+    <div class="vol-cards">${VOL_META.map(vm=>`<div class="vol-card" onclick="openVol(${vm.num})">
+      <div class="vc-num">VOLUME ${vm.num}</div>
+      <div class="vc-name">${vm.name}</div>
+      <div class="vc-desc">${vm.desc}</div></div>`).join('')}</div>
+  </div>`;
+}
+
+async function resumeLastRead(){
+  const last=localStorage.getItem('ge_last');
+  if(!last){ showWelcome(); return; }
+  const [v,c]=last.split(',').map(Number);
+  const vol=await getVol(v); if(!vol){ showWelcome(); return; }
+  toggleVol(v);
+  await loadVolSidebar(v,document.getElementById('chlist'+v));
+  await loadChapter(v,c);
+}
+
+async function openVol(num){
+  const vol=await getVol(num); if(!vol) return;
+  toggleVol(num); await loadChapter(num,0);
+}
+
+/* ── CHAPTER LOAD ──────────────────────────────────────── */
+async function loadChapter(volNum,chIdx){
+  stopRead();
+  const vol=await getVol(volNum); if(!vol) return;
+  const ch=vol.chapters[chIdx]; if(!ch) return;
+  currentVol=volNum; currentChIdx=chIdx;
+  readPosKey=`ge_pos_${volNum}_${chIdx}`;
+  document.querySelectorAll('.ch-btn.active').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.vol-btn.active').forEach(b=>b.classList.remove('active'));
+  const cb=document.getElementById(`chbtn${volNum}_${chIdx}`);
+  if(cb){cb.classList.add('active');cb.scrollIntoView({block:'nearest'});}
+  const vb=document.getElementById('vbtn'+volNum); if(vb) vb.classList.add('active');
+  const flatIdx=chapterIndex.findIndex(x=>x.volNum===volNum&&x.chIdx===chIdx);
+  const pos=flatIdx>=0?`(${flatIdx+1} of ${totalChapters})`:'';
+  document.getElementById('hdrTitle').innerHTML=
+    `<span style="font-size:11px;font-weight:400;color:var(--hdr-sub)">Vol ${volNum} · </span>CH.${ch.num} — ${ch.title.slice(0,42)}${ch.title.length>42?'…':''} <span class="pos">${pos}</span>`;
+  document.getElementById('contentArea').innerHTML=renderChapter(vol,ch,volNum,chIdx,flatIdx);
+  setTimeout(()=>restoreHighlights(volNum,chIdx),80);
+  loadNote(volNum,chIdx);
+  if(notesPanelOpen) document.getElementById('notesPanelTitle').textContent=`Notes — CH.${ch.num}`;
+  const savedScroll=parseInt(localStorage.getItem(readPosKey)||'0');
+  window.scrollTo({top:savedScroll,behavior:'instant'});
+  updateProgress();
+  addRecent(volNum,chIdx,ch);
+  localStorage.setItem('ge_last',''+volNum+','+chIdx);
+  if(window.innerWidth<=720) closeSidebar();
+}
+
+/* ── RENDER ────────────────────────────────────────────── */
+function renderChapter(vol,ch,volNum,chIdx,flatIdx){
+  const vm=VOL_META.find(v=>v.num===volNum);
+  let body='';
+  (ch.content||[]).forEach(b=>{
+    switch(b.type){
+      case 'part':
+        body+=`<div class="part-banner">${esc(b.text)}</div>`;
+        break;
+      case 'section':
+        const isX=b.heading&&b.heading.includes('Cross-Reference');
+        body+=isX
+          ?`<div class="xref-hdr">⊕ ${esc(b.heading)}</div>`
+          :`<div class="section-banner">${esc(b.heading)}</div>`;
+        (b.paragraphs||[]).forEach(p=>body+=`<p class="para">${esc(p)}</p>`);
+        break;
+      case 'body':
+        body+=`<p class="para">${esc(b.text)}</p>`;
+        break;
+      case 'bullet':
+        body+=`<div class="bullet-item">${esc(b.text)}</div>`;
+        break;
+      case 'source':
+        body+=`<div class="source-line">${esc(b.text)}</div>`;
+        break;
+      case 'fact':
+        body+=`<div class="fact-box"><p class="para">${esc(b.text)}</p></div>`;
+        break;
+      case 'note':
+        const nt=b.note_type||'dss';
+        const cls={dss:'dss',orit:'orit',critical:'critical',masoretic:'masoretic',gold:'gold'}[nt]||'dss';
+        body+=`<div class="note-box ${cls}"><div class="note-label">[${esc(b.label||nt.toUpperCase())}]</div><div class="note-text">${esc(b.text)}</div></div>`;
+        break;
+      case 'part_banner':
+        body+=`<div class="part-banner">${esc(b.text)}</div>`;
+        break;
+      case 'xref_hdr':
+        body+=`<div class="xref-hdr">⊕ ${esc(b.text)}</div>`;
+        break;
+    }
+  });
+  const fi=flatIdx>=0?flatIdx:0;
+  const prev=fi>0
+    ?`<button class="nav-btn" onclick="loadFlat(${fi-1})"><small>← Previous</small>CH.${chapterIndex[fi-1]?.chNum||''}</button>`
+    :`<button class="nav-btn" disabled><small>Start</small>Beginning</button>`;
+  const next=fi<chapterIndex.length-1
+    ?`<button class="nav-btn" onclick="loadFlat(${fi+1})"><small>Next →</small>CH.${chapterIndex[fi+1]?.chNum||''}</button>`
+    :`<button class="nav-btn" disabled><small>End</small>Complete</button>`;
+  return `<div class="chapter-view">
+    <div class="ch-hdr">
+      <div class="ch-vol-label">${vm?vm.name:'VOL '+volNum} · Chapter ${fi>=0?fi+1:'?'} of ${totalChapters}</div>
+      <div class="ch-number">Chapter ${ch.num}</div>
+      <div class="ch-title">${esc(ch.title)}</div>
+    </div>
+    <div class="content-body" id="chapterBody" style="line-height:${lineSpacing}">${body}</div>
+    <nav class="ch-nav">${prev}${next}</nav>
+  </div>`;
+}
+
+async function loadFlat(fi){
+  if(!chapterIndex[fi]) return;
+  const {volNum,chIdx}=chapterIndex[fi];
+  const vol=await getVol(volNum); if(!vol) return;
+  toggleVol(volNum);
+  await loadVolSidebar(volNum,document.getElementById('chlist'+volNum));
+  await loadChapter(volNum,chIdx);
+}
+
+/* ── RESTORE SESSION ───────────────────────────────────── */
+async function restoreLastSession(){
+  const last=localStorage.getItem('ge_last');
+  if(last){
+    const [v,c]=last.split(',').map(Number);
+    const vol=await getVol(v); if(!vol){showWelcome();return;}
+    toggleVol(v);
+    await loadVolSidebar(v,document.getElementById('chlist'+v));
+    await loadChapter(v,c);
+  } else { showWelcome(); }
+}
+
+/* ── SCROLL & PROGRESS ─────────────────────────────────── */
+function onScroll(){
+  updateProgress();
+  document.getElementById('scrollTopBtn').classList.toggle('visible',window.scrollY>300);
+  if(readPosKey){
+    clearTimeout(saveScrollTimer);
+    saveScrollTimer=setTimeout(()=>localStorage.setItem(readPosKey,''+Math.round(window.scrollY)),2500);
+  }
+}
+function updateProgress(){
+  const d=document.documentElement;
+  const st=d.scrollTop||document.body.scrollTop;
+  const sh=d.scrollHeight-d.clientHeight;
+  document.getElementById('progressFill').style.width=sh>0?((st/sh)*100)+'%':'0%';
+}
+
+/* ── SEARCH ────────────────────────────────────────────── */
+function focusSearch(){
+  document.getElementById('sidebarSearch').focus();
+  if(!sidebarOpen) toggleSidebar();
+}
+let searchTimer;
+function handleSearch(q){
+  clearTimeout(searchTimer);
+  if(!q||q.length<2) return;
+  searchTimer=setTimeout(()=>doSearch(q),380);
+}
+async function doSearch(q){
+  const results=[],ql=q.toLowerCase();
+  for(let n=1;n<=8;n++){
+    const vol=await getVol(n); if(!vol) continue;
+    vol.chapters.forEach((ch,idx)=>{
+      let found=ch.title.toLowerCase().includes(ql),snippet='';
+      (ch.content||[]).forEach(b=>{
+        const txt=b.text||b.heading||'';
+        if(txt.toLowerCase().includes(ql)){found=true;if(!snippet){const p=txt.toLowerCase().indexOf(ql);snippet=txt.slice(Math.max(0,p-50),p+100);}}
+        (b.paragraphs||[]).forEach(p=>{if(p.toLowerCase().includes(ql)){found=true;if(!snippet)snippet=p.slice(0,120);}});
+      });
+      if(found) results.push({volNum:n,idx,ch,snippet});
+    });
+  }
+  const hi=t=>t.replace(new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'),m=>`<mark>${esc(m)}</mark>`);
+  document.getElementById('contentArea').innerHTML=`<div class="search-results">
+    <h2>Results for "${esc(q)}" — ${results.length} found</h2>
+    ${results.slice(0,50).map(r=>`<div class="result-item" onclick="loadChapter(${r.volNum},${r.idx})">
+      <div class="result-vol">VOLUME ${r.volNum} · CH.${r.ch.num}</div>
+      <div class="result-title">${hi(esc(r.ch.title))}</div>
+      ${r.snippet?`<div class="result-snip">${hi(esc(r.snippet))}…</div>`:''}</div>`).join('')}
+    ${results.length===0?'<div class="modal-empty" style="padding:20px 0">No results found.</div>':''}</div>`;
+}
+
+/* ── CHAPTER JUMP ──────────────────────────────────────── */
+function openChapterJump(){
+  document.getElementById('jumpModal').classList.add('open');
+  document.getElementById('jumpInput').value='';
+  document.getElementById('jumpInput').focus();
+}
+async function doJump(){
+  const n=parseInt(document.getElementById('jumpInput').value);
+  if(!n||n<1||n>111) return;
+  closeModal('jumpModal');
+  for(let v=1;v<=8;v++){
+    const vol=await getVol(v); if(!vol) continue;
+    const idx=vol.chapters.findIndex(c=>c.num===n);
+    if(idx>=0){toggleVol(v);await loadVolSidebar(v,document.getElementById('chlist'+v));await loadChapter(v,idx);return;}
+  }
+}
+
+/* ── RECENT & BOOKMARKS ────────────────────────────────── */
+function addRecent(v,c,ch){
+  let r=JSON.parse(localStorage.getItem('ge_recent')||'[]');
+  r=r.filter(x=>!(x.v===v&&x.c===c));
+  r.unshift({v,c,num:ch.num,title:ch.title,ts:Date.now()});
+  if(r.length>12) r=r.slice(0,12);
+  localStorage.setItem('ge_recent',JSON.stringify(r));
+}
+function openRecent(){
+  const r=JSON.parse(localStorage.getItem('ge_recent')||'[]');
+  document.getElementById('recentList').innerHTML=r.length
+    ?r.map(x=>`<li onclick="loadChapter(${x.v},${x.c});closeModal('recentModal')">CH.${x.num} — ${esc(x.title)}<small>Vol ${x.v}</small></li>`).join('')
+    :'<div class="modal-empty">No recent sections yet</div>';
+  document.getElementById('recentModal').classList.add('open');
+}
+function bookmarkCurrent(){
+  if(currentVol===null) return;
+  const ch=volumes[currentVol]?.chapters[currentChIdx]; if(!ch) return;
+  let bm=JSON.parse(localStorage.getItem('ge_bookmarks')||'[]');
+  const key=`${currentVol}_${currentChIdx}`;
+  if(bm.find(x=>x.key===key)){
+    bm=bm.filter(x=>x.key!==key);
+    showToast('Bookmark removed');
+  } else {
+    bm.unshift({key,v:currentVol,c:currentChIdx,num:ch.num,title:ch.title,ts:Date.now()});
+    showToast('Bookmarked ★');
+  }
+  localStorage.setItem('ge_bookmarks',JSON.stringify(bm));
+}
+function openBookmarks(){
+  const bm=JSON.parse(localStorage.getItem('ge_bookmarks')||'[]');
+  document.getElementById('bookmarkList').innerHTML=bm.length
+    ?bm.map(x=>`<li onclick="loadChapter(${x.v},${x.c});closeModal('bookmarksModal')">CH.${x.num} — ${esc(x.title)}<small>Vol ${x.v}</small></li>`).join('')
+    :'<div class="modal-empty">No bookmarks yet</div>';
+  document.getElementById('bookmarksModal').classList.add('open');
+}
+
+/* ── NOTES ─────────────────────────────────────────────── */
+function loadNote(v,c){
+  const key=`ge_note_${v}_${c}`;
+  document.getElementById('notesTextarea').value=localStorage.getItem(key)||'';
+  document.getElementById('notesSaved').textContent='';
+}
+function saveNote(){
+  if(currentVol===null) return;
+  const key=`ge_note_${currentVol}_${currentChIdx}`;
+  clearTimeout(noteSaveTimer);
+  noteSaveTimer=setTimeout(()=>{
+    localStorage.setItem(key,document.getElementById('notesTextarea').value);
+    const s=document.getElementById('notesSaved');
+    s.textContent='Saved ✓';
+    setTimeout(()=>s.textContent='',2000);
+  },700);
+}
+function toggleNotes(){
+  notesPanelOpen=!notesPanelOpen;
+  document.getElementById('notesPanel').classList.toggle('open',notesPanelOpen);
+  if(notesPanelOpen&&currentVol!==null){
+    const ch=volumes[currentVol]?.chapters[currentChIdx];
+    document.getElementById('notesPanelTitle').textContent=ch?`Notes — CH.${ch.num}`:'Section Notes';
+  }
+}
+function openAllNotes(){
+  const list=document.getElementById('allNotesList');
+  let items='';
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(!k||!k.startsWith('ge_note_')) continue;
+    const val=localStorage.getItem(k);
+    if(!val||!val.trim()) continue;
+    const parts=k.split('_');
+    const v=Number(parts[2]),c=Number(parts[3]);
+    const ch=volumes[v]?.chapters[c];
+    const title=ch?`CH.${ch.num} — ${ch.title}`:`Vol ${v} Ch ${c}`;
+    items+=`<li onclick="loadChapter(${v},${c});closeModal('allNotesModal')">${esc(title)}<small>${esc(val.slice(0,80))}…</small></li>`;
+  }
+  list.innerHTML=items||'<div class="modal-empty">No notes yet</div>';
+  document.getElementById('allNotesModal').classList.add('open');
+}
+
+/* ── HIGHLIGHTS ─────────────────────────────────────────── */
+function onMouseUp(e){
+  if(e.target.closest('#hlBar')||e.target.closest('.reading-bar')||e.target.closest('.modal-overlay')) return;
+  const sel=window.getSelection();
+  if(!sel||sel.isCollapsed||!sel.toString().trim()){
+    setTimeout(()=>{if(!window.getSelection()||window.getSelection().isCollapsed) hideHLBar();},120);
+    return;
+  }
+  if(!sel.anchorNode||!document.getElementById('chapterBody')?.contains(sel.anchorNode)) return;
+  hlSelection=sel.getRangeAt(0).cloneRange();
+  const rect=sel.getRangeAt(0).getBoundingClientRect();
+  showHLBar(rect.left+rect.width/2,rect.top+window.scrollY-52);
+}
+function showHLBar(x,y){
+  const bar=document.getElementById('hlBar');
+  bar.classList.add('visible');
+  bar.style.left=Math.min(Math.max(4,x-100),window.innerWidth-230)+'px';
+  bar.style.top=Math.max(60,y)+'px';
+}
+function hideHLBar(){document.getElementById('hlBar').classList.remove('visible');hlSelection=null;}
+function applyHL(cls){
+  if(!hlSelection) return;
+  const span=document.createElement('span');
+  span.className=cls;
+  try{hlSelection.surroundContents(span);saveHighlights();}catch(e){}
+  window.getSelection()?.removeAllRanges();
+  hideHLBar();
+}
+function copySelection(){
+  if(!hlSelection) return;
+  navigator.clipboard.writeText(hlSelection.toString()).catch(()=>{});
+  showToast('Copied to clipboard');
+  hideHLBar();
+}
+function removeHL(){
+  if(!hlSelection) return;
+  const node=hlSelection.commonAncestorContainer;
+  const span=node.nodeType===3?node.parentElement:node;
+  if(span&&/^hl-/.test(span.className)){
+    const parent=span.parentNode;
+    while(span.firstChild) parent.insertBefore(span.firstChild,span);
+    parent.removeChild(span);
+    saveHighlights();
+  }
+  hideHLBar();
+}
+function saveHighlights(){
+  if(currentVol===null) return;
+  const body=document.getElementById('chapterBody'); if(!body) return;
+  localStorage.setItem(`ge_hl_${currentVol}_${currentChIdx}`,body.innerHTML);
+}
+function restoreHighlights(v,c){
+  const saved=localStorage.getItem(`ge_hl_${v}_${c}`); if(!saved) return;
+  const body=document.getElementById('chapterBody'); if(body) body.innerHTML=saved;
+}
+
+/* ── VOICE READ ─────────────────────────────────────────── */
+function pronunciationFix(t){
+  return t
+    .replace(/𐤉𐤄𐤅𐤄/g,'Yahweh')
+    .replace(/\bYHWH\b/g,'Yahweh')
+    .replace(/\bYH\b/g,'Yah')
+    .replace(/\bDSS\b/g,'Dead Sea Scrolls')
+    .replace(/\bQumran\b/g,'Koom-rahn')
+    .replace(/\bOrit\b/g,'Oh-reet')
+    .replace(/\bGe'ez\b/gi,'Geh-ez')
+    .replace(/\bBereshit\b/g,'Beh-reh-sheet')
+    .replace(/\bShemot\b/g,'Sheh-mot')
+    .replace(/\bDevarim\b/g,'Deh-vah-reem')
+    .replace(/\bMosheh\b/g,'Mo-sheh')
+    .replace(/[^\x00-\x7F\u00C0-\u024F]/g,' ');
+}
+function getReadableText(){
+  const body=document.getElementById('chapterBody'); if(!body) return '';
+  const mode=document.getElementById('readMode').value;
+  let nodes=[];
+  if(mode==='verses') nodes=Array.from(body.querySelectorAll('.para,.bullet-item'));
+  else if(mode==='notes') nodes=Array.from(body.querySelectorAll('.note-box'));
+  else nodes=Array.from(body.querySelectorAll('.para,.bullet-item,.note-text,.fact-box'));
+  return nodes.map(n=>(n.innerText||n.textContent||'').trim()).join(' . ');
+}
+function startRead(){
+  if(paused&&synth.paused){synth.resume();reading=true;paused=false;togglePlayUI(true,false);return;}
+  stopRead();
+  const raw=getReadableText(); if(!raw) return;
+  const txt=pronunciationFix(raw);
+  utterance=new SpeechSynthesisUtterance(txt);
+  utterance.rate=parseFloat(document.getElementById('readSpeed').value);
+  const vi=parseInt(document.getElementById('voiceSelect').value);
+  if(voices[vi]) utterance.voice=voices[vi];
+  utterance.onend=()=>{
+    reading=false;paused=false;togglePlayUI(false,false);
+    const fi=chapterIndex.findIndex(x=>x.volNum===currentVol&&x.chIdx===currentChIdx);
+    if(fi>=0&&fi<chapterIndex.length-1) setTimeout(()=>loadFlat(fi+1).then(()=>setTimeout(startRead,350)),150);
+  };
+  utterance.onerror=()=>{reading=false;paused=false;togglePlayUI(false,false);};
+  synth.speak(utterance);
+  reading=true;paused=false;togglePlayUI(true,false);
+}
+function pauseRead(){
+  if(synth.speaking&&!synth.paused){synth.pause();reading=false;paused=true;togglePlayUI(false,true);}
+}
+function stopRead(){synth.cancel();reading=false;paused=false;togglePlayUI(false,false);}
+function togglePlayUI(playing,pausing){
+  document.getElementById('playBtn').style.display=(playing||pausing)?'none':'';
+  document.getElementById('pauseBtn').style.display=playing?'':'none';
+  if(pausing) document.getElementById('playBtn').style.display='';
+}
+function previewVoice(){
+  synth.cancel();
+  const u=new SpeechSynthesisUtterance('YHWH — Yahweh — established a covenant. Dead Sea Scrolls confirmed.');
+  u.rate=parseFloat(document.getElementById('readSpeed').value);
+  const vi=parseInt(document.getElementById('voiceSelect').value);
+  if(voices[vi]) u.voice=voices[vi];
+  synth.speak(u);
+}
+
+/* ── DISPLAY CONTROLS ───────────────────────────────────── */
+function toggleReadingBar(){readingBarOpen=!readingBarOpen;document.getElementById('readingBar').classList.toggle('visible',readingBarOpen);}
+function toggleReadingMode(){
+  readingMode=!readingMode;
+  document.getElementById('main').classList.toggle('reading-mode',readingMode);
+  if(readingMode) closeSidebar();
+  showToast(readingMode?'Focus Mode on':'Focus Mode off');
+}
+function changeFontSize(d){
+  fontAdj=Math.max(-3,Math.min(8,fontAdj+d));
+  applyFontAdj();
+  const body=document.getElementById('chapterBody');
+  if(body) body.style.lineHeight=lineSpacing;
+  saveSettings();
+}
+function changeLineSpacing(d){
+  lineSpacing=Math.round(Math.max(1.3,Math.min(2.8,lineSpacing+d))*10)/10;
+  document.getElementById('lineSpacingLabel').textContent=lineSpacing.toFixed(1);
+  const body=document.getElementById('chapterBody');
+  if(body) body.style.lineHeight=lineSpacing;
+  saveSettings();
+}
+
+/* ── MODALS ─────────────────────────────────────────────── */
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.addEventListener('click',e=>{
+  if(e.target.classList.contains('modal-overlay')) e.target.classList.remove('open');
+});
+
+/* ── TOAST ──────────────────────────────────────────────── */
+let toastTimer;
+function showToast(msg){
+  let t=document.getElementById('toast');
+  if(!t){
+    t=document.createElement('div');t.id='toast';
+    t.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1A1600;color:#C9A84C;border:1px solid #3A3018;padding:8px 18px;border-radius:20px;font-family:inherit;font-size:14px;z-index:999;pointer-events:none;opacity:0;transition:opacity .2s';
+    document.body.appendChild(t);
+  }
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.style.opacity='0',2200);
+}
+
+/* ── UTILS ──────────────────────────────────────────────── */
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function onKey(e){
+  if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) return;
+  if(e.key==='ArrowRight'||e.key==='j'){document.querySelector('.ch-nav .nav-btn:last-child')?.click();}
+  if(e.key==='ArrowLeft'||e.key==='k'){document.querySelector('.ch-nav .nav-btn:first-child')?.click();}
+  if(e.key==='Escape'){
+    stopRead();closeSidebar();hideHLBar();
+    document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));
+  }
+  if(e.key===' '&&!e.target.closest('button')){e.preventDefault();reading?pauseRead():startRead();}
+  if(e.key==='b') bookmarkCurrent();
+  if(e.key==='f') focusSearch();
+}
+</script>
 </body>
 </html>
