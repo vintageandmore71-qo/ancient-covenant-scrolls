@@ -1527,6 +1527,31 @@
     });
   }
 
+  function buildHelperWelcomeHtml() {
+    // One-bubble summary of what the helper can do, tuned to whether
+    // the user has an AI key set up. Kept short and plain-language
+    // so dyslexic users can scan it without losing the thread.
+    var hasAi = anyAiProviderConfigured();
+    var lines = [];
+    if (hasAi) {
+      lines.push('<strong>Ask me anything.</strong> Your question goes straight to the AI — real answers, not canned.');
+    } else {
+      lines.push('<strong>I\'m in offline mode.</strong> Add a free key in ⚙ Settings → Load AI (Gemini is fastest) to unlock real AI answers.');
+    }
+    lines.push('');
+    lines.push('<strong>Quick commands</strong> (type the slash):');
+    lines.push('• <code>/explain</code> — explain the open file');
+    lines.push('• <code>/fix</code> — suggest fixes');
+    lines.push('• <code>/optimize</code> — make it faster / cleaner');
+    lines.push('• <code>/analyze</code> — deep code review');
+    lines.push('• <code>/plan</code> — build a plan for a task');
+    lines.push('');
+    lines.push('<strong>I can see:</strong>');
+    lines.push('• The page you\'re on');
+    lines.push('• Any <strong>errors</strong> on that page (tap 🛠 Fix errors)');
+    lines.push('• Any text you <strong>highlight</strong> — I\'ll focus on it');
+    return lines.join('<br>');
+  }
   function openHelperPanel() {
     helperContext = captureHelperContext();
     refreshHelperQuickChips();
@@ -1536,11 +1561,14 @@
     var intro = $('helper-intro'); if (intro) intro.style.display = '';
     var quick = $('helper-quick'); if (quick) quick.classList.remove('hidden');
     $('helper-messages').innerHTML = '';
+    // Welcome bubble first — explains what the helper can do *right now*
+    // (AI-powered or offline) so users know what to expect.
+    addHelperMessage('assistant', buildHelperWelcomeHtml(), null, BADGE_BUILTIN);
     // If there's content available, lead with a context note so the user
     // knows the helper is looking at the current item.
     if (helperContext.kind === 'viewer' && helperContext.app) {
       addHelperMessage('assistant',
-        'I can see you\'re reading <strong>' + escHtml(helperContext.app.name) + '</strong>. Ask me to summarize it, find a word, outline it, or walk you through it step by step. Or ask me anything about Load.');
+        'I can see you\'re reading <strong>' + escHtml(helperContext.app.name) + '</strong>. Ask me to summarize it, find a word, outline it, or walk you through it step by step.');
     } else if (helperContext.kind === 'editor') {
       addHelperMessage('assistant',
         'You\'re in the HTML editor. Ask me for code snippets (buttons, links, centering text, colors), or how to use any Load feature.');
