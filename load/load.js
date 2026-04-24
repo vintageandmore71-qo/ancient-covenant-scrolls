@@ -1664,20 +1664,58 @@
     return;
   }
   function fallbackToOffline(q, helperContext) {
+    // Figure out the honest reason nothing answered, so the user gets
+    // an actionable message instead of the old lying "everyone is
+    // rate-limited" blanket.
+    var reason = diagnoseNoProvider();
     if (helperContext.kind === 'viewer' && helperContext.text) {
       addHelperMessage('assistant',
-        'Every free AI provider is unavailable right now (rate-limited or offline). I can copy the text + your question to the clipboard and open a public AI site instead.',
+        reason.msg + ' I can copy the text + your question to the clipboard and open a public AI site instead.',
         { label: 'Send to ChatGPT', fn: function () { handoffToAi(q, helperContext.text, 'chatgpt'); } },
-        { tier: 'offline', label: 'all providers unavailable' }
+        { tier: 'offline', label: reason.label }
       );
     } else {
       addHelperMessage('assistant',
-        'Every free AI provider is unavailable right now (rate-limited or offline). I\'m focused on helping you <strong>use Load</strong> and <strong>create content</strong>. ' +
-        'For questions <em>about the content of a specific file</em>, open that file first — then ask me to summarize it, find a word, outline it, or walk you through it step by step.',
+        reason.msg + ' Meanwhile I\'m still here for anything <strong>about using Load</strong> or <strong>creating content</strong> — those use the built-in helper and answer instantly.',
         null,
-        { tier: 'offline', label: 'all providers unavailable' }
+        { tier: 'offline', label: reason.label }
       );
     }
+  }
+
+  // Honest explanation of why askProviderChain returned nothing.
+  // Returns { msg, label } — msg is HTML shown in the bubble, label is
+  // the small badge under it.
+  function diagnoseNoProvider() {
+    var local = providerPrefs.local;
+    var localLoading = !!localAiInitPromise;
+    var localReady = typeof window.__LOAD_LOCAL_AI === 'function';
+    var anyCloudKey = ['gemini', 'groq', 'openrouter', 'huggingface']
+      .some(function (n) { return providerPrefs[n] && providerPrefs[n].enabled && providerPrefs[n].apiKey; });
+
+    if (local.installed && !localReady && localLoading) {
+      return {
+        msg: 'The on-device model is <strong>still warming up</strong> — it takes ~10–20 seconds to load from your iPad\'s cache after the app launches. Please try your question again in a moment.',
+        label: 'local model warming up'
+      };
+    }
+    if (local.installed && !localReady && !localLoading) {
+      return {
+        msg: 'The on-device model is installed but <strong>did not reload</strong> — your iPad may have cleared the browser cache. Tap <strong>⚙ Settings → Load AI → Reinstall</strong> to get it back.',
+        label: 'local model cache gone'
+      };
+    }
+    if (!local.installed && !anyCloudKey) {
+      return {
+        msg: 'No AI provider is set up yet. Open <strong>⚙ Settings → Load AI</strong> and either: <br>• Tap <strong>📥 Install local model (~400 MB)</strong> for a private offline AI, or<br>• Paste a free-tier key for Gemini / Groq / OpenRouter / Hugging Face.',
+        label: 'no provider configured'
+      };
+    }
+    // Fallback: something was enabled but every attempt failed at runtime.
+    return {
+      msg: 'Every enabled AI provider failed right now — either rate-limited, offline, or returned an error.',
+      label: 'all providers failed'
+    };
   }
 
   /* ---------- Load AI provider chain ----------
