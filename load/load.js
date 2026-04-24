@@ -1603,6 +1603,13 @@
     }
   }
   var BADGE_BUILTIN = { tier: 'offline', label: 'via built-in (rule-based)' };
+  function anyAiProviderConfigured() {
+    // Local counts if installed+enabled+actually loaded. Cloud counts
+    // whenever the user has saved a key and enabled the provider.
+    if (providerPrefs.local.enabled && providerPrefs.local.installed && typeof window.__LOAD_LOCAL_AI === 'function') return true;
+    return ['gemini', 'groq', 'openrouter', 'huggingface']
+      .some(function (n) { return providerPrefs[n] && providerPrefs[n].enabled && providerPrefs[n].apiKey; });
+  }
   function submitHelperQuestion() {
     var input = $('helper-input');
     var q = (input.value || '').trim();
@@ -1626,43 +1633,68 @@
       }
     }
 
-    // 1. Content-aware commands — only work when there's an app open
-    if (helperContext.kind === 'viewer' && helperContext.text) {
-      var contentResponse = handleContentCommand(q, helperContext);
-      if (contentResponse) {
-        addHelperMessage('assistant', contentResponse.answer, contentResponse.action || null, BADGE_BUILTIN);
+    // Offline builtin handlers — ONLY fire automatically when no AI
+    // provider is available. When a real AI (Gemini / OpenRouter /
+    // on-device) is configured, the user expects the AI to read the
+    // full question instead of a keyword-matched canned response.
+    var hasAi = anyAiProviderConfigured();
+    if (!hasAi) {
+      if (helperContext.kind === 'viewer' && helperContext.text) {
+        var contentResponse = handleContentCommand(q, helperContext);
+        if (contentResponse) {
+          addHelperMessage('assistant', contentResponse.answer, contentResponse.action || null, BADGE_BUILTIN);
+          return;
+        }
+      }
+      var createMatch = matchCreateIntent(q);
+      if (createMatch) {
+        addHelperMessage('assistant',
+          'I can set that up for you! I\'ll open the Create screen with the <strong>' + createMatch.template + '</strong> template' +
+          (createMatch.topic ? ' and pre-fill the title as <strong>' + escHtml(createMatch.topic) + '</strong>.' : '.') +
+          ' You just type the content and save.',
+          { label: 'Open Create screen', fn: function () { openCreateWithHelper(createMatch); } },
+          BADGE_BUILTIN
+        );
+        return;
+      }
+      var hit = scoreKnowledgeBase(q);
+      if (hit) {
+        addHelperMessage('assistant', hit.answer, hit.actionLabel ? { label: hit.actionLabel, fn: hit.actionFn } : null, BADGE_BUILTIN);
         return;
       }
     }
 
-    // 2. "Create a X" intent
-    var createMatch = matchCreateIntent(q);
-    if (createMatch) {
-      addHelperMessage('assistant',
-        'I can set that up for you! I\'ll open the Create screen with the <strong>' + createMatch.template + '</strong> template' +
-        (createMatch.topic ? ' and pre-fill the title as <strong>' + escHtml(createMatch.topic) + '</strong>.' : '.') +
-        ' You just type the content and save.',
-        { label: 'Open Create screen', fn: function () { openCreateWithHelper(createMatch); } },
-        BADGE_BUILTIN
-      );
-      return;
-    }
-
-    // 3. Match knowledge base
-    var hit = scoreKnowledgeBase(q);
-    if (hit) {
-      addHelperMessage('assistant', hit.answer, hit.actionLabel ? { label: hit.actionLabel, fn: hit.actionFn } : null, BADGE_BUILTIN);
-      return;
-    }
-
-    // 4. Route to the cloud provider chain (Pollinations → AI Horde →
-    //    local model). Each provider is attempted in order; the first
-    //    that succeeds wins. If none work, fall back to the original
-    //    offline behaviour (hand-off modal).
+    // Route to the provider chain. When AI is up, it gets first
+    // crack at every non-slash question. The offline handlers above
+    // still serve as fallback if every provider fails.
     askProviderChain(q, helperContext).then(function (result) {
       if (result && result.answer) {
         addHelperMessage('assistant', result.answer, null, result.badge);
         return;
+      }
+      // AI chain came up empty — try the offline handlers once as a
+      // last resort so the user at least gets *something* useful.
+      if (hasAi) {
+        if (helperContext.kind === 'viewer' && helperContext.text) {
+          var cr = handleContentCommand(q, helperContext);
+          if (cr) { addHelperMessage('assistant', cr.answer, cr.action || null, BADGE_BUILTIN); return; }
+        }
+        var cm = matchCreateIntent(q);
+        if (cm) {
+          addHelperMessage('assistant',
+            'I can set that up for you! I\'ll open the Create screen with the <strong>' + cm.template + '</strong> template' +
+            (cm.topic ? ' and pre-fill the title as <strong>' + escHtml(cm.topic) + '</strong>.' : '.') +
+            ' You just type the content and save.',
+            { label: 'Open Create screen', fn: function () { openCreateWithHelper(cm); } },
+            BADGE_BUILTIN
+          );
+          return;
+        }
+        var kb = scoreKnowledgeBase(q);
+        if (kb) {
+          addHelperMessage('assistant', kb.answer, kb.actionLabel ? { label: kb.actionLabel, fn: kb.actionFn } : null, BADGE_BUILTIN);
+          return;
+        }
       }
       fallbackToOffline(q, helperContext);
     }).catch(function (err) {
@@ -2934,8 +2966,12 @@
   }
   function matchCreateIntent(q) {
     var s = q.toLowerCase();
-    // Direct patterns: "make a checklist for trip", "create a recipe for soup"
-    var m = s.match(/(?:make|create|write|build|new)\s+(?:me\s+)?(?:a|an|some)?\s*(checklist|recipe|letter|article|note|story|essay|paragraph|to-?do|shopping\s*list|grocery\s*list|book|reader|acr)\s*(?:for|about|of|to)?\s*(.*)/i);
+    // Only the verb-initiated pattern — "make a checklist for trip",
+    // "create a recipe for soup". The bare-noun pattern
+    // ("recipe for pasta") was removed because it was stealing general
+    // questions where the user actually wanted the answer, not a
+    // blank template.
+    var m = s.match(/(?:make|create|write|build|new|start)\s+(?:me\s+)?(?:a|an|some)?\s*(checklist|recipe|letter|article|note|story|essay|paragraph|to-?do|shopping\s*list|grocery\s*list|book|reader|acr)\s*(?:for|about|of|to)?\s*(.*)/i);
     if (m) {
       var tpl = m[1].toLowerCase();
       if (/shopping|grocery|to-?do/.test(tpl)) tpl = 'checklist';
@@ -2943,14 +2979,6 @@
       if (/book|reader|acr/.test(tpl)) tpl = 'acr';
       if (!['checklist','recipe','letter','article','note','acr'].includes(tpl)) tpl = 'article';
       return { template: tpl, topic: (m[2] || '').trim() };
-    }
-    // Phrase-initial: "recipe for X", "checklist for X", "book about X"
-    m = s.match(/^(checklist|recipe|letter|article|note|shopping\s*list|grocery\s*list|to-?do|book|reader)\s+(?:for|of|about|to)\s+(.+)/i);
-    if (m) {
-      var tpl2 = m[1].toLowerCase();
-      if (/shopping|grocery|to-?do/.test(tpl2)) tpl2 = 'checklist';
-      if (/book|reader/.test(tpl2)) tpl2 = 'acr';
-      return { template: tpl2, topic: m[2].trim() };
     }
     return null;
   }
