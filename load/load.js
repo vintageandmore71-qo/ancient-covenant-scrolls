@@ -783,6 +783,30 @@
         '<div class="detail">' + item.detail + '</div>' +
       '</div>';
     }).join('');
+    // Wire any embedded scan-action buttons (e.g. "Download & embed
+    // fonts"). These aren't part of the auto-fix flow because they
+    // need async network work — they run on their own.
+    box.querySelectorAll('[data-scan-action]').forEach(function (btn) {
+      var action = btn.getAttribute('data-scan-action');
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (action === 'embed-gfonts') runEmbedGoogleFonts();
+        else if (action === 'ai-fix') runAiFixEverything();
+      });
+    });
+    // Add an "Ask AI to fix everything" card at the bottom when at
+    // least one provider is configured. Lets the user trigger a
+    // broader LLM-powered rewrite in addition to the built-in fixes.
+    if (typeof anyAiProviderConfigured === 'function' && anyAiProviderConfigured()) {
+      var aiCard = document.createElement('div');
+      aiCard.className = 'scan-item ai-fix-card';
+      aiCard.innerHTML =
+        '<div class="label">&#129302; Ask AI to fix everything</div>' +
+        '<div class="detail">Send this file + the scan report to your configured AI (Gemini / OpenRouter) and have it rewrite the HTML to address every warning above — including ones without built-in fixes. You preview the result before anything is saved.' +
+        '<br><button class="scan-action scan-action-primary" data-scan-action="ai-fix">&#9889; Ask AI to fix it</button></div>';
+      box.appendChild(aiCard);
+      aiCard.querySelector('[data-scan-action="ai-fix"]').addEventListener('click', runAiFixEverything);
+    }
   }
   function scanReportAsText(report) {
     var out = ['Load — Developer Console scan'];
@@ -871,9 +895,28 @@
     var extRe = /\b(?:src|href)\s*=\s*["'](https?:\/\/[^"']+)["']/gi;
     var externals = [];
     while ((m = extRe.exec(html)) !== null) externals.push(m[1]);
-    if (externals.length) {
-      var uniq = Array.from(new Set(externals)).slice(0, 5);
-      pushItem(report, 'warn', '&#127760;', externals.length + ' external URL reference' + (externals.length === 1 ? '' : 's'),
+    // Split out Google Fonts specifically — those have an automated
+    // embed path via runEmbedGoogleFonts() since both the CSS host
+    // (fonts.googleapis.com) and the font-file host (fonts.gstatic.com)
+    // serve Access-Control-Allow-Origin: * so we can fetch + base64
+    // them directly from the page.
+    var gfontUrls = externals.filter(function (u) {
+      return /^https?:\/\/fonts\.(googleapis|gstatic)\.com\//i.test(u);
+    });
+    var otherExternals = externals.filter(function (u) {
+      return !/^https?:\/\/fonts\.(googleapis|gstatic)\.com\//i.test(u);
+    });
+    if (gfontUrls.length) {
+      var gfUniq = Array.from(new Set(gfontUrls)).slice(0, 6);
+      pushItem(report, 'warn', '&#127912;', gfontUrls.length + ' Google Fonts reference' + (gfontUrls.length === 1 ? '' : 's'),
+        'This file loads fonts from Google at runtime. Offline users will see a system fallback font instead of the one you picked.<br>URLs: ' +
+        gfUniq.map(function (u) { return '<code>' + escHtml(u) + '</code>'; }).join(', ') +
+        '<br><button class="scan-action scan-action-primary" data-scan-action="embed-gfonts">&#11015; Download &amp; embed fonts</button>' +
+        '<span class="scan-action-note"> One tap: grabs the font files, inlines them as base64 data URLs, rewrites the file. Works fully offline after.</span>');
+    }
+    if (otherExternals.length) {
+      var uniq = Array.from(new Set(otherExternals)).slice(0, 5);
+      pushItem(report, 'warn', '&#127760;', otherExternals.length + ' external URL reference' + (otherExternals.length === 1 ? '' : 's'),
         'This file pulls resources from the internet at runtime. If you open Load offline, these will fail silently.<br>Examples: ' +
         uniq.map(function (u) { return '<code>' + escHtml(u) + '</code>'; }).join(', ') +
         '<br><strong>Fix:</strong> download those files into the bundle before importing, or switch to a fully self-contained version.');
@@ -975,6 +1018,155 @@
         'Cross-origin or sandbox restrictions blocked the inspection: <code>' + escHtml(String(e.message || e)) + '</code>. This is usually safe to ignore.');
     }
   }
+  // ---------- Google Fonts offline embed ----------
+  // Fetches every fonts.googleapis.com stylesheet referenced by the
+  // file, downloads each font file, base64-encodes it, and rewrites
+  // the HTML so the fonts load from data URLs. After this the page
+  // renders correctly with no network access required.
+  async function runEmbedGoogleFonts() {
+    if (!currentApp) { toast('Open an app first.', true); return; }
+    var html = currentApp.html || '';
+    var linkRe = /<link\s+[^>]*href=["'](https:\/\/fonts\.googleapis\.com\/[^"']+)["'][^>]*>/gi;
+    var imports = [];
+    var m;
+    while ((m = linkRe.exec(html)) !== null) imports.push({ tag: m[0], url: m[1] });
+    // Also catch @import url(...) in inline <style> blocks.
+    var importInStyleRe = /@import\s+url\(\s*["']?(https:\/\/fonts\.googleapis\.com\/[^"')]+)["']?\s*\)\s*;?/gi;
+    while ((m = importInStyleRe.exec(html)) !== null) imports.push({ tag: m[0], url: m[1] });
+    if (!imports.length) { toast('No Google Fonts references found.'); return; }
+    toast('Downloading ' + imports.length + ' Google Fonts stylesheet' + (imports.length === 1 ? '' : 's') + '…');
+    // Fetch each CSS. Google Fonts returns woff2 URLs when the caller's
+    // User-Agent is a modern browser — iPad Safari qualifies.
+    var combinedCss = '';
+    for (var i = 0; i < imports.length; i++) {
+      try {
+        var resp = await fetch(imports[i].url);
+        if (!resp.ok) continue;
+        var css = await resp.text();
+        combinedCss += '/* from ' + imports[i].url + ' */\n' + css + '\n\n';
+      } catch (e) {
+        console.warn('Failed fetching ' + imports[i].url, e);
+      }
+    }
+    if (!combinedCss) { toast('Could not download any Google Fonts stylesheets. Are you offline?', true); return; }
+    // Extract the font-file URLs from the returned CSS and fetch each
+    // one. fonts.gstatic.com serves Access-Control-Allow-Origin: *.
+    var fontUrlRe = /url\(\s*['"]?(https?:\/\/fonts\.gstatic\.com\/[^'")\s]+)['"]?\s*\)/gi;
+    var fontUrls = [];
+    var seen = {};
+    while ((m = fontUrlRe.exec(combinedCss)) !== null) {
+      if (!seen[m[1]]) { seen[m[1]] = true; fontUrls.push(m[1]); }
+    }
+    if (!fontUrls.length) { toast('No font files found in the CSS — nothing to embed.', true); return; }
+    toast('Embedding ' + fontUrls.length + ' font file' + (fontUrls.length === 1 ? '' : 's') + '… hold tight.');
+    var urlMap = {};
+    for (var j = 0; j < fontUrls.length; j++) {
+      try {
+        var fresp = await fetch(fontUrls[j]);
+        if (!fresp.ok) continue;
+        var blob = await fresp.blob();
+        var dataUrl = await new Promise(function (resolve, reject) {
+          var r = new FileReader();
+          r.onloadend = function () { resolve(r.result); };
+          r.onerror = reject;
+          r.readAsDataURL(blob);
+        });
+        urlMap[fontUrls[j]] = dataUrl;
+      } catch (e) {
+        console.warn('Failed fetching ' + fontUrls[j], e);
+      }
+    }
+    // Rewrite CSS to use data URLs
+    var rewrittenCss = combinedCss.replace(fontUrlRe, function (match, url) {
+      return urlMap[url] ? 'url(' + urlMap[url] + ')' : match;
+    });
+    // Strip original <link> and @import references, inject one inline <style>
+    var newHtml = html;
+    imports.forEach(function (imp) { newHtml = newHtml.split(imp.tag).join(''); });
+    var styleBlock = '\n<style data-embedded-fonts="1">\n/* Google Fonts — downloaded + embedded offline by Load */\n' + rewrittenCss + '\n</style>\n';
+    if (/<\/head>/i.test(newHtml)) {
+      newHtml = newHtml.replace(/<\/head>/i, styleBlock + '</head>');
+    } else {
+      newHtml = styleBlock + newHtml;
+    }
+    currentApp.html = newHtml;
+    currentApp.sizeBytes = newHtml.length;
+    try { await putApp(currentApp); } catch (e) { console.warn('putApp failed', e); }
+    toast('✓ Fonts embedded. File now works fully offline.');
+    // Re-scan to reflect the change
+    try { runScanCurrentApp(); } catch (e) {}
+  }
+
+  // ---------- AI-powered full rewrite ----------
+  // Sends the current file HTML + the current scan report to the user's
+  // configured AI provider (Gemini / OpenRouter) with instructions to
+  // return a corrected version of the HTML. The result is piped through
+  // the same patch-preview UI so the user reviews before anything is
+  // written to IndexedDB.
+  async function runAiFixEverything() {
+    if (!currentApp) { toast('Open an app first.', true); return; }
+    if (typeof anyAiProviderConfigured !== 'function' || !anyAiProviderConfigured()) {
+      toast('Set up a Gemini or OpenRouter key in Settings first.', true);
+      return;
+    }
+    var html = currentApp.html || '';
+    if (html.length > 60000) {
+      toast('File is too big (' + humanBytes(html.length) + ') for a single AI pass. Try the individual fixes above instead.', true);
+      return;
+    }
+    // Build the issues summary from the current scan. Fresh scan if
+    // the user hasn't run one yet in this session.
+    if (!currentScanReport) {
+      try { runScanCurrentApp(); } catch (e) {}
+    }
+    var problems = currentScanReport ? currentScanReport.items
+      .filter(function (i) { return i.severity !== 'ok'; })
+      .map(function (i, idx) { return (idx + 1) + '. ' + i.label.replace(/<[^>]+>/g, '') + ' — ' + i.detail.replace(/<[^>]+>/g, '').slice(0, 300); })
+      .join('\n') : '(no scan data)';
+    var promptText =
+      'You are fixing an HTML file for an offline-first PWA called Load. The user ran a scan that flagged these issues:\n\n' +
+      problems + '\n\n' +
+      'Return ONLY the corrected full HTML document, starting with <!DOCTYPE html> and ending with </html>. ' +
+      'Do not explain, do not use markdown fences, do not include any text before or after the HTML. ' +
+      'Preserve the original content and styling as much as possible — only change what you must to address the issues. ' +
+      'For external resources (fonts, images, scripts) that break offline use, prefer removing the <link>/<script> tag over changing the URL. ' +
+      'Do not inject analytics, tracking, or service-worker registration unless already present.\n\n' +
+      'Here is the current HTML:\n\n' + html;
+    toast('Asking AI to rewrite the file — this takes ~10–30 seconds…');
+    try {
+      var result = await askProviderChain(promptText, { kind: 'home' });
+      if (!result || !result.answer) {
+        toast('AI did not return a rewrite. Check ⚙ Settings for provider errors.', true);
+        return;
+      }
+      // Strip HTML-ified markdown wrappers we might have rendered.
+      var raw = String(result.answer)
+        .replace(/<[^>]+>/g, function (m) { return m === '<br>' ? '\n' : ''; })
+        .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+      // Pull out the HTML document. Accept plain <!DOCTYPE…</html>, or
+      // a fenced block if the model ignored our instructions.
+      var docMatch = raw.match(/<!DOCTYPE[\s\S]*?<\/html>/i);
+      if (!docMatch) {
+        toast('AI response did not contain a full HTML document.', true);
+        console.warn('AI fix raw:', raw);
+        return;
+      }
+      var fixed = docMatch[0];
+      if (Math.abs(fixed.length - html.length) > html.length * 0.8) {
+        if (!confirm('AI rewrite is ' + (fixed.length > html.length ? 'much larger' : 'much smaller') + ' than the original (' + humanBytes(html.length) + ' → ' + humanBytes(fixed.length) + '). Apply anyway?')) return;
+      }
+      // Show a single-item patch preview so the user reviews before save.
+      showPatchPreview([{
+        label: 'AI full rewrite',
+        detail: 'Complete file rewrite based on the scan report. Size ' + humanBytes(html.length) + ' → ' + humanBytes(fixed.length) + '.',
+        fix: function () { return fixed; }
+      }]);
+    } catch (e) {
+      console.warn('runAiFixEverything failed', e);
+      toast('AI fix failed: ' + ((e && e.message) || e), true);
+    }
+  }
+
   async function runAutoFix() {
     if (!currentScanReport || !currentApp) {
       toast('Run a scan first — open an app, then tap Scan current page.', true);
