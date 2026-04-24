@@ -2437,19 +2437,31 @@
   // required once cached. Skipped on cold page loads if the user disabled
   // the local provider in settings.
   function autoInitLocalAi() {
-    if (!providerPrefs.local.installed || !providerPrefs.local.enabled) return;
-    if (typeof window.__LOAD_LOCAL_AI === 'function') return;
-    if (localAiInitPromise) return;
-    setProviderStatus('local', 'busy', 'Reloading cached model…');
-    localAiInitPromise = initLocalAiPipeline({ firstInstall: false })
-      .then(function () {
-        setProviderStatus('local', 'ok', 'Ready offline');
-      })
-      .catch(function (e) {
-        console.warn('Local AI auto-init failed', e);
-        setProviderStatus('local', 'error', 'Re-init failed — tap Install to retry');
-      })
-      .finally(function () { localAiInitPromise = null; });
+    // Deferred: kicking off transformers.js + a 400 MB WASM model at
+    // boot time freezes iPad Safari while WASM compiles. We delay the
+    // init until the browser is idle (or 5 seconds after boot, whichever
+    // comes first) so every button the user taps in the first few
+    // seconds stays responsive.
+    function start() {
+      if (!providerPrefs.local.installed || !providerPrefs.local.enabled) return;
+      if (typeof window.__LOAD_LOCAL_AI === 'function') return;
+      if (localAiInitPromise) return;
+      setProviderStatus('local', 'busy', 'Reloading cached model…');
+      localAiInitPromise = initLocalAiPipeline({ firstInstall: false })
+        .then(function () {
+          setProviderStatus('local', 'ok', 'Ready offline');
+        })
+        .catch(function (e) {
+          console.warn('Local AI auto-init failed', e);
+          setProviderStatus('local', 'error', 'Re-init failed — tap Install to retry');
+        })
+        .finally(function () { localAiInitPromise = null; });
+    }
+    if (typeof requestIdleCallback === 'function') {
+      requestIdleCallback(start, { timeout: 5000 });
+    } else {
+      setTimeout(start, 5000);
+    }
   }
   function wireAiProviderSettings() {
     var CLOUD_PROVIDERS = ['gemini', 'groq', 'openrouter', 'huggingface'];
