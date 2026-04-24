@@ -1766,7 +1766,21 @@
     } catch (e) { return defaultProviderPrefs(); }
   }
   function saveProviderPrefs() {
-    try { localStorage.setItem(LS_PROVIDERS, JSON.stringify(providerPrefs)); } catch (e) {}
+    // Returns true on success, false on failure. Callers that depend on
+    // the write actually landing (the install flow) should check this
+    // and surface an error if it's false — Safari on iPad can silently
+    // reject localStorage writes under storage pressure.
+    try {
+      var json = JSON.stringify(providerPrefs);
+      localStorage.setItem(LS_PROVIDERS, json);
+      // Verify round-trip — some Safari failure modes accept setItem
+      // but don't actually persist.
+      var got = localStorage.getItem(LS_PROVIDERS);
+      return got === json;
+    } catch (e) {
+      console.warn('saveProviderPrefs failed', e);
+      return false;
+    }
   }
   function setProviderStatus(name, state, detail) {
     providerStatus[name] = state;
@@ -2109,13 +2123,21 @@
       await localAiInitPromise;
       providerPrefs.local.installed = true;
       providerPrefs.local.enabled = true;
-      saveProviderPrefs();
-      setProviderStatus('local', 'ok', 'Installed, ready offline');
-      toast('✓ Local model installed. Ready for offline use.');
+      var persisted = saveProviderPrefs();
+      if (!persisted) {
+        // The pipeline loaded fine but Safari refused to save the flag.
+        // The user can still use the model THIS session but it won't
+        // rehydrate on next launch. Tell them honestly.
+        setProviderStatus('local', 'warn', 'Ready this session — but iPad could not save the install flag. You may need to reinstall next time you open Load.');
+        toast('Loaded, but install state could not be saved — may need to reinstall next launch.', true);
+      } else {
+        setProviderStatus('local', 'ok', 'Installed, ready offline');
+        toast('✓ Local model installed. Ready for offline use.');
+      }
       var cb = document.getElementById('ai-prov-local');
       if (cb) cb.checked = true;
       var btn = document.getElementById('ai-prov-local-install');
-      if (btn) { btn.disabled = true; btn.textContent = '✓ Installed'; }
+      if (btn) { btn.disabled = true; btn.textContent = persisted ? '✓ Installed' : '⚠ Ready this session'; }
     } catch (e) {
       console.warn('Local AI install failed', e);
       setProviderStatus('local', 'error', 'Install failed: ' + ((e && e.message) || e));
