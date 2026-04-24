@@ -1867,13 +1867,18 @@
       if (src.installed === true && cur.installed !== true) {
         cur.installed = true; changed = true;
       }
-      // enabled: IDB wins if LS was default (false) but IDB has a real value.
-      if (typeof src.enabled === 'boolean' && src.enabled !== cur.enabled && src.installed) {
-        cur.enabled = src.enabled; changed = true;
-      }
-      // apiKey: only fill in if LS lost it.
+      // apiKey: fill in if LS lost it.
       if (typeof src.apiKey === 'string' && src.apiKey && !cur.apiKey) {
         cur.apiKey = src.apiKey; changed = true;
+      }
+      // enabled: restore from IDB when the underlying prerequisite is
+      // present. For cloud providers that means an apiKey (either in
+      // cur already, or just restored above). For local that means
+      // installed=true. Without this, Safari's LS eviction leaves the
+      // user with the key saved but the checkbox mysteriously off.
+      if (src.enabled === true && !cur.enabled) {
+        var prereq = (k === 'local') ? cur.installed === true : !!cur.apiKey;
+        if (prereq) { cur.enabled = true; changed = true; }
       }
     });
     if (changed) {
