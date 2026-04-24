@@ -676,7 +676,7 @@ select.read-ctl{
 .content-table tr:nth-child(even) td{background:var(--bg2)}
 </style>
 </head>
-<body>
+<body class="light">
 
 <!-- ══ SPLASH / LOCK SCREEN ══════════════════════════════ -->
 <div id="splash">
@@ -887,7 +887,7 @@ const VOL_META=[
 
 let volumes={},currentVol=null,currentChIdx=0,totalChapters=57;
 let sidebarOpen=false,readingBarOpen=false,readingMode=false,notesPanelOpen=false;
-let fontAdj=0,lineSpacing=1.9,themeMode='dark';
+let fontAdj=0,lineSpacing=1.9,themeMode='light';
 let synth=window.speechSynthesis,utterance=null,reading=false,paused=false,voices=[];
 let readPosKey=null,saveScrollTimer=null,hlSelection=null,noteSaveTimer=null;
 let chapterIndex=[];
@@ -911,7 +911,7 @@ function loadSettings(){
   const s=JSON.parse(localStorage.getItem('ge_settings')||'{}');
   fontAdj=s.fontAdj||0;
   lineSpacing=s.lineSpacing||1.9;
-  themeMode=s.themeMode||'dark';
+  themeMode=s.themeMode||'light';
   applyFontAdj();
   setTheme(themeMode);
   const sp=document.getElementById('readSpeed'); if(s.readSpeed) sp.value=s.readSpeed;
