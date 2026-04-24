@@ -103,6 +103,12 @@ User pivoted the long-term focus. Sunday's work should serve this bigger mission
 
 5. **📦 Mobile app packaging walkthrough** — "PWA → native" via pwabuilder.com, **iOS + Android only, no Windows target**. Document the workflow so Load users can generate `.ipa` / `.apk` / `.aab` packages from any Load PWA. Apple Developer account needed for iOS App Store submission but not for sideloading / TestFlight. Android APK can be distributed without Play Store.
 
+6. **👶 Start building Attain Jr™** — kid-focused variant of Attain. Scaffold created April 24 at `attain-jr/` with `index.html` placeholder and `NOTES.md` laying out the design principles (picture-first, touch-only, no network, parent-gated AI, no ads, COPPA-friendly). Sunday decision point: **fork from Attain and strip back, or fresh build sharing only the content format?**
+
+### ✅ Already in Load (reminder — don't rebuild)
+
+- **Kindle-style book reading.** Load already handles **EPUB** and **PDF** import out of the box. Users can load books directly from Files or via share-to-Load from any reader. Dyslexia-friendly fonts, TTS, bookmarks, notes, and per-app theme memory all work on imported books.
+
 ### ⏸ Deferred (few weeks out)
 
 - **Piper TTS** — better voices than Safari's built-in. Revisit when main publishing pipeline is shipping.
