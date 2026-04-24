@@ -233,8 +233,12 @@
     wrap.style.display = '';
     if (label) label.style.display = '';
     wrap.innerHTML = list.map(function (t) {
+      // Raw-HTML templates get the floppy icon so the user can tell at
+      // a glance which entries came from "Save as template" on an open
+      // file versus which came from Create-wizard drafts.
+      var icon = t.type === 'raw' ? '&#128190;' : '&#128196;';
       return '<button class="seg-btn" data-user-template="' + escHtml(t.id) + '">' +
-        '&#128196; ' + escHtml(t.name) +
+        icon + ' ' + escHtml(t.name) +
         ' <span class="remove-tpl" data-remove-tpl="' + escHtml(t.id) + '" aria-label="Remove template">&times;</span>' +
       '</button>';
     }).join('');
@@ -255,6 +259,22 @@
     var list = loadUserTemplates();
     var t = list.find(function (x) { return x.id === id; });
     if (!t) return;
+    // Raw-HTML templates saved from an open file bypass the Create
+    // wizard and open directly in the HTML editor as a new scratch
+    // app. Nothing is persisted until the user taps Save.
+    if (t.type === 'raw') {
+      var scratch = {
+        id: 'scratch-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+        name: (t.name || 'Untitled') + ' — copy',
+        kind: 'html',
+        html: t.html || '',
+        sizeBytes: (t.html || '').length,
+        dateAdded: Date.now()
+      };
+      try { openEditor(scratch); toast('Opened "' + scratch.name + '" in the editor. Tap Save to keep it.'); }
+      catch (e) { console.warn('loadUserTemplateInto raw failed', e); toast('Could not open editor.', true); }
+      return;
+    }
     currentTemplate = t.basedOn || 'article';
     $('create-title').value = t.title || '';
     $('create-body').value = t.body || '';
@@ -3598,6 +3618,7 @@
       safe('wireNotes', wireNotes);
       safe('wireTts', wireTts);
       safe('wireBookmarks', wireBookmarks);
+      safe('wireSaveTemplate', wireSaveTemplate);
       safe('wirePerAppTheme', wirePerAppTheme);
       safe('wireNotesScreen', wireNotesScreen);
       safe('wireHelp', wireHelp);
@@ -4399,6 +4420,38 @@
         renderBookmarks(app);
       });
     });
+  }
+  function saveCurrentAppAsTemplate() {
+    if (!currentApp) {
+      toast('Open a file first, then save it as a template.', true);
+      return;
+    }
+    var html = currentApp.html || '';
+    if (!html || html.length < 30) {
+      toast('This file has no HTML to save.', true);
+      return;
+    }
+    var suggested = (currentApp.name || 'Untitled') + ' — template';
+    var name = prompt('Save this page as a template.\n\nTemplates show up on the Create screen — pick one later to start a new page with the same layout.\n\nName:', suggested);
+    if (!name) return;
+    name = String(name).trim();
+    if (!name) return;
+    var list = loadUserTemplates();
+    list.push({
+      id: 'tpl-raw-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+      name: name,
+      type: 'raw',
+      html: html,
+      sourceName: currentApp.name,
+      sourceKind: currentApp.kind || 'html',
+      dateAdded: Date.now()
+    });
+    saveUserTemplates(list);
+    toast('✓ Saved "' + name + '" as a template. Find it on the Create screen.');
+  }
+  function wireSaveTemplate() {
+    var btn = $('save-template-btn');
+    if (btn) btn.addEventListener('click', saveCurrentAppAsTemplate);
   }
   function wireBookmarks() {
     $('bookmarks-btn').addEventListener('click', function () {
