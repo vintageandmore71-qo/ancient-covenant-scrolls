@@ -1840,9 +1840,14 @@
       available: function () { return providerPrefs.local.enabled && providerPrefs.local.installed && typeof window.__LOAD_LOCAL_AI === 'function'; },
       ask: async function (question, contextText) {
         setProviderStatus('local', 'busy', 'Running on-device…');
-        var sys = buildSystemPrompt();
-        var prompt = sys + '\n\n' + (contextText ? 'Context:\n' + contextText + '\n\n' : '') + 'User: ' + question + '\nAssistant:';
-        var out = await window.__LOAD_LOCAL_AI(prompt);
+        var messages = [
+          { role: 'system', content: buildSystemPrompt() }
+        ];
+        if (contextText) {
+          messages.push({ role: 'user', content: 'Context:\n' + contextText });
+        }
+        messages.push({ role: 'user', content: question });
+        var out = await window.__LOAD_LOCAL_AI(messages);
         setProviderStatus('local', 'ok');
         return out;
       }
@@ -2101,9 +2106,38 @@
         }
       }
     });
-    window.__LOAD_LOCAL_AI = async function (prompt) {
-      var out = await gen(prompt, { max_new_tokens: 240, temperature: 0.6, do_sample: true, return_full_text: false });
-      return (out && out[0] && (out[0].generated_text || '')) || '';
+    // Accepts either a ChatML messages array [{role, content}, …] OR a
+    // plain string (legacy). When given messages, the transformers.js
+    // pipeline applies Qwen's built-in chat template so the model sees
+    // the format it was trained on — without that, Qwen1.5 Chat returns
+    // an empty response because "User: …\nAssistant:" isn't recognized
+    // as a chat turn.
+    window.__LOAD_LOCAL_AI = async function (input) {
+      var messages;
+      if (typeof input === 'string') {
+        messages = [{ role: 'user', content: input }];
+      } else if (Array.isArray(input)) {
+        messages = input;
+      } else {
+        return '';
+      }
+      var out = await gen(messages, {
+        max_new_tokens: 240,
+        temperature: 0.6,
+        do_sample: true,
+        repetition_penalty: 1.1
+      });
+      // transformers.js returns [{ generated_text: [...messages, { role: 'assistant', content: '…' }] }]
+      var first = out && out[0];
+      if (!first) return '';
+      var gt = first.generated_text;
+      if (typeof gt === 'string') return gt; // legacy shape
+      if (Array.isArray(gt)) {
+        for (var i = gt.length - 1; i >= 0; i--) {
+          if (gt[i] && gt[i].role === 'assistant') return gt[i].content || '';
+        }
+      }
+      return '';
     };
     return gen;
   }
