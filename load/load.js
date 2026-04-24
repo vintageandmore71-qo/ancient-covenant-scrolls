@@ -4255,9 +4255,46 @@
     ctx.fillText(initials, size / 2, size / 2);
     try { return canvas.toDataURL('image/png'); } catch (e) { return ''; }
   }
+  // Small self-contained banner + script that auto-pops on the first
+  // Safari open of the shared file, telling the recipient exactly how
+  // to add it to their home screen. Hides forever once dismissed, and
+  // is never shown when the file is already running as a home-screen
+  // PWA (display-mode: standalone). Pure inline CSS/JS so it works on
+  // any iPad with no dependencies.
+  function buildAddToHomeScreenBanner(appName) {
+    var safeName = escHtml(appName || 'this app');
+    // Using a templated string that's inlined verbatim into the shared
+    // HTML. Nothing here depends on Load's runtime.
+    return '<div id="__loadInstallHint" style="display:none;position:fixed;left:12px;right:12px;bottom:12px;z-index:2147483647;background:#1a1a2e;color:#f5f5f5;border-radius:14px;padding:16px 18px;box-shadow:0 12px 40px rgba(0,0,0,0.45);font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;font-size:16px;line-height:1.45;max-width:560px;margin:0 auto;">' +
+      '<button aria-label="Dismiss" onclick="this.parentNode.remove()" style="position:absolute;top:8px;right:10px;background:transparent;border:none;color:#aaa;font-size:22px;cursor:pointer;padding:4px 8px;">&times;</button>' +
+      '<div style="font-weight:700;font-size:17px;margin-bottom:6px;color:#a18cff;">&#128241; Save ' + safeName + ' to your Home Screen</div>' +
+      '<div style="color:#d0d0d8;margin-bottom:10px;">To use this as an app (with icon, full-screen):</div>' +
+      '<ol style="margin:0 0 10px 20px;padding:0;color:#e0e0e8;">' +
+      '<li>Tap the <strong>Share</strong> button <span style="display:inline-block;width:18px;height:18px;border:1.5px solid #a18cff;border-radius:4px;vertical-align:middle;position:relative;top:-1px;">&#8593;</span> at the top of Safari</li>' +
+      '<li>Scroll and tap <strong>Add to Home Screen</strong></li>' +
+      '<li>Tap <strong>Add</strong> in the corner</li>' +
+      '</ol>' +
+      '<div style="font-size:13px;color:#9a9aa6;">Only shows once. Sent via <strong>Load</strong>.</div>' +
+      '</div>' +
+      '<script>(function(){try{' +
+      // Never show when already running as a home-screen PWA
+      'var standalone=window.matchMedia&&(window.matchMedia(\'(display-mode: standalone)\').matches||window.matchMedia(\'(display-mode: fullscreen)\').matches)||window.navigator.standalone===true;' +
+      'if(standalone)return;' +
+      // Dismiss persistence per-recipient (localStorage on the shared-file origin)
+      'var seenKey="__load_a2hs_seen_v1";' +
+      'if(localStorage.getItem(seenKey))return;' +
+      // Pop after a short delay so the content paints first
+      'setTimeout(function(){' +
+      'var el=document.getElementById("__loadInstallHint");' +
+      'if(el){el.style.display="block";try{localStorage.setItem(seenKey,"1")}catch(_){}}' +
+      '},1200);' +
+      '}catch(_){}})();<\/script>';
+  }
   // Insert PWA-ready meta tags + an inline apple-touch-icon into an
   // HTML string. When the recipient taps Share → Add to Home Screen in
   // Safari, iOS picks up our title + icon and launches fullscreen.
+  // Also injects an auto-popup banner into <body> that walks the
+  // recipient through the Add-to-Home-Screen steps on first open.
   function enhanceHtmlForHomeScreen(html, app, iconDataUrl) {
     var metas = [];
     if (!/apple-mobile-web-app-capable/i.test(html)) {
@@ -4278,12 +4315,22 @@
       metas.push('<link rel="apple-touch-icon-precomposed" href="' + iconDataUrl + '">');
       metas.push('<link rel="icon" type="image/png" href="' + iconDataUrl + '">');
     }
-    var injection = '\n' + metas.join('\n') + '\n';
-    if (/<head[^>]*>/i.test(html)) {
-      return html.replace(/<head([^>]*)>/i, '<head$1>' + injection);
+    var headInjection = '\n' + metas.join('\n') + '\n';
+    var bodyInjection = buildAddToHomeScreenBanner(app.name);
+    var out = html;
+    if (/<head[^>]*>/i.test(out)) {
+      out = out.replace(/<head([^>]*)>/i, '<head$1>' + headInjection);
+    } else {
+      out = '<!DOCTYPE html><html><head>' + headInjection + '<title>' + escHtml(app.name || 'Load PWA') + '</title></head><body>' + out + '</body></html>';
     }
-    // No head — build a minimal doctype wrapper.
-    return '<!DOCTYPE html><html><head>' + injection + '<title>' + escHtml(app.name || 'Load PWA') + '</title></head><body>' + html + '</body></html>';
+    // Inject the banner just before </body> so it renders above app
+    // content without shifting layout.
+    if (/<\/body>/i.test(out)) {
+      out = out.replace(/<\/body>/i, bodyInjection + '</body>');
+    } else {
+      out += bodyInjection;
+    }
+    return out;
   }
   async function shareAsStandaloneHtml(app) {
     var html = '';
