@@ -976,9 +976,26 @@
     }
   }
   async function runAutoFix() {
-    if (!currentScanReport || !currentApp) return;
+    if (!currentScanReport || !currentApp) {
+      toast('Run a scan first — open an app, then tap Scan current page.', true);
+      return;
+    }
     var fixable = currentScanReport.items.filter(function (i) { return typeof i.fix === 'function'; });
-    if (!fixable.length) { toast('Nothing to fix.'); return; }
+    if (!fixable.length) {
+      // Explain *why* there's nothing to fix so the user can tell the
+      // difference between "clean scan" and "warnings that need manual
+      // work". List the non-ok items as a scrollable helper bubble.
+      var problems = currentScanReport.items.filter(function (i) { return i.severity !== 'ok'; });
+      if (!problems.length) {
+        toast('✓ Your file is clean — nothing to fix.');
+      } else {
+        var lines = problems.map(function (i) {
+          return '• ' + i.label.replace(/<[^>]+>/g, '') + ' — needs your input';
+        }).join('\n');
+        alert('Auto-fix has no automated fixes for these ' + problems.length + ' issue' + (problems.length === 1 ? '' : 's') + ':\n\n' + lines + '\n\nOpen each in the scan list to see the detail and fix it manually.');
+      }
+      return;
+    }
     // Preview step: show the user exactly what's about to change — the
     // list of fixes, size before/after, and a diff-ish snippet per fix.
     // Only apply when they explicitly confirm.
