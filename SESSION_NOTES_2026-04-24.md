@@ -61,25 +61,48 @@ Load is fully working on your iPad with full AI, sharing, and scan/fix features.
 
 ## Parked for Sunday
 
-### 1. Standalone Load PWA file (like Attain has)
-**User wants this next.** A single self-contained `Load-Standalone.html` that inlines the three external libs (jszip, pdf.js, epub.js). Would let Load itself run without a hosted repo.
+### 🎯 Strategic direction (updated April 24 evening)
 
-Size estimate: ~7-10 MB inlined. Non-trivial — each lib is ~1 MB uncompressed.
+User pivoted the long-term focus. Sunday's work should serve this bigger mission:
 
-Approach:
-- Fetch each vendor lib
-- Inline into `<script>` blocks
-- Remove the `<script src=…>` tags
-- Package with current Load HTML/CSS
+> **Load = a universal packaging + publishing platform for offline-first content.**
+>
+> Think: "Swift-like wrapper, but iPad-native." A creator opens Load, authors or imports a web app / book / PWA, and Load produces *every format anyone might want* — standalone PWA, native app bundle, EPUB for Kindle, PDF, webarchive, webloc — without ever needing a desktop, a build server, or an Apple Developer account.
+>
+> The unprecedented bit: Load itself runs offline on iPad. No other tool in this space does that.
 
-### 2. PWA → Native app via PWABuilder
-Walk-through for packaging Load + Attain as iOS/Android app packages via pwabuilder.com. Needs:
-- A live hosted URL (✅ already have)
-- PWABuilder generates an `.ipa` or App Store bundle
-- For App Store: needs Apple Developer account ($99/yr)
+### Sunday priority queue (in order)
 
-### 3. Piper TTS
-Better TTS voices than Safari's built-in. Piper is a client-side ONNX model — similar story to the local AI model (ship by IndexedDB, request persistence). Estimated 40-80 MB per voice.
+1. **🏆 Standalone Load PWA file** — the first proof point of the vision. Load produces a single-file version of itself with the three vendor libs (jszip, pdf.js, epub.js) inlined. Ships the same flavor as `Attain-Standalone.html` that already exists in the repo. ~7–10 MB. ~1–2 hours work.
+
+2. **📚 EPUB export** — unlocks KDP. Every iPad-authored book from Load can be uploaded directly to:
+   - Amazon KDP (accepts EPUB/KPF)
+   - Apple Books (EPUB native)
+   - Kobo / Smashwords / Draft2Digital (EPUB)
+   - Barnes & Noble Nook Press (EPUB)
+
+   Load would need to construct a valid EPUB 3.0 bundle: `mimetype`, `META-INF/container.xml`, `OEBPS/content.opf`, `OEBPS/toc.ncx`, `OEBPS/nav.xhtml`, `OEBPS/content.xhtml`, plus embedded images. Use JSZip (already loaded).
+
+3. **🎨 Publishing templates** — "nice designed templates for the different file uploads." Pre-built cover-page, copyright-page, dedication, TOC, chapter-opener, and back-matter layouts that the user picks in Load's Create screen. Each template is dyslexia-friendly AND formatted to each platform's spec:
+   - **KDP print paperback** — trim size, bleed, margins, ISBN area
+   - **KDP Kindle ebook** — reflowable EPUB, no fixed layout
+   - **Apple Books** — same EPUB but with Apple-specific metadata
+   - **Generic EPUB** — neutral, universal
+   - **Cover-only** — for separate cover upload (KDP asks separately)
+
+4. **📑 PDF export** — universal fallback, needed for KDP paperback print. Use browser print API, styled carefully to produce KDP-acceptable PDF.
+
+5. **📦 App packaging walkthrough** — "PWA → native" via pwabuilder.com. Document the workflow so Load users can generate `.ipa` / `.apk` packages from any Load PWA. Needs Apple Developer account for iOS store submission but not for sideloading / TestFlight.
+
+### ⏸ Deferred (few weeks out)
+
+- **Piper TTS** — better voices than Safari's built-in. Revisit when main publishing pipeline is shipping.
+
+### 📋 Also useful during build
+
+- Remember: user **doesn't like Groq** — suggest OpenRouter / Hugging Face if a second AI provider is needed
+- User's work style: **dyslexia-friendly short steps, one thing at a time**
+- Load's tagline is **"work offline"** — every feature should respect that. Hosting is a last-resort fallback, not a default
 
 ---
 
