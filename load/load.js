@@ -1756,6 +1756,84 @@
       huggingface: { enabled: false, apiKey: '' }
     };
   }
+
+  // iOS Safari evicts PWA data under storage pressure unless we ask for
+  // persistence. Without it, the 400 MB model weights (and even our tiny
+  // install flag) can vanish between sessions. Home-screen PWAs get a
+  // favorable grant heuristic on iOS 17+.
+  var storagePersistResult = null; // true | false | null (unknown/unsupported)
+  async function requestPersistentStorage() {
+    try {
+      if (!navigator.storage || !navigator.storage.persist) return null;
+      if (navigator.storage.persisted) {
+        var already = await navigator.storage.persisted();
+        if (already) { storagePersistResult = true; return true; }
+      }
+      var granted = await navigator.storage.persist();
+      storagePersistResult = !!granted;
+      return storagePersistResult;
+    } catch (e) {
+      console.warn('requestPersistentStorage failed', e);
+      return null;
+    }
+  }
+  async function estimateStorage() {
+    try {
+      if (!navigator.storage || !navigator.storage.estimate) return null;
+      var est = await navigator.storage.estimate();
+      return { usage: est.usage || 0, quota: est.quota || 0 };
+    } catch (e) { return null; }
+  }
+  function formatBytes(bytes) {
+    if (bytes == null) return '?';
+    var mb = bytes / (1024 * 1024);
+    if (mb >= 1024) return (mb / 1024).toFixed(2) + ' GB';
+    return mb.toFixed(0) + ' MB';
+  }
+
+  // Mirror of providerPrefs backed by IndexedDB. localStorage on iOS
+  // Safari gets evicted alongside the model's IDB cache under storage
+  // pressure; a separate IDB store gives us a second source of truth
+  // that survives most eviction events, and lets boot() recover the
+  // install flag even if LS is wiped.
+  var AI_IDB_NAME = 'load_ai_prefs_v1';
+  var AI_IDB_STORE = 'kv';
+  function openAiPrefsDb() {
+    return new Promise(function (resolve, reject) {
+      try {
+        var req = indexedDB.open(AI_IDB_NAME, 1);
+        req.onupgradeneeded = function () {
+          var db = req.result;
+          if (!db.objectStoreNames.contains(AI_IDB_STORE)) {
+            db.createObjectStore(AI_IDB_STORE);
+          }
+        };
+        req.onsuccess = function () { resolve(req.result); };
+        req.onerror = function () { reject(req.error); };
+      } catch (e) { reject(e); }
+    });
+  }
+  function idbGetAiPrefs() {
+    return openAiPrefsDb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(AI_IDB_STORE, 'readonly');
+        var req = tx.objectStore(AI_IDB_STORE).get('providerPrefs');
+        req.onsuccess = function () { resolve(req.result || null); };
+        req.onerror = function () { reject(req.error); };
+      });
+    }).catch(function () { return null; });
+  }
+  function idbSetAiPrefs(value) {
+    return openAiPrefsDb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(AI_IDB_STORE, 'readwrite');
+        var req = tx.objectStore(AI_IDB_STORE).put(value, 'providerPrefs');
+        req.onsuccess = function () { resolve(true); };
+        req.onerror = function () { reject(req.error); };
+      });
+    }).catch(function (e) { console.warn('idbSetAiPrefs failed', e); return false; });
+  }
+
   function loadProviderPrefs() {
     try {
       var raw = localStorage.getItem(LS_PROVIDERS);
@@ -1765,20 +1843,53 @@
       return base;
     } catch (e) { return defaultProviderPrefs(); }
   }
+  async function hydrateProviderPrefsFromIdb() {
+    // Runs during boot(), after loadProviderPrefs() has already populated
+    // providerPrefs synchronously from localStorage. Merges in anything
+    // stronger from IDB — primarily the `installed` flag, which Safari
+    // may have dropped from LS but kept in IDB.
+    var idbPrefs = await idbGetAiPrefs();
+    if (!idbPrefs || typeof idbPrefs !== 'object') return false;
+    var changed = false;
+    Object.keys(idbPrefs).forEach(function (k) {
+      if (!providerPrefs[k]) return;
+      var cur = providerPrefs[k];
+      var src = idbPrefs[k] || {};
+      // installed: IDB true wins — never let a missing LS flag downgrade.
+      if (src.installed === true && cur.installed !== true) {
+        cur.installed = true; changed = true;
+      }
+      // enabled: IDB wins if LS was default (false) but IDB has a real value.
+      if (typeof src.enabled === 'boolean' && src.enabled !== cur.enabled && src.installed) {
+        cur.enabled = src.enabled; changed = true;
+      }
+      // apiKey: only fill in if LS lost it.
+      if (typeof src.apiKey === 'string' && src.apiKey && !cur.apiKey) {
+        cur.apiKey = src.apiKey; changed = true;
+      }
+    });
+    if (changed) {
+      // Push the merged state back to LS so subsequent reads are consistent.
+      try {
+        localStorage.setItem(LS_PROVIDERS, JSON.stringify(providerPrefs));
+      } catch (e) { /* LS still broken; IDB remains source of truth */ }
+    }
+    return changed;
+  }
   function saveProviderPrefs() {
-    // Returns true on success, false on failure. Callers that depend on
-    // the write actually landing (the install flow) should check this
-    // and surface an error if it's false — Safari on iPad can silently
-    // reject localStorage writes under storage pressure.
+    // Sync return = LS write success. IDB mirror is fire-and-forget —
+    // it's the durability backstop for the next launch, not the path
+    // the UI depends on. If LS fails, the install flow surfaces a
+    // warning; meanwhile the IDB write still lands asynchronously so
+    // next boot can recover via hydrateProviderPrefsFromIdb().
+    idbSetAiPrefs(providerPrefs);
     try {
       var json = JSON.stringify(providerPrefs);
       localStorage.setItem(LS_PROVIDERS, json);
-      // Verify round-trip — some Safari failure modes accept setItem
-      // but don't actually persist.
       var got = localStorage.getItem(LS_PROVIDERS);
       return got === json;
     } catch (e) {
-      console.warn('saveProviderPrefs failed', e);
+      console.warn('saveProviderPrefs LS failed', e);
       return false;
     }
   }
@@ -2152,21 +2263,32 @@
       toast('Already installing — please wait.');
       return;
     }
+    // Ask iOS to keep our storage *before* downloading 400 MB. If iOS
+    // denies persistence, Safari will evict the model cache under
+    // pressure and the user will have to reinstall every session.
+    // Home-screen PWAs on iOS 17+ usually get granted.
+    var persistGranted = await requestPersistentStorage();
     localAiInitPromise = initLocalAiPipeline({ firstInstall: true });
     try {
       await localAiInitPromise;
       providerPrefs.local.installed = true;
       providerPrefs.local.enabled = true;
       var persisted = saveProviderPrefs();
+      var est = await estimateStorage();
+      var sizeDetail = est ? ' — using ' + formatBytes(est.usage) + ' of ' + formatBytes(est.quota) + ' available' : '';
+      var persistDetail = persistGranted === true
+        ? 'iPad will keep the model offline'
+        : persistGranted === false
+          ? 'iPad did NOT grant persistent storage — model may be cleared later. Keep Load on your home screen and reopen often to improve odds.'
+          : 'persistence status unknown on this device';
       if (!persisted) {
-        // The pipeline loaded fine but Safari refused to save the flag.
-        // The user can still use the model THIS session but it won't
-        // rehydrate on next launch. Tell them honestly.
-        setProviderStatus('local', 'warn', 'Ready this session — but iPad could not save the install flag. You may need to reinstall next time you open Load.');
+        setProviderStatus('local', 'warn', 'Ready this session — install flag may not persist. ' + persistDetail + sizeDetail);
         toast('Loaded, but install state could not be saved — may need to reinstall next launch.', true);
       } else {
-        setProviderStatus('local', 'ok', 'Installed, ready offline');
-        toast('✓ Local model installed. Ready for offline use.');
+        setProviderStatus('local', 'ok', 'Installed, ready offline. ' + persistDetail + sizeDetail);
+        toast(persistGranted === false
+          ? '✓ Model installed — but iPad did not grant persistent storage. Open Load regularly to keep it.'
+          : '✓ Local model installed. Ready for offline use.');
       }
       var cb = document.getElementById('ai-prov-local');
       if (cb) cb.checked = true;
@@ -2875,8 +2997,17 @@
   async function boot() {
     try {
       safe('applySettings', applySettings);
+      // Fire-and-forget: ask iOS to keep our storage. Home-screen PWAs
+      // on iOS 17+ usually get granted without a prompt. If denied we
+      // keep going — install UI will surface the real state later.
+      requestPersistentStorage();
       try { db = await openDB(); apps = await listAll(); }
       catch (e) { console.warn('IndexedDB open failed', e); apps = []; }
+      // Recover install state from IDB in case Safari evicted localStorage.
+      // Must run before wireAiProviderSettings / autoInitLocalAi so the
+      // UI and auto-init see the corrected providerPrefs.
+      try { await hydrateProviderPrefsFromIdb(); }
+      catch (e) { console.warn('hydrateProviderPrefsFromIdb failed', e); }
       safe('updateHomeCounts', updateHomeCounts);
       safe('wireNavButtons', wireNavButtons);
       safe('wireHomeActions', wireHomeActions);
