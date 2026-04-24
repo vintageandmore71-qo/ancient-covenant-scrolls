@@ -1579,9 +1579,12 @@
   function buildHelperWelcomeHtml() {
     // One-bubble summary of what the helper can do, tuned to whether
     // the user has an AI key set up. Kept short and plain-language
-    // so dyslexic users can scan it without losing the thread.
+    // so dyslexic users can scan it without losing the thread. The
+    // data-welcome marker is detected by addHelperMessage so preamble
+    // bubbles don't get a "Copy" button (user wants to copy answers,
+    // not the help text).
     var hasAi = anyAiProviderConfigured();
-    var lines = [];
+    var lines = ['<span data-welcome="1" style="display:none"></span>'];
     if (hasAi) {
       lines.push('<strong>Ask me anything.</strong> Your question goes straight to the AI — real answers, not canned.');
     } else {
@@ -1653,6 +1656,31 @@
       });
       div.appendChild(document.createElement('br'));
       div.appendChild(btn);
+    }
+    // Copy button on assistant bubbles — one-tap to paste the answer
+    // into Notes, Messages, email, etc. Skipped on the welcome/context
+    // preambles (they set role='assistant-meta' internally via the
+    // opt-out flag on the data-welcome marker below).
+    var isPreamble = /data-welcome="1"/.test(String(html));
+    if (role === 'assistant' && !isPreamble && html && String(html).replace(/<[^>]+>/g, '').trim().length > 0) {
+      var copyBtn = document.createElement('button');
+      copyBtn.className = 'helper-action helper-copy';
+      copyBtn.setAttribute('aria-label', 'Copy answer');
+      copyBtn.innerHTML = '&#128203; Copy';
+      copyBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        // Clone the bubble, strip the copy button + action buttons +
+        // badge, then extract plain text to preserve line breaks.
+        var clone = div.cloneNode(true);
+        clone.querySelectorAll('.helper-action, .prov-badge').forEach(function (n) { n.remove(); });
+        var txt = (clone.innerText || clone.textContent || '').trim();
+        copyToClipboard(txt);
+        var prev = copyBtn.innerHTML;
+        copyBtn.innerHTML = '&#10003; Copied';
+        setTimeout(function () { copyBtn.innerHTML = prev; }, 1400);
+      });
+      div.appendChild(document.createElement('br'));
+      div.appendChild(copyBtn);
     }
     msgs.appendChild(div);
     msgs.scrollTop = msgs.scrollHeight;

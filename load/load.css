@@ -1080,6 +1080,16 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
   min-height: 40px; display: inline-flex; align-items: center; gap: 6px;
 }
 .helper-action:active { transform: scale(0.98); }
+/* Copy button is a quieter secondary action so it doesn't compete
+   with primary "Open X" actions — translucent chip, tight padding. */
+.helper-action.helper-copy {
+  margin-left: 6px;
+  background: transparent; color: var(--ink-mid);
+  border: 1px solid var(--border);
+  font-size: 12px; font-weight: 500;
+  padding: 6px 10px; min-height: 32px;
+}
+.helper-action.helper-copy:active { background: var(--bg-2); }
 
 .helper-quick {
   display: flex; flex-wrap: wrap; gap: 8px;
