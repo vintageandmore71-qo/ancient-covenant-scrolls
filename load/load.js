@@ -4208,10 +4208,87 @@
    * resulting HTML is one file someone else can open with no extras.
    * The Web Share API (iPad Safari 16+) opens the native share sheet so
    * the user can AirDrop, email, save to Files, or message the file. */
+  // Extract a usable app icon — from the zip bundle if possible, else
+  // generate a simple initials-based PNG so the recipient's iPad gets a
+  // real home-screen icon instead of a thumbnail of the page.
+  async function findOrGenerateAppIconDataUrl(app) {
+    if (app.kind === 'zip' && app.bundleBlobs) {
+      var keys = Object.keys(app.bundleBlobs).filter(function (k) {
+        return /(?:^|\/)(?:apple-touch-icon|icon|favicon)[^/]*\.(?:png|jpg|jpeg|svg)$/i.test(k);
+      }).sort(function (a, b) {
+        // Prefer apple-touch-icon-*, then plain "icon", then favicon.
+        var order = function (s) {
+          if (/apple-touch/i.test(s)) return 0;
+          if (/\/icon[.\-]/i.test(s) || /^icon[.\-]/i.test(s)) return 1;
+          return 2;
+        };
+        return order(a) - order(b);
+      });
+      for (var i = 0; i < keys.length; i++) {
+        try {
+          var blob = app.bundleBlobs[keys[i]];
+          var buf = await blob.arrayBuffer();
+          var b64 = arrayBufferToBase64(buf);
+          var mime = blob.type || (/\.svg$/i.test(keys[i]) ? 'image/svg+xml' : /\.jpe?g$/i.test(keys[i]) ? 'image/jpeg' : 'image/png');
+          return 'data:' + mime + ';base64,' + b64;
+        } catch (e) { /* try next */ }
+      }
+    }
+    return generateInitialsIconDataUrl(app.name || 'L', 192);
+  }
+  function generateInitialsIconDataUrl(name, size) {
+    var initials = String(name).trim().split(/\s+/).slice(0, 2)
+      .map(function (w) { return (w.charAt(0) || '').toUpperCase(); }).join('') || 'L';
+    var canvas = document.createElement('canvas');
+    canvas.width = canvas.height = size;
+    var ctx = canvas.getContext('2d');
+    // Deterministic color from the name so each app keeps its own hue.
+    var hash = 0;
+    for (var i = 0; i < name.length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i);
+    var hue = Math.abs(hash) % 360;
+    ctx.fillStyle = 'hsl(' + hue + ',55%,42%)';
+    ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold ' + Math.floor(size * 0.45) + 'px -apple-system,sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(initials, size / 2, size / 2);
+    try { return canvas.toDataURL('image/png'); } catch (e) { return ''; }
+  }
+  // Insert PWA-ready meta tags + an inline apple-touch-icon into an
+  // HTML string. When the recipient taps Share → Add to Home Screen in
+  // Safari, iOS picks up our title + icon and launches fullscreen.
+  function enhanceHtmlForHomeScreen(html, app, iconDataUrl) {
+    var metas = [];
+    if (!/apple-mobile-web-app-capable/i.test(html)) {
+      metas.push('<meta name="apple-mobile-web-app-capable" content="yes">');
+    }
+    metas.push('<meta name="apple-mobile-web-app-title" content="' + escHtml(app.name || 'Load PWA') + '">');
+    if (!/apple-mobile-web-app-status-bar-style/i.test(html)) {
+      metas.push('<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">');
+    }
+    if (!/name=["']viewport/i.test(html)) {
+      metas.push('<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">');
+    }
+    if (!/<meta[^>]+charset/i.test(html)) {
+      metas.push('<meta charset="UTF-8">');
+    }
+    if (iconDataUrl) {
+      metas.push('<link rel="apple-touch-icon" href="' + iconDataUrl + '">');
+      metas.push('<link rel="apple-touch-icon-precomposed" href="' + iconDataUrl + '">');
+      metas.push('<link rel="icon" type="image/png" href="' + iconDataUrl + '">');
+    }
+    var injection = '\n' + metas.join('\n') + '\n';
+    if (/<head[^>]*>/i.test(html)) {
+      return html.replace(/<head([^>]*)>/i, '<head$1>' + injection);
+    }
+    // No head — build a minimal doctype wrapper.
+    return '<!DOCTYPE html><html><head>' + injection + '<title>' + escHtml(app.name || 'Load PWA') + '</title></head><body>' + html + '</body></html>';
+  }
   async function shareAsStandaloneHtml(app) {
     var html = '';
     if (app.kind === 'media' && app.binary) {
-      toast('Preparing media file...');
+      toast('Preparing media file…');
       var buf = await app.binary.arrayBuffer();
       var b64 = arrayBufferToBase64(buf);
       var dataUrl = 'data:' + (app.mime || 'application/octet-stream') + ';base64,' + b64;
@@ -4221,6 +4298,13 @@
     } else {
       toast('Nothing to share for this item.', true); return;
     }
+    // Enhance the HTML with PWA meta tags + an inlined apple-touch-icon
+    // so when the recipient taps "Add to Home Screen" in Safari they get
+    // a proper app icon + full-screen launch, not a screenshot thumbnail.
+    try {
+      var iconDataUrl = await findOrGenerateAppIconDataUrl(app);
+      html = enhanceHtmlForHomeScreen(html, app, iconDataUrl);
+    } catch (e) { console.warn('PWA enhancement failed (still shareable)', e); }
     var safeName = String(app.name || 'load-item').replace(/[^a-zA-Z0-9 _\-]/g, '').trim() || 'load-item';
     var fileName = safeName + '.html';
     var blob = new Blob([html], { type: 'text/html; charset=utf-8' });
@@ -4231,13 +4315,13 @@
     if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
         await navigator.share({ title: app.name, files: [file] });
-        toast('Shared.');
+        toast('Shared. Recipient opens in Safari, taps Share → Add to Home Screen.');
         return;
       } catch (e) { /* user canceled or API refused; fall back */ }
     }
     var url = URL.createObjectURL(blob);
     triggerAnchorDownload(url, fileName);
-    toast('Exported as ' + fileName);
+    toast('Exported ' + fileName + ' — open the file in Safari, then Share → Add to Home Screen.');
   }
   function buildStandaloneMediaPage(app, dataUrl) {
     var safeName = escHtml(app.name || 'Media');
