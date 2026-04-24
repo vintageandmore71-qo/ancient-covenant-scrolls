@@ -2827,6 +2827,20 @@
     });
     return Object.keys(out);
   }
+  // Very common English filler words that should never count as a
+  // keyword match on their own. Without this, questions like "recipe
+  // for pasta" falsely match a KB entry whose keyword list happens to
+  // contain "icon for book" — the word "for" scores enough to pass the
+  // threshold and hijacks the answer.
+  var KB_STOPWORDS = {
+    'a':1,'an':1,'the':1,'and':1,'or':1,'but':1,'if':1,'is':1,'are':1,
+    'was':1,'were':1,'be':1,'been':1,'being':1,'to':1,'from':1,'for':1,
+    'of':1,'in':1,'on':1,'at':1,'by':1,'with':1,'this':1,'that':1,'it':1,
+    'its':1,'as':1,'my':1,'your':1,'our':1,'their':1,'what':1,'which':1,
+    'who':1,'whom':1,'whose':1,'how':1,'can':1,'do':1,'does':1,'did':1,
+    'will':1,'would':1,'should':1,'could':1,'i':1,'you':1,'we':1,'they':1,
+    'he':1,'she':1,'me':1,'us':1,'them':1,'item':1,'thing':1,'about':1
+  };
   function scoreKnowledgeBase(q) {
     var qLower = ' ' + q.toLowerCase() + ' ';
     var expanded = expandTokens(q);
@@ -2839,7 +2853,8 @@
         if (qLower.indexOf(' ' + kLower + ' ') >= 0) score += 6;
         else if (qLower.indexOf(kLower) >= 0) score += 4;
         kLower.split(/\s+/).forEach(function (kt) {
-          if (kt.length < 3) return;
+          if (kt.length < 4) return;
+          if (KB_STOPWORDS[kt]) return;
           if (expanded.indexOf(kt) >= 0) score += 1.5;
           var kStem = kt.replace(/(ies|es|s|ing|ed)$/i, '');
           if (kStem && kStem !== kt && expanded.indexOf(kStem) >= 0) score += 1;
@@ -2847,7 +2862,7 @@
       });
       if (!best || score > best.score) best = { score: score, entry: entry };
     }
-    if (best && best.score >= 2) return best.entry;
+    if (best && best.score >= 4) return best.entry;
     return null;
   }
 
