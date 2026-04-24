@@ -1464,6 +1464,12 @@
     if (!wrap) return;
     var ctx = helperContext;
     var chips = [];
+    // When the running page has real JS errors, prepend a "Fix errors"
+    // chip. One tap and the AI gets the errors + file source together.
+    var hasErrors = consoleEntries.some(function (e) { return e.level === 'error'; });
+    var fixErrorsChip = hasErrors
+      ? { q: '🛠 Fix errors', ask: 'Look at the recent console errors and tell me exactly what\'s wrong and how to fix it. Show the corrected code.' }
+      : null;
     if (ctx.kind === 'viewer' && ctx.app) {
       chips = [
         { q: '/explain', ask: '/explain' },
@@ -1476,6 +1482,7 @@
         { q: 'Step by step', ask: 'walk me through this step by step' },
         { q: 'Ask ChatGPT', ask: 'open chatgpt with this' }
       ];
+      if (fixErrorsChip) chips.unshift(fixErrorsChip);
     } else if (ctx.kind === 'editor') {
       chips = [
         { q: '/explain', ask: '/explain' },
@@ -1488,6 +1495,7 @@
         { q: 'Add an image', ask: 'how do I add an image' },
         { q: 'Open console', ask: 'how do I see errors' }
       ];
+      if (fixErrorsChip) chips.unshift(fixErrorsChip);
     } else if (ctx.kind === 'library') {
       chips = [
         { q: 'How do I search?', ask: 'how do I search' },
@@ -1909,8 +1917,37 @@
   /* Build a context string from the file the user is currently looking
    * at. Keeps the prompt small enough that free-tier providers don't
    * reject it: trims the inlined page text to ~6 KB. */
+  function recentConsoleErrorsText(max) {
+    // Last N error/warning entries from the captured console. Feeds the
+    // provider a "what's broken right now" snapshot so 'fix it' questions
+    // don't need the user to copy errors manually.
+    var n = max || 8;
+    var errs = consoleEntries.filter(function (e) {
+      return e.level === 'error' || e.level === 'warn';
+    }).slice(-n);
+    if (!errs.length) return '';
+    return errs.map(function (e) {
+      return '[' + e.level + '] ' + String(e.msg).slice(0, 500);
+    }).join('\n');
+  }
+  function currentSelectionText() {
+    // Whatever the user has selected on the page (or inside the editor
+    // textarea). Providers treat this as "the thing the user wants me
+    // to focus on" — great for "explain this" / "fix this" questions.
+    try {
+      var sel = window.getSelection && window.getSelection();
+      var s = sel ? String(sel.toString() || '').trim() : '';
+      if (s) return s.slice(0, 2000);
+      var ed = document.getElementById('editor-code');
+      if (ed && typeof ed.selectionStart === 'number' && ed.selectionStart !== ed.selectionEnd) {
+        return (ed.value || '').slice(ed.selectionStart, ed.selectionEnd).slice(0, 2000);
+      }
+    } catch (e) {}
+    return '';
+  }
   function buildProviderContext(ctx) {
     if (!ctx) return '';
+    var out = '';
     if (ctx.kind === 'viewer' && ctx.app) {
       var t = ctx.text || '';
       var head = '[Current file: ' + ctx.app.name + '. Kind: ' + (ctx.app.kind || 'html') + '.]\n\n';
@@ -1931,13 +1968,24 @@
           }
         }
       }
-      return head + t.slice(0, 6000) + bundleCtx;
-    }
-    if (ctx.kind === 'editor' && currentApp) {
+      out = head + t.slice(0, 6000) + bundleCtx;
+    } else if (ctx.kind === 'editor' && currentApp) {
       var src = (currentApp.html || '').slice(0, 6000);
-      return '[User is editing HTML source of ' + currentApp.name + '.]\n\n' + src;
+      out = '[User is editing HTML source of ' + currentApp.name + '.]\n\n' + src;
     }
-    return '';
+    // In-page "Copilot" context additions — console errors and the
+    // user's current text selection. Both are optional; if missing
+    // we omit the headers so free-tier providers don't waste tokens
+    // on empty sections.
+    var errs = recentConsoleErrorsText(8);
+    if (errs) {
+      out += '\n\n[Recent console errors/warnings from the running page — the user wants these fixed]\n' + errs;
+    }
+    var sel = currentSelectionText();
+    if (sel) {
+      out += '\n\n[User selected this text — focus on it]\n' + sel;
+    }
+    return out;
   }
   function buildSystemPrompt() {
     return 'You are Load AI, a helpful offline-first coding and reading assistant embedded in an iPad PWA called Load. Answer in plain language. Prefer short, direct replies. If asked about code, produce minimal self-contained HTML/CSS/JS snippets. Never request that the user sign up for anything.';
