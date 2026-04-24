@@ -4208,6 +4208,51 @@
    * resulting HTML is one file someone else can open with no extras.
    * The Web Share API (iPad Safari 16+) opens the native share sheet so
    * the user can AirDrop, email, save to Files, or message the file. */
+  // Apple's .webarchive format — an XML plist wrapping a full HTML
+  // document. AirDropping one to another iPad opens it directly in
+  // Safari (not in the QuickLook preview that blocks JavaScript) so
+  // the full PWA runs: scripts, password gates, audio, sidebar, and
+  // "Add to Home Screen" all work without the recipient installing
+  // anything or the sender hosting anything.
+  function buildWebArchiveXml(html, pseudoUrl, title) {
+    // btoa only accepts latin-1; use TextEncoder to get UTF-8 bytes
+    // and fold them into a binary string we can base64 safely.
+    var bytes = new TextEncoder().encode(html);
+    var binary = '';
+    for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    var b64 = btoa(binary);
+    // Apple's WebKit serializes the data in ~68-char lines inside <data>;
+    // matching that shape keeps parsers that are picky about whitespace
+    // happy on some older iPadOS versions.
+    var wrapped = b64.replace(/(.{68})/g, '$1\n');
+    var escTitle = (title || 'Load PWA').replace(/[&<>]/g, function (c) {
+      return c === '&' ? '&amp;' : c === '<' ? '&lt;' : '&gt;';
+    });
+    var escUrl = (pseudoUrl || 'https://load.local/index.html').replace(/[&<>]/g, function (c) {
+      return c === '&' ? '&amp;' : c === '<' ? '&lt;' : '&gt;';
+    });
+    return '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n' +
+      '<plist version="1.0">\n' +
+      '<dict>\n' +
+      '\t<key>WebMainResource</key>\n' +
+      '\t<dict>\n' +
+      '\t\t<key>WebResourceData</key>\n' +
+      '\t\t<data>\n' + wrapped + '\n\t\t</data>\n' +
+      '\t\t<key>WebResourceFrameName</key>\n' +
+      '\t\t<string></string>\n' +
+      '\t\t<key>WebResourceMIMEType</key>\n' +
+      '\t\t<string>text/html</string>\n' +
+      '\t\t<key>WebResourceTextEncodingName</key>\n' +
+      '\t\t<string>UTF-8</string>\n' +
+      '\t\t<key>WebResourceURL</key>\n' +
+      '\t\t<string>' + escUrl + '</string>\n' +
+      '\t</dict>\n' +
+      '</dict>\n' +
+      '</plist>\n';
+    // title is included via the HTML's own <title> — webarchive format
+    // doesn't have a separate title field at top level.
+  }
   // Extract a usable app icon — from the zip bundle if possible, else
   // generate a simple initials-based PNG so the recipient's iPad gets a
   // real home-screen icon instead of a thumbnail of the page.
@@ -4388,7 +4433,10 @@
     }
     return out;
   }
-  async function shareAsStandaloneHtml(app) {
+  // Build the app's enhanced HTML once; every share format that needs
+  // HTML starts from this (icon + PWA metas + A2HS popup + multi-page
+  // router already injected).
+  async function buildEnhancedShareHtml(app) {
     var html = '';
     if (app.kind === 'media' && app.binary) {
       toast('Preparing media file…');
@@ -4399,32 +4447,91 @@
     } else if (app.html) {
       html = app.html;
     } else {
-      toast('Nothing to share for this item.', true); return;
+      return null;
     }
-    // Enhance the HTML with PWA meta tags + an inlined apple-touch-icon
-    // so when the recipient taps "Add to Home Screen" in Safari they get
-    // a proper app icon + full-screen launch, not a screenshot thumbnail.
     try {
       var iconDataUrl = await findOrGenerateAppIconDataUrl(app);
       html = enhanceHtmlForHomeScreen(html, app, iconDataUrl);
     } catch (e) { console.warn('PWA enhancement failed (still shareable)', e); }
-    var safeName = String(app.name || 'load-item').replace(/[^a-zA-Z0-9 _\-]/g, '').trim() || 'load-item';
-    var fileName = safeName + '.html';
-    var blob = new Blob([html], { type: 'text/html; charset=utf-8' });
+    return html;
+  }
+  async function shareBlobOrDownload(blob, fileName, mime, successMsg) {
     var file;
-    try { file = new File([blob], fileName, { type: 'text/html' }); } catch (e) {}
-    // Prefer the Web Share API — on iPad it opens the native share sheet
-    // so the user can AirDrop, message, email, or Save to Files in one tap.
+    try { file = new File([blob], fileName, { type: mime }); } catch (e) {}
     if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
-        await navigator.share({ title: app.name, files: [file] });
-        toast('Shared. Recipient opens in Safari, taps Share → Add to Home Screen.');
-        return;
-      } catch (e) { /* user canceled or API refused; fall back */ }
+        await navigator.share({ title: fileName, files: [file] });
+        toast(successMsg || 'Shared.');
+        return true;
+      } catch (e) { /* user canceled or API refused; fall back to download */ }
     }
     var url = URL.createObjectURL(blob);
     triggerAnchorDownload(url, fileName);
-    toast('Exported ' + fileName + ' — open the file in Safari, then Share → Add to Home Screen.');
+    toast('Exported ' + fileName + '.');
+    return true;
+  }
+  // Main share entry point — presents a small picker so the user can
+  // choose how the recipient will open the file. Default/most useful
+  // for interactive PWAs is .webarchive (opens right in Safari, full JS).
+  async function shareAsStandaloneHtml(app) {
+    if (!app || (!app.html && !(app.kind === 'media' && app.binary))) {
+      toast('Nothing to share for this item.', true); return;
+    }
+    openShareFormatPicker(app);
+  }
+  function openShareFormatPicker(app) {
+    // Lightweight inline modal — built from scratch so we don't have to
+    // edit index.html. Styled to match Load's dark theme palette.
+    var existing = document.getElementById('__loadSharePicker');
+    if (existing) existing.remove();
+    var wrap = document.createElement('div');
+    wrap.id = '__loadSharePicker';
+    wrap.style.cssText = 'position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.55);padding:20px;';
+    wrap.innerHTML =
+      '<div role="dialog" aria-label="Share as" style="background:var(--bg-1,#1a1a2e);color:var(--ink-hi,#f0f0f0);border-radius:16px;padding:22px 22px 18px;max-width:520px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.55);">' +
+        '<div style="font-size:19px;font-weight:700;margin-bottom:4px;">Share ' + escHtml(app.name || 'this') + ' as&hellip;</div>' +
+        '<div style="font-size:13px;color:var(--ink-mid,#a0a0b0);margin-bottom:16px;">Pick the format that fits what you want the recipient to do.</div>' +
+        '<button data-format="webarchive" class="seg-btn full" style="text-align:left;padding:14px 16px;margin-bottom:10px;background:var(--accent,#7b6cff);color:#12121a;border:none;border-radius:10px;font-weight:700;font-size:15px;display:block;width:100%;">' +
+          '&#128241; Safari App (.webarchive) &nbsp;&mdash; <em style="font-weight:500;">recommended for full PWAs</em>' +
+          '<div style="font-weight:400;font-size:12.5px;color:#2a2540;margin-top:3px;">Opens in Safari with full JS. Password, sidebar, audio all work. Add to Home Screen works.</div>' +
+        '</button>' +
+        '<button data-format="html" class="seg-btn full" style="text-align:left;padding:14px 16px;margin-bottom:10px;background:var(--bg-2,#2a2a40);color:inherit;border:1px solid var(--border,#3a3a55);border-radius:10px;font-weight:600;font-size:15px;display:block;width:100%;">' +
+          '&#128196; Standalone HTML (.html)' +
+          '<div style="font-weight:400;font-size:12.5px;color:var(--ink-mid,#a0a0b0);margin-top:3px;">For uploading to a host (GitHub Pages, Netlify). On iPad itself, recipients hit preview restrictions &mdash; use webarchive instead.</div>' +
+        '</button>' +
+        '<button data-format="cancel" class="seg-btn full" style="text-align:center;padding:10px;background:transparent;color:var(--ink-mid,#a0a0b0);border:none;font-size:14px;margin-top:4px;">Cancel</button>' +
+      '</div>';
+    document.body.appendChild(wrap);
+    wrap.addEventListener('click', function (e) {
+      if (e.target === wrap) { wrap.remove(); return; }
+      var btn = e.target.closest ? e.target.closest('[data-format]') : null;
+      if (!btn) return;
+      var format = btn.getAttribute('data-format');
+      wrap.remove();
+      if (format === 'webarchive') shareAsWebArchive(app);
+      else if (format === 'html') shareAsPlainHtml(app);
+    });
+  }
+  async function shareAsWebArchive(app) {
+    toast('Packaging as Safari app…');
+    var html = await buildEnhancedShareHtml(app);
+    if (!html) { toast('Nothing to share for this item.', true); return; }
+    var safeName = String(app.name || 'load-item').replace(/[^a-zA-Z0-9 _\-]/g, '').trim() || 'load-item';
+    var fileName = safeName + '.webarchive';
+    var pseudoUrl = 'https://load.local/' + encodeURIComponent(safeName) + '.html';
+    var xml = buildWebArchiveXml(html, pseudoUrl, app.name);
+    var blob = new Blob([xml], { type: 'application/x-webarchive' });
+    await shareBlobOrDownload(blob, fileName, 'application/x-webarchive',
+      'Shared as ' + fileName + '. Recipient taps it → opens in Safari with full features, then Share → Add to Home Screen.');
+  }
+  async function shareAsPlainHtml(app) {
+    var html = await buildEnhancedShareHtml(app);
+    if (!html) { toast('Nothing to share for this item.', true); return; }
+    var safeName = String(app.name || 'load-item').replace(/[^a-zA-Z0-9 _\-]/g, '').trim() || 'load-item';
+    var fileName = safeName + '.html';
+    var blob = new Blob([html], { type: 'text/html; charset=utf-8' });
+    await shareBlobOrDownload(blob, fileName, 'text/html',
+      'Shared as ' + fileName + '. Best for uploading to a host — iPad preview blocks JavaScript on raw .html.');
   }
   function buildStandaloneMediaPage(app, dataUrl) {
     var safeName = escHtml(app.name || 'Media');
