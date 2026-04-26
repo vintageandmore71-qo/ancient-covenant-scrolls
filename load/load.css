@@ -375,6 +375,7 @@ button, .tap, [role="button"] { min-height: 48px; }
 .type-epub { background: linear-gradient(135deg, #1f5a48, #0e3024); border-color: #2e7a60; }
 .type-manuscript { background: linear-gradient(135deg, #2a4a8c, #142654); border-color: #3a5fae; }
 .type-media { background: linear-gradient(135deg, #c2410c, #6b1f07); border-color: #d9551a; }
+.type-video-edit { background: linear-gradient(135deg, #6e2e8a, #3a1844); border-color: #883aae; }
 
 .home-recent-row {
   display: flex; overflow-x: auto; gap: 12px; padding: 4px 0 12px;

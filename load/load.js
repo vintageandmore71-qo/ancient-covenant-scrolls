@@ -5405,6 +5405,10 @@
         else if (t === 'pdf') picker.setAttribute('accept', '.pdf,application/pdf');
         else if (t === 'epub') picker.setAttribute('accept', '.epub,application/epub+zip');
         else if (t === 'manuscript') picker.setAttribute('accept', '.docx,.txt,.md,.markdown,text/plain,text/markdown,application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        else if (t === 'video-edit') {
+          picker.setAttribute('accept', 'video/*,.mp4,.mov,.m4v,.webm,.mkv');
+          picker.dataset.openVideoEditor = '1';
+        }
         else if (t === 'media') picker.setAttribute('accept', 'video/*,audio/*,image/*,.mp4,.mov,.m4v,.webm,.mp3,.m4a,.wav,.ogg,.aac,.jpg,.jpeg,.png,.gif,.webp');
         else if (t === 'zip') {
           // Web apps card: show the PWA help modal first; modal's "Pick" button opens picker
@@ -7968,6 +7972,388 @@
     });
   }
 
+  /* ---------- Video editor (in-Load) ----------
+     Browser-native video editing: import a video via the Edit-Video
+     import card or open any video already in the library, trim it
+     with an in/out slider, add ONE text overlay, layer in optional
+     background music, and export to MP4.
+
+     The export pipeline is 100% web -- no ffmpeg.wasm. We composite
+     the playing <video> + an overlay <canvas> (text drawn each
+     frame), captureStream() the canvas at 30 fps, mix in the
+     background-music AudioBufferSourceNode through an
+     AudioContext destination, and feed both streams into a
+     MediaRecorder that emits an MP4 (H.264 + AAC) on iPad Safari.
+
+     Tradeoff: MediaRecorder encodes in real time, so a 60s clip
+     takes 60s to render. Acceptable for short kid-book trailers /
+     promo clips / TikTok-length pieces. WebCodecs (faster than
+     real time) is a future optimization. */
+  function openVideoEditor(app) {
+    if (!app || app.kind !== 'media' || app.subKind !== 'video' || !app.binary) {
+      toast('Open a video file first.', true); return;
+    }
+    var existing = document.getElementById('__loadVideoEdit');
+    if (existing) existing.remove();
+    var blobUrl = URL.createObjectURL(app.binary);
+
+    var wrap = document.createElement('div');
+    wrap.id = '__loadVideoEdit';
+    wrap.style.cssText = 'position:fixed;inset:0;z-index:2050;display:flex;flex-direction:column;background:#0f0f1a;color:#f0f0f0;font-family:-apple-system,sans-serif;';
+    wrap.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#1a1a2e;border-bottom:1px solid #2a2a40;flex-wrap:wrap;">' +
+        '<button id="ve-close" style="background:#3a3a55;border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:14px;cursor:pointer;">&larr; Close</button>' +
+        '<div style="font-weight:700;font-size:15px;margin-right:auto;">Video Editor &mdash; ' + escHtml(app.name || 'Untitled') + '</div>' +
+        '<button id="ve-export" style="background:linear-gradient(90deg,#ff5ea3,#7b6cff);border:none;color:#fff;padding:8px 16px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">📥 Export MP4</button>' +
+      '</div>' +
+      '<div style="flex:1;overflow-y:auto;padding:18px;max-width:980px;width:100%;margin:0 auto;">' +
+        // Stage: real <video> stacked under an overlay <canvas>
+        '<div id="ve-stage" style="position:relative;background:#000;border-radius:14px;overflow:hidden;aspect-ratio:16/9;box-shadow:0 12px 32px rgba(0,0,0,0.5);">' +
+          '<video id="ve-video" src="' + blobUrl + '" playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;"></video>' +
+          '<canvas id="ve-overlay" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"></canvas>' +
+        '</div>' +
+
+        // Transport row
+        '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0 16px;">' +
+          '<button id="ve-play" style="background:#22c55e;color:#062013;border:none;padding:10px 18px;border-radius:999px;font-weight:700;font-size:14px;">▶ Play</button>' +
+          '<button id="ve-pause" style="background:#3a3a55;color:#fff;border:2px solid #555;padding:10px 14px;border-radius:999px;font-size:13px;">⏸ Pause</button>' +
+          '<span id="ve-time" style="font-size:13px;color:#a0a0b0;font-variant-numeric:tabular-nums;">0:00 / 0:00</span>' +
+        '</div>' +
+
+        // Trim
+        '<div style="background:#1a1a2e;border:1px solid #2a2a40;border-radius:14px;padding:14px 16px;margin-bottom:12px;">' +
+          '<h3 style="margin:0 0 8px;font-size:13px;color:#f0f0f0;text-transform:uppercase;letter-spacing:0.5px;">✂ Trim</h3>' +
+          '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' +
+            '<label style="font-size:13px;color:#a0a0b0;">In</label>' +
+            '<input id="ve-trim-in" type="range" min="0" max="100" step="0.1" value="0" style="flex:1;min-width:160px;">' +
+            '<span id="ve-trim-in-val" class="num">0.00s</span>' +
+          '</div>' +
+          '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;">' +
+            '<label style="font-size:13px;color:#a0a0b0;">Out</label>' +
+            '<input id="ve-trim-out" type="range" min="0" max="100" step="0.1" value="100" style="flex:1;min-width:160px;">' +
+            '<span id="ve-trim-out-val" class="num">0.00s</span>' +
+          '</div>' +
+          '<div style="font-size:12px;color:#a0a0b0;margin-top:6px;">Final length: <strong id="ve-final-len" style="color:#fff;">—</strong></div>' +
+        '</div>' +
+
+        // Text overlay
+        '<div style="background:#1a1a2e;border:1px solid #2a2a40;border-radius:14px;padding:14px 16px;margin-bottom:12px;">' +
+          '<h3 style="margin:0 0 8px;font-size:13px;color:#f0f0f0;text-transform:uppercase;letter-spacing:0.5px;">📝 Text overlay</h3>' +
+          '<input id="ve-text" placeholder="Optional caption / title" style="width:100%;padding:8px 10px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:8px;font-size:14px;margin-bottom:8px;">' +
+          '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;">' +
+            '<label style="font-size:12.5px;color:#a0a0b0;">Position<select id="ve-text-pos" style="display:block;width:100%;margin-top:4px;padding:6px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:13px;"><option value="top">Top</option><option value="middle">Middle</option><option value="bottom" selected>Bottom</option></select></label>' +
+            '<label style="font-size:12.5px;color:#a0a0b0;">Size<input id="ve-text-size" type="number" value="48" min="12" max="200" style="display:block;width:100%;margin-top:4px;padding:6px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:13px;"></label>' +
+            '<label style="font-size:12.5px;color:#a0a0b0;">Color<input id="ve-text-color" type="color" value="#ffffff" style="display:block;width:100%;height:34px;margin-top:4px;border:none;background:transparent;cursor:pointer;"></label>' +
+            '<label style="font-size:12.5px;color:#a0a0b0;">BG<select id="ve-text-bg" style="display:block;width:100%;margin-top:4px;padding:6px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:13px;"><option value="none">None</option><option value="black" selected>Black bar</option><option value="white">White bar</option></select></label>' +
+          '</div>' +
+        '</div>' +
+
+        // Audio (background music)
+        '<div style="background:#1a1a2e;border:1px solid #2a2a40;border-radius:14px;padding:14px 16px;margin-bottom:12px;">' +
+          '<h3 style="margin:0 0 8px;font-size:13px;color:#f0f0f0;text-transform:uppercase;letter-spacing:0.5px;">🎵 Background music</h3>' +
+          '<input id="ve-audio-pick" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg" style="font-size:13px;">' +
+          '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;">' +
+            '<label style="font-size:13px;color:#a0a0b0;">Music volume</label>' +
+            '<input id="ve-audio-vol" type="range" min="0" max="1" step="0.05" value="0.35" style="flex:1;min-width:160px;">' +
+            '<span id="ve-audio-vol-val" class="num">35%</span>' +
+            '<label style="font-size:13px;color:#a0a0b0;display:inline-flex;align-items:center;gap:4px;"><input id="ve-mute-orig" type="checkbox"> Mute original audio</label>' +
+          '</div>' +
+        '</div>' +
+
+        '<div id="ve-progress" style="display:none;align-items:center;gap:10px;background:#1a1a2e;border-radius:12px;padding:12px 14px;border:1px solid #2a2a40;">' +
+          '<div style="flex:1;height:8px;background:#2a2a40;border-radius:4px;overflow:hidden;"><div id="ve-progress-fill" style="height:100%;width:0%;background:linear-gradient(90deg,#ff5ea3,#fbbf24,#22c55e,#4ea0ff,#a18cff);transition:width 0.15s;"></div></div>' +
+          '<span id="ve-progress-label" style="font-size:13px;color:#a0a0b0;white-space:nowrap;">Recording…</span>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(wrap);
+
+    var video = document.getElementById('ve-video');
+    var canvas = document.getElementById('ve-overlay');
+    var ctx = canvas.getContext('2d');
+    var trimIn = document.getElementById('ve-trim-in');
+    var trimOut = document.getElementById('ve-trim-out');
+    var trimInVal = document.getElementById('ve-trim-in-val');
+    var trimOutVal = document.getElementById('ve-trim-out-val');
+    var finalLen = document.getElementById('ve-final-len');
+    var timeLbl = document.getElementById('ve-time');
+
+    var musicBuffer = null;     // decoded AudioBuffer of imported music
+    var audioCtx = null;        // shared AudioContext
+    var musicSource = null;     // currently-playing music node (live preview)
+    var musicGain = null;
+    var musicVol = 0.35;
+    var muteOrig = false;
+
+    function fmtTime(s) {
+      s = Math.max(0, s || 0);
+      var m = Math.floor(s / 60), sec = (s % 60).toFixed(1);
+      return m + ':' + (sec < 10 ? '0' : '') + sec;
+    }
+    function refreshTrimDisplay() {
+      var inS = parseFloat(trimIn.value), outS = parseFloat(trimOut.value);
+      if (outS < inS + 0.2) outS = inS + 0.2;
+      trimInVal.textContent = inS.toFixed(2) + 's';
+      trimOutVal.textContent = outS.toFixed(2) + 's';
+      finalLen.textContent = (outS - inS).toFixed(2) + 's';
+    }
+    video.addEventListener('loadedmetadata', function () {
+      var d = video.duration || 0;
+      trimIn.max = trimOut.max = d.toFixed(2);
+      trimOut.value = d.toFixed(2);
+      // Match canvas internal resolution to video
+      canvas.width = video.videoWidth || 1280;
+      canvas.height = video.videoHeight || 720;
+      refreshTrimDisplay();
+      drawOverlay();
+    });
+    video.addEventListener('timeupdate', function () {
+      timeLbl.textContent = fmtTime(video.currentTime) + ' / ' + fmtTime(video.duration);
+      // Auto-stop at out point
+      if (video.currentTime >= parseFloat(trimOut.value)) video.pause();
+      drawOverlay();
+    });
+
+    [trimIn, trimOut].forEach(function (el) { el.addEventListener('input', refreshTrimDisplay); });
+
+    function drawOverlay() {
+      if (!canvas.width) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      var t = (document.getElementById('ve-text').value || '').trim();
+      if (!t) return;
+      var pos = document.getElementById('ve-text-pos').value;
+      var size = parseInt(document.getElementById('ve-text-size').value, 10) || 48;
+      var color = document.getElementById('ve-text-color').value;
+      var bg = document.getElementById('ve-text-bg').value;
+      var w = canvas.width, h = canvas.height;
+      var pad = Math.round(size * 0.6);
+      var lineH = Math.round(size * 1.25);
+      ctx.font = '700 ' + size + 'px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      var lines = wrapTextLines(ctx, t, w - pad * 2);
+      var blockH = lines.length * lineH + pad;
+      var y;
+      if (pos === 'top') y = pad + lineH / 2;
+      else if (pos === 'middle') y = h / 2 - (blockH / 2) + lineH / 2;
+      else y = h - blockH + lineH / 2;
+      if (bg === 'black') { ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, y - lineH / 2 - pad / 2, w, blockH + pad / 2); }
+      else if (bg === 'white') { ctx.fillStyle = 'rgba(255,255,255,0.78)'; ctx.fillRect(0, y - lineH / 2 - pad / 2, w, blockH + pad / 2); }
+      ctx.fillStyle = color;
+      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+      ctx.shadowBlur = bg === 'none' ? Math.round(size * 0.12) : 0;
+      lines.forEach(function (line, i) { ctx.fillText(line, w / 2, y + i * lineH); });
+      ctx.shadowBlur = 0;
+    }
+    function wrapTextLines(c, text, maxW) {
+      var words = String(text).split(/\s+/), lines = [], cur = '';
+      for (var i = 0; i < words.length; i++) {
+        var test = cur ? cur + ' ' + words[i] : words[i];
+        if (c.measureText(test).width > maxW && cur) { lines.push(cur); cur = words[i]; } else cur = test;
+      }
+      if (cur) lines.push(cur);
+      return lines;
+    }
+    ['ve-text', 've-text-pos', 've-text-size', 've-text-color', 've-text-bg'].forEach(function (id) {
+      document.getElementById(id).addEventListener('input', drawOverlay);
+      document.getElementById(id).addEventListener('change', drawOverlay);
+    });
+
+    document.getElementById('ve-play').addEventListener('click', function () {
+      var inS = parseFloat(trimIn.value);
+      if (Math.abs(video.currentTime - inS) > 0.5 || video.currentTime > parseFloat(trimOut.value)) video.currentTime = inS;
+      muteOrig = document.getElementById('ve-mute-orig').checked;
+      video.muted = muteOrig;
+      video.play().catch(function () {});
+      // Preview music if loaded
+      if (musicBuffer) playPreviewMusic();
+    });
+    document.getElementById('ve-pause').addEventListener('click', function () {
+      video.pause();
+      stopPreviewMusic();
+    });
+    document.getElementById('ve-audio-vol').addEventListener('input', function (e) {
+      musicVol = parseFloat(e.target.value);
+      document.getElementById('ve-audio-vol-val').textContent = Math.round(musicVol * 100) + '%';
+      if (musicGain) musicGain.gain.value = musicVol;
+    });
+    document.getElementById('ve-audio-pick').addEventListener('change', async function (e) {
+      var f = e.target.files && e.target.files[0];
+      if (!f) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        var buf = await f.arrayBuffer();
+        musicBuffer = await audioCtx.decodeAudioData(buf);
+        toast('Music loaded — ' + musicBuffer.duration.toFixed(1) + 's.');
+      } catch (err) { toast('Could not decode that audio file.', true); }
+    });
+    function playPreviewMusic() {
+      stopPreviewMusic();
+      if (!musicBuffer || !audioCtx) return;
+      musicSource = audioCtx.createBufferSource();
+      musicSource.buffer = musicBuffer;
+      musicSource.loop = true;
+      musicGain = audioCtx.createGain();
+      musicGain.gain.value = musicVol;
+      musicSource.connect(musicGain).connect(audioCtx.destination);
+      musicSource.start();
+    }
+    function stopPreviewMusic() {
+      try { if (musicSource) musicSource.stop(); } catch (e) {}
+      musicSource = null;
+    }
+
+    // ---- Export ----
+    document.getElementById('ve-export').addEventListener('click', exportMp4);
+    async function exportMp4() {
+      if (!('MediaRecorder' in window)) { toast('Your browser does not support MediaRecorder.', true); return; }
+      var inS = parseFloat(trimIn.value);
+      var outS = parseFloat(trimOut.value);
+      if (outS - inS < 0.2) { toast('Trim is too short.', true); return; }
+      muteOrig = document.getElementById('ve-mute-orig').checked;
+
+      var pickMime = (function () {
+        var candidates = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=h264', 'video/webm;codecs=vp8'];
+        for (var i = 0; i < candidates.length; i++) if (MediaRecorder.isTypeSupported(candidates[i])) return candidates[i];
+        return '';
+      })();
+
+      var prog = document.getElementById('ve-progress');
+      var fill = document.getElementById('ve-progress-fill');
+      var label = document.getElementById('ve-progress-label');
+      prog.style.display = 'flex';
+      fill.style.width = '0%'; label.textContent = 'Preparing…';
+
+      // Off-screen render canvas — same size as video, used to composite
+      // both the live video frame AND the text overlay each frame.
+      var rc = document.createElement('canvas');
+      rc.width = video.videoWidth || 1280;
+      rc.height = video.videoHeight || 720;
+      var rctx = rc.getContext('2d');
+
+      // Build streams
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      var dest = audioCtx.createMediaStreamDestination();
+
+      // Original-video audio: capture via captureStream() and route into the
+      // mix unless the user muted it.
+      var videoStream = video.captureStream ? video.captureStream() : (video.mozCaptureStream ? video.mozCaptureStream() : null);
+      if (videoStream && !muteOrig) {
+        var origTracks = videoStream.getAudioTracks();
+        if (origTracks.length) {
+          var srcEl = audioCtx.createMediaStreamSource(new MediaStream([origTracks[0]]));
+          srcEl.connect(dest);
+        }
+      }
+      // Music: BufferSource into dest at current volume
+      var recMusicSource = null, recMusicGain = null;
+      if (musicBuffer) {
+        recMusicSource = audioCtx.createBufferSource();
+        recMusicSource.buffer = musicBuffer;
+        recMusicSource.loop = true;
+        recMusicGain = audioCtx.createGain();
+        recMusicGain.gain.value = musicVol;
+        recMusicSource.connect(recMusicGain).connect(dest);
+      }
+
+      var canvasStream = rc.captureStream(30);
+      // Combine canvas video tracks with the mixed audio destination.
+      var combined = new MediaStream();
+      canvasStream.getVideoTracks().forEach(function (t) { combined.addTrack(t); });
+      dest.stream.getAudioTracks().forEach(function (t) { combined.addTrack(t); });
+
+      var rec = new MediaRecorder(combined, pickMime ? { mimeType: pickMime, videoBitsPerSecond: 4500000 } : { videoBitsPerSecond: 4500000 });
+      var chunks = [];
+      rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+      var stopped = false;
+      rec.onstop = async function () {
+        if (stopped) return;
+        stopped = true;
+        try { if (recMusicSource) recMusicSource.stop(); } catch (_) {}
+        var blob = new Blob(chunks, { type: pickMime || 'video/mp4' });
+        var ext = (pickMime && pickMime.indexOf('webm') >= 0) ? '.webm' : '.mp4';
+        var safeName = String(app.name || 'video').replace(/[^a-zA-Z0-9 _\-]/g, '').trim() || 'video';
+        prog.style.display = 'none';
+        await shareBlobOrDownload(blob, safeName + '-edit' + ext, blob.type,
+          'Exported ' + safeName + '-edit' + ext + '.');
+        // Save back into the library so the user can package / share
+        try {
+          var newApp = {
+            id: newId(), name: safeName + ' (edited)', kind: 'media', subKind: 'video',
+            mime: blob.type, binary: blob, dateAdded: Date.now(), lastOpened: null,
+            sizeBytes: blob.size
+          };
+          await putApp(newApp);
+          apps.push(newApp);
+          renderLibrary();
+          updateHomeCounts();
+        } catch (e) {}
+      };
+
+      // Start recording, seek to in-point, play
+      video.muted = muteOrig;
+      video.currentTime = inS;
+      await new Promise(function (r) {
+        function once() { video.removeEventListener('seeked', once); r(); }
+        video.addEventListener('seeked', once);
+      });
+      rec.start();
+      if (recMusicSource) try { recMusicSource.start(); } catch (e) {}
+      label.textContent = 'Recording…';
+      var startWall = performance.now();
+      var totalLen = outS - inS;
+      function frame() {
+        if (stopped) return;
+        rctx.drawImage(video, 0, 0, rc.width, rc.height);
+        // Re-draw overlay onto the render canvas (drawOverlay drew into the
+        // preview canvas; we replicate inline here for the render canvas)
+        var t = (document.getElementById('ve-text').value || '').trim();
+        if (t) {
+          var pos = document.getElementById('ve-text-pos').value;
+          var size = parseInt(document.getElementById('ve-text-size').value, 10) || 48;
+          var color = document.getElementById('ve-text-color').value;
+          var bg = document.getElementById('ve-text-bg').value;
+          var w = rc.width, h = rc.height;
+          var pad = Math.round(size * 0.6);
+          var lineH = Math.round(size * 1.25);
+          rctx.font = '700 ' + size + 'px -apple-system,sans-serif';
+          rctx.textAlign = 'center'; rctx.textBaseline = 'middle';
+          var lines = wrapTextLines(rctx, t, w - pad * 2);
+          var blockH = lines.length * lineH + pad;
+          var y = pos === 'top' ? pad + lineH / 2
+                : pos === 'middle' ? (h / 2 - blockH / 2 + lineH / 2)
+                : (h - blockH + lineH / 2);
+          if (bg === 'black') { rctx.fillStyle = 'rgba(0,0,0,0.55)'; rctx.fillRect(0, y - lineH / 2 - pad / 2, w, blockH + pad / 2); }
+          else if (bg === 'white') { rctx.fillStyle = 'rgba(255,255,255,0.78)'; rctx.fillRect(0, y - lineH / 2 - pad / 2, w, blockH + pad / 2); }
+          rctx.fillStyle = color;
+          rctx.shadowColor = 'rgba(0,0,0,0.5)';
+          rctx.shadowBlur = bg === 'none' ? Math.round(size * 0.12) : 0;
+          lines.forEach(function (line, i) { rctx.fillText(line, w / 2, y + i * lineH); });
+          rctx.shadowBlur = 0;
+        }
+        var pct = Math.min(100, Math.round(((video.currentTime - inS) / totalLen) * 100));
+        fill.style.width = pct + '%';
+        label.textContent = 'Recording… ' + pct + '%';
+        if (video.currentTime >= outS || video.paused) {
+          rec.stop();
+          return;
+        }
+        requestAnimationFrame(frame);
+      }
+      try { await video.play(); } catch (e) { toast('Cannot start playback for export. Tap Play first, then Export.', true); rec.stop(); return; }
+      requestAnimationFrame(frame);
+    }
+
+    document.getElementById('ve-close').addEventListener('click', function () {
+      try { video.pause(); } catch (e) {}
+      stopPreviewMusic();
+      try { URL.revokeObjectURL(blobUrl); } catch (e) {}
+      wrap.remove();
+    });
+  }
+
+  // Expose so tile menus / library can also open the editor on a video
+  window.openVideoEditor = openVideoEditor;
+
   function wireMetadataBtn() {
     var btn = $('metadata-btn');
     if (btn) btn.addEventListener('click', function () {
@@ -9084,7 +9470,9 @@
       toast('Import failed: ' + (err && err.message ? err.message : err), true);
     }
     hideProgress();
+    var openVideoAfter = e.target.dataset.openVideoEditor === '1';
     e.target.value = '';
+    e.target.removeAttribute('data-open-video-editor');
     renderLibrary();
     updateHomeCounts();
     renderRecent();
@@ -9097,6 +9485,14 @@
         : '✓ Imported ' + imported + ' files — now in your Library';
       if (failed > 0) label += ' (' + failed + ' failed)';
       toast(label);
+      // If the user came in via "Edit Video", jump straight to the
+      // editor on the most recently-imported video instead of bouncing
+      // through the library tile.
+      if (openVideoAfter) {
+        var newest = apps.filter(function (a) { return a.kind === 'media' && a.subKind === 'video'; })
+                         .sort(function (a, b) { return b.dateAdded - a.dateAdded; })[0];
+        if (newest) openVideoEditor(newest);
+      }
     }
   });
 
