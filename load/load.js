@@ -4913,7 +4913,7 @@
     var contentChunks = paginateForPreview(body.innerHTML, trim.w, trim.h,
       0.5, settings.marginOutside, settings.marginTop, settings.marginBottom);
     if (isPicBook) {
-      var total = PICTURE_BOOK_TEMPLATES[settings.bookType].pages;
+      var total = picBookPageCount(settings.bookType, settings.customPageCount);
       var STRUCTURAL_FRONT = 5, STRUCTURAL_BACK = 3;
       var storyPageCount = total - STRUCTURAL_FRONT - STRUCTURAL_BACK;
       var perPage = Math.max(1, Math.ceil(contentChunks.length / Math.max(1, storyPageCount)));
@@ -5627,23 +5627,44 @@
       marginOutside: 0.5,
       headerText: '',
       footerText: '',
-      bookType: 'standard',  // 'standard' | 'picture-24' | 'picture-32' | 'picture-40' | 'picture-48'
-      view: 'schema'         // 'schema' | 'stacked' | 'spread'
+      bookType: 'standard',  // 'standard' | 'picture-24/32/40/48/custom'
+      view: 'schema',        // 'schema' | 'flip' | 'spread' | 'stacked'
+      customPageCount: 32    // used only when bookType === 'picture-custom'
     };
   }
 
   // Picture-book industry standards. KDP Kids accepts picture books in
   // multiples of 4. 32 is the most common because it efficiently uses
   // a single signature on the press; 24 / 40 / 48 also common.
+  // 'picture-custom' uses settings.customPageCount so the user can
+  // pick non-standard counts (28, 36, 56, board books, etc.).
   // Each template fixes the total page count and the structural
   // (non-story) pages: cover paste, end papers, title, copyright,
   // dedication, back-matter, back cover paste.
   var PICTURE_BOOK_TEMPLATES = {
-    'picture-24': { pages: 24, label: "Picture book — 24 pages" },
-    'picture-32': { pages: 32, label: "Picture book — 32 pages (industry standard)" },
-    'picture-40': { pages: 40, label: "Picture book — 40 pages" },
-    'picture-48': { pages: 48, label: "Picture book — 48 pages" }
+    'picture-24':     { pages: 24, label: "Picture book — 24 pages" },
+    'picture-32':     { pages: 32, label: "Picture book — 32 pages (industry standard)" },
+    'picture-40':     { pages: 40, label: "Picture book — 40 pages" },
+    'picture-48':     { pages: 48, label: "Picture book — 48 pages" },
+    'picture-custom': { pages: 0,  label: "Picture book — custom page count" }   // pages filled in from settings.customPageCount at render time
   };
+
+  // Returns the effective page count for a picture-book template. For
+  // 'picture-custom' the user-entered value drives this; for the
+  // canonical sizes the template fixes it.
+  function picBookPageCount(bookType, customPageCount) {
+    if (bookType !== 'picture-custom') {
+      return PICTURE_BOOK_TEMPLATES[bookType] && PICTURE_BOOK_TEMPLATES[bookType].pages;
+    }
+    var n = parseInt(customPageCount, 10) || 32;
+    // Clamp to KDP rules: even, 16-64. 16 covers board books; 64 is
+    // a high cap for picture books (anything taller usually goes
+    // chapter-book / middle-grade format).
+    if (n < 16) n = 16;
+    if (n > 64) n = 64;
+    if (n % 2 !== 0) n += 1;
+    return n;
+  }
 
   // Returns the human label for a given printed page in a picture-book
   // template. Page numbering starts at 1 = front cover paste-down (not
@@ -5692,6 +5713,9 @@
         '<div style="font-weight:700;font-size:15px;margin-right:auto;">Layout for Print &mdash; ' + escHtml(app.name || 'Untitled') + '</div>' +
         '<label style="font-size:12.5px;color:#a0a0b0;">Book ' +
           '<select id="ll-booktype" style="margin-left:6px;padding:6px 8px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:13px;">' + bookTypeOptions + '</select>' +
+        '</label>' +
+        '<label id="ll-pages-label" style="font-size:12.5px;color:#a0a0b0;display:' + (settings.bookType === 'picture-custom' ? 'inline-flex' : 'none') + ';align-items:center;gap:4px;">Pages ' +
+          '<input id="ll-pages" type="number" min="16" max="64" step="2" value="' + (settings.customPageCount || 32) + '" style="width:60px;padding:6px 8px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:13px;">' +
         '</label>' +
         '<label style="font-size:12.5px;color:#a0a0b0;">Trim ' +
           '<select id="ll-trim" style="margin-left:6px;padding:6px 8px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:13px;">' + trimOptions + '</select>' +
@@ -5742,7 +5766,8 @@
         headerText: document.getElementById('ll-header').value,
         footerText: document.getElementById('ll-footer').value,
         bookType: document.getElementById('ll-booktype').value,
-        view: document.getElementById('ll-view').value
+        view: document.getElementById('ll-view').value,
+        customPageCount: parseInt(document.getElementById('ll-pages').value, 10) || 32
       };
     }
 
@@ -5783,6 +5808,9 @@
     // trim. Both are still user-overridable after the auto-flip.
     document.getElementById('ll-booktype').addEventListener('change', function () {
       var v = document.getElementById('ll-booktype').value;
+      // Show / hide the custom-page-count input when picture-custom is picked
+      var pagesLabel = document.getElementById('ll-pages-label');
+      if (pagesLabel) pagesLabel.style.display = (v === 'picture-custom') ? 'inline-flex' : 'none';
       if (v && v !== 'standard') {
         // Picture-book templates default to schema view -- the whole
         // book on one screen, matching the standard picture-book
@@ -5797,6 +5825,8 @@
       }
       rebuild();
     });
+    var pagesInput = document.getElementById('ll-pages');
+    if (pagesInput) pagesInput.addEventListener('change', rebuild);
     ['ll-header', 'll-footer'].forEach(function (id) {
       var el = document.getElementById(id);
       if (el) el.addEventListener('input', debounce(rebuild, 500));
@@ -5888,7 +5918,7 @@
     if (isPicBook) {
       // Picture-book: fixed page count + structural pages. Story
       // distributes across (totalPages - structural) story pages.
-      var total = PICTURE_BOOK_TEMPLATES[s.bookType].pages;
+      var total = picBookPageCount(s.bookType, s.customPageCount);
       var STRUCTURAL_FRONT = 5;     // pages 1..5 = paste, end paper, title, copyright, dedication
       var STRUCTURAL_BACK = 3;      // pages totalPages-2..totalPages = back matter, end paper, paste
       var storyPageCount = total - STRUCTURAL_FRONT - STRUCTURAL_BACK;
@@ -6203,6 +6233,7 @@
         '<button data-cmd="undo" class="pe-tool" style="flex-shrink:0;">&#8630;</button>' +
         '<button data-cmd="redo" class="pe-tool" style="flex-shrink:0;">&#8631;</button>' +
         '<button id="pe-find" class="pe-tool" style="flex-shrink:0;" title="Find &amp; replace">🔍 Find</button>' +
+        '<button id="pe-chart" class="pe-tool" style="flex-shrink:0;" title="Insert chart or table">📊 Chart</button>' +
         '<button id="pe-save" style="background:#7b6cff;border:none;color:#12121a;padding:8px 14px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;">Save</button>' +
       '</div>' +
       '<div id="pe-find-bar" style="display:none;align-items:center;gap:8px;padding:8px 14px;background:#15152a;border-bottom:1px solid #2a2a40;flex-wrap:wrap;">' +
@@ -6400,7 +6431,341 @@
       if (e.key === 'Enter') { e.preventDefault(); replaceCurrent(); }
     });
 
+    // ---- Chart maker ----
+    // Save the caret position before the modal steals focus so we can
+    // insert the chart back at the right place.
+    var savedRange = null;
+    area.addEventListener('blur', function () {
+      var sel = window.getSelection();
+      if (sel && sel.rangeCount && area.contains(sel.anchorNode)) {
+        savedRange = sel.getRangeAt(0).cloneRange();
+      }
+    });
+    document.getElementById('pe-chart').addEventListener('click', function () {
+      // Capture current caret if we can; otherwise insert at end.
+      var sel = window.getSelection();
+      if (sel && sel.rangeCount && area.contains(sel.anchorNode)) {
+        savedRange = sel.getRangeAt(0).cloneRange();
+      }
+      openChartMaker(function (insertHtml) {
+        if (!insertHtml) return;
+        if (savedRange) {
+          var r = savedRange.cloneRange();
+          var temp = document.createElement('div');
+          temp.innerHTML = insertHtml;
+          var frag = document.createDocumentFragment();
+          var node;
+          while ((node = temp.firstChild)) frag.appendChild(node);
+          r.deleteContents();
+          r.insertNode(frag);
+        } else {
+          area.insertAdjacentHTML('beforeend', insertHtml);
+        }
+        area.dataset.dirty = '1';
+        area.focus();
+      });
+    });
+
     area.focus();
+  }
+
+  /* ---------- In-app chart maker ----------
+     Pure-Canvas charts (bar / line / pie) plus an HTML table option,
+     all built without any external libraries so it stays offline.
+     Tap the 📊 button in the prose editor toolbar, pick a chart type,
+     enter "label,value" data one per line, tap Insert and the
+     rendered image (or table) lands at your caret position. */
+  function openChartMaker(onInsert) {
+    var existing = document.getElementById('__loadChart');
+    if (existing) existing.remove();
+
+    var defaultData = '2021,12\n2022,18\n2023,27\n2024,34\n2025,41';
+    var wrap = document.createElement('div');
+    wrap.id = '__loadChart';
+    wrap.style.cssText = 'position:fixed;inset:0;z-index:2100;display:flex;flex-direction:column;background:#0f0f1a;color:#f0f0f0;font-family:-apple-system,sans-serif;';
+
+    wrap.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#1a1a2e;border-bottom:1px solid #2a2a40;flex-wrap:wrap;">' +
+        '<button id="ch-close" style="background:#3a3a55;border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:14px;cursor:pointer;">&larr; Cancel</button>' +
+        '<div style="font-weight:700;font-size:15px;margin-right:auto;">Chart maker</div>' +
+        '<button id="ch-insert" style="background:#22c55e;border:none;color:#062013;padding:8px 16px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">Insert into manuscript</button>' +
+      '</div>' +
+      '<div style="flex:1;display:flex;overflow:hidden;">' +
+        '<div style="width:340px;border-right:1px solid #2a2a40;padding:14px;overflow-y:auto;background:#15152a;">' +
+          '<label style="display:block;font-size:12.5px;color:#a0a0b0;margin-bottom:4px;">Chart type</label>' +
+          '<select id="ch-type" style="width:100%;padding:8px 10px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:14px;margin-bottom:12px;">' +
+            '<option value="bar">Bar chart</option>' +
+            '<option value="line">Line chart</option>' +
+            '<option value="pie">Pie chart</option>' +
+            '<option value="table">Table (HTML, not image)</option>' +
+          '</select>' +
+          '<label style="display:block;font-size:12.5px;color:#a0a0b0;margin-bottom:4px;">Title</label>' +
+          '<input id="ch-title" value="My chart" style="width:100%;padding:8px 10px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:14px;margin-bottom:12px;">' +
+          '<label style="display:block;font-size:12.5px;color:#a0a0b0;margin-bottom:4px;">Data &mdash; one <code>label, value</code> per line</label>' +
+          '<textarea id="ch-data" style="width:100%;height:180px;padding:10px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:13px;font-family:Menlo,monospace;resize:vertical;">' + escHtml(defaultData) + '</textarea>' +
+          '<div style="display:flex;gap:8px;margin-top:10px;">' +
+            '<label style="flex:1;font-size:12.5px;color:#a0a0b0;">Color<input id="ch-color" type="color" value="#7b6cff" style="display:block;width:100%;height:34px;margin-top:4px;border:none;background:transparent;cursor:pointer;"></label>' +
+            '<label style="flex:1;font-size:12.5px;color:#a0a0b0;">Width<input id="ch-w" type="number" value="600" min="200" max="1600" style="display:block;width:100%;padding:6px 8px;margin-top:4px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:13px;"></label>' +
+            '<label style="flex:1;font-size:12.5px;color:#a0a0b0;">Height<input id="ch-h" type="number" value="400" min="200" max="1200" style="display:block;width:100%;padding:6px 8px;margin-top:4px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:13px;"></label>' +
+          '</div>' +
+          '<p style="font-size:12px;color:#a0a0b0;margin-top:14px;">Pure-Canvas, no internet required. Charts are inserted as PNG images. Tables are inserted as live HTML you can edit further in the prose view.</p>' +
+        '</div>' +
+        '<div id="ch-preview-wrap" style="flex:1;display:flex;align-items:center;justify-content:center;background:#222232;overflow:auto;padding:20px;">' +
+          '<canvas id="ch-canvas" style="max-width:100%;max-height:100%;background:#fff;box-shadow:0 6px 22px rgba(0,0,0,0.5);border-radius:6px;"></canvas>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(wrap);
+
+    var canvas = document.getElementById('ch-canvas');
+    var typeEl = document.getElementById('ch-type');
+    var titleEl = document.getElementById('ch-title');
+    var dataEl = document.getElementById('ch-data');
+    var colorEl = document.getElementById('ch-color');
+    var wEl = document.getElementById('ch-w');
+    var hEl = document.getElementById('ch-h');
+
+    function parseData() {
+      var lines = (dataEl.value || '').split(/\r?\n/);
+      var rows = [];
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i].trim();
+        if (!line) continue;
+        var parts = line.split(/[,\t]/);
+        var label = (parts[0] || '').trim();
+        var val = parseFloat(parts[1]);
+        if (label && !isNaN(val)) rows.push({ label: label, value: val });
+      }
+      return rows;
+    }
+
+    function render() {
+      var rows = parseData();
+      var w = parseInt(wEl.value, 10) || 600;
+      var h = parseInt(hEl.value, 10) || 400;
+      var type = typeEl.value;
+      if (type === 'table') {
+        // Table preview: hide canvas, show an HTML table styled inside
+        // the preview wrap.
+        canvas.style.display = 'none';
+        var existing = document.getElementById('ch-table-preview');
+        if (existing) existing.remove();
+        var t = document.createElement('table');
+        t.id = 'ch-table-preview';
+        t.style.cssText = 'background:#fff;color:#222;border-collapse:collapse;font-family:Georgia,serif;font-size:14px;box-shadow:0 6px 22px rgba(0,0,0,0.5);';
+        var caption = '<caption style="caption-side:top;padding:8px;font-weight:bold;">' + escHtml(titleEl.value) + '</caption>';
+        var rowsHtml = rows.map(function (r) {
+          return '<tr><td style="padding:6px 14px;border:1px solid #ccc;">' + escHtml(r.label) + '</td><td style="padding:6px 14px;border:1px solid #ccc;text-align:right;">' + r.value + '</td></tr>';
+        }).join('');
+        t.innerHTML = caption + '<thead><tr><th style="padding:6px 14px;border:1px solid #ccc;background:#f0f0f0;">Label</th><th style="padding:6px 14px;border:1px solid #ccc;background:#f0f0f0;">Value</th></tr></thead><tbody>' + rowsHtml + '</tbody>';
+        document.getElementById('ch-preview-wrap').appendChild(t);
+        return;
+      }
+      var existingTable = document.getElementById('ch-table-preview');
+      if (existingTable) existingTable.remove();
+      canvas.style.display = '';
+      canvas.width = w;
+      canvas.height = h;
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, w, h);
+      if (!rows.length) {
+        ctx.fillStyle = '#999';
+        ctx.font = '14px -apple-system,sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('No data', w / 2, h / 2);
+        return;
+      }
+      var color = colorEl.value;
+      if (type === 'bar') drawBarChart(ctx, w, h, rows, titleEl.value, color);
+      else if (type === 'line') drawLineChart(ctx, w, h, rows, titleEl.value, color);
+      else if (type === 'pie') drawPieChart(ctx, w, h, rows, titleEl.value, color);
+    }
+
+    typeEl.addEventListener('change', render);
+    titleEl.addEventListener('input', debounce(render, 200));
+    dataEl.addEventListener('input', debounce(render, 250));
+    colorEl.addEventListener('change', render);
+    wEl.addEventListener('change', render);
+    hEl.addEventListener('change', render);
+
+    document.getElementById('ch-close').addEventListener('click', function () {
+      wrap.remove();
+      if (onInsert) onInsert(null);
+    });
+    document.getElementById('ch-insert').addEventListener('click', function () {
+      var rows = parseData();
+      if (!rows.length) { toast('Add at least one "label, value" line.', true); return; }
+      var type = typeEl.value;
+      var insertHtml;
+      if (type === 'table') {
+        var t = document.getElementById('ch-table-preview');
+        // Strip preview-only id + box-shadow before inserting
+        var clone = t.cloneNode(true);
+        clone.id = '';
+        clone.style.boxShadow = 'none';
+        insertHtml = clone.outerHTML;
+      } else {
+        var dataUrl = canvas.toDataURL('image/png');
+        insertHtml = '<img src="' + dataUrl + '" alt="' + escHtml(titleEl.value) + '" style="max-width:100%;height:auto;display:block;margin:12px auto;">';
+      }
+      wrap.remove();
+      if (onInsert) onInsert(insertHtml);
+    });
+
+    render();
+  }
+
+  function drawBarChart(ctx, w, h, rows, title, color) {
+    var pad = 36;
+    var titleH = title ? 28 : 0;
+    var plotX = pad + 30;
+    var plotY = pad + titleH;
+    var plotW = w - plotX - pad;
+    var plotH = h - plotY - pad - 24;
+    if (title) {
+      ctx.fillStyle = '#222';
+      ctx.font = 'bold 16px -apple-system,sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(title, w / 2, pad + 4);
+    }
+    var max = Math.max.apply(null, rows.map(function (r) { return r.value; }));
+    var step = max / 4;
+    var nice = niceTicks(max);
+    var maxNice = nice[nice.length - 1];
+    // Y-axis grid + labels
+    ctx.fillStyle = '#666';
+    ctx.font = '11px -apple-system,sans-serif';
+    ctx.textAlign = 'right';
+    for (var i = 0; i < nice.length; i++) {
+      var y = plotY + plotH - (nice[i] / maxNice) * plotH;
+      ctx.strokeStyle = '#eee';
+      ctx.beginPath(); ctx.moveTo(plotX, y); ctx.lineTo(plotX + plotW, y); ctx.stroke();
+      ctx.fillText(String(nice[i]), plotX - 4, y + 4);
+    }
+    // Bars
+    var barGap = 12;
+    var barW = (plotW - barGap * (rows.length + 1)) / rows.length;
+    ctx.textAlign = 'center';
+    rows.forEach(function (r, idx) {
+      var bx = plotX + barGap + idx * (barW + barGap);
+      var bh = (r.value / maxNice) * plotH;
+      var by = plotY + plotH - bh;
+      ctx.fillStyle = color;
+      ctx.fillRect(bx, by, barW, bh);
+      // Label below bar
+      ctx.fillStyle = '#333';
+      ctx.fillText(r.label, bx + barW / 2, plotY + plotH + 16);
+      // Value on top
+      ctx.fillStyle = '#222';
+      ctx.font = '11px -apple-system,sans-serif';
+      ctx.fillText(String(r.value), bx + barW / 2, by - 4);
+    });
+  }
+
+  function drawLineChart(ctx, w, h, rows, title, color) {
+    var pad = 36;
+    var titleH = title ? 28 : 0;
+    var plotX = pad + 30;
+    var plotY = pad + titleH;
+    var plotW = w - plotX - pad;
+    var plotH = h - plotY - pad - 24;
+    if (title) {
+      ctx.fillStyle = '#222';
+      ctx.font = 'bold 16px -apple-system,sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(title, w / 2, pad + 4);
+    }
+    var max = Math.max.apply(null, rows.map(function (r) { return r.value; }));
+    var nice = niceTicks(max);
+    var maxNice = nice[nice.length - 1];
+    ctx.fillStyle = '#666';
+    ctx.font = '11px -apple-system,sans-serif';
+    ctx.textAlign = 'right';
+    for (var i = 0; i < nice.length; i++) {
+      var y = plotY + plotH - (nice[i] / maxNice) * plotH;
+      ctx.strokeStyle = '#eee';
+      ctx.beginPath(); ctx.moveTo(plotX, y); ctx.lineTo(plotX + plotW, y); ctx.stroke();
+      ctx.fillText(String(nice[i]), plotX - 4, y + 4);
+    }
+    var stepX = plotW / Math.max(1, rows.length - 1);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    rows.forEach(function (r, idx) {
+      var x = plotX + idx * stepX;
+      var y = plotY + plotH - (r.value / maxNice) * plotH;
+      if (idx === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    // Dots and labels
+    rows.forEach(function (r, idx) {
+      var x = plotX + idx * stepX;
+      var y = plotY + plotH - (r.value / maxNice) * plotH;
+      ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#333';
+      ctx.textAlign = 'center';
+      ctx.font = '11px -apple-system,sans-serif';
+      ctx.fillText(r.label, x, plotY + plotH + 16);
+    });
+  }
+
+  function drawPieChart(ctx, w, h, rows, title, color) {
+    var pad = 24;
+    if (title) {
+      ctx.fillStyle = '#222';
+      ctx.font = 'bold 16px -apple-system,sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(title, w / 2, pad);
+    }
+    var total = rows.reduce(function (s, r) { return s + r.value; }, 0);
+    if (total === 0) return;
+    var legendW = 160;
+    var pieR = Math.min(w - legendW - pad * 3, h - pad * 3 - (title ? 28 : 0)) / 2;
+    var cx = pad + pieR;
+    var cy = pad + pieR + (title ? 28 : 0);
+    var palette = ['#7b6cff', '#22c55e', '#fbbf24', '#ef4444', '#06b6d4', '#ec4899', '#84cc16', '#a78bfa', '#f97316'];
+    var startAngle = -Math.PI / 2;
+    rows.forEach(function (r, i) {
+      var fraction = r.value / total;
+      var slice = fraction * Math.PI * 2;
+      ctx.fillStyle = palette[i % palette.length];
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, pieR, startAngle, startAngle + slice);
+      ctx.closePath();
+      ctx.fill();
+      startAngle += slice;
+    });
+    // Legend
+    var lx = cx + pieR + 24;
+    var ly = pad + 16 + (title ? 28 : 0);
+    ctx.font = '12px -apple-system,sans-serif';
+    ctx.textAlign = 'left';
+    rows.forEach(function (r, i) {
+      ctx.fillStyle = palette[i % palette.length];
+      ctx.fillRect(lx, ly + i * 22, 14, 14);
+      ctx.fillStyle = '#222';
+      var pct = ((r.value / total) * 100).toFixed(1) + '%';
+      ctx.fillText(r.label + ' (' + pct + ')', lx + 22, ly + i * 22 + 11);
+    });
+  }
+
+  // Returns an array of "nice" tick values from 0 to a value >= max.
+  // Picks 4-5 ticks at increments of 1, 2, 5, 10, 20, 50, 100, ...
+  function niceTicks(max) {
+    if (max <= 0) return [0, 1];
+    var pow = Math.pow(10, Math.floor(Math.log10(max)));
+    var n = max / pow;
+    var step;
+    if (n <= 1) step = pow / 5;
+    else if (n <= 2) step = pow / 2;
+    else if (n <= 5) step = pow;
+    else step = pow * 2;
+    var ticks = [];
+    var v = 0;
+    while (v < max + step) { ticks.push(Math.round(v * 1000) / 1000); v += step; }
+    return ticks;
   }
 
   // Re-render the open manuscript in the viewer iframe after a save.
@@ -6623,7 +6988,7 @@
       var trim = TRIM_PRESETS.filter(function (t) { return t.id === bookSettings.trim; })[0] || TRIM_PRESETS[3];
       var pageCount = 0;
       if (PICTURE_BOOK_TEMPLATES[bookSettings.bookType]) {
-        pageCount = PICTURE_BOOK_TEMPLATES[bookSettings.bookType].pages;
+        pageCount = picBookPageCount(bookSettings.bookType, bookSettings.customPageCount);
       } else if (app.html) {
         try {
           var doc = new DOMParser().parseFromString(app.html, 'text/html');
@@ -7039,7 +7404,7 @@
     var isPicBook = !!PICTURE_BOOK_TEMPLATES[layoutSettings.bookType];
     var pageCount = 0;
     if (isPicBook) {
-      pageCount = PICTURE_BOOK_TEMPLATES[layoutSettings.bookType].pages;
+      pageCount = picBookPageCount(layoutSettings.bookType, layoutSettings.customPageCount);
     } else if (app.html) {
       try {
         var doc = new DOMParser().parseFromString(app.html, 'text/html');
