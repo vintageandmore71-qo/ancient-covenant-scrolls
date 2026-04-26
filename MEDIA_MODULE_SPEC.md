@@ -75,12 +75,12 @@ Format per item:
   (Edit · Split · Replace · Speed · Opacity · Duplicate · Delete · Done)
 - ✅ Tap-outside or Done deselects
 - ✅ Delete (single-clip MVP) wired
-- ⛔ Edit → real per-clip property editor
+- ✅ Edit → opens text-overlay panel (full property editor lands later)
 - ⛔ Split → actual mid-clip split (creates two clips on timeline)
-- ⛔ Replace → file picker, swap source, keep position
-- ⛔ Speed → 0.25x – 4x slider with live preview
-- ⛔ Opacity → 0–100% slider with live preview
-- ⛔ Duplicate → clone clip on the timeline
+- ✅ Replace → file picker swaps video src, regenerates thumbs, resets trim
+- ✅ Speed → 0.25x – 4x slider + presets, live playbackRate preview
+- ✅ Opacity → 0–100% slider, live preview on video + overlay
+- ⛔ Duplicate → clone clip on the timeline (multi-clip phase)
 
 ## H. Replace / Relink media (priority 3)
 
@@ -158,11 +158,11 @@ Format per item:
 1. Context Action Bar — ✅ shipped 67156a6 → a8665da batch
 2. Floating Quick Toolbar — ✅ same commit
 3. Strong Visual Selection Feedback — ✅ same commit
-4. Replace / Relink Media — ⛔ NEXT
-5. Clip Interaction (drag / trim / duplicate) — ⛔
+4. Replace / Relink Media — ✅ Replace shipped (Relink to library = next)
+5. Clip Interaction (drag / trim / duplicate) — ⛔ NEXT
 6. Snap Toggle — ⛔
-7. Real Speed slider — ⛔
-8. Real Opacity slider — ⛔
+7. Real Speed slider — ✅ shipped
+8. Real Opacity slider — ✅ shipped
 9. Multi-clip support — ⛔
 10. Auto Captions (speech-to-text) — ⛔
 11. Voice Assign / Character Voice — ⛔

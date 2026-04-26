@@ -8467,6 +8467,34 @@
         '</div>' +
         '<label class="ve-lbl" style="margin-top:8px;display:flex;align-items:center;gap:6px;"><input id="ve-mute-orig" type="checkbox"> Mute original audio</label>' +
       '</div>' +
+      // ===== Speed panel — slides up when Speed action tapped =====
+      '<div id="ve-speed-panel" class="ve-panel" hidden>' +
+        '<div class="ve-panel-head"><span>Speed</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
+        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' +
+          '<label class="ve-lbl">Playback rate</label>' +
+          '<input id="ve-speed-range" type="range" min="0.25" max="4" step="0.25" value="1" style="flex:1;min-width:160px;accent-color:#fbbf24;">' +
+          '<span id="ve-speed-val" style="font-size:14px;color:#fbbf24;font-weight:800;min-width:48px;text-align:right;">1.0x</span>' +
+        '</div>' +
+        '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">' +
+          '<button class="ve-speed-preset" data-speed="0.25">0.25x</button>' +
+          '<button class="ve-speed-preset" data-speed="0.5">0.5x</button>' +
+          '<button class="ve-speed-preset" data-speed="1">1x</button>' +
+          '<button class="ve-speed-preset" data-speed="1.5">1.5x</button>' +
+          '<button class="ve-speed-preset" data-speed="2">2x</button>' +
+          '<button class="ve-speed-preset" data-speed="4">4x</button>' +
+        '</div>' +
+      '</div>' +
+      // ===== Opacity panel — slides up when Opacity action tapped =====
+      '<div id="ve-opacity-panel" class="ve-panel" hidden>' +
+        '<div class="ve-panel-head"><span>Opacity</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
+        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' +
+          '<label class="ve-lbl">Transparency</label>' +
+          '<input id="ve-opacity-range" type="range" min="0" max="100" step="5" value="100" style="flex:1;min-width:160px;accent-color:#fbbf24;">' +
+          '<span id="ve-opacity-val" style="font-size:14px;color:#fbbf24;font-weight:800;min-width:48px;text-align:right;">100%</span>' +
+        '</div>' +
+      '</div>' +
+      // Hidden replace-media file picker (triggered from clip context menu)
+      '<input id="ve-replace-pick" type="file" accept="video/*,.mp4,.mov,.m4v,.webm,.mkv" style="display:none;">' +
       // ===== Bottom action toolbar — full VN action set the user
       // pasted across three reference screenshots. Section separators
       // (|) split it into three groups: clip-level (Filter→Cutout),
@@ -8568,7 +8596,10 @@
       '#__loadVideoEdit .ve-panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-weight:700;color:#fff;font-size:14px;}' +
       '#__loadVideoEdit .ve-lbl{font-size:12.5px;color:#a0a0b0;display:block;}' +
       '#__loadVideoEdit .ve-input{display:block;width:100%;margin-top:4px;padding:6px 8px;background:#0e0e18;color:#fff;border:1px solid #2a2a40;border-radius:6px;font-size:13px;}' +
-      '#__loadVideoEdit .ve-color{display:block;width:100%;height:34px;margin-top:4px;border:none;background:transparent;cursor:pointer;}';
+      '#__loadVideoEdit .ve-color{display:block;width:100%;height:34px;margin-top:4px;border:none;background:transparent;cursor:pointer;}' +
+      '#__loadVideoEdit .ve-speed-preset{background:#0e0e18;color:#cfcfdc;border:1px solid #2a2a40;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}' +
+      '#__loadVideoEdit .ve-speed-preset:hover{background:#1a1a26;color:#fff;border-color:#fbbf24;}' +
+      '#__loadVideoEdit .ve-speed-preset:active{transform:scale(0.97);}';
     wrap.appendChild(styleTag);
 
     document.body.appendChild(wrap);
@@ -8628,7 +8659,9 @@
 
     // Track-add buttons -> open inline panels
     function showPanel(id) {
-      ['ve-text-panel', 've-music-panel'].forEach(function (p) { document.getElementById(p).hidden = (p !== id); });
+      ['ve-text-panel', 've-music-panel', 've-speed-panel', 've-opacity-panel'].forEach(function (p) {
+        var el = document.getElementById(p); if (el) el.hidden = (p !== id);
+      });
     }
     Array.prototype.forEach.call(wrap.querySelectorAll('[data-add]'), function (btn) {
       btn.addEventListener('click', function () {
@@ -8895,10 +8928,16 @@
       if (act === 'deselect') return deselectClip();
       if (act === 'edit')      { showPanel('ve-text-panel'); return; }
       if (act === 'split')     { toast('Split: drag the yellow trim handles to slice the clip.', false); return; }
-      if (act === 'replace')   { toast('Replace: drop a new file from the Library — coming next.', false); return; }
-      if (act === 'speed')     { toast('Speed: 0.25x – 4x slider coming next.', false); return; }
-      if (act === 'opacity')   { toast('Opacity: clip transparency slider coming next.', false); return; }
-      if (act === 'duplicate') { toast('Duplicate: clones the clip on the timeline — coming next.', false); return; }
+      if (act === 'replace')   {
+        // Open the hidden replace-media picker. On pick we swap the
+        // <video> src for a new blob URL, regenerate frame thumbs,
+        // and reset the trim window to the new clip's full duration.
+        document.getElementById('ve-replace-pick').click();
+        return;
+      }
+      if (act === 'speed')     { showPanel('ve-speed-panel'); return; }
+      if (act === 'opacity')   { showPanel('ve-opacity-panel'); return; }
+      if (act === 'duplicate') { toast('Duplicate: lands with multi-clip support (next phase).', false); return; }
       if (act === 'delete') {
         if (!confirm('Delete this clip? The editor will close.')) return;
         var existing = document.getElementById('__loadVideoEdit');
@@ -8906,6 +8945,66 @@
         return;
       }
     }
+
+    /* Replace media — pick a new file, swap video src, regenerate
+       frame thumbnails, reset trim to the new clip's full length.
+       Saves the old blob URL so we can revoke it after the new one
+       starts loading (avoids a memory spike on repeated replaces). */
+    var replacePick = document.getElementById('ve-replace-pick');
+    if (replacePick) replacePick.addEventListener('change', function (e) {
+      var f = e.target.files && e.target.files[0];
+      e.target.value = '';
+      if (!f) return;
+      if (!/^video\//.test(f.type) && !/\.(mp4|mov|m4v|webm|mkv)$/i.test(f.name)) {
+        toast('Replace requires a video file.', true);
+        return;
+      }
+      var oldUrl = video.src;
+      var newUrl = URL.createObjectURL(f);
+      video.src = newUrl;
+      // Reset trim + thumbnails after the new metadata loads.
+      video.addEventListener('loadedmetadata', function once() {
+        video.removeEventListener('loadedmetadata', once);
+        try { trimIn.value = '0'; trimOut.value = String(video.duration || 0); refreshTrimDisplay(); } catch (e) {}
+        try { generateClipThumbnails(video, 8); } catch (e) {}
+        if (oldUrl && oldUrl.indexOf('blob:') === 0) {
+          try { URL.revokeObjectURL(oldUrl); } catch (e) {}
+        }
+        toast('Clip replaced.', false);
+      }, { once: true });
+    });
+
+    /* Speed — live preview via video.playbackRate. Range slider +
+       quick presets keep the same internal state. Persisted to
+       playbackRate so playback (and any future export bake step)
+       picks it up. */
+    var speedRange = document.getElementById('ve-speed-range');
+    var speedVal = document.getElementById('ve-speed-val');
+    function applySpeed(rate) {
+      try { video.playbackRate = rate; } catch (e) {}
+      if (speedVal) speedVal.textContent = (+rate).toFixed(2).replace(/\.?0+$/, '') + 'x';
+      if (speedRange && +speedRange.value !== +rate) speedRange.value = String(rate);
+    }
+    if (speedRange) speedRange.addEventListener('input', function () { applySpeed(parseFloat(speedRange.value)); });
+    Array.prototype.forEach.call(wrap.querySelectorAll('.ve-speed-preset'), function (b) {
+      b.addEventListener('click', function () { applySpeed(parseFloat(b.getAttribute('data-speed'))); });
+    });
+
+    /* Opacity — live preview by setting CSS opacity on the <video>
+       AND the overlay canvas so subtitle/text overlays fade with the
+       clip. Stored on a closure var so the export bake step can
+       apply globalAlpha when drawing each frame. */
+    var clipOpacity = 1;
+    var opacityRange = document.getElementById('ve-opacity-range');
+    var opacityVal = document.getElementById('ve-opacity-val');
+    function applyOpacity(pct) {
+      clipOpacity = Math.max(0, Math.min(1, pct / 100));
+      video.style.opacity = String(clipOpacity);
+      var overlay = document.getElementById('ve-overlay');
+      if (overlay) overlay.style.opacity = String(clipOpacity);
+      if (opacityVal) opacityVal.textContent = pct + '%';
+    }
+    if (opacityRange) opacityRange.addEventListener('input', function () { applyOpacity(parseInt(opacityRange.value, 10)); });
     Array.prototype.forEach.call(wrap.querySelectorAll('[data-clip-action]'), function (b) {
       b.addEventListener('click', function (e) {
         e.stopPropagation();
