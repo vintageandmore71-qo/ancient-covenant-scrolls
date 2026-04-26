@@ -30,31 +30,32 @@ button { font-family: inherit; cursor: pointer; }
 input, select { font-family: inherit; }
 
 /* ===== Splash =====
-   Plain scrollable layout. Cover art renders at full width at the top,
-   CTA card sits below it. Users see the entire artwork, then scroll
-   to the buttons. No overlap, no fixed positioning. */
+   Mirrors Attain's intro pattern: a flex column, top-aligned, that
+   fills the viewport. Image renders at full width up to a sensible
+   max, sign sits below in normal flow, and the whole thing scrolls
+   like any other document. No fixed positioning, no overlap. */
 #splash {
   position: relative;
   min-height: 100vh;
   display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-start;
+  padding: 0 0 max(30px, env(safe-area-inset-bottom));
   background: var(--jr-purple-deep);
+  text-align: center;
 }
 #splash-cover {
   display: block;
-  width: 100%; height: auto;
-  max-width: 1024px;
+  width: 100%; max-width: 600px; height: auto;
   margin: 0 auto;
 }
 .splash-card {
   position: relative;
-  margin: 0 auto;
+  margin: 20px auto 0;
   max-width: 560px; width: calc(100% - 32px);
   background: linear-gradient(180deg, rgba(255,235,170,0.98) 0%, rgba(255,200,140,0.98) 100%);
   border: 3px solid rgba(255,255,255,0.85);
   border-radius: 22px;
-  padding: 18px 20px 16px;
-  margin-top: -28px;
-  margin-bottom: max(20px, env(safe-area-inset-bottom));
+  padding: 20px 22px 18px;
   text-align: center;
   color: var(--jr-ink);
   box-shadow: 0 12px 36px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(0,0,0,0.04);
