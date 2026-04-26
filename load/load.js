@@ -5188,6 +5188,298 @@
     var btn = $('save-template-btn');
     if (btn) btn.addEventListener('click', saveCurrentAppAsTemplate);
   }
+
+  /* ---------- KDP page layout view ----------
+     Wraps the open manuscript in a print-aware preview: KDP trim
+     presets, bleed/margin overlays, page numbers, full-bleed image
+     mode for children's books. Settings are stored on app.layout so
+     the PDF export step can re-use them without re-prompting. */
+
+  // Popular KDP / IngramSpark trim sizes (width x height in inches).
+  // Source: KDP Help -- Print Specifications.
+  var TRIM_PRESETS = [
+    { id: '5x8',     label: '5 × 8 in',     w: 5,    h: 8,    notes: 'Paperback novel' },
+    { id: '5.25x8',  label: '5.25 × 8 in',  w: 5.25, h: 8,    notes: 'Paperback novel' },
+    { id: '5.5x8.5', label: '5.5 × 8.5 in', w: 5.5,  h: 8.5,  notes: 'Paperback novel' },
+    { id: '6x9',     label: '6 × 9 in',     w: 6,    h: 9,    notes: 'Most common -- fiction & non-fiction' },
+    { id: '7x10',    label: '7 × 10 in',    w: 7,    h: 10,   notes: 'Workbook / large paperback' },
+    { id: '8x10',    label: '8 × 10 in',    w: 8,    h: 10,   notes: 'Children / workbook' },
+    { id: '8.5x8.5', label: '8.5 × 8.5 in', w: 8.5,  h: 8.5,  notes: "Children's picture book (square)" },
+    { id: '8.5x11',  label: '8.5 × 11 in',  w: 8.5,  h: 11,   notes: 'Workbook / journal / manual' }
+  ];
+
+  // KDP gutter (inside margin) tiers based on total page count.
+  function gutterForPageCount(pageCount) {
+    if (pageCount <= 150) return 0.375;
+    if (pageCount <= 300) return 0.5;
+    if (pageCount <= 500) return 0.625;
+    if (pageCount <= 700) return 0.75;
+    return 0.875;
+  }
+
+  function defaultLayout() {
+    return {
+      trim: '6x9',
+      bleed: false,
+      pageNumbers: true,
+      pageNumberPosition: 'outside', // 'centered' | 'outside'
+      marginTop: 0.75,
+      marginBottom: 0.75,
+      marginOutside: 0.5,
+      headerText: '',
+      footerText: ''
+    };
+  }
+
+  function openLayoutView(app) {
+    if (!app || !app.html) { toast('Open a manuscript first.', true); return; }
+    var settings = Object.assign(defaultLayout(), app.layout || {});
+
+    var existing = document.getElementById('__loadLayout');
+    if (existing) existing.remove();
+
+    var wrap = document.createElement('div');
+    wrap.id = '__loadLayout';
+    wrap.style.cssText = 'position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;background:#0f0f1a;color:#f0f0f0;font-family:-apple-system,sans-serif;';
+
+    var trimOptions = TRIM_PRESETS.map(function (t) {
+      return '<option value="' + t.id + '"' + (t.id === settings.trim ? ' selected' : '') + '>' + t.label + ' — ' + t.notes + '</option>';
+    }).join('');
+
+    wrap.innerHTML =
+      '<div class="ll-bar" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#1a1a2e;border-bottom:1px solid #2a2a40;flex-wrap:wrap;">' +
+        '<button id="ll-close" style="background:#3a3a55;border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:14px;cursor:pointer;">&larr; Close</button>' +
+        '<div style="font-weight:700;font-size:15px;margin-right:auto;">Layout for Print &mdash; ' + escHtml(app.name || 'Untitled') + '</div>' +
+        '<label style="font-size:12.5px;color:#a0a0b0;">Trim ' +
+          '<select id="ll-trim" style="margin-left:6px;padding:6px 8px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:13px;">' + trimOptions + '</select>' +
+        '</label>' +
+        '<label style="font-size:12.5px;color:#a0a0b0;display:inline-flex;align-items:center;gap:4px;">' +
+          '<input id="ll-bleed" type="checkbox"' + (settings.bleed ? ' checked' : '') + '> Bleed (full-bleed images)' +
+        '</label>' +
+        '<label style="font-size:12.5px;color:#a0a0b0;display:inline-flex;align-items:center;gap:4px;">' +
+          '<input id="ll-pn" type="checkbox"' + (settings.pageNumbers ? ' checked' : '') + '> Page numbers' +
+        '</label>' +
+        '<select id="ll-pnpos" style="padding:6px 8px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:13px;">' +
+          '<option value="outside"' + (settings.pageNumberPosition === 'outside' ? ' selected' : '') + '>Outside corner</option>' +
+          '<option value="centered"' + (settings.pageNumberPosition === 'centered' ? ' selected' : '') + '>Centered</option>' +
+        '</select>' +
+        '<button id="ll-save" style="background:#7b6cff;border:none;color:#12121a;padding:8px 14px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">Save layout</button>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:14px;padding:8px 14px;background:#15152a;border-bottom:1px solid #2a2a40;font-size:12px;color:#a0a0b0;flex-wrap:wrap;">' +
+        '<div>Header text <input id="ll-header" value="' + escHtml(settings.headerText || '') + '" placeholder="(optional book title)" style="margin-left:6px;padding:5px 8px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:5px;font-size:12.5px;width:180px;"></div>' +
+        '<div>Footer text <input id="ll-footer" value="' + escHtml(settings.footerText || '') + '" placeholder="(optional)" style="margin-left:6px;padding:5px 8px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:5px;font-size:12.5px;width:180px;"></div>' +
+        '<div id="ll-pagecount" style="margin-left:auto;font-weight:600;color:#cfcfdc;">Estimating pages…</div>' +
+        '<div id="ll-gutter" style="color:#a0a0b0;"></div>' +
+      '</div>' +
+      '<div style="flex:1;overflow:hidden;background:#222232;">' +
+        '<iframe id="ll-preview" style="width:100%;height:100%;border:none;background:#444;"></iframe>' +
+      '</div>';
+
+    document.body.appendChild(wrap);
+
+    var iframe = document.getElementById('ll-preview');
+
+    function readSettings() {
+      return {
+        trim: document.getElementById('ll-trim').value,
+        bleed: document.getElementById('ll-bleed').checked,
+        pageNumbers: document.getElementById('ll-pn').checked,
+        pageNumberPosition: document.getElementById('ll-pnpos').value,
+        marginTop: settings.marginTop,
+        marginBottom: settings.marginBottom,
+        marginOutside: settings.marginOutside,
+        headerText: document.getElementById('ll-header').value,
+        footerText: document.getElementById('ll-footer').value
+      };
+    }
+
+    function rebuild() {
+      var s = readSettings();
+      var preview = buildLayoutPreviewHtml(app, s);
+      // Use srcdoc for an isolated rendering context
+      iframe.srcdoc = preview;
+      iframe.onload = function () {
+        try {
+          var doc = iframe.contentDocument;
+          if (!doc) return;
+          // Estimate page count from the printable content height
+          var pageEls = doc.querySelectorAll('.page');
+          var pages = pageEls.length;
+          document.getElementById('ll-pagecount').textContent =
+            pages + ' page' + (pages === 1 ? '' : 's');
+          var gutter = gutterForPageCount(pages);
+          document.getElementById('ll-gutter').textContent =
+            'KDP gutter (inside margin) for this length: ' + gutter.toFixed(3) + ' in';
+        } catch (e) {}
+      };
+    }
+
+    document.getElementById('ll-close').addEventListener('click', function () { wrap.remove(); });
+    document.getElementById('ll-save').addEventListener('click', async function () {
+      var s = readSettings();
+      app.layout = s;
+      try { await putApp(app); toast('Layout saved.'); }
+      catch (e) { toast('Could not save layout: ' + (e && e.message), true); }
+    });
+    ['ll-trim', 'll-bleed', 'll-pn', 'll-pnpos'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('change', rebuild);
+    });
+    ['ll-header', 'll-footer'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('input', debounce(rebuild, 500));
+    });
+
+    rebuild();
+  }
+
+  function debounce(fn, ms) {
+    var t = null;
+    return function () {
+      var args = arguments, ctx = this;
+      if (t) clearTimeout(t);
+      t = setTimeout(function () { fn.apply(ctx, args); }, ms);
+    };
+  }
+
+  // Build the preview HTML: each page is a fixed-size .page div sized
+  // in inches so the on-screen result physically matches the chosen
+  // trim. We chunk content client-side by H1 boundaries plus a soft
+  // height cap so the preview is roughly paginated -- close enough for
+  // a creator to see how their book will lay out, exact pagination
+  // happens at PDF time.
+  function buildLayoutPreviewHtml(app, s) {
+    var trim = TRIM_PRESETS.filter(function (t) { return t.id === s.trim; })[0] || TRIM_PRESETS[3];
+    var w = trim.w, h = trim.h;
+    var bleedExtra = s.bleed ? 0.125 : 0;
+    var pageW = w + bleedExtra * 2;
+    var pageH = h + bleedExtra * 2;
+
+    // We don't know the final page count yet; gutter is recomputed at
+    // PDF time. Use 0.5in as a reasonable preview default.
+    var gutter = 0.5;
+    var marginInside = gutter;
+
+    var contentBody = '';
+    try {
+      var doc = new DOMParser().parseFromString(app.html || '', 'text/html');
+      contentBody = doc.body ? doc.body.innerHTML : (app.html || '');
+    } catch (e) { contentBody = app.html || ''; }
+
+    var headerText = s.headerText || '';
+    var footerText = s.footerText || '';
+    var showPN = !!s.pageNumbers;
+    var pnPos = s.pageNumberPosition || 'outside';
+
+    var css =
+      '*{box-sizing:border-box;}' +
+      'html,body{margin:0;padding:0;background:#444;color:#222;font-family:Georgia,"Times New Roman",serif;line-height:1.55;}' +
+      '.page-stack{padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px;}' +
+      '.page{position:relative;background:#fff;width:' + pageW + 'in;height:' + pageH + 'in;box-shadow:0 6px 24px rgba(0,0,0,0.45);overflow:hidden;}' +
+      '.bleed-line{position:absolute;border:1px dashed #d0a050;pointer-events:none;left:' + bleedExtra + 'in;top:' + bleedExtra + 'in;width:' + w + 'in;height:' + h + 'in;}' +
+      '.safe-area{position:absolute;left:' + (bleedExtra + marginInside) + 'in;right:' + (bleedExtra + s.marginOutside) + 'in;top:' + (bleedExtra + s.marginTop) + 'in;bottom:' + (bleedExtra + s.marginBottom) + 'in;overflow:hidden;}' +
+      '.safe-area p{margin:0 0 0.6em;text-indent:1.2em;}' +
+      '.safe-area p:first-of-type, .safe-area h1+p, .safe-area h2+p{text-indent:0;}' +
+      '.safe-area h1{font-size:24pt;margin:0 0 0.4em;text-align:center;line-height:1.2;}' +
+      '.safe-area h2{font-size:16pt;margin:1em 0 0.3em;}' +
+      '.safe-area h3{font-size:13pt;margin:0.8em 0 0.25em;}' +
+      '.safe-area img{max-width:100%;height:auto;display:block;margin:0.6em auto;}' +
+      '.safe-area blockquote{margin:0.6em 0.8em;font-style:italic;}' +
+      '.safe-area ul,.safe-area ol{margin:0.4em 0 0.6em 1.4em;}' +
+      '.page-num{position:absolute;bottom:' + (bleedExtra + 0.25) + 'in;font-size:10pt;color:#444;}' +
+      '.page.even .page-num.outside{left:' + (bleedExtra + 0.25) + 'in;}' +
+      '.page.odd .page-num.outside{right:' + (bleedExtra + 0.25) + 'in;}' +
+      '.page-num.centered{left:0;right:0;text-align:center;}' +
+      '.header,.footer{position:absolute;left:' + (bleedExtra + marginInside) + 'in;right:' + (bleedExtra + s.marginOutside) + 'in;font-size:9pt;color:#888;}' +
+      '.header{top:' + (bleedExtra + 0.3) + 'in;text-align:center;}' +
+      '.footer{bottom:' + (bleedExtra + 0.3) + 'in;text-align:center;}' +
+      '.legend{position:fixed;bottom:10px;left:10px;background:rgba(0,0,0,0.65);color:#fff;padding:8px 12px;border-radius:6px;font:12px -apple-system,sans-serif;line-height:1.5;}' +
+      '.legend .swatch{display:inline-block;width:14px;height:0;border-top:1px dashed #d0a050;vertical-align:middle;margin-right:4px;}' +
+      '@media print { .legend{display:none;} body{background:#fff;} .page-stack{padding:0;gap:0;} .page{box-shadow:none;page-break-after:always;} }';
+
+    // Chunk content into pages: each <h1> starts a new page; otherwise
+    // we push everything into one page until visual height fills up.
+    // The "fill" measurement is done client-side after render via JS.
+    var pagesHtml = paginateForPreview(contentBody, w, h, marginInside, s.marginOutside, s.marginTop, s.marginBottom);
+
+    var html =
+      '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
+      '<title>Print Layout Preview</title>' +
+      '<style>' + css + '</style></head><body>' +
+      '<div class="page-stack">' +
+      pagesHtml.map(function (pageBodyHtml, idx) {
+        var pageNum = idx + 1;
+        var parity = (pageNum % 2 === 0) ? 'even' : 'odd';
+        var headerHtml = headerText ? '<div class="header">' + escHtml(headerText) + '</div>' : '';
+        var footerHtml = footerText ? '<div class="footer">' + escHtml(footerText) + '</div>' : '';
+        var pnHtml = showPN ? '<div class="page-num ' + pnPos + '">' + pageNum + '</div>' : '';
+        var bleedLine = s.bleed ? '<div class="bleed-line"></div>' : '';
+        return '<div class="page ' + parity + '">' +
+                  bleedLine +
+                  headerHtml +
+                  '<div class="safe-area">' + pageBodyHtml + '</div>' +
+                  footerHtml +
+                  pnHtml +
+                '</div>';
+      }).join('') +
+      '</div>' +
+      (s.bleed ? '<div class="legend"><span class="swatch"></span>Trim line (dashed orange) &mdash; KDP cuts here. Anything outside is bleed.</div>' : '') +
+      '</body></html>';
+    return html;
+  }
+
+  // Heuristic paginator: split body HTML into "pages" suitable for the
+  // preview only. Pages start at every <h1>, and each chapter spills
+  // forward as continuous flow. Real pagination happens at PDF time.
+  // Output: array of HTML strings, one per page.
+  function paginateForPreview(bodyHtml, trimW, trimH, mIn, mOut, mTop, mBot) {
+    var contentHIn = trimH - mTop - mBot;
+    // Approximate body text density in characters per page at 11pt/1.55
+    // line-height. ~ (charsPerLine) * (linesPerPage). For a 6x9 -> ~1900
+    // chars; 8.5x8.5 -> ~2100; 8.5x11 -> ~3400. Tune by area.
+    var contentWIn = trimW - mIn - mOut;
+    var areaSqIn = contentWIn * contentHIn;
+    var charsPerPage = Math.round(areaSqIn * 50); // tuned constant
+
+    var doc;
+    try { doc = new DOMParser().parseFromString('<div>' + bodyHtml + '</div>', 'text/html'); }
+    catch (e) { return [bodyHtml]; }
+    var root = doc.body.firstChild;
+    if (!root) return [bodyHtml];
+
+    var pages = [];
+    var current = '', currentChars = 0;
+    function pushPage() { if (current.trim()) { pages.push(current); current = ''; currentChars = 0; } }
+
+    var children = Array.prototype.slice.call(root.childNodes);
+    for (var i = 0; i < children.length; i++) {
+      var node = children[i];
+      if (node.nodeType !== 1 && node.nodeType !== 3) continue;
+      // H1 starts a fresh page (chapter break)
+      if (node.nodeType === 1 && node.tagName.toLowerCase() === 'h1' &&
+          !(node.classList && node.classList.contains('book-title'))) {
+        pushPage();
+      }
+      var html = node.nodeType === 1 ? node.outerHTML : escHtml(node.textContent);
+      var chars = (node.textContent || '').length;
+      if (currentChars + chars > charsPerPage && current.trim()) {
+        pushPage();
+      }
+      current += html;
+      currentChars += chars;
+    }
+    pushPage();
+    if (!pages.length) pages = [bodyHtml];
+    return pages;
+  }
+
+  function wireLayoutBtn() {
+    var btn = $('layout-btn');
+    if (btn) btn.addEventListener('click', function () {
+      if (currentApp) openLayoutView(currentApp);
+      else toast('Open a manuscript first.', true);
+    });
+  }
   function wireBookmarks() {
     $('bookmarks-btn').addEventListener('click', function () {
       if (currentApp) openBookmarksFor(currentApp);
