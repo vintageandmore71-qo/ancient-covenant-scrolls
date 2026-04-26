@@ -8458,21 +8458,36 @@
         '</div>' +
         '<label class="ve-lbl" style="margin-top:8px;display:flex;align-items:center;gap:6px;"><input id="ve-mute-orig" type="checkbox"> Mute original audio</label>' +
       '</div>' +
-      // ===== Bottom action toolbar (VN-style: small round icons +
-      // tiny labels). Matches the order in the user reference image:
-      // Filter / Trim / FX / Split / Cutout / Speed / Volume / Fade /
-      // Crop / Rotate. Scrolls horizontally on portrait.
-      '<div id="ve-actions" style="display:flex;align-items:center;background:#0a0a14;padding:10px 8px max(10px,env(safe-area-inset-bottom));border-top:1px solid #1a1a26;flex-shrink:0;overflow-x:auto;gap:18px;">' +
+      // ===== Bottom action toolbar — full VN action set the user
+      // pasted across three reference screenshots. Section separators
+      // (|) split it into three groups: clip-level (Filter→Cutout),
+      // playback / framing (Speed→Fit), then visual / audio polish
+      // (BG → TTS). Scrolls horizontally on iPad portrait.
+      '<div id="ve-actions" style="display:flex;align-items:center;background:#0a0a14;padding:10px 8px max(10px,env(safe-area-inset-bottom));border-top:1px solid #1a1a26;flex-shrink:0;overflow-x:auto;gap:14px;">' +
         '<button class="ve-action" data-action="filter"><span class="ve-act-icon">&#9678;</span><span class="ve-act-lbl">Filter</span></button>' +
         '<button class="ve-action" data-action="trim"><span class="ve-act-icon">&lt;/&gt;</span><span class="ve-act-lbl">Trim</span></button>' +
         '<button class="ve-action" data-action="fx"><span class="ve-act-icon">&#9733;</span><span class="ve-act-lbl">FX</span></button>' +
         '<button class="ve-action" data-action="split"><span class="ve-act-icon">&#9986;</span><span class="ve-act-lbl">Split</span></button>' +
         '<button class="ve-action" data-action="cutout"><span class="ve-act-icon">&#129489;</span><span class="ve-act-lbl">Cutout</span></button>' +
+        '<span class="ve-action-sep" aria-hidden="true"></span>' +
         '<button class="ve-action" data-action="speed"><span class="ve-act-icon">&#9201;</span><span class="ve-act-lbl">Speed</span></button>' +
         '<button class="ve-action" data-action="volume"><span class="ve-act-icon">&#128266;</span><span class="ve-act-lbl">Volume</span></button>' +
         '<button class="ve-action" data-action="fade"><span class="ve-act-icon">&#9696;</span><span class="ve-act-lbl">Fade</span></button>' +
         '<button class="ve-action" data-action="crop"><span class="ve-act-icon">&#9974;</span><span class="ve-act-lbl">Crop</span></button>' +
         '<button class="ve-action" data-action="rotate"><span class="ve-act-icon">&#10227;</span><span class="ve-act-lbl">Rotate</span></button>' +
+        '<button class="ve-action" data-action="mirror"><span class="ve-act-icon">&#9647;&#9646;</span><span class="ve-act-lbl">Mirror</span></button>' +
+        '<button class="ve-action" data-action="flip"><span class="ve-act-icon">&#8693;</span><span class="ve-act-lbl">Flip</span></button>' +
+        '<button class="ve-action" data-action="fit"><span class="ve-act-icon">&#9783;</span><span class="ve-act-lbl">Fit</span></button>' +
+        '<span class="ve-action-sep" aria-hidden="true"></span>' +
+        '<button class="ve-action" data-action="bg"><span class="ve-act-icon">&#9646;</span><span class="ve-act-lbl">BG</span></button>' +
+        '<button class="ve-action" data-action="border"><span class="ve-act-icon">&#9633;</span><span class="ve-act-lbl">Border</span></button>' +
+        '<button class="ve-action" data-action="blur"><span class="ve-act-icon">&#10070;</span><span class="ve-act-lbl">Blur</span></button>' +
+        '<button class="ve-action" data-action="opacity"><span class="ve-act-icon">&#9680;</span><span class="ve-act-lbl">Opacity</span></button>' +
+        '<button class="ve-action" data-action="denoise"><span class="ve-act-icon">&#127891;&#65039;</span><span class="ve-act-lbl">Denoise</span></button>' +
+        '<button class="ve-action" data-action="zoom"><span class="ve-act-icon">&#11042;</span><span class="ve-act-lbl">Zoom</span></button>' +
+        '<button class="ve-action" data-action="extract-audio"><span class="ve-act-icon">&#127925;&#11014;</span><span class="ve-act-lbl">Extract Audio</span></button>' +
+        '<button class="ve-action" data-action="auto-captions"><span class="ve-act-icon">[A]</span><span class="ve-act-lbl">Auto Captions</span></button>' +
+        '<button class="ve-action" data-action="tts"><span class="ve-act-icon">A&#127908;</span><span class="ve-act-lbl">TTS</span></button>' +
       '</div>' +
       // ===== Recording progress overlay =====
       '<div id="ve-progress" style="display:none;position:absolute;left:14px;right:14px;bottom:90px;align-items:center;gap:10px;background:rgba(26,26,38,0.95);border-radius:12px;padding:12px 14px;border:1px solid #2a2a40;backdrop-filter:blur(8px);z-index:5;">' +
@@ -8501,10 +8516,11 @@
       '#__loadVideoEdit .ve-track-audio .ve-track-body{background:transparent;}' +
       '#__loadVideoEdit .ve-waveform{flex:1;height:30px;background:repeating-linear-gradient(90deg,#fbbf24 0,#fbbf24 1px,transparent 1px,transparent 4px);opacity:0.7;border-radius:4px;}' +
       '#__loadVideoEdit .ve-time-ruler{height:18px;color:#7b7b8c;font-size:10px;display:flex;justify-content:space-around;align-items:center;padding:0 70px 4px;border-bottom:1px solid #1a1a26;}' +
-      '#__loadVideoEdit .ve-action{flex:1;background:transparent;border:none;color:#cfcfdc;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px;cursor:pointer;min-width:54px;}' +
-      '#__loadVideoEdit .ve-act-icon{font-size:20px;width:34px;height:34px;border-radius:50%;background:#1a1a26;display:flex;align-items:center;justify-content:center;}' +
-      '#__loadVideoEdit .ve-act-lbl{font-size:11px;}' +
-      '#__loadVideoEdit .ve-action.on .ve-act-icon{background:#fbbf24;color:#1a1a26;}' +
+      '#__loadVideoEdit .ve-action{flex:0 0 auto;background:transparent;border:none;color:#cfcfdc;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px;cursor:pointer;min-width:62px;}' +
+      '#__loadVideoEdit .ve-act-icon{font-size:18px;width:32px;height:32px;border-radius:50%;background:transparent;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,0.85);color:#fff;}' +
+      '#__loadVideoEdit .ve-act-lbl{font-size:11px;color:#cfcfdc;text-align:center;line-height:1.2;}' +
+      '#__loadVideoEdit .ve-action.on .ve-act-icon{background:#fbbf24;color:#1a1a26;border-color:#fbbf24;}' +
+      '#__loadVideoEdit .ve-action-sep{flex:0 0 auto;width:1px;height:36px;background:#2a2a40;margin:0 4px;display:inline-block;}' +
       '#__loadVideoEdit .ve-panel{position:fixed;left:0;right:0;bottom:60px;background:#1a1a26;border-top:1px solid #2a2a40;padding:14px 16px 18px;z-index:6;max-width:580px;margin:0 auto;border-radius:18px 18px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,0.5);}' +
       '#__loadVideoEdit .ve-panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-weight:700;color:#fff;font-size:14px;}' +
       '#__loadVideoEdit .ve-lbl{font-size:12.5px;color:#a0a0b0;display:block;}' +
@@ -8600,13 +8616,29 @@
         // adjustment panels — for now they show a one-line "coming
         // next" toast so the visual chrome is intact and users know
         // where each tool will live.
-        else if (act === 'cutout')   toast('Cutout: subject-isolation tool coming next.', false);
-        else if (act === 'filter')   toast('Filter: color-grade presets coming next.', false);
-        else if (act === 'fx')       toast('FX: zoom/shake presets coming next.', false);
-        else if (act === 'speed')    toast('Speed: 0.25x – 4x coming next.', false);
-        else if (act === 'fade')     toast('Fade: in / out timing coming next.', false);
-        else if (act === 'crop')     toast('Crop: tight reframe coming next.', false);
-        else if (act === 'rotate')   toast('Rotate: 90° / 180° coming next.', false);
+        else if (act === 'cutout')        toast('Cutout: subject-isolation tool coming next.', false);
+        else if (act === 'filter')        toast('Filter: color-grade presets coming next.', false);
+        else if (act === 'fx')            toast('FX: zoom/shake presets coming next.', false);
+        else if (act === 'speed')         toast('Speed: 0.25x – 4x coming next.', false);
+        else if (act === 'fade')          toast('Fade: in / out timing coming next.', false);
+        else if (act === 'crop')          toast('Crop: tight reframe coming next.', false);
+        else if (act === 'rotate')        toast('Rotate: 90° / 180° coming next.', false);
+        else if (act === 'mirror')        toast('Mirror: horizontal flip coming next.', false);
+        else if (act === 'flip')          toast('Flip: vertical flip coming next.', false);
+        else if (act === 'fit')           toast('Fit: aspect-fill / fit toggle coming next.', false);
+        else if (act === 'bg')            toast('BG: solid colour, blur, image background coming next.', false);
+        else if (act === 'border')        toast('Border: outline + corner radius coming next.', false);
+        else if (act === 'blur')          toast('Blur: motion / radial / box blur coming next.', false);
+        else if (act === 'opacity')       toast('Opacity: clip transparency coming next.', false);
+        else if (act === 'denoise')       toast('Denoise: audio noise reduction coming next.', false);
+        else if (act === 'zoom')          toast('Zoom: ken-burns pan / zoom coming next.', false);
+        else if (act === 'extract-audio') toast('Extract Audio: separate the audio track coming next.', false);
+        else if (act === 'auto-captions') toast('Auto Captions: speech-to-subtitle coming next.', false);
+        else if (act === 'tts') {
+          var t = (document.getElementById('ve-text') && document.getElementById('ve-text').value || '').trim();
+          if (!t) { toast('Add subtitle text first, then TTS will read it.', true); showPanel('ve-text-panel'); return; }
+          if (window.speechSynthesis) { var u = new SpeechSynthesisUtterance(t); speechSynthesis.cancel(); speechSynthesis.speak(u); }
+        }
         else toast(act.charAt(0).toUpperCase() + act.slice(1) + ' tool: coming in v2.', false);
       });
     });
