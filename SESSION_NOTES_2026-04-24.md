@@ -82,15 +82,22 @@ User pivoted the long-term focus. Sunday's work should serve this bigger mission
 
 ### Sunday priority queue (in order)
 
-1. **🏆 Standalone Load PWA file** — the first proof point of the vision. Load produces a single-file version of itself with the three vendor libs (jszip, pdf.js, epub.js) inlined. Ships the same flavor as `Attain-Standalone.html` that already exists in the repo. ~7–10 MB. ~1–2 hours work.
+1. **🏆 Standalone Load PWA file** — the first proof point of the vision. Load produces a single-file version of itself with the three vendor libs (jszip, pdf.js, epub.js) inlined. Ships the same flavor as `Attain-Standalone.html` that already exists in the repo. ~7–10 MB. ~1–2 hours work. ✅ **DONE April 26** — rebuilt against current `/load/` tree, all April 24 features inlined.
 
-2. **📚 EPUB export** — unlocks KDP. Every iPad-authored book from Load can be uploaded directly to:
-   - Amazon KDP (accepts EPUB/KPF)
-   - Apple Books (EPUB native)
-   - Kobo / Smashwords / Draft2Digital (EPUB)
-   - Barnes & Noble Nook Press (EPUB)
+2. **📚 Import → Edit → Publish pipeline (NEW — replaces former #2 EPUB-only step)**
 
-   Load would need to construct a valid EPUB 3.0 bundle: `mimetype`, `META-INF/container.xml`, `OEBPS/content.opf`, `OEBPS/toc.ncx`, `OEBPS/nav.xhtml`, `OEBPS/content.xhtml`, plus embedded images. Use JSZip (already loaded).
+   User scope (April 26): *"Drop in your already-written + art-generated book, edit, export for KDP-friendly or other digital publishing sites."* No image generation, no template gallery curation, no real-time collab. The realistic reach with one well-built EPUB + one well-built PDF: **Amazon KDP** (print + Kindle), **Apple Books**, **Kobo**, **Barnes & Noble Nook Press**, **Smashwords / Draft2Digital**, **IngramSpark**, **Google Play Books**.
+
+   Build part-by-part, smallest shippable first:
+
+   1. **Import .docx + .txt + .md** — read .docx as zipped XML (paragraphs, headings, lists, inline images), drop tracked changes / complex tables. Lossy-but-functional. Most common case, fastest win.
+   2. **EPUB 3 export** — covers Kindle / Apple / Kobo / Nook / Google in one shot. Use the JSZip already loaded.
+   3. **KDP page-layout view** — trim presets (6×9, 8.5×11, kids' 8.5×8.5, etc.), KDP-spec bleed and margins (margins grow with page count), page numbers, headers, full-bleed children's-book layout.
+   4. **PDF export** — KDP print + IngramSpark. Browser print API styled to KDP-acceptable PDF.
+   5. **Import .epub + .pdf** — so users can re-edit a book they already published.
+   6. **Cover-image export** — high-res PNG / JPEG for KDP's separate cover upload.
+
+   Skipped on purpose: image generation (user already has art), Canva-scale stock library (use iPad Photos / Files), Microsoft Word docx export (KDP wants EPUB/PDF anyway), real-time collab (offline-first; async AirDrop round-trips + local comments cover 95% of self-pub feedback rounds).
 
 3. **🎨 Publishing templates** — "nice designed templates for the different file uploads." Pre-built cover-page, copyright-page, dedication, TOC, chapter-opener, and back-matter layouts that the user picks in Load's Create screen. Each template is dyslexia-friendly AND formatted to each platform's spec:
    - **KDP print paperback** — trim size, bleed, margins, ISBN area
@@ -99,11 +106,9 @@ User pivoted the long-term focus. Sunday's work should serve this bigger mission
    - **Generic EPUB** — neutral, universal
    - **Cover-only** — for separate cover upload (KDP asks separately)
 
-4. **📑 PDF export** — universal fallback, needed for KDP paperback print. Use browser print API, styled carefully to produce KDP-acceptable PDF.
+4. **📦 Mobile app packaging walkthrough** — "PWA → native" via pwabuilder.com, **iOS + Android only, no Windows target**. Document the workflow so Load users can generate `.ipa` / `.apk` / `.aab` packages from any Load PWA. Apple Developer account needed for iOS App Store submission but not for sideloading / TestFlight. Android APK can be distributed without Play Store.
 
-5. **📦 Mobile app packaging walkthrough** — "PWA → native" via pwabuilder.com, **iOS + Android only, no Windows target**. Document the workflow so Load users can generate `.ipa` / `.apk` / `.aab` packages from any Load PWA. Apple Developer account needed for iOS App Store submission but not for sideloading / TestFlight. Android APK can be distributed without Play Store.
-
-6. **👶 Start building Attain Jr™** — kid-focused variant of Attain. Scaffold created April 24 at `attain-jr/` with `index.html` placeholder and `NOTES.md` laying out the design principles (picture-first, touch-only, no network, parent-gated AI, no ads, COPPA-friendly). Sunday decision point: **fork from Attain and strip back, or fresh build sharing only the content format?**
+5. **👶 Start building Attain Jr™** — kid-focused variant of Attain. Scaffold created April 24 at `attain-jr/` with `index.html` placeholder and `NOTES.md` laying out the design principles (picture-first, touch-only, no network, parent-gated AI, no ads, COPPA-friendly). Sunday decision point: **fork from Attain and strip back, or fresh build sharing only the content format?**
 
 ### ✅ Already in Load (reminder — don't rebuild)
 
