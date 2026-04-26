@@ -8827,11 +8827,16 @@
     });
 
     /* Pull N evenly-spaced frame thumbnails out of the video and
-       render them into the yellow timeline strip. Hardened against
-       iPad Safari's lazy-load: waits for canplay (readyState >= 3)
-       before seeking so drawImage doesn't pull an empty frame. Each
-       seek has a 1.5s timeout — if Safari never fires "seeked", we
-       reuse the previous thumbnail rather than stalling forever. */
+       render them into the yellow timeline strip. Two-pass for
+       responsiveness:
+         Pass 1 (instant) — once one frame is decodable, capture it
+                            once and tile it across N <img> slots so
+                            the strip looks correct immediately
+         Pass 2 (per-frame) — seek to each evenly-spaced timestamp
+                              with a watchdog; replace each tile in
+                              place with the real frame when it
+                              arrives. Surviving frames from pass 1
+                              fill in for any seeks Safari refuses. */
     function generateClipThumbnails(vid, count) {
       var thumbsEl = document.getElementById('ve-clip-thumbs');
       if (!thumbsEl) return Promise.resolve();
@@ -8843,15 +8848,13 @@
         return Promise.resolve();
       }
       function whenReady() {
-        // readyState 3 = HAVE_FUTURE_DATA, enough to draw a frame.
-        if (vid.readyState >= 3) return Promise.resolve();
+        if (vid.readyState >= 2) return Promise.resolve();
         return new Promise(function (resolve) {
           var done = false;
           var finish = function () { if (!done) { done = true; resolve(); } };
+          vid.addEventListener('loadeddata', finish, { once: true });
           vid.addEventListener('canplay', finish, { once: true });
-          // Also trigger a load if Safari is being lazy.
           try { vid.load(); } catch (e) {}
-          // Hard cap: 3s, otherwise we draw whatever we have.
           setTimeout(finish, 3000);
         });
       }
@@ -8862,49 +8865,47 @@
         var savedTime = vid.currentTime;
         var wasMuted = vid.muted;
         vid.muted = true;
-        var lastDataUrl = '';
+        // Pass 1 — capture the current frame, tile it across the
+        // strip so the user sees the timeline populate immediately.
+        var instantUrl = '';
+        try { octx.drawImage(vid, 0, 0, off.width, off.height); instantUrl = off.toDataURL('image/jpeg', 0.55); }
+        catch (e) {}
+        var slotImgs = [];
+        for (var k = 0; k < count; k++) {
+          var slot = document.createElement('img');
+          if (instantUrl) slot.src = instantUrl;
+          slot.alt = '';
+          thumbsEl.appendChild(slot);
+          slotImgs.push(slot);
+        }
+        thumbsEl.classList.remove('loading');
+        // Pass 2 — replace each tile with its actual frame.
         var i = 0;
         function drawNext() {
           if (i >= count) {
             try { vid.currentTime = savedTime; } catch (e) {}
             vid.muted = wasMuted;
-            thumbsEl.classList.remove('loading');
             return Promise.resolve();
           }
           var t = (d * (i + 0.5)) / count;
           return new Promise(function (resolve) {
             var done = false;
-            var finish = function () { if (done) return; done = true; resolve(); };
+            var finish = function () { if (!done) { done = true; resolve(); } };
             var onSeeked = function () {
               vid.removeEventListener('seeked', onSeeked);
-              try { octx.drawImage(vid, 0, 0, off.width, off.height); } catch (e) {}
-              var img = document.createElement('img');
-              try { lastDataUrl = off.toDataURL('image/jpeg', 0.55); } catch (e) {}
-              if (lastDataUrl) img.src = lastDataUrl;
-              thumbsEl.appendChild(img);
-              i++;
-              finish();
+              try {
+                octx.drawImage(vid, 0, 0, off.width, off.height);
+                var u = off.toDataURL('image/jpeg', 0.55);
+                if (u && slotImgs[i]) slotImgs[i].src = u;
+              } catch (e) {}
+              i++; finish();
             };
             vid.addEventListener('seeked', onSeeked);
             try { vid.currentTime = t; }
-            catch (e) {
-              vid.removeEventListener('seeked', onSeeked);
-              if (lastDataUrl) {
-                var img2 = document.createElement('img');
-                img2.src = lastDataUrl;
-                thumbsEl.appendChild(img2);
-              }
-              i++; finish(); return;
-            }
-            // 1.5s per-frame watchdog — Safari sometimes never fires
-            // "seeked" for a particular timestamp, so we move on.
+            catch (e) { vid.removeEventListener('seeked', onSeeked); i++; finish(); return; }
+            // Watchdog so a missing "seeked" event doesn't stall.
             setTimeout(function () {
               vid.removeEventListener('seeked', onSeeked);
-              if (lastDataUrl) {
-                var img3 = document.createElement('img');
-                img3.src = lastDataUrl;
-                thumbsEl.appendChild(img3);
-              }
               i++; finish();
             }, 1500);
           }).then(drawNext);
@@ -11261,13 +11262,15 @@
       /\.(jpe?g|png|gif|webp|heic|heif|svg|bmp)$/i.test(lower) || /^image\//.test(file.type || '') ? 'image' :
       'media';
     var mime = file.type || mimeForMedia(lower, subKind);
-    // Store the File object directly. Files are Blobs already, and
-    // IndexedDB handles them natively. Skipping the readAsArrayBuffer
-    // round-trip means we don't load a multi-hundred-MB video into
-    // RAM as an ArrayBuffer just to wrap it in a fresh Blob — that
-    // was causing the "Saving..." stall + "produced no content" error
-    // on iPad Safari for videos over ~250 MB.
-    var blob = (file.type || mime) === file.type ? file : new Blob([file], { type: mime });
+    // Always normalise to a fresh Blob with explicit MIME. Storing a
+    // raw File reference in IndexedDB sometimes survives across iPad
+    // Safari sessions and sometimes doesn't — the File's underlying
+    // file-system handle can go stale, leaving an empty record on
+    // reload (the "error files in library" the user reported).
+    // new Blob([file]) wraps the file's bytes without an immediate
+    // ArrayBuffer copy; IDB serialises the bytes properly so the
+    // Blob survives reloads cleanly.
+    var blob = new Blob([file], { type: mime });
     return {
       id: newId(),
       name: baseName,
