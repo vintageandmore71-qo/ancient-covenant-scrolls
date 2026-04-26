@@ -301,3 +301,108 @@ the user-visible outcome and the current build state.
 14. Media type selector — ⛔
 15. Loop / Autoplay / Muted-start toggles — ⛔
 16. App mode + screen size preview at top — ⛔
+
+---
+
+## SCREEN LAYOUT SPEC (locked 2026-04-27)
+
+The exact 4-section screen anatomy the user wants Load Media to
+reproduce. Maps each VN section letter to current Load build state.
+
+### A. Top bar — project + export controls
+- ✅ Back button
+- ✅ Help button (with quick-guide alert)
+- ✅ Aspect ratio selector (Original / 16:9 / 9:16 / 1:1 / 4:5)
+- ✅ Settings ⋯ (cycles aspect for now; full sheet later)
+- ✅ Save button (writes editorDraft to app record)
+- ✅ Export button (Canvas + MediaRecorder MP4)
+- ✅ Visible build stamp + Force-Refresh button
+
+### B. Preview canvas — main display
+- ✅ Video output rendered into the stage
+- ✅ Tap-to-play / pause
+- ✅ Centre play overlay via native iOS controls
+- ✅ Frame syncs with timeline scrub
+- ✅ Fullscreen icon
+- ✅ Codec error toast on video.error
+- ✅ Load-failure overlay if duration stays 0/NaN for 3s
+
+### C. Timeline + tracks — core engine
+
+#### C.1 Playhead
+- ✅ Vertical white line + grab dot
+- ✅ Drag updates preview instantly (drag-to-scrub)
+- ✅ Snap to 0.5s grid when Snap toggle is on
+
+#### C.2 Video track (primary)
+- ✅ Horizontal strip with frame thumbnails (8 evenly-spaced)
+- ✅ Two-pass thumb generation (instant tile + per-frame replace)
+- ✅ Duration label (`5.04s` style) inside the clip
+- ✅ Selected state (yellow ring + drop shadow)
+- ✅ Trim — drag yellow handles
+- ⚠️ Split — UI present, real splice needs multi-clip array
+- ⛔ Drag clip to reposition (multi-clip phase)
+- ⛔ Duplicate (multi-clip phase)
+- ✅ Delete (single-clip MVP closes editor)
+- ✅ + adder before clip
+- ✅ + adder after clip / append at end of track
+
+#### C.3 Audio waveform
+- ⚠️ Decorative yellow bars under video (no real decode yet)
+- ⛔ Real waveform via decodeAudioData
+
+#### C.4 Secondary tracks (layer system)
+- ✅ Music track row + adder
+- ✅ Subtitle track row + adder
+- ✅ Sticker / PiP track row + adder
+- ⛔ Each track with INDEPENDENT timeline (currently all share one playhead)
+- ⛔ Layer overlap with z-order management
+- ⛔ Per-layer trim handles
+
+### D. Left sidebar — Add layers (NOT YET BUILT AS A SEPARATE COLUMN)
+- ⛔ Add Music (currently inline + on the music track row)
+- ⛔ Add Subtitle (currently inline)
+- ⛔ Add Sticker / PiP (currently inline)
+- ⛔ Add Video (currently only via Replace)
+- Note: VN puts these in a dedicated left rail; Load currently
+  attaches each + adder directly to its track row. Functionally
+  equivalent for now but visually different — restructure flagged.
+
+### E. Cover section
+- ✅ Cover tile on left of timeline strip
+- ⛔ Tap → frame picker UI to choose the cover image (currently
+  a static label)
+
+### F. Bottom toolbar — editing tools (default state)
+- ✅ All 26 actions in VN order (Filter · Trim · FX · Split ·
+  Cutout · | · Speed · Volume · Fade · Crop · Rotate · Mirror ·
+  Flip · Fit · | · BG · Border · Blur · Opacity · Denoise · Zoom ·
+  Extract Audio · Auto Captions · TTS · Story · Reverse · Freeze ·
+  PiP Track)
+- ✅ Working today: Trim · Split · Volume · Speed · Opacity · TTS
+- ⛔ Other 20: real implementations (placeholder toasts ship)
+
+### Context-aware tool swap (when a clip is selected)
+- ✅ Video clip: Edit · Split · Replace · Speed · Opacity · Duplicate · Delete · Done
+- ⛔ Text clip: Edit text / Style / Position
+- ⛔ Audio clip: Volume / Fade / Sync
+- ⛔ Sticker / PiP clip: Replace / Resize / Opacity
+
+---
+
+## INTERACTION RULES (locked 2026-04-27)
+- ✅ Tap = select clip
+- ⛔ Drag = move clip (multi-clip phase)
+- ✅ Drag edges = trim
+- ✅ Tap playhead area = scrub position
+- ✅ Tap tools = apply changes (or open panel)
+
+## BEHAVIOUR REQUIREMENTS (locked 2026-04-27)
+- ✅ Smooth touch interaction (touch-action: none on scrub strip,
+  pointer events with tap-vs-drag disambiguation)
+- ⚠️ No lag when scrubbing (depends on video decode speed; H.264
+  ~30fps clips are fine, HEVC stutters)
+- ✅ Instant preview updates on scrub
+- ✅ Visual feedback for every action (toast + class state)
+- ✅ Non-destructive editing (trim / speed / opacity stored as
+  state, never re-encode source until export)
