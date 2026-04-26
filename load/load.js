@@ -3668,6 +3668,7 @@
       safe('wireBookmarks', wireBookmarks);
       safe('wireSaveTemplate', wireSaveTemplate);
       safe('wireLayoutBtn', wireLayoutBtn);
+      safe('wireProseEditBtn', wireProseEditBtn);
       safe('wirePerAppTheme', wirePerAppTheme);
       safe('wireNotesScreen', wireNotesScreen);
       safe('wireHelp', wireHelp);
@@ -5483,6 +5484,152 @@
     var btn = $('layout-btn');
     if (btn) btn.addEventListener('click', function () {
       if (currentApp) openLayoutView(currentApp);
+      else toast('Open a manuscript first.', true);
+    });
+  }
+
+  /* ---------- Prose editor ----------
+     A friendly WYSIWYG-ish editor for re-editing a manuscript without
+     having to touch HTML source. Loads the body of the current app's
+     HTML into a contentEditable div, exposes a tiny toolbar (bold,
+     italic, H1, H2, list, undo, redo, save, cancel), and writes the
+     edited innerHTML back to app.html on save.
+
+     Designed for the .docx / .txt / .md / .epub / .pdf import
+     pipeline -- creators bring in a finished book and edit prose
+     directly. Power users who need to edit raw markup still have the
+     code-source 'Edit HTML' option in the tile menu. */
+  function openProseEditor(app) {
+    if (!app || !app.html) { toast('Open a manuscript first.', true); return; }
+
+    var existing = document.getElementById('__loadProseEdit');
+    if (existing) existing.remove();
+
+    // Pull the body content out of app.html so the editor doesn't show
+    // <head>, doctype, etc.
+    var bodyHtml = '', bodyTitle = app.name || 'Manuscript';
+    try {
+      var doc = new DOMParser().parseFromString(app.html, 'text/html');
+      if (doc && doc.body) bodyHtml = doc.body.innerHTML;
+      var titleEl = doc && doc.querySelector('title');
+      if (titleEl && titleEl.textContent.trim()) bodyTitle = titleEl.textContent.trim();
+    } catch (e) { bodyHtml = app.html; }
+
+    var wrap = document.createElement('div');
+    wrap.id = '__loadProseEdit';
+    wrap.style.cssText = 'position:fixed;inset:0;z-index:2050;display:flex;flex-direction:column;background:#0f0f1a;color:#f0f0f0;font-family:-apple-system,sans-serif;';
+
+    wrap.innerHTML =
+      '<div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:#1a1a2e;border-bottom:1px solid #2a2a40;flex-wrap:wrap;overflow-x:auto;">' +
+        '<button id="pe-cancel" style="background:#3a3a55;border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:14px;cursor:pointer;flex-shrink:0;">&larr; Cancel</button>' +
+        '<div style="font-weight:700;font-size:15px;margin-right:auto;flex-shrink:0;">Edit &mdash; ' + escHtml(bodyTitle) + '</div>' +
+        '<button data-cmd="bold" class="pe-tool" style="flex-shrink:0;font-weight:bold;">B</button>' +
+        '<button data-cmd="italic" class="pe-tool" style="flex-shrink:0;font-style:italic;">I</button>' +
+        '<button data-cmd="underline" class="pe-tool" style="flex-shrink:0;text-decoration:underline;">U</button>' +
+        '<button data-cmd="formatBlock" data-arg="H1" class="pe-tool" style="flex-shrink:0;">H1</button>' +
+        '<button data-cmd="formatBlock" data-arg="H2" class="pe-tool" style="flex-shrink:0;">H2</button>' +
+        '<button data-cmd="formatBlock" data-arg="P" class="pe-tool" style="flex-shrink:0;">P</button>' +
+        '<button data-cmd="insertUnorderedList" class="pe-tool" style="flex-shrink:0;">&bull; List</button>' +
+        '<button data-cmd="insertOrderedList" class="pe-tool" style="flex-shrink:0;">1. List</button>' +
+        '<button data-cmd="formatBlock" data-arg="BLOCKQUOTE" class="pe-tool" style="flex-shrink:0;">&ldquo;</button>' +
+        '<button data-cmd="undo" class="pe-tool" style="flex-shrink:0;">&#8630;</button>' +
+        '<button data-cmd="redo" class="pe-tool" style="flex-shrink:0;">&#8631;</button>' +
+        '<button id="pe-save" style="background:#7b6cff;border:none;color:#12121a;padding:8px 14px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;">Save</button>' +
+      '</div>' +
+      '<div style="flex:1;overflow:auto;background:#fff;color:#222;">' +
+        '<div id="pe-area" contenteditable="true" spellcheck="true" style="' +
+          'max-width:780px;margin:0 auto;padding:32px 24px 80px;' +
+          'font-family:Georgia,\"Times New Roman\",serif;line-height:1.7;font-size:16px;outline:none;min-height:100%;">' +
+        bodyHtml +
+        '</div>' +
+      '</div>' +
+      '<style>' +
+      '.pe-tool { background:#2a2a40; color:#f0f0f0; border:1px solid #3a3a55; padding:6px 10px; border-radius:6px; font-size:13px; cursor:pointer; min-width:34px; }' +
+      '.pe-tool:hover { background:#3a3a55; }' +
+      '#pe-area h1 { font-size:24px; margin:1em 0 0.4em; line-height:1.3; }' +
+      '#pe-area h2 { font-size:19px; margin:0.9em 0 0.3em; line-height:1.3; }' +
+      '#pe-area h3 { font-size:17px; margin:0.8em 0 0.3em; }' +
+      '#pe-area p { margin:0 0 0.7em; }' +
+      '#pe-area blockquote { margin:1em 0 1em 1em; padding-left:1em; border-left:3px solid #ccc; color:#555; }' +
+      '#pe-area img { max-width:100%; height:auto; }' +
+      '#pe-area ul, #pe-area ol { margin:0.5em 0 1em 1.4em; }' +
+      '</style>';
+
+    document.body.appendChild(wrap);
+
+    var area = document.getElementById('pe-area');
+
+    // Wire toolbar via execCommand. Yes, document.execCommand is
+    // formally deprecated but every iPad Safari version still supports
+    // it for contenteditable styling, and the Selection-API rewrite to
+    // replace it is several hundred lines we don't need today.
+    wrap.addEventListener('click', function (e) {
+      var btn = e.target.closest ? e.target.closest('[data-cmd]') : null;
+      if (!btn) return;
+      var cmd = btn.getAttribute('data-cmd');
+      var arg = btn.getAttribute('data-arg') || null;
+      area.focus();
+      try { document.execCommand(cmd, false, arg); }
+      catch (err) { /* unsupported -- ignore */ }
+    });
+
+    document.getElementById('pe-cancel').addEventListener('click', function () {
+      if (area.dataset.dirty === '1') {
+        if (!confirm('Discard your edits?')) return;
+      }
+      wrap.remove();
+    });
+    document.getElementById('pe-save').addEventListener('click', async function () {
+      var newBody = area.innerHTML;
+      // Re-emit the full HTML doc using the manuscript shell so it
+      // round-trips cleanly with the existing renderer / EPUB / PDF
+      // export. If app.html had a custom shell (e.g. a PWA template),
+      // preserve everything outside <body>.
+      try {
+        var doc = new DOMParser().parseFromString(app.html, 'text/html');
+        if (doc && doc.body) {
+          doc.body.innerHTML = newBody;
+          var serialized = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+          app.html = serialized;
+        } else {
+          app.html = buildManuscriptDoc(bodyTitle, newBody);
+        }
+      } catch (e) {
+        app.html = buildManuscriptDoc(bodyTitle, newBody);
+      }
+      app.sizeBytes = (app.html || '').length;
+      try {
+        await putApp(app);
+        toast('Saved.');
+        wrap.remove();
+        // If currently viewing this app, reload the iframe so the new
+        // content shows immediately.
+        if (currentApp && currentApp.id === app.id) {
+          try { reopenApp(app); }
+          catch (e) { /* renderer may handle reopen its own way */ }
+        }
+      } catch (err) {
+        toast('Could not save: ' + (err && err.message), true);
+      }
+    });
+    area.addEventListener('input', function () { area.dataset.dirty = '1'; });
+
+    area.focus();
+  }
+
+  // Re-render the open manuscript in the viewer iframe after a save.
+  // Falls back to a simple srcdoc swap if the original openApp helper
+  // expects a different code path; either way, the user immediately
+  // sees their edits.
+  function reopenApp(app) {
+    var frame = $('viewer-frame');
+    if (frame && app.html) frame.srcdoc = app.html;
+  }
+
+  function wireProseEditBtn() {
+    var btn = $('prose-edit-btn');
+    if (btn) btn.addEventListener('click', function () {
+      if (currentApp) openProseEditor(currentApp);
       else toast('Open a manuscript first.', true);
     });
   }
