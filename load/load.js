@@ -4650,8 +4650,12 @@
           '<div style="font-weight:400;font-size:12.5px;color:var(--ink-mid,#a0a0b0);margin-top:3px;">For uploading to a host (GitHub Pages, Netlify). iPad preview blocks JS on raw .html &mdash; prefer Offline Link for direct sharing.</div>' +
         '</button>' +
         '<button data-format="epub" class="seg-btn full" style="text-align:left;padding:14px 16px;margin-bottom:10px;background:var(--bg-2,#2a2a40);color:inherit;border:1px solid var(--border,#3a3a55);border-radius:10px;font-weight:600;font-size:15px;display:block;width:100%;">' +
-          '&#128214; Publish as EPUB (.epub)' +
-          '<div style="font-weight:400;font-size:12.5px;color:var(--ink-mid,#a0a0b0);margin-top:3px;">For Amazon KDP (Kindle), Apple Books, Kobo, Barnes &amp; Noble Nook, Smashwords, Google Play. One file uploads to all of them.</div>' +
+          '&#128214; Publish as EPUB (.epub) &nbsp;&mdash; reflowable' +
+          '<div style="font-weight:400;font-size:12.5px;color:var(--ink-mid,#a0a0b0);margin-top:3px;">Best for novels &amp; non-fiction. For KDP Kindle, Apple Books, Kobo, Nook, Smashwords, Google Play. One file uploads to all of them.</div>' +
+        '</button>' +
+        '<button data-format="epub-fxl" class="seg-btn full" style="text-align:left;padding:14px 16px;margin-bottom:10px;background:var(--bg-2,#2a2a40);color:inherit;border:1px solid var(--border,#3a3a55);border-radius:10px;font-weight:600;font-size:15px;display:block;width:100%;">' +
+          '&#128396;&#65039; Picture-Book EPUB (.epub) &nbsp;&mdash; fixed-layout' +
+          '<div style="font-weight:400;font-size:12.5px;color:var(--ink-mid,#a0a0b0);margin-top:3px;">For picture books / illustrated kids\' books. Preserves the spread layout (image + text stay anchored). Required by KDP Kids; preferred by Apple Books for picture books.</div>' +
         '</button>' +
         '<button data-format="pdf" class="seg-btn full" style="text-align:left;padding:14px 16px;margin-bottom:10px;background:var(--bg-2,#2a2a40);color:inherit;border:1px solid var(--border,#3a3a55);border-radius:10px;font-weight:600;font-size:15px;display:block;width:100%;">' +
           '&#128209; Print PDF for KDP / IngramSpark' +
@@ -4670,6 +4674,7 @@
       else if (format === 'webarchive') shareAsWebArchive(app);
       else if (format === 'html') shareAsPlainHtml(app);
       else if (format === 'epub') exportAsEpub(app);
+      else if (format === 'epub-fxl') exportAsFixedLayoutEpub(app);
       else if (format === 'pdf') exportAsPdf(app);
     });
   }
@@ -4747,6 +4752,232 @@
     } catch (e) {
       toast('EPUB export failed: ' + (e && e.message || e), true);
     }
+  }
+
+  /* ---------- EPUB 3 Fixed-Layout export ----------
+     For picture books and any other book where the spread layout is
+     part of the design. Required by KDP Kids and preferred by Apple
+     Books for picture books because reflowable EPUB destroys the
+     image+text positioning that defines a picture-book spread.
+
+     Fixed-layout EPUB pins each page to a fixed viewport in pixels
+     and tells the reader to display two pages side-by-side. Each
+     page is one XHTML file with absolute positioning.
+
+     Spec ref: https://www.w3.org/publishing/epub3/epub-rendering.html */
+  async function exportAsFixedLayoutEpub(app) {
+    if (typeof JSZip === 'undefined') { toast('JSZip not loaded — cannot build EPUB.', true); return; }
+    if (!app || !app.html) { toast('Nothing to export for this item.', true); return; }
+    toast('Building Fixed-Layout EPUB…');
+    try {
+      var blob = await buildFixedLayoutEpubBlob(app);
+      var safeName = String(app.name || 'book').replace(/[^a-zA-Z0-9 _\-]/g, '').trim() || 'book';
+      var fileName = safeName + '-fxl.epub';
+      await shareBlobOrDownload(blob, fileName, 'application/epub+zip',
+        'Exported ' + fileName + '. Use the KDP "Children\'s Book" upload path.');
+    } catch (e) {
+      toast('Fixed-layout EPUB export failed: ' + (e && e.message || e), true);
+    }
+  }
+
+  async function buildFixedLayoutEpubBlob(app) {
+    var settings = Object.assign(defaultLayout(), app.layout || {});
+    var trim = TRIM_PRESETS.filter(function (t) { return t.id === settings.trim; })[0] || TRIM_PRESETS[3];
+    // Pick a sensible page viewport in pixels based on trim. KDP Kids
+    // recommends 1600 px on the long edge minimum; we go higher for
+    // sharper rendering on retina readers.
+    var DPI = 200;
+    var pageWPx = Math.round(trim.w * DPI);
+    var pageHPx = Math.round(trim.h * DPI);
+
+    var bookTitle = (app.name || 'Untitled Book').trim();
+
+    // Build the page list using the same logic as the layout preview.
+    var doc;
+    try { doc = new DOMParser().parseFromString(app.html || '', 'text/html'); }
+    catch (e) { throw new Error('Could not parse the source HTML.'); }
+    var body = doc.body;
+    if (!body) throw new Error('The source has no <body> to publish.');
+
+    // Extract data: image URLs into separate files, just like the
+    // reflowable exporter -- keeps the EPUB self-contained.
+    var imageFiles = [];
+    var imgs = body.querySelectorAll('img');
+    var imgIdx = 0;
+    for (var i = 0; i < imgs.length; i++) {
+      var srcAttr = imgs[i].getAttribute('src') || '';
+      if (!/^data:/i.test(srcAttr)) continue;
+      var m = /^data:([^;,]+)(;base64)?,(.*)$/i.exec(srcAttr);
+      if (!m) continue;
+      var mime = m[1].toLowerCase();
+      var isB64 = !!m[2];
+      var data = m[3];
+      var ext = mime.indexOf('jpeg') >= 0 ? 'jpg' :
+                mime.indexOf('png') >= 0 ? 'png' :
+                mime.indexOf('gif') >= 0 ? 'gif' :
+                mime.indexOf('webp') >= 0 ? 'webp' :
+                mime.indexOf('svg') >= 0 ? 'svg' : 'bin';
+      var name = 'img' + (++imgIdx) + '.' + ext;
+      var bytes = isB64 ? base64ToBytes(data) : new TextEncoder().encode(decodeURIComponent(data));
+      imageFiles.push({ name: name, path: 'OEBPS/images/' + name, bytes: bytes, mime: mime });
+      imgs[i].setAttribute('src', 'images/' + name);
+      if (!imgs[i].hasAttribute('alt')) imgs[i].setAttribute('alt', '');
+    }
+
+    // Build pages with picture-book role logic if applicable.
+    var pages = [];
+    var isPicBook = !!PICTURE_BOOK_TEMPLATES[settings.bookType];
+    var contentChunks = paginateForPreview(body.innerHTML, trim.w, trim.h,
+      0.5, settings.marginOutside, settings.marginTop, settings.marginBottom);
+    if (isPicBook) {
+      var total = PICTURE_BOOK_TEMPLATES[settings.bookType].pages;
+      var STRUCTURAL_FRONT = 5, STRUCTURAL_BACK = 3;
+      var storyPageCount = total - STRUCTURAL_FRONT - STRUCTURAL_BACK;
+      var perPage = Math.max(1, Math.ceil(contentChunks.length / Math.max(1, storyPageCount)));
+      for (var pn = 1; pn <= total; pn++) {
+        var role = pageRoleForPictureBook(pn, total);
+        var isStructural = pn <= STRUCTURAL_FRONT || pn > total - STRUCTURAL_BACK;
+        var pageHtml = '';
+        if (!isStructural) {
+          var storyIdx = pn - STRUCTURAL_FRONT - 1;
+          var fromIdx = storyIdx * perPage;
+          var toIdx = Math.min(contentChunks.length, fromIdx + perPage);
+          pageHtml = contentChunks.slice(fromIdx, toIdx).join('');
+        } else {
+          // Structural pages get a clean placeholder so a KDP reviewer
+          // can see the role; creator can replace before final upload.
+          pageHtml = '<div style="text-align:center;padding:40px 30px;color:#888;font-style:italic;">' + escXml(role) + '</div>';
+        }
+        pages.push({ index: pn, role: role, html: pageHtml });
+      }
+    } else {
+      pages = contentChunks.map(function (h, i) { return { index: i + 1, role: '', html: h }; });
+    }
+
+    // Build chapter XHTML files (one per page). Use absolute positioning
+    // inside a viewport-sized div so reader rendering matches design.
+    var chapterFiles = [];
+    pages.forEach(function (pg, idx) {
+      var chId = 'p' + (idx + 1);
+      var spread = (idx === 0) ? 'page-spread-right' :     // page 1 always recto
+                   (idx % 2 === 1) ? 'page-spread-left' :   // page 2 = left/verso
+                                     'page-spread-right';  // page 3 = right/recto, ...
+      var xhtml =
+        '<?xml version="1.0" encoding="UTF-8"?>\n' +
+        '<!DOCTYPE html>\n' +
+        '<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="en">\n' +
+        '<head>\n' +
+        '<meta charset="UTF-8"/>\n' +
+        '<meta name="viewport" content="width=' + pageWPx + ', height=' + pageHPx + '"/>\n' +
+        '<title>' + escXml(bookTitle) + ' — page ' + (idx + 1) + '</title>\n' +
+        '<link rel="stylesheet" type="text/css" href="css/style.css"/>\n' +
+        '</head>\n' +
+        '<body>\n' +
+        '<div class="page" style="width:' + pageWPx + 'px;height:' + pageHPx + 'px;position:relative;overflow:hidden;">' +
+        pg.html +
+        '</div>\n' +
+        '</body>\n</html>\n';
+      chapterFiles.push({ id: chId, hrefRel: chId + '.xhtml', path: 'OEBPS/' + chId + '.xhtml', content: xhtml, spread: spread });
+    });
+
+    var bookId = 'urn:uuid:' + uuid4();
+    var nowIso = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
+
+    var containerXml =
+      '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">\n' +
+      '<rootfiles>\n' +
+      '<rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>\n' +
+      '</rootfiles>\n' +
+      '</container>\n';
+
+    var styleCss =
+      'html, body { margin: 0; padding: 0; }\n' +
+      '.page { font-family: Georgia, "Times New Roman", serif; line-height: 1.4; }\n' +
+      '.page p { margin: 0 0 0.7em 0; padding: 0 30px; }\n' +
+      '.page h1 { font-size: 2em; text-align: center; margin: 0.5em 0; }\n' +
+      '.page img { max-width: 100%; height: auto; display: block; }\n';
+
+    var manifest = [];
+    manifest.push('<item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>');
+    manifest.push('<item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>');
+    manifest.push('<item id="css" href="css/style.css" media-type="text/css"/>');
+    chapterFiles.forEach(function (c) {
+      manifest.push('<item id="' + c.id + '" href="' + c.hrefRel + '" media-type="application/xhtml+xml"/>');
+    });
+    imageFiles.forEach(function (img, ix) {
+      manifest.push('<item id="img' + (ix + 1) + '" href="images/' + img.name + '" media-type="' + img.mime + '"/>');
+    });
+
+    var spineRefs = chapterFiles.map(function (c) {
+      return '<itemref idref="' + c.id + '" properties="' + c.spread + '"/>';
+    }).join('\n');
+
+    var contentOpf =
+      '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="bookid"' +
+      ' xml:lang="en" prefix="rendition: http://www.idpf.org/vocab/rendition/#">\n' +
+      '<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">\n' +
+      '<dc:identifier id="bookid">' + escXml(bookId) + '</dc:identifier>\n' +
+      '<dc:title>' + escXml(bookTitle) + '</dc:title>\n' +
+      '<dc:language>en</dc:language>\n' +
+      '<dc:creator>' + escXml(app.author || 'Unknown') + '</dc:creator>\n' +
+      '<meta property="dcterms:modified">' + nowIso + '</meta>\n' +
+      // Fixed-layout rendition properties
+      '<meta property="rendition:layout">pre-paginated</meta>\n' +
+      '<meta property="rendition:orientation">auto</meta>\n' +
+      '<meta property="rendition:spread">both</meta>\n' +
+      '</metadata>\n' +
+      '<manifest>\n' + manifest.join('\n') + '\n</manifest>\n' +
+      '<spine toc="ncx">\n' + spineRefs + '\n</spine>\n' +
+      '</package>\n';
+
+    var navList = chapterFiles.map(function (c, ix) {
+      var label = pages[ix].role || ('Page ' + (ix + 1));
+      return '<li><a href="' + c.hrefRel + '">' + escXml(label) + '</a></li>';
+    }).join('\n');
+    var navXhtml =
+      '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<!DOCTYPE html>\n' +
+      '<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="en">\n' +
+      '<head><meta charset="UTF-8"/><title>' + escXml(bookTitle) + ' — Contents</title></head>\n' +
+      '<body><nav epub:type="toc" id="toc"><h1>Contents</h1><ol>\n' + navList + '\n</ol></nav></body></html>\n';
+
+    var ncxNavPoints = chapterFiles.map(function (c, ix) {
+      var label = pages[ix].role || ('Page ' + (ix + 1));
+      return '<navPoint id="np' + (ix + 1) + '" playOrder="' + (ix + 1) + '">' +
+        '<navLabel><text>' + escXml(label) + '</text></navLabel>' +
+        '<content src="' + c.hrefRel + '"/></navPoint>';
+    }).join('\n');
+    var tocNcx =
+      '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN" "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd">\n' +
+      '<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">\n' +
+      '<head>\n' +
+      '<meta name="dtb:uid" content="' + escXml(bookId) + '"/>\n' +
+      '<meta name="dtb:depth" content="1"/>\n' +
+      '<meta name="dtb:totalPageCount" content="0"/>\n' +
+      '<meta name="dtb:maxPageNumber" content="0"/>\n' +
+      '</head>\n' +
+      '<docTitle><text>' + escXml(bookTitle) + '</text></docTitle>\n' +
+      '<navMap>\n' + ncxNavPoints + '\n</navMap>\n' +
+      '</ncx>\n';
+
+    var zip = new JSZip();
+    zip.file('mimetype', 'application/epub+zip', { compression: 'STORE' });
+    zip.file('META-INF/container.xml', containerXml);
+    zip.file('OEBPS/content.opf', contentOpf);
+    zip.file('OEBPS/nav.xhtml', navXhtml);
+    zip.file('OEBPS/toc.ncx', tocNcx);
+    zip.file('OEBPS/css/style.css', styleCss);
+    chapterFiles.forEach(function (c) { zip.file(c.path, c.content); });
+    imageFiles.forEach(function (img) { zip.file(img.path, img.bytes); });
+    return await zip.generateAsync({
+      type: 'blob',
+      mimeType: 'application/epub+zip',
+      compression: 'DEFLATE',
+      compressionOptions: { level: 6 }
+    });
   }
 
   async function buildEpubBlob(app) {
@@ -5312,8 +5543,42 @@
       marginBottom: 0.75,
       marginOutside: 0.5,
       headerText: '',
-      footerText: ''
+      footerText: '',
+      bookType: 'standard',  // 'standard' | 'picture-24' | 'picture-32' | 'picture-40' | 'picture-48'
+      view: 'stacked'        // 'stacked' | 'spread'
     };
+  }
+
+  // Picture-book industry standards. KDP Kids accepts picture books in
+  // multiples of 4. 32 is the most common because it efficiently uses
+  // a single signature on the press; 24 / 40 / 48 also common.
+  // Each template fixes the total page count and the structural
+  // (non-story) pages: cover paste, end papers, title, copyright,
+  // dedication, back-matter, back cover paste.
+  var PICTURE_BOOK_TEMPLATES = {
+    'picture-24': { pages: 24, label: "Picture book — 24 pages" },
+    'picture-32': { pages: 32, label: "Picture book — 32 pages (industry standard)" },
+    'picture-40': { pages: 40, label: "Picture book — 40 pages" },
+    'picture-48': { pages: 48, label: "Picture book — 48 pages" }
+  };
+
+  // Returns the human label for a given printed page in a picture-book
+  // template. Page numbering starts at 1 = front cover paste-down (not
+  // visible to reader). Returns 'Spread N' for story pages so the
+  // creator can see how their content will distribute.
+  function pageRoleForPictureBook(pageNum, totalPages) {
+    if (pageNum === 1) return 'Front Cover (paste-down)';
+    if (pageNum === 2) return 'Inside Front Cover (end paper)';
+    if (pageNum === 3) return 'Title Page';
+    if (pageNum === 4) return 'Copyright';
+    if (pageNum === 5) return 'Dedication';
+    if (pageNum === totalPages)     return 'Back Cover (paste-down)';
+    if (pageNum === totalPages - 1) return 'Inside Back Cover (end paper)';
+    if (pageNum === totalPages - 2) return 'Author Bio / Back Matter';
+    // Story pages: pair into spreads. Story starts at page 6.
+    var storyPage = pageNum - 6;            // 0-indexed within story area
+    var spreadIdx = Math.floor(storyPage / 2) + 1;
+    return 'Story Spread ' + spreadIdx;
   }
 
   function openLayoutView(app) {
@@ -5331,12 +5596,28 @@
       return '<option value="' + t.id + '"' + (t.id === settings.trim ? ' selected' : '') + '>' + t.label + ' — ' + t.notes + '</option>';
     }).join('');
 
+    var bookTypeOptions =
+      '<option value="standard"' + (settings.bookType === 'standard' ? ' selected' : '') + '>Standard novel / non-fiction</option>' +
+      Object.keys(PICTURE_BOOK_TEMPLATES).map(function (k) {
+        var t = PICTURE_BOOK_TEMPLATES[k];
+        return '<option value="' + k + '"' + (settings.bookType === k ? ' selected' : '') + '>' + t.label + '</option>';
+      }).join('');
+
     wrap.innerHTML =
       '<div class="ll-bar" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#1a1a2e;border-bottom:1px solid #2a2a40;flex-wrap:wrap;">' +
         '<button id="ll-close" style="background:#3a3a55;border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:14px;cursor:pointer;">&larr; Close</button>' +
         '<div style="font-weight:700;font-size:15px;margin-right:auto;">Layout for Print &mdash; ' + escHtml(app.name || 'Untitled') + '</div>' +
+        '<label style="font-size:12.5px;color:#a0a0b0;">Book ' +
+          '<select id="ll-booktype" style="margin-left:6px;padding:6px 8px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:13px;">' + bookTypeOptions + '</select>' +
+        '</label>' +
         '<label style="font-size:12.5px;color:#a0a0b0;">Trim ' +
           '<select id="ll-trim" style="margin-left:6px;padding:6px 8px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:13px;">' + trimOptions + '</select>' +
+        '</label>' +
+        '<label style="font-size:12.5px;color:#a0a0b0;">View ' +
+          '<select id="ll-view" style="margin-left:6px;padding:6px 8px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:13px;">' +
+            '<option value="stacked"' + (settings.view === 'stacked' ? ' selected' : '') + '>Stacked pages</option>' +
+            '<option value="spread"' + (settings.view === 'spread' ? ' selected' : '') + '>Side-by-side spreads</option>' +
+          '</select>' +
         '</label>' +
         '<label style="font-size:12.5px;color:#a0a0b0;display:inline-flex;align-items:center;gap:4px;">' +
           '<input id="ll-bleed" type="checkbox"' + (settings.bleed ? ' checked' : '') + '> Bleed (full-bleed images)' +
@@ -5374,7 +5655,9 @@
         marginBottom: settings.marginBottom,
         marginOutside: settings.marginOutside,
         headerText: document.getElementById('ll-header').value,
-        footerText: document.getElementById('ll-footer').value
+        footerText: document.getElementById('ll-footer').value,
+        bookType: document.getElementById('ll-booktype').value,
+        view: document.getElementById('ll-view').value
       };
     }
 
@@ -5406,9 +5689,25 @@
       try { await putApp(app); toast('Layout saved.'); }
       catch (e) { toast('Could not save layout: ' + (e && e.message), true); }
     });
-    ['ll-trim', 'll-bleed', 'll-pn', 'll-pnpos'].forEach(function (id) {
+    ['ll-trim', 'll-bleed', 'll-pn', 'll-pnpos', 'll-view'].forEach(function (id) {
       var el = document.getElementById(id);
       if (el) el.addEventListener('change', rebuild);
+    });
+    // Picture-book templates auto-flip the view to spreads (that's the
+    // whole point of these layouts) and suggest the children's-square
+    // trim. Both are still user-overridable after the auto-flip.
+    document.getElementById('ll-booktype').addEventListener('change', function () {
+      var v = document.getElementById('ll-booktype').value;
+      if (v && v !== 'standard') {
+        document.getElementById('ll-view').value = 'spread';
+        // Suggest 8.5x8.5 if the user hasn't picked an obviously
+        // non-children's trim yet.
+        var trimEl = document.getElementById('ll-trim');
+        if (trimEl && (trimEl.value === '6x9' || trimEl.value === '5x8' || trimEl.value === '5.25x8' || trimEl.value === '5.5x8.5')) {
+          trimEl.value = '8.5x8.5';
+        }
+      }
+      rebuild();
     });
     ['ll-header', 'll-footer'].forEach(function (id) {
       var el = document.getElementById(id);
@@ -5456,12 +5755,24 @@
     var showPN = !!s.pageNumbers;
     var pnPos = s.pageNumberPosition || 'outside';
 
+    // Picture-book template: fixed page count, structural pages
+    // reserved at front + back, story content distributed across the
+    // story spreads in between.
+    var isPicBook = !!PICTURE_BOOK_TEMPLATES[s.bookType];
+    var spreadView = s.view === 'spread' || isPicBook;
+
     var css =
       '*{box-sizing:border-box;}' +
       'html,body{margin:0;padding:0;background:#444;color:#222;font-family:Georgia,"Times New Roman",serif;line-height:1.55;}' +
+      // Stacked: column. Spread: each row is a single page (or a pair).
       '.page-stack{padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px;}' +
+      '.spread-row{display:flex;align-items:flex-start;gap:0;}' +
+      '.spread-row .page{box-shadow:0 6px 24px rgba(0,0,0,0.45);}' +
+      '.spread-row .spacer{width:' + pageW + 'in;height:' + pageH + 'in;background:transparent;}' +
       '.page{position:relative;background:#fff;width:' + pageW + 'in;height:' + pageH + 'in;box-shadow:0 6px 24px rgba(0,0,0,0.45);overflow:hidden;}' +
       '.bleed-line{position:absolute;border:1px dashed #d0a050;pointer-events:none;left:' + bleedExtra + 'in;top:' + bleedExtra + 'in;width:' + w + 'in;height:' + h + 'in;}' +
+      '.role-label{position:absolute;top:6px;left:6px;background:rgba(123,108,255,0.92);color:#fff;font:600 10px -apple-system,sans-serif;padding:2px 6px;border-radius:3px;letter-spacing:0.3px;z-index:5;}' +
+      '.page.structural{background:repeating-linear-gradient(135deg,#fafaf6 0 12px,#f0f0e6 12px 24px);}' +
       '.safe-area{position:absolute;left:' + (bleedExtra + marginInside) + 'in;right:' + (bleedExtra + s.marginOutside) + 'in;top:' + (bleedExtra + s.marginTop) + 'in;bottom:' + (bleedExtra + s.marginBottom) + 'in;overflow:hidden;}' +
       '.safe-area p{margin:0 0 0.6em;text-indent:1.2em;}' +
       '.safe-area p:first-of-type, .safe-area h1+p, .safe-area h2+p{text-indent:0;}' +
@@ -5480,34 +5791,80 @@
       '.footer{bottom:' + (bleedExtra + 0.3) + 'in;text-align:center;}' +
       '.legend{position:fixed;bottom:10px;left:10px;background:rgba(0,0,0,0.65);color:#fff;padding:8px 12px;border-radius:6px;font:12px -apple-system,sans-serif;line-height:1.5;}' +
       '.legend .swatch{display:inline-block;width:14px;height:0;border-top:1px dashed #d0a050;vertical-align:middle;margin-right:4px;}' +
-      '@media print { .legend{display:none;} body{background:#fff;} .page-stack{padding:0;gap:0;} .page{box-shadow:none;page-break-after:always;} }';
+      '@media print { .legend{display:none;} .role-label{display:none;} body{background:#fff;} .page-stack{padding:0;gap:0;} .page{box-shadow:none;page-break-after:always;} .spread-row{display:contents;} }';
 
-    // Chunk content into pages: each <h1> starts a new page; otherwise
-    // we push everything into one page until visual height fills up.
-    // The "fill" measurement is done client-side after render via JS.
-    var pagesHtml = paginateForPreview(contentBody, w, h, marginInside, s.marginOutside, s.marginTop, s.marginBottom);
+    // Decide how many pages we render and what content goes on each.
+    var pagesHtml;
+    if (isPicBook) {
+      // Picture-book: fixed page count + structural pages. Story
+      // distributes across (totalPages - structural) story pages.
+      var total = PICTURE_BOOK_TEMPLATES[s.bookType].pages;
+      var STRUCTURAL_FRONT = 5;     // pages 1..5 = paste, end paper, title, copyright, dedication
+      var STRUCTURAL_BACK = 3;      // pages totalPages-2..totalPages = back matter, end paper, paste
+      var storyPageCount = total - STRUCTURAL_FRONT - STRUCTURAL_BACK;
+      var storyChunks = paginateForPreview(contentBody, w, h, marginInside, s.marginOutside, s.marginTop, s.marginBottom);
+      // Distribute story chunks across the available story pages
+      // (approximate: one chunk per page, last page gets the remainder).
+      pagesHtml = [];
+      for (var i = 0; i < total; i++) {
+        var pn = i + 1;
+        var role = pageRoleForPictureBook(pn, total);
+        var isStructural = pn <= STRUCTURAL_FRONT || pn > total - STRUCTURAL_BACK;
+        var pageContent = '';
+        if (!isStructural) {
+          var storyIdx = pn - STRUCTURAL_FRONT - 1;     // 0-indexed story page
+          var perPage = Math.max(1, Math.ceil(storyChunks.length / storyPageCount));
+          var fromIdx = storyIdx * perPage;
+          var toIdx = Math.min(storyChunks.length, fromIdx + perPage);
+          pageContent = storyChunks.slice(fromIdx, toIdx).join('');
+        }
+        pagesHtml.push({ html: pageContent, role: role, structural: isStructural });
+      }
+    } else {
+      // Standard book: chunk content into pages by H1 + soft height cap.
+      var chunks = paginateForPreview(contentBody, w, h, marginInside, s.marginOutside, s.marginTop, s.marginBottom);
+      pagesHtml = chunks.map(function (h) { return { html: h, role: '', structural: false }; });
+    }
+
+    function renderPage(pg, idx) {
+      var pageNum = idx + 1;
+      var parity = (pageNum % 2 === 0) ? 'even' : 'odd';
+      var headerHtml = headerText ? '<div class="header">' + escHtml(headerText) + '</div>' : '';
+      var footerHtml = footerText ? '<div class="footer">' + escHtml(footerText) + '</div>' : '';
+      var pnHtml = showPN ? '<div class="page-num ' + pnPos + '">' + pageNum + '</div>' : '';
+      var bleedLine = s.bleed ? '<div class="bleed-line"></div>' : '';
+      var roleHtml = pg.role ? '<div class="role-label">' + escHtml(pg.role) + '</div>' : '';
+      var classes = 'page ' + parity + (pg.structural ? ' structural' : '');
+      return '<div class="' + classes + '">' +
+                bleedLine +
+                roleHtml +
+                headerHtml +
+                '<div class="safe-area">' + pg.html + '</div>' +
+                footerHtml +
+                pnHtml +
+              '</div>';
+    }
+
+    var stackHtml = '';
+    if (spreadView) {
+      // First page is alone on the right (recto), then [2|3], [4|5], ...
+      // Page 1 alone uses a left-side blank spacer so it visually sits
+      // on the right of the spread row.
+      stackHtml += '<div class="spread-row"><div class="spacer"></div>' + renderPage(pagesHtml[0], 0) + '</div>';
+      for (var p = 1; p < pagesHtml.length; p += 2) {
+        var leftPage = renderPage(pagesHtml[p], p);
+        var rightPage = (p + 1 < pagesHtml.length) ? renderPage(pagesHtml[p + 1], p + 1) : '<div class="spacer"></div>';
+        stackHtml += '<div class="spread-row">' + leftPage + rightPage + '</div>';
+      }
+    } else {
+      stackHtml = pagesHtml.map(renderPage).join('');
+    }
 
     var html =
       '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
       '<title>Print Layout Preview</title>' +
       '<style>' + css + '</style></head><body>' +
-      '<div class="page-stack">' +
-      pagesHtml.map(function (pageBodyHtml, idx) {
-        var pageNum = idx + 1;
-        var parity = (pageNum % 2 === 0) ? 'even' : 'odd';
-        var headerHtml = headerText ? '<div class="header">' + escHtml(headerText) + '</div>' : '';
-        var footerHtml = footerText ? '<div class="footer">' + escHtml(footerText) + '</div>' : '';
-        var pnHtml = showPN ? '<div class="page-num ' + pnPos + '">' + pageNum + '</div>' : '';
-        var bleedLine = s.bleed ? '<div class="bleed-line"></div>' : '';
-        return '<div class="page ' + parity + '">' +
-                  bleedLine +
-                  headerHtml +
-                  '<div class="safe-area">' + pageBodyHtml + '</div>' +
-                  footerHtml +
-                  pnHtml +
-                '</div>';
-      }).join('') +
-      '</div>' +
+      '<div class="page-stack">' + stackHtml + '</div>' +
       (s.bleed ? '<div class="legend"><span class="swatch"></span>Trim line (dashed orange) &mdash; KDP cuts here. Anything outside is bleed.</div>' : '') +
       '</body></html>';
     return html;
@@ -5743,8 +6100,23 @@
       darken: 0.35,
       imageDataUrl: null,
       format: 'jpeg', // 'jpeg' | 'png'
-      quality: 0.92
+      quality: 0.92,
+      // Wrap settings (for the cover-wrap PDF used by KDP / IngramSpark
+      // print uploads). Defaults map to a 6x9 paperback on white paper.
+      wrapPaper: 'white',          // 'white' | 'cream' | 'colorpremium'
+      wrapTrim: '6x9',
+      wrapBackText: ''
     };
+  }
+
+  // KDP spine-width formulas. Pages-per-inch by paper type:
+  //   White (60 lb)        -> 444
+  //   Cream (55 lb)        -> 426
+  //   Color premium 70 lb  -> 360
+  // Source: Amazon KDP "Print Specifications -- Cover Calculator"
+  function spineWidthInches(pageCount, paper) {
+    var ppi = paper === 'cream' ? 426 : paper === 'colorpremium' ? 360 : 444;
+    return pageCount / ppi;
   }
 
   function openCoverDesigner(app) {
@@ -5788,6 +6160,7 @@
         '</select>' +
         '<button id="cv-save" style="background:#7b6cff;border:none;color:#12121a;padding:8px 14px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">Save design</button>' +
         '<button id="cv-export" style="background:#22c55e;border:none;color:#062013;padding:8px 14px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">Export image</button>' +
+        '<button id="cv-wrap" style="background:#fbbf24;border:none;color:#3a2a05;padding:8px 14px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;" title="Front + spine + back PDF for KDP paperback / IngramSpark print upload">Print cover wrap PDF</button>' +
       '</div>' +
       '<div style="flex:1;display:flex;overflow:hidden;">' +
         '<div style="width:320px;border-right:1px solid #2a2a40;padding:14px;overflow-y:auto;background:#15152a;">' +
@@ -5890,8 +6263,124 @@
           'Exported ' + safeName + '-cover' + ext + '. Upload to KDP / Apple Books / Kobo as the cover image.');
       }, mime, s.quality);
     });
+    document.getElementById('cv-wrap').addEventListener('click', async function () {
+      var s = readSettings();
+      // Need the page count to compute the spine. Use the layout-saved
+      // page count if available; otherwise estimate from the current
+      // book's content via the same heuristic as the Print PDF step.
+      var bookSettings = Object.assign(defaultLayout(), app.layout || {});
+      var trim = TRIM_PRESETS.filter(function (t) { return t.id === bookSettings.trim; })[0] || TRIM_PRESETS[3];
+      var pageCount = 0;
+      if (PICTURE_BOOK_TEMPLATES[bookSettings.bookType]) {
+        pageCount = PICTURE_BOOK_TEMPLATES[bookSettings.bookType].pages;
+      } else if (app.html) {
+        try {
+          var doc = new DOMParser().parseFromString(app.html, 'text/html');
+          var body = doc.body;
+          if (body) {
+            var chunks = paginateForPreview(body.innerHTML, trim.w, trim.h, 0.5,
+              bookSettings.marginOutside, bookSettings.marginTop, bookSettings.marginBottom);
+            pageCount = chunks.length;
+          }
+        } catch (_) {}
+      }
+      if (!pageCount) {
+        var raw = prompt('Couldn\'t auto-detect page count. Enter the total page count of your book (must be even, 24+ for KDP paperback):', '32');
+        if (raw == null) return;
+        pageCount = parseInt(raw, 10);
+        if (isNaN(pageCount) || pageCount < 24) { toast('Page count must be 24 or more for KDP paperback.', true); return; }
+      }
+      await openCoverWrapPreview(app, s, trim, pageCount);
+    });
 
     rebuild();
+  }
+
+  // Build + open the cover-wrap print preview. Layout:
+  //
+  //   [BACK COVER]  [SPINE]  [FRONT COVER]
+  //
+  // Total physical width = trim.w * 2 + spine + 0.125" bleed both ends.
+  // Total physical height = trim.h + 0.125" bleed top + 0.125" bleed bottom.
+  // No bleed at the spine edges -- only the four outer sides.
+  // Browser print API generates the PDF when the user taps Save to Files.
+  async function openCoverWrapPreview(app, s, trim, pageCount) {
+    var paper = s.wrapPaper || 'white';
+    var spine = spineWidthInches(pageCount, paper);
+    var bleed = 0.125;
+    var totalW = trim.w * 2 + spine + bleed * 2;
+    var totalH = trim.h + bleed * 2;
+    // Render the front-cover artwork (re-use the canvas designer) at
+    // higher resolution so it stays crisp when stretched into the
+    // wrap PDF.
+    var DPI = 300;
+    var renderCanvas = document.createElement('canvas');
+    renderCanvas.width = Math.round(trim.w * DPI);
+    renderCanvas.height = Math.round(trim.h * DPI);
+    // Use the print6x9 preset's canvas size for a 6x9 wrap, etc -- we
+    // already have a canvas-renderer; reuse it on a temp canvas.
+    await renderCoverToCanvas(renderCanvas, Object.assign({}, s, {
+      preset: trim.id === '6x9' ? 'print6x9' :
+              trim.id === '8x10' ? 'print8x10' :
+              trim.id === '8.5x8.5' ? 'square' :
+              'kindle'
+    }));
+    var coverDataUrl = renderCanvas.toDataURL(s.format === 'png' ? 'image/png' : 'image/jpeg', 0.92);
+
+    var safeTitle = escHtml(s.title || 'Untitled');
+    var safeAuthor = escHtml(s.author || '');
+    var safeBack = escHtml(s.wrapBackText || '');
+    var bgGradient = 'linear-gradient(180deg,' + s.bgColor1 + ',' + s.bgColor2 + ')';
+
+    var html =
+      '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
+      '<title>' + escHtml(app.name || 'Cover') + ' — Print Wrap</title>' +
+      '<style>' +
+      '@page { size: ' + totalW + 'in ' + totalH + 'in; margin: 0; }' +
+      '*{box-sizing:border-box;}' +
+      'html,body{margin:0;padding:0;background:#fff;}' +
+      '.wrap{position:relative;width:' + totalW + 'in;height:' + totalH + 'in;background:' + bgGradient + ';overflow:hidden;}' +
+      // Bleed-line (dashed) for visual reference -- hidden in print
+      '.bleed-line{position:absolute;left:' + bleed + 'in;top:' + bleed + 'in;right:' + bleed + 'in;bottom:' + bleed + 'in;border:1px dashed #d0a050;pointer-events:none;}' +
+      // Spine fold lines
+      '.fold{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed #888;}' +
+      '.fold-left{left:' + (bleed + trim.w) + 'in;}' +
+      '.fold-right{left:' + (bleed + trim.w + spine) + 'in;}' +
+      // Back cover area
+      '.back{position:absolute;left:' + bleed + 'in;top:' + bleed + 'in;width:' + trim.w + 'in;height:' + trim.h + 'in;padding:0.5in;color:' + s.titleColor + ';font-family:Georgia,serif;line-height:1.55;font-size:11pt;}' +
+      '.back-text{white-space:pre-wrap;}' +
+      // Spine area: title + author rotated
+      '.spine{position:absolute;left:' + (bleed + trim.w) + 'in;top:' + bleed + 'in;width:' + spine + 'in;height:' + trim.h + 'in;color:' + s.titleColor + ';display:flex;align-items:center;justify-content:center;}' +
+      '.spine-content{transform:rotate(90deg);transform-origin:center;white-space:nowrap;font-family:Georgia,serif;font-weight:700;font-size:14pt;}' +
+      // Front cover area: drop the rendered image in
+      '.front{position:absolute;left:' + (bleed + trim.w + spine) + 'in;top:' + bleed + 'in;width:' + trim.w + 'in;height:' + trim.h + 'in;background-image:url(' + coverDataUrl + ');background-size:cover;background-position:center;}' +
+      // Hide guides at print time
+      '@media print { .bleed-line{display:none;} .fold{display:none;} .legend{display:none;} }' +
+      '.legend{position:fixed;top:6px;left:6px;background:rgba(0,0,0,0.7);color:#fff;font:11px -apple-system,sans-serif;padding:6px 10px;border-radius:4px;}' +
+      '</style>' +
+      '</head><body>' +
+      '<div class="wrap">' +
+        '<div class="back"><div class="back-text">' + safeBack + '</div></div>' +
+        '<div class="spine"><div class="spine-content">' + safeTitle + (safeAuthor ? '   ·   ' + safeAuthor : '') + '</div></div>' +
+        '<div class="front"></div>' +
+        '<div class="bleed-line"></div>' +
+        '<div class="fold fold-left"></div>' +
+        '<div class="fold fold-right"></div>' +
+      '</div>' +
+      '<div class="legend">Cover Wrap &mdash; total ' + totalW.toFixed(3) + ' x ' + totalH.toFixed(3) + ' in &nbsp;|&nbsp; spine ' + spine.toFixed(3) + ' in (' + pageCount + ' pages, ' + paper + ' paper) &nbsp;|&nbsp; bleed 0.125 in</div>' +
+      '<script>window.addEventListener("load",function(){setTimeout(function(){try{window.print();}catch(e){}},400);});<\/script>' +
+      '</body></html>';
+
+    var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var w = window.open(url, '_blank');
+    if (!w) {
+      toast('Pop-up blocked — downloading the wrap HTML instead. Open it in Safari, then Share → Print → Save as PDF.', true);
+      var safeName = String(app.name || 'cover').replace(/[^a-zA-Z0-9 _\-]/g, '').trim() || 'cover';
+      triggerAnchorDownload(url, safeName + '-cover-wrap.html');
+      return;
+    }
+    toast('Opening wrap preview… Save to Files for KDP cover upload.');
   }
 
   // Walk the manuscript HTML and pull out every <img src> we find. Used
