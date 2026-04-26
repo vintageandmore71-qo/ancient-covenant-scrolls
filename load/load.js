@@ -3669,6 +3669,7 @@
       safe('wireSaveTemplate', wireSaveTemplate);
       safe('wireLayoutBtn', wireLayoutBtn);
       safe('wireProseEditBtn', wireProseEditBtn);
+      safe('wireCoverBtn', wireCoverBtn);
       safe('wirePerAppTheme', wirePerAppTheme);
       safe('wireNotesScreen', wireNotesScreen);
       safe('wireHelp', wireHelp);
@@ -5630,6 +5631,316 @@
     var btn = $('prose-edit-btn');
     if (btn) btn.addEventListener('click', function () {
       if (currentApp) openProseEditor(currentApp);
+      else toast('Open a manuscript first.', true);
+    });
+  }
+
+  /* ---------- Cover-image designer ----------
+     KDP Kindle, Apple Books, Kobo, IngramSpark, etc all want a
+     high-resolution cover JPEG / PNG uploaded separately from the
+     interior file. This designer takes whatever image the creator
+     already has (drop in from Photos, pick from images embedded in
+     the manuscript, or use a fallback gradient) plus the title and
+     author, renders the result to a canvas at the chosen target
+     resolution, and downloads it as a single image. No external
+     libraries -- canvas + drawImage + fillText. */
+
+  var COVER_PRESETS = [
+    { id: 'kindle',  label: 'Kindle eBook (2560 \xd7 1600)',  w: 1600, h: 2560 },
+    { id: 'apple',   label: 'Apple Books (1400 \xd7 2100)',   w: 1400, h: 2100 },
+    { id: 'kobo',    label: 'Kobo / Nook (1600 \xd7 2400)',   w: 1600, h: 2400 },
+    { id: 'print6x9', label: 'KDP Print 6 \xd7 9 (1800 \xd7 2700)', w: 1800, h: 2700 },
+    { id: 'print8x10', label: 'KDP Print 8 \xd7 10 (2400 \xd7 3000)', w: 2400, h: 3000 },
+    { id: 'square',  label: "Children's square 8.5 \xd7 8.5 (2550 \xd7 2550)", w: 2550, h: 2550 }
+  ];
+
+  function defaultCoverDesign(app) {
+    return {
+      preset: 'kindle',
+      title: app && app.name ? app.name : 'Untitled',
+      author: (app && app.author) ? app.author : '',
+      titleColor: '#ffffff',
+      authorColor: '#ffffff',
+      bgColor1: '#1a1a3e',
+      bgColor2: '#503080',
+      darken: 0.35,
+      imageDataUrl: null,
+      format: 'jpeg', // 'jpeg' | 'png'
+      quality: 0.92
+    };
+  }
+
+  function openCoverDesigner(app) {
+    if (!app) { toast('Open a manuscript first.', true); return; }
+    var settings = Object.assign(defaultCoverDesign(app), app.coverDesign || {});
+
+    // If no image picked yet, see if the manuscript has any embedded
+    // images we can offer as defaults.
+    var manuscriptImages = extractManuscriptImages(app.html || '');
+
+    var existing = document.getElementById('__loadCover');
+    if (existing) existing.remove();
+
+    var presetOptions = COVER_PRESETS.map(function (p) {
+      return '<option value="' + p.id + '"' + (p.id === settings.preset ? ' selected' : '') + '>' + p.label + '</option>';
+    }).join('');
+
+    var manuscriptThumbs = manuscriptImages.length
+      ? '<div style="font-size:12.5px;color:#a0a0b0;margin-top:6px;">Or pick from your manuscript:</div>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">' +
+          manuscriptImages.slice(0, 12).map(function (src, i) {
+            return '<button class="cv-thumb" data-img-idx="' + i + '" style="width:60px;height:80px;background:#2a2a40;border:1px solid #3a3a55;border-radius:6px;cursor:pointer;padding:0;overflow:hidden;">' +
+              '<img src="' + src + '" alt="" style="width:100%;height:100%;object-fit:cover;">' +
+            '</button>';
+          }).join('') +
+        '</div>'
+      : '';
+
+    var wrap = document.createElement('div');
+    wrap.id = '__loadCover';
+    wrap.style.cssText = 'position:fixed;inset:0;z-index:2050;display:flex;flex-direction:column;background:#0f0f1a;color:#f0f0f0;font-family:-apple-system,sans-serif;';
+
+    wrap.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#1a1a2e;border-bottom:1px solid #2a2a40;flex-wrap:wrap;">' +
+        '<button id="cv-close" style="background:#3a3a55;border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:14px;cursor:pointer;">&larr; Close</button>' +
+        '<div style="font-weight:700;font-size:15px;margin-right:auto;">Cover &mdash; ' + escHtml(app.name || 'Untitled') + '</div>' +
+        '<select id="cv-preset" style="padding:6px 8px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:13px;">' + presetOptions + '</select>' +
+        '<select id="cv-format" style="padding:6px 8px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:13px;">' +
+          '<option value="jpeg"' + (settings.format === 'jpeg' ? ' selected' : '') + '>JPEG (smaller, ebook)</option>' +
+          '<option value="png"' + (settings.format === 'png' ? ' selected' : '') + '>PNG (lossless, print)</option>' +
+        '</select>' +
+        '<button id="cv-save" style="background:#7b6cff;border:none;color:#12121a;padding:8px 14px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">Save design</button>' +
+        '<button id="cv-export" style="background:#22c55e;border:none;color:#062013;padding:8px 14px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">Export image</button>' +
+      '</div>' +
+      '<div style="flex:1;display:flex;overflow:hidden;">' +
+        '<div style="width:320px;border-right:1px solid #2a2a40;padding:14px;overflow-y:auto;background:#15152a;">' +
+          '<label style="display:block;font-size:12.5px;color:#a0a0b0;margin-bottom:4px;">Title</label>' +
+          '<input id="cv-title" value="' + escHtml(settings.title) + '" style="width:100%;padding:8px 10px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:14px;margin-bottom:10px;">' +
+          '<label style="display:block;font-size:12.5px;color:#a0a0b0;margin-bottom:4px;">Author</label>' +
+          '<input id="cv-author" value="' + escHtml(settings.author) + '" style="width:100%;padding:8px 10px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:14px;margin-bottom:14px;">' +
+          '<label style="display:block;font-size:12.5px;color:#a0a0b0;margin-bottom:4px;">Cover image</label>' +
+          '<button id="cv-pick-image" style="width:100%;padding:10px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:13px;cursor:pointer;margin-bottom:6px;">' +
+            '\xf0\x9f\x96\xbc\xef\xb8\x8f Pick image from Files / Photos' +
+          '</button>' +
+          '<input id="cv-file" type="file" accept="image/*" style="display:none;">' +
+          (settings.imageDataUrl ? '<button id="cv-clear-image" style="width:100%;padding:6px;background:transparent;color:#e88;border:1px solid #5a3a3a;border-radius:6px;font-size:12px;cursor:pointer;margin-bottom:6px;">Clear current image</button>' : '') +
+          manuscriptThumbs +
+          '<div style="margin-top:14px;">' +
+            '<label style="display:block;font-size:12.5px;color:#a0a0b0;margin-bottom:4px;">Image darken (helps text show)</label>' +
+            '<input id="cv-darken" type="range" min="0" max="0.8" step="0.05" value="' + settings.darken + '" style="width:100%;">' +
+            '<div style="display:flex;gap:8px;margin-top:10px;">' +
+              '<label style="flex:1;font-size:12.5px;color:#a0a0b0;">Title color<input id="cv-titlecolor" type="color" value="' + settings.titleColor + '" style="display:block;width:100%;height:34px;margin-top:4px;border:none;background:transparent;cursor:pointer;"></label>' +
+              '<label style="flex:1;font-size:12.5px;color:#a0a0b0;">Author color<input id="cv-authorcolor" type="color" value="' + settings.authorColor + '" style="display:block;width:100%;height:34px;margin-top:4px;border:none;background:transparent;cursor:pointer;"></label>' +
+            '</div>' +
+            '<div style="display:flex;gap:8px;margin-top:10px;">' +
+              '<label style="flex:1;font-size:12.5px;color:#a0a0b0;">BG top<input id="cv-bg1" type="color" value="' + settings.bgColor1 + '" style="display:block;width:100%;height:34px;margin-top:4px;border:none;background:transparent;cursor:pointer;"></label>' +
+              '<label style="flex:1;font-size:12.5px;color:#a0a0b0;">BG bottom<input id="cv-bg2" type="color" value="' + settings.bgColor2 + '" style="display:block;width:100%;height:34px;margin-top:4px;border:none;background:transparent;cursor:pointer;"></label>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="flex:1;display:flex;align-items:center;justify-content:center;background:#222232;overflow:auto;padding:20px;">' +
+          '<canvas id="cv-canvas" style="max-width:100%;max-height:100%;background:#000;box-shadow:0 8px 32px rgba(0,0,0,0.5);border-radius:4px;"></canvas>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(wrap);
+
+    var canvas = document.getElementById('cv-canvas');
+    var fileInput = document.getElementById('cv-file');
+
+    function readSettings() {
+      return {
+        preset: document.getElementById('cv-preset').value,
+        title: document.getElementById('cv-title').value,
+        author: document.getElementById('cv-author').value,
+        titleColor: document.getElementById('cv-titlecolor').value,
+        authorColor: document.getElementById('cv-authorcolor').value,
+        bgColor1: document.getElementById('cv-bg1').value,
+        bgColor2: document.getElementById('cv-bg2').value,
+        darken: parseFloat(document.getElementById('cv-darken').value),
+        imageDataUrl: settings.imageDataUrl,
+        format: document.getElementById('cv-format').value,
+        quality: settings.quality
+      };
+    }
+
+    async function rebuild() {
+      var s = readSettings();
+      await renderCoverToCanvas(canvas, s);
+    }
+
+    document.getElementById('cv-close').addEventListener('click', function () { wrap.remove(); });
+    document.getElementById('cv-pick-image').addEventListener('click', function () { fileInput.click(); });
+    fileInput.addEventListener('change', function () {
+      var f = fileInput.files && fileInput.files[0];
+      if (!f) return;
+      var r = new FileReader();
+      r.onload = function () { settings.imageDataUrl = r.result; rebuild(); };
+      r.readAsDataURL(f);
+    });
+    var clearBtn = document.getElementById('cv-clear-image');
+    if (clearBtn) clearBtn.addEventListener('click', function () { settings.imageDataUrl = null; rebuild(); });
+    Array.prototype.forEach.call(wrap.querySelectorAll('.cv-thumb'), function (btn) {
+      btn.addEventListener('click', function () {
+        var idx = parseInt(btn.getAttribute('data-img-idx'), 10);
+        settings.imageDataUrl = manuscriptImages[idx] || null;
+        rebuild();
+      });
+    });
+    ['cv-preset', 'cv-format', 'cv-titlecolor', 'cv-authorcolor', 'cv-bg1', 'cv-bg2'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('change', rebuild);
+    });
+    document.getElementById('cv-darken').addEventListener('input', rebuild);
+    ['cv-title', 'cv-author'].forEach(function (id) {
+      document.getElementById(id).addEventListener('input', debounce(rebuild, 300));
+    });
+
+    document.getElementById('cv-save').addEventListener('click', async function () {
+      app.coverDesign = readSettings();
+      try { await putApp(app); toast('Cover design saved.'); }
+      catch (e) { toast('Could not save: ' + (e && e.message), true); }
+    });
+    document.getElementById('cv-export').addEventListener('click', async function () {
+      var s = readSettings();
+      await renderCoverToCanvas(canvas, s);
+      var mime = s.format === 'png' ? 'image/png' : 'image/jpeg';
+      canvas.toBlob(function (blob) {
+        if (!blob) { toast('Could not export image.', true); return; }
+        var safeName = String(app.name || 'cover').replace(/[^a-zA-Z0-9 _\-]/g, '').trim() || 'cover';
+        var ext = s.format === 'png' ? '.png' : '.jpg';
+        shareBlobOrDownload(blob, safeName + '-cover' + ext, mime,
+          'Exported ' + safeName + '-cover' + ext + '. Upload to KDP / Apple Books / Kobo as the cover image.');
+      }, mime, s.quality);
+    });
+
+    rebuild();
+  }
+
+  // Walk the manuscript HTML and pull out every <img src> we find. Used
+  // by the cover designer's "pick from your manuscript" thumbnail row
+  // so creators don't have to re-import an image they already have.
+  function extractManuscriptImages(html) {
+    var out = [];
+    if (!html) return out;
+    try {
+      var doc = new DOMParser().parseFromString(html, 'text/html');
+      var imgs = doc.querySelectorAll('img');
+      var seen = {};
+      for (var i = 0; i < imgs.length; i++) {
+        var src = imgs[i].getAttribute('src') || '';
+        if (!src || seen[src]) continue;
+        seen[src] = 1;
+        out.push(src);
+      }
+    } catch (e) {}
+    return out;
+  }
+
+  // Render the cover into the supplied <canvas> at the preset's full
+  // print resolution. The canvas is also displayed in the designer
+  // preview at CSS-fit size (max-width / max-height) so the user sees
+  // the same layout they'll get on export.
+  async function renderCoverToCanvas(canvas, s) {
+    var preset = COVER_PRESETS.filter(function (p) { return p.id === s.preset; })[0] || COVER_PRESETS[0];
+    canvas.width = preset.w;
+    canvas.height = preset.h;
+    var ctx = canvas.getContext('2d');
+
+    // 1. Background gradient
+    var grad = ctx.createLinearGradient(0, 0, 0, preset.h);
+    grad.addColorStop(0, s.bgColor1);
+    grad.addColorStop(1, s.bgColor2);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, preset.w, preset.h);
+
+    // 2. Cover image (object-fit: cover behavior)
+    if (s.imageDataUrl) {
+      try {
+        var img = await loadImage(s.imageDataUrl);
+        var ar = img.width / img.height;
+        var dstAr = preset.w / preset.h;
+        var sw, sh, sx, sy;
+        if (ar > dstAr) {
+          sh = img.height;
+          sw = sh * dstAr;
+          sy = 0;
+          sx = (img.width - sw) / 2;
+        } else {
+          sw = img.width;
+          sh = sw / dstAr;
+          sx = 0;
+          sy = (img.height - sh) / 2;
+        }
+        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, preset.w, preset.h);
+      } catch (e) { /* fall through to gradient-only background */ }
+    }
+
+    // 3. Optional darken overlay -- helps text legibility on busy
+    // images. Skipped automatically when there's no image so the user
+    // gets a clean colored cover from the gradient alone.
+    if (s.imageDataUrl && s.darken > 0) {
+      ctx.fillStyle = 'rgba(0,0,0,' + s.darken + ')';
+      ctx.fillRect(0, 0, preset.w, preset.h);
+    }
+
+    // 4. Title text -- big, center, wraps to multiple lines if needed
+    var pad = preset.w * 0.08;
+    var titleSize = Math.round(preset.h * 0.075);
+    ctx.fillStyle = s.titleColor;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.shadowColor = 'rgba(0,0,0,0.4)';
+    ctx.shadowBlur = preset.h * 0.005;
+    ctx.font = '700 ' + titleSize + 'px Georgia, "Times New Roman", serif';
+    var titleLines = wrapLines(ctx, s.title || '', preset.w - pad * 2);
+    var titleY = preset.h * 0.18;
+    titleLines.forEach(function (line, i) {
+      ctx.fillText(line, preset.w / 2, titleY + i * titleSize * 1.15);
+    });
+
+    // 5. Author text -- smaller, near bottom
+    if (s.author) {
+      var authorSize = Math.round(preset.h * 0.035);
+      ctx.fillStyle = s.authorColor;
+      ctx.font = '500 ' + authorSize + 'px Georgia, "Times New Roman", serif';
+      ctx.fillText(s.author, preset.w / 2, preset.h - pad - authorSize);
+    }
+    ctx.shadowBlur = 0;
+  }
+
+  function loadImage(src) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      img.onload = function () { resolve(img); };
+      img.onerror = function () { reject(new Error('Could not load cover image.')); };
+      // Allow cross-origin if browser permits; ignored for data: URLs
+      img.crossOrigin = 'anonymous';
+      img.src = src;
+    });
+  }
+
+  function wrapLines(ctx, text, maxWidth) {
+    if (!text) return [];
+    var words = String(text).split(/\s+/);
+    var lines = [], line = '';
+    for (var i = 0; i < words.length; i++) {
+      var test = line ? line + ' ' + words[i] : words[i];
+      if (ctx.measureText(test).width > maxWidth && line) {
+        lines.push(line);
+        line = words[i];
+      } else {
+        line = test;
+      }
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  function wireCoverBtn() {
+    var btn = $('cover-btn');
+    if (btn) btn.addEventListener('click', function () {
+      if (currentApp) openCoverDesigner(currentApp);
       else toast('Open a manuscript first.', true);
     });
   }
