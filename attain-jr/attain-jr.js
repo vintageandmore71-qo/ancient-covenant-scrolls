@@ -1716,6 +1716,9 @@
   }
   function readAloudInternal(storyOnly) {
     stopRead();
+    // Clear any sticky tap-highlights so the moving .reading marker
+    // is the ONLY pink-bordered line on screen during read-aloud.
+    Array.prototype.forEach.call(document.querySelectorAll('.jr-highlighted'), function (e) { e.classList.remove('jr-highlighted'); });
     readQueue = buildReadQueue(!!storyOnly);
     readIdx = 0; readPaused = false;
     nextRead();
@@ -1727,7 +1730,12 @@
     if (readIdx >= readQueue.length) return;
     var item = readQueue[readIdx];
     var el = item.el;
-    Array.prototype.forEach.call(document.querySelectorAll('.reading'), function (e) { e.classList.remove('reading'); });
+    // Move the highlight to this line: clear .reading from anywhere
+    // it might be lingering, and also strip .jr-highlighted off the
+    // previous line so two lines never appear "lit" at the same time.
+    Array.prototype.forEach.call(document.querySelectorAll('.reading, .jr-highlighted'), function (e) {
+      e.classList.remove('reading'); e.classList.remove('jr-highlighted');
+    });
     el.classList.add('reading');
     el.scrollIntoView({ block: 'center', behavior: 'smooth' });
     var mode = (document.getElementById('ab-voice-mode') || {}).value || 'cast';
