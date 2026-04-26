@@ -541,6 +541,34 @@
 </div>
 
 <!-- PWA import help modal -->
+<!-- VN-style media picker. Opens when the user taps Media or Edit
+     Video. Three tabs: Recents (Load library media + iPad Files),
+     Stocks (paste URL → fetch & import), Subtitle (quick-nav to the
+     video editor's subtitle / TTS surface). -->
+<div id="media-picker-modal" class="modal media-picker-modal" role="dialog" aria-label="Pick media">
+  <div class="modal-box media-picker-box">
+    <div class="mp-topbar">
+      <button id="mp-close" class="mp-iconbtn" aria-label="Close">&times;</button>
+      <button id="mp-more" class="mp-iconbtn mp-right" aria-label="More">&hellip;</button>
+    </div>
+    <div class="mp-tabs" role="tablist">
+      <button class="mp-tab on" data-mp-tab="recents" role="tab">&#127909; Recents</button>
+      <button class="mp-tab" data-mp-tab="stocks" role="tab">&#11088; Stocks</button>
+      <button class="mp-tab" data-mp-tab="subtitle" role="tab">&#128221; Subtitle</button>
+    </div>
+    <div class="mp-subtabs" id="mp-subtabs">
+      <button class="mp-sub on" data-mp-sub="all">All</button>
+      <button class="mp-sub" data-mp-sub="video">Video</button>
+      <button class="mp-sub" data-mp-sub="image">Photo</button>
+    </div>
+    <div class="mp-body" id="mp-body"></div>
+    <div class="mp-foot">
+      <span id="mp-selected-count" class="mp-count">0 selected</span>
+      <button id="mp-confirm" class="mp-confirm" aria-label="Use selected">&rarr;</button>
+    </div>
+  </div>
+</div>
+
 <div id="pwa-modal" class="modal" role="dialog" aria-label="Import a PWA">
   <div class="modal-box">
     <h3>Import a PWA</h3>
