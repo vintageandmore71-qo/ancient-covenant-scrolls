@@ -128,6 +128,8 @@
     <div class="topbar-tools">
       <button id="tool-back" title="Back to splash" aria-label="Back to splash">&larr;</button>
       <a id="tool-attain-home" class="tool-link" href="../attain/" title="Back to Attain" aria-label="Back to Attain">&#127968; Attain</a>
+      <button id="tool-focus" title="Focus mode — dim everything except the line you tap" aria-label="Focus mode">&#127919; Focus</button>
+      <button id="tool-customize" title="Customize this book — colors, character names, storyworld" aria-label="Customize this book">&#127912; Customize</button>
       <button id="tool-aa" title="Reading aids" aria-label="Reading aids">Aa</button>
       <button id="tool-paraphrase" title="Paraphrase aloud" aria-label="Paraphrase the current chapter aloud">&#128172; Paraphrase</button>
     </div>
@@ -192,6 +194,29 @@
     <button id="def-close" aria-label="Close">&times;</button>
   </div>
   <div id="def-body" class="def-body">Loading…</div>
+</div>
+
+<!-- Customize modal — per-book character colors / names / emoji
+     plus storyworld editor. Saves back to the library entry. -->
+<div id="jr-customize-modal" class="modal" hidden>
+  <div class="modal-card jr-customize-card">
+    <h2>&#127912; Customize this book</h2>
+    <p class="jr-settings-hint">Pick colors, names &amp; emoji for each character, and edit Where / When / Lesson. Saves to this book only.</p>
+
+    <h3 class="jr-cz-h3">Characters</h3>
+    <div id="jr-cz-chars" class="jr-cz-chars"></div>
+
+    <h3 class="jr-cz-h3">Storyworld</h3>
+    <label class="jr-cz-row"><span>📍 Where</span><input id="jr-cz-setting" type="text" placeholder="A bright forest…"></label>
+    <label class="jr-cz-row"><span>🕰 When</span><input id="jr-cz-time" type="text" placeholder="Long ago…"></label>
+    <label class="jr-cz-row"><span>💡 Lesson</span><input id="jr-cz-lesson" type="text" placeholder="What does the story teach?"></label>
+
+    <div class="modal-row">
+      <button id="jr-cz-cast" class="cta cta-secondary">🎧 Voice cast</button>
+      <button id="jr-cz-cancel" class="cta cta-tertiary">Cancel</button>
+      <button id="jr-cz-save" class="cta cta-primary">Save</button>
+    </div>
+  </div>
 </div>
 
 <!-- Voice cast modal -->

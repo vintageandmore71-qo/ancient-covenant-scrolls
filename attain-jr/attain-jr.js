@@ -1005,6 +1005,18 @@
     c.innerHTML = html;
     // Activate the jump-to-activities button after innerHTML is set.
     bindAll('.jr-jump-act', 'click', function (el) { selectTab(el.getAttribute('data-jump-tab') || 'activities'); });
+    // Tap-to-highlight (Stop Lion pattern). Tapping a readable line
+    // toggles a yellow highlight; in focus mode it also becomes the
+    // single un-dimmed paragraph.
+    bindAll('.content [data-rl]', 'click', function (el, ev) {
+      if (ev && ev.target && ev.target !== el && (ev.target.tagName === 'A' || ev.target.tagName === 'BUTTON')) return;
+      var alreadyOn = el.classList.contains('jr-highlighted');
+      if (document.body.classList.contains('jr-focus-mode')) {
+        Array.prototype.forEach.call(document.querySelectorAll('.jr-focus-on'), function (p) { p.classList.remove('jr-focus-on'); });
+        if (!alreadyOn) el.classList.add('jr-focus-on');
+      }
+      el.classList.toggle('jr-highlighted', !alreadyOn);
+    });
     // Mark this scene read after a short dwell so a quick swipe past
     // doesn't count, but a real read does.
     scheduleSceneReadMark(sc.id);
@@ -2042,6 +2054,109 @@
   /* ---------- Back button → splash ---------- */
   document.getElementById('tool-back').addEventListener('click', function () {
     location.reload();
+  });
+
+  // Focus mode toggle. Adds .jr-focus-mode to <body>; CSS dims every
+  // paragraph in the content area until the user taps one — that
+  // paragraph gets .jr-focus-on and pops back to full opacity.
+  bind('tool-focus', 'click', function () {
+    var on = document.body.classList.toggle('jr-focus-mode');
+    var btn = document.getElementById('tool-focus');
+    if (btn) btn.classList.toggle('on', on);
+  });
+
+  // Customize this book.
+  bind('tool-customize', 'click', openCustomizeModal);
+
+  /* ---------- Customize this book ----------
+     Per-book editor for character display name / emoji / color and
+     the storyworld setting / time / lesson. Changes persist by
+     writing the modified book object back to localStorage so the
+     library carries the user's tweaks across sessions. */
+  var KID_PALETTE = [
+    '#ef476f', '#ff9f1c', '#ffd166', '#06d6a0',
+    '#118ab2', '#7b2cbf', '#ff6ba6', '#4d3eea',
+    '#2bbd7e', '#a36cff', '#2fb6c4', '#444'
+  ];
+  function saveBookToLibrary(b) {
+    var lib = loadLibrary();
+    var id = bookId(b);
+    var found = false;
+    for (var i = 0; i < lib.length; i++) {
+      if (bookId(lib[i]) === id) { lib[i] = b; found = true; break; }
+    }
+    if (!found) lib.push(b);
+    saveLibrary(lib);
+  }
+  function openCustomizeModal() {
+    var modal = document.getElementById('jr-customize-modal');
+    if (!modal) return;
+    var box = document.getElementById('jr-cz-chars');
+    var chars = (book.characters || []);
+    if (!chars.length) {
+      box.innerHTML = '<p style="color:#666;font-size:12pt">This book has no characters yet. Upload a story with character lines (e.g. <code>LION:</code> or <code>DANIEL:</code>) and they will appear here.</p>';
+    } else {
+      box.innerHTML = chars.map(function (ch, idx) {
+        var color = characterColor(ch.name) || '#7b6cff';
+        var swatches = KID_PALETTE.map(function (col) {
+          var on = col.toLowerCase() === color.toLowerCase() ? ' on' : '';
+          return '<button class="jr-cz-swatch' + on + '" style="background:' + col + '" data-cz-idx="' + idx + '" data-cz-color="' + col + '" aria-label="' + col + '"></button>';
+        }).join('');
+        var dn = ch.displayName || ch.name;
+        return '<div class="jr-cz-char">' +
+          '<div class="jr-cz-name-row">' +
+            '<input class="jr-cz-name" data-cz-idx="' + idx + '" type="text" value="' + escAttr(dn) + '" placeholder="Name">' +
+            '<input class="jr-cz-emoji" data-cz-idx="' + idx + '" type="text" value="' + escAttr(ch.emoji || '') + '" placeholder="🦊" maxlength="2">' +
+          '</div>' +
+          '<div class="jr-cz-swatches">' + swatches + '</div>' +
+        '</div>';
+      }).join('');
+    }
+    var sw = book.storyworld || {};
+    document.getElementById('jr-cz-setting').value = sw.setting || '';
+    document.getElementById('jr-cz-time').value = sw.time || '';
+    document.getElementById('jr-cz-lesson').value = sw.lesson || '';
+    // Wire palette swatches: tapping one paints that character.
+    bindAll('.jr-cz-swatch', 'click', function (el) {
+      var idx = +el.getAttribute('data-cz-idx');
+      var col = el.getAttribute('data-cz-color');
+      Array.prototype.forEach.call(document.querySelectorAll('.jr-cz-swatch[data-cz-idx="' + idx + '"]'), function (s) { s.classList.remove('on'); });
+      el.classList.add('on');
+      // Mutate the in-memory book so the next save picks it up.
+      if (book.characters[idx]) book.characters[idx].color = col;
+    });
+    modal.hidden = false;
+  }
+  bind('jr-cz-cancel', 'click', function () {
+    document.getElementById('jr-customize-modal').hidden = true;
+  });
+  bind('jr-cz-save', 'click', function () {
+    var chars = book.characters || [];
+    Array.prototype.forEach.call(document.querySelectorAll('.jr-cz-name'), function (inp) {
+      var idx = +inp.getAttribute('data-cz-idx');
+      if (chars[idx]) chars[idx].displayName = inp.value.trim() || chars[idx].name;
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.jr-cz-emoji'), function (inp) {
+      var idx = +inp.getAttribute('data-cz-idx');
+      if (chars[idx]) chars[idx].emoji = inp.value.trim();
+    });
+    book.storyworld = {
+      setting: document.getElementById('jr-cz-setting').value.trim(),
+      time:    document.getElementById('jr-cz-time').value.trim(),
+      lesson:  document.getElementById('jr-cz-lesson').value.trim()
+    };
+    saveBookToLibrary(book);
+    document.getElementById('jr-customize-modal').hidden = true;
+    // Re-render the current view so colour / name changes show
+    // immediately. Don't change the active tab.
+    if (currentTab === 'reader') renderReader();
+    else if (currentTab === 'characters') renderCharacters();
+    else if (currentTab === 'storyworld') renderStoryworld();
+  });
+  bind('jr-cz-cast', 'click', function () {
+    document.getElementById('jr-customize-modal').hidden = true;
+    var castBtn = document.getElementById('ab-cast');
+    if (castBtn) castBtn.click();
   });
 
   /* ---------- Word definition lookup ----------
