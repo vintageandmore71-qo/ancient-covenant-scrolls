@@ -5382,6 +5382,25 @@
     var lib = $('home-library'); if (lib) lib.addEventListener('click', function () {
       currentTypeFilter = 'all'; show('library-screen'); renderLibrary();
     });
+    // Home Dashboard workspace tiles. Each one is a one-tap shortcut
+    // to a workspace tool, mirroring the Workspace hub for users who
+    // want to jump straight in without going through Import first.
+    document.querySelectorAll('[data-home-ws]').forEach(function (tile) {
+      tile.addEventListener('click', function () {
+        var act = tile.getAttribute('data-home-ws');
+        if (act === 'hub') openWorkspaceHub();
+        else if (act === 'doctor') {
+          if (typeof openDevConsole === 'function') openDevConsole();
+        }
+        else if (act === 'copilot') {
+          if (typeof openHelperPanel === 'function') openHelperPanel();
+        }
+        else if (act === 'help') {
+          var helpBtn = document.querySelector('[data-tool="help"]');
+          if (helpBtn) helpBtn.click();
+        }
+      });
+    });
     // Optional PWA-help modal kept wired (used when user picks Web Apps card)
     var pc = $('pwa-modal-cancel'); if (pc) pc.addEventListener('click', function () { $('pwa-modal').classList.remove('on'); });
     var pp = $('pwa-modal-pick'); if (pp) pp.addEventListener('click', function () {

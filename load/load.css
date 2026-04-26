@@ -336,9 +336,32 @@ button, .tap, [role="button"] { min-height: 48px; }
 .big-btn-sub { font-size: 14px; opacity: 0.85; font-weight: 400; }
 
 /* Type boxes — colored file-type filter cards */
-.home-types, .home-recent {
+.home-types, .home-recent, .home-workspace {
   padding: 8px 24px 32px; max-width: 820px; margin: 0 auto;
 }
+.home-workspace { padding-bottom: 16px; }
+.home-ws-row {
+  display: grid; gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+.home-ws-tile {
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: 4px;
+  padding: 12px 14px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--ink-hi);
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  min-height: 84px;
+}
+.home-ws-tile:active { transform: scale(0.97); }
+.home-ws-tile:hover { border-color: var(--accent); }
+.home-ws-icon { font-size: 22px; }
+.home-ws-label { font-size: 14px; font-weight: 700; color: var(--ink-hi); }
+.home-ws-dir { font-size: 12px; color: var(--ink-mid); line-height: 1.4; }
 .home-section-title {
   font-size: 14px; color: var(--ink-mid);
   text-transform: uppercase; letter-spacing: 2px;
