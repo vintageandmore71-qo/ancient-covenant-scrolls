@@ -2895,65 +2895,133 @@
    */
   var localAiInitPromise = null;
 
+  /* Worker source string -- runs transformers.js off the main thread so
+     the iPad UI stays responsive during the multi-second WASM compile.
+     Built as a Blob URL at install time so it ships inside the
+     standalone HTML without a separate worker.js file. */
+  var LOCAL_AI_WORKER_SRC =
+    'let pipelineFn = null;\n' +
+    'let gen = null;\n' +
+    'self.onmessage = async function (e) {\n' +
+    '  const msg = e.data || {};\n' +
+    '  try {\n' +
+    '    if (msg.type === "init") {\n' +
+    '      const mod = await import("https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2");\n' +
+    '      pipelineFn = mod.pipeline;\n' +
+    '      mod.env.allowLocalModels = false;\n' +
+    '      mod.env.useBrowserCache = true;\n' +
+    '      gen = await pipelineFn("text-generation", msg.model || "Xenova/Qwen1.5-0.5B-Chat", {\n' +
+    '        progress_callback: function (p) { self.postMessage({ type: "progress", payload: p }); }\n' +
+    '      });\n' +
+    '      self.postMessage({ type: "ready" });\n' +
+    '      return;\n' +
+    '    }\n' +
+    '    if (msg.type === "generate") {\n' +
+    '      if (!gen) { self.postMessage({ type: "error", id: msg.id, payload: "Model not loaded yet." }); return; }\n' +
+    '      const out = await gen(msg.payload.messages, msg.payload.opts || {\n' +
+    '        max_new_tokens: 240, temperature: 0.6, do_sample: true, repetition_penalty: 1.1\n' +
+    '      });\n' +
+    '      const first = out && out[0];\n' +
+    '      let text = "";\n' +
+    '      if (first) {\n' +
+    '        const gt = first.generated_text;\n' +
+    '        if (typeof gt === "string") text = gt;\n' +
+    '        else if (Array.isArray(gt)) {\n' +
+    '          for (let i = gt.length - 1; i >= 0; i--) {\n' +
+    '            if (gt[i] && gt[i].role === "assistant") { text = gt[i].content || ""; break; }\n' +
+    '          }\n' +
+    '        }\n' +
+    '      }\n' +
+    '      self.postMessage({ type: "result", id: msg.id, payload: text });\n' +
+    '      return;\n' +
+    '    }\n' +
+    '  } catch (err) {\n' +
+    '    self.postMessage({ type: "error", id: msg.id, payload: String((err && err.message) || err) });\n' +
+    '  }\n' +
+    '};\n';
+
+  var localAiWorker = null;
+  var localAiWorkerReady = null; // Promise that resolves when worker says "ready"
+
   async function initLocalAiPipeline(opts) {
     opts = opts || {};
     var firstInstall = !!opts.firstInstall;
     if (firstInstall) {
-      setProviderStatus('local', 'busy', 'Loading transformers.js…');
+      setProviderStatus('local', 'busy', 'Spawning local AI worker…');
     } else {
       setProviderStatus('local', 'busy', 'Warming up on-device model…');
     }
-    var mod = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
-    if (firstInstall) {
-      setProviderStatus('local', 'busy', 'Downloading model (~400 MB)…');
+    if (localAiWorker) {
+      // Already spawned; just wait for ready
+      return localAiWorkerReady;
     }
-    var pipeline = mod.pipeline;
-    mod.env.allowLocalModels = false;
-    mod.env.useBrowserCache = true;
-    var gen = await pipeline('text-generation', 'Xenova/Qwen1.5-0.5B-Chat', {
-      progress_callback: function (p) {
-        if (!p) return;
-        if (p.status === 'progress' && p.progress != null) {
-          setProviderStatus('local', 'busy', 'Downloading ' + p.file + ' — ' + Math.round(p.progress) + '%');
-        } else if (p.status === 'done' && firstInstall) {
-          setProviderStatus('local', 'busy', 'Finalizing ' + p.file + '…');
+    // Build the worker from an inline Blob so the standalone HTML
+    // doesn't need a separate file. type:'module' so we can use
+    // dynamic import() inside the worker.
+    var blob = new Blob([LOCAL_AI_WORKER_SRC], { type: 'application/javascript' });
+    var workerUrl = URL.createObjectURL(blob);
+    try {
+      localAiWorker = new Worker(workerUrl, { type: 'module' });
+    } catch (e) {
+      // iOS Safari < 15 doesn't support module workers. Fall back to
+      // a classic worker; transformers.js's import() still works there
+      // when we use the umd build. For now, surface the issue clearly.
+      setProviderStatus('local', 'error', 'Browser does not support module workers (need iOS 15+).');
+      throw e;
+    }
+
+    var pendingGenerations = {};
+    var nextGenId = 1;
+
+    localAiWorkerReady = new Promise(function (resolve, reject) {
+      localAiWorker.addEventListener('message', function (e) {
+        var msg = e.data || {};
+        if (msg.type === 'progress') {
+          var p = msg.payload || {};
+          if (p.status === 'progress' && p.progress != null) {
+            setProviderStatus('local', 'busy', 'Downloading ' + p.file + ' — ' + Math.round(p.progress) + '%');
+          } else if (p.status === 'done' && firstInstall) {
+            setProviderStatus('local', 'busy', 'Finalizing ' + p.file + '…');
+          }
+        } else if (msg.type === 'ready') {
+          resolve();
+        } else if (msg.type === 'result' && msg.id != null) {
+          var r = pendingGenerations[msg.id];
+          if (r) { delete pendingGenerations[msg.id]; r.resolve(msg.payload); }
+        } else if (msg.type === 'error') {
+          if (msg.id != null && pendingGenerations[msg.id]) {
+            var rj = pendingGenerations[msg.id]; delete pendingGenerations[msg.id]; rj.reject(new Error(msg.payload));
+          } else {
+            reject(new Error(msg.payload));
+          }
         }
-      }
-    });
-    // Accepts either a ChatML messages array [{role, content}, …] OR a
-    // plain string (legacy). When given messages, the transformers.js
-    // pipeline applies Qwen's built-in chat template so the model sees
-    // the format it was trained on — without that, Qwen1.5 Chat returns
-    // an empty response because "User: …\nAssistant:" isn't recognized
-    // as a chat turn.
-    window.__LOAD_LOCAL_AI = async function (input) {
-      var messages;
-      if (typeof input === 'string') {
-        messages = [{ role: 'user', content: input }];
-      } else if (Array.isArray(input)) {
-        messages = input;
-      } else {
-        return '';
-      }
-      var out = await gen(messages, {
-        max_new_tokens: 240,
-        temperature: 0.6,
-        do_sample: true,
-        repetition_penalty: 1.1
       });
-      // transformers.js returns [{ generated_text: [...messages, { role: 'assistant', content: '…' }] }]
-      var first = out && out[0];
-      if (!first) return '';
-      var gt = first.generated_text;
-      if (typeof gt === 'string') return gt; // legacy shape
-      if (Array.isArray(gt)) {
-        for (var i = gt.length - 1; i >= 0; i--) {
-          if (gt[i] && gt[i].role === 'assistant') return gt[i].content || '';
-        }
-      }
-      return '';
+      localAiWorker.addEventListener('error', function (e) {
+        reject(new Error((e && e.message) || 'Worker crashed'));
+      });
+    });
+
+    // Tell the worker to install the model
+    localAiWorker.postMessage({
+      type: 'init',
+      model: opts.model || 'Xenova/Qwen1.5-0.5B-Chat'
+    });
+
+    // Wire the public API. Each generate() round-trip gets a unique id
+    // so concurrent requests don't cross-talk.
+    window.__LOAD_LOCAL_AI = function (input) {
+      var messages;
+      if (typeof input === 'string') messages = [{ role: 'user', content: input }];
+      else if (Array.isArray(input)) messages = input;
+      else return Promise.resolve('');
+      var id = nextGenId++;
+      return new Promise(function (resolve, reject) {
+        pendingGenerations[id] = { resolve: resolve, reject: reject };
+        localAiWorker.postMessage({ type: 'generate', id: id, payload: { messages: messages } });
+      });
     };
-    return gen;
+
+    return localAiWorkerReady;
   }
 
   async function installLocalAiModel() {
@@ -3007,19 +3075,30 @@
   }
 
   // Auto re-init on startup when the user has already done the one-time
-  // install. Silent; uses the cached weights from IndexedDB, no network
-  // required once cached. Skipped on cold page loads if the user disabled
-  // the local provider in settings.
+  // install. Silent; uses the cached weights from the browser cache.
+  // Skipped on cold page loads if the user disabled the local provider
+  // in settings, or if no install has happened yet.
   function autoInitLocalAi() {
-    // Disabled by default: transformers.js's WASM compile can freeze
-    // the main thread on iPad Safari for tens of seconds during the
-    // reload from IDB cache, making every button feel dead. We only
-    // start the pipeline when the user actually needs on-device
-    // inference — i.e., the helper sends a question and Gemini /
-    // OpenRouter both fail. In the meantime cloud providers answer
-    // instantly on their own. If the user wants to force a warm-up
-    // they can tap "Install / Reinstall" in Settings → Load AI.
-    return;
+    // Now safe to run on boot: the heavy WASM compile happens inside
+    // the Web Worker rather than the main thread, so the UI stays
+    // responsive while the model warms up. Previous version had to
+    // be neutered because the on-main-thread compile froze iPad
+    // Safari for tens of seconds. The worker keeps that off the UI
+    // critical path.
+    if (!providerPrefs.local.installed || !providerPrefs.local.enabled) return;
+    if (typeof window.__LOAD_LOCAL_AI === 'function') return; // already up
+    if (localAiInitPromise) return; // install in progress
+    localAiInitPromise = (async function () {
+      try {
+        await initLocalAiPipeline({ firstInstall: false });
+        setProviderStatus('local', 'ok', 'Ready offline');
+      } catch (e) {
+        console.warn('Local AI auto-init failed', e);
+        setProviderStatus('local', 'error', 'Could not warm up cached model: ' + ((e && e.message) || e));
+      } finally {
+        localAiInitPromise = null;
+      }
+    })();
   }
   function wireAiProviderSettings() {
     var CLOUD_PROVIDERS = ['gemini', 'groq', 'openrouter', 'huggingface'];
