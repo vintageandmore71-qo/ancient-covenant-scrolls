@@ -2100,7 +2100,11 @@
   function anyAiProviderConfigured() {
     // Local counts if installed+enabled+actually loaded. Cloud counts
     // whenever the user has saved a key and enabled the provider.
+    // Pollinations counts as configured whenever it's enabled (no key
+    // required) -- which means Load AI is always "configured" by
+    // default since Pollinations ships enabled.
     if (providerPrefs.local.enabled && providerPrefs.local.installed && typeof window.__LOAD_LOCAL_AI === 'function') return true;
+    if (providerPrefs.pollinations && providerPrefs.pollinations.enabled !== false) return true;
     return ['gemini', 'groq', 'openrouter', 'huggingface']
       .some(function (n) { return providerPrefs[n] && providerPrefs[n].enabled && providerPrefs[n].apiKey; });
   }
@@ -2348,7 +2352,12 @@
       gemini:      { enabled: false, apiKey: '' },
       groq:        { enabled: false, apiKey: '' },
       openrouter:  { enabled: false, apiKey: '' },
-      huggingface: { enabled: false, apiKey: '' }
+      huggingface: { enabled: false, apiKey: '' },
+      // Pollinations.ai — completely free, no account, no API key.
+      // Default ENABLED so Load AI just works the moment you open the app.
+      // User can disable it from settings if they don't want prompts
+      // going to a third-party server.
+      pollinations: { enabled: true }
     };
   }
 
@@ -2754,6 +2763,60 @@
         setProviderStatus('huggingface', 'ok', 'Ready');
         return text;
       }
+    },
+    /* Pollinations.ai — free, no account, no API key. Always-on fallback
+     * so Load AI works out-of-the-box for every user. They proxy
+     * various open models behind one simple OpenAI-compatible endpoint.
+     * Sits AFTER the user's own keyed providers (Gemini, OpenRouter,
+     * etc) so paid quality wins when configured, but BEFORE the local
+     * model so it picks up the slack when nothing is configured. */
+    {
+      name: 'pollinations',
+      label: 'via Pollinations (free, no key)',
+      tier: 'free-cloud',
+      available: function () { return providerPrefs.pollinations && providerPrefs.pollinations.enabled !== false; },
+      ask: async function (question, contextText) {
+        setProviderStatus('pollinations', 'busy', 'Thinking…');
+        var body = {
+          // Pollinations exposes several free models. 'openai' is their
+          // default wrapper around a free OpenAI-compatible model;
+          // 'llama' and 'mistral' are alternatives that have less queue
+          // pressure. We ask for 'openai' first; if it ever 503s we
+          // could rotate.
+          model: 'openai',
+          messages: [
+            { role: 'system', content: buildSystemPrompt() },
+            contextText ? { role: 'user', content: 'Context:\n' + contextText } : null,
+            { role: 'user', content: question }
+          ].filter(Boolean),
+          temperature: 0.6,
+          // Don't post our prompts to their public feed
+          private: true,
+          referrer: 'load.dssorit'
+        };
+        var resp = await fetchWithTimeout('https://text.pollinations.ai/openai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        }, 30000);
+        if (resp.status === 429) { setProviderStatus('pollinations', 'rate-limited'); throw new Error('rate-limited'); }
+        if (resp.status === 503) { setProviderStatus('pollinations', 'error', 'Busy — try again'); throw new Error('busy'); }
+        if (!resp.ok) { setProviderStatus('pollinations', 'error', 'HTTP ' + resp.status); throw new Error('http ' + resp.status); }
+        // The /openai endpoint returns OpenAI-shape JSON; older versions of
+        // their API returned plain text instead. Handle both shapes
+        // defensively so a quiet API change doesn't break Load AI.
+        var raw = await resp.text();
+        var text = '';
+        try {
+          var data = JSON.parse(raw);
+          text = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+        } catch (e) { text = raw; }
+        if (!text || !String(text).trim()) {
+          setProviderStatus('pollinations', 'error', 'Empty response'); throw new Error('empty');
+        }
+        setProviderStatus('pollinations', 'ok', 'Ready');
+        return text;
+      }
     }
   ];
   async function fetchWithTimeout(url, opts, timeout) {
@@ -2960,6 +3023,20 @@
   }
   function wireAiProviderSettings() {
     var CLOUD_PROVIDERS = ['gemini', 'groq', 'openrouter', 'huggingface'];
+    // Pollinations toggle (no key, default on). Drives anyAiProviderConfigured()
+    // so the helper UI knows AI is available even with no setup.
+    var pollCb = document.getElementById('ai-prov-pollinations');
+    if (pollCb) {
+      if (!providerPrefs.pollinations) providerPrefs.pollinations = { enabled: true };
+      pollCb.checked = providerPrefs.pollinations.enabled !== false;
+      setProviderStatus('pollinations', 'ok', 'Ready (no key needed)');
+      pollCb.addEventListener('change', function () {
+        providerPrefs.pollinations.enabled = pollCb.checked;
+        saveProviderPrefs();
+        setProviderStatus('pollinations', pollCb.checked ? 'ok' : '',
+          pollCb.checked ? 'Ready (no key needed)' : 'Disabled');
+      });
+    }
     // On-device toggle + install
     var localCb = document.getElementById('ai-prov-local');
     if (localCb) {
