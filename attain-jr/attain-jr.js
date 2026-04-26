@@ -281,8 +281,9 @@
     var lower = f.name.toLowerCase();
     if (/\.json$/.test(lower))           handleJsonImport(f);
     else if (/\.(html?|htm)$/.test(lower)) handleHtmlImport(f);
+    else if (/\.epub$/.test(lower))      handleEpubImport(f);
     else if (/\.zip$/.test(lower))       handleZipImport(f);
-    else alert('Pick a .json story, an .html / .htm web app, or a .zip PWA bundle.');
+    else alert('Pick a .json story, an .html / .htm web app, an .epub book, or a .zip PWA bundle.');
   });
 
   function handleJsonImport(f) {
@@ -305,11 +306,233 @@
   function handleHtmlImport(f) {
     var rd = new FileReader();
     rd.onload = function () {
-      var book = htmlToBook(rd.result, f.name);
-      if (!book) { alert('Could not read that HTML file.'); return; }
-      addBookToLibrary(book);
+      Promise.resolve(htmlToBook(rd.result, f.name)).then(function (book) {
+        if (!book) { alert('Could not read that HTML file.'); return; }
+        addBookToLibrary(book);
+      });
     };
     rd.readAsText(f);
+  }
+
+  /* EPUB import. EPUBs are ZIPs with a known structure:
+       META-INF/container.xml -> rootfile path (usually content.opf)
+       content.opf            -> manifest, spine, metadata
+       spine                  -> ordered list of chapter files (XHTML)
+     We pick out the spine items in order, parse each as HTML, and
+     turn each into a scene. Cover image is found via either the
+     manifest's properties="cover-image" item or a metadata
+     <meta name="cover" content="<id>"> reference. */
+  function handleEpubImport(f) {
+    if (!window.JSZip) { alert('JSZip is missing — please refresh the page.'); return; }
+    var rd = new FileReader();
+    rd.onload = function () {
+      window.JSZip.loadAsync(rd.result).then(function (zip) {
+        return parseEpubZip(zip, f.name);
+      }).then(function (b) {
+        if (!b) { alert('Could not read that EPUB.'); return; }
+        addBookToLibrary(b);
+      }).catch(function () { alert('Could not unzip that EPUB file.'); });
+    };
+    rd.readAsArrayBuffer(f);
+  }
+
+  function parseEpubZip(zip, filename) {
+    var containerFile = zip.file('META-INF/container.xml');
+    if (!containerFile) return Promise.resolve(null);
+    return containerFile.async('string').then(function (xml) {
+      var doc = new DOMParser().parseFromString(xml, 'application/xml');
+      var rootEl = doc.querySelector('rootfile');
+      if (!rootEl) return null;
+      var opfPath = rootEl.getAttribute('full-path');
+      if (!opfPath) return null;
+      var opfFile = zip.file(opfPath);
+      if (!opfFile) return null;
+      var opfDir = opfPath.indexOf('/') >= 0 ? opfPath.substring(0, opfPath.lastIndexOf('/') + 1) : '';
+      return opfFile.async('string').then(function (opfXml) {
+        var opf = new DOMParser().parseFromString(opfXml, 'application/xml');
+        var title = (opf.querySelector('metadata title') || {}).textContent || filename.replace(/\.epub$/i, '');
+        var author = (opf.querySelector('metadata creator') || {}).textContent || 'Imported';
+        // Manifest: id -> { href, mediaType, properties }
+        var manifest = {};
+        Array.prototype.forEach.call(opf.querySelectorAll('manifest > item'), function (it) {
+          manifest[it.getAttribute('id')] = {
+            href: opfDir + (it.getAttribute('href') || ''),
+            type: it.getAttribute('media-type') || '',
+            props: it.getAttribute('properties') || ''
+          };
+        });
+        // Cover detection: prefer properties="cover-image", then any
+        // metadata <meta name="cover" content=ID>, then any image
+        // file with "cover" in the path.
+        var coverItem = null;
+        Object.keys(manifest).forEach(function (id) {
+          if (!coverItem && /\bcover-image\b/.test(manifest[id].props)) coverItem = manifest[id];
+        });
+        if (!coverItem) {
+          var metaCover = opf.querySelector('metadata > meta[name="cover"]');
+          if (metaCover && manifest[metaCover.getAttribute('content')]) {
+            coverItem = manifest[metaCover.getAttribute('content')];
+          }
+        }
+        if (!coverItem) {
+          Object.keys(manifest).forEach(function (id) {
+            if (!coverItem && /image\//i.test(manifest[id].type) && /cover/i.test(manifest[id].href)) {
+              coverItem = manifest[id];
+            }
+          });
+        }
+        // Spine: ordered list of chapter idrefs.
+        var spine = Array.prototype.map.call(opf.querySelectorAll('spine > itemref'), function (ir) {
+          return ir.getAttribute('idref');
+        }).map(function (idref) { return manifest[idref]; }).filter(Boolean);
+
+        var coverP = coverItem ? readImageAsDataUrl(zip, coverItem.href, coverItem.type) : Promise.resolve('');
+        var scenesP = Promise.all(spine.map(function (it, i) {
+          var f = zip.file(it.href);
+          if (!f) return null;
+          return f.async('string').then(function (html) {
+            // Resolve <img src> to data URLs from the zip so they
+            // render — EPUBs use relative paths like
+            // "images/cover.jpg" that don't exist on the web.
+            return chapterHtmlToScene(html, i, zip, it.href);
+          });
+        })).then(function (scenes) { return scenes.filter(Boolean); });
+
+        return Promise.all([coverP, scenesP]).then(function (out) {
+          var cover = out[0];
+          var scenes = out[1];
+          // Skip empty/blank scenes (typical EPUB has a cover-only
+          // first chapter with nothing to read).
+          scenes = scenes.filter(function (s) { return s.body && s.body.length > 0; });
+          if (!scenes.length) return null;
+          return {
+            title: (title || '').trim() || 'Untitled',
+            author: (author || '').trim() || 'Imported',
+            ageBand: '6-8',
+            cover: cover || '',
+            characters: [],
+            storyworld: { setting: '', time: '', lesson: '' },
+            gallery: [],
+            scenes: scenes,
+            activities: []
+          };
+        });
+      });
+    });
+  }
+
+  function readImageAsDataUrl(zip, path, mime) {
+    var f = zip.file(path);
+    if (!f) return Promise.resolve('');
+    return f.async('base64').then(function (b64) {
+      var ext = (path.split('.').pop() || '').toLowerCase();
+      var m = mime || (ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' : ext === 'webp' ? 'image/webp' : 'image/png');
+      return 'data:' + m + ';base64,' + b64;
+    });
+  }
+
+  function chapterHtmlToScene(html, idx, zip, chapterHref) {
+    var doc = new DOMParser().parseFromString(html, 'text/html');
+    if (!doc || !doc.body) return Promise.resolve(null);
+    var sceneTitle = '';
+    var h = doc.querySelector('h1, h2, h3');
+    if (h && h.textContent.trim()) sceneTitle = h.textContent.trim().slice(0, 40);
+    var colors = ['blue', 'orange', 'purple', 'green', 'pink', 'teal'];
+    var nodes = doc.body.querySelectorAll('h1, h2, h3, p, blockquote, img, image');
+    var body = [];
+    var imgPromises = [];
+    var chapterDir = chapterHref && chapterHref.indexOf('/') >= 0
+      ? chapterHref.substring(0, chapterHref.lastIndexOf('/') + 1) : '';
+    Array.prototype.forEach.call(nodes, function (n) {
+      var tag = n.tagName.toLowerCase();
+      if (tag === 'img' || tag === 'image') {
+        // SVG <image> uses xlink:href; HTML <img> uses src.
+        var rawSrc = n.getAttribute('src')
+          || n.getAttribute('xlink:href')
+          || n.getAttribute('href')
+          || '';
+        if (!rawSrc) return;
+        var alt = n.getAttribute('alt') || '';
+        var blockIdx = body.length;
+        body.push({ type: 'img', src: rawSrc, alt: alt });
+        if (zip) {
+          imgPromises.push(resolveZipImageRef(zip, rawSrc, chapterDir).then(function (dataUrl) {
+            if (dataUrl) body[blockIdx].src = dataUrl;
+            else body[blockIdx]._broken = true;
+          }));
+        }
+      } else if (tag === 'blockquote' || tag === 'h3') {
+        var t = (n.textContent || '').trim();
+        if (t) body.push({ type: 'highlight', text: t });
+      } else {
+        var t2 = (n.textContent || '').trim();
+        if (t2) body.push({ type: 'p', text: t2 });
+      }
+    });
+
+    function finish() {
+      // Drop any image whose ZIP lookup failed so we don't render a
+      // broken-image icon next to the cover-art alt text.
+      var clean = body.filter(function (b) { return !(b.type === 'img' && b._broken); });
+      return {
+        id: 's' + (idx + 1),
+        title: sceneTitle || ('Chapter ' + (idx + 1)),
+        color: colors[idx % colors.length],
+        sfx: [],
+        body: clean
+      };
+    }
+    if (!imgPromises.length) return Promise.resolve(finish());
+    return Promise.all(imgPromises).then(finish);
+  }
+
+  /* Resolve a relative image href (from inside an EPUB or PWA zip)
+     to a base64 data URL. Tries the literal path first, then the
+     chapter-relative path, then a few common rewrites (strip leading
+     ./, drop a ../ traversal, look in any "images" or "OEBPS"
+     subfolder). Returns '' if no match. */
+  function resolveZipImageRef(zip, rawSrc, chapterDir) {
+    if (!rawSrc) return Promise.resolve('');
+    var normalized = rawSrc.replace(/^\.\//, '').replace(/\\/g, '/');
+    var candidates = [
+      normalized,
+      chapterDir + normalized,
+      chapterDir.replace(/[^/]+\/$/, '') + normalized,
+      'OEBPS/' + normalized,
+      'OPS/' + normalized,
+      'EPUB/' + normalized,
+      normalized.replace(/^\.\.\//, '')
+    ];
+    // Resolve any "../" segments left in candidates against simple
+    // path arithmetic so EPUBs with chapters in OEBPS/text/ pointing
+    // at ../images/ still work.
+    candidates = candidates.map(resolveDots);
+    // De-dup and try each.
+    var seen = {};
+    candidates = candidates.filter(function (p) { if (seen[p]) return false; seen[p] = true; return !!p; });
+    function tryNext(i) {
+      if (i >= candidates.length) {
+        // Last resort: walk the entire zip looking for a basename match.
+        var base = normalized.split('/').pop();
+        var hit = null;
+        zip.forEach(function (path, entry) { if (!entry.dir && path.split('/').pop() === base) hit = path; });
+        if (hit) return readImageAsDataUrl(zip, hit);
+        return Promise.resolve('');
+      }
+      var f = zip.file(candidates[i]);
+      if (!f) return tryNext(i + 1);
+      return readImageAsDataUrl(zip, candidates[i]);
+    }
+    return tryNext(0);
+  }
+  function resolveDots(path) {
+    var parts = path.split('/');
+    var out = [];
+    for (var i = 0; i < parts.length; i++) {
+      if (parts[i] === '..') out.pop();
+      else if (parts[i] !== '.') out.push(parts[i]);
+    }
+    return out.join('/');
   }
 
   function handleZipImport(f) {
@@ -329,8 +552,10 @@
           var bi = /(^|\/)index\.html?$/i.test(b) ? 0 : b.split('/').length;
           return ai - bi;
         });
-        return zip.file(candidates[0]).async('string').then(function (html) {
-          var book = htmlToBook(html, f.name);
+        var picked = candidates[0];
+        return zip.file(picked).async('string').then(function (html) {
+          return htmlToBook(html, f.name, zip, picked);
+        }).then(function (book) {
           if (!book) { alert('Could not parse the HTML inside the ZIP.'); return; }
           // Look for a manifest.json or sibling files we can pull a cover image from.
           var coverPath = null;
@@ -361,7 +586,7 @@
      between two headings becomes that scene's body. Each <p> becomes
      a paragraph block, each <img> becomes an image block. Title comes
      from <title> or first <h1>. */
-  function htmlToBook(html, filename) {
+  function htmlToBook(html, filename, zip, htmlHref) {
     if (!html || typeof html !== 'string') return null;
     var doc;
     try { doc = new DOMParser().parseFromString(html, 'text/html'); }
@@ -370,15 +595,15 @@
     var title = (doc.querySelector('title') && doc.querySelector('title').textContent.trim()) ||
                 (doc.querySelector('h1') && doc.querySelector('h1').textContent.trim()) ||
                 filename.replace(/\.(html?|htm|zip)$/i, '');
-    // Walk the body in document order and build scenes.
     var scenes = [];
     var cur = { id: 'intro', title: 'Beginning', color: 'blue', sfx: [], body: [] };
     var sceneCount = 0;
     var colors = ['blue', 'orange', 'purple', 'green', 'pink', 'teal'];
-    function flush() {
-      if (cur.body.length) scenes.push(cur);
-    }
-    var nodes = doc.body.querySelectorAll('h1, h2, h3, p, blockquote, li, img');
+    function flush() { if (cur.body.length) scenes.push(cur); }
+    var imgPromises = [];
+    var htmlDir = htmlHref && htmlHref.indexOf('/') >= 0
+      ? htmlHref.substring(0, htmlHref.lastIndexOf('/') + 1) : '';
+    var nodes = doc.body.querySelectorAll('h1, h2, h3, p, blockquote, li, img, image');
     Array.prototype.forEach.call(nodes, function (n) {
       var tag = n.tagName.toLowerCase();
       if (tag === 'h1' || tag === 'h2') {
@@ -394,8 +619,28 @@
       } else if (tag === 'h3') {
         var t = (n.textContent || '').trim();
         if (t) cur.body.push({ type: 'highlight', text: t });
-      } else if (tag === 'img' && n.getAttribute('src')) {
-        cur.body.push({ type: 'img', src: n.getAttribute('src'), alt: n.getAttribute('alt') || '' });
+      } else if (tag === 'img' || tag === 'image') {
+        var rawSrc = n.getAttribute('src')
+          || n.getAttribute('xlink:href')
+          || n.getAttribute('href')
+          || '';
+        if (!rawSrc) return;
+        // Skip absolute http(s)/data URLs — those already resolve.
+        if (/^(?:https?:|data:|blob:)/.test(rawSrc)) {
+          cur.body.push({ type: 'img', src: rawSrc, alt: n.getAttribute('alt') || '' });
+          return;
+        }
+        // Relative — only useful if we have a zip to resolve from.
+        if (zip) {
+          var blockTarget = cur;
+          var blockIdx = blockTarget.body.length;
+          blockTarget.body.push({ type: 'img', src: rawSrc, alt: n.getAttribute('alt') || '' });
+          imgPromises.push(resolveZipImageRef(zip, rawSrc, htmlDir).then(function (dataUrl) {
+            if (dataUrl) blockTarget.body[blockIdx].src = dataUrl;
+            else blockTarget.body[blockIdx]._broken = true;
+          }));
+        }
+        // No zip and a relative src can't load — drop silently.
       } else if (tag === 'blockquote') {
         var qt = (n.textContent || '').trim();
         if (qt) cur.body.push({ type: 'highlight', text: qt });
@@ -405,18 +650,26 @@
       }
     });
     flush();
-    if (!scenes.length) return null;
-    return {
-      title: title,
-      author: 'Imported',
-      ageBand: '6-8',
-      cover: '',
-      characters: [],
-      storyworld: { setting: '', time: '', lesson: '' },
-      gallery: [],
-      scenes: scenes,
-      activities: []
-    };
+    function finish() {
+      // Strip broken images so the reader doesn't show ? icons.
+      scenes.forEach(function (s) {
+        s.body = s.body.filter(function (b) { return !(b.type === 'img' && b._broken); });
+      });
+      if (!scenes.length) return null;
+      return {
+        title: title,
+        author: 'Imported',
+        ageBand: '6-8',
+        cover: '',
+        characters: [],
+        storyworld: { setting: '', time: '', lesson: '' },
+        gallery: [],
+        scenes: scenes,
+        activities: []
+      };
+    }
+    if (!imgPromises.length) return finish();
+    return Promise.all(imgPromises).then(finish);
   }
 
   function addBookToLibrary(b) {
@@ -617,6 +870,28 @@
     html += '<h2 style="color:#7b6cff">Scene: ' + escHtml(sc.title) + '</h2>';
     html += sc.body.map(renderBlock).join('');
     c.innerHTML = html;
+    // Mark this scene read after a short dwell so a quick swipe past
+    // doesn't count, but a real read does.
+    scheduleSceneReadMark(sc.id);
+  }
+  var sceneReadTimer = null;
+  function scheduleSceneReadMark(sceneId) {
+    clearTimeout(sceneReadTimer);
+    sceneReadTimer = setTimeout(function () { markSceneRead(sceneId); }, 4000);
+  }
+  function markSceneRead(sceneId) {
+    if (!sceneId) return;
+    var prog = loadProgress();
+    var id = bookId(book);
+    var p = prog[id] || { lastScene: 0, scenesRead: [], activitiesRight: 0, activitiesAttempted: 0 };
+    p.lastScene = currentSceneIdx;
+    p.scenesRead = p.scenesRead || [];
+    if (p.scenesRead.indexOf(sceneId) === -1) {
+      p.scenesRead.push(sceneId);
+      bumpDailyStreak();
+    }
+    prog[id] = p;
+    saveProgress(prog);
   }
   function renderBlock(b) {
     // data-rl   = read-aloud (everything that should be spoken in full mode)

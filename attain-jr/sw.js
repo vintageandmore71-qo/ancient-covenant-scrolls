@@ -1,7 +1,7 @@
 /* Attain Jr — service worker.
    Network-first for the HTML shell so edits propagate; cache-first
    for everything else so the app works offline once visited. */
-var CACHE = 'attainjr-v1h';
+var CACHE = 'attainjr-v1i';
 var SHELL = ['./', 'index.html', 'attain-jr.css', 'attain-jr.js', 'lib-jszip.min.js', 'manifest.json', 'icon.png', 'splash.jpg'];
 
 self.addEventListener('install', function (e) {

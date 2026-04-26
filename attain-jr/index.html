@@ -50,7 +50,7 @@
 
     <div class="jr-action-grid">
       <button id="jr-get-started" class="jr-action jr-action-primary">&#128214; Get Started</button>
-      <button id="jr-upload-story" class="jr-action jr-action-secondary">&plus; Upload a Story</button>
+      <button id="jr-upload-story" class="jr-action jr-action-secondary" title="JSON, HTML, ZIP, or EPUB">&plus; Upload a Story</button>
     </div>
 
     <h2 class="jr-section-title">My Stories</h2>
@@ -68,8 +68,10 @@
        .json    — Attain Jr story object (canonical format)
        .html    — single-file HTML/PWA, parsed into auto scenes
        .htm     — same
-       .zip     — multi-file PWA bundle, unzipped to find index.html -->
-<input id="jr-file-picker" type="file" accept=".json,.html,.htm,.zip,application/json,text/html,application/zip" style="display:none">
+       .zip     — multi-file PWA bundle, unzipped to find index.html
+       .epub    — EPUB picture book / chapter book; spine items
+                  become scenes, cover image is auto-extracted -->
+<input id="jr-file-picker" type="file" accept=".json,.html,.htm,.zip,.epub,application/json,text/html,application/zip,application/epub+zip" style="display:none">
 
 <!-- Settings modal -->
 <div id="jr-settings-modal" class="modal" hidden>
