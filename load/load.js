@@ -4569,6 +4569,10 @@
           '&#128196; Standalone HTML (.html)' +
           '<div style="font-weight:400;font-size:12.5px;color:var(--ink-mid,#a0a0b0);margin-top:3px;">For uploading to a host (GitHub Pages, Netlify). iPad preview blocks JS on raw .html &mdash; prefer Offline Link for direct sharing.</div>' +
         '</button>' +
+        '<button data-format="epub" class="seg-btn full" style="text-align:left;padding:14px 16px;margin-bottom:10px;background:var(--bg-2,#2a2a40);color:inherit;border:1px solid var(--border,#3a3a55);border-radius:10px;font-weight:600;font-size:15px;display:block;width:100%;">' +
+          '&#128214; Publish as EPUB (.epub)' +
+          '<div style="font-weight:400;font-size:12.5px;color:var(--ink-mid,#a0a0b0);margin-top:3px;">For Amazon KDP (Kindle), Apple Books, Kobo, Barnes &amp; Noble Nook, Smashwords, Google Play. One file uploads to all of them.</div>' +
+        '</button>' +
         '<button data-format="cancel" class="seg-btn full" style="text-align:center;padding:10px;background:transparent;color:var(--ink-mid,#a0a0b0);border:none;font-size:14px;margin-top:4px;">Cancel</button>' +
       '</div>';
     document.body.appendChild(wrap);
@@ -4581,6 +4585,7 @@
       if (format === 'webloc') shareAsWebloc(app);
       else if (format === 'webarchive') shareAsWebArchive(app);
       else if (format === 'html') shareAsPlainHtml(app);
+      else if (format === 'epub') exportAsEpub(app);
     });
   }
   async function shareAsWebloc(app) {
@@ -4627,6 +4632,298 @@
     var blob = new Blob([html], { type: 'text/html; charset=utf-8' });
     await shareBlobOrDownload(blob, fileName, 'text/html',
       'Shared as ' + fileName + '. Best for uploading to a host — iPad preview blocks JavaScript on raw .html.');
+  }
+
+  /* ---------- EPUB 3 export ----------
+     Produces a valid EPUB 3 file from any app whose `html` is editable
+     book content. Output works for Amazon KDP (Kindle), Apple Books,
+     Kobo, Barnes & Noble Nook Press, Smashwords / Draft2Digital, and
+     Google Play Books — one file, every major retailer.
+
+     Build steps:
+       1. Read the source HTML into a DOM, isolate body content.
+       2. Lift any data: image URLs into separate OEBPS/images/imgN.ext
+          files; rewrite the <img src> to the relative path.
+       3. Split the body into chapters at <h1> boundaries (one chapter
+          file per <h1>). Falls back to a single chapter if no <h1>.
+       4. Generate package.opf, nav.xhtml, toc.ncx, container.xml.
+       5. Zip everything: mimetype first, STORE-compressed (uncompressed
+          per the EPUB spec); every other entry DEFLATE-compressed. */
+  async function exportAsEpub(app) {
+    if (typeof JSZip === 'undefined') { toast('JSZip not loaded — cannot build EPUB.', true); return; }
+    if (!app || !app.html) { toast('Nothing to export for this item.', true); return; }
+    toast('Building EPUB…');
+    try {
+      var blob = await buildEpubBlob(app);
+      var safeName = String(app.name || 'book').replace(/[^a-zA-Z0-9 _\-]/g, '').trim() || 'book';
+      var fileName = safeName + '.epub';
+      await shareBlobOrDownload(blob, fileName, 'application/epub+zip',
+        'Exported ' + fileName + '. Upload to KDP / Apple Books / Kobo / Nook directly.');
+    } catch (e) {
+      toast('EPUB export failed: ' + (e && e.message || e), true);
+    }
+  }
+
+  async function buildEpubBlob(app) {
+    var rawHtml = app.html || '';
+    var doc;
+    try { doc = new DOMParser().parseFromString(rawHtml, 'text/html'); }
+    catch (e) { throw new Error('Could not parse the source HTML.'); }
+
+    var bookTitle = (app.name || 'Untitled Book').trim();
+    var titleEl = doc.querySelector('title');
+    if (titleEl && titleEl.textContent.trim()) bookTitle = titleEl.textContent.trim();
+
+    // Walk body, extract data: image URLs into separate files
+    var body = doc.body;
+    if (!body) throw new Error('The source has no <body> to publish.');
+
+    var imageFiles = []; // [{path, bytes, mime}]
+    var imgs = body.querySelectorAll('img');
+    var imgIdx = 0;
+    for (var i = 0; i < imgs.length; i++) {
+      var srcAttr = imgs[i].getAttribute('src') || '';
+      if (!/^data:/i.test(srcAttr)) continue;
+      var m = /^data:([^;,]+)(;base64)?,(.*)$/i.exec(srcAttr);
+      if (!m) continue;
+      var mime = m[1].toLowerCase();
+      var isB64 = !!m[2];
+      var data = m[3];
+      var ext = mime.indexOf('jpeg') >= 0 ? 'jpg' :
+                mime.indexOf('png') >= 0 ? 'png' :
+                mime.indexOf('gif') >= 0 ? 'gif' :
+                mime.indexOf('webp') >= 0 ? 'webp' :
+                mime.indexOf('svg') >= 0 ? 'svg' :
+                'bin';
+      var name = 'img' + (++imgIdx) + '.' + ext;
+      var path = 'OEBPS/images/' + name;
+      var bytes;
+      if (isB64) bytes = base64ToBytes(data);
+      else bytes = new TextEncoder().encode(decodeURIComponent(data));
+      imageFiles.push({ path: path, bytes: bytes, mime: mime });
+      imgs[i].setAttribute('src', 'images/' + name);
+      // Self-closing alt is required for valid XHTML; ensure attr exists
+      if (!imgs[i].hasAttribute('alt')) imgs[i].setAttribute('alt', '');
+    }
+
+    // Split into chapters at <h1>
+    var chapters = splitBodyIntoChapters(body, bookTitle);
+
+    // Build the chapter XHTML files
+    var chapterFiles = []; // [{path, manifestId, mediaType, content, navTitle}]
+    for (var ci = 0; ci < chapters.length; ci++) {
+      var ch = chapters[ci];
+      var chId = 'ch' + (ci + 1);
+      var xhtmlPath = 'OEBPS/' + chId + '.xhtml';
+      var xhtml =
+        '<?xml version="1.0" encoding="UTF-8"?>\n' +
+        '<!DOCTYPE html>\n' +
+        '<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="en">\n' +
+        '<head>\n' +
+        '<meta charset="UTF-8"/>\n' +
+        '<title>' + escXml(ch.title) + '</title>\n' +
+        '<link rel="stylesheet" type="text/css" href="css/style.css"/>\n' +
+        '</head>\n' +
+        '<body>\n' +
+        ch.html +
+        '\n</body>\n</html>\n';
+      chapterFiles.push({ path: xhtmlPath, id: chId, mediaType: 'application/xhtml+xml', content: xhtml, navTitle: ch.title, hrefRel: chId + '.xhtml' });
+    }
+
+    var bookId = 'urn:uuid:' + uuid4();
+
+    var containerXml =
+      '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">\n' +
+      '<rootfiles>\n' +
+      '<rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>\n' +
+      '</rootfiles>\n' +
+      '</container>\n';
+
+    var styleCss =
+      'body { font-family: Georgia, "Times New Roman", serif; line-height: 1.55; margin: 0 1em; }\n' +
+      'h1, h2, h3, h4, h5, h6 { line-height: 1.25; }\n' +
+      'h1 { font-size: 1.6em; margin: 1.2em 0 0.6em; }\n' +
+      'h2 { font-size: 1.3em; margin: 1.1em 0 0.4em; }\n' +
+      'p { margin: 0 0 0.7em; text-indent: 1.2em; }\n' +
+      'p:first-of-type { text-indent: 0; }\n' +
+      'blockquote { margin: 1em 1.4em; font-style: italic; }\n' +
+      'img { max-width: 100%; height: auto; display: block; margin: 1em auto; }\n' +
+      'pre { white-space: pre-wrap; }\n' +
+      'ul, ol { margin: 0.5em 0 1em 1.4em; }\n' +
+      'hr { border: none; border-top: 1px solid #888; margin: 2em 0; }\n';
+
+    // Build manifest items
+    var manifestItems = [];
+    manifestItems.push('<item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>');
+    manifestItems.push('<item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>');
+    manifestItems.push('<item id="css" href="css/style.css" media-type="text/css"/>');
+    chapterFiles.forEach(function (c) {
+      manifestItems.push('<item id="' + c.id + '" href="' + c.hrefRel + '" media-type="' + c.mediaType + '"/>');
+    });
+    imageFiles.forEach(function (img, ix) {
+      var rel = 'images/' + img.path.split('/').pop();
+      manifestItems.push('<item id="img' + (ix + 1) + '" href="' + rel + '" media-type="' + img.mime + '"/>');
+    });
+
+    var spineItems = chapterFiles.map(function (c) {
+      return '<itemref idref="' + c.id + '"/>';
+    }).join('\n');
+
+    var nowIso = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
+
+    var contentOpf =
+      '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="bookid" xml:lang="en">\n' +
+      '<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">\n' +
+      '<dc:identifier id="bookid">' + escXml(bookId) + '</dc:identifier>\n' +
+      '<dc:title>' + escXml(bookTitle) + '</dc:title>\n' +
+      '<dc:language>en</dc:language>\n' +
+      '<dc:creator>' + escXml(app.author || 'Unknown') + '</dc:creator>\n' +
+      '<meta property="dcterms:modified">' + nowIso + '</meta>\n' +
+      '</metadata>\n' +
+      '<manifest>\n' + manifestItems.join('\n') + '\n</manifest>\n' +
+      '<spine toc="ncx">\n' + spineItems + '\n</spine>\n' +
+      '</package>\n';
+
+    var navList = chapterFiles.map(function (c) {
+      return '<li><a href="' + c.hrefRel + '">' + escXml(c.navTitle) + '</a></li>';
+    }).join('\n');
+    var navXhtml =
+      '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<!DOCTYPE html>\n' +
+      '<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="en">\n' +
+      '<head><meta charset="UTF-8"/><title>' + escXml(bookTitle) + ' — Contents</title></head>\n' +
+      '<body>\n' +
+      '<nav epub:type="toc" id="toc"><h1>Contents</h1><ol>\n' + navList + '\n</ol></nav>\n' +
+      '</body></html>\n';
+
+    var ncxNavPoints = chapterFiles.map(function (c, ix) {
+      return '<navPoint id="np' + (ix + 1) + '" playOrder="' + (ix + 1) + '">' +
+        '<navLabel><text>' + escXml(c.navTitle) + '</text></navLabel>' +
+        '<content src="' + c.hrefRel + '"/></navPoint>';
+    }).join('\n');
+    var tocNcx =
+      '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN" "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd">\n' +
+      '<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">\n' +
+      '<head>\n' +
+      '<meta name="dtb:uid" content="' + escXml(bookId) + '"/>\n' +
+      '<meta name="dtb:depth" content="1"/>\n' +
+      '<meta name="dtb:totalPageCount" content="0"/>\n' +
+      '<meta name="dtb:maxPageNumber" content="0"/>\n' +
+      '</head>\n' +
+      '<docTitle><text>' + escXml(bookTitle) + '</text></docTitle>\n' +
+      '<navMap>\n' + ncxNavPoints + '\n</navMap>\n' +
+      '</ncx>\n';
+
+    // Assemble the zip. mimetype MUST be the first entry, STORE-compressed.
+    var zip = new JSZip();
+    zip.file('mimetype', 'application/epub+zip', { compression: 'STORE' });
+    zip.file('META-INF/container.xml', containerXml);
+    zip.file('OEBPS/content.opf', contentOpf);
+    zip.file('OEBPS/nav.xhtml', navXhtml);
+    zip.file('OEBPS/toc.ncx', tocNcx);
+    zip.file('OEBPS/css/style.css', styleCss);
+    chapterFiles.forEach(function (c) { zip.file(c.path, c.content); });
+    imageFiles.forEach(function (img) { zip.file(img.path, img.bytes); });
+
+    return await zip.generateAsync({
+      type: 'blob',
+      mimeType: 'application/epub+zip',
+      compression: 'DEFLATE',
+      compressionOptions: { level: 6 }
+    });
+  }
+
+  // Walk the body and split it into chapter chunks at <h1> boundaries.
+  // Returns [{title, html}, ...]. If there are no <h1> elements, returns
+  // a single chapter holding the whole body.
+  function splitBodyIntoChapters(body, bookTitle) {
+    var children = Array.prototype.slice.call(body.childNodes);
+    var h1s = body.querySelectorAll('h1');
+    if (!h1s.length) {
+      return [{ title: bookTitle, html: body.innerHTML }];
+    }
+    var chapters = [];
+    var current = null;
+    function flush() {
+      if (current) {
+        // Convert the buffered child nodes to an XHTML-safe string
+        var wrapper = body.ownerDocument.createElement('div');
+        current.nodes.forEach(function (n) { wrapper.appendChild(n.cloneNode(true)); });
+        chapters.push({ title: current.title, html: serializeForXhtml(wrapper) });
+      }
+    }
+    for (var i = 0; i < children.length; i++) {
+      var node = children[i];
+      var isH1 = node.nodeType === 1 && node.tagName.toLowerCase() === 'h1';
+      // Skip the auto-injected book-title H1 (class="book-title") so it
+      // doesn't become its own ghost chapter
+      var isBookTitleH1 = isH1 && node.classList && node.classList.contains('book-title');
+      if (isH1 && !isBookTitleH1) {
+        flush();
+        current = { title: (node.textContent || 'Chapter ' + (chapters.length + 1)).trim(), nodes: [node] };
+      } else if (current) {
+        current.nodes.push(node);
+      } else if (!isBookTitleH1) {
+        // Content before the first H1 — gather under "Front Matter"
+        if (!chapters.length) {
+          current = { title: 'Front Matter', nodes: [node] };
+        }
+      }
+    }
+    flush();
+    if (!chapters.length) {
+      return [{ title: bookTitle, html: body.innerHTML }];
+    }
+    return chapters;
+  }
+
+  // Serialize a DOM tree into XHTML-safe markup. innerHTML is HTML5,
+  // which is mostly fine for EPUB readers, but void elements need to
+  // self-close to satisfy strict validators.
+  function serializeForXhtml(node) {
+    var html = node.innerHTML || '';
+    // Self-close common void elements: <br>, <hr>, <img>, <meta>, <link>,
+    // <input>. Only target the ones we actually emit; over-broad rewrites
+    // can corrupt content.
+    html = html.replace(/<br\s*>/gi, '<br/>');
+    html = html.replace(/<hr\s*>/gi, '<hr/>');
+    html = html.replace(/<img([^>]*?)>/gi, function (_m, attrs) {
+      // Already self-closing? Leave it.
+      if (/\/\s*$/.test(attrs)) return '<img' + attrs + '>';
+      return '<img' + attrs + '/>';
+    });
+    return html;
+  }
+
+  function escXml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
+  }
+
+  function uuid4() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    // RFC4122 v4 fallback
+    var b = new Uint8Array(16);
+    (window.crypto || window.msCrypto).getRandomValues(b);
+    b[6] = (b[6] & 0x0f) | 0x40;
+    b[8] = (b[8] & 0x3f) | 0x80;
+    var h = Array.prototype.map.call(b, function (x) { return ('0' + x.toString(16)).slice(-2); }).join('');
+    return h.slice(0, 8) + '-' + h.slice(8, 12) + '-' + h.slice(12, 16) + '-' + h.slice(16, 20) + '-' + h.slice(20);
+  }
+
+  function base64ToBytes(b64) {
+    var bin = atob(b64);
+    var len = bin.length;
+    var out = new Uint8Array(len);
+    for (var i = 0; i < len; i++) out[i] = bin.charCodeAt(i);
+    return out;
   }
   function buildStandaloneMediaPage(app, dataUrl) {
     var safeName = escHtml(app.name || 'Media');
