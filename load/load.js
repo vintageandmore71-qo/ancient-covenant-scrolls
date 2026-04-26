@@ -2607,9 +2607,22 @@
           messages.push({ role: 'user', content: 'Context:\n' + contextText });
         }
         messages.push({ role: 'user', content: question });
-        var out = await window.__LOAD_LOCAL_AI(messages);
-        setProviderStatus('local', 'ok');
-        return out;
+        // 30s watchdog. The on-device worker can hang indefinitely on
+        // first-run WASM compile or on a stuck token loop; without a
+        // timeout the chat just sits forever. When this fires, the
+        // promise rejects and the provider chain moves on to cloud.
+        var timeoutMs = 30000;
+        var watchdog = new Promise(function (_, reject) {
+          setTimeout(function () { reject(new Error('On-device model timed out after ' + (timeoutMs / 1000) + 's. Falling back to cloud.')); }, timeoutMs);
+        });
+        try {
+          var out = await Promise.race([window.__LOAD_LOCAL_AI(messages), watchdog]);
+          setProviderStatus('local', 'ok');
+          return out;
+        } catch (e) {
+          setProviderStatus('local', 'error', (e && e.message) || 'On-device model failed');
+          throw e;
+        }
       }
     },
     // Google Gemini — free tier via AI Studio API key
@@ -9261,6 +9274,72 @@
       try { if (musicSource) musicSource.stop(); } catch (e) {}
       musicSource = null;
     }
+
+    /* Topbar buttons — back / help / more / save / stack / undo / redo
+       were rendered but unwired in v1; the user couldn't exit the
+       editor or save a draft. Wire them all. */
+    document.getElementById('ve-back').addEventListener('click', function () {
+      var existing = document.getElementById('__loadVideoEdit');
+      if (existing) existing.remove();
+    });
+    document.getElementById('ve-help').addEventListener('click', function () {
+      alert(
+        'Load Video Editor — quick guide\n\n' +
+        '• Tap the preview to play / pause\n' +
+        '• Drag the timeline below the preview to scrub\n' +
+        '• Drag the yellow handles on the clip to trim\n' +
+        '• Tap the clip to enter clip-edit mode (Edit / Split / Replace / Speed / Opacity / Delete)\n' +
+        '• Snap toggle (◌ / ●) snaps trim + scrub to 0.5s grid\n' +
+        '• Tap Music / Subtitle / Sticker rows to add overlays\n' +
+        '• ⬆ Export renders an MP4 you can save to Files\n' +
+        '• 💾 Save stores the current edits as a draft for next time'
+      );
+    });
+    document.getElementById('ve-more').addEventListener('click', function () {
+      // Cycle aspect-ratio options as the simplest "more" action;
+      // a full settings sheet lands in the next phase.
+      var ratio = document.getElementById('ve-ratio');
+      if (ratio) {
+        var idx = ratio.selectedIndex || 0;
+        ratio.selectedIndex = (idx + 1) % ratio.options.length;
+        ratio.dispatchEvent(new Event('change'));
+        toast('Aspect ratio: ' + ratio.options[ratio.selectedIndex].text, false);
+      } else {
+        toast('More settings: full sheet coming next.', false);
+      }
+    });
+    document.getElementById('ve-save').addEventListener('click', function () {
+      // Persist the current trim / overlay / music settings to a
+      // draft record on the source app so re-opening the editor
+      // restores them instead of starting fresh.
+      try {
+        var draft = {
+          trimIn: parseFloat(trimIn.value) || 0,
+          trimOut: parseFloat(trimOut.value) || 0,
+          muteOrig: !!(document.getElementById('ve-mute-orig') || {}).checked,
+          textOverlay: (document.getElementById('ve-text') || {}).value || '',
+          musicVol: parseFloat((document.getElementById('ve-audio-vol') || {}).value || '0.35'),
+          speed: video.playbackRate || 1,
+          opacity: clipOpacity,
+          savedAt: Date.now()
+        };
+        app.editorDraft = draft;
+        if (typeof putApp === 'function') putApp(app);
+        toast('Draft saved.', false);
+      } catch (e) { toast('Could not save draft.', true); }
+    });
+    document.getElementById('ve-stack').addEventListener('click', function () {
+      // Layers panel — for v1 just toggles a class that scales up the
+      // track rows so they're easier to see; full layer manager next.
+      var tracks = document.getElementById('ve-tracks');
+      if (tracks) tracks.classList.toggle('ve-tracks-expanded');
+    });
+    document.getElementById('ve-undo').addEventListener('click', function () {
+      toast('Undo: history stack lands with multi-clip phase.', false);
+    });
+    document.getElementById('ve-redo').addEventListener('click', function () {
+      toast('Redo: history stack lands with multi-clip phase.', false);
+    });
 
     // ---- Export ----
     document.getElementById('ve-export').addEventListener('click', exportMp4);
