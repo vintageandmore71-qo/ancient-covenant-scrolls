@@ -3,25 +3,103 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Attain Jr — Coming Soon</title>
+<title>Attain Jr</title>
+<meta name="description" content="A kid-friendly study companion. Bright, audio-first, dyslexia-friendly. Built on the Attain offline-first philosophy.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Attain Jr">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#7b6cff">
-<style>
-  html,body { margin:0; padding:0; min-height:100vh; background:linear-gradient(135deg,#7b6cff 0%,#a18cff 100%); color:#fff; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; }
-  .wrap { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; text-align:center; gap:16px; }
-  h1 { margin:0; font-size:52px; letter-spacing:1px; }
-  .tm { font-size:0.35em; vertical-align:super; opacity:0.8; font-weight:400; margin-left:4px; }
-  .tag { font-size:20px; opacity:0.92; max-width:440px; line-height:1.5; }
-  .note { margin-top:28px; font-size:14px; opacity:0.8; max-width:420px; }
-</style>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="apple-touch-startup-image" href="splash.jpg">
+<link rel="stylesheet" href="attain-jr.css">
 </head>
-<body>
-<div class="wrap">
-  <h1>Attain Jr<span class="tm">&trade;</span></h1>
-  <p class="tag">A kid-focused study companion, built on the same offline-first philosophy as Attain.</p>
-  <p class="note">In development. Starter scaffold created April 24, 2026. See <code>NOTES.md</code> in this folder for the planned design.</p>
+<body class="splash-on">
+
+<!-- Splash page (cover-fill pattern from Stop Lion). Always shows on
+     first load. Tap "Begin reading" or "Music" to enter. -->
+<section id="splash" aria-label="Attain Jr splash">
+  <img id="splash-cover" src="splash.jpg" alt="Attain Jr — universal study engine for the littlest learners">
+  <div class="splash-card">
+    <div class="splash-badge">A study companion for early readers</div>
+    <div class="splash-cta-row">
+      <button id="b-begin" class="cta cta-primary">&#129305;&#127995;&#8205;&#9794;&#65039; Begin Reading</button>
+      <button id="b-begin-music" class="cta cta-secondary">&#127916; With music</button>
+    </div>
+    <div class="splash-cta-row">
+      <button id="b-parent" class="cta cta-tertiary">&#128105;&#8205;&#128105;&#8205;&#128103; Parent / teacher</button>
+    </div>
+    <p class="splash-hint">Cover fills the splash page. Tap a button after opening, because iPad needs a tap before sound can play.</p>
+  </div>
+</section>
+
+<!-- Main reader app. Hidden until splash is dismissed. -->
+<div id="app" hidden>
+
+  <!-- Rainbow header with big nav pills (Jonah / Stop Lion style) -->
+  <header id="topbar" role="navigation" aria-label="Sections">
+    <div class="topbar-tabs">
+      <button class="tab on" data-tab="reader">Reader</button>
+      <button class="tab" data-tab="characters">Characters</button>
+      <button class="tab" data-tab="storyworld">Storyworld</button>
+      <button class="tab" data-tab="gallery">Gallery</button>
+      <button class="tab" data-tab="activities">Activities</button>
+    </div>
+    <div class="topbar-tools">
+      <button id="tool-back" title="Back to splash" aria-label="Back to splash">&larr;</button>
+      <button id="tool-aa" title="Reading aids" aria-label="Reading aids">Aa</button>
+      <button id="tool-paraphrase" title="Paraphrase aloud" aria-label="Paraphrase the current chapter aloud">&#128172; Paraphrase</button>
+    </div>
+  </header>
+
+  <!-- Scene strip — shows scene chips inside Reader -->
+  <div id="scene-strip" class="scene-strip" hidden></div>
+
+  <!-- Per-tab panes -->
+  <main id="content" class="content"></main>
+
+  <!-- Inline SFX bar (Jonah pattern) -->
+  <div id="sfx-bar" class="sfx-bar" hidden>
+    <button class="sfx" data-sfx="cinematic">&#127916; Cinematic</button>
+    <button class="sfx" data-sfx="celebrate">&#10024; Celebrate</button>
+    <button class="sfx" data-sfx="storm">&#127786; Storm</button>
+    <button class="sfx" data-sfx="splash">&#128011; Splash</button>
+    <button class="sfx" data-sfx="pop">&#128165; Pop</button>
+    <button class="sfx" data-sfx="chime">&#128276; Chime</button>
+    <button class="sfx sfx-stop" data-sfx="stop">&#9209;&#65039; Stop</button>
+  </div>
+
+  <!-- Bottom audio bar (Stop Lion pattern) -->
+  <div id="audio-bar" class="audio-bar">
+    <button id="ab-read" title="Read aloud">&#9654;&#65039; Read</button>
+    <button id="ab-pause" title="Pause">&#9208;&#65039; Pause</button>
+    <button id="ab-stop" title="Stop">&#9209;&#65039; Stop</button>
+    <button id="ab-music" title="Background music">&#127908; Music</button>
+    <button id="ab-prev" title="Previous">&laquo; Back</button>
+    <button id="ab-next" title="Next">Next &raquo;</button>
+    <select id="ab-voice" title="Voice"></select>
+    <button id="ab-record-voice" title="Record your own voice">&#127908;&#65039; Record</button>
+  </div>
+
 </div>
+
+<!-- Parent gate -->
+<div id="parent-gate" class="modal" hidden>
+  <div class="modal-card">
+    <h2>Parent / teacher area</h2>
+    <p>Enter your 4-digit PIN. (First time? Pick any 4 digits and we'll save them.)</p>
+    <input id="pg-pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="••••">
+    <div class="modal-row">
+      <button id="pg-cancel">Cancel</button>
+      <button id="pg-ok" class="cta cta-primary">Open</button>
+    </div>
+    <p id="pg-err" class="modal-err"></p>
+  </div>
+</div>
+
+<!-- Celebration overlay (shown on right answers) -->
+<div id="celebrate" class="celebrate" hidden></div>
+
+<script src="attain-jr.js"></script>
 </body>
 </html>
