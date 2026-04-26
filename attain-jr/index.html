@@ -16,8 +16,9 @@
 </head>
 <body class="splash-on">
 
-<!-- Splash page (cover-fill pattern from Stop Lion). Always shows on
-     first load. Tap "Begin reading" or "Music" to enter. -->
+<!-- Splash page. Mirrors Attain's home pattern: cover image, sign card,
+     then a feature grid (Get Started / Upload / Library / Progress /
+     Settings) below. Scrolls naturally. -->
 <section id="splash" aria-label="Attain Jr splash">
   <img id="splash-cover" src="splash.jpg" alt="Attain Jr — universal study engine for the littlest learners">
   <div class="splash-card">
@@ -29,9 +30,77 @@
     <div class="splash-cta-row">
       <button id="b-parent" class="cta cta-tertiary">&#128105;&#8205;&#128105;&#8205;&#128103; Parent / teacher</button>
     </div>
-    <p class="splash-hint">Cover fills the splash page. Tap a button after opening, because iPad needs a tap before sound can play.</p>
+    <p class="splash-hint">Tap a story below to start reading. iPad needs a tap before sound can play.</p>
   </div>
+
+  <!-- Home features panel — mirrors Attain's home: backup banner,
+       Upload + Get Started CTAs, "My Stories" library grid,
+       Progress / Settings buttons. -->
+  <section class="jr-home" id="jr-home" aria-label="Attain Jr home">
+    <div class="jr-warning" id="jr-warning">
+      <strong>Your stories live only in this browser.</strong>
+      If you clear Safari data they are gone. Export a backup now.
+      <button id="jr-export-now" class="jr-export-btn">&#128229; Export now</button>
+    </div>
+
+    <div class="jr-action-grid">
+      <button id="jr-get-started" class="jr-action jr-action-primary">&#128214; Get Started</button>
+      <button id="jr-upload-story" class="jr-action jr-action-secondary">&plus; Upload a Story</button>
+    </div>
+
+    <h2 class="jr-section-title">My Stories</h2>
+    <div id="jr-library-grid" class="jr-library-grid" aria-live="polite"></div>
+
+    <div class="jr-action-grid jr-bottom-row">
+      <button id="jr-progress" class="jr-action jr-action-tertiary">&#128202; Progress</button>
+      <button id="jr-settings" class="jr-action jr-action-tertiary">&#9881;&#65039; Settings</button>
+    </div>
+  </section>
 </section>
+
+<!-- Hidden file picker for "Upload a Story" — accepts JSON for v1.
+     Future: ZIP / EPUB picture-book imports. -->
+<input id="jr-file-picker" type="file" accept=".json,application/json" style="display:none">
+
+<!-- Settings modal -->
+<div id="jr-settings-modal" class="modal" hidden>
+  <div class="modal-card jr-settings-card">
+    <h2>&#9881;&#65039; Settings</h2>
+    <p class="jr-settings-hint">Tap a setting to change it. Settings save automatically.</p>
+    <div class="jr-set-row">
+      <span class="jr-set-label">&#127752; Dyslexia font</span>
+      <button id="jr-set-font" class="jr-set-btn">Off</button>
+    </div>
+    <div class="jr-set-row">
+      <span class="jr-set-label">&#127912; High contrast</span>
+      <button id="jr-set-contrast" class="jr-set-btn">Off</button>
+    </div>
+    <div class="jr-set-row">
+      <span class="jr-set-label">&#128266; Voice mode</span>
+      <button id="jr-set-voice-mode" class="jr-set-btn">Cast</button>
+    </div>
+    <div class="jr-set-row">
+      <span class="jr-set-label">&#127908; Music on start</span>
+      <button id="jr-set-music" class="jr-set-btn">Off</button>
+    </div>
+    <div class="modal-row">
+      <button id="jr-set-close" class="cta cta-tertiary">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Progress modal -->
+<div id="jr-progress-modal" class="modal" hidden>
+  <div class="modal-card jr-progress-card">
+    <h2>&#128202; Your progress</h2>
+    <div id="jr-progress-body" class="jr-progress-body">
+      <p>Read your first story to start tracking progress.</p>
+    </div>
+    <div class="modal-row">
+      <button id="jr-prog-close" class="cta cta-tertiary">Done</button>
+    </div>
+  </div>
+</div>
 
 <!-- Main reader app. Hidden until splash is dismissed. -->
 <div id="app" hidden>

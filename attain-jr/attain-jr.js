@@ -115,7 +115,65 @@
     ]
   };
 
-  var book = SAMPLE_BOOK;
+  /* ---------- Library (localStorage-backed) ----------
+     Stories live in localStorage as an array of book objects shaped
+     like SAMPLE_BOOK. Per-story progress (last scene index, completed
+     scene ids, activity scores) is stored separately so progress
+     survives book replacement on re-import. */
+  var LS_LIBRARY = 'attainjr_library_v1';
+  var LS_PROGRESS = 'attainjr_progress_v1';
+  var LS_LAST_BOOK = 'attainjr_last_book_v1';
+  var LS_SETTINGS = 'attainjr_settings_v1';
+
+  function loadLibrary() {
+    try { var raw = localStorage.getItem(LS_LIBRARY); var arr = raw ? JSON.parse(raw) : []; if (!Array.isArray(arr)) arr = []; return arr; }
+    catch (e) { return []; }
+  }
+  function saveLibrary(arr) {
+    try { localStorage.setItem(LS_LIBRARY, JSON.stringify(arr)); } catch (e) {}
+  }
+  function loadProgress() {
+    try { var raw = localStorage.getItem(LS_PROGRESS); return raw ? JSON.parse(raw) : {}; }
+    catch (e) { return {}; }
+  }
+  function saveProgress(p) {
+    try { localStorage.setItem(LS_PROGRESS, JSON.stringify(p)); } catch (e) {}
+  }
+  function loadJrSettings() {
+    try { var raw = localStorage.getItem(LS_SETTINGS); return raw ? JSON.parse(raw) : {}; }
+    catch (e) { return {}; }
+  }
+  function saveJrSettings(s) {
+    try { localStorage.setItem(LS_SETTINGS, JSON.stringify(s)); } catch (e) {}
+  }
+  function bookId(b) {
+    // Stable id derived from title so the same uploaded book updates
+    // rather than spawning duplicates.
+    return 'b_' + (b.title || 'untitled').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 60);
+  }
+  function ensureSampleInLibrary() {
+    var lib = loadLibrary();
+    var sampleId = bookId(SAMPLE_BOOK);
+    if (!lib.some(function (b) { return bookId(b) === sampleId; })) {
+      lib.unshift(Object.assign({}, SAMPLE_BOOK, { __sample: true }));
+      saveLibrary(lib);
+    }
+    return lib;
+  }
+
+  var library = ensureSampleInLibrary();
+  var book = (function () {
+    // Restore last-opened book if its id still exists, else fall back
+    // to the first library entry (which is always at minimum the
+    // bundled sample).
+    var lastId = null;
+    try { lastId = localStorage.getItem(LS_LAST_BOOK); } catch (e) {}
+    if (lastId) {
+      var hit = library.filter(function (b) { return bookId(b) === lastId; })[0];
+      if (hit) return hit;
+    }
+    return library[0] || SAMPLE_BOOK;
+  })();
   var currentSceneIdx = 0;
   var currentTab = 'reader';
   var withMusic = false;
@@ -138,6 +196,219 @@
     dismissSplash({ music: true });
   });
   document.getElementById('b-parent').addEventListener('click', openParentGate);
+
+  /* ---------- Splash home features (Library / Upload / Progress / Settings / Export) ---------- */
+  function renderLibraryGrid() {
+    var grid = document.getElementById('jr-library-grid');
+    if (!grid) return;
+    library = loadLibrary();
+    if (!library.length) ensureSampleInLibrary();
+    library = loadLibrary();
+    var currentId = bookId(book);
+    var html = library.map(function (b) {
+      var id = bookId(b);
+      var on = id === currentId ? ' on' : '';
+      var sceneCount = (b.scenes || []).length;
+      var coverImg = b.cover ? '<img class="jr-card-cover" src="' + escAttr(b.cover) + '" alt="">'
+        : '<div class="jr-card-cover jr-card-cover-fallback">📖</div>';
+      var sample = b.__sample ? '<span class="jr-card-tag">Sample</span>' : '';
+      return '<button class="jr-story-card' + on + '" data-book-id="' + escAttr(id) + '">' +
+        coverImg +
+        '<div class="jr-card-body">' +
+          '<div class="jr-card-title">' + escHtml(b.title || 'Untitled') + '</div>' +
+          '<div class="jr-card-sub">' + sceneCount + ' scene' + (sceneCount === 1 ? '' : 's') +
+            (b.author ? ' · ' + escHtml(b.author) : '') + '</div>' +
+        '</div>' +
+        sample +
+        (b.__sample ? '' : '<button class="jr-card-del" data-del-id="' + escAttr(id) + '" aria-label="Delete">×</button>') +
+      '</button>';
+    }).join('') +
+    '<button class="jr-story-card jr-story-new" id="jr-card-new" aria-label="Upload a new story">' +
+      '<div class="jr-card-cover jr-card-cover-new">+</div>' +
+      '<div class="jr-card-body"><div class="jr-card-title">Upload a story</div>' +
+      '<div class="jr-card-sub">JSON file for now</div></div>' +
+    '</button>';
+    grid.innerHTML = html;
+    Array.prototype.forEach.call(grid.querySelectorAll('.jr-story-card[data-book-id]'), function (card) {
+      card.addEventListener('click', function (e) {
+        if (e.target.closest('.jr-card-del')) return;
+        var id = card.getAttribute('data-book-id');
+        var hit = library.filter(function (b) { return bookId(b) === id; })[0];
+        if (!hit) return;
+        switchToBook(hit);
+      });
+    });
+    Array.prototype.forEach.call(grid.querySelectorAll('.jr-card-del'), function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var id = btn.getAttribute('data-del-id');
+        if (!confirm('Remove this story from your library? Progress for this story will also be cleared.')) return;
+        var lib = loadLibrary().filter(function (b) { return bookId(b) !== id; });
+        saveLibrary(lib);
+        var prog = loadProgress(); delete prog[id]; saveProgress(prog);
+        if (bookId(book) === id) book = lib[0] || SAMPLE_BOOK;
+        renderLibraryGrid();
+      });
+    });
+    var newCard = document.getElementById('jr-card-new');
+    if (newCard) newCard.addEventListener('click', function () {
+      document.getElementById('jr-file-picker').click();
+    });
+  }
+
+  function switchToBook(b) {
+    book = b;
+    currentSceneIdx = 0;
+    try { localStorage.setItem(LS_LAST_BOOK, bookId(b)); } catch (e) {}
+    primeAudio();
+    dismissSplash();
+  }
+
+  /* Upload a new story. v1 accepts JSON shaped like SAMPLE_BOOK
+     (title, characters, scenes, etc.). Future versions will accept
+     ZIP / EPUB picture-book bundles. */
+  document.getElementById('jr-upload-story').addEventListener('click', function () {
+    document.getElementById('jr-file-picker').click();
+  });
+  document.getElementById('jr-get-started').addEventListener('click', function () {
+    primeAudio();
+    dismissSplash();
+  });
+  document.getElementById('jr-file-picker').addEventListener('change', function (e) {
+    var f = e.target.files && e.target.files[0];
+    e.target.value = ''; // allow re-picking the same file
+    if (!f) return;
+    if (!/\.json$/i.test(f.name)) {
+      alert('For now, please upload a .json story file. ZIP / EPUB picture-book imports are coming next.');
+      return;
+    }
+    var rd = new FileReader();
+    rd.onload = function () {
+      try {
+        var parsed = JSON.parse(rd.result);
+        if (!parsed || !parsed.title || !Array.isArray(parsed.scenes)) {
+          alert('That JSON does not look like an Attain Jr story (needs at least a title and scenes).');
+          return;
+        }
+        var lib = loadLibrary();
+        var id = bookId(parsed);
+        var idx = -1;
+        for (var i = 0; i < lib.length; i++) { if (bookId(lib[i]) === id) { idx = i; break; } }
+        if (idx >= 0) lib[idx] = parsed; else lib.push(parsed);
+        saveLibrary(lib);
+        renderLibraryGrid();
+        alert('Story added: ' + parsed.title);
+      } catch (err) {
+        alert('Could not read that file. Make sure it is valid JSON.');
+      }
+    };
+    rd.readAsText(f);
+  });
+
+  /* Export now: write the entire library + progress + settings to a
+     downloadable JSON file. Same shape as the import format so a
+     user can re-import on a new device. */
+  document.getElementById('jr-export-now').addEventListener('click', function () {
+    var payload = {
+      __attainjr: true,
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      library: loadLibrary(),
+      progress: loadProgress(),
+      settings: loadJrSettings()
+    };
+    var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'attain-jr-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 1000);
+  });
+
+  /* Settings modal */
+  document.getElementById('jr-settings').addEventListener('click', openJrSettings);
+  function openJrSettings() {
+    var m = document.getElementById('jr-settings-modal');
+    var s = loadJrSettings();
+    document.getElementById('jr-set-font').textContent = s.font === 'opendyslexic' ? 'OpenDyslexic' : 'Off';
+    document.getElementById('jr-set-contrast').textContent = s.contrast ? 'On' : 'Off';
+    document.getElementById('jr-set-voice-mode').textContent = s.voiceMode === 'single' ? 'Single' : 'Cast';
+    document.getElementById('jr-set-music').textContent = s.musicOnStart ? 'On' : 'Off';
+    m.hidden = false;
+  }
+  document.getElementById('jr-set-close').addEventListener('click', function () {
+    document.getElementById('jr-settings-modal').hidden = true;
+    applyJrSettings();
+  });
+  document.getElementById('jr-set-font').addEventListener('click', function () {
+    var s = loadJrSettings();
+    s.font = (s.font === 'opendyslexic') ? 'off' : 'opendyslexic';
+    saveJrSettings(s);
+    this.textContent = s.font === 'opendyslexic' ? 'OpenDyslexic' : 'Off';
+    applyJrSettings();
+  });
+  document.getElementById('jr-set-contrast').addEventListener('click', function () {
+    var s = loadJrSettings();
+    s.contrast = !s.contrast;
+    saveJrSettings(s);
+    this.textContent = s.contrast ? 'On' : 'Off';
+    applyJrSettings();
+  });
+  document.getElementById('jr-set-voice-mode').addEventListener('click', function () {
+    var s = loadJrSettings();
+    s.voiceMode = (s.voiceMode === 'single') ? 'cast' : 'single';
+    saveJrSettings(s);
+    this.textContent = s.voiceMode === 'single' ? 'Single' : 'Cast';
+    var sel = document.getElementById('ab-voice-mode');
+    if (sel) sel.value = s.voiceMode;
+  });
+  document.getElementById('jr-set-music').addEventListener('click', function () {
+    var s = loadJrSettings();
+    s.musicOnStart = !s.musicOnStart;
+    saveJrSettings(s);
+    this.textContent = s.musicOnStart ? 'On' : 'Off';
+  });
+  function applyJrSettings() {
+    var s = loadJrSettings();
+    document.body.classList.toggle('aa-contrast', !!s.contrast);
+    if (s.font === 'opendyslexic') {
+      document.body.style.fontFamily = "'OpenDyslexic', 'Lexend', sans-serif";
+    } else {
+      document.body.style.fontFamily = '';
+    }
+  }
+  applyJrSettings();
+
+  /* Progress modal */
+  document.getElementById('jr-progress').addEventListener('click', openJrProgress);
+  function openJrProgress() {
+    var m = document.getElementById('jr-progress-modal');
+    var body = document.getElementById('jr-progress-body');
+    var prog = loadProgress();
+    var lib = loadLibrary();
+    var rows = lib.map(function (b) {
+      var id = bookId(b);
+      var p = prog[id] || { lastScene: 0, scenesRead: [], activitiesRight: 0, activitiesAttempted: 0 };
+      var totalScenes = (b.scenes || []).length;
+      var pct = totalScenes ? Math.round((p.scenesRead || []).length / totalScenes * 100) : 0;
+      return '<div class="jr-prog-row">' +
+        '<strong>' + escHtml(b.title) + '</strong>' +
+        '<div class="jr-prog-bar"><div class="jr-prog-fill" style="width:' + pct + '%"></div></div>' +
+        '<div class="jr-prog-meta">' + ((p.scenesRead || []).length) + ' / ' + totalScenes + ' scenes &middot; ' +
+          (p.activitiesRight || 0) + ' &#11088;</div>' +
+      '</div>';
+    }).join('');
+    body.innerHTML = rows || '<p>Read your first story to start tracking progress.</p>';
+    m.hidden = false;
+  }
+  document.getElementById('jr-prog-close').addEventListener('click', function () {
+    document.getElementById('jr-progress-modal').hidden = true;
+  });
+
+  // Initial paint of the splash library grid.
+  renderLibraryGrid();
 
   /* ---------- Tabs ---------- */
   Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (btn) {
