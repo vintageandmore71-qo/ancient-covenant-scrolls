@@ -663,29 +663,462 @@
   }
 
   /* ---------- Activities ---------- */
+  /* ---------- Activities tab ----------
+     Mirrors Attain's chapter activity grid (Read / Breakdown / Fill in
+     Blank / Multiple Choice / etc.) but kid-coloured with cloud-blob
+     shaped tiles to keep it visually distinct. Picks a current scene
+     from the scene strip above. Tap a tile to launch that activity.
+     Activities are auto-derived from the book's content where
+     possible (T/F from paragraph blocks, Who-Said-It from char
+     blocks, Sequence from the scene list itself). */
+  var JR_ACTIVITIES = [
+    // Big primary tile — runs every mini-game in order so the child
+    // ends with a well-rounded grasp of the book.
+    { id: 'quest',   label: 'Book Quest',     emoji: '🚀', cls: 'jr-act-rainbow', big: true },
+    { id: 'read',    label: 'Read',           emoji: '📖', cls: 'jr-act-blue'    },
+    { id: 'listen',  label: 'Listen',         emoji: '🔊', cls: 'jr-act-teal'    },
+    { id: 'mc',      label: 'Multiple Choice',emoji: '🎯', cls: 'jr-act-purple'  },
+    { id: 'tf',      label: 'True or False',  emoji: '⚖️', cls: 'jr-act-green'   },
+    { id: 'who',     label: 'Who Said It?',   emoji: '💬', cls: 'jr-act-violet'  },
+    { id: 'seq',     label: 'Story Sequence', emoji: '🔄', cls: 'jr-act-orange'  },
+    { id: 'world',   label: 'Storyworld',     emoji: '🌍', cls: 'jr-act-pink'    },
+    { id: 'lesson',  label: 'What I Learned', emoji: '💡', cls: 'jr-act-yellow'  }
+  ];
+  var JR_QUEST_STEPS = ['listen', 'who', 'tf', 'seq', 'world', 'lesson'];
+  var JR_QUESTION_CAP = 3; // short books, short attention spans
+
   function renderActivities() {
     var c = document.getElementById('content');
-    c.innerHTML = '<h1>Activities</h1>' + (book.activities || []).map(function (a, i) {
-      return renderActivity(a, i);
+    var tiles = JR_ACTIVITIES.map(function (a) {
+      var bigCls = a.big ? ' jr-act-tile-big' : '';
+      return '<button class="jr-act-tile ' + a.cls + bigCls + '" data-jr-act="' + a.id + '">' +
+        '<span class="jr-act-emoji" aria-hidden="true">' + a.emoji + '</span>' +
+        '<span class="jr-act-label">' + a.label + '</span>' +
+      '</button>';
     }).join('');
-    Array.prototype.forEach.call(c.querySelectorAll('.act-opt'), function (btn) {
+    c.innerHTML =
+      '<h1 class="jr-act-h1">Activities</h1>' +
+      '<p class="jr-act-sub">Tap a cloud to play. Earn ⭐ for every right answer!</p>' +
+      '<div class="jr-act-grid">' + tiles + '</div>' +
+      '<div id="jr-act-stage" class="jr-act-stage" hidden></div>';
+    Array.prototype.forEach.call(c.querySelectorAll('.jr-act-tile'), function (btn) {
       btn.addEventListener('click', function () {
-        var right = btn.getAttribute('data-right') === '1';
-        if (right) { btn.classList.add('right'); celebrate('⭐'); playSfx('celebrate'); speak('Yes! You got it!'); }
-        else { btn.classList.add('wrong'); playSfx('pop'); speak('Try again!'); setTimeout(function () { btn.classList.remove('wrong'); }, 800); }
+        var id = btn.getAttribute('data-jr-act');
+        playSfx('pop');
+        launchActivity(id);
       });
     });
   }
-  function renderActivity(a, i) {
-    if (a.type !== 'mc') return '';
-    return '<div class="act">' +
-      '<h3>Q' + (i + 1) + '. ' + escHtml(a.prompt) + '</h3>' +
-      '<div class="act-options">' +
-        a.choices.map(function (c) {
-          return '<button class="act-opt" data-right="' + (c.correct ? '1' : '0') + '">' + escHtml(c.text) + '</button>';
+
+  function launchActivity(id) {
+    var stage = document.getElementById('jr-act-stage');
+    if (!stage) return;
+    stage.hidden = false;
+    if (id === 'read')    return runReadActivity(stage);
+    if (id === 'listen')  return runListenActivity(stage);
+    if (id === 'mc')      return runMcActivity(stage);
+    if (id === 'tf')      return runTrueFalseActivity(stage);
+    if (id === 'who')     return runWhoSaidItActivity(stage);
+    if (id === 'seq')     return runSequenceActivity(stage);
+    if (id === 'world')   return runStoryworldActivity(stage);
+    if (id === 'lesson')  return runLessonActivity(stage);
+    if (id === 'quest')   return runBookQuest(stage);
+    return runComingSoonActivity(stage, id);
+  }
+
+  function activityShell(stage, title, body) {
+    stage.innerHTML =
+      '<div class="jr-stage-head">' +
+        '<h2>' + escHtml(title) + '</h2>' +
+        '<button class="jr-stage-close" aria-label="Close">×</button>' +
+      '</div>' +
+      '<div class="jr-stage-body">' + body + '</div>';
+    stage.querySelector('.jr-stage-close').addEventListener('click', function () {
+      stage.hidden = true; stage.innerHTML = '';
+    });
+    stage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function runReadActivity(stage) {
+    // Switch back to the Reader tab — the tile is a teleport, not a
+    // duplicated reader UI inside the activities pane.
+    stage.hidden = true; stage.innerHTML = '';
+    selectTab('reader');
+  }
+
+  function runListenActivity(stage) {
+    activityShell(stage, '🔊 Listen', '<p>Reading the current scene aloud. Tap any text in the reader to hear it again.</p>');
+    selectTab('reader');
+    setTimeout(readAloud, 400);
+  }
+
+  function runMcActivity(stage) {
+    var qs = (book.activities || []).filter(function (a) { return a.type === 'mc'; });
+    if (!qs.length) {
+      activityShell(stage, '🎯 Multiple Choice', '<p>This book has no multiple-choice questions yet.</p>');
+      return;
+    }
+    var html = qs.map(function (q, i) {
+      return '<div class="jr-q">' +
+        '<h3>Q' + (i + 1) + '. ' + escHtml(q.prompt) + '</h3>' +
+        '<div class="jr-q-options">' +
+          q.choices.map(function (c) {
+            return '<button class="jr-q-opt" data-right="' + (c.correct ? '1' : '0') + '">' + escHtml(c.text) + '</button>';
+          }).join('') +
+        '</div>' +
+      '</div>';
+    }).join('');
+    activityShell(stage, '🎯 Multiple Choice', html);
+    wireQuestionButtons(stage);
+  }
+
+  function runTrueFalseActivity(stage) {
+    var sc = book.scenes[currentSceneIdx] || book.scenes[0];
+    if (!sc) {
+      activityShell(stage, '⚖️ True or False', '<p>Read a scene first, then come back.</p>');
+      return;
+    }
+    var paragraphs = sc.body.filter(function (b) { return b.type === 'p' && b.text && b.text.length > 12; });
+    if (!paragraphs.length) {
+      activityShell(stage, '⚖️ True or False', '<p>This scene needs more text to play True or False.</p>');
+      return;
+    }
+    var picked = paragraphs.slice(0, JR_QUESTION_CAP);
+    var qs = picked.map(function (p, i) {
+      var flipped = (i % 2 === 1);
+      var text = flipped ? mangleParagraph(p.text) : p.text;
+      return { text: text, isTrue: !flipped };
+    });
+    var html = qs.map(function (q, i) {
+      return '<div class="jr-q">' +
+        '<h3>"' + escHtml(q.text) + '"</h3>' +
+        '<div class="jr-q-options">' +
+          '<button class="jr-q-opt" data-right="' + (q.isTrue ? '1' : '0') + '">✅ True</button>' +
+          '<button class="jr-q-opt" data-right="' + (q.isTrue ? '0' : '1') + '">❌ False</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    activityShell(stage, '⚖️ True or False — ' + (sc.title || 'Scene'), html);
+    wireQuestionButtons(stage);
+  }
+
+  function mangleParagraph(text) {
+    // Flip a small word so the sentence reads false. Targets common
+    // simple words first to stay readable for kids.
+    var swaps = { 'big':'small', 'small':'big', 'happy':'sad', 'sad':'happy',
+                  'fast':'slow', 'slow':'fast', 'up':'down', 'down':'up',
+                  'wide':'narrow', 'narrow':'wide', 'brave':'scared', 'scared':'brave',
+                  'wise':'silly', 'silly':'wise' };
+    var keys = Object.keys(swaps);
+    for (var i = 0; i < keys.length; i++) {
+      var re = new RegExp('\\b' + keys[i] + '\\b', 'i');
+      if (re.test(text)) return text.replace(re, swaps[keys[i]]);
+    }
+    // Fallback: prefix a "not" before a verb-ish first word — crude
+    // but produces an obviously-false sentence.
+    return text.replace(/^([A-Z][a-z]+\s)/, '$1did not ');
+  }
+
+  function runWhoSaidItActivity(stage) {
+    var sc = book.scenes[currentSceneIdx] || book.scenes[0];
+    var characters = book.characters || [];
+    if (!sc || !characters.length) {
+      activityShell(stage, '💬 Who Said It?', '<p>This book needs characters first.</p>');
+      return;
+    }
+    // Walk the scene body in order; whenever we see a 'char' block,
+    // the next 'p' block becomes the quote attributed to that char.
+    var pairs = [];
+    for (var i = 0; i < sc.body.length - 1; i++) {
+      if (sc.body[i].type === 'char' && sc.body[i + 1].type === 'p') {
+        pairs.push({ who: sc.body[i].who, text: sc.body[i + 1].text });
+      }
+    }
+    if (!pairs.length) {
+      activityShell(stage, '💬 Who Said It?', '<p>This scene has no character lines to play.</p>');
+      return;
+    }
+    var html = pairs.slice(0, JR_QUESTION_CAP).map(function (p) {
+      var opts = characters.slice().sort(function () { return 0.5 - Math.random(); });
+      return '<div class="jr-q">' +
+        '<h3>"' + escHtml(p.text) + '"</h3>' +
+        '<div class="jr-q-options">' +
+          opts.map(function (ch) {
+            return '<button class="jr-q-opt" data-right="' + (ch.name === p.who ? '1' : '0') + '">' +
+              ch.emoji + ' ' + escHtml(ch.name) + '</button>';
+          }).join('') +
+        '</div>' +
+      '</div>';
+    }).join('');
+    activityShell(stage, '💬 Who Said It?', html);
+    wireQuestionButtons(stage);
+  }
+
+  function runSequenceActivity(stage) {
+    var scenes = (book.scenes || []).slice();
+    if (scenes.length < 2) {
+      activityShell(stage, '🔄 Story Sequence', '<p>This book needs at least 2 scenes to play Sequence.</p>');
+      return;
+    }
+    var shuffled = scenes.slice().sort(function () { return 0.5 - Math.random(); });
+    var html = '<p class="jr-seq-hint">Tap the scenes in the right order from the start of the story to the end.</p>' +
+      '<div id="jr-seq-pool" class="jr-seq-pool">' +
+        shuffled.map(function (s, i) {
+          return '<button class="jr-seq-pill" data-seq-id="' + escAttr(s.id) + '">' +
+            (i + 1) + '. ' + escHtml(s.title) + '</button>';
         }).join('') +
       '</div>' +
-    '</div>';
+      '<div id="jr-seq-picked" class="jr-seq-picked"></div>' +
+      '<button id="jr-seq-check" class="jr-seq-check">Check my answer</button>';
+    activityShell(stage, '🔄 Story Sequence', html);
+    var picked = [];
+    Array.prototype.forEach.call(stage.querySelectorAll('.jr-seq-pill'), function (b) {
+      b.addEventListener('click', function () {
+        if (b.classList.contains('used')) return;
+        b.classList.add('used');
+        picked.push(b.getAttribute('data-seq-id'));
+        var label = b.textContent.replace(/^\d+\.\s*/, '');
+        var div = document.createElement('div');
+        div.className = 'jr-seq-step';
+        div.textContent = (picked.length) + '. ' + label;
+        stage.querySelector('#jr-seq-picked').appendChild(div);
+      });
+    });
+    stage.querySelector('#jr-seq-check').addEventListener('click', function () {
+      var correct = picked.length === scenes.length &&
+        picked.every(function (id, i) { return scenes[i].id === id; });
+      if (correct) { celebrate('🌟'); playSfx('celebrate'); speak('Perfect order!'); recordRight(); }
+      else { playSfx('pop'); speak('Almost! Try again.'); }
+    });
+  }
+
+  /* Storyworld game — auto-generates Where & When questions from the
+     book.storyworld block. Distractors are picked from a small kid
+     vocabulary so the answers feel reachable, not impossible. */
+  var JR_DISTRACTORS = {
+    setting: ['a busy city', 'a sandy desert', 'a snowy mountain', 'a deep ocean', 'a tall castle', 'a dark cave'],
+    time: ['next week', 'tomorrow morning', 'in space', 'underwater', 'at school today', 'next summer']
+  };
+  function pickDistractors(pool, exclude, n) {
+    var clean = pool.filter(function (x) {
+      return x.toLowerCase() !== (exclude || '').toLowerCase();
+    });
+    clean.sort(function () { return 0.5 - Math.random(); });
+    return clean.slice(0, n);
+  }
+  function runStoryworldActivity(stage) {
+    var sw = book.storyworld || {};
+    if (!sw.setting && !sw.time) {
+      activityShell(stage, '🌍 Storyworld', '<p>This book has no Where / When info yet.</p>');
+      return;
+    }
+    var qs = [];
+    if (sw.setting) {
+      var opts = pickDistractors(JR_DISTRACTORS.setting, sw.setting, 3).concat([sw.setting]);
+      opts.sort(function () { return 0.5 - Math.random(); });
+      qs.push({ prompt: '📍 Where does the story happen?', right: sw.setting, options: opts });
+    }
+    if (sw.time) {
+      var topts = pickDistractors(JR_DISTRACTORS.time, sw.time, 3).concat([sw.time]);
+      topts.sort(function () { return 0.5 - Math.random(); });
+      qs.push({ prompt: '🕰 When does the story happen?', right: sw.time, options: topts });
+    }
+    var html = qs.slice(0, JR_QUESTION_CAP).map(function (q) {
+      return '<div class="jr-q">' +
+        '<h3>' + escHtml(q.prompt) + '</h3>' +
+        '<div class="jr-q-options">' +
+          q.options.map(function (o) {
+            return '<button class="jr-q-opt" data-right="' + (o === q.right ? '1' : '0') + '">' + escHtml(o) + '</button>';
+          }).join('') +
+        '</div>' +
+      '</div>';
+    }).join('');
+    activityShell(stage, '🌍 Storyworld', html);
+    wireQuestionButtons(stage);
+  }
+
+  /* Lesson game — pulls book.storyworld.lesson and any 'highlight'
+     blocks across scenes (callouts in the reader). One real lesson +
+     three distractors generated from a tiny stock of common
+     children's-book lessons that DON'T match the right answer. */
+  var JR_LESSON_DISTRACTORS = [
+    'Always race ahead alone.',
+    'Never share your snack.',
+    'Tomatoes are the best fruit.',
+    'Stay quiet when you need help.',
+    'Going to bed late is fine.',
+    'Skip your friends and play by yourself.',
+    'Animals can talk if you whisper to them.',
+    'Hide when you feel scared.'
+  ];
+  function runLessonActivity(stage) {
+    var sw = book.storyworld || {};
+    var lessons = [];
+    if (sw.lesson) lessons.push(sw.lesson);
+    (book.scenes || []).forEach(function (s) {
+      (s.body || []).forEach(function (b) { if (b.type === 'highlight' && b.text) lessons.push(b.text); });
+    });
+    if (!lessons.length) {
+      activityShell(stage, '💡 What I Learned',
+        '<p>This book has no highlighted lesson yet. Tap <strong>Read</strong> first to find one!</p>');
+      return;
+    }
+    // Use up to JR_QUESTION_CAP unique lessons.
+    var seen = {};
+    var uniq = [];
+    for (var i = 0; i < lessons.length && uniq.length < JR_QUESTION_CAP; i++) {
+      if (!seen[lessons[i]]) { seen[lessons[i]] = true; uniq.push(lessons[i]); }
+    }
+    var html = uniq.map(function (lesson) {
+      var distractors = pickDistractors(JR_LESSON_DISTRACTORS, lesson, 3);
+      var opts = distractors.concat([lesson]);
+      opts.sort(function () { return 0.5 - Math.random(); });
+      return '<div class="jr-q">' +
+        '<h3>💡 What did this story teach?</h3>' +
+        '<div class="jr-q-options">' +
+          opts.map(function (o) {
+            return '<button class="jr-q-opt" data-right="' + (o === lesson ? '1' : '0') + '">' + escHtml(o) + '</button>';
+          }).join('') +
+        '</div>' +
+      '</div>';
+    }).join('');
+    activityShell(stage, '💡 What I Learned', html);
+    wireQuestionButtons(stage);
+  }
+
+  /* Book Quest — guided sequence through every mini-game so the
+     child finishes with a well-rounded grasp of characters, plot,
+     setting, and lesson. Keeps each step short. After the final
+     step a "Book Mastered!" celebration triggers, marks the book
+     read in progress, and bumps the streak counter. */
+  function runBookQuest(stage) {
+    var step = 0;
+    function nextStep() {
+      if (step >= JR_QUEST_STEPS.length) return finishQuest();
+      var stepId = JR_QUEST_STEPS[step++];
+      stage.hidden = false; stage.scrollIntoView({ behavior: 'smooth' });
+      // Inline progress strip + next-button shell, then drop the real
+      // activity content underneath.
+      var dotRow = JR_QUEST_STEPS.map(function (_, i) {
+        return '<span class="jr-quest-dot' + (i < step ? ' done' : '') + (i === step - 1 ? ' on' : '') + '"></span>';
+      }).join('');
+      stage.innerHTML =
+        '<div class="jr-quest-head">' +
+          '<h2>🚀 Book Quest — Step ' + step + ' / ' + JR_QUEST_STEPS.length + '</h2>' +
+          '<div class="jr-quest-dots">' + dotRow + '</div>' +
+        '</div>' +
+        '<div id="jr-quest-body" class="jr-quest-body"></div>' +
+        '<button id="jr-quest-next" class="jr-seq-check">Next ▶</button>' +
+        '<button id="jr-quest-quit" class="jr-quest-quit">Quit</button>';
+      var body = stage.querySelector('#jr-quest-body');
+      // Each step renders into a child stage element so the inner
+      // close button doesn't kill the quest UI.
+      var sub = document.createElement('div');
+      sub.className = 'jr-act-stage jr-quest-substage';
+      sub.style.display = 'block';
+      body.appendChild(sub);
+      // Hijack the inner shell so the close button just goes to next.
+      sub._isQuestSub = true;
+      launchQuestStep(sub, stepId);
+      stage.querySelector('#jr-quest-next').addEventListener('click', nextStep);
+      stage.querySelector('#jr-quest-quit').addEventListener('click', function () {
+        stage.hidden = true; stage.innerHTML = '';
+      });
+    }
+    function launchQuestStep(sub, id) {
+      // Reuse the runners but render into our sub element. Because
+      // each runner expects a stage element with the structure
+      // matching activityShell, we just call them with sub.
+      if (id === 'listen')  return runListenInline(sub);
+      if (id === 'who')     return runWhoSaidItActivity(sub);
+      if (id === 'tf')      return runTrueFalseActivity(sub);
+      if (id === 'seq')     return runSequenceActivity(sub);
+      if (id === 'world')   return runStoryworldActivity(sub);
+      if (id === 'lesson')  return runLessonActivity(sub);
+      if (id === 'mc')      return runMcActivity(sub);
+    }
+    function runListenInline(sub) {
+      activityShell(sub, '🔊 Listen', '<p>Press play in the reader, then come back.</p>');
+      setTimeout(readAloud, 200);
+    }
+    function finishQuest() {
+      stage.innerHTML =
+        '<div class="jr-quest-finish">' +
+          '<div class="jr-quest-trophy">🏆</div>' +
+          '<h2>Book Mastered!</h2>' +
+          '<p>You finished every activity for <strong>' + escHtml(book.title || 'this book') + '</strong>. Way to go!</p>' +
+          '<button id="jr-quest-done" class="jr-seq-check">Done</button>' +
+        '</div>';
+      celebrate('🏆'); playSfx('celebrate'); speak('Book mastered! Great job!');
+      // Mark every scene read so the splash stats finished-books
+      // counter ticks up.
+      var prog = loadProgress();
+      var id = bookId(book);
+      var p = prog[id] || { lastScene: 0, scenesRead: [], activitiesRight: 0, activitiesAttempted: 0 };
+      p.scenesRead = (book.scenes || []).map(function (s) { return s.id; });
+      p.questFinishedAt = Date.now();
+      prog[id] = p;
+      saveProgress(prog);
+      bumpDailyStreak();
+      stage.querySelector('#jr-quest-done').addEventListener('click', function () {
+        stage.hidden = true; stage.innerHTML = '';
+      });
+    }
+    nextStep();
+  }
+
+  function bumpDailyStreak() {
+    var KEY = 'attainjr_streak_v1';
+    var LAST = 'attainjr_streak_last_v1';
+    try {
+      var todayStr = new Date().toISOString().slice(0, 10);
+      var lastStr = localStorage.getItem(LAST) || '';
+      if (lastStr === todayStr) return; // already counted today
+      var streak = parseInt(localStorage.getItem(KEY) || '0', 10);
+      // If yesterday was the last, +1; otherwise reset to 1.
+      var yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+      var ydStr = yesterday.toISOString().slice(0, 10);
+      streak = (lastStr === ydStr) ? (streak + 1) : 1;
+      localStorage.setItem(KEY, String(streak));
+      localStorage.setItem(LAST, todayStr);
+    } catch (e) {}
+  }
+
+  function runComingSoonActivity(stage, id) {
+    activityShell(stage,
+      'Coming soon!',
+      '<p>This activity (<strong>' + escHtml(id) + '</strong>) is on the way. ' +
+      'Right now you can play <strong>Read</strong>, <strong>Listen</strong>, ' +
+      '<strong>Multiple Choice</strong>, <strong>True or False</strong>, ' +
+      '<strong>Who Said It</strong>, and <strong>Story Sequence</strong>.</p>');
+  }
+
+  function wireQuestionButtons(scope) {
+    Array.prototype.forEach.call(scope.querySelectorAll('.jr-q-opt'), function (btn) {
+      btn.addEventListener('click', function () {
+        var right = btn.getAttribute('data-right') === '1';
+        if (right) {
+          btn.classList.add('right');
+          celebrate('⭐'); playSfx('celebrate'); speak('Yes! You got it!');
+          recordRight();
+        } else {
+          btn.classList.add('wrong'); playSfx('pop'); speak('Try again!');
+          setTimeout(function () { btn.classList.remove('wrong'); }, 800);
+        }
+      });
+    });
+  }
+
+  function recordRight() {
+    // Track stars/right-answers per-book so the splash stats row and
+    // Progress modal show real numbers.
+    var prog = loadProgress();
+    var id = bookId(book);
+    var p = prog[id] || { lastScene: 0, scenesRead: [], activitiesRight: 0, activitiesAttempted: 0 };
+    p.activitiesRight = (p.activitiesRight || 0) + 1;
+    p.activitiesAttempted = (p.activitiesAttempted || 0) + 1;
+    prog[id] = p;
+    saveProgress(prog);
   }
 
   /* ---------- Audio: Speech, Read-aloud, Pause/Stop, Voice cast ----------
