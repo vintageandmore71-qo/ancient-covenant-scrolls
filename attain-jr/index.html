@@ -33,10 +33,15 @@
     <p class="splash-hint">Tap a story below to start reading. iPad needs a tap before sound can play.</p>
   </div>
 
-  <!-- Home features panel — mirrors Attain's home: backup banner,
-       Upload + Get Started CTAs, "My Stories" library grid,
-       Progress / Settings buttons. -->
+  <!-- Home features panel — mirrors Attain's home: stats row, backup
+       banner, Upload + Get Started CTAs, "My Stories" library grid,
+       Progress / Settings buttons. Kid-coloured. -->
   <section class="jr-home" id="jr-home" aria-label="Attain Jr home">
+    <!-- Stats row, populated by JS at runtime. Hidden until at least
+         one stat is non-zero so first-time users see encouragement
+         instead of zero counters. -->
+    <div id="jr-stats" class="jr-stats" hidden></div>
+
     <div class="jr-warning" id="jr-warning">
       <strong>Your stories live only in this browser.</strong>
       If you clear Safari data they are gone. Export a backup now.
@@ -54,6 +59,7 @@
     <div class="jr-action-grid jr-bottom-row">
       <button id="jr-progress" class="jr-action jr-action-tertiary">&#128202; Progress</button>
       <button id="jr-settings" class="jr-action jr-action-tertiary">&#9881;&#65039; Settings</button>
+      <a id="jr-back-attain" class="jr-action jr-action-tertiary jr-back-attain" href="../attain/">&larr; Back to Attain</a>
     </div>
   </section>
 </section>
@@ -119,6 +125,7 @@
     </div>
     <div class="topbar-tools">
       <button id="tool-back" title="Back to splash" aria-label="Back to splash">&larr;</button>
+      <a id="tool-attain-home" class="tool-link" href="../attain/" title="Back to Attain" aria-label="Back to Attain">&#127968; Attain</a>
       <button id="tool-aa" title="Reading aids" aria-label="Reading aids">Aa</button>
       <button id="tool-paraphrase" title="Paraphrase aloud" aria-label="Paraphrase the current chapter aloud">&#128172; Paraphrase</button>
     </div>

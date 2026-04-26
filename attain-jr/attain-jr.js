@@ -532,8 +532,50 @@
     document.getElementById('jr-progress-modal').hidden = true;
   });
 
-  // Initial paint of the splash library grid.
+  /* Kid-coloured stats row, mirrors Attain's home-stats (cards due /
+     streak / level / xp). Numbers come from loadProgress(). Hidden
+     until at least one stat is > 0 so a brand-new user sees the
+     encouraging Get Started CTA, not a row of zeros. */
+  function renderJrStats() {
+    var el = document.getElementById('jr-stats');
+    if (!el) return;
+    var prog = loadProgress();
+    var lib = loadLibrary();
+    var stars = 0, scenesRead = 0, activitiesRight = 0, booksFinished = 0;
+    Object.keys(prog).forEach(function (k) {
+      var p = prog[k] || {};
+      stars += (p.activitiesRight || 0);
+      activitiesRight += (p.activitiesRight || 0);
+      scenesRead += ((p.scenesRead || []).length);
+      var b = lib.filter(function (x) { return bookId(x) === k; })[0];
+      if (b && p.scenesRead && p.scenesRead.length >= (b.scenes || []).length && (b.scenes || []).length > 0) {
+        booksFinished++;
+      }
+    });
+    var streak = +localStorage.getItem('attainjr_streak_v1') || 0;
+    var level = 1 + Math.floor(stars / 10);
+    var levelEmoji = ['🐣', '🌱', '⭐', '🌈', '🚀', '🦄', '👑'][Math.min(level - 1, 6)] || '👑';
+    var anyStat = stars > 0 || scenesRead > 0 || streak > 0 || booksFinished > 0;
+    if (!anyStat) { el.hidden = true; el.innerHTML = ''; return; }
+    el.hidden = false;
+    var boxes = [];
+    if (stars > 0)        boxes.push({ cls: 'jr-stat-stars',     icon: '⭐', big: stars,           label: 'star' + (stars === 1 ? '' : 's') + ' earned' });
+    if (streak > 0)       boxes.push({ cls: 'jr-stat-streak',    icon: '🔥', big: streak,          label: 'day streak' });
+    boxes.push(             { cls: 'jr-stat-level',     icon: levelEmoji, big: 'L' + level,        label: 'reader level' });
+    if (scenesRead > 0)   boxes.push({ cls: 'jr-stat-scenes',    icon: '📖', big: scenesRead,      label: 'scene' + (scenesRead === 1 ? '' : 's') + ' read' });
+    if (booksFinished > 0) boxes.push({ cls: 'jr-stat-finished', icon: '🏆', big: booksFinished,   label: 'book' + (booksFinished === 1 ? '' : 's') + ' finished' });
+    el.innerHTML = boxes.map(function (b) {
+      return '<div class="jr-stat ' + b.cls + '">' +
+        '<div class="jr-stat-icon">' + b.icon + '</div>' +
+        '<div class="jr-stat-big">' + b.big + '</div>' +
+        '<div class="jr-stat-label">' + b.label + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // Initial paint of the splash library grid + stats.
   renderLibraryGrid();
+  renderJrStats();
 
   /* ---------- Tabs ---------- */
   Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (btn) {

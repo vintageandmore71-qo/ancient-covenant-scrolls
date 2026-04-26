@@ -112,6 +112,32 @@ input, select { font-family: inherit; }
   color: #fff;
   text-align: left;
 }
+/* Stats row — mirrors Attain's home-stats (cards due / streak / level)
+   but kid-coloured. Hidden until any counter is > 0. */
+.jr-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.jr-stat {
+  border-radius: 18px;
+  padding: 14px 12px 12px;
+  text-align: center;
+  color: #fff;
+  font-weight: 800;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+  border: 3px solid rgba(255,255,255,0.20);
+}
+.jr-stat-icon { font-size: 28pt; line-height: 1; }
+.jr-stat-big { font-size: 22pt; margin-top: 4px; line-height: 1; }
+.jr-stat-label { font-size: 11pt; opacity: 0.92; margin-top: 4px; line-height: 1.3; font-weight: 700; }
+.jr-stat-stars    { background: linear-gradient(135deg, #ffd166, #ff8c42); color: #14142a; }
+.jr-stat-streak   { background: linear-gradient(135deg, #ff6b6b, #d9376e); }
+.jr-stat-level    { background: linear-gradient(135deg, #7b6cff, #4d3eea); }
+.jr-stat-scenes   { background: linear-gradient(135deg, #4ea0ff, #2563eb); }
+.jr-stat-finished { background: linear-gradient(135deg, #2bbd7e, #0e7e51); }
+
 .jr-warning {
   background: #fce8e8;
   color: #6e1414;
@@ -165,6 +191,17 @@ input, select { font-family: inherit; }
   padding: 14px 16px;
   min-height: 52px;
   box-shadow: none;
+}
+a.jr-action {
+  display: inline-flex; align-items: center; justify-content: center;
+  text-decoration: none;
+  font-family: inherit;
+}
+.jr-back-attain {
+  background: linear-gradient(135deg, #2563eb, #7c3aed) !important;
+  color: #fff !important;
+  border-color: rgba(255,255,255,0.40) !important;
+  font-weight: 800;
 }
 .jr-bottom-row { margin-top: 8px; }
 
@@ -287,10 +324,12 @@ input, select { font-family: inherit; }
 .topbar-tools {
   display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;
 }
-.topbar-tools button {
+.topbar-tools button, .topbar-tools .tool-link {
   background: rgba(0,0,0,0.18); color: #fff; border: 2px solid rgba(255,255,255,0.5);
   padding: 8px 14px; border-radius: 999px; font-size: 13pt; font-weight: 700;
   min-height: 40px;
+  display: inline-flex; align-items: center; justify-content: center;
+  text-decoration: none; font-family: inherit;
 }
 
 /* ===== Scene strip ===== */
