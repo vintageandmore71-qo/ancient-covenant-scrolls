@@ -8374,6 +8374,8 @@
       '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#0a0a14;flex-shrink:0;">' +
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
+        '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17c</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -9301,6 +9303,23 @@
     document.getElementById('ve-back').addEventListener('click', function () {
       var existing = document.getElementById('__loadVideoEdit');
       if (existing) existing.remove();
+    });
+    /* Force-refresh — purges the SW cache for this origin and hard
+       reloads the page bypassing iOS Safari's lazy-update behaviour
+       that often leaves the editor on a stale build. */
+    document.getElementById('ve-refresh').addEventListener('click', async function () {
+      try {
+        if ('serviceWorker' in navigator) {
+          var regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map(function (r) { return r.update(); }));
+        }
+        if ('caches' in window) {
+          var keys = await caches.keys();
+          await Promise.all(keys.map(function (k) { return caches.delete(k); }));
+        }
+      } catch (e) {}
+      // Cache-busted reload — bypasses Safari memory cache too.
+      location.replace(location.pathname + '?_=' + Date.now());
     });
     document.getElementById('ve-help').addEventListener('click', function () {
       alert(
