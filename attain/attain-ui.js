@@ -471,9 +471,9 @@ function showUpload() {
   h += '<div class="upload-drop" id="upload-drop" role="button" tabindex="0" aria-label="Drop a file here or tap to browse">';
   h += '<div class="upload-drop-icon">\u{1F4C4}</div>';
   h += '<div class="upload-drop-text">Drop a file here or tap to browse</div>';
-  h += '<div class="upload-drop-sub">PDF \u2022 EPUB \u2022 DOCX \u2022 TXT \u2022 HTML</div>';
+  h += '<div class="upload-drop-sub">PDF \u2022 EPUB \u2022 DOCX \u2022 TXT \u2022 HTML \u2022 ZIP / PWA</div>';
   h += '</div>';
-  h += '<input type="file" id="upload-file" accept=".pdf,.epub,.docx,.txt,.md,.html,.htm" style="display:none">';
+  h += '<input type="file" id="upload-file" accept=".pdf,.epub,.docx,.txt,.md,.html,.htm,.zip,application/zip" style="display:none">';
 
   // OR divider — URL paste
   h += '<div class="upload-or">\u2014 or paste a URL \u2014</div>';

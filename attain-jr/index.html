@@ -58,9 +58,12 @@
   </section>
 </section>
 
-<!-- Hidden file picker for "Upload a Story" — accepts JSON for v1.
-     Future: ZIP / EPUB picture-book imports. -->
-<input id="jr-file-picker" type="file" accept=".json,application/json" style="display:none">
+<!-- Hidden file picker for "Upload a Story". Accepts:
+       .json    — Attain Jr story object (canonical format)
+       .html    — single-file HTML/PWA, parsed into auto scenes
+       .htm     — same
+       .zip     — multi-file PWA bundle, unzipped to find index.html -->
+<input id="jr-file-picker" type="file" accept=".json,.html,.htm,.zip,application/json,text/html,application/zip" style="display:none">
 
 <!-- Settings modal -->
 <div id="jr-settings-modal" class="modal" hidden>
@@ -199,6 +202,7 @@
 <!-- Celebration overlay (shown on right answers) -->
 <div id="celebrate" class="celebrate" hidden></div>
 
+<script src="lib-jszip.min.js"></script>
 <script src="attain-jr.js"></script>
 </body>
 </html>

@@ -163,12 +163,47 @@ function parseDOCX(file) {
   });
 }
 
+// ---- ZIP / PWA Parser ----
+// Accepts a multi-file PWA bundle. Finds the index.html (root preferred,
+// shallowest path otherwise) and pulls its text content out so it can
+// run through the same chapter detection as a plain HTML upload.
+function parseZIP(file) {
+  return new Promise(function (resolve, reject) {
+    if (!window.JSZip) { reject(new Error('JSZip not loaded — cannot parse ZIP')); return; }
+    var reader = new FileReader();
+    reader.onload = function (ev) {
+      window.JSZip.loadAsync(ev.target.result).then(function (zip) {
+        var candidates = [];
+        zip.forEach(function (path, entry) {
+          if (entry.dir) return;
+          if (/\.(html?|htm)$/i.test(path)) candidates.push(path);
+        });
+        if (!candidates.length) { reject(new Error('No HTML file found in ZIP')); return; }
+        candidates.sort(function (a, b) {
+          var ai = /(^|\/)index\.html?$/i.test(a) ? 0 : a.split('/').length;
+          var bi = /(^|\/)index\.html?$/i.test(b) ? 0 : b.split('/').length;
+          return ai - bi;
+        });
+        return zip.file(candidates[0]).async('string').then(function (html) {
+          var div = document.createElement('div');
+          div.innerHTML = html;
+          var text = div.textContent || div.innerText || '';
+          resolve(text);
+        });
+      }).catch(reject);
+    };
+    reader.onerror = function () { reject(new Error('Failed to read file')); };
+    reader.readAsArrayBuffer(file);
+  });
+}
+
 // ---- Unified File Parser ----
 function parseFile(file) {
   var name = file.name.toLowerCase();
   if (name.endsWith('.pdf')) return parsePDF(file);
   if (name.endsWith('.epub')) return parseEPUB(file);
   if (name.endsWith('.docx')) return parseDOCX(file);
+  if (name.endsWith('.zip')) return parseZIP(file);
   if (name.endsWith('.txt') || name.endsWith('.md') || name.endsWith('.html') || name.endsWith('.htm')) {
     return new Promise(function (resolve, reject) {
       var reader = new FileReader();

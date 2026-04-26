@@ -278,10 +278,14 @@
     var f = e.target.files && e.target.files[0];
     e.target.value = ''; // allow re-picking the same file
     if (!f) return;
-    if (!/\.json$/i.test(f.name)) {
-      alert('For now, please upload a .json story file. ZIP / EPUB picture-book imports are coming next.');
-      return;
-    }
+    var lower = f.name.toLowerCase();
+    if (/\.json$/.test(lower))           handleJsonImport(f);
+    else if (/\.(html?|htm)$/.test(lower)) handleHtmlImport(f);
+    else if (/\.zip$/.test(lower))       handleZipImport(f);
+    else alert('Pick a .json story, an .html / .htm web app, or a .zip PWA bundle.');
+  });
+
+  function handleJsonImport(f) {
     var rd = new FileReader();
     rd.onload = function () {
       try {
@@ -290,20 +294,141 @@
           alert('That JSON does not look like an Attain Jr story (needs at least a title and scenes).');
           return;
         }
-        var lib = loadLibrary();
-        var id = bookId(parsed);
-        var idx = -1;
-        for (var i = 0; i < lib.length; i++) { if (bookId(lib[i]) === id) { idx = i; break; } }
-        if (idx >= 0) lib[idx] = parsed; else lib.push(parsed);
-        saveLibrary(lib);
-        renderLibraryGrid();
-        alert('Story added: ' + parsed.title);
+        addBookToLibrary(parsed);
       } catch (err) {
         alert('Could not read that file. Make sure it is valid JSON.');
       }
     };
     rd.readAsText(f);
-  });
+  }
+
+  function handleHtmlImport(f) {
+    var rd = new FileReader();
+    rd.onload = function () {
+      var book = htmlToBook(rd.result, f.name);
+      if (!book) { alert('Could not read that HTML file.'); return; }
+      addBookToLibrary(book);
+    };
+    rd.readAsText(f);
+  }
+
+  function handleZipImport(f) {
+    if (!window.JSZip) { alert('JSZip is missing — please refresh the page.'); return; }
+    var rd = new FileReader();
+    rd.onload = function () {
+      window.JSZip.loadAsync(rd.result).then(function (zip) {
+        // Find an index.html (root preferred) or first .html file.
+        var candidates = [];
+        zip.forEach(function (path, entry) {
+          if (entry.dir) return;
+          if (/\.(html?|htm)$/i.test(path)) candidates.push(path);
+        });
+        if (!candidates.length) { alert('No HTML file found in that ZIP.'); return; }
+        candidates.sort(function (a, b) {
+          var ai = /(^|\/)index\.html?$/i.test(a) ? 0 : a.split('/').length;
+          var bi = /(^|\/)index\.html?$/i.test(b) ? 0 : b.split('/').length;
+          return ai - bi;
+        });
+        return zip.file(candidates[0]).async('string').then(function (html) {
+          var book = htmlToBook(html, f.name);
+          if (!book) { alert('Could not parse the HTML inside the ZIP.'); return; }
+          // Look for a manifest.json or sibling files we can pull a cover image from.
+          var coverPath = null;
+          zip.forEach(function (path) {
+            if (coverPath) return;
+            if (/(^|\/)icon\.(png|jpe?g|webp)$/i.test(path)) coverPath = path;
+            else if (/(^|\/)cover\.(png|jpe?g|webp)$/i.test(path)) coverPath = path;
+            else if (/(^|\/)splash\.(png|jpe?g|webp)$/i.test(path)) coverPath = path;
+          });
+          if (coverPath) {
+            return zip.file(coverPath).async('base64').then(function (b64) {
+              var ext = coverPath.split('.').pop().toLowerCase();
+              var mime = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg'
+                : ext === 'webp' ? 'image/webp' : 'image/png';
+              book.cover = 'data:' + mime + ';base64,' + b64;
+              addBookToLibrary(book);
+            });
+          }
+          addBookToLibrary(book);
+        });
+      }).catch(function () { alert('Could not unzip that file.'); });
+    };
+    rd.readAsArrayBuffer(f);
+  }
+
+  /* Convert an HTML document into an Attain Jr book object.
+     Heuristic: split by <h1>/<h2> headings into scenes; everything
+     between two headings becomes that scene's body. Each <p> becomes
+     a paragraph block, each <img> becomes an image block. Title comes
+     from <title> or first <h1>. */
+  function htmlToBook(html, filename) {
+    if (!html || typeof html !== 'string') return null;
+    var doc;
+    try { doc = new DOMParser().parseFromString(html, 'text/html'); }
+    catch (e) { return null; }
+    if (!doc || !doc.body) return null;
+    var title = (doc.querySelector('title') && doc.querySelector('title').textContent.trim()) ||
+                (doc.querySelector('h1') && doc.querySelector('h1').textContent.trim()) ||
+                filename.replace(/\.(html?|htm|zip)$/i, '');
+    // Walk the body in document order and build scenes.
+    var scenes = [];
+    var cur = { id: 'intro', title: 'Beginning', color: 'blue', sfx: [], body: [] };
+    var sceneCount = 0;
+    var colors = ['blue', 'orange', 'purple', 'green', 'pink', 'teal'];
+    function flush() {
+      if (cur.body.length) scenes.push(cur);
+    }
+    var nodes = doc.body.querySelectorAll('h1, h2, h3, p, blockquote, li, img');
+    Array.prototype.forEach.call(nodes, function (n) {
+      var tag = n.tagName.toLowerCase();
+      if (tag === 'h1' || tag === 'h2') {
+        flush();
+        sceneCount++;
+        cur = {
+          id: 's' + sceneCount,
+          title: (n.textContent || '').trim().slice(0, 40) || ('Scene ' + sceneCount),
+          color: colors[sceneCount % colors.length],
+          sfx: [],
+          body: []
+        };
+      } else if (tag === 'h3') {
+        var t = (n.textContent || '').trim();
+        if (t) cur.body.push({ type: 'highlight', text: t });
+      } else if (tag === 'img' && n.getAttribute('src')) {
+        cur.body.push({ type: 'img', src: n.getAttribute('src'), alt: n.getAttribute('alt') || '' });
+      } else if (tag === 'blockquote') {
+        var qt = (n.textContent || '').trim();
+        if (qt) cur.body.push({ type: 'highlight', text: qt });
+      } else {
+        var t2 = (n.textContent || '').trim();
+        if (t2) cur.body.push({ type: 'p', text: t2 });
+      }
+    });
+    flush();
+    if (!scenes.length) return null;
+    return {
+      title: title,
+      author: 'Imported',
+      ageBand: '6-8',
+      cover: '',
+      characters: [],
+      storyworld: { setting: '', time: '', lesson: '' },
+      gallery: [],
+      scenes: scenes,
+      activities: []
+    };
+  }
+
+  function addBookToLibrary(b) {
+    var lib = loadLibrary();
+    var id = bookId(b);
+    var idx = -1;
+    for (var i = 0; i < lib.length; i++) { if (bookId(lib[i]) === id) { idx = i; break; } }
+    if (idx >= 0) lib[idx] = b; else lib.push(b);
+    saveLibrary(lib);
+    renderLibraryGrid();
+    alert('Story added: ' + b.title);
+  }
 
   /* Export now: write the entire library + progress + settings to a
      downloadable JSON file. Same shape as the import format so a
