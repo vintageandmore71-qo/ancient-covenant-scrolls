@@ -5699,8 +5699,9 @@
         '<label style="font-size:12.5px;color:#a0a0b0;">View ' +
           '<select id="ll-view" style="margin-left:6px;padding:6px 8px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:13px;">' +
             '<option value="schema"' + (settings.view === 'schema' ? ' selected' : '') + '>Schema overview (whole book)</option>' +
-            '<option value="spread"' + (settings.view === 'spread' ? ' selected' : '') + '>Side-by-side spreads (full size)</option>' +
-            '<option value="stacked"' + (settings.view === 'stacked' ? ' selected' : '') + '>Stacked pages (full size)</option>' +
+            '<option value="flip"' + (settings.view === 'flip' ? ' selected' : '') + '>Flip book (one spread at a time)</option>' +
+            '<option value="spread"' + (settings.view === 'spread' ? ' selected' : '') + '>Side-by-side spreads (scroll all)</option>' +
+            '<option value="stacked"' + (settings.view === 'stacked' ? ' selected' : '') + '>Stacked pages (scroll all)</option>' +
           '</select>' +
         '</label>' +
         '<label style="font-size:12.5px;color:#a0a0b0;display:inline-flex;align-items:center;gap:4px;">' +
@@ -5847,7 +5848,8 @@
     // story spreads in between.
     var isPicBook = !!PICTURE_BOOK_TEMPLATES[s.bookType];
     var schemaView = s.view === 'schema';
-    var spreadView = s.view === 'spread' || (s.view !== 'stacked' && s.view !== 'schema');
+    var flipView = s.view === 'flip';
+    var spreadView = s.view === 'spread' || flipView;
 
     var css =
       '*{box-sizing:border-box;}' +
@@ -5934,7 +5936,44 @@
     }
 
     var stackHtml = '';
-    if (schemaView) {
+    if (flipView) {
+      // Flip book -- ONE spread visible at a time, like reading a real
+      // picture book. Prev / Next buttons move through the spreads.
+      // Page 1 alone (recto), then [2|3], [4|5], ..., last page alone.
+      var spreads = [];
+      spreads.push('<div class="spread-row"><div class="spacer"></div>' + renderPage(pagesHtml[0], 0) + '</div>');
+      for (var pf = 1; pf < pagesHtml.length - 1; pf += 2) {
+        var lf = renderPage(pagesHtml[pf], pf);
+        var rf = (pf + 1 < pagesHtml.length - 1) ? renderPage(pagesHtml[pf + 1], pf + 1) :
+                  ((pf + 1 < pagesHtml.length) ? renderPage(pagesHtml[pf + 1], pf + 1) : '<div class="spacer"></div>');
+        spreads.push('<div class="spread-row">' + lf + rf + '</div>');
+      }
+      // Back cover on its own row when total pages is even (so we
+      // didn't already render it as the right-hand of the last pair)
+      if (pagesHtml.length % 2 === 0 && pagesHtml.length > 1) {
+        var lastIdx = pagesHtml.length - 1;
+        spreads.push('<div class="spread-row"><div class="spacer"></div>' + renderPage(pagesHtml[lastIdx], lastIdx) + '</div>');
+      }
+      stackHtml +=
+        '<div id="flip-stage">' +
+          spreads.map(function (s, i) {
+            return '<div class="flip-page" data-flip-idx="' + i + '" style="' + (i === 0 ? 'display:flex;' : 'display:none;') + '">' + s + '</div>';
+          }).join('') +
+        '</div>' +
+        '<div id="flip-controls">' +
+          '<button id="flip-prev" type="button">&larr; Prev</button>' +
+          '<span id="flip-indicator">Spread 1 of ' + spreads.length + '</span>' +
+          '<button id="flip-next" type="button">Next &rarr;</button>' +
+        '</div>';
+      css += '#flip-stage{padding:24px;display:flex;flex-direction:column;align-items:center;gap:0;background:#444;}' +
+        '.flip-page{display:none;}' +
+        '.flip-page.on{display:flex;}' +
+        '#flip-controls{position:sticky;bottom:0;display:flex;align-items:center;justify-content:center;gap:18px;background:#1a1a2e;color:#f0f0f0;padding:10px;border-top:1px solid #2a2a40;font:14px -apple-system,sans-serif;z-index:10;}' +
+        '#flip-controls button{background:#7b6cff;border:none;color:#12121a;padding:10px 18px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;}' +
+        '#flip-controls button:disabled{opacity:0.4;cursor:default;}' +
+        '#flip-indicator{font-weight:600;}' +
+        '@media print { #flip-controls{display:none;} .flip-page{display:flex !important;} }';
+    } else if (schemaView) {
       // Schema overview -- the whole book visible at once, like a
       // picture-book self-publishing infographic. Pages render as
       // small thumbnails in a flex grid; spreads pair visually.
@@ -6015,12 +6054,51 @@
       stackHtml = pagesHtml.map(renderPage).join('');
     }
 
+    // Flip-book interactivity: keyboard arrows + swipe + prev/next.
+    // Embedded as inline JS so the iframe owns the navigation; the
+    // outer Load app stays uninvolved.
+    var flipScript = flipView ?
+      '<script>(function(){' +
+        'var idx = 0;' +
+        'var pages = document.querySelectorAll(".flip-page");' +
+        'var total = pages.length;' +
+        'var prev = document.getElementById("flip-prev");' +
+        'var next = document.getElementById("flip-next");' +
+        'var ind = document.getElementById("flip-indicator");' +
+        'function show(i) {' +
+          'if (i < 0 || i >= total) return;' +
+          'idx = i;' +
+          'for (var j = 0; j < pages.length; j++) { pages[j].style.display = j === idx ? "flex" : "none"; }' +
+          'ind.textContent = "Spread " + (idx + 1) + " of " + total;' +
+          'prev.disabled = idx === 0;' +
+          'next.disabled = idx === total - 1;' +
+          'window.scrollTo(0, 0);' +
+        '}' +
+        'prev.addEventListener("click", function(){ show(idx - 1); });' +
+        'next.addEventListener("click", function(){ show(idx + 1); });' +
+        'document.addEventListener("keydown", function(e){' +
+          'if (e.key === "ArrowLeft") show(idx - 1);' +
+          'else if (e.key === "ArrowRight") show(idx + 1);' +
+        '});' +
+        'var startX = null;' +
+        'document.addEventListener("touchstart", function(e){ if (e.touches && e.touches[0]) startX = e.touches[0].clientX; }, {passive:true});' +
+        'document.addEventListener("touchend", function(e){' +
+          'if (startX == null) return;' +
+          'var dx = (e.changedTouches[0].clientX - startX);' +
+          'if (Math.abs(dx) > 60) { if (dx < 0) show(idx + 1); else show(idx - 1); }' +
+          'startX = null;' +
+        '}, {passive:true});' +
+        'show(0);' +
+      '})();<\/script>'
+      : '';
+
     var html =
       '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
       '<title>Print Layout Preview</title>' +
       '<style>' + css + '</style></head><body>' +
       '<div class="page-stack">' + stackHtml + '</div>' +
       (s.bleed ? '<div class="legend"><span class="swatch"></span>Trim line (dashed orange) &mdash; KDP cuts here. Anything outside is bleed.</div>' : '') +
+      flipScript +
       '</body></html>';
     return html;
   }
