@@ -8422,6 +8422,14 @@
                 '<div class="ve-clip-handle ve-handle-right" id="ve-handle-right"></div>' +
                 '<div class="ve-clip-duration" id="ve-clip-duration">0.00s</div>' +
               '</div>' +
+              // Floating quick toolbar — pops above the clip when it
+              // is tapped/selected. Mirrors VN's mini-action pill.
+              '<div class="ve-clip-quick" id="ve-clip-quick" hidden>' +
+                '<button class="ve-quick-btn" data-clip-action="split" aria-label="Split">&#9986;</button>' +
+                '<button class="ve-quick-btn" data-clip-action="duplicate" aria-label="Duplicate">&#10063;</button>' +
+                '<button class="ve-quick-btn" data-clip-action="replace" aria-label="Replace">&#8634;</button>' +
+                '<button class="ve-quick-btn" data-clip-action="delete" aria-label="Delete">&#128465;</button>' +
+              '</div>' +
               '<div class="ve-clip-playhead" id="ve-clip-playhead"></div>' +
             '</div>' +
           '</div>' +
@@ -8494,6 +8502,20 @@
         '<button class="ve-action" data-action="freeze"><span class="ve-act-icon">&#10052;</span><span class="ve-act-lbl">Freeze</span></button>' +
         '<button class="ve-action" data-action="pip-track"><span class="ve-act-icon">&#128301;</span><span class="ve-act-lbl">PiP Track</span></button>' +
       '</div>' +
+      // ===== Context action bar — slides in OVER the bottom toolbar
+      // when a clip is selected. Hidden by default. Mirrors VN's
+      // contextual edit set: Edit / Split / Replace / Speed /
+      // Opacity / Duplicate / Delete.
+      '<div id="ve-context" class="ve-context" hidden>' +
+        '<button class="ve-action" data-clip-action="edit"><span class="ve-act-icon">&#9998;</span><span class="ve-act-lbl">Edit</span></button>' +
+        '<button class="ve-action" data-clip-action="split"><span class="ve-act-icon">&#9986;</span><span class="ve-act-lbl">Split</span></button>' +
+        '<button class="ve-action" data-clip-action="replace"><span class="ve-act-icon">&#8634;</span><span class="ve-act-lbl">Replace</span></button>' +
+        '<button class="ve-action" data-clip-action="speed"><span class="ve-act-icon">&#9201;</span><span class="ve-act-lbl">Speed</span></button>' +
+        '<button class="ve-action" data-clip-action="opacity"><span class="ve-act-icon">&#9680;</span><span class="ve-act-lbl">Opacity</span></button>' +
+        '<button class="ve-action" data-clip-action="duplicate"><span class="ve-act-icon">&#10063;</span><span class="ve-act-lbl">Duplicate</span></button>' +
+        '<button class="ve-action" data-clip-action="delete"><span class="ve-act-icon">&#128465;</span><span class="ve-act-lbl">Delete</span></button>' +
+        '<button class="ve-action ve-context-done" data-clip-action="deselect"><span class="ve-act-icon">&#10003;</span><span class="ve-act-lbl">Done</span></button>' +
+      '</div>' +
       // ===== Recording progress overlay =====
       '<div id="ve-progress" style="display:none;position:absolute;left:14px;right:14px;bottom:90px;align-items:center;gap:10px;background:rgba(26,26,38,0.95);border-radius:12px;padding:12px 14px;border:1px solid #2a2a40;backdrop-filter:blur(8px);z-index:5;">' +
         '<div style="flex:1;height:8px;background:#1a1a26;border-radius:4px;overflow:hidden;"><div id="ve-progress-fill" style="height:100%;width:0%;background:linear-gradient(90deg,#ff5ea3,#fbbf24,#22c55e,#4ea0ff,#a18cff);transition:width 0.15s;"></div></div>' +
@@ -8511,7 +8533,19 @@
       '#__loadVideoEdit .ve-track-cover{background:#1a1a26;border:1px dashed #3a3a55;color:#cfcfdc;width:62px;height:42px;border-radius:6px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}' +
       '#__loadVideoEdit .ve-track-body{flex:1;min-width:0;height:42px;background:#0e0e18;border-radius:6px;display:flex;align-items:center;padding:0 10px;color:#7b7b8c;font-size:13px;overflow:hidden;position:relative;}' +
       '#__loadVideoEdit .ve-track-empty{user-select:none;}' +
-      '#__loadVideoEdit .ve-clip-strip{position:relative;flex:1;height:48px;background:#0e0e18;border-radius:6px;overflow:hidden;cursor:ew-resize;touch-action:none;}' +
+      '#__loadVideoEdit .ve-clip-strip{position:relative;flex:1;height:48px;background:#0e0e18;border-radius:6px;cursor:ew-resize;touch-action:none;}' +
+      '#__loadVideoEdit .ve-clip-strip.ve-selected{box-shadow:0 0 0 3px #fbbf24, 0 0 24px rgba(251,191,36,0.55);}' +
+      '#__loadVideoEdit .ve-clip-strip.ve-selected .ve-clip-trim{border-color:#fff;border-width:3px;}' +
+      '#__loadVideoEdit .ve-clip-quick{position:absolute;top:-46px;left:50%;transform:translateX(-50%);background:#1d6fff;border-radius:14px;padding:4px 6px;display:flex;gap:2px;box-shadow:0 6px 18px rgba(0,0,0,0.45);z-index:6;animation:vePopIn 0.18s ease-out;}' +
+      '#__loadVideoEdit .ve-clip-quick::after{content:"";position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);border-left:7px solid transparent;border-right:7px solid transparent;border-top:7px solid #1d6fff;}' +
+      '#__loadVideoEdit .ve-quick-btn{background:transparent;border:none;color:#fff;font-size:18px;width:36px;height:36px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;}' +
+      '#__loadVideoEdit .ve-quick-btn:active{background:rgba(255,255,255,0.18);}' +
+      '@keyframes vePopIn{from{opacity:0;transform:translateX(-50%) translateY(4px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}' +
+      '#__loadVideoEdit .ve-context{position:absolute;left:0;right:0;bottom:0;background:#1a1a26;padding:10px 8px max(10px,env(safe-area-inset-bottom));border-top:1px solid #2a2a40;display:flex;align-items:center;gap:14px;overflow-x:auto;scrollbar-width:none;z-index:8;}' +
+      '#__loadVideoEdit .ve-context::-webkit-scrollbar{display:none;}' +
+      '#__loadVideoEdit .ve-context-done .ve-act-icon{background:#1d6fff;color:#fff;border-color:#1d6fff;}' +
+      '#__loadVideoEdit.ve-clip-active #ve-context{display:flex;}' +
+      '#__loadVideoEdit.ve-clip-active #ve-actions{display:none;}' +
       '#__loadVideoEdit .ve-clip-thumbs{position:absolute;top:0;bottom:0;left:0;right:0;display:flex;}' +
       '#__loadVideoEdit .ve-clip-thumbs img{flex:1;width:0;height:100%;object-fit:cover;display:block;border-right:1px solid rgba(0,0,0,0.25);}' +
       '#__loadVideoEdit .ve-clip-thumbs img:last-child{border-right:none;}' +
@@ -8806,6 +8840,78 @@
       if (wasPlaying) video.play().catch(function () {});
     }
     if (clipStripEl) clipStripEl.addEventListener('pointerdown', onScrubStart);
+
+    /* Clip selection — tap the strip to enter clip-edit mode. The
+       strip glows yellow, a floating quick-toolbar pops above it,
+       and the bottom 26-button toolbar swaps to the contextual
+       Edit/Split/Replace/Speed/Opacity/Duplicate/Delete bar. Tap
+       outside the strip (or Done) to leave selection. */
+    var quickEl = document.getElementById('ve-clip-quick');
+    function selectClip() {
+      if (!clipStripEl) return;
+      clipStripEl.classList.add('ve-selected');
+      wrap.classList.add('ve-clip-active');
+      if (quickEl) quickEl.hidden = false;
+    }
+    function deselectClip() {
+      if (clipStripEl) clipStripEl.classList.remove('ve-selected');
+      wrap.classList.remove('ve-clip-active');
+      if (quickEl) quickEl.hidden = true;
+    }
+    // Differentiate a tap (select) from a drag (scrub). We track the
+    // pointer-down timestamp + start coords; if movement is small and
+    // duration is short, treat as a selection tap.
+    var tapStart = 0, tapX = 0, tapY = 0;
+    if (clipStripEl) {
+      clipStripEl.addEventListener('pointerdown', function (e) {
+        tapStart = Date.now();
+        tapX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+        tapY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+      });
+      clipStripEl.addEventListener('pointerup', function (e) {
+        var dx = Math.abs((e.clientX || 0) - tapX);
+        var dy = Math.abs((e.clientY || 0) - tapY);
+        var dt = Date.now() - tapStart;
+        if (dt < 250 && dx < 8 && dy < 8) selectClip();
+      });
+    }
+    // Tap-outside-the-clip clears selection. Listen on document; if
+    // the click target isn't inside the strip or the quick toolbar
+    // or the context bar, deselect.
+    document.addEventListener('pointerdown', function (e) {
+      if (!wrap.classList.contains('ve-clip-active')) return;
+      if (e.target.closest('#ve-clip-strip')) return;
+      if (e.target.closest('#ve-clip-quick')) return;
+      if (e.target.closest('#ve-context')) return;
+      deselectClip();
+    }, true);
+
+    /* Context + quick-toolbar action handler. Wired today:
+         deselect → close clip-edit mode
+         delete   → after confirm, removes the editor entirely
+                    (single-clip MVP — multi-clip splice lands later)
+       Everything else toasts a one-line "coming next" descriptor. */
+    function onClipAction(act) {
+      if (act === 'deselect') return deselectClip();
+      if (act === 'edit')      { showPanel('ve-text-panel'); return; }
+      if (act === 'split')     { toast('Split: drag the yellow trim handles to slice the clip.', false); return; }
+      if (act === 'replace')   { toast('Replace: drop a new file from the Library — coming next.', false); return; }
+      if (act === 'speed')     { toast('Speed: 0.25x – 4x slider coming next.', false); return; }
+      if (act === 'opacity')   { toast('Opacity: clip transparency slider coming next.', false); return; }
+      if (act === 'duplicate') { toast('Duplicate: clones the clip on the timeline — coming next.', false); return; }
+      if (act === 'delete') {
+        if (!confirm('Delete this clip? The editor will close.')) return;
+        var existing = document.getElementById('__loadVideoEdit');
+        if (existing) existing.remove();
+        return;
+      }
+    }
+    Array.prototype.forEach.call(wrap.querySelectorAll('[data-clip-action]'), function (b) {
+      b.addEventListener('click', function (e) {
+        e.stopPropagation();
+        onClipAction(b.getAttribute('data-clip-action'));
+      });
+    });
     // Surface video-load errors loudly. iPad Safari rejects some
     // codecs (HEVC in non-MP4 wrapper, certain ProRes) silently —
     // before this handler the user just saw "Play does nothing".
