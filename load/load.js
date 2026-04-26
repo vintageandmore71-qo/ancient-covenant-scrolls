@@ -8562,9 +8562,14 @@
       '#__loadVideoEdit .ve-track-cover{background:#1a1a26;border:1px dashed #3a3a55;color:#cfcfdc;width:62px;height:42px;border-radius:6px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}' +
       '#__loadVideoEdit .ve-track-body{flex:1;min-width:0;height:42px;background:#0e0e18;border-radius:6px;display:flex;align-items:center;padding:0 10px;color:#7b7b8c;font-size:13px;overflow:hidden;position:relative;}' +
       '#__loadVideoEdit .ve-track-empty{user-select:none;}' +
-      '#__loadVideoEdit .ve-clip-strip{position:relative;flex:1;height:48px;background:#0e0e18;border-radius:6px;cursor:ew-resize;touch-action:none;}' +
+      '#__loadVideoEdit .ve-clip-strip{position:relative;flex:1;height:48px;background:#1a1a26;border-radius:6px;cursor:ew-resize;touch-action:none;}' +
       '#__loadVideoEdit .ve-clip-strip.ve-selected{box-shadow:0 0 0 3px #fbbf24, 0 0 24px rgba(251,191,36,0.55);}' +
       '#__loadVideoEdit .ve-clip-strip.ve-selected .ve-clip-trim{border-color:#fff;border-width:3px;}' +
+      '#__loadVideoEdit .ve-clip-thumbs{position:absolute;top:0;bottom:0;left:0;right:0;display:flex;border-radius:6px;overflow:hidden;}' +
+      '#__loadVideoEdit .ve-clip-thumbs img{flex:1;width:0;height:100%;object-fit:cover;display:block;border-right:1px solid rgba(0,0,0,0.30);}' +
+      '#__loadVideoEdit .ve-clip-thumbs img:last-child{border-right:none;}' +
+      '#__loadVideoEdit .ve-clip-thumbs.loading::before{content:"Loading frames…";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#888;font-size:12px;font-weight:600;letter-spacing:0.05em;}' +
+      '#__loadVideoEdit .ve-clip-trim{position:absolute;top:0;bottom:0;left:0;right:0;border:2px solid #fbbf24;border-radius:6px;background:transparent;pointer-events:none;}' +
       '#__loadVideoEdit .ve-clip-quick{position:absolute;top:-46px;left:50%;transform:translateX(-50%);background:#1d6fff;border-radius:14px;padding:4px 6px;display:flex;gap:2px;box-shadow:0 6px 18px rgba(0,0,0,0.45);z-index:6;animation:vePopIn 0.18s ease-out;}' +
       '#__loadVideoEdit .ve-clip-quick::after{content:"";position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);border-left:7px solid transparent;border-right:7px solid transparent;border-top:7px solid #1d6fff;}' +
       '#__loadVideoEdit .ve-quick-btn{background:transparent;border:none;color:#fff;font-size:18px;width:36px;height:36px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;}' +
@@ -8575,10 +8580,6 @@
       '#__loadVideoEdit .ve-context-done .ve-act-icon{background:#1d6fff;color:#fff;border-color:#1d6fff;}' +
       '#__loadVideoEdit.ve-clip-active #ve-context{display:flex;}' +
       '#__loadVideoEdit.ve-clip-active #ve-actions{display:none;}' +
-      '#__loadVideoEdit .ve-clip-thumbs{position:absolute;top:0;bottom:0;left:0;right:0;display:flex;}' +
-      '#__loadVideoEdit .ve-clip-thumbs img{flex:1;width:0;height:100%;object-fit:cover;display:block;border-right:1px solid rgba(0,0,0,0.25);}' +
-      '#__loadVideoEdit .ve-clip-thumbs img:last-child{border-right:none;}' +
-      '#__loadVideoEdit .ve-clip-trim{position:absolute;top:0;bottom:0;left:0;right:0;border:2px solid #fbbf24;border-radius:6px;background:rgba(251,191,36,0.06);pointer-events:none;}' +
       '#__loadVideoEdit .ve-clip-handle{position:absolute;top:-3px;bottom:-3px;width:18px;background:#fbbf24;cursor:ew-resize;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#1a1a26;font-size:14px;font-weight:900;pointer-events:auto;touch-action:none;box-shadow:0 0 0 1px rgba(0,0,0,0.25);}' +
       '#__loadVideoEdit .ve-clip-handle::before{content:attr(data-time);position:absolute;top:-22px;background:#1a1a26;color:#fbbf24;font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap;pointer-events:none;}' +
       '#__loadVideoEdit .ve-handle-left{left:-9px;}' +
@@ -8826,45 +8827,90 @@
     });
 
     /* Pull N evenly-spaced frame thumbnails out of the video and
-       render them into the yellow timeline strip. Uses an offscreen
-       canvas + the video's existing seek pipeline. Each seek waits
-       on a "seeked" event before drawing so we never paint the wrong
-       frame. */
+       render them into the yellow timeline strip. Hardened against
+       iPad Safari's lazy-load: waits for canplay (readyState >= 3)
+       before seeking so drawImage doesn't pull an empty frame. Each
+       seek has a 1.5s timeout — if Safari never fires "seeked", we
+       reuse the previous thumbnail rather than stalling forever. */
     function generateClipThumbnails(vid, count) {
       var thumbsEl = document.getElementById('ve-clip-thumbs');
       if (!thumbsEl) return Promise.resolve();
       thumbsEl.innerHTML = '';
+      thumbsEl.classList.add('loading');
       var d = vid.duration;
-      if (!d || isNaN(d) || d <= 0) return Promise.resolve();
-      var off = document.createElement('canvas');
-      off.width = 96; off.height = 56;
-      var octx = off.getContext('2d');
-      var savedTime = vid.currentTime;
-      var wasMuted = vid.muted;
-      vid.muted = true;
-      var i = 0;
-      function drawNext() {
-        if (i >= count) {
-          vid.currentTime = savedTime;
-          vid.muted = wasMuted;
-          return Promise.resolve();
-        }
-        var t = (d * (i + 0.5)) / count;
-        return new Promise(function (resolve) {
-          var onSeeked = function () {
-            vid.removeEventListener('seeked', onSeeked);
-            try { octx.drawImage(vid, 0, 0, off.width, off.height); } catch (e) {}
-            var img = document.createElement('img');
-            try { img.src = off.toDataURL('image/jpeg', 0.55); } catch (e) {}
-            thumbsEl.appendChild(img);
-            i++;
-            resolve();
-          };
-          vid.addEventListener('seeked', onSeeked);
-          try { vid.currentTime = t; } catch (e) { i++; resolve(); }
-        }).then(drawNext);
+      if (!d || isNaN(d) || d <= 0) {
+        thumbsEl.classList.remove('loading');
+        return Promise.resolve();
       }
-      return drawNext();
+      function whenReady() {
+        // readyState 3 = HAVE_FUTURE_DATA, enough to draw a frame.
+        if (vid.readyState >= 3) return Promise.resolve();
+        return new Promise(function (resolve) {
+          var done = false;
+          var finish = function () { if (!done) { done = true; resolve(); } };
+          vid.addEventListener('canplay', finish, { once: true });
+          // Also trigger a load if Safari is being lazy.
+          try { vid.load(); } catch (e) {}
+          // Hard cap: 3s, otherwise we draw whatever we have.
+          setTimeout(finish, 3000);
+        });
+      }
+      return whenReady().then(function () {
+        var off = document.createElement('canvas');
+        off.width = 96; off.height = 56;
+        var octx = off.getContext('2d');
+        var savedTime = vid.currentTime;
+        var wasMuted = vid.muted;
+        vid.muted = true;
+        var lastDataUrl = '';
+        var i = 0;
+        function drawNext() {
+          if (i >= count) {
+            try { vid.currentTime = savedTime; } catch (e) {}
+            vid.muted = wasMuted;
+            thumbsEl.classList.remove('loading');
+            return Promise.resolve();
+          }
+          var t = (d * (i + 0.5)) / count;
+          return new Promise(function (resolve) {
+            var done = false;
+            var finish = function () { if (done) return; done = true; resolve(); };
+            var onSeeked = function () {
+              vid.removeEventListener('seeked', onSeeked);
+              try { octx.drawImage(vid, 0, 0, off.width, off.height); } catch (e) {}
+              var img = document.createElement('img');
+              try { lastDataUrl = off.toDataURL('image/jpeg', 0.55); } catch (e) {}
+              if (lastDataUrl) img.src = lastDataUrl;
+              thumbsEl.appendChild(img);
+              i++;
+              finish();
+            };
+            vid.addEventListener('seeked', onSeeked);
+            try { vid.currentTime = t; }
+            catch (e) {
+              vid.removeEventListener('seeked', onSeeked);
+              if (lastDataUrl) {
+                var img2 = document.createElement('img');
+                img2.src = lastDataUrl;
+                thumbsEl.appendChild(img2);
+              }
+              i++; finish(); return;
+            }
+            // 1.5s per-frame watchdog — Safari sometimes never fires
+            // "seeked" for a particular timestamp, so we move on.
+            setTimeout(function () {
+              vid.removeEventListener('seeked', onSeeked);
+              if (lastDataUrl) {
+                var img3 = document.createElement('img');
+                img3.src = lastDataUrl;
+                thumbsEl.appendChild(img3);
+              }
+              i++; finish();
+            }, 1500);
+          }).then(drawNext);
+        }
+        return drawNext();
+      });
     }
 
     /* Drag-to-scrub on the timeline strip — VN behaviour. Pointer
