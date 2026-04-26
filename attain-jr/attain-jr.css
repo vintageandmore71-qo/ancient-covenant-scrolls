@@ -294,16 +294,13 @@ a.jr-action {
 #topbar {
   position: sticky; top: 0; z-index: 50;
   background: var(--jr-rainbow);
-  padding: 10px 12px 12px;
-  display: flex; flex-direction: column; gap: 8px;
-  border-bottom: 4px solid rgba(0,0,0,0.18);
+  padding: 6px 10px 8px;
+  display: flex; flex-direction: column; gap: 6px;
+  border-bottom: 2px solid rgba(0,0,0,0.18);
 }
 .topbar-tabs {
-  display: flex; gap: 8px; overflow-x: auto;
-  scrollbar-width: none; padding-bottom: 4px;
-  /* Right edge fade hints at horizontal scroll on iPad portrait
-     where 5 tabs do not fit in one row. Activities is the rightmost
-     tab and was getting cut off without any visual cue. */
+  display: flex; gap: 6px; overflow-x: auto;
+  scrollbar-width: none; padding-bottom: 2px;
   -webkit-mask-image: linear-gradient(to right, #000 92%, rgba(0,0,0,0.5) 100%);
           mask-image: linear-gradient(to right, #000 92%, rgba(0,0,0,0.5) 100%);
 }
@@ -312,27 +309,27 @@ a.jr-action {
   flex-shrink: 0;
   background: rgba(255,255,255,0.92);
   color: var(--jr-ink);
-  border: 3px solid #fff;
+  border: 2px solid #fff;
   border-radius: 999px;
-  padding: 10px 16px;
-  font-size: 14pt;
+  padding: 6px 14px;
+  font-size: 12pt;
   font-weight: 800;
-  min-height: 48px;
-  box-shadow: 0 3px 0 rgba(0,0,0,0.12), 0 6px 14px rgba(0,0,0,0.15);
+  min-height: 34px;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.10), 0 3px 8px rgba(0,0,0,0.10);
 }
 .tab.on {
   background: linear-gradient(180deg, #ffd166, #ff8c42);
   color: var(--jr-ink);
   border-color: #fff;
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.7), 0 4px 0 rgba(0,0,0,0.18), 0 8px 18px rgba(255,140,80,0.55);
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.7), 0 2px 0 rgba(0,0,0,0.18), 0 4px 12px rgba(255,140,80,0.50);
 }
 .topbar-tools {
-  display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;
+  display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap;
 }
 .topbar-tools button, .topbar-tools .tool-link {
-  background: rgba(0,0,0,0.18); color: #fff; border: 2px solid rgba(255,255,255,0.5);
-  padding: 8px 14px; border-radius: 999px; font-size: 13pt; font-weight: 700;
-  min-height: 40px;
+  background: rgba(0,0,0,0.18); color: #fff; border: 1.5px solid rgba(255,255,255,0.50);
+  padding: 4px 10px; border-radius: 999px; font-size: 11pt; font-weight: 700;
+  min-height: 28px;
   display: inline-flex; align-items: center; justify-content: center;
   text-decoration: none; font-family: inherit;
 }
@@ -457,42 +454,74 @@ a.jr-action {
   box-shadow: 0 0 0 3px rgba(255,200,80,0.5);
 }
 
-/* ===== Bottom audio bar ===== */
+/* When the audio sidebar is on screen (after splash dismiss), pad the
+   LEFT edge of every content surface so the activity tiles, scene
+   strip, reader text and SFX bar don't slide under the sidebar.
+   Topbar is full-width because the sidebar starts below it. */
+#app .content,
+#app #scene-strip,
+#app .sfx-bar,
+#app .jr-act-stage {
+  padding-left: 76px;
+}
+
+/* ===== Audio sidebar (left-edge vertical rail) =====
+   Pinned to the left side of the viewport since Attain Jr has no
+   table-of-contents on the left. Compact 64px-wide column with
+   icon + tiny label buttons. Vibrant violet→blue gradient picks up
+   the splash CTA palette. Frees the bottom of the screen for
+   activity content. */
 .audio-bar {
-  position: fixed; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(180deg, #4b2a16 0%, #6b4226 100%);
-  color: #fff;
-  display: flex; gap: 8px;
-  padding: 10px 12px max(10px, env(safe-area-inset-bottom));
-  align-items: center;
-  flex-wrap: wrap;
-  border-top: 4px solid rgba(255,255,255,0.18);
-  box-shadow: 0 -8px 24px rgba(0,0,0,0.4);
+  position: fixed;
+  left: 6px;
+  top: 76px;
+  bottom: max(8px, env(safe-area-inset-bottom));
+  width: 64px;
+  display: flex; flex-direction: column;
+  gap: 6px;
+  padding: 8px 6px;
+  background: linear-gradient(160deg, #4d3eea 0%, #7b6cff 50%, #4ea0ff 100%);
+  border-radius: 22px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.10) inset;
+  border: none;
   z-index: 40;
-  overflow-x: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   scrollbar-width: none;
+  align-items: stretch;
+  flex-wrap: nowrap;
 }
 .audio-bar::-webkit-scrollbar { display: none; }
 .audio-bar > * { flex-shrink: 0; }
 .audio-bar button {
-  background: rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.14);
   color: #fff;
-  border: 2px solid rgba(255,255,255,0.35);
-  padding: 10px 16px;
-  border-radius: 999px;
-  font-size: 14pt;
-  font-weight: 800;
-  min-height: 46px;
+  border: 1px solid rgba(255,255,255,0.22);
+  padding: 8px 4px 6px;
+  border-radius: 14px;
+  font-size: 9.5pt;
+  font-weight: 700;
+  line-height: 1.15;
+  min-height: 50px;
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  white-space: normal;
+  cursor: pointer;
 }
-.audio-bar button:active { transform: translateY(1px); }
+.audio-bar button:active { transform: scale(0.95); }
+.audio-bar button:hover { background: rgba(255,255,255,0.22); }
 .audio-bar select {
-  background: #fffbe6;
+  background: rgba(255,251,230,0.95);
   color: #4a3000;
-  border: 2px solid rgba(255,255,255,0.5);
-  padding: 8px 14px;
-  border-radius: 999px;
-  font-size: 14pt; font-weight: 700;
-  min-height: 46px;
+  border: 1px solid rgba(255,255,255,0.45);
+  padding: 6px 4px;
+  border-radius: 12px;
+  font-size: 9.5pt; font-weight: 700;
+  min-height: 38px;
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  text-align: center;
 }
 
 /* ===== SFX bar ===== */
