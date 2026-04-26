@@ -3667,6 +3667,7 @@
       safe('wireTts', wireTts);
       safe('wireBookmarks', wireBookmarks);
       safe('wireSaveTemplate', wireSaveTemplate);
+      safe('wireLayoutBtn', wireLayoutBtn);
       safe('wirePerAppTheme', wirePerAppTheme);
       safe('wireNotesScreen', wireNotesScreen);
       safe('wireHelp', wireHelp);

@@ -9,7 +9,7 @@
 // fetched or transmitted. Imported apps live in IndexedDB on the
 // user's device and are never sent anywhere.
 
-var CACHE = 'load-v15x';
+var CACHE = 'load-v15y';
 
 var SHELL = [
   './',
