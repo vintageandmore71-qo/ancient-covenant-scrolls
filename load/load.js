@@ -8377,7 +8377,7 @@
       '</div>' +
       // ===== Preview stage (black) =====
       '<div id="ve-stage" style="flex:1;min-height:0;position:relative;background:#000;display:flex;align-items:center;justify-content:center;">' +
-        '<video id="ve-video" src="' + blobUrl + '" playsinline style="max-width:100%;max-height:100%;background:#000;"></video>' +
+        '<video id="ve-video" src="' + blobUrl + '" playsinline preload="auto" controls style="max-width:100%;max-height:100%;background:#000;"></video>' +
         '<canvas id="ve-overlay" style="position:absolute;pointer-events:none;"></canvas>' +
         '<button id="ve-fullscreen" class="ve-iconbtn" style="position:absolute;right:10px;bottom:10px;background:rgba(255,255,255,0.1);" aria-label="Fullscreen">&#10070;</button>' +
       '</div>' +
@@ -8667,8 +8667,11 @@
     });
     video.addEventListener('timeupdate', function () {
       timeLbl.textContent = fmtTime(video.currentTime) + ' / ' + fmtTime(video.duration);
-      // Auto-stop at out point
-      if (video.currentTime >= parseFloat(trimOut.value)) video.pause();
+      // Auto-stop at out point ONLY when an out point has been set.
+      // Initial trimOut is "0" and pausing on currentTime >= 0
+      // freezes playback the moment it starts.
+      var outS = parseFloat(trimOut.value);
+      if (outS > 0 && video.currentTime >= outS) video.pause();
       drawOverlay();
     });
 
@@ -8718,14 +8721,35 @@
     });
 
     document.getElementById('ve-play').addEventListener('click', function () {
-      var inS = parseFloat(trimIn.value);
-      if (Math.abs(video.currentTime - inS) > 0.5 || video.currentTime > parseFloat(trimOut.value)) video.currentTime = inS;
-      muteOrig = document.getElementById('ve-mute-orig').checked;
-      video.muted = muteOrig;
-      video.play().catch(function () {});
-      // Preview music if loaded
-      if (musicBuffer) playPreviewMusic();
+      // Defer if metadata hasn't loaded yet — otherwise duration is
+      // NaN, trimOut is "0", and the timeupdate auto-stop pauses
+      // playback the instant it starts.
+      if (!video.duration || isNaN(video.duration)) {
+        toast('Video is still loading… one moment.', false);
+        video.addEventListener('loadedmetadata', function () { tryPlay(); }, { once: true });
+        return;
+      }
+      tryPlay();
     });
+    function tryPlay() {
+      var inS = parseFloat(trimIn.value);
+      var outS = parseFloat(trimOut.value);
+      if (isNaN(inS)) inS = 0;
+      // If trimOut is still 0 (e.g. user tapped Play before adjusting
+      // trim handles), fall back to the full video duration.
+      if (!outS || outS <= 0) {
+        outS = video.duration;
+        try { trimOut.value = outS.toFixed(2); refreshTrimDisplay(); } catch (e) {}
+      }
+      if (Math.abs(video.currentTime - inS) > 0.5 || video.currentTime > outS - 0.05) video.currentTime = inS;
+      var muteEl = document.getElementById('ve-mute-orig');
+      muteOrig = !!(muteEl && muteEl.checked);
+      video.muted = muteOrig;
+      video.play().catch(function (e) {
+        toast('Play failed: ' + (e && e.message ? e.message : 'browser blocked playback'), true);
+      });
+      if (musicBuffer) playPreviewMusic();
+    }
     document.getElementById('ve-pause').addEventListener('click', function () {
       video.pause();
       stopPreviewMusic();
@@ -10754,7 +10778,6 @@
   /* ----- Media: videos / audio / images — stored as raw Blob ----- */
   async function handleMedia(file, baseName) {
     showProgress('Saving ' + file.name + '...');
-    var buf = await readAsArrayBuffer(file);
     var lower = (file.name || '').toLowerCase();
     var subKind =
       /\.(mp4|mov|m4v|webm|mkv)$/i.test(lower) || /^video\//.test(file.type || '') ? 'video' :
@@ -10762,9 +10785,13 @@
       /\.(jpe?g|png|gif|webp|heic|heif|svg|bmp)$/i.test(lower) || /^image\//.test(file.type || '') ? 'image' :
       'media';
     var mime = file.type || mimeForMedia(lower, subKind);
-    // Store as a Blob directly; IndexedDB handles that natively without
-    // the ~33% bloat that base64 would add.
-    var blob = new Blob([buf], { type: mime });
+    // Store the File object directly. Files are Blobs already, and
+    // IndexedDB handles them natively. Skipping the readAsArrayBuffer
+    // round-trip means we don't load a multi-hundred-MB video into
+    // RAM as an ArrayBuffer just to wrap it in a fresh Blob — that
+    // was causing the "Saving..." stall + "produced no content" error
+    // on iPad Safari for videos over ~250 MB.
+    var blob = (file.type || mime) === file.type ? file : new Blob([file], { type: mime });
     return {
       id: newId(),
       name: baseName,
@@ -10774,7 +10801,7 @@
       binary: blob,
       dateAdded: Date.now(),
       lastOpened: null,
-      sizeBytes: buf.byteLength
+      sizeBytes: (file.size != null ? file.size : 0)
     };
   }
 
