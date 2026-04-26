@@ -564,6 +564,63 @@ a.jr-action {
    the reader so kids see words ARE tappable. Kept very light. */
 .content [data-rl] { cursor: pointer; }
 
+/* Reader → Activities jump pill, always pinned at the top of the
+   Reader content. Replaces the easy-to-miss topbar tab when the
+   topbar scrolls horizontally on portrait. */
+.jr-reader-cta { display: flex; justify-content: flex-end; padding: 6px 4px 12px; }
+.jr-jump-act {
+  background: linear-gradient(135deg, #ff6b6b, #ffd166, #2bbd7e, #4ea0ff, #a36cff);
+  background-size: 200% 200%;
+  animation: jr-rainbow-shift 6s ease infinite;
+  color: #fff; border: 3px solid rgba(255,255,255,0.65);
+  border-radius: 999px;
+  padding: 10px 18px; font-size: 14pt; font-weight: 800;
+  font-family: inherit;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.30);
+  text-shadow: 0 2px 0 rgba(0,0,0,0.30);
+}
+
+/* Character-colored speech. Each .char header gets the speaker's
+   colour as a left bar; the next paragraph (.jr-p-spoken) gets a
+   tinted background + matching left border so children visually
+   associate the line with the right character. */
+.char {
+  --char-color: #7b6cff;
+  background: var(--char-color, #7b6cff);
+  border-left: 8px solid rgba(0,0,0,0.30);
+  color: #fff;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 12px 12px 0 0;
+  margin: 14px 0 0;
+  font-size: 13pt;
+  letter-spacing: 0.04em;
+  display: inline-block;
+  text-shadow: 0 2px 0 rgba(0,0,0,0.20);
+}
+.jr-p-spoken {
+  --char-color: #7b6cff;
+  border-left: 8px solid var(--char-color);
+  background: color-mix(in srgb, var(--char-color) 18%, white);
+  border-radius: 0 14px 14px 14px;
+  padding: 12px 16px;
+  margin: 0 0 12px;
+}
+@supports not (background: color-mix(in srgb, red, white)) {
+  /* Older Safari fallback: lighten via low-alpha overlay. */
+  .jr-p-spoken { background: rgba(255,255,255,0.85); }
+}
+
+/* Currently-being-read paragraph gets a stronger glow so kids can
+   follow the read-aloud cursor visually. Pairs with the existing
+   .reading class added by the TTS sequencer. */
+.jr-p-spoken.reading,
+p.reading {
+  outline: 4px solid var(--char-color, #ffd166);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px rgba(255, 209, 102, 0.35);
+}
+
 /* ===== Voice cast modal ===== */
 .cast-card { max-width: 520px; }
 .cast-row {

@@ -6,6 +6,29 @@
 (function () {
   'use strict';
 
+  // Defensive helper: every top-level addEventListener wrapped in this
+  // means a single missing element or runtime throw doesn't kill all
+  // the other bindings. iPad Safari was hitting one bad call high up
+  // in the script and silently dropping the rest of the wires (Read,
+  // Pause, Stop, Music, Back, Next, etc. all stopped responding).
+  function bind(id, evt, fn) {
+    try {
+      var el = document.getElementById(id);
+      if (!el) { try { console.warn('[Attain Jr] missing #' + id); } catch (_) {} return; }
+      el.addEventListener(evt, fn);
+    } catch (e) { try { console.warn('[Attain Jr] bind failed for #' + id, e); } catch (_) {} }
+  }
+  function bindAll(selector, evt, fn) {
+    try {
+      Array.prototype.forEach.call(document.querySelectorAll(selector), function (el) {
+        el.addEventListener(evt, fn.bind(null, el));
+      });
+    } catch (e) { try { console.warn('[Attain Jr] bindAll failed for ' + selector, e); } catch (_) {} }
+  }
+  function safe(label, fn) {
+    try { fn(); } catch (e) { try { console.warn('[Attain Jr] safe(' + label + ')', e); } catch (_) {} }
+  }
+
   /* ---------- Sample story (ships in v1 so the app demonstrates
      itself even with zero imported books). Replace via Library
      import in a future commit. */
@@ -179,23 +202,30 @@
   var withMusic = false;
 
   /* ---------- Splash ---------- */
+  // dismissSplash(opts) — opts.music starts background music,
+  // opts.tab picks which tab to show first. Default lands on
+  // Activities so the kid sees the activity grid (mirroring Attain's
+  // chapter-then-activities flow). The Reader tab is always one tap
+  // away via the topbar pill or the in-tab "Reader" button.
   function dismissSplash(opts) {
     opts = opts || {};
     document.body.classList.remove('splash-on');
-    document.getElementById('splash').remove();
+    var s = document.getElementById('splash'); if (s) s.remove();
     document.getElementById('app').hidden = false;
     if (opts.music) startMusic();
-    selectTab('reader');
+    selectTab(opts.tab || 'activities');
   }
-  document.getElementById('b-begin').addEventListener('click', function () {
+  bind('b-begin', 'click', function () {
     primeAudio();
-    dismissSplash();
+    // "Begin Reading" implies they want the colourful reader, not the
+    // activity grid — opt them straight in.
+    dismissSplash({ tab: 'reader' });
   });
-  document.getElementById('b-begin-music').addEventListener('click', function () {
+  bind('b-begin-music', 'click', function () {
     primeAudio();
-    dismissSplash({ music: true });
+    dismissSplash({ music: true, tab: 'reader' });
   });
-  document.getElementById('b-parent').addEventListener('click', openParentGate);
+  bind('b-parent', 'click', openParentGate);
 
   /* ---------- Splash home features (Library / Upload / Progress / Settings / Export) ---------- */
   function renderLibraryGrid() {
@@ -706,7 +736,21 @@
     if (idx >= 0) lib[idx] = b; else lib.push(b);
     saveLibrary(lib);
     renderLibraryGrid();
-    alert('Story added: ' + b.title);
+    // Match Attain's flow: once a story is uploaded, jump straight
+    // into Activities for that book instead of leaving the user on
+    // the splash to figure out which tile to tap. Reader is one tap
+    // away via the topbar pill or the in-content Activities button.
+    book = b;
+    currentSceneIdx = 0;
+    try { localStorage.setItem(LS_LAST_BOOK, bookId(b)); } catch (e) {}
+    if (document.getElementById('splash')) {
+      primeAudio();
+      dismissSplash({ tab: 'activities' });
+    } else {
+      // Splash already dismissed (e.g. user re-uploaded from inside
+      // the app). Just navigate the visible app to Activities.
+      try { selectTab('activities'); } catch (e) {}
+    }
   }
 
   /* Export now: write the entire library + progress + settings to a
@@ -879,7 +923,7 @@
   /* ---------- Reader ---------- */
   function renderReader() {
     var strip = document.getElementById('scene-strip');
-    strip.innerHTML = book.scenes.map(function (s, i) {
+    strip.innerHTML = (book.scenes || []).map(function (s, i) {
       var on = i === currentSceneIdx ? ' on' : '';
       return '<button class="scene-pill' + on + '" data-color="' + s.color + '" data-idx="' + i + '">' + escHtml(s.title) + '</button>';
     }).join('');
@@ -890,12 +934,28 @@
         renderReader();
       });
     });
-    var sc = book.scenes[currentSceneIdx];
+    var sc = (book.scenes || [])[currentSceneIdx];
     var c = document.getElementById('content');
-    var html = '<h1>' + escHtml(book.title) + '</h1>';
+    if (!sc) {
+      c.innerHTML = '<h1>' + escHtml(book.title || 'Untitled') + '</h1>' +
+        '<p>This book has no scenes yet. Try uploading a different story.</p>' +
+        '<button class="jr-jump-act" data-jump-tab="activities">🚀 Open Activities</button>';
+      bindAll('.jr-jump-act', 'click', function (el) { selectTab(el.getAttribute('data-jump-tab') || 'activities'); });
+      return;
+    }
+    // Quick "jump to Activities" pill always visible at the top of the
+    // reader so a user can leave the reading surface without hunting
+    // the topbar (which sometimes scrolls Activities off screen on
+    // narrow iPads).
+    var html = '<div class="jr-reader-cta">' +
+      '<button class="jr-jump-act" data-jump-tab="activities">🚀 Activities</button>' +
+      '</div>';
+    html += '<h1>' + escHtml(book.title) + '</h1>';
     html += '<h2 style="color:#7b6cff">Scene: ' + escHtml(sc.title) + '</h2>';
     html += sc.body.map(renderBlock).join('');
     c.innerHTML = html;
+    // Activate the jump-to-activities button after innerHTML is set.
+    bindAll('.jr-jump-act', 'click', function (el) { selectTab(el.getAttribute('data-jump-tab') || 'activities'); });
     // Mark this scene read after a short dwell so a quick swipe past
     // doesn't count, but a real read does.
     scheduleSceneReadMark(sc.id);
@@ -919,17 +979,54 @@
     prog[id] = p;
     saveProgress(prog);
   }
+  // Walking renderer state — when a [char] block is seen, the next
+  // [p] block is attributed to that character and gets that
+  // character's colour as its background tint, mirroring the colour-
+  // coded reading style the user pointed out in their reference ZIPs.
+  var _renderCurrentChar = null;
+  function characterColor(name) {
+    if (!name || !book.characters) return null;
+    var ch = book.characters.filter(function (x) { return x.name === name; })[0];
+    if (!ch) return null;
+    if (ch.color) return ch.color;
+    // Auto-assign a stable colour from a kid-friendly palette so books
+    // with no per-character colour still get the highlight effect.
+    var palette = ['#ff6b6b', '#4ea0ff', '#2bbd7e', '#a36cff', '#ff9a3a', '#ff6ba6', '#ffd166', '#2fb6c4'];
+    var hash = 0;
+    for (var i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) | 0;
+    ch.color = palette[Math.abs(hash) % palette.length];
+    return ch.color;
+  }
   function renderBlock(b) {
-    // data-rl   = read-aloud (everything that should be spoken in full mode)
-    // data-story = story body only (skips stage directions, character labels)
-    if (b.type === 'stage') return '<div class="stage" data-rl>' + escHtml(b.text) + '</div>';
+    if (b.type === 'stage') {
+      _renderCurrentChar = null; // stage directions reset speaker
+      return '<div class="stage" data-rl>' + escHtml(b.text) + '</div>';
+    }
     if (b.type === 'highlight') return '<div class="highlight" data-rl data-story>' + escHtml(b.text) + '</div>';
     if (b.type === 'char') {
-      var ch = book.characters.find(function (x) { return x.name === b.who; });
+      _renderCurrentChar = b.who;
+      var ch = (book.characters || []).filter(function (x) { return x.name === b.who; })[0];
       var em = ch ? ch.emoji : '';
-      return '<div class="char" data-char="' + escHtml(b.who) + '">' + em + ' ' + escHtml(b.who.toUpperCase()) + '</div>';
+      var color = characterColor(b.who) || '#7b6cff';
+      return '<div class="char" data-char="' + escHtml(b.who) + '" style="--char-color:' + color + '">' +
+        em + ' ' + escHtml(b.who.toUpperCase()) + '</div>';
     }
-    if (b.type === 'p') return '<p data-rl data-story>' + escHtml(b.text) + '</p>';
+    if (b.type === 'p') {
+      // Tint this paragraph with the speaker's colour if a [char]
+      // block was seen most recently. Reset after rendering so the
+      // next paragraph (without a speaker) reverts to plain prose.
+      var who = _renderCurrentChar;
+      _renderCurrentChar = null;
+      var styleAttr = '';
+      var classAttr = ' data-story';
+      if (who) {
+        var c = characterColor(who) || '#7b6cff';
+        styleAttr = ' style="--char-color:' + c + '"';
+        classAttr += ' jr-p-spoken';
+      }
+      return '<p data-rl' + classAttr + (who ? ' data-spoken-by="' + escAttr(who) + '"' : '') + styleAttr + '>' +
+        escHtml(b.text) + '</p>';
+    }
     if (b.type === 'img') return '<div class="imgcard"><img src="' + escAttr(b.src) + '" alt="' + escAttr(b.alt || '') + '"></div>';
     return '';
   }
@@ -1504,7 +1601,13 @@
       if (opts.onend) setTimeout(opts.onend, 1200);
       return;
     }
-    var u = new SpeechSynthesisUtterance(text);
+    // Hebrew preprocessor — runs the spoken text through the shared
+    // Hebrew phoneme dictionary so iPad voices say "Yeshayahu" close
+    // to how a native speaker would. Falls through unchanged when
+    // there's no Hebrew or biblical-name token.
+    var spoken = text;
+    try { if (window.HebrewPron) spoken = window.HebrewPron.normalize(text); } catch (e) {}
+    var u = new SpeechSynthesisUtterance(spoken);
     var v = opts.voice || pickNarratorVoice();
     if (v) u.voice = v;
     u.rate = opts.rate || 0.95;
@@ -1585,22 +1688,22 @@
     Array.prototype.forEach.call(document.querySelectorAll('.reading'), function (e) { e.classList.remove('reading'); });
     try { speechSynthesis.cancel(); } catch (e) {}
   }
-  document.getElementById('ab-read').addEventListener('click', readAloud);
-  document.getElementById('ab-read-story').addEventListener('click', readStoryOnly);
-  document.getElementById('ab-pause').addEventListener('click', function () {
+  bind('ab-read', 'click', readAloud);
+  bind('ab-read-story', 'click', readStoryOnly);
+  bind('ab-pause', 'click', function () {
     if (!window.speechSynthesis) return;
     if (readPaused) { speechSynthesis.resume(); readPaused = false; }
     else { speechSynthesis.pause(); readPaused = true; }
   });
-  document.getElementById('ab-stop').addEventListener('click', stopRead);
-  document.getElementById('ab-music').addEventListener('click', function () {
+  bind('ab-stop', 'click', stopRead);
+  bind('ab-music', 'click', function () {
     if (musicNode) stopMusic(); else startMusic();
   });
-  document.getElementById('ab-prev').addEventListener('click', function () {
+  bind('ab-prev', 'click', function () {
     if (currentSceneIdx > 0) { stopRead(); currentSceneIdx--; renderReader(); }
   });
-  document.getElementById('ab-next').addEventListener('click', function () {
-    if (currentSceneIdx < book.scenes.length - 1) { stopRead(); currentSceneIdx++; renderReader(); }
+  bind('ab-next', 'click', function () {
+    if (currentSceneIdx < (book.scenes || []).length - 1) { stopRead(); currentSceneIdx++; renderReader(); }
   });
 
   /* ---------- Custom voice recording ---------- */

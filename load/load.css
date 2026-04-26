@@ -120,7 +120,16 @@ button, .tap, [role="button"] { min-height: 48px; }
   background: rgba(20, 20, 42, 0.88);
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
+  /* Allow horizontal scroll when icons overflow on iPad portrait
+     so every tool stays reachable. Right-edge fade hints at scroll. */
+  overflow-x: auto; flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, #000 92%, rgba(0,0,0,0.35) 100%);
+          mask-image: linear-gradient(to right, #000 92%, rgba(0,0,0,0.35) 100%);
 }
+.app-topbar::-webkit-scrollbar { display: none; }
+.app-topbar > * { flex-shrink: 0; }
 .app-topbar .spacer { flex: 1; }
 .nav-btn {
   display: inline-flex; align-items: center; gap: 6px;
@@ -341,8 +350,13 @@ button, .tap, [role="button"] { min-height: 48px; }
 }
 .home-workspace { padding-bottom: 16px; }
 .home-ws-row {
-  display: grid; gap: 10px;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  display: grid; gap: 12px;
+  /* Always 2x2 on iPad — feels balanced, no awkward single column. */
+  grid-template-columns: 1fr 1fr;
+}
+@media (min-width: 820px) {
+  /* Wider desktops can fit all four side-by-side. */
+  .home-ws-row { grid-template-columns: repeat(4, 1fr); }
 }
 .home-ws-tile {
   display: flex; flex-direction: column; align-items: flex-start;

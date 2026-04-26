@@ -10144,7 +10144,9 @@
       if (/epub|container\.xml/i.test(msg)) throw new Error('Could not parse ' + name + ' as an EPUB — it is missing the standard <code>META-INF/container.xml</code> entry. Open it in Apple Books first to confirm the file is valid, then re-export if possible.');
       throw e;
     }
-    if (!app || !app.html) {
+    // Media imports (video/audio/image) store a Blob, not html — they
+    // are valid even when app.html is undefined.
+    if (!app || (!app.html && app.kind !== 'media')) {
       throw new Error('Load finished reading ' + name + ' but produced no content. The file is likely empty or corrupted. Check it in Files first.');
     }
 
@@ -10179,7 +10181,20 @@
     var dismiss = $('import-error-dismiss');
     if (dismiss) dismiss.addEventListener('click', close);
     var scan = $('import-error-scan');
-    if (scan) scan.addEventListener('click', function () { close(); openDevConsole(); });
+    if (scan) scan.addEventListener('click', function () {
+      close();
+      try { openDevConsole(); } catch (e) {}
+      // The dev console only exposes its scan tab when a project is
+      // currently open. After a failed import there is no project, so
+      // route the user to the Library where they can pick something.
+      try { if (typeof currentApp === 'undefined' || !currentApp) {
+        show('library-screen');
+        if (typeof renderLibrary === 'function') renderLibrary();
+      } } catch (e) {}
+    });
+    // Tap-outside to dismiss so users aren't trapped if the buttons
+    // happen to be invisible due to a CSS glitch.
+    modal.addEventListener('click', function (e) { if (e.target === modal) close(); });
   }
 
   /* ----- Multi-file bundle (folder-like) import ----- */
