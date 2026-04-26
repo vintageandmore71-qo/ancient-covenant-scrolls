@@ -717,6 +717,139 @@
     location.reload();
   });
 
+  /* ---------- Word definition lookup ----------
+     Tap a single word in the reader -> floating popup with a
+     kid-friendly definition + speak button. Definitions are cached
+     in IndexedDB so repeats are instant + offline-friendly. */
+  var defCache = {};
+  idbGet('defs').then(function (d) { defCache = d || {}; }).catch(function () {});
+
+  function findWordAtPoint(x, y) {
+    // Use caretRangeFromPoint (Safari) or caretPositionFromPoint
+    var range = null;
+    if (document.caretRangeFromPoint) {
+      range = document.caretRangeFromPoint(x, y);
+    } else if (document.caretPositionFromPoint) {
+      var pos = document.caretPositionFromPoint(x, y);
+      if (pos) { range = document.createRange(); range.setStart(pos.offsetNode, pos.offset); range.collapse(true); }
+    }
+    if (!range || !range.startContainer || range.startContainer.nodeType !== 3) return null;
+    var node = range.startContainer;
+    var text = node.textContent || '';
+    var idx = range.startOffset;
+    // Expand to whole word
+    var start = idx, end = idx;
+    while (start > 0 && /\w/.test(text.charAt(start - 1))) start--;
+    while (end < text.length && /\w/.test(text.charAt(end))) end++;
+    var word = text.slice(start, end);
+    if (!word || !/^\w+$/.test(word)) return null;
+    var wordRange = document.createRange();
+    wordRange.setStart(node, start);
+    wordRange.setEnd(node, end);
+    return { word: word, range: wordRange };
+  }
+
+  function showDefPop(word, range) {
+    var pop = document.getElementById('def-pop');
+    document.getElementById('def-word').textContent = word;
+    document.getElementById('def-body').textContent = 'Looking up…';
+    pop.hidden = false;
+    // Position above the word, clamped to viewport
+    var rect = range.getBoundingClientRect();
+    pop.style.left = '0px'; pop.style.top = '0px'; // reset for measurement
+    var popW = Math.min(320, Math.max(220, pop.offsetWidth));
+    var leftRaw = rect.left + window.scrollX + (rect.width / 2) - 30;
+    var top = rect.top + window.scrollY - pop.offsetHeight - 16;
+    if (top < window.scrollY + 10) top = rect.bottom + window.scrollY + 12; // flip below if too close to top
+    var maxLeft = window.scrollX + window.innerWidth - popW - 10;
+    if (leftRaw > maxLeft) leftRaw = maxLeft;
+    if (leftRaw < 10) leftRaw = 10;
+    pop.style.left = leftRaw + 'px';
+    pop.style.top = top + 'px';
+    // Fetch + display
+    getDefinition(word).then(function (def) {
+      if (document.getElementById('def-word').textContent !== word) return; // stale
+      document.getElementById('def-body').textContent = def;
+    });
+  }
+
+  function hideDefPop() {
+    document.getElementById('def-pop').hidden = true;
+  }
+
+  async function getDefinition(rawWord) {
+    var w = String(rawWord || '').toLowerCase().trim();
+    if (!w) return '';
+    if (defCache[w]) return defCache[w];
+    // Try Pollinations first -- gives kid-friendly one-sentence answers
+    try {
+      var resp = await fetch('https://text.pollinations.ai/openai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'openai',
+          private: true,
+          referrer: 'attain-jr',
+          messages: [
+            { role: 'system', content: 'Define the word for a child age 5. Use ONE short, simple sentence (under 20 words). No quotes, no preamble, no examples, no part of speech.' },
+            { role: 'user', content: w }
+          ]
+        })
+      });
+      if (resp.ok) {
+        var raw = await resp.text();
+        var text = '';
+        try {
+          var data = JSON.parse(raw);
+          text = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+        } catch (e) { text = raw; }
+        if (text) {
+          var clean = String(text).replace(/^["'\s]+|["'\s]+$/g, '').trim();
+          defCache[w] = clean;
+          idbPut('defs', defCache).catch(function () {});
+          return clean;
+        }
+      }
+    } catch (e) {}
+    // Fallback to free dictionaryapi.dev (no key)
+    try {
+      var r2 = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(w));
+      if (r2.ok) {
+        var arr = await r2.json();
+        var def = arr && arr[0] && arr[0].meanings && arr[0].meanings[0] && arr[0].meanings[0].definitions && arr[0].meanings[0].definitions[0] && arr[0].meanings[0].definitions[0].definition;
+        if (def) {
+          defCache[w] = def;
+          idbPut('defs', defCache).catch(function () {});
+          return def;
+        }
+      }
+    } catch (e) {}
+    return 'I don\'t know that word yet. Tap me again when you\'re online!';
+  }
+
+  // Tap on a word in the content area -> show definition popup
+  document.getElementById('content').addEventListener('click', function (e) {
+    // Skip clicks on activity buttons + character badges + images
+    var t = e.target;
+    if (t.closest && (t.closest('.act-opt') || t.closest('.char') || t.tagName === 'IMG' || t.tagName === 'BUTTON')) return;
+    var hit = findWordAtPoint(e.clientX, e.clientY);
+    if (!hit) { hideDefPop(); return; }
+    showDefPop(hit.word, hit.range);
+    e.stopPropagation();
+  });
+  document.addEventListener('click', function (e) {
+    var pop = document.getElementById('def-pop');
+    if (pop.hidden) return;
+    if (pop.contains(e.target)) return;
+    hideDefPop();
+  });
+  document.getElementById('def-close').addEventListener('click', hideDefPop);
+  document.getElementById('def-speak').addEventListener('click', function () {
+    var word = document.getElementById('def-word').textContent;
+    var def = document.getElementById('def-body').textContent;
+    if (word && def) speak(word + '. ' + def, { rate: 0.9 });
+  });
+
   /* ---------- Service worker ---------- */
   if ('serviceWorker' in navigator) {
     try { navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }); } catch (e) {}

@@ -323,6 +323,38 @@ input, select { font-family: inherit; }
 .modal-row button { padding: 12px 22px; border-radius: 999px; font-size: 14pt; font-weight: 700; border: 2px solid var(--jr-violet); background: #fff; color: var(--jr-purple-deep); }
 .modal-err { color: #c0252f; margin: 8px 0 0; min-height: 18px; font-size: 13pt; }
 
+/* ===== Word-definition popup =====
+   Floating bubble above the selected word. Stays inside the
+   viewport on small iPads. Big touch targets per kid-mode. */
+.def-pop {
+  position: absolute; z-index: 90;
+  max-width: 320px; min-width: 220px;
+  background: #fffbe6; color: var(--jr-ink);
+  border: 4px solid var(--jr-pink);
+  border-radius: 18px;
+  padding: 12px 14px 14px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+  font-size: 15pt; line-height: 1.4;
+}
+.def-pop::after {
+  content: ''; position: absolute; left: 30px; bottom: -14px;
+  width: 0; height: 0; border-left: 12px solid transparent;
+  border-right: 12px solid transparent; border-top: 14px solid var(--jr-pink);
+}
+.def-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.def-word { flex: 1; font-weight: 800; color: var(--jr-purple-deep); font-size: 17pt; }
+.def-head button {
+  border: none; background: var(--jr-violet); color: #fff;
+  width: 38px; height: 38px; border-radius: 50%; font-size: 16pt; font-weight: 800;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+#def-close { background: rgba(0,0,0,0.18); color: #fff; }
+.def-body { color: var(--jr-ink); }
+
+/* Tappable-word affordance: subtle dotted underline on paragraphs in
+   the reader so kids see words ARE tappable. Kept very light. */
+.content [data-rl] { cursor: pointer; }
+
 /* ===== Voice cast modal ===== */
 .cast-card { max-width: 520px; }
 .cast-row {
