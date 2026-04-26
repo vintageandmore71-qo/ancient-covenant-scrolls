@@ -8665,6 +8665,28 @@
       refreshTrimDisplay();
       drawOverlay();
     });
+    // Surface video-load errors loudly. iPad Safari rejects some
+    // codecs (HEVC in non-MP4 wrapper, certain ProRes) silently —
+    // before this handler the user just saw "Play does nothing".
+    video.addEventListener('error', function () {
+      var err = video.error || {};
+      var code = err.code;
+      var msg = code === 4
+        ? 'iPad cannot decode this video format. Re-export as standard H.264 MP4 first.'
+        : code === 2 ? 'Network error reading the video.'
+        : code === 3 ? 'Video file appears damaged.'
+        : 'Could not load this video.';
+      toast(msg, true);
+    });
+    // Tap the preview itself to play/pause (VN behaviour). Useful on
+    // iPad portrait where the small play triangle is easy to miss.
+    video.addEventListener('click', function () {
+      if (video.paused) {
+        document.getElementById('ve-play').click();
+      } else {
+        video.pause();
+      }
+    });
     video.addEventListener('timeupdate', function () {
       timeLbl.textContent = fmtTime(video.currentTime) + ' / ' + fmtTime(video.duration);
       // Auto-stop at out point ONLY when an out point has been set.
