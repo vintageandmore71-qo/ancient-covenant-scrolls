@@ -8395,7 +8395,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17h</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17i</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -11665,15 +11665,43 @@
       /\.(jpe?g|png|gif|webp|heic|heif|svg|bmp)$/i.test(lower) || /^image\//.test(file.type || '') ? 'image' :
       'media';
     var mime = file.type || mimeForMedia(lower, subKind);
-    // Always normalise to a fresh Blob with explicit MIME. Storing a
-    // raw File reference in IndexedDB sometimes survives across iPad
-    // Safari sessions and sometimes doesn't — the File's underlying
-    // file-system handle can go stale, leaving an empty record on
-    // reload (the "error files in library" the user reported).
-    // new Blob([file]) wraps the file's bytes without an immediate
-    // ArrayBuffer copy; IDB serialises the bytes properly so the
-    // Blob survives reloads cleanly.
-    var blob = new Blob([file], { type: mime });
+    // Three-tier import strategy with fallbacks so a single failure
+    // path can't kill the entire upload. Each tier is more memory-
+    // intensive than the last; we only escalate if the prior tier
+    // throws (Safari sometimes rejects new Blob([file]) on huge
+    // files, especially HEIC > 50MB).
+    var blob;
+    try {
+      // Tier 1: lightweight Blob wrap. No data copy, IDB serialises
+      // the underlying bytes on put. Works for the vast majority.
+      blob = new Blob([file], { type: mime });
+    } catch (e1) {
+      try {
+        // Tier 2: arrayBuffer() round-trip. Costs RAM but normalises
+        // any weird file-system handle into a clean ArrayBuffer.
+        var buf = await file.arrayBuffer();
+        blob = new Blob([buf], { type: mime });
+      } catch (e2) {
+        try {
+          // Tier 3: legacy FileReader path. Slowest, highest peak
+          // RAM, but works on the broadest range of Safari builds.
+          blob = await new Promise(function (resolve, reject) {
+            var r = new FileReader();
+            r.onload = function () { resolve(new Blob([r.result], { type: mime })); };
+            r.onerror = function () { reject(r.error || new Error('FileReader failed')); };
+            r.readAsArrayBuffer(file);
+          });
+        } catch (e3) {
+          // All three failed — surface a real error instead of a
+          // mystery import-error modal.
+          throw new Error(
+            'Could not save ' + file.name + ' to your Library. ' +
+            'Reason: ' + ((e3 && e3.message) || e3 || 'unknown') + '. ' +
+            'If the file is over 1 GB, try a smaller export from Photos first.'
+          );
+        }
+      }
+    }
     return {
       id: newId(),
       name: baseName,
