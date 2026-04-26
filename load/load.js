@@ -8416,6 +8416,7 @@
           '<button class="ve-track-cover" aria-label="Cover" id="ve-cover">Cover</button>' +
           '<div class="ve-track-body">' +
             '<div class="ve-clip-strip" id="ve-clip-strip">' +
+              '<div class="ve-clip-thumbs" id="ve-clip-thumbs"></div>' +
               '<div class="ve-clip-trim" id="ve-clip-trim">' +
                 '<div class="ve-clip-handle ve-handle-left" id="ve-handle-left"></div>' +
                 '<div class="ve-clip-handle ve-handle-right" id="ve-handle-right"></div>' +
@@ -8488,6 +8489,10 @@
         '<button class="ve-action" data-action="extract-audio"><span class="ve-act-icon">&#127925;&#11014;</span><span class="ve-act-lbl">Extract Audio</span></button>' +
         '<button class="ve-action" data-action="auto-captions"><span class="ve-act-icon">[A]</span><span class="ve-act-lbl">Auto Captions</span></button>' +
         '<button class="ve-action" data-action="tts"><span class="ve-act-icon">A&#127908;</span><span class="ve-act-lbl">TTS</span></button>' +
+        '<button class="ve-action" data-action="story"><span class="ve-act-icon">&#9776;</span><span class="ve-act-lbl">Story</span></button>' +
+        '<button class="ve-action" data-action="reverse"><span class="ve-act-icon">&#8634;</span><span class="ve-act-lbl">Reverse</span></button>' +
+        '<button class="ve-action" data-action="freeze"><span class="ve-act-icon">&#10052;</span><span class="ve-act-lbl">Freeze</span></button>' +
+        '<button class="ve-action" data-action="pip-track"><span class="ve-act-icon">&#128301;</span><span class="ve-act-lbl">PiP Track</span></button>' +
       '</div>' +
       // ===== Recording progress overlay =====
       '<div id="ve-progress" style="display:none;position:absolute;left:14px;right:14px;bottom:90px;align-items:center;gap:10px;background:rgba(26,26,38,0.95);border-radius:12px;padding:12px 14px;border:1px solid #2a2a40;backdrop-filter:blur(8px);z-index:5;">' +
@@ -8506,13 +8511,17 @@
       '#__loadVideoEdit .ve-track-cover{background:#1a1a26;border:1px dashed #3a3a55;color:#cfcfdc;width:62px;height:42px;border-radius:6px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}' +
       '#__loadVideoEdit .ve-track-body{flex:1;min-width:0;height:42px;background:#0e0e18;border-radius:6px;display:flex;align-items:center;padding:0 10px;color:#7b7b8c;font-size:13px;overflow:hidden;position:relative;}' +
       '#__loadVideoEdit .ve-track-empty{user-select:none;}' +
-      '#__loadVideoEdit .ve-clip-strip{position:relative;flex:1;height:36px;background:#0e0e18;}' +
-      '#__loadVideoEdit .ve-clip-trim{position:absolute;top:0;bottom:0;left:0;right:0;border:2px solid #fbbf24;border-radius:4px;background:repeating-linear-gradient(135deg,rgba(251,191,36,0.05) 0,rgba(251,191,36,0.05) 6px,transparent 6px,transparent 12px);}' +
+      '#__loadVideoEdit .ve-clip-strip{position:relative;flex:1;height:48px;background:#0e0e18;border-radius:6px;overflow:hidden;cursor:ew-resize;touch-action:none;}' +
+      '#__loadVideoEdit .ve-clip-thumbs{position:absolute;top:0;bottom:0;left:0;right:0;display:flex;}' +
+      '#__loadVideoEdit .ve-clip-thumbs img{flex:1;width:0;height:100%;object-fit:cover;display:block;border-right:1px solid rgba(0,0,0,0.25);}' +
+      '#__loadVideoEdit .ve-clip-thumbs img:last-child{border-right:none;}' +
+      '#__loadVideoEdit .ve-clip-trim{position:absolute;top:0;bottom:0;left:0;right:0;border:2px solid #fbbf24;border-radius:6px;background:rgba(251,191,36,0.06);pointer-events:none;}' +
       '#__loadVideoEdit .ve-clip-handle{position:absolute;top:-2px;bottom:-2px;width:14px;background:#fbbf24;cursor:ew-resize;border-radius:2px;}' +
       '#__loadVideoEdit .ve-handle-left{left:-7px;}' +
       '#__loadVideoEdit .ve-handle-right{right:-7px;}' +
       '#__loadVideoEdit .ve-clip-duration{position:absolute;left:6px;top:-18px;font-size:10px;color:#fbbf24;font-weight:700;background:#1a1a26;padding:1px 6px;border-radius:3px;}' +
-      '#__loadVideoEdit .ve-clip-playhead{position:absolute;top:-4px;bottom:-4px;width:2px;background:#fff;left:0;pointer-events:none;}' +
+      '#__loadVideoEdit .ve-clip-playhead{position:absolute;top:-4px;bottom:-4px;width:2px;background:#fff;left:0;pointer-events:none;box-shadow:0 0 6px rgba(255,255,255,0.6);}' +
+      '#__loadVideoEdit .ve-clip-playhead::before{content:"";position:absolute;top:-3px;left:-5px;width:12px;height:12px;background:#fff;border-radius:50%;box-shadow:0 0 0 2px #1a1a26;}' +
       '#__loadVideoEdit .ve-track-audio .ve-track-body{background:transparent;}' +
       '#__loadVideoEdit .ve-waveform{flex:1;height:30px;background:repeating-linear-gradient(90deg,#fbbf24 0,#fbbf24 1px,transparent 1px,transparent 4px);opacity:0.7;border-radius:4px;}' +
       '#__loadVideoEdit .ve-time-ruler{height:18px;color:#7b7b8c;font-size:10px;display:flex;justify-content:space-around;align-items:center;padding:0 70px 4px;border-bottom:1px solid #1a1a26;}' +
@@ -8634,6 +8643,10 @@
         else if (act === 'zoom')          toast('Zoom: ken-burns pan / zoom coming next.', false);
         else if (act === 'extract-audio') toast('Extract Audio: separate the audio track coming next.', false);
         else if (act === 'auto-captions') toast('Auto Captions: speech-to-subtitle coming next.', false);
+        else if (act === 'story')         toast('Story: chapter beats list coming next.', false);
+        else if (act === 'reverse')       toast('Reverse: play clip backwards coming next.', false);
+        else if (act === 'freeze')        toast('Freeze: hold a single frame coming next.', false);
+        else if (act === 'pip-track')     toast('PiP Track: picture-in-picture overlay coming next.', false);
         else if (act === 'tts') {
           var t = (document.getElementById('ve-text') && document.getElementById('ve-text').value || '').trim();
           if (!t) { toast('Add subtitle text first, then TTS will read it.', true); showPanel('ve-text-panel'); return; }
@@ -8716,7 +8729,83 @@
       canvas.height = video.videoHeight || 720;
       refreshTrimDisplay();
       drawOverlay();
+      // Generate frame thumbnails for the timeline strip — VN-style.
+      // Async so the editor stays interactive while seeking happens.
+      generateClipThumbnails(video, 8).catch(function () {});
     });
+
+    /* Pull N evenly-spaced frame thumbnails out of the video and
+       render them into the yellow timeline strip. Uses an offscreen
+       canvas + the video's existing seek pipeline. Each seek waits
+       on a "seeked" event before drawing so we never paint the wrong
+       frame. */
+    function generateClipThumbnails(vid, count) {
+      var thumbsEl = document.getElementById('ve-clip-thumbs');
+      if (!thumbsEl) return Promise.resolve();
+      thumbsEl.innerHTML = '';
+      var d = vid.duration;
+      if (!d || isNaN(d) || d <= 0) return Promise.resolve();
+      var off = document.createElement('canvas');
+      off.width = 96; off.height = 56;
+      var octx = off.getContext('2d');
+      var savedTime = vid.currentTime;
+      var wasMuted = vid.muted;
+      vid.muted = true;
+      var i = 0;
+      function drawNext() {
+        if (i >= count) {
+          vid.currentTime = savedTime;
+          vid.muted = wasMuted;
+          return Promise.resolve();
+        }
+        var t = (d * (i + 0.5)) / count;
+        return new Promise(function (resolve) {
+          var onSeeked = function () {
+            vid.removeEventListener('seeked', onSeeked);
+            try { octx.drawImage(vid, 0, 0, off.width, off.height); } catch (e) {}
+            var img = document.createElement('img');
+            try { img.src = off.toDataURL('image/jpeg', 0.55); } catch (e) {}
+            thumbsEl.appendChild(img);
+            i++;
+            resolve();
+          };
+          vid.addEventListener('seeked', onSeeked);
+          try { vid.currentTime = t; } catch (e) { i++; resolve(); }
+        }).then(drawNext);
+      }
+      return drawNext();
+    }
+
+    /* Drag-to-scrub on the timeline strip — VN behaviour. Pointer
+       down on the strip moves the video.currentTime to the matching
+       offset; dragging keeps it synced; releasing resumes if the
+       video was playing. */
+    var clipStripEl = document.getElementById('ve-clip-strip');
+    var wasPlaying = false;
+    function scrubFromEvent(ev) {
+      if (!video.duration || isNaN(video.duration)) return;
+      var rect = clipStripEl.getBoundingClientRect();
+      var x = (ev.touches ? ev.touches[0].clientX : ev.clientX) - rect.left;
+      var pct = Math.max(0, Math.min(1, x / rect.width));
+      try { video.currentTime = pct * video.duration; } catch (e) {}
+    }
+    function onScrubStart(ev) {
+      ev.preventDefault();
+      wasPlaying = !video.paused;
+      if (wasPlaying) video.pause();
+      scrubFromEvent(ev);
+      document.addEventListener('pointermove', onScrubMove);
+      document.addEventListener('pointerup', onScrubEnd);
+      document.addEventListener('pointercancel', onScrubEnd);
+    }
+    function onScrubMove(ev) { scrubFromEvent(ev); }
+    function onScrubEnd() {
+      document.removeEventListener('pointermove', onScrubMove);
+      document.removeEventListener('pointerup', onScrubEnd);
+      document.removeEventListener('pointercancel', onScrubEnd);
+      if (wasPlaying) video.play().catch(function () {});
+    }
+    if (clipStripEl) clipStripEl.addEventListener('pointerdown', onScrubStart);
     // Surface video-load errors loudly. iPad Safari rejects some
     // codecs (HEVC in non-MP4 wrapper, certain ProRes) silently —
     // before this handler the user just saw "Play does nothing".
