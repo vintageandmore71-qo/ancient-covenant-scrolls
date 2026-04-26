@@ -4574,6 +4574,10 @@
           '&#128214; Publish as EPUB (.epub)' +
           '<div style="font-weight:400;font-size:12.5px;color:var(--ink-mid,#a0a0b0);margin-top:3px;">For Amazon KDP (Kindle), Apple Books, Kobo, Barnes &amp; Noble Nook, Smashwords, Google Play. One file uploads to all of them.</div>' +
         '</button>' +
+        '<button data-format="pdf" class="seg-btn full" style="text-align:left;padding:14px 16px;margin-bottom:10px;background:var(--bg-2,#2a2a40);color:inherit;border:1px solid var(--border,#3a3a55);border-radius:10px;font-weight:600;font-size:15px;display:block;width:100%;">' +
+          '&#128209; Print PDF for KDP / IngramSpark' +
+          '<div style="font-weight:400;font-size:12.5px;color:var(--ink-mid,#a0a0b0);margin-top:3px;">Uses your saved Layout (trim, bleed, margins, page numbers). Opens print preview &mdash; tap "Save to Files" to make a print-ready PDF.</div>' +
+        '</button>' +
         '<button data-format="cancel" class="seg-btn full" style="text-align:center;padding:10px;background:transparent;color:var(--ink-mid,#a0a0b0);border:none;font-size:14px;margin-top:4px;">Cancel</button>' +
       '</div>';
     document.body.appendChild(wrap);
@@ -4587,6 +4591,7 @@
       else if (format === 'webarchive') shareAsWebArchive(app);
       else if (format === 'html') shareAsPlainHtml(app);
       else if (format === 'epub') exportAsEpub(app);
+      else if (format === 'pdf') exportAsPdf(app);
     });
   }
   async function shareAsWebloc(app) {
@@ -5480,6 +5485,136 @@
       if (currentApp) openLayoutView(currentApp);
       else toast('Open a manuscript first.', true);
     });
+  }
+
+  /* ---------- KDP PDF export ----------
+     Builds a print-ready HTML document using the saved app.layout
+     settings, then opens it in a new tab and triggers the browser
+     print dialog. On iPad the user picks "Save to Files" which
+     produces a PDF with proper trim size, bleed, margins, and
+     page numbers -- KDP-acceptable.
+
+     Design choice: paginate client-side into fixed-size .page divs
+     in inches. iOS Safari's @page :left/:right + running-margin
+     support is uneven, so doing the work in JS gives us a reliable
+     result everywhere. Each .page has page-break-after:always so
+     the print engine maps one .page div to one physical PDF page. */
+  async function exportAsPdf(app) {
+    if (!app || !app.html) { toast('Open a manuscript first.', true); return; }
+    var settings = Object.assign(defaultLayout(), app.layout || {});
+    var html = buildPrintReadyHtml(app, settings);
+
+    // Some iOS Safari versions block window.open() on Blob URLs unless
+    // it's inside a user-gesture stack. We're already inside a click
+    // handler, so this is fine. If pop-up blocked, fall back to
+    // download.
+    var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var w;
+    try { w = window.open(url, '_blank'); } catch (e) {}
+    if (!w) {
+      toast('Pop-up blocked — downloading the print file instead. Open it in Safari, then Share → Print → Save as PDF.', true);
+      var safeName = String(app.name || 'book').replace(/[^a-zA-Z0-9 _\-]/g, '').trim() || 'book';
+      triggerAnchorDownload(url, safeName + '-print.html');
+      return;
+    }
+    toast('Opening print preview… use "Save to Files" to make a KDP-ready PDF.');
+  }
+
+  function buildPrintReadyHtml(app, s) {
+    var trim = TRIM_PRESETS.filter(function (t) { return t.id === s.trim; })[0] || TRIM_PRESETS[3];
+    var w = trim.w, h = trim.h;
+    var bleedExtra = s.bleed ? 0.125 : 0;
+    var pageW = w + bleedExtra * 2;
+    var pageH = h + bleedExtra * 2;
+
+    var contentBody = '';
+    try {
+      var doc = new DOMParser().parseFromString(app.html || '', 'text/html');
+      contentBody = doc.body ? doc.body.innerHTML : (app.html || '');
+    } catch (e) { contentBody = app.html || ''; }
+
+    // Pre-paginate the body using the same heuristic as the preview, so
+    // page count + page numbers are real before we hit the print engine.
+    var pages = paginateForPreview(contentBody, w, h, 0.5, s.marginOutside, s.marginTop, s.marginBottom);
+    var pageCount = pages.length;
+    var gutter = gutterForPageCount(pageCount);
+    var marginInside = gutter;
+
+    var headerText = s.headerText || '';
+    var footerText = s.footerText || '';
+    var showPN = !!s.pageNumbers;
+    var pnPos = s.pageNumberPosition || 'outside';
+
+    var css =
+      '@page { size: ' + pageW + 'in ' + pageH + 'in; margin: 0; }\n' +
+      '*{box-sizing:border-box;}' +
+      'html, body { margin: 0; padding: 0; background: #fff; color: #000; ' +
+        'font-family: Georgia, "Times New Roman", serif; line-height: 1.55; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
+      '.page { position: relative; width: ' + pageW + 'in; height: ' + pageH + 'in; ' +
+        'page-break-after: always; break-after: page; overflow: hidden; }\n' +
+      '.page:last-child { page-break-after: auto; break-after: auto; }\n' +
+      // Print convention: odd pages are recto (right side of binding) so the
+      // spine sits on their LEFT edge -> wider gutter is the LEFT margin.
+      // Even pages are verso so the spine sits on their RIGHT edge.
+      '.page.odd .safe-area { position: absolute; ' +
+        'left: ' + (bleedExtra + marginInside) + 'in; right: ' + (bleedExtra + s.marginOutside) + 'in; ' +
+        'top: ' + (bleedExtra + s.marginTop) + 'in; bottom: ' + (bleedExtra + s.marginBottom) + 'in; ' +
+        'overflow: hidden; }' +
+      '.page.even .safe-area { position: absolute; ' +
+        'left: ' + (bleedExtra + s.marginOutside) + 'in; right: ' + (bleedExtra + marginInside) + 'in; ' +
+        'top: ' + (bleedExtra + s.marginTop) + 'in; bottom: ' + (bleedExtra + s.marginBottom) + 'in; ' +
+        'overflow: hidden; }' +
+      '.safe-area p { margin: 0 0 0.6em; text-indent: 1.2em; }' +
+      '.safe-area p:first-of-type, .safe-area h1+p, .safe-area h2+p, .safe-area h3+p { text-indent: 0; }' +
+      '.safe-area h1 { font-size: 22pt; margin: 0 0 0.5em; text-align: center; line-height: 1.2; page-break-after: avoid; }' +
+      '.safe-area h2 { font-size: 14pt; margin: 1em 0 0.3em; }' +
+      '.safe-area h3 { font-size: 12pt; margin: 0.8em 0 0.25em; }' +
+      '.safe-area img { max-width: 100%; height: auto; display: block; margin: 0.6em auto; }' +
+      '.safe-area blockquote { margin: 0.6em 0.8em; font-style: italic; }' +
+      '.safe-area ul, .safe-area ol { margin: 0.4em 0 0.6em 1.4em; }' +
+      '.page-num { position: absolute; bottom: ' + (bleedExtra + 0.25) + 'in; font-size: 10pt; color: #000; }' +
+      '.page.even .page-num.outside { left: ' + (bleedExtra + 0.25) + 'in; }' +
+      '.page.odd .page-num.outside { right: ' + (bleedExtra + 0.25) + 'in; }' +
+      '.page-num.centered { left: 0; right: 0; text-align: center; }' +
+      '.header, .footer { position: absolute; ' +
+        'left: ' + (bleedExtra + marginInside) + 'in; right: ' + (bleedExtra + s.marginOutside) + 'in; ' +
+        'font-size: 9pt; color: #444; text-align: center; }' +
+      '.header { top: ' + (bleedExtra + 0.3) + 'in; }' +
+      '.footer { bottom: ' + (bleedExtra + 0.3) + 'in; }' +
+      // No on-screen scaling -- leave the .page divs at their native inch
+      // size so what the user sees in the new-tab print preview matches
+      // the printed PDF
+      '@media screen { body { background: #555; padding: 14px; } ' +
+        '.page { background: #fff; box-shadow: 0 6px 24px rgba(0,0,0,0.4); margin: 0 auto 14px; } }';
+
+    var pagesHtml = pages.map(function (pageBodyHtml, idx) {
+      var pageNum = idx + 1;
+      var parity = (pageNum % 2 === 0) ? 'even' : 'odd';
+      var headerHtml = headerText ? '<div class="header">' + escHtml(headerText) + '</div>' : '';
+      var footerHtml = footerText ? '<div class="footer">' + escHtml(footerText) + '</div>' : '';
+      var pnHtml = showPN ? '<div class="page-num ' + pnPos + '">' + pageNum + '</div>' : '';
+      return '<div class="page ' + parity + '">' +
+                headerHtml +
+                '<div class="safe-area">' + pageBodyHtml + '</div>' +
+                footerHtml +
+                pnHtml +
+              '</div>';
+    }).join('');
+
+    // Auto-trigger print after content has rendered. The user can
+    // cancel and re-trigger via Cmd+P / Share -> Print if needed.
+    var autoPrintScript =
+      '<script>' +
+      'window.addEventListener("load", function () { setTimeout(function () { try { window.print(); } catch (e) {} }, 400); });' +
+      '<\/script>';
+
+    return '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
+      '<title>' + escHtml(app.name || 'book') + ' — KDP Print</title>' +
+      '<style>' + css + '</style></head><body>' +
+      pagesHtml +
+      autoPrintScript +
+      '</body></html>';
   }
   function wireBookmarks() {
     $('bookmarks-btn').addEventListener('click', function () {
