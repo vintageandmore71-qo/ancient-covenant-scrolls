@@ -5628,7 +5628,7 @@
       headerText: '',
       footerText: '',
       bookType: 'standard',  // 'standard' | 'picture-24' | 'picture-32' | 'picture-40' | 'picture-48'
-      view: 'stacked'        // 'stacked' | 'spread'
+      view: 'schema'         // 'schema' | 'stacked' | 'spread'
     };
   }
 
@@ -5698,8 +5698,9 @@
         '</label>' +
         '<label style="font-size:12.5px;color:#a0a0b0;">View ' +
           '<select id="ll-view" style="margin-left:6px;padding:6px 8px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:13px;">' +
-            '<option value="stacked"' + (settings.view === 'stacked' ? ' selected' : '') + '>Stacked pages</option>' +
-            '<option value="spread"' + (settings.view === 'spread' ? ' selected' : '') + '>Side-by-side spreads</option>' +
+            '<option value="schema"' + (settings.view === 'schema' ? ' selected' : '') + '>Schema overview (whole book)</option>' +
+            '<option value="spread"' + (settings.view === 'spread' ? ' selected' : '') + '>Side-by-side spreads (full size)</option>' +
+            '<option value="stacked"' + (settings.view === 'stacked' ? ' selected' : '') + '>Stacked pages (full size)</option>' +
           '</select>' +
         '</label>' +
         '<label style="font-size:12.5px;color:#a0a0b0;display:inline-flex;align-items:center;gap:4px;">' +
@@ -5782,7 +5783,10 @@
     document.getElementById('ll-booktype').addEventListener('change', function () {
       var v = document.getElementById('ll-booktype').value;
       if (v && v !== 'standard') {
-        document.getElementById('ll-view').value = 'spread';
+        // Picture-book templates default to schema view -- the whole
+        // book on one screen, matching the standard picture-book
+        // self-publishing infographics.
+        document.getElementById('ll-view').value = 'schema';
         // Suggest 8.5x8.5 if the user hasn't picked an obviously
         // non-children's trim yet.
         var trimEl = document.getElementById('ll-trim');
@@ -5842,7 +5846,8 @@
     // reserved at front + back, story content distributed across the
     // story spreads in between.
     var isPicBook = !!PICTURE_BOOK_TEMPLATES[s.bookType];
-    var spreadView = s.view === 'spread' || isPicBook;
+    var schemaView = s.view === 'schema';
+    var spreadView = s.view === 'spread' || (s.view !== 'stacked' && s.view !== 'schema');
 
     var css =
       '*{box-sizing:border-box;}' +
@@ -5929,7 +5934,74 @@
     }
 
     var stackHtml = '';
-    if (spreadView) {
+    if (schemaView) {
+      // Schema overview -- the whole book visible at once, like a
+      // picture-book self-publishing infographic. Pages render as
+      // small thumbnails in a flex grid; spreads pair visually.
+      // Aspect ratio matches the chosen trim so the user sees how
+      // their pages will actually shape up.
+      var aspect = pageW / pageH;
+      stackHtml += '<div class="schema-grid">';
+      // Row layout: first row is page 1 alone (with leading spacer
+      // for visual balance), then 5 spreads per row, last row is the
+      // back cover alone.
+      function renderThumb(pg, idx) {
+        var pageNum = idx + 1;
+        var isStructural = pg.structural;
+        var bg = isStructural ? '#7b6cff' : '#fff';
+        var fg = isStructural ? '#fff' : '#222';
+        var subFg = isStructural ? '#e0d0ff' : '#666';
+        var contentTeaser = '';
+        if (!isStructural && pg.html) {
+          // Strip HTML and show first ~60 chars as a flavor preview
+          var t = String(pg.html).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 70);
+          if (t) contentTeaser = '<div class="schema-teaser">' + escHtml(t) + '…</div>';
+        }
+        return '<div class="schema-thumb" style="background:' + bg + ';color:' + fg + ';" data-page="' + pageNum + '">' +
+                  '<div class="schema-num" style="color:' + subFg + ';">Page ' + pageNum + '</div>' +
+                  '<div class="schema-role">' + escHtml(pg.role || ('Page ' + pageNum)) + '</div>' +
+                  contentTeaser +
+                '</div>';
+      }
+      function renderThumbSpread(left, right) {
+        return '<div class="schema-spread">' + left + right + '</div>';
+      }
+      // Page 1 alone (paste-down)
+      stackHtml += '<div class="schema-row schema-row-single">' +
+        '<div class="schema-spread schema-spread-single">' + renderThumb(pagesHtml[0], 0) + '</div>' +
+      '</div>';
+      // Pair pages 2-3, 4-5, ... up to the back cover
+      var spreadsHtml = [];
+      for (var p2 = 1; p2 < pagesHtml.length - 1; p2 += 2) {
+        var l = renderThumb(pagesHtml[p2], p2);
+        var r = (p2 + 1 < pagesHtml.length - 1) ? renderThumb(pagesHtml[p2 + 1], p2 + 1) : '';
+        spreadsHtml.push(renderThumbSpread(l, r));
+      }
+      // Group spreads into rows of 5 to match the standard
+      // picture-book infographic layout
+      for (var r2 = 0; r2 < spreadsHtml.length; r2 += 5) {
+        stackHtml += '<div class="schema-row">' + spreadsHtml.slice(r2, r2 + 5).join('') + '</div>';
+      }
+      // Back cover alone
+      if (pagesHtml.length > 1) {
+        stackHtml += '<div class="schema-row schema-row-single">' +
+          '<div class="schema-spread schema-spread-single">' + renderThumb(pagesHtml[pagesHtml.length - 1], pagesHtml.length - 1) + '</div>' +
+        '</div>';
+      }
+      stackHtml += '</div>';
+
+      // Schema-specific CSS appended to the existing css string
+      css += '.schema-grid{padding:24px;display:flex;flex-direction:column;gap:18px;align-items:center;background:#444;color:#222;}' +
+        '.schema-row{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;}' +
+        '.schema-row-single{justify-content:center;}' +
+        '.schema-spread{display:flex;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,0.45);border-radius:4px;overflow:hidden;}' +
+        '.schema-spread-single .schema-thumb{box-shadow:none;}' +
+        '.schema-thumb{width:140px;aspect-ratio:' + aspect + ';padding:8px 8px 6px;display:flex;flex-direction:column;justify-content:flex-start;font-family:-apple-system,sans-serif;border-right:1px solid #ddd;}' +
+        '.schema-thumb:last-child{border-right:none;}' +
+        '.schema-num{font-size:9.5px;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:4px;}' +
+        '.schema-role{font-size:11.5px;font-weight:700;line-height:1.25;}' +
+        '.schema-teaser{font-size:9px;color:#888;margin-top:6px;line-height:1.35;font-style:italic;font-family:Georgia,serif;}';
+    } else if (spreadView) {
       // First page is alone on the right (recto), then [2|3], [4|5], ...
       // Page 1 alone uses a left-side blank spacer so it visually sits
       // on the right of the spread row.
