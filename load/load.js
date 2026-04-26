@@ -3747,6 +3747,9 @@
       safe('wireLayoutBtn', wireLayoutBtn);
       safe('wireProseEditBtn', wireProseEditBtn);
       safe('wireCoverBtn', wireCoverBtn);
+      safe('wireBookCheckBtn', wireBookCheckBtn);
+      safe('wireBlurbBtn', wireBlurbBtn);
+      safe('wireMetadataBtn', wireMetadataBtn);
       safe('wirePerAppTheme', wirePerAppTheme);
       safe('wireNotesScreen', wireNotesScreen);
       safe('wireHelp', wireHelp);
@@ -5969,7 +5972,17 @@
         '<button data-cmd="formatBlock" data-arg="BLOCKQUOTE" class="pe-tool" style="flex-shrink:0;">&ldquo;</button>' +
         '<button data-cmd="undo" class="pe-tool" style="flex-shrink:0;">&#8630;</button>' +
         '<button data-cmd="redo" class="pe-tool" style="flex-shrink:0;">&#8631;</button>' +
+        '<button id="pe-find" class="pe-tool" style="flex-shrink:0;" title="Find &amp; replace">🔍 Find</button>' +
         '<button id="pe-save" style="background:#7b6cff;border:none;color:#12121a;padding:8px 14px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;">Save</button>' +
+      '</div>' +
+      '<div id="pe-find-bar" style="display:none;align-items:center;gap:8px;padding:8px 14px;background:#15152a;border-bottom:1px solid #2a2a40;flex-wrap:wrap;">' +
+        '<input id="pe-find-input" placeholder="Find" style="flex:1;min-width:140px;padding:7px 10px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:13.5px;">' +
+        '<input id="pe-replace-input" placeholder="Replace with" style="flex:1;min-width:140px;padding:7px 10px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:13.5px;">' +
+        '<label style="font-size:12px;color:#a0a0b0;display:inline-flex;align-items:center;gap:4px;"><input id="pe-find-case" type="checkbox"> Case sensitive</label>' +
+        '<button id="pe-find-next" style="background:#3a3a55;border:none;color:#fff;padding:7px 12px;border-radius:6px;font-size:13px;cursor:pointer;">Find next</button>' +
+        '<button id="pe-replace-one" style="background:#3a3a55;border:none;color:#fff;padding:7px 12px;border-radius:6px;font-size:13px;cursor:pointer;">Replace</button>' +
+        '<button id="pe-replace-all" style="background:#fbbf24;border:none;color:#3a2a05;padding:7px 12px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;">Replace all</button>' +
+        '<span id="pe-find-status" style="font-size:12px;color:#a0a0b0;"></span>' +
       '</div>' +
       '<div style="flex:1;overflow:auto;background:#fff;color:#222;">' +
         '<div id="pe-area" contenteditable="true" spellcheck="true" style="' +
@@ -6048,6 +6061,114 @@
       }
     });
     area.addEventListener('input', function () { area.dataset.dirty = '1'; });
+
+    // ---- Find & Replace ----
+    var findBar = document.getElementById('pe-find-bar');
+    var findInput = document.getElementById('pe-find-input');
+    var replaceInput = document.getElementById('pe-replace-input');
+    var caseCb = document.getElementById('pe-find-case');
+    var statusEl = document.getElementById('pe-find-status');
+
+    document.getElementById('pe-find').addEventListener('click', function () {
+      var open = findBar.style.display !== 'flex';
+      findBar.style.display = open ? 'flex' : 'none';
+      if (open) findInput.focus();
+    });
+
+    function findRangesIn(node, needle, caseSensitive) {
+      if (!needle) return [];
+      var hits = [];
+      var walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, null);
+      var n;
+      while ((n = walker.nextNode())) {
+        var text = n.nodeValue;
+        var hay = caseSensitive ? text : text.toLowerCase();
+        var nd = caseSensitive ? needle : needle.toLowerCase();
+        var idx = 0, found;
+        while ((found = hay.indexOf(nd, idx)) >= 0) {
+          hits.push({ node: n, start: found, end: found + needle.length });
+          idx = found + needle.length;
+        }
+      }
+      return hits;
+    }
+
+    var lastHitIdx = -1;
+    function findNext() {
+      var needle = findInput.value;
+      if (!needle) { statusEl.textContent = 'Type something to find'; return; }
+      var hits = findRangesIn(area, needle, caseCb.checked);
+      if (!hits.length) { statusEl.textContent = 'No matches'; return; }
+      lastHitIdx = (lastHitIdx + 1) % hits.length;
+      var h = hits[lastHitIdx];
+      var range = document.createRange();
+      range.setStart(h.node, h.start);
+      range.setEnd(h.node, h.end);
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      // Scroll the match into view
+      try {
+        var rect = range.getBoundingClientRect();
+        if (rect.top < 60 || rect.top > window.innerHeight - 60) {
+          var anchor = h.node.parentNode;
+          if (anchor && anchor.scrollIntoView) anchor.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }
+      } catch (e) {}
+      statusEl.textContent = (lastHitIdx + 1) + ' of ' + hits.length;
+    }
+
+    function replaceCurrent() {
+      var needle = findInput.value;
+      var replacement = replaceInput.value;
+      if (!needle) { statusEl.textContent = 'Type something to find'; return; }
+      var sel = window.getSelection();
+      if (sel && sel.rangeCount) {
+        var current = sel.toString();
+        var same = caseCb.checked ? current === needle : current.toLowerCase() === needle.toLowerCase();
+        if (same) {
+          var range = sel.getRangeAt(0);
+          range.deleteContents();
+          range.insertNode(document.createTextNode(replacement));
+          area.dataset.dirty = '1';
+          statusEl.textContent = 'Replaced';
+          // Re-find to advance to the next hit
+          lastHitIdx = -1;
+          return findNext();
+        }
+      }
+      // Nothing selected -> just find next so the user can replace it on the second tap
+      return findNext();
+    }
+
+    function replaceAll() {
+      var needle = findInput.value;
+      var replacement = replaceInput.value;
+      if (!needle) { statusEl.textContent = 'Type something to find'; return; }
+      var hits = findRangesIn(area, needle, caseCb.checked);
+      if (!hits.length) { statusEl.textContent = 'No matches'; return; }
+      // Walk hits in REVERSE so earlier hits stay valid as we mutate
+      // text nodes from the back of the document.
+      for (var i = hits.length - 1; i >= 0; i--) {
+        var h = hits[i];
+        var node = h.node, before = node.nodeValue.slice(0, h.start);
+        var after = node.nodeValue.slice(h.end);
+        node.nodeValue = before + replacement + after;
+      }
+      area.dataset.dirty = '1';
+      statusEl.textContent = 'Replaced ' + hits.length + ' match' + (hits.length === 1 ? '' : 'es');
+      lastHitIdx = -1;
+    }
+
+    document.getElementById('pe-find-next').addEventListener('click', findNext);
+    document.getElementById('pe-replace-one').addEventListener('click', replaceCurrent);
+    document.getElementById('pe-replace-all').addEventListener('click', replaceAll);
+    findInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); findNext(); }
+    });
+    replaceInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); replaceCurrent(); }
+    });
 
     area.focus();
   }
@@ -6507,6 +6628,585 @@
     var btn = $('cover-btn');
     if (btn) btn.addEventListener('click', function () {
       if (currentApp) openCoverDesigner(currentApp);
+      else toast('Open a manuscript first.', true);
+    });
+  }
+
+  /* ---------- Book Check ----------
+     Two scans rolled into one panel because they share the same
+     read-the-manuscript-once architecture and creators usually want
+     both before publishing:
+
+     - KDP Pre-flight: catches showstopper issues that cause KDP to
+       reject an upload after the 24-hour review (low-DPI images,
+       page count not divisible by 4, missing copyright, bleed
+       violations, gigantic files...).
+     - Reading-level: Flesch reading-ease + Flesch-Kincaid grade level
+       computed offline (no AI needed -- just word/sentence/syllable
+       counts) plus a suggested BISAC age band for KDP's category
+       picker.
+
+     All checks are pure functions over the manuscript HTML, so the
+     panel is fast and works offline. */
+  function openBookCheck(app) {
+    if (!app || !app.html) { toast('Open a manuscript first.', true); return; }
+
+    var existing = document.getElementById('__loadBookCheck');
+    if (existing) existing.remove();
+
+    var settings = Object.assign(defaultLayout(), app.layout || {});
+    var preflight = runKdpPreflight(app, settings);
+    var reading = runReadingLevel(app);
+
+    var wrap = document.createElement('div');
+    wrap.id = '__loadBookCheck';
+    wrap.style.cssText = 'position:fixed;inset:0;z-index:2050;display:flex;flex-direction:column;background:#0f0f1a;color:#f0f0f0;font-family:-apple-system,sans-serif;';
+
+    function row(level, msg, fix) {
+      var icon = level === 'pass' ? '✅' :
+                 level === 'warn' ? '⚠️' :
+                 '❌';
+      var border = level === 'pass' ? '#22c55e' :
+                   level === 'warn' ? '#fbbf24' :
+                   '#ef4444';
+      return '<div style="border-left:3px solid ' + border + ';padding:10px 12px;margin-bottom:8px;background:#1a1a2e;border-radius:6px;">' +
+        '<div style="font-size:13.5px;color:#f0f0f0;margin-bottom:' + (fix ? 4 : 0) + 'px;"><span style="margin-right:6px;">' + icon + '</span>' + escHtml(msg) + '</div>' +
+        (fix ? '<div style="font-size:12px;color:#a0a0b0;line-height:1.4;">Fix: ' + escHtml(fix) + '</div>' : '') +
+      '</div>';
+    }
+
+    var preflightHtml = preflight.map(function (r) { return row(r.level, r.msg, r.fix); }).join('');
+    var passCount = preflight.filter(function (r) { return r.level === 'pass'; }).length;
+    var warnCount = preflight.filter(function (r) { return r.level === 'warn'; }).length;
+    var failCount = preflight.filter(function (r) { return r.level === 'fail'; }).length;
+
+    var bisacBand = bisacAgeBandFor(reading.gradeLevel);
+    var readingHtml =
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:14px;">' +
+        statTile('Words', reading.words.toLocaleString()) +
+        statTile('Sentences', reading.sentences.toLocaleString()) +
+        statTile('Avg sentence', reading.avgSentenceLen.toFixed(1) + ' words') +
+        statTile('Reading ease', reading.readingEase.toFixed(1) + ' / 100', readingEaseLabel(reading.readingEase)) +
+        statTile('Grade level', reading.gradeLevel.toFixed(1), bisacBand.gradeLabel) +
+        statTile('Best for ages', bisacBand.ages, bisacBand.bisac) +
+      '</div>';
+
+    wrap.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#1a1a2e;border-bottom:1px solid #2a2a40;flex-wrap:wrap;">' +
+        '<button id="bc-close" style="background:#3a3a55;border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:14px;cursor:pointer;">&larr; Close</button>' +
+        '<div style="font-weight:700;font-size:15px;margin-right:auto;">Book Check &mdash; ' + escHtml(app.name || 'Untitled') + '</div>' +
+        '<div style="font-size:12.5px;color:#a0a0b0;">' +
+          '<span style="color:#22c55e;">✅ ' + passCount + ' pass</span> &middot; ' +
+          '<span style="color:#fbbf24;">⚠️ ' + warnCount + ' warn</span> &middot; ' +
+          '<span style="color:#ef4444;">❌ ' + failCount + ' fail</span>' +
+        '</div>' +
+      '</div>' +
+      '<div style="flex:1;overflow-y:auto;padding:18px 22px;max-width:900px;width:100%;margin:0 auto;">' +
+        '<h2 style="font-size:17px;color:#f0f0f0;margin:0 0 12px;border-bottom:1px solid #2a2a40;padding-bottom:6px;">📚 Reading level &amp; age band</h2>' +
+        readingHtml +
+        '<p style="font-size:12.5px;color:#a0a0b0;margin:0 0 22px;">Flesch reading-ease and Flesch-Kincaid grade are computed offline from word, sentence and syllable counts. The age band maps the grade level to KDP’s standard BISAC categories &mdash; pick this on the KDP upload form.</p>' +
+        '<h2 style="font-size:17px;color:#f0f0f0;margin:0 0 12px;border-bottom:1px solid #2a2a40;padding-bottom:6px;">✈️ KDP pre-flight check</h2>' +
+        preflightHtml +
+        '<p style="font-size:12.5px;color:#a0a0b0;margin:14px 0 0;">All checks run locally on this device. Re-open Book Check after edits to re-scan.</p>' +
+      '</div>';
+
+    document.body.appendChild(wrap);
+    document.getElementById('bc-close').addEventListener('click', function () { wrap.remove(); });
+  }
+
+  function statTile(label, value, sub) {
+    return '<div style="background:#1a1a2e;border:1px solid #2a2a40;border-radius:8px;padding:12px 14px;">' +
+      '<div style="font-size:11px;color:#a0a0b0;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">' + escHtml(label) + '</div>' +
+      '<div style="font-size:20px;font-weight:700;color:#f0f0f0;">' + escHtml(String(value)) + '</div>' +
+      (sub ? '<div style="font-size:12px;color:#7b6cff;margin-top:4px;">' + escHtml(sub) + '</div>' : '') +
+    '</div>';
+  }
+
+  // Strip HTML and return plain text for analysis
+  function manuscriptPlainText(app) {
+    try {
+      var doc = new DOMParser().parseFromString(app.html || '', 'text/html');
+      // Drop any auto-injected book title H1 so it doesn't skew sentence counts
+      var bookTitle = doc.querySelector('h1.book-title');
+      if (bookTitle) bookTitle.remove();
+      return (doc.body && doc.body.textContent || '').replace(/\s+/g, ' ').trim();
+    } catch (e) {
+      return String(app.html || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+  }
+
+  /* Heuristic syllable counter. Won't match a dictionary perfectly but
+     it's accurate to within ~5% for ordinary English prose -- which is
+     the precision Flesch-Kincaid needs. Counts vowel groups and
+     subtracts a silent trailing 'e'. */
+  function countSyllables(word) {
+    if (!word) return 0;
+    word = word.toLowerCase().replace(/[^a-z]/g, '');
+    if (!word) return 0;
+    if (word.length <= 3) return 1;
+    word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
+    word = word.replace(/^y/, '');
+    var matches = word.match(/[aeiouy]+/g);
+    return matches ? matches.length : 1;
+  }
+
+  function runReadingLevel(app) {
+    var text = manuscriptPlainText(app);
+    if (!text) {
+      return { words: 0, sentences: 0, syllables: 0, avgSentenceLen: 0, readingEase: 0, gradeLevel: 0 };
+    }
+    // Sentences: split on period / exclam / question, ignore empty
+    var sentenceMatches = text.match(/[^.!?]+[.!?]+/g);
+    var sentences = sentenceMatches ? sentenceMatches.length : 1;
+    // Words: split on whitespace
+    var words = text.split(/\s+/).filter(function (w) { return /[a-zA-Z]/.test(w); });
+    var wordCount = words.length;
+    if (!wordCount) return { words: 0, sentences: sentences, syllables: 0, avgSentenceLen: 0, readingEase: 0, gradeLevel: 0 };
+    var syllables = 0;
+    for (var i = 0; i < words.length; i++) syllables += countSyllables(words[i]);
+    var asl = wordCount / sentences;
+    var asw = syllables / wordCount;
+    var ease = 206.835 - 1.015 * asl - 84.6 * asw;
+    var grade = 0.39 * asl + 11.8 * asw - 15.59;
+    return {
+      words: wordCount,
+      sentences: sentences,
+      syllables: syllables,
+      avgSentenceLen: asl,
+      readingEase: Math.max(0, Math.min(120, ease)),
+      gradeLevel: Math.max(0, grade)
+    };
+  }
+
+  function readingEaseLabel(score) {
+    if (score >= 90) return 'Very easy';
+    if (score >= 80) return 'Easy';
+    if (score >= 70) return 'Fairly easy';
+    if (score >= 60) return 'Plain English';
+    if (score >= 50) return 'Fairly hard';
+    if (score >= 30) return 'College level';
+    return 'College graduate';
+  }
+
+  function bisacAgeBandFor(grade) {
+    // Map grade level to KDP / BISAC age categories. KDP requires
+    // picking an age range and grade range when listing a kids' book;
+    // these ranges line up with the standard JUVENILE FICTION
+    // categories.
+    if (grade < 1) return { ages: '0-3', gradeLabel: 'Pre-K', bisac: 'Picture book / board book' };
+    if (grade < 2) return { ages: '3-5', gradeLabel: 'Pre-K - K', bisac: 'Picture book / early reader' };
+    if (grade < 3) return { ages: '4-7', gradeLabel: 'K - 2', bisac: 'Beginner reader / early picture book' };
+    if (grade < 5) return { ages: '6-9', gradeLabel: '1 - 4', bisac: 'Chapter book / early middle grade' };
+    if (grade < 7) return { ages: '8-12', gradeLabel: '3 - 7', bisac: 'Middle grade' };
+    if (grade < 9) return { ages: '12-17', gradeLabel: '7 - 12', bisac: 'Young adult' };
+    return { ages: '18+', gradeLabel: 'College+', bisac: 'Adult fiction / non-fiction' };
+  }
+
+  function runKdpPreflight(app, layoutSettings) {
+    var checks = [];
+
+    // 1. Page count rules (paperback only)
+    var isPicBook = !!PICTURE_BOOK_TEMPLATES[layoutSettings.bookType];
+    var pageCount = 0;
+    if (isPicBook) {
+      pageCount = PICTURE_BOOK_TEMPLATES[layoutSettings.bookType].pages;
+    } else if (app.html) {
+      try {
+        var doc = new DOMParser().parseFromString(app.html, 'text/html');
+        var trim = TRIM_PRESETS.filter(function (t) { return t.id === layoutSettings.trim; })[0] || TRIM_PRESETS[3];
+        if (doc && doc.body) {
+          var chunks = paginateForPreview(doc.body.innerHTML, trim.w, trim.h, 0.5,
+            layoutSettings.marginOutside, layoutSettings.marginTop, layoutSettings.marginBottom);
+          pageCount = chunks.length;
+        }
+      } catch (e) {}
+    }
+    if (pageCount === 0) {
+      checks.push({ level: 'warn', msg: 'Could not estimate the page count.',
+        fix: 'Open the Layout panel once so the preview can compute pagination.' });
+    } else {
+      if (pageCount < 24) {
+        checks.push({ level: 'fail', msg: 'Page count is ' + pageCount + ', but KDP paperback minimum is 24.',
+          fix: 'Add more content, or print as an ebook only (no minimum for Kindle).' });
+      } else if (pageCount > 828) {
+        checks.push({ level: 'fail', msg: 'Page count is ' + pageCount + ', but KDP paperback maximum is 828 (white) / 776 (cream).',
+          fix: 'Split into Volume 1 and Volume 2.' });
+      } else if (pageCount % 2 !== 0) {
+        checks.push({ level: 'warn', msg: 'Page count is ' + pageCount + ' (odd). KDP prefers an even total.',
+          fix: 'Add a blank back-matter page.' });
+      } else {
+        checks.push({ level: 'pass', msg: 'Page count ' + pageCount + ' is within KDP paperback range (24–828).' });
+      }
+      // Picture-book rule: KDP Kids requires multiples of 4
+      if (isPicBook && pageCount % 4 !== 0) {
+        checks.push({ level: 'fail', msg: 'Picture-book templates require page counts divisible by 4. Current: ' + pageCount + '.',
+          fix: 'Switch to a 24/32/40/48-page template in the Layout panel.' });
+      } else if (isPicBook) {
+        checks.push({ level: 'pass', msg: 'Picture-book page count divisible by 4 (KDP Kids requirement).' });
+      }
+    }
+
+    // 2. Image checks via DOM scan
+    try {
+      var doc2 = new DOMParser().parseFromString(app.html || '', 'text/html');
+      var imgs = doc2.querySelectorAll('img');
+      var noAlt = 0, dataUrls = 0, total = imgs.length;
+      for (var i = 0; i < imgs.length; i++) {
+        if (!imgs[i].getAttribute('alt')) noAlt++;
+        var src = imgs[i].getAttribute('src') || '';
+        if (/^data:/i.test(src)) dataUrls++;
+      }
+      if (total === 0) {
+        if (isPicBook) {
+          checks.push({ level: 'warn', msg: 'Picture-book layout selected but no images found in the manuscript.',
+            fix: 'Drop your illustrations into the manuscript via the Edit Text view (✏️) or import a .docx with images.' });
+        } else {
+          checks.push({ level: 'pass', msg: 'No inline images to validate.' });
+        }
+      } else {
+        checks.push({ level: 'pass', msg: 'Found ' + total + ' inline image' + (total === 1 ? '' : 's') + '.' });
+        if (noAlt > 0) {
+          checks.push({ level: 'warn', msg: noAlt + ' of ' + total + ' images are missing alt text.',
+            fix: 'Open Edit Text, select the image, and add a description so VoiceOver readers and KDP accessibility checks pass.' });
+        } else {
+          checks.push({ level: 'pass', msg: 'All ' + total + ' images have alt text.' });
+        }
+        // Data URL images carry their own resolution; warn the creator we
+        // cannot natively check DPI without rendering each one. Cheap
+        // heuristic: tiny base64 length means low resolution.
+        if (dataUrls > 0) {
+          checks.push({ level: 'warn', msg: dataUrls + ' image' + (dataUrls === 1 ? '' : 's') + ' embedded as data URL.',
+            fix: 'Verify each is at least 300 DPI for print (KDP rejects below). Open the Cover designer to see the rendered size, or re-import a higher-resolution version.' });
+        }
+      }
+    } catch (e) {
+      checks.push({ level: 'warn', msg: 'Could not parse the manuscript HTML for an image scan.',
+        fix: 'Re-import the manuscript if it was damaged.' });
+    }
+
+    // 3. Front-matter sanity
+    var lower = (app.html || '').toLowerCase();
+    if (!/copyright|©|&copy;|\(c\)\s*\d{4}/i.test(lower)) {
+      checks.push({ level: 'warn', msg: 'No copyright statement found.',
+        fix: 'Add a copyright line such as "© ' + new Date().getFullYear() + ' [your name], all rights reserved." on a dedicated front-matter page.' });
+    } else {
+      checks.push({ level: 'pass', msg: 'Copyright statement detected.' });
+    }
+    if (!app.author && !/by\s+[A-Z]/.test(app.html || '')) {
+      checks.push({ level: 'warn', msg: 'No author name on the book record.',
+        fix: 'Set app.author or add "by [Your Name]" near the title page. KDP requires the author field on upload.' });
+    } else {
+      checks.push({ level: 'pass', msg: 'Author information is present.' });
+    }
+
+    // 4. Cover design saved?
+    if (!app.coverDesign) {
+      checks.push({ level: 'warn', msg: 'No cover design saved.',
+        fix: 'Open the Cover designer (🎨) and tap Save design. KDP requires a separate cover image upload.' });
+    } else {
+      checks.push({ level: 'pass', msg: 'Cover design saved.' });
+    }
+
+    // 5. File size sanity (rough MB estimate)
+    var sizeBytes = (app.html || '').length;
+    var sizeMb = sizeBytes / (1024 * 1024);
+    if (sizeMb > 50) {
+      checks.push({ level: 'warn', msg: 'Manuscript HTML is ' + sizeMb.toFixed(1) + ' MB.',
+        fix: 'KDP allows up to 650 MB for print PDFs but the heavier the file the slower the upload. Compress embedded images.' });
+    } else {
+      checks.push({ level: 'pass', msg: 'Manuscript size ' + (sizeMb < 1 ? sizeBytes.toLocaleString() + ' bytes' : sizeMb.toFixed(1) + ' MB') + ' is reasonable.' });
+    }
+
+    return checks;
+  }
+
+  function wireBookCheckBtn() {
+    var btn = $('book-check-btn');
+    if (btn) btn.addEventListener('click', function () {
+      if (currentApp) openBookCheck(currentApp);
+      else toast('Open a manuscript first.', true);
+    });
+  }
+
+  /* ---------- AI Blurb Writer ----------
+     Drafts a 150-word back-cover blurb using the AI provider chain.
+     Pre-fills title, author, age band (from the reading-level scan),
+     genre. Result is shown inline; tap Copy or Save to keep it on the
+     book record.
+
+     Blurbs are universally hated by authors; making it one tap saves
+     hours of agonizing over comp titles and hooks. */
+  function openBlurbWriter(app) {
+    if (!app) { toast('Open a manuscript first.', true); return; }
+    var existing = document.getElementById('__loadBlurb');
+    if (existing) existing.remove();
+
+    var reading = runReadingLevel(app);
+    var ageBand = bisacAgeBandFor(reading.gradeLevel);
+    var existingBlurb = (app.blurb && app.blurb.text) || '';
+
+    var wrap = document.createElement('div');
+    wrap.id = '__loadBlurb';
+    wrap.style.cssText = 'position:fixed;inset:0;z-index:2050;display:flex;flex-direction:column;background:#0f0f1a;color:#f0f0f0;font-family:-apple-system,sans-serif;';
+
+    wrap.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#1a1a2e;border-bottom:1px solid #2a2a40;flex-wrap:wrap;">' +
+        '<button id="bl-close" style="background:#3a3a55;border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:14px;cursor:pointer;">&larr; Close</button>' +
+        '<div style="font-weight:700;font-size:15px;margin-right:auto;">AI Blurb Writer &mdash; ' + escHtml(app.name || 'Untitled') + '</div>' +
+      '</div>' +
+      '<div style="flex:1;overflow-y:auto;padding:18px 22px;max-width:780px;width:100%;margin:0 auto;">' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">' +
+          '<label style="font-size:12.5px;color:#a0a0b0;">Title<input id="bl-title" value="' + escHtml(app.name || '') + '" style="display:block;width:100%;margin-top:4px;padding:8px 10px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:14px;"></label>' +
+          '<label style="font-size:12.5px;color:#a0a0b0;">Author<input id="bl-author" value="' + escHtml(app.author || '') + '" style="display:block;width:100%;margin-top:4px;padding:8px 10px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:14px;"></label>' +
+          '<label style="font-size:12.5px;color:#a0a0b0;">Genre / category<select id="bl-genre" style="display:block;width:100%;margin-top:4px;padding:8px 10px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:14px;">' +
+            '<option>Picture book</option>' +
+            '<option>Middle-grade fiction</option>' +
+            '<option>Young-adult fiction</option>' +
+            '<option>Adult fiction</option>' +
+            '<option>Memoir / non-fiction</option>' +
+            '<option>Self-help</option>' +
+            '<option>Cookbook</option>' +
+            '<option>Devotional / spiritual</option>' +
+            '<option>Workbook / journal</option>' +
+          '</select></label>' +
+          '<label style="font-size:12.5px;color:#a0a0b0;">Age band<input id="bl-age" value="' + escHtml(ageBand.ages) + '" style="display:block;width:100%;margin-top:4px;padding:8px 10px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:14px;"></label>' +
+        '</div>' +
+        '<label style="font-size:12.5px;color:#a0a0b0;">Hook (one line, optional)' +
+          '<input id="bl-hook" placeholder="What makes this book special?" style="display:block;width:100%;margin-top:4px;padding:8px 10px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:14px;">' +
+        '</label>' +
+        '<div style="display:flex;gap:8px;margin-top:14px;">' +
+          '<button id="bl-generate" style="flex:1;background:#7b6cff;border:none;color:#12121a;padding:12px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">✨ Generate blurb</button>' +
+          '<button id="bl-regenerate" style="background:#3a3a55;border:none;color:#fff;padding:12px 14px;border-radius:8px;font-size:14px;cursor:pointer;" title="Try another draft">↻ Try again</button>' +
+        '</div>' +
+        '<div id="bl-status" style="font-size:12.5px;color:#a0a0b0;margin-top:8px;min-height:18px;"></div>' +
+        '<textarea id="bl-result" placeholder="Your blurb appears here. Tap Generate when ready." style="width:100%;min-height:240px;margin-top:12px;padding:14px;background:#1a1a2e;color:#f0f0f0;border:1px solid #2a2a40;border-radius:8px;font-size:15px;line-height:1.55;font-family:Georgia,serif;resize:vertical;">' + escHtml(existingBlurb) + '</textarea>' +
+        '<div style="display:flex;gap:8px;margin-top:10px;">' +
+          '<button id="bl-copy" style="background:#22c55e;border:none;color:#062013;padding:10px 16px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">📋 Copy</button>' +
+          '<button id="bl-save" style="background:#3a3a55;border:none;color:#fff;padding:10px 16px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">Save to book</button>' +
+        '</div>' +
+        '<p style="font-size:12px;color:#a0a0b0;margin-top:18px;">Routes through your AI helper chain (Pollinations / Hugging Face / OpenRouter / Gemini / on-device). Try Again uses a different temperature for variation.</p>' +
+      '</div>';
+
+    document.body.appendChild(wrap);
+
+    var resultEl = document.getElementById('bl-result');
+    var statusEl = document.getElementById('bl-status');
+
+    function buildPrompt(temp) {
+      var title = document.getElementById('bl-title').value.trim() || 'Untitled';
+      var author = document.getElementById('bl-author').value.trim() || 'an emerging author';
+      var genre = document.getElementById('bl-genre').value;
+      var ages = document.getElementById('bl-age').value.trim();
+      var hook = document.getElementById('bl-hook').value.trim();
+      var sample = manuscriptPlainText(app).slice(0, 1500);
+      var p = 'You are a professional book-marketing copywriter. Write a back-cover blurb for the book described below.';
+      p += '\n\nTITLE: ' + title;
+      p += '\nAUTHOR: ' + author;
+      p += '\nGENRE: ' + genre;
+      if (ages) p += '\nTARGET AGE: ' + ages;
+      if (hook) p += '\nHOOK: ' + hook;
+      p += '\n\nMANUSCRIPT EXCERPT (first ~1500 chars):\n' + sample;
+      p += '\n\nWrite ONLY the blurb body. 130–170 words. ';
+      p += 'Open with a hook. Tease the conflict. End with stakes that make a browser want to buy. ';
+      p += 'Plain language, no clichés like "rollercoaster" or "page-turner". No headings, no bullet lists, no spoilers. ';
+      p += 'Do not include the title, the author name, or quote-marks around the blurb.';
+      if (temp) p += '\n\n(Try a different angle than a standard blurb -- emotional / mood-driven.)';
+      return p;
+    }
+
+    async function generate(varyAngle) {
+      statusEl.textContent = 'Asking the AI helper…';
+      resultEl.disabled = true;
+      var prompt = buildPrompt(varyAngle);
+      var got = null;
+      // Run the same provider chain the helper bubble uses, but
+      // silent (no thinking-bubble UI). Returns first non-empty
+      // string answer.
+      for (var i = 0; i < LOAD_PROVIDERS.length; i++) {
+        var p = LOAD_PROVIDERS[i];
+        if (!p.available || !p.available()) continue;
+        if (p.name === 'builtin') continue; // KB rule-based can't write blurbs
+        statusEl.textContent = 'Asking ' + p.label.replace(/^via\s+/, '') + '…';
+        try {
+          var text = await p.ask(prompt, '');
+          if (text && text.trim().length > 30) { got = { text: text.trim(), provider: p.label }; break; }
+        } catch (e) {
+          // Fall through to the next provider
+        }
+      }
+      resultEl.disabled = false;
+      if (!got) {
+        statusEl.textContent = 'No AI provider responded. Check Settings → Load AI: enable Pollinations or paste a key.';
+        return;
+      }
+      // Strip any wrapping quotes / heading the model added despite the
+      // instruction, and any leading '## Blurb' style header.
+      var clean = got.text
+        .replace(/^["'\s]+|["'\s]+$/g, '')
+        .replace(/^#{1,3}.*\n+/, '')
+        .replace(/^[Bb]lurb:?\s*\n+/, '')
+        .trim();
+      resultEl.value = clean;
+      statusEl.textContent = 'Drafted ' + got.provider.replace(/^via\s+/, '') + '. ' +
+        clean.split(/\s+/).length + ' words.';
+    }
+
+    document.getElementById('bl-close').addEventListener('click', function () { wrap.remove(); });
+    document.getElementById('bl-generate').addEventListener('click', function () { generate(false); });
+    document.getElementById('bl-regenerate').addEventListener('click', function () { generate(true); });
+    document.getElementById('bl-copy').addEventListener('click', function () {
+      var v = resultEl.value;
+      if (!v) { toast('Nothing to copy.', true); return; }
+      try {
+        navigator.clipboard.writeText(v).then(function () { toast('Blurb copied.'); });
+      } catch (e) { toast('Could not copy.', true); }
+    });
+    document.getElementById('bl-save').addEventListener('click', async function () {
+      app.blurb = { text: resultEl.value, savedAt: Date.now() };
+      try { await putApp(app); toast('Blurb saved to this book.'); }
+      catch (e) { toast('Could not save: ' + (e && e.message), true); }
+    });
+  }
+
+  function wireBlurbBtn() {
+    var btn = $('blurb-btn');
+    if (btn) btn.addEventListener('click', function () {
+      if (currentApp) openBlurbWriter(currentApp);
+      else toast('Open a manuscript first.', true);
+    });
+  }
+
+  /* ---------- KDP Metadata Manager ----------
+     One screen that stores everything the KDP upload form asks for so
+     the user doesn't have to remember them at submission time. ISBN,
+     three BISAC categories, seven keywords, series info, price, the
+     edition number, language, contributors. Saves to app.metadata,
+     and offers a "Copy for KDP form" button that pastes a
+     pre-formatted block. */
+  function openMetadataManager(app) {
+    if (!app) { toast('Open a manuscript first.', true); return; }
+    var existing = document.getElementById('__loadMetadata');
+    if (existing) existing.remove();
+
+    var meta = Object.assign({
+      isbn: '', categories: ['', '', ''], keywords: ['', '', '', '', '', '', ''],
+      seriesName: '', seriesNumber: '', priceUsd: '', edition: '1',
+      language: 'English', contributors: '',
+      description: '', // pulled from blurb if present
+      releaseDate: ''
+    }, app.metadata || {});
+    if ((!meta.description || !meta.description.trim()) && app.blurb && app.blurb.text) {
+      meta.description = app.blurb.text;
+    }
+
+    var wrap = document.createElement('div');
+    wrap.id = '__loadMetadata';
+    wrap.style.cssText = 'position:fixed;inset:0;z-index:2050;display:flex;flex-direction:column;background:#0f0f1a;color:#f0f0f0;font-family:-apple-system,sans-serif;';
+
+    function field(label, id, value, opts) {
+      opts = opts || {};
+      var t = opts.type || 'text';
+      return '<label style="display:block;font-size:12.5px;color:#a0a0b0;margin-bottom:10px;">' + escHtml(label) +
+        '<input id="' + id + '" type="' + t + '" value="' + escHtml(value || '') + '"' +
+          (opts.placeholder ? ' placeholder="' + escHtml(opts.placeholder) + '"' : '') +
+          ' style="display:block;width:100%;margin-top:4px;padding:8px 10px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:14px;">' +
+      '</label>';
+    }
+
+    var keywordsHtml = meta.keywords.map(function (kw, i) {
+      return field('Keyword ' + (i + 1), 'mt-kw-' + i, kw, { placeholder: 'KDP allows 7 keywords' });
+    }).join('');
+
+    var categoriesHtml = meta.categories.map(function (cat, i) {
+      return field('BISAC category ' + (i + 1), 'mt-cat-' + i, cat,
+        { placeholder: 'e.g. JUVENILE FICTION / Animals / Foxes' });
+    }).join('');
+
+    wrap.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#1a1a2e;border-bottom:1px solid #2a2a40;">' +
+        '<button id="mt-close" style="background:#3a3a55;border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:14px;cursor:pointer;">&larr; Close</button>' +
+        '<div style="font-weight:700;font-size:15px;margin-right:auto;">KDP Metadata &mdash; ' + escHtml(app.name || 'Untitled') + '</div>' +
+        '<button id="mt-copy" style="background:#22c55e;border:none;color:#062013;padding:8px 14px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">📋 Copy for KDP form</button>' +
+        '<button id="mt-save" style="background:#7b6cff;border:none;color:#12121a;padding:8px 14px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">Save</button>' +
+      '</div>' +
+      '<div style="flex:1;overflow-y:auto;padding:18px 22px;max-width:900px;width:100%;margin:0 auto;">' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px;">' +
+          field('ISBN (13-digit, optional — KDP gives you a free ASIN)', 'mt-isbn', meta.isbn, { placeholder: '978-...' }) +
+          field('Edition', 'mt-edition', meta.edition, { placeholder: '1' }) +
+          field('Language', 'mt-lang', meta.language) +
+          field('Release date (YYYY-MM-DD, optional)', 'mt-release', meta.releaseDate, { placeholder: '2026-05-01' }) +
+          field('Series name (optional)', 'mt-series', meta.seriesName) +
+          field('Series number', 'mt-series-n', meta.seriesNumber, { placeholder: '1' }) +
+          field('Price (USD, ebook list price)', 'mt-price', meta.priceUsd, { placeholder: '4.99' }) +
+          field('Contributors (illustrator, editor, narrator)', 'mt-contrib', meta.contributors) +
+        '</div>' +
+        '<h3 style="font-size:14px;color:#f0f0f0;margin:16px 0 8px;">BISAC categories (KDP picks 3)</h3>' +
+        categoriesHtml +
+        '<h3 style="font-size:14px;color:#f0f0f0;margin:16px 0 8px;">Keywords (KDP picks 7)</h3>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px;">' + keywordsHtml + '</div>' +
+        '<h3 style="font-size:14px;color:#f0f0f0;margin:16px 0 8px;">Description / blurb</h3>' +
+        '<textarea id="mt-desc" placeholder="Description shown on the Amazon listing. Pulled from your saved blurb when present." style="width:100%;min-height:160px;padding:12px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:14px;line-height:1.55;font-family:Georgia,serif;resize:vertical;">' + escHtml(meta.description) + '</textarea>' +
+        '<p style="font-size:12px;color:#a0a0b0;margin:18px 0 0;">All metadata is saved on this device only. Tap "Copy for KDP form" to get a paste-friendly text block to drop into KDP\'s upload screens.</p>' +
+      '</div>';
+
+    document.body.appendChild(wrap);
+
+    function readAll() {
+      return {
+        isbn: document.getElementById('mt-isbn').value.trim(),
+        edition: document.getElementById('mt-edition').value.trim(),
+        language: document.getElementById('mt-lang').value.trim(),
+        releaseDate: document.getElementById('mt-release').value.trim(),
+        seriesName: document.getElementById('mt-series').value.trim(),
+        seriesNumber: document.getElementById('mt-series-n').value.trim(),
+        priceUsd: document.getElementById('mt-price').value.trim(),
+        contributors: document.getElementById('mt-contrib').value.trim(),
+        categories: [0, 1, 2].map(function (i) { return document.getElementById('mt-cat-' + i).value.trim(); }),
+        keywords: [0, 1, 2, 3, 4, 5, 6].map(function (i) { return document.getElementById('mt-kw-' + i).value.trim(); }),
+        description: document.getElementById('mt-desc').value.trim()
+      };
+    }
+
+    document.getElementById('mt-close').addEventListener('click', function () { wrap.remove(); });
+    document.getElementById('mt-save').addEventListener('click', async function () {
+      app.metadata = readAll();
+      try { await putApp(app); toast('Metadata saved.'); }
+      catch (e) { toast('Could not save: ' + (e && e.message), true); }
+    });
+    document.getElementById('mt-copy').addEventListener('click', function () {
+      var m = readAll();
+      var lines = [];
+      lines.push('# KDP upload — ' + (app.name || 'Untitled'));
+      if (app.author) lines.push('Author: ' + app.author);
+      if (m.contributors) lines.push('Contributors: ' + m.contributors);
+      lines.push('Language: ' + (m.language || 'English'));
+      lines.push('Edition: ' + (m.edition || '1'));
+      if (m.isbn) lines.push('ISBN: ' + m.isbn);
+      if (m.releaseDate) lines.push('Release date: ' + m.releaseDate);
+      if (m.seriesName) lines.push('Series: ' + m.seriesName + (m.seriesNumber ? ' #' + m.seriesNumber : ''));
+      if (m.priceUsd) lines.push('Price (USD): $' + m.priceUsd);
+      lines.push('');
+      lines.push('## BISAC categories (paste into KDP categories)');
+      m.categories.filter(Boolean).forEach(function (c, i) { lines.push((i + 1) + '. ' + c); });
+      lines.push('');
+      lines.push('## Keywords (paste into the 7 keyword fields)');
+      m.keywords.filter(Boolean).forEach(function (k, i) { lines.push((i + 1) + '. ' + k); });
+      lines.push('');
+      lines.push('## Description');
+      lines.push(m.description || '(no description yet)');
+      var blob = lines.join('\n');
+      try {
+        navigator.clipboard.writeText(blob).then(function () {
+          toast('KDP form data copied to clipboard. Paste into the KDP browser tab.');
+        });
+      } catch (e) { toast('Could not copy.', true); }
+    });
+  }
+
+  function wireMetadataBtn() {
+    var btn = $('metadata-btn');
+    if (btn) btn.addEventListener('click', function () {
+      if (currentApp) openMetadataManager(currentApp);
       else toast('Open a manuscript first.', true);
     });
   }
