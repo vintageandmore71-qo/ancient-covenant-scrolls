@@ -3829,6 +3829,7 @@
       safe('wireBookCheckBtn', wireBookCheckBtn);
       safe('wireBlurbBtn', wireBlurbBtn);
       safe('wireMetadataBtn', wireMetadataBtn);
+      safe('wirePackageBtn', wirePackageBtn);
       safe('wirePerAppTheme', wirePerAppTheme);
       safe('wireNotesScreen', wireNotesScreen);
       safe('wireHelp', wireHelp);
@@ -7287,6 +7288,207 @@
     if (btn) btn.addEventListener('click', function () {
       if (currentApp) openMetadataManager(currentApp);
       else toast('Open a manuscript first.', true);
+    });
+  }
+
+  /* ---------- Package as native app ----------
+     Walks the user through turning their PWA into a real iOS app
+     (.ipa) or Android app (.apk / .aab) via pwabuilder.com. We
+     don't run the build ourselves -- iOS app signing requires Apple
+     Developer credentials and Xcode, neither of which exist on iPad.
+     What we DO is:
+       1. Help them upload their PWA somewhere PWABuilder can reach
+          (the standalone HTML for free upload, or a hosted URL).
+       2. Pre-fill the manifest checks PWABuilder runs (icon sizes,
+          theme color, display mode, start_url).
+       3. Tell them, step by step, what to do on pwabuilder.com.
+       4. List exactly what's free vs paid (sideload vs App Store
+          submission). */
+  function openPackageWalkthrough(app) {
+    if (!app) { toast('Open a PWA first.', true); return; }
+    var existing = document.getElementById('__loadPackage');
+    if (existing) existing.remove();
+
+    var checks = runManifestChecks(app);
+
+    var wrap = document.createElement('div');
+    wrap.id = '__loadPackage';
+    wrap.style.cssText = 'position:fixed;inset:0;z-index:2050;display:flex;flex-direction:column;background:#0f0f1a;color:#f0f0f0;font-family:-apple-system,sans-serif;';
+
+    var checkRows = checks.map(function (c) {
+      var icon = c.level === 'pass' ? '✅' : c.level === 'warn' ? '⚠️' : '❌';
+      var border = c.level === 'pass' ? '#22c55e' : c.level === 'warn' ? '#fbbf24' : '#ef4444';
+      return '<div style="border-left:3px solid ' + border + ';padding:8px 12px;margin-bottom:6px;background:#1a1a2e;border-radius:6px;font-size:13.5px;">' +
+        '<span style="margin-right:6px;">' + icon + '</span>' + escHtml(c.msg) +
+        (c.fix ? '<div style="font-size:12px;color:#a0a0b0;margin-top:3px;">Fix: ' + escHtml(c.fix) + '</div>' : '') +
+      '</div>';
+    }).join('');
+
+    wrap.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#1a1a2e;border-bottom:1px solid #2a2a40;">' +
+        '<button id="pk-close" style="background:#3a3a55;border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:14px;cursor:pointer;">&larr; Close</button>' +
+        '<div style="font-weight:700;font-size:15px;margin-right:auto;">Package as native app &mdash; ' + escHtml(app.name || 'Untitled') + '</div>' +
+      '</div>' +
+      '<div style="flex:1;overflow-y:auto;padding:18px 22px;max-width:880px;width:100%;margin:0 auto;line-height:1.55;">' +
+        '<p style="font-size:14px;color:#cfcfdc;margin:0 0 16px;">Load + <strong>PWABuilder</strong> turns this PWA into a real iOS or Android app. PWABuilder is free and runs in your iPad browser. Apple App Store submission still needs an <strong>Apple Developer account ($99/yr)</strong>; sideload + TestFlight + Android sideload do not.</p>' +
+
+        '<h3 style="font-size:15px;color:#f0f0f0;margin:18px 0 8px;">Step 1 &mdash; Pre-flight</h3>' +
+        '<p style="font-size:13.5px;color:#cfcfdc;margin:0 0 8px;">PWABuilder needs a hosted URL or a packaged ZIP. Load checked your manifest:</p>' +
+        checkRows +
+
+        '<h3 style="font-size:15px;color:#f0f0f0;margin:22px 0 8px;">Step 2 &mdash; Pick how PWABuilder will see your PWA</h3>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">' +
+          '<div style="background:#1a1a2e;border:1px solid #2a2a40;border-radius:8px;padding:14px;">' +
+            '<div style="font-weight:700;color:#f0f0f0;margin-bottom:6px;">A. Hosted URL (recommended)</div>' +
+            '<p style="font-size:13px;color:#cfcfdc;margin:0 0 8px;">If your PWA is hosted somewhere with HTTPS (GitHub Pages, Netlify, Vercel, your own domain), PWABuilder reads it directly.</p>' +
+            '<p style="font-size:12px;color:#a0a0b0;margin:0;">Example: <code>https://load.dssorit.app/</code></p>' +
+          '</div>' +
+          '<div style="background:#1a1a2e;border:1px solid #2a2a40;border-radius:8px;padding:14px;">' +
+            '<div style="font-weight:700;color:#f0f0f0;margin-bottom:6px;">B. Standalone ZIP</div>' +
+            '<p style="font-size:13px;color:#cfcfdc;margin:0 0 8px;">Export this PWA as a self-contained zip, host it on a free static-host service, then point PWABuilder at the resulting URL.</p>' +
+            '<button id="pk-export-zip" style="background:#7b6cff;border:none;color:#12121a;padding:8px 12px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;">Export PWA as ZIP</button>' +
+          '</div>' +
+        '</div>' +
+
+        '<h3 style="font-size:15px;color:#f0f0f0;margin:22px 0 8px;">Step 3 &mdash; Open PWABuilder</h3>' +
+        '<p style="font-size:13.5px;color:#cfcfdc;margin:0 0 10px;">Tap the button below. PWABuilder will scan your PWA and show three buttons: <strong>Package for Stores</strong> &rarr; iOS / Android / Windows. Use iOS and Android only.</p>' +
+        '<a id="pk-pwabuilder" href="https://www.pwabuilder.com/" target="_blank" rel="noopener" style="display:inline-block;background:#22c55e;color:#062013;padding:12px 20px;border-radius:10px;font-size:15px;font-weight:700;text-decoration:none;">📦 Open pwabuilder.com</a>' +
+
+        '<h3 style="font-size:15px;color:#f0f0f0;margin:22px 0 8px;">Step 4 &mdash; iOS package (.ipa)</h3>' +
+        '<ol style="font-size:13.5px;color:#cfcfdc;margin:0 0 10px 18px;padding:0;">' +
+          '<li>On PWABuilder, click <strong>Package for Stores → iOS</strong>.</li>' +
+          '<li>Fill in the form: bundle id (e.g. <code>app.dssorit.load</code>), display name, version (start at 1.0.0).</li>' +
+          '<li>Tap <strong>Download Package</strong>. You get a ZIP with an Xcode project + a signed-source <code>.ipa</code>.</li>' +
+          '<li>Distribution paths:' +
+            '<ul style="margin:6px 0;padding-left:18px;">' +
+              '<li><strong>App Store:</strong> needs Apple Developer ($99/yr) + a Mac running Xcode to upload via App Store Connect.</li>' +
+              '<li><strong>TestFlight beta:</strong> same Apple Developer account required, but you can share with up to 10,000 testers without going through review first.</li>' +
+              '<li><strong>Sideload:</strong> use a service like <a href="https://altstore.io/" target="_blank" rel="noopener" style="color:#7b6cff;">AltStore</a> or <a href="https://sideloadly.io/" target="_blank" rel="noopener" style="color:#7b6cff;">Sideloadly</a>. Re-sign every 7 days unless you have a paid Apple Developer cert.</li>' +
+            '</ul>' +
+          '</li>' +
+        '</ol>' +
+
+        '<h3 style="font-size:15px;color:#f0f0f0;margin:22px 0 8px;">Step 5 &mdash; Android package (.apk / .aab)</h3>' +
+        '<ol style="font-size:13.5px;color:#cfcfdc;margin:0 0 10px 18px;padding:0;">' +
+          '<li>On PWABuilder, click <strong>Package for Stores → Android</strong>.</li>' +
+          '<li>Fill in the form: package id, display name, splash screen color, signing key (PWABuilder can generate one for you).</li>' +
+          '<li>Tap <strong>Download Package</strong>. You get a ZIP with both <code>.apk</code> (sideload) and <code>.aab</code> (Play Store).</li>' +
+          '<li>Distribution paths:' +
+            '<ul style="margin:6px 0;padding-left:18px;">' +
+              '<li><strong>Google Play:</strong> $25 one-time fee, upload the <code>.aab</code>.</li>' +
+              '<li><strong>Sideload:</strong> share the <code>.apk</code> directly. User taps it on their Android phone, accepts "install from unknown sources", done. No fees, no Google account.</li>' +
+              '<li><strong>Amazon Appstore:</strong> free for developers, also accepts <code>.apk</code>.</li>' +
+            '</ul>' +
+          '</li>' +
+        '</ol>' +
+
+        '<h3 style="font-size:15px;color:#f0f0f0;margin:22px 0 8px;">Cost summary (worst case)</h3>' +
+        '<div style="background:#1a1a2e;border:1px solid #2a2a40;border-radius:8px;padding:12px 14px;font-size:13px;color:#cfcfdc;">' +
+          '<div>📱 <strong>iOS App Store:</strong> $99/yr Apple Developer + a Mac (or rent one — MacInCloud ~$30/mo).</div>' +
+          '<div>🤖 <strong>Google Play Store:</strong> $25 one-time.</div>' +
+          '<div>📦 <strong>PWABuilder:</strong> free.</div>' +
+          '<div>↪️ <strong>Sideloading both:</strong> $0.</div>' +
+        '</div>' +
+
+        '<p style="font-size:12.5px;color:#a0a0b0;margin:18px 0 0;">Load only ships to iOS and Android; Windows / desktop targets are intentionally left out so users always know they\'re getting a mobile-native app.</p>' +
+      '</div>';
+
+    document.body.appendChild(wrap);
+    document.getElementById('pk-close').addEventListener('click', function () { wrap.remove(); });
+    document.getElementById('pk-export-zip').addEventListener('click', async function () {
+      // Reuse the standalone-share path that already produces a single
+      // self-contained HTML; for PWABuilder zip, we want a multi-file
+      // bundle. The simplest cross-version answer is to produce a zip
+      // containing index.html + manifest.json so PWABuilder finds both.
+      try {
+        var zip = new JSZip();
+        var bundle = await buildEnhancedShareHtml(app);
+        zip.file('index.html', bundle);
+        var manifest = {
+          name: app.name || 'My App',
+          short_name: (app.name || 'App').slice(0, 12),
+          start_url: 'index.html',
+          display: 'standalone',
+          background_color: '#1a1a3e',
+          theme_color: '#7b6cff',
+          icons: app.coverDesign && app.coverDesign.imageDataUrl
+            ? [{ src: 'icon-512.png', sizes: '512x512', type: 'image/png' }]
+            : []
+        };
+        zip.file('manifest.json', JSON.stringify(manifest, null, 2));
+        var blob = await zip.generateAsync({ type: 'blob' });
+        var safeName = String(app.name || 'pwa').replace(/[^a-zA-Z0-9 _\-]/g, '').trim() || 'pwa';
+        await shareBlobOrDownload(blob, safeName + '-pwa.zip', 'application/zip',
+          'PWA bundle exported. Upload to a static host (GitHub Pages / Netlify), then paste the URL into pwabuilder.com.');
+      } catch (e) {
+        toast('Could not export ZIP: ' + (e && e.message), true);
+      }
+    });
+  }
+
+  function runManifestChecks(app) {
+    var checks = [];
+    var html = app.html || '';
+
+    // Title / name
+    if (app.name && app.name.length >= 3) {
+      checks.push({ level: 'pass', msg: 'App name is set: "' + app.name + '"' });
+    } else {
+      checks.push({ level: 'fail', msg: 'No app name on the record.', fix: 'Tap rename in the library tile menu.' });
+    }
+
+    // Manifest in source
+    var hasManifest = /<link\s+rel=["']manifest["']/i.test(html);
+    if (hasManifest) {
+      checks.push({ level: 'pass', msg: 'manifest.json link tag is in the HTML head.' });
+    } else {
+      checks.push({ level: 'warn', msg: 'No <link rel="manifest"> in the HTML.',
+        fix: 'PWABuilder generates a manifest if missing, but a hand-written one gives you control over icon, theme color and start URL.' });
+    }
+
+    // Icons in HTML head
+    var hasAppleIcon = /apple-touch-icon/i.test(html);
+    if (hasAppleIcon) {
+      checks.push({ level: 'pass', msg: 'apple-touch-icon present (iOS home-screen icon).' });
+    } else {
+      checks.push({ level: 'warn', msg: 'No apple-touch-icon link.',
+        fix: 'Add <link rel="apple-touch-icon" href="...">. PWABuilder uses this for the iOS app icon.' });
+    }
+
+    // Theme color
+    var hasTheme = /<meta\s+name=["']theme-color["']/i.test(html);
+    if (hasTheme) {
+      checks.push({ level: 'pass', msg: 'theme-color meta tag present.' });
+    } else {
+      checks.push({ level: 'warn', msg: 'No theme-color meta tag.',
+        fix: 'Add <meta name="theme-color" content="#xxxxxx"> to set the system bar color in the packaged app.' });
+    }
+
+    // Service worker hint (PWABuilder requires one for installability)
+    var hasSw = /serviceWorker\.register/.test(html);
+    if (hasSw) {
+      checks.push({ level: 'pass', msg: 'Service worker registration found.' });
+    } else {
+      checks.push({ level: 'warn', msg: 'No service worker registration in the HTML.',
+        fix: 'PWABuilder accepts apps without one but the resulting iOS / Android app will not work fully offline. Use the AI helper to add a service worker for full offline support.' });
+    }
+
+    // Cover / icon ready
+    if (app.coverDesign) {
+      checks.push({ level: 'pass', msg: 'Cover design saved — usable as an app icon.' });
+    } else {
+      checks.push({ level: 'warn', msg: 'No cover design saved.',
+        fix: 'Open the Cover designer (🎨) and save a design. PWABuilder will use the cover image as the icon.' });
+    }
+
+    return checks;
+  }
+
+  function wirePackageBtn() {
+    var btn = $('package-btn');
+    if (btn) btn.addEventListener('click', function () {
+      if (currentApp) openPackageWalkthrough(currentApp);
+      else toast('Open a PWA first.', true);
     });
   }
 
