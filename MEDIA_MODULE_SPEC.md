@@ -41,7 +41,9 @@ Format per item:
 - ✅ Clip duration label
 - ✅ + adder per track
 - ✅ + append at end of track
-- ⛔ Snap toggle (snap-to-grid / beats / captions)
+- ✅ Snap toggle (snap-to-grid 0.5s, with visible tick markers)
+- ⛔ Snap-to-beats (audio-aware)
+- ⛔ Snap-to-caption boundaries
 
 ## D. Track layers
 
@@ -159,8 +161,11 @@ Format per item:
 2. Floating Quick Toolbar — ✅ same commit
 3. Strong Visual Selection Feedback — ✅ same commit
 4. Replace / Relink Media — ✅ Replace shipped (Relink to library = next)
-5. Clip Interaction (drag / trim / duplicate) — ⛔ NEXT
-6. Snap Toggle — ⛔
+5. Clip Interaction (drag / trim / duplicate) — ⚠️ trim handles +
+   live timestamps shipped; drag-to-reposition + duplicate need
+   multi-clip foundation first
+6. Snap Toggle — ✅ shipped (0.5s grid, snap button in transport,
+   visible tick markers)
 7. Real Speed slider — ✅ shipped
 8. Real Opacity slider — ✅ shipped
 9. Multi-clip support — ⛔

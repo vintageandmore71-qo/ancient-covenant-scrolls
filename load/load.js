@@ -8390,6 +8390,7 @@
           '<button id="ve-next" class="ve-iconbtn" aria-label="Next frame">&#9197;</button>' +
         '</div>' +
         '<button id="ve-stack" class="ve-iconbtn" aria-label="Layers">&#9783;</button>' +
+        '<button id="ve-snap" class="ve-iconbtn" aria-label="Snap to grid" title="Snap (off)">&#9899;</button>' +
         '<button id="ve-undo" class="ve-iconbtn" aria-label="Undo">&#8634;</button>' +
         '<button id="ve-redo" class="ve-iconbtn" aria-label="Redo">&#8635;</button>' +
         '<button id="ve-pause" class="ve-iconbtn" aria-label="Pause" style="display:none;">&#9208;</button>' +
@@ -8578,9 +8579,16 @@
       '#__loadVideoEdit .ve-clip-thumbs img{flex:1;width:0;height:100%;object-fit:cover;display:block;border-right:1px solid rgba(0,0,0,0.25);}' +
       '#__loadVideoEdit .ve-clip-thumbs img:last-child{border-right:none;}' +
       '#__loadVideoEdit .ve-clip-trim{position:absolute;top:0;bottom:0;left:0;right:0;border:2px solid #fbbf24;border-radius:6px;background:rgba(251,191,36,0.06);pointer-events:none;}' +
-      '#__loadVideoEdit .ve-clip-handle{position:absolute;top:-2px;bottom:-2px;width:14px;background:#fbbf24;cursor:ew-resize;border-radius:2px;}' +
-      '#__loadVideoEdit .ve-handle-left{left:-7px;}' +
-      '#__loadVideoEdit .ve-handle-right{right:-7px;}' +
+      '#__loadVideoEdit .ve-clip-handle{position:absolute;top:-3px;bottom:-3px;width:18px;background:#fbbf24;cursor:ew-resize;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#1a1a26;font-size:14px;font-weight:900;pointer-events:auto;touch-action:none;box-shadow:0 0 0 1px rgba(0,0,0,0.25);}' +
+      '#__loadVideoEdit .ve-clip-handle::before{content:attr(data-time);position:absolute;top:-22px;background:#1a1a26;color:#fbbf24;font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap;pointer-events:none;}' +
+      '#__loadVideoEdit .ve-handle-left{left:-9px;}' +
+      '#__loadVideoEdit .ve-handle-left::after{content:"\\\\\\\\";color:#1a1a26;}' +
+      '#__loadVideoEdit .ve-handle-right{right:-9px;}' +
+      '#__loadVideoEdit .ve-handle-right::after{content:"\\\\\\\\";color:#1a1a26;}' +
+      '#__loadVideoEdit #ve-snap.on{background:#fbbf24;color:#1a1a26;}' +
+      '#__loadVideoEdit .ve-snap-grid{position:absolute;top:0;bottom:0;left:0;right:0;pointer-events:none;z-index:4;}' +
+      '#__loadVideoEdit .ve-snap-tick{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,0.18);}' +
+      '#__loadVideoEdit .ve-snap-tick.major{background:rgba(255,255,255,0.40);}' +
       '#__loadVideoEdit .ve-clip-duration{position:absolute;left:6px;top:-18px;font-size:10px;color:#fbbf24;font-weight:700;background:#1a1a26;padding:1px 6px;border-radius:3px;}' +
       '#__loadVideoEdit .ve-clip-playhead{position:absolute;top:-4px;bottom:-4px;width:2px;background:#fff;left:0;pointer-events:none;box-shadow:0 0 6px rgba(255,255,255,0.6);}' +
       '#__loadVideoEdit .ve-clip-playhead::before{content:"";position:absolute;top:-3px;left:-5px;width:12px;height:12px;background:#fff;border-radius:50%;box-shadow:0 0 0 2px #1a1a26;}' +
@@ -8624,12 +8632,23 @@
       clipTrim.style.left = leftPct + '%';
       clipTrim.style.right = (100 - rightPct) + '%';
       clipDur.textContent = (outS - inS).toFixed(2) + 's';
+      // Live timestamps above each handle so the user sees the exact
+      // in / out point during a drag without checking the centre label.
+      if (handleL) handleL.setAttribute('data-time', inS.toFixed(2) + 's');
+      if (handleR) handleR.setAttribute('data-time', outS.toFixed(2) + 's');
     }
     function startDrag(handle, side) {
       var moveHandler = function (e) {
         var clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
         var rect = clipStrip.getBoundingClientRect();
         var pct = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+        // Snap-to-grid: if Snap is on, round the trim handle to the
+        // nearest 0.5 second mark on the actual video duration.
+        if (snapEnabled && video.duration && isFinite(video.duration)) {
+          var sec = (pct / 100) * video.duration;
+          var snapped = Math.round(sec / SNAP_STEP) * SNAP_STEP;
+          pct = Math.max(0, Math.min(100, (snapped / video.duration) * 100));
+        }
         if (side === 'left') {
           var rp = parseFloat(clipTrim.dataset.rpct || '100');
           if (pct > rp - 2) pct = rp - 2;
@@ -8774,6 +8793,11 @@
     var musicGain = null;
     var musicVol = 0.35;
     var muteOrig = false;
+    // Snap-to-grid for trim handles + scrub. Step is half a second
+    // because that's the finest granularity that still feels useful
+    // for kid-book / short-clip editing without fighting drag.
+    var snapEnabled = false;
+    var SNAP_STEP = 0.5;
 
     function fmtTime(s) {
       s = Math.max(0, s || 0);
@@ -8854,7 +8878,11 @@
       var rect = clipStripEl.getBoundingClientRect();
       var x = (ev.touches ? ev.touches[0].clientX : ev.clientX) - rect.left;
       var pct = Math.max(0, Math.min(1, x / rect.width));
-      try { video.currentTime = pct * video.duration; } catch (e) {}
+      var t = pct * video.duration;
+      // Snap-to-grid for scrub too — keeps the playhead landing on
+      // the same beat the trim handles snap to.
+      if (snapEnabled) t = Math.round(t / SNAP_STEP) * SNAP_STEP;
+      try { video.currentTime = t; } catch (e) {}
     }
     function onScrubStart(ev) {
       ev.preventDefault();
@@ -8873,6 +8901,40 @@
       if (wasPlaying) video.play().catch(function () {});
     }
     if (clipStripEl) clipStripEl.addEventListener('pointerdown', onScrubStart);
+
+    /* Snap toggle wiring. Updates the button visual + redraws the
+       half-second grid markers across the timeline strip when on. */
+    var snapBtn = document.getElementById('ve-snap');
+    function renderSnapGrid() {
+      var stripEl = document.getElementById('ve-clip-strip');
+      if (!stripEl) return;
+      var existing = stripEl.querySelector('.ve-snap-grid');
+      if (existing) existing.remove();
+      if (!snapEnabled || !video.duration || !isFinite(video.duration)) return;
+      var grid = document.createElement('div');
+      grid.className = 've-snap-grid';
+      var total = Math.floor(video.duration / SNAP_STEP);
+      var ticks = '';
+      for (var i = 1; i < total; i++) {
+        var pct = ((i * SNAP_STEP) / video.duration) * 100;
+        // Major (full second) ticks vs minor (half second).
+        var major = (i * SNAP_STEP) % 1 === 0;
+        ticks += '<span class="ve-snap-tick' + (major ? ' major' : '') + '" style="left:' + pct.toFixed(2) + '%;"></span>';
+      }
+      grid.innerHTML = ticks;
+      stripEl.appendChild(grid);
+    }
+    if (snapBtn) snapBtn.addEventListener('click', function () {
+      snapEnabled = !snapEnabled;
+      snapBtn.classList.toggle('on', snapEnabled);
+      snapBtn.title = 'Snap (' + (snapEnabled ? 'on' : 'off') + ')';
+      snapBtn.innerHTML = snapEnabled ? '&#9899;' : '&#9898;';
+      renderSnapGrid();
+      toast('Snap to 0.5s grid: ' + (snapEnabled ? 'ON' : 'OFF'), false);
+    });
+    // Re-render the grid whenever new metadata loads (e.g. after a
+    // Replace) so tick spacing matches the new duration.
+    video.addEventListener('loadedmetadata', renderSnapGrid);
 
     /* Clip selection — tap the strip to enter clip-edit mode. The
        strip glows yellow, a floating quick-toolbar pops above it,
