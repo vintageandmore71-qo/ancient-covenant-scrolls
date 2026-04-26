@@ -7999,73 +7999,277 @@
 
     var wrap = document.createElement('div');
     wrap.id = '__loadVideoEdit';
-    wrap.style.cssText = 'position:fixed;inset:0;z-index:2050;display:flex;flex-direction:column;background:#0f0f1a;color:#f0f0f0;font-family:-apple-system,sans-serif;';
+    wrap.style.cssText = 'position:fixed;inset:0;z-index:2050;display:flex;flex-direction:column;background:#0a0a14;color:#f0f0f0;font-family:-apple-system,sans-serif;overflow:hidden;';
+    // VN-style layout: dark topbar / black preview / track rows / bottom action toolbar
     wrap.innerHTML =
-      '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#1a1a2e;border-bottom:1px solid #2a2a40;flex-wrap:wrap;">' +
-        '<button id="ve-close" style="background:#3a3a55;border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:14px;cursor:pointer;">&larr; Close</button>' +
-        '<div style="font-weight:700;font-size:15px;margin-right:auto;">Video Editor &mdash; ' + escHtml(app.name || 'Untitled') + '</div>' +
-        '<button id="ve-export" style="background:linear-gradient(90deg,#ff5ea3,#7b6cff);border:none;color:#fff;padding:8px 16px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">📥 Export MP4</button>' +
+      // ===== Topbar =====
+      '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#0a0a14;flex-shrink:0;">' +
+        '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
+        '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
+        '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
+          '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
+          '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
+            '<option value="original" selected>Original</option>' +
+            '<option value="16:9">16:9</option>' +
+            '<option value="9:16">9:16</option>' +
+            '<option value="1:1">1:1</option>' +
+            '<option value="4:5">4:5</option>' +
+          '</select>' +
+        '</div>' +
+        '<button id="ve-more" class="ve-iconbtn" aria-label="More">&#8943;</button>' +
+        '<button id="ve-save" class="ve-iconbtn" aria-label="Save draft">&#128190;</button>' +
+        '<button id="ve-export" style="background:#1d6fff;border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">&#11014;&#65039;</button>' +
       '</div>' +
-      '<div style="flex:1;overflow-y:auto;padding:18px;max-width:980px;width:100%;margin:0 auto;">' +
-        // Stage: real <video> stacked under an overlay <canvas>
-        '<div id="ve-stage" style="position:relative;background:#000;border-radius:14px;overflow:hidden;aspect-ratio:16/9;box-shadow:0 12px 32px rgba(0,0,0,0.5);">' +
-          '<video id="ve-video" src="' + blobUrl + '" playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;"></video>' +
-          '<canvas id="ve-overlay" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"></canvas>' +
+      // ===== Preview stage (black) =====
+      '<div id="ve-stage" style="flex:1;min-height:0;position:relative;background:#000;display:flex;align-items:center;justify-content:center;">' +
+        '<video id="ve-video" src="' + blobUrl + '" playsinline style="max-width:100%;max-height:100%;background:#000;"></video>' +
+        '<canvas id="ve-overlay" style="position:absolute;pointer-events:none;"></canvas>' +
+        '<button id="ve-fullscreen" class="ve-iconbtn" style="position:absolute;right:10px;bottom:10px;background:rgba(255,255,255,0.1);" aria-label="Fullscreen">&#10070;</button>' +
+      '</div>' +
+      // ===== Transport row =====
+      '<div style="display:flex;align-items:center;gap:14px;padding:8px 14px;background:#0a0a14;border-top:1px solid #1a1a26;flex-shrink:0;">' +
+        '<span id="ve-time" style="font-size:13px;color:#cfcfdc;font-variant-numeric:tabular-nums;min-width:120px;">0:00 / 0:00</span>' +
+        '<div style="margin:0 auto;display:flex;align-items:center;gap:18px;">' +
+          '<button id="ve-prev" class="ve-iconbtn" aria-label="Previous frame">&#9198;</button>' +
+          '<button id="ve-play" class="ve-iconbtn" style="font-size:22px;" aria-label="Play">&#9654;</button>' +
+          '<button id="ve-next" class="ve-iconbtn" aria-label="Next frame">&#9197;</button>' +
         '</div>' +
-
-        // Transport row
-        '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0 16px;">' +
-          '<button id="ve-play" style="background:#22c55e;color:#062013;border:none;padding:10px 18px;border-radius:999px;font-weight:700;font-size:14px;">▶ Play</button>' +
-          '<button id="ve-pause" style="background:#3a3a55;color:#fff;border:2px solid #555;padding:10px 14px;border-radius:999px;font-size:13px;">⏸ Pause</button>' +
-          '<span id="ve-time" style="font-size:13px;color:#a0a0b0;font-variant-numeric:tabular-nums;">0:00 / 0:00</span>' +
+        '<button id="ve-stack" class="ve-iconbtn" aria-label="Layers">&#9783;</button>' +
+        '<button id="ve-undo" class="ve-iconbtn" aria-label="Undo">&#8634;</button>' +
+        '<button id="ve-redo" class="ve-iconbtn" aria-label="Redo">&#8635;</button>' +
+        '<button id="ve-pause" class="ve-iconbtn" aria-label="Pause" style="display:none;">&#9208;</button>' +
+      '</div>' +
+      // ===== Track rows =====
+      '<div id="ve-tracks" style="background:#0a0a14;padding:6px 0 4px;flex-shrink:0;border-top:1px solid #1a1a26;">' +
+        // Music
+        '<div class="ve-track" data-track="music">' +
+          '<button class="ve-track-add" data-add="music" aria-label="Add music"><span>&#127925;</span><span class="plus">+</span></button>' +
+          '<div class="ve-track-body"><span class="ve-track-empty" id="ve-music-empty">Tap to add music</span><div class="ve-track-clip" id="ve-music-clip" hidden></div></div>' +
         '</div>' +
-
-        // Trim
-        '<div style="background:#1a1a2e;border:1px solid #2a2a40;border-radius:14px;padding:14px 16px;margin-bottom:12px;">' +
-          '<h3 style="margin:0 0 8px;font-size:13px;color:#f0f0f0;text-transform:uppercase;letter-spacing:0.5px;">✂ Trim</h3>' +
-          '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' +
-            '<label style="font-size:13px;color:#a0a0b0;">In</label>' +
-            '<input id="ve-trim-in" type="range" min="0" max="100" step="0.1" value="0" style="flex:1;min-width:160px;">' +
-            '<span id="ve-trim-in-val" class="num">0.00s</span>' +
-          '</div>' +
-          '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;">' +
-            '<label style="font-size:13px;color:#a0a0b0;">Out</label>' +
-            '<input id="ve-trim-out" type="range" min="0" max="100" step="0.1" value="100" style="flex:1;min-width:160px;">' +
-            '<span id="ve-trim-out-val" class="num">0.00s</span>' +
-          '</div>' +
-          '<div style="font-size:12px;color:#a0a0b0;margin-top:6px;">Final length: <strong id="ve-final-len" style="color:#fff;">—</strong></div>' +
+        // Subtitle / text overlay
+        '<div class="ve-track" data-track="text">' +
+          '<button class="ve-track-add" data-add="text" aria-label="Add subtitle"><span>T</span><span class="plus">+</span></button>' +
+          '<div class="ve-track-body"><span class="ve-track-empty" id="ve-text-empty">Tap to add subtitle</span><div class="ve-track-clip" id="ve-text-clip" hidden></div></div>' +
         '</div>' +
-
-        // Text overlay
-        '<div style="background:#1a1a2e;border:1px solid #2a2a40;border-radius:14px;padding:14px 16px;margin-bottom:12px;">' +
-          '<h3 style="margin:0 0 8px;font-size:13px;color:#f0f0f0;text-transform:uppercase;letter-spacing:0.5px;">📝 Text overlay</h3>' +
-          '<input id="ve-text" placeholder="Optional caption / title" style="width:100%;padding:8px 10px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:8px;font-size:14px;margin-bottom:8px;">' +
-          '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;">' +
-            '<label style="font-size:12.5px;color:#a0a0b0;">Position<select id="ve-text-pos" style="display:block;width:100%;margin-top:4px;padding:6px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:13px;"><option value="top">Top</option><option value="middle">Middle</option><option value="bottom" selected>Bottom</option></select></label>' +
-            '<label style="font-size:12.5px;color:#a0a0b0;">Size<input id="ve-text-size" type="number" value="48" min="12" max="200" style="display:block;width:100%;margin-top:4px;padding:6px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:13px;"></label>' +
-            '<label style="font-size:12.5px;color:#a0a0b0;">Color<input id="ve-text-color" type="color" value="#ffffff" style="display:block;width:100%;height:34px;margin-top:4px;border:none;background:transparent;cursor:pointer;"></label>' +
-            '<label style="font-size:12.5px;color:#a0a0b0;">BG<select id="ve-text-bg" style="display:block;width:100%;margin-top:4px;padding:6px;background:#2a2a40;color:#fff;border:1px solid #3a3a55;border-radius:6px;font-size:13px;"><option value="none">None</option><option value="black" selected>Black bar</option><option value="white">White bar</option></select></label>' +
-          '</div>' +
+        // Sticker / PiP (placeholder for v2)
+        '<div class="ve-track" data-track="sticker">' +
+          '<button class="ve-track-add" data-add="sticker" aria-label="Add sticker"><span>&#128444;</span><span class="plus">+</span></button>' +
+          '<div class="ve-track-body"><span class="ve-track-empty">Tap to add sticker / PiP</span></div>' +
         '</div>' +
-
-        // Audio (background music)
-        '<div style="background:#1a1a2e;border:1px solid #2a2a40;border-radius:14px;padding:14px 16px;margin-bottom:12px;">' +
-          '<h3 style="margin:0 0 8px;font-size:13px;color:#f0f0f0;text-transform:uppercase;letter-spacing:0.5px;">🎵 Background music</h3>' +
-          '<input id="ve-audio-pick" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg" style="font-size:13px;">' +
-          '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;">' +
-            '<label style="font-size:13px;color:#a0a0b0;">Music volume</label>' +
-            '<input id="ve-audio-vol" type="range" min="0" max="1" step="0.05" value="0.35" style="flex:1;min-width:160px;">' +
-            '<span id="ve-audio-vol-val" class="num">35%</span>' +
-            '<label style="font-size:13px;color:#a0a0b0;display:inline-flex;align-items:center;gap:4px;"><input id="ve-mute-orig" type="checkbox"> Mute original audio</label>' +
+        // Video clip with cover thumbnail + yellow timeline strip
+        '<div class="ve-track ve-track-video" data-track="video">' +
+          '<button class="ve-track-cover" aria-label="Cover" id="ve-cover">Cover</button>' +
+          '<div class="ve-track-body">' +
+            '<div class="ve-clip-strip" id="ve-clip-strip">' +
+              '<div class="ve-clip-trim" id="ve-clip-trim">' +
+                '<div class="ve-clip-handle ve-handle-left" id="ve-handle-left"></div>' +
+                '<div class="ve-clip-handle ve-handle-right" id="ve-handle-right"></div>' +
+                '<div class="ve-clip-duration" id="ve-clip-duration">0.00s</div>' +
+              '</div>' +
+              '<div class="ve-clip-playhead" id="ve-clip-playhead"></div>' +
+            '</div>' +
           '</div>' +
         '</div>' +
-
-        '<div id="ve-progress" style="display:none;align-items:center;gap:10px;background:#1a1a2e;border-radius:12px;padding:12px 14px;border:1px solid #2a2a40;">' +
-          '<div style="flex:1;height:8px;background:#2a2a40;border-radius:4px;overflow:hidden;"><div id="ve-progress-fill" style="height:100%;width:0%;background:linear-gradient(90deg,#ff5ea3,#fbbf24,#22c55e,#4ea0ff,#a18cff);transition:width 0.15s;"></div></div>' +
-          '<span id="ve-progress-label" style="font-size:13px;color:#a0a0b0;white-space:nowrap;">Recording…</span>' +
+        // Audio waveform (decorative for now -- yellow)
+        '<div class="ve-track ve-track-audio" data-track="audio">' +
+          '<button class="ve-track-add" data-add="audio-orig" aria-label="Original audio"><span>&#128264;</span></button>' +
+          '<div class="ve-track-body"><div class="ve-waveform" id="ve-waveform"></div></div>' +
         '</div>' +
+        // Time ruler
+        '<div class="ve-time-ruler" id="ve-time-ruler"></div>' +
+      '</div>' +
+      // ===== Hidden trim sliders (used by handles via JS) =====
+      '<input type="hidden" id="ve-trim-in" value="0">' +
+      '<input type="hidden" id="ve-trim-out" value="0">' +
+      // ===== Hidden text-overlay panel (slides up when 'subtitle' add tapped) =====
+      '<div id="ve-text-panel" class="ve-panel" hidden>' +
+        '<div class="ve-panel-head"><span>Subtitle / overlay</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
+        '<input id="ve-text" placeholder="Caption / title" style="width:100%;padding:10px;background:#1a1a26;color:#fff;border:1px solid #2a2a40;border-radius:8px;font-size:14px;">' +
+        '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:10px;">' +
+          '<label class="ve-lbl">Position<select id="ve-text-pos" class="ve-input"><option value="top">Top</option><option value="middle">Middle</option><option value="bottom" selected>Bottom</option></select></label>' +
+          '<label class="ve-lbl">Size<input id="ve-text-size" type="number" value="48" min="12" max="200" class="ve-input"></label>' +
+          '<label class="ve-lbl">Color<input id="ve-text-color" type="color" value="#ffffff" class="ve-color"></label>' +
+          '<label class="ve-lbl">BG<select id="ve-text-bg" class="ve-input"><option value="none">None</option><option value="black" selected>Black bar</option><option value="white">White bar</option></select></label>' +
+        '</div>' +
+      '</div>' +
+      // ===== Hidden music panel =====
+      '<div id="ve-music-panel" class="ve-panel" hidden>' +
+        '<div class="ve-panel-head"><span>Music</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
+        '<input id="ve-audio-pick" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg" style="font-size:13px;">' +
+        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;">' +
+          '<label class="ve-lbl">Volume</label>' +
+          '<input id="ve-audio-vol" type="range" min="0" max="1" step="0.05" value="0.35" style="flex:1;min-width:140px;accent-color:#fbbf24;">' +
+          '<span id="ve-audio-vol-val" style="font-size:13px;color:#cfcfdc;font-weight:700;">35%</span>' +
+        '</div>' +
+        '<label class="ve-lbl" style="margin-top:8px;display:flex;align-items:center;gap:6px;"><input id="ve-mute-orig" type="checkbox"> Mute original audio</label>' +
+      '</div>' +
+      // ===== Bottom action toolbar (VN style: round icons w/ labels) =====
+      '<div id="ve-actions" style="display:flex;justify-content:space-around;align-items:center;background:#0a0a14;padding:10px 8px max(10px,env(safe-area-inset-bottom));border-top:1px solid #1a1a26;flex-shrink:0;overflow-x:auto;gap:6px;">' +
+        '<button class="ve-action" data-action="split"><span class="ve-act-icon">&#9986;</span><span class="ve-act-lbl">Split</span></button>' +
+        '<button class="ve-action" data-action="cutout"><span class="ve-act-icon">&#9986;&#65039;</span><span class="ve-act-lbl">Cutout</span></button>' +
+        '<button class="ve-action" data-action="bg"><span class="ve-act-icon">&#9633;</span><span class="ve-act-lbl">BG</span></button>' +
+        '<button class="ve-action" data-action="tts"><span class="ve-act-icon">A&#127908;</span><span class="ve-act-lbl">TTS</span></button>' +
+        '<button class="ve-action" data-action="mosaic"><span class="ve-act-icon">&#9783;</span><span class="ve-act-lbl">Mosaic</span></button>' +
+        '<button class="ve-action" data-action="magnifier"><span class="ve-act-icon">&#128270;</span><span class="ve-act-lbl">Magnifier</span></button>' +
+      '</div>' +
+      // ===== Recording progress overlay =====
+      '<div id="ve-progress" style="display:none;position:absolute;left:14px;right:14px;bottom:90px;align-items:center;gap:10px;background:rgba(26,26,38,0.95);border-radius:12px;padding:12px 14px;border:1px solid #2a2a40;backdrop-filter:blur(8px);z-index:5;">' +
+        '<div style="flex:1;height:8px;background:#1a1a26;border-radius:4px;overflow:hidden;"><div id="ve-progress-fill" style="height:100%;width:0%;background:linear-gradient(90deg,#ff5ea3,#fbbf24,#22c55e,#4ea0ff,#a18cff);transition:width 0.15s;"></div></div>' +
+        '<span id="ve-progress-label" style="font-size:13px;color:#cfcfdc;white-space:nowrap;">Recording…</span>' +
       '</div>';
+
+    // ===== Inline styles for the editor (scoped) =====
+    var styleTag = document.createElement('style');
+    styleTag.textContent =
+      '#__loadVideoEdit .ve-iconbtn{background:transparent;border:none;color:#fff;width:38px;height:38px;border-radius:8px;cursor:pointer;font-size:17px;display:inline-flex;align-items:center;justify-content:center;}' +
+      '#__loadVideoEdit .ve-iconbtn:active{background:rgba(255,255,255,0.1);}' +
+      '#__loadVideoEdit .ve-track{display:flex;align-items:center;gap:6px;padding:3px 10px;min-height:42px;}' +
+      '#__loadVideoEdit .ve-track-add{position:relative;background:#1a1a26;border:none;color:#fff;width:42px;height:36px;border-radius:8px;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}' +
+      '#__loadVideoEdit .ve-track-add .plus{position:absolute;right:-2px;bottom:-2px;background:#fff;color:#0a0a14;font-weight:900;font-size:10px;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;}' +
+      '#__loadVideoEdit .ve-track-cover{background:#1a1a26;border:1px dashed #3a3a55;color:#cfcfdc;width:62px;height:42px;border-radius:6px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}' +
+      '#__loadVideoEdit .ve-track-body{flex:1;min-width:0;height:42px;background:#0e0e18;border-radius:6px;display:flex;align-items:center;padding:0 10px;color:#7b7b8c;font-size:13px;overflow:hidden;position:relative;}' +
+      '#__loadVideoEdit .ve-track-empty{user-select:none;}' +
+      '#__loadVideoEdit .ve-clip-strip{position:relative;flex:1;height:36px;background:#0e0e18;}' +
+      '#__loadVideoEdit .ve-clip-trim{position:absolute;top:0;bottom:0;left:0;right:0;border:2px solid #fbbf24;border-radius:4px;background:repeating-linear-gradient(135deg,rgba(251,191,36,0.05) 0,rgba(251,191,36,0.05) 6px,transparent 6px,transparent 12px);}' +
+      '#__loadVideoEdit .ve-clip-handle{position:absolute;top:-2px;bottom:-2px;width:14px;background:#fbbf24;cursor:ew-resize;border-radius:2px;}' +
+      '#__loadVideoEdit .ve-handle-left{left:-7px;}' +
+      '#__loadVideoEdit .ve-handle-right{right:-7px;}' +
+      '#__loadVideoEdit .ve-clip-duration{position:absolute;left:6px;top:-18px;font-size:10px;color:#fbbf24;font-weight:700;background:#1a1a26;padding:1px 6px;border-radius:3px;}' +
+      '#__loadVideoEdit .ve-clip-playhead{position:absolute;top:-4px;bottom:-4px;width:2px;background:#fff;left:0;pointer-events:none;}' +
+      '#__loadVideoEdit .ve-track-audio .ve-track-body{background:transparent;}' +
+      '#__loadVideoEdit .ve-waveform{flex:1;height:30px;background:repeating-linear-gradient(90deg,#fbbf24 0,#fbbf24 1px,transparent 1px,transparent 4px);opacity:0.7;border-radius:4px;}' +
+      '#__loadVideoEdit .ve-time-ruler{height:18px;color:#7b7b8c;font-size:10px;display:flex;justify-content:space-around;align-items:center;padding:0 70px 4px;border-bottom:1px solid #1a1a26;}' +
+      '#__loadVideoEdit .ve-action{flex:1;background:transparent;border:none;color:#cfcfdc;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px;cursor:pointer;min-width:54px;}' +
+      '#__loadVideoEdit .ve-act-icon{font-size:20px;width:34px;height:34px;border-radius:50%;background:#1a1a26;display:flex;align-items:center;justify-content:center;}' +
+      '#__loadVideoEdit .ve-act-lbl{font-size:11px;}' +
+      '#__loadVideoEdit .ve-action.on .ve-act-icon{background:#fbbf24;color:#1a1a26;}' +
+      '#__loadVideoEdit .ve-panel{position:fixed;left:0;right:0;bottom:60px;background:#1a1a26;border-top:1px solid #2a2a40;padding:14px 16px 18px;z-index:6;max-width:580px;margin:0 auto;border-radius:18px 18px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,0.5);}' +
+      '#__loadVideoEdit .ve-panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-weight:700;color:#fff;font-size:14px;}' +
+      '#__loadVideoEdit .ve-lbl{font-size:12.5px;color:#a0a0b0;display:block;}' +
+      '#__loadVideoEdit .ve-input{display:block;width:100%;margin-top:4px;padding:6px 8px;background:#0e0e18;color:#fff;border:1px solid #2a2a40;border-radius:6px;font-size:13px;}' +
+      '#__loadVideoEdit .ve-color{display:block;width:100%;height:34px;margin-top:4px;border:none;background:transparent;cursor:pointer;}';
+    wrap.appendChild(styleTag);
+
     document.body.appendChild(wrap);
+
+    // Wire timeline trim handles -> hidden trim-in/out inputs (existing
+    // export pipeline reads those, so it keeps working without changes)
+    var clipTrim = document.getElementById('ve-clip-trim');
+    var clipStrip = document.getElementById('ve-clip-strip');
+    var handleL = document.getElementById('ve-handle-left');
+    var handleR = document.getElementById('ve-handle-right');
+    var clipDur = document.getElementById('ve-clip-duration');
+    var playhead = document.getElementById('ve-clip-playhead');
+    function syncTrimFromHandles() {
+      if (!video.duration) return;
+      var sw = clipStrip.clientWidth || 1;
+      var leftPct = parseFloat(clipTrim.dataset.lpct || '0');
+      var rightPct = parseFloat(clipTrim.dataset.rpct || '100');
+      var inS = (leftPct / 100) * video.duration;
+      var outS = (rightPct / 100) * video.duration;
+      document.getElementById('ve-trim-in').value = inS.toFixed(2);
+      document.getElementById('ve-trim-out').value = outS.toFixed(2);
+      clipTrim.style.left = leftPct + '%';
+      clipTrim.style.right = (100 - rightPct) + '%';
+      clipDur.textContent = (outS - inS).toFixed(2) + 's';
+    }
+    function startDrag(handle, side) {
+      var moveHandler = function (e) {
+        var clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+        var rect = clipStrip.getBoundingClientRect();
+        var pct = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+        if (side === 'left') {
+          var rp = parseFloat(clipTrim.dataset.rpct || '100');
+          if (pct > rp - 2) pct = rp - 2;
+          clipTrim.dataset.lpct = pct;
+        } else {
+          var lp = parseFloat(clipTrim.dataset.lpct || '0');
+          if (pct < lp + 2) pct = lp + 2;
+          clipTrim.dataset.rpct = pct;
+        }
+        syncTrimFromHandles();
+      };
+      var endHandler = function () {
+        document.removeEventListener('mousemove', moveHandler);
+        document.removeEventListener('touchmove', moveHandler);
+        document.removeEventListener('mouseup', endHandler);
+        document.removeEventListener('touchend', endHandler);
+      };
+      document.addEventListener('mousemove', moveHandler);
+      document.addEventListener('touchmove', moveHandler, { passive: true });
+      document.addEventListener('mouseup', endHandler);
+      document.addEventListener('touchend', endHandler);
+    }
+    handleL.addEventListener('mousedown', function (e) { e.preventDefault(); startDrag(handleL, 'left'); });
+    handleL.addEventListener('touchstart', function (e) { startDrag(handleL, 'left'); }, { passive: true });
+    handleR.addEventListener('mousedown', function (e) { e.preventDefault(); startDrag(handleR, 'right'); });
+    handleR.addEventListener('touchstart', function (e) { startDrag(handleR, 'right'); }, { passive: true });
+
+    // Track-add buttons -> open inline panels
+    function showPanel(id) {
+      ['ve-text-panel', 've-music-panel'].forEach(function (p) { document.getElementById(p).hidden = (p !== id); });
+    }
+    Array.prototype.forEach.call(wrap.querySelectorAll('[data-add]'), function (btn) {
+      btn.addEventListener('click', function () {
+        var k = btn.getAttribute('data-add');
+        if (k === 'text') showPanel('ve-text-panel');
+        else if (k === 'music') showPanel('ve-music-panel');
+        else if (k === 'sticker') toast('Stickers / PiP coming in v2.', false);
+        else if (k === 'audio-orig') toast('Original audio is on by default. Tap "Mute original" in the music panel to silence.', false);
+      });
+    });
+    Array.prototype.forEach.call(wrap.querySelectorAll('[data-close-panel]'), function (b) {
+      b.addEventListener('click', function () { showPanel(null); });
+    });
+
+    // Bottom action toolbar -- v2 stubs but Split / TTS work today
+    Array.prototype.forEach.call(wrap.querySelectorAll('[data-action]'), function (btn) {
+      btn.addEventListener('click', function () {
+        var act = btn.getAttribute('data-action');
+        if (act === 'split') showPanel(null);   // Split = trim-mode (handles already visible)
+        else if (act === 'tts') {
+          var t = (document.getElementById('ve-text').value || '').trim();
+          if (!t) { toast('Add subtitle text first, then TTS will read it.', true); showPanel('ve-text-panel'); return; }
+          if (window.speechSynthesis) { var u = new SpeechSynthesisUtterance(t); speechSynthesis.cancel(); speechSynthesis.speak(u); }
+        }
+        else toast(act.charAt(0).toUpperCase() + act.slice(1) + ' tool: coming in v2.', false);
+      });
+    });
+
+    // Update playhead position based on currentTime
+    function updatePlayhead() {
+      if (!video.duration) return;
+      var pct = (video.currentTime / video.duration) * 100;
+      playhead.style.left = pct + '%';
+    }
+    video.addEventListener('timeupdate', updatePlayhead);
+    video.addEventListener('seeking', updatePlayhead);
+
+    // Time ruler labels (5 evenly-spaced ticks)
+    function renderRuler() {
+      var ruler = document.getElementById('ve-time-ruler');
+      ruler.innerHTML = '';
+      var d = video.duration || 0;
+      for (var i = 0; i <= 5; i++) {
+        var t = (d * i) / 5;
+        var span = document.createElement('span');
+        span.textContent = (Math.floor(t / 60) ? Math.floor(t / 60) + 'm ' : '') + Math.floor(t % 60) + 's';
+        ruler.appendChild(span);
+      }
+    }
+
+    // Initialize trim handles after video metadata is ready
+    var earlyHandler = function () {
+      clipTrim.dataset.lpct = '0';
+      clipTrim.dataset.rpct = '100';
+      syncTrimFromHandles();
+      renderRuler();
+    };
+    video.addEventListener('loadedmetadata', earlyHandler);
+
+    // Expose backwards-compat IDs the existing handlers below expect.
+    // The hidden inputs (#ve-trim-in / #ve-trim-out) plus the handle
+    // sync above keep the export pipeline working unchanged.
 
     var video = document.getElementById('ve-video');
     var canvas = document.getElementById('ve-overlay');
