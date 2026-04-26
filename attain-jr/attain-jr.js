@@ -181,14 +181,16 @@
     c.innerHTML = html;
   }
   function renderBlock(b) {
+    // data-rl   = read-aloud (everything that should be spoken in full mode)
+    // data-story = story body only (skips stage directions, character labels)
     if (b.type === 'stage') return '<div class="stage" data-rl>' + escHtml(b.text) + '</div>';
-    if (b.type === 'highlight') return '<div class="highlight" data-rl>' + escHtml(b.text) + '</div>';
+    if (b.type === 'highlight') return '<div class="highlight" data-rl data-story>' + escHtml(b.text) + '</div>';
     if (b.type === 'char') {
       var ch = book.characters.find(function (x) { return x.name === b.who; });
       var em = ch ? ch.emoji : '';
       return '<div class="char" data-char="' + escHtml(b.who) + '">' + em + ' ' + escHtml(b.who.toUpperCase()) + '</div>';
     }
-    if (b.type === 'p') return '<p data-rl>' + escHtml(b.text) + '</p>';
+    if (b.type === 'p') return '<p data-rl data-story>' + escHtml(b.text) + '</p>';
     if (b.type === 'img') return '<div class="imgcard"><img src="' + escAttr(b.src) + '" alt="' + escAttr(b.alt || '') + '"></div>';
     return '';
   }
@@ -248,9 +250,17 @@
     '</div>';
   }
 
-  /* ---------- Audio: Speech, Read-aloud, Pause/Stop, Voices ---------- */
+  /* ---------- Audio: Speech, Read-aloud, Pause/Stop, Voice cast ----------
+     Voice modes:
+       cast   — per-character voice + narrator voice (Jonah-style)
+       single — one voice reads everything
+
+     Voice cast persists per-book via localStorage so the user picks
+     once and the assignment sticks. */
   var voices = [];
   var customVoiceBlob = null;   // user-recorded voice (Blob)
+  var voiceCast = {};           // { characterName: voiceIndex }
+  var narratorVoiceIdx = -1;    // -1 = first English voice / system default
   var currentUtter = null;
   var readQueue = [];
   var readIdx = 0;
@@ -258,6 +268,7 @@
   function loadVoices() {
     voices = (window.speechSynthesis && speechSynthesis.getVoices()) || [];
     var sel = document.getElementById('ab-voice');
+    if (!sel) return;
     sel.innerHTML = '<option value="auto">Auto voice</option>' +
       voices.map(function (v, i) { return '<option value="' + i + '">' + escHtml(v.name) + '</option>'; }).join('');
     if (customVoiceBlob) sel.innerHTML += '<option value="custom">🎙 My recorded voice</option>';
@@ -265,27 +276,64 @@
   if (window.speechSynthesis) speechSynthesis.onvoiceschanged = loadVoices;
   loadVoices();
   setTimeout(loadVoices, 600);
-  function pickVoice() {
+  function pickNarratorVoice() {
     var sel = document.getElementById('ab-voice');
-    var v = sel.value;
-    if (v === 'auto' || v === 'custom') return null;
+    var v = sel ? sel.value : 'auto';
+    if (v === 'custom') return null;
+    if (v === 'auto') {
+      // Pick first English voice we find (Siri / Samantha on iPad)
+      for (var i = 0; i < voices.length; i++) {
+        if (voices[i].lang && voices[i].lang.indexOf('en') === 0) return voices[i];
+      }
+      return voices[0] || null;
+    }
     var idx = parseInt(v, 10);
     return isNaN(idx) ? null : voices[idx];
+  }
+  function autoAssignCast() {
+    // Pick distinct voices for each character. Prefer English voices,
+    // skip the narrator voice when picking character voices.
+    var en = voices.filter(function (v) { return v.lang && v.lang.indexOf('en') === 0; });
+    var pool = en.length >= book.characters.length + 1 ? en : voices.slice();
+    var narrator = pickNarratorVoice();
+    var available = pool.filter(function (v) { return !narrator || v.name !== narrator.name; });
+    book.characters.forEach(function (ch, i) {
+      if (available.length) {
+        voiceCast[ch.name] = voices.indexOf(available[i % available.length]);
+      } else {
+        voiceCast[ch.name] = -1;
+      }
+    });
+    saveCast();
+  }
+  function loadCast() {
+    try {
+      var raw = localStorage.getItem('attainjr_cast_' + (book.title || 'sample'));
+      if (raw) voiceCast = JSON.parse(raw) || {};
+    } catch (e) { voiceCast = {}; }
+  }
+  function saveCast() {
+    try { localStorage.setItem('attainjr_cast_' + (book.title || 'sample'), JSON.stringify(voiceCast)); } catch (e) {}
+  }
+  function voiceForCharacter(name) {
+    if (!name) return pickNarratorVoice();
+    var idx = voiceCast[name];
+    if (typeof idx === 'number' && idx >= 0 && voices[idx]) return voices[idx];
+    return pickNarratorVoice();
   }
   function speak(text, opts) {
     if (!text || !text.trim()) return;
     if (!window.speechSynthesis) return;
     opts = opts || {};
-    // If user has custom voice and selected it, play recording for the
-    // entire passage instead of TTS. Simple v1 -- a real per-line custom
-    // voice would require per-line recordings.
+    // Custom-recorded voice plays for the WHOLE passage when selected.
     if (customVoiceBlob && document.getElementById('ab-voice').value === 'custom') {
       var au = new Audio(URL.createObjectURL(customVoiceBlob));
       au.play().catch(function () {});
+      if (opts.onend) setTimeout(opts.onend, 1200);
       return;
     }
     var u = new SpeechSynthesisUtterance(text);
-    var v = pickVoice();
+    var v = opts.voice || pickNarratorVoice();
     if (v) u.voice = v;
     u.rate = opts.rate || 0.95;
     u.pitch = opts.pitch || 1.05;
@@ -295,20 +343,70 @@
     try { speechSynthesis.cancel(); } catch (e) {}
     speechSynthesis.speak(u);
   }
-  function readAloud() {
-    var blocks = document.querySelectorAll('[data-rl]');
-    readQueue = Array.prototype.slice.call(blocks);
+
+  // Read-aloud with optional story-only mode + voice-cast switching.
+  // storyOnly=true skips stage directions, character labels and front
+  // matter (cover/title/copyright) -- reads only paragraph + highlight
+  // blocks marked data-story.
+  // mode='cast' switches voices per-character: when a [character] block
+  // is encountered, the next [paragraph] block is voiced as that
+  // character. Otherwise the narrator voice reads.
+  function buildReadQueue(storyOnly) {
+    var sel = storyOnly ? '[data-story]' : '[data-rl]';
+    var nodes = Array.prototype.slice.call(document.querySelectorAll(sel));
+    // Walk the DOM in document order to detect character context for
+    // voice-cast mode -- a 'char' badge sets the speaker for the next
+    // paragraph until another char or stage block resets it.
+    var allReadable = Array.prototype.slice.call(document.querySelectorAll('[data-rl], [data-char]'));
+    var speakerByEl = new Map();
+    var currentSpeaker = null;
+    for (var i = 0; i < allReadable.length; i++) {
+      var el = allReadable[i];
+      if (el.hasAttribute && el.hasAttribute('data-char')) {
+        currentSpeaker = el.getAttribute('data-char');
+        speakerByEl.set(el, null);
+      } else {
+        speakerByEl.set(el, currentSpeaker);
+        // Stage directions reset the speaker (back to narrator)
+        if (el.classList && el.classList.contains('stage')) currentSpeaker = null;
+      }
+    }
+    return nodes.map(function (el) {
+      return { el: el, text: el.textContent || '', speaker: speakerByEl.get(el) || null };
+    });
+  }
+  function readAloudInternal(storyOnly) {
+    stopRead();
+    readQueue = buildReadQueue(!!storyOnly);
     readIdx = 0; readPaused = false;
     nextRead();
   }
+  function readAloud()      { readAloudInternal(false); }
+  function readStoryOnly()  { readAloudInternal(true); }
   function nextRead() {
     if (readPaused) return;
     if (readIdx >= readQueue.length) return;
-    var el = readQueue[readIdx];
+    var item = readQueue[readIdx];
+    var el = item.el;
     Array.prototype.forEach.call(document.querySelectorAll('.reading'), function (e) { e.classList.remove('reading'); });
     el.classList.add('reading');
     el.scrollIntoView({ block: 'center', behavior: 'smooth' });
-    speak(el.textContent, { onend: function () { readIdx++; nextRead(); } });
+    var mode = (document.getElementById('ab-voice-mode') || {}).value || 'cast';
+    var voice = (mode === 'cast' && item.speaker) ? voiceForCharacter(item.speaker) : pickNarratorVoice();
+    var pitch = (mode === 'cast' && item.speaker) ? voicePitchHint(item.speaker) : 1.05;
+    speak(item.text, { voice: voice, pitch: pitch, onend: function () { readIdx++; nextRead(); } });
+  }
+  // Per-character pitch nudge so distinct voices are even more distinct.
+  // We can't control timbre with SpeechSynthesis, but pitch + speaker
+  // voice combine to give noticeably different deliveries.
+  function voicePitchHint(name) {
+    var ch = book.characters.find(function (x) { return x.name === name; });
+    if (!ch) return 1.05;
+    if ((ch.voiceHint || '').indexOf('high') >= 0) return 1.4;
+    if ((ch.voiceHint || '').indexOf('low')  >= 0) return 0.7;
+    if ((ch.voiceHint || '').indexOf('deep') >= 0) return 0.75;
+    if ((ch.voiceHint || '').indexOf('warm') >= 0) return 0.95;
+    return 1.05;
   }
   function stopRead() {
     readPaused = false; readQueue = []; readIdx = 0;
@@ -316,6 +414,7 @@
     try { speechSynthesis.cancel(); } catch (e) {}
   }
   document.getElementById('ab-read').addEventListener('click', readAloud);
+  document.getElementById('ab-read-story').addEventListener('click', readStoryOnly);
   document.getElementById('ab-pause').addEventListener('click', function () {
     if (!window.speechSynthesis) return;
     if (readPaused) { speechSynthesis.resume(); readPaused = false; }
@@ -544,8 +643,62 @@
       });
     });
   }
-  // On boot, restore any previously-recorded voice
+  // On boot, restore any previously-recorded voice + voice cast
   idbGet('voice').then(function (b) { if (b) { customVoiceBlob = b; loadVoices(); } }).catch(function () {});
+  loadCast();
+  // Auto-assign cast on first load if none saved (after voices are
+  // available -- iOS Safari populates them asynchronously).
+  setTimeout(function () {
+    if (Object.keys(voiceCast).length === 0 && voices.length > 0) autoAssignCast();
+  }, 1000);
+
+  /* ---------- Voice cast modal ---------- */
+  document.getElementById('ab-cast').addEventListener('click', openCastModal);
+  function openCastModal() {
+    var modal = document.getElementById('cast-modal');
+    var rows = document.getElementById('cast-rows');
+    rows.innerHTML = book.characters.map(function (ch) {
+      var current = voiceCast[ch.name];
+      var opts = '<option value="-1">— Narrator voice —</option>' +
+        voices.map(function (v, i) {
+          var on = (i === current) ? ' selected' : '';
+          return '<option value="' + i + '"' + on + '>' + escHtml(v.name) + ' (' + escHtml(v.lang || '') + ')</option>';
+        }).join('');
+      return '<div class="cast-row">' +
+        '<div class="cast-label">' + ch.emoji + ' <strong>' + escHtml(ch.name) + '</strong> <span class="cast-hint">' + escHtml(ch.voiceHint || '') + '</span></div>' +
+        '<select class="cast-pick" data-char="' + escHtml(ch.name) + '">' + opts + '</select>' +
+        '<button class="cast-test" data-char="' + escHtml(ch.name) + '">▶ Test</button>' +
+      '</div>';
+    }).join('');
+    modal.hidden = false;
+    Array.prototype.forEach.call(rows.querySelectorAll('.cast-test'), function (b) {
+      b.addEventListener('click', function () {
+        var name = b.getAttribute('data-char');
+        var sel = rows.querySelector('.cast-pick[data-char="' + name.replace(/"/g, '\\"') + '"]');
+        var idx = parseInt(sel.value, 10);
+        var v = (idx >= 0) ? voices[idx] : pickNarratorVoice();
+        speak('Hi! I am ' + name + '.', { voice: v, pitch: voicePitchHint(name) });
+      });
+    });
+  }
+  document.getElementById('cast-cancel').addEventListener('click', function () {
+    document.getElementById('cast-modal').hidden = true;
+  });
+  document.getElementById('cast-auto').addEventListener('click', function () {
+    autoAssignCast();
+    openCastModal();   // refresh dropdowns
+  });
+  document.getElementById('cast-save').addEventListener('click', function () {
+    var picks = document.querySelectorAll('#cast-rows .cast-pick');
+    Array.prototype.forEach.call(picks, function (sel) {
+      var name = sel.getAttribute('data-char');
+      var idx = parseInt(sel.value, 10);
+      voiceCast[name] = isNaN(idx) ? -1 : idx;
+    });
+    saveCast();
+    document.getElementById('cast-modal').hidden = true;
+    speak('Voice cast saved.');
+  });
 
   /* ---------- Reading aids cycle (Aa button) ---------- */
   document.getElementById('tool-aa').addEventListener('click', function () {

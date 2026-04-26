@@ -72,12 +72,18 @@
   <!-- Bottom audio bar (Stop Lion pattern) -->
   <div id="audio-bar" class="audio-bar">
     <button id="ab-read" title="Read aloud">&#9654;&#65039; Read</button>
+    <button id="ab-read-story" title="Read STORY only — skips covers, character cards and front matter">&#128214; Story only</button>
     <button id="ab-pause" title="Pause">&#9208;&#65039; Pause</button>
     <button id="ab-stop" title="Stop">&#9209;&#65039; Stop</button>
     <button id="ab-music" title="Background music">&#127908; Music</button>
     <button id="ab-prev" title="Previous">&laquo; Back</button>
     <button id="ab-next" title="Next">Next &raquo;</button>
-    <select id="ab-voice" title="Voice"></select>
+    <select id="ab-voice-mode" title="Voice mode">
+      <option value="cast" selected>Character cast voices</option>
+      <option value="single">One voice for everything</option>
+    </select>
+    <select id="ab-voice" title="Narrator voice"></select>
+    <button id="ab-cast" title="Assign voices to characters">&#127911; Voice cast</button>
     <button id="ab-record-voice" title="Record your own voice">&#127908;&#65039; Record</button>
   </div>
 
@@ -94,6 +100,20 @@
       <button id="pg-ok" class="cta cta-primary">Open</button>
     </div>
     <p id="pg-err" class="modal-err"></p>
+  </div>
+</div>
+
+<!-- Voice cast modal -->
+<div id="cast-modal" class="modal" hidden>
+  <div class="modal-card cast-card">
+    <h2>&#127911; Voice cast</h2>
+    <p>Pick a different voice for each character. The narrator voice reads everything else.</p>
+    <div id="cast-rows"></div>
+    <div class="modal-row">
+      <button id="cast-auto">Auto-assign</button>
+      <button id="cast-cancel">Cancel</button>
+      <button id="cast-save" class="cta cta-primary">Save cast</button>
+    </div>
   </div>
 </div>
 
