@@ -299,8 +299,13 @@ a.jr-action {
   border-bottom: 4px solid rgba(0,0,0,0.18);
 }
 .topbar-tabs {
-  display: flex; gap: 10px; overflow-x: auto;
+  display: flex; gap: 8px; overflow-x: auto;
   scrollbar-width: none; padding-bottom: 4px;
+  /* Right edge fade hints at horizontal scroll on iPad portrait
+     where 5 tabs do not fit in one row. Activities is the rightmost
+     tab and was getting cut off without any visual cue. */
+  -webkit-mask-image: linear-gradient(to right, #000 92%, rgba(0,0,0,0.5) 100%);
+          mask-image: linear-gradient(to right, #000 92%, rgba(0,0,0,0.5) 100%);
 }
 .topbar-tabs::-webkit-scrollbar { display: none; }
 .tab {
@@ -309,10 +314,10 @@ a.jr-action {
   color: var(--jr-ink);
   border: 3px solid #fff;
   border-radius: 999px;
-  padding: 12px 22px;
-  font-size: 16pt;
+  padding: 10px 16px;
+  font-size: 14pt;
   font-weight: 800;
-  min-height: 52px;
+  min-height: 48px;
   box-shadow: 0 3px 0 rgba(0,0,0,0.12), 0 6px 14px rgba(0,0,0,0.15);
 }
 .tab.on {

@@ -471,9 +471,15 @@
     });
 
     function finish() {
-      // Drop any image whose ZIP lookup failed so we don't render a
-      // broken-image icon next to the cover-art alt text.
-      var clean = body.filter(function (b) { return !(b.type === 'img' && b._broken); });
+      // Replace broken images with a visible placeholder block so the
+      // user can see which path failed and we don't render the
+      // browser's default broken-image icon.
+      var clean = body.map(function (b) {
+        if (b.type === 'img' && b._broken) {
+          return { type: 'highlight', text: '🖼 Image not found in EPUB: ' + (b.src || '(no src)') };
+        }
+        return b;
+      });
       return {
         id: 's' + (idx + 1),
         title: sceneTitle || ('Chapter ' + (idx + 1)),
@@ -494,6 +500,11 @@
   function resolveZipImageRef(zip, rawSrc, chapterDir) {
     if (!rawSrc) return Promise.resolve('');
     var normalized = rawSrc.replace(/^\.\//, '').replace(/\\/g, '/');
+    // Strip any URL fragment / query before lookup.
+    normalized = normalized.split('#')[0].split('?')[0];
+    // Decode %20 etc. so a pretty filename matches the zip path.
+    try { normalized = decodeURIComponent(normalized); } catch (e) {}
+    var basename = normalized.split('/').pop();
     var candidates = [
       normalized,
       chapterDir + normalized,
@@ -501,7 +512,14 @@
       'OEBPS/' + normalized,
       'OPS/' + normalized,
       'EPUB/' + normalized,
-      normalized.replace(/^\.\.\//, '')
+      normalized.replace(/^\.\.\//, ''),
+      'images/' + basename,
+      'Images/' + basename,
+      'IMAGES/' + basename,
+      'OEBPS/images/' + basename,
+      'OEBPS/Images/' + basename,
+      'OPS/images/' + basename,
+      basename
     ];
     // Resolve any "../" segments left in candidates against simple
     // path arithmetic so EPUBs with chapters in OEBPS/text/ pointing
@@ -513,10 +531,12 @@
     function tryNext(i) {
       if (i >= candidates.length) {
         // Last resort: walk the entire zip looking for a basename match.
-        var base = normalized.split('/').pop();
         var hit = null;
-        zip.forEach(function (path, entry) { if (!entry.dir && path.split('/').pop() === base) hit = path; });
+        zip.forEach(function (path, entry) {
+          if (!entry.dir && path.split('/').pop().toLowerCase() === basename.toLowerCase()) hit = path;
+        });
         if (hit) return readImageAsDataUrl(zip, hit);
+        try { console.warn('[Attain Jr] image not found in ZIP:', rawSrc, '— tried:', candidates); } catch (_) {}
         return Promise.resolve('');
       }
       var f = zip.file(candidates[i]);
@@ -651,9 +671,15 @@
     });
     flush();
     function finish() {
-      // Strip broken images so the reader doesn't show ? icons.
+      // Replace broken images with a visible placeholder so the user
+      // can see exactly which path inside the ZIP didn't resolve.
       scenes.forEach(function (s) {
-        s.body = s.body.filter(function (b) { return !(b.type === 'img' && b._broken); });
+        s.body = s.body.map(function (b) {
+          if (b.type === 'img' && b._broken) {
+            return { type: 'highlight', text: '🖼 Image not found in ZIP: ' + (b.src || '(no src)') };
+          }
+          return b;
+        });
       });
       if (!scenes.length) return null;
       return {
