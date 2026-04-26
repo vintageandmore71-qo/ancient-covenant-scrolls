@@ -4708,6 +4708,7 @@
         if (t === 'html') picker.setAttribute('accept', '.html,.htm,text/html');
         else if (t === 'pdf') picker.setAttribute('accept', '.pdf,application/pdf');
         else if (t === 'epub') picker.setAttribute('accept', '.epub,application/epub+zip');
+        else if (t === 'manuscript') picker.setAttribute('accept', '.docx,.txt,.md,.markdown,text/plain,text/markdown,application/vnd.openxmlformats-officedocument.wordprocessingml.document');
         else if (t === 'media') picker.setAttribute('accept', 'video/*,audio/*,image/*,.mp4,.mov,.m4v,.webm,.mp3,.m4a,.wav,.ogg,.aac,.jpg,.jpeg,.png,.gif,.webp');
         else if (t === 'zip') {
           // Web apps card: show the PWA help modal first; modal's "Pick" button opens picker
@@ -4715,7 +4716,7 @@
           $('pwa-modal').classList.add('on');
           return;
         } else {
-          picker.setAttribute('accept', '.html,.htm,.zip,.pdf,.epub,.mp4,.mov,.mp3,.m4a,.jpg,.png,.gif,.webp');
+          picker.setAttribute('accept', '.html,.htm,.zip,.pdf,.epub,.docx,.txt,.md,.markdown,.mp4,.mov,.mp3,.m4a,.jpg,.png,.gif,.webp');
         }
         picker.click();
       });
@@ -5738,6 +5739,12 @@
     try {
       if (/\.(html?|xhtml)$/.test(lower)) {
         app = await handleHtml(file, baseName);
+      } else if (/\.docx$/.test(lower)) {
+        app = await handleDocx(file, baseName);
+      } else if (/\.(md|markdown)$/.test(lower)) {
+        app = await handleMarkdown(file, baseName);
+      } else if (/\.txt$/.test(lower)) {
+        app = await handleText(file, baseName);
       } else if (/\.zip$/.test(lower)) {
         app = await handleZip(file, baseName);
       } else if (/\.pdf$/.test(lower)) {
@@ -5749,11 +5756,14 @@
       } else {
         // Fall back on MIME type if extension is unclear
         if (file.type === 'text/html') app = await handleHtml(file, baseName);
+        else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') app = await handleDocx(file, baseName);
+        else if (file.type === 'text/markdown' || file.type === 'text/x-markdown') app = await handleMarkdown(file, baseName);
+        else if (file.type === 'text/plain') app = await handleText(file, baseName);
         else if (file.type === 'application/pdf') app = await handlePdf(file, baseName);
         else if (file.type === 'application/epub+zip') app = await handleEpub(file, baseName);
         else if (file.type === 'application/zip') app = await handleZip(file, baseName);
         else if (/^(video|audio|image)\//.test(file.type || '')) app = await handleMedia(file, baseName);
-        else throw new Error('Unsupported file type: "' + name + '". Load accepts .html, .zip, .pdf, .epub, and media (video/audio/image). Kindle (.azw/.mobi/.kfx) is not supported because of DRM.');
+        else throw new Error('Unsupported file type: "' + name + '". Load accepts .html, .docx, .md, .txt, .zip, .pdf, .epub, and media (video/audio/image). Kindle (.azw/.mobi/.kfx) is not supported because of DRM.');
       }
     } catch (e) {
       // Translate low-level parser failures into language that tells the
@@ -6395,6 +6405,410 @@
       bmp: 'image/bmp', heic: 'image/heic', heif: 'image/heif'
     };
     return map[ext] || (subKind === 'video' ? 'video/mp4' : subKind === 'audio' ? 'audio/mpeg' : 'image/jpeg');
+  }
+
+  /* ----- Manuscript text formats: .docx, .txt, .md -----
+     These three sit on the import path so a creator can drop in an
+     already-written book and edit / re-format / export from Load. */
+
+  // Wraps inner body HTML in a clean book-style document shell. Used by
+  // every manuscript handler so they all render the same way in the viewer.
+  function buildManuscriptDoc(title, bodyHtml) {
+    var esc = escHtml;
+    return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+      '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+      '<title>' + esc(title) + '</title>' +
+      '<style>' +
+      'body{font-family:-apple-system,"Segoe UI",sans-serif;line-height:1.7;color:#222;background:#fff;padding:30px 20px;max-width:780px;margin:0 auto;}' +
+      'h1.book-title{font-size:24px;color:#222;margin:0 0 24px;border-bottom:1px solid #ddd;padding-bottom:12px;}' +
+      'h1,h2,h3,h4,h5,h6{color:#222;margin:1.4em 0 .5em;line-height:1.3;}' +
+      'h1{font-size:22px;}h2{font-size:18px;}h3{font-size:16px;}h4,h5,h6{font-size:15px;}' +
+      'p{margin:0 0 .9em;}' +
+      'blockquote{margin:1em 0;padding:.4em 1em;border-left:3px solid #bbb;color:#555;}' +
+      'code{font-family:"SF Mono",Menlo,Consolas,monospace;background:#f4f4f4;padding:1px 4px;border-radius:3px;font-size:.92em;}' +
+      'pre{background:#f4f4f4;padding:12px;border-radius:6px;overflow-x:auto;font-size:.9em;}' +
+      'pre code{background:transparent;padding:0;}' +
+      'img{max-width:100%;height:auto;display:block;margin:1em auto;border-radius:4px;}' +
+      'ul,ol{margin:.6em 0 1em 1.4em;}li{margin:.2em 0;}' +
+      'hr{border:none;border-top:1px solid #ddd;margin:2em 0;}' +
+      'table{border-collapse:collapse;margin:1em 0;}td,th{border:1px solid #ccc;padding:6px 10px;}' +
+      '</style></head><body>' +
+      '<h1 class="book-title">' + esc(title) + '</h1>' +
+      bodyHtml +
+      '</body></html>';
+  }
+
+  /* ----- DOCX: Office Open XML -----
+     A .docx file is a ZIP with `word/document.xml` as the main content,
+     plus `word/_rels/document.xml.rels` mapping rIds -> media files, and
+     `word/media/*` holding the embedded images.
+
+     We pull paragraphs, headings, lists, basic bold/italic/underline,
+     and inline images. Lossy on purpose: tracked changes, complex
+     tables, embedded objects, Word XML drawings, and footnote refs are
+     dropped so the result is clean editable HTML. */
+  async function handleDocx(file, baseName) {
+    if (typeof JSZip === 'undefined') throw new Error('JSZip not loaded.');
+    showProgress('Parsing DOCX...');
+    var buf = await readAsArrayBuffer(file);
+    var zip;
+    try { zip = await JSZip.loadAsync(buf); }
+    catch (e) { throw new Error('Could not unpack the DOCX file. It may be corrupted; re-export it from Word / Pages / Google Docs.'); }
+
+    var docXml = zip.file('word/document.xml');
+    if (!docXml) throw new Error('This file does not look like a Word document — word/document.xml is missing inside the .docx archive.');
+    var docText = await docXml.async('string');
+
+    // Build rId -> filename map from the rels file (for inline images)
+    var relsFile = zip.file('word/_rels/document.xml.rels');
+    var relsText = relsFile ? await relsFile.async('string') : '';
+    var rIdToTarget = {};
+    if (relsText) {
+      var relRe = /<Relationship\b[^>]*Id="([^"]+)"[^>]*Target="([^"]+)"/g, rm;
+      while ((rm = relRe.exec(relsText))) rIdToTarget[rm[1]] = rm[2];
+    }
+
+    // Inline embedded images as data URLs so the imported HTML is self-contained
+    var rIdToDataUrl = {};
+    var rIds = Object.keys(rIdToTarget);
+    for (var i = 0; i < rIds.length; i++) {
+      var target = rIdToTarget[rIds[i]];
+      if (!/^media\//i.test(target)) continue;
+      var imgPath = 'word/' + target.replace(/^\.?\//, '');
+      var imgFile = zip.file(imgPath);
+      if (!imgFile) continue;
+      var ext = (target.split('.').pop() || 'png').toLowerCase();
+      var mime = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' :
+                 ext === 'gif' ? 'image/gif' :
+                 ext === 'svg' ? 'image/svg+xml' :
+                 ext === 'webp' ? 'image/webp' :
+                 'image/png';
+      try {
+        var b64data = await imgFile.async('base64');
+        rIdToDataUrl[rIds[i]] = 'data:' + mime + ';base64,' + b64data;
+      } catch (e) {}
+    }
+
+    // Try to get the document title from core.xml
+    var metaName = baseName;
+    try {
+      var coreFile = zip.file('docProps/core.xml');
+      if (coreFile) {
+        var coreText = await coreFile.async('string');
+        var tm = /<dc:title>([^<]+)<\/dc:title>/i.exec(coreText);
+        if (tm && tm[1].trim()) metaName = tm[1].trim();
+      }
+    } catch (e) {}
+
+    // Parse the body XML
+    var dp = new DOMParser();
+    var xml = dp.parseFromString(docText, 'application/xml');
+    if (xml.querySelector('parsererror')) throw new Error('The DOCX document.xml is not valid XML — the file may be damaged.');
+
+    // Helper: read text + format runs out of a <w:p>
+    function runHtml(rNode) {
+      var rPr = rNode.getElementsByTagNameNS('*', 'rPr')[0];
+      var bold = false, italic = false, under = false;
+      if (rPr) {
+        bold = !!rPr.getElementsByTagNameNS('*', 'b')[0];
+        italic = !!rPr.getElementsByTagNameNS('*', 'i')[0];
+        under = !!rPr.getElementsByTagNameNS('*', 'u')[0];
+      }
+      var pieces = [];
+      var children = rNode.childNodes;
+      for (var k = 0; k < children.length; k++) {
+        var c = children[k];
+        if (c.nodeType !== 1) continue;
+        var ln = c.localName;
+        if (ln === 't') pieces.push(escHtml(c.textContent || ''));
+        else if (ln === 'tab') pieces.push('&nbsp;&nbsp;&nbsp;&nbsp;');
+        else if (ln === 'br') pieces.push('<br>');
+        else if (ln === 'drawing') {
+          var blips = c.getElementsByTagNameNS('*', 'blip');
+          for (var b = 0; b < blips.length; b++) {
+            var embed = blips[b].getAttribute('r:embed') || blips[b].getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'embed');
+            if (!embed) {
+              var attrs = blips[b].attributes;
+              for (var ai = 0; ai < attrs.length; ai++) {
+                if (/(^|:)embed$/.test(attrs[ai].name)) { embed = attrs[ai].value; break; }
+              }
+            }
+            if (embed && rIdToDataUrl[embed]) pieces.push('<img src="' + rIdToDataUrl[embed] + '" alt="">');
+          }
+        }
+      }
+      var html = pieces.join('');
+      if (!html) return '';
+      if (under) html = '<u>' + html + '</u>';
+      if (italic) html = '<em>' + html + '</em>';
+      if (bold) html = '<strong>' + html + '</strong>';
+      return html;
+    }
+
+    // Walk paragraphs in document order
+    var bodyEls = xml.getElementsByTagNameNS('*', 'body');
+    if (!bodyEls.length) throw new Error('The DOCX document is missing a body. Try re-exporting it.');
+    var bodyEl = bodyEls[0];
+    var out = [];
+    var listOpen = null; // 'ul' | 'ol' | null
+    function closeList() { if (listOpen) { out.push('</' + listOpen + '>'); listOpen = null; } }
+
+    var nodes = bodyEl.childNodes;
+    for (var n = 0; n < nodes.length; n++) {
+      var node = nodes[n];
+      if (node.nodeType !== 1) continue;
+      var tag = node.localName;
+
+      if (tag === 'p') {
+        var pPr = node.getElementsByTagNameNS('*', 'pPr')[0];
+        var styleVal = '';
+        var numPr = null;
+        if (pPr) {
+          var styleEl = pPr.getElementsByTagNameNS('*', 'pStyle')[0];
+          if (styleEl) styleVal = (styleEl.getAttribute('w:val') || styleEl.getAttribute('val') || '').toLowerCase();
+          numPr = pPr.getElementsByTagNameNS('*', 'numPr')[0] || null;
+        }
+        // Build inline content
+        var runs = node.getElementsByTagNameNS('*', 'r');
+        var inner = '';
+        for (var ri = 0; ri < runs.length; ri++) {
+          // Skip runs nested inside other elements we've already processed
+          // (DOM .getElementsByTagNameNS includes all descendants)
+          if (runs[ri].parentNode === node) inner += runHtml(runs[ri]);
+        }
+        if (!inner.replace(/&nbsp;|<br>|\s/g, '')) {
+          // Skip pure-whitespace paragraphs
+          continue;
+        }
+        // Heading?
+        var hMatch = /^heading\s*([1-6])$/.exec(styleVal) || /^h([1-6])$/.exec(styleVal);
+        if (hMatch) {
+          closeList();
+          out.push('<h' + hMatch[1] + '>' + inner + '</h' + hMatch[1] + '>');
+          continue;
+        }
+        if (/^title$/.test(styleVal)) {
+          closeList();
+          out.push('<h1>' + inner + '</h1>');
+          continue;
+        }
+        if (/^subtitle$/.test(styleVal)) {
+          closeList();
+          out.push('<h2>' + inner + '</h2>');
+          continue;
+        }
+        // Quote
+        if (/quote/.test(styleVal)) {
+          closeList();
+          out.push('<blockquote><p>' + inner + '</p></blockquote>');
+          continue;
+        }
+        // List item
+        if (numPr) {
+          // Heuristic: presence of numId implies list. Word doesn't tell us
+          // ul-vs-ol cleanly without resolving numbering.xml -- assume <ul>
+          // unless paragraph style mentions "ListNumber".
+          var wantOl = /listnumber|number/.test(styleVal);
+          var newType = wantOl ? 'ol' : 'ul';
+          if (listOpen !== newType) { closeList(); out.push('<' + newType + '>'); listOpen = newType; }
+          out.push('<li>' + inner + '</li>');
+          continue;
+        }
+        closeList();
+        out.push('<p>' + inner + '</p>');
+      } else if (tag === 'tbl') {
+        // Render tables flat: rows -> <tr>, cells -> <td>, plain text only
+        closeList();
+        var rows = node.getElementsByTagNameNS('*', 'tr');
+        var rowsHtml = [];
+        for (var ti = 0; ti < rows.length; ti++) {
+          var cells = rows[ti].getElementsByTagNameNS('*', 'tc');
+          var cellsHtml = [];
+          for (var ci = 0; ci < cells.length; ci++) {
+            cellsHtml.push('<td>' + escHtml(cells[ci].textContent || '') + '</td>');
+          }
+          rowsHtml.push('<tr>' + cellsHtml.join('') + '</tr>');
+        }
+        if (rowsHtml.length) out.push('<table>' + rowsHtml.join('') + '</table>');
+      }
+    }
+    closeList();
+
+    if (!out.length) throw new Error('Found no readable text in the DOCX. The file may use unsupported features (drawing canvas, embedded objects, or tracked-only changes).');
+
+    var bodyHtml = out.join('\n');
+    var html = buildManuscriptDoc(metaName, bodyHtml);
+    return {
+      id: newId(),
+      name: metaName,
+      kind: 'docx',
+      html: html,
+      dateAdded: Date.now(),
+      lastOpened: null,
+      sizeBytes: html.length
+    };
+  }
+
+  /* ----- Plain text -----
+     Splits on blank lines into paragraphs; preserves single line breaks
+     inside a paragraph as <br>. */
+  async function handleText(file, baseName) {
+    showProgress('Reading text file...');
+    var text = await readAsText(file);
+    if (!text) throw new Error(file.name + ' is empty.');
+    var paras = text.replace(/\r\n/g, '\n').split(/\n\s*\n+/);
+    var bodyHtml = paras.map(function (p) {
+      var t = p.replace(/\s+$/g, '');
+      if (!t.trim()) return '';
+      return '<p>' + escHtml(t).replace(/\n/g, '<br>') + '</p>';
+    }).filter(Boolean).join('\n');
+    var html = buildManuscriptDoc(baseName, bodyHtml);
+    return {
+      id: newId(),
+      name: baseName,
+      kind: 'text',
+      html: html,
+      dateAdded: Date.now(),
+      lastOpened: null,
+      sizeBytes: html.length
+    };
+  }
+
+  /* ----- Markdown -----
+     Tiny offline parser: covers headings #, lists - / 1., emphasis ** *,
+     inline code `x`, fenced ```code```, links [t](u), images ![a](s),
+     blockquotes >, hr ---. Deliberately small; users who need
+     CommonMark-perfect rendering can paste the HTML from another tool. */
+  async function handleMarkdown(file, baseName) {
+    showProgress('Parsing Markdown...');
+    var src = await readAsText(file);
+    if (!src) throw new Error(file.name + ' is empty.');
+    var bodyHtml = renderMarkdown(src);
+    // Hoist a leading H1 into the document title if the file has one
+    var titleGuess = baseName;
+    var firstH1 = /^#\s+(.+)$/m.exec(src);
+    if (firstH1 && firstH1[1].trim()) titleGuess = firstH1[1].trim().replace(/[*_`]/g, '');
+    var html = buildManuscriptDoc(titleGuess, bodyHtml);
+    return {
+      id: newId(),
+      name: titleGuess,
+      kind: 'markdown',
+      html: html,
+      dateAdded: Date.now(),
+      lastOpened: null,
+      sizeBytes: html.length
+    };
+  }
+
+  function renderMarkdown(src) {
+    src = src.replace(/\r\n/g, '\n');
+    var lines = src.split('\n');
+    var out = [];
+    var i = 0, listType = null, inBQ = false, codeOpen = false, codeBuf = [], codeLang = '';
+
+    function closeList() { if (listType) { out.push('</' + listType + '>'); listType = null; } }
+    function closeBQ() { if (inBQ) { out.push('</blockquote>'); inBQ = false; } }
+
+    function inline(s) {
+      // Escape first; we'll re-introduce the markup we recognize as literal
+      // tags below. This avoids the user's text injecting HTML.
+      s = escHtml(s);
+      // Images ![alt](src)
+      s = s.replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+&quot;[^&]*&quot;)?\)/g,
+        function (_m, alt, src) { return '<img src="' + src + '" alt="' + alt + '">'; });
+      // Links [text](url)
+      s = s.replace(/\[([^\]]+)\]\(([^)\s]+)(?:\s+&quot;[^&]*&quot;)?\)/g,
+        function (_m, t, u) { return '<a href="' + u + '">' + t + '</a>'; });
+      // Inline code
+      s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+      // Bold + italic
+      s = s.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+      s = s.replace(/__([^_\n]+)__/g, '<strong>$1</strong>');
+      s = s.replace(/(^|[\s>])\*([^*\n]+)\*/g, '$1<em>$2</em>');
+      s = s.replace(/(^|[\s>])_([^_\n]+)_/g, '$1<em>$2</em>');
+      return s;
+    }
+
+    while (i < lines.length) {
+      var line = lines[i];
+
+      // Code fences
+      if (/^\s*```/.test(line)) {
+        if (!codeOpen) {
+          closeList(); closeBQ();
+          codeOpen = true;
+          codeLang = (line.match(/^\s*```(\w+)?/) || [])[1] || '';
+          codeBuf = [];
+        } else {
+          out.push('<pre><code' + (codeLang ? ' class="lang-' + codeLang + '"' : '') + '>' + escHtml(codeBuf.join('\n')) + '</code></pre>');
+          codeOpen = false; codeLang = ''; codeBuf = [];
+        }
+        i++; continue;
+      }
+      if (codeOpen) { codeBuf.push(line); i++; continue; }
+
+      // Blank line breaks blocks
+      if (/^\s*$/.test(line)) { closeList(); closeBQ(); i++; continue; }
+
+      // Horizontal rule
+      if (/^\s*(---+|\*\*\*+|___+)\s*$/.test(line)) {
+        closeList(); closeBQ();
+        out.push('<hr>'); i++; continue;
+      }
+
+      // ATX heading
+      var hm = /^(#{1,6})\s+(.+?)\s*#*\s*$/.exec(line);
+      if (hm) {
+        closeList(); closeBQ();
+        var lvl = hm[1].length;
+        out.push('<h' + lvl + '>' + inline(hm[2]) + '</h' + lvl + '>');
+        i++; continue;
+      }
+
+      // Blockquote
+      var bm = /^\s*>\s?(.*)$/.exec(line);
+      if (bm) {
+        closeList();
+        if (!inBQ) { out.push('<blockquote>'); inBQ = true; }
+        out.push('<p>' + inline(bm[1]) + '</p>');
+        i++; continue;
+      }
+      if (inBQ) closeBQ();
+
+      // Unordered list item
+      var um = /^\s*[-*+]\s+(.*)$/.exec(line);
+      if (um) {
+        if (listType !== 'ul') { closeList(); out.push('<ul>'); listType = 'ul'; }
+        out.push('<li>' + inline(um[1]) + '</li>');
+        i++; continue;
+      }
+
+      // Ordered list item
+      var om = /^\s*\d+[.)]\s+(.*)$/.exec(line);
+      if (om) {
+        if (listType !== 'ol') { closeList(); out.push('<ol>'); listType = 'ol'; }
+        out.push('<li>' + inline(om[1]) + '</li>');
+        i++; continue;
+      }
+      closeList();
+
+      // Default: paragraph -- gather adjacent non-blank, non-special lines
+      var pBuf = [line];
+      while (i + 1 < lines.length) {
+        var next = lines[i + 1];
+        if (/^\s*$/.test(next) || /^\s*```/.test(next) || /^\s*(---+|\*\*\*+|___+)\s*$/.test(next) ||
+            /^#{1,6}\s+/.test(next) || /^\s*>\s?/.test(next) || /^\s*[-*+]\s+/.test(next) ||
+            /^\s*\d+[.)]\s+/.test(next)) break;
+        pBuf.push(next); i++;
+      }
+      out.push('<p>' + inline(pBuf.join(' ')) + '</p>');
+      i++;
+    }
+    if (codeOpen) {
+      out.push('<pre><code>' + escHtml(codeBuf.join('\n')) + '</code></pre>');
+    }
+    closeList(); closeBQ();
+    return out.join('\n');
   }
 
   /* Build the HTML wrapper that plays a media file inside the viewer

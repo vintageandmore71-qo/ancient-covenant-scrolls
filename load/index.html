@@ -230,6 +230,11 @@
         <span class="type-label">Books</span>
         <span class="type-sub">EPUB digital books (.epub)</span>
       </button>
+      <button class="type-card type-manuscript" data-import-type="manuscript">
+        <span class="type-icon">&#128221;</span>
+        <span class="type-label">Manuscript</span>
+        <span class="type-sub">Word, text, Markdown (.docx, .txt, .md)</span>
+      </button>
       <button class="type-card type-media" data-import-type="media">
         <span class="type-icon">&#127916;</span>
         <span class="type-label">Media</span>
@@ -281,14 +286,14 @@
     <div class="empty-icon">&#128230;</div>
     <h3>Nothing imported yet</h3>
     <p>Tap <strong>Add</strong> to import files from your iPad.</p>
-    <p class="hint"><strong>Supported:</strong> <code>.html</code> (single-file web app) &middot; <code>.zip</code> (web app bundle) &middot; <code>.pdf</code> &middot; <code>.epub</code></p>
+    <p class="hint"><strong>Supported:</strong> <code>.html</code> (single-file web app) &middot; <code>.zip</code> (web app bundle) &middot; <code>.pdf</code> &middot; <code>.epub</code> &middot; <code>.docx</code> &middot; <code>.txt</code> &middot; <code>.md</code></p>
     <p class="hint"><strong>Full PWA folder?</strong> Two options on iPad: zip the folder first in Files, or tap Add and multi-select all the files in the folder (Files app supports multi-select).</p>
     <p class="hint"><strong>Kindle books?</strong> Amazon files (<code>.azw</code>/<code>.mobi</code>/<code>.kfx</code>) are DRM-locked. Use <a href="https://calibre-ebook.com" target="_blank" rel="noopener" class="link">Calibre</a> on a computer to convert them to EPUB first, then import the EPUB here.</p>
   </div>
 
   <div id="library-grid" class="grid"></div>
 
-  <input id="file-picker" type="file" accept=".html,.htm,.zip,.pdf,.epub,.mp4,.mov,.m4v,.webm,.mp3,.m4a,.wav,.ogg,.aac,.jpg,.jpeg,.png,.gif,.webp,text/html,application/zip,application/pdf,application/epub+zip,video/*,audio/*,image/*" multiple style="display:none;">
+  <input id="file-picker" type="file" accept=".html,.htm,.zip,.pdf,.epub,.docx,.txt,.md,.markdown,.mp4,.mov,.m4v,.webm,.mp3,.m4a,.wav,.ogg,.aac,.jpg,.jpeg,.png,.gif,.webp,text/html,text/plain,text/markdown,application/zip,application/pdf,application/epub+zip,application/vnd.openxmlformats-officedocument.wordprocessingml.document,video/*,audio/*,image/*" multiple style="display:none;">
 
   <!-- Progress indicator shown during import (PDF/EPUB parsing can take a moment) -->
   <div id="import-progress" class="import-progress">

@@ -373,6 +373,7 @@ button, .tap, [role="button"] { min-height: 48px; }
 .type-zip { background: linear-gradient(135deg, #4a2466, #2a1244); border-color: #5a2e7a; }
 .type-pdf { background: linear-gradient(135deg, #6e2e2a, #3a1a18); border-color: #883a36; }
 .type-epub { background: linear-gradient(135deg, #1f5a48, #0e3024); border-color: #2e7a60; }
+.type-manuscript { background: linear-gradient(135deg, #2a4a8c, #142654); border-color: #3a5fae; }
 .type-media { background: linear-gradient(135deg, #c2410c, #6b1f07); border-color: #d9551a; }
 
 .home-recent-row {
