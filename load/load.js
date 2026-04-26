@@ -8375,7 +8375,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17f</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17g</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -9564,17 +9564,22 @@
       musicSource = null;
     }
 
-    /* Topbar buttons — back / help / more / save / stack / undo / redo
-       were rendered but unwired in v1; the user couldn't exit the
-       editor or save a draft. Wire them all. */
-    document.getElementById('ve-back').addEventListener('click', function () {
+    /* Topbar buttons — wired with a defensive bind() helper so a
+       single missing element never kills the rest of the row.
+       Earlier versions used document.getElementById(id).addEventListener
+       directly; if any of the seven buttons was absent (typo in id,
+       refactor drift, etc.) the whole topbar went dark. */
+    function bindEd(id, evt, fn) {
+      var el = document.getElementById(id);
+      if (!el) { try { console.warn('[VE] missing #' + id); } catch (_) {} return; }
+      try { el.addEventListener(evt, fn); }
+      catch (e) { try { console.warn('[VE] bind failed for #' + id, e); } catch (_) {} }
+    }
+    bindEd('ve-back', 'click', function () {
       var existing = document.getElementById('__loadVideoEdit');
       if (existing) existing.remove();
     });
-    /* Force-refresh — purges the SW cache for this origin and hard
-       reloads the page bypassing iOS Safari's lazy-update behaviour
-       that often leaves the editor on a stale build. */
-    document.getElementById('ve-refresh').addEventListener('click', async function () {
+    bindEd('ve-refresh', 'click', async function () {
       try {
         if ('serviceWorker' in navigator) {
           var regs = await navigator.serviceWorker.getRegistrations();
@@ -9585,10 +9590,9 @@
           await Promise.all(keys.map(function (k) { return caches.delete(k); }));
         }
       } catch (e) {}
-      // Cache-busted reload — bypasses Safari memory cache too.
       location.replace(location.pathname + '?_=' + Date.now());
     });
-    document.getElementById('ve-help').addEventListener('click', function () {
+    bindEd('ve-help', 'click', function () {
       alert(
         'Load Video Editor — quick guide\n\n' +
         '• Tap the preview to play / pause\n' +
@@ -9601,9 +9605,7 @@
         '• 💾 Save stores the current edits as a draft for next time'
       );
     });
-    document.getElementById('ve-more').addEventListener('click', function () {
-      // Cycle aspect-ratio options as the simplest "more" action;
-      // a full settings sheet lands in the next phase.
+    bindEd('ve-more', 'click', function () {
       var ratio = document.getElementById('ve-ratio');
       if (ratio) {
         var idx = ratio.selectedIndex || 0;
@@ -9614,10 +9616,7 @@
         toast('More settings: full sheet coming next.', false);
       }
     });
-    document.getElementById('ve-save').addEventListener('click', function () {
-      // Persist the current trim / overlay / music settings to a
-      // draft record on the source app so re-opening the editor
-      // restores them instead of starting fresh.
+    bindEd('ve-save', 'click', function () {
       try {
         var draft = {
           trimIn: parseFloat(trimIn.value) || 0,
@@ -9626,24 +9625,23 @@
           textOverlay: (document.getElementById('ve-text') || {}).value || '',
           musicVol: parseFloat((document.getElementById('ve-audio-vol') || {}).value || '0.35'),
           speed: video.playbackRate || 1,
-          opacity: clipOpacity,
+          opacity: (typeof clipOpacity !== 'undefined') ? clipOpacity : 1,
+          clips: engine.clips.slice(),
           savedAt: Date.now()
         };
         app.editorDraft = draft;
         if (typeof putApp === 'function') putApp(app);
         toast('Draft saved.', false);
-      } catch (e) { toast('Could not save draft.', true); }
+      } catch (e) { toast('Could not save draft: ' + (e && e.message || e), true); }
     });
-    document.getElementById('ve-stack').addEventListener('click', function () {
-      // Layers panel — for v1 just toggles a class that scales up the
-      // track rows so they're easier to see; full layer manager next.
+    bindEd('ve-stack', 'click', function () {
       var tracks = document.getElementById('ve-tracks');
       if (tracks) tracks.classList.toggle('ve-tracks-expanded');
     });
-    document.getElementById('ve-undo').addEventListener('click', function () {
+    bindEd('ve-undo', 'click', function () {
       toast('Undo: history stack lands with multi-clip phase.', false);
     });
-    document.getElementById('ve-redo').addEventListener('click', function () {
+    bindEd('ve-redo', 'click', function () {
       toast('Redo: history stack lands with multi-clip phase.', false);
     });
 
