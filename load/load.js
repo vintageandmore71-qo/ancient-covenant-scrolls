@@ -3949,8 +3949,28 @@
         else if (tool === 'helper') openHelperPanel();
         else if (tool === 'devconsole') openDevConsole();
         else if (tool === 'help') openHelp();
+        else if (tool === 'hard-refresh') hardRefresh();
       });
     });
+  }
+  /* Force-refresh from any screen — purges every Cache Storage
+     entry, asks active service workers to update, then reloads
+     with a cache-busting query so iPad Safari's HTTP layer can't
+     serve a stale load.js either. Reachable via the ↻ icon in
+     the global topbar, so users can bust the cache without first
+     having to load the editor. */
+  async function hardRefresh() {
+    try {
+      if ('serviceWorker' in navigator) {
+        var regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(function (r) { return r.update(); }));
+      }
+      if ('caches' in window) {
+        var keys = await caches.keys();
+        await Promise.all(keys.map(function (k) { return caches.delete(k); }));
+      }
+    } catch (e) {}
+    location.replace(location.pathname + '?_=' + Date.now());
   }
   function openDevConsole() {
     var drawer = $('console-drawer');
@@ -8375,7 +8395,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17g</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17h</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
