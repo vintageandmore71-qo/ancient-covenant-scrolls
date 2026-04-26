@@ -1525,11 +1525,21 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
 /* ------------- Viewer ------------- */
 .viewer-topbar {
   transition: transform 0.2s ease;
+  /* Buttons keep landing on the viewer topbar -- TTS, bookmarks, save-as-template,
+     layout, notes, share, AI, console, reload, Aa, hide. Make it horizontally
+     scrollable so nothing falls off-screen on smaller iPads or split view. */
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
 }
+.viewer-topbar::-webkit-scrollbar { display: none; }   /* Safari / Chrome */
+.viewer-topbar > .icon-btn { flex-shrink: 0; }         /* don't squish buttons */
 .viewer-topbar.hidden { transform: translateY(-100%); }
 .viewer-topbar .title {
-  flex: 1; font-size: 13px; color: #a8a8c4; text-align: center;
+  flex: 1 1 auto; font-size: 13px; color: #a8a8c4; text-align: center;
   padding: 0 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  min-width: 80px;
 }
 
 #viewer-screen { display: none; flex-direction: column; }
