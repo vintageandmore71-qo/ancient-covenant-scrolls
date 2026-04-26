@@ -8614,7 +8614,17 @@
       '#__loadVideoEdit .ve-act-lbl{font-size:11px;color:#cfcfdc;text-align:center;line-height:1.2;}' +
       '#__loadVideoEdit .ve-action.on .ve-act-icon{background:#fbbf24;color:#1a1a26;border-color:#fbbf24;}' +
       '#__loadVideoEdit .ve-action-sep{flex:0 0 auto;width:1px;height:36px;background:#2a2a40;margin:0 4px;display:inline-block;}' +
-      '#__loadVideoEdit .ve-panel{position:fixed;left:0;right:0;bottom:60px;background:#1a1a26;border-top:1px solid #2a2a40;padding:14px 16px 18px;z-index:6;max-width:580px;margin:0 auto;border-radius:18px 18px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,0.5);}' +
+      // Panel sits above the bottom action toolbar, with safe-area
+      // inset so iPad's home indicator doesn't crop the close button.
+      // bottom is generous (calc(80px + safe-area)) so on portrait
+      // there is always clear separation between the panel and the
+      // toolbar; the toolbar is hidden via a parent class while a
+      // panel is open as a belt-and-suspenders fallback.
+      '#__loadVideoEdit .ve-panel{position:fixed;left:0;right:0;bottom:calc(80px + env(safe-area-inset-bottom));background:#1a1a26;border:1px solid #2a2a40;padding:14px 16px 18px;z-index:30;max-width:580px;margin:0 auto;border-radius:18px;box-shadow:0 -10px 36px rgba(0,0,0,0.55);}' +
+      // While any panel is open, suppress the bottom action toolbar
+      // and the context-action bar so they don't visually compete.
+      '#__loadVideoEdit.ve-panel-open #ve-actions{display:none;}' +
+      '#__loadVideoEdit.ve-panel-open #ve-context{display:none;}' +
       '#__loadVideoEdit .ve-panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-weight:700;color:#fff;font-size:14px;}' +
       '#__loadVideoEdit .ve-lbl{font-size:12.5px;color:#a0a0b0;display:block;}' +
       '#__loadVideoEdit .ve-input{display:block;width:100%;margin-top:4px;padding:6px 8px;background:#0e0e18;color:#fff;border:1px solid #2a2a40;border-radius:6px;font-size:13px;}' +
@@ -8625,6 +8635,12 @@
     wrap.appendChild(styleTag);
 
     document.body.appendChild(wrap);
+    // Discoverability toast — fires once per editor session so the
+    // user has confirmation the wiring is live and knows the core
+    // gestures (tap clip, drag trim handles, scrub, ⬆ export).
+    setTimeout(function () {
+      try { toast('Editor ready · tap clip to edit · drag yellow handles to trim · ⬆ Export when done', false); } catch (e) {}
+    }, 350);
 
     // Wire timeline trim handles -> hidden trim-in/out inputs (existing
     // export pipeline reads those, so it keeps working without changes)
@@ -8695,6 +8711,10 @@
       ['ve-text-panel', 've-music-panel', 've-speed-panel', 've-opacity-panel'].forEach(function (p) {
         var el = document.getElementById(p); if (el) el.hidden = (p !== id);
       });
+      // Toggle ve-panel-open on the editor wrap so CSS hides the
+      // bottom action bars while a panel is up — prevents the
+      // toolbars from covering the panel's controls / close button.
+      wrap.classList.toggle('ve-panel-open', !!id);
     }
     Array.prototype.forEach.call(wrap.querySelectorAll('[data-add]'), function (btn) {
       btn.addEventListener('click', function () {
