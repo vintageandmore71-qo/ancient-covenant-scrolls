@@ -578,7 +578,39 @@ closeCJ();
 });
 document.getElementById('cj-input').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('cj-go').click();});
 
-document.getElementById('b-sb').addEventListener('click',function(){if(window.innerWidth<=700){document.getElementById('sb').classList.toggle('m');}else{sbo=!sbo;document.getElementById('sb').classList.toggle('h',!sbo);document.getElementById('main').classList.toggle('x',!sbo);setLeft(sbo?'270px':'0');}});
+function syncSidebar(){
+var sb=document.getElementById('sb'),mn=document.getElementById('main');
+if(window.innerWidth<=700){
+// Mobile: clear desktop classes so the leftover .h from a prior desktop session can't keep it hidden
+sb.classList.remove('h');mn.classList.remove('x');setLeft('0');
+}else{
+// Desktop: clear mobile-open class and restore based on sbo
+sb.classList.remove('m');sb.classList.toggle('h',!sbo);mn.classList.toggle('x',!sbo);setLeft(sbo?'270px':'0');
+}
+}
+document.getElementById('b-sb').addEventListener('click',function(e){
+e.stopPropagation();
+var sb=document.getElementById('sb');
+if(window.innerWidth<=700){
+// Always clear desktop class first to avoid stuck state
+sb.classList.remove('h');document.getElementById('main').classList.remove('x');
+sb.classList.toggle('m');
+}else{
+sbo=!sbo;sb.classList.remove('m');sb.classList.toggle('h',!sbo);document.getElementById('main').classList.toggle('x',!sbo);setLeft(sbo?'270px':'0');
+}
+});
+// Tap on the page outside the sidebar closes it on mobile
+document.addEventListener('click',function(e){
+if(window.innerWidth>700)return;
+var sb=document.getElementById('sb');
+if(!sb.classList.contains('m'))return;
+if(sb.contains(e.target))return;
+if(e.target.closest&&e.target.closest('#topnav'))return;
+sb.classList.remove('m');
+});
+// Re-normalize when the iPad rotates or the window crosses the 700px breakpoint
+window.addEventListener('resize',syncSidebar);
+window.addEventListener('orientationchange',function(){setTimeout(syncSidebar,150);});
 document.getElementById('b-dk').addEventListener('click',function(){document.body.classList.remove('sepia');localStorage.setItem('acr_sepia','0');document.getElementById('b-sep').classList.remove('on');var d=document.body.classList.toggle('dark');localStorage.setItem('acr_dark',d?'1':'0');this.classList.toggle('on',d);});
 document.getElementById('b-sep').addEventListener('click',function(){document.body.classList.remove('dark');localStorage.setItem('acr_dark','0');document.getElementById('b-dk').classList.remove('on');var s=document.body.classList.toggle('sepia');localStorage.setItem('acr_sepia',s?'1':'0');this.classList.toggle('on',s);});
 document.getElementById('b-rd').addEventListener('click',function(){var r=document.body.classList.toggle('acr-rd');document.getElementById('sb').classList.toggle('h',r);document.getElementById('main').classList.toggle('x',r);setLeft(r?'0':(sbo?'270px':'0'));});
@@ -663,6 +695,8 @@ if(!vop){stp();return;}
 // Auto-start playback when opening the voice reader from a loaded section - gives immediate audio feedback
 if(cur>=0&&window.speechSynthesis&&!sp)startPlayback();
 });
+var speakSeq=0,wd=null;
+function clearWatchdog(){if(wd){clearTimeout(wd);wd=null;}}
 function speakCurrent(){
 if(!sp||pi<0||pi>=ps.length)return false;
 var p=ps[pi];if(cp)cp.classList.remove('sp');p.classList.add('sp');cp=p;
@@ -671,11 +705,20 @@ document.getElementById('vst').textContent=(pi+1)+' of '+ps.length;
 try{localStorage.setItem('acr_vpos',JSON.stringify({fid:IDS[cur],pi:pi}));}catch(e){}
 var txt=prepTTS(p.textContent.trim());
 if(!txt){pi++;return speakCurrent();}
+var mySeq=++speakSeq,advanced=false;
+function advance(){if(advanced||mySeq!==speakSeq||!sp)return;advanced=true;clearWatchdog();pi++;rn();}
+// iOS Safari: leftover queue can cause the previous utterance to replay -- cancel before each speak
+try{window.speechSynthesis.cancel();}catch(e){}
 var u=new SpeechSynthesisUtterance(txt);
 u.rate=spd;u.lang='en-US';u.volume=1;u.pitch=1;
 var voice=getVoice();if(voice)u.voice=voice;
-u.onend=function(){if(!sp)return;pi++;rn();};
-u.onerror=function(ev){if(!sp)return;var err=ev&&ev.error||'';if(err==='canceled'||err==='interrupted')return;pi++;rn();};
+u.onend=function(){if(!sp||mySeq!==speakSeq)return;advance();};
+u.onerror=function(ev){if(!sp||mySeq!==speakSeq)return;var err=ev&&ev.error||'';if(err==='canceled'||err==='interrupted')return;advance();};
+// Watchdog: if onend never fires (iOS Safari known to silently stall on long utterances), force advance.
+// Estimate: ~14 chars/sec at rate 1 + 4 second buffer, capped between 8s and 90s.
+clearWatchdog();
+var est=Math.min(90000,Math.max(8000,(txt.length/14)*1000/Math.max(0.5,spd)+4000));
+wd=setTimeout(function(){if(mySeq===speakSeq&&sp&&!advanced){try{window.speechSynthesis.cancel();}catch(e){}advance();}},est);
 try{window.speechSynthesis.speak(u);return true;}catch(e){return false;}
 }
 function startPlayback(){
@@ -706,8 +749,8 @@ speakCurrent();
 document.getElementById('b-pa').addEventListener('click',function(){window.speechSynthesis.pause();pa=true;this.style.display='none';document.getElementById('b-pl').style.display='inline';document.getElementById('vst').textContent='Paused';});
 document.getElementById('b-st').addEventListener('click',stp);
 
-function stp(){sp=false;pa=false;if(window.speechSynthesis)window.speechSynthesis.cancel();pi=0;if(cp)cp.classList.remove('sp');cp=null;document.getElementById('b-pl').style.display='inline';document.getElementById('b-pa').style.display='none';document.getElementById('vst').textContent='Ready';}
-function dn(){sp=false;pi=0;if(cp)cp.classList.remove('sp');cp=null;document.getElementById('b-pl').style.display='inline';document.getElementById('b-pa').style.display='none';document.getElementById('vst').textContent='Done';}
+function stp(){sp=false;pa=false;speakSeq++;clearWatchdog();if(window.speechSynthesis)window.speechSynthesis.cancel();pi=0;if(cp)cp.classList.remove('sp');cp=null;document.getElementById('b-pl').style.display='inline';document.getElementById('b-pa').style.display='none';document.getElementById('vst').textContent='Ready';}
+function dn(){sp=false;speakSeq++;clearWatchdog();pi=0;if(cp)cp.classList.remove('sp');cp=null;document.getElementById('b-pl').style.display='inline';document.getElementById('b-pa').style.display='none';document.getElementById('vst').textContent='Done';}
 
 window.onscroll=function(){var s=window.scrollY||0,h=document.documentElement.scrollHeight-window.innerHeight;document.getElementById('pf').style.width=(h>0?Math.round(s/h*100):0)+'%';document.getElementById('tb2').style.display=s>300?'block':'none';};
 (function(){
