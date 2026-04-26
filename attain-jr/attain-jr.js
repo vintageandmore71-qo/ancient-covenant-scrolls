@@ -654,8 +654,37 @@
     var htmlDir = htmlHref && htmlHref.indexOf('/') >= 0
       ? htmlHref.substring(0, htmlHref.lastIndexOf('/') + 1) : '';
     var nodes = doc.body.querySelectorAll('h1, h2, h3, p, blockquote, li, img, image');
+    // Track characters discovered via data-role / "NAME:" patterns so
+    // we can publish them on book.characters and the colour-coded
+    // reader pulls each one's paint automatically.
+    var discoveredChars = {};
+    function recordChar(role, displayName) {
+      if (!role) return;
+      if (!discoveredChars[role]) {
+        discoveredChars[role] = { name: displayName || role, emoji: '' };
+      } else if (displayName && discoveredChars[role].name === role) {
+        discoveredChars[role].name = displayName;
+      }
+    }
     Array.prototype.forEach.call(nodes, function (n) {
       var tag = n.tagName.toLowerCase();
+      // Stop Lion / Jonah-style speaker label: <p class="speaker" data-role="lion">LION</p>
+      // Becomes a char block; the very NEXT paragraph is attributed.
+      if (tag === 'p' && (n.classList.contains('speaker') || n.getAttribute('data-role'))) {
+        var role = (n.getAttribute('data-role') || (n.textContent || '').trim().toLowerCase()).replace(/[^a-z0-9]+/g, '');
+        var label = (n.textContent || '').trim();
+        if (role && label) {
+          recordChar(role, label);
+          cur.body.push({ type: 'char', who: role });
+          return;
+        }
+      }
+      // Stop Lion-style stage direction: <p class="action">...</p>
+      if (tag === 'p' && n.classList.contains('action')) {
+        var actionText = (n.textContent || '').trim();
+        if (actionText) cur.body.push({ type: 'stage', text: actionText });
+        return;
+      }
       if (tag === 'h1' || tag === 'h2') {
         flush();
         sceneCount++;
@@ -696,7 +725,21 @@
         if (qt) cur.body.push({ type: 'highlight', text: qt });
       } else {
         var t2 = (n.textContent || '').trim();
-        if (t2) cur.body.push({ type: 'p', text: t2 });
+        if (!t2) return;
+        // Jonah-style inline cast pattern: "JONAH: text" or "GOD — text".
+        // Convert into a [char] + [p] pair so the colour-tint render
+        // path picks the speaker up.
+        var inline = t2.match(/^([A-Z][A-Z' .#0-9-]{1,30})\s*[:—–-]\s*(.+)$/);
+        if (inline) {
+          var role = inline[1].toLowerCase().replace(/[^a-z0-9]+/g, '');
+          if (role && role.length >= 2) {
+            recordChar(role, inline[1].trim());
+            cur.body.push({ type: 'char', who: role });
+            cur.body.push({ type: 'p', text: inline[2].trim() });
+            return;
+          }
+        }
+        cur.body.push({ type: 'p', text: t2 });
       }
     });
     flush();
@@ -712,12 +755,18 @@
         });
       });
       if (!scenes.length) return null;
+      // Publish characters discovered during the walk so per-character
+      // colour tinting kicks in for imported books.
+      var charList = Object.keys(discoveredChars).map(function (key) {
+        var c = discoveredChars[key];
+        return { name: key, displayName: c.name, emoji: c.emoji || '' };
+      });
       return {
         title: title,
         author: 'Imported',
         ageBand: '6-8',
         cover: '',
-        characters: [],
+        characters: charList,
         storyworld: { setting: '', time: '', lesson: '' },
         gallery: [],
         scenes: scenes,
@@ -1007,9 +1056,12 @@
       _renderCurrentChar = b.who;
       var ch = (book.characters || []).filter(function (x) { return x.name === b.who; })[0];
       var em = ch ? ch.emoji : '';
+      // Prefer the human-readable displayName (e.g. "LION") over the
+      // canonical role key (e.g. "lion") for the visible label.
+      var label = (ch && ch.displayName) ? ch.displayName : b.who;
       var color = characterColor(b.who) || '#7b6cff';
       return '<div class="char" data-char="' + escHtml(b.who) + '" style="--char-color:' + color + '">' +
-        em + ' ' + escHtml(b.who.toUpperCase()) + '</div>';
+        em + ' ' + escHtml(label.toUpperCase()) + '</div>';
     }
     if (b.type === 'p') {
       // Tint this paragraph with the speaker's colour if a [char]
