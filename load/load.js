@@ -7286,6 +7286,48 @@
         statTile('Best for ages', bisacBand.ages, bisacBand.bisac) +
       '</div>';
 
+    // Picture-text balance section -- only relevant when a picture-book
+    // template is selected (otherwise word-per-spread isn't meaningful).
+    var balanceHtml = '';
+    if (PICTURE_BOOK_TEMPLATES[settings.bookType]) {
+      var balance = runSpreadBalance(app, settings);
+      balanceHtml =
+        '<h2 style="font-size:17px;color:#f0f0f0;margin:18px 0 8px;border-bottom:1px solid #2a2a40;padding-bottom:6px;">🖼️ Picture-text balance per spread</h2>' +
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">' +
+          '<div style="font-size:13px;color:#cfcfdc;">Target reading age:</div>' +
+          '<div style="display:flex;gap:6px;">' +
+            ['0-3', '3-5', '5-7', '7-10'].map(function (band) {
+              var on = band === balance.ageBand;
+              return '<button class="bc-age-band" data-band="' + band + '" style="padding:6px 12px;border-radius:6px;border:1px solid ' + (on ? '#7b6cff' : '#3a3a55') + ';background:' + (on ? '#7b6cff' : '#2a2a40') + ';color:' + (on ? '#12121a' : '#cfcfdc') + ';font-size:12.5px;font-weight:' + (on ? '700' : '500') + ';cursor:pointer;">Ages ' + band + '</button>';
+            }).join('') +
+          '</div>' +
+          '<div style="font-size:12px;color:#a0a0b0;margin-left:auto;">Industry max: <strong>' + balance.maxWords + ' words / spread</strong></div>' +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:10px;">' +
+          balance.spreads.map(function (sp) {
+            var color = sp.level === 'pass' ? '#22c55e' :
+                        sp.level === 'warn' ? '#fbbf24' :
+                        sp.level === 'fail' ? '#ef4444' :
+                        '#3a3a55';
+            var bg = sp.level === 'pass' ? 'rgba(34,197,94,0.10)' :
+                     sp.level === 'warn' ? 'rgba(251,191,36,0.10)' :
+                     sp.level === 'fail' ? 'rgba(239,68,68,0.10)' :
+                     'rgba(123,108,255,0.06)';
+            return '<div style="border:1px solid ' + color + ';background:' + bg + ';border-radius:6px;padding:8px 10px;">' +
+              '<div style="font-size:10px;color:#a0a0b0;text-transform:uppercase;letter-spacing:0.5px;">' + escHtml(sp.label) + '</div>' +
+              '<div style="font-size:18px;font-weight:700;color:' + color + ';">' + sp.words + '</div>' +
+              '<div style="font-size:11px;color:#cfcfdc;">' + (sp.note || (sp.words === 1 ? 'word' : 'words')) + '</div>' +
+            '</div>';
+          }).join('') +
+        '</div>' +
+        '<p style="font-size:12.5px;color:#a0a0b0;margin:0 0 22px;">' +
+          '<strong>' + balance.failCount + '</strong> spread' + (balance.failCount === 1 ? '' : 's') + ' over the max' +
+          (balance.warnCount ? ', <strong>' + balance.warnCount + '</strong> close to it' : '') + '. ' +
+          'Story average: <strong>' + balance.avgWords.toFixed(1) + ' words/spread</strong>. ' +
+          'Tap an age band above to re-evaluate against a different audience.' +
+        '</p>';
+    }
+
     wrap.innerHTML =
       '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#1a1a2e;border-bottom:1px solid #2a2a40;flex-wrap:wrap;">' +
         '<button id="bc-close" style="background:#3a3a55;border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:14px;cursor:pointer;">&larr; Close</button>' +
@@ -7300,6 +7342,7 @@
         '<h2 style="font-size:17px;color:#f0f0f0;margin:0 0 12px;border-bottom:1px solid #2a2a40;padding-bottom:6px;">📚 Reading level &amp; age band</h2>' +
         readingHtml +
         '<p style="font-size:12.5px;color:#a0a0b0;margin:0 0 22px;">Flesch reading-ease and Flesch-Kincaid grade are computed offline from word, sentence and syllable counts. The age band maps the grade level to KDP’s standard BISAC categories &mdash; pick this on the KDP upload form.</p>' +
+        balanceHtml +
         '<h2 style="font-size:17px;color:#f0f0f0;margin:0 0 12px;border-bottom:1px solid #2a2a40;padding-bottom:6px;">✈️ KDP pre-flight check</h2>' +
         preflightHtml +
         '<p style="font-size:12.5px;color:#a0a0b0;margin:14px 0 0;">All checks run locally on this device. Re-open Book Check after edits to re-scan.</p>' +
@@ -7307,6 +7350,16 @@
 
     document.body.appendChild(wrap);
     document.getElementById('bc-close').addEventListener('click', function () { wrap.remove(); });
+    // Re-evaluate the balance section against a different age band
+    // without re-opening the panel.
+    Array.prototype.forEach.call(wrap.querySelectorAll('.bc-age-band'), function (btn) {
+      btn.addEventListener('click', function () {
+        if (!app.layout) app.layout = {};
+        app.layout.targetAgeBand = btn.getAttribute('data-band');
+        wrap.remove();
+        openBookCheck(app);  // simplest: re-open with the new band sticky
+      });
+    });
   }
 
   function statTile(label, value, sub) {
@@ -7396,6 +7449,123 @@
     if (grade < 9) return { ages: '12-17', gradeLabel: '7 - 12', bisac: 'Young adult' };
     return { ages: '18+', gradeLabel: 'College+', bisac: 'Adult fiction / non-fiction' };
   }
+
+  /* Picture-text balance per spread.
+     Industry rule of thumb (children's-book editorial): the younger
+     the reader, the fewer words per spread. Board books for ages 0-3
+     stay around 5-10 words per spread; standard picture books for
+     ages 3-5 cap at ~50 words; ages 5-7 can handle ~100; early
+     chapter books for ages 7-10 can run higher.
+
+     This walks the picture-book layout the same way buildLayoutPreviewHtml
+     does, gets the words landing on each story page, pairs them
+     into spreads, and flags which ones exceed the recommended max
+     for the chosen age band.
+
+     Returns { ageBand, maxWords, spreads:[{label, words, level, note}],
+               failCount, warnCount, avgWords, totalStoryWords }. */
+  function runSpreadBalance(app, settings) {
+    var bandFromSettings = settings.targetAgeBand;
+    // Default age band: derive from the reading-level grade if the user
+    // hasn't explicitly chosen one yet
+    if (!bandFromSettings) {
+      var rl = runReadingLevel(app);
+      var b = bisacAgeBandFor(rl.gradeLevel);
+      bandFromSettings = b.ages;
+    }
+    var maxWordsByBand = {
+      '0-3': 10,
+      '3-5': 50,
+      '5-7': 100,
+      '7-10': 200,
+      // Reading-level mapper sometimes returns these adjacent bands
+      '4-7': 75,
+      '6-9': 150,
+      '8-12': 250,
+      '12-17': 400,
+      '18+': 600
+    };
+    var max = maxWordsByBand[bandFromSettings] || 50;
+
+    // Build pages exactly as the layout view does so per-spread word
+    // counts match what the user will see on the page.
+    var trim = TRIM_PRESETS.filter(function (t) { return t.id === settings.trim; })[0] || TRIM_PRESETS[3];
+    var contentBody = '';
+    try {
+      var doc = new DOMParser().parseFromString(app.html || '', 'text/html');
+      contentBody = doc.body ? doc.body.innerHTML : (app.html || '');
+    } catch (e) { contentBody = app.html || ''; }
+    var chunks = paginateForPreview(contentBody, trim.w, trim.h, 0.5,
+      settings.marginOutside, settings.marginTop, settings.marginBottom);
+    var total = picBookPageCount(settings.bookType, settings.customPageCount);
+    var STRUCTURAL_FRONT = 5, STRUCTURAL_BACK = 3;
+    var storyPageCount = total - STRUCTURAL_FRONT - STRUCTURAL_BACK;
+    var perPage = Math.max(1, Math.ceil(chunks.length / Math.max(1, storyPageCount)));
+
+    function wordsOf(html) {
+      if (!html) return 0;
+      var t = String(html).replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+      if (!t) return 0;
+      return t.split(/\s+/).filter(function (w) { return /[a-zA-Z0-9]/.test(w); }).length;
+    }
+
+    // Walk each printed page index, pull its content, count words.
+    // Then pair into spreads following the same convention as the
+    // schema view: page 1 alone, [2|3], [4|5], ..., last page alone.
+    var pageWords = [];
+    for (var pn = 1; pn <= total; pn++) {
+      var isStructural = pn <= STRUCTURAL_FRONT || pn > total - STRUCTURAL_BACK;
+      if (isStructural) { pageWords.push(0); continue; }
+      var storyIdx = pn - STRUCTURAL_FRONT - 1;
+      var fromIdx = storyIdx * perPage;
+      var toIdx = Math.min(chunks.length, fromIdx + perPage);
+      pageWords.push(wordsOf(chunks.slice(fromIdx, toIdx).join('')));
+    }
+
+    var spreads = [];
+    // Page 1 alone (cover paste-down)
+    spreads.push({ label: 'Page 1', words: 0, level: 'na', note: 'Cover paste-down' });
+    for (var p = 1; p < total - 1; p += 2) {
+      var pair = pageWords[p] + (pageWords[p + 1] || 0);
+      var role1 = pageRoleForPictureBook(p + 1, total);
+      var role2 = (p + 1 < total - 1) ? pageRoleForPictureBook(p + 2, total) : '';
+      var label = role1.indexOf('Story Spread') === 0 ? role1.replace('Story ', '') :
+                  ('Pages ' + (p + 1) + '–' + (p + 2));
+      var level, note;
+      if (role1.indexOf('Story Spread') !== 0 && role2.indexOf('Story Spread') !== 0) {
+        // Structural spread (title/copyright/dedication/back-matter)
+        level = 'na'; note = 'structural';
+      } else if (pair === 0) {
+        level = 'warn'; note = 'empty — add content or illustration';
+      } else if (pair > max) {
+        level = 'fail'; note = 'over max for ages ' + bandFromSettings;
+      } else if (pair > max * 0.85) {
+        level = 'warn'; note = 'near the limit';
+      } else {
+        level = 'pass'; note = pair === 1 ? 'word' : 'words';
+      }
+      spreads.push({ label: label, words: pair, level: level, note: note });
+    }
+    // Last page alone (back paste-down)
+    spreads.push({ label: 'Page ' + total, words: 0, level: 'na', note: 'Back paste-down' });
+
+    var storyOnly = spreads.filter(function (s) { return s.level !== 'na'; });
+    var failCount = storyOnly.filter(function (s) { return s.level === 'fail'; }).length;
+    var warnCount = storyOnly.filter(function (s) { return s.level === 'warn'; }).length;
+    var totalStoryWords = storyOnly.reduce(function (sum, s) { return sum + s.words; }, 0);
+    var avgWords = storyOnly.length ? (totalStoryWords / storyOnly.length) : 0;
+
+    return {
+      ageBand: bandFromSettings,
+      maxWords: max,
+      spreads: spreads,
+      failCount: failCount,
+      warnCount: warnCount,
+      avgWords: avgWords,
+      totalStoryWords: totalStoryWords
+    };
+  }
+
 
   function runKdpPreflight(app, layoutSettings) {
     var checks = [];
