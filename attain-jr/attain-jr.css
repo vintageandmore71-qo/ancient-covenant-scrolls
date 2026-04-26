@@ -291,48 +291,64 @@ a.jr-action {
 .jr-prog-meta { font-size: 11pt; color: #555; }
 
 /* ===== Topbar ===== */
+/* ===== Top header — Attain pattern, kid palette =====
+   Fixed 54px indigo→violet gradient strip. Tabs flow inline along
+   with the tools so the whole bar reads as one clean row. Active
+   tab uses a subtle white-on-dark fill. */
 #topbar {
-  position: sticky; top: 0; z-index: 50;
-  background: var(--jr-rainbow);
-  padding: 6px 10px 8px;
-  display: flex; flex-direction: column; gap: 6px;
-  border-bottom: 2px solid rgba(0,0,0,0.18);
+  position: fixed; top: 0; left: 0; right: 0; height: 54px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #2d1b69 100%);
+  display: flex; align-items: center; gap: 4px; padding: 0 10px;
+  z-index: 1000;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.25);
+  flex-direction: row;
+  border-bottom: none;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+#topbar::-webkit-scrollbar { display: none; }
 .topbar-tabs {
-  display: flex; gap: 6px; overflow-x: auto;
-  scrollbar-width: none; padding-bottom: 2px;
-  -webkit-mask-image: linear-gradient(to right, #000 92%, rgba(0,0,0,0.5) 100%);
-          mask-image: linear-gradient(to right, #000 92%, rgba(0,0,0,0.5) 100%);
+  display: flex; gap: 3px; flex: 1; min-width: 0;
 }
-.topbar-tabs::-webkit-scrollbar { display: none; }
 .tab {
   flex-shrink: 0;
-  background: rgba(255,255,255,0.92);
-  color: var(--jr-ink);
-  border: 2px solid #fff;
-  border-radius: 999px;
-  padding: 6px 14px;
-  font-size: 12pt;
-  font-weight: 800;
-  min-height: 34px;
-  box-shadow: 0 2px 0 rgba(0,0,0,0.10), 0 3px 8px rgba(0,0,0,0.10);
+  background: transparent;
+  color: #b8b8d8;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  min-height: 44px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .15s, color .15s;
 }
+.tab:hover { background: rgba(255,255,255,0.10); color: #fff; }
 .tab.on {
-  background: linear-gradient(180deg, #ffd166, #ff8c42);
-  color: var(--jr-ink);
-  border-color: #fff;
-  box-shadow: 0 0 0 2px rgba(255,255,255,0.7), 0 2px 0 rgba(0,0,0,0.18), 0 4px 12px rgba(255,140,80,0.50);
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+  border: none;
+  box-shadow: none;
 }
 .topbar-tools {
-  display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap;
+  display: flex; gap: 3px; flex-wrap: nowrap;
 }
 .topbar-tools button, .topbar-tools .tool-link {
-  background: rgba(0,0,0,0.18); color: #fff; border: 1.5px solid rgba(255,255,255,0.50);
-  padding: 4px 10px; border-radius: 999px; font-size: 11pt; font-weight: 700;
-  min-height: 28px;
+  background: transparent;
+  color: #c8c8e8;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  min-width: 44px; min-height: 44px;
   display: inline-flex; align-items: center; justify-content: center;
   text-decoration: none; font-family: inherit;
+  transition: background .15s, color .15s;
 }
+.topbar-tools button:hover, .topbar-tools .tool-link:hover { background: rgba(255,255,255,0.12); color: #fff; }
+#tool-focus.on { background: rgba(255,209,102,0.22); color: #ffd166; }
 
 /* ===== Scene strip ===== */
 .scene-strip {
@@ -454,130 +470,67 @@ a.jr-action {
   box-shadow: 0 0 0 3px rgba(255,200,80,0.5);
 }
 
-/* When the unified sidebar is on screen (after splash dismiss), pad
-   the LEFT edge of every content surface so the activity tiles,
-   scene strip, reader text and SFX bar don't slide under the
-   sidebar. Topbar is hidden in this layout — the sidebar replaces
-   both the previous topbar and the bottom audio bar. */
-#app .content,
-#app #scene-strip,
-#app .sfx-bar,
-#app .jr-act-stage {
-  padding-left: 80px;
+/* Three-band layout matching Attain: fixed top header (54px),
+   fixed bottom audio dock (56px), content fills the middle with
+   appropriate top/bottom padding so it never slides under either. */
+#app { padding-top: 54px; padding-bottom: 64px; min-height: 100vh; }
+#app .content {
+  padding-left: 16px; padding-right: 16px;
+  padding-top: 0; padding-bottom: 16px;
+  max-width: 880px; margin: 0 auto;
 }
-/* Topbar is folded into the sidebar — its tab + tool children are
-   moved into .audio-bar at boot. Hide the empty container so it
-   doesn't reserve any vertical space at the top. */
-#app #topbar.jr-rail-folded { display: none; }
+#app #scene-strip { padding-left: 12px; padding-right: 12px; }
+#app .sfx-bar { padding-left: 12px; padding-right: 12px; }
+#app .jr-act-stage { margin-left: 14px; margin-right: 14px; }
 
-/* ===== Unified sidebar (left-edge vertical rail) =====
-   Replaces both the old rainbow topbar and the brown bottom audio
-   bar. Top → bottom layout:
-     1. Tabs    (Reader / Characters / Storyworld / Gallery / Activities)
-     2. Tools   (Back, Attain home, Focus, Customize, Aa, Paraphrase)
-     3. Audio   (Read, Story-only, Pause, Stop, Music, Back, Next,
-                 Voice-mode, Voice picker, Cast, Record)
-   Each section is separated by a thin 1px divider. Whole rail
-   scrolls vertically when content overflows iPad height. */
+/* ===== Bottom audio dock — Attain pattern, kid palette =====
+   Fixed 56px indigo gradient strip pinned to the bottom of the
+   viewport. Transparent buttons that light up on hover; same
+   visual weight as the top header so the two bars frame the
+   content like Attain does. */
 .audio-bar {
   position: fixed;
-  left: 6px;
-  top: 6px;
-  bottom: max(8px, env(safe-area-inset-bottom));
-  width: 64px;
-  display: flex; flex-direction: column;
-  gap: 6px;
-  padding: 8px 6px;
-  background: linear-gradient(160deg, #4d3eea 0%, #7b6cff 50%, #4ea0ff 100%);
-  border-radius: 22px;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.10) inset;
-  border: none;
-  z-index: 40;
-  overflow-y: auto;
-  overflow-x: hidden;
+  left: 0; right: 0; bottom: 0;
+  height: calc(56px + env(safe-area-inset-bottom));
+  background: linear-gradient(135deg, #12121e 0%, #1a1a2e 100%);
+  display: flex; flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  padding: 0 10px env(safe-area-inset-bottom);
+  border-top: 2px solid var(--jr-violet, #7b6cff);
+  z-index: 1000;
+  overflow-x: auto;
   scrollbar-width: none;
-  align-items: stretch;
-  flex-wrap: nowrap;
 }
 .audio-bar::-webkit-scrollbar { display: none; }
 .audio-bar > * { flex-shrink: 0; }
 .audio-bar button {
-  background: rgba(255,255,255,0.14);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.22);
-  padding: 8px 4px 6px;
-  border-radius: 14px;
-  font-size: 9.5pt;
-  font-weight: 700;
-  line-height: 1.15;
-  min-height: 50px;
-  text-align: center;
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
-  white-space: normal;
+  background: rgba(255,255,255,0.10);
+  color: #e0e0f0;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 44px; min-height: 44px;
   cursor: pointer;
+  font-family: inherit;
+  transition: background .15s;
 }
-.audio-bar button:active { transform: scale(0.95); }
-.audio-bar button:hover { background: rgba(255,255,255,0.22); }
+.audio-bar button:hover { background: rgba(255,255,255,0.20); color: #fff; }
+.audio-bar button:active { transform: scale(0.97); }
 .audio-bar select {
-  background: rgba(255,251,230,0.95);
-  color: #4a3000;
-  border: 1px solid rgba(255,255,255,0.45);
-  padding: 6px 4px;
-  border-radius: 12px;
-  font-size: 9.5pt; font-weight: 700;
-  min-height: 38px;
-  width: 100%;
+  background: rgba(255,255,255,0.08);
+  color: #e0e0f0;
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  min-height: 44px;
+  font-family: inherit;
   -webkit-appearance: none;
   appearance: none;
-  text-align: center;
-}
-
-/* Tab pills + tool buttons re-styled when they land inside the rail.
-   The originals were horizontal pills sized for the rainbow topbar;
-   in the rail they need to match the audio buttons' vertical look. */
-.audio-bar .topbar-tabs,
-.audio-bar .topbar-tools {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  width: 100%;
-  padding: 0;
-  margin: 0;
-  -webkit-mask-image: none;
-          mask-image: none;
-}
-.audio-bar .tab,
-.audio-bar .topbar-tools button,
-.audio-bar .topbar-tools .tool-link {
-  background: rgba(255,255,255,0.14);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.22);
-  border-radius: 14px;
-  padding: 8px 4px;
-  font-size: 9.5pt;
-  font-weight: 700;
-  min-height: 42px;
-  text-align: center;
-  width: 100%;
-  display: flex; align-items: center; justify-content: center;
-  white-space: normal;
-  line-height: 1.15;
-  text-transform: none;
-  letter-spacing: 0;
-  box-shadow: none;
-}
-.audio-bar .tab.on {
-  background: linear-gradient(180deg, #ffd166, #ff8c42);
-  color: #14142a;
-  border-color: #fff;
-  box-shadow: 0 0 0 2px rgba(255,255,255,0.35);
-}
-/* Thin divider between sections inside the rail. */
-.audio-bar .topbar-tools,
-.audio-bar > [data-rail-audio="1"] {
-  border-top: 1px solid rgba(255,255,255,0.18);
-  padding-top: 8px;
-  margin-top: 4px;
 }
 
 /* ===== SFX bar ===== */
