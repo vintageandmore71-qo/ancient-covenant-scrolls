@@ -8458,14 +8458,21 @@
         '</div>' +
         '<label class="ve-lbl" style="margin-top:8px;display:flex;align-items:center;gap:6px;"><input id="ve-mute-orig" type="checkbox"> Mute original audio</label>' +
       '</div>' +
-      // ===== Bottom action toolbar (VN style: round icons w/ labels) =====
-      '<div id="ve-actions" style="display:flex;justify-content:space-around;align-items:center;background:#0a0a14;padding:10px 8px max(10px,env(safe-area-inset-bottom));border-top:1px solid #1a1a26;flex-shrink:0;overflow-x:auto;gap:6px;">' +
+      // ===== Bottom action toolbar (VN-style: small round icons +
+      // tiny labels). Matches the order in the user reference image:
+      // Filter / Trim / FX / Split / Cutout / Speed / Volume / Fade /
+      // Crop / Rotate. Scrolls horizontally on portrait.
+      '<div id="ve-actions" style="display:flex;align-items:center;background:#0a0a14;padding:10px 8px max(10px,env(safe-area-inset-bottom));border-top:1px solid #1a1a26;flex-shrink:0;overflow-x:auto;gap:18px;">' +
+        '<button class="ve-action" data-action="filter"><span class="ve-act-icon">&#9678;</span><span class="ve-act-lbl">Filter</span></button>' +
+        '<button class="ve-action" data-action="trim"><span class="ve-act-icon">&lt;/&gt;</span><span class="ve-act-lbl">Trim</span></button>' +
+        '<button class="ve-action" data-action="fx"><span class="ve-act-icon">&#9733;</span><span class="ve-act-lbl">FX</span></button>' +
         '<button class="ve-action" data-action="split"><span class="ve-act-icon">&#9986;</span><span class="ve-act-lbl">Split</span></button>' +
-        '<button class="ve-action" data-action="cutout"><span class="ve-act-icon">&#9986;&#65039;</span><span class="ve-act-lbl">Cutout</span></button>' +
-        '<button class="ve-action" data-action="bg"><span class="ve-act-icon">&#9633;</span><span class="ve-act-lbl">BG</span></button>' +
-        '<button class="ve-action" data-action="tts"><span class="ve-act-icon">A&#127908;</span><span class="ve-act-lbl">TTS</span></button>' +
-        '<button class="ve-action" data-action="mosaic"><span class="ve-act-icon">&#9783;</span><span class="ve-act-lbl">Mosaic</span></button>' +
-        '<button class="ve-action" data-action="magnifier"><span class="ve-act-icon">&#128270;</span><span class="ve-act-lbl">Magnifier</span></button>' +
+        '<button class="ve-action" data-action="cutout"><span class="ve-act-icon">&#129489;</span><span class="ve-act-lbl">Cutout</span></button>' +
+        '<button class="ve-action" data-action="speed"><span class="ve-act-icon">&#9201;</span><span class="ve-act-lbl">Speed</span></button>' +
+        '<button class="ve-action" data-action="volume"><span class="ve-act-icon">&#128266;</span><span class="ve-act-lbl">Volume</span></button>' +
+        '<button class="ve-action" data-action="fade"><span class="ve-act-icon">&#9696;</span><span class="ve-act-lbl">Fade</span></button>' +
+        '<button class="ve-action" data-action="crop"><span class="ve-act-icon">&#9974;</span><span class="ve-act-lbl">Crop</span></button>' +
+        '<button class="ve-action" data-action="rotate"><span class="ve-act-icon">&#10227;</span><span class="ve-act-lbl">Rotate</span></button>' +
       '</div>' +
       // ===== Recording progress overlay =====
       '<div id="ve-progress" style="display:none;position:absolute;left:14px;right:14px;bottom:90px;align-items:center;gap:10px;background:rgba(26,26,38,0.95);border-radius:12px;padding:12px 14px;border:1px solid #2a2a40;backdrop-filter:blur(8px);z-index:5;">' +
@@ -8581,12 +8588,25 @@
     Array.prototype.forEach.call(wrap.querySelectorAll('[data-action]'), function (btn) {
       btn.addEventListener('click', function () {
         var act = btn.getAttribute('data-action');
-        if (act === 'split') showPanel(null);   // Split = trim-mode (handles already visible)
-        else if (act === 'tts') {
-          var t = (document.getElementById('ve-text').value || '').trim();
-          if (!t) { toast('Add subtitle text first, then TTS will read it.', true); showPanel('ve-text-panel'); return; }
-          if (window.speechSynthesis) { var u = new SpeechSynthesisUtterance(t); speechSynthesis.cancel(); speechSynthesis.speak(u); }
+        // Split / Trim — both jump to the trim-handle mode where the
+        // user can drag the yellow video clip's left + right edges.
+        if (act === 'split' || act === 'trim') {
+          showPanel(null);
+          toast('Drag the yellow handles on the video clip to ' + (act === 'split' ? 'split' : 'trim') + '.', false);
         }
+        // Volume opens the music panel (volume slider lives there).
+        else if (act === 'volume') showPanel('ve-music-panel');
+        // Crop / Rotate / Filter / FX / Speed / Fade / Cutout open
+        // adjustment panels — for now they show a one-line "coming
+        // next" toast so the visual chrome is intact and users know
+        // where each tool will live.
+        else if (act === 'cutout')   toast('Cutout: subject-isolation tool coming next.', false);
+        else if (act === 'filter')   toast('Filter: color-grade presets coming next.', false);
+        else if (act === 'fx')       toast('FX: zoom/shake presets coming next.', false);
+        else if (act === 'speed')    toast('Speed: 0.25x – 4x coming next.', false);
+        else if (act === 'fade')     toast('Fade: in / out timing coming next.', false);
+        else if (act === 'crop')     toast('Crop: tight reframe coming next.', false);
+        else if (act === 'rotate')   toast('Rotate: 90° / 180° coming next.', false);
         else toast(act.charAt(0).toUpperCase() + act.slice(1) + ' tool: coming in v2.', false);
       });
     });
