@@ -8375,7 +8375,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17e</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17f</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -8820,14 +8820,62 @@
       });
     });
 
-    // Update playhead position based on currentTime
-    function updatePlayhead() {
-      if (!video.duration) return;
-      var pct = (video.currentTime / video.duration) * 100;
-      playhead.style.left = pct + '%';
+    // Engine-driven playhead. The engine.onTick callback fires
+    // EVERY rAF during playback (60fps) and on every setTime() call,
+    // so the playhead UI tracks t precisely instead of waiting for
+    // the <video>'s 4fps timeupdate event.
+    function updatePlayheadFromEngine(t) {
+      var d = engine.duration() || 1;
+      var pct = (t / d) * 100;
+      if (playhead) playhead.style.left = pct + '%';
+      if (timeLbl) timeLbl.textContent = fmtTime(t) + ' / ' + fmtTime(d);
     }
-    video.addEventListener('timeupdate', updatePlayhead);
-    video.addEventListener('seeking', updatePlayhead);
+    engine.onTick = updatePlayheadFromEngine;
+    // Re-render the clip strip whenever the engine's clips array
+    // mutates (Split / Duplicate / Delete).
+    engine.onClipsChanged = function () { renderClipBlocks(); };
+
+    /* Render N visible clip blocks across the strip — one per entry
+       in engine.clips. Each block sits at a percentage of the total
+       timeline duration and shows a yellow border + duration label.
+       The frame thumbnails sit underneath in .ve-clip-thumbs and
+       are continuous (single source MVP) — the borders just show
+       which range of source video belongs to which clip. */
+    function renderClipBlocks() {
+      var stripEl = document.getElementById('ve-clip-strip');
+      if (!stripEl) return;
+      Array.prototype.forEach.call(stripEl.querySelectorAll('.ve-clip-block'), function (b) { b.remove(); });
+      var total = engine.duration() || 0;
+      if (!total) return;
+      var acc = 0;
+      engine.clips.forEach(function (c, i) {
+        var dur = c.srcEnd - c.srcStart;
+        var leftPct = (acc / total) * 100;
+        var widthPct = (dur / total) * 100;
+        var block = document.createElement('div');
+        block.className = 've-clip-block';
+        block.style.cssText = 'position:absolute;left:' + leftPct + '%;width:' + widthPct + '%;top:0;bottom:0;border:2px solid #fbbf24;border-radius:6px;pointer-events:none;z-index:5;';
+        // Each subsequent clip gets a thin white separator on its
+        // left edge so the boundary between adjacent clips is
+        // visible even though the underlying thumbnails are continuous.
+        if (i > 0) block.style.borderLeftColor = '#fff';
+        var label = document.createElement('div');
+        label.style.cssText = 'position:absolute;left:4px;bottom:2px;background:rgba(0,0,0,0.55);color:#fff;font-size:10px;font-weight:700;padding:1px 4px;border-radius:3px;font-variant-numeric:tabular-nums;';
+        label.textContent = dur.toFixed(2) + 's';
+        block.appendChild(label);
+        stripEl.appendChild(block);
+        acc += dur;
+      });
+    }
+
+    /* Engine-driven keyboard play/pause for laptop testing. */
+    document.addEventListener('keydown', function (e) {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+      if (e.key === ' ' && document.getElementById('__loadVideoEdit')) {
+        e.preventDefault();
+        engine.toggle();
+      }
+    });
 
     // Time ruler labels (5 evenly-spaced ticks)
     function renderRuler() {
@@ -8886,6 +8934,123 @@
       s = Math.max(0, s || 0);
       return s.toFixed(2) + 's';
     }
+    /* ===== TIMELINE ENGINE =====
+       The timeline IS the source of truth. Nothing else accesses
+       video.currentTime / video.play() / video.pause() directly —
+       every interaction routes through `engine`. The engine maintains
+       a global timeline `t` (seconds) and an ordered clips[] array;
+       at every tick it resolves t -> (which clip, what srcOffset)
+       and drives the <video> output to match. Multi-clip is real:
+       Split bisects the active clip and playback walks across the
+       boundary because resolve() returns the right srcOffset on each
+       side.
+    */
+    var engine = {
+      clips: [],
+      t: 0,
+      isPlaying: false,
+      rafId: null,
+      lastFrame: 0,
+      onTick: function () {},  // editor sets this to update UI
+      onClipsChanged: function () {},  // editor re-renders strip when clips mutate
+      duration: function () {
+        return this.clips.reduce(function (s, c) { return s + (c.srcEnd - c.srcStart); }, 0);
+      },
+      // Map global timeline t -> {clip, srcOffset} so the <video>
+      // element can be told what frame to show. Single-source MVP:
+      // every clip references the SAME video element; only srcStart/
+      // srcEnd differ per clip. resolve walks clips in order.
+      resolve: function (t) {
+        var acc = 0;
+        for (var i = 0; i < this.clips.length; i++) {
+          var c = this.clips[i];
+          var d = c.srcEnd - c.srcStart;
+          if (t < acc + d) {
+            return { idx: i, clip: c, srcOffset: c.srcStart + (t - acc) };
+          }
+          acc += d;
+        }
+        var last = this.clips[this.clips.length - 1];
+        return last ? { idx: this.clips.length - 1, clip: last, srcOffset: last.srcEnd } : null;
+      },
+      // Drive the video to match a global t. Use fastSeek for
+      // smooth scrub when available (Safari supports it).
+      setTime: function (t, immediate) {
+        var d = this.duration() || 0;
+        t = Math.max(0, Math.min(d, t));
+        this.t = t;
+        var r = this.resolve(t);
+        if (!r) { this.onTick(this.t); return; }
+        try {
+          if (immediate && typeof video.fastSeek === 'function') video.fastSeek(r.srcOffset);
+          else video.currentTime = r.srcOffset;
+        } catch (e) {}
+        this.onTick(this.t);
+      },
+      play: function () {
+        if (this.isPlaying) return;
+        var self = this;
+        if (this.t >= this.duration() - 0.01) this.setTime(0);
+        this.isPlaying = true;
+        this.lastFrame = performance.now();
+        var step = function (now) {
+          if (!self.isPlaying) return;
+          var dt = (now - self.lastFrame) / 1000;
+          self.lastFrame = now;
+          var newT = self.t + dt;
+          if (newT >= self.duration()) {
+            self.pause();
+            self.setTime(self.duration());
+            return;
+          }
+          self.setTime(newT);
+          self.rafId = requestAnimationFrame(step);
+        };
+        try { video.play().catch(function () {}); } catch (e) {}
+        this.rafId = requestAnimationFrame(step);
+      },
+      pause: function () {
+        this.isPlaying = false;
+        if (this.rafId) cancelAnimationFrame(this.rafId);
+        this.rafId = null;
+        try { video.pause(); } catch (e) {}
+      },
+      toggle: function () { this.isPlaying ? this.pause() : this.play(); },
+      // Bisect the active clip at the current t. Both halves still
+      // reference the same source video; their srcStart/srcEnd ranges
+      // are non-overlapping so playback walks across cleanly.
+      splitAtCursor: function () {
+        var r = this.resolve(this.t);
+        if (!r) return false;
+        var c = r.clip;
+        var splitOffset = r.srcOffset;
+        if (splitOffset - c.srcStart < 0.1) return false;
+        if (c.srcEnd - splitOffset < 0.1) return false;
+        var newClip = { id: 'c' + Date.now(), srcStart: splitOffset, srcEnd: c.srcEnd };
+        c.srcEnd = splitOffset;
+        this.clips.splice(r.idx + 1, 0, newClip);
+        this.onClipsChanged();
+        return true;
+      },
+      duplicateAt: function (clipIdx) {
+        var c = this.clips[clipIdx];
+        if (!c) return false;
+        var copy = { id: 'c' + Date.now(), srcStart: c.srcStart, srcEnd: c.srcEnd };
+        this.clips.splice(clipIdx + 1, 0, copy);
+        this.onClipsChanged();
+        return true;
+      },
+      removeAt: function (clipIdx) {
+        if (clipIdx < 0 || clipIdx >= this.clips.length) return false;
+        this.clips.splice(clipIdx, 1);
+        if (this.t > this.duration()) this.setTime(this.duration());
+        this.onClipsChanged();
+        return true;
+      }
+    };
+    // Expose for debug + future tooling.
+    wrap.__engine = engine;
+
     function refreshTrimDisplay() {
       var inS = parseFloat(trimIn.value), outS = parseFloat(trimOut.value);
       if (outS < inS + 0.2) outS = inS + 0.2;
@@ -8900,6 +9065,12 @@
       // Match canvas internal resolution to video
       canvas.width = video.videoWidth || 1280;
       canvas.height = video.videoHeight || 720;
+      // Initialise the timeline engine with one clip spanning the
+      // whole source video. Split / Duplicate / Delete will mutate
+      // this array; the strip render iterates it.
+      engine.clips = [{ id: 'c0', srcStart: 0, srcEnd: d }];
+      engine.t = 0;
+      engine.onClipsChanged();
       refreshTrimDisplay();
       drawOverlay();
       // Generate frame thumbnails for the timeline strip — VN-style.
@@ -9013,21 +9184,34 @@
        video was playing. */
     var clipStripEl = document.getElementById('ve-clip-strip');
     var wasPlaying = false;
+    /* Scrub through the engine, not directly to video.currentTime.
+       rAF-throttled — pointermove queues at most ONE setTime per
+       frame so iPad Safari isn't drowned in seek requests at fast
+       scrub speeds (which causes the "jumping" the user reported).
+       Engine.setTime uses fastSeek when immediate=true so the
+       preview catches up smoothly. */
+    var scrubPendingX = null;
+    var scrubFrameQueued = false;
     function scrubFromEvent(ev) {
-      if (!video.duration || isNaN(video.duration)) return;
+      var dur = engine.duration();
+      if (!dur || isNaN(dur)) return;
       var rect = clipStripEl.getBoundingClientRect();
-      var x = (ev.touches ? ev.touches[0].clientX : ev.clientX) - rect.left;
-      var pct = Math.max(0, Math.min(1, x / rect.width));
-      var t = pct * video.duration;
-      // Snap-to-grid for scrub too — keeps the playhead landing on
-      // the same beat the trim handles snap to.
-      if (snapEnabled) t = Math.round(t / SNAP_STEP) * SNAP_STEP;
-      try { video.currentTime = t; } catch (e) {}
+      scrubPendingX = (ev.touches ? ev.touches[0].clientX : ev.clientX) - rect.left;
+      if (scrubFrameQueued) return;
+      scrubFrameQueued = true;
+      requestAnimationFrame(function () {
+        scrubFrameQueued = false;
+        if (scrubPendingX == null) return;
+        var pct = Math.max(0, Math.min(1, scrubPendingX / rect.width));
+        var t = pct * engine.duration();
+        if (snapEnabled) t = Math.round(t / SNAP_STEP) * SNAP_STEP;
+        engine.setTime(t, true); // fastSeek path
+      });
     }
     function onScrubStart(ev) {
       ev.preventDefault();
-      wasPlaying = !video.paused;
-      if (wasPlaying) video.pause();
+      wasPlaying = engine.isPlaying;
+      if (wasPlaying) engine.pause();
       scrubFromEvent(ev);
       document.addEventListener('pointermove', onScrubMove);
       document.addEventListener('pointerup', onScrubEnd);
@@ -9038,7 +9222,7 @@
       document.removeEventListener('pointermove', onScrubMove);
       document.removeEventListener('pointerup', onScrubEnd);
       document.removeEventListener('pointercancel', onScrubEnd);
-      if (wasPlaying) video.play().catch(function () {});
+      if (wasPlaying) engine.play();
     }
     if (clipStripEl) clipStripEl.addEventListener('pointerdown', onScrubStart);
 
@@ -9129,7 +9313,25 @@
     function onClipAction(act) {
       if (act === 'deselect') return deselectClip();
       if (act === 'edit')      { showPanel('ve-text-panel'); return; }
-      if (act === 'split')     { toast('Split: drag the yellow trim handles to slice the clip.', false); return; }
+      if (act === 'split') {
+        // REAL split via the timeline engine. Bisects the active clip
+        // at the current playhead position; creates a second entry in
+        // engine.clips that references the same source but starts
+        // where the first ends. Re-renders the clip blocks so the
+        // user sees two yellow blocks side-by-side.
+        var ok = engine.splitAtCursor();
+        if (ok) toast('Clip split at ' + engine.t.toFixed(2) + 's. Now ' + engine.clips.length + ' clips.', false);
+        else toast('Move the playhead away from the clip edge first.', true);
+        return;
+      }
+      if (act === 'duplicate') {
+        // Duplicate the LAST clip for now (single-clip selection model);
+        // multi-clip selection lands when each block becomes tappable.
+        var ok = engine.duplicateAt(engine.clips.length - 1);
+        if (ok) toast('Clip duplicated. Now ' + engine.clips.length + ' clips.', false);
+        else toast('Could not duplicate.', true);
+        return;
+      }
       if (act === 'replace')   {
         // Open the hidden replace-media picker. On pick we swap the
         // <video> src for a new blob URL, regenerate frame thumbs,
@@ -9139,8 +9341,15 @@
       }
       if (act === 'speed')     { showPanel('ve-speed-panel'); return; }
       if (act === 'opacity')   { showPanel('ve-opacity-panel'); return; }
-      if (act === 'duplicate') { toast('Duplicate: lands with multi-clip support (next phase).', false); return; }
       if (act === 'delete') {
+        // If the engine has more than one clip, delete the last one.
+        // Single-clip case still tears down the editor.
+        if (engine.clips.length > 1) {
+          if (!confirm('Delete the last clip?')) return;
+          engine.removeAt(engine.clips.length - 1);
+          toast('Deleted. Now ' + engine.clips.length + ' clip' + (engine.clips.length === 1 ? '' : 's') + '.', false);
+          return;
+        }
         if (!confirm('Delete this clip? The editor will close.')) return;
         var existing = document.getElementById('__loadVideoEdit');
         if (existing) existing.remove();
@@ -9291,15 +9500,15 @@
     });
 
     document.getElementById('ve-play').addEventListener('click', function () {
-      // Defer if metadata hasn't loaded yet — otherwise duration is
-      // NaN, trimOut is "0", and the timeupdate auto-stop pauses
-      // playback the instant it starts.
-      if (!video.duration || isNaN(video.duration)) {
+      // Engine-driven. If clips aren't loaded yet, wait for metadata
+      // then call engine.play(). engine.play() handles the case where
+      // we're at the end (resets to 0) and starts the rAF loop.
+      if (!engine.duration() || isNaN(engine.duration())) {
         toast('Video is still loading… one moment.', false);
-        video.addEventListener('loadedmetadata', function () { tryPlay(); }, { once: true });
+        video.addEventListener('loadedmetadata', function () { engine.play(); }, { once: true });
         return;
       }
-      tryPlay();
+      engine.toggle();
     });
     function tryPlay() {
       var inS = parseFloat(trimIn.value);
