@@ -8375,7 +8375,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17c</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17e</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -8637,6 +8637,48 @@
     wrap.appendChild(styleTag);
 
     document.body.appendChild(wrap);
+    // Force iPad Safari to start downloading metadata + first frame
+    // immediately. Without this the <video> waits for user gesture +
+    // auto-loads lazily; on broken / unsupported clips that lazy
+    // path leaves video.duration stuck at 0 forever, which is what
+    // makes Play / scrub / trim / thumbnails all feel dead.
+    try { video.load(); } catch (e) {}
+    // 3-second "did the video actually decode?" probe. If duration
+    // is still 0/NaN by then, surface a loud overlay so the user
+    // knows the file failed (instead of a silent inert editor).
+    setTimeout(function () {
+      if (!video.duration || isNaN(video.duration)) showLoadFailure();
+    }, 3000);
+    function showLoadFailure() {
+      var stage = document.getElementById('ve-stage');
+      if (!stage || stage.querySelector('.ve-fail-overlay')) return;
+      var ov = document.createElement('div');
+      ov.className = 've-fail-overlay';
+      ov.style.cssText = 'position:absolute;inset:0;background:rgba(10,10,20,0.92);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;z-index:20;';
+      ov.innerHTML =
+        '<div style="font-size:42px;">&#9888;&#65039;</div>' +
+        '<div style="font-size:16px;font-weight:700;line-height:1.4;max-width:320px;">This video did not decode on iPad.</div>' +
+        '<div style="font-size:13px;color:#a8a8c4;line-height:1.6;max-width:340px;">Most common cause: the file is HEVC inside a non-MP4 container, or the original was deleted on the device after import. Re-import the clip as standard H.264 MP4.</div>' +
+        '<div style="display:flex;gap:10px;margin-top:8px;">' +
+          '<button id="ve-fail-replace" style="background:#1d6fff;color:#fff;border:none;padding:10px 18px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">&#8634; Replace clip</button>' +
+          '<button id="ve-fail-close" style="background:#2a2a40;color:#fff;border:none;padding:10px 18px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">Close editor</button>' +
+        '</div>';
+      stage.appendChild(ov);
+      document.getElementById('ve-fail-replace').addEventListener('click', function () {
+        document.getElementById('ve-replace-pick').click();
+        // Once a Replace pick is made, the loadedmetadata handler will
+        // fire and the overlay can come down.
+        var observer = setInterval(function () {
+          if (video.duration && !isNaN(video.duration)) {
+            ov.remove(); clearInterval(observer);
+          }
+        }, 500);
+      });
+      document.getElementById('ve-fail-close').addEventListener('click', function () {
+        var existing = document.getElementById('__loadVideoEdit');
+        if (existing) existing.remove();
+      });
+    }
     // Discoverability toast — fires once per editor session so the
     // user has confirmation the wiring is live and knows the core
     // gestures (tap clip, drag trim handles, scrub, ⬆ export).
@@ -8835,10 +8877,14 @@
     var snapEnabled = false;
     var SNAP_STEP = 0.5;
 
+    /* Seconds-with-2dp format to match the VN reference exactly:
+       "2.30s / 8.04s" instead of "0:02.3 / 0:08.0". Falls back to
+       em-dash when duration is unknown so the user can tell at a
+       glance the video didn't decode. */
     function fmtTime(s) {
+      if (s == null || isNaN(s)) return '—s';
       s = Math.max(0, s || 0);
-      var m = Math.floor(s / 60), sec = (s % 60).toFixed(1);
-      return m + ':' + (sec < 10 ? '0' : '') + sec;
+      return s.toFixed(2) + 's';
     }
     function refreshTrimDisplay() {
       var inS = parseFloat(trimIn.value), outS = parseFloat(trimOut.value);
@@ -8860,6 +8906,18 @@
       // Async so the editor stays interactive while seeking happens.
       generateClipThumbnails(video, 8).catch(function () {});
     });
+    // Belt-and-suspenders thumb triggers — fire on the earliest event
+    // that gives us a paintable frame so the strip populates the
+    // moment the preview shows anything, not when full metadata
+    // (duration / videoWidth) finally lands.
+    var _thumbsKicked = false;
+    function kickThumbsOnce() {
+      if (_thumbsKicked) return;
+      _thumbsKicked = true;
+      generateClipThumbnails(video, 8).catch(function () {});
+    }
+    video.addEventListener('loadeddata', kickThumbsOnce);
+    video.addEventListener('canplay', kickThumbsOnce);
 
     /* Pull N evenly-spaced frame thumbnails out of the video and
        render them into the yellow timeline strip. Two-pass for
