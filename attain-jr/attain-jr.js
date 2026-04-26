@@ -949,6 +949,30 @@
   renderLibraryGrid();
   renderJrStats();
 
+  /* Fold the topbar's tabs + tools into the unified left sidebar so
+     there's a single rail instead of a topbar + bottom audio bar.
+     Move (don't clone) so the existing event listeners — wired below
+     for tab clicks, tool-back, tool-focus, tool-customize, tool-aa,
+     tool-paraphrase, tool-attain-home — keep working unchanged. */
+  function foldRail() {
+    var topbar = document.getElementById('topbar');
+    var rail = document.getElementById('audio-bar');
+    if (!topbar || !rail) return;
+    var tabs = topbar.querySelector('.topbar-tabs');
+    var tools = topbar.querySelector('.topbar-tools');
+    if (tabs) rail.insertBefore(tabs, rail.firstChild);
+    if (tools) {
+      // Tools section sits between tabs (top) and audio buttons (bottom)
+      rail.insertBefore(tools, tabs ? tabs.nextSibling : rail.firstChild);
+    }
+    // Mark the first audio button so the section divider in CSS picks
+    // it up — that's the boundary between Tools and Audio.
+    var firstAudioBtn = rail.querySelector('button[id^="ab-"]');
+    if (firstAudioBtn) firstAudioBtn.setAttribute('data-rail-audio', '1');
+    topbar.classList.add('jr-rail-folded');
+  }
+  safe('foldRail', foldRail);
+
   /* ---------- Tabs ---------- */
   Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (btn) {
     btn.addEventListener('click', function () {

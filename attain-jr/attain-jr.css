@@ -454,27 +454,35 @@ a.jr-action {
   box-shadow: 0 0 0 3px rgba(255,200,80,0.5);
 }
 
-/* When the audio sidebar is on screen (after splash dismiss), pad the
-   LEFT edge of every content surface so the activity tiles, scene
-   strip, reader text and SFX bar don't slide under the sidebar.
-   Topbar is full-width because the sidebar starts below it. */
+/* When the unified sidebar is on screen (after splash dismiss), pad
+   the LEFT edge of every content surface so the activity tiles,
+   scene strip, reader text and SFX bar don't slide under the
+   sidebar. Topbar is hidden in this layout — the sidebar replaces
+   both the previous topbar and the bottom audio bar. */
 #app .content,
 #app #scene-strip,
 #app .sfx-bar,
 #app .jr-act-stage {
-  padding-left: 76px;
+  padding-left: 80px;
 }
+/* Topbar is folded into the sidebar — its tab + tool children are
+   moved into .audio-bar at boot. Hide the empty container so it
+   doesn't reserve any vertical space at the top. */
+#app #topbar.jr-rail-folded { display: none; }
 
-/* ===== Audio sidebar (left-edge vertical rail) =====
-   Pinned to the left side of the viewport since Attain Jr has no
-   table-of-contents on the left. Compact 64px-wide column with
-   icon + tiny label buttons. Vibrant violet→blue gradient picks up
-   the splash CTA palette. Frees the bottom of the screen for
-   activity content. */
+/* ===== Unified sidebar (left-edge vertical rail) =====
+   Replaces both the old rainbow topbar and the brown bottom audio
+   bar. Top → bottom layout:
+     1. Tabs    (Reader / Characters / Storyworld / Gallery / Activities)
+     2. Tools   (Back, Attain home, Focus, Customize, Aa, Paraphrase)
+     3. Audio   (Read, Story-only, Pause, Stop, Music, Back, Next,
+                 Voice-mode, Voice picker, Cast, Record)
+   Each section is separated by a thin 1px divider. Whole rail
+   scrolls vertically when content overflows iPad height. */
 .audio-bar {
   position: fixed;
   left: 6px;
-  top: 76px;
+  top: 6px;
   bottom: max(8px, env(safe-area-inset-bottom));
   width: 64px;
   display: flex; flex-direction: column;
@@ -522,6 +530,54 @@ a.jr-action {
   -webkit-appearance: none;
   appearance: none;
   text-align: center;
+}
+
+/* Tab pills + tool buttons re-styled when they land inside the rail.
+   The originals were horizontal pills sized for the rainbow topbar;
+   in the rail they need to match the audio buttons' vertical look. */
+.audio-bar .topbar-tabs,
+.audio-bar .topbar-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  -webkit-mask-image: none;
+          mask-image: none;
+}
+.audio-bar .tab,
+.audio-bar .topbar-tools button,
+.audio-bar .topbar-tools .tool-link {
+  background: rgba(255,255,255,0.14);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 14px;
+  padding: 8px 4px;
+  font-size: 9.5pt;
+  font-weight: 700;
+  min-height: 42px;
+  text-align: center;
+  width: 100%;
+  display: flex; align-items: center; justify-content: center;
+  white-space: normal;
+  line-height: 1.15;
+  text-transform: none;
+  letter-spacing: 0;
+  box-shadow: none;
+}
+.audio-bar .tab.on {
+  background: linear-gradient(180deg, #ffd166, #ff8c42);
+  color: #14142a;
+  border-color: #fff;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.35);
+}
+/* Thin divider between sections inside the rail. */
+.audio-bar .topbar-tools,
+.audio-bar > [data-rail-audio="1"] {
+  border-top: 1px solid rgba(255,255,255,0.18);
+  padding-top: 8px;
+  margin-top: 4px;
 }
 
 /* ===== SFX bar ===== */
