@@ -3830,6 +3830,7 @@
       safe('wireBlurbBtn', wireBlurbBtn);
       safe('wireMetadataBtn', wireMetadataBtn);
       safe('wirePackageBtn', wirePackageBtn);
+      safe('wireWorkspaceHub', wireWorkspaceHub);
       safe('wirePerAppTheme', wirePerAppTheme);
       safe('wireNotesScreen', wireNotesScreen);
       safe('wireHelp', wireHelp);
@@ -5408,6 +5409,14 @@
         else if (t === 'video-edit') {
           picker.setAttribute('accept', 'video/*,.mp4,.mov,.m4v,.webm,.mkv');
           picker.dataset.openVideoEditor = '1';
+        }
+        else if (t === 'workspace') {
+          // Workspace card opens the project workspace hub instead
+          // of the file picker. From there the user can jump to any
+          // Load tool with a one-line direction telling them what
+          // each one does.
+          openWorkspaceHub();
+          return;
         }
         else if (t === 'media') picker.setAttribute('accept', 'video/*,audio/*,image/*,.mp4,.mov,.m4v,.webm,.mp3,.m4a,.wav,.ogg,.aac,.jpg,.jpeg,.png,.gif,.webp');
         else if (t === 'zip') {
@@ -7971,6 +7980,333 @@
       } catch (e) { toast('Could not copy.', true); }
     });
   }
+
+  /* ---------- Workspace hub ----------
+     VN-style project workspace, reachable from the Import screen's
+     "Workspace" card and from the workflow banner. Tiles route to
+     existing Load tools so users get a single discoverable map of
+     every feature with one-line directions. Tools that need a
+     project open redirect to the Library when nothing is selected. */
+  function openWorkspaceHub() {
+    var hub = $('workspace-hub');
+    if (!hub) return;
+    hub.classList.add('on');
+  }
+  function closeWorkspaceHub() {
+    var hub = $('workspace-hub');
+    if (hub) hub.classList.remove('on');
+  }
+  function currentlyOpenApp() {
+    // Whatever app the viewer last opened. Workspace tools that need
+    // a project (Asset Doctor, Code Editor, Export, etc.) operate on
+    // this. If nothing is open we steer the user back to the library.
+    try { return (typeof currentApp !== 'undefined' && currentApp) ? currentApp : null; }
+    catch (e) { return null; }
+  }
+  function workspaceRequireApp(label) {
+    var a = currentlyOpenApp();
+    if (a) return a;
+    closeWorkspaceHub();
+    toast('Open a project first, then re-open ' + label + '.');
+    show('library-screen');
+    if (typeof renderLibrary === 'function') renderLibrary();
+    return null;
+  }
+  function handleWorkspaceAction(action) {
+    switch (action) {
+      case 'library':
+        closeWorkspaceHub();
+        if (typeof currentTypeFilter !== 'undefined') currentTypeFilter = 'all';
+        show('library-screen');
+        if (typeof renderLibrary === 'function') renderLibrary();
+        return;
+      case 'import':
+        closeWorkspaceHub();
+        show('import-screen');
+        return;
+      case 'recent': {
+        closeWorkspaceHub();
+        var pool = (typeof apps !== 'undefined' && apps) ? apps : [];
+        var sorted = pool.slice().sort(function (x, y) {
+          return (y.lastOpened || y.dateAdded || 0) - (x.lastOpened || x.dateAdded || 0);
+        });
+        if (sorted.length && typeof openApp === 'function') openApp(sorted[0]);
+        else { show('library-screen'); if (typeof renderLibrary === 'function') renderLibrary(); }
+        return;
+      }
+      case 'filetree': {
+        var a = workspaceRequireApp('File Tree');
+        if (!a) return;
+        closeWorkspaceHub();
+        if (typeof openFileTreeView === 'function') openFileTreeView(a);
+        else if (typeof openDevConsole === 'function') openDevConsole();
+        return;
+      }
+      case 'preview': {
+        var ap = workspaceRequireApp('Live Preview');
+        if (!ap) return;
+        closeWorkspaceHub();
+        if (typeof openApp === 'function') openApp(ap);
+        return;
+      }
+      case 'doctor':
+        closeWorkspaceHub();
+        if (typeof openDevConsole === 'function') openDevConsole();
+        if (typeof runScanCurrentApp === 'function') {
+          try { runScanCurrentApp(); } catch (e) {}
+        }
+        return;
+      case 'manifest':
+      case 'sw':
+        closeWorkspaceHub();
+        if (typeof openDevConsole === 'function') openDevConsole();
+        toast(action === 'manifest'
+          ? 'Manifest checks live in the Scan tab.'
+          : 'Service-worker checks live in the Scan tab.');
+        return;
+      case 'copilot':
+        closeWorkspaceHub();
+        if (typeof openHelperPanel === 'function') openHelperPanel();
+        return;
+      case 'codeedit': {
+        var ce = workspaceRequireApp('Code Editor');
+        if (!ce) return;
+        closeWorkspaceHub();
+        if (typeof openEditor === 'function') openEditor(ce);
+        return;
+      }
+      case 'prose': {
+        var pe = workspaceRequireApp('Prose Editor');
+        if (!pe) return;
+        closeWorkspaceHub();
+        if (typeof openProseEditor === 'function') openProseEditor(pe);
+        else toast('Prose editor opens from a manuscript viewer.');
+        return;
+      }
+      case 'cover': {
+        var co = workspaceRequireApp('Cover Designer');
+        if (!co) return;
+        closeWorkspaceHub();
+        if (typeof openCoverDesigner === 'function') openCoverDesigner(co);
+        else toast('Cover designer opens from a book viewer.');
+        return;
+      }
+      case 'video': {
+        var v = workspaceRequireApp('Video Editor');
+        if (!v) return;
+        closeWorkspaceHub();
+        if (typeof openVideoEditor === 'function') openVideoEditor(v);
+        return;
+      }
+      case 'export-html': {
+        var eh = workspaceRequireApp('Standalone HTML export');
+        if (!eh) return;
+        closeWorkspaceHub();
+        if (typeof exportAsStandaloneHtml === 'function') exportAsStandaloneHtml(eh);
+        else toast('Open the project, then tap Share → Standalone HTML.');
+        return;
+      }
+      case 'export-zip': {
+        var ez = workspaceRequireApp('PWA / ZIP export');
+        if (!ez) return;
+        closeWorkspaceHub();
+        if (typeof exportAsZip === 'function') exportAsZip(ez);
+        else toast('Open the project, then tap Share → PWA ZIP.');
+        return;
+      }
+      case 'export-epub': {
+        var ee = workspaceRequireApp('EPUB export');
+        if (!ee) return;
+        closeWorkspaceHub();
+        if (typeof exportAsEpub === 'function') exportAsEpub(ee);
+        else toast('Open a manuscript, then tap Share → EPUB.');
+        return;
+      }
+      case 'export-pdf': {
+        var ep = workspaceRequireApp('PDF export');
+        if (!ep) return;
+        closeWorkspaceHub();
+        if (typeof exportAsPdf === 'function') exportAsPdf(ep);
+        else toast('Open a manuscript, then tap Share → PDF.');
+        return;
+      }
+      case 'package': {
+        var pk = workspaceRequireApp('App Package');
+        if (!pk) return;
+        closeWorkspaceHub();
+        if (typeof openPackageWalkthrough === 'function') openPackageWalkthrough(pk);
+        else toast('Open the project, then tap the Package button.');
+        return;
+      }
+    }
+  }
+  function wireWorkspaceHub() {
+    var hub = $('workspace-hub');
+    if (!hub) return;
+    var closeBtn = $('ws-close');
+    if (closeBtn) closeBtn.addEventListener('click', closeWorkspaceHub);
+    hub.addEventListener('click', function (e) {
+      if (e.target === hub) closeWorkspaceHub();
+    });
+    hub.querySelectorAll('[data-ws-action]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        handleWorkspaceAction(b.getAttribute('data-ws-action'));
+      });
+    });
+    // Workflow banner steps on the Import screen — each chip jumps to
+    // the matching Workspace section so users see the same map.
+    document.querySelectorAll('.wf-step').forEach(function (s) {
+      s.addEventListener('click', function () {
+        var step = s.getAttribute('data-wf');
+        if (step === 'import') { show('import-screen'); return; }
+        if (step === 'preview') { handleWorkspaceAction('preview'); return; }
+        if (step === 'diagnose') { handleWorkspaceAction('doctor'); return; }
+        if (step === 'fix') { openWorkspaceHub(); return; }
+        if (step === 'export') { openWorkspaceHub(); return; }
+      });
+    });
+  }
+  // Expose so other code paths (banner clicks, future deep links) can
+  // open the hub without going through the import card.
+  window.openWorkspaceHub = openWorkspaceHub;
+
+  /* ---------- File Tree view ----------
+     Lightweight project file tree, opened from the Workspace hub. For
+     each file in app.bundleIndex we show the path, an estimated size,
+     and status badges. We compute four badges client-side:
+       Large    — sample/file content > 200 KB
+       Cached   — path appears in the bundle's service-worker cache list
+       Missing  — referenced in HTML/CSS but absent from bundleIndex
+       Unused   — present in bundleIndex but never referenced
+     Missing/Unused are heuristics; Asset Doctor stays the source of
+     truth, this is the at-a-glance view. */
+  function fileSizeFromSample(app, path) {
+    if (!app.bundleSamples) return null;
+    var s = app.bundleSamples[path];
+    if (typeof s === 'string') return s.length;
+    return null;
+  }
+  function fmtBytes(n) {
+    if (n == null) return '';
+    if (n < 1024) return n + ' B';
+    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+    return (n / 1024 / 1024).toFixed(2) + ' MB';
+  }
+  function ftBadge(text, color) {
+    return '<span class="ft-badge" style="background:' + color + '">' + text + '</span>';
+  }
+  function buildFileTreeMarkup(app) {
+    var idx = (app.bundleIndex || []).slice();
+    if (!idx.length) {
+      return '<p class="ft-empty">No bundle file list for this project. ' +
+        'Single-HTML imports do not have a tree — open the Code Editor ' +
+        'to view the source instead.</p>';
+    }
+    var html = String(app.html || '');
+    var refs = {};
+    var refRegex = /(?:src|href)=["']([^"'#?]+)["']|url\(["']?([^)"']+)["']?\)/gi;
+    var m;
+    while ((m = refRegex.exec(html))) {
+      var u = (m[1] || m[2] || '').trim();
+      if (u && !/^(?:https?:|data:|blob:|#)/.test(u)) {
+        refs[u.replace(/^\.?\//, '')] = true;
+      }
+    }
+    var swCache = {};
+    if (app.bundleSamples) {
+      var swFiles = ['sw.js', 'service-worker.js', 'serviceworker.js'];
+      for (var si = 0; si < swFiles.length; si++) {
+        var sw = app.bundleSamples[swFiles[si]];
+        if (typeof sw === 'string') {
+          var cm;
+          var cmRe = /["']([^"']+\.[a-z0-9]{2,5})["']/gi;
+          while ((cm = cmRe.exec(sw))) {
+            swCache[cm[1].replace(/^\.?\//, '')] = true;
+          }
+        }
+      }
+    }
+    var byPath = {};
+    idx.forEach(function (p) { byPath[p.replace(/^\.?\//, '')] = true; });
+
+    var rows = idx.slice().sort().map(function (p) {
+      var key = p.replace(/^\.?\//, '');
+      var sz = fileSizeFromSample(app, p);
+      var bs = '';
+      if (sz != null && sz > 200 * 1024) bs += ftBadge('Large', '#a64a3a');
+      if (swCache[key]) bs += ftBadge('Cached', '#2e7a60');
+      if (refs[key] === undefined && !/index\.html?$|manifest\.json$|sw\.js$|service-worker\.js$|icon\.png$|apple-touch-icon/i.test(p)) {
+        bs += ftBadge('Unused', '#5a5a7a');
+      }
+      var icon = '📄';
+      if (/\.html?$/i.test(p)) icon = '📄';
+      else if (/\.css$/i.test(p)) icon = '🎨';
+      else if (/\.js$/i.test(p)) icon = '⚙️';
+      else if (/\.json$/i.test(p)) icon = '📑';
+      else if (/\.(png|jpe?g|gif|webp|svg)$/i.test(p)) icon = '🖼️';
+      else if (/\.(mp4|mov|webm|m4v)$/i.test(p)) icon = '🎬';
+      else if (/\.(mp3|m4a|wav|ogg|aac)$/i.test(p)) icon = '🎵';
+      else if (/\.(woff2?|ttf|otf)$/i.test(p)) icon = '🔤';
+      else if (/\.pdf$/i.test(p)) icon = '📃';
+      else if (/\.epub$/i.test(p)) icon = '📖';
+      return '<div class="ft-row">' +
+        '<span class="ft-icon">' + icon + '</span>' +
+        '<span class="ft-path">' + escHtml(p) + '</span>' +
+        '<span class="ft-size">' + (sz != null ? fmtBytes(sz) : '') + '</span>' +
+        '<span class="ft-badges">' + bs + '</span>' +
+        '</div>';
+    }).join('');
+
+    var missing = [];
+    Object.keys(refs).forEach(function (r) {
+      var rk = r.replace(/^\.?\//, '');
+      if (!byPath[rk] && !/^https?:|^data:|^blob:|^#/.test(rk)) missing.push(rk);
+    });
+    var missingHtml = '';
+    if (missing.length) {
+      missingHtml = '<div class="ft-missing"><strong>' + ftBadge('Missing', '#c14a4a') + ' ' +
+        missing.length + ' referenced file' + (missing.length === 1 ? '' : 's') +
+        ' not in the bundle</strong><ul>' +
+        missing.slice(0, 12).map(function (mp) { return '<li>' + escHtml(mp) + '</li>'; }).join('') +
+        (missing.length > 12 ? '<li>… and ' + (missing.length - 12) + ' more</li>' : '') +
+        '</ul><p class="ft-fix-hint">Open <strong>Asset Doctor</strong> from the Workspace to repair them.</p></div>';
+    }
+
+    return missingHtml +
+      '<div class="ft-summary">' + idx.length + ' file' + (idx.length === 1 ? '' : 's') + ' in this project</div>' +
+      '<div class="ft-list">' + rows + '</div>';
+  }
+  function openFileTreeView(app) {
+    var hub = $('workspace-hub');
+    if (hub) hub.classList.remove('on');
+    var wrap = $('filetree-modal');
+    if (!wrap) {
+      wrap = document.createElement('div');
+      wrap.id = 'filetree-modal';
+      wrap.className = 'modal filetree-modal';
+      wrap.innerHTML =
+        '<div class="modal-box filetree-box">' +
+        '<button class="ft-close" aria-label="Close">&times;</button>' +
+        '<h3>📁 File Tree</h3>' +
+        '<p class="ft-intro">Every file in <strong id="ft-app-name"></strong>. ' +
+        'Tap <strong>Asset Doctor</strong> from Workspace to fix anything flagged Missing.</p>' +
+        '<div id="ft-body"></div>' +
+        '</div>';
+      document.body.appendChild(wrap);
+      wrap.querySelector('.ft-close').addEventListener('click', function () {
+        wrap.classList.remove('on');
+      });
+      wrap.addEventListener('click', function (e) {
+        if (e.target === wrap) wrap.classList.remove('on');
+      });
+    }
+    var nameEl = wrap.querySelector('#ft-app-name');
+    if (nameEl) nameEl.textContent = app.name || 'this project';
+    var body = wrap.querySelector('#ft-body');
+    if (body) body.innerHTML = buildFileTreeMarkup(app);
+    wrap.classList.add('on');
+  }
+  window.openFileTreeView = openFileTreeView;
 
   /* ---------- Video editor (in-Load) ----------
      Browser-native video editing: import a video via the Edit-Video

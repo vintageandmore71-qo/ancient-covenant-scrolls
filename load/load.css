@@ -376,6 +376,7 @@ button, .tap, [role="button"] { min-height: 48px; }
 .type-manuscript { background: linear-gradient(135deg, #2a4a8c, #142654); border-color: #3a5fae; }
 .type-media { background: linear-gradient(135deg, #c2410c, #6b1f07); border-color: #d9551a; }
 .type-video-edit { background: linear-gradient(135deg, #6e2e8a, #3a1844); border-color: #883aae; }
+.type-workspace { background: linear-gradient(135deg, #0c5e6e, #07343c); border-color: #1a8aa6; }
 
 .home-recent-row {
   display: flex; overflow-x: auto; gap: 12px; padding: 4px 0 12px;
@@ -1031,6 +1032,183 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
   border-left-color: #cc3f55;
 }
 .import-hint strong { color: var(--ink-hi); }
+
+/* ------- Workflow banner (IMPORT -> PREVIEW -> DIAGNOSE -> FIX -> EXPORT)
+   Sits above the import grid. Each chip is tappable and routes into
+   the matching Workspace section. Scrolls horizontally on narrow
+   widths so the full 5-step pipeline stays readable on iPad portrait. */
+.workflow-banner {
+  background: rgba(124, 124, 255, 0.08);
+  border: 1px solid rgba(124, 124, 255, 0.25);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 0 0 18px;
+}
+.workflow-banner .wf-title {
+  color: var(--ink-hi);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.workflow-banner .wf-steps {
+  display: flex; align-items: stretch; gap: 6px;
+  flex-wrap: nowrap; overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.workflow-banner .wf-step {
+  flex: 0 0 auto;
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: 2px;
+  padding: 8px 12px;
+  background: rgba(20, 20, 42, 0.6);
+  border: 1px solid #2a2a42;
+  border-radius: 10px;
+  color: var(--ink-hi);
+  cursor: pointer;
+  text-align: left;
+  min-width: 140px;
+  font-family: inherit;
+}
+.workflow-banner .wf-step:active { transform: scale(0.97); }
+.workflow-banner .wf-step .wf-num {
+  display: inline-flex; width: 22px; height: 22px;
+  border-radius: 11px; background: var(--accent); color: #14142a;
+  align-items: center; justify-content: center;
+  font-weight: 700; font-size: 12px;
+}
+.workflow-banner .wf-step .wf-label {
+  font-weight: 700; font-size: 14px; margin-top: 2px;
+}
+.workflow-banner .wf-step .wf-sub {
+  font-size: 11px; color: var(--ink-mid); line-height: 1.4;
+}
+.workflow-banner .wf-arrow {
+  align-self: center; color: var(--ink-mid); font-size: 18px;
+}
+
+/* ------- Workspace hub modal (VN-style project workspace) ------- */
+.workspace-hub .workspace-box {
+  max-width: 720px; max-height: 88vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  padding: 22px 22px 26px;
+}
+.workspace-hub .ws-close {
+  position: absolute; top: 10px; right: 10px;
+  background: transparent; border: none;
+  color: var(--ink-mid); font-size: 28px; line-height: 1;
+  cursor: pointer; padding: 4px 10px;
+}
+.workspace-hub .ws-close:hover { color: var(--ink-hi); }
+.workspace-hub .ws-intro {
+  margin: 0 0 14px; color: var(--ink-mid); font-size: 14px; line-height: 1.6;
+}
+.workspace-hub .ws-section { margin: 14px 0; }
+.workspace-hub .ws-section h4 {
+  margin: 0 0 8px; color: var(--ink-hi);
+  font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase;
+}
+.workspace-hub .ws-tiles {
+  display: grid; gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+.workspace-hub .ws-tile {
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: 4px;
+  padding: 12px 14px;
+  background: #1a1a2e;
+  border: 1px solid #2a2a42;
+  border-radius: 10px;
+  color: var(--ink-hi);
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  min-height: 86px;
+}
+.workspace-hub .ws-tile:active { transform: scale(0.97); }
+.workspace-hub .ws-tile:hover { border-color: var(--accent); }
+.workspace-hub .ws-tile .ws-icon { font-size: 22px; }
+.workspace-hub .ws-tile .ws-label { font-size: 14px; font-weight: 700; }
+.workspace-hub .ws-tile .ws-dir {
+  font-size: 12px; color: var(--ink-mid); line-height: 1.5;
+}
+.workspace-hub .ws-foot-hint {
+  margin: 18px 0 0; font-size: 12px; color: var(--ink-mid);
+  padding-top: 12px; border-top: 1px solid #2a2a42;
+}
+
+/* ------- File Tree modal ------- */
+.filetree-modal .filetree-box {
+  max-width: 720px; max-height: 88vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  padding: 22px 22px 26px;
+}
+.filetree-modal .ft-close {
+  position: absolute; top: 10px; right: 10px;
+  background: transparent; border: none;
+  color: var(--ink-mid); font-size: 28px; line-height: 1;
+  cursor: pointer; padding: 4px 10px;
+}
+.filetree-modal .ft-close:hover { color: var(--ink-hi); }
+.filetree-modal .ft-intro {
+  margin: 0 0 12px; color: var(--ink-mid); font-size: 13px; line-height: 1.6;
+}
+.filetree-modal .ft-summary {
+  margin: 8px 0; color: var(--ink-mid);
+  font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase;
+}
+.filetree-modal .ft-list {
+  background: #14142a; border: 1px solid #2a2a42; border-radius: 8px;
+  padding: 6px 0; max-height: 50vh; overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.filetree-modal .ft-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 12px;
+  font-family: SFMono-Regular, Menlo, monospace;
+  font-size: 12px; color: var(--ink-hi);
+  border-bottom: 1px solid #2a2a42;
+}
+.filetree-modal .ft-row:last-child { border-bottom: none; }
+.filetree-modal .ft-icon { flex-shrink: 0; font-size: 14px; }
+.filetree-modal .ft-path { flex: 1; word-break: break-all; }
+.filetree-modal .ft-size { flex-shrink: 0; color: var(--ink-mid); font-size: 11px; }
+.filetree-modal .ft-badges { flex-shrink: 0; display: flex; gap: 4px; flex-wrap: wrap; }
+.filetree-modal .ft-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.filetree-modal .ft-missing {
+  background: rgba(193, 74, 74, 0.10);
+  border: 1px solid #c14a4a;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin: 0 0 12px;
+  color: var(--ink-hi);
+}
+.filetree-modal .ft-missing ul {
+  margin: 6px 0 0; padding-left: 20px;
+  font-family: SFMono-Regular, Menlo, monospace;
+  font-size: 12px; color: var(--ink-mid);
+}
+.filetree-modal .ft-fix-hint {
+  margin: 8px 0 0; font-size: 12px; color: var(--ink-mid);
+}
+.filetree-modal .ft-empty {
+  color: var(--ink-mid); font-size: 14px; line-height: 1.6;
+  padding: 20px; text-align: center;
+}
 
 /* ------------- Load AI chat panel ------------- */
 .helper-panel {

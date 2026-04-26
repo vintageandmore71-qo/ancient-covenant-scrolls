@@ -209,6 +209,23 @@
     <h2 class="import-heading">Import a file</h2>
     <p class="import-sub">Pick the kind of file you have. Each opens the iPad file picker set to the right filter.</p>
 
+    <!-- How Load works — five-step workflow banner. Tap any chip to open
+         the matching tool. Same flow VN uses, adapted for Load. -->
+    <div class="workflow-banner" aria-label="How Load works">
+      <div class="wf-title">How Load works</div>
+      <div class="wf-steps">
+        <button class="wf-step" data-wf="import" title="You are here"><span class="wf-num">1</span><span class="wf-label">Import</span><span class="wf-sub">Drop in HTML, ZIP, PDF, EPUB, manuscript, media</span></button>
+        <span class="wf-arrow">&rarr;</span>
+        <button class="wf-step" data-wf="preview"><span class="wf-num">2</span><span class="wf-label">Preview</span><span class="wf-sub">Live iframe + responsive view</span></button>
+        <span class="wf-arrow">&rarr;</span>
+        <button class="wf-step" data-wf="diagnose"><span class="wf-num">3</span><span class="wf-label">Diagnose</span><span class="wf-sub">Asset Doctor scan</span></button>
+        <span class="wf-arrow">&rarr;</span>
+        <button class="wf-step" data-wf="fix"><span class="wf-num">4</span><span class="wf-label">Fix</span><span class="wf-sub">Replace, relink, edit code</span></button>
+        <span class="wf-arrow">&rarr;</span>
+        <button class="wf-step" data-wf="export"><span class="wf-num">5</span><span class="wf-label">Export</span><span class="wf-sub">Standalone HTML, PWA ZIP, PDF, EPUB, MP4</span></button>
+      </div>
+    </div>
+
     <div class="import-grid">
       <button class="type-card type-html" data-import-type="html">
         <span class="type-icon">&#128196;</span>
@@ -244,6 +261,11 @@
         <span class="type-icon">&#127916;&#65039;</span>
         <span class="type-label">Edit Video</span>
         <span class="type-sub">Trim, text overlay, music, export MP4</span>
+      </button>
+      <button class="type-card type-workspace" data-import-type="workspace">
+        <span class="type-icon">&#128736;&#65039;</span>
+        <span class="type-label">Workspace</span>
+        <span class="type-sub">Diagnose, fix &amp; repair any project</span>
       </button>
     </div>
 
@@ -502,6 +524,141 @@
       <button id="pwa-modal-cancel" class="secondary-btn">Cancel</button>
       <button id="pwa-modal-pick" class="primary-btn">Pick file(s) now</button>
     </div>
+  </div>
+</div>
+
+<!-- Workspace hub — VN-style project workspace. Tiles open existing
+     Load tools (Library, Asset Doctor, Code Editor, Manifest, Service
+     Worker, Export, AI Copilot, Video Editor) plus the file-tree view.
+     Each tile carries a one-line direction so first-time users know
+     exactly what it does without reading docs. -->
+<div id="workspace-hub" class="modal workspace-hub" role="dialog" aria-label="Workspace">
+  <div class="modal-box workspace-box">
+    <button id="ws-close" class="ws-close" aria-label="Close">&times;</button>
+    <h3>&#128736;&#65039; Workspace</h3>
+    <p class="ws-intro">Pick a tool. Each one tells you what it does. New here? Start at <strong>Library</strong> &mdash; that's where every imported file lives.</p>
+
+    <div class="ws-section">
+      <h4>1. Find your project</h4>
+      <div class="ws-tiles">
+        <button class="ws-tile" data-ws-action="library">
+          <span class="ws-icon">&#128218;</span>
+          <span class="ws-label">Library</span>
+          <span class="ws-dir">See every file you've imported. Tap one to open it.</span>
+        </button>
+        <button class="ws-tile" data-ws-action="import">
+          <span class="ws-icon">&#8682;</span>
+          <span class="ws-label">Import</span>
+          <span class="ws-dir">Add a new HTML, ZIP, PDF, EPUB, manuscript, or media file.</span>
+        </button>
+        <button class="ws-tile" data-ws-action="recent">
+          <span class="ws-icon">&#128340;</span>
+          <span class="ws-label">Recent</span>
+          <span class="ws-dir">Jump back to the last app you opened.</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="ws-section">
+      <h4>2. Look inside &amp; preview</h4>
+      <div class="ws-tiles">
+        <button class="ws-tile" data-ws-action="filetree">
+          <span class="ws-icon">&#128193;</span>
+          <span class="ws-label">File Tree</span>
+          <span class="ws-dir">See every file in the open project, with size + status badges.</span>
+        </button>
+        <button class="ws-tile" data-ws-action="preview">
+          <span class="ws-icon">&#128065;</span>
+          <span class="ws-label">Live Preview</span>
+          <span class="ws-dir">Open the project in the iframe viewer to test it.</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="ws-section">
+      <h4>3. Diagnose &amp; fix</h4>
+      <div class="ws-tiles">
+        <button class="ws-tile" data-ws-action="doctor">
+          <span class="ws-icon">&#129658;</span>
+          <span class="ws-label">Asset Doctor</span>
+          <span class="ws-dir">Scans for missing images, broken links, missing manifest / service worker.</span>
+        </button>
+        <button class="ws-tile" data-ws-action="manifest">
+          <span class="ws-icon">&#128241;</span>
+          <span class="ws-label">Manifest</span>
+          <span class="ws-dir">Auto-build or repair manifest.json so iPad treats it as an app.</span>
+        </button>
+        <button class="ws-tile" data-ws-action="sw">
+          <span class="ws-icon">&#128640;</span>
+          <span class="ws-label">Service Worker</span>
+          <span class="ws-dir">Generate offline cache so the app works without Wi-Fi.</span>
+        </button>
+        <button class="ws-tile" data-ws-action="copilot">
+          <span class="ws-icon">&#128172;</span>
+          <span class="ws-label">AI Copilot</span>
+          <span class="ws-dir">Plain-language help. Explain errors, fix code, generate files.</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="ws-section">
+      <h4>4. Edit &amp; create</h4>
+      <div class="ws-tiles">
+        <button class="ws-tile" data-ws-action="codeedit">
+          <span class="ws-icon">&#128221;</span>
+          <span class="ws-label">Code Editor</span>
+          <span class="ws-dir">Edit HTML / CSS / JS source for the open project.</span>
+        </button>
+        <button class="ws-tile" data-ws-action="prose">
+          <span class="ws-icon">&#9999;&#65039;</span>
+          <span class="ws-label">Prose Editor</span>
+          <span class="ws-dir">Re-edit a manuscript or book in a clean writing view.</span>
+        </button>
+        <button class="ws-tile" data-ws-action="cover">
+          <span class="ws-icon">&#127912;</span>
+          <span class="ws-label">Cover Designer</span>
+          <span class="ws-dir">Make a KDP-ready cover (front, spine, wrap PDF).</span>
+        </button>
+        <button class="ws-tile" data-ws-action="video">
+          <span class="ws-icon">&#127916;&#65039;</span>
+          <span class="ws-label">Video Editor</span>
+          <span class="ws-dir">Trim, add text, music, then export MP4. VN-style timeline.</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="ws-section">
+      <h4>5. Export &amp; share</h4>
+      <div class="ws-tiles">
+        <button class="ws-tile" data-ws-action="export-html">
+          <span class="ws-icon">&#128196;</span>
+          <span class="ws-label">Standalone HTML</span>
+          <span class="ws-dir">Inline everything into one .html file you can email or AirDrop.</span>
+        </button>
+        <button class="ws-tile" data-ws-action="export-zip">
+          <span class="ws-icon">&#128230;</span>
+          <span class="ws-label">PWA / ZIP</span>
+          <span class="ws-dir">Bundle as a ZIP ready for GitHub Pages or PWABuilder.</span>
+        </button>
+        <button class="ws-tile" data-ws-action="export-epub">
+          <span class="ws-icon">&#128214;</span>
+          <span class="ws-label">EPUB</span>
+          <span class="ws-dir">Export the open manuscript as an EPUB 3 file.</span>
+        </button>
+        <button class="ws-tile" data-ws-action="export-pdf">
+          <span class="ws-icon">&#128462;</span>
+          <span class="ws-label">PDF</span>
+          <span class="ws-dir">Export a KDP-trim-ready interior PDF.</span>
+        </button>
+        <button class="ws-tile" data-ws-action="package">
+          <span class="ws-icon">&#128241;</span>
+          <span class="ws-label">App Package</span>
+          <span class="ws-dir">Bundle the project for PWABuilder &rarr; .ipa / .apk.</span>
+        </button>
+      </div>
+    </div>
+
+    <p class="ws-foot-hint">Tip: Tools that need a project open (Asset Doctor, Code Editor, Export) will say so and walk you to the Library if nothing is selected.</p>
   </div>
 </div>
 
