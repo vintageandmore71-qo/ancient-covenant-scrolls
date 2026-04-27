@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17av</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17aw</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -8646,9 +8646,9 @@
         '</div>' +
         '<div class="timeline-scroll" id="timelineScroll">' +
           // Empty tracks for music / subtitle / sticker
-          '<div class="track empty-track" data-add="music">Tap to add music</div>' +
-          '<div class="track empty-track" data-add="text">Tap to add subtitle</div>' +
-          '<div class="track empty-track" data-add="sticker">Tap to add sticker / PiP</div>' +
+          '<div class="track ve-track-row" data-track="music"><span class="ve-track-empty" data-add="music">Tap to add music</span></div>' +
+          '<div class="track ve-track-row" data-track="text"><span class="ve-track-empty" data-add="text">Tap to add subtitle</span></div>' +
+          '<div class="track ve-track-row" data-track="sticker"><span class="ve-track-empty" data-add="sticker">Tap to add sticker / PiP</span></div>' +
           // Main video track — clip objects + empty slots + big-add
           // are appended dynamically by renderClipBlocks().
           '<div class="video-track" id="ve-clip-strip"></div>' +
@@ -8823,6 +8823,21 @@
       // Empty slot width matches a thumbnail frame's width for consistent
       // spacing alongside the populated clip strip.
       '#__loadVideoEdit .empty-slot{flex:0 0 100px;height:56px;border:1px dashed #2a2a40;border-radius:6px;background:#0c0c14;cursor:pointer;}' +
+      // Multi-track parallel timelines — each ve-track-row is a
+      // positioned container for music / subtitle / sticker blocks.
+      // Blocks are absolutely positioned inside the row at a pixel
+      // offset matching their start time (PX_PER_SECOND = 90).
+      '#__loadVideoEdit .ve-track-row{position:relative !important;height:38px !important;margin-bottom:8px !important;border-radius:8px !important;background:#191923 !important;color:#8f8f9d !important;display:block !important;padding:0 !important;overflow:visible !important;}' +
+      '#__loadVideoEdit .ve-track-empty{position:absolute;top:50%;left:18px;transform:translateY(-50%);font-size:13px;color:#5a5a78;pointer-events:auto;cursor:pointer;}' +
+      '#__loadVideoEdit .ve-track-row .ve-track-block{position:absolute;top:3px;bottom:3px;border-radius:6px;display:flex;align-items:center;padding:0 8px;font-size:11px;font-weight:600;cursor:grab;color:#fff;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;touch-action:none;user-select:none;}' +
+      '#__loadVideoEdit .ve-track-row .ve-track-block.dragging{cursor:grabbing;opacity:0.85;}' +
+      '#__loadVideoEdit .ve-track-row[data-track="music"] .ve-track-block{background:linear-gradient(180deg,#1d6fff,#1456c4);}' +
+      '#__loadVideoEdit .ve-track-row[data-track="text"] .ve-track-block{background:linear-gradient(180deg,#fbbf24,#d99a16);color:#1a1a26;}' +
+      '#__loadVideoEdit .ve-track-row[data-track="sticker"] .ve-track-block{background:linear-gradient(180deg,#a855f7,#7c3aed);}' +
+      '#__loadVideoEdit .ve-track-row .ve-track-block .ve-tb-trim{position:absolute;top:0;bottom:0;width:8px;background:rgba(0,0,0,0.35);cursor:ew-resize;}' +
+      '#__loadVideoEdit .ve-track-row .ve-track-block .ve-tb-trim.l{left:0;border-radius:6px 0 0 6px;}' +
+      '#__loadVideoEdit .ve-track-row .ve-track-block .ve-tb-trim.r{right:0;border-radius:0 6px 6px 0;}' +
+      '#__loadVideoEdit .ve-track-row .ve-track-block .ve-tb-x{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#fff;color:#1a1a26;border:none;font-size:11px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}' +
       '#__loadVideoEdit .empty-slot:hover{background:#15152a;}' +
       '#__loadVideoEdit .big-add{flex:0 0 44px;height:56px;background:#1e1e2a;border:none;border-radius:8px;color:#cfcfdc;font-size:22px;font-weight:900;cursor:pointer;font-family:inherit;}' +
       '#__loadVideoEdit .big-add:hover{background:#2a2a3a;color:#ffcc1a;}' +
@@ -9779,6 +9794,131 @@
     var SLOT_PX = 80; // each empty slot is 80px wide in the spec
     var PX_PER_SECOND = 90; // base pixel scale for clip widths
     var SLOT_PCT = 0; // safety fallback so trim/ruler never crash from an undefined legacy constant
+
+    // ===== Multi-track parallel timelines =====
+    // Each track holds an array of items. Each item:
+    //   { id, t0, dur, payload }  where payload is kind-specific
+    //   - music   : { url, name, buffer? }
+    //   - text    : { text }
+    //   - sticker : { src, kind: 'image' | 'video' }
+    engine.tracks = engine.tracks || { music: [], text: [], sticker: [] };
+    var __nextTrackId = 1;
+    function addTrackItem(kind, item) {
+      var t0 = (engine.t || 0);
+      var dur = item.dur || 3;
+      // Avoid overlap with existing items in the same track — push start
+      // forward to the end of the latest overlapping item.
+      (engine.tracks[kind] || []).forEach(function (it) {
+        if (t0 < it.t0 + it.dur && t0 + dur > it.t0) t0 = it.t0 + it.dur;
+      });
+      var newItem = Object.assign({ id: kind + '-' + (__nextTrackId++), t0: t0, dur: dur }, item);
+      engine.tracks[kind] = engine.tracks[kind] || [];
+      engine.tracks[kind].push(newItem);
+      renderTracks();
+      return newItem;
+    }
+    function removeTrackItem(kind, id) {
+      engine.tracks[kind] = (engine.tracks[kind] || []).filter(function (it) { return it.id !== id; });
+      renderTracks();
+    }
+    function renderTracks() {
+      ['music', 'text', 'sticker'].forEach(function (kind) {
+        var row = wrap.querySelector('.ve-track-row[data-track="' + kind + '"]');
+        if (!row) return;
+        // Wipe blocks (preserve the empty placeholder)
+        Array.prototype.forEach.call(row.querySelectorAll('.ve-track-block'), function (b) { b.remove(); });
+        var items = engine.tracks[kind] || [];
+        var empty = row.querySelector('.ve-track-empty');
+        if (empty) empty.style.display = items.length ? 'none' : '';
+        items.forEach(function (it) {
+          var el = document.createElement('div');
+          el.className = 've-track-block';
+          el.dataset.trackKind = kind;
+          el.dataset.itemId = it.id;
+          el.style.left = (it.t0 * PX_PER_SECOND) + 'px';
+          el.style.width = Math.max(40, it.dur * PX_PER_SECOND) + 'px';
+          var label = (kind === 'text') ? (it.text || 'Text') : (kind === 'music') ? (it.name || 'Music') : 'Sticker';
+          el.innerHTML =
+            '<div class="ve-tb-trim l" data-edge="l"></div>' +
+            '<span class="ve-tb-lbl">' + label.replace(/[<>&]/g, '') + '</span>' +
+            '<div class="ve-tb-trim r" data-edge="r"></div>' +
+            '<button class="ve-tb-x" aria-label="Remove">×</button>';
+          row.appendChild(el);
+          // Drag-to-reposition with link-aware coupling.
+          var dragStartX = 0, origT0 = 0, origAcrossT0s = {};
+          el.addEventListener('pointerdown', function (e) {
+            if (e.target.classList.contains('ve-tb-trim')) return; // trim handler below
+            if (e.target.classList.contains('ve-tb-x')) return;
+            e.preventDefault(); e.stopPropagation();
+            el.setPointerCapture(e.pointerId);
+            el.classList.add('dragging');
+            dragStartX = e.clientX;
+            origT0 = it.t0;
+            origAcrossT0s = {};
+            if (window.__veLinked) {
+              ['music','text','sticker'].forEach(function (kk) {
+                origAcrossT0s[kk] = (engine.tracks[kk] || []).map(function (x) { return { id: x.id, t0: x.t0 }; });
+              });
+            }
+            function move(ev) {
+              var dx = (ev.clientX || (ev.touches && ev.touches[0] && ev.touches[0].clientX) || dragStartX) - dragStartX;
+              var dt = dx / PX_PER_SECOND;
+              if (window.__veLinked) {
+                ['music','text','sticker'].forEach(function (kk) {
+                  (engine.tracks[kk] || []).forEach(function (x, ix) {
+                    var snap = origAcrossT0s[kk][ix];
+                    if (snap) x.t0 = Math.max(0, snap.t0 + dt);
+                  });
+                });
+              } else {
+                it.t0 = Math.max(0, origT0 + dt);
+              }
+              renderTracks();
+            }
+            function up() {
+              document.removeEventListener('pointermove', move);
+              document.removeEventListener('pointerup', up);
+              document.removeEventListener('pointercancel', up);
+              el.classList.remove('dragging');
+            }
+            document.addEventListener('pointermove', move);
+            document.addEventListener('pointerup', up);
+            document.addEventListener('pointercancel', up);
+          });
+          // Trim left / right
+          Array.prototype.forEach.call(el.querySelectorAll('.ve-tb-trim'), function (h) {
+            h.addEventListener('pointerdown', function (e) {
+              e.preventDefault(); e.stopPropagation();
+              var origDur = it.dur, origT0_ = it.t0, startX = e.clientX, edge = h.dataset.edge;
+              function move(ev) {
+                var dx = ((ev.clientX || (ev.touches && ev.touches[0] && ev.touches[0].clientX) || startX) - startX) / PX_PER_SECOND;
+                if (edge === 'l') {
+                  var nt0 = Math.max(0, origT0_ + dx);
+                  var nd  = Math.max(0.2, origDur - (nt0 - origT0_));
+                  it.t0 = nt0; it.dur = nd;
+                } else {
+                  it.dur = Math.max(0.2, origDur + dx);
+                }
+                renderTracks();
+              }
+              function up() {
+                document.removeEventListener('pointermove', move);
+                document.removeEventListener('pointerup', up);
+              }
+              document.addEventListener('pointermove', move);
+              document.addEventListener('pointerup', up);
+            });
+          });
+          // Remove ×
+          el.querySelector('.ve-tb-x').addEventListener('click', function (e) {
+            e.stopPropagation();
+            removeTrackItem(kind, it.id);
+            toast('Removed.', false);
+          });
+        });
+      });
+    }
+
     function renderClipBlocks() {
       var stripEl = document.getElementById('ve-clip-strip'); // .video-track
       if (!stripEl) return;
@@ -11142,10 +11282,29 @@
         e.stopPropagation();
         var kind = btn.getAttribute('data-add');
         if (kind === 'music') {
-          var m = document.getElementById('ve-audio-pick');
-          if (m) m.click(); else showPanel('ve-music-panel');
+          var pkM = document.createElement('input');
+          pkM.type = 'file'; pkM.accept = 'audio/*'; pkM.style.display = 'none';
+          document.body.appendChild(pkM);
+          pkM.addEventListener('change', async function (ev) {
+            var f = ev.target.files && ev.target.files[0];
+            pkM.remove();
+            if (!f) return;
+            try {
+              if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+              var buf = await audioCtx.decodeAudioData(await f.arrayBuffer());
+              musicBuffer = buf;
+              addTrackItem('music', { name: f.name, dur: Math.min(buf.duration, engine.duration() || buf.duration), buffer: buf });
+              try { renderWaveformFor(buf); } catch (_) {}
+              toast('Music added — ' + f.name + ' (' + buf.duration.toFixed(1) + 's).', false);
+            } catch (err) { toast('Could not decode that audio: ' + (err && err.message || err), true); }
+          });
+          pkM.click();
         } else if (kind === 'text') {
+          // Open the text panel + add a default 3s subtitle block at the playhead.
           showPanel('ve-text-panel');
+          var existingText = (document.getElementById('ve-text') || {}).value || 'New subtitle';
+          addTrackItem('text', { text: existingText, dur: 3 });
+          toast('Subtitle block added. Edit text in the panel.', false);
         } else if (kind === 'sticker') {
           var pk = document.createElement('input');
           pk.type = 'file';
@@ -11177,7 +11336,8 @@
                 pip.className = 've-pip-overlay';
                 pip.style.cssText = 'position:absolute;top:20px;right:20px;width:30%;max-height:30%;border:2px solid #fbbf24;border-radius:6px;z-index:5;pointer-events:auto;cursor:move;';
                 stage.appendChild(pip);
-                toast('Sticker added. Drag it on the preview.', false);
+                addTrackItem('sticker', { src: fr2.result, kind: 'image', dur: 3 });
+                toast('Sticker added — visible on preview + draggable on timeline.', false);
               };
               fr2.readAsDataURL(f);
             }
