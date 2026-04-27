@@ -2856,7 +2856,11 @@
         var text = await p.ask(question, context);
         if (text && text.trim().length > 1) {
           var html = markdownToHtml(text.trim());
-          replaceMessage(placeholder, html, { tier: p.tier, label: p.label });
+          // The caller (submitHelperQuestionCore / home rewrite) is the
+          // single source of truth for rendering the answer. Drop the
+          // "thinking…" placeholder so the caller's addHelperMessage
+          // doesn't produce a duplicate bubble.
+          placeholder.remove();
           return { answer: html, badge: { tier: p.tier, label: p.label } };
         }
         providerLastError[p.name] = 'empty response';
@@ -8593,7 +8597,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bj</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bk</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
