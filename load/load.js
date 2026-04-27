@@ -4287,9 +4287,17 @@
       dotsEl.appendChild(d);
     });
 
-    function speak(text) {
+    async function speak(text) {
+      if (!voiceOn) return;
+      // Prefer Piper when the user has installed + enabled it. Falls
+      // through to Safari speechSynthesis on any error.
       try {
-        if (!voiceOn) return;
+        if (window.LoadPiper && LoadPiper.isEnabled() && await LoadPiper.isCached()) {
+          try { await LoadPiper.say(text, { rate: 1 }); return; }
+          catch (e) { console.warn('[Tour] Piper say failed, falling back:', e); }
+        }
+      } catch (_) {}
+      try {
         if (!('speechSynthesis' in window)) return;
         speechSynthesis.cancel();
         var u = new SpeechSynthesisUtterance(text);
@@ -4298,6 +4306,7 @@
       } catch (_) {}
     }
     function stopSpeak() {
+      try { if (window.LoadPiper) LoadPiper.stop(); } catch (_) {}
       try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (_) {}
     }
     function placeRing(rect) {
@@ -8871,7 +8880,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bl</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bm</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -13839,6 +13848,120 @@
       u.rate = parseFloat(settings.ttsSpeed || '1') || 1;
       speechSynthesis.speak(u);
     });
+    // Piper TTS — premium offline neural voice. Lives at the repo
+    // root (lib-piper.js) and is shared across all five ACR apps via
+    // OPFS, so the user only pays the ~30 MB download once.
+    wirePiperSettings();
+  }
+
+  function wirePiperSettings() {
+    var section = $('piper-section');
+    if (!section) return;
+    if (!window.LoadPiper) {
+      // Library failed to load (network blocked, file missing). Hide
+      // the whole section so the user isn't shown a non-working UI.
+      section.style.display = 'none';
+      return;
+    }
+    if (!LoadPiper.isSupported()) {
+      // Old iPad / browser — OPFS or AudioContext missing.
+      section.style.display = 'none';
+      return;
+    }
+    var enableEl    = $('piper-enable');
+    var statusEl    = $('piper-status-badge');
+    var installEl   = $('piper-install');
+    var testEl      = $('piper-test');
+    var uninstallEl = $('piper-uninstall');
+    var progressRow = $('piper-progress-row');
+    var progressFill= $('piper-progress-fill');
+    var progressLbl = $('piper-progress-label');
+
+    function setStatus(label, color) {
+      if (!statusEl) return;
+      statusEl.textContent = label;
+      statusEl.style.background = color || '';
+    }
+    async function refresh() {
+      enableEl.checked = LoadPiper.isEnabled();
+      var cached = false;
+      try { cached = await LoadPiper.isCached(); } catch (_) {}
+      if (cached) {
+        setStatus('Installed · ready', '#22c55e');
+        installEl.textContent = '✓ Installed';
+        installEl.disabled = true;
+        testEl.disabled = false;
+        uninstallEl.style.display = '';
+      } else {
+        setStatus('Not installed', '');
+        installEl.textContent = '⬇ Install voice (~30 MB)';
+        installEl.disabled = false;
+        testEl.disabled = true;
+        uninstallEl.style.display = 'none';
+      }
+    }
+
+    enableEl.addEventListener('change', function () {
+      LoadPiper.setEnabled(enableEl.checked);
+      toast(enableEl.checked ? 'Piper voice enabled.' : 'Piper voice off — using iOS voices.');
+    });
+
+    installEl.addEventListener('click', async function () {
+      if (installEl.disabled) return;
+      installEl.disabled = true;
+      progressRow.style.display = '';
+      progressFill.style.width = '0%';
+      progressLbl.textContent = 'Starting download…';
+      try {
+        await LoadPiper.install(function (p) {
+          var pct = (p && p.percent) || 0;
+          progressFill.style.width = pct + '%';
+          if (p && p.phase === 'downloading') {
+            var mb = (p.loaded / 1048576).toFixed(1) + ' MB / ' + (p.total / 1048576).toFixed(1) + ' MB';
+            progressLbl.textContent = pct + '% · ' + mb;
+          } else if (p && p.phase === 'already-cached') {
+            progressLbl.textContent = 'Already cached — ready.';
+          } else if (p && p.phase === 'done') {
+            progressLbl.textContent = 'Done. Voice ready.';
+          }
+        });
+        // Auto-enable on first successful install
+        if (!LoadPiper.isEnabled()) { LoadPiper.setEnabled(true); }
+        toast('Piper voice installed and ready.');
+      } catch (e) {
+        progressLbl.textContent = 'Install failed: ' + (e && e.message || e);
+        installEl.disabled = false;
+        toast('Piper install failed. Check connection and try again.', true);
+      }
+      setTimeout(function () { progressRow.style.display = 'none'; }, 2400);
+      refresh();
+    });
+
+    testEl.addEventListener('click', async function () {
+      if (testEl.disabled) return;
+      testEl.disabled = true;
+      var orig = testEl.textContent;
+      testEl.textContent = '🔊 Speaking…';
+      try {
+        await LoadPiper.say(
+          'Hello. I am Piper, your offline voice. Bereshit, Chanokh, and Yovelim. Listen for yourself.',
+          { rate: 1 }
+        );
+      } catch (e) {
+        toast('Test failed: ' + (e && e.message || e), true);
+      }
+      setTimeout(function () { testEl.textContent = orig; testEl.disabled = false; }, 1200);
+    });
+
+    uninstallEl.addEventListener('click', async function () {
+      if (!confirm('Remove the Piper voice file? You can re-install any time.')) return;
+      try { await LoadPiper.uninstall(); } catch (_) {}
+      LoadPiper.setEnabled(false);
+      toast('Piper voice removed.');
+      refresh();
+    });
+
+    refresh();
   }
 
   /* ---------- Library ---------- */

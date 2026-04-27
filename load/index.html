@@ -1429,6 +1429,34 @@
     <button id="settings-tts-test" class="seg-btn full" style="margin-top:4px;">&#128266; Test voice</button>
   </div>
 
+  <div class="panel-section piper-section" id="piper-section">
+    <h4>Premium voice &mdash; Piper</h4>
+    <p class="panel-hint">A natural neural voice that lives <em>inside Load</em> &mdash; not the iOS voice list. One ~30 MB download, then it works offline forever. Pronounces Hebrew names (Bereshit, Chanokh, Yovelim) properly. Same voice on every device.</p>
+    <p class="panel-hint" style="font-size:12px;color:var(--ink-low);">Shared across the ACR / Attain / Attain Jr / Study apps on this device &mdash; only downloads once, even if you use all of them.</p>
+
+    <div class="piper-row">
+      <label class="ai-prov-head" style="flex:1;">
+        <input type="checkbox" id="piper-enable">
+        <strong>Use Piper voice</strong>
+        <span class="ai-prov-badge" id="piper-status-badge">Not installed</span>
+      </label>
+    </div>
+
+    <div id="piper-progress-row" style="display:none;margin:8px 0 0;">
+      <div style="height:10px;background:var(--bg-2);border-radius:6px;overflow:hidden;">
+        <div id="piper-progress-fill" style="height:100%;width:0%;background:linear-gradient(90deg,#fbbf24,#22c55e);transition:width .15s;"></div>
+      </div>
+      <div id="piper-progress-label" style="font-size:12px;color:var(--ink-low);margin-top:4px;">Downloading…</div>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+      <button id="piper-install" class="seg-btn" style="flex:1;min-width:140px;">&#11015; Install voice</button>
+      <button id="piper-test" class="seg-btn" style="flex:1;min-width:140px;" disabled>&#128266; Test</button>
+      <button id="piper-uninstall" class="seg-btn danger" style="flex:0 0 auto;display:none;">&#128465; Remove</button>
+    </div>
+    <p class="panel-hint" id="piper-help" style="font-size:11px;color:var(--ink-low);margin-top:8px;">Tip: install once on Wi-Fi. After that the voice is yours offline forever.</p>
+  </div>
+
   <div class="panel-section">
     <h4>Load AI &mdash; provider chain</h4>
     <p class="panel-hint">Load cycles through providers in the order below. The built-in rule-based assistant always runs first; cloud providers only get used for questions it can't answer. <strong>No anonymous relays</strong> &mdash; every cloud provider uses <em>your</em> free-tier API key, stored only on this device. Sign up once at the provider's site, paste the key, done.</p>
@@ -1755,6 +1783,11 @@
 <script src="lib-pdf.min.js"></script>
 <script src="lib-epub.min.js"></script>
 <script src="lib-hebrew-pron.js"></script>
+<!-- Shared Piper TTS engine (lives at the repo root so all 5 ACR
+     apps share the same OPFS-cached voice file — first app to install
+     pays the download once, every other reads from cache). Failure to
+     load is non-fatal: Load just falls back to Safari speechSynthesis. -->
+<script src="../lib-piper.js"></script>
 <script>
 /* Configure pdf.js worker from our locally-served worker file. */
 if (window.pdfjsLib) {
