@@ -5461,6 +5461,11 @@
         else if (t === 'video-edit') {
           picker.setAttribute('accept', 'video/*,.mp4,.mov,.m4v,.webm,.mkv');
           picker.dataset.openVideoEditor = '1';
+          // VN-style picker first — gives users Recents (existing
+          // library media), Stocks (paste-URL), and Subtitle nav
+          // before falling back to the iPad file picker.
+          openMediaPicker({ filter: 'video', openVideoAfter: true });
+          return;
         }
         else if (t === 'workspace') {
           // Workspace card opens the project workspace hub instead
@@ -5470,7 +5475,11 @@
           openWorkspaceHub();
           return;
         }
-        else if (t === 'media') picker.setAttribute('accept', 'video/*,audio/*,image/*,.mp4,.mov,.m4v,.webm,.mp3,.m4a,.wav,.ogg,.aac,.jpg,.jpeg,.png,.gif,.webp');
+        else if (t === 'media') {
+          picker.setAttribute('accept', 'video/*,audio/*,image/*,.mp4,.mov,.m4v,.webm,.mp3,.m4a,.wav,.ogg,.aac,.jpg,.jpeg,.png,.gif,.webp');
+          openMediaPicker({ filter: 'all' });
+          return;
+        }
         else if (t === 'zip') {
           // Web apps card: show the PWA help modal first; modal's "Pick" button opens picker
           picker.setAttribute('accept', '.zip,.html,.htm,application/zip,text/html');
@@ -8039,6 +8048,195 @@
      existing Load tools so users get a single discoverable map of
      every feature with one-line directions. Tools that need a
      project open redirect to the Library when nothing is selected. */
+  /* ---------- VN-style media picker (Recents / Stocks / Subtitle) ----
+     Opens before the iPad file picker so users can pick from media
+     they've already imported (Recents tab), pull a free stock asset
+     by URL (Stocks tab), or navigate to the subtitle / TTS surface
+     (Subtitle tab). The "From device" tile in Recents falls through
+     to the regular file picker. */
+  var _mpState = { tab: 'recents', sub: 'all', filter: 'all', selected: null, openVideoAfter: false };
+  function openMediaPicker(opts) {
+    opts = opts || {};
+    _mpState.filter = opts.filter || 'all';
+    _mpState.openVideoAfter = !!opts.openVideoAfter;
+    _mpState.selected = null;
+    _mpState.tab = 'recents';
+    _mpState.sub = _mpState.filter === 'video' ? 'video' : 'all';
+    var modal = $('media-picker-modal');
+    if (!modal) return;
+    modal.classList.add('on');
+    wireMediaPicker();
+    renderMediaPickerBody();
+    updateMpSelectedCount();
+  }
+  function closeMediaPicker() {
+    var modal = $('media-picker-modal');
+    if (modal) modal.classList.remove('on');
+  }
+  function wireMediaPicker() {
+    var modal = $('media-picker-modal');
+    if (!modal || modal.dataset.wired === '1') return;
+    modal.dataset.wired = '1';
+    var close = $('mp-close');
+    if (close) close.addEventListener('click', closeMediaPicker);
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal) closeMediaPicker();
+    });
+    Array.prototype.forEach.call(modal.querySelectorAll('.mp-tab'), function (b) {
+      b.addEventListener('click', function () {
+        _mpState.tab = b.getAttribute('data-mp-tab');
+        Array.prototype.forEach.call(modal.querySelectorAll('.mp-tab'), function (x) {
+          x.classList.toggle('on', x === b);
+        });
+        var subs = $('mp-subtabs');
+        if (subs) subs.style.display = (_mpState.tab === 'recents') ? 'flex' : 'none';
+        renderMediaPickerBody();
+      });
+    });
+    Array.prototype.forEach.call(modal.querySelectorAll('.mp-sub'), function (b) {
+      b.addEventListener('click', function () {
+        _mpState.sub = b.getAttribute('data-mp-sub');
+        Array.prototype.forEach.call(modal.querySelectorAll('.mp-sub'), function (x) {
+          x.classList.toggle('on', x === b);
+        });
+        renderMediaPickerBody();
+      });
+    });
+    var confirm = $('mp-confirm');
+    if (confirm) confirm.addEventListener('click', mpConfirm);
+  }
+  function updateMpSelectedCount() {
+    var el = $('mp-selected-count');
+    if (el) el.textContent = (_mpState.selected ? '1' : '0') + ' selected';
+    var btn = $('mp-confirm');
+    if (btn) btn.disabled = !_mpState.selected;
+  }
+  function renderMediaPickerBody() {
+    var body = $('mp-body');
+    if (!body) return;
+    if (_mpState.tab === 'recents') return renderMpRecents(body);
+    if (_mpState.tab === 'stocks')  return renderMpStocks(body);
+    if (_mpState.tab === 'subtitle') return renderMpSubtitle(body);
+  }
+  function renderMpRecents(body) {
+    // List Load library media items matching the current sub-filter.
+    var items = (typeof apps !== 'undefined' ? apps : []).filter(function (a) {
+      if (a.kind !== 'media') return false;
+      if (_mpState.sub === 'all') return true;
+      if (_mpState.sub === 'video') return a.subKind === 'video';
+      if (_mpState.sub === 'image') return a.subKind === 'image';
+      if (_mpState.sub === 'audio') return a.subKind === 'audio';
+      return true;
+    }).sort(function (x, y) { return (y.dateAdded || 0) - (x.dateAdded || 0); });
+
+    var deviceTile =
+      '<button class="mp-source-card" data-mp-action="device">' +
+        '<strong>📂 From iPad Files</strong>' +
+        '<span>Pick a fresh file from Photos / Files / iCloud</span>' +
+      '</button>';
+
+    if (!items.length) {
+      body.innerHTML =
+        '<div class="mp-source-row">' + deviceTile + '</div>' +
+        '<p class="mp-empty">No media in your Library yet. Import a file to populate Recents.</p>';
+    } else {
+      var grid = items.map(function (a) {
+        var on = (_mpState.selected && _mpState.selected.id === a.id) ? ' on' : '';
+        var thumb = '';
+        if (a.subKind === 'image' && a.binary) {
+          // Inline image preview by creating an object URL on demand
+          var u;
+          try { u = URL.createObjectURL(a.binary); } catch (e) { u = ''; }
+          if (u) thumb = '<img src="' + u + '" alt="">';
+        } else if (a.subKind === 'video') {
+          thumb = '<div style="background:#14142a;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:32px;color:#666">🎬</div>';
+        } else if (a.subKind === 'audio') {
+          thumb = '<div style="background:#14142a;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:32px;color:#666">🎵</div>';
+        }
+        return '<button class="mp-tile' + on + '" data-mp-id="' + esc(a.id) + '">' +
+          thumb +
+          '<span class="mp-duration">' + esc(a.subKind || 'media') + '</span>' +
+          '<span class="mp-pick"></span>' +
+        '</button>';
+      }).join('');
+      body.innerHTML =
+        '<div class="mp-source-row">' + deviceTile + '</div>' +
+        '<div class="mp-grid">' + grid + '</div>';
+    }
+    Array.prototype.forEach.call(body.querySelectorAll('.mp-tile'), function (t) {
+      t.addEventListener('click', function () {
+        var id = t.getAttribute('data-mp-id');
+        var hit = (apps || []).filter(function (x) { return x.id === id; })[0];
+        _mpState.selected = hit;
+        Array.prototype.forEach.call(body.querySelectorAll('.mp-tile'), function (x) {
+          x.classList.toggle('on', x === t);
+        });
+        updateMpSelectedCount();
+      });
+    });
+    Array.prototype.forEach.call(body.querySelectorAll('[data-mp-action="device"]'), function (b) {
+      b.addEventListener('click', function () {
+        closeMediaPicker();
+        $('file-picker').click();
+      });
+    });
+  }
+  function renderMpStocks(body) {
+    body.innerHTML =
+      '<div class="mp-stocks-form">' +
+        '<p class="hint">Paste a direct URL to a video / image / audio file from a free stock site (Pexels, Pixabay, etc.) and we will fetch + import it into your Library.</p>' +
+        '<input id="mp-stocks-url" type="url" placeholder="https://example.com/video.mp4">' +
+        '<button id="mp-stocks-fetch" class="mp-source-card" style="text-align:center;cursor:pointer;"><strong>↓ Fetch &amp; import</strong></button>' +
+        '<p class="hint">Tip: Pexels (https://pexels.com), Pixabay (https://pixabay.com) and Unsplash all offer free-to-use media. Right-tap a file there and pick "Copy link" to get the URL.</p>' +
+      '</div>';
+    var fetchBtn = body.querySelector('#mp-stocks-fetch');
+    if (fetchBtn) fetchBtn.addEventListener('click', async function () {
+      var url = (body.querySelector('#mp-stocks-url') || {}).value;
+      if (!url) { toast('Paste a URL first.', true); return; }
+      try {
+        showProgress('Fetching ' + url + '…');
+        var res = await fetch(url);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        var blob = await res.blob();
+        var name = url.split('/').pop().split('?')[0] || 'stock-asset';
+        var pseudoFile = new File([blob], name, { type: blob.type });
+        var app = await handleMedia(pseudoFile, name.replace(/\.[^.]+$/, ''));
+        await putApp(app); apps.push(app);
+        hideProgress();
+        closeMediaPicker();
+        toast('Stock asset imported.', false);
+        renderLibrary && renderLibrary();
+      } catch (e) {
+        hideProgress();
+        toast('Fetch failed: ' + ((e && e.message) || e) + '. Some sites block cross-origin fetches — download the file and use From iPad Files instead.', true);
+      }
+    });
+  }
+  function renderMpSubtitle(body) {
+    body.innerHTML =
+      '<div class="mp-stocks-form">' +
+        '<p class="hint">Subtitle / caption editor lives inside the video editor. Open a video, then tap the <strong>T+</strong> "Tap to add subtitle" row in the timeline.</p>' +
+        '<button id="mp-sub-go" class="mp-source-card" style="text-align:center;cursor:pointer;"><strong>→ Open Library to pick a video</strong></button>' +
+      '</div>';
+    var go = body.querySelector('#mp-sub-go');
+    if (go) go.addEventListener('click', function () {
+      closeMediaPicker();
+      currentTypeFilter = 'media';
+      show('library-screen');
+      renderLibrary && renderLibrary();
+    });
+  }
+  function mpConfirm() {
+    var sel = _mpState.selected;
+    if (!sel) return;
+    closeMediaPicker();
+    if (_mpState.openVideoAfter && sel.kind === 'media' && sel.subKind === 'video') {
+      openVideoEditor(sel);
+    } else if (typeof openApp === 'function') {
+      openApp(sel);
+    }
+  }
+
   function openWorkspaceHub() {
     var hub = $('workspace-hub');
     if (!hub) return;
@@ -8395,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17k</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17l</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
