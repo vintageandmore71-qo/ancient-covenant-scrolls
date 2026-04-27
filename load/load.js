@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17aq</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ar</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -10701,53 +10701,38 @@
           });
           pk.click();
         } else if (kind === 'audio-orig') {
-          // Quick tap = mute toggle for editing in silence.
-          // Long press (>500ms) = open the music panel for editing /
-          // replacing the audio (mute toggle, volume slider, music
-          // file picker, all live there).
-          // Long-press is wired below in v17aq.
-          var muteEl = document.getElementById('ve-mute-orig');
-          var newMuted;
-          if (muteEl) {
-            muteEl.checked = !muteEl.checked;
-            newMuted = muteEl.checked;
-          } else {
-            newMuted = !video.muted;
-          }
-          try { video.muted = newMuted; } catch (_) {}
-          btn.classList.toggle('on', newMuted);
-          btn.style.background = newMuted ? '#fbbf24' : '#1e1e2a';
-          btn.style.color = newMuted ? '#1a1a26' : '#fff';
-          btn.innerHTML = newMuted ? '🔇' : '🔊';
-          toast('Tap = mute (now ' + (newMuted ? 'muted' : 'on') + '). Long-press to edit / replace audio.', false);
+          // Tap opens a file picker just like the sticker / picture
+          // box. Picking an audio file decodes it and loads it as
+          // the timeline's music track (replacing the original).
+          // Picking nothing (cancel) leaves the timeline alone.
+          var pk = document.createElement('input');
+          pk.type = 'file';
+          pk.accept = 'audio/*';
+          pk.style.display = 'none';
+          document.body.appendChild(pk);
+          pk.addEventListener('change', async function (ev) {
+            var f = ev.target.files && ev.target.files[0];
+            pk.remove();
+            if (!f) return;
+            try {
+              if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+              var buf = await audioCtx.decodeAudioData(await f.arrayBuffer());
+              musicBuffer = buf;
+              var muteEl = document.getElementById('ve-mute-orig');
+              if (muteEl) muteEl.checked = true;
+              try { video.muted = true; } catch (_) {}
+              btn.classList.add('on');
+              btn.style.background = '#fbbf24';
+              btn.style.color = '#1a1a26';
+              btn.innerHTML = '🔇';
+              try { renderWaveformFor(musicBuffer); } catch (_) {}
+              toast('Audio uploaded — ' + f.name + ' (' + buf.duration.toFixed(1) + 's). Original muted.', false);
+            } catch (e) { toast('Could not decode that audio: ' + (e && e.message || e), true); }
+          });
+          pk.click();
         }
       });
     });
-
-    // Long-press on the side audio button (🔊) opens the music panel
-    // for editing / replacing the audio. Quick tap stays as mute
-    // toggle.
-    (function () {
-      var audioBtn = wrap.querySelector('[data-add="audio-orig"]');
-      if (!audioBtn) return;
-      var lpTimer = null;
-      var lpFired = false;
-      audioBtn.addEventListener('pointerdown', function () {
-        lpFired = false;
-        clearTimeout(lpTimer);
-        lpTimer = setTimeout(function () {
-          lpFired = true;
-          showPanel('ve-music-panel');
-          toast('Audio panel: mute, volume, replace.', false);
-        }, 500);
-      });
-      audioBtn.addEventListener('pointerup',     function () { clearTimeout(lpTimer); });
-      audioBtn.addEventListener('pointerleave',  function () { clearTimeout(lpTimer); });
-      audioBtn.addEventListener('pointercancel', function () { clearTimeout(lpTimer); });
-      // Suppress the click-fired mute toggle if a long-press just
-      // opened the panel.
-      audioBtn.addEventListener('click', function (e) { if (lpFired) { e.stopImmediatePropagation(); lpFired = false; } }, true);
-    })();
 
     // ---- Export ----
     document.getElementById('ve-export').addEventListener('click', exportMp4);
