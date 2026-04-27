@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bc</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bd</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -9947,11 +9947,19 @@
     //   - music   : { url, name, buffer? }
     //   - text    : { text }
     //   - sticker : { src, kind: 'image' | 'video' }
-    engine.tracks = engine.tracks || { music: [], text: [], sticker: [] };
+    // NB: actual seeding of engine.tracks happens AFTER `var engine = {}`
+    // is initialised (see ensureTracks() at the end of this block) — we
+    // can't touch it here because `var` hoisting leaves engine = undefined
+    // at this position in the code.
     var __nextTrackId = 1;
+    function ensureTracks() {
+      if (typeof engine === 'undefined' || !engine) return;
+      engine.tracks = engine.tracks || { music: [], text: [], sticker: [] };
+    }
     function addTrackItem(kind, item) {
       var t0 = (engine.t || 0);
       var dur = item.dur || 3;
+      ensureTracks();
       // Avoid overlap with existing items in the same track — push start
       // forward to the end of the latest overlapping item.
       (engine.tracks[kind] || []).forEach(function (it) {
@@ -9964,10 +9972,13 @@
       return newItem;
     }
     function removeTrackItem(kind, id) {
+      ensureTracks();
       engine.tracks[kind] = (engine.tracks[kind] || []).filter(function (it) { return it.id !== id; });
       renderTracks();
     }
     function renderTracks() {
+      ensureTracks();
+      if (!engine || !engine.tracks) return;
       ['music', 'text', 'sticker'].forEach(function (kind) {
         var row = wrap.querySelector('.ve-track-row[data-track="' + kind + '"]');
         if (!row) return;
@@ -10511,6 +10522,7 @@
     */
     var engine = {
       clips: [],
+      tracks: { music: [], text: [], sticker: [] },
       t: 0,
       isPlaying: false,
       rafId: null,
