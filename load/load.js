@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17w</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17aa-sync</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -8913,6 +8913,9 @@
     wrap.appendChild(styleTag);
 
     document.body.appendChild(wrap);
+    // FIX v17y-safe: bind video/canvas immediately after mounting editor DOM, before anything touches them.
+    var video = document.getElementById("ve-video");
+    var canvas = document.getElementById("ve-overlay");
     // Force iPad Safari to start downloading metadata + first frame
     // immediately. Without this the <video> waits for user gesture +
     // auto-loads lazily; on broken / unsupported clips that lazy
@@ -9112,10 +9115,10 @@
       if (playhead) playhead.style.left = leftPx + 'px';
       if (timeLbl) timeLbl.textContent = fmtTime(t) + ' / ' + fmtTime(d);
     }
-    engine.onTick = updatePlayheadFromEngine;
+    var __vePendingOnTick = updatePlayheadFromEngine;
     // Re-render the clip strip whenever the engine's clips array
     // mutates (Split / Duplicate / Delete).
-    engine.onClipsChanged = function () { renderClipBlocks(); };
+    var __vePendingClipsChanged = function () { renderClipBlocks(); };
 
     /* Render N visible clip blocks across the strip — one per entry
        in engine.clips. Each block sits at a percentage of the total
@@ -9134,6 +9137,7 @@
        surface, not blank space. */
     var SLOT_PX = 80; // each empty slot is 80px wide in the spec
     var PX_PER_SECOND = 90; // base pixel scale for clip widths
+    var SLOT_PCT = 0; // safety fallback so trim/ruler never crash from an undefined legacy constant
     function renderClipBlocks() {
       var stripEl = document.getElementById('ve-clip-strip'); // .video-track
       if (!stripEl) return;
@@ -9308,10 +9312,10 @@
         // Refresh per-block thumbs after the engine's master thumbs
         // are populated.
         try {
-          var blocks = document.querySelectorAll('.ve-clip-block');
+          var blocks = document.querySelectorAll('.timeline-clip');
           blocks.forEach(function (b) {
             var idx = +b.dataset.clipIdx;
-            populateBlockThumbs(b.querySelector('.ve-block-thumbs'), engine.clips[idx]);
+            populateBlockThumbs(b.querySelector('.thumbnail-strip'), engine.clips[idx]);
           });
         } catch (e) {}
       });
@@ -9364,11 +9368,12 @@
         }
       }
     }
-    // Re-render the ruler whenever clips change (split / duplicate)
-    var _origOnClipsChanged = engine.onClipsChanged;
-    engine.onClipsChanged = function () {
-      _origOnClipsChanged && _origOnClipsChanged();
-      try { renderRuler(); } catch (e) {}
+    // Re-render the ruler whenever clips change (split / duplicate).
+    // Do not attach this until engine exists. The final binding happens
+    // immediately after the engine object is created below.
+    var __vePendingClipsChangedWithRuler = function () {
+      try { renderClipBlocks(); } catch (e) { console.error('[VE] renderClipBlocks failed', e); }
+      try { renderRuler(); } catch (e) { console.error('[VE] renderRuler failed', e); }
     };
 
     // Initialize trim handles after video metadata is ready
@@ -9378,7 +9383,7 @@
       syncTrimFromHandles();
       renderRuler();
     };
-    video.addEventListener('loadedmetadata', earlyHandler);
+    // Attach earlyHandler after video is bound.
 
     // Expose backwards-compat IDs the existing handlers below expect.
     // The hidden inputs (#ve-trim-in / #ve-trim-out) plus the handle
@@ -9463,9 +9468,17 @@
         var r = this.resolve(t);
         if (!r) { this.onTick(this.t); return; }
         try {
-          if (immediate && typeof video.fastSeek === 'function') video.fastSeek(r.srcOffset);
-          else video.currentTime = r.srcOffset;
-        } catch (e) {}
+          // IMPORTANT: do not use fastSeek here. On iPad Safari, fastSeek can jump
+          // only to keyframes and may not repaint the preview during a drag. For
+          // editor scrubbing we need exact currentTime control.
+          var srcTime = r.srcOffset;
+          if (video.duration && isFinite(video.duration)) {
+            srcTime = Math.max(0, Math.min(srcTime, Math.max(0, video.duration - 0.001)));
+          }
+          if (Math.abs((video.currentTime || 0) - srcTime) > 0.015) {
+            video.currentTime = srcTime;
+          }
+        } catch (e) { try { console.warn('[VE] setTime seek failed', e); } catch (_) {} }
         this.onTick(this.t);
       },
       play: function () {
@@ -9543,9 +9556,16 @@
     // Expose for debug + future tooling.
     wrap.__engine = engine;
 
+    // Bind pending UI callbacks now that engine exists. Older builds set engine.onTick before engine was created, aborting before .timeline-clip could mount.
+    if (typeof __vePendingOnTick === 'function') engine.onTick = __vePendingOnTick;
+    engine.onClipsChanged = (typeof __vePendingClipsChangedWithRuler === 'function') ? __vePendingClipsChangedWithRuler : (typeof __vePendingClipsChanged === 'function' ? __vePendingClipsChanged : function () {});
+    try { video.addEventListener('loadedmetadata', earlyHandler); } catch (e) { console.warn('[VE] early metadata handler not attached', e); }
+
     // RENDER THE CLIP IMMEDIATELY — do not wait for loadedmetadata.
     engine.clips = [{ id: 'c0', srcStart: 0, srcEnd: 5, _placeholder: true }];
     engine.t = 0;
+    try { engine.onClipsChanged(); } catch (e) { console.error('[VE] initial clip render failed', e); }
+    try { engine.onTick(0); } catch (e) {}
 
     function refreshTrimDisplay() {
       var inS = parseFloat(trimIn.value), outS = parseFloat(trimOut.value);
@@ -9738,6 +9758,87 @@
       if (wasPlaying) engine.play();
     }
     if (clipStripEl) clipStripEl.addEventListener('pointerdown', onScrubStart);
+
+
+    /* v17aa-sync: global VN-style timeline scrubbing.
+       The earlier build only listened on #ve-clip-strip. That meant dragging
+       the white playhead through the empty music/subtitle/sticker rows or the
+       waveform/ruler could move the visual area without driving the preview.
+       This listener makes the entire timeline column the scrub surface. */
+    (function bindTimelineScrollScrub() {
+      var timelineScrollEl = document.getElementById('timelineScroll');
+      var videoTrackEl = document.getElementById('ve-clip-strip');
+      if (!timelineScrollEl || !videoTrackEl) return;
+
+      function clientXFromEvent(ev) {
+        if (ev.touches && ev.touches[0]) return ev.touches[0].clientX;
+        if (ev.changedTouches && ev.changedTouches[0]) return ev.changedTouches[0].clientX;
+        return ev.clientX;
+      }
+
+      function timelineTimeFromClientX(clientX) {
+        var rect = videoTrackEl.getBoundingClientRect();
+        var x = clientX - rect.left;
+        var dur = engine.duration() || 0;
+        var t = x / PX_PER_SECOND;
+        if (snapEnabled) t = Math.round(t / SNAP_STEP) * SNAP_STEP;
+        return Math.max(0, Math.min(dur, t));
+      }
+
+      function shouldIgnoreTimelineScrub(target) {
+        return !!(target && target.closest && target.closest(
+          'button,input,select,textarea,.trim-handle,.clip-add,.ve-block-handle,#ve-context,#ve-clip-quick,.ve-iconbtn'
+        ));
+      }
+
+      var timelineWasPlaying = false;
+      function seekFromEvent(ev) {
+        var t = timelineTimeFromClientX(clientXFromEvent(ev));
+        engine.setTime(t, false);
+        return t;
+      }
+
+      function startTimelineScrub(ev) {
+        if (shouldIgnoreTimelineScrub(ev.target)) return;
+        if (!engine.duration()) return;
+        ev.preventDefault();
+        timelineWasPlaying = engine.isPlaying;
+        if (timelineWasPlaying) engine.pause();
+        seekFromEvent(ev);
+        document.addEventListener('pointermove', moveTimelineScrub, { passive: false });
+        document.addEventListener('pointerup', endTimelineScrub, { passive: false });
+        document.addEventListener('pointercancel', endTimelineScrub, { passive: false });
+      }
+      function moveTimelineScrub(ev) {
+        ev.preventDefault();
+        seekFromEvent(ev);
+      }
+      function endTimelineScrub(ev) {
+        document.removeEventListener('pointermove', moveTimelineScrub);
+        document.removeEventListener('pointerup', endTimelineScrub);
+        document.removeEventListener('pointercancel', endTimelineScrub);
+        if (timelineWasPlaying) engine.play();
+      }
+
+      timelineScrollEl.addEventListener('pointerdown', startTimelineScrub, { passive: false });
+
+      // Keep the engine UI synchronized if the native video controls are used.
+      video.addEventListener('timeupdate', function () {
+        if (engine.isPlaying) return;
+        var src = video.currentTime || 0;
+        var acc = 0;
+        for (var i = 0; i < engine.clips.length; i++) {
+          var c = engine.clips[i];
+          var len = c.srcEnd - c.srcStart;
+          if (src >= c.srcStart && src <= c.srcEnd) {
+            engine.t = acc + (src - c.srcStart);
+            engine.onTick(engine.t);
+            return;
+          }
+          acc += len;
+        }
+      });
+    })();
 
     /* Snap toggle wiring. Updates the button visual + redraws the
        half-second grid markers across the timeline strip when on. */
