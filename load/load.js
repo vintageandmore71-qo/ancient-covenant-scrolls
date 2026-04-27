@@ -8395,7 +8395,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17i</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17j</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -11665,35 +11665,33 @@
       /\.(jpe?g|png|gif|webp|heic|heif|svg|bmp)$/i.test(lower) || /^image\//.test(file.type || '') ? 'image' :
       'media';
     var mime = file.type || mimeForMedia(lower, subKind);
-    // Three-tier import strategy with fallbacks so a single failure
-    // path can't kill the entire upload. Each tier is more memory-
-    // intensive than the last; we only escalate if the prior tier
-    // throws (Safari sometimes rejects new Blob([file]) on huge
-    // files, especially HEIC > 50MB).
+    // Three-tier import strategy. Reliability comes FIRST, memory
+    // optimisation second — earlier ordering put new Blob([file])
+    // first which broke imports for files that worked fine under
+    // the legacy readAsArrayBuffer path. The user reported a clip
+    // they had imported many times suddenly erroring. Now:
+    //   Tier 1: arrayBuffer() — modern, reliable, what every other
+    //           handler uses. The only path that's never failed.
+    //   Tier 2: legacy FileReader.readAsArrayBuffer — older but
+    //           identical semantics.
+    //   Tier 3: new Blob([file]) — lightweight wrap. Last resort
+    //           because it sometimes silently produces empty Blobs
+    //           for stale File handles.
     var blob;
     try {
-      // Tier 1: lightweight Blob wrap. No data copy, IDB serialises
-      // the underlying bytes on put. Works for the vast majority.
-      blob = new Blob([file], { type: mime });
+      var buf = await file.arrayBuffer();
+      blob = new Blob([buf], { type: mime });
     } catch (e1) {
       try {
-        // Tier 2: arrayBuffer() round-trip. Costs RAM but normalises
-        // any weird file-system handle into a clean ArrayBuffer.
-        var buf = await file.arrayBuffer();
-        blob = new Blob([buf], { type: mime });
+        blob = await new Promise(function (resolve, reject) {
+          var r = new FileReader();
+          r.onload = function () { resolve(new Blob([r.result], { type: mime })); };
+          r.onerror = function () { reject(r.error || new Error('FileReader failed')); };
+          r.readAsArrayBuffer(file);
+        });
       } catch (e2) {
-        try {
-          // Tier 3: legacy FileReader path. Slowest, highest peak
-          // RAM, but works on the broadest range of Safari builds.
-          blob = await new Promise(function (resolve, reject) {
-            var r = new FileReader();
-            r.onload = function () { resolve(new Blob([r.result], { type: mime })); };
-            r.onerror = function () { reject(r.error || new Error('FileReader failed')); };
-            r.readAsArrayBuffer(file);
-          });
-        } catch (e3) {
-          // All three failed — surface a real error instead of a
-          // mystery import-error modal.
+        try { blob = new Blob([file], { type: mime }); }
+        catch (e3) {
           throw new Error(
             'Could not save ' + file.name + ' to your Library. ' +
             'Reason: ' + ((e3 && e3.message) || e3 || 'unknown') + '. ' +

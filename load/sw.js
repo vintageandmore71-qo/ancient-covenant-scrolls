@@ -9,7 +9,7 @@
 // fetched or transmitted. Imported apps live in IndexedDB on the
 // user's device and are never sent anywhere.
 
-var CACHE = 'load-v17i';
+var CACHE = 'load-v17j';
 
 var SHELL = [
   './',
@@ -61,7 +61,24 @@ self.addEventListener('fetch', function (e) {
     var u = new URL(req.url);
     if (u.origin !== self.location.origin) return;
   } catch (err) { return; }
-  // Same-origin: network-first for everything so updates always take effect.
+  // Code files (load.js, load.css, index.html, sw.js) are NEVER cached
+  // by the SW — they go straight to network with no cache write so a
+  // user can never get stuck on a stale build. Their update happens on
+  // every page load. Asset files (fonts, libs, icons) still go through
+  // the network-first cached path because they rarely change.
+  var url = new URL(req.url);
+  var path = url.pathname;
+  var isCode = /\/(load\.js|load\.css|index\.html|sw\.js)(\?|$)/.test(path) || path.endsWith('/');
+  if (isCode) {
+    e.respondWith(
+      fetch(req, { cache: 'no-store' }).catch(function () {
+        // Only fall back to cache when truly offline.
+        return caches.match(req).then(function (r) { return r || caches.match('index.html'); });
+      })
+    );
+    return;
+  }
+  // Other same-origin assets: network-first with cache fallback.
   e.respondWith(
     fetch(req).then(function (res) {
       var clone = res.clone();
