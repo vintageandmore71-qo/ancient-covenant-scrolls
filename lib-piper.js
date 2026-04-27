@@ -58,7 +58,31 @@
     try {
       var lib = await ensureLib();
       var stored = await lib.stored();
-      return Array.isArray(stored) && stored.indexOf(DEFAULT_VOICE) !== -1;
+      var libSays = Array.isArray(stored) && stored.indexOf(DEFAULT_VOICE) !== -1;
+      if (!libSays) return false;
+      // Cross-check OPFS — the library can return a stale list after
+      // a flush(), which is what made the UI keep saying "Installed"
+      // after Remove. Verify at least one piper-shaped file actually
+      // exists at the expected size.
+      try {
+        if (navigator.storage && typeof navigator.storage.getDirectory === 'function') {
+          var root = await navigator.storage.getDirectory();
+          var found = false;
+          if (typeof root.entries === 'function') {
+            for await (var entry of root.entries()) {
+              var n = entry[0] || '';
+              if (/piper|onnx|amy|libritts/i.test(n) || /\.onnx(\.json)?$/i.test(n)) {
+                found = true; break;
+              }
+            }
+          } else {
+            // Older Safari without .entries(): trust the library.
+            found = true;
+          }
+          return found;
+        }
+      } catch (_) {}
+      return libSays;
     } catch (e) {
       console.warn('[Piper] isCached check failed:', e);
       return false;
@@ -83,14 +107,50 @@
   }
 
   async function uninstall() {
+    var ok = false;
+    // 1. Try the library's own cleanup paths
     try {
       var lib = await ensureLib();
-      await lib.remove(DEFAULT_VOICE);
-      return true;
-    } catch (e) {
-      console.warn('[Piper] uninstall failed:', e);
-      return false;
-    }
+      try { await lib.remove(DEFAULT_VOICE); ok = true; } catch (_) {}
+      try { if (typeof lib.flush === 'function') { await lib.flush(); ok = true; } } catch (_) {}
+    } catch (_) {}
+    // 2. As a fallback, walk OPFS at root + the library's known
+    // subdirectories and delete anything piper / onnx / voice
+    // related. Defensive — survives a library bug where remove()
+    // returns success without actually clearing files.
+    try {
+      if (navigator.storage && typeof navigator.storage.getDirectory === 'function') {
+        var root = await navigator.storage.getDirectory();
+        var SUBDIRS = ['piper', 'piper-tts', 'piper-tts-web', 'voices', 'tts', 'huggingface', 'models'];
+        async function nukeMatching(dir) {
+          // Some Safari versions don't expose entries() yet; gracefully
+          // fall back to no-op if iteration isn't supported.
+          if (typeof dir.entries !== 'function') return;
+          var names = [];
+          try {
+            for await (var entry of dir.entries()) {
+              names.push(entry[0]);
+            }
+          } catch (_) { return; }
+          for (var i = 0; i < names.length; i++) {
+            var name = names[i];
+            if (/piper|onnx|voice|amy|libritts/i.test(name) ||
+                /\.onnx(\.json)?$/i.test(name)) {
+              try { await dir.removeEntry(name, { recursive: true }); ok = true; } catch (_) {}
+            }
+          }
+        }
+        await nukeMatching(root);
+        for (var s = 0; s < SUBDIRS.length; s++) {
+          try {
+            var sub = await root.getDirectoryHandle(SUBDIRS[s], { create: false });
+            await nukeMatching(sub);
+            try { await root.removeEntry(SUBDIRS[s], { recursive: true }); ok = true; } catch (_) {}
+          } catch (_) { /* not present */ }
+        }
+      }
+    } catch (e) { console.warn('[Piper] OPFS sweep failed:', e); }
+    return ok;
   }
 
   function stopAll() {
