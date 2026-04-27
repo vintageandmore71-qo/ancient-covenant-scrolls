@@ -8880,7 +8880,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17by</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bz</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -8898,6 +8898,7 @@
       // ===== Preview stage (black) =====
       '<div id="ve-stage" style="flex:1;min-height:0;position:relative;background:#000;display:flex;align-items:center;justify-content:center;">' +
         '<video id="ve-video" src="' + blobUrl + '" playsinline preload="auto" controls style="max-width:100%;max-height:100%;background:#000;"></video>' +
+        '<img id="ve-stage-image" alt="" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;pointer-events:none;">' +
         '<canvas id="ve-overlay" style="position:absolute;pointer-events:none;"></canvas>' +
         '<button id="ve-fullscreen" class="ve-iconbtn" style="position:absolute;right:10px;bottom:10px;background:rgba(255,255,255,0.1);" aria-label="Fullscreen">&#10070;</button>' +
       '</div>' +
@@ -8929,6 +8930,7 @@
           '<button class="track-add" data-add="text" aria-label="Add subtitle">T+</button>' +
           '<button class="track-add" data-add="sticker" aria-label="Add sticker / PiP">&#128444;+</button>' +
           '<button class="cover-btn" id="ve-cover">Cover</button>' +
+          '<button class="track-add" data-add="media" aria-label="Add image or video to timeline">&#127909;+</button>' +
           '<button class="track-add" data-add="audio-orig" aria-label="Original audio">&#128264;</button>' +
         '</div>' +
         '<div class="timeline-scroll" id="timelineScroll">' +
@@ -8952,11 +8954,18 @@
             '<div class="ve-clip-handle ve-handle-right" id="ve-handle-right"></div>' +
             '<div class="ve-clip-duration" id="ve-clip-duration">0.00s</div>' +
           '</div>' +
+          // VN-style per-clip popup: 6 buttons (Replace · Keyframe ·
+          // Curve · Lock · Duplicate · Delete). Anchored above the
+          // tapped clip so it visually points at the clip the user
+          // is editing. Moved into the selected clip element by
+          // selectClip() at runtime.
           '<div class="ve-clip-quick" id="ve-clip-quick" hidden>' +
-            '<button class="ve-quick-btn" data-clip-action="split" aria-label="Split">&#9986;</button>' +
-            '<button class="ve-quick-btn" data-clip-action="duplicate" aria-label="Duplicate">&#10063;</button>' +
-            '<button class="ve-quick-btn" data-clip-action="replace" aria-label="Replace">&#8634;</button>' +
-            '<button class="ve-quick-btn" data-clip-action="delete" aria-label="Delete">&#128465;</button>' +
+            '<button class="ve-quick-btn" data-clip-action="replace" aria-label="Replace">&#8634;<span class="ve-qb-lbl">Replace</span></button>' +
+            '<button class="ve-quick-btn" data-clip-action="keyframe" aria-label="Keyframe">&#10010;<span class="ve-qb-lbl">Keyframe</span></button>' +
+            '<button class="ve-quick-btn" data-clip-action="curve" aria-label="Curve">&#8599;<span class="ve-qb-lbl">Curve</span></button>' +
+            '<button class="ve-quick-btn" data-clip-action="lock" aria-label="Lock">&#128274;<span class="ve-qb-lbl">Lock</span></button>' +
+            '<button class="ve-quick-btn" data-clip-action="duplicate" aria-label="Duplicate">&#10063;<span class="ve-qb-lbl">Duplicate</span></button>' +
+            '<button class="ve-quick-btn" data-clip-action="delete" aria-label="Delete">&#128465;<span class="ve-qb-lbl">Delete</span></button>' +
           '</div>' +
         '</div>' +
       '</div>' +
@@ -9133,6 +9142,12 @@
       '#__loadVideoEdit .ve-track-row .ve-track-block .ve-tb-trim.l{left:0;border-radius:6px 0 0 6px;}' +
       '#__loadVideoEdit .ve-track-row .ve-track-block .ve-tb-trim.r{right:0;border-radius:0 6px 6px 0;}' +
       '#__loadVideoEdit .ve-track-row .ve-track-block .ve-tb-x{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#fff;color:#1a1a26;border:none;font-size:11px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}' +
+      // VN-style blue sticker popup, anchored above the tapped block.
+      '#__loadVideoEdit .ve-stk-popup{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);background:#1d6fff;border-radius:12px;padding:6px 4px;display:flex;gap:0;box-shadow:0 6px 18px rgba(0,0,0,0.55);z-index:30;animation:vePopIn 0.18s ease-out;white-space:nowrap;}' +
+      '#__loadVideoEdit .ve-stk-popup::after{content:"";position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);border-left:7px solid transparent;border-right:7px solid transparent;border-top:7px solid #1d6fff;}' +
+      '#__loadVideoEdit .ve-stk-popup button{background:transparent;border:none;color:#fff;font-size:16px;min-width:60px;height:48px;padding:2px 6px;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-family:inherit;font-weight:700;}' +
+      '#__loadVideoEdit .ve-stk-popup button:active{background:rgba(255,255,255,0.15);}' +
+      '#__loadVideoEdit .ve-stk-popup button span:last-child{font-size:10px;font-weight:700;letter-spacing:0.02em;}' +
       '#__loadVideoEdit .empty-slot:hover{background:#15152a;}' +
       '#__loadVideoEdit .big-add{flex:0 0 44px;height:56px;background:#1e1e2a;border:none;border-radius:8px;color:#cfcfdc;font-size:22px;font-weight:900;cursor:pointer;font-family:inherit;}' +
       '#__loadVideoEdit .big-add:hover{background:#2a2a3a;color:#ffcc1a;}' +
@@ -9171,10 +9186,14 @@
       '#__loadVideoEdit .ve-clip-thumbs img:last-child{border-right:none;}' +
       '#__loadVideoEdit .ve-clip-thumbs.loading::before{content:"Loading frames…";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#888;font-size:12px;font-weight:600;letter-spacing:0.05em;}' +
       '#__loadVideoEdit .ve-clip-trim{position:absolute;top:0;bottom:0;left:0;right:0;border:2px solid #fbbf24;border-radius:6px;background:transparent;pointer-events:none;}' +
-      '#__loadVideoEdit .ve-clip-quick{position:absolute;top:-46px;left:50%;transform:translateX(-50%);background:#1d6fff;border-radius:14px;padding:4px 6px;display:flex;gap:2px;box-shadow:0 6px 18px rgba(0,0,0,0.45);z-index:6;animation:vePopIn 0.18s ease-out;}' +
-      '#__loadVideoEdit .ve-clip-quick::after{content:"";position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);border-left:7px solid transparent;border-right:7px solid transparent;border-top:7px solid #1d6fff;}' +
-      '#__loadVideoEdit .ve-quick-btn{background:transparent;border:none;color:#fff;font-size:18px;width:36px;height:36px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;}' +
-      '#__loadVideoEdit .ve-quick-btn:active{background:rgba(255,255,255,0.18);}' +
+      // VN-style yellow popup: anchored to the selected clip via JS,
+      // appears above the clip with a downward-pointing notch.
+      '#__loadVideoEdit .ve-clip-quick{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);background:#fbbf24;border-radius:12px;padding:6px 4px;display:flex;gap:0;box-shadow:0 6px 18px rgba(0,0,0,0.55);z-index:25;animation:vePopIn 0.18s ease-out;white-space:nowrap;}' +
+      '#__loadVideoEdit .ve-clip-quick::after{content:"";position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);border-left:7px solid transparent;border-right:7px solid transparent;border-top:7px solid #fbbf24;}' +
+      '#__loadVideoEdit .ve-quick-btn{background:transparent;border:none;color:#1a1a26;font-size:16px;min-width:56px;height:46px;padding:2px 6px;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-family:inherit;font-weight:700;}' +
+      '#__loadVideoEdit .ve-quick-btn:active{background:rgba(0,0,0,0.10);}' +
+      '#__loadVideoEdit .ve-quick-btn .ve-qb-lbl{font-size:10px;font-weight:700;letter-spacing:0.02em;}' +
+      '#__loadVideoEdit .ve-quick-btn[data-on="1"]{background:rgba(0,0,0,0.18);}' +
       '@keyframes vePopIn{from{opacity:0;transform:translateX(-50%) translateY(4px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}' +
       '#__loadVideoEdit .ve-context{position:absolute;left:0;right:0;bottom:0;background:#1a1a26;padding:10px 8px max(10px,env(safe-area-inset-bottom));border-top:1px solid #2a2a40;display:flex;align-items:center;gap:14px;overflow-x:auto;scrollbar-width:none;z-index:8;}' +
       // Single-bottom-bar layout. The clip-context bar (#ve-context)
@@ -10677,6 +10696,12 @@
       ensureTracks();
       engine.tracks[kind] = (engine.tracks[kind] || []).filter(function (it) { return it.id !== id; });
       renderTracks();
+      // Sweep any active sticker DOM whose track item just disappeared.
+      // Without this the overlay would linger until the next playhead
+      // tick, leaving a "can't delete" feeling.
+      if (kind === 'sticker') {
+        try { renderStickerOverlaysAt(engine.t || 0); } catch (_) {}
+      }
     }
     function renderTracks() {
       ensureTracks();
@@ -10774,8 +10799,142 @@
             removeTrackItem(kind, it.id);
             toast('Removed.', false);
           });
+          // Stickers get a VN-style blue popup (Replace · Motion ·
+          // Keyframe · Curve · Lock · Duplicate · Delete) on tap.
+          // Music + text track blocks reuse their own panels; stickers
+          // are the only kind that benefits from per-block options.
+          if (kind === 'sticker') {
+            el.addEventListener('click', function (e) {
+              if (e.target.classList.contains('ve-tb-x')) return;
+              if (e.target.classList.contains('ve-tb-trim')) return;
+              e.stopPropagation();
+              showStickerPopup(it, el);
+            });
+          }
         });
       });
+    }
+
+    // VN-style sticker context popup. Anchored above the tapped
+    // sticker block on the timeline. Six actions plus Motion (the
+    // animation preset, e.g. fade-in / slide / zoom). Blue accent
+    // matches the sticker block colour.
+    function showStickerPopup(it, blockEl) {
+      // Tear down any existing popup
+      var existing = wrap.querySelector('.ve-stk-popup');
+      if (existing) existing.remove();
+      var pop = document.createElement('div');
+      pop.className = 've-stk-popup';
+      pop.innerHTML =
+        '<button data-stk-action="replace"><span>&#8634;</span><span>Replace</span></button>' +
+        '<button data-stk-action="motion"><span>&#9737;</span><span>Motion</span></button>' +
+        '<button data-stk-action="keyframe"><span>&#10010;</span><span>Keyframe</span></button>' +
+        '<button data-stk-action="curve"><span>&#8599;</span><span>Curve</span></button>' +
+        '<button data-stk-action="lock"><span>' + (it.locked ? '&#128274;' : '&#128275;') + '</span><span>' + (it.locked ? 'Locked' : 'Lock') + '</span></button>' +
+        '<button data-stk-action="duplicate"><span>&#10063;</span><span>Duplicate</span></button>' +
+        '<button data-stk-action="delete"><span>&#128465;</span><span>Delete</span></button>';
+      blockEl.appendChild(pop);
+      // Wire actions
+      Array.prototype.forEach.call(pop.querySelectorAll('[data-stk-action]'), function (b) {
+        b.addEventListener('click', function (e) {
+          e.stopPropagation();
+          onStickerAction(b.getAttribute('data-stk-action'), it);
+          // Re-render after action so the popup state stays fresh.
+          if (b.getAttribute('data-stk-action') !== 'replace') {
+            try { renderTracks(); } catch (_) {}
+          }
+        });
+      });
+      // Tap-outside dismisses
+      var dismiss = function (e) {
+        if (e.target.closest('.ve-stk-popup')) return;
+        if (pop && pop.parentNode) pop.remove();
+        document.removeEventListener('pointerdown', dismiss, true);
+      };
+      setTimeout(function () { document.addEventListener('pointerdown', dismiss, true); }, 0);
+    }
+    function onStickerAction(act, it) {
+      if (it.locked && act !== 'lock') {
+        toast('Sticker is locked. Tap 🔒 to unlock first.', true);
+        return;
+      }
+      if (act === 'lock') {
+        it.locked = !it.locked;
+        toast(it.locked ? 'Sticker locked.' : 'Sticker unlocked.', false);
+        return;
+      }
+      if (act === 'delete') {
+        removeTrackItem('sticker', it.id);
+        toast('Sticker removed.', false);
+        return;
+      }
+      if (act === 'duplicate') {
+        var copy = Object.assign({}, it, { id: 's' + Date.now(), t0: it.t0 + it.dur });
+        engine.tracks.sticker.push(copy);
+        renderTracks();
+        toast('Sticker duplicated.', false);
+        return;
+      }
+      if (act === 'replace') {
+        var pk = document.createElement('input');
+        pk.type = 'file';
+        pk.accept = 'image/*,video/*';
+        pk.style.display = 'none';
+        document.body.appendChild(pk);
+        pk.addEventListener('change', function (ev) {
+          var f = ev.target.files && ev.target.files[0];
+          pk.remove();
+          if (!f) return;
+          var fr = new FileReader();
+          fr.onload = function () {
+            it.src = fr.result;
+            it.kind = /^video\//.test(f.type) ? 'video' : 'image';
+            renderTracks();
+            try { renderStickerOverlaysAt(engine.t || 0); } catch (_) {}
+            toast('Sticker replaced.', false);
+          };
+          fr.readAsDataURL(f);
+        });
+        pk.click();
+        return;
+      }
+      if (act === 'motion') {
+        openToolSheet('Sticker motion', [
+          { key: 'none',     label: 'No motion',  icon: '◯' },
+          { key: 'fade-in',  label: 'Fade in',    icon: '◐' },
+          { key: 'fade-out', label: 'Fade out',   icon: '◑' },
+          { key: 'slide-l',  label: 'Slide left', icon: '←' },
+          { key: 'slide-r',  label: 'Slide right',icon: '→' },
+          { key: 'slide-up', label: 'Slide up',   icon: '↑' },
+          { key: 'slide-dn', label: 'Slide down', icon: '↓' },
+          { key: 'zoom-in',  label: 'Zoom in',    icon: '⊕' },
+          { key: 'zoom-out', label: 'Zoom out',   icon: '⊖' },
+          { key: 'pulse',    label: 'Pulse',      icon: '✺' }
+        ], it.motion || 'none').then(function (k) {
+          if (k == null) return;
+          it.motion = k;
+          toast('Motion: ' + k, false);
+        });
+        return;
+      }
+      if (act === 'curve') {
+        openToolSheet('Sticker curve', [
+          { key: 'linear',     label: 'Linear',    icon: '/' },
+          { key: 'ease-in',    label: 'Ease in',   icon: '⌒' },
+          { key: 'ease-out',   label: 'Ease out',  icon: '⌒' },
+          { key: 'ease-in-out',label: 'Ease both', icon: 'S' },
+          { key: 'bounce',     label: 'Bounce',    icon: '∿' }
+        ], it.curve || 'linear').then(function (k) {
+          if (k == null) return;
+          it.curve = k;
+          toast('Curve: ' + k, false);
+        });
+        return;
+      }
+      if (act === 'keyframe') {
+        toast('Sticker keyframe panel coming next — global Keyframe button on bottom toolbar works for the active main clip.', false);
+        return;
+      }
     }
 
     function renderClipBlocks() {
@@ -11282,6 +11441,26 @@
         this.t = t;
         var r = this.resolve(t);
         if (!r) { this.onTick(this.t); return; }
+        // Multi-source / image-clip support. If the active clip is an
+        // image, hide the <video> and show a still <img> over the
+        // stage. If it's a video clip with a different srcUrl from
+        // what's currently loaded, swap sources before seeking.
+        var stageImg = document.getElementById('ve-stage-image');
+        if (r.clip && r.clip.kind === 'image') {
+          if (stageImg) {
+            if (stageImg.getAttribute('src') !== r.clip.srcUrl) stageImg.src = r.clip.srcUrl;
+            stageImg.style.display = 'block';
+          }
+          try { video.style.opacity = '0'; if (!video.paused) video.pause(); } catch (_) {}
+          this.onTick(this.t);
+          return;
+        } else {
+          if (stageImg) stageImg.style.display = 'none';
+          try { video.style.opacity = ''; } catch (_) {}
+          if (r.clip && r.clip.srcUrl && video.src !== r.clip.srcUrl) {
+            try { video.src = r.clip.srcUrl; } catch (_) {}
+          }
+        }
         try {
           // IMPORTANT: do not use fastSeek here. On iPad Safari, fastSeek can jump
           // only to keyframes and may not repaint the preview during a drag. For
@@ -11407,9 +11586,13 @@
       if (d > 0 && !isNaN(d)) {
         if (engine.clips.length === 1 && engine.clips[0]._placeholder) {
           engine.clips[0].srcEnd = d;
+          // Pin srcUrl on the initial clip so multi-source clips
+          // (added via the new Add Media button) can swap correctly.
+          engine.clips[0].srcUrl = video.src;
+          engine.clips[0].kind = 'video';
           delete engine.clips[0]._placeholder;
         } else if (!engine.clips.length) {
-          engine.clips = [{ id: 'c0', srcStart: 0, srcEnd: d }];
+          engine.clips = [{ id: 'c0', srcStart: 0, srcEnd: d, srcUrl: video.src, kind: 'video' }];
         }
         engine.t = 0;
         engine.onClipsChanged();
@@ -11709,7 +11892,29 @@
       if (!clipStripEl) return;
       clipStripEl.classList.add('ve-selected');
       wrap.classList.add('ve-clip-active');
-      if (quickEl) quickEl.hidden = false;
+      if (!quickEl) return;
+      // Anchor the VN-style popup ABOVE the selected clip, not at a
+      // fixed strip position. We move it into the selected clip's DOM
+      // so its absolute positioning resolves against that clip.
+      var sel = clipStripEl.querySelector('.timeline-clip[data-clip-idx="' + selectedClipIdx + '"]');
+      if (sel) sel.appendChild(quickEl);
+      // Reflect "locked" state on the Lock button so the user can see
+      // at a glance whether this clip is locked.
+      var clip = engine.clips[selectedClipIdx];
+      var lockBtn = quickEl.querySelector('[data-clip-action="lock"]');
+      if (lockBtn) {
+        lockBtn.setAttribute('data-on', (clip && clip.locked) ? '1' : '0');
+        var lbl = lockBtn.querySelector('.ve-qb-lbl');
+        if (lbl) lbl.textContent = (clip && clip.locked) ? 'Locked' : 'Lock';
+      }
+      // Snap the playhead to the start of the selected clip so the
+      // main preview shows the exact frame for the tapped clip.
+      try {
+        var acc = 0;
+        for (var i = 0; i < selectedClipIdx; i++) acc += (engine.clips[i].srcEnd - engine.clips[i].srcStart);
+        engine.setTime(acc);
+      } catch (_) {}
+      quickEl.hidden = false;
     }
     function deselectClip() {
       if (clipStripEl) clipStripEl.classList.remove('ve-selected');
@@ -11752,6 +11957,53 @@
     function onClipAction(act) {
       if (act === 'deselect') return deselectClip();
       if (act === 'edit')      { showPanel('ve-text-panel'); return; }
+      // Honor the per-clip lock for any destructive action. Lock
+      // itself can always run (to unlock).
+      var sel = engine.clips[selectedClipIdx];
+      if (sel && sel.locked && act !== 'lock' && act !== 'deselect' && act !== 'keyframe' && act !== 'curve') {
+        toast('Clip is locked. Tap 🔒 Lock to unlock first.', true);
+        return;
+      }
+      if (act === 'lock') {
+        if (!sel) { toast('No clip selected.', true); return; }
+        sel.locked = !sel.locked;
+        toast(sel.locked ? 'Clip locked. Tap again to unlock.' : 'Clip unlocked.', false);
+        // Reflect new state on the popup
+        try {
+          var lockBtn = quickEl.querySelector('[data-clip-action="lock"]');
+          if (lockBtn) {
+            lockBtn.setAttribute('data-on', sel.locked ? '1' : '0');
+            var lbl = lockBtn.querySelector('.ve-qb-lbl');
+            if (lbl) lbl.textContent = sel.locked ? 'Locked' : 'Lock';
+          }
+        } catch (_) {}
+        return;
+      }
+      if (act === 'keyframe') {
+        // Re-uses the bottom-toolbar keyframe sheet so users get the
+        // exact same options whichever way they arrive at it.
+        var kfBtn = wrap.querySelector('[data-action="keyframe"]');
+        if (kfBtn && kfBtn.click) kfBtn.click();
+        else toast('Keyframe panel is on the bottom toolbar (🔑 Keyframe).', false);
+        return;
+      }
+      if (act === 'curve') {
+        // Animation curve picker — choose easing for keyframe-driven
+        // motion. Stored on the clip so each clip can have its own
+        // feel. Defaults to linear (matches existing keyframe math).
+        openToolSheet('Animation curve', [
+          { key: 'linear',     label: 'Linear',     icon: '/' },
+          { key: 'ease-in',    label: 'Ease in',    icon: '⌒' },
+          { key: 'ease-out',   label: 'Ease out',   icon: '⌒' },
+          { key: 'ease-in-out',label: 'Ease both',  icon: 'S' },
+          { key: 'bounce',     label: 'Bounce',     icon: '∿' }
+        ], (sel && sel.curve) || 'linear').then(function (k) {
+          if (k == null) return;
+          if (sel) sel.curve = k;
+          toast('Curve: ' + k, false);
+        });
+        return;
+      }
       if (act === 'split') {
         // REAL split via the timeline engine. Bisects the active clip
         // at the current playhead position; creates a second entry in
@@ -12515,6 +12767,87 @@
             pk.remove();
           });
           pk.click();
+        } else if (kind === 'media') {
+          // Add image OR video as a NEW main-scene clip (not a sticker
+          // overlay). Each clip carries its own srcUrl + kind so the
+          // engine can swap sources / show stills as the playhead
+          // walks across the timeline.
+          var pkM2 = document.createElement('input');
+          pkM2.type = 'file';
+          pkM2.accept = 'image/*,video/*,audio/*';
+          pkM2.style.display = 'none';
+          document.body.appendChild(pkM2);
+          pkM2.addEventListener('change', function (ev) {
+            var f = ev.target.files && ev.target.files[0];
+            if (!f) { pkM2.remove(); return; }
+            var url = URL.createObjectURL(f);
+            var name = f.name || 'media';
+            if (/^image\//.test(f.type)) {
+              // Default 5 s image clip per the user's spec.
+              var imgClip = {
+                id: 'c' + Date.now(),
+                kind: 'image',
+                srcUrl: url,
+                name: name,
+                srcStart: 0,
+                srcEnd: 5,
+                fitMode: 'contain'
+              };
+              engine.clips.push(imgClip);
+              try { engine.onClipsChanged(); } catch (_) {}
+              try { renderClipBlocks(); } catch (_) {}
+              try { engine.setTime(engine.t || 0); } catch (_) {}
+              toast('Image clip added — 5s default. Drag the trim handles to change duration.', false);
+              pkM2.remove();
+              return;
+            }
+            if (/^video\//.test(f.type)) {
+              // Probe duration so we set srcEnd correctly. We use a
+              // separate <video> element so this doesn't disturb the
+              // currently-playing main <video>.
+              var probe2 = document.createElement('video');
+              probe2.preload = 'metadata';
+              probe2.src = url;
+              probe2.addEventListener('loadedmetadata', function () {
+                var dur = isFinite(probe2.duration) ? probe2.duration : 5;
+                var vClip = {
+                  id: 'c' + Date.now(),
+                  kind: 'video',
+                  srcUrl: url,
+                  name: name,
+                  srcStart: 0,
+                  srcEnd: dur,
+                  fitMode: 'contain'
+                };
+                engine.clips.push(vClip);
+                try { engine.onClipsChanged(); } catch (_) {}
+                try { renderClipBlocks(); } catch (_) {}
+                try { engine.setTime(engine.t || 0); } catch (_) {}
+                toast('Video clip added — ' + dur.toFixed(2) + 's, appended to timeline.', false);
+              }, { once: true });
+              probe2.addEventListener('error', function () {
+                toast('Could not read that video file.', true);
+              });
+              pkM2.remove();
+              return;
+            }
+            // Audio: route to the music track for now (matches user's
+            // spec note that audio support is "later if easy").
+            try {
+              if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+              f.arrayBuffer().then(function (ab) {
+                return audioCtx.decodeAudioData(ab);
+              }).then(function (buf) {
+                musicBuffer = buf;
+                addTrackItem('music', { name: name, dur: Math.min(buf.duration, engine.duration() || buf.duration), buffer: buf });
+                toast('Audio added to music track — ' + name + '.', false);
+              }).catch(function (err) {
+                toast('Could not decode audio: ' + (err && err.message || err), true);
+              });
+            } catch (e) { toast('Audio import failed: ' + e.message, true); }
+            pkM2.remove();
+          });
+          pkM2.click();
         } else if (kind === 'audio-orig') {
           // Tap opens a file picker just like the sticker / picture
           // box. Picking an audio file decodes it and loads it as
