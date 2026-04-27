@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17au</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17av</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -11219,8 +11219,101 @@
     });
 
     // ---- Export ----
-    document.getElementById('ve-export').addEventListener('click', exportMp4);
-    async function exportMp4() {
+    document.getElementById('ve-export').addEventListener('click', function () { openExportOptions(); });
+
+    // Export options sheet — runs BEFORE the encode so the user can
+    // pick format, resolution, and bitrate. iPad Safari's
+    // MediaRecorder natively emits MP4 (H.264 + AAC); WebM is
+    // emitted on Chrome / Firefox. The other formats (MOV, AVI,
+    // MKV, WMV, AVCHD) are not produced by any browser today, so
+    // we either: (a) save the H.264 MP4 stream with the requested
+    // extension when the container is byte-compatible (MOV ←→ MP4
+    // both use ISO BMFF and QuickTime accepts either), or (b) flag
+    // the format as "desktop converter required" and produce an
+    // MP4 alongside.
+    var EXPORT_FORMATS = [
+      { key: 'mp4',   label: 'MP4',    ext: '.mp4',   mime: 'video/mp4',          note: 'Universal · web + social' },
+      { key: 'mov',   label: 'MOV',    ext: '.mov',   mime: 'video/mp4',          note: 'Apple QuickTime · same H.264' },
+      { key: 'webm',  label: 'WebM',   ext: '.webm',  mime: 'video/webm',         note: 'Web · Chrome / Firefox' },
+      { key: 'mkv',   label: 'MKV',    ext: '.mkv',   mime: 'video/x-matroska',   note: 'Saves as MP4 — rename only' },
+      { key: 'avi',   label: 'AVI',    ext: '.avi',   mime: 'video/avi',          note: 'Saves as MP4 — rename only' },
+      { key: 'wmv',   label: 'WMV',    ext: '.wmv',   mime: 'video/x-ms-wmv',     note: 'Saves as MP4 — rename only' },
+      { key: 'mts',   label: 'AVCHD',  ext: '.mts',   mime: 'video/avchd',        note: 'Saves as MP4 — rename only' }
+    ];
+    var EXPORT_RESOLUTIONS = [
+      { key: 'src',   label: 'Original' },
+      { key: '2160',  label: '4K (2160p)' },
+      { key: '1440',  label: '2K (1440p)' },
+      { key: '1080',  label: '1080p' },
+      { key: '720',   label: '720p' },
+      { key: '480',   label: '480p' },
+      { key: '360',   label: '360p' }
+    ];
+    var EXPORT_BITRATES = [
+      { key: 'low',    label: 'Low · 1.5 Mbps',  bps: 1500000 },
+      { key: 'med',    label: 'Medium · 4 Mbps', bps: 4000000 },
+      { key: 'high',   label: 'High · 8 Mbps',   bps: 8000000 },
+      { key: 'best',   label: 'Best · 16 Mbps',  bps: 16000000 }
+    ];
+
+    function openExportOptions() {
+      var picked = { format: 'mp4', resolution: 'src', bitrate: 'med' };
+      var menu = document.createElement('div');
+      menu.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:3500;display:flex;align-items:flex-end;justify-content:center;';
+      function rowHtml(group, list, sel) {
+        return '<div style="display:flex;flex-wrap:wrap;gap:6px;">' +
+          list.map(function (o) {
+            var on = (o.key === sel) ? 'background:#fbbf24;color:#1a1a26;border-color:#fbbf24;' : '';
+            var note = o.note ? '<div style="font-size:9.5px;opacity:0.7;font-weight:400;line-height:1.2;margin-top:2px;">' + o.note + '</div>' : '';
+            return '<button class="ve-exp-opt" data-group="' + group + '" data-key="' + o.key + '" style="' + on + '">' +
+              '<div style="font-weight:700;">' + o.label + '</div>' + note + '</button>';
+          }).join('') +
+        '</div>';
+      }
+      function render() {
+        menu.querySelector('#ve-exp-format').innerHTML = rowHtml('format', EXPORT_FORMATS, picked.format);
+        menu.querySelector('#ve-exp-res').innerHTML    = rowHtml('resolution', EXPORT_RESOLUTIONS, picked.resolution);
+        menu.querySelector('#ve-exp-rate').innerHTML   = rowHtml('bitrate', EXPORT_BITRATES, picked.bitrate);
+        Array.prototype.forEach.call(menu.querySelectorAll('.ve-exp-opt'), function (b) {
+          b.addEventListener('click', function () {
+            picked[b.getAttribute('data-group')] = b.getAttribute('data-key');
+            render();
+          });
+        });
+      }
+      menu.innerHTML =
+        '<div style="background:#1a1a26;color:#fff;width:100%;max-width:560px;border-top-left-radius:16px;border-top-right-radius:16px;padding:14px 14px max(14px,env(safe-area-inset-bottom));max-height:80vh;overflow-y:auto;">' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
+            '<h3 style="margin:0;font-size:17px;font-weight:700;">Export options</h3>' +
+            '<button id="ve-exp-close" style="background:transparent;border:none;color:#cfcfdc;font-size:22px;cursor:pointer;line-height:1;">×</button>' +
+          '</div>' +
+          '<div style="display:flex;flex-direction:column;gap:14px;">' +
+            '<div><div style="font-size:12px;font-weight:700;color:#cfcfdc;margin-bottom:6px;letter-spacing:0.04em;">FILE FORMAT</div><div id="ve-exp-format"></div></div>' +
+            '<div><div style="font-size:12px;font-weight:700;color:#cfcfdc;margin-bottom:6px;letter-spacing:0.04em;">RESOLUTION</div><div id="ve-exp-res"></div></div>' +
+            '<div><div style="font-size:12px;font-weight:700;color:#cfcfdc;margin-bottom:6px;letter-spacing:0.04em;">BITRATE</div><div id="ve-exp-rate"></div></div>' +
+            '<button id="ve-exp-go" style="background:#1d6fff;color:#fff;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:6px;">⬆ Export now</button>' +
+          '</div>' +
+        '</div>' +
+        '<style>' +
+          '.ve-exp-opt{flex:1 1 calc(33.33% - 6px);min-width:96px;background:#2a2a40;border:1.5px solid transparent;color:#fff;border-radius:10px;padding:10px 8px;font-family:inherit;font-size:13px;cursor:pointer;text-align:left;}' +
+          '.ve-exp-opt:active{transform:scale(0.96);}' +
+        '</style>';
+      document.body.appendChild(menu);
+      var close = function () { try { menu.remove(); } catch (_) {} };
+      menu.addEventListener('click', function (e) { if (e.target === menu) close(); });
+      document.getElementById('ve-exp-close').addEventListener('click', close);
+      render();
+      document.getElementById('ve-exp-go').addEventListener('click', function () {
+        close();
+        exportMp4(picked);
+      });
+    }
+
+    async function exportMp4(opts) {
+      opts = opts || { format: 'mp4', resolution: 'src', bitrate: 'med' };
+      var fmt = EXPORT_FORMATS.filter(function (f) { return f.key === opts.format; })[0] || EXPORT_FORMATS[0];
+      var resPick = EXPORT_RESOLUTIONS.filter(function (r) { return r.key === opts.resolution; })[0] || EXPORT_RESOLUTIONS[0];
+      var bratePick = EXPORT_BITRATES.filter(function (b) { return b.key === opts.bitrate; })[0] || EXPORT_BITRATES[1];
       if (!('MediaRecorder' in window)) { toast('Your browser does not support MediaRecorder.', true); return; }
       // Multi-clip aware export. Walks engine.clips[] in order so a
       // 5s clip split at 2s into [A=0..2s, B=2..5s] then reordered
@@ -11233,11 +11326,22 @@
       if (totalLen < 0.2) { toast('Total trimmed length is too short.', true); return; }
       muteOrig = document.getElementById('ve-mute-orig').checked;
 
+      // Pick the actual MIME the browser can encode. For WebM the
+      // user's choice maps directly. For MP4 / MOV / MKV / AVI / WMV /
+      // AVCHD we encode H.264 inside an MP4 container — the file is
+      // saved with the requested extension. MOV is byte-compatible
+      // with MP4 (both ISO BMFF) so QuickTime accepts it natively.
+      // The other "rename only" formats may not play in apps that
+      // strictly validate the container header — that's why the
+      // sheet labels them as such.
       var pickMime = (function () {
-        var candidates = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=h264', 'video/webm;codecs=vp8'];
-        for (var i = 0; i < candidates.length; i++) if (MediaRecorder.isTypeSupported(candidates[i])) return candidates[i];
+        var pref = (fmt.key === 'webm')
+          ? ['video/webm;codecs=h264', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm']
+          : ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=h264', 'video/webm;codecs=vp8'];
+        for (var i = 0; i < pref.length; i++) if (MediaRecorder.isTypeSupported(pref[i])) return pref[i];
         return '';
       })();
+      var actuallyWebm = pickMime.indexOf('webm') >= 0;
 
       var prog = document.getElementById('ve-progress');
       var fill = document.getElementById('ve-progress-fill');
@@ -11248,8 +11352,21 @@
       // Off-screen render canvas — same size as video, used to composite
       // both the live video frame AND the text overlay each frame.
       var rc = document.createElement('canvas');
-      rc.width = video.videoWidth || 1280;
-      rc.height = video.videoHeight || 720;
+      var srcW = video.videoWidth || 1280;
+      var srcH = video.videoHeight || 720;
+      // Resolution scaling — keep aspect, scale by the long edge
+      // matching the picked target (or use source if 'src').
+      if (resPick.key === 'src') {
+        rc.width = srcW; rc.height = srcH;
+      } else {
+        var targetH = parseInt(resPick.key, 10);
+        var aspect = srcW / srcH;
+        rc.height = targetH;
+        rc.width = Math.round(targetH * aspect);
+        // Keep dimensions even (some encoders reject odd numbers).
+        if (rc.width % 2) rc.width++;
+        if (rc.height % 2) rc.height++;
+      }
       var rctx = rc.getContext('2d');
 
       // Build streams
@@ -11283,7 +11400,7 @@
       canvasStream.getVideoTracks().forEach(function (t) { combined.addTrack(t); });
       dest.stream.getAudioTracks().forEach(function (t) { combined.addTrack(t); });
 
-      var rec = new MediaRecorder(combined, pickMime ? { mimeType: pickMime, videoBitsPerSecond: 4500000 } : { videoBitsPerSecond: 4500000 });
+      var rec = new MediaRecorder(combined, pickMime ? { mimeType: pickMime, videoBitsPerSecond: bratePick.bps } : { videoBitsPerSecond: bratePick.bps });
       var chunks = [];
       rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
       var stopped = false;
@@ -11291,12 +11408,31 @@
         if (stopped) return;
         stopped = true;
         try { if (recMusicSource) recMusicSource.stop(); } catch (_) {}
-        var blob = new Blob(chunks, { type: pickMime || 'video/mp4' });
-        var ext = (pickMime && pickMime.indexOf('webm') >= 0) ? '.webm' : '.mp4';
+        // Encoded blob has the actual encoded MIME (mp4 or webm). When
+        // the user picked a non-encoded container (MOV / MKV / AVI /
+        // WMV / AVCHD) we keep the underlying MP4 bytes but save with
+        // the requested extension, since the browser can't transcode
+        // those containers natively. MOV in particular plays cleanly
+        // because .mov is byte-compatible with MP4 (ISO BMFF).
+        var actualMime = actuallyWebm ? 'video/webm' : 'video/mp4';
+        var blob = new Blob(chunks, { type: actualMime });
+        var ext = fmt.ext;
+        // If the user picked WebM but the device can only encode MP4,
+        // honour reality and save as .mp4 with a toast.
+        if (fmt.key === 'webm' && !actuallyWebm) {
+          ext = '.mp4';
+          toast('WebM not supported on this device — saving as MP4.', false);
+        }
+        // If the user picked MP4 but only WebM was available, save as .webm.
+        if (fmt.key !== 'webm' && actuallyWebm && (fmt.key === 'mp4' || fmt.key === 'mov')) {
+          ext = '.webm';
+          toast('MP4 not supported on this browser — saving as WebM.', false);
+        }
         var safeName = String(app.name || 'video').replace(/[^a-zA-Z0-9 _\-]/g, '').trim() || 'video';
+        var qualityTag = (resPick.key === 'src') ? '' : '-' + resPick.key + 'p';
         prog.style.display = 'none';
-        await shareBlobOrDownload(blob, safeName + '-edit' + ext, blob.type,
-          'Exported ' + safeName + '-edit' + ext + '.');
+        await shareBlobOrDownload(blob, safeName + '-edit' + qualityTag + ext, blob.type,
+          'Exported ' + safeName + '-edit' + qualityTag + ext + ' (' + bratePick.label + ').');
         // Save back into the library so the user can package / share
         try {
           var newApp = {
