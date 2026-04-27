@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17aa-sync</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ad</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -8862,6 +8862,17 @@
       '#__loadVideoEdit .ve-quick-btn:active{background:rgba(255,255,255,0.18);}' +
       '@keyframes vePopIn{from{opacity:0;transform:translateX(-50%) translateY(4px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}' +
       '#__loadVideoEdit .ve-context{position:absolute;left:0;right:0;bottom:0;background:#1a1a26;padding:10px 8px max(10px,env(safe-area-inset-bottom));border-top:1px solid #2a2a40;display:flex;align-items:center;gap:14px;overflow-x:auto;scrollbar-width:none;z-index:8;}' +
+      // Bottom-bar overlap fix — reserve room below the timeline so the
+      // absolute #ve-context / in-flow #ve-actions row never covers the
+      // last timeline row (Original-audio / waveform).
+      '#__loadVideoEdit .timeline-engine{padding-bottom:96px !important;height:auto !important;min-height:260px !important;}' +
+      '#__loadVideoEdit .timeline-scroll{padding-bottom:24px !important;}' +
+      '#__loadVideoEdit #ve-actions,#__loadVideoEdit .ve-context{padding-bottom:max(14px,env(safe-area-inset-bottom)) !important;}' +
+      // Thumbnail-distortion fix — equal flex shares with object-fit:cover.
+      '#__loadVideoEdit .timeline-clip{overflow:hidden !important;height:56px !important;}' +
+      '#__loadVideoEdit .thumbnail-strip{width:100% !important;height:100% !important;display:flex !important;align-items:stretch !important;overflow:hidden !important;min-width:0 !important;}' +
+      '#__loadVideoEdit .thumbnail-strip > *,#__loadVideoEdit .thumbnail-strip img,#__loadVideoEdit .thumbnail-frame{flex:1 1 0 !important;width:0 !important;min-width:0 !important;height:100% !important;object-fit:cover !important;object-position:center !important;display:block !important;border-right:1px solid rgba(255,255,255,0.15) !important;}' +
+      '#__loadVideoEdit .thumbnail-strip img:last-child,#__loadVideoEdit .thumbnail-frame:last-child{border-right:none !important;}' +
       '#__loadVideoEdit .ve-context::-webkit-scrollbar{display:none;}' +
       '#__loadVideoEdit .ve-context-done .ve-act-icon{background:#1d6fff;color:#fff;border-color:#1d6fff;}' +
       '#__loadVideoEdit.ve-clip-active #ve-context{display:flex;}' +
@@ -10301,23 +10312,36 @@
         toast('More settings: full sheet coming next.', false);
       }
     });
-    bindEd('ve-save', 'click', function () {
+    bindEd('ve-save', 'click', async function () {
+      var btn = document.getElementById('ve-save');
       try {
+        var serializableClips = (engine.clips || []).map(function (c) {
+          return { id: c.id, srcStart: c.srcStart, srcEnd: c.srcEnd };
+        });
         var draft = {
-          trimIn: parseFloat(trimIn.value) || 0,
-          trimOut: parseFloat(trimOut.value) || 0,
+          trimIn: parseFloat((trimIn || {}).value) || 0,
+          trimOut: parseFloat((trimOut || {}).value) || 0,
           muteOrig: !!(document.getElementById('ve-mute-orig') || {}).checked,
           textOverlay: (document.getElementById('ve-text') || {}).value || '',
           musicVol: parseFloat((document.getElementById('ve-audio-vol') || {}).value || '0.35'),
           speed: video.playbackRate || 1,
           opacity: (typeof clipOpacity !== 'undefined') ? clipOpacity : 1,
-          clips: engine.clips.slice(),
+          clips: serializableClips,
           savedAt: Date.now()
         };
         app.editorDraft = draft;
-        if (typeof putApp === 'function') putApp(app);
-        toast('Draft saved.', false);
-      } catch (e) { toast('Could not save draft: ' + (e && e.message || e), true); }
+        if (typeof putApp !== 'function') throw new Error('putApp unavailable');
+        await putApp(app);
+        if (btn) {
+          var prev = btn.innerHTML;
+          btn.innerHTML = '✅';
+          setTimeout(function () { btn.innerHTML = prev; }, 1200);
+        }
+        toast('Draft saved · ' + serializableClips.length + ' clip' + (serializableClips.length === 1 ? '' : 's') + ' at ' + new Date(draft.savedAt).toLocaleTimeString(), false);
+      } catch (e) {
+        toast('Could not save draft: ' + (e && e.message || e), true);
+        try { console.error('[VE] save failed', e); } catch (_) {}
+      }
     });
     bindEd('ve-stack', 'click', function () {
       var tracks = document.getElementById('ve-tracks');
@@ -10328,6 +10352,61 @@
     });
     bindEd('ve-redo', 'click', function () {
       toast('Redo: history stack lands with multi-clip phase.', false);
+    });
+
+    // Rewind / fast-forward — engine-driven so they respect clip math.
+    bindEd('ve-prev', 'click', function () {
+      try {
+        var step = 5;
+        var t = Math.max(0, (engine.t || 0) - step);
+        engine.setTime(t, true);
+        toast('Rewound to ' + t.toFixed(2) + 's', false);
+      } catch (e) { toast('Rewind failed: ' + (e && e.message || e), true); }
+    });
+    bindEd('ve-next', 'click', function () {
+      try {
+        var step = 5;
+        var max = engine.duration() || 0;
+        var t = Math.min(max, (engine.t || 0) + step);
+        engine.setTime(t, true);
+        toast('Forward to ' + t.toFixed(2) + 's', false);
+      } catch (e) { toast('Forward failed: ' + (e && e.message || e), true); }
+    });
+
+    // Cover picker — image box next to the timeline. Opens a file
+    // picker, stashes the chosen image as app.cover (data URL) so the
+    // export pipeline + library card can use it, and previews it on
+    // the Cover button itself.
+    bindEd('ve-cover', 'click', function () {
+      var picker = document.createElement('input');
+      picker.type = 'file';
+      picker.accept = 'image/*';
+      picker.style.display = 'none';
+      document.body.appendChild(picker);
+      picker.addEventListener('change', function (e) {
+        var f = e.target.files && e.target.files[0];
+        if (!f) { picker.remove(); return; }
+        var fr = new FileReader();
+        fr.onload = function () {
+          try {
+            app.cover = fr.result;
+            if (typeof putApp === 'function') {
+              Promise.resolve(putApp(app)).catch(function () {});
+            }
+            var btn = document.getElementById('ve-cover');
+            if (btn) {
+              btn.style.background = '#000 center/cover no-repeat url("' + fr.result + '")';
+              btn.style.borderStyle = 'solid';
+              btn.style.color = 'transparent';
+            }
+            toast('Cover image set.', false);
+          } catch (err) { toast('Cover save failed: ' + (err && err.message || err), true); }
+          picker.remove();
+        };
+        fr.onerror = function () { toast('Could not read that image.', true); picker.remove(); };
+        fr.readAsDataURL(f);
+      });
+      picker.click();
     });
 
     // ---- Export ----
