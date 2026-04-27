@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17u</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17v</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -9560,22 +9560,24 @@
       // Initialise the timeline engine with one clip spanning the
       // whole source video. Split / Duplicate / Delete will mutate
       // this array; the strip render iterates it.
-      // Patch the placeholder clip with the real duration. If user
-      // hasn't split yet (still 1 clip), update srcEnd; otherwise
-      // leave existing clips alone.
-      if (engine.clips.length === 1 && engine.clips[0]._placeholder) {
-        engine.clips[0].srcEnd = d;
-        delete engine.clips[0]._placeholder;
-      } else if (!engine.clips.length) {
-        engine.clips = [{ id: 'c0', srcStart: 0, srcEnd: d }];
+      // Patch the placeholder ONLY if we actually got a real duration.
+      // If video.duration is 0/NaN (codec issue, no audio track,
+      // file failed to decode) we KEEP the placeholder srcEnd so the
+      // clip stays visible while the load-failure overlay (3s probe)
+      // surfaces the real problem.
+      if (d > 0 && !isNaN(d)) {
+        if (engine.clips.length === 1 && engine.clips[0]._placeholder) {
+          engine.clips[0].srcEnd = d;
+          delete engine.clips[0]._placeholder;
+        } else if (!engine.clips.length) {
+          engine.clips = [{ id: 'c0', srcStart: 0, srcEnd: d }];
+        }
+        engine.t = 0;
+        engine.onClipsChanged();
+        engine.setTime(0);
+      } else {
+        try { console.warn('[VE] loadedmetadata fired but duration is 0/NaN — keeping placeholder clip'); } catch (_) {}
       }
-      engine.t = 0;
-      engine.onClipsChanged();
-      // Force a setTime(0) after the duration patch so the playhead's
-      // percent position recalculates against the new (real) duration
-      // — without this the playhead would stay at the placeholder's
-      // 5s baseline until the user interacted again.
-      engine.setTime(0);
       refreshTrimDisplay();
       drawOverlay();
       // Generate frame thumbnails for the timeline strip — VN-style.
@@ -10406,34 +10408,56 @@
       wrap.remove();
     });
 
-    /* MOUNT THE PLACEHOLDER CLIP NOW.
-       At this point in openVideoEditor every function declaration
-       (renderClipBlocks, populateBlockThumbs) is hoisted and every
-       reassignment (engine.onClipsChanged → renderClipBlocks) has
-       run. Calling renderClipBlocks directly guarantees the
-       .timeline-clip element appears immediately — no async wait,
-       no setTimeout, no dependence on metadata. If renderClipBlocks
-       throws or stripEl is missing, fall back to a hardcoded test
-       clip so the timeline is NEVER empty. */
-    try {
-      renderClipBlocks();
-      var testCheck = document.querySelector('.timeline-clip');
-      if (!testCheck) {
-        // Hard fallback — proves the DOM mount path works even if
-        // engine.clips state somehow got cleared.
-        var stripEl = document.getElementById('ve-clip-strip');
-        if (stripEl) {
-          stripEl.innerHTML =
-            '<div class="timeline-clip selected" id="ve-clip-fallback" style="width:450px;height:56px;background:#08080d;border:3px solid #ffcc1a;display:flex;align-items:center;justify-content:center;color:#ffcc1a;font-weight:700;">' +
-              'Loading clip…' +
-            '</div>';
-          try { console.warn('[VE] renderClipBlocks did not mount a clip — using fallback. engine.clips=', engine.clips); } catch (_) {}
-        }
+    /* DIAGNOSTIC FORCE-MOUNT.
+       Inject a hard-coded yellow-bordered clip block into .video-track
+       UNCONDITIONALLY before anything else has a chance to clear it.
+       Inline styles override every CSS rule. If the user sees this,
+       CSS / layout is fine and the engine renderer is the issue. If
+       they DON'T see this, the .video-track itself is hidden or
+       offscreen and the layout is broken upstream. */
+    (function forceMount() {
+      var stripEl = document.getElementById('ve-clip-strip');
+      if (!stripEl) {
+        try { console.error('[VE] #ve-clip-strip MISSING from DOM after mount'); } catch (_) {}
+        return;
       }
-    } catch (e) {
-      try { console.warn('[VE] renderClipBlocks threw on mount', e); } catch (_) {}
-    }
-    try { renderRuler(); } catch (e) {}
+      stripEl.innerHTML =
+        '<div class="timeline-clip selected" id="ve-clip-forced" ' +
+          'style="display:flex !important;visibility:visible !important;opacity:1 !important;' +
+          'width:450px !important;height:56px !important;' +
+          'background:#08080d !important;border:3px solid #ffcc1a !important;' +
+          'border-radius:6px !important;position:relative !important;' +
+          'flex:0 0 auto !important;align-items:center !important;' +
+          'justify-content:center !important;color:#ffcc1a !important;' +
+          'font-weight:700 !important;font-size:14px !important;' +
+          'box-shadow:0 0 16px rgba(255,204,26,0.4) !important;z-index:50 !important;">' +
+          'CLIP READY' +
+        '</div>' +
+        '<div class="empty-slot"></div>' +
+        '<div class="empty-slot"></div>' +
+        '<div class="empty-slot"></div>';
+      try { console.log('[VE] force-mounted CLIP READY block. stripEl=', stripEl, 'innerHTML.length=', stripEl.innerHTML.length); } catch (_) {}
+      // Now try the real renderer; if it works, it replaces the
+      // forced block with the proper engine-driven clip.
+      try {
+        renderClipBlocks();
+        if (!document.querySelector('.timeline-clip')) {
+          // Renderer wiped the strip without putting anything back —
+          // restore the forced block.
+          stripEl.innerHTML =
+            '<div class="timeline-clip selected" id="ve-clip-forced" ' +
+              'style="display:flex !important;width:450px !important;height:56px !important;' +
+              'background:#08080d !important;border:3px solid #ffcc1a !important;' +
+              'border-radius:6px !important;align-items:center !important;' +
+              'justify-content:center !important;color:#ffcc1a !important;' +
+              'font-weight:700 !important;flex:0 0 auto !important;">CLIP READY</div>';
+          try { console.warn('[VE] renderer wiped without clip — restored forced block'); } catch (_) {}
+        }
+      } catch (e) {
+        try { console.error('[VE] renderClipBlocks threw', e); } catch (_) {}
+      }
+      try { renderRuler(); } catch (e) {}
+    })();
   }
 
   // Expose so tile menus / library can also open the editor on a video
