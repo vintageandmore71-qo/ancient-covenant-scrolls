@@ -8880,7 +8880,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17br</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bs</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -13873,6 +13873,7 @@
     var installEl   = $('piper-install');
     var testEl      = $('piper-test');
     var uninstallEl = $('piper-uninstall');
+    var repairEl    = $('piper-repair');
     var progressRow = $('piper-progress-row');
     var progressFill= $('piper-progress-fill');
     var progressLbl = $('piper-progress-label');
@@ -13962,25 +13963,81 @@
       try { if (window.LoadPiper && LoadPiper.warmAudio) LoadPiper.warmAudio(); } catch (_) {}
       testEl.disabled = true;
       var orig = testEl.textContent;
-      testEl.textContent = '🔊 Speaking…';
+      testEl.textContent = '⏳ Generating…';
       try {
-        var buf = await LoadPiper.say(
-          'Hello. I am Piper, your offline voice. Bereshit, Chanokh, and Yovelim. Listen for yourself.',
-          { rate: 1 }
-        );
-        var dur = (buf && buf.duration) ? buf.duration.toFixed(1) + 's' : '?';
-        toast('Piper played ' + dur + '. If you heard nothing, raise the volume / unmute.');
+        var startedAt = 0;
+        var buf = await LoadPiper.say('Piper voice is working.', {
+          rate: 1,
+          onstart: function () { startedAt = Date.now(); testEl.textContent = '🔊 Speaking…'; }
+        });
+        if (!buf || !buf.duration) throw new Error('no audio buffer returned');
+        var dur = buf.duration.toFixed(1) + 's';
+        toast('✓ Piper played ' + dur + '. If silent: raise the volume.');
       } catch (e) {
         var em = (e && e.message) || String(e);
-        toast('Test failed: ' + em, true);
         console.error('[Piper test] failed', e);
-        // Cache was self-cleared — flip the UI back to "Not installed"
-        // so the user can tap Install again immediately.
-        if (e && e.code === 'PIPER_CACHE_CORRUPT') {
-          refresh();
+        if (/cache.*corrupt|JSON.*Parse|Unexpected EOF|verify-failed|Install incomplete/i.test(em)) {
+          toast('Voice cache was incomplete. Tap Repair voice to fix.', true);
+        } else {
+          toast('Piper test failed: ' + em, true);
         }
+        // Auto-disable Piper so other speak() calls fall back to
+        // iOS voices instead of repeatedly hitting the same error.
+        try { LoadPiper.setEnabled(false); enableEl.checked = false; } catch (_) {}
+        refresh();
       }
-      setTimeout(function () { testEl.textContent = orig; testEl.disabled = false; }, 1200);
+      setTimeout(function () { testEl.textContent = orig; testEl.disabled = false; }, 1500);
+    });
+
+    // Repair voice — one-tap recovery for any broken state.
+    repairEl.addEventListener('click', async function () {
+      if (repairEl.disabled) return;
+      try { if (window.LoadPiper && LoadPiper.warmAudio) LoadPiper.warmAudio(); } catch (_) {}
+      repairEl.disabled = true;
+      var orig = repairEl.textContent;
+      repairEl.textContent = '⏳ Repairing…';
+      progressRow.style.display = '';
+      progressFill.style.width = '0%';
+      progressLbl.textContent = 'Wiping any bad voice cache…';
+      try {
+        await LoadPiper.uninstall();
+        progressLbl.textContent = 'Re-downloading voice…';
+        await LoadPiper.install(function (p) {
+          var pct = (p && p.percent) || 0;
+          progressFill.style.width = pct + '%';
+          if (p && p.phase === 'downloading' && p.total > 0) {
+            var mb = (p.loaded / 1048576).toFixed(1) + ' MB / ' + (p.total / 1048576).toFixed(1) + ' MB';
+            progressLbl.textContent = pct + '% · ' + mb;
+          }
+        });
+        progressLbl.textContent = '✓ Repaired. Testing voice…';
+        // Auto-test so the user knows immediately if it works.
+        var ok = false;
+        try {
+          await LoadPiper.say('Piper voice is working.', { rate: 1 });
+          ok = true;
+        } catch (e) {
+          progressLbl.innerHTML = '<span style="color:#ff6b8a;">Repair completed but Piper still cannot play. Falling back to iOS voices.</span>';
+        }
+        if (ok) {
+          LoadPiper.setEnabled(true);
+          enableEl.checked = true;
+          toast('Piper voice repaired and ready.');
+        } else {
+          LoadPiper.setEnabled(false);
+          enableEl.checked = false;
+        }
+      } catch (e) {
+        var rem = (e && e.message) || String(e);
+        progressLbl.innerHTML = '<span style="color:#ff6b8a;">Repair failed: ' + rem + '</span>';
+        toast('Repair failed: ' + rem, true);
+      }
+      setTimeout(function () {
+        progressRow.style.display = 'none';
+        repairEl.textContent = orig;
+        repairEl.disabled = false;
+      }, 2400);
+      refresh();
     });
 
     uninstallEl.addEventListener('click', async function () {

@@ -60,6 +60,64 @@
     return loadPromise;
   }
 
+  // Verify the install actually landed something usable on disk.
+  // The library's stored() can lie after a manual sweep; this
+  // walks OPFS, finds piper-shaped files, and validates the
+  // config JSON parses. Returns { ok, reason }.
+  async function verifyInstall() {
+    if (!navigator.storage || typeof navigator.storage.getDirectory !== 'function') {
+      return { ok: false, reason: 'OPFS not available on this device' };
+    }
+    try {
+      var root = await navigator.storage.getDirectory();
+      if (typeof root.entries !== 'function') {
+        // Older Safari — can't enumerate; trust stored()
+        try {
+          var libCheck = await ensureLib();
+          var s = await libCheck.stored();
+          if (Array.isArray(s) && s.indexOf(DEFAULT_VOICE) !== -1) return { ok: true };
+        } catch (_) {}
+        return { ok: false, reason: 'Cannot enumerate OPFS on this Safari' };
+      }
+      // Find candidate model + config files
+      var modelOk = false, configOk = false, configBytes = 0;
+      async function walk(dir) {
+        for await (var entry of dir.entries()) {
+          var name = entry[0], handle = entry[1];
+          if (handle.kind === 'file') {
+            var lower = name.toLowerCase();
+            if (lower.indexOf('.onnx.json') !== -1) {
+              try {
+                var f = await handle.getFile();
+                configBytes = f.size;
+                if (f.size < 10) continue;
+                var txt = await f.text();
+                if (!txt || txt.length < 10) continue;
+                var first = txt.charAt(0), last = txt.charAt(txt.length - 1);
+                if ((first !== '{' && first !== '[') || (last !== '}' && last !== ']')) continue;
+                JSON.parse(txt); // throws if invalid
+                configOk = true;
+              } catch (_) { /* keep looking */ }
+            } else if (/\.onnx$/.test(lower)) {
+              try {
+                var mf = await handle.getFile();
+                if (mf.size > 100000) modelOk = true;
+              } catch (_) {}
+            }
+          } else if (handle.kind === 'directory') {
+            try { await walk(handle); } catch (_) {}
+          }
+        }
+      }
+      await walk(root);
+      if (!modelOk) return { ok: false, reason: 'voice model file not found or too small' };
+      if (!configOk) return { ok: false, reason: 'voice config JSON missing or unreadable (' + configBytes + ' bytes)' };
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, reason: (e && e.message) || String(e) };
+    }
+  }
+
   async function isCached() {
     try {
       var lib = await ensureLib();
@@ -118,6 +176,15 @@
     } catch (e) {
       var dem = (e && e.message) || String(e);
       throw new Error('Download failed: ' + dem);
+    }
+    // Validate the install actually produced usable files. If not,
+    // wipe + report so the user gets a clear, recoverable error
+    // instead of a silent "Installed" that fails on first speech.
+    var v = await verifyInstall();
+    if (!v.ok) {
+      progressFn && progressFn({ phase: 'verify-failed', loaded: 0, total: 0, percent: 0 });
+      try { await uninstall(); } catch (_) {}
+      throw new Error('Install incomplete: ' + v.reason + '. Please reinstall the voice.');
     }
     progressFn && progressFn({ phase: 'done', loaded: 1, total: 1, percent: 100 });
     return true;
@@ -237,17 +304,36 @@
       } catch (e) { rej(e); }
     });
 
+    if (!audioBuffer || !audioBuffer.duration || audioBuffer.length < 100) {
+      throw new Error('Decoded audio buffer is empty (' + (audioBuffer && audioBuffer.length) + ' samples)');
+    }
+
     stopAll();
     var src = ctx.createBufferSource();
     src.buffer = audioBuffer;
     var rate = (typeof opts.rate === 'number' && opts.rate > 0) ? opts.rate : 1;
     if (rate !== 1) { try { src.playbackRate.value = rate; } catch (_) {} }
-    src.connect(ctx.destination);
+
+    // Insert a GainNode so we can guarantee non-zero volume.
+    var gain = ctx.createGain();
+    gain.gain.value = 1.0;
+    src.connect(gain);
+    gain.connect(ctx.destination);
+
     currentSource = src;
     src.onended = function () {
       if (currentSource === src) currentSource = null;
+      if (typeof opts.onended === 'function') {
+        try { opts.onended(); } catch (_) {}
+      }
     };
     src.start(0);
+
+    // Notify the caller when audio actually starts so the UI can
+    // wait before declaring "Speaking".
+    if (typeof opts.onstart === 'function') {
+      try { opts.onstart(audioBuffer); } catch (_) {}
+    }
     return audioBuffer;
   }
 
@@ -296,6 +382,7 @@
     DEFAULT_VOICE: DEFAULT_VOICE,
     isSupported: isSupported,
     isCached: isCached,
+    verifyInstall: verifyInstall,
     install: install,
     uninstall: uninstall,
     say: say,

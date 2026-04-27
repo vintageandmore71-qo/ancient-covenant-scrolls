@@ -1451,10 +1451,13 @@
 
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
       <button id="piper-install" class="seg-btn" style="flex:1;min-width:140px;">&#11015; Install voice</button>
-      <button id="piper-test" class="seg-btn" style="flex:1;min-width:140px;" disabled>&#128266; Test</button>
-      <button id="piper-uninstall" class="seg-btn danger" style="flex:0 0 auto;display:none;">&#128465; Remove</button>
+      <button id="piper-test" class="seg-btn" style="flex:1;min-width:140px;" disabled>&#128266; Test sound</button>
     </div>
-    <p class="panel-hint" id="piper-help" style="font-size:11px;color:var(--ink-low);margin-top:8px;">Tip: install once on Wi-Fi. After that the voice is yours offline forever.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+      <button id="piper-repair" class="seg-btn" style="flex:1;min-width:140px;">&#129657; Repair voice</button>
+      <button id="piper-uninstall" class="seg-btn danger" style="flex:0 0 auto;">&#128465; Remove</button>
+    </div>
+    <p class="panel-hint" id="piper-help" style="font-size:11px;color:var(--ink-low);margin-top:8px;">First install must be on Wi-Fi. After that the voice works offline forever. If something breaks, tap <strong>Repair voice</strong> &mdash; it wipes the bad cache and re-downloads in one step.</p>
   </div>
 
   <div class="panel-section">
