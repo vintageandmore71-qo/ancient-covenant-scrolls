@@ -8764,6 +8764,7 @@
         '<button class="ve-action" data-action="preset"><span class="ve-act-icon">&#9733;</span><span class="ve-act-lbl">Preset</span></button>' +
         '<button class="ve-action" data-action="keyframe"><span class="ve-act-icon">&#128273;</span><span class="ve-act-lbl">Keyframe</span></button>' +
         '<button class="ve-action" data-action="pip-track"><span class="ve-act-icon">&#128301;</span><span class="ve-act-lbl">PiP Track</span></button>' +
+        '<button class="ve-action" data-action="stock-media"><span class="ve-act-icon">&#127760;</span><span class="ve-act-lbl">Free Media</span></button>' +
       '</div>' +
       // ===== Context action bar — slides in OVER the bottom toolbar
       // when a clip is selected. Hidden by default. Mirrors VN's
@@ -8822,6 +8823,11 @@
       '#__loadVideoEdit .clip-add{position:absolute;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;background:#fff;color:#101018;border:2px solid #101018;font-size:14px;font-weight:900;cursor:pointer;line-height:1;padding:0;z-index:7;}' +
       '#__loadVideoEdit .clip-add.left{left:-12px;}' +
       '#__loadVideoEdit .clip-add.right{right:-12px;}' +
+      // Always-visible delete × on each timeline frame. Sits at top-right
+      // of the clip block so the user can remove a frame in one tap
+      // without first selecting + opening the context bar.
+      '#__loadVideoEdit .clip-x{position:absolute;top:-9px;right:-9px;width:22px;height:22px;border-radius:50%;background:#ff3b5c;color:#fff;border:2px solid #fff;font-size:14px;font-weight:900;cursor:pointer;line-height:1;padding:0;z-index:8;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.45);}' +
+      '#__loadVideoEdit .clip-x:active{transform:scale(0.9);background:#ff5e7a;}' +
       // Empty slot width matches a thumbnail frame's width for consistent
       // spacing alongside the populated clip strip.
       '#__loadVideoEdit .empty-slot{flex:0 0 100px;height:56px;border:1px dashed #2a2a40;border-radius:6px;background:#0c0c14;cursor:pointer;}' +
@@ -9171,6 +9177,91 @@
           b.addEventListener('click', function () { done(b.getAttribute('data-key')); });
         });
       });
+    }
+    // Curated free / royalty-free media sources. Tapping a row opens the
+    // site in a new tab; once the user copies a direct file URL there
+    // they can paste it back into the Library's Stocks tab to import.
+    function openStockMediaSheet() {
+      var SECTIONS = [
+        { title: 'Free cinematic music', icon: '🎵', items: [
+          { name: 'Pixabay Music',          url: 'https://pixabay.com/music/search/cinematic/',         note: 'No login. Royalty-free, commercial OK.' },
+          { name: 'Free Music Archive',     url: 'https://freemusicarchive.org/genre/Soundtrack/',      note: 'CC-licensed soundtrack & cinematic.' },
+          { name: 'YouTube Audio Library',  url: 'https://studio.youtube.com/channel/UC/music',         note: 'Free for any project (Google login).' },
+          { name: 'Bensound',               url: 'https://www.bensound.com/royalty-free-music/cinematic', note: 'Cinematic playlist. Free w/ credit.' },
+          { name: 'Uppbeat',                url: 'https://uppbeat.io/browse/music/cinematic',           note: 'Free tier with credit; sign-up.' },
+          { name: 'Mixkit Music',           url: 'https://mixkit.co/free-stock-music/tag/cinematic/',   note: 'No sign-up. License: free for commercial.' },
+          { name: 'Chosic Cinematic',       url: 'https://www.chosic.com/free-music/cinematic/',        note: 'Curated CC + royalty-free cinematic.' },
+          { name: 'Incompetech',            url: 'https://incompetech.com/music/royalty-free/music.html',note: 'Kevin MacLeod — free w/ credit.' }
+        ]},
+        { title: 'Free stock video clips', icon: '🎬', items: [
+          { name: 'Pexels Videos',          url: 'https://www.pexels.com/videos/',                      note: 'No login. Free for commercial use.' },
+          { name: 'Pixabay Videos',         url: 'https://pixabay.com/videos/',                         note: 'No login. Royalty-free.' },
+          { name: 'Coverr',                 url: 'https://coverr.co/',                                  note: 'Cinematic 4K loops, free.' },
+          { name: 'Mixkit Video',           url: 'https://mixkit.co/free-stock-video/',                 note: 'No sign-up. Free license.' },
+          { name: 'Videvo',                 url: 'https://www.videvo.net/free-stock-footage/',          note: 'Free stock + motion graphics.' },
+          { name: 'Vidsplay',               url: 'https://www.vidsplay.com/',                           note: 'Free 4K clips w/ attribution.' }
+        ]},
+        { title: 'Free stock photos', icon: '🖼', items: [
+          { name: 'Unsplash',               url: 'https://unsplash.com/',                               note: 'High-res. Unsplash license (free).' },
+          { name: 'Pexels',                 url: 'https://www.pexels.com/',                             note: 'Free for commercial. No attribution.' },
+          { name: 'Pixabay',                url: 'https://pixabay.com/images/search/cinematic/',        note: 'Royalty-free, no login.' },
+          { name: 'Burst (Shopify)',        url: 'https://burst.shopify.com/',                          note: 'Free for any project.' },
+          { name: 'StockSnap',              url: 'https://stocksnap.io/',                               note: 'CC0 — no attribution required.' },
+          { name: 'Kaboompics',             url: 'https://kaboompics.com/',                             note: 'Free, custom license.' }
+        ]}
+      ];
+      var menu = document.createElement('div');
+      menu.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:3500;display:flex;align-items:flex-end;justify-content:center;padding:0;';
+      var html =
+        '<div style="background:#1a1a26;color:#fff;width:100%;max-width:640px;border-top-left-radius:16px;border-top-right-radius:16px;padding:14px 14px max(14px,env(safe-area-inset-bottom));max-height:82vh;display:flex;flex-direction:column;">' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">' +
+            '<h3 style="margin:0;font-size:16px;font-weight:700;">🌐 Free media sources</h3>' +
+            '<button id="vesm-close" style="background:transparent;border:none;color:#cfcfdc;font-size:22px;cursor:pointer;line-height:1;">×</button>' +
+          '</div>' +
+          '<p style="margin:0 0 10px;font-size:12px;color:#a8a8c4;line-height:1.4;">Tap a source to open it in a new tab. Right-tap a file there → <strong>Copy link</strong>. Then come back to Library → Add → Stocks tab and paste the URL to import directly into Load.</p>' +
+          '<div id="vesm-body" style="overflow-y:auto;flex:1;padding-right:4px;"></div>' +
+        '</div>';
+      menu.innerHTML = html;
+      document.body.appendChild(menu);
+      var body = menu.querySelector('#vesm-body');
+      SECTIONS.forEach(function (sec) {
+        var h = document.createElement('div');
+        h.style.cssText = 'margin:12px 0 6px;font-size:13px;font-weight:800;color:#fbbf24;letter-spacing:0.04em;text-transform:uppercase;';
+        h.textContent = sec.icon + '  ' + sec.title;
+        body.appendChild(h);
+        sec.items.forEach(function (it) {
+          var row = document.createElement('button');
+          row.style.cssText = 'display:flex;align-items:center;gap:10px;width:100%;background:#2a2a40;border:1.5px solid transparent;border-radius:10px;padding:10px 12px;margin-bottom:6px;color:#fff;cursor:pointer;text-align:left;font-family:inherit;';
+          row.innerHTML =
+            '<div style="flex:1;min-width:0;">' +
+              '<div style="font-size:14px;font-weight:700;">' + it.name + '</div>' +
+              '<div style="font-size:11px;color:#a8a8c4;line-height:1.3;margin-top:2px;">' + it.note + '</div>' +
+              '<div style="font-size:10px;color:#7b7b8c;margin-top:2px;font-family:ui-monospace,Menlo,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + it.url + '</div>' +
+            '</div>' +
+            '<div style="font-size:18px;color:#fbbf24;flex-shrink:0;">↗</div>';
+          row.addEventListener('click', function () {
+            try {
+              var w = window.open(it.url, '_blank', 'noopener');
+              if (!w) {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                  navigator.clipboard.writeText(it.url);
+                  toast('Pop-up blocked — link copied: ' + it.url, false);
+                } else {
+                  toast('Open this URL: ' + it.url, false);
+                }
+              } else {
+                toast('Opening ' + it.name + '…', false);
+              }
+            } catch (e) {
+              toast('Could not open: ' + it.url, true);
+            }
+          });
+          body.appendChild(row);
+        });
+      });
+      var done = function () { try { menu.remove(); } catch (_) {} };
+      menu.addEventListener('click', function (e) { if (e.target === menu) done(); });
+      menu.querySelector('#vesm-close').addEventListener('click', done);
     }
     // Keyframe interpolation. Returns the value of `prop` at time t
     // by linear-interpolating between the closest two keyframes.
@@ -9893,6 +9984,7 @@
           });
         }
         else if (act === 'opacity')  showPanel('ve-opacity-panel');
+        else if (act === 'stock-media') { openStockMediaSheet(); }
         else if (act === 'tts') {
           var t = (document.getElementById('ve-text') && document.getElementById('ve-text').value || '').trim();
           if (!t) { toast('Add subtitle text first, then TTS will read it.', true); showPanel('ve-text-panel'); return; }
@@ -10095,6 +10187,7 @@
         clip.style.width = widthPx + 'px';
         clip.innerHTML =
           '<button class="clip-add left" data-clip-idx="' + i + '" data-edge="before" aria-label="Add clip before">+</button>' +
+          '<button class="clip-x" data-clip-idx="' + i + '" aria-label="Delete frame ' + (i + 1) + '" title="Delete frame">&times;</button>' +
           '<div class="thumbnail-strip" data-clip-idx="' + i + '"></div>' +
           '<span class="clip-duration">' + dur.toFixed(2) + 's</span>' +
           '<div class="trim-handle trim-left ve-block-handle ve-block-handle-l" data-clip-idx="' + i + '" data-side="left"></div>' +
@@ -10108,7 +10201,7 @@
           if (!strip) return;
           var lpTimer = null;
           strip.addEventListener('pointerdown', function (e) {
-            if (e.target.closest('.trim-handle') || e.target.closest('.clip-add')) return;
+            if (e.target.closest('.trim-handle') || e.target.closest('.clip-add') || e.target.closest('.clip-x')) return;
             clearTimeout(lpTimer);
             lpTimer = setTimeout(function () {
               try { if (navigator.vibrate) navigator.vibrate(15); } catch (_) {}
@@ -10173,14 +10266,14 @@
         var fromIdx = 0;
         b.addEventListener('click', function (e) {
           if (dragging) { dragging = false; return; }
-          if (e.target.closest('.trim-handle') || e.target.closest('.clip-add')) return;
+          if (e.target.closest('.trim-handle') || e.target.closest('.clip-add') || e.target.closest('.clip-x')) return;
           e.stopPropagation();
           selectedClipIdx = +b.dataset.clipIdx;
           selectClip();
           renderClipBlocks();
         });
         b.addEventListener('pointerdown', function (e) {
-          if (e.target.closest('.trim-handle') || e.target.closest('.clip-add')) return;
+          if (e.target.closest('.trim-handle') || e.target.closest('.clip-add') || e.target.closest('.clip-x')) return;
           startX = e.clientX;
           fromIdx = +b.dataset.clipIdx;
           clearTimeout(pressTimer);
@@ -10251,6 +10344,28 @@
           if (edge === 'before' && idx > 0) engine.duplicateAt(idx - 1);
           else engine.duplicateAt(idx);
           toast('Clip added. Now ' + engine.clips.length + ' clips.', false);
+        });
+      });
+      // Per-frame × delete button (always visible on each clip block).
+      Array.prototype.forEach.call(stripEl.querySelectorAll('.clip-x'), function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          e.preventDefault();
+          var idx = +btn.dataset.clipIdx;
+          var n = engine.clips.length;
+          var c = engine.clips[idx];
+          var dur = c ? (c.srcEnd - c.srcStart).toFixed(2) : '';
+          if (n <= 1) {
+            if (!confirm('Delete this clip? The editor will close.')) return;
+            var existing = document.getElementById('__loadVideoEdit');
+            if (existing) existing.remove();
+            return;
+          }
+          if (!confirm('Delete frame ' + (idx + 1) + ' of ' + n + ' (' + dur + 's)?')) return;
+          engine.removeAt(idx);
+          selectedClipIdx = Math.min(idx, engine.clips.length - 1);
+          renderClipBlocks();
+          toast('Deleted frame ' + (idx + 1) + '. Now ' + engine.clips.length + ' clip' + (engine.clips.length === 1 ? '' : 's') + '.', false);
         });
       });
       // Per-block trim drag. Captures the original clip + timeline
@@ -11056,12 +11171,19 @@
       if (act === 'speed')     { showPanel('ve-speed-panel'); return; }
       if (act === 'opacity')   { showPanel('ve-opacity-panel'); return; }
       if (act === 'delete') {
-        // If the engine has more than one clip, delete the last one.
-        // Single-clip case still tears down the editor.
-        if (engine.clips.length > 1) {
-          if (!confirm('Delete the last clip?')) return;
-          engine.removeAt(engine.clips.length - 1);
-          toast('Deleted. Now ' + engine.clips.length + ' clip' + (engine.clips.length === 1 ? '' : 's') + '.', false);
+        // Delete the SELECTED frame (or the last one if nothing is
+        // explicitly selected). Single-clip case tears down the editor.
+        var n = engine.clips.length;
+        var idx = (typeof selectedClipIdx === 'number' && selectedClipIdx >= 0 && selectedClipIdx < n)
+          ? selectedClipIdx : n - 1;
+        if (n > 1) {
+          var c = engine.clips[idx];
+          var dur = c ? (c.srcEnd - c.srcStart).toFixed(2) : '';
+          if (!confirm('Delete frame ' + (idx + 1) + ' of ' + n + ' (' + dur + 's)?')) return;
+          engine.removeAt(idx);
+          selectedClipIdx = Math.min(idx, engine.clips.length - 1);
+          renderClipBlocks();
+          toast('Deleted frame ' + (idx + 1) + '. Now ' + engine.clips.length + ' clip' + (engine.clips.length === 1 ? '' : 's') + '.', false);
           return;
         }
         if (!confirm('Delete this clip? The editor will close.')) return;
@@ -11482,6 +11604,8 @@
         '• Yellow-bordered block is your video clip — drag the side handles to trim\n' +
         '• Tap the clip to select it (clip-edit mode)\n' +
         '• Edge + buttons: add a copy of the clip before / after\n' +
+        '• Red × at the top-right of every frame: tap to delete that frame (single-tap, asks to confirm)\n' +
+        '• Bottom-bar 🗑 Delete also removes the SELECTED frame (the one with the yellow border)\n' +
         '• Yellow waveform: real audio amplitude under each clip\n' +
         '• Time ruler: shows seconds 0s, 1s, 2s …\n\n' +
 
@@ -11511,7 +11635,8 @@
         '• Story: alert with each clip\'s duration\n' +
         '• Reverse: plays the video backwards at 15 fps\n' +
         '• Freeze: captures the current frame onto the overlay\n' +
-        '• PiP Track: requests Picture-in-Picture\n\n' +
+        '• PiP Track: requests Picture-in-Picture\n' +
+        '• 🌐 Free Media: opens a sheet of curated free / royalty-free sites — cinematic music (Pixabay, FMA, Bensound, Uppbeat, Mixkit, Chosic, Incompetech, YouTube Audio Library), stock video (Pexels, Pixabay, Coverr, Mixkit, Videvo, Vidsplay) and stock photos (Unsplash, Pexels, Pixabay, Burst, StockSnap, Kaboompics). Tap a row to open. Copy a direct file URL there, then paste it in Library → Add → Stocks tab to import.\n\n' +
 
         'CLIP-EDIT MODE (after tapping a clip)\n' +
         '• Edit: opens the subtitle / text panel\n' +
@@ -11519,7 +11644,12 @@
         '• Replace: pick a new video to swap in\n' +
         '• Speed / Opacity: live sliders\n' +
         '• Duplicate: copies the clip\n' +
-        '• Delete: removes the clip (closes editor if it was the last one)\n\n' +
+        '• Delete: removes the SELECTED frame (yellow border). With one clip left it tears down the editor instead.\n\n' +
+
+        'DELETE A FRAME — three quick ways\n' +
+        '• Easiest: red × on the top-right of every clip block on the timeline → confirm\n' +
+        '• Tap the clip first (yellow border appears) → tap 🗑 Delete on the context bar\n' +
+        '• Or tap 🗑 Delete on the bottom toolbar — it also targets the selected frame\n\n' +
 
         'EXPORT OPTIONS (when you tap ⬆ Export)\n' +
         '• File format: MP4 / MOV / WebM / MKV / AVI / WMV / AVCHD\n' +
