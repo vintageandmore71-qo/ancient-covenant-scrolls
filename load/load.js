@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17v</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17w</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -8827,6 +8827,10 @@
       '#__loadVideoEdit .time-ruler{position:relative;height:22px;color:#8f8f9d;font-size:11px;font-variant-numeric:tabular-nums;margin-top:6px;}' +
       '#__loadVideoEdit .playhead{position:absolute;top:12px;bottom:12px;width:2px;background:#fff;left:0;pointer-events:none;box-shadow:0 0 6px rgba(255,255,255,0.7);z-index:10;}' +
       '#__loadVideoEdit .playhead::before{content:"";position:absolute;top:-3px;left:-5px;width:12px;height:12px;background:#fff;border-radius:50%;box-shadow:0 0 0 2px #101018;}' +
+      // ===== FORCE-FIX TEST CLIP (verbatim from user spec) =====
+      '#__loadVideoEdit .force-test-clip{width:450px !important;height:56px !important;background:red !important;border:3px solid #ffcc1a !important;display:block !important;position:relative !important;z-index:9999 !important;opacity:1 !important;visibility:visible !important;}' +
+      '#__loadVideoEdit .force-test-clip .thumbnail-strip{width:100% !important;height:100% !important;display:flex !important;background:#222 !important;}' +
+      '#__loadVideoEdit .force-test-clip .thumbnail-frame{width:86px !important;height:100% !important;display:flex !important;align-items:center !important;justify-content:center !important;color:white !important;background:#333 !important;}' +
       // Legacy class shims (kept hidden so existing engine code that
       // queries them still finds something to bind to without throwing)
       '#__loadVideoEdit .ve-clip-strip{position:relative;flex:1;height:56px;background:transparent;cursor:ew-resize;touch-action:none;overflow:visible;}' +
@@ -10408,54 +10412,31 @@
       wrap.remove();
     });
 
-    /* DIAGNOSTIC FORCE-MOUNT.
-       Inject a hard-coded yellow-bordered clip block into .video-track
-       UNCONDITIONALLY before anything else has a chance to clear it.
-       Inline styles override every CSS rule. If the user sees this,
-       CSS / layout is fine and the engine renderer is the issue. If
-       they DON'T see this, the .video-track itself is hidden or
-       offscreen and the layout is broken upstream. */
+    /* FORCE-FIX TEST CLIP — verbatim from user spec. This block
+       runs UNCONDITIONALLY at editor open. If it does NOT appear,
+       the issue is CSS / layout / parent container clipping. If it
+       DOES appear, the issue is render / data logic and we know
+       where to look. Inline + .force-test-clip CSS rules use
+       !important to defeat every other rule on the page. */
     (function forceMount() {
       var stripEl = document.getElementById('ve-clip-strip');
       if (!stripEl) {
         try { console.error('[VE] #ve-clip-strip MISSING from DOM after mount'); } catch (_) {}
         return;
       }
+      // Inject the test markup user specified, byte-for-byte.
       stripEl.innerHTML =
-        '<div class="timeline-clip selected" id="ve-clip-forced" ' +
-          'style="display:flex !important;visibility:visible !important;opacity:1 !important;' +
-          'width:450px !important;height:56px !important;' +
-          'background:#08080d !important;border:3px solid #ffcc1a !important;' +
-          'border-radius:6px !important;position:relative !important;' +
-          'flex:0 0 auto !important;align-items:center !important;' +
-          'justify-content:center !important;color:#ffcc1a !important;' +
-          'font-weight:700 !important;font-size:14px !important;' +
-          'box-shadow:0 0 16px rgba(255,204,26,0.4) !important;z-index:50 !important;">' +
-          'CLIP READY' +
-        '</div>' +
-        '<div class="empty-slot"></div>' +
-        '<div class="empty-slot"></div>' +
-        '<div class="empty-slot"></div>';
-      try { console.log('[VE] force-mounted CLIP READY block. stripEl=', stripEl, 'innerHTML.length=', stripEl.innerHTML.length); } catch (_) {}
-      // Now try the real renderer; if it works, it replaces the
-      // forced block with the proper engine-driven clip.
-      try {
-        renderClipBlocks();
-        if (!document.querySelector('.timeline-clip')) {
-          // Renderer wiped the strip without putting anything back —
-          // restore the forced block.
-          stripEl.innerHTML =
-            '<div class="timeline-clip selected" id="ve-clip-forced" ' +
-              'style="display:flex !important;width:450px !important;height:56px !important;' +
-              'background:#08080d !important;border:3px solid #ffcc1a !important;' +
-              'border-radius:6px !important;align-items:center !important;' +
-              'justify-content:center !important;color:#ffcc1a !important;' +
-              'font-weight:700 !important;flex:0 0 auto !important;">CLIP READY</div>';
-          try { console.warn('[VE] renderer wiped without clip — restored forced block'); } catch (_) {}
-        }
-      } catch (e) {
-        try { console.error('[VE] renderClipBlocks threw', e); } catch (_) {}
-      }
+        '<div class="timeline-clip selected force-test-clip">' +
+          '<div class="clip-add left">+</div>' +
+          '<div class="thumbnail-strip">' +
+            '<div class="thumbnail-frame">TEST CLIP</div>' +
+          '</div>' +
+          '<div class="clip-duration">5.04s</div>' +
+          '<div class="trim-handle trim-left"></div>' +
+          '<div class="trim-handle trim-right"></div>' +
+          '<div class="clip-add right">+</div>' +
+        '</div>';
+      try { console.log('[VE] forceMount: test clip injected. stripEl=', stripEl, 'children=', stripEl.children.length); } catch (_) {}
       try { renderRuler(); } catch (e) {}
     })();
   }
