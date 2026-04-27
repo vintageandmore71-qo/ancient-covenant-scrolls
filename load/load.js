@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bd</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17be</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -11173,12 +11173,33 @@
     function drawOverlay() {
       if (!canvas.width) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      var t = (document.getElementById('ve-text').value || '').trim();
+      // Per-clip text track: any subtitle block whose [t0, t0+dur] window
+      // covers the current playhead time wins over the global text. Falls
+      // back to the global text panel value when no track item matches.
+      var t = '';
+      var pos, size, color, bg;
+      var nowT = (typeof engine !== 'undefined' && engine && typeof engine.t === 'number') ? engine.t : 0;
+      var trackItems = (typeof engine !== 'undefined' && engine && engine.tracks && engine.tracks.text) || [];
+      var active = null;
+      for (var ti = 0; ti < trackItems.length; ti++) {
+        var it = trackItems[ti];
+        if (nowT >= it.t0 && nowT <= it.t0 + it.dur) { active = it; break; }
+      }
+      if (active) {
+        t = (active.text || '').trim();
+        pos   = active.pos   || (document.getElementById('ve-text-pos')   || {}).value || 'bottom';
+        size  = active.size  || parseInt((document.getElementById('ve-text-size')  || {}).value || '48', 10);
+        color = active.color || (document.getElementById('ve-text-color') || {}).value || '#ffffff';
+        bg    = active.bg    || (document.getElementById('ve-text-bg')    || {}).value || 'none';
+      } else {
+        t = ((document.getElementById('ve-text') || {}).value || '').trim();
+        if (!t) return;
+        pos   = (document.getElementById('ve-text-pos')   || {}).value || 'bottom';
+        size  = parseInt((document.getElementById('ve-text-size')  || {}).value || '48', 10);
+        color = (document.getElementById('ve-text-color') || {}).value || '#ffffff';
+        bg    = (document.getElementById('ve-text-bg')    || {}).value || 'none';
+      }
       if (!t) return;
-      var pos = document.getElementById('ve-text-pos').value;
-      var size = parseInt(document.getElementById('ve-text-size').value, 10) || 48;
-      var color = document.getElementById('ve-text-color').value;
-      var bg = document.getElementById('ve-text-bg').value;
       var w = canvas.width, h = canvas.height;
       var pad = Math.round(size * 0.6);
       var lineH = Math.round(size * 1.25);
@@ -11500,9 +11521,57 @@
         '• Duplicate: copies the clip\n' +
         '• Delete: removes the clip (closes editor if it was the last one)\n\n' +
 
+        'EXPORT OPTIONS (when you tap ⬆ Export)\n' +
+        '• File format: MP4 / MOV / WebM / MKV / AVI / WMV / AVCHD\n' +
+        '• Resolution: Original / 4K / 2K / 1080p / 720p / 480p / 360p\n' +
+        '• Bitrate: Low 1.5 / Medium 4 / High 8 / Best 16 Mbps\n' +
+        '• "⬆ Export now" runs the encode immediately\n' +
+        '• "＋ Add to queue" stacks the picked options as a job; queue more variants, then "▶ Run queue (N)" exports them sequentially\n' +
+        '• "Clear queue" empties the stack\n\n' +
+
+        'SEND-TO (after every export)\n' +
+        '• 🗂 Media Library — saves the new MP4 as a standalone item\n' +
+        '• ↻ Replace this app\'s video — overwrites the source video\n' +
+        '• 📖 Attain book asset — saves as kind:attain for an Attain / Attain Jr book\n' +
+        '• 📎 Attach to an existing app — file goes into that app\'s attachments\n\n' +
+
+        'CUSTOM POSTER THUMBNAIL (per clip)\n' +
+        '• Long-press a clip\'s thumbnail strip to open the poster sheet\n' +
+        '• "Use current frame" snapshots the playhead frame as the thumbnail\n' +
+        '• "Pick image…" lets you upload any image as the clip\'s thumbnail\n' +
+        '• "Reset (auto)" returns to the auto-generated frame samples\n\n' +
+
+        'COLOR / FX PRESETS\n' +
+        '• ★ Preset opens the preset sheet\n' +
+        '• "Save current…" snapshots Filter / FX / Blur / BG / Border / Opacity / Zoom / Mirror / Flip / Rotate / Fit as one named look\n' +
+        '• Tap any saved preset to re-apply the whole look at once\n' +
+        '• "Reset all FX" clears every effect; "Delete a preset…" removes one\n\n' +
+
+        'KEYFRAMES (animate values over time)\n' +
+        '• 🗝 Keyframe opens the keyframe sheet at the current playhead\n' +
+        '• Set a value (e.g. Zoom 1.5×) → tap "Set Scale" to mark a kf at this time\n' +
+        '• Move the playhead later, change the value, tap "Set Scale" again\n' +
+        '• On playback, the editor linearly interpolates between the kfs\n' +
+        '• Properties: Opacity / Scale / Rotate / Pan X / Pan Y\n' +
+        '• "List + delete" shows every kf; "Clear all" wipes the active clip\'s kfs\n\n' +
+
+        'PER-CLIP SUBTITLE TRACKS\n' +
+        '• T+ on the left adds a yellow subtitle block on the timeline\n' +
+        '• Drag the block to reposition; drag its edges to trim its duration\n' +
+        '• Edit the text in the panel — the active block (whichever covers the current playhead) drives the on-screen overlay\n' +
+        '• Multiple blocks can chain so different text shows at different times\n\n' +
+
+        'MULTI-TRACK + LINK\n' +
+        '• Music / subtitle / sticker rows now hold real positioned, draggable, trim-able blocks\n' +
+        '• 🔗 Link toggle: when on, dragging any timeline block moves all blocks across all tracks together (relative timing preserved)\n\n' +
+
+        'DRAG-TO-REORDER CLIPS\n' +
+        '• Long-press (~400ms) on a clip lifts it; drag it left or right to swap with another clip\n' +
+        '• Release to drop. Plain horizontal scrubs still work because motion before the press timer cancels the long-press.\n\n' +
+
         'SAVE vs EXPORT\n' +
         '• 💾 Save = store edits as a draft inside Load (no MP4 produced)\n' +
-        '• ⬆ Export = render an actual MP4 file (real-time encode), shareable + saved to Library'
+        '• ⬆ Export = render an actual file in your chosen format / resolution / bitrate, shareable + sent to your chosen destination'
       );
     });
     bindEd('ve-more', 'click', function () {
@@ -11844,7 +11913,12 @@
             '<div><div style="font-size:12px;font-weight:700;color:#cfcfdc;margin-bottom:6px;letter-spacing:0.04em;">FILE FORMAT</div><div id="ve-exp-format"></div></div>' +
             '<div><div style="font-size:12px;font-weight:700;color:#cfcfdc;margin-bottom:6px;letter-spacing:0.04em;">RESOLUTION</div><div id="ve-exp-res"></div></div>' +
             '<div><div style="font-size:12px;font-weight:700;color:#cfcfdc;margin-bottom:6px;letter-spacing:0.04em;">BITRATE</div><div id="ve-exp-rate"></div></div>' +
-            '<button id="ve-exp-go" style="background:#1d6fff;color:#fff;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:6px;">⬆ Export now</button>' +
+            '<div style="display:flex;gap:8px;margin-top:6px;">' +
+              '<button id="ve-exp-go" style="flex:1;background:#1d6fff;color:#fff;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">⬆ Export now</button>' +
+              '<button id="ve-exp-queue" style="flex:1;background:#2a2a40;color:#fff;border:1.5px solid #3a3a55;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">＋ Add to queue</button>' +
+            '</div>' +
+            '<button id="ve-exp-runqueue" style="background:#fbbf24;color:#1a1a26;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;">▶ Run queue (' + ((window.__veQueue && window.__veQueue.length) || 0) + ')</button>' +
+            '<button id="ve-exp-clearqueue" style="background:transparent;color:#cfcfdc;border:none;padding:8px;border-radius:10px;font-size:12px;cursor:pointer;">Clear queue</button>' +
           '</div>' +
         '</div>' +
         '<style>' +
@@ -11859,6 +11933,34 @@
       document.getElementById('ve-exp-go').addEventListener('click', function () {
         close();
         exportMp4(picked);
+      });
+      document.getElementById('ve-exp-queue').addEventListener('click', function () {
+        window.__veQueue = window.__veQueue || [];
+        window.__veQueue.push(JSON.parse(JSON.stringify(picked)));
+        toast('Added to queue (' + window.__veQueue.length + ').', false);
+        // Update the button label without closing the sheet so the user
+        // can queue up more variants in one session.
+        var btn = document.getElementById('ve-exp-runqueue');
+        if (btn) btn.textContent = '▶ Run queue (' + window.__veQueue.length + ')';
+      });
+      document.getElementById('ve-exp-runqueue').addEventListener('click', async function () {
+        var q = (window.__veQueue || []).slice();
+        if (!q.length) { toast('Queue is empty — Add to queue first.', true); return; }
+        close();
+        toast('Running ' + q.length + ' export job' + (q.length === 1 ? '' : 's') + '…', false);
+        for (var i = 0; i < q.length; i++) {
+          var label = (i + 1) + '/' + q.length;
+          toast('Queue ' + label + ' starting…', false);
+          try { await exportMp4(q[i]); } catch (e) { toast('Queue ' + label + ' failed: ' + (e && e.message || e), true); }
+        }
+        window.__veQueue = [];
+        toast('Queue done.', false);
+      });
+      document.getElementById('ve-exp-clearqueue').addEventListener('click', function () {
+        window.__veQueue = [];
+        var btn = document.getElementById('ve-exp-runqueue');
+        if (btn) btn.textContent = '▶ Run queue (0)';
+        toast('Queue cleared.', false);
       });
     }
 
