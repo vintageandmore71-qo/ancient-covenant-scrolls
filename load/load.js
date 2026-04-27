@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17as</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17at</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -8606,7 +8606,7 @@
         '</div>' +
         '<button id="ve-more" class="ve-iconbtn" aria-label="More">&#8943;</button>' +
         '<button id="ve-save" class="ve-iconbtn" aria-label="Save draft">&#128190;</button>' +
-        '<button id="ve-export" style="background:#1d6fff;border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">&#11014;&#65039;</button>' +
+        '<button id="ve-export" title="Export — encode + save the edit" aria-label="Export" style="background:#1d6fff;border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">&#11014;&#65039; <span style="font-size:12px;">Export</span></button>' +
       '</div>' +
       // ===== Preview stage (black) =====
       '<div id="ve-stage" style="flex:1;min-height:0;position:relative;background:#000;display:flex;align-items:center;justify-content:center;">' +
@@ -8780,7 +8780,7 @@
       // ===== Recording progress overlay =====
       '<div id="ve-progress" style="display:none;position:absolute;left:14px;right:14px;bottom:90px;align-items:center;gap:10px;background:rgba(26,26,38,0.95);border-radius:12px;padding:12px 14px;border:1px solid #2a2a40;backdrop-filter:blur(8px);z-index:5;">' +
         '<div style="flex:1;height:8px;background:#1a1a26;border-radius:4px;overflow:hidden;"><div id="ve-progress-fill" style="height:100%;width:0%;background:linear-gradient(90deg,#ff5ea3,#fbbf24,#22c55e,#4ea0ff,#a18cff);transition:width 0.15s;"></div></div>' +
-        '<span id="ve-progress-label" style="font-size:13px;color:#cfcfdc;white-space:nowrap;">Recording…</span>' +
+        '<span id="ve-progress-label" style="font-size:13px;color:#cfcfdc;white-space:nowrap;">Exporting…</span>' +
       '</div>';
 
     // ===== Inline styles for the editor (scoped) =====
@@ -10535,15 +10535,85 @@
     });
     bindEd('ve-help', 'click', function () {
       alert(
-        'Load Video Editor — quick guide\n\n' +
-        '• Tap the preview to play / pause\n' +
-        '• Drag the timeline below the preview to scrub\n' +
-        '• Drag the yellow handles on the clip to trim\n' +
-        '• Tap the clip to enter clip-edit mode (Edit / Split / Replace / Speed / Opacity / Delete)\n' +
-        '• Snap toggle (◌ / ●) snaps trim + scrub to 0.5s grid\n' +
-        '• Tap Music / Subtitle / Sticker rows to add overlays\n' +
-        '• ⬆ Export renders an MP4 you can save to Files\n' +
-        '• 💾 Save stores the current edits as a draft for next time'
+        'Load Video Editor — full guide\n' +
+        '═══════════════════════════════\n\n' +
+
+        'TOP BAR\n' +
+        '• ← Back: closes the editor (your unsaved edits stay until you reload)\n' +
+        '• ?  Help: this guide\n' +
+        '• ↻  Force-Refresh: clears the cache + reloads to pull the latest build\n' +
+        '• Original ▾: aspect ratio (Original / 16:9 / 9:16 / 1:1 / 4:5)\n' +
+        '• …  More: cycles through aspect ratios quickly\n' +
+        '• 💾 Save: stores the current state (clips, trim, speed, opacity, music, text) as a draft\n' +
+        '• ⬆ Export: encodes the edit to MP4 (real-time encode), opens iOS share sheet, also saves a copy back to your Library as "(edited)"\n\n' +
+
+        'PREVIEW\n' +
+        '• Tap the video to play / pause\n' +
+        '• Native iOS controls also work\n' +
+        '• Effects (filter / blur / mirror / flip / rotate / zoom / mosaic / magnifier) all preview live on this screen\n\n' +
+
+        'TRANSPORT (under preview)\n' +
+        '• ⏮ / ⏭: skip ±5 seconds\n' +
+        '• ▶ / ⏸: play / pause\n' +
+        '• ☰ Layers: expand / collapse the track rows\n' +
+        '• ◌ / ● Snap: snap trim + scrub to a 0.5s grid\n' +
+        '• 🔗 Link: when on, dragging one timeline element moves all linked tracks together (text, sticker, music)\n' +
+        '• ↺ / ↻ Undo / Redo (multi-clip phase)\n\n' +
+
+        'LEFT TRACK LABELS\n' +
+        '• 🎵+ Music: opens picker to add background music\n' +
+        '• T+  Subtitle: opens text-overlay panel\n' +
+        '• 🖼️+ Sticker / PiP: pick image (drops as draggable PiP overlay) OR video (adds as new clip on timeline)\n' +
+        '• Cover: pick a cover image for the exported video\n' +
+        '• 🔊 Audio: tap to upload an audio file that replaces the original (auto-mutes the video sound)\n\n' +
+
+        'TIMELINE\n' +
+        '• Drag along it to scrub the playhead\n' +
+        '• Yellow-bordered block is your video clip — drag the side handles to trim\n' +
+        '• Tap the clip to select it (clip-edit mode)\n' +
+        '• Edge + buttons: add a copy of the clip before / after\n' +
+        '• Yellow waveform: real audio amplitude under each clip\n' +
+        '• Time ruler: shows seconds 0s, 1s, 2s …\n\n' +
+
+        'BOTTOM BAR (scrollable, 28 tools)\n' +
+        '• Filter: cycle warm / cool / noir / vivid / soft / vintage\n' +
+        '• Trim: highlights the yellow trim handles\n' +
+        '• FX: subtle zoom on/off\n' +
+        '• Split: bisect the clip at the playhead (now 2 clips)\n' +
+        '• Cutout: high-contrast preview filter\n' +
+        '• Speed: 0.5× / 1× / 1.5× / 2× preset slider\n' +
+        '• Volume: opens music panel for level\n' +
+        '• Fade: opens music panel\n' +
+        '• Crop / Fit: object-fit cover / contain\n' +
+        '• Rotate: 90° / 180° / 270° / 0°\n' +
+        '• Mirror / Flip: horizontal / vertical flip\n' +
+        '• BG: cycles 5 background colours behind the video\n' +
+        '• Border: 0 / 4 / 8 / 16 px\n' +
+        '• Blur: 0 / 2 / 5 / 10 / 20 px\n' +
+        '• Opacity: clip transparency slider\n' +
+        '• Denoise: 5 kHz audio lowpass to cut hiss\n' +
+        '• Zoom: 0.75× / 1× / 1.25× / 1.5× / 2× scale\n' +
+        '• Extract Audio: decodes the video, downloads a WAV\n' +
+        '• Auto Captions: speech-to-text into the subtitle box\n' +
+        '• TTS: speaks the subtitle text out loud\n' +
+        '• Mosaic: heavy pixelation toggle\n' +
+        '• Magnifier: 1.6× preview zoom toggle\n' +
+        '• Story: alert with each clip\'s duration\n' +
+        '• Reverse: plays the video backwards at 15 fps\n' +
+        '• Freeze: captures the current frame onto the overlay\n' +
+        '• PiP Track: requests Picture-in-Picture\n\n' +
+
+        'CLIP-EDIT MODE (after tapping a clip)\n' +
+        '• Edit: opens the subtitle / text panel\n' +
+        '• Split: bisects at the playhead\n' +
+        '• Replace: pick a new video to swap in\n' +
+        '• Speed / Opacity: live sliders\n' +
+        '• Duplicate: copies the clip\n' +
+        '• Delete: removes the clip (closes editor if it was the last one)\n\n' +
+
+        'SAVE vs EXPORT\n' +
+        '• 💾 Save = store edits as a draft inside Load (no MP4 produced)\n' +
+        '• ⬆ Export = render an actual MP4 file (real-time encode), shareable + saved to Library'
       );
     });
     bindEd('ve-more', 'click', function () {
@@ -10890,7 +10960,7 @@
       // Start recorder + music
       rec.start();
       if (recMusicSource) try { recMusicSource.start(); } catch (e) {}
-      label.textContent = 'Recording…';
+      label.textContent = 'Exporting…';
       var elapsed = 0;
       // Walk clips in engine order. For each, seek to its srcStart,
       // play until srcEnd is reached, paint frames continuously.
@@ -10912,7 +10982,7 @@
             elapsed = stepStart + Math.max(0, local);
             var pct = Math.min(100, Math.round((elapsed / totalLen) * 100));
             fill.style.width = pct + '%';
-            label.textContent = 'Recording clip ' + (idxLocal + 1) + '/' + totalIdx + '… ' + pct + '%';
+            label.textContent = 'Exporting clip ' + (idxLocal + 1) + '/' + totalIdx + '… ' + pct + '%';
             if (video.currentTime >= endSrc - 0.02 || video.paused) {
               video.pause();
               return resolve();
