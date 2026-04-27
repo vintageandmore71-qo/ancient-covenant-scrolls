@@ -9178,90 +9178,347 @@
         });
       });
     }
-    // Curated free / royalty-free media sources. Tapping a row opens the
-    // site in a new tab; once the user copies a direct file URL there
-    // they can paste it back into the Library's Stocks tab to import.
+    // In-app free-media browser. Tabbed UI (Photos / Videos / Music)
+    // with multiple providers per type. User pastes API keys once
+    // (saved to localStorage); after that, search runs in-app and
+    // tapping a result fetches + imports the asset to the Library —
+    // no copy-paste of URLs needed.
     function openStockMediaSheet() {
-      var SECTIONS = [
-        { title: 'Free cinematic music', icon: '🎵', items: [
-          { name: 'Pixabay Music',          url: 'https://pixabay.com/music/search/cinematic/',         note: 'No login. Royalty-free, commercial OK.' },
-          { name: 'Free Music Archive',     url: 'https://freemusicarchive.org/genre/Soundtrack/',      note: 'CC-licensed soundtrack & cinematic.' },
-          { name: 'YouTube Audio Library',  url: 'https://studio.youtube.com/channel/UC/music',         note: 'Free for any project (Google login).' },
-          { name: 'Bensound',               url: 'https://www.bensound.com/royalty-free-music/cinematic', note: 'Cinematic playlist. Free w/ credit.' },
-          { name: 'Uppbeat',                url: 'https://uppbeat.io/browse/music/cinematic',           note: 'Free tier with credit; sign-up.' },
-          { name: 'Mixkit Music',           url: 'https://mixkit.co/free-stock-music/tag/cinematic/',   note: 'No sign-up. License: free for commercial.' },
-          { name: 'Chosic Cinematic',       url: 'https://www.chosic.com/free-music/cinematic/',        note: 'Curated CC + royalty-free cinematic.' },
-          { name: 'Incompetech',            url: 'https://incompetech.com/music/royalty-free/music.html',note: 'Kevin MacLeod — free w/ credit.' }
-        ]},
-        { title: 'Free stock video clips', icon: '🎬', items: [
-          { name: 'Pexels Videos',          url: 'https://www.pexels.com/videos/',                      note: 'No login. Free for commercial use.' },
-          { name: 'Pixabay Videos',         url: 'https://pixabay.com/videos/',                         note: 'No login. Royalty-free.' },
-          { name: 'Coverr',                 url: 'https://coverr.co/',                                  note: 'Cinematic 4K loops, free.' },
-          { name: 'Mixkit Video',           url: 'https://mixkit.co/free-stock-video/',                 note: 'No sign-up. Free license.' },
-          { name: 'Videvo',                 url: 'https://www.videvo.net/free-stock-footage/',          note: 'Free stock + motion graphics.' },
-          { name: 'Vidsplay',               url: 'https://www.vidsplay.com/',                           note: 'Free 4K clips w/ attribution.' }
-        ]},
-        { title: 'Free stock photos', icon: '🖼', items: [
-          { name: 'Unsplash',               url: 'https://unsplash.com/',                               note: 'High-res. Unsplash license (free).' },
-          { name: 'Pexels',                 url: 'https://www.pexels.com/',                             note: 'Free for commercial. No attribution.' },
-          { name: 'Pixabay',                url: 'https://pixabay.com/images/search/cinematic/',        note: 'Royalty-free, no login.' },
-          { name: 'Burst (Shopify)',        url: 'https://burst.shopify.com/',                          note: 'Free for any project.' },
-          { name: 'StockSnap',              url: 'https://stocksnap.io/',                               note: 'CC0 — no attribution required.' },
-          { name: 'Kaboompics',             url: 'https://kaboompics.com/',                             note: 'Free, custom license.' }
-        ]}
-      ];
-      var menu = document.createElement('div');
-      menu.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:3500;display:flex;align-items:flex-end;justify-content:center;padding:0;';
-      var html =
-        '<div style="background:#1a1a26;color:#fff;width:100%;max-width:640px;border-top-left-radius:16px;border-top-right-radius:16px;padding:14px 14px max(14px,env(safe-area-inset-bottom));max-height:82vh;display:flex;flex-direction:column;">' +
-          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">' +
-            '<h3 style="margin:0;font-size:16px;font-weight:700;">🌐 Free media sources</h3>' +
-            '<button id="vesm-close" style="background:transparent;border:none;color:#cfcfdc;font-size:22px;cursor:pointer;line-height:1;">×</button>' +
-          '</div>' +
-          '<p style="margin:0 0 10px;font-size:12px;color:#a8a8c4;line-height:1.4;">Tap a source to open it in a new tab. Right-tap a file there → <strong>Copy link</strong>. Then come back to Library → Add → Stocks tab and paste the URL to import directly into Load.</p>' +
-          '<div id="vesm-body" style="overflow-y:auto;flex:1;padding-right:4px;"></div>' +
-        '</div>';
-      menu.innerHTML = html;
-      document.body.appendChild(menu);
-      var body = menu.querySelector('#vesm-body');
-      SECTIONS.forEach(function (sec) {
-        var h = document.createElement('div');
-        h.style.cssText = 'margin:12px 0 6px;font-size:13px;font-weight:800;color:#fbbf24;letter-spacing:0.04em;text-transform:uppercase;';
-        h.textContent = sec.icon + '  ' + sec.title;
-        body.appendChild(h);
-        sec.items.forEach(function (it) {
-          var row = document.createElement('button');
-          row.style.cssText = 'display:flex;align-items:center;gap:10px;width:100%;background:#2a2a40;border:1.5px solid transparent;border-radius:10px;padding:10px 12px;margin-bottom:6px;color:#fff;cursor:pointer;text-align:left;font-family:inherit;';
-          row.innerHTML =
-            '<div style="flex:1;min-width:0;">' +
-              '<div style="font-size:14px;font-weight:700;">' + it.name + '</div>' +
-              '<div style="font-size:11px;color:#a8a8c4;line-height:1.3;margin-top:2px;">' + it.note + '</div>' +
-              '<div style="font-size:10px;color:#7b7b8c;margin-top:2px;font-family:ui-monospace,Menlo,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + it.url + '</div>' +
-            '</div>' +
-            '<div style="font-size:18px;color:#fbbf24;flex-shrink:0;">↗</div>';
-          row.addEventListener('click', function () {
-            try {
-              var w = window.open(it.url, '_blank', 'noopener');
-              if (!w) {
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                  navigator.clipboard.writeText(it.url);
-                  toast('Pop-up blocked — link copied: ' + it.url, false);
-                } else {
-                  toast('Open this URL: ' + it.url, false);
+      var KEY_STORE = 'load_media_key_';
+      function getKey(p) { try { return localStorage.getItem(KEY_STORE + p) || ''; } catch (_) { return ''; } }
+      function setKey(p, v) { try { localStorage.setItem(KEY_STORE + p, v || ''); } catch (_) {} }
+
+      var PROVIDERS = {
+        pixabay: {
+          name: 'Pixabay',
+          types: ['photos','videos'],
+          needsKey: true,
+          signup: 'https://pixabay.com/accounts/register/',
+          keyDocs: 'https://pixabay.com/api/docs/',
+          license: 'No attribution required. Free for commercial use.',
+          search: function (type, q, page) {
+            var k = getKey('pixabay'); if (!k) return Promise.reject(new Error('Pixabay API key needed.'));
+            var url = (type === 'photos' ? 'https://pixabay.com/api/?' : 'https://pixabay.com/api/videos/?') +
+              'key=' + encodeURIComponent(k) + '&q=' + encodeURIComponent(q || '') + '&per_page=20&page=' + page +
+              (type === 'photos' ? '&safesearch=true' : '');
+            return fetch(url).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(function (j) {
+              return (j.hits || []).map(function (h) {
+                if (type === 'photos') {
+                  return { thumb: h.previewURL || h.webformatURL, full: h.largeImageURL || h.webformatURL, name: 'pixabay-' + h.id + '.jpg', credit: 'Pixabay / ' + (h.user || '') };
                 }
-              } else {
-                toast('Opening ' + it.name + '…', false);
+                var v = (h.videos && (h.videos.medium || h.videos.small || h.videos.tiny || h.videos.large)) || {};
+                return { thumb: 'https://i.vimeocdn.com/video/' + h.picture_id + '_295x166.jpg', full: v.url, name: 'pixabay-' + h.id + '.mp4', credit: 'Pixabay / ' + (h.user || '') };
+              }).filter(function (r) { return r.full; });
+            });
+          }
+        },
+        pexels: {
+          name: 'Pexels',
+          types: ['photos','videos'],
+          needsKey: true,
+          signup: 'https://www.pexels.com/api/new/',
+          keyDocs: 'https://www.pexels.com/api/documentation/',
+          license: 'Free for commercial use. Attribution appreciated.',
+          search: function (type, q, page) {
+            var k = getKey('pexels'); if (!k) return Promise.reject(new Error('Pexels API key needed.'));
+            var url = type === 'photos'
+              ? 'https://api.pexels.com/v1/search?query=' + encodeURIComponent(q || 'nature') + '&per_page=20&page=' + page
+              : 'https://api.pexels.com/videos/search?query=' + encodeURIComponent(q || 'nature') + '&per_page=20&page=' + page;
+            return fetch(url, { headers: { Authorization: k } }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(function (j) {
+              if (type === 'photos') {
+                return (j.photos || []).map(function (p) {
+                  return { thumb: p.src && p.src.medium, full: (p.src && (p.src.large || p.src.original)), name: 'pexels-' + p.id + '.jpg', credit: 'Pexels / ' + (p.photographer || '') };
+                });
               }
-            } catch (e) {
-              toast('Could not open: ' + it.url, true);
-            }
+              return (j.videos || []).map(function (v) {
+                var files = (v.video_files || []).slice().sort(function (a, b) { return (a.width || 0) - (b.width || 0); });
+                var pick = files.find(function (f) { return f.width >= 1280; }) || files[files.length - 1];
+                return { thumb: v.image, full: pick && pick.link, name: 'pexels-' + v.id + '.mp4', credit: 'Pexels / ' + ((v.user && v.user.name) || '') };
+              }).filter(function (r) { return r.full; });
+            });
+          }
+        },
+        unsplash: {
+          name: 'Unsplash',
+          types: ['photos'],
+          needsKey: true,
+          signup: 'https://unsplash.com/oauth/applications',
+          keyDocs: 'https://unsplash.com/documentation',
+          license: 'Free Unsplash license. Credit photographer + Unsplash.',
+          search: function (type, q, page) {
+            var k = getKey('unsplash'); if (!k) return Promise.reject(new Error('Unsplash access key needed.'));
+            var url = 'https://api.unsplash.com/search/photos?query=' + encodeURIComponent(q || 'cinematic') + '&per_page=20&page=' + page;
+            return fetch(url, { headers: { Authorization: 'Client-ID ' + k } }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(function (j) {
+              return (j.results || []).map(function (p) {
+                return { thumb: p.urls && p.urls.small, full: (p.urls && (p.urls.regular || p.urls.full)), name: 'unsplash-' + p.id + '.jpg', credit: 'Unsplash / ' + ((p.user && p.user.name) || '') };
+              });
+            });
+          }
+        },
+        jamendo: {
+          name: 'Jamendo',
+          types: ['music'],
+          needsKey: true,
+          signup: 'https://devportal.jamendo.com/signup',
+          keyDocs: 'https://developer.jamendo.com/v3.0',
+          license: 'Free for non-commercial. Commercial: Jamendo Licensing.',
+          search: function (type, q, page) {
+            var k = getKey('jamendo'); if (!k) return Promise.reject(new Error('Jamendo client_id needed.'));
+            var offset = (page - 1) * 20;
+            var url = 'https://api.jamendo.com/v3.0/tracks/?client_id=' + encodeURIComponent(k) +
+              '&format=json&limit=20&offset=' + offset +
+              '&search=' + encodeURIComponent(q || 'cinematic') +
+              '&audioformat=mp32&include=musicinfo';
+            return fetch(url).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(function (j) {
+              return (j.results || []).map(function (t) {
+                return { thumb: t.image || t.album_image, full: t.audiodownload || t.audio, name: 'jamendo-' + t.id + '.mp3', credit: 'Jamendo / ' + (t.artist_name || '') + ' — ' + (t.name || '') };
+              }).filter(function (r) { return r.full; });
+            });
+          }
+        },
+        openverse: {
+          name: 'Openverse (no key)',
+          types: ['photos','music'],
+          needsKey: false,
+          signup: 'https://openverse.org/',
+          keyDocs: 'https://api.openverse.org/v1/',
+          license: 'CC + public domain. Check per-item license.',
+          search: function (type, q, page) {
+            var endpoint = type === 'photos' ? 'images' : 'audio';
+            var url = 'https://api.openverse.org/v1/' + endpoint + '/?q=' + encodeURIComponent(q || 'cinematic') + '&page_size=20&page=' + page;
+            return fetch(url).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(function (j) {
+              return (j.results || []).map(function (it) {
+                if (type === 'photos') {
+                  return { thumb: it.thumbnail || it.url, full: it.url, name: 'openverse-' + (it.id || Date.now()) + '.jpg', credit: 'Openverse / ' + (it.creator || '') + ' (' + (it.license || 'CC') + ')' };
+                }
+                return { thumb: it.thumbnail, full: it.url, name: 'openverse-' + (it.id || Date.now()) + '.mp3', credit: 'Openverse / ' + (it.creator || '') + ' (' + (it.license || 'CC') + ')' };
+              }).filter(function (r) { return r.full; });
+            });
+          }
+        }
+      };
+
+      var TYPE_PROVIDERS = {
+        photos: ['pixabay','pexels','unsplash','openverse'],
+        videos: ['pixabay','pexels'],
+        music:  ['jamendo','openverse']
+      };
+
+      var state = { type: 'photos', provider: 'pixabay', query: 'cinematic', page: 1 };
+
+      var menu = document.createElement('div');
+      menu.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:3500;display:flex;align-items:flex-end;justify-content:center;';
+      menu.innerHTML =
+        '<div style="background:#1a1a26;color:#fff;width:100%;max-width:720px;border-top-left-radius:16px;border-top-right-radius:16px;padding:14px 14px max(14px,env(safe-area-inset-bottom));max-height:90vh;display:flex;flex-direction:column;">' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px;">' +
+            '<h3 style="margin:0;font-size:16px;font-weight:700;">🌐 Free media library</h3>' +
+            '<div style="display:flex;gap:6px;">' +
+              '<button id="vesm-keys" style="background:#2a2a40;border:none;color:#fff;font-size:13px;padding:6px 10px;border-radius:8px;cursor:pointer;">⚙ Keys</button>' +
+              '<button id="vesm-close" style="background:transparent;border:none;color:#cfcfdc;font-size:22px;cursor:pointer;line-height:1;">×</button>' +
+            '</div>' +
+          '</div>' +
+          '<div id="vesm-tabs" style="display:flex;gap:6px;margin-bottom:8px;"></div>' +
+          '<div id="vesm-prov" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>' +
+          '<div style="display:flex;gap:6px;margin-bottom:8px;">' +
+            '<input id="vesm-q" type="search" placeholder="Search…" style="flex:1;padding:9px 11px;background:#0e0e18;border:1px solid #2a2a40;color:#fff;border-radius:8px;font-size:14px;">' +
+            '<button id="vesm-go" style="background:#fbbf24;color:#1a1a26;border:none;font-weight:800;padding:0 14px;border-radius:8px;cursor:pointer;">Search</button>' +
+          '</div>' +
+          '<div id="vesm-info" style="font-size:11px;color:#a8a8c4;margin-bottom:6px;"></div>' +
+          '<div id="vesm-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;overflow-y:auto;flex:1;align-content:start;"></div>' +
+          '<div id="vesm-status" style="font-size:12px;color:#a8a8c4;text-align:center;padding-top:6px;">Pick a type and tap Search.</div>' +
+        '</div>';
+      document.body.appendChild(menu);
+
+      var tabsEl = menu.querySelector('#vesm-tabs');
+      var provEl = menu.querySelector('#vesm-prov');
+      var qEl = menu.querySelector('#vesm-q');
+      var goEl = menu.querySelector('#vesm-go');
+      var gridEl = menu.querySelector('#vesm-grid');
+      var infoEl = menu.querySelector('#vesm-info');
+      var statusEl = menu.querySelector('#vesm-status');
+
+      var TYPES = [
+        { key: 'photos', label: '🖼  Photos' },
+        { key: 'videos', label: '🎬  Videos' },
+        { key: 'music',  label: '🎵  Music' }
+      ];
+      function renderTabs() {
+        tabsEl.innerHTML = '';
+        TYPES.forEach(function (t) {
+          var b = document.createElement('button');
+          var on = state.type === t.key;
+          b.textContent = t.label;
+          b.style.cssText = 'flex:1;padding:9px;border-radius:8px;border:none;cursor:pointer;font-weight:700;font-size:13px;' +
+            (on ? 'background:#fbbf24;color:#1a1a26;' : 'background:#2a2a40;color:#fff;');
+          b.addEventListener('click', function () {
+            if (state.type === t.key) return;
+            state.type = t.key;
+            state.provider = TYPE_PROVIDERS[t.key][0];
+            state.page = 1;
+            renderTabs(); renderProviders();
+            gridEl.innerHTML = ''; statusEl.textContent = 'Pick a provider and tap Search.';
+            updateInfo();
           });
-          body.appendChild(row);
+          tabsEl.appendChild(b);
         });
-      });
-      var done = function () { try { menu.remove(); } catch (_) {} };
-      menu.addEventListener('click', function (e) { if (e.target === menu) done(); });
-      menu.querySelector('#vesm-close').addEventListener('click', done);
+      }
+      function renderProviders() {
+        provEl.innerHTML = '';
+        var list = TYPE_PROVIDERS[state.type] || [];
+        list.forEach(function (pk) {
+          var p = PROVIDERS[pk];
+          var b = document.createElement('button');
+          var on = state.provider === pk;
+          var hasKey = !p.needsKey || !!getKey(pk);
+          b.innerHTML = (hasKey ? '✓ ' : '⚠ ') + p.name;
+          b.title = p.license + (p.needsKey && !hasKey ? '  (No key — tap ⚙ Keys)' : '');
+          b.style.cssText = 'padding:7px 11px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:12px;' +
+            (on ? 'background:#1d6fff;color:#fff;' : 'background:#2a2a40;color:' + (hasKey ? '#fff' : '#a8a8c4') + ';');
+          b.addEventListener('click', function () {
+            state.provider = pk; state.page = 1;
+            renderProviders(); updateInfo();
+          });
+          provEl.appendChild(b);
+        });
+      }
+      function updateInfo() {
+        var p = PROVIDERS[state.provider];
+        if (!p) { infoEl.textContent = ''; return; }
+        var hasKey = !p.needsKey || !!getKey(state.provider);
+        infoEl.innerHTML = (hasKey ? '✓ ' : '⚠ no key — tap ⚙ Keys · ') + p.license;
+      }
+      function runSearch() {
+        var p = PROVIDERS[state.provider];
+        if (!p) return;
+        state.query = (qEl.value || '').trim() || 'cinematic';
+        gridEl.innerHTML = '';
+        statusEl.textContent = 'Searching ' + p.name + ' for "' + state.query + '"…';
+        p.search(state.type, state.query, state.page).then(function (rows) {
+          if (!rows.length) { statusEl.textContent = 'No results from ' + p.name + '. Try different words or another provider.'; return; }
+          statusEl.textContent = rows.length + ' result' + (rows.length === 1 ? '' : 's') + ' from ' + p.name + '. Tap any tile to import.';
+          rows.forEach(function (r) { gridEl.appendChild(buildTile(r)); });
+        }).catch(function (err) {
+          var msg = (err && err.message) || String(err);
+          if (/key needed/i.test(msg)) {
+            statusEl.textContent = msg + ' Tap ⚙ Keys to paste it (free signup links inside).';
+          } else if (/HTTP 401|HTTP 403/i.test(msg)) {
+            statusEl.textContent = 'Provider rejected the key (' + msg + '). Tap ⚙ Keys to re-paste, or pick another provider.';
+          } else if (/Failed to fetch|NetworkError|CORS/i.test(msg)) {
+            statusEl.textContent = 'Network blocked the request (' + msg + '). Try a different provider, or open the site directly via the older link list.';
+          } else {
+            statusEl.textContent = 'Search failed: ' + msg;
+          }
+        });
+      }
+      function buildTile(r) {
+        var tile = document.createElement('button');
+        tile.style.cssText = 'background:#0e0e18;border:1px solid #2a2a40;border-radius:8px;overflow:hidden;cursor:pointer;padding:0;display:flex;flex-direction:column;text-align:left;';
+        tile.innerHTML =
+          '<div style="aspect-ratio:16/9;background:#0a0a14 center/cover no-repeat;background-image:url(\'' + (r.thumb || '') + '\');"></div>' +
+          '<div style="padding:6px 8px;font-size:10px;color:#a8a8c4;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (r.credit || '') + '</div>';
+        tile.addEventListener('click', function () { importResult(r); });
+        return tile;
+      }
+      async function importResult(r) {
+        if (!r.full) { toast('No download URL for that item.', true); return; }
+        statusEl.textContent = 'Fetching ' + r.name + '…';
+        try {
+          var res = await fetch(r.full);
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          var blob = await res.blob();
+          var pseudo = new File([blob], r.name, { type: blob.type || '' });
+          var baseName = r.name.replace(/\.[^.]+$/, '');
+          var imported = await handleMedia(pseudo, baseName);
+          imported.attribution = r.credit || '';
+          await putApp(imported);
+          if (typeof apps !== 'undefined' && apps && apps.push) apps.push(imported);
+          hideProgress && hideProgress();
+          if (typeof renderLibrary === 'function') { try { renderLibrary(); } catch (_) {} }
+          statusEl.textContent = '✓ Imported "' + baseName + '" to Library. Credit: ' + (r.credit || '—');
+          toast('Imported: ' + baseName, false);
+        } catch (e) {
+          hideProgress && hideProgress();
+          var m = (e && e.message) || String(e);
+          statusEl.textContent = 'Import failed: ' + m;
+          toast('Import failed: ' + m, true);
+        }
+      }
+      function openKeys() {
+        var pane = document.createElement('div');
+        pane.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:3600;display:flex;align-items:flex-end;justify-content:center;';
+        var rows = '';
+        Object.keys(PROVIDERS).forEach(function (pk) {
+          var p = PROVIDERS[pk];
+          if (!p.needsKey) return;
+          var v = getKey(pk);
+          rows +=
+            '<div style="background:#0e0e18;border:1px solid #2a2a40;border-radius:10px;padding:10px;margin-bottom:8px;">' +
+              '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;">' +
+                '<div style="font-weight:700;font-size:14px;">' + p.name + (v ? ' <span style="color:#22c55e;font-size:11px;">✓ saved</span>' : ' <span style="color:#fbbf24;font-size:11px;">— no key</span>') + '</div>' +
+                '<div style="display:flex;gap:6px;">' +
+                  '<button class="vesm-signup" data-url="' + p.signup + '" style="background:#1d6fff;color:#fff;border:none;border-radius:6px;font-size:11px;padding:4px 8px;cursor:pointer;font-weight:700;">↗ Get free key</button>' +
+                  '<button class="vesm-docs" data-url="' + p.keyDocs + '" style="background:#2a2a40;color:#cfcfdc;border:none;border-radius:6px;font-size:11px;padding:4px 8px;cursor:pointer;">Docs</button>' +
+                '</div>' +
+              '</div>' +
+              '<div style="font-size:11px;color:#a8a8c4;margin-bottom:6px;">' + p.license + ' · Covers: ' + p.types.join(', ') + '</div>' +
+              '<div style="display:flex;gap:6px;">' +
+                '<input class="vesm-key-input" data-prov="' + pk + '" type="text" placeholder="Paste your key here" value="' + (v || '').replace(/"/g, '&quot;') + '" style="flex:1;background:#1a1a26;border:1px solid #2a2a40;color:#fff;padding:8px 10px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:12px;">' +
+                '<button class="vesm-key-save" data-prov="' + pk + '" style="background:#22c55e;color:#1a1a26;border:none;border-radius:6px;font-weight:800;padding:0 12px;cursor:pointer;">Save</button>' +
+                (v ? '<button class="vesm-key-clear" data-prov="' + pk + '" style="background:#ff3b5c;color:#fff;border:none;border-radius:6px;font-weight:700;padding:0 10px;cursor:pointer;">Clear</button>' : '') +
+              '</div>' +
+            '</div>';
+        });
+        pane.innerHTML =
+          '<div style="background:#1a1a26;color:#fff;width:100%;max-width:680px;border-top-left-radius:16px;border-top-right-radius:16px;padding:14px 14px max(14px,env(safe-area-inset-bottom));max-height:88vh;display:flex;flex-direction:column;">' +
+            '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">' +
+              '<h3 style="margin:0;font-size:16px;font-weight:700;">⚙ Free media — API keys</h3>' +
+              '<button id="vesmk-close" style="background:transparent;border:none;color:#cfcfdc;font-size:22px;cursor:pointer;line-height:1;">×</button>' +
+            '</div>' +
+            '<p style="font-size:12px;color:#a8a8c4;line-height:1.4;margin:0 0 10px;">Each provider needs a free key (one-time signup, takes &lt; 2 min). Keys are stored on this iPad only — never sent to Load servers. Tap “Get free key”, sign up, copy your key, paste it here, Save. Then close this panel and search.</p>' +
+            '<div style="overflow-y:auto;flex:1;">' + rows + '</div>' +
+            '<p style="font-size:11px;color:#7b7b8c;margin:10px 0 0;line-height:1.4;">Openverse needs no key — it always works. Use it as a fallback while you set up the others.</p>' +
+          '</div>';
+        document.body.appendChild(pane);
+        pane.addEventListener('click', function (e) { if (e.target === pane) try { pane.remove(); } catch (_) {} });
+        pane.querySelector('#vesmk-close').addEventListener('click', function () { try { pane.remove(); } catch (_) {} });
+        Array.prototype.forEach.call(pane.querySelectorAll('.vesm-signup, .vesm-docs'), function (b) {
+          b.addEventListener('click', function () {
+            var u = b.getAttribute('data-url');
+            try {
+              var w = window.open(u, '_blank', 'noopener');
+              if (!w && navigator.clipboard) { navigator.clipboard.writeText(u); toast('Pop-up blocked — link copied: ' + u, false); }
+            } catch (_) { toast('Open: ' + u, false); }
+          });
+        });
+        Array.prototype.forEach.call(pane.querySelectorAll('.vesm-key-save'), function (b) {
+          b.addEventListener('click', function () {
+            var pk = b.getAttribute('data-prov');
+            var inp = pane.querySelector('.vesm-key-input[data-prov="' + pk + '"]');
+            var v = inp ? inp.value.trim() : '';
+            setKey(pk, v);
+            toast(PROVIDERS[pk].name + ' key ' + (v ? 'saved' : 'cleared') + '.', false);
+            try { pane.remove(); } catch (_) {}
+            renderProviders(); updateInfo();
+          });
+        });
+        Array.prototype.forEach.call(pane.querySelectorAll('.vesm-key-clear'), function (b) {
+          b.addEventListener('click', function () {
+            var pk = b.getAttribute('data-prov');
+            setKey(pk, '');
+            toast(PROVIDERS[pk].name + ' key cleared.', false);
+            try { pane.remove(); } catch (_) {}
+            renderProviders(); updateInfo();
+          });
+        });
+      }
+
+      menu.addEventListener('click', function (e) { if (e.target === menu) try { menu.remove(); } catch (_) {} });
+      menu.querySelector('#vesm-close').addEventListener('click', function () { try { menu.remove(); } catch (_) {} });
+      menu.querySelector('#vesm-keys').addEventListener('click', openKeys);
+      goEl.addEventListener('click', runSearch);
+      qEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') runSearch(); });
+      qEl.value = state.query;
+      renderTabs(); renderProviders(); updateInfo();
     }
     // Keyframe interpolation. Returns the value of `prop` at time t
     // by linear-interpolating between the closest two keyframes.
