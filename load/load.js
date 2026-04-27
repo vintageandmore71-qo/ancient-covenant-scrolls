@@ -8880,7 +8880,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bo</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bp</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -13888,8 +13888,11 @@
       try { cached = await LoadPiper.isCached(); } catch (_) {}
       if (cached) {
         setStatus('Installed · ready', '#22c55e');
-        installEl.textContent = '✓ Installed';
-        installEl.disabled = true;
+        // Even when cached, expose Re-install so a corrupt cache
+        // can be flushed with one tap (no need to Remove + Install
+        // separately).
+        installEl.textContent = '⟲ Re-install';
+        installEl.disabled = false;
         testEl.disabled = false;
         uninstallEl.style.display = '';
       } else {
@@ -13897,7 +13900,7 @@
         installEl.textContent = '⬇ Install voice (~30 MB)';
         installEl.disabled = false;
         testEl.disabled = true;
-        uninstallEl.style.display = 'none';
+        uninstallEl.style.display = '';
       }
     }
 
@@ -13908,10 +13911,19 @@
 
     installEl.addEventListener('click', async function () {
       if (installEl.disabled) return;
+      // If the cache is currently in place, treat the click as
+      // "Re-install" — wipe first, then re-download. Fixes corrupt
+      // cache states (e.g. zero-byte config) without forcing the
+      // user to use Remove + Install as two separate steps.
+      var wasCached = false;
+      try { wasCached = await LoadPiper.isCached(); } catch (_) {}
+      if (wasCached) {
+        try { await LoadPiper.uninstall(); } catch (_) {}
+      }
       installEl.disabled = true;
       progressRow.style.display = '';
       progressFill.style.width = '0%';
-      progressLbl.textContent = 'Starting download…';
+      progressLbl.textContent = wasCached ? 'Wiped old cache. Re-downloading…' : 'Starting download…';
       try {
         await LoadPiper.install(function (p) {
           var pct = (p && p.percent) || 0;
