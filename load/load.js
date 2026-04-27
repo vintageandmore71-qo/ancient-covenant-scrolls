@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17az</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ba</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -11630,6 +11630,45 @@
       { key: 'best',   label: 'Best · 16 Mbps',  bps: 16000000 }
     ];
 
+    // Send-To sheet — runs AFTER export to route the new MP4 blob.
+    function openSendToSheet() {
+      return new Promise(function (resolve) {
+        var others = (apps || []).filter(function (a) { return a.id !== app.id; }).slice(0, 18);
+        var menu = document.createElement('div');
+        menu.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:3500;display:flex;align-items:flex-end;justify-content:center;';
+        var attachList = others.length
+          ? others.map(function (a) {
+              return '<button class="ve-sendto-opt" data-key="attach:' + a.id + '">' +
+                '<div style="font-weight:700;">📎 ' + (a.name || 'App').replace(/[<>&]/g,'').slice(0,40) + '</div>' +
+                '<div style="font-size:9.5px;opacity:0.7;font-weight:400;line-height:1.2;margin-top:2px;">Attach as asset · ' + (a.kind || 'app') + '</div>' +
+              '</button>';
+            }).join('')
+          : '<div style="font-size:12px;color:#7a7a8a;padding:10px;">No other apps to attach to.</div>';
+        menu.innerHTML =
+          '<div style="background:#1a1a26;color:#fff;width:100%;max-width:560px;border-top-left-radius:16px;border-top-right-radius:16px;padding:14px 14px max(14px,env(safe-area-inset-bottom));max-height:80vh;overflow-y:auto;">' +
+            '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
+              '<h3 style="margin:0;font-size:17px;font-weight:700;">Send To</h3>' +
+              '<button id="ve-send-close" style="background:transparent;border:none;color:#cfcfdc;font-size:22px;cursor:pointer;line-height:1;">×</button>' +
+            '</div>' +
+            '<div style="display:flex;flex-direction:column;gap:8px;">' +
+              '<button class="ve-sendto-opt" data-key="library"><div style="font-weight:700;">🗂 Media Library</div><div style="font-size:9.5px;opacity:0.7;font-weight:400;line-height:1.2;margin-top:2px;">Save the new MP4 as a standalone item in your Library (default)</div></button>' +
+              '<button class="ve-sendto-opt" data-key="replace"><div style="font-weight:700;">↻ Replace this app\'s video</div><div style="font-size:9.5px;opacity:0.7;font-weight:400;line-height:1.2;margin-top:2px;">Overwrite the source video with the edited export</div></button>' +
+              '<button class="ve-sendto-opt" data-key="attain"><div style="font-weight:700;">📖 Attain book asset</div><div style="font-size:9.5px;opacity:0.7;font-weight:400;line-height:1.2;margin-top:2px;">Save as a kind:attain video for use in an Attain / Attain Jr book project</div></button>' +
+              '<div style="font-size:11px;color:#7a7a8a;margin:8px 4px 4px;letter-spacing:0.04em;">ATTACH TO AN EXISTING APP</div>' +
+              attachList +
+            '</div>' +
+          '</div>' +
+          '<style>.ve-sendto-opt{background:#2a2a40;border:1.5px solid transparent;color:#fff;border-radius:10px;padding:12px 12px;font-family:inherit;font-size:13px;cursor:pointer;text-align:left;}.ve-sendto-opt:active{transform:scale(0.98);}</style>';
+        document.body.appendChild(menu);
+        var done = function (k) { try { menu.remove(); } catch (_) {} resolve(k); };
+        menu.addEventListener('click', function (e) { if (e.target === menu) done('library'); });
+        document.getElementById('ve-send-close').addEventListener('click', function () { done('library'); });
+        Array.prototype.forEach.call(menu.querySelectorAll('.ve-sendto-opt'), function (b) {
+          b.addEventListener('click', function () { done(b.getAttribute('data-key')); });
+        });
+      });
+    }
+
     function openExportOptions() {
       var picked = { format: 'mp4', resolution: 'src', bitrate: 'med' };
       var menu = document.createElement('div');
@@ -11807,18 +11846,57 @@
         prog.style.display = 'none';
         await shareBlobOrDownload(blob, safeName + '-edit' + qualityTag + ext, blob.type,
           'Exported ' + safeName + '-edit' + qualityTag + ext + ' (' + bratePick.label + ').');
-        // Save back into the library so the user can package / share
+        // Send-To sheet: route the export to one or more destinations.
+        // Always-on default = Media Library; user can additionally attach
+        // to an existing app, replace this app's binary, or prepare an
+        // Attain book asset.
         try {
-          var newApp = {
-            id: newId(), name: safeName + ' (edited)', kind: 'media', subKind: 'video',
-            mime: blob.type, binary: blob, dateAdded: Date.now(), lastOpened: null,
-            sizeBytes: blob.size
-          };
-          await putApp(newApp);
-          apps.push(newApp);
-          renderLibrary();
-          updateHomeCounts();
-        } catch (e) {}
+          var dest = await openSendToSheet();
+          var fileName = safeName + '-edit' + qualityTag + ext;
+          if (!dest || dest === 'library') {
+            var newApp = {
+              id: newId(), name: safeName + ' (edited)', kind: 'media', subKind: 'video',
+              mime: blob.type, binary: blob, dateAdded: Date.now(), lastOpened: null,
+              sizeBytes: blob.size
+            };
+            await putApp(newApp);
+            apps.push(newApp);
+            renderLibrary && renderLibrary();
+            updateHomeCounts && updateHomeCounts();
+            toast('Saved to Media Library: ' + fileName, false);
+          } else if (dest === 'replace') {
+            app.binary = blob;
+            app.mime = blob.type;
+            app.sizeBytes = blob.size;
+            app.lastOpened = Date.now();
+            await putApp(app);
+            renderLibrary && renderLibrary();
+            toast('Replaced this app\'s video with the new export.', false);
+          } else if (dest === 'attain') {
+            var bookApp = {
+              id: newId(), name: safeName + ' (Attain video)', kind: 'attain', subKind: 'video',
+              mime: blob.type, binary: blob, dateAdded: Date.now(), lastOpened: null,
+              sizeBytes: blob.size, attainAsset: true
+            };
+            await putApp(bookApp);
+            apps.push(bookApp);
+            renderLibrary && renderLibrary();
+            updateHomeCounts && updateHomeCounts();
+            toast('Saved as Attain book asset: ' + fileName, false);
+          } else if (dest && dest.indexOf('attach:') === 0) {
+            var targetId = dest.slice('attach:'.length);
+            var target = apps.filter(function (a) { return a.id === targetId; })[0];
+            if (target) {
+              target.attachments = target.attachments || [];
+              target.attachments.push({ name: fileName, mime: blob.type, binary: blob, sizeBytes: blob.size, dateAdded: Date.now() });
+              await putApp(target);
+              renderLibrary && renderLibrary();
+              toast('Attached to ' + (target.name || 'app') + '.', false);
+            } else {
+              toast('Target app not found — saved to Media Library instead.', false);
+            }
+          }
+        } catch (e) { try { console.warn('[VE] send-to failed', e); } catch (_) {} }
       };
 
       video.muted = muteOrig;
