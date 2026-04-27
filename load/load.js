@@ -8880,7 +8880,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17cb</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17cc</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -10590,6 +10590,90 @@
       // on the timeline, not as a permanent overlay.
       try { renderStickerOverlaysAt(t); } catch (_) {}
     }
+    // Per-clip preview rendering. Each clip lazily owns its preview
+    // <img> or <video> element and we just toggle visibility. Original
+    // clips reuse the persistent ve-video element so existing fx,
+    // mute, audio extraction etc. stay wired. Added clips get their
+    // own dedicated element. No source swapping, no broken-image
+    // flashes between clips.
+    function mountPreviewForClip(clip, srcOffset, isPlaying) {
+      var stage = document.getElementById('ve-stage');
+      if (!stage || !clip) return;
+      var stageImg = document.getElementById('ve-stage-image');
+      // The "main" original video element. If this clip has no own
+      // srcUrl OR its srcUrl matches video.src, treat it as the
+      // original and show ve-video.
+      var isOriginal = !clip.srcUrl || clip.srcUrl === video.src;
+      // Hide every per-clip element first
+      Array.prototype.forEach.call(stage.querySelectorAll('[data-clip-preview]'), function (el) {
+        if (el !== clip._previewEl) {
+          el.style.display = 'none';
+          if (el.tagName === 'VIDEO') { try { el.pause(); } catch (_) {} }
+        }
+      });
+      if (isOriginal && clip.kind !== 'image') {
+        // Original video clip — the persistent <video id="ve-video">.
+        if (stageImg) stageImg.style.display = 'none';
+        try { video.style.opacity = ''; video.style.display = ''; } catch (_) {}
+        try {
+          var dur = video.duration;
+          var srcTime = srcOffset;
+          if (dur && isFinite(dur)) srcTime = Math.max(0, Math.min(srcTime, dur - 0.001));
+          if (Math.abs((video.currentTime || 0) - srcTime) > 0.015) {
+            video.currentTime = srcTime;
+          }
+          if (isPlaying && video.paused) { video.play().catch(function () {}); }
+          else if (!isPlaying && !video.paused) { try { video.pause(); } catch (_) {} }
+        } catch (e) {}
+        return;
+      }
+      // Hide the original video for non-original active clips
+      try { video.style.display = 'none'; if (!video.paused) video.pause(); } catch (_) {}
+      if (stageImg) stageImg.style.display = 'none';
+      // Lazily create a dedicated preview element for this clip
+      if (!clip._previewEl) {
+        if (clip.kind === 'image') {
+          var im = document.createElement('img');
+          im.src = clip.srcUrl;
+          im.alt = clip.name || '';
+          im.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:' +
+            (clip.fitMode || 'contain') + ';background:#000;pointer-events:none;';
+          im.setAttribute('data-clip-preview', clip.id);
+          im.addEventListener('error', function () {
+            im.style.background = '#1a1a26';
+            im.alt = '';
+            im.title = 'Could not load image — try a different format.';
+          });
+          stage.appendChild(im);
+          clip._previewEl = im;
+        } else {
+          // kind: 'video' with its own srcUrl
+          var vd = document.createElement('video');
+          vd.src = clip.srcUrl;
+          vd.preload = 'auto';
+          vd.playsInline = true;
+          vd.muted = false;
+          vd.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:' +
+            (clip.fitMode || 'contain') + ';background:#000;';
+          vd.setAttribute('data-clip-preview', clip.id);
+          stage.appendChild(vd);
+          clip._previewEl = vd;
+        }
+      }
+      // Show + position
+      clip._previewEl.style.display = '';
+      if (clip.kind === 'video' && clip._previewEl.tagName === 'VIDEO') {
+        var local = srcOffset;
+        try {
+          if (Math.abs((clip._previewEl.currentTime || 0) - local) > 0.05) {
+            clip._previewEl.currentTime = Math.max(0, local);
+          }
+        } catch (_) {}
+        if (isPlaying) { try { clip._previewEl.play().catch(function () {}); } catch (_) {} }
+        else            { try { clip._previewEl.pause(); } catch (_) {} }
+      }
+    }
+
     function renderStickerOverlaysAt(t) {
       var stage = document.getElementById('ve-stage');
       if (!stage) return;
@@ -11493,38 +11577,15 @@
         this.t = t;
         var r = this.resolve(t);
         if (!r) { this.onTick(this.t); return; }
-        // Multi-source / image-clip support. If the active clip is an
-        // image, hide the <video> and show a still <img> over the
-        // stage. If it's a video clip with a different srcUrl from
-        // what's currently loaded, swap sources before seeking.
-        var stageImg = document.getElementById('ve-stage-image');
-        if (r.clip && r.clip.kind === 'image') {
-          if (stageImg) {
-            if (stageImg.getAttribute('src') !== r.clip.srcUrl) stageImg.src = r.clip.srcUrl;
-            stageImg.style.display = 'block';
-          }
-          try { video.style.opacity = '0'; if (!video.paused) video.pause(); } catch (_) {}
-          this.onTick(this.t);
-          return;
-        } else {
-          if (stageImg) stageImg.style.display = 'none';
-          try { video.style.opacity = ''; } catch (_) {}
-          if (r.clip && r.clip.srcUrl && video.src !== r.clip.srcUrl) {
-            try { video.src = r.clip.srcUrl; } catch (_) {}
-          }
-        }
-        try {
-          // IMPORTANT: do not use fastSeek here. On iPad Safari, fastSeek can jump
-          // only to keyframes and may not repaint the preview during a drag. For
-          // editor scrubbing we need exact currentTime control.
-          var srcTime = r.srcOffset;
-          if (video.duration && isFinite(video.duration)) {
-            srcTime = Math.max(0, Math.min(srcTime, Math.max(0, video.duration - 0.001)));
-          }
-          if (Math.abs((video.currentTime || 0) - srcTime) > 0.015) {
-            video.currentTime = srcTime;
-          }
-        } catch (e) { try { console.warn('[VE] setTime seek failed', e); } catch (_) {} }
+        // Per-clip preview elements (the user's reference pattern).
+        // Each clip caches its own DOM element on clip._previewEl
+        // so we never swap video.src under the user's feet — every
+        // active clip is its own dedicated element, lazily created,
+        // shown when active and hidden otherwise. Original clips
+        // re-use the existing <video id="ve-video"> element so all
+        // the existing fx wiring stays intact.
+        try { mountPreviewForClip(r.clip, r.srcOffset, this.isPlaying); }
+        catch (e) { try { console.warn('[VE] preview mount failed', e); } catch (_) {} }
         this.onTick(this.t);
       },
       play: function () {
@@ -11546,7 +11607,9 @@
           self.setTime(newT);
           self.rafId = requestAnimationFrame(step);
         };
-        try { video.play().catch(function () {}); } catch (e) {}
+        // mountPreviewForClip handles starting/pausing the right
+        // element each tick, so we no longer blindly play the main
+        // video element here — that would race with per-clip videos.
         this.rafId = requestAnimationFrame(step);
       },
       pause: function () {
@@ -11554,6 +11617,16 @@
         if (this.rafId) cancelAnimationFrame(this.rafId);
         this.rafId = null;
         try { video.pause(); } catch (e) {}
+        // Pause every per-clip video too so audio doesn't keep
+        // running from a paused timeline.
+        try {
+          var stage = document.getElementById('ve-stage');
+          if (stage) {
+            stage.querySelectorAll('video[data-clip-preview]').forEach(function (v) {
+              try { v.pause(); } catch (_) {}
+            });
+          }
+        } catch (_) {}
       },
       toggle: function () { this.isPlaying ? this.pause() : this.play(); },
       // Bisect the active clip at the current t. Both halves still
