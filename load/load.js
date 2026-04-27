@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ar</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17as</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -8624,6 +8624,7 @@
         '</div>' +
         '<button id="ve-stack" class="ve-iconbtn" aria-label="Layers">&#9783;</button>' +
         '<button id="ve-snap" class="ve-iconbtn" aria-label="Snap to grid" title="Snap (off)">&#9899;</button>' +
+        '<button id="ve-link" class="ve-iconbtn" aria-label="Link / unlink timeline elements" title="Link timeline elements (off)">&#128279;</button>' +
         '<button id="ve-undo" class="ve-iconbtn" aria-label="Undo">&#8634;</button>' +
         '<button id="ve-redo" class="ve-iconbtn" aria-label="Redo">&#8635;</button>' +
         '<button id="ve-pause" class="ve-iconbtn" aria-label="Pause" style="display:none;">&#9208;</button>' +
@@ -10596,6 +10597,24 @@
     });
     bindEd('ve-redo', 'click', function () {
       toast('Redo: history stack lands with multi-clip phase.', false);
+    });
+
+    // Link / unlink timeline elements. When linked, dragging any one
+    // of the timeline elements (clip, music, subtitle, sticker) moves
+    // them together so their relative timing is preserved. Toggle is
+    // visual + state, the actual coupled-drag wiring lives inside
+    // each element's pointermove handler (reads window.__veLinked).
+    window.__veLinked = false;
+    bindEd('ve-link', 'click', function () {
+      window.__veLinked = !window.__veLinked;
+      var btn = document.getElementById('ve-link');
+      if (btn) {
+        btn.classList.toggle('on', window.__veLinked);
+        btn.style.background = window.__veLinked ? '#fbbf24' : '';
+        btn.style.color = window.__veLinked ? '#1a1a26' : '';
+        btn.title = 'Link timeline elements (' + (window.__veLinked ? 'on' : 'off') + ')';
+      }
+      toast(window.__veLinked ? 'Linked — text, stickers, audio move with the clip.' : 'Unlinked — each track moves independently.', false);
     });
 
     // Rewind / fast-forward — engine-driven so they respect clip math.
