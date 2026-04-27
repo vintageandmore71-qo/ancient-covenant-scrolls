@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17n</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17p</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -8798,7 +8798,7 @@
       '#__loadVideoEdit .ve-track-cover{background:#1a1a26;border:1px dashed #3a3a55;color:#cfcfdc;width:62px;height:42px;border-radius:6px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}' +
       '#__loadVideoEdit .ve-track-body{flex:1;min-width:0;height:42px;background:#0e0e18;border-radius:6px;display:flex;align-items:center;padding:0 10px;color:#7b7b8c;font-size:13px;overflow:hidden;position:relative;}' +
       '#__loadVideoEdit .ve-track-empty{user-select:none;}' +
-      '#__loadVideoEdit .ve-clip-strip{position:relative;flex:1;height:56px;background:#0a0a14;border-radius:6px;cursor:ew-resize;touch-action:none;overflow:visible;}' +
+      '#__loadVideoEdit .ve-clip-strip{position:relative;flex:1;height:56px;background:transparent;cursor:ew-resize;touch-action:none;overflow:visible;}' +
       '#__loadVideoEdit .ve-clip-block{box-shadow:0 0 0 2px #fbbf24;cursor:pointer;}' +
       '#__loadVideoEdit .ve-clip-block.on{box-shadow:0 0 0 3px #fff, 0 0 0 5px #fbbf24, 0 0 18px rgba(251,191,36,0.6);}' +
       '#__loadVideoEdit .ve-block-thumbs{position:absolute;inset:0;display:flex;border-radius:4px;overflow:hidden;background:#1a1a26;}' +
@@ -9171,9 +9171,9 @@
           toast('Clip added. Now ' + engine.clips.length + ' clips.', false);
         });
       });
-      // Per-block trim drag — each clip's left/right handle moves
-      // that clip's srcStart / srcEnd in source-video time. Independent
-      // from every other clip and from the legacy whole-strip handles.
+      // Per-block trim drag. Captures the original clip + timeline
+       // state at pointerdown time so the math doesn't drift as
+       // clip.srcStart/srcEnd mutate during the drag.
       Array.prototype.forEach.call(stripEl.querySelectorAll('.ve-block-handle'), function (h) {
         h.addEventListener('pointerdown', function (e) {
           e.preventDefault(); e.stopPropagation();
@@ -9181,50 +9181,40 @@
           var side = h.dataset.side;
           var clip = engine.clips[idx];
           if (!clip) return;
-          var stripRect = stripEl.getBoundingClientRect();
-          // Total strip visual width = duration + empty slots, same
-          // math renderClipBlocks uses, so dragging inside the strip
-          // maps cleanly back to source time.
-          var total = engine.duration() || video.duration || 1;
-          var emptySlots = 3;
-          var stripVisualUnits = total + (emptySlots * (SLOT_PCT / 100) * total);
-          // Where on the source-time axis is each pixel of the strip?
-          // Pixel-X within strip → source-time relative to clip start.
-          var srcMin = 0;
-          var srcMax = video.duration || total;
-          // Constrain so left < right with 0.1s minimum gap
+          // SNAPSHOT at drag start — never recompute from current
+          // (mutating) clip values mid-drag.
+          var origSrcStart = clip.srcStart;
+          var origSrcEnd = clip.srcEnd;
+          var origDur = engine.duration();
+          var origEmpty = 3 * (SLOT_PCT / 100) * origDur;
+          var stripVisualUnits = origDur + origEmpty;
+          var origAcc = 0;
+          for (var k = 0; k < idx; k++) {
+            origAcc += engine.clips[k].srcEnd - engine.clips[k].srcStart;
+          }
+          var clipTimelineEnd = origAcc + (origSrcEnd - origSrcStart);
+          var srcMax = video.duration || origDur;
           var minGap = 0.1;
+          var stripRect = stripEl.getBoundingClientRect();
           function move(ev) {
             var x = (ev.touches && ev.touches[0] ? ev.touches[0].clientX : ev.clientX) - stripRect.left;
             var pct = Math.max(0, Math.min(1, x / stripRect.width));
-            var visualT = pct * stripVisualUnits;
-            // Convert visualT (timeline-position seconds) into the
-            // source-time the user is pointing at. Walk the clips
-            // before this one to figure out where this clip starts
-            // on the timeline, then add the offset.
-            var acc = 0;
-            for (var k = 0; k < idx; k++) {
-              acc += engine.clips[k].srcEnd - engine.clips[k].srcStart;
-            }
-            var withinClip = visualT - acc;
-            // If user dragged outside this clip's span, clamp.
-            var clipDur = clip.srcEnd - clip.srcStart;
-            withinClip = Math.max(0, Math.min(clipDur, withinClip));
-            // Convert clip-local offset back to source-time.
-            var newSrcTime = clip.srcStart + withinClip;
+            var visualT = pct * stripVisualUnits; // timeline seconds
+            // Clamp into this clip's original timeline range.
+            visualT = Math.max(origAcc, Math.min(clipTimelineEnd, visualT));
+            var withinClip = visualT - origAcc; // 0..origDur of this clip
+            // Map back to source time, anchored to the ORIGINAL
+            // srcStart so successive moves don't accelerate.
+            var srcAtCursor = origSrcStart + withinClip;
             if (side === 'left') {
-              if (newSrcTime > clip.srcEnd - minGap) newSrcTime = clip.srcEnd - minGap;
-              if (newSrcTime < srcMin) newSrcTime = srcMin;
-              clip.srcStart = newSrcTime;
+              srcAtCursor = Math.max(0, Math.min(origSrcEnd - minGap, srcAtCursor));
+              clip.srcStart = srcAtCursor;
             } else {
-              if (newSrcTime < clip.srcStart + minGap) newSrcTime = clip.srcStart + minGap;
-              if (newSrcTime > srcMax) newSrcTime = srcMax;
-              clip.srcEnd = newSrcTime;
+              srcAtCursor = Math.max(origSrcStart + minGap, Math.min(srcMax, srcAtCursor));
+              clip.srcEnd = srcAtCursor;
             }
-            // Re-render so the block resizes live as the user drags.
             renderClipBlocks();
             try { renderRuler(); } catch (e2) {}
-            // Keep playhead within new duration.
             if (engine.t > engine.duration()) engine.setTime(engine.duration());
           }
           function end() {
@@ -9471,6 +9461,17 @@
         var newClip = { id: 'c' + Date.now(), srcStart: splitOffset, srcEnd: c.srcEnd };
         c.srcEnd = splitOffset;
         this.clips.splice(r.idx + 1, 0, newClip);
+        this.onClipsChanged();
+        return true;
+      },
+      // Reorder by removing from one index and inserting at another.
+      // Used by drag-to-reposition.
+      moveClip: function (fromIdx, toIdx) {
+        if (fromIdx === toIdx) return false;
+        if (fromIdx < 0 || fromIdx >= this.clips.length) return false;
+        if (toIdx < 0 || toIdx >= this.clips.length) return false;
+        var c = this.clips.splice(fromIdx, 1)[0];
+        this.clips.splice(toIdx, 0, c);
         this.onClipsChanged();
         return true;
       },
