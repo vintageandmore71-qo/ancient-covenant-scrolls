@@ -8880,7 +8880,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bt</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bu</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -14040,6 +14040,8 @@
       refresh();
     });
 
+    wirePiperDiagnostics(enableEl);
+
     // Skip / disable Piper — definite exit from the install loop.
     var skipEl = $('piper-skip');
     if (skipEl) skipEl.addEventListener('click', function () {
@@ -14059,6 +14061,217 @@
     });
 
     refresh();
+  }
+
+  /* Build a tiny synthetic WAV (sine-wave beep) to test the raw audio
+   * pipeline without depending on any external file or codec. The
+   * result is a 0.5 s 440 Hz mono 16-bit PCM blob. */
+  function buildBeepWav(durationSec, frequency, sampleRate) {
+    durationSec = durationSec || 0.6;
+    frequency = frequency || 440;
+    sampleRate = sampleRate || 22050;
+    var samples = Math.floor(durationSec * sampleRate);
+    var bytes = 44 + samples * 2;
+    var buf = new ArrayBuffer(bytes);
+    var view = new DataView(buf);
+    function wstr(off, str) { for (var i = 0; i < str.length; i++) view.setUint8(off + i, str.charCodeAt(i)); }
+    wstr(0, 'RIFF');
+    view.setUint32(4, 36 + samples * 2, true);
+    wstr(8, 'WAVE'); wstr(12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * 2, true);
+    view.setUint16(32, 2, true); view.setUint16(34, 16, true);
+    wstr(36, 'data'); view.setUint32(40, samples * 2, true);
+    for (var i = 0; i < samples; i++) {
+      var t = i / sampleRate;
+      // Soft fade-in/out so there's no click at the edges
+      var fade = Math.min(1, t * 20, (durationSec - t) * 20);
+      var sample = Math.sin(2 * Math.PI * frequency * t) * 0.32 * fade;
+      view.setInt16(44 + i * 2, Math.max(-1, Math.min(1, sample)) * 0x7fff, true);
+    }
+    return new Blob([buf], { type: 'audio/wav' });
+  }
+
+  function wirePiperDiagnostics(enableEl) {
+    var envEl = $('diag-env');
+    if (envEl) {
+      var ua = (navigator.userAgent || '').slice(0, 90);
+      var hasOPFS = !!(navigator.storage && navigator.storage.getDirectory);
+      var hasAC   = !!(window.AudioContext || window.webkitAudioContext);
+      var hasSS   = 'speechSynthesis' in window;
+      envEl.textContent =
+        'UA: ' + ua + '\n' +
+        'OPFS: ' + (hasOPFS ? 'yes' : 'NO') +
+        ' · AudioContext: ' + (hasAC ? 'yes' : 'NO') +
+        ' · speechSynthesis: ' + (hasSS ? 'yes' : 'NO') +
+        ' · LoadPiper: ' + (window.LoadPiper ? 'loaded' : 'NOT LOADED');
+    }
+
+    function setResult(id, kind, html) {
+      var el = $(id);
+      if (!el) return;
+      var color = kind === 'pass' ? '#22c55e' : kind === 'fail' ? '#ff6b8a' : '#fbbf24';
+      el.innerHTML = '<span style="color:' + color + ';font-weight:700;">' + (kind === 'pass' ? '✓ ' : kind === 'fail' ? '✗ ' : '… ') + '</span><span style="font-size:12px;line-height:1.4;">' + html + '</span>';
+      el.style.cssText = 'padding:6px 10px;background:var(--bg-2);border-radius:6px;font-family:ui-monospace,Menlo,monospace;';
+    }
+
+    // Test 1 — Raw audio. Generate a synthetic WAV and play via
+    // <audio> element. This is the lowest-level sanity check: if
+    // this fails, the device/PWA is blocking audio entirely.
+    var rawBtn = $('diag-raw');
+    if (rawBtn) rawBtn.addEventListener('click', async function () {
+      setResult('diag-raw-result', 'pending', 'Generating beep…');
+      try {
+        var wav = buildBeepWav(0.6, 440, 22050);
+        var url = URL.createObjectURL(wav);
+        var a = new Audio(url);
+        a.volume = 1; a.muted = false;
+        a.preload = 'auto';
+        var played = await new Promise(function (resolve) {
+          var startedAt = 0;
+          a.addEventListener('playing', function () { startedAt = Date.now(); });
+          a.addEventListener('ended', function () { resolve(true); });
+          a.addEventListener('error', function () { resolve(false); });
+          setTimeout(function () { resolve(startedAt > 0); }, 1500);
+          a.play().catch(function () { resolve(false); });
+        });
+        URL.revokeObjectURL(url);
+        if (played) {
+          setResult('diag-raw-result', 'pass', 'Beep played. Raw audio works on this device.');
+        } else {
+          setResult('diag-raw-result', 'fail', 'Beep did not play. Likely cause: iPad ringer mute switch on, system volume at 0, or PWA-wrapped Load is blocking audio. Try iPad volume up + reopen.');
+        }
+      } catch (e) {
+        setResult('diag-raw-result', 'fail', 'Exception: ' + ((e && e.message) || e));
+      }
+    });
+
+    // Test 2 — Browser voice via speechSynthesis. If THIS fails too,
+    // the issue is global audio permissions, not Piper.
+    var speechBtn = $('diag-speech');
+    if (speechBtn) speechBtn.addEventListener('click', function () {
+      setResult('diag-speech-result', 'pending', 'Speaking…');
+      if (!('speechSynthesis' in window)) {
+        setResult('diag-speech-result', 'fail', 'speechSynthesis unavailable on this device.');
+        return;
+      }
+      try {
+        speechSynthesis.cancel();
+        var u = new SpeechSynthesisUtterance('Browser voice test. One. Two. Three.');
+        u.rate = 0.95; u.volume = 1;
+        var startedAt = 0;
+        u.onstart = function () { startedAt = Date.now(); };
+        u.onend = function () {
+          if (startedAt > 0) setResult('diag-speech-result', 'pass', 'Browser voice spoke. iOS speechSynthesis works.');
+          else setResult('diag-speech-result', 'fail', 'speechSynthesis ended without starting. iOS voice list may be empty — try Settings → Accessibility → Spoken Content → Voices.');
+        };
+        u.onerror = function (e) {
+          setResult('diag-speech-result', 'fail', 'speechSynthesis error: ' + (e && e.error || 'unknown'));
+        };
+        speechSynthesis.speak(u);
+      } catch (e) {
+        setResult('diag-speech-result', 'fail', 'Exception: ' + ((e && e.message) || e));
+      }
+    });
+
+    // Test 3 — Piper GENERATION only (no playback). Proves whether
+    // the model produces audio bytes at all.
+    var genBtn = $('diag-piper-gen');
+    if (genBtn) genBtn.addEventListener('click', async function () {
+      if (!window.LoadPiper) {
+        setResult('diag-piper-gen-result', 'fail', 'LoadPiper library not loaded.');
+        return;
+      }
+      setResult('diag-piper-gen-result', 'pending', 'Calling lib.predict()…');
+      try {
+        var lib = await (LoadPiper._ensureLib ? LoadPiper._ensureLib() : (await import('https://esm.sh/@mintplex-labs/piper-tts-web@1.0.4')));
+        var wav = await lib.predict({ text: 'Test.', voiceId: LoadPiper.DEFAULT_VOICE });
+        var size = (wav && wav.size) || 0;
+        var mime = (wav && wav.type) || '?';
+        if (size < 100) {
+          setResult('diag-piper-gen-result', 'fail', 'Piper returned only ' + size + ' bytes. Voice cache likely incomplete — tap Repair voice.');
+          return;
+        }
+        // Try to decode it
+        var ctx = new (window.AudioContext || window.webkitAudioContext)();
+        var ab = await wav.arrayBuffer();
+        var buf = await new Promise(function (res, rej) {
+          try { var p = ctx.decodeAudioData(ab.slice(0), res, rej); if (p && p.then) p.then(res, rej); }
+          catch (e) { rej(e); }
+        });
+        setResult('diag-piper-gen-result', 'pass',
+          'Piper produced valid audio.<br>' +
+          '· size: ' + size + ' bytes<br>' +
+          '· MIME: ' + mime + '<br>' +
+          '· duration: ' + buf.duration.toFixed(2) + 's<br>' +
+          '· samples: ' + buf.length + '<br>' +
+          '· sampleRate: ' + buf.sampleRate + ' Hz'
+        );
+        ctx.close().catch(function(){});
+      } catch (e) {
+        setResult('diag-piper-gen-result', 'fail', 'Generate failed: ' + ((e && e.message) || e));
+      }
+    });
+
+    // Test 4 — Piper GENERATE + PLAY with visible <audio controls>.
+    // If the controls render but no sound: Piper produced bad audio
+    // OR iPad blocked playback even after a tap.
+    var playBtn = $('diag-piper-play');
+    if (playBtn) playBtn.addEventListener('click', async function () {
+      if (!window.LoadPiper) {
+        setResult('diag-piper-play-result', 'fail', 'LoadPiper library not loaded.');
+        return;
+      }
+      var host = $('diag-piper-audio-host');
+      if (host) host.innerHTML = '';
+      setResult('diag-piper-play-result', 'pending', 'Generating + playing…');
+      try {
+        var lib = await import('https://esm.sh/@mintplex-labs/piper-tts-web@1.0.4');
+        var wav = await lib.predict({ text: 'Piper voice test, one two three.', voiceId: LoadPiper.DEFAULT_VOICE });
+        var size = (wav && wav.size) || 0;
+        if (size < 100) {
+          setResult('diag-piper-play-result', 'fail', 'Piper returned ' + size + ' bytes — invalid. Tap Repair voice.');
+          return;
+        }
+        var url = URL.createObjectURL(wav);
+        // Visible audio element so the user can hit play manually
+        if (host) {
+          var au = document.createElement('audio');
+          au.controls = true; au.src = url; au.volume = 1; au.muted = false;
+          au.style.cssText = 'width:100%;margin-top:6px;';
+          host.innerHTML = '';
+          host.appendChild(au);
+          host.appendChild(document.createTextNode(''));
+          var caption = document.createElement('div');
+          caption.style.cssText = 'font-size:11px;color:var(--ink-low);margin-top:4px;';
+          caption.textContent = 'Tap ▶ on the player above. If it plays — Piper audio is good and the auto-play path is what is failing.';
+          host.appendChild(caption);
+        }
+        // Also try auto-playback via the same path say() uses
+        var startedAt = 0;
+        try {
+          await LoadPiper.say('Piper voice test, one two three.', {
+            rate: 1,
+            onstart: function () { startedAt = Date.now(); }
+          });
+          if (startedAt > 0) {
+            setResult('diag-piper-play-result', 'pass', 'Piper generated valid audio AND playback started. Size: ' + size + ' bytes. Try the visible &lt;audio&gt; control too.');
+          } else {
+            setResult('diag-piper-play-result', 'fail', 'Piper generated valid audio but auto-playback never started. Try the ▶ button on the visible control above — if THAT plays, iPad is blocking the auto-play path.');
+          }
+        } catch (pe) {
+          setResult('diag-piper-play-result', 'fail',
+            'Generated audio is valid (' + size + ' bytes) but auto-play threw: ' +
+            ((pe && pe.message) || pe) +
+            '. Try the ▶ on the visible control above — if THAT plays, iPad blocked the silent path.'
+          );
+        }
+      } catch (e) {
+        setResult('diag-piper-play-result', 'fail', 'Failed: ' + ((e && e.message) || e));
+      }
+    });
   }
 
   /* ---------- Library ---------- */
