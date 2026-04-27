@@ -8880,7 +8880,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bw</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bx</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -14013,19 +14013,27 @@
         progressLbl.textContent = '✓ Repaired. Testing voice…';
         // Auto-test so the user knows immediately if it works.
         var ok = false;
+        var testErr = null;
         try {
           await LoadPiper.say('Piper voice is working.', { rate: 1 });
           ok = true;
         } catch (e) {
-          progressLbl.innerHTML = '<span style="color:#ff6b8a;">Repair completed but Piper still cannot play. Falling back to iOS voices.</span>';
+          testErr = e;
         }
         if (ok) {
           LoadPiper.setEnabled(true);
           enableEl.checked = true;
           toast('Piper voice repaired and ready.');
+          progressLbl.innerHTML = '<span style="color:#22c55e;">✓ Repaired and tested. Piper is ready.</span>';
         } else {
           LoadPiper.setEnabled(false);
           enableEl.checked = false;
+          var em = (testErr && testErr.message) || String(testErr || 'unknown');
+          progressLbl.innerHTML =
+            '<span style="color:#ff6b8a;">✗ Repair completed but speech failed.</span><br>' +
+            '<span style="font-size:11px;color:#a8a8c4;">Reason: <code>' + em + '</code></span><br>' +
+            '<span style="font-size:11px;color:#a8a8c4;">Try Diagnostic <strong>3. Piper generate</strong> to see if the model produces audio at all. Or tap <strong>Skip Piper</strong> to keep iOS voices.</span>';
+          console.error('[Piper repair test] failed:', testErr);
         }
       } catch (e) {
         var rem = (e && e.message) || String(e);
