@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17r</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17s</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -9061,24 +9061,25 @@
         // adjustment panels — for now they show a one-line "coming
         // next" toast so the visual chrome is intact and users know
         // where each tool will live.
-        else if (act === 'cutout')        toast('Cutout: subject-isolation tool coming next.', false);
-        else if (act === 'filter')        toast('Filter: color-grade presets coming next.', false);
-        else if (act === 'fx')            toast('FX: zoom/shake presets coming next.', false);
-        else if (act === 'speed')         toast('Speed: 0.25x – 4x coming next.', false);
-        else if (act === 'fade')          toast('Fade: in / out timing coming next.', false);
-        else if (act === 'crop')          toast('Crop: tight reframe coming next.', false);
-        else if (act === 'rotate')        toast('Rotate: 90° / 180° coming next.', false);
-        else if (act === 'mirror')        toast('Mirror: horizontal flip coming next.', false);
-        else if (act === 'flip')          toast('Flip: vertical flip coming next.', false);
-        else if (act === 'fit')           toast('Fit: aspect-fill / fit toggle coming next.', false);
-        else if (act === 'bg')            toast('BG: solid colour, blur, image background coming next.', false);
-        else if (act === 'border')        toast('Border: outline + corner radius coming next.', false);
-        else if (act === 'blur')          toast('Blur: motion / radial / box blur coming next.', false);
-        else if (act === 'opacity')       toast('Opacity: clip transparency coming next.', false);
-        else if (act === 'denoise')       toast('Denoise: audio noise reduction coming next.', false);
-        else if (act === 'zoom')          toast('Zoom: ken-burns pan / zoom coming next.', false);
-        else if (act === 'extract-audio') toast('Extract Audio: separate the audio track coming next.', false);
-        else if (act === 'auto-captions') toast('Auto Captions: speech-to-subtitle coming next.', false);
+        // STUB-FEATURE: each block below toasts a "coming next"
+        // descriptor and console.warns with [STUB] so the dev
+        // tools clearly mark what is not yet a real implementation.
+        else if (act === 'cutout')        { console.warn('[STUB] cutout'); toast('Cutout: subject-isolation tool coming next.', false); }
+        else if (act === 'filter')        { console.warn('[STUB] filter'); toast('Filter: color-grade presets coming next.', false); }
+        else if (act === 'fx')            { console.warn('[STUB] fx'); toast('FX: zoom/shake presets coming next.', false); }
+        else if (act === 'fade')          { console.warn('[STUB] fade'); toast('Fade: in / out timing coming next.', false); }
+        else if (act === 'crop')          { console.warn('[STUB] crop'); toast('Crop: tight reframe coming next.', false); }
+        else if (act === 'rotate')        { console.warn('[STUB] rotate'); toast('Rotate: 90° / 180° coming next.', false); }
+        else if (act === 'mirror')        { console.warn('[STUB] mirror'); toast('Mirror: horizontal flip coming next.', false); }
+        else if (act === 'flip')          { console.warn('[STUB] flip'); toast('Flip: vertical flip coming next.', false); }
+        else if (act === 'fit')           { console.warn('[STUB] fit'); toast('Fit: aspect-fill / fit toggle coming next.', false); }
+        else if (act === 'bg')            { console.warn('[STUB] bg'); toast('BG: solid colour, blur, image background coming next.', false); }
+        else if (act === 'border')        { console.warn('[STUB] border'); toast('Border: outline + corner radius coming next.', false); }
+        else if (act === 'blur')          { console.warn('[STUB] blur'); toast('Blur: motion / radial / box blur coming next.', false); }
+        else if (act === 'denoise')       { console.warn('[STUB] denoise'); toast('Denoise: audio noise reduction coming next.', false); }
+        else if (act === 'zoom')          { console.warn('[STUB] zoom'); toast('Zoom: ken-burns pan / zoom coming next.', false); }
+        else if (act === 'extract-audio') { console.warn('[STUB] extract-audio'); toast('Extract Audio: separate the audio track coming next.', false); }
+        else if (act === 'auto-captions') { console.warn('[STUB] auto-captions'); toast('Auto Captions: speech-to-subtitle coming next.', false); }
         else if (act === 'story')         toast('Story: chapter beats list coming next.', false);
         else if (act === 'reverse')       toast('Reverse: play clip backwards coming next.', false);
         else if (act === 'freeze')        toast('Freeze: hold a single frame coming next.', false);
@@ -9129,8 +9130,10 @@
       if (!stripEl) return;
       // Clear all clip + slot + big-add children (keep nothing inside)
       stripEl.innerHTML = '';
-      var total = engine.duration() || 0;
-      if (!total) return;
+      // No bail on zero duration — we render the clip immediately
+      // even when the engine is seeded with a placeholder clip whose
+      // srcEnd is the fallback 5s. The user's directive: timeline
+      // must show a clip RIGHT AWAY, not after async loads.
       engine.clips.forEach(function (c, i) {
         var dur = c.srcEnd - c.srcStart;
         var widthPx = Math.max(60, dur * PX_PER_SECOND);
@@ -9512,6 +9515,20 @@
     // Expose for debug + future tooling.
     wrap.__engine = engine;
 
+    // RENDER THE CLIP IMMEDIATELY — do not wait for loadedmetadata.
+    // The user's directive: timeline must show a clip the moment the
+    // editor opens, even before metadata / thumbnails / waveform load.
+    // We seed engine.clips with a fallback duration (5s) so renderClipBlocks
+    // emits a visible .timeline-clip right away. loadedmetadata will
+    // patch the real srcEnd in once it arrives.
+    engine.clips = [{ id: 'c0', srcStart: 0, srcEnd: 5, _placeholder: true }];
+    engine.t = 0;
+    // Defer the first render to next tick so the strip element exists
+    // in the DOM by the time render runs.
+    setTimeout(function () {
+      try { engine.onClipsChanged(); } catch (e) {}
+    }, 0);
+
     function refreshTrimDisplay() {
       var inS = parseFloat(trimIn.value), outS = parseFloat(trimOut.value);
       if (outS < inS + 0.2) outS = inS + 0.2;
@@ -9529,7 +9546,15 @@
       // Initialise the timeline engine with one clip spanning the
       // whole source video. Split / Duplicate / Delete will mutate
       // this array; the strip render iterates it.
-      engine.clips = [{ id: 'c0', srcStart: 0, srcEnd: d }];
+      // Patch the placeholder clip with the real duration. If user
+      // hasn't split yet (still 1 clip), update srcEnd; otherwise
+      // leave existing clips alone.
+      if (engine.clips.length === 1 && engine.clips[0]._placeholder) {
+        engine.clips[0].srcEnd = d;
+        delete engine.clips[0]._placeholder;
+      } else if (!engine.clips.length) {
+        engine.clips = [{ id: 'c0', srcStart: 0, srcEnd: d }];
+      }
       engine.t = 0;
       engine.onClipsChanged();
       refreshTrimDisplay();
@@ -10181,9 +10206,15 @@
     document.getElementById('ve-export').addEventListener('click', exportMp4);
     async function exportMp4() {
       if (!('MediaRecorder' in window)) { toast('Your browser does not support MediaRecorder.', true); return; }
-      var inS = parseFloat(trimIn.value);
-      var outS = parseFloat(trimOut.value);
-      if (outS - inS < 0.2) { toast('Trim is too short.', true); return; }
+      // Multi-clip aware export. Walks engine.clips[] in order so a
+      // 5s clip split at 2s into [A=0..2s, B=2..5s] then reordered
+      // to [B, A] exports as B's range followed by A's range. The
+      // canvas captureStream continues through between-clip seeks
+      // so the recorder gets one continuous video stream.
+      var clipsToExport = (engine.clips || []).slice();
+      if (!clipsToExport.length) { toast('No clips to export.', true); return; }
+      var totalLen = clipsToExport.reduce(function (s, c) { return s + (c.srcEnd - c.srcStart); }, 0);
+      if (totalLen < 0.2) { toast('Total trimmed length is too short.', true); return; }
       muteOrig = document.getElementById('ve-mute-orig').checked;
 
       var pickMime = (function () {
@@ -10264,23 +10295,10 @@
         } catch (e) {}
       };
 
-      // Start recording, seek to in-point, play
       video.muted = muteOrig;
-      video.currentTime = inS;
-      await new Promise(function (r) {
-        function once() { video.removeEventListener('seeked', once); r(); }
-        video.addEventListener('seeked', once);
-      });
-      rec.start();
-      if (recMusicSource) try { recMusicSource.start(); } catch (e) {}
-      label.textContent = 'Recording…';
-      var startWall = performance.now();
-      var totalLen = outS - inS;
-      function frame() {
-        if (stopped) return;
+      // Helper: paint one frame onto the render canvas + overlay
+      function paintFrame() {
         rctx.drawImage(video, 0, 0, rc.width, rc.height);
-        // Re-draw overlay onto the render canvas (drawOverlay drew into the
-        // preview canvas; we replicate inline here for the render canvas)
         var t = (document.getElementById('ve-text').value || '').trim();
         if (t) {
           var pos = document.getElementById('ve-text-pos').value;
@@ -10305,17 +10323,59 @@
           lines.forEach(function (line, i) { rctx.fillText(line, w / 2, y + i * lineH); });
           rctx.shadowBlur = 0;
         }
-        var pct = Math.min(100, Math.round(((video.currentTime - inS) / totalLen) * 100));
-        fill.style.width = pct + '%';
-        label.textContent = 'Recording… ' + pct + '%';
-        if (video.currentTime >= outS || video.paused) {
-          rec.stop();
-          return;
-        }
-        requestAnimationFrame(frame);
       }
-      try { await video.play(); } catch (e) { toast('Cannot start playback for export. Tap Play first, then Export.', true); rec.stop(); return; }
-      requestAnimationFrame(frame);
+      // Seek the video to a source time, await the seeked event.
+      function seekTo(srcT) {
+        return new Promise(function (resolve) {
+          var done = false;
+          var fin = function () { if (done) return; done = true; resolve(); };
+          var on = function () { video.removeEventListener('seeked', on); fin(); };
+          video.addEventListener('seeked', on);
+          try { video.currentTime = srcT; } catch (e) { fin(); return; }
+          // Hard cap so we don't stall if Safari refuses the seek.
+          setTimeout(fin, 600);
+        });
+      }
+      // Start recorder + music
+      rec.start();
+      if (recMusicSource) try { recMusicSource.start(); } catch (e) {}
+      label.textContent = 'Recording…';
+      var elapsed = 0;
+      // Walk clips in engine order. For each, seek to its srcStart,
+      // play until srcEnd is reached, paint frames continuously.
+      for (var ci = 0; ci < clipsToExport.length; ci++) {
+        if (stopped) break;
+        var clip = clipsToExport[ci];
+        await seekTo(clip.srcStart);
+        try { await video.play(); } catch (e) { toast('Cannot start playback for export.', true); rec.stop(); return; }
+        var clipDur = clip.srcEnd - clip.srcStart;
+        // Per-clip frame loop. Paint until we hit srcEnd or video pauses.
+        await new Promise(function (resolve) {
+          var endSrc = clip.srcEnd;
+          var idxLocal = ci, totalIdx = clipsToExport.length;
+          var stepStart = elapsed;
+          function step() {
+            if (stopped) return resolve();
+            paintFrame();
+            var local = video.currentTime - clip.srcStart;
+            elapsed = stepStart + Math.max(0, local);
+            var pct = Math.min(100, Math.round((elapsed / totalLen) * 100));
+            fill.style.width = pct + '%';
+            label.textContent = 'Recording clip ' + (idxLocal + 1) + '/' + totalIdx + '… ' + pct + '%';
+            if (video.currentTime >= endSrc - 0.02 || video.paused) {
+              video.pause();
+              return resolve();
+            }
+            requestAnimationFrame(step);
+          }
+          requestAnimationFrame(step);
+        });
+        // Move our running counter forward by this clip's full duration
+        // (the per-clip loop may have stopped slightly under endSrc).
+        elapsed = elapsed > 0 ? elapsed : clipDur;
+      }
+      // All clips exported — stop recorder
+      try { rec.stop(); } catch (e) {}
     }
 
     document.getElementById('ve-close').addEventListener('click', function () {
