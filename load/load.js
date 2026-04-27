@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ab</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ac</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -8862,6 +8862,12 @@
       '#__loadVideoEdit .ve-quick-btn:active{background:rgba(255,255,255,0.18);}' +
       '@keyframes vePopIn{from{opacity:0;transform:translateX(-50%) translateY(4px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}' +
       '#__loadVideoEdit .ve-context{position:absolute;left:0;right:0;bottom:0;background:#1a1a26;padding:10px 8px max(10px,env(safe-area-inset-bottom));border-top:1px solid #2a2a40;display:flex;align-items:center;gap:14px;overflow-x:auto;scrollbar-width:none;z-index:8;}' +
+      // Bottom-bar overlap fix — reserve room below the timeline so the
+      // absolute #ve-context / in-flow #ve-actions row never covers the
+      // last timeline row (Original-audio / waveform).
+      '#__loadVideoEdit .timeline-engine{padding-bottom:96px !important;height:auto !important;min-height:260px !important;}' +
+      '#__loadVideoEdit .timeline-scroll{padding-bottom:24px !important;}' +
+      '#__loadVideoEdit #ve-actions,#__loadVideoEdit .ve-context{padding-bottom:max(14px,env(safe-area-inset-bottom)) !important;}' +
       '#__loadVideoEdit .ve-context::-webkit-scrollbar{display:none;}' +
       '#__loadVideoEdit .ve-context-done .ve-act-icon{background:#1d6fff;color:#fff;border-color:#1d6fff;}' +
       '#__loadVideoEdit.ve-clip-active #ve-context{display:flex;}' +
