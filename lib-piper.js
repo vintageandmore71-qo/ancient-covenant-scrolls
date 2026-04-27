@@ -32,7 +32,16 @@
 
   var tts = null;          // resolved lib once first import completes
   var loadPromise = null;  // shared in-flight import promise
-  var currentAudio = null; // last played <audio>; stopAll() pauses it
+  var audioCtx = null;     // shared AudioContext (created on first user gesture)
+  var currentSource = null;// last AudioBufferSourceNode; stopAll() stops it
+
+  function getAudioContext() {
+    if (audioCtx) return audioCtx;
+    var Ctor = window.AudioContext || window.webkitAudioContext;
+    if (!Ctor) return null;
+    try { audioCtx = new Ctor(); } catch (_) { return null; }
+    return audioCtx;
+  }
 
   async function ensureLib() {
     if (tts) return tts;
@@ -86,45 +95,59 @@
 
   function stopAll() {
     try {
-      if (currentAudio) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
-        var src = currentAudio.src;
-        if (src && src.indexOf('blob:') === 0) {
-          try { URL.revokeObjectURL(src); } catch (_) {}
-        }
+      if (currentSource) {
+        try { currentSource.stop(0); } catch (_) {}
+        try { currentSource.disconnect(); } catch (_) {}
       }
     } catch (_) {}
-    currentAudio = null;
+    currentSource = null;
   }
 
   async function say(text, opts) {
     opts = opts || {};
     var clean = String(text || '').trim();
     if (!clean) return null;
+
+    // Set up + unlock the AudioContext FIRST so the user-gesture
+    // chain that called us is still valid. Doing this after a long
+    // await on lib.predict() would let iPad Safari decide the
+    // gesture expired, leaving the buffer source silent.
+    var ctx = getAudioContext();
+    if (!ctx) throw new Error('AudioContext unavailable');
+    if (ctx.state === 'suspended') {
+      try { await ctx.resume(); } catch (_) {}
+    }
+
     var lib = await ensureLib();
-    // The library accepts speakerId in newer versions; pass through
-    // when supplied so we're future-proofed for the multi-speaker
-    // LibriTTS swap. Older versions silently ignore it.
     var req = { text: clean, voiceId: opts.voiceId || DEFAULT_VOICE };
     if (opts.speakerId != null) req.speakerId = opts.speakerId;
+
     var wav = await lib.predict(req);
-    stopAll();
-    var url = URL.createObjectURL(wav);
-    var a = new Audio(url);
-    a.playbackRate = (typeof opts.rate === 'number' && opts.rate > 0) ? opts.rate : 1;
-    a.preservesPitch = false;
-    a.onended = function () { try { URL.revokeObjectURL(url); } catch (_) {} };
-    a.onerror  = function () { try { URL.revokeObjectURL(url); } catch (_) {} };
-    currentAudio = a;
-    try { await a.play(); }
-    catch (e) {
-      // iOS: play() must be triggered by a user gesture. Fall through
-      // to caller — they may rerun under a tap handler.
-      console.warn('[Piper] audio.play() rejected:', e);
-      throw e;
+    if (!wav || (wav.size != null && wav.size < 100)) {
+      throw new Error('Piper returned empty audio (' + (wav && wav.size) + ' bytes)');
     }
-    return a;
+
+    var arrayBuffer = await wav.arrayBuffer();
+    var audioBuffer = await new Promise(function (res, rej) {
+      // Some Safari versions only support the callback form of decodeAudioData.
+      try {
+        var p = ctx.decodeAudioData(arrayBuffer.slice(0), res, rej);
+        if (p && typeof p.then === 'function') { p.then(res, rej); }
+      } catch (e) { rej(e); }
+    });
+
+    stopAll();
+    var src = ctx.createBufferSource();
+    src.buffer = audioBuffer;
+    var rate = (typeof opts.rate === 'number' && opts.rate > 0) ? opts.rate : 1;
+    if (rate !== 1) { try { src.playbackRate.value = rate; } catch (_) {} }
+    src.connect(ctx.destination);
+    currentSource = src;
+    src.onended = function () {
+      if (currentSource === src) currentSource = null;
+    };
+    src.start(0);
+    return audioBuffer;
   }
 
   async function listVoices() {
@@ -156,6 +179,18 @@
     } catch (_) { return false; }
   }
 
+  function warmAudio() {
+    // Call this synchronously inside a click/tap handler. Creates +
+    // resumes the AudioContext so a later say() call (which awaits
+    // a slow predict()) still has a valid gesture-unlocked context.
+    var ctx = getAudioContext();
+    if (!ctx) return false;
+    if (ctx.state === 'suspended') {
+      try { ctx.resume(); } catch (_) {}
+    }
+    return true;
+  }
+
   global.LoadPiper = {
     DEFAULT_VOICE: DEFAULT_VOICE,
     isSupported: isSupported,
@@ -164,6 +199,7 @@
     uninstall: uninstall,
     say: say,
     stop: stopAll,
+    warmAudio: warmAudio,
     isEnabled: isEnabled,
     setEnabled: setEnabled,
     voices: listVoices

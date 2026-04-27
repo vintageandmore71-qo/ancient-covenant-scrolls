@@ -8880,7 +8880,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bm</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bn</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -13939,16 +13939,23 @@
 
     testEl.addEventListener('click', async function () {
       if (testEl.disabled) return;
+      // Pre-warm the AudioContext SYNCHRONOUSLY inside the tap so iPad
+      // Safari treats playback as gesture-initiated even after the
+      // long predict() await that follows.
+      try { if (window.LoadPiper && LoadPiper.warmAudio) LoadPiper.warmAudio(); } catch (_) {}
       testEl.disabled = true;
       var orig = testEl.textContent;
       testEl.textContent = '🔊 Speaking…';
       try {
-        await LoadPiper.say(
+        var buf = await LoadPiper.say(
           'Hello. I am Piper, your offline voice. Bereshit, Chanokh, and Yovelim. Listen for yourself.',
           { rate: 1 }
         );
+        var dur = (buf && buf.duration) ? buf.duration.toFixed(1) + 's' : '?';
+        toast('Piper played ' + dur + '. If you heard nothing, raise the volume / unmute.');
       } catch (e) {
         toast('Test failed: ' + (e && e.message || e), true);
+        console.error('[Piper test] failed', e);
       }
       setTimeout(function () { testEl.textContent = orig; testEl.disabled = false; }, 1200);
     });
