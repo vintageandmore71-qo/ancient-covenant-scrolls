@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17z-fix</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17aa-sync</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -9468,9 +9468,17 @@
         var r = this.resolve(t);
         if (!r) { this.onTick(this.t); return; }
         try {
-          if (immediate && typeof video.fastSeek === 'function') video.fastSeek(r.srcOffset);
-          else video.currentTime = r.srcOffset;
-        } catch (e) {}
+          // IMPORTANT: do not use fastSeek here. On iPad Safari, fastSeek can jump
+          // only to keyframes and may not repaint the preview during a drag. For
+          // editor scrubbing we need exact currentTime control.
+          var srcTime = r.srcOffset;
+          if (video.duration && isFinite(video.duration)) {
+            srcTime = Math.max(0, Math.min(srcTime, Math.max(0, video.duration - 0.001)));
+          }
+          if (Math.abs((video.currentTime || 0) - srcTime) > 0.015) {
+            video.currentTime = srcTime;
+          }
+        } catch (e) { try { console.warn('[VE] setTime seek failed', e); } catch (_) {} }
         this.onTick(this.t);
       },
       play: function () {
@@ -9750,6 +9758,87 @@
       if (wasPlaying) engine.play();
     }
     if (clipStripEl) clipStripEl.addEventListener('pointerdown', onScrubStart);
+
+
+    /* v17aa-sync: global VN-style timeline scrubbing.
+       The earlier build only listened on #ve-clip-strip. That meant dragging
+       the white playhead through the empty music/subtitle/sticker rows or the
+       waveform/ruler could move the visual area without driving the preview.
+       This listener makes the entire timeline column the scrub surface. */
+    (function bindTimelineScrollScrub() {
+      var timelineScrollEl = document.getElementById('timelineScroll');
+      var videoTrackEl = document.getElementById('ve-clip-strip');
+      if (!timelineScrollEl || !videoTrackEl) return;
+
+      function clientXFromEvent(ev) {
+        if (ev.touches && ev.touches[0]) return ev.touches[0].clientX;
+        if (ev.changedTouches && ev.changedTouches[0]) return ev.changedTouches[0].clientX;
+        return ev.clientX;
+      }
+
+      function timelineTimeFromClientX(clientX) {
+        var rect = videoTrackEl.getBoundingClientRect();
+        var x = clientX - rect.left;
+        var dur = engine.duration() || 0;
+        var t = x / PX_PER_SECOND;
+        if (snapEnabled) t = Math.round(t / SNAP_STEP) * SNAP_STEP;
+        return Math.max(0, Math.min(dur, t));
+      }
+
+      function shouldIgnoreTimelineScrub(target) {
+        return !!(target && target.closest && target.closest(
+          'button,input,select,textarea,.trim-handle,.clip-add,.ve-block-handle,#ve-context,#ve-clip-quick,.ve-iconbtn'
+        ));
+      }
+
+      var timelineWasPlaying = false;
+      function seekFromEvent(ev) {
+        var t = timelineTimeFromClientX(clientXFromEvent(ev));
+        engine.setTime(t, false);
+        return t;
+      }
+
+      function startTimelineScrub(ev) {
+        if (shouldIgnoreTimelineScrub(ev.target)) return;
+        if (!engine.duration()) return;
+        ev.preventDefault();
+        timelineWasPlaying = engine.isPlaying;
+        if (timelineWasPlaying) engine.pause();
+        seekFromEvent(ev);
+        document.addEventListener('pointermove', moveTimelineScrub, { passive: false });
+        document.addEventListener('pointerup', endTimelineScrub, { passive: false });
+        document.addEventListener('pointercancel', endTimelineScrub, { passive: false });
+      }
+      function moveTimelineScrub(ev) {
+        ev.preventDefault();
+        seekFromEvent(ev);
+      }
+      function endTimelineScrub(ev) {
+        document.removeEventListener('pointermove', moveTimelineScrub);
+        document.removeEventListener('pointerup', endTimelineScrub);
+        document.removeEventListener('pointercancel', endTimelineScrub);
+        if (timelineWasPlaying) engine.play();
+      }
+
+      timelineScrollEl.addEventListener('pointerdown', startTimelineScrub, { passive: false });
+
+      // Keep the engine UI synchronized if the native video controls are used.
+      video.addEventListener('timeupdate', function () {
+        if (engine.isPlaying) return;
+        var src = video.currentTime || 0;
+        var acc = 0;
+        for (var i = 0; i < engine.clips.length; i++) {
+          var c = engine.clips[i];
+          var len = c.srcEnd - c.srcStart;
+          if (src >= c.srcStart && src <= c.srcEnd) {
+            engine.t = acc + (src - c.srcStart);
+            engine.onTick(engine.t);
+            return;
+          }
+          acc += len;
+        }
+      });
+    })();
 
     /* Snap toggle wiring. Updates the button visual + redraws the
        half-second grid markers across the timeline strip when on. */
