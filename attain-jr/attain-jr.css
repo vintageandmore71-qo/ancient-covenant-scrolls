@@ -304,11 +304,14 @@ a.jr-action {
   flex-direction: row;
   border-bottom: none;
   overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
 #topbar::-webkit-scrollbar { display: none; }
+#topbar > * { flex-shrink: 0; }
 .topbar-tabs {
-  display: flex; gap: 3px; flex: 1; min-width: 0;
+  display: flex; gap: 3px; flex-shrink: 0;
 }
 .tab {
   flex-shrink: 0;
