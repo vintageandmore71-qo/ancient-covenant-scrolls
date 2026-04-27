@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17am</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17an</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -8641,7 +8641,6 @@
           '<button class="track-add" data-add="text" aria-label="Add subtitle">T+</button>' +
           '<button class="track-add" data-add="sticker" aria-label="Add sticker / PiP">&#128444;+</button>' +
           '<button class="cover-btn" id="ve-cover">Cover</button>' +
-          '<button class="track-add" data-add="audio-orig" aria-label="Original audio">&#128264;</button>' +
         '</div>' +
         '<div class="timeline-scroll" id="timelineScroll">' +
           // Empty tracks for music / subtitle / sticker
