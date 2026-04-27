@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17l</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17m</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -8845,7 +8845,9 @@
       '#__loadVideoEdit .ve-clip-playhead{position:absolute;top:-4px;bottom:-4px;width:2px;background:#fff;left:0;pointer-events:none;box-shadow:0 0 6px rgba(255,255,255,0.6);}' +
       '#__loadVideoEdit .ve-clip-playhead::before{content:"";position:absolute;top:-3px;left:-5px;width:12px;height:12px;background:#fff;border-radius:50%;box-shadow:0 0 0 2px #1a1a26;}' +
       '#__loadVideoEdit .ve-track-audio .ve-track-body{background:transparent;}' +
-      '#__loadVideoEdit .ve-waveform{flex:1;height:32px;background:linear-gradient(180deg,transparent 0%,transparent 50%,#fbbf24 50%,#fbbf24 51%,transparent 51%,transparent 100%),repeating-linear-gradient(90deg,#fbbf24 0,#fbbf24 1px,transparent 1px,transparent 3px);opacity:0.85;border-radius:4px;}' +
+      '#__loadVideoEdit .ve-waveform{flex:1;height:32px;background:#0a0a14;border-radius:4px;position:relative;overflow:hidden;}' +
+      '#__loadVideoEdit .ve-waveform canvas{position:absolute;inset:0;width:100%;height:100%;display:block;}' +
+      '#__loadVideoEdit .ve-waveform.empty::before{content:"Audio waveform decoding…";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#5a5a78;font-size:11px;font-weight:600;letter-spacing:0.05em;}' +
       '#__loadVideoEdit .ve-time-ruler{position:relative;height:22px;color:#9a9aac;font-size:11px;font-variant-numeric:tabular-nums;background:#0a0a14;}' +
       '#__loadVideoEdit .ve-time-ruler .tick{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,0.18);}' +
       '#__loadVideoEdit .ve-time-ruler .tick.major{background:rgba(255,255,255,0.45);}' +
@@ -9920,8 +9922,79 @@
         var buf = await f.arrayBuffer();
         musicBuffer = await audioCtx.decodeAudioData(buf);
         toast('Music loaded — ' + musicBuffer.duration.toFixed(1) + 's.');
+        // Show the music's waveform under the video clip strip so
+        // the user sees real amplitude bars matching the audio they
+        // just imported.
+        renderWaveformFor(musicBuffer);
       } catch (err) { toast('Could not decode that audio file.', true); }
     });
+
+    /* Decode the source video's audio track and draw real amplitude
+       bars in .ve-waveform — replaces the decorative repeating-line
+       background. Triggered on loadedmetadata; if the file's audio
+       can't be decoded (codec mismatch, no audio track, etc.) the
+       waveform area stays in its empty placeholder state. */
+    async function decodeSourceVideoWaveform() {
+      try {
+        if (!app || !app.binary) return;
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        var ab = await app.binary.arrayBuffer();
+        // decodeAudioData consumes the buffer; clone it so we don't
+        // disturb other consumers.
+        var copy = ab.slice(0);
+        var decoded = await audioCtx.decodeAudioData(copy);
+        renderWaveformFor(decoded);
+      } catch (e) {
+        // Silent — waveform stays empty. Source format may not
+        // include an iPad-decodable audio track.
+      }
+    }
+
+    /* Draw amplitude bars from an AudioBuffer into the waveform
+       element. Down-samples the channel data into ~200 buckets and
+       renders each as a vertical yellow bar centred on the strip's
+       midline. Honours device pixel ratio for crisp lines. */
+    function renderWaveformFor(audioBuffer) {
+      var wf = document.getElementById('ve-waveform');
+      if (!wf || !audioBuffer) return;
+      wf.classList.remove('empty');
+      // Reuse or create the canvas.
+      var c = wf.querySelector('canvas');
+      if (!c) { c = document.createElement('canvas'); wf.appendChild(c); }
+      var dpr = window.devicePixelRatio || 1;
+      var rect = wf.getBoundingClientRect();
+      c.width = Math.max(200, rect.width * dpr);
+      c.height = Math.max(32, rect.height * dpr);
+      var ctx = c.getContext('2d');
+      ctx.clearRect(0, 0, c.width, c.height);
+      var data = audioBuffer.getChannelData(0);
+      var bars = 220;
+      var step = Math.max(1, Math.floor(data.length / bars));
+      var midY = c.height / 2;
+      var barW = c.width / bars;
+      ctx.fillStyle = '#fbbf24';
+      for (var b = 0; b < bars; b++) {
+        // Peak amplitude in this bucket (cheap RMS would also work).
+        var max = 0;
+        var startIdx = b * step;
+        var endIdx = Math.min(data.length, startIdx + step);
+        for (var i = startIdx; i < endIdx; i++) {
+          var v = Math.abs(data[i]);
+          if (v > max) max = v;
+        }
+        var h = Math.max(1, max * c.height * 0.85);
+        var x = b * barW;
+        ctx.fillRect(x, midY - h / 2, Math.max(1, barW - 1), h);
+      }
+    }
+    // Kick the source-audio decode when the video has metadata.
+    video.addEventListener('loadedmetadata', function () {
+      var wf = document.getElementById('ve-waveform');
+      if (wf) wf.classList.add('empty');
+      // Defer briefly so the rest of the metadata-load chain finishes
+      // first (canvas dims, thumbnail kickoff, etc).
+      setTimeout(decodeSourceVideoWaveform, 200);
+    }, { once: true });
     function playPreviewMusic() {
       stopPreviewMusic();
       if (!musicBuffer || !audioCtx) return;
