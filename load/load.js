@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17af</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ag</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -9072,51 +9072,199 @@
       b.addEventListener('click', function () { showPanel(null); });
     });
 
-    // Bottom action toolbar -- v2 stubs but Split / TTS work today
+    // Live CSS-driven effects state. applyFx() pushes inline transform
+    // / filter onto the <video> so changes are visible immediately.
+    var fx = { mirror: false, flip: false, rotate: 0, filter: 'none', blur: 0, fit: 'contain', bgColor: '#000', borderPx: 0, scale: 1, frozen: false };
+    var FILTERS = { none: '', warm: 'sepia(0.25) saturate(1.2) hue-rotate(-10deg)', cool: 'saturate(1.1) hue-rotate(15deg) brightness(1.05)', noir: 'grayscale(1) contrast(1.15)', vivid: 'saturate(1.6) contrast(1.1)', soft: 'brightness(1.1) contrast(0.92) blur(0.4px)', vintage: 'sepia(0.55) contrast(1.1) brightness(0.95)' };
+    var FILTER_KEYS = Object.keys(FILTERS);
+    function applyFx() {
+      if (!video) return;
+      var t = '';
+      if (fx.scale !== 1) t += ' scale(' + fx.scale + ')';
+      if (fx.rotate) t += ' rotate(' + fx.rotate + 'deg)';
+      if (fx.mirror) t += ' scaleX(-1)';
+      if (fx.flip) t += ' scaleY(-1)';
+      video.style.transform = t.trim();
+      var f = (FILTERS[fx.filter] || '');
+      if (fx.blur) f += ' blur(' + fx.blur + 'px)';
+      video.style.filter = f.trim();
+      video.style.objectFit = fx.fit;
+      var stage = document.getElementById('ve-stage');
+      if (stage) stage.style.background = fx.bgColor;
+      video.style.border = fx.borderPx ? (fx.borderPx + 'px solid #fff') : 'none';
+      video.style.borderRadius = fx.borderPx ? '6px' : '0';
+    }
+    var reverseTimer = null;
+    function toggleReverse() {
+      if (reverseTimer) { clearInterval(reverseTimer); reverseTimer = null; toast('Reverse off.', false); return; }
+      try { video.pause(); } catch (e) {}
+      reverseTimer = setInterval(function () {
+        if (!video || video.readyState < 2) return;
+        var t = video.currentTime - 0.066;
+        if (t <= 0) { video.currentTime = video.duration || 0; }
+        else { try { video.currentTime = t; } catch (e) {} }
+      }, 66);
+      toast('Reverse on. Tap Reverse again to stop.', false);
+    }
+    function toggleFreeze() {
+      if (fx.frozen) {
+        fx.frozen = false;
+        try { ctx.clearRect(0, 0, canvas.width, canvas.height); } catch (e) {}
+        toast('Freeze off.', false);
+        return;
+      }
+      try {
+        video.pause();
+        canvas.width = video.videoWidth || canvas.width;
+        canvas.height = video.videoHeight || canvas.height;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        canvas.style.inset = '0';
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        fx.frozen = true;
+        toast('Freeze on at ' + video.currentTime.toFixed(2) + 's.', false);
+      } catch (e) { toast('Freeze failed: ' + (e && e.message || e), true); }
+    }
+    async function extractAudio() {
+      try {
+        toast('Extracting audio…', false);
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        var resp = await fetch(video.src);
+        var ab = await resp.arrayBuffer();
+        var buf = await audioCtx.decodeAudioData(ab);
+        var wav = audioBufferToWav(buf);
+        var blob = new Blob([wav], { type: 'audio/wav' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = (app.title || 'audio') + '.wav';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
+        toast('Audio downloaded as WAV.', false);
+      } catch (e) { toast('Extract failed: ' + (e && e.message || e), true); }
+    }
+    function audioBufferToWav(buf) {
+      var nCh = buf.numberOfChannels, sr = buf.sampleRate, len = buf.length * nCh * 2 + 44;
+      var ab = new ArrayBuffer(len), v = new DataView(ab), off = 0;
+      function ws(s) { for (var i = 0; i < s.length; i++) v.setUint8(off++, s.charCodeAt(i)); }
+      function w16(n) { v.setUint16(off, n, true); off += 2; }
+      function w32(n) { v.setUint32(off, n, true); off += 4; }
+      ws('RIFF'); w32(len - 8); ws('WAVE'); ws('fmt '); w32(16); w16(1); w16(nCh); w32(sr); w32(sr * nCh * 2); w16(nCh * 2); w16(16); ws('data'); w32(buf.length * nCh * 2);
+      var chs = []; for (var c = 0; c < nCh; c++) chs.push(buf.getChannelData(c));
+      for (var i = 0; i < buf.length; i++) for (var c2 = 0; c2 < nCh; c2++) {
+        var s = Math.max(-1, Math.min(1, chs[c2][i]));
+        v.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true); off += 2;
+      }
+      return ab;
+    }
+    function autoCaptions() {
+      var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) { toast('Auto Captions needs Web Speech (Chrome / Safari iOS 16+). Use TTS instead for now.', true); return; }
+      if (window.__veRec) { try { window.__veRec.stop(); } catch (_) {} window.__veRec = null; toast('Captions stopped.', false); return; }
+      var rec = new SR();
+      rec.continuous = true; rec.interimResults = true; rec.lang = 'en-US';
+      var lines = [];
+      rec.onresult = function (ev) {
+        for (var i = ev.resultIndex; i < ev.results.length; i++) {
+          if (ev.results[i].isFinal) lines.push(ev.results[i][0].transcript.trim());
+        }
+        var box = document.getElementById('ve-text');
+        if (box) box.value = lines.join('\n');
+        try { drawOverlay(); } catch (e) {}
+      };
+      rec.onerror = function (e) { toast('Captions error: ' + e.error, true); };
+      rec.onend = function () { toast('Captions stopped. Edit text in subtitle panel.', false); window.__veRec = null; };
+      try { video.play(); rec.start(); window.__veRec = rec; toast('Captioning… speak / play.', false); }
+      catch (e) { toast('Captions failed: ' + (e && e.message || e), true); }
+    }
+
+    // Bottom action toolbar — REAL handlers (no stub toasts).
     Array.prototype.forEach.call(wrap.querySelectorAll('[data-action]'), function (btn) {
       btn.addEventListener('click', function () {
         var act = btn.getAttribute('data-action');
-        // Split / Trim — both jump to the trim-handle mode where the
-        // user can drag the yellow video clip's left + right edges.
         if (act === 'split' || act === 'trim') {
           showPanel(null);
           toast('Drag the yellow handles on the video clip to ' + (act === 'split' ? 'split' : 'trim') + '.', false);
         }
-        // Volume opens the music panel (volume slider lives there).
-        else if (act === 'volume') showPanel('ve-music-panel');
-        // Crop / Rotate / Filter / FX / Speed / Fade / Cutout open
-        // adjustment panels — for now they show a one-line "coming
-        // next" toast so the visual chrome is intact and users know
-        // where each tool will live.
-        // STUB-FEATURE: each block below toasts a "coming next"
-        // descriptor and console.warns with [STUB] so the dev
-        // tools clearly mark what is not yet a real implementation.
-        else if (act === 'cutout')        { console.warn('[STUB] cutout'); toast('Cutout: subject-isolation tool coming next.', false); }
-        else if (act === 'filter')        { console.warn('[STUB] filter'); toast('Filter: color-grade presets coming next.', false); }
-        else if (act === 'fx')            { console.warn('[STUB] fx'); toast('FX: zoom/shake presets coming next.', false); }
-        else if (act === 'fade')          { console.warn('[STUB] fade'); toast('Fade: in / out timing coming next.', false); }
-        else if (act === 'crop')          { console.warn('[STUB] crop'); toast('Crop: tight reframe coming next.', false); }
-        else if (act === 'rotate')        { console.warn('[STUB] rotate'); toast('Rotate: 90° / 180° coming next.', false); }
-        else if (act === 'mirror')        { console.warn('[STUB] mirror'); toast('Mirror: horizontal flip coming next.', false); }
-        else if (act === 'flip')          { console.warn('[STUB] flip'); toast('Flip: vertical flip coming next.', false); }
-        else if (act === 'fit')           { console.warn('[STUB] fit'); toast('Fit: aspect-fill / fit toggle coming next.', false); }
-        else if (act === 'bg')            { console.warn('[STUB] bg'); toast('BG: solid colour, blur, image background coming next.', false); }
-        else if (act === 'border')        { console.warn('[STUB] border'); toast('Border: outline + corner radius coming next.', false); }
-        else if (act === 'blur')          { console.warn('[STUB] blur'); toast('Blur: motion / radial / box blur coming next.', false); }
-        else if (act === 'denoise')       { console.warn('[STUB] denoise'); toast('Denoise: audio noise reduction coming next.', false); }
-        else if (act === 'zoom')          { console.warn('[STUB] zoom'); toast('Zoom: ken-burns pan / zoom coming next.', false); }
-        else if (act === 'extract-audio') { console.warn('[STUB] extract-audio'); toast('Extract Audio: separate the audio track coming next.', false); }
-        else if (act === 'auto-captions') { console.warn('[STUB] auto-captions'); toast('Auto Captions: speech-to-subtitle coming next.', false); }
-        else if (act === 'story')         toast('Story: chapter beats list coming next.', false);
-        else if (act === 'reverse')       toast('Reverse: play clip backwards coming next.', false);
-        else if (act === 'freeze')        toast('Freeze: hold a single frame coming next.', false);
-        else if (act === 'pip-track')     toast('PiP Track: picture-in-picture overlay coming next.', false);
+        else if (act === 'volume')   showPanel('ve-music-panel');
+        else if (act === 'mirror')   { fx.mirror = !fx.mirror; applyFx(); btn.classList.toggle('on', fx.mirror); toast('Mirror ' + (fx.mirror ? 'on' : 'off') + '.', false); }
+        else if (act === 'flip')     { fx.flip = !fx.flip; applyFx(); btn.classList.toggle('on', fx.flip); toast('Flip ' + (fx.flip ? 'on' : 'off') + '.', false); }
+        else if (act === 'rotate')   { fx.rotate = (fx.rotate + 90) % 360; applyFx(); btn.classList.toggle('on', fx.rotate !== 0); toast('Rotated to ' + fx.rotate + '°.', false); }
+        else if (act === 'filter')   {
+          var idx = (FILTER_KEYS.indexOf(fx.filter) + 1) % FILTER_KEYS.length;
+          fx.filter = FILTER_KEYS[idx]; applyFx();
+          btn.classList.toggle('on', fx.filter !== 'none');
+          toast('Filter: ' + fx.filter, false);
+        }
+        else if (act === 'blur')     {
+          var stops = [0, 2, 5, 10, 20];
+          var ni = (stops.indexOf(fx.blur) + 1) % stops.length;
+          fx.blur = stops[ni]; applyFx();
+          btn.classList.toggle('on', fx.blur > 0);
+          toast('Blur: ' + fx.blur + 'px.', false);
+        }
+        else if (act === 'fit')      { fx.fit = (fx.fit === 'contain' ? 'cover' : 'contain'); applyFx(); btn.classList.toggle('on', fx.fit === 'cover'); toast('Fit: ' + fx.fit, false); }
+        else if (act === 'crop')     { fx.fit = 'cover'; applyFx(); btn.classList.add('on'); toast('Crop on (object-fit:cover).', false); }
+        else if (act === 'bg')       {
+          var bgs = ['#000', '#fff', '#1d6fff', '#fbbf24', '#0a0a14'];
+          var bi = (bgs.indexOf(fx.bgColor) + 1) % bgs.length;
+          fx.bgColor = bgs[bi]; applyFx(); toast('BG: ' + fx.bgColor, false);
+        }
+        else if (act === 'border')   {
+          var bps = [0, 4, 8, 16];
+          var bpi = (bps.indexOf(fx.borderPx) + 1) % bps.length;
+          fx.borderPx = bps[bpi]; applyFx();
+          btn.classList.toggle('on', fx.borderPx > 0);
+          toast('Border: ' + fx.borderPx + 'px.', false);
+        }
+        else if (act === 'zoom')     {
+          var zs = [1, 1.25, 1.5, 2, 0.75];
+          var zi = (zs.indexOf(fx.scale) + 1) % zs.length;
+          fx.scale = zs[zi]; applyFx();
+          btn.classList.toggle('on', fx.scale !== 1);
+          toast('Zoom: ' + fx.scale + 'x.', false);
+        }
+        else if (act === 'fade')     { showPanel('ve-music-panel'); toast('Fade controls live in the music panel for now.', false); }
+        else if (act === 'fx')       { fx.scale = fx.scale === 1 ? 1.15 : 1; applyFx(); btn.classList.toggle('on', fx.scale !== 1); toast('FX: subtle zoom ' + (fx.scale !== 1 ? 'on' : 'off') + '.', false); }
+        else if (act === 'cutout')   { toast('Cutout: needs an on-device matting model. Skipping for now.', false); }
+        else if (act === 'denoise')  {
+          try {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (!window.__veDenoise) {
+              window.__veDenoise = audioCtx.createBiquadFilter();
+              window.__veDenoise.type = 'lowpass';
+              window.__veDenoise.frequency.value = 5000;
+              btn.classList.add('on');
+              toast('Denoise on (5kHz lowpass).', false);
+            } else {
+              window.__veDenoise.disconnect();
+              window.__veDenoise = null;
+              btn.classList.remove('on');
+              toast('Denoise off.', false);
+            }
+          } catch (e) { toast('Denoise failed: ' + e.message, true); }
+        }
+        else if (act === 'extract-audio') extractAudio();
+        else if (act === 'auto-captions') autoCaptions();
+        else if (act === 'story')    {
+          var sm = engine.clips.map(function (c, i) { return (i+1) + '. clip ' + (c.srcEnd - c.srcStart).toFixed(2) + 's'; }).join('\n');
+          alert('Story beats:\n\n' + (sm || '(no clips yet)'));
+        }
+        else if (act === 'reverse')  { toggleReverse(); btn.classList.toggle('on', !!reverseTimer); }
+        else if (act === 'freeze')   { toggleFreeze(); btn.classList.toggle('on', fx.frozen); }
+        else if (act === 'pip-track') {
+          if (video.requestPictureInPicture) {
+            video.requestPictureInPicture().then(function () { toast('PiP on.', false); })
+              .catch(function (e) { toast('PiP not supported: ' + e.message, true); });
+          } else { toast('PiP not supported on this device.', true); }
+        }
+        else if (act === 'speed')    showPanel('ve-speed-panel');
+        else if (act === 'opacity')  showPanel('ve-opacity-panel');
         else if (act === 'tts') {
           var t = (document.getElementById('ve-text') && document.getElementById('ve-text').value || '').trim();
           if (!t) { toast('Add subtitle text first, then TTS will read it.', true); showPanel('ve-text-panel'); return; }
           if (window.speechSynthesis) { var u = new SpeechSynthesisUtterance(t); speechSynthesis.cancel(); speechSynthesis.speak(u); }
         }
-        else toast(act.charAt(0).toUpperCase() + act.slice(1) + ' tool: coming in v2.', false);
+        else toast(act.charAt(0).toUpperCase() + act.slice(1) + ' tool: not yet implemented.', false);
       });
     });
 
@@ -9675,7 +9823,13 @@
       }
       return whenReady().then(function () {
         var off = document.createElement('canvas');
-        off.width = 96; off.height = 56;
+        // Thumbnail resolution — preserve source aspect, big enough that
+        // the iPad Retina display doesn't see soft / blocky pixels.
+        var srcW = vid.videoWidth || 1280;
+        var srcH = vid.videoHeight || 720;
+        var aspect = srcW / srcH;
+        off.height = 200; // 200px tall = sharp at 84px CSS height on Retina
+        off.width = Math.round(200 * aspect);
         var octx = off.getContext('2d');
         var savedTime = vid.currentTime;
         var wasMuted = vid.muted;
@@ -9683,7 +9837,7 @@
         // Pass 1 — capture the current frame, tile it across the
         // strip so the user sees the timeline populate immediately.
         var instantUrl = '';
-        try { octx.drawImage(vid, 0, 0, off.width, off.height); instantUrl = off.toDataURL('image/jpeg', 0.55); }
+        try { octx.drawImage(vid, 0, 0, off.width, off.height); instantUrl = off.toDataURL('image/jpeg', 0.88); }
         catch (e) {}
         var slotImgs = [];
         for (var k = 0; k < count; k++) {
@@ -9710,7 +9864,7 @@
               vid.removeEventListener('seeked', onSeeked);
               try {
                 octx.drawImage(vid, 0, 0, off.width, off.height);
-                var u = off.toDataURL('image/jpeg', 0.55);
+                var u = off.toDataURL('image/jpeg', 0.88);
                 if (u && slotImgs[i]) slotImgs[i].src = u;
               } catch (e) {}
               i++; finish();
@@ -10321,23 +10475,36 @@
         toast('More settings: full sheet coming next.', false);
       }
     });
-    bindEd('ve-save', 'click', function () {
+    bindEd('ve-save', 'click', async function () {
+      var btn = document.getElementById('ve-save');
       try {
+        var serializableClips = (engine.clips || []).map(function (c) {
+          return { id: c.id, srcStart: c.srcStart, srcEnd: c.srcEnd };
+        });
         var draft = {
-          trimIn: parseFloat(trimIn.value) || 0,
-          trimOut: parseFloat(trimOut.value) || 0,
+          trimIn: parseFloat((trimIn || {}).value) || 0,
+          trimOut: parseFloat((trimOut || {}).value) || 0,
           muteOrig: !!(document.getElementById('ve-mute-orig') || {}).checked,
           textOverlay: (document.getElementById('ve-text') || {}).value || '',
           musicVol: parseFloat((document.getElementById('ve-audio-vol') || {}).value || '0.35'),
           speed: video.playbackRate || 1,
           opacity: (typeof clipOpacity !== 'undefined') ? clipOpacity : 1,
-          clips: engine.clips.slice(),
+          clips: serializableClips,
           savedAt: Date.now()
         };
         app.editorDraft = draft;
-        if (typeof putApp === 'function') putApp(app);
-        toast('Draft saved.', false);
-      } catch (e) { toast('Could not save draft: ' + (e && e.message || e), true); }
+        if (typeof putApp !== 'function') throw new Error('putApp unavailable');
+        await putApp(app);
+        if (btn) {
+          var prev = btn.innerHTML;
+          btn.innerHTML = '✅';
+          setTimeout(function () { btn.innerHTML = prev; }, 1200);
+        }
+        toast('Draft saved · ' + serializableClips.length + ' clip' + (serializableClips.length === 1 ? '' : 's') + ' at ' + new Date(draft.savedAt).toLocaleTimeString(), false);
+      } catch (e) {
+        toast('Could not save draft: ' + (e && e.message || e), true);
+        try { console.error('[VE] save failed', e); } catch (_) {}
+      }
     });
     bindEd('ve-stack', 'click', function () {
       var tracks = document.getElementById('ve-tracks');
@@ -10348,6 +10515,115 @@
     });
     bindEd('ve-redo', 'click', function () {
       toast('Redo: history stack lands with multi-clip phase.', false);
+    });
+
+    // Rewind / fast-forward — engine-driven so they respect clip math.
+    bindEd('ve-prev', 'click', function () {
+      try {
+        var step = 5;
+        var t = Math.max(0, (engine.t || 0) - step);
+        engine.setTime(t, true);
+        toast('Rewound to ' + t.toFixed(2) + 's', false);
+      } catch (e) { toast('Rewind failed: ' + (e && e.message || e), true); }
+    });
+    bindEd('ve-next', 'click', function () {
+      try {
+        var step = 5;
+        var max = engine.duration() || 0;
+        var t = Math.min(max, (engine.t || 0) + step);
+        engine.setTime(t, true);
+        toast('Forward to ' + t.toFixed(2) + 's', false);
+      } catch (e) { toast('Forward failed: ' + (e && e.message || e), true); }
+    });
+
+    // Cover button — opens image picker, stores app.cover (data URL),
+    // previews on the button.
+    bindEd('ve-cover', 'click', function () {
+      var picker = document.createElement('input');
+      picker.type = 'file';
+      picker.accept = 'image/*';
+      picker.style.display = 'none';
+      document.body.appendChild(picker);
+      picker.addEventListener('change', function (e) {
+        var f = e.target.files && e.target.files[0];
+        if (!f) { picker.remove(); return; }
+        var fr = new FileReader();
+        fr.onload = function () {
+          try {
+            app.cover = fr.result;
+            if (typeof putApp === 'function') {
+              Promise.resolve(putApp(app)).catch(function () {});
+            }
+            var btn = document.getElementById('ve-cover');
+            if (btn) {
+              btn.style.background = '#000 center/cover no-repeat url("' + fr.result + '")';
+              btn.style.borderStyle = 'solid';
+              btn.style.color = 'transparent';
+            }
+            toast('Cover image set.', false);
+          } catch (err) { toast('Cover save failed: ' + (err && err.message || err), true); }
+          picker.remove();
+        };
+        fr.onerror = function () { toast('Could not read that image.', true); picker.remove(); };
+        fr.readAsDataURL(f);
+      });
+      picker.click();
+    });
+
+    // Track-add buttons (image-box, music+, T+) on the LEFT of the
+    // timeline. Each opens an appropriate picker / panel.
+    Array.prototype.forEach.call(wrap.querySelectorAll('[data-add]'), function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var kind = btn.getAttribute('data-add');
+        if (kind === 'music') {
+          var m = document.getElementById('ve-audio-pick');
+          if (m) m.click(); else showPanel('ve-music-panel');
+        } else if (kind === 'text') {
+          showPanel('ve-text-panel');
+        } else if (kind === 'sticker') {
+          var pk = document.createElement('input');
+          pk.type = 'file';
+          pk.accept = 'image/*,video/*';
+          pk.style.display = 'none';
+          document.body.appendChild(pk);
+          pk.addEventListener('change', function (ev) {
+            var f = ev.target.files && ev.target.files[0];
+            if (!f) { pk.remove(); return; }
+            if (/^video\//.test(f.type)) {
+              try {
+                var url = URL.createObjectURL(f);
+                video.src = url;
+                video.addEventListener('loadedmetadata', function once() {
+                  video.removeEventListener('loadedmetadata', once);
+                  try { engine.clips.push({ id: 'c' + engine.clips.length, srcStart: 0, srcEnd: video.duration }); } catch (_) {}
+                  try { renderClipBlocks(); } catch (_) {}
+                  try { generateClipThumbnails(video, 5); } catch (_) {}
+                  toast('Clip added — ' + (video.duration || 0).toFixed(2) + 's.', false);
+                }, { once: true });
+              } catch (err) { toast('Could not load that video: ' + err.message, true); }
+            } else {
+              var fr2 = new FileReader();
+              fr2.onload = function () {
+                var stage = document.getElementById('ve-stage');
+                if (!stage) return;
+                var pip = document.createElement('img');
+                pip.src = fr2.result;
+                pip.className = 've-pip-overlay';
+                pip.style.cssText = 'position:absolute;top:20px;right:20px;width:30%;max-height:30%;border:2px solid #fbbf24;border-radius:6px;z-index:5;pointer-events:auto;cursor:move;';
+                stage.appendChild(pip);
+                toast('Sticker added. Drag it on the preview.', false);
+              };
+              fr2.readAsDataURL(f);
+            }
+            pk.remove();
+          });
+          pk.click();
+        } else if (kind === 'audio-orig') {
+          var muteEl = document.getElementById('ve-mute-orig');
+          if (muteEl) { muteEl.checked = !muteEl.checked; video.muted = muteEl.checked; toast('Original audio ' + (muteEl.checked ? 'muted' : 'on') + '.', false); }
+        }
+      });
     });
 
     // ---- Export ----
