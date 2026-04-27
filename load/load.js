@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17y-safe</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17z-fix</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -9115,10 +9115,10 @@
       if (playhead) playhead.style.left = leftPx + 'px';
       if (timeLbl) timeLbl.textContent = fmtTime(t) + ' / ' + fmtTime(d);
     }
-    engine.onTick = updatePlayheadFromEngine;
+    var __vePendingOnTick = updatePlayheadFromEngine;
     // Re-render the clip strip whenever the engine's clips array
     // mutates (Split / Duplicate / Delete).
-    engine.onClipsChanged = function () { renderClipBlocks(); };
+    var __vePendingClipsChanged = function () { renderClipBlocks(); };
 
     /* Render N visible clip blocks across the strip — one per entry
        in engine.clips. Each block sits at a percentage of the total
@@ -9137,6 +9137,7 @@
        surface, not blank space. */
     var SLOT_PX = 80; // each empty slot is 80px wide in the spec
     var PX_PER_SECOND = 90; // base pixel scale for clip widths
+    var SLOT_PCT = 0; // safety fallback so trim/ruler never crash from an undefined legacy constant
     function renderClipBlocks() {
       var stripEl = document.getElementById('ve-clip-strip'); // .video-track
       if (!stripEl) return;
@@ -9311,10 +9312,10 @@
         // Refresh per-block thumbs after the engine's master thumbs
         // are populated.
         try {
-          var blocks = document.querySelectorAll('.ve-clip-block');
+          var blocks = document.querySelectorAll('.timeline-clip');
           blocks.forEach(function (b) {
             var idx = +b.dataset.clipIdx;
-            populateBlockThumbs(b.querySelector('.ve-block-thumbs'), engine.clips[idx]);
+            populateBlockThumbs(b.querySelector('.thumbnail-strip'), engine.clips[idx]);
           });
         } catch (e) {}
       });
@@ -9367,11 +9368,12 @@
         }
       }
     }
-    // Re-render the ruler whenever clips change (split / duplicate)
-    var _origOnClipsChanged = engine.onClipsChanged;
-    engine.onClipsChanged = function () {
-      _origOnClipsChanged && _origOnClipsChanged();
-      try { renderRuler(); } catch (e) {}
+    // Re-render the ruler whenever clips change (split / duplicate).
+    // Do not attach this until engine exists. The final binding happens
+    // immediately after the engine object is created below.
+    var __vePendingClipsChangedWithRuler = function () {
+      try { renderClipBlocks(); } catch (e) { console.error('[VE] renderClipBlocks failed', e); }
+      try { renderRuler(); } catch (e) { console.error('[VE] renderRuler failed', e); }
     };
 
     // Initialize trim handles after video metadata is ready
@@ -9381,7 +9383,7 @@
       syncTrimFromHandles();
       renderRuler();
     };
-    video.addEventListener('loadedmetadata', earlyHandler);
+    // Attach earlyHandler after video is bound.
 
     // Expose backwards-compat IDs the existing handlers below expect.
     // The hidden inputs (#ve-trim-in / #ve-trim-out) plus the handle
@@ -9546,9 +9548,16 @@
     // Expose for debug + future tooling.
     wrap.__engine = engine;
 
+    // Bind pending UI callbacks now that engine exists. Older builds set engine.onTick before engine was created, aborting before .timeline-clip could mount.
+    if (typeof __vePendingOnTick === 'function') engine.onTick = __vePendingOnTick;
+    engine.onClipsChanged = (typeof __vePendingClipsChangedWithRuler === 'function') ? __vePendingClipsChangedWithRuler : (typeof __vePendingClipsChanged === 'function' ? __vePendingClipsChanged : function () {});
+    try { video.addEventListener('loadedmetadata', earlyHandler); } catch (e) { console.warn('[VE] early metadata handler not attached', e); }
+
     // RENDER THE CLIP IMMEDIATELY — do not wait for loadedmetadata.
     engine.clips = [{ id: 'c0', srcStart: 0, srcEnd: 5, _placeholder: true }];
     engine.t = 0;
+    try { engine.onClipsChanged(); } catch (e) { console.error('[VE] initial clip render failed', e); }
+    try { engine.onTick(0); } catch (e) {}
 
     function refreshTrimDisplay() {
       var inS = parseFloat(trimIn.value), outS = parseFloat(trimOut.value);
