@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ae</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17w</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -8609,8 +8609,8 @@
         '<button id="ve-export" style="background:#1d6fff;border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">&#11014;&#65039;</button>' +
       '</div>' +
       // ===== Preview stage (black) =====
-      '<div id="ve-stage" style="flex:3 1 0;min-height:280px;position:relative;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden;">' +
-        '<video id="ve-video" src="' + blobUrl + '" playsinline preload="auto" controls style="width:100%;height:100%;max-width:100%;max-height:100%;background:#000;object-fit:contain;"></video>' +
+      '<div id="ve-stage" style="flex:1;min-height:0;position:relative;background:#000;display:flex;align-items:center;justify-content:center;">' +
+        '<video id="ve-video" src="' + blobUrl + '" playsinline preload="auto" controls style="max-width:100%;max-height:100%;background:#000;"></video>' +
         '<canvas id="ve-overlay" style="position:absolute;pointer-events:none;"></canvas>' +
         '<button id="ve-fullscreen" class="ve-iconbtn" style="position:absolute;right:10px;bottom:10px;background:rgba(255,255,255,0.1);" aria-label="Fullscreen">&#10070;</button>' +
       '</div>' +
@@ -8862,21 +8862,6 @@
       '#__loadVideoEdit .ve-quick-btn:active{background:rgba(255,255,255,0.18);}' +
       '@keyframes vePopIn{from{opacity:0;transform:translateX(-50%) translateY(4px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}' +
       '#__loadVideoEdit .ve-context{position:absolute;left:0;right:0;bottom:0;background:#1a1a26;padding:10px 8px max(10px,env(safe-area-inset-bottom));border-top:1px solid #2a2a40;display:flex;align-items:center;gap:14px;overflow-x:auto;scrollbar-width:none;z-index:8;}' +
-      // Bottom-bar overlap fix — give the editor flex layout so the
-      // bottom action bars (Edit/Split/Replace + Filter/FX/...) sit
-      // BELOW the timeline instead of overlaying it. Stage gets the
-      // remaining vertical room so the preview is large.
-      '#__loadVideoEdit{display:flex !important;flex-direction:column !important;}' +
-      '#__loadVideoEdit #ve-stage{flex:3 1 0 !important;min-height:280px !important;}' +
-      '#__loadVideoEdit .timeline-engine{flex:0 0 auto !important;height:240px !important;min-height:240px !important;padding-bottom:6px !important;}' +
-      '#__loadVideoEdit .timeline-scroll{padding-bottom:6px !important;}' +
-      '#__loadVideoEdit #ve-actions,#__loadVideoEdit .ve-context{flex:0 0 auto !important;position:relative !important;bottom:auto !important;padding-bottom:max(8px,env(safe-area-inset-bottom)) !important;}' +
-      '#__loadVideoEdit.ve-clip-active #ve-context{position:relative !important;}' +
-      // Thumbnail-distortion fix — equal flex shares with object-fit:cover.
-      '#__loadVideoEdit .timeline-clip{overflow:hidden !important;height:56px !important;}' +
-      '#__loadVideoEdit .thumbnail-strip{width:100% !important;height:100% !important;display:flex !important;align-items:stretch !important;overflow:hidden !important;min-width:0 !important;}' +
-      '#__loadVideoEdit .thumbnail-strip > *,#__loadVideoEdit .thumbnail-strip img,#__loadVideoEdit .thumbnail-frame{flex:1 1 0 !important;width:0 !important;min-width:0 !important;height:100% !important;object-fit:cover !important;object-position:center !important;display:block !important;border-right:1px solid rgba(255,255,255,0.15) !important;}' +
-      '#__loadVideoEdit .thumbnail-strip img:last-child,#__loadVideoEdit .thumbnail-frame:last-child{border-right:none !important;}' +
       '#__loadVideoEdit .ve-context::-webkit-scrollbar{display:none;}' +
       '#__loadVideoEdit .ve-context-done .ve-act-icon{background:#1d6fff;color:#fff;border-color:#1d6fff;}' +
       '#__loadVideoEdit.ve-clip-active #ve-context{display:flex;}' +
@@ -8928,9 +8913,6 @@
     wrap.appendChild(styleTag);
 
     document.body.appendChild(wrap);
-    // FIX v17y-safe: bind video/canvas immediately after mounting editor DOM, before anything touches them.
-    var video = document.getElementById("ve-video");
-    var canvas = document.getElementById("ve-overlay");
     // Force iPad Safari to start downloading metadata + first frame
     // immediately. Without this the <video> waits for user gesture +
     // auto-loads lazily; on broken / unsupported clips that lazy
@@ -9067,221 +9049,51 @@
       b.addEventListener('click', function () { showPanel(null); });
     });
 
-    // Live CSS-driven effects state — reads applied to the <video>
-    // element via inline style transform/filter so changes are visible
-    // immediately. State lives on the editor wrap so it persists
-    // across panel toggles + survives re-renders of the toolbar.
-    var fx = { mirror: false, flip: false, rotate: 0, filter: 'none', blur: 0, fit: 'contain', bgColor: '#000', borderPx: 0, scale: 1, frozen: false };
-    var FILTERS = { none: '', warm: 'sepia(0.25) saturate(1.2) hue-rotate(-10deg)', cool: 'saturate(1.1) hue-rotate(15deg) brightness(1.05)', noir: 'grayscale(1) contrast(1.15)', vivid: 'saturate(1.6) contrast(1.1)', soft: 'brightness(1.1) contrast(0.92) blur(0.4px)', vintage: 'sepia(0.55) contrast(1.1) brightness(0.95)' };
-    var FILTER_KEYS = Object.keys(FILTERS);
-    function applyFx() {
-      if (!video) return;
-      var t = '';
-      if (fx.scale !== 1) t += ' scale(' + fx.scale + ')';
-      if (fx.rotate) t += ' rotate(' + fx.rotate + 'deg)';
-      if (fx.mirror) t += ' scaleX(-1)';
-      if (fx.flip) t += ' scaleY(-1)';
-      video.style.transform = t.trim();
-      var f = (FILTERS[fx.filter] || '');
-      if (fx.blur) f += ' blur(' + fx.blur + 'px)';
-      video.style.filter = f.trim();
-      video.style.objectFit = fx.fit;
-      var stage = document.getElementById('ve-stage');
-      if (stage) stage.style.background = fx.bgColor;
-      video.style.border = fx.borderPx ? (fx.borderPx + 'px solid #fff') : 'none';
-      video.style.borderRadius = fx.borderPx ? '6px' : '0';
-    }
-
-    // Reverse playback — schedule timeupdate handler that walks the
-    // currentTime backwards. Toggle on/off so the user can return to
-    // forward play.
-    var reverseTimer = null;
-    function toggleReverse() {
-      if (reverseTimer) { clearInterval(reverseTimer); reverseTimer = null; toast('Reverse off.', false); return; }
-      try { video.pause(); } catch (e) {}
-      reverseTimer = setInterval(function () {
-        if (!video || video.readyState < 2) return;
-        var t = video.currentTime - 0.066; // ~15fps backward step
-        if (t <= 0) { video.currentTime = video.duration || 0; }
-        else { try { video.currentTime = t; } catch (e) {} }
-      }, 66);
-      toast('Reverse on. Tap Reverse again to stop.', false);
-    }
-
-    // Freeze — pause + capture current frame onto overlay canvas so it
-    // stays visible. Toggle off restores normal playback.
-    function toggleFreeze() {
-      if (fx.frozen) {
-        fx.frozen = false;
-        try { ctx.clearRect(0, 0, canvas.width, canvas.height); } catch (e) {}
-        toast('Freeze off.', false);
-        return;
-      }
-      try {
-        video.pause();
-        canvas.width = video.videoWidth || canvas.width;
-        canvas.height = video.videoHeight || canvas.height;
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        canvas.style.inset = '0';
-        canvas.style.width = '100%';
-        canvas.style.height = '100%';
-        fx.frozen = true;
-        toast('Freeze on at ' + video.currentTime.toFixed(2) + 's.', false);
-      } catch (e) { toast('Freeze failed: ' + (e && e.message || e), true); }
-    }
-
-    // Extract audio — decode the file, encode to WAV, trigger download.
-    async function extractAudio() {
-      try {
-        toast('Extracting audio…', false);
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        var resp = await fetch(video.src);
-        var ab = await resp.arrayBuffer();
-        var buf = await audioCtx.decodeAudioData(ab);
-        var wav = audioBufferToWav(buf);
-        var blob = new Blob([wav], { type: 'audio/wav' });
-        var a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = (app.title || 'audio') + '.wav';
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
-        toast('Audio downloaded as WAV.', false);
-      } catch (e) { toast('Extract failed: ' + (e && e.message || e), true); }
-    }
-    function audioBufferToWav(buf) {
-      var nCh = buf.numberOfChannels, sr = buf.sampleRate, len = buf.length * nCh * 2 + 44;
-      var ab = new ArrayBuffer(len), v = new DataView(ab), off = 0;
-      function ws(s) { for (var i = 0; i < s.length; i++) v.setUint8(off++, s.charCodeAt(i)); }
-      function w16(n) { v.setUint16(off, n, true); off += 2; }
-      function w32(n) { v.setUint32(off, n, true); off += 4; }
-      ws('RIFF'); w32(len - 8); ws('WAVE'); ws('fmt '); w32(16); w16(1); w16(nCh); w32(sr); w32(sr * nCh * 2); w16(nCh * 2); w16(16); ws('data'); w32(buf.length * nCh * 2);
-      var chs = []; for (var c = 0; c < nCh; c++) chs.push(buf.getChannelData(c));
-      for (var i = 0; i < buf.length; i++) for (var c2 = 0; c2 < nCh; c2++) {
-        var s = Math.max(-1, Math.min(1, chs[c2][i]));
-        v.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true); off += 2;
-      }
-      return ab;
-    }
-
-    // Auto Captions — Web Speech recognition on a captured audio
-    // stream. iOS Safari support is partial; falls back with a clear
-    // error if the API is missing.
-    function autoCaptions() {
-      var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SR) { toast('Auto Captions needs Web Speech (Chrome / Safari iOS 16+). Use TTS instead for now.', true); return; }
-      var rec = new SR();
-      rec.continuous = true; rec.interimResults = true; rec.lang = 'en-US';
-      var lines = [];
-      rec.onresult = function (ev) {
-        for (var i = ev.resultIndex; i < ev.results.length; i++) {
-          if (ev.results[i].isFinal) lines.push(ev.results[i][0].transcript.trim());
-        }
-        var box = document.getElementById('ve-text');
-        if (box) box.value = lines.join('\n');
-        try { drawOverlay(); } catch (e) {}
-      };
-      rec.onerror = function (e) { toast('Captions error: ' + e.error, true); };
-      rec.onend = function () { toast('Captions stopped. Edit text in subtitle panel.', false); };
-      try { video.play(); rec.start(); toast('Captioning… speak / play. Tap Auto Captions again to stop.', false); window.__veRec = rec; }
-      catch (e) {
-        if (window.__veRec) { try { window.__veRec.stop(); } catch (_) {} window.__veRec = null; }
-        else toast('Captions failed: ' + (e && e.message || e), true);
-      }
-    }
-
-    // Bottom action toolbar — REAL handlers. Effects mutate `fx` and
-    // re-apply via applyFx() so the preview updates immediately.
+    // Bottom action toolbar -- v2 stubs but Split / TTS work today
     Array.prototype.forEach.call(wrap.querySelectorAll('[data-action]'), function (btn) {
       btn.addEventListener('click', function () {
         var act = btn.getAttribute('data-action');
+        // Split / Trim — both jump to the trim-handle mode where the
+        // user can drag the yellow video clip's left + right edges.
         if (act === 'split' || act === 'trim') {
           showPanel(null);
           toast('Drag the yellow handles on the video clip to ' + (act === 'split' ? 'split' : 'trim') + '.', false);
         }
+        // Volume opens the music panel (volume slider lives there).
         else if (act === 'volume') showPanel('ve-music-panel');
-        else if (act === 'mirror')   { fx.mirror = !fx.mirror; applyFx(); btn.classList.toggle('on', fx.mirror); toast('Mirror ' + (fx.mirror ? 'on' : 'off') + '.', false); }
-        else if (act === 'flip')     { fx.flip = !fx.flip; applyFx(); btn.classList.toggle('on', fx.flip); toast('Flip ' + (fx.flip ? 'on' : 'off') + '.', false); }
-        else if (act === 'rotate')   { fx.rotate = (fx.rotate + 90) % 360; applyFx(); toast('Rotated to ' + fx.rotate + '°.', false); }
-        else if (act === 'filter')   {
-          var idx = (FILTER_KEYS.indexOf(fx.filter) + 1) % FILTER_KEYS.length;
-          fx.filter = FILTER_KEYS[idx]; applyFx();
-          btn.classList.toggle('on', fx.filter !== 'none');
-          toast('Filter: ' + fx.filter, false);
-        }
-        else if (act === 'blur')     {
-          var stops = [0, 2, 5, 10, 20];
-          var ni = (stops.indexOf(fx.blur) + 1) % stops.length;
-          fx.blur = stops[ni]; applyFx();
-          btn.classList.toggle('on', fx.blur > 0);
-          toast('Blur: ' + fx.blur + 'px.', false);
-        }
-        else if (act === 'fit')      { fx.fit = (fx.fit === 'contain' ? 'cover' : 'contain'); applyFx(); btn.classList.toggle('on', fx.fit === 'cover'); toast('Fit: ' + fx.fit, false); }
-        else if (act === 'crop')     { fx.fit = 'cover'; applyFx(); btn.classList.add('on'); toast('Crop on (object-fit:cover).', false); }
-        else if (act === 'bg')       {
-          var bgs = ['#000', '#fff', '#1d6fff', '#fbbf24', '#0a0a14'];
-          var bi = (bgs.indexOf(fx.bgColor) + 1) % bgs.length;
-          fx.bgColor = bgs[bi]; applyFx(); toast('BG: ' + fx.bgColor, false);
-        }
-        else if (act === 'border')   {
-          var bps = [0, 4, 8, 16];
-          var bpi = (bps.indexOf(fx.borderPx) + 1) % bps.length;
-          fx.borderPx = bps[bpi]; applyFx();
-          btn.classList.toggle('on', fx.borderPx > 0);
-          toast('Border: ' + fx.borderPx + 'px.', false);
-        }
-        else if (act === 'zoom')     {
-          var zs = [1, 1.25, 1.5, 2, 0.75];
-          var zi = (zs.indexOf(fx.scale) + 1) % zs.length;
-          fx.scale = zs[zi]; applyFx();
-          btn.classList.toggle('on', fx.scale !== 1);
-          toast('Zoom: ' + fx.scale + 'x.', false);
-        }
-        else if (act === 'fade')     { showPanel('ve-music-panel'); toast('Fade controls live in the music panel for now.', false); }
-        else if (act === 'fx')       { fx.scale = fx.scale === 1 ? 1.15 : 1; applyFx(); toast('FX: subtle zoom ' + (fx.scale !== 1 ? 'on' : 'off') + '.', false); }
-        else if (act === 'cutout')   { toast('Cutout needs an on-device matting model (300MB). Skipping for now.', false); }
-        else if (act === 'denoise')  {
-          if (typeof musicVol !== 'undefined') {
-            // crude denoise: cut high-frequency hiss via WebAudio biquad
-            try {
-              if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-              if (!window.__veDenoise) {
-                window.__veDenoise = audioCtx.createBiquadFilter();
-                window.__veDenoise.type = 'lowpass';
-                window.__veDenoise.frequency.value = 5000;
-                btn.classList.add('on');
-                toast('Denoise on (5kHz lowpass).', false);
-              } else {
-                window.__veDenoise.disconnect();
-                window.__veDenoise = null;
-                btn.classList.remove('on');
-                toast('Denoise off.', false);
-              }
-            } catch (e) { toast('Denoise failed: ' + e.message, true); }
-          }
-        }
-        else if (act === 'zoom')     { fx.scale = fx.scale >= 2 ? 1 : fx.scale + 0.25; applyFx(); toast('Zoom: ' + fx.scale + 'x.', false); }
-        else if (act === 'extract-audio') extractAudio();
-        else if (act === 'auto-captions') autoCaptions();
-        else if (act === 'story')    {
-          var sm = engine.clips.map(function (c, i) { return (i+1) + '. clip ' + (c.srcEnd - c.srcStart).toFixed(2) + 's'; }).join('\n');
-          alert('Story beats:\n\n' + (sm || '(no clips yet)'));
-        }
-        else if (act === 'reverse')  { toggleReverse(); btn.classList.toggle('on', !!reverseTimer); }
-        else if (act === 'freeze')   { toggleFreeze(); btn.classList.toggle('on', fx.frozen); }
-        else if (act === 'pip-track') {
-          if (video.requestPictureInPicture) {
-            video.requestPictureInPicture().then(function () { toast('PiP on.', false); })
-              .catch(function (e) { toast('PiP not supported: ' + e.message, true); });
-          } else { toast('PiP not supported on this device.', true); }
-        }
-        else if (act === 'speed')    showPanel('ve-speed-panel');
-        else if (act === 'opacity')  showPanel('ve-opacity-panel');
+        // Crop / Rotate / Filter / FX / Speed / Fade / Cutout open
+        // adjustment panels — for now they show a one-line "coming
+        // next" toast so the visual chrome is intact and users know
+        // where each tool will live.
+        // STUB-FEATURE: each block below toasts a "coming next"
+        // descriptor and console.warns with [STUB] so the dev
+        // tools clearly mark what is not yet a real implementation.
+        else if (act === 'cutout')        { console.warn('[STUB] cutout'); toast('Cutout: subject-isolation tool coming next.', false); }
+        else if (act === 'filter')        { console.warn('[STUB] filter'); toast('Filter: color-grade presets coming next.', false); }
+        else if (act === 'fx')            { console.warn('[STUB] fx'); toast('FX: zoom/shake presets coming next.', false); }
+        else if (act === 'fade')          { console.warn('[STUB] fade'); toast('Fade: in / out timing coming next.', false); }
+        else if (act === 'crop')          { console.warn('[STUB] crop'); toast('Crop: tight reframe coming next.', false); }
+        else if (act === 'rotate')        { console.warn('[STUB] rotate'); toast('Rotate: 90° / 180° coming next.', false); }
+        else if (act === 'mirror')        { console.warn('[STUB] mirror'); toast('Mirror: horizontal flip coming next.', false); }
+        else if (act === 'flip')          { console.warn('[STUB] flip'); toast('Flip: vertical flip coming next.', false); }
+        else if (act === 'fit')           { console.warn('[STUB] fit'); toast('Fit: aspect-fill / fit toggle coming next.', false); }
+        else if (act === 'bg')            { console.warn('[STUB] bg'); toast('BG: solid colour, blur, image background coming next.', false); }
+        else if (act === 'border')        { console.warn('[STUB] border'); toast('Border: outline + corner radius coming next.', false); }
+        else if (act === 'blur')          { console.warn('[STUB] blur'); toast('Blur: motion / radial / box blur coming next.', false); }
+        else if (act === 'denoise')       { console.warn('[STUB] denoise'); toast('Denoise: audio noise reduction coming next.', false); }
+        else if (act === 'zoom')          { console.warn('[STUB] zoom'); toast('Zoom: ken-burns pan / zoom coming next.', false); }
+        else if (act === 'extract-audio') { console.warn('[STUB] extract-audio'); toast('Extract Audio: separate the audio track coming next.', false); }
+        else if (act === 'auto-captions') { console.warn('[STUB] auto-captions'); toast('Auto Captions: speech-to-subtitle coming next.', false); }
+        else if (act === 'story')         toast('Story: chapter beats list coming next.', false);
+        else if (act === 'reverse')       toast('Reverse: play clip backwards coming next.', false);
+        else if (act === 'freeze')        toast('Freeze: hold a single frame coming next.', false);
+        else if (act === 'pip-track')     toast('PiP Track: picture-in-picture overlay coming next.', false);
         else if (act === 'tts') {
           var t = (document.getElementById('ve-text') && document.getElementById('ve-text').value || '').trim();
           if (!t) { toast('Add subtitle text first, then TTS will read it.', true); showPanel('ve-text-panel'); return; }
           if (window.speechSynthesis) { var u = new SpeechSynthesisUtterance(t); speechSynthesis.cancel(); speechSynthesis.speak(u); }
         }
-        else toast(act.charAt(0).toUpperCase() + act.slice(1) + ' tool: not yet implemented.', false);
+        else toast(act.charAt(0).toUpperCase() + act.slice(1) + ' tool: coming in v2.', false);
       });
     });
 
@@ -9300,10 +9112,10 @@
       if (playhead) playhead.style.left = leftPx + 'px';
       if (timeLbl) timeLbl.textContent = fmtTime(t) + ' / ' + fmtTime(d);
     }
-    var __vePendingOnTick = updatePlayheadFromEngine;
+    engine.onTick = updatePlayheadFromEngine;
     // Re-render the clip strip whenever the engine's clips array
     // mutates (Split / Duplicate / Delete).
-    var __vePendingClipsChanged = function () { renderClipBlocks(); };
+    engine.onClipsChanged = function () { renderClipBlocks(); };
 
     /* Render N visible clip blocks across the strip — one per entry
        in engine.clips. Each block sits at a percentage of the total
@@ -9322,7 +9134,6 @@
        surface, not blank space. */
     var SLOT_PX = 80; // each empty slot is 80px wide in the spec
     var PX_PER_SECOND = 90; // base pixel scale for clip widths
-    var SLOT_PCT = 0; // safety fallback so trim/ruler never crash from an undefined legacy constant
     function renderClipBlocks() {
       var stripEl = document.getElementById('ve-clip-strip'); // .video-track
       if (!stripEl) return;
@@ -9497,10 +9308,10 @@
         // Refresh per-block thumbs after the engine's master thumbs
         // are populated.
         try {
-          var blocks = document.querySelectorAll('.timeline-clip');
+          var blocks = document.querySelectorAll('.ve-clip-block');
           blocks.forEach(function (b) {
             var idx = +b.dataset.clipIdx;
-            populateBlockThumbs(b.querySelector('.thumbnail-strip'), engine.clips[idx]);
+            populateBlockThumbs(b.querySelector('.ve-block-thumbs'), engine.clips[idx]);
           });
         } catch (e) {}
       });
@@ -9553,12 +9364,11 @@
         }
       }
     }
-    // Re-render the ruler whenever clips change (split / duplicate).
-    // Do not attach this until engine exists. The final binding happens
-    // immediately after the engine object is created below.
-    var __vePendingClipsChangedWithRuler = function () {
-      try { renderClipBlocks(); } catch (e) { console.error('[VE] renderClipBlocks failed', e); }
-      try { renderRuler(); } catch (e) { console.error('[VE] renderRuler failed', e); }
+    // Re-render the ruler whenever clips change (split / duplicate)
+    var _origOnClipsChanged = engine.onClipsChanged;
+    engine.onClipsChanged = function () {
+      _origOnClipsChanged && _origOnClipsChanged();
+      try { renderRuler(); } catch (e) {}
     };
 
     // Initialize trim handles after video metadata is ready
@@ -9568,7 +9378,7 @@
       syncTrimFromHandles();
       renderRuler();
     };
-    // Attach earlyHandler after video is bound.
+    video.addEventListener('loadedmetadata', earlyHandler);
 
     // Expose backwards-compat IDs the existing handlers below expect.
     // The hidden inputs (#ve-trim-in / #ve-trim-out) plus the handle
@@ -9653,17 +9463,9 @@
         var r = this.resolve(t);
         if (!r) { this.onTick(this.t); return; }
         try {
-          // IMPORTANT: do not use fastSeek here. On iPad Safari, fastSeek can jump
-          // only to keyframes and may not repaint the preview during a drag. For
-          // editor scrubbing we need exact currentTime control.
-          var srcTime = r.srcOffset;
-          if (video.duration && isFinite(video.duration)) {
-            srcTime = Math.max(0, Math.min(srcTime, Math.max(0, video.duration - 0.001)));
-          }
-          if (Math.abs((video.currentTime || 0) - srcTime) > 0.015) {
-            video.currentTime = srcTime;
-          }
-        } catch (e) { try { console.warn('[VE] setTime seek failed', e); } catch (_) {} }
+          if (immediate && typeof video.fastSeek === 'function') video.fastSeek(r.srcOffset);
+          else video.currentTime = r.srcOffset;
+        } catch (e) {}
         this.onTick(this.t);
       },
       play: function () {
@@ -9741,16 +9543,9 @@
     // Expose for debug + future tooling.
     wrap.__engine = engine;
 
-    // Bind pending UI callbacks now that engine exists. Older builds set engine.onTick before engine was created, aborting before .timeline-clip could mount.
-    if (typeof __vePendingOnTick === 'function') engine.onTick = __vePendingOnTick;
-    engine.onClipsChanged = (typeof __vePendingClipsChangedWithRuler === 'function') ? __vePendingClipsChangedWithRuler : (typeof __vePendingClipsChanged === 'function' ? __vePendingClipsChanged : function () {});
-    try { video.addEventListener('loadedmetadata', earlyHandler); } catch (e) { console.warn('[VE] early metadata handler not attached', e); }
-
     // RENDER THE CLIP IMMEDIATELY — do not wait for loadedmetadata.
     engine.clips = [{ id: 'c0', srcStart: 0, srcEnd: 5, _placeholder: true }];
     engine.t = 0;
-    try { engine.onClipsChanged(); } catch (e) { console.error('[VE] initial clip render failed', e); }
-    try { engine.onTick(0); } catch (e) {}
 
     function refreshTrimDisplay() {
       var inS = parseFloat(trimIn.value), outS = parseFloat(trimOut.value);
@@ -9943,87 +9738,6 @@
       if (wasPlaying) engine.play();
     }
     if (clipStripEl) clipStripEl.addEventListener('pointerdown', onScrubStart);
-
-
-    /* v17aa-sync: global VN-style timeline scrubbing.
-       The earlier build only listened on #ve-clip-strip. That meant dragging
-       the white playhead through the empty music/subtitle/sticker rows or the
-       waveform/ruler could move the visual area without driving the preview.
-       This listener makes the entire timeline column the scrub surface. */
-    (function bindTimelineScrollScrub() {
-      var timelineScrollEl = document.getElementById('timelineScroll');
-      var videoTrackEl = document.getElementById('ve-clip-strip');
-      if (!timelineScrollEl || !videoTrackEl) return;
-
-      function clientXFromEvent(ev) {
-        if (ev.touches && ev.touches[0]) return ev.touches[0].clientX;
-        if (ev.changedTouches && ev.changedTouches[0]) return ev.changedTouches[0].clientX;
-        return ev.clientX;
-      }
-
-      function timelineTimeFromClientX(clientX) {
-        var rect = videoTrackEl.getBoundingClientRect();
-        var x = clientX - rect.left;
-        var dur = engine.duration() || 0;
-        var t = x / PX_PER_SECOND;
-        if (snapEnabled) t = Math.round(t / SNAP_STEP) * SNAP_STEP;
-        return Math.max(0, Math.min(dur, t));
-      }
-
-      function shouldIgnoreTimelineScrub(target) {
-        return !!(target && target.closest && target.closest(
-          'button,input,select,textarea,.trim-handle,.clip-add,.ve-block-handle,#ve-context,#ve-clip-quick,.ve-iconbtn'
-        ));
-      }
-
-      var timelineWasPlaying = false;
-      function seekFromEvent(ev) {
-        var t = timelineTimeFromClientX(clientXFromEvent(ev));
-        engine.setTime(t, false);
-        return t;
-      }
-
-      function startTimelineScrub(ev) {
-        if (shouldIgnoreTimelineScrub(ev.target)) return;
-        if (!engine.duration()) return;
-        ev.preventDefault();
-        timelineWasPlaying = engine.isPlaying;
-        if (timelineWasPlaying) engine.pause();
-        seekFromEvent(ev);
-        document.addEventListener('pointermove', moveTimelineScrub, { passive: false });
-        document.addEventListener('pointerup', endTimelineScrub, { passive: false });
-        document.addEventListener('pointercancel', endTimelineScrub, { passive: false });
-      }
-      function moveTimelineScrub(ev) {
-        ev.preventDefault();
-        seekFromEvent(ev);
-      }
-      function endTimelineScrub(ev) {
-        document.removeEventListener('pointermove', moveTimelineScrub);
-        document.removeEventListener('pointerup', endTimelineScrub);
-        document.removeEventListener('pointercancel', endTimelineScrub);
-        if (timelineWasPlaying) engine.play();
-      }
-
-      timelineScrollEl.addEventListener('pointerdown', startTimelineScrub, { passive: false });
-
-      // Keep the engine UI synchronized if the native video controls are used.
-      video.addEventListener('timeupdate', function () {
-        if (engine.isPlaying) return;
-        var src = video.currentTime || 0;
-        var acc = 0;
-        for (var i = 0; i < engine.clips.length; i++) {
-          var c = engine.clips[i];
-          var len = c.srcEnd - c.srcStart;
-          if (src >= c.srcStart && src <= c.srcEnd) {
-            engine.t = acc + (src - c.srcStart);
-            engine.onTick(engine.t);
-            return;
-          }
-          acc += len;
-        }
-      });
-    })();
 
     /* Snap toggle wiring. Updates the button visual + redraws the
        half-second grid markers across the timeline strip when on. */
@@ -10486,36 +10200,23 @@
         toast('More settings: full sheet coming next.', false);
       }
     });
-    bindEd('ve-save', 'click', async function () {
-      var btn = document.getElementById('ve-save');
+    bindEd('ve-save', 'click', function () {
       try {
-        var serializableClips = (engine.clips || []).map(function (c) {
-          return { id: c.id, srcStart: c.srcStart, srcEnd: c.srcEnd };
-        });
         var draft = {
-          trimIn: parseFloat((trimIn || {}).value) || 0,
-          trimOut: parseFloat((trimOut || {}).value) || 0,
+          trimIn: parseFloat(trimIn.value) || 0,
+          trimOut: parseFloat(trimOut.value) || 0,
           muteOrig: !!(document.getElementById('ve-mute-orig') || {}).checked,
           textOverlay: (document.getElementById('ve-text') || {}).value || '',
           musicVol: parseFloat((document.getElementById('ve-audio-vol') || {}).value || '0.35'),
           speed: video.playbackRate || 1,
           opacity: (typeof clipOpacity !== 'undefined') ? clipOpacity : 1,
-          clips: serializableClips,
+          clips: engine.clips.slice(),
           savedAt: Date.now()
         };
         app.editorDraft = draft;
-        if (typeof putApp !== 'function') throw new Error('putApp unavailable');
-        await putApp(app);
-        if (btn) {
-          var prev = btn.innerHTML;
-          btn.innerHTML = '✅';
-          setTimeout(function () { btn.innerHTML = prev; }, 1200);
-        }
-        toast('Draft saved · ' + serializableClips.length + ' clip' + (serializableClips.length === 1 ? '' : 's') + ' at ' + new Date(draft.savedAt).toLocaleTimeString(), false);
-      } catch (e) {
-        toast('Could not save draft: ' + (e && e.message || e), true);
-        try { console.error('[VE] save failed', e); } catch (_) {}
-      }
+        if (typeof putApp === 'function') putApp(app);
+        toast('Draft saved.', false);
+      } catch (e) { toast('Could not save draft: ' + (e && e.message || e), true); }
     });
     bindEd('ve-stack', 'click', function () {
       var tracks = document.getElementById('ve-tracks');
@@ -10526,61 +10227,6 @@
     });
     bindEd('ve-redo', 'click', function () {
       toast('Redo: history stack lands with multi-clip phase.', false);
-    });
-
-    // Rewind / fast-forward — engine-driven so they respect clip math.
-    bindEd('ve-prev', 'click', function () {
-      try {
-        var step = 5;
-        var t = Math.max(0, (engine.t || 0) - step);
-        engine.setTime(t, true);
-        toast('Rewound to ' + t.toFixed(2) + 's', false);
-      } catch (e) { toast('Rewind failed: ' + (e && e.message || e), true); }
-    });
-    bindEd('ve-next', 'click', function () {
-      try {
-        var step = 5;
-        var max = engine.duration() || 0;
-        var t = Math.min(max, (engine.t || 0) + step);
-        engine.setTime(t, true);
-        toast('Forward to ' + t.toFixed(2) + 's', false);
-      } catch (e) { toast('Forward failed: ' + (e && e.message || e), true); }
-    });
-
-    // Cover picker — image box next to the timeline. Opens a file
-    // picker, stashes the chosen image as app.cover (data URL) so the
-    // export pipeline + library card can use it, and previews it on
-    // the Cover button itself.
-    bindEd('ve-cover', 'click', function () {
-      var picker = document.createElement('input');
-      picker.type = 'file';
-      picker.accept = 'image/*';
-      picker.style.display = 'none';
-      document.body.appendChild(picker);
-      picker.addEventListener('change', function (e) {
-        var f = e.target.files && e.target.files[0];
-        if (!f) { picker.remove(); return; }
-        var fr = new FileReader();
-        fr.onload = function () {
-          try {
-            app.cover = fr.result;
-            if (typeof putApp === 'function') {
-              Promise.resolve(putApp(app)).catch(function () {});
-            }
-            var btn = document.getElementById('ve-cover');
-            if (btn) {
-              btn.style.background = '#000 center/cover no-repeat url("' + fr.result + '")';
-              btn.style.borderStyle = 'solid';
-              btn.style.color = 'transparent';
-            }
-            toast('Cover image set.', false);
-          } catch (err) { toast('Cover save failed: ' + (err && err.message || err), true); }
-          picker.remove();
-        };
-        fr.onerror = function () { toast('Could not read that image.', true); picker.remove(); };
-        fr.readAsDataURL(f);
-      });
-      picker.click();
     });
 
     // ---- Export ----
