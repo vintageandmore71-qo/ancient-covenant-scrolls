@@ -122,7 +122,24 @@
     var req = { text: clean, voiceId: opts.voiceId || DEFAULT_VOICE };
     if (opts.speakerId != null) req.speakerId = opts.speakerId;
 
-    var wav = await lib.predict(req);
+    var wav;
+    try {
+      wav = await lib.predict(req);
+    } catch (e) {
+      var msg = (e && e.message) || String(e);
+      // The cached voice config or model is corrupt (typical: install
+      // declared success while the underlying file was 0-byte). Wipe
+      // it so the next attempt re-downloads cleanly. Surface the
+      // marker so the caller can prompt for reinstall.
+      if (/JSON.*Parse|Unexpected EOF|Unexpected token|invalid model/i.test(msg)) {
+        try { await lib.flush && lib.flush(); } catch (_) {}
+        try { await lib.remove && lib.remove(opts.voiceId || DEFAULT_VOICE); } catch (_) {}
+        var err = new Error('Voice cache was corrupt (' + msg + '). Cleared — please tap Install again.');
+        err.code = 'PIPER_CACHE_CORRUPT';
+        throw err;
+      }
+      throw e;
+    }
     if (!wav || (wav.size != null && wav.size < 100)) {
       throw new Error('Piper returned empty audio (' + (wav && wav.size) + ' bytes)');
     }
