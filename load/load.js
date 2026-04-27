@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bh</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bi</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -9413,8 +9413,16 @@
       function buildTile(r) {
         var tile = document.createElement('button');
         tile.style.cssText = 'background:#0e0e18;border:1px solid #2a2a40;border-radius:8px;overflow:hidden;cursor:pointer;padding:0;display:flex;flex-direction:column;text-align:left;';
+        var thumb = (r.thumb || '').replace(/"/g, '%22');
         tile.innerHTML =
-          '<div style="aspect-ratio:16/9;background:#0a0a14 center/cover no-repeat;background-image:url(\'' + (r.thumb || '') + '\');"></div>' +
+          '<div style="position:relative;width:100%;height:90px;background:#0a0a14;overflow:hidden;flex-shrink:0;">' +
+            (thumb
+              ? '<img src="' + thumb + '" alt="" referrerpolicy="no-referrer" loading="lazy" ' +
+                  'style="width:100%;height:100%;object-fit:cover;display:block;" ' +
+                  'onerror="this.style.display=\'none\';this.parentNode.style.background=\'#1a1a26\';this.parentNode.innerHTML+=\'<div style=&quot;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#5a5a78;font-size:11px;&quot;>(no preview)</div>\';">'
+              : '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#5a5a78;font-size:11px;">(no preview)</div>'
+            ) +
+          '</div>' +
           '<div style="padding:6px 8px;font-size:10px;color:#a8a8c4;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (r.credit || '') + '</div>';
         tile.addEventListener('click', function () { importResult(r); });
         return tile;
