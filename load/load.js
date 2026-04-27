@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17m</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17n</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -9169,6 +9169,72 @@
           if (edge === 'before' && idx > 0) engine.duplicateAt(idx - 1);
           else engine.duplicateAt(idx);
           toast('Clip added. Now ' + engine.clips.length + ' clips.', false);
+        });
+      });
+      // Per-block trim drag — each clip's left/right handle moves
+      // that clip's srcStart / srcEnd in source-video time. Independent
+      // from every other clip and from the legacy whole-strip handles.
+      Array.prototype.forEach.call(stripEl.querySelectorAll('.ve-block-handle'), function (h) {
+        h.addEventListener('pointerdown', function (e) {
+          e.preventDefault(); e.stopPropagation();
+          var idx = +h.dataset.clipIdx;
+          var side = h.dataset.side;
+          var clip = engine.clips[idx];
+          if (!clip) return;
+          var stripRect = stripEl.getBoundingClientRect();
+          // Total strip visual width = duration + empty slots, same
+          // math renderClipBlocks uses, so dragging inside the strip
+          // maps cleanly back to source time.
+          var total = engine.duration() || video.duration || 1;
+          var emptySlots = 3;
+          var stripVisualUnits = total + (emptySlots * (SLOT_PCT / 100) * total);
+          // Where on the source-time axis is each pixel of the strip?
+          // Pixel-X within strip → source-time relative to clip start.
+          var srcMin = 0;
+          var srcMax = video.duration || total;
+          // Constrain so left < right with 0.1s minimum gap
+          var minGap = 0.1;
+          function move(ev) {
+            var x = (ev.touches && ev.touches[0] ? ev.touches[0].clientX : ev.clientX) - stripRect.left;
+            var pct = Math.max(0, Math.min(1, x / stripRect.width));
+            var visualT = pct * stripVisualUnits;
+            // Convert visualT (timeline-position seconds) into the
+            // source-time the user is pointing at. Walk the clips
+            // before this one to figure out where this clip starts
+            // on the timeline, then add the offset.
+            var acc = 0;
+            for (var k = 0; k < idx; k++) {
+              acc += engine.clips[k].srcEnd - engine.clips[k].srcStart;
+            }
+            var withinClip = visualT - acc;
+            // If user dragged outside this clip's span, clamp.
+            var clipDur = clip.srcEnd - clip.srcStart;
+            withinClip = Math.max(0, Math.min(clipDur, withinClip));
+            // Convert clip-local offset back to source-time.
+            var newSrcTime = clip.srcStart + withinClip;
+            if (side === 'left') {
+              if (newSrcTime > clip.srcEnd - minGap) newSrcTime = clip.srcEnd - minGap;
+              if (newSrcTime < srcMin) newSrcTime = srcMin;
+              clip.srcStart = newSrcTime;
+            } else {
+              if (newSrcTime < clip.srcStart + minGap) newSrcTime = clip.srcStart + minGap;
+              if (newSrcTime > srcMax) newSrcTime = srcMax;
+              clip.srcEnd = newSrcTime;
+            }
+            // Re-render so the block resizes live as the user drags.
+            renderClipBlocks();
+            try { renderRuler(); } catch (e2) {}
+            // Keep playhead within new duration.
+            if (engine.t > engine.duration()) engine.setTime(engine.duration());
+          }
+          function end() {
+            document.removeEventListener('pointermove', move);
+            document.removeEventListener('pointerup', end);
+            document.removeEventListener('pointercancel', end);
+          }
+          document.addEventListener('pointermove', move);
+          document.addEventListener('pointerup', end);
+          document.addEventListener('pointercancel', end);
         });
       });
     }
