@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17aa-sync</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17af</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -8862,6 +8862,26 @@
       '#__loadVideoEdit .ve-quick-btn:active{background:rgba(255,255,255,0.18);}' +
       '@keyframes vePopIn{from{opacity:0;transform:translateX(-50%) translateY(4px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}' +
       '#__loadVideoEdit .ve-context{position:absolute;left:0;right:0;bottom:0;background:#1a1a26;padding:10px 8px max(10px,env(safe-area-inset-bottom));border-top:1px solid #2a2a40;display:flex;align-items:center;gap:14px;overflow-x:auto;scrollbar-width:none;z-index:8;}' +
+      // Single-bottom-bar layout. The clip-context bar (#ve-context)
+      // duplicates actions already on #ve-actions + the floating
+      // quick toolbar, so it's hidden permanently. Editor is a flex
+      // column: stage flex:3, timeline 240px, action bar at the
+      // bottom — no overlapping, no two-bar stack.
+      '#__loadVideoEdit{display:flex !important;flex-direction:column !important;}' +
+      '#__loadVideoEdit #ve-stage{flex:3 1 0 !important;min-height:280px !important;}' +
+      '#__loadVideoEdit .timeline-engine{flex:0 0 auto !important;height:240px !important;min-height:240px !important;padding-bottom:6px !important;}' +
+      '#__loadVideoEdit .timeline-scroll{padding-bottom:6px !important;}' +
+      '#__loadVideoEdit #ve-actions{flex:0 0 auto !important;position:relative !important;bottom:auto !important;padding-bottom:max(10px,env(safe-area-inset-bottom)) !important;display:flex !important;}' +
+      '#__loadVideoEdit .ve-context,#__loadVideoEdit #ve-context{display:none !important;}' +
+      // Thumbnail-distortion fix — equal flex shares with object-fit:cover.
+      // Taller clip + wider per-thumb so source aspect crops less and the
+      // image inside reads naturally instead of as a thin strip.
+      '#__loadVideoEdit .video-track{height:90px !important;}' +
+      '#__loadVideoEdit .timeline-clip{overflow:hidden !important;height:84px !important;}' +
+      '#__loadVideoEdit .empty-slot,#__loadVideoEdit .big-add{height:84px !important;}' +
+      '#__loadVideoEdit .thumbnail-strip{width:100% !important;height:100% !important;display:flex !important;align-items:stretch !important;overflow:hidden !important;min-width:0 !important;}' +
+      '#__loadVideoEdit .thumbnail-strip > *,#__loadVideoEdit .thumbnail-strip img,#__loadVideoEdit .thumbnail-frame{flex:1 1 0 !important;width:0 !important;min-width:0 !important;height:100% !important;object-fit:cover !important;object-position:center !important;display:block !important;border-right:1px solid rgba(255,255,255,0.15) !important;}' +
+      '#__loadVideoEdit .thumbnail-strip img:last-child,#__loadVideoEdit .thumbnail-frame:last-child{border-right:none !important;}' +
       '#__loadVideoEdit .ve-context::-webkit-scrollbar{display:none;}' +
       '#__loadVideoEdit .ve-context-done .ve-act-icon{background:#1d6fff;color:#fff;border-color:#1d6fff;}' +
       '#__loadVideoEdit.ve-clip-active #ve-context{display:flex;}' +
@@ -9606,7 +9626,7 @@
       drawOverlay();
       // Generate frame thumbnails for the timeline strip — VN-style.
       // Async so the editor stays interactive while seeking happens.
-      generateClipThumbnails(video, 8).catch(function () {});
+      generateClipThumbnails(video, 5).catch(function () {});
     });
     // Belt-and-suspenders thumb triggers — fire on the earliest event
     // that gives us a paintable frame so the strip populates the
@@ -9616,7 +9636,7 @@
     function kickThumbsOnce() {
       if (_thumbsKicked) return;
       _thumbsKicked = true;
-      generateClipThumbnails(video, 8).catch(function () {});
+      generateClipThumbnails(video, 5).catch(function () {});
     }
     video.addEventListener('loadeddata', kickThumbsOnce);
     video.addEventListener('canplay', kickThumbsOnce);
@@ -9991,7 +10011,7 @@
       video.addEventListener('loadedmetadata', function once() {
         video.removeEventListener('loadedmetadata', once);
         try { trimIn.value = '0'; trimOut.value = String(video.duration || 0); refreshTrimDisplay(); } catch (e) {}
-        try { generateClipThumbnails(video, 8); } catch (e) {}
+        try { generateClipThumbnails(video, 5); } catch (e) {}
         if (oldUrl && oldUrl.indexOf('blob:') === 0) {
           try { URL.revokeObjectURL(oldUrl); } catch (e) {}
         }
