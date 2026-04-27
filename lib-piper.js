@@ -32,6 +32,7 @@
 
   var tts = null;          // resolved lib once first import completes
   var loadPromise = null;  // shared in-flight import promise
+  var libBust = 0;         // bumped after uninstall to bypass JS module cache
   var audioCtx = null;     // shared AudioContext (created on first user gesture)
   var currentSource = null;// last AudioBufferSourceNode; stopAll() stops it
 
@@ -47,7 +48,12 @@
     if (tts) return tts;
     if (!loadPromise) {
       loadPromise = (async function () {
-        tts = await import(TTS_LIB_URL);
+        // Append a cache-buster after uninstall so the runtime doesn't
+        // hand us back a stale module instance whose internal index
+        // still points at OPFS files we already deleted. esm.sh
+        // ignores unknown query params and serves the same content.
+        var url = TTS_LIB_URL + (libBust > 0 ? '?_bust=' + libBust : '');
+        tts = await import(url);
         return tts;
       })();
     }
@@ -90,18 +96,29 @@
   }
 
   async function install(progressFn) {
-    var lib = await ensureLib();
-    var stored = await lib.stored();
-    if (stored.indexOf(DEFAULT_VOICE) !== -1) {
-      progressFn && progressFn({ phase: 'already-cached', loaded: 1, total: 1, percent: 100 });
-      return true;
+    var lib;
+    try { lib = await ensureLib(); }
+    catch (e) {
+      var em = (e && e.message) || String(e);
+      throw new Error('Could not load Piper library (' + em + '). Check your connection.');
     }
-    await lib.download(DEFAULT_VOICE, function (p) {
-      var loaded = (p && p.loaded) || 0;
-      var total  = (p && p.total)  || 0;
-      var percent = total > 0 ? Math.round((loaded / total) * 100) : 0;
-      progressFn && progressFn({ phase: 'downloading', loaded: loaded, total: total, percent: percent });
-    });
+    // Always call download() — let the library decide whether the
+    // file is already there. We removed the early-return on stored()
+    // because after a manual OPFS sweep the library's internal index
+    // can be stale, leading to "install succeeded" with nothing on
+    // disk. download() is idempotent in the lib.
+    progressFn && progressFn({ phase: 'starting', loaded: 0, total: 0, percent: 0 });
+    try {
+      await lib.download(DEFAULT_VOICE, function (p) {
+        var loaded = (p && p.loaded) || 0;
+        var total  = (p && p.total)  || 0;
+        var percent = total > 0 ? Math.round((loaded / total) * 100) : 0;
+        progressFn && progressFn({ phase: 'downloading', loaded: loaded, total: total, percent: percent });
+      });
+    } catch (e) {
+      var dem = (e && e.message) || String(e);
+      throw new Error('Download failed: ' + dem);
+    }
     progressFn && progressFn({ phase: 'done', loaded: 1, total: 1, percent: 100 });
     return true;
   }
@@ -150,6 +167,13 @@
         }
       }
     } catch (e) { console.warn('[Piper] OPFS sweep failed:', e); }
+    // Drop the cached library reference + bump the import URL so the
+    // next ensureLib() pulls a clean module instance whose internal
+    // OPFS index isn't holding on to references to files we just
+    // deleted underneath it.
+    tts = null;
+    loadPromise = null;
+    libBust += 1;
     return ok;
   }
 
