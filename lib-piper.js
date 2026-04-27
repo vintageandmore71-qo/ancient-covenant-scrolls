@@ -84,19 +84,59 @@
     return loadPromise;
   }
 
+  // Verify the install actually landed something usable on disk.
+  // The library's stored() can lie when its OPFS files are 0-byte
+  // (which is exactly what produced the user-visible "JSON Parse
+  // error: Unexpected EOF" on every predict() call). We walk OPFS
+  // ourselves and validate any *.onnx.json file actually parses.
   async function verifyInstall() {
-    // Trust the library's own stored() report — that's what predict()
-    // will actually consult at speech time. The earlier OPFS walk
-    // approach was too brittle: the lib stores files under names /
-    // paths we couldn't always match, so verify reported failure
-    // even on healthy installs.
+    var libOk = false;
     try {
       var lib = await ensureLib();
       var s = await lib.stored();
-      if (Array.isArray(s) && s.indexOf(DEFAULT_VOICE) !== -1) return { ok: true };
-      return { ok: false, reason: 'library reports voice not stored after download' };
+      libOk = Array.isArray(s) && s.indexOf(DEFAULT_VOICE) !== -1;
+    } catch (_) {}
+    if (!libOk) return { ok: false, reason: 'library reports voice not stored after download' };
+    // Library says it's there — now check OPFS directly that the
+    // config JSON is a real, parseable file (not a 0-byte stub).
+    if (!navigator.storage || typeof navigator.storage.getDirectory !== 'function') {
+      return { ok: true }; // can't verify on this Safari, accept the lib's word
+    }
+    try {
+      var root = await navigator.storage.getDirectory();
+      if (typeof root.entries !== 'function') return { ok: true };
+      var configFound = false, configSize = 0;
+      async function walk(dir) {
+        for await (var entry of dir.entries()) {
+          var name = entry[0], handle = entry[1];
+          if (handle.kind === 'file' && /\.onnx\.json$/i.test(name)) {
+            try {
+              var f = await handle.getFile();
+              configSize = f.size;
+              if (f.size < 10) continue;
+              var txt = await f.text();
+              if (!txt || txt.length < 10) continue;
+              var first = txt.charAt(0), last = txt.charAt(txt.length - 1).trim ? txt.trim().charAt(txt.trim().length - 1) : txt.charAt(txt.length - 1);
+              if (first !== '{' && first !== '[') continue;
+              JSON.parse(txt);
+              configFound = true;
+              return;
+            } catch (_) { /* keep walking */ }
+          } else if (handle.kind === 'directory') {
+            try { await walk(handle); } catch (_) {}
+            if (configFound) return;
+          }
+        }
+      }
+      await walk(root);
+      if (!configFound) {
+        return { ok: false, reason: 'voice config JSON is empty or corrupt (' + configSize + ' bytes). Tap Repair voice to re-download.' };
+      }
+      return { ok: true };
     } catch (e) {
-      return { ok: false, reason: (e && e.message) || String(e) };
+      // Couldn't enumerate OPFS — accept the lib's word so we don't
+      // false-fail healthy installs on quirky Safari builds.
+      return { ok: true };
     }
   }
 
