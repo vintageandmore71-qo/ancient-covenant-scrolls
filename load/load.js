@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ao</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ap</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -8738,6 +8738,7 @@
         '<button class="ve-action" data-action="cutout"><span class="ve-act-icon">&#129489;</span><span class="ve-act-lbl">Cutout</span></button>' +
         '<span class="ve-action-sep" aria-hidden="true"></span>' +
         '<button class="ve-action" data-action="speed"><span class="ve-act-icon">&#9201;</span><span class="ve-act-lbl">Speed</span></button>' +
+        '<button class="ve-action" data-action="volume"><span class="ve-act-icon">&#128266;</span><span class="ve-act-lbl">Volume</span></button>' +
         '<button class="ve-action" data-action="fade"><span class="ve-act-icon">&#9696;</span><span class="ve-act-lbl">Fade</span></button>' +
         '<button class="ve-action" data-action="crop"><span class="ve-act-icon">&#9974;</span><span class="ve-act-lbl">Crop</span></button>' +
         '<button class="ve-action" data-action="rotate"><span class="ve-act-icon">&#10227;</span><span class="ve-act-lbl">Rotate</span></button>' +
@@ -8754,6 +8755,8 @@
         '<button class="ve-action" data-action="extract-audio"><span class="ve-act-icon">&#127925;&#11014;</span><span class="ve-act-lbl">Extract Audio</span></button>' +
         '<button class="ve-action" data-action="auto-captions"><span class="ve-act-icon">[A]</span><span class="ve-act-lbl">Auto Captions</span></button>' +
         '<button class="ve-action" data-action="tts"><span class="ve-act-icon">A&#127908;</span><span class="ve-act-lbl">TTS</span></button>' +
+        '<button class="ve-action" data-action="mosaic"><span class="ve-act-icon">&#9783;</span><span class="ve-act-lbl">Mosaic</span></button>' +
+        '<button class="ve-action" data-action="magnifier"><span class="ve-act-icon">&#128270;</span><span class="ve-act-lbl">Magnifier</span></button>' +
         '<button class="ve-action" data-action="story"><span class="ve-act-icon">&#9776;</span><span class="ve-act-lbl">Story</span></button>' +
         '<button class="ve-action" data-action="reverse"><span class="ve-act-icon">&#8634;</span><span class="ve-act-lbl">Reverse</span></button>' +
         '<button class="ve-action" data-action="freeze"><span class="ve-act-icon">&#10052;</span><span class="ve-act-lbl">Freeze</span></button>' +
@@ -9291,6 +9294,34 @@
         }
         else if (act === 'extract-audio') extractAudio();
         else if (act === 'auto-captions') autoCaptions();
+        else if (act === 'mosaic')   {
+          // Mosaic: heavy pixelation via CSS filter — toggleable.
+          var on = btn.classList.toggle('on');
+          if (on) {
+            video.style.filter = (video.style.filter || '') + ' contrast(1.1) blur(6px)';
+            video.style.imageRendering = 'pixelated';
+            toast('Mosaic on (pixelated). Re-tap to disable.', false);
+          } else {
+            video.style.filter = '';
+            video.style.imageRendering = '';
+            applyFx();
+            toast('Mosaic off.', false);
+          }
+        }
+        else if (act === 'magnifier'){
+          // Magnifier: 1.6x scale + center origin so the preview shows
+          // a zoomed-in detail view. Toggle off restores 1x.
+          var on = btn.classList.toggle('on');
+          if (on) {
+            fx.scale = 1.6;
+            applyFx();
+            toast('Magnifier on (1.6x). Re-tap to disable.', false);
+          } else {
+            fx.scale = 1;
+            applyFx();
+            toast('Magnifier off.', false);
+          }
+        }
         else if (act === 'story')    {
           var sm = engine.clips.map(function (c, i) { return (i+1) + '. clip ' + (c.srcEnd - c.srcStart).toFixed(2) + 's'; }).join('\n');
           alert('Story beats:\n\n' + (sm || '(no clips yet)'));
