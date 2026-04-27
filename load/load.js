@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17at</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17au</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -9093,8 +9093,68 @@
     // Live CSS-driven effects state. applyFx() pushes inline transform
     // / filter onto the <video> so changes are visible immediately.
     var fx = { mirror: false, flip: false, rotate: 0, filter: 'none', blur: 0, fit: 'contain', bgColor: '#000', borderPx: 0, scale: 1, frozen: false };
-    var FILTERS = { none: '', warm: 'sepia(0.25) saturate(1.2) hue-rotate(-10deg)', cool: 'saturate(1.1) hue-rotate(15deg) brightness(1.05)', noir: 'grayscale(1) contrast(1.15)', vivid: 'saturate(1.6) contrast(1.1)', soft: 'brightness(1.1) contrast(0.92) blur(0.4px)', vintage: 'sepia(0.55) contrast(1.1) brightness(0.95)' };
+    var FILTERS = {
+      none:      '',
+      warm:      'sepia(0.25) saturate(1.2) hue-rotate(-10deg)',
+      cool:      'saturate(1.1) hue-rotate(15deg) brightness(1.05)',
+      noir:      'grayscale(1) contrast(1.15)',
+      vivid:     'saturate(1.6) contrast(1.1)',
+      soft:      'brightness(1.1) contrast(0.92) blur(0.4px)',
+      vintage:   'sepia(0.55) contrast(1.1) brightness(0.95)',
+      sepia:     'sepia(1)',
+      bw:        'grayscale(1)',
+      cinema:    'contrast(1.25) saturate(0.85) brightness(0.95) hue-rotate(-5deg)',
+      teal:      'hue-rotate(20deg) saturate(1.3) brightness(1.05)',
+      sunset:    'sepia(0.4) saturate(1.4) hue-rotate(-20deg) brightness(1.05)',
+      crisp:     'contrast(1.4) saturate(1.2) brightness(1.05)',
+      faded:     'contrast(0.85) saturate(0.7) brightness(1.1)',
+      dramatic:  'contrast(1.6) saturate(1.5) brightness(0.92)',
+      pastel:    'contrast(0.9) saturate(0.8) brightness(1.15)',
+      neon:      'saturate(2) contrast(1.3) hue-rotate(35deg) brightness(1.1)',
+      moody:     'contrast(1.2) saturate(0.9) brightness(0.85) sepia(0.15)',
+      golden:    'sepia(0.6) saturate(1.3) hue-rotate(-15deg) brightness(1.08)',
+      arctic:    'saturate(0.7) hue-rotate(190deg) brightness(1.15) contrast(1.1)',
+      film:      'sepia(0.35) contrast(1.15) saturate(1.2) brightness(0.96)'
+    };
     var FILTER_KEYS = Object.keys(FILTERS);
+    var FILTER_LABELS = { none: 'None', warm: 'Warm', cool: 'Cool', noir: 'Noir', vivid: 'Vivid', soft: 'Soft', vintage: 'Vintage', sepia: 'Sepia', bw: 'B & W', cinema: 'Cinema', teal: 'Teal', sunset: 'Sunset', crisp: 'Crisp', faded: 'Faded', dramatic: 'Dramatic', pastel: 'Pastel', neon: 'Neon', moody: 'Moody', golden: 'Golden', arctic: 'Arctic', film: 'Film' };
+
+    // Generic option-sheet popup. Used by Filter / FX / Blur / BG /
+    // Border / Mosaic / Magnifier / Freeze / Reverse / Zoom etc. so
+    // each tool can offer multiple choices instead of single-tap
+    // cycle. Returns a promise resolving with the picked option key,
+    // or null if cancelled.
+    function openToolSheet(title, options, currentKey) {
+      return new Promise(function (resolve) {
+        var menu = document.createElement('div');
+        menu.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:3500;display:flex;align-items:flex-end;justify-content:center;padding:0;';
+        var grid = options.map(function (o) {
+          var on = (o.key === currentKey) ? ' style="background:#fbbf24;color:#1a1a26;border-color:#fbbf24;"' : '';
+          return '<button class="ve-sheet-opt" data-key="' + o.key + '"' + on + '><span class="ve-sheet-icon">' + (o.icon || '•') + '</span><span class="ve-sheet-lbl">' + o.label + '</span></button>';
+        }).join('');
+        menu.innerHTML =
+          '<div style="background:#1a1a26;color:#fff;width:100%;max-width:560px;border-top-left-radius:16px;border-top-right-radius:16px;padding:14px 14px max(14px,env(safe-area-inset-bottom));">' +
+            '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
+              '<h3 style="margin:0;font-size:16px;font-weight:700;">' + title + '</h3>' +
+              '<button id="vesheet-close" style="background:transparent;border:none;color:#cfcfdc;font-size:22px;cursor:pointer;line-height:1;">×</button>' +
+            '</div>' +
+            '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:8px;max-height:60vh;overflow-y:auto;">' + grid + '</div>' +
+          '</div>' +
+          '<style>' +
+            '.ve-sheet-opt{background:#2a2a40;border:1.5px solid transparent;color:#fff;border-radius:10px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;font-family:inherit;}' +
+            '.ve-sheet-opt:active{transform:scale(0.96);}' +
+            '.ve-sheet-icon{font-size:20px;}' +
+            '.ve-sheet-lbl{font-size:11px;font-weight:600;text-align:center;line-height:1.15;}' +
+          '</style>';
+        document.body.appendChild(menu);
+        var done = function (key) { try { menu.remove(); } catch (_) {} resolve(key); };
+        menu.addEventListener('click', function (e) { if (e.target === menu) done(null); });
+        document.getElementById('vesheet-close').addEventListener('click', function () { done(null); });
+        Array.prototype.forEach.call(menu.querySelectorAll('.ve-sheet-opt'), function (b) {
+          b.addEventListener('click', function () { done(b.getAttribute('data-key')); });
+        });
+      });
+    }
     function applyFx() {
       if (!video) return;
       var t = '';
@@ -9240,102 +9300,437 @@
         else if (act === 'flip')     { fx.flip = !fx.flip; applyFx(); btn.classList.toggle('on', fx.flip); toast('Flip ' + (fx.flip ? 'on' : 'off') + '.', false); }
         else if (act === 'rotate')   { fx.rotate = (fx.rotate + 90) % 360; applyFx(); btn.classList.toggle('on', fx.rotate !== 0); toast('Rotated to ' + fx.rotate + '°.', false); }
         else if (act === 'filter')   {
-          var idx = (FILTER_KEYS.indexOf(fx.filter) + 1) % FILTER_KEYS.length;
-          fx.filter = FILTER_KEYS[idx]; applyFx();
-          btn.classList.toggle('on', fx.filter !== 'none');
-          toast('Filter: ' + fx.filter, false);
+          // 21 filter presets in a grid sheet. Tap one and it applies
+          // immediately + the sheet closes.
+          var fopts = FILTER_KEYS.map(function (k) { return { key: k, label: FILTER_LABELS[k] || k, icon: k === 'none' ? '○' : '◐' }; });
+          openToolSheet('Filter', fopts, fx.filter).then(function (k) {
+            if (k == null) return;
+            fx.filter = k; applyFx();
+            btn.classList.toggle('on', fx.filter !== 'none');
+            toast('Filter: ' + (FILTER_LABELS[k] || k), false);
+          });
         }
         else if (act === 'blur')     {
-          var stops = [0, 2, 5, 10, 20];
-          var ni = (stops.indexOf(fx.blur) + 1) % stops.length;
-          fx.blur = stops[ni]; applyFx();
-          btn.classList.toggle('on', fx.blur > 0);
-          toast('Blur: ' + fx.blur + 'px.', false);
+          var blurOpts = [
+            { key: '0',  label: 'Off',     icon: '○' },
+            { key: '2',  label: '2 px',    icon: '◔' },
+            { key: '5',  label: '5 px',    icon: '◑' },
+            { key: '10', label: '10 px',   icon: '◕' },
+            { key: '20', label: '20 px',   icon: '●' },
+            { key: '40', label: '40 px',   icon: '⬤' },
+            { key: '80', label: 'Heavy',   icon: '◉' }
+          ];
+          openToolSheet('Blur', blurOpts, String(fx.blur)).then(function (k) {
+            if (k == null) return;
+            fx.blur = parseInt(k, 10); applyFx();
+            btn.classList.toggle('on', fx.blur > 0);
+            toast('Blur: ' + fx.blur + 'px.', false);
+          });
         }
-        else if (act === 'fit')      { fx.fit = (fx.fit === 'contain' ? 'cover' : 'contain'); applyFx(); btn.classList.toggle('on', fx.fit === 'cover'); toast('Fit: ' + fx.fit, false); }
-        else if (act === 'crop')     { fx.fit = 'cover'; applyFx(); btn.classList.add('on'); toast('Crop on (object-fit:cover).', false); }
+        else if (act === 'fit')      {
+          openToolSheet('Fit', [
+            { key: 'contain', label: 'Contain', icon: '▭' },
+            { key: 'cover',   label: 'Cover',   icon: '◼' },
+            { key: 'fill',    label: 'Stretch', icon: '⬛' }
+          ], fx.fit).then(function (k) {
+            if (k == null) return;
+            fx.fit = k; applyFx();
+            btn.classList.toggle('on', fx.fit !== 'contain');
+            toast('Fit: ' + fx.fit, false);
+          });
+        }
+        else if (act === 'crop')     {
+          openToolSheet('Crop / Aspect', [
+            { key: '16:9',  label: '16:9',     icon: '▭' },
+            { key: '9:16',  label: '9:16',     icon: '▯' },
+            { key: '1:1',   label: '1:1',      icon: '◻' },
+            { key: '4:5',   label: '4:5',      icon: '▭' },
+            { key: '4:3',   label: '4:3',      icon: '▭' },
+            { key: '21:9',  label: '21:9',     icon: '▬' },
+            { key: 'fit',   label: 'Reset',    icon: '↺' }
+          ], 'fit').then(function (k) {
+            if (k == null) return;
+            var ratio = document.getElementById('ve-ratio');
+            if (ratio && k !== 'fit') {
+              for (var i = 0; i < ratio.options.length; i++) {
+                if (ratio.options[i].value === k) { ratio.selectedIndex = i; ratio.dispatchEvent(new Event('change')); break; }
+              }
+            }
+            fx.fit = (k === 'fit') ? 'contain' : 'cover'; applyFx();
+            btn.classList.toggle('on', k !== 'fit');
+            toast('Crop: ' + k, false);
+          });
+        }
         else if (act === 'bg')       {
-          var bgs = ['#000', '#fff', '#1d6fff', '#fbbf24', '#0a0a14'];
-          var bi = (bgs.indexOf(fx.bgColor) + 1) % bgs.length;
-          fx.bgColor = bgs[bi]; applyFx(); toast('BG: ' + fx.bgColor, false);
+          openToolSheet('Background', [
+            { key: '#000',     label: 'Black',  icon: '⬛' },
+            { key: '#fff',     label: 'White',  icon: '⬜' },
+            { key: '#1d6fff',  label: 'Blue',   icon: '🟦' },
+            { key: '#fbbf24',  label: 'Yellow', icon: '🟨' },
+            { key: '#dc2626',  label: 'Red',    icon: '🟥' },
+            { key: '#10b981',  label: 'Green',  icon: '🟩' },
+            { key: '#7c3aed',  label: 'Purple', icon: '🟪' },
+            { key: '#f59e0b',  label: 'Orange', icon: '🟧' },
+            { key: '#1f2937',  label: 'Slate',  icon: '⬛' },
+            { key: '#fbf5e6',  label: 'Cream',  icon: '⬜' }
+          ], fx.bgColor).then(function (k) {
+            if (k == null) return;
+            fx.bgColor = k; applyFx(); toast('BG: ' + k, false);
+          });
         }
         else if (act === 'border')   {
-          var bps = [0, 4, 8, 16];
-          var bpi = (bps.indexOf(fx.borderPx) + 1) % bps.length;
-          fx.borderPx = bps[bpi]; applyFx();
-          btn.classList.toggle('on', fx.borderPx > 0);
-          toast('Border: ' + fx.borderPx + 'px.', false);
+          openToolSheet('Border', [
+            { key: '0',  label: 'Off',    icon: '○' },
+            { key: '2',  label: '2 px',   icon: '◔' },
+            { key: '4',  label: '4 px',   icon: '◑' },
+            { key: '8',  label: '8 px',   icon: '◕' },
+            { key: '16', label: '16 px',  icon: '●' },
+            { key: '24', label: '24 px',  icon: '⬤' }
+          ], String(fx.borderPx)).then(function (k) {
+            if (k == null) return;
+            fx.borderPx = parseInt(k, 10); applyFx();
+            btn.classList.toggle('on', fx.borderPx > 0);
+            toast('Border: ' + fx.borderPx + 'px.', false);
+          });
         }
         else if (act === 'zoom')     {
-          var zs = [1, 1.25, 1.5, 2, 0.75];
-          var zi = (zs.indexOf(fx.scale) + 1) % zs.length;
-          fx.scale = zs[zi]; applyFx();
-          btn.classList.toggle('on', fx.scale !== 1);
-          toast('Zoom: ' + fx.scale + 'x.', false);
+          openToolSheet('Zoom', [
+            { key: '0.5',  label: '0.5×',  icon: '⊖' },
+            { key: '0.75', label: '0.75×', icon: '⊖' },
+            { key: '1',    label: '1×',    icon: '○' },
+            { key: '1.25', label: '1.25×', icon: '⊕' },
+            { key: '1.5',  label: '1.5×',  icon: '⊕' },
+            { key: '2',    label: '2×',    icon: '⊕' },
+            { key: '3',    label: '3×',    icon: '⊕' },
+            { key: '4',    label: '4×',    icon: '⊕' }
+          ], String(fx.scale)).then(function (k) {
+            if (k == null) return;
+            fx.scale = parseFloat(k); applyFx();
+            btn.classList.toggle('on', fx.scale !== 1);
+            toast('Zoom: ' + fx.scale + '×.', false);
+          });
         }
-        else if (act === 'fade')     { showPanel('ve-music-panel'); toast('Fade controls live in the music panel for now.', false); }
-        else if (act === 'fx')       { fx.scale = fx.scale === 1 ? 1.15 : 1; applyFx(); btn.classList.toggle('on', fx.scale !== 1); toast('FX: subtle zoom ' + (fx.scale !== 1 ? 'on' : 'off') + '.', false); }
-        else if (act === 'cutout')   { toast('Cutout: needs an on-device matting model. Skipping for now.', false); }
-        else if (act === 'denoise')  {
-          try {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (!window.__veDenoise) {
-              window.__veDenoise = audioCtx.createBiquadFilter();
-              window.__veDenoise.type = 'lowpass';
-              window.__veDenoise.frequency.value = 5000;
-              btn.classList.add('on');
-              toast('Denoise on (5kHz lowpass).', false);
-            } else {
-              window.__veDenoise.disconnect();
-              window.__veDenoise = null;
-              btn.classList.remove('on');
-              toast('Denoise off.', false);
+        else if (act === 'fade')     {
+          openToolSheet('Fade', [
+            { key: 'in-0.5',  label: 'In 0.5s',  icon: '◔' },
+            { key: 'in-1',    label: 'In 1s',    icon: '◑' },
+            { key: 'in-2',    label: 'In 2s',    icon: '◕' },
+            { key: 'out-0.5', label: 'Out 0.5s', icon: '◔' },
+            { key: 'out-1',   label: 'Out 1s',   icon: '◑' },
+            { key: 'out-2',   label: 'Out 2s',   icon: '◕' },
+            { key: 'both-1',  label: 'In+Out 1s',icon: '⬗' },
+            { key: 'off',     label: 'Off',      icon: '○' }
+          ], 'off').then(function (k) {
+            if (k == null) return;
+            video.style.transition = (k === 'off') ? '' : 'opacity ' + (parseFloat(k.split('-')[1]) || 1) + 's ease-in-out';
+            if (k.indexOf('out') === 0) { video.style.opacity = '0'; }
+            else if (k.indexOf('in') === 0) { video.style.opacity = '1'; }
+            else if (k.indexOf('both') === 0) { video.style.opacity = '1'; }
+            else { video.style.opacity = '1'; video.style.transition = ''; }
+            toast('Fade: ' + k, false);
+          });
+        }
+        else if (act === 'fx')       {
+          // Real FX presets sheet — 12 effects to pick from.
+          openToolSheet('FX', [
+            { key: 'none',    label: 'None',         icon: '○' },
+            { key: 'zoom-in', label: 'Subtle zoom',  icon: '⊕' },
+            { key: 'zoom-out',label: 'Zoom out',     icon: '⊖' },
+            { key: 'shake',   label: 'Shake',        icon: '↔' },
+            { key: 'pulse',   label: 'Pulse',        icon: '◉' },
+            { key: 'tilt',    label: 'Tilt',         icon: '⤢' },
+            { key: 'glitch',  label: 'Glitch',       icon: '⚡' },
+            { key: 'vignette',label: 'Vignette',     icon: '◐' },
+            { key: 'spin',    label: 'Spin',         icon: '↻' },
+            { key: 'kenburns',label: 'Ken Burns',    icon: '⤧' },
+            { key: 'flash',   label: 'Flash',        icon: '✦' },
+            { key: 'wobble',  label: 'Wobble',       icon: '〰' }
+          ], 'none').then(function (k) {
+            if (k == null) return;
+            // Reset the previous fx animation
+            video.style.animation = '';
+            video.style.boxShadow = '';
+            fx.scale = 1; fx.rotate = 0; applyFx();
+            // Inject a one-off keyframes block per effect.
+            var styleId = 've-fx-keyframes';
+            var existing = document.getElementById(styleId);
+            if (existing) existing.remove();
+            var s = document.createElement('style');
+            s.id = styleId;
+            var defs = {
+              'zoom-in':  '@keyframes vefx-zin{0%{transform:scale(1)}100%{transform:scale(1.18)}}',
+              'zoom-out': '@keyframes vefx-zout{0%{transform:scale(1.18)}100%{transform:scale(1)}}',
+              'shake':    '@keyframes vefx-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}',
+              'pulse':    '@keyframes vefx-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}',
+              'tilt':     '@keyframes vefx-tilt{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}',
+              'glitch':   '@keyframes vefx-glitch{0%,90%,100%{transform:translate(0)filter:hue-rotate(0)}93%{transform:translate(-2px,1px);filter:hue-rotate(40deg)}96%{transform:translate(2px,-1px);filter:hue-rotate(-40deg)}}',
+              'spin':     '@keyframes vefx-spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}',
+              'kenburns': '@keyframes vefx-kb{0%{transform:scale(1) translate(0,0)}100%{transform:scale(1.2) translate(-4%,-3%)}}',
+              'flash':    '@keyframes vefx-flash{0%,100%{filter:brightness(1)}50%{filter:brightness(1.6)}}',
+              'wobble':   '@keyframes vefx-wob{0%,100%{transform:translateY(0)}25%{transform:translateY(-4px)rotate(-1deg)}75%{transform:translateY(4px)rotate(1deg)}}'
+            };
+            var anims = {
+              'zoom-in':  'vefx-zin 1.2s ease-out forwards',
+              'zoom-out': 'vefx-zout 1.2s ease-out forwards',
+              'shake':    'vefx-shake 0.5s ease-in-out infinite',
+              'pulse':    'vefx-pulse 1.4s ease-in-out infinite',
+              'tilt':     'vefx-tilt 2s ease-in-out infinite',
+              'glitch':   'vefx-glitch 2s linear infinite',
+              'spin':     'vefx-spin 3s linear infinite',
+              'kenburns': 'vefx-kb 6s ease-in-out infinite alternate',
+              'flash':    'vefx-flash 0.6s ease-in-out infinite',
+              'wobble':   'vefx-wob 1.2s ease-in-out infinite'
+            };
+            if (k === 'vignette') {
+              video.style.boxShadow = 'inset 0 0 120px 40px rgba(0,0,0,0.7)';
+            } else if (defs[k]) {
+              s.textContent = defs[k];
+              document.head.appendChild(s);
+              video.style.animation = anims[k];
             }
-          } catch (e) { toast('Denoise failed: ' + e.message, true); }
+            btn.classList.toggle('on', k !== 'none');
+            toast('FX: ' + k, false);
+          });
+        }
+        else if (act === 'cutout')   {
+          openToolSheet('Cutout', [
+            { key: 'off',       label: 'Off',           icon: '○' },
+            { key: 'highc',     label: 'High contrast', icon: '◑' },
+            { key: 'edges',     label: 'Edges only',    icon: '⊞' },
+            { key: 'subject',   label: 'Subject pop',   icon: '◉' },
+            { key: 'silhouette',label: 'Silhouette',    icon: '⬛' }
+          ], 'off').then(function (k) {
+            if (k == null) return;
+            video.style.filter = '';
+            applyFx();
+            if (k === 'highc')      video.style.filter = 'contrast(1.6) saturate(1.8) brightness(1.05)';
+            else if (k === 'edges') video.style.filter = 'contrast(2) brightness(1.1) grayscale(1) invert(1)';
+            else if (k === 'subject') video.style.filter = 'contrast(1.4) saturate(2) brightness(0.95)';
+            else if (k === 'silhouette') video.style.filter = 'contrast(2.5) brightness(0.7) grayscale(1)';
+            btn.classList.toggle('on', k !== 'off');
+            toast('Cutout: ' + k, false);
+          });
+        }
+        else if (act === 'denoise')  {
+          openToolSheet('Denoise', [
+            { key: 'off',     label: 'Off',           icon: '○' },
+            { key: 'light',   label: 'Light hiss',    icon: '◔' },
+            { key: 'medium',  label: 'Medium room',   icon: '◑' },
+            { key: 'heavy',   label: 'Heavy hum',     icon: '◕' },
+            { key: 'voice',   label: 'Voice focus',   icon: '🎙' },
+            { key: 'wind',    label: 'Wind cut',      icon: '〰' }
+          ], window.__veDenoise ? 'medium' : 'off').then(function (k) {
+            if (k == null) return;
+            try {
+              if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+              if (window.__veDenoise) { try { window.__veDenoise.disconnect(); } catch (_) {} window.__veDenoise = null; }
+              if (k === 'off') { btn.classList.remove('on'); toast('Denoise off.', false); return; }
+              var bq = audioCtx.createBiquadFilter();
+              if (k === 'light')       { bq.type = 'lowpass';  bq.frequency.value = 7000; }
+              else if (k === 'medium') { bq.type = 'lowpass';  bq.frequency.value = 5000; }
+              else if (k === 'heavy')  { bq.type = 'highpass'; bq.frequency.value = 200;  }
+              else if (k === 'voice')  { bq.type = 'bandpass'; bq.frequency.value = 1500; bq.Q.value = 1.2; }
+              else if (k === 'wind')   { bq.type = 'highpass'; bq.frequency.value = 80;   }
+              window.__veDenoise = bq;
+              btn.classList.add('on');
+              toast('Denoise: ' + k, false);
+            } catch (e) { toast('Denoise failed: ' + e.message, true); }
+          });
         }
         else if (act === 'extract-audio') extractAudio();
         else if (act === 'auto-captions') autoCaptions();
         else if (act === 'mosaic')   {
-          // Mosaic: heavy pixelation via CSS filter — toggleable.
-          var on = btn.classList.toggle('on');
-          if (on) {
-            video.style.filter = (video.style.filter || '') + ' contrast(1.1) blur(6px)';
-            video.style.imageRendering = 'pixelated';
-            toast('Mosaic on (pixelated). Re-tap to disable.', false);
-          } else {
-            video.style.filter = '';
+          openToolSheet('Mosaic', [
+            { key: 'off',     label: 'Off',         icon: '○' },
+            { key: 'light',   label: 'Light',       icon: '◔' },
+            { key: 'medium',  label: 'Medium',      icon: '◑' },
+            { key: 'heavy',   label: 'Heavy',       icon: '●' },
+            { key: 'extreme', label: 'Extreme',     icon: '⬤' },
+            { key: 'face',    label: 'Face only',   icon: '☻' }
+          ], 'off').then(function (k) {
+            if (k == null) return;
             video.style.imageRendering = '';
+            video.style.filter = '';
             applyFx();
-            toast('Mosaic off.', false);
-          }
+            if (k === 'light')   video.style.filter = 'blur(3px)';
+            else if (k === 'medium')  { video.style.filter = 'blur(6px) contrast(1.1)'; video.style.imageRendering = 'pixelated'; }
+            else if (k === 'heavy')   { video.style.filter = 'blur(12px) contrast(1.2)'; video.style.imageRendering = 'pixelated'; }
+            else if (k === 'extreme') { video.style.filter = 'blur(24px) contrast(1.3)'; video.style.imageRendering = 'pixelated'; }
+            else if (k === 'face')    { video.style.filter = 'blur(8px)'; toast('Face-only blur needs ML; using full-frame for now.', false); }
+            btn.classList.toggle('on', k !== 'off');
+            if (k !== 'face') toast('Mosaic: ' + k, false);
+          });
         }
         else if (act === 'magnifier'){
-          // Magnifier: 1.6x scale + center origin so the preview shows
-          // a zoomed-in detail view. Toggle off restores 1x.
-          var on = btn.classList.toggle('on');
-          if (on) {
-            fx.scale = 1.6;
-            applyFx();
-            toast('Magnifier on (1.6x). Re-tap to disable.', false);
-          } else {
-            fx.scale = 1;
-            applyFx();
-            toast('Magnifier off.', false);
-          }
+          openToolSheet('Magnifier', [
+            { key: '1',    label: 'Off',    icon: '○' },
+            { key: '1.25', label: '1.25×',  icon: '⊕' },
+            { key: '1.5',  label: '1.5×',   icon: '⊕' },
+            { key: '1.75', label: '1.75×',  icon: '⊕' },
+            { key: '2',    label: '2×',     icon: '⊕' },
+            { key: '2.5',  label: '2.5×',   icon: '⊕' },
+            { key: '3',    label: '3×',     icon: '⊕' },
+            { key: '4',    label: '4×',     icon: '⊕' }
+          ], String(fx.scale)).then(function (k) {
+            if (k == null) return;
+            fx.scale = parseFloat(k); applyFx();
+            btn.classList.toggle('on', fx.scale !== 1);
+            toast('Magnifier: ' + fx.scale + '×.', false);
+          });
         }
         else if (act === 'story')    {
-          var sm = engine.clips.map(function (c, i) { return (i+1) + '. clip ' + (c.srcEnd - c.srcStart).toFixed(2) + 's'; }).join('\n');
-          alert('Story beats:\n\n' + (sm || '(no clips yet)'));
+          var beats = engine.clips.map(function (c, i) { return (i+1) + '. clip ' + (c.srcEnd - c.srcStart).toFixed(2) + 's'; }).join('\n');
+          openToolSheet('Story beats', [
+            { key: 'view',     label: 'View beats',     icon: '☰' },
+            { key: 'add',      label: 'Add chapter',    icon: '＋' },
+            { key: 'reorder',  label: 'Reorder',        icon: '⇅' },
+            { key: 'export',   label: 'Export script',  icon: '⬇' }
+          ], 'view').then(function (k) {
+            if (k == null) return;
+            if (k === 'view') alert('Story beats:\n\n' + (beats || '(no clips yet)'));
+            else if (k === 'add') showPanel('ve-text-panel');
+            else if (k === 'reorder') toast('Reorder: long-press a clip on the timeline to drag.', false);
+            else if (k === 'export') {
+              var blob = new Blob([beats || '(no clips yet)'], { type: 'text/plain' });
+              var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'story-beats.txt';
+              document.body.appendChild(a); a.click(); a.remove();
+              toast('Story beats exported.', false);
+            }
+          });
         }
-        else if (act === 'reverse')  { toggleReverse(); btn.classList.toggle('on', !!reverseTimer); }
-        else if (act === 'freeze')   { toggleFreeze(); btn.classList.toggle('on', fx.frozen); }
+        else if (act === 'reverse')  {
+          openToolSheet('Reverse', [
+            { key: 'off',     label: 'Off',          icon: '○' },
+            { key: 'slow',    label: '0.5× back',    icon: '◐' },
+            { key: 'normal',  label: '1× back',      icon: '◑' },
+            { key: 'fast',    label: '2× back',      icon: '◕' },
+            { key: 'pingpong',label: 'Ping-pong',    icon: '↔' }
+          ], reverseTimer ? 'normal' : 'off').then(function (k) {
+            if (k == null) return;
+            if (reverseTimer) { clearInterval(reverseTimer); reverseTimer = null; }
+            if (k === 'off') { btn.classList.remove('on'); toast('Reverse off.', false); return; }
+            try { video.pause(); } catch (_) {}
+            var stepSec = (k === 'slow') ? 0.033 : (k === 'fast') ? 0.132 : 0.066;
+            var dir = -1;
+            reverseTimer = setInterval(function () {
+              if (!video || video.readyState < 2) return;
+              var t = video.currentTime + dir * stepSec;
+              if (t <= 0) { if (k === 'pingpong') dir = +1; else { video.currentTime = video.duration || 0; return; } video.currentTime = 0; return; }
+              if (t >= (video.duration || 0)) { if (k === 'pingpong') dir = -1; else { video.currentTime = 0; return; } }
+              try { video.currentTime = t; } catch (_) {}
+            }, 66);
+            btn.classList.add('on');
+            toast('Reverse: ' + k, false);
+          });
+        }
+        else if (act === 'freeze')   {
+          openToolSheet('Freeze frame', [
+            { key: 'off',  label: 'Off',         icon: '○' },
+            { key: '1',    label: 'Hold 1 s',    icon: '❄' },
+            { key: '2',    label: 'Hold 2 s',    icon: '❄' },
+            { key: '3',    label: 'Hold 3 s',    icon: '❄' },
+            { key: '5',    label: 'Hold 5 s',    icon: '❄' },
+            { key: 'inf',  label: 'Indefinite',  icon: '∞' }
+          ], fx.frozen ? 'inf' : 'off').then(function (k) {
+            if (k == null) return;
+            if (k === 'off') {
+              if (fx.frozen) toggleFreeze();
+              btn.classList.remove('on');
+              return;
+            }
+            if (!fx.frozen) toggleFreeze();
+            btn.classList.add('on');
+            if (k !== 'inf') {
+              var secs = parseInt(k, 10);
+              setTimeout(function () { if (fx.frozen) toggleFreeze(); btn.classList.remove('on'); }, secs * 1000);
+              toast('Freeze for ' + secs + 's.', false);
+            }
+          });
+        }
         else if (act === 'pip-track') {
-          if (video.requestPictureInPicture) {
-            video.requestPictureInPicture().then(function () { toast('PiP on.', false); })
-              .catch(function (e) { toast('PiP not supported: ' + e.message, true); });
-          } else { toast('PiP not supported on this device.', true); }
+          openToolSheet('PiP overlay', [
+            { key: 'native',     label: 'Native PiP',  icon: '⊞' },
+            { key: 'tl',         label: 'Top-left',    icon: '◰' },
+            { key: 'tr',         label: 'Top-right',   icon: '◱' },
+            { key: 'bl',         label: 'Bot-left',    icon: '◳' },
+            { key: 'br',         label: 'Bot-right',   icon: '◲' },
+            { key: 'center',     label: 'Centered',    icon: '◫' },
+            { key: 'add-image',  label: 'Add image',   icon: '🖼' },
+            { key: 'add-video',  label: 'Add video',   icon: '🎬' },
+            { key: 'remove',     label: 'Remove all',  icon: '✕' }
+          ], 'native').then(function (k) {
+            if (k == null) return;
+            if (k === 'native') {
+              if (video.requestPictureInPicture) {
+                video.requestPictureInPicture().then(function () { toast('Native PiP on.', false); })
+                  .catch(function (e) { toast('PiP not supported: ' + e.message, true); });
+              } else toast('Native PiP not supported on this device.', true);
+              return;
+            }
+            if (k === 'remove') {
+              wrap.querySelectorAll('.ve-pip-overlay').forEach(function (n) { n.remove(); });
+              toast('Overlays removed.', false);
+              return;
+            }
+            if (k === 'add-image' || k === 'add-video') {
+              var pk = document.createElement('input');
+              pk.type = 'file';
+              pk.accept = (k === 'add-image') ? 'image/*' : 'video/*';
+              pk.style.display = 'none'; document.body.appendChild(pk);
+              pk.addEventListener('change', function (ev) {
+                var f = ev.target.files && ev.target.files[0];
+                pk.remove();
+                if (!f) return;
+                var fr = new FileReader();
+                fr.onload = function () {
+                  var stage = document.getElementById('ve-stage');
+                  if (!stage) return;
+                  var el;
+                  if (k === 'add-image') { el = document.createElement('img'); el.src = fr.result; }
+                  else { el = document.createElement('video'); el.src = fr.result; el.autoplay = true; el.loop = true; el.muted = true; el.playsInline = true; }
+                  el.className = 've-pip-overlay';
+                  el.style.cssText = 'position:absolute;top:20px;right:20px;width:30%;max-height:30%;border:2px solid #fbbf24;border-radius:6px;z-index:5;cursor:move;';
+                  stage.appendChild(el);
+                  toast('PiP added. Drag on the preview.', false);
+                };
+                fr.readAsDataURL(f);
+              });
+              pk.click();
+              return;
+            }
+            // Position presets — affect any existing overlays
+            wrap.querySelectorAll('.ve-pip-overlay').forEach(function (el) {
+              el.style.top = el.style.right = el.style.left = el.style.bottom = el.style.transform = '';
+              if (k === 'tl') { el.style.top = '20px'; el.style.left = '20px'; }
+              else if (k === 'tr') { el.style.top = '20px'; el.style.right = '20px'; }
+              else if (k === 'bl') { el.style.bottom = '20px'; el.style.left = '20px'; }
+              else if (k === 'br') { el.style.bottom = '20px'; el.style.right = '20px'; }
+              else if (k === 'center') { el.style.top = '50%'; el.style.left = '50%'; el.style.transform = 'translate(-50%,-50%)'; }
+            });
+            toast('PiP position: ' + k, false);
+          });
         }
-        else if (act === 'speed')    showPanel('ve-speed-panel');
+        else if (act === 'speed')    {
+          openToolSheet('Speed', [
+            { key: '0.25', label: '0.25×', icon: '⏪' },
+            { key: '0.5',  label: '0.5×',  icon: '⏪' },
+            { key: '0.75', label: '0.75×', icon: '⏪' },
+            { key: '1',    label: '1× normal', icon: '▶' },
+            { key: '1.25', label: '1.25×', icon: '⏩' },
+            { key: '1.5',  label: '1.5×',  icon: '⏩' },
+            { key: '2',    label: '2×',    icon: '⏩' },
+            { key: '3',    label: '3×',    icon: '⏩' },
+            { key: '4',    label: '4×',    icon: '⏩' },
+            { key: 'panel',label: 'Slider…', icon: '⫾' }
+          ], String(video.playbackRate || 1)).then(function (k) {
+            if (k == null) return;
+            if (k === 'panel') { showPanel('ve-speed-panel'); return; }
+            try { video.playbackRate = parseFloat(k); } catch (_) {}
+            var speedVal = document.getElementById('ve-speed-val');
+            if (speedVal) speedVal.textContent = k + 'x';
+            toast('Speed: ' + k + '×', false);
+          });
+        }
         else if (act === 'opacity')  showPanel('ve-opacity-panel');
         else if (act === 'tts') {
           var t = (document.getElementById('ve-text') && document.getElementById('ve-text').value || '').trim();
