@@ -1224,7 +1224,7 @@ function buildSidebar(bookId) {
     (function (idx) {
       hdr.addEventListener('click', function () {
         activeChapterIdx = idx;
-        if (window.innerWidth <= 768) { sbOpen = false; updateSB(); }
+        if (window.innerWidth <= 1024) { sbOpen = false; updateSB(); }
         showChapterActivities(bookId, idx);
       });
     })(i);
@@ -1255,7 +1255,7 @@ function initNav() {
   var savedTheme = localStorage.getItem('attain_theme');
   if (savedTheme) document.body.classList.add(savedTheme);
 
-  sbOpen = window.innerWidth > 768;
+  sbOpen = window.innerWidth > 1024;
   var sb = document.getElementById('sb');
   var main = document.getElementById('main');
   var vr = document.getElementById('vr');
@@ -1266,7 +1266,7 @@ function initNav() {
   updateSB = function () {
     sb.classList.remove('h', 'm');
     if (sbOpen) {
-      if (window.innerWidth <= 768) {
+      if (window.innerWidth <= 1024) {
         sb.classList.add('m');
       }
       main.classList.remove('x');
@@ -1283,9 +1283,10 @@ function initNav() {
     updateSB();
   });
 
-  // Close sidebar when tapping main content on mobile
+  // Close sidebar when tapping main content on overlay-mode widths
+  // (anything iPad portrait or smaller).
   document.getElementById('main').addEventListener('click', function () {
-    if (sbOpen && window.innerWidth <= 768) {
+    if (sbOpen && window.innerWidth <= 1024) {
       sbOpen = false;
       updateSB();
     }
@@ -1449,8 +1450,9 @@ function initNav() {
     }
   }
 
-  // Mobile: close sidebar on section click
-  if (window.innerWidth <= 768) sbOpen = false;
+  // iPad portrait + smaller: keep sidebar closed by default so the
+  // reading area gets full width.
+  if (window.innerWidth <= 1024) sbOpen = false;
   updateSB();
 
   // Start at library or resume last book at last chapter

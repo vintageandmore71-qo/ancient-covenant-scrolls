@@ -35,11 +35,13 @@ body.sepia .toc-vol{color:#f0c040}
 body.sepia .toc-sec{color:#b89030}
 #prog{position:fixed;top:0;left:0;right:0;height:3px;background:#e0e0e0;z-index:9999}
 #pf{height:3px;background:#444;width:0%}
-#topnav{position:fixed;top:3px;left:0;right:0;height:46px;background:#222;display:flex;align-items:center;gap:3px;padding:0 5px;z-index:1000;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+#topnav{position:fixed;top:3px;left:0;right:0;height:46px;background:#222;display:flex;align-items:center;gap:3px;padding:0 5px;z-index:1000;box-shadow:0 2px 8px rgba(0,0,0,.4);overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+#topnav::-webkit-scrollbar{display:none}
+#topnav>*{flex-shrink:0}
 body.dark #topnav{background:#111}
 #topnav button{background:none;border:none;color:#ccc;cursor:pointer;padding:4px 5px;border-radius:4px;font-size:12px;font-family:Arial}
 #topnav button:hover,#topnav button.on{background:#555;color:#fff}
-#tb{flex:1;color:#888;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#tb{flex:1 1 auto;min-width:80px;max-width:280px;color:#888;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #sq{background:#333;border:1px solid #555;border-radius:4px;color:#ddd;padding:3px 5px;font-size:11px;width:80px;font-family:Arial}
 #sq::placeholder{color:#777}
 #sb{position:fixed;top:49px;left:0;bottom:0;width:270px;background:#2a2a2a;overflow-y:auto;z-index:900;transition:transform .3s}

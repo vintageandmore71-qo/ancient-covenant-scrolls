@@ -67,7 +67,10 @@ body.theme-amber .act-card{box-shadow:0 4px 14px rgba(0,0,0,.3)}
   background:linear-gradient(135deg,#1a1a2e 0%,#2a2a4e 100%);
   display:flex;align-items:center;gap:4px;padding:0 8px;
   z-index:1000;box-shadow:0 3px 12px rgba(0,0,0,.25);
+  overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;
 }
+#topnav::-webkit-scrollbar{display:none}
+#topnav>*{flex-shrink:0}
 #topnav button,#topnav a.lnk{
   background:none;border:none;color:#c8c8e8;cursor:pointer;
   padding:8px 10px;border-radius:8px;font-size:15px;font-family:var(--font-main);
@@ -79,7 +82,8 @@ body.theme-amber .act-card{box-shadow:0 4px 14px rgba(0,0,0,.3)}
   background:rgba(255,255,255,.12);color:#fff;
 }
 #tb{
-  flex:1;color:#b8b8d8;font-size:13px;
+  flex:1 1 auto;min-width:80px;max-width:320px;
+  color:#b8b8d8;font-size:13px;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   padding:8px;font-weight:700;
   cursor:pointer;border-radius:8px;transition:background .15s;
@@ -95,8 +99,9 @@ body.theme-amber .act-card{box-shadow:0 4px 14px rgba(0,0,0,.3)}
 #sb{
   position:fixed;top:54px;left:0;bottom:0;width:290px;
   background:linear-gradient(180deg,#1a1a2e 0%,#12121e 100%);
-  overflow-y:auto;z-index:900;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:900;
   transition:transform .3s;border-right:1px solid #2a2a3e;
+  will-change:transform;
 }
 #sb.h{transform:translateX(-290px)}
 .sb-intro{
@@ -1388,16 +1393,23 @@ body.beeline-on .ch-question{
 /* =========================================================================
    Mobile
    ========================================================================= */
-@media(max-width:768px){
+/* iPad portrait + smaller: sidebar overlays content (instead of taking
+   a 290px column) so the reading area gets full width and the sidebar
+   auto-closes when a chapter is picked. Bumped from 768 → 1024 so
+   iPad mini / 10 / 11 / Pro 11 in portrait all get overlay behavior
+   (only iPad landscape + laptops keep the column layout). */
+@media(max-width:1024px){
   #main{margin-left:0;padding:16px 14px 60px}
   #sb{transform:translateX(-290px)}
   #sb.m{transform:translateX(0) !important}
   #sb.h{transform:translateX(-290px) !important}
+  #vr,#np,#nv{left:0!important}
+}
+@media(max-width:768px){
   #home{margin:-16px -14px -60px -14px;padding:0}
   #home .logo{font-size:3.5em}
   #home h1{font-size:1.5em}
   #topnav a.lnk span.hide-mobile{display:none}
-  #vr,#np,#nv{left:0!important}
   .sv-actions .study-btn{min-width:auto;flex:1 1 100%}
 }
 
