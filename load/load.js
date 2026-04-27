@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17t</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17u</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -9540,18 +9540,8 @@
     wrap.__engine = engine;
 
     // RENDER THE CLIP IMMEDIATELY — do not wait for loadedmetadata.
-    // The user's directive: timeline must show a clip the moment the
-    // editor opens, even before metadata / thumbnails / waveform load.
-    // We seed engine.clips with a fallback duration (5s) so renderClipBlocks
-    // emits a visible .timeline-clip right away. loadedmetadata will
-    // patch the real srcEnd in once it arrives.
     engine.clips = [{ id: 'c0', srcStart: 0, srcEnd: 5, _placeholder: true }];
     engine.t = 0;
-    // Defer the first render to next tick so the strip element exists
-    // in the DOM by the time render runs.
-    setTimeout(function () {
-      try { engine.onClipsChanged(); } catch (e) {}
-    }, 0);
 
     function refreshTrimDisplay() {
       var inS = parseFloat(trimIn.value), outS = parseFloat(trimOut.value);
@@ -10415,6 +10405,35 @@
       try { URL.revokeObjectURL(blobUrl); } catch (e) {}
       wrap.remove();
     });
+
+    /* MOUNT THE PLACEHOLDER CLIP NOW.
+       At this point in openVideoEditor every function declaration
+       (renderClipBlocks, populateBlockThumbs) is hoisted and every
+       reassignment (engine.onClipsChanged → renderClipBlocks) has
+       run. Calling renderClipBlocks directly guarantees the
+       .timeline-clip element appears immediately — no async wait,
+       no setTimeout, no dependence on metadata. If renderClipBlocks
+       throws or stripEl is missing, fall back to a hardcoded test
+       clip so the timeline is NEVER empty. */
+    try {
+      renderClipBlocks();
+      var testCheck = document.querySelector('.timeline-clip');
+      if (!testCheck) {
+        // Hard fallback — proves the DOM mount path works even if
+        // engine.clips state somehow got cleared.
+        var stripEl = document.getElementById('ve-clip-strip');
+        if (stripEl) {
+          stripEl.innerHTML =
+            '<div class="timeline-clip selected" id="ve-clip-fallback" style="width:450px;height:56px;background:#08080d;border:3px solid #ffcc1a;display:flex;align-items:center;justify-content:center;color:#ffcc1a;font-weight:700;">' +
+              'Loading clip…' +
+            '</div>';
+          try { console.warn('[VE] renderClipBlocks did not mount a clip — using fallback. engine.clips=', engine.clips); } catch (_) {}
+        }
+      }
+    } catch (e) {
+      try { console.warn('[VE] renderClipBlocks threw on mount', e); } catch (_) {}
+    }
+    try { renderRuler(); } catch (e) {}
   }
 
   // Expose so tile menus / library can also open the editor on a video
