@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bi</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bj</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -9204,10 +9204,10 @@
             return fetch(url).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(function (j) {
               return (j.hits || []).map(function (h) {
                 if (type === 'photos') {
-                  return { thumb: h.previewURL || h.webformatURL, full: h.largeImageURL || h.webformatURL, name: 'pixabay-' + h.id + '.jpg', credit: 'Pixabay / ' + (h.user || '') };
+                  return { thumb: h.webformatURL || h.previewURL, full: h.largeImageURL || h.webformatURL, name: 'pixabay-' + h.id + '.jpg', credit: 'Pixabay / ' + (h.user || '') };
                 }
                 var v = (h.videos && (h.videos.medium || h.videos.small || h.videos.tiny || h.videos.large)) || {};
-                return { thumb: 'https://i.vimeocdn.com/video/' + h.picture_id + '_295x166.jpg', full: v.url, name: 'pixabay-' + h.id + '.mp4', credit: 'Pixabay / ' + (h.user || '') };
+                return { thumb: 'https://i.vimeocdn.com/video/' + h.picture_id + '_640x360.jpg', full: v.url, name: 'pixabay-' + h.id + '.mp4', credit: 'Pixabay / ' + (h.user || '') };
               }).filter(function (r) { return r.full; });
             });
           }
@@ -9227,7 +9227,7 @@
             return fetch(url, { headers: { Authorization: k } }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(function (j) {
               if (type === 'photos') {
                 return (j.photos || []).map(function (p) {
-                  return { thumb: p.src && p.src.medium, full: (p.src && (p.src.large || p.src.original)), name: 'pexels-' + p.id + '.jpg', credit: 'Pexels / ' + (p.photographer || '') };
+                  return { thumb: p.src && (p.src.large || p.src.medium), full: (p.src && (p.src.large2x || p.src.large || p.src.original)), name: 'pexels-' + p.id + '.jpg', credit: 'Pexels / ' + (p.photographer || '') };
                 });
               }
               return (j.videos || []).map(function (v) {
@@ -9324,7 +9324,7 @@
             '<button id="vesm-go" style="background:#fbbf24;color:#1a1a26;border:none;font-weight:800;padding:0 14px;border-radius:8px;cursor:pointer;">Search</button>' +
           '</div>' +
           '<div id="vesm-info" style="font-size:11px;color:#a8a8c4;margin-bottom:6px;"></div>' +
-          '<div id="vesm-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;overflow-y:auto;flex:1;align-content:start;"></div>' +
+          '<div id="vesm-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;overflow-y:auto;flex:1;align-content:start;"></div>' +
           '<div id="vesm-status" style="font-size:12px;color:#a8a8c4;text-align:center;padding-top:6px;">Pick a type and tap Search.</div>' +
         '</div>';
       document.body.appendChild(menu);
@@ -9412,18 +9412,21 @@
       }
       function buildTile(r) {
         var tile = document.createElement('button');
-        tile.style.cssText = 'background:#0e0e18;border:1px solid #2a2a40;border-radius:8px;overflow:hidden;cursor:pointer;padding:0;display:flex;flex-direction:column;text-align:left;';
+        tile.style.cssText = 'background:#0e0e18;border:1px solid #2a2a40;border-radius:10px;overflow:hidden;cursor:pointer;padding:0;display:flex;flex-direction:column;text-align:left;';
         var thumb = (r.thumb || '').replace(/"/g, '%22');
         tile.innerHTML =
-          '<div style="position:relative;width:100%;height:90px;background:#0a0a14;overflow:hidden;flex-shrink:0;">' +
+          // padding-bottom 56.25% gives a true responsive 16:9 box,
+          // works on every iPad Safari we care about (no aspect-ratio
+          // collapse). The img is absolutely positioned to fill it.
+          '<div style="position:relative;width:100%;padding-bottom:56.25%;background:#0a0a14;overflow:hidden;flex-shrink:0;">' +
             (thumb
               ? '<img src="' + thumb + '" alt="" referrerpolicy="no-referrer" loading="lazy" ' +
-                  'style="width:100%;height:100%;object-fit:cover;display:block;" ' +
+                  'style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;image-rendering:auto;" ' +
                   'onerror="this.style.display=\'none\';this.parentNode.style.background=\'#1a1a26\';this.parentNode.innerHTML+=\'<div style=&quot;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#5a5a78;font-size:11px;&quot;>(no preview)</div>\';">'
               : '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#5a5a78;font-size:11px;">(no preview)</div>'
             ) +
           '</div>' +
-          '<div style="padding:6px 8px;font-size:10px;color:#a8a8c4;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (r.credit || '') + '</div>';
+          '<div style="padding:7px 9px;font-size:11px;color:#cfcfdc;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (r.credit || '') + '</div>';
         tile.addEventListener('click', function () { importResult(r); });
         return tile;
       }
