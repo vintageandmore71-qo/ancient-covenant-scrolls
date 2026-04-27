@@ -8880,7 +8880,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bs</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bt</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -13943,11 +13943,11 @@
         toast('Piper voice installed and ready.');
       } catch (e) {
         var emsg = (e && e.message) || String(e);
-        progressLbl.innerHTML = '<span style="color:#ff6b8a;">✗ ' + emsg + '</span>';
+        progressLbl.innerHTML = '<span style="color:#ff6b8a;">✗ ' + emsg + '</span><br><span style="color:#a8a8c4;font-size:11px;">Tip: tap <strong>Skip Piper</strong> below to keep using iOS voices.</span>';
         installEl.disabled = false;
         toast('Piper install failed: ' + emsg, true);
         console.error('[Piper install] failed', e);
-        // Keep the error on screen — only auto-hide on success
+        // Keep the error on screen — only the success path auto-hides.
         refresh();
         return;
       }
@@ -14029,14 +14029,24 @@
         }
       } catch (e) {
         var rem = (e && e.message) || String(e);
-        progressLbl.innerHTML = '<span style="color:#ff6b8a;">Repair failed: ' + rem + '</span>';
+        progressLbl.innerHTML = '<span style="color:#ff6b8a;">✗ Repair failed: ' + rem + '</span><br><span style="color:#a8a8c4;font-size:11px;">Tap <strong>Skip Piper</strong> below to stop trying. Load will use iOS voices instead.</span>';
         toast('Repair failed: ' + rem, true);
+        console.error('[Piper repair] failed', e);
       }
-      setTimeout(function () {
-        progressRow.style.display = 'none';
-        repairEl.textContent = orig;
-        repairEl.disabled = false;
-      }, 2400);
+      // Only auto-hide the progress row on success; on failure leave
+      // the error visible so the user can read it.
+      repairEl.textContent = orig;
+      repairEl.disabled = false;
+      refresh();
+    });
+
+    // Skip / disable Piper — definite exit from the install loop.
+    var skipEl = $('piper-skip');
+    if (skipEl) skipEl.addEventListener('click', function () {
+      LoadPiper.setEnabled(false);
+      enableEl.checked = false;
+      toast('Piper turned off. Load will use iOS voices.');
+      progressRow.style.display = 'none';
       refresh();
     });
 

@@ -60,59 +60,17 @@
     return loadPromise;
   }
 
-  // Verify the install actually landed something usable on disk.
-  // The library's stored() can lie after a manual sweep; this
-  // walks OPFS, finds piper-shaped files, and validates the
-  // config JSON parses. Returns { ok, reason }.
   async function verifyInstall() {
-    if (!navigator.storage || typeof navigator.storage.getDirectory !== 'function') {
-      return { ok: false, reason: 'OPFS not available on this device' };
-    }
+    // Trust the library's own stored() report — that's what predict()
+    // will actually consult at speech time. The earlier OPFS walk
+    // approach was too brittle: the lib stores files under names /
+    // paths we couldn't always match, so verify reported failure
+    // even on healthy installs.
     try {
-      var root = await navigator.storage.getDirectory();
-      if (typeof root.entries !== 'function') {
-        // Older Safari — can't enumerate; trust stored()
-        try {
-          var libCheck = await ensureLib();
-          var s = await libCheck.stored();
-          if (Array.isArray(s) && s.indexOf(DEFAULT_VOICE) !== -1) return { ok: true };
-        } catch (_) {}
-        return { ok: false, reason: 'Cannot enumerate OPFS on this Safari' };
-      }
-      // Find candidate model + config files
-      var modelOk = false, configOk = false, configBytes = 0;
-      async function walk(dir) {
-        for await (var entry of dir.entries()) {
-          var name = entry[0], handle = entry[1];
-          if (handle.kind === 'file') {
-            var lower = name.toLowerCase();
-            if (lower.indexOf('.onnx.json') !== -1) {
-              try {
-                var f = await handle.getFile();
-                configBytes = f.size;
-                if (f.size < 10) continue;
-                var txt = await f.text();
-                if (!txt || txt.length < 10) continue;
-                var first = txt.charAt(0), last = txt.charAt(txt.length - 1);
-                if ((first !== '{' && first !== '[') || (last !== '}' && last !== ']')) continue;
-                JSON.parse(txt); // throws if invalid
-                configOk = true;
-              } catch (_) { /* keep looking */ }
-            } else if (/\.onnx$/.test(lower)) {
-              try {
-                var mf = await handle.getFile();
-                if (mf.size > 100000) modelOk = true;
-              } catch (_) {}
-            }
-          } else if (handle.kind === 'directory') {
-            try { await walk(handle); } catch (_) {}
-          }
-        }
-      }
-      await walk(root);
-      if (!modelOk) return { ok: false, reason: 'voice model file not found or too small' };
-      if (!configOk) return { ok: false, reason: 'voice config JSON missing or unreadable (' + configBytes + ' bytes)' };
-      return { ok: true };
+      var lib = await ensureLib();
+      var s = await lib.stored();
+      if (Array.isArray(s) && s.indexOf(DEFAULT_VOICE) !== -1) return { ok: true };
+      return { ok: false, reason: 'library reports voice not stored after download' };
     } catch (e) {
       return { ok: false, reason: (e && e.message) || String(e) };
     }
