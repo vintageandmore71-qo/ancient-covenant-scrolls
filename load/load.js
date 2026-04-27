@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ay</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17az</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -8761,6 +8761,7 @@
         '<button class="ve-action" data-action="story"><span class="ve-act-icon">&#9776;</span><span class="ve-act-lbl">Story</span></button>' +
         '<button class="ve-action" data-action="reverse"><span class="ve-act-icon">&#8634;</span><span class="ve-act-lbl">Reverse</span></button>' +
         '<button class="ve-action" data-action="freeze"><span class="ve-act-icon">&#10052;</span><span class="ve-act-lbl">Freeze</span></button>' +
+        '<button class="ve-action" data-action="keyframe"><span class="ve-act-icon">&#128273;</span><span class="ve-act-lbl">Keyframe</span></button>' +
         '<button class="ve-action" data-action="pip-track"><span class="ve-act-icon">&#128301;</span><span class="ve-act-lbl">PiP Track</span></button>' +
       '</div>' +
       // ===== Context action bar — slides in OVER the bottom toolbar
@@ -9170,6 +9171,48 @@
         });
       });
     }
+    // Keyframe interpolation. Returns the value of `prop` at time t
+    // by linear-interpolating between the closest two keyframes.
+    // Times outside the keyframe range clamp to the nearest endpoint.
+    function evalKeyframe(arr, t, fallback) {
+      if (!arr || !arr.length) return fallback;
+      if (arr.length === 1) return arr[0].v;
+      if (t <= arr[0].t) return arr[0].v;
+      if (t >= arr[arr.length - 1].t) return arr[arr.length - 1].v;
+      for (var i = 0; i < arr.length - 1; i++) {
+        var a = arr[i], b = arr[i + 1];
+        if (t >= a.t && t <= b.t) {
+          var span = (b.t - a.t) || 1;
+          var f = (t - a.t) / span;
+          return a.v + (b.v - a.v) * f;
+        }
+      }
+      return fallback;
+    }
+    // Resolve (clip, sourceTimeOffsetIntoClip) for the engine playhead
+    // and apply any keyframe-driven fx values to the live preview.
+    function applyKeyframes(clip, tInClip) {
+      if (!clip || !clip.keyframes) return;
+      var op = evalKeyframe(clip.keyframes.opacity, tInClip, null);
+      var sc = evalKeyframe(clip.keyframes.scale,   tInClip, null);
+      var ro = evalKeyframe(clip.keyframes.rotate,  tInClip, null);
+      var tx = evalKeyframe(clip.keyframes.translateX, tInClip, null);
+      var ty = evalKeyframe(clip.keyframes.translateY, tInClip, null);
+      if (op != null && video) video.style.opacity = String(op);
+      if (sc != null) fx.scale = sc;
+      if (ro != null) fx.rotate = ro;
+      if (sc != null || ro != null || tx != null || ty != null) {
+        var t = '';
+        if (sc != null && sc !== 1) t += ' scale(' + sc + ')';
+        if (ro != null && ro !== 0) t += ' rotate(' + ro + 'deg)';
+        if (tx != null && tx !== 0) t += ' translateX(' + tx + 'px)';
+        if (ty != null && ty !== 0) t += ' translateY(' + ty + 'px)';
+        if (fx.mirror) t += ' scaleX(-1)';
+        if (fx.flip)   t += ' scaleY(-1)';
+        if (video) video.style.transform = t.trim();
+      }
+    }
+
     function applyFx() {
       if (!video) return;
       var t = '';
@@ -9662,6 +9705,58 @@
             }
           });
         }
+        else if (act === 'keyframe') {
+          // Per-clip keyframe sheet. Picks a property + sets a kf at
+          // the current playhead time using the property's CURRENT
+          // value. Repeating with a different value at a different
+          // time creates an interpolated animation between them.
+          var clip = engine.clips[selectedClipIdx] || engine.clips[0];
+          if (!clip) { toast('Pick a clip first.', true); return; }
+          clip.keyframes = clip.keyframes || { opacity: [], scale: [], rotate: [], translateX: [], translateY: [] };
+          var t = engine.t || 0;
+          var summary = Object.keys(clip.keyframes).map(function (k) {
+            return k + ': ' + clip.keyframes[k].length;
+          }).join(' · ');
+          openToolSheet('Keyframe @ ' + t.toFixed(2) + 's  (' + summary + ')', [
+            { key: 'opacity',     label: 'Set Opacity',    icon: '◑' },
+            { key: 'scale',       label: 'Set Scale',      icon: '⊕' },
+            { key: 'rotate',      label: 'Set Rotate',     icon: '↻' },
+            { key: 'translateX',  label: 'Set Pan X',      icon: '↔' },
+            { key: 'translateY',  label: 'Set Pan Y',      icon: '↕' },
+            { key: 'list',        label: 'List + delete',  icon: '☰' },
+            { key: 'clear',       label: 'Clear all',      icon: '✕' }
+          ], 'opacity').then(function (k) {
+            if (k == null) return;
+            if (k === 'clear') {
+              clip.keyframes = { opacity: [], scale: [], rotate: [], translateX: [], translateY: [] };
+              toast('Keyframes cleared.', false);
+              applyKeyframes(clip, t);
+              return;
+            }
+            if (k === 'list') {
+              var lines = [];
+              Object.keys(clip.keyframes).forEach(function (prop) {
+                clip.keyframes[prop].forEach(function (kf) {
+                  lines.push(prop + ' @ ' + kf.t.toFixed(2) + 's = ' + kf.v);
+                });
+              });
+              alert(lines.length ? lines.join('\n') : '(no keyframes yet)');
+              return;
+            }
+            // Read CURRENT value from the active fx state for the prop.
+            var current = (k === 'opacity') ? (typeof clipOpacity !== 'undefined' ? clipOpacity : 1)
+                       : (k === 'scale')   ? fx.scale
+                       : (k === 'rotate')  ? fx.rotate
+                       : 0;
+            var arr = clip.keyframes[k];
+            // Replace any existing kf at the same t (within 0.05s), else append.
+            var existed = arr.findIndex(function (kf) { return Math.abs(kf.t - t) < 0.05; });
+            if (existed >= 0) arr[existed].v = current;
+            else arr.push({ t: t, v: current });
+            arr.sort(function (a, b) { return a.t - b.t; });
+            toast('Keyframe set: ' + k + ' = ' + (typeof current === 'number' ? current.toFixed(2) : current) + ' @ ' + t.toFixed(2) + 's', false);
+          });
+        }
         else if (act === 'pip-track') {
           openToolSheet('PiP overlay', [
             { key: 'native',     label: 'Native PiP',  icon: '⊞' },
@@ -9762,14 +9857,14 @@
     // the <video>'s 4fps timeupdate event.
     function updatePlayheadFromEngine(t) {
       var d = engine.duration() || 1;
-      // Pixel-precise positioning: t × PX_PER_SECOND aligns the
-      // playhead exactly with the clip widths above (and the
-      // waveform / ruler below, which use the same scale). Stays
-      // aligned even when the placeholder's 5s patches up to the
-      // real duration.
       var leftPx = t * PX_PER_SECOND;
       if (playhead) playhead.style.left = leftPx + 'px';
       if (timeLbl) timeLbl.textContent = fmtTime(t) + ' / ' + fmtTime(d);
+      // Apply keyframe-driven fx for the active clip at this time.
+      try {
+        var r = engine.resolve(t);
+        if (r && r.clip) applyKeyframes(r.clip, t - (r.clipStart || 0));
+      } catch (_) {}
     }
     var __vePendingOnTick = updatePlayheadFromEngine;
     // Re-render the clip strip whenever the engine's clips array
@@ -10307,12 +10402,12 @@
           var c = this.clips[i];
           var d = c.srcEnd - c.srcStart;
           if (t < acc + d) {
-            return { idx: i, clip: c, srcOffset: c.srcStart + (t - acc) };
+            return { idx: i, clip: c, srcOffset: c.srcStart + (t - acc), clipStart: acc };
           }
           acc += d;
         }
         var last = this.clips[this.clips.length - 1];
-        return last ? { idx: this.clips.length - 1, clip: last, srcOffset: last.srcEnd } : null;
+        return last ? { idx: this.clips.length - 1, clip: last, srcOffset: last.srcEnd, clipStart: acc - (last.srcEnd - last.srcStart) } : null;
       },
       // Drive the video to match a global t. Use fastSeek for
       // smooth scrub when available (Safari supports it).
