@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ba</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bb</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -10040,6 +10040,23 @@
           '<button class="clip-add right" data-clip-idx="' + i + '" data-edge="after" aria-label="Add clip after">+</button>';
         stripEl.appendChild(clip);
         try { populateBlockThumbs(clip.querySelector('.thumbnail-strip'), c); } catch (e) {}
+        // Long-press on the thumb strip → poster sheet (custom thumb).
+        (function (idx) {
+          var strip = clip.querySelector('.thumbnail-strip');
+          if (!strip) return;
+          var lpTimer = null;
+          strip.addEventListener('pointerdown', function (e) {
+            if (e.target.closest('.trim-handle') || e.target.closest('.clip-add')) return;
+            clearTimeout(lpTimer);
+            lpTimer = setTimeout(function () {
+              try { if (navigator.vibrate) navigator.vibrate(15); } catch (_) {}
+              openPosterSheetFor(idx);
+            }, 600);
+          });
+          strip.addEventListener('pointerup',     function () { clearTimeout(lpTimer); });
+          strip.addEventListener('pointerleave',  function () { clearTimeout(lpTimer); });
+          strip.addEventListener('pointercancel', function () { clearTimeout(lpTimer); });
+        })(i);
       });
       // 3 empty-slot placeholders after the last clip + a big-add tail
       for (var s = 0; s < 3; s++) {
@@ -10242,6 +10259,16 @@
     function populateBlockThumbs(container, clip) {
       if (!container) return;
       container.innerHTML = '';
+      // Custom poster — when set, render it tiled across the strip so
+      // the clip reads as a single "poster" instead of frame samples.
+      if (clip.poster) {
+        var poster = document.createElement('img');
+        poster.src = clip.poster;
+        poster.alt = '';
+        poster.style.cssText = 'flex:1 1 auto;width:100%;height:100%;object-fit:cover;object-position:center;display:block;';
+        container.appendChild(poster);
+        return;
+      }
       var srcThumbs = document.querySelectorAll('#ve-clip-thumbs img');
       if (!srcThumbs.length || !video.duration) return;
       var first = (clip.srcStart / video.duration) * srcThumbs.length;
@@ -10253,6 +10280,56 @@
         var img = srcThumbs[k] && srcThumbs[k].cloneNode(true);
         if (img) container.appendChild(img);
       }
+    }
+
+    // Long-press on a clip's thumbnail strip opens a poster sheet
+    // (Use current frame / Pick image / Reset to auto frames).
+    function openPosterSheetFor(clipIdx) {
+      var clip = engine.clips[clipIdx];
+      if (!clip) return;
+      openToolSheet('Clip thumbnail (' + (clipIdx + 1) + '/' + engine.clips.length + ')', [
+        { key: 'frame',  label: 'Use current frame', icon: '🖼' },
+        { key: 'pick',   label: 'Pick image…',       icon: '📁' },
+        { key: 'reset',  label: 'Reset (auto)',      icon: '↺' }
+      ], clip.poster ? 'pick' : 'frame').then(function (k) {
+        if (k == null) return;
+        if (k === 'reset') {
+          clip.poster = null;
+          renderClipBlocks();
+          toast('Thumbnail reset to auto frames.', false);
+          return;
+        }
+        if (k === 'frame') {
+          try {
+            var c = document.createElement('canvas');
+            c.width = video.videoWidth || 1280;
+            c.height = video.videoHeight || 720;
+            c.getContext('2d').drawImage(video, 0, 0, c.width, c.height);
+            clip.poster = c.toDataURL('image/jpeg', 0.88);
+            renderClipBlocks();
+            toast('Thumbnail set from current frame.', false);
+          } catch (e) { toast('Could not capture frame: ' + (e && e.message || e), true); }
+          return;
+        }
+        if (k === 'pick') {
+          var pk = document.createElement('input');
+          pk.type = 'file'; pk.accept = 'image/*'; pk.style.display = 'none';
+          document.body.appendChild(pk);
+          pk.addEventListener('change', function (ev) {
+            var f = ev.target.files && ev.target.files[0];
+            pk.remove();
+            if (!f) return;
+            var fr = new FileReader();
+            fr.onload = function () {
+              clip.poster = fr.result;
+              renderClipBlocks();
+              toast('Custom thumbnail set.', false);
+            };
+            fr.readAsDataURL(f);
+          });
+          pk.click();
+        }
+      });
     }
     // Re-skin every block's thumbs once the engine-level thumb
     // generator finishes its second pass (real per-frame seeks).
