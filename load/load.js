@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ax</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ay</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -9965,6 +9965,10 @@
       });
       stripEl.appendChild(bigAdd);
 
+      // Paint per-clip mini waveform inside each block (only when the
+      // source audio is already decoded — first call no-ops silently).
+      try { renderPerClipWaveforms(); } catch (_) {}
+
       // Sync waveform-track width to match the sum of clip widths so
       // the amplitude bars align under the clips they came from.
       var totalClipPx = 0;
@@ -11033,20 +11037,65 @@
        background. Triggered on loadedmetadata; if the file's audio
        can't be decoded (codec mismatch, no audio track, etc.) the
        waveform area stays in its empty placeholder state. */
+    var sourceAudioBuffer = null;
     async function decodeSourceVideoWaveform() {
       try {
         if (!app || !app.binary) return;
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         var ab = await app.binary.arrayBuffer();
-        // decodeAudioData consumes the buffer; clone it so we don't
-        // disturb other consumers.
         var copy = ab.slice(0);
         var decoded = await audioCtx.decodeAudioData(copy);
+        sourceAudioBuffer = decoded;
         renderWaveformFor(decoded);
-      } catch (e) {
-        // Silent — waveform stays empty. Source format may not
-        // include an iPad-decodable audio track.
-      }
+        // Now that the source is decoded, paint a waveform inside
+        // every existing clip block (per-clip mini-waveform).
+        try { renderPerClipWaveforms(); } catch (_) {}
+      } catch (e) { /* silent — source may not have a decodable audio track */ }
+    }
+
+    // Per-clip mini waveform — paints a small canvas at the bottom
+    // of each .timeline-clip showing only that clip's source range.
+    // Uses sourceAudioBuffer (decoded once at editor open).
+    function renderPerClipWaveforms() {
+      if (!sourceAudioBuffer) return;
+      var data = sourceAudioBuffer.getChannelData(0);
+      var sr = sourceAudioBuffer.sampleRate;
+      Array.prototype.forEach.call(wrap.querySelectorAll('.timeline-clip'), function (clipEl) {
+        var idx = +clipEl.dataset.clipIdx;
+        var c = engine.clips[idx];
+        if (!c) return;
+        var existing = clipEl.querySelector('.ve-clip-mini-wf');
+        if (existing) existing.remove();
+        var canvas = document.createElement('canvas');
+        canvas.className = 've-clip-mini-wf';
+        canvas.style.cssText = 'position:absolute;left:0;right:0;bottom:0;width:100%;height:18px;display:block;pointer-events:none;border-bottom-left-radius:6px;border-bottom-right-radius:6px;';
+        clipEl.appendChild(canvas);
+        var rect = clipEl.getBoundingClientRect();
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.max(60, rect.width * dpr);
+        canvas.height = 18 * dpr;
+        var ctx2 = canvas.getContext('2d');
+        ctx2.fillStyle = 'rgba(0,0,0,0.45)';
+        ctx2.fillRect(0, 0, canvas.width, canvas.height);
+        var startSamp = Math.max(0, Math.floor(c.srcStart * sr));
+        var endSamp   = Math.min(data.length, Math.floor(c.srcEnd * sr));
+        var bars = Math.max(20, Math.floor(rect.width / 4));
+        var step = Math.max(1, Math.floor((endSamp - startSamp) / bars));
+        var midY = canvas.height / 2;
+        var barW = canvas.width / bars;
+        ctx2.fillStyle = 'rgba(251,191,36,0.95)';
+        for (var b = 0; b < bars; b++) {
+          var max = 0;
+          var s0 = startSamp + b * step;
+          var s1 = Math.min(endSamp, s0 + step);
+          for (var i = s0; i < s1; i++) {
+            var v = Math.abs(data[i]);
+            if (v > max) max = v;
+          }
+          var h = Math.max(1, max * canvas.height * 0.85);
+          ctx2.fillRect(b * barW, midY - h / 2, Math.max(1, barW - 1), h);
+        }
+      });
     }
 
     /* Draw amplitude bars from an AudioBuffer into the waveform
