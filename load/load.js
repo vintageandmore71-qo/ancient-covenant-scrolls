@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ai</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17aj</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -8884,7 +8884,7 @@
       '#__loadVideoEdit .timeline-clip{overflow:hidden !important;height:84px !important;}' +
       '#__loadVideoEdit .empty-slot,#__loadVideoEdit .big-add{height:84px !important;}' +
       '#__loadVideoEdit .thumbnail-strip{width:100% !important;height:100% !important;display:flex !important;align-items:stretch !important;overflow:hidden !important;min-width:0 !important;}' +
-      '#__loadVideoEdit .thumbnail-strip > *,#__loadVideoEdit .thumbnail-strip img,#__loadVideoEdit .thumbnail-frame{flex:1 1 0 !important;width:0 !important;min-width:0 !important;height:100% !important;object-fit:cover !important;object-position:center !important;display:block !important;border-right:1px solid rgba(255,255,255,0.15) !important;}' +
+      '#__loadVideoEdit .thumbnail-strip > *,#__loadVideoEdit .thumbnail-strip img,#__loadVideoEdit .thumbnail-frame{flex:1 1 0 !important;width:0 !important;min-width:0 !important;height:100% !important;object-fit:cover !important;object-position:center !important;display:block !important;border-right:1px solid rgba(255,255,255,0.15) !important;image-rendering:auto !important;-webkit-image-rendering:auto !important;}' +
       '#__loadVideoEdit .thumbnail-strip img:last-child,#__loadVideoEdit .thumbnail-frame:last-child{border-right:none !important;}' +
       '#__loadVideoEdit .ve-context::-webkit-scrollbar{display:none;}' +
       '#__loadVideoEdit .ve-context-done .ve-act-icon{background:#1d6fff;color:#fff;border-color:#1d6fff;}' +
@@ -9832,8 +9832,12 @@
         var srcW = vid.videoWidth || 1280;
         var srcH = vid.videoHeight || 720;
         var aspect = srcW / srcH;
-        off.height = 200; // 200px tall = sharp at 84px CSS height on Retina
-        off.width = Math.round(200 * aspect);
+        // Render at 480px tall — gives ~5x oversampling vs 84px CSS height
+        // on a 2x Retina iPad, so the displayed thumbnail stays crisp
+        // even when the strip stretches. Width preserves source aspect
+        // so there is zero distortion when CSS lays out at flex:1 1 0.
+        off.height = 480;
+        off.width = Math.round(480 * aspect);
         var octx = off.getContext('2d');
         var savedTime = vid.currentTime;
         var wasMuted = vid.muted;
@@ -9841,7 +9845,7 @@
         // Pass 1 — capture the current frame, tile it across the
         // strip so the user sees the timeline populate immediately.
         var instantUrl = '';
-        try { octx.drawImage(vid, 0, 0, off.width, off.height); instantUrl = off.toDataURL('image/jpeg', 0.88); }
+        try { octx.drawImage(vid, 0, 0, off.width, off.height); instantUrl = off.toDataURL('image/jpeg', 0.95); }
         catch (e) {}
         var slotImgs = [];
         for (var k = 0; k < count; k++) {
@@ -9868,7 +9872,7 @@
               vid.removeEventListener('seeked', onSeeked);
               try {
                 octx.drawImage(vid, 0, 0, off.width, off.height);
-                var u = off.toDataURL('image/jpeg', 0.88);
+                var u = off.toDataURL('image/jpeg', 0.95);
                 if (u && slotImgs[i]) slotImgs[i].src = u;
               } catch (e) {}
               i++; finish();
