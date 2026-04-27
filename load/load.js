@@ -8880,7 +8880,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ca</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17cb</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -11215,6 +11215,58 @@
         container.appendChild(poster);
         return;
       }
+      // IMAGE CLIPS — show the imported image itself across the strip
+      // so the timeline thumb actually represents what's IN the clip,
+      // not the original video's frames.
+      if (clip.kind === 'image' && clip.srcUrl) {
+        var imgT = document.createElement('img');
+        imgT.src = clip.srcUrl;
+        imgT.alt = '';
+        imgT.style.cssText = 'flex:1 1 auto;width:100%;height:100%;object-fit:cover;object-position:center;display:block;';
+        imgT.addEventListener('error', function () {
+          container.innerHTML = '<div style="flex:1;display:flex;align-items:center;justify-content:center;background:#3a3a55;color:#fbbf24;font-size:11px;font-weight:700;">image</div>';
+        });
+        container.appendChild(imgT);
+        return;
+      }
+      // VIDEO CLIPS WITH OWN SOURCE — generate a poster from clip.srcUrl
+      // (one-time, cached on clip._thumbCache) so the timeline shows
+      // the actual content of the new clip rather than the main video.
+      if (clip.kind === 'video' && clip.srcUrl && clip.srcUrl !== video.src) {
+        if (clip._thumbCache) {
+          var c2 = document.createElement('img');
+          c2.src = clip._thumbCache;
+          c2.style.cssText = 'flex:1 1 auto;width:100%;height:100%;object-fit:cover;object-position:center;display:block;';
+          container.appendChild(c2);
+          return;
+        }
+        var ph = document.createElement('div');
+        ph.style.cssText = 'flex:1;display:flex;align-items:center;justify-content:center;background:#1d6fff;color:#fff;font-size:11px;font-weight:700;';
+        ph.textContent = '◰ video';
+        container.appendChild(ph);
+        // Async: extract first frame, cache as data URL, refresh.
+        try {
+          var hv = document.createElement('video');
+          hv.preload = 'auto'; hv.muted = true; hv.playsInline = true; hv.src = clip.srcUrl;
+          hv.addEventListener('loadeddata', function () {
+            try {
+              var w = hv.videoWidth || 320, h = hv.videoHeight || 180;
+              var cv = document.createElement('canvas');
+              cv.width = w; cv.height = h;
+              cv.getContext('2d').drawImage(hv, 0, 0, w, h);
+              clip._thumbCache = cv.toDataURL('image/jpeg', 0.7);
+              container.innerHTML = '';
+              var done = document.createElement('img');
+              done.src = clip._thumbCache;
+              done.style.cssText = 'flex:1 1 auto;width:100%;height:100%;object-fit:cover;object-position:center;display:block;';
+              container.appendChild(done);
+            } catch (_) {}
+          }, { once: true });
+        } catch (_) {}
+        return;
+      }
+      // ORIGINAL CLIPS — sample from the main video's pre-generated
+      // thumbnail strip (fast, in-memory).
       var srcThumbs = document.querySelectorAll('#ve-clip-thumbs img');
       if (!srcThumbs.length || !video.duration) return;
       var first = (clip.srcStart / video.duration) * srcThumbs.length;
@@ -12783,21 +12835,38 @@
             var url = URL.createObjectURL(f);
             var name = f.name || 'media';
             if (/^image\//.test(f.type)) {
-              // Default 5 s image clip per the user's spec.
-              var imgClip = {
-                id: 'c' + Date.now(),
-                kind: 'image',
-                srcUrl: url,
-                name: name,
-                srcStart: 0,
-                srcEnd: 5,
-                fitMode: 'contain'
+              // Use FileReader → data URL (NOT blob URL) for image
+              // clips. Blob URLs can be GC'd or fail silently for
+              // HEIC files from iPad Photos. Data URLs always render.
+              var fr = new FileReader();
+              fr.onload = function () {
+                var dataUrl = fr.result;
+                var imgClip = {
+                  id: 'c' + Date.now(),
+                  kind: 'image',
+                  srcUrl: dataUrl,
+                  name: name,
+                  srcStart: 0,
+                  srcEnd: 5,
+                  fitMode: 'contain'
+                };
+                engine.clips.push(imgClip);
+                try { engine.onClipsChanged(); } catch (_) {}
+                try { renderClipBlocks(); } catch (_) {}
+                try {
+                  var startT = 0;
+                  for (var k = 0; k < engine.clips.length - 1; k++) {
+                    startT += engine.clips[k].srcEnd - engine.clips[k].srcStart;
+                  }
+                  engine.setTime(startT);
+                } catch (_) {}
+                toast('Image clip added (5s). Drag the trim handles to change duration.', false);
               };
-              engine.clips.push(imgClip);
-              try { engine.onClipsChanged(); } catch (_) {}
-              try { renderClipBlocks(); } catch (_) {}
-              try { engine.setTime(engine.t || 0); } catch (_) {}
-              toast('Image clip added — 5s default. Drag the trim handles to change duration.', false);
+              fr.onerror = function () {
+                toast('Could not read that image: ' + (fr.error && fr.error.message || 'unknown'), true);
+              };
+              fr.readAsDataURL(f);
+              try { URL.revokeObjectURL(url); } catch (_) {}
               pkM2.remove();
               return;
             }
@@ -12822,8 +12891,15 @@
                 engine.clips.push(vClip);
                 try { engine.onClipsChanged(); } catch (_) {}
                 try { renderClipBlocks(); } catch (_) {}
-                try { engine.setTime(engine.t || 0); } catch (_) {}
-                toast('Video clip added — ' + dur.toFixed(2) + 's, appended to timeline.', false);
+                // Same snap-to-new-clip-start as image branch.
+                try {
+                  var startV = 0;
+                  for (var kk = 0; kk < engine.clips.length - 1; kk++) {
+                    startV += engine.clips[kk].srcEnd - engine.clips[kk].srcStart;
+                  }
+                  engine.setTime(startV);
+                } catch (_) {}
+                toast('Video clip added at ' + (engine.clips.length) + ' (' + dur.toFixed(2) + 's). Tap any clip to preview it.', false);
               }, { once: true });
               probe2.addEventListener('error', function () {
                 toast('Could not read that video file.', true);
