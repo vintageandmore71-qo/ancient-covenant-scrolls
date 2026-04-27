@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17s</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17t</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -9099,8 +9099,13 @@
     // the <video>'s 4fps timeupdate event.
     function updatePlayheadFromEngine(t) {
       var d = engine.duration() || 1;
-      var pct = (t / d) * 100;
-      if (playhead) playhead.style.left = pct + '%';
+      // Pixel-precise positioning: t × PX_PER_SECOND aligns the
+      // playhead exactly with the clip widths above (and the
+      // waveform / ruler below, which use the same scale). Stays
+      // aligned even when the placeholder's 5s patches up to the
+      // real duration.
+      var leftPx = t * PX_PER_SECOND;
+      if (playhead) playhead.style.left = leftPx + 'px';
       if (timeLbl) timeLbl.textContent = fmtTime(t) + ' / ' + fmtTime(d);
     }
     engine.onTick = updatePlayheadFromEngine;
@@ -9170,6 +9175,25 @@
         if (engine.clips.length) engine.duplicateAt(engine.clips.length - 1);
       });
       stripEl.appendChild(bigAdd);
+
+      // Sync waveform-track width to match the sum of clip widths so
+      // the amplitude bars align under the clips they came from.
+      var totalClipPx = 0;
+      engine.clips.forEach(function (c) {
+        totalClipPx += Math.max(60, (c.srcEnd - c.srcStart) * PX_PER_SECOND);
+      });
+      var wfEl = document.getElementById('ve-waveform');
+      if (wfEl && totalClipPx > 0) {
+        wfEl.style.width = totalClipPx + 'px';
+        wfEl.style.flex = '0 0 auto';
+      }
+      // Same for the time ruler so its tick positions line up with
+      // clip boundaries above and waveform below.
+      var rulerEl = document.getElementById('ve-time-ruler');
+      if (rulerEl && totalClipPx > 0) {
+        rulerEl.style.width = totalClipPx + 'px';
+        rulerEl.style.flex = '0 0 auto';
+      }
 
       // Wire per-clip click → select
       Array.prototype.forEach.call(stripEl.querySelectorAll('.timeline-clip'), function (b) {
@@ -9557,6 +9581,11 @@
       }
       engine.t = 0;
       engine.onClipsChanged();
+      // Force a setTime(0) after the duration patch so the playhead's
+      // percent position recalculates against the new (real) duration
+      // — without this the playhead would stay at the placeholder's
+      // 5s baseline until the user interacted again.
+      engine.setTime(0);
       refreshTrimDisplay();
       drawOverlay();
       // Generate frame thumbnails for the timeline strip — VN-style.
@@ -9688,8 +9717,10 @@
       requestAnimationFrame(function () {
         scrubFrameQueued = false;
         if (scrubPendingX == null) return;
-        var pct = Math.max(0, Math.min(1, scrubPendingX / rect.width));
-        var t = pct * engine.duration();
+        // Pixel-time math: cursor X / PX_PER_SECOND = timeline t.
+        // Matches the scale used for clip widths + playhead so the
+        // visual playhead lands exactly under the cursor.
+        var t = Math.max(0, Math.min(dur, scrubPendingX / PX_PER_SECOND));
         if (snapEnabled) t = Math.round(t / SNAP_STEP) * SNAP_STEP;
         engine.setTime(t, true); // fastSeek path
       });
