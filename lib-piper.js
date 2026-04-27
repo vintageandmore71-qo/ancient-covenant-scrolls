@@ -44,15 +44,39 @@
     return audioCtx;
   }
 
+  // Version of onnxruntime-web we load + configure. piper-tts-web
+  // depends on this transitively; we pin a known-good build that
+  // jsDelivr serves the WASM blobs for.
+  var ORT_VERSION = '1.17.1';
+  var ORT_WASM_BASE = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@' + ORT_VERSION + '/dist/';
+
   async function ensureLib() {
     if (tts) return tts;
     if (!loadPromise) {
       loadPromise = (async function () {
-        // Append a cache-buster after uninstall so the runtime doesn't
-        // hand us back a stale module instance whose internal index
-        // still points at OPFS files we already deleted. esm.sh
-        // ignores unknown query params and serves the same content.
-        var url = TTS_LIB_URL + (libBust > 0 ? '?_bust=' + libBust : '');
+        // CRITICAL: configure onnxruntime-web BEFORE piper-tts-web
+        // initialises an InferenceSession. esm.sh resolves the JS
+        // but fails to serve the matching .wasm files at the URLs
+        // ort expects, which is what produced the user-visible
+        // "no available backend found / [wasm] TypeError: Importing
+        // a module script failed" error in v17bu's diagnostic.
+        try {
+          var ort = await import('https://esm.sh/onnxruntime-web@' + ORT_VERSION);
+          if (ort && ort.env && ort.env.wasm) {
+            ort.env.wasm.wasmPaths = ORT_WASM_BASE;
+            // SharedArrayBuffer/cross-origin-isolation isn't
+            // available on github.io, so don't ask for threads.
+            ort.env.wasm.numThreads = 1;
+            ort.env.wasm.simd = true;
+            ort.env.wasm.proxy = false;
+          }
+        } catch (e) {
+          console.warn('[Piper] onnxruntime-web pre-config failed:', e);
+        }
+        // Force piper-tts-web to use the SAME pinned ort version we
+        // just configured (esm.sh dedupes when versions match).
+        var url = TTS_LIB_URL + '?deps=onnxruntime-web@' + ORT_VERSION;
+        if (libBust > 0) url += '&_bust=' + libBust;
         tts = await import(url);
         return tts;
       })();
