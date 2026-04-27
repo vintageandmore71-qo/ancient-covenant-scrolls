@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17aj</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ak</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -8883,8 +8883,13 @@
       '#__loadVideoEdit .video-track{height:90px !important;}' +
       '#__loadVideoEdit .timeline-clip{overflow:hidden !important;height:84px !important;}' +
       '#__loadVideoEdit .empty-slot,#__loadVideoEdit .big-add{height:84px !important;}' +
-      '#__loadVideoEdit .thumbnail-strip{width:100% !important;height:100% !important;display:flex !important;align-items:stretch !important;overflow:hidden !important;min-width:0 !important;}' +
-      '#__loadVideoEdit .thumbnail-strip > *,#__loadVideoEdit .thumbnail-strip img,#__loadVideoEdit .thumbnail-frame{flex:1 1 0 !important;width:0 !important;min-width:0 !important;height:100% !important;object-fit:cover !important;object-position:center !important;display:block !important;border-right:1px solid rgba(255,255,255,0.15) !important;image-rendering:auto !important;-webkit-image-rendering:auto !important;}' +
+      // Natural-aspect thumbnails (Option 1, VN-like). Each thumb keeps
+      // its source aspect ratio at the clip's height — no horizontal
+      // stretch, no crop. The strip scrolls horizontally if its
+      // natural total width exceeds the clip width.
+      '#__loadVideoEdit .thumbnail-strip{width:100% !important;height:100% !important;display:flex !important;align-items:stretch !important;overflow-x:auto !important;overflow-y:hidden !important;-webkit-overflow-scrolling:touch !important;scrollbar-width:none !important;}' +
+      '#__loadVideoEdit .thumbnail-strip::-webkit-scrollbar{display:none !important;}' +
+      '#__loadVideoEdit .thumbnail-strip > *,#__loadVideoEdit .thumbnail-strip img,#__loadVideoEdit .thumbnail-frame{flex:0 0 auto !important;width:auto !important;height:100% !important;object-fit:contain !important;object-position:center !important;display:block !important;border-right:1px solid rgba(255,255,255,0.15) !important;image-rendering:auto !important;-webkit-image-rendering:auto !important;}' +
       '#__loadVideoEdit .thumbnail-strip img:last-child,#__loadVideoEdit .thumbnail-frame:last-child{border-right:none !important;}' +
       '#__loadVideoEdit .ve-context::-webkit-scrollbar{display:none;}' +
       '#__loadVideoEdit .ve-context-done .ve-act-icon{background:#1d6fff;color:#fff;border-color:#1d6fff;}' +
