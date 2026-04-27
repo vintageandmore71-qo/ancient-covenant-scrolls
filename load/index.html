@@ -1824,7 +1824,22 @@ if (window.pdfjsLib) {
 <script src="load.js"></script>
 <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(function () {});
+  // Register with updateViaCache:'none' AND call .update() on each
+  // page load so a new sw.js is fetched every time. iOS Safari
+  // sometimes ignores updateViaCache, so the explicit update() is
+  // a belt-and-braces guarantee. When the new SW activates and
+  // claims clients, postMessage('reload') triggers a soft reload
+  // so the page picks up the just-installed code.
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
+    .then(function (reg) { try { reg.update(); } catch (_) {} })
+    .catch(function () {});
+  navigator.serviceWorker.addEventListener('controllerchange', function () {
+    // A new SW just took over. The current page is still running old
+    // code, so reload to pick up the new build.
+    if (window.__loadJustReloaded) return;
+    window.__loadJustReloaded = true;
+    location.reload();
+  });
 }
 </script>
 </body>

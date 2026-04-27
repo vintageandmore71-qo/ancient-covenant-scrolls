@@ -9,7 +9,7 @@
 // fetched or transmitted. Imported apps live in IndexedDB on the
 // user's device and are never sent anywhere.
 
-var CACHE = 'load-v17bz';
+var CACHE = 'load-v17ca';
 
 var SHELL = [
   './',
@@ -70,8 +70,27 @@ self.addEventListener('fetch', function (e) {
   var path = url.pathname;
   var isCode = /\/(load\.js|load\.css|index\.html|sw\.js)(\?|$)/.test(path) || path.endsWith('/');
   if (isCode) {
+    // Append a cache-buster query string. iOS Safari has a known bug
+    // where { cache: 'no-store' } alone is silently ignored, so the
+    // device serves stale load.js / index.html from the HTTP cache
+    // even after the SW + GitHub Pages have shipped a new version.
+    // A unique query param every fetch closes that loophole — the
+    // URL no longer matches any cached entry, so the browser MUST
+    // hit the network.
+    var bust;
+    try {
+      bust = new URL(req.url);
+      bust.searchParams.set('__v', Date.now());
+      bust = bust.toString();
+    } catch (_) { bust = req.url; }
+    var fresh = new Request(bust, {
+      method: 'GET',
+      headers: req.headers,
+      credentials: req.credentials,
+      cache: 'no-store'
+    });
     e.respondWith(
-      fetch(req, { cache: 'no-store' }).catch(function () {
+      fetch(fresh).catch(function () {
         // Only fall back to cache when truly offline.
         return caches.match(req).then(function (r) { return r || caches.match('index.html'); });
       })
