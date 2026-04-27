@@ -8880,7 +8880,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bx</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17by</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -10563,6 +10563,61 @@
         var r = engine.resolve(t);
         if (r && r.clip) applyKeyframes(r.clip, t - (r.clipStart || 0));
       } catch (_) {}
+      // Show / hide sticker overlays based on the playhead. A sticker
+      // is "active" only while engine.t sits inside its [t0, t0+dur]
+      // window — outside that range the DOM element is removed so it
+      // doesn't bleed into other parts of the timeline. This is the
+      // VN-style behaviour: the sticker plays where the user drops it
+      // on the timeline, not as a permanent overlay.
+      try { renderStickerOverlaysAt(t); } catch (_) {}
+    }
+    function renderStickerOverlaysAt(t) {
+      var stage = document.getElementById('ve-stage');
+      if (!stage) return;
+      var items = (engine && engine.tracks && engine.tracks.sticker) || [];
+      var seen = {};
+      for (var i = 0; i < items.length; i++) {
+        var it = items[i];
+        var t0 = +it.t0 || 0, dur = +it.dur || 0;
+        var active = (t >= t0 && t <= t0 + dur);
+        var stickerId = 've-stk-' + (it.id || i);
+        seen[stickerId] = true;
+        var el = stage.querySelector('[data-sticker-id="' + stickerId + '"]');
+        if (active) {
+          if (!el) {
+            if (it.kind === 'video') {
+              el = document.createElement('video');
+              el.src = it.src; el.autoplay = true; el.loop = true;
+              el.muted = true; el.playsInline = true;
+            } else {
+              el = document.createElement('img');
+              el.src = it.src;
+            }
+            el.className = 've-pip-overlay ve-sticker-overlay';
+            el.dataset.stickerId = stickerId;
+            // Saved per-item position so dragging is sticky; fall back
+            // to a sensible default top-right placement.
+            var top = (it.top != null) ? it.top : '20px';
+            var left = (it.left != null) ? it.left : '';
+            var right = (it.left == null) ? '20px' : '';
+            var width = (it.width != null) ? it.width : '30%';
+            el.style.cssText =
+              'position:absolute;top:' + top + ';' +
+              (right ? 'right:' + right + ';' : '') +
+              (left ? 'left:' + left + ';' : '') +
+              'width:' + width + ';max-height:50%;border:2px solid #fbbf24;' +
+              'border-radius:6px;z-index:5;pointer-events:auto;cursor:move;';
+            stage.appendChild(el);
+          }
+        } else if (el) {
+          if (el.tagName === 'VIDEO') { try { el.pause(); } catch (_) {} }
+          el.remove();
+        }
+      }
+      // Remove any orphan sticker DOM left over from a deleted item.
+      Array.prototype.forEach.call(stage.querySelectorAll('.ve-sticker-overlay'), function (n) {
+        if (!seen[n.dataset.stickerId]) n.remove();
+      });
     }
     var __vePendingOnTick = updatePlayheadFromEngine;
     // Re-render the clip strip whenever the engine's clips array
@@ -12422,30 +12477,38 @@
           pk.addEventListener('change', function (ev) {
             var f = ev.target.files && ev.target.files[0];
             if (!f) { pk.remove(); return; }
+            // Both video AND image picks become STICKERS on the
+            // sticker track — time-bound to wherever the playhead
+            // sits when added. We never replace the main video, never
+            // create a permanent overlay. drawOverlay's per-tick
+            // sticker renderer mounts/unmounts the DOM element based
+            // on whether engine.t falls inside [t0, t0+dur].
             if (/^video\//.test(f.type)) {
               try {
-                var url = URL.createObjectURL(f);
-                video.src = url;
-                video.addEventListener('loadedmetadata', function once() {
-                  video.removeEventListener('loadedmetadata', once);
-                  try { engine.clips.push({ id: 'c' + engine.clips.length, srcStart: 0, srcEnd: video.duration }); } catch (_) {}
-                  try { renderClipBlocks(); } catch (_) {}
-                  try { generateClipThumbnails(video, 5); } catch (_) {}
-                  toast('Clip added — ' + (video.duration || 0).toFixed(2) + 's.', false);
+                var blobUrl = URL.createObjectURL(f);
+                // Probe duration so the sticker block on the timeline
+                // matches the video's actual length (capped to the
+                // remaining timeline).
+                var probe = document.createElement('video');
+                probe.preload = 'metadata';
+                probe.src = blobUrl;
+                probe.addEventListener('loadedmetadata', function () {
+                  var avail = Math.max(0.5, (engine.duration() || 0) - (engine.t || 0));
+                  var dur = Math.min(probe.duration || 3, avail || probe.duration || 3);
+                  addTrackItem('sticker', { src: blobUrl, kind: 'video', dur: dur });
+                  toast('Video sticker added on timeline at ' + (engine.t || 0).toFixed(2) + 's. Drag to reposition.', false);
+                  try { renderStickerOverlaysAt(engine.t || 0); } catch (_) {}
                 }, { once: true });
+                probe.addEventListener('error', function () {
+                  toast('Could not read that video. Try MP4.', true);
+                });
               } catch (err) { toast('Could not load that video: ' + err.message, true); }
             } else {
               var fr2 = new FileReader();
               fr2.onload = function () {
-                var stage = document.getElementById('ve-stage');
-                if (!stage) return;
-                var pip = document.createElement('img');
-                pip.src = fr2.result;
-                pip.className = 've-pip-overlay';
-                pip.style.cssText = 'position:absolute;top:20px;right:20px;width:30%;max-height:30%;border:2px solid #fbbf24;border-radius:6px;z-index:5;pointer-events:auto;cursor:move;';
-                stage.appendChild(pip);
                 addTrackItem('sticker', { src: fr2.result, kind: 'image', dur: 3 });
-                toast('Sticker added — visible on preview + draggable on timeline.', false);
+                toast('Sticker added on timeline at ' + (engine.t || 0).toFixed(2) + 's. It plays inside that 3-second block.', false);
+                try { renderStickerOverlaysAt(engine.t || 0); } catch (_) {}
               };
               fr2.readAsDataURL(f);
             }
