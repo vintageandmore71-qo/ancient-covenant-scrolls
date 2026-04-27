@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17al</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17am</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -8918,10 +8918,15 @@
       '#__loadVideoEdit .ve-time-ruler .tick{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,0.18);}' +
       '#__loadVideoEdit .ve-time-ruler .tick.major{background:rgba(255,255,255,0.45);}' +
       '#__loadVideoEdit .ve-time-ruler .tick-label{position:absolute;top:4px;color:#cfcfdc;font-weight:600;transform:translateX(-50%);}' +
-      '#__loadVideoEdit .ve-action{flex:0 0 auto;background:transparent;border:none;color:#cfcfdc;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px;cursor:pointer;min-width:62px;}' +
-      '#__loadVideoEdit .ve-act-icon{font-size:18px;width:32px;height:32px;border-radius:50%;background:transparent;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,0.85);color:#fff;}' +
-      '#__loadVideoEdit .ve-act-lbl{font-size:11px;color:#cfcfdc;text-align:center;line-height:1.2;}' +
+      // VN-tight bottom toolbar — smaller icons, smaller text, tighter
+      // gaps. Whole bar reads as a single sleek strip instead of fat
+      // chunky tiles. Outline icon + caption stack matches VN exactly.
+      '#__loadVideoEdit .ve-action{flex:0 0 auto;background:transparent;border:none;color:#cfcfdc;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 2px;cursor:pointer;min-width:46px;font-family:inherit;}' +
+      '#__loadVideoEdit .ve-action:active{transform:scale(0.94);}' +
+      '#__loadVideoEdit .ve-act-icon{font-size:15px;width:26px;height:26px;border-radius:50%;background:transparent;display:flex;align-items:center;justify-content:center;border:1.4px solid rgba(255,255,255,0.85);color:#fff;line-height:1;}' +
+      '#__loadVideoEdit .ve-act-lbl{font-size:9.5px;color:#cfcfdc;text-align:center;line-height:1.15;letter-spacing:0.01em;white-space:nowrap;}' +
       '#__loadVideoEdit .ve-action.on .ve-act-icon{background:#fbbf24;color:#1a1a26;border-color:#fbbf24;}' +
+      '#__loadVideoEdit #ve-actions{gap:6px !important;padding:6px 8px max(6px,env(safe-area-inset-bottom)) !important;}' +
       '#__loadVideoEdit .ve-action-sep{flex:0 0 auto;width:1px;height:36px;background:#2a2a40;margin:0 4px;display:inline-block;}' +
       // Panel sits above the bottom action toolbar, with safe-area
       // inset so iPad's home indicator doesn't crop the close button.
@@ -9070,14 +9075,13 @@
       // toolbars from covering the panel's controls / close button.
       wrap.classList.toggle('ve-panel-open', !!id);
     }
-    Array.prototype.forEach.call(wrap.querySelectorAll('[data-add]'), function (btn) {
-      btn.addEventListener('click', function () {
-        var k = btn.getAttribute('data-add');
-        if (k === 'text') showPanel('ve-text-panel');
-        else if (k === 'music') showPanel('ve-music-panel');
-        else if (k === 'sticker') toast('Stickers / PiP coming in v2.', false);
-        else if (k === 'audio-orig') toast('Original audio is on by default. Tap "Mute original" in the music panel to silence.', false);
-      });
+    // Old data-add handler removed in v17am — the new handler later
+    // in this file (around line ~10590) actually opens pickers, drops
+    // clips, and toggles original-audio mute. Keeping both fired
+    // duplicate toasts and let the older one shadow the newer one's
+    // visual feedback.
+    Array.prototype.forEach.call(wrap.querySelectorAll('[data-add-noop]'), function (btn) {
+      btn.addEventListener('click', function () {});
     });
     Array.prototype.forEach.call(wrap.querySelectorAll('[data-close-panel]'), function (b) {
       b.addEventListener('click', function () { showPanel(null); });
@@ -9192,9 +9196,41 @@
     Array.prototype.forEach.call(wrap.querySelectorAll('[data-action]'), function (btn) {
       btn.addEventListener('click', function () {
         var act = btn.getAttribute('data-action');
-        if (act === 'split' || act === 'trim') {
-          showPanel(null);
-          toast('Drag the yellow handles on the video clip to ' + (act === 'split' ? 'split' : 'trim') + '.', false);
+        if (act === 'split') {
+          // Real bisect via the engine — same as the clip-context Split.
+          var ok = engine.splitAtCursor();
+          if (ok) {
+            toast('Clip split at ' + engine.t.toFixed(2) + 's. Now ' + engine.clips.length + ' clips.', false);
+            renderClipBlocks();
+          } else {
+            toast('Move the playhead away from the clip edge first.', true);
+          }
+        }
+        else if (act === 'trim') {
+          // Scroll the timeline into view + flash the trim handles so
+          // the user sees what to drag. No more silent close.
+          var stripEl = document.getElementById('ve-clip-strip');
+          if (stripEl) stripEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          var handles = document.querySelectorAll('#__loadVideoEdit .trim-handle');
+          handles.forEach(function (h) {
+            h.style.transition = 'none';
+            h.style.boxShadow = '0 0 18px 4px #ffcc1a';
+            setTimeout(function () { h.style.transition = 'box-shadow 0.4s ease-out'; h.style.boxShadow = ''; }, 600);
+          });
+          toast('Drag the yellow handles on the clip to trim.', false);
+        }
+        else if (act === 'cutout') {
+          // Real-ish cutout: cycle a high-contrast / threshold filter
+          // that visually isolates the subject. Not ML-quality but
+          // gives the user immediate visible feedback.
+          var on = btn.classList.toggle('on');
+          if (on) {
+            video.style.filter = 'contrast(1.6) saturate(1.8) brightness(1.05)';
+            toast('Cutout preview on (high-contrast). Re-tap to disable.', false);
+          } else {
+            video.style.filter = '';
+            toast('Cutout preview off.', false);
+          }
         }
         else if (act === 'volume')   showPanel('ve-music-panel');
         else if (act === 'mirror')   { fx.mirror = !fx.mirror; applyFx(); btn.classList.toggle('on', fx.mirror); toast('Mirror ' + (fx.mirror ? 'on' : 'off') + '.', false); }
@@ -10635,8 +10671,23 @@
           });
           pk.click();
         } else if (kind === 'audio-orig') {
+          // Toggle original-audio mute. Update the hidden checkbox
+          // (existing export pipeline reads it), the <video> element,
+          // AND the button visual so the user gets immediate feedback.
           var muteEl = document.getElementById('ve-mute-orig');
-          if (muteEl) { muteEl.checked = !muteEl.checked; video.muted = muteEl.checked; toast('Original audio ' + (muteEl.checked ? 'muted' : 'on') + '.', false); }
+          var newMuted;
+          if (muteEl) {
+            muteEl.checked = !muteEl.checked;
+            newMuted = muteEl.checked;
+          } else {
+            newMuted = !video.muted;
+          }
+          try { video.muted = newMuted; } catch (_) {}
+          btn.classList.toggle('on', newMuted);
+          btn.style.background = newMuted ? '#fbbf24' : '#1e1e2a';
+          btn.style.color = newMuted ? '#1a1a26' : '#fff';
+          btn.innerHTML = newMuted ? '🔇' : '🔊';
+          toast('Original audio ' + (newMuted ? 'muted' : 'on') + '.', false);
         }
       });
     });
