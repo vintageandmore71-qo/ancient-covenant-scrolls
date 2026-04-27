@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ah</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ai</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -8817,7 +8817,9 @@
       '#__loadVideoEdit .clip-add{position:absolute;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;background:#fff;color:#101018;border:2px solid #101018;font-size:14px;font-weight:900;cursor:pointer;line-height:1;padding:0;z-index:7;}' +
       '#__loadVideoEdit .clip-add.left{left:-12px;}' +
       '#__loadVideoEdit .clip-add.right{right:-12px;}' +
-      '#__loadVideoEdit .empty-slot{flex:0 0 86px;height:56px;border:1px dashed #2a2a40;border-radius:6px;background:#0c0c14;cursor:pointer;}' +
+      // Empty slot width matches a thumbnail frame's width for consistent
+      // spacing alongside the populated clip strip.
+      '#__loadVideoEdit .empty-slot{flex:0 0 100px;height:56px;border:1px dashed #2a2a40;border-radius:6px;background:#0c0c14;cursor:pointer;}' +
       '#__loadVideoEdit .empty-slot:hover{background:#15152a;}' +
       '#__loadVideoEdit .big-add{flex:0 0 44px;height:56px;background:#1e1e2a;border:none;border-radius:8px;color:#cfcfdc;font-size:22px;font-weight:900;cursor:pointer;font-family:inherit;}' +
       '#__loadVideoEdit .big-add:hover{background:#2a2a3a;color:#ffcc1a;}' +
