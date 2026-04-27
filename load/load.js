@@ -3887,6 +3887,9 @@
       }
       // Otherwise show home by default
       show('home-screen');
+      // First-launch guided tour. Only fires if the user hasn't seen
+      // it before; safe to call every boot.
+      safe('maybeAutoStartTour', maybeAutoStartTour);
     } catch (e) {
       alert('Failed to start Load: ' + (e && e.message ? e.message : e));
     }
@@ -4153,9 +4156,280 @@
     $('help-close').addEventListener('click', function () {
       $('help-modal').classList.remove('on');
     });
+    var replay = $('help-replay-tour');
+    if (replay) replay.addEventListener('click', function () {
+      $('help-modal').classList.remove('on');
+      setTimeout(function () { startGuidedTour({ auto: false }); }, 150);
+    });
   }
   function openHelp() {
     $('help-modal').classList.add('on');
+  }
+
+  /* ---------- Guided tour ----------
+   * One-screen-at-a-time intro. Each step shows a card with one short
+   * sentence (≤ 15 words), a soft yellow ring around the real button it
+   * is talking about, optional voice narration, and Back / Next / Skip
+   * controls. User controls pace — nothing auto-advances. Auto-runs
+   * on first launch (LS flag), re-runnable from Help.
+   */
+  var LS_TOUR_SEEN = 'load_tour_seen_v2';
+  var LS_TOUR_VOICE = 'load_tour_voice_v1';
+  function startGuidedTour(opts) {
+    opts = opts || {};
+    // Always start from Home so the anchor selectors line up.
+    try {
+      var homeBtn = document.querySelector('[data-nav="home"]');
+      if (homeBtn && typeof homeBtn.click === 'function') homeBtn.click();
+    } catch (_) {}
+    // Tear down any leftover tour overlay
+    var prev = document.getElementById('load-tour'); if (prev) prev.remove();
+
+    var STEPS = [
+      { anchor: null,
+        title: 'Welcome to Load',
+        body: 'I\'ll walk you through the basics in under a minute. Tap Next to begin.' },
+      { anchor: '#home-get-started',
+        title: 'Bring in a file',
+        body: 'Tap Get Started to add anything from your iPad. PDFs, books, videos, web pages — they all work.' },
+      { anchor: '#home-create',
+        title: 'Make something new',
+        body: 'Or tap Create New to start from a template and write your own page.' },
+      { anchor: '[data-nav="library"]',
+        title: 'Your library',
+        body: 'Everything you add lives here. Tap a tile to open it.' },
+      { anchor: '.home-workspace',
+        title: 'Workspace shortcuts',
+        body: 'These tiles open the most-used tools. Each one tells you what it does.' },
+      { anchor: '[data-tool="helper"]',
+        title: 'Load AI helper',
+        body: 'Ask anything in plain language. Works offline. Free with no sign-up.' },
+      { anchor: '[data-tool="audio"]',
+        title: 'Listen instead of read',
+        body: 'Tap to hear any page read out loud. Change the speed if it feels too fast.' },
+      { anchor: '[data-tool="theme"]',
+        title: 'Make it easy on your eyes',
+        body: 'Switch colors and font from the top bar. Pick what feels right for you.' },
+      { anchor: '[data-tool="help"]',
+        title: 'Help is one tap away',
+        body: 'The ? button has the full guide. You can replay this tour from there.' },
+      { anchor: null,
+        title: 'You\'re ready',
+        body: 'Have fun making things. Come back to Help any time.' }
+    ];
+
+    var idx = 0;
+    var voiceOn = (function () {
+      var raw = null;
+      try { raw = localStorage.getItem(LS_TOUR_VOICE); } catch (_) {}
+      // Default voice ON for first-run, OFF if user previously turned it off.
+      return raw === null ? true : raw === '1';
+    })();
+
+    var root = document.createElement('div');
+    root.id = 'load-tour';
+    root.innerHTML =
+      '<div class="lt-scrim"></div>' +
+      '<div class="lt-ring" aria-hidden="true"></div>' +
+      '<div class="lt-card" role="dialog" aria-modal="true" aria-labelledby="lt-title">' +
+        '<div class="lt-dots"></div>' +
+        '<h2 id="lt-title" class="lt-title"></h2>' +
+        '<p class="lt-body"></p>' +
+        '<div class="lt-controls">' +
+          '<button class="lt-btn lt-skip" type="button">Skip</button>' +
+          '<button class="lt-btn lt-voice" type="button" aria-pressed="false" title="Voice narration">🔊 <span class="lt-voice-lbl">Voice</span></button>' +
+          '<div class="lt-spacer"></div>' +
+          '<button class="lt-btn lt-back" type="button">Back</button>' +
+          '<button class="lt-btn lt-next lt-primary" type="button">Next</button>' +
+        '</div>' +
+      '</div>';
+    if (!document.getElementById('load-tour-style')) {
+      var st = document.createElement('style');
+      st.id = 'load-tour-style';
+      st.textContent =
+        '#load-tour{position:fixed;inset:0;z-index:9000;font-family:inherit;}' +
+        '#load-tour .lt-scrim{position:absolute;inset:0;background:rgba(10,10,20,0.78);backdrop-filter:blur(2px);transition:opacity .25s;}' +
+        '#load-tour .lt-ring{position:absolute;border:3px solid #fbbf24;border-radius:14px;box-shadow:0 0 0 9999px rgba(10,10,20,0.78),0 0 22px 4px rgba(251,191,36,0.55);transition:all .35s cubic-bezier(.2,.7,.2,1);pointer-events:none;display:none;}' +
+        '#load-tour .lt-card{position:absolute;background:#1a1a26;color:#fff;border-radius:18px;padding:22px 22px 18px;max-width:420px;width:calc(100% - 32px);box-shadow:0 18px 50px rgba(0,0,0,0.55);border:1px solid #2a2a40;transition:top .35s cubic-bezier(.2,.7,.2,1),left .35s cubic-bezier(.2,.7,.2,1);}' +
+        '#load-tour .lt-dots{display:flex;gap:6px;margin-bottom:12px;}' +
+        '#load-tour .lt-dots span{width:8px;height:8px;border-radius:50%;background:#3a3a55;transition:background .2s,transform .2s;}' +
+        '#load-tour .lt-dots span.on{background:#fbbf24;transform:scale(1.25);}' +
+        '#load-tour .lt-title{margin:0 0 8px;font-size:22px;font-weight:800;line-height:1.2;letter-spacing:-0.01em;}' +
+        '#load-tour .lt-body{margin:0 0 18px;font-size:17px;line-height:1.55;color:#dcdce8;}' +
+        '#load-tour .lt-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}' +
+        '#load-tour .lt-spacer{flex:1;}' +
+        '#load-tour .lt-btn{background:#2a2a40;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;min-height:44px;}' +
+        '#load-tour .lt-btn:active{transform:scale(0.97);}' +
+        '#load-tour .lt-skip{background:transparent;color:#a8a8c4;font-weight:600;padding-left:6px;padding-right:6px;}' +
+        '#load-tour .lt-voice{background:#2a2a40;color:#fbbf24;font-size:14px;}' +
+        '#load-tour .lt-voice[aria-pressed="false"]{color:#7a7a8c;}' +
+        '#load-tour .lt-back:disabled{opacity:0.35;cursor:not-allowed;}' +
+        '#load-tour .lt-primary{background:#fbbf24;color:#1a1a26;font-weight:800;}' +
+        '#load-tour .lt-primary:hover{background:#fcc847;}' +
+        '@media(max-width:520px){#load-tour .lt-title{font-size:20px}#load-tour .lt-body{font-size:16px}}';
+      document.head.appendChild(st);
+    }
+    document.body.appendChild(root);
+
+    var ring = root.querySelector('.lt-ring');
+    var card = root.querySelector('.lt-card');
+    var titleEl = root.querySelector('.lt-title');
+    var bodyEl = root.querySelector('.lt-body');
+    var dotsEl = root.querySelector('.lt-dots');
+    var backBtn = root.querySelector('.lt-back');
+    var nextBtn = root.querySelector('.lt-next');
+    var skipBtn = root.querySelector('.lt-skip');
+    var voiceBtn = root.querySelector('.lt-voice');
+
+    // Build the dots once
+    STEPS.forEach(function () {
+      var d = document.createElement('span');
+      dotsEl.appendChild(d);
+    });
+
+    function speak(text) {
+      try {
+        if (!voiceOn) return;
+        if (!('speechSynthesis' in window)) return;
+        speechSynthesis.cancel();
+        var u = new SpeechSynthesisUtterance(text);
+        u.rate = 0.95; u.pitch = 1; u.volume = 1;
+        speechSynthesis.speak(u);
+      } catch (_) {}
+    }
+    function stopSpeak() {
+      try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (_) {}
+    }
+    function placeRing(rect) {
+      if (!rect) { ring.style.display = 'none'; return; }
+      var pad = 8;
+      ring.style.display = 'block';
+      ring.style.top = (rect.top - pad) + 'px';
+      ring.style.left = (rect.left - pad) + 'px';
+      ring.style.width = (rect.width + pad * 2) + 'px';
+      ring.style.height = (rect.height + pad * 2) + 'px';
+    }
+    function placeCard(rect) {
+      var vw = window.innerWidth, vh = window.innerHeight;
+      var cardRect = card.getBoundingClientRect();
+      var cw = cardRect.width || Math.min(420, vw - 32);
+      var ch = cardRect.height || 220;
+      var top, left;
+      if (!rect) {
+        top = Math.max(20, (vh - ch) / 2);
+        left = Math.max(16, (vw - cw) / 2);
+      } else {
+        var spaceBelow = vh - rect.bottom;
+        var spaceAbove = rect.top;
+        if (spaceBelow >= ch + 24) {
+          top = rect.bottom + 16;
+        } else if (spaceAbove >= ch + 24) {
+          top = rect.top - ch - 16;
+        } else {
+          // No room above or below — center vertically
+          top = Math.max(16, (vh - ch) / 2);
+        }
+        left = Math.min(Math.max(16, rect.left + rect.width / 2 - cw / 2), vw - cw - 16);
+      }
+      card.style.top = Math.round(top) + 'px';
+      card.style.left = Math.round(left) + 'px';
+    }
+    function renderDots() {
+      Array.prototype.forEach.call(dotsEl.children, function (d, i) {
+        d.classList.toggle('on', i === idx);
+      });
+    }
+    function renderVoiceBtn() {
+      voiceBtn.setAttribute('aria-pressed', voiceOn ? 'true' : 'false');
+      voiceBtn.firstChild.nodeValue = voiceOn ? '🔊 ' : '🔇 ';
+    }
+    function renderStep() {
+      var step = STEPS[idx];
+      titleEl.textContent = step.title;
+      bodyEl.textContent = step.body;
+      backBtn.disabled = idx === 0;
+      nextBtn.textContent = idx === STEPS.length - 1 ? 'Done' : 'Next';
+      renderDots();
+      // Find and highlight the anchor (might fail if user is on a
+      // different screen — that's fine, we just centre the card).
+      var rect = null;
+      if (step.anchor) {
+        var el = null;
+        try { el = document.querySelector(step.anchor); } catch (_) {}
+        if (el) {
+          try { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (_) {}
+          rect = el.getBoundingClientRect();
+          if (rect.width === 0 && rect.height === 0) rect = null;
+        }
+      }
+      placeRing(rect);
+      // Wait one frame so card has a real size before placing it.
+      requestAnimationFrame(function () { placeCard(rect); });
+      speak(step.title + '. ' + step.body);
+    }
+    function endTour(seen) {
+      stopSpeak();
+      try { if (seen) localStorage.setItem(LS_TOUR_SEEN, '1'); } catch (_) {}
+      try { localStorage.setItem(LS_TOUR_VOICE, voiceOn ? '1' : '0'); } catch (_) {}
+      try { root.remove(); } catch (_) {}
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('orientationchange', onResize);
+    }
+    function onResize() {
+      // Re-render the current step so anchor + card positions track
+      // rotation / window size changes.
+      var step = STEPS[idx];
+      var rect = null;
+      if (step.anchor) {
+        var el = null;
+        try { el = document.querySelector(step.anchor); } catch (_) {}
+        if (el) {
+          rect = el.getBoundingClientRect();
+          if (rect.width === 0 && rect.height === 0) rect = null;
+        }
+      }
+      placeRing(rect);
+      placeCard(rect);
+    }
+    nextBtn.addEventListener('click', function () {
+      stopSpeak();
+      if (idx >= STEPS.length - 1) { endTour(true); return; }
+      idx++; renderStep();
+    });
+    backBtn.addEventListener('click', function () {
+      if (idx === 0) return;
+      stopSpeak(); idx--; renderStep();
+    });
+    skipBtn.addEventListener('click', function () { endTour(true); });
+    voiceBtn.addEventListener('click', function () {
+      voiceOn = !voiceOn;
+      renderVoiceBtn();
+      if (voiceOn) speak(STEPS[idx].title + '. ' + STEPS[idx].body);
+      else stopSpeak();
+    });
+    // Esc + scrim tap to skip
+    root.querySelector('.lt-scrim').addEventListener('click', function () { endTour(true); });
+    document.addEventListener('keydown', function escHandler(e) {
+      if (!document.getElementById('load-tour')) {
+        document.removeEventListener('keydown', escHandler);
+        return;
+      }
+      if (e.key === 'Escape') endTour(true);
+      else if (e.key === 'ArrowRight') nextBtn.click();
+      else if (e.key === 'ArrowLeft') backBtn.click();
+    });
+    window.addEventListener('resize', onResize);
+    window.addEventListener('orientationchange', onResize);
+
+    renderVoiceBtn();
+    renderStep();
+  }
+  function maybeAutoStartTour() {
+    try {
+      if (localStorage.getItem(LS_TOUR_SEEN)) return;
+    } catch (_) { return; }
+    // Wait for the splash + screens to be visible before launching.
+    setTimeout(function () { startGuidedTour({ auto: true }); }, 900);
   }
 
   /* ---------- Folders / Collections (option 5) ---------- */
@@ -8597,7 +8871,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bk</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17bl</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
