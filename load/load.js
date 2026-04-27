@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17aw</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ax</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -9984,15 +9984,85 @@
         rulerEl.style.flex = '0 0 auto';
       }
 
-      // Wire per-clip click → select
+      // Wire per-clip click → select. Long-press (>=400ms) starts a
+      // drag-to-reorder gesture: a ghost outline follows the pointer
+      // and the engine.moveClip call commits the new index on release.
       Array.prototype.forEach.call(stripEl.querySelectorAll('.timeline-clip'), function (b) {
+        var pressTimer = null;
+        var dragging = false;
+        var dragGhost = null;
+        var startX = 0;
+        var fromIdx = 0;
         b.addEventListener('click', function (e) {
+          if (dragging) { dragging = false; return; }
           if (e.target.closest('.trim-handle') || e.target.closest('.clip-add')) return;
           e.stopPropagation();
           selectedClipIdx = +b.dataset.clipIdx;
           selectClip();
           renderClipBlocks();
         });
+        b.addEventListener('pointerdown', function (e) {
+          if (e.target.closest('.trim-handle') || e.target.closest('.clip-add')) return;
+          startX = e.clientX;
+          fromIdx = +b.dataset.clipIdx;
+          clearTimeout(pressTimer);
+          pressTimer = setTimeout(function () {
+            // Start drag-to-reorder.
+            dragging = true;
+            try { b.setPointerCapture(e.pointerId); } catch (_) {}
+            b.classList.add('dragging');
+            b.style.opacity = '0.6';
+            b.style.transform = 'scale(1.04)';
+            b.style.zIndex = '20';
+            try { if (navigator.vibrate) navigator.vibrate(15); } catch (_) {}
+            toast('Drag to reorder. Release to drop.', false);
+            function move(ev) {
+              if (!dragging) return;
+              var dx = (ev.clientX || (ev.touches && ev.touches[0] && ev.touches[0].clientX) || startX) - startX;
+              b.style.transform = 'scale(1.04) translateX(' + dx + 'px)';
+              // Compute target index by which sibling clip's centre we're over.
+              var bRect = b.getBoundingClientRect();
+              var midX = bRect.left + bRect.width / 2;
+              var siblings = Array.prototype.slice.call(stripEl.querySelectorAll('.timeline-clip'));
+              var target = fromIdx;
+              for (var i = 0; i < siblings.length; i++) {
+                var s = siblings[i];
+                if (s === b) continue;
+                var r = s.getBoundingClientRect();
+                if (midX > r.left && midX < r.right) {
+                  target = +s.dataset.clipIdx;
+                  break;
+                }
+              }
+              b.dataset._dropTarget = String(target);
+            }
+            function up() {
+              document.removeEventListener('pointermove', move);
+              document.removeEventListener('pointerup', up);
+              document.removeEventListener('pointercancel', up);
+              if (!dragging) return;
+              var to = +(b.dataset._dropTarget || fromIdx);
+              b.classList.remove('dragging');
+              b.style.opacity = '';
+              b.style.transform = '';
+              b.style.zIndex = '';
+              if (to !== fromIdx) {
+                engine.moveClip(fromIdx, to);
+                toast('Reordered: clip ' + (fromIdx + 1) + ' → position ' + (to + 1) + '.', false);
+              }
+              setTimeout(function () { dragging = false; }, 50);
+            }
+            document.addEventListener('pointermove', move);
+            document.addEventListener('pointerup', up);
+            document.addEventListener('pointercancel', up);
+          }, 400);
+        });
+        b.addEventListener('pointerup', function () { clearTimeout(pressTimer); });
+        b.addEventListener('pointermove', function (e) {
+          // Cancel long-press if user starts horizontal scrubbing.
+          if (Math.abs(e.clientX - startX) > 6) clearTimeout(pressTimer);
+        });
+        b.addEventListener('pointercancel', function () { clearTimeout(pressTimer); });
       });
       // Wire edge + buttons
       Array.prototype.forEach.call(stripEl.querySelectorAll('.clip-add'), function (btn) {
