@@ -8593,7 +8593,7 @@
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17p</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17q</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -8629,55 +8629,48 @@
         '<button id="ve-pause" class="ve-iconbtn" aria-label="Pause" style="display:none;">&#9208;</button>' +
       '</div>' +
       // ===== Track rows =====
-      '<div id="ve-tracks" style="background:#0a0a14;padding:6px 0 4px;flex-shrink:0;border-top:1px solid #1a1a26;">' +
-        // Music
-        '<div class="ve-track" data-track="music">' +
-          '<button class="ve-track-add" data-add="music" aria-label="Add music"><span>&#127925;</span><span class="plus">+</span></button>' +
-          '<div class="ve-track-body"><span class="ve-track-empty" id="ve-music-empty">Tap to add music</span><div class="ve-track-clip" id="ve-music-clip" hidden></div></div>' +
+      // ===== TIMELINE ENGINE (clean clip-object structure) =====
+      // Two-column layout: left column has track labels + Cover
+      // button; right column is the scrollable timeline holding
+      // empty layer rows, the .video-track with .timeline-clip
+      // objects, the waveform, the ruler, and the playhead spanning
+      // all rows. Markup mirrors the user's locked-in spec.
+      '<div class="timeline-engine" id="timelineEngine">' +
+        '<div class="track-labels">' +
+          '<button class="track-add" data-add="music" aria-label="Add music">&#127925;+</button>' +
+          '<button class="track-add" data-add="text" aria-label="Add subtitle">T+</button>' +
+          '<button class="track-add" data-add="sticker" aria-label="Add sticker / PiP">&#128444;+</button>' +
+          '<button class="cover-btn" id="ve-cover">Cover</button>' +
+          '<button class="track-add" data-add="audio-orig" aria-label="Original audio">&#128264;</button>' +
         '</div>' +
-        // Subtitle / text overlay
-        '<div class="ve-track" data-track="text">' +
-          '<button class="ve-track-add" data-add="text" aria-label="Add subtitle"><span>T</span><span class="plus">+</span></button>' +
-          '<div class="ve-track-body"><span class="ve-track-empty" id="ve-text-empty">Tap to add subtitle</span><div class="ve-track-clip" id="ve-text-clip" hidden></div></div>' +
-        '</div>' +
-        // Sticker / PiP (placeholder for v2)
-        '<div class="ve-track" data-track="sticker">' +
-          '<button class="ve-track-add" data-add="sticker" aria-label="Add sticker"><span>&#128444;</span><span class="plus">+</span></button>' +
-          '<div class="ve-track-body"><span class="ve-track-empty">Tap to add sticker / PiP</span></div>' +
-        '</div>' +
-        // Video clip with cover thumbnail + yellow timeline strip
-        '<div class="ve-track ve-track-video" data-track="video">' +
-          '<button class="ve-track-cover" aria-label="Cover" id="ve-cover">Cover</button>' +
-          '<div class="ve-track-body">' +
-            '<div class="ve-clip-strip" id="ve-clip-strip">' +
-              // Per-clip blocks are appended dynamically by
-              // renderClipBlocks() — each contains its own thumbs,
-              // duration label, trim handles, and edge + buttons.
-              // Empty slot blocks fill the rest of the strip after
-              // the clip(s) end.
-              '<div class="ve-clip-thumbs" id="ve-clip-thumbs" style="display:none;"></div>' +
-              '<div class="ve-clip-trim" id="ve-clip-trim" style="display:none;">' +
-                '<div class="ve-clip-handle ve-handle-left" id="ve-handle-left"></div>' +
-                '<div class="ve-clip-handle ve-handle-right" id="ve-handle-right"></div>' +
-                '<div class="ve-clip-duration" id="ve-clip-duration">0.00s</div>' +
-              '</div>' +
-              '<div class="ve-clip-quick" id="ve-clip-quick" hidden>' +
-                '<button class="ve-quick-btn" data-clip-action="split" aria-label="Split">&#9986;</button>' +
-                '<button class="ve-quick-btn" data-clip-action="duplicate" aria-label="Duplicate">&#10063;</button>' +
-                '<button class="ve-quick-btn" data-clip-action="replace" aria-label="Replace">&#8634;</button>' +
-                '<button class="ve-quick-btn" data-clip-action="delete" aria-label="Delete">&#128465;</button>' +
-              '</div>' +
-              '<div class="ve-clip-playhead" id="ve-clip-playhead"></div>' +
-            '</div>' +
+        '<div class="timeline-scroll" id="timelineScroll">' +
+          // Empty tracks for music / subtitle / sticker
+          '<div class="track empty-track" data-add="music">Tap to add music</div>' +
+          '<div class="track empty-track" data-add="text">Tap to add subtitle</div>' +
+          '<div class="track empty-track" data-add="sticker">Tap to add sticker / PiP</div>' +
+          // Main video track — clip objects + empty slots + big-add
+          // are appended dynamically by renderClipBlocks().
+          '<div class="video-track" id="ve-clip-strip"></div>' +
+          // Waveform track — drawn into a canvas by renderWaveformFor()
+          '<div class="waveform-track ve-waveform empty" id="ve-waveform"></div>' +
+          // Time ruler — second markers + tick marks
+          '<div class="time-ruler ve-time-ruler" id="ve-time-ruler"></div>' +
+          // Playhead spans every track + waveform + ruler in this column
+          '<div class="playhead ve-clip-playhead" id="ve-clip-playhead"></div>' +
+          // Hidden legacy elements kept ONLY for engine wiring continuity
+          '<div id="ve-clip-thumbs" style="display:none;"></div>' +
+          '<div id="ve-clip-trim" style="display:none;">' +
+            '<div class="ve-clip-handle ve-handle-left" id="ve-handle-left"></div>' +
+            '<div class="ve-clip-handle ve-handle-right" id="ve-handle-right"></div>' +
+            '<div class="ve-clip-duration" id="ve-clip-duration">0.00s</div>' +
+          '</div>' +
+          '<div class="ve-clip-quick" id="ve-clip-quick" hidden>' +
+            '<button class="ve-quick-btn" data-clip-action="split" aria-label="Split">&#9986;</button>' +
+            '<button class="ve-quick-btn" data-clip-action="duplicate" aria-label="Duplicate">&#10063;</button>' +
+            '<button class="ve-quick-btn" data-clip-action="replace" aria-label="Replace">&#8634;</button>' +
+            '<button class="ve-quick-btn" data-clip-action="delete" aria-label="Delete">&#128465;</button>' +
           '</div>' +
         '</div>' +
-        // Audio waveform (decorative for now -- yellow)
-        '<div class="ve-track ve-track-audio" data-track="audio">' +
-          '<button class="ve-track-add" data-add="audio-orig" aria-label="Original audio"><span>&#128264;</span></button>' +
-          '<div class="ve-track-body"><div class="ve-waveform" id="ve-waveform"></div></div>' +
-        '</div>' +
-        // Time ruler
-        '<div class="ve-time-ruler" id="ve-time-ruler"></div>' +
       '</div>' +
       // ===== Hidden trim sliders (used by handles via JS) =====
       '<input type="hidden" id="ve-trim-in" value="0">' +
@@ -8798,6 +8791,41 @@
       '#__loadVideoEdit .ve-track-cover{background:#1a1a26;border:1px dashed #3a3a55;color:#cfcfdc;width:62px;height:42px;border-radius:6px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}' +
       '#__loadVideoEdit .ve-track-body{flex:1;min-width:0;height:42px;background:#0e0e18;border-radius:6px;display:flex;align-items:center;padding:0 10px;color:#7b7b8c;font-size:13px;overflow:hidden;position:relative;}' +
       '#__loadVideoEdit .ve-track-empty{user-select:none;}' +
+      // Two-column timeline-engine layout
+      '#__loadVideoEdit .timeline-engine{display:flex;flex-direction:row;background:#0a0a14;flex-shrink:0;border-top:1px solid #1a1a26;}' +
+      '#__loadVideoEdit .track-labels{display:flex;flex-direction:column;gap:4px;padding:6px 8px;background:#0e0e18;border-right:1px solid #1a1a26;flex-shrink:0;}' +
+      '#__loadVideoEdit .track-labels button{background:#1a1a26;color:#fff;border:1px solid #2a2a40;border-radius:8px;padding:6px 10px;font-size:13px;font-weight:700;cursor:pointer;min-height:32px;font-family:inherit;}' +
+      '#__loadVideoEdit .track-labels .cover-btn{background:#14142a;border:1px dashed #5a5a7a;color:#cfcfdc;}' +
+      '#__loadVideoEdit .timeline-scroll{flex:1;position:relative;padding:6px 0 4px;overflow-x:auto;overflow-y:hidden;}' +
+      '#__loadVideoEdit .timeline-scroll::-webkit-scrollbar{display:none;}' +
+      '#__loadVideoEdit .track{height:32px;margin:2px 8px;padding:0 12px;background:#14142a;border-radius:6px;color:#5a5a78;font-size:11px;display:flex;align-items:center;cursor:pointer;}' +
+      '#__loadVideoEdit .track.empty-track:hover{background:#1c1c30;color:#cfcfdc;}' +
+      '#__loadVideoEdit .video-track{position:relative;height:56px;margin:4px 8px;display:flex;align-items:center;gap:4px;}' +
+      '#__loadVideoEdit .timeline-clip{position:relative;height:100%;flex:0 0 auto;background:#1a1a26;border-radius:6px;overflow:visible;cursor:pointer;box-shadow:0 0 0 2px #fbbf24;}' +
+      '#__loadVideoEdit .timeline-clip.selected{box-shadow:0 0 0 3px #fff,0 0 0 5px #fbbf24,0 0 18px rgba(251,191,36,0.6);}' +
+      '#__loadVideoEdit .thumbnail-strip{position:absolute;inset:0;display:flex;border-radius:4px;overflow:hidden;}' +
+      '#__loadVideoEdit .thumbnail-strip img{flex:1;width:0;height:100%;object-fit:cover;display:block;border-right:1px solid rgba(0,0,0,0.30);}' +
+      '#__loadVideoEdit .thumbnail-strip img:last-child{border-right:none;}' +
+      '#__loadVideoEdit .clip-duration{position:absolute;left:6px;bottom:4px;background:rgba(0,0,0,0.7);color:#fff;font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px;font-variant-numeric:tabular-nums;pointer-events:none;}' +
+      '#__loadVideoEdit .trim-handle{position:absolute;top:0;bottom:0;width:14px;background:#fbbf24;cursor:ew-resize;display:flex;align-items:center;justify-content:center;color:#1a1a26;font-weight:900;}' +
+      '#__loadVideoEdit .trim-handle.trim-left{left:0;border-radius:4px 0 0 4px;}' +
+      '#__loadVideoEdit .trim-handle.trim-right{right:0;border-radius:0 4px 4px 0;}' +
+      '#__loadVideoEdit .trim-handle::after{content:"||";font-size:10px;letter-spacing:-1px;}' +
+      '#__loadVideoEdit .clip-add{position:absolute;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;background:#fff;color:#1a1a26;border:2px solid #1a1a26;font-size:14px;font-weight:900;cursor:pointer;line-height:1;padding:0;z-index:7;}' +
+      '#__loadVideoEdit .clip-add.left{left:-12px;}' +
+      '#__loadVideoEdit .clip-add.right{right:-12px;}' +
+      '#__loadVideoEdit .empty-slot{flex:0 0 80px;height:100%;border:1px dashed #2a2a40;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#3a3a55;font-size:18px;cursor:pointer;}' +
+      '#__loadVideoEdit .empty-slot:hover{background:#15152a;color:#5a5a78;}' +
+      '#__loadVideoEdit .big-add{flex:0 0 44px;height:100%;background:#14142a;border:1px solid #2a2a40;border-radius:6px;color:#cfcfdc;font-size:22px;font-weight:900;cursor:pointer;}' +
+      '#__loadVideoEdit .big-add:hover{background:#1c1c30;color:#fbbf24;}' +
+      '#__loadVideoEdit .waveform-track{height:32px;margin:4px 8px;background:#0a0a14;border-radius:4px;position:relative;overflow:hidden;}' +
+      '#__loadVideoEdit .waveform-track canvas{position:absolute;inset:0;width:100%;height:100%;display:block;}' +
+      '#__loadVideoEdit .waveform-track.empty::before{content:"Audio waveform decoding…";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#5a5a78;font-size:11px;font-weight:600;letter-spacing:0.05em;}' +
+      '#__loadVideoEdit .time-ruler{position:relative;height:22px;color:#9a9aac;font-size:11px;font-variant-numeric:tabular-nums;background:#0a0a14;margin:0 8px;}' +
+      '#__loadVideoEdit .playhead{position:absolute;top:6px;bottom:6px;width:2px;background:#fff;left:8px;pointer-events:none;box-shadow:0 0 6px rgba(255,255,255,0.7);z-index:10;}' +
+      '#__loadVideoEdit .playhead::before{content:"";position:absolute;top:-3px;left:-5px;width:12px;height:12px;background:#fff;border-radius:50%;box-shadow:0 0 0 2px #1a1a26;}' +
+      // Legacy class shims (kept hidden so existing engine code that
+      // queries them still finds something to bind to without throwing)
       '#__loadVideoEdit .ve-clip-strip{position:relative;flex:1;height:56px;background:transparent;cursor:ew-resize;touch-action:none;overflow:visible;}' +
       '#__loadVideoEdit .ve-clip-block{box-shadow:0 0 0 2px #fbbf24;cursor:pointer;}' +
       '#__loadVideoEdit .ve-clip-block.on{box-shadow:0 0 0 3px #fff, 0 0 0 5px #fbbf24, 0 0 18px rgba(251,191,36,0.6);}' +
@@ -9091,66 +9119,56 @@
        Plus, at the right of the strip, dark "empty slot" placeholders
        fill the remaining width so the timeline reads as a continuation
        surface, not blank space. */
-    var SLOT_PCT = 12; // each empty slot represents ~12% of the strip's total width
+    var SLOT_PX = 80; // each empty slot is 80px wide in the spec
+    var PX_PER_SECOND = 90; // base pixel scale for clip widths
     function renderClipBlocks() {
-      var stripEl = document.getElementById('ve-clip-strip');
+      var stripEl = document.getElementById('ve-clip-strip'); // .video-track
       if (!stripEl) return;
-      Array.prototype.forEach.call(stripEl.querySelectorAll('.ve-clip-block, .ve-empty-slot'), function (b) { b.remove(); });
+      // Clear all clip + slot + big-add children (keep nothing inside)
+      stripEl.innerHTML = '';
       var total = engine.duration() || 0;
       if (!total) return;
-      // Total visual width is total + N empty slots so the clip
-      // never fills 100% — there's always room visible to drop more.
-      var emptySlots = 3;
-      var stripVisualUnits = total + (emptySlots * (SLOT_PCT / 100) * total);
-      if (stripVisualUnits === 0) stripVisualUnits = 1;
-      var acc = 0;
       engine.clips.forEach(function (c, i) {
         var dur = c.srcEnd - c.srcStart;
-        var leftPct = (acc / stripVisualUnits) * 100;
-        var widthPct = (dur / stripVisualUnits) * 100;
-        var block = document.createElement('div');
-        block.className = 've-clip-block';
-        if (selectedClipIdx === i) block.classList.add('on');
-        block.dataset.clipIdx = i;
-        block.style.cssText = 'position:absolute;left:' + leftPct + '%;width:' + widthPct + '%;top:0;bottom:0;border-radius:6px;overflow:hidden;z-index:5;';
-        block.innerHTML =
-          // Thumbnail row inside the clip — sliced view of the
-          // continuous source thumbs. Each clip gets its own row so
-          // it visually reads as containing real frames.
-          '<div class="ve-block-thumbs"></div>' +
-          // Yellow border layer above the thumbs
-          '<div class="ve-block-border"></div>' +
-          // Duration label, bottom-left inside the clip
-          '<div class="ve-block-dur">' + dur.toFixed(2) + 's</div>' +
-          // Trim handles attached to clip ends
-          '<div class="ve-block-handle ve-block-handle-l" data-clip-idx="' + i + '" data-side="left"></div>' +
-          '<div class="ve-block-handle ve-block-handle-r" data-clip-idx="' + i + '" data-side="right"></div>' +
-          // Edge + buttons (add clip before / after)
-          '<button class="ve-block-add ve-block-add-l" data-clip-idx="' + i + '" data-edge="before" aria-label="Add clip before">+</button>' +
-          '<button class="ve-block-add ve-block-add-r" data-clip-idx="' + i + '" data-edge="after"  aria-label="Add clip after">+</button>';
-        stripEl.appendChild(block);
-        // Populate the per-block thumbnail row by cloning the
-        // engine-level thumb dataURLs in proportion to this clip's
-        // src range.
-        try { populateBlockThumbs(block.querySelector('.ve-block-thumbs'), c); } catch (e) {}
-        acc += dur;
+        var widthPx = Math.max(60, dur * PX_PER_SECOND);
+        var clip = document.createElement('div');
+        clip.className = 'timeline-clip' + (selectedClipIdx === i ? ' selected' : '');
+        clip.id = 've-clip-' + i;
+        clip.dataset.clipIdx = i;
+        clip.style.width = widthPx + 'px';
+        clip.innerHTML =
+          '<button class="clip-add left" data-clip-idx="' + i + '" data-edge="before" aria-label="Add clip before">+</button>' +
+          '<div class="thumbnail-strip" data-clip-idx="' + i + '"></div>' +
+          '<span class="clip-duration">' + dur.toFixed(2) + 's</span>' +
+          '<div class="trim-handle trim-left ve-block-handle ve-block-handle-l" data-clip-idx="' + i + '" data-side="left"></div>' +
+          '<div class="trim-handle trim-right ve-block-handle ve-block-handle-r" data-clip-idx="' + i + '" data-side="right"></div>' +
+          '<button class="clip-add right" data-clip-idx="' + i + '" data-edge="after" aria-label="Add clip after">+</button>';
+        stripEl.appendChild(clip);
+        try { populateBlockThumbs(clip.querySelector('.thumbnail-strip'), c); } catch (e) {}
       });
-      // Append empty slot placeholders after the last clip.
-      var leftEmpty = (acc / stripVisualUnits) * 100;
-      for (var s = 0; s < emptySlots; s++) {
+      // 3 empty-slot placeholders after the last clip + a big-add tail
+      for (var s = 0; s < 3; s++) {
         var slot = document.createElement('div');
-        slot.className = 've-empty-slot';
-        var slotLeft = leftEmpty + s * (SLOT_PCT * total / stripVisualUnits);
-        var slotW = (SLOT_PCT * total / stripVisualUnits) - 0.4;
-        slot.style.cssText = 'position:absolute;left:' + slotLeft + '%;width:' + slotW + '%;top:0;bottom:0;border-radius:6px;background:#0e0e18;border:1px dashed #2a2a40;z-index:3;display:flex;align-items:center;justify-content:center;color:#3a3a55;font-size:18px;';
-        slot.innerHTML = '+';
-        slot.addEventListener('click', function () { engine.duplicateAt(engine.clips.length - 1); });
+        slot.className = 'empty-slot';
+        slot.textContent = '';
+        slot.addEventListener('click', function () {
+          if (engine.clips.length) engine.duplicateAt(engine.clips.length - 1);
+        });
         stripEl.appendChild(slot);
       }
-      // Wire per-block click → select that clip
-      Array.prototype.forEach.call(stripEl.querySelectorAll('.ve-clip-block'), function (b) {
+      var bigAdd = document.createElement('button');
+      bigAdd.className = 'big-add';
+      bigAdd.textContent = '+';
+      bigAdd.setAttribute('aria-label', 'Add clip at end');
+      bigAdd.addEventListener('click', function () {
+        if (engine.clips.length) engine.duplicateAt(engine.clips.length - 1);
+      });
+      stripEl.appendChild(bigAdd);
+
+      // Wire per-clip click → select
+      Array.prototype.forEach.call(stripEl.querySelectorAll('.timeline-clip'), function (b) {
         b.addEventListener('click', function (e) {
-          if (e.target.closest('.ve-block-handle') || e.target.closest('.ve-block-add')) return;
+          if (e.target.closest('.trim-handle') || e.target.closest('.clip-add')) return;
           e.stopPropagation();
           selectedClipIdx = +b.dataset.clipIdx;
           selectClip();
@@ -9158,14 +9176,11 @@
         });
       });
       // Wire edge + buttons
-      Array.prototype.forEach.call(stripEl.querySelectorAll('.ve-block-add'), function (btn) {
+      Array.prototype.forEach.call(stripEl.querySelectorAll('.clip-add'), function (btn) {
         btn.addEventListener('click', function (e) {
           e.stopPropagation();
           var idx = +btn.dataset.clipIdx;
           var edge = btn.dataset.edge;
-          // Both edges call duplicateAt; "before" inserts at idx,
-          // "after" inserts at idx+1. Future: open a file picker
-          // for a different source.
           if (edge === 'before' && idx > 0) engine.duplicateAt(idx - 1);
           else engine.duplicateAt(idx);
           toast('Clip added. Now ' + engine.clips.length + ' clips.', false);
