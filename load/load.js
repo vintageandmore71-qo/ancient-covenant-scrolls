@@ -9022,7 +9022,7 @@ window.LoadAudioFix = {
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ch</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ci</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -9128,7 +9128,7 @@ window.LoadAudioFix = {
       // ===== Hidden music panel =====
       '<div id="ve-music-panel" class="ve-panel" hidden>' +
         '<div class="ve-panel-head"><span>Music</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
-        '<input id="ve-audio-pick" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg" style="font-size:13px;">' +
+        '<input id="ve-audio-pick" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg,.flac,.aiff,.aif,.webm,.weba,.opus" style="font-size:13px;">' +
         '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;">' +
           '<label class="ve-lbl">Volume</label>' +
           '<input id="ve-audio-vol" type="range" min="0" max="1" step="0.05" value="0.35" style="flex:1;min-width:140px;accent-color:#fbbf24;">' +
@@ -10071,20 +10071,178 @@ window.LoadAudioFix = {
     }
     async function extractAudio() {
       try {
-        toast('Extracting audio…', false);
+        toast('Decoding audio…', false);
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         var resp = await fetch(video.src);
         var ab = await resp.arrayBuffer();
         var buf = await audioCtx.decodeAudioData(ab);
-        var wav = audioBufferToWav(buf);
-        var blob = new Blob([wav], { type: 'audio/wav' });
+        // Pop a format picker. Resolves with a key the encoder
+        // dispatcher understands. WAV / AIFF are instant (header +
+        // PCM bytes); M4A / WebM / OGG go through a real-time
+        // MediaRecorder encode that takes ~ buf.duration seconds.
+        var fmt = await openAudioFormatSheet(buf.duration);
+        if (!fmt) { toast('Cancelled.', false); return; }
+        toast(fmt.label + ' export — ' + (fmt.realtime ? 'recording in real time…' : 'building file…'), false);
+        var out = await encodeAudioBufferToBlob(buf, fmt, function (pct) {
+          if (pct != null) toast(fmt.label + ' export… ' + Math.round(pct) + '%', false);
+        });
+        if (!out || !out.blob) { toast('Encode failed.', true); return; }
         var a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = (app.title || 'audio') + '.wav';
+        a.href = URL.createObjectURL(out.blob);
+        a.download = (app.title || 'audio') + fmt.ext;
         document.body.appendChild(a); a.click(); a.remove();
         setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
-        toast('Audio downloaded as WAV.', false);
+        toast('Audio downloaded as ' + fmt.label + '.', false);
       } catch (e) { toast('Extract failed: ' + (e && e.message || e), true); }
+    }
+
+    /* Format sheet — returns { key, label, ext, mime, realtime } or
+     * null on cancel. Filters formats whose MediaRecorder mime isn't
+     * supported on this browser, so we never show options that would
+     * silently fail at encode time. */
+    function openAudioFormatSheet(durSec) {
+      return new Promise(function (resolve) {
+        var canM4a   = window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported('audio/mp4');
+        var canWebm  = window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported('audio/webm;codecs=opus');
+        var canOgg   = window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported('audio/ogg;codecs=opus');
+        var canAac   = window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported('audio/aac');
+        var formats = [
+          { key: 'wav',   label: 'WAV',     ext: '.wav',  mime: 'audio/wav',  realtime: false, available: true,
+            note: 'Instant · uncompressed, large file' },
+          { key: 'aiff',  label: 'AIFF',    ext: '.aiff', mime: 'audio/aiff', realtime: false, available: true,
+            note: 'Instant · uncompressed, Apple format' },
+          { key: 'm4a',   label: 'M4A',     ext: '.m4a',  mime: 'audio/mp4',  realtime: true,  available: canM4a,
+            note: 'iOS-friendly · real-time encode (~' + Math.ceil(durSec) + 's)' },
+          { key: 'aac',   label: 'AAC',     ext: '.aac',  mime: 'audio/aac',  realtime: true,  available: canAac,
+            note: 'Real-time encode · Chrome/Edge mostly' },
+          { key: 'webma', label: 'WebM',    ext: '.webm', mime: 'audio/webm;codecs=opus', realtime: true, available: canWebm,
+            note: 'Real-time encode · web standard' },
+          { key: 'ogg',   label: 'OGG',     ext: '.ogg',  mime: 'audio/ogg;codecs=opus',  realtime: true, available: canOgg,
+            note: 'Real-time encode · Firefox' },
+          { key: 'mp3',   label: 'MP3',     ext: '.mp3',  mime: 'audio/mpeg', realtime: true, available: false,
+            note: 'Needs codec library — coming next' },
+          { key: 'flac',  label: 'FLAC',    ext: '.flac', mime: 'audio/flac', realtime: true, available: false,
+            note: 'Needs codec library — coming next' }
+        ];
+        var menu = document.createElement('div');
+        menu.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9700;display:flex;align-items:flex-end;justify-content:center;';
+        var rows = formats.map(function (f) {
+          var dim = f.available ? '' : 'opacity:0.45;cursor:not-allowed;';
+          return '<button data-fmt="' + f.key + '" ' + (f.available ? '' : 'disabled') +
+            ' style="background:#2a2a40;border:1px solid #3a3a55;color:#fff;border-radius:10px;padding:11px 12px;text-align:left;cursor:pointer;font-family:inherit;' + dim + '">' +
+            '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">' +
+            '<strong style="font-size:14px;">' + f.label + '</strong>' +
+            '<span style="font-size:11px;color:#a8a8c4;">' + (f.available ? f.note : '⚠ ' + f.note) + '</span>' +
+            '</div></button>';
+        }).join('');
+        menu.innerHTML =
+          '<div style="background:#1a1a26;color:#fff;width:100%;max-width:560px;border-top-left-radius:16px;border-top-right-radius:16px;padding:14px 14px max(14px,env(safe-area-inset-bottom));max-height:80vh;display:flex;flex-direction:column;">' +
+            '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
+              '<h3 style="margin:0;font-size:16px;font-weight:800;">🎵 Export audio as…</h3>' +
+              '<button id="afs-close" style="background:transparent;border:none;color:#cfcfdc;font-size:22px;cursor:pointer;">×</button>' +
+            '</div>' +
+            '<div style="display:flex;flex-direction:column;gap:6px;overflow-y:auto;">' + rows + '</div>' +
+          '</div>';
+        document.body.appendChild(menu);
+        var done = function (r) { try { menu.remove(); } catch (_) {} resolve(r); };
+        menu.addEventListener('click', function (e) { if (e.target === menu) done(null); });
+        menu.querySelector('#afs-close').addEventListener('click', function () { done(null); });
+        Array.prototype.forEach.call(menu.querySelectorAll('[data-fmt]'), function (b) {
+          if (b.disabled) return;
+          b.addEventListener('click', function () {
+            var k = b.getAttribute('data-fmt');
+            done(formats.filter(function (f) { return f.key === k; })[0] || null);
+          });
+        });
+      });
+    }
+
+    /* Encoder dispatcher. Returns { blob } or null. */
+    async function encodeAudioBufferToBlob(buf, fmt, onProgress) {
+      if (fmt.key === 'wav') {
+        return { blob: new Blob([audioBufferToWav(buf)], { type: 'audio/wav' }) };
+      }
+      if (fmt.key === 'aiff') {
+        return { blob: new Blob([audioBufferToAiff(buf)], { type: 'audio/aiff' }) };
+      }
+      // Real-time encode via MediaRecorder. Plays the buffer through an
+      // OfflineAudioContext is not available for MediaRecorder so we
+      // use a regular AudioContext + MediaStreamDestination, route the
+      // buffer source into the stream, record the stream.
+      if (!window.MediaRecorder) return null;
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      try {
+        var dest = ctx.createMediaStreamDestination();
+        var src = ctx.createBufferSource();
+        src.buffer = buf;
+        src.connect(dest);
+        var rec = new MediaRecorder(dest.stream, { mimeType: fmt.mime });
+        var chunks = [];
+        rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+        var stopped = new Promise(function (res) { rec.onstop = res; });
+        rec.start();
+        src.start();
+        var startMs = performance.now();
+        var totalMs = (buf.duration || 1) * 1000;
+        var progTimer = setInterval(function () {
+          var pct = Math.min(99, ((performance.now() - startMs) / totalMs) * 100);
+          if (onProgress) try { onProgress(pct); } catch (_) {}
+        }, 250);
+        await new Promise(function (res) { src.onended = res; setTimeout(res, totalMs + 1000); });
+        rec.stop();
+        await stopped;
+        clearInterval(progTimer);
+        try { src.disconnect(); } catch (_) {}
+        try { ctx.close(); } catch (_) {}
+        return { blob: new Blob(chunks, { type: fmt.mime }) };
+      } catch (e) {
+        try { ctx.close(); } catch (_) {}
+        throw e;
+      }
+    }
+
+    /* AIFF encoder — big-endian PCM with COMM + SSND chunks.
+     * Same sample data as WAV; only the headers + endianness differ. */
+    function audioBufferToAiff(buf) {
+      var nCh = buf.numberOfChannels, sr = buf.sampleRate, nSamp = buf.length;
+      var ssndDataLen = nSamp * nCh * 2; // 16-bit PCM
+      var commChunkSize = 18;
+      var ssndChunkSize = 8 + ssndDataLen;
+      var formSize = 4 + (8 + commChunkSize) + (8 + ssndChunkSize);
+      var totalLen = 8 + formSize;
+      var ab = new ArrayBuffer(totalLen);
+      var v = new DataView(ab);
+      var off = 0;
+      function ws(s) { for (var i = 0; i < s.length; i++) v.setUint8(off++, s.charCodeAt(i)); }
+      function w16BE(n) { v.setInt16(off, n, false); off += 2; }
+      function w32BE(n) { v.setUint32(off, n, false); off += 4; }
+      // Extended-precision 80-bit float for sample rate
+      function writeIEEE754Extended(rate) {
+        var sign = rate < 0 ? 0x8000 : 0;
+        rate = Math.abs(rate);
+        var exp = Math.floor(Math.log(rate) / Math.LN2);
+        var mantissa = rate / Math.pow(2, exp - 63);
+        var hi = Math.floor(mantissa / 0x100000000);
+        var lo = mantissa - hi * 0x100000000;
+        v.setUint16(off, sign | (exp + 16383), false); off += 2;
+        v.setUint32(off, hi >>> 0, false); off += 4;
+        v.setUint32(off, lo >>> 0, false); off += 4;
+      }
+      ws('FORM'); w32BE(formSize); ws('AIFF');
+      ws('COMM'); w32BE(commChunkSize);
+      w16BE(nCh); w32BE(nSamp); w16BE(16);
+      writeIEEE754Extended(sr);
+      ws('SSND'); w32BE(ssndChunkSize);
+      w32BE(0); w32BE(0); // offset + blockSize
+      var chs = []; for (var c = 0; c < nCh; c++) chs.push(buf.getChannelData(c));
+      for (var i = 0; i < nSamp; i++) {
+        for (var c2 = 0; c2 < nCh; c2++) {
+          var s = Math.max(-1, Math.min(1, chs[c2][i]));
+          var s16 = s < 0 ? Math.round(s * 32768) : Math.round(s * 32767);
+          v.setInt16(off, s16, false); off += 2;
+        }
+      }
+      return ab;
     }
     function audioBufferToWav(buf) {
       var nCh = buf.numberOfChannels, sr = buf.sampleRate, len = buf.length * nCh * 2 + 44;
@@ -13222,7 +13380,7 @@ window.LoadAudioFix = {
           // Picking nothing (cancel) leaves the timeline alone.
           var pk = document.createElement('input');
           pk.type = 'file';
-          pk.accept = 'audio/*';
+          pk.accept = 'audio/*,.mp3,.m4a,.wav,.aac,.ogg,.flac,.aiff,.aif,.webm,.weba,.opus';
           pk.style.display = 'none';
           document.body.appendChild(pk);
           pk.addEventListener('change', async function (ev) {
