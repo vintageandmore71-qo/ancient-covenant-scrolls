@@ -362,6 +362,14 @@
   <!-- Filter chips — file types + folders. Tap to filter the grid. -->
   <div id="library-chips" class="library-chips"></div>
 
+  <!-- Library action bar: count + Clear Library. Hidden when grid is empty. -->
+  <div id="library-actions" style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px;gap:8px;flex-wrap:wrap;">
+    <span id="library-count" style="font-size:13px;color:#7a7a8a;font-weight:600;"></span>
+    <button id="library-clear-btn-inline" style="background:#c0392b;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+      <span>&#128465;</span><span>Clear Library</span>
+    </button>
+  </div>
+
   <div id="library-empty" class="empty-state">
     <div class="empty-icon">&#128230;</div>
     <h3>Nothing imported yet</h3>

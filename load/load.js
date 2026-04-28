@@ -9057,7 +9057,7 @@ window.LoadAudioFix = {
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17cq</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17cr</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -15362,6 +15362,8 @@ window.LoadAudioFix = {
   function renderLibrary() {
     var grid = $('library-grid');
     var empty = $('library-empty');
+    var actions = $('library-actions');
+    var countEl = $('library-count');
     var filtered = (currentTypeFilter === 'all')
       ? apps.slice()
       : apps.filter(function (a) { return (a.kind || 'html') === currentTypeFilter; });
@@ -15383,9 +15385,16 @@ window.LoadAudioFix = {
     if (!filtered.length) {
       grid.innerHTML = '';
       empty.style.display = 'flex';
+      if (actions) actions.style.display = 'none';
       return;
     }
     empty.style.display = 'none';
+    if (actions) actions.style.display = 'flex';
+    if (countEl) {
+      var favCount = filtered.filter(function (a) { return a.favorite; }).length;
+      countEl.textContent = filtered.length + ' item' + (filtered.length === 1 ? '' : 's') +
+        (favCount ? ' (' + favCount + ' ⭐ favorite' + (favCount === 1 ? '' : 's') + ')' : '');
+    }
     filtered.sort(function (a, b) {
       var la = a.lastOpened || a.dateAdded || 0;
       var lb = b.lastOpened || b.dateAdded || 0;
@@ -16985,10 +16994,13 @@ window.LoadAudioFix = {
     };
   }
 
-  // Wire the Clear Library button (rendered in the library-screen header).
+  // Wire both Clear Library buttons: the topbar icon-only one and the
+  // labeled inline one above the grid. Either tap opens the same prompt.
   (function wireLibraryClearBtn() {
-    var btn = $('library-clear-btn');
-    if (btn) btn.addEventListener('click', promptClearLibrary);
+    var btn1 = $('library-clear-btn');
+    if (btn1) btn1.addEventListener('click', promptClearLibrary);
+    var btn2 = $('library-clear-btn-inline');
+    if (btn2) btn2.addEventListener('click', promptClearLibrary);
   })();
 
   /* ---------- Viewer ---------- */
