@@ -68,6 +68,11 @@ Stable-state backup branches on origin. To recover any of these states:
 
 ## Pending features (parked, NOT abandoned)
 
+- **Image Prompt feature for Load** — full plan in `PLAN_IMAGE_PROMPT.md`.
+  Source files in `inbox/`. User confirmed name "Image Prompt" (not "Prompt
+  Studio"). Phase 1 (drop-in chat PWA, ~30 min) ready to build next session;
+  Phase 2 (real image editing) needs more decisions.
+
 - **Piper TTS** — parked since Apr 27 (see `SESSION_NOTES_2026-04-27.md`). Still blocked on the post-install play() exception text from the user. v17bx surfaces it; need user to tap Repair voice and report.
 - **Voice Library cross-app integration** — only Load currently has the save-to-library buttons. ACR / Attain / Attain Jr / Study can READ from the shared IndexedDB but no UI yet to invoke library voices for reading. Phase 2 once the 🎤 button is verified working.
 - **Stage 2 of Piper rollout** (ACR / Attain / Study) — blocked on Stage 1 working.
