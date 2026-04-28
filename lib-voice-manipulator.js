@@ -36,7 +36,7 @@
     { key: 'robot',    label: 'Robot',      icon: '🤖', vals: { pitchSemitones: -3, speed: 1.0,  eqLow: -2, eqMid: 4, eqHigh: 2,  reverb: 0,   echo: 0.25, distortion: 0.55, wet: 1 } },
     { key: 'narrator', label: 'Narrator',   icon: '🎙', vals: { pitchSemitones: -1, speed: 0.97, eqLow: 2,  eqMid: 2, eqHigh: 1,  reverb: 0.18,echo: 0,    distortion: 0,    wet: 1 } },
     { key: 'cartoon',  label: 'Cartoon',    icon: '🎬', vals: { pitchSemitones: 5,  speed: 1.1,  eqLow: -1, eqMid: 3, eqHigh: 4,  reverb: 0.05,echo: 0.1,  distortion: 0,    wet: 1 } },
-    { key: 'creature', label: 'Creature',   icon: '🐲', vals: { pitchSemitones: -8, speed: 0.85, eqLow: 6,  eqMid: -3,eqHigh: -4, reverb: 0.25,echo: 0.15, distortion: 0.7,  wet: 1 } }
+    { key: 'creature', label: 'Creature',   icon: '🤡', vals: { pitchSemitones: -8, speed: 0.85, eqLow: 6,  eqMid: -3,eqHigh: -4, reverb: 0.25,echo: 0.15, distortion: 0.7,  wet: 1 } }
   ];
 
   /* Pitch shift WITH formant shift (resample + granular stretch).
