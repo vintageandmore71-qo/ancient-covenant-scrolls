@@ -4013,6 +4013,9 @@ window.LoadAudioFix = {
       // First-launch guided tour. Only fires if the user hasn't seen
       // it before; safe to call every boot.
       safe('maybeAutoStartTour', maybeAutoStartTour);
+      // Library auto-cleanup: ask once per session before silently
+      // deleting items not opened in 30+ days (favorites/notes kept).
+      try { cleanupExpiredApps(); } catch (e) { console.warn('cleanupExpiredApps failed', e); }
     } catch (e) {
       alert('Failed to start Load: ' + (e && e.message ? e.message : e));
     }
@@ -9054,7 +9057,7 @@ window.LoadAudioFix = {
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17cp</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17cq</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -15405,11 +15408,12 @@ window.LoadAudioFix = {
         else { iconChar = '&#128444;'; kindLabel = 'Image'; }
       }
       var notesIcon = a.notes && a.notes.trim() ? ' <span class="tile-has-notes" title="Has notes">&#128221;</span>' : '';
+      var favIcon = a.favorite ? ' <span class="tile-fav" title="Favorite — kept during auto-cleanup">&#11088;</span>' : '';
       parts.push(
         '<div class="tile" data-id="' + esc(a.id) + '">' +
           '<button class="tile-menu-btn" data-menu="' + esc(a.id) + '" aria-label="Options">&#8230;</button>' +
           '<div class="tile-icon">' + iconChar + '</div>' +
-          '<div class="tile-name">' + esc(a.name) + notesIcon + '</div>' +
+          '<div class="tile-name">' + esc(a.name) + favIcon + notesIcon + '</div>' +
           '<div class="tile-meta">' + (kindLabel ? kindLabel + ' &middot; ' : '') + esc(last) + '</div>' +
         '</div>'
       );
@@ -15455,8 +15459,13 @@ window.LoadAudioFix = {
     for (var i = 0; i < existing.length; i++) existing[i].remove();
     var menu = document.createElement('div');
     menu.className = 'context-menu';
+    var menuApp = apps.find(function (x) { return x.id === id; });
+    var favLabel = (menuApp && menuApp.favorite)
+      ? '&#11088; Unfavorite (allow auto-cleanup)'
+      : '&#11088; Favorite (keep during auto-cleanup)';
     menu.innerHTML =
       '<button data-act="open">&#128065; View</button>' +
+      '<button data-act="favorite">' + favLabel + '</button>' +
       '<button data-act="notes">&#128221; Notes</button>' +
       '<button data-act="folder">&#128193; Move to folder...</button>' +
       '<button data-act="share">&#10150; Share (Text, Email, AirDrop)</button>' +
@@ -15495,6 +15504,7 @@ window.LoadAudioFix = {
       var app = apps.find(function (x) { return x.id === id; });
       if (!app) return;
       if (act === 'open') openApp(app);
+      else if (act === 'favorite') toggleFavorite(id);
       else if (act === 'notes') openNotesFor(app);
       else if (act === 'folder') promptMoveToFolder(app);
       else if (act === 'share') shareAsStandaloneHtml(app);
@@ -16860,6 +16870,126 @@ window.LoadAudioFix = {
     $('confirm-cancel').onclick = closeConfirm;
   }
   function closeConfirm() { $('confirm-modal').classList.remove('on'); }
+
+  /* ---------- Favorites + auto-cleanup ---------- */
+
+  // Mark an app as favorite (kept during auto-cleanup) or clear that flag.
+  async function toggleFavorite(id) {
+    var app = apps.find(function (x) { return x.id === id; });
+    if (!app) return;
+    app.favorite = !app.favorite;
+    try { await putApp(app); } catch (e) {}
+    renderLibrary();
+    toast(app.favorite
+      ? '⭐ "' + app.name + '" marked favorite'
+      : '"' + app.name + '" no longer favorite');
+  }
+
+  // An app is "kept" if the user has shown intent: favorite, notes, or
+  // bookmarks. Anything not kept and not opened in 30+ days is eligible
+  // for auto-cleanup.
+  function isAppKept(a) {
+    if (a.favorite) return true;
+    if (a.notes && String(a.notes).trim()) return true;
+    if (Array.isArray(a.bookmarks) && a.bookmarks.length) return true;
+    return false;
+  }
+
+  function isExpired(a, nowTs) {
+    var ref = a.lastOpened || a.dateAdded || 0;
+    if (!ref) return false; // unknown age — don't auto-delete
+    return (nowTs - ref) > (30 * 24 * 60 * 60 * 1000);
+  }
+
+  // Boot-time cleanup. One consent popup per session; "No" defers
+  // for the rest of this boot (per CLAUDE.md: don't nag the user).
+  async function cleanupExpiredApps() {
+    if (!apps || !apps.length) return;
+    if (window.__loadCleanupAsked) return;
+    var now = Date.now();
+    var expired = apps.filter(function (a) { return isExpired(a, now) && !isAppKept(a); });
+    if (!expired.length) return;
+    window.__loadCleanupAsked = true;
+    var n = expired.length;
+    $('confirm-title').textContent = 'Auto-clean ' + n + ' old item' + (n === 1 ? '' : 's') + '?';
+    $('confirm-body').textContent =
+      n + ' item' + (n === 1 ? ' has' : 's have') + ' not been opened in 30+ days, ' +
+      'and ' + (n === 1 ? 'is' : 'are') + ' not marked favorite or annotated. ' +
+      'Remove ' + (n === 1 ? 'it' : 'them') + ' to keep your Library tidy? ' +
+      'Mark items ⭐ Favorite from the tile menu to keep them next time.';
+    var okBtn = $('confirm-ok');
+    var cancelBtn = $('confirm-cancel');
+    okBtn.textContent = 'Auto-clean ' + n;
+    $('confirm-modal').classList.add('on');
+    okBtn.onclick = async function () {
+      var removed = 0;
+      for (var i = 0; i < expired.length; i++) {
+        try { await deleteApp(expired[i].id); removed++; } catch (e) {}
+      }
+      apps = apps.filter(function (x) {
+        for (var i = 0; i < expired.length; i++) if (expired[i].id === x.id) return false;
+        return true;
+      });
+      renderLibrary();
+      updateHomeCounts();
+      renderRecent();
+      renderLibraryChips();
+      renderFolderList();
+      okBtn.textContent = 'Delete';
+      closeConfirm();
+      toast('✓ Auto-cleaned ' + removed + ' old item' + (removed === 1 ? '' : 's'));
+    };
+    cancelBtn.onclick = function () {
+      okBtn.textContent = 'Delete';
+      closeConfirm();
+    };
+  }
+
+  // Manual "Clear Library" button. Wipes everything except favorites.
+  async function promptClearLibrary() {
+    if (!apps || !apps.length) { toast('Library is already empty.'); return; }
+    var keep = apps.filter(isAppKept);
+    var toRemove = apps.filter(function (a) { return !isAppKept(a); });
+    if (!toRemove.length) {
+      toast('Nothing to clear — every item is favorited or annotated.');
+      return;
+    }
+    $('confirm-title').textContent = 'Clear ' + toRemove.length + ' item' + (toRemove.length === 1 ? '' : 's') + '?';
+    $('confirm-body').textContent =
+      'This removes ' + toRemove.length + ' item' + (toRemove.length === 1 ? '' : 's') +
+      ' from your Library. ' + keep.length + ' favorite/annotated item' +
+      (keep.length === 1 ? ' is' : 's are') + ' kept. ' +
+      'The original files on your iPad are not touched.';
+    var okBtn = $('confirm-ok');
+    var cancelBtn = $('confirm-cancel');
+    okBtn.textContent = 'Clear ' + toRemove.length;
+    $('confirm-modal').classList.add('on');
+    okBtn.onclick = async function () {
+      var removed = 0;
+      for (var i = 0; i < toRemove.length; i++) {
+        try { await deleteApp(toRemove[i].id); removed++; } catch (e) {}
+      }
+      apps = apps.filter(isAppKept);
+      renderLibrary();
+      updateHomeCounts();
+      renderRecent();
+      renderLibraryChips();
+      renderFolderList();
+      okBtn.textContent = 'Delete';
+      closeConfirm();
+      toast('✓ Cleared ' + removed + ' item' + (removed === 1 ? '' : 's'));
+    };
+    cancelBtn.onclick = function () {
+      okBtn.textContent = 'Delete';
+      closeConfirm();
+    };
+  }
+
+  // Wire the Clear Library button (rendered in the library-screen header).
+  (function wireLibraryClearBtn() {
+    var btn = $('library-clear-btn');
+    if (btn) btn.addEventListener('click', promptClearLibrary);
+  })();
 
   /* ---------- Viewer ---------- */
 

@@ -2,13 +2,14 @@
 
 ## Current state
 
-- Latest commit: `624996f` — Add CLAUDE.md (project rules + session-logging mandate)
-- Load is at **v17cp** (`load/sw.js` `CACHE = 'load-v17cp'`, on-screen badge `v17cp`).
-  The v17cp bump landed inside commit `34f9127` (Voice Library + ACR per-chapter
+- Working branch: `claude/fix-session-sending-TVMbW` (per session task config)
+- Load is at **v17cq** (`load/sw.js` `CACHE = 'load-v17cq'`, on-screen badge `v17cq`).
+  v17cq adds Library auto-cleanup (one-prompt consent) + manual Clear Library button + per-tile favorite toggle.
+  The earlier v17cp bump landed inside commit `34f9127` (Voice Library + ACR per-chapter
   recording) — the title doesn't say "Load" so don't be misled by `git log` greps.
 - ACR is at **acr-v15** (latest standalone ACR commit `33d8ac3`).
-- Branch: `main`, pushed to origin
-- All file work for the day is committed; nothing local-only
+- Latest commit before this turn: `624996f` — Add CLAUDE.md (project rules + session-logging mandate)
+- v17cq commit pending push to `claude/fix-session-sending-TVMbW`
 
 ## Live verification
 
@@ -29,6 +30,11 @@
 9. ACR v14 — SW cache-buster query string + controllerchange auto-reload (port from Load v17ca pattern) (commit 076b927)
 10. ACR v15 — fixed-position bright-red MIC TEST marker for forensic deployment verification (commit 33d8ac3)
 11. v17cm — Voice Studio (cvs) record button now works without a script (free-recording fallback) (commit d20795b)
+12. **Load v17cq — Library auto-cleanup + Clear Library + favorites**:
+    - ⭐ Favorite toggle in tile context menu (sets `app.favorite` boolean, shown as star next to tile name)
+    - 🗑 "Clear Library" button in `library-screen` header — wipes everything except favorited / annotated / bookmarked apps with confirm
+    - On boot: `cleanupExpiredApps()` finds apps with `now - (lastOpened||dateAdded) > 30 days` AND not favorite AND no notes AND no bookmarks; ONE consent popup ("Auto-clean N old items?"), Yes → silent delete + toast, No → defers for the rest of the boot (no nagging)
+    - Bumped `load/sw.js` `CACHE = 'load-v17cq'` and on-screen badge `v17cq`
 
 ## Outstanding / blocking
 
