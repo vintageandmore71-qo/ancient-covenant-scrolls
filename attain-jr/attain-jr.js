@@ -1684,7 +1684,11 @@
     u.volume = 1;
     u.onend = opts.onend || null;
     currentUtter = u;
-    try { speechSynthesis.cancel(); } catch (e) {}
+    // No cancel() here — Web Speech cancel() is async and racing it
+    // with speak() in the same tick silently drops the speak across
+    // iPad Safari, desktop Safari, and Chrome. Stop paths elsewhere
+    // (ab-stop, b-pa) call cancel separately when interruption is
+    // intended.
     speechSynthesis.speak(u);
   }
 

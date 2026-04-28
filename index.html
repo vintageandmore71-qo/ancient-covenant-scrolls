@@ -709,8 +709,7 @@ var txt=prepTTS(p.textContent.trim());
 if(!txt){pi++;return speakCurrent();}
 var mySeq=++speakSeq,advanced=false;
 function advance(){if(advanced||mySeq!==speakSeq||!sp)return;advanced=true;clearWatchdog();pi++;rn();}
-// iOS Safari: leftover queue can cause the previous utterance to replay -- cancel before each speak
-try{window.speechSynthesis.cancel();}catch(e){}
+// NOTE: do NOT call speechSynthesis.cancel() here. Web Speech cancel() is async and queueing it in the same tick as speak() races the queue and silently drops the speak across iPad Safari, desktop Safari, and Chrome. The mySeq guard on onend/onerror + the watchdog already prevent stale re-reads.
 var u=new SpeechSynthesisUtterance(txt);
 u.rate=spd;u.lang='en-US';u.volume=1;u.pitch=1;
 var voice=getVoice();if(voice)u.voice=voice;

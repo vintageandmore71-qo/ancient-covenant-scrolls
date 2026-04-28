@@ -1110,7 +1110,9 @@ function prepTTS(txt) {
 function speakText(text) {
   if (!window.speechSynthesis) return;
   try { window.speechSynthesis.resume(); } catch (e) {}
-  try { window.speechSynthesis.cancel(); } catch (e) {}
+  // No cancel() here — Web Speech cancel() is async and racing it
+  // with speak() in the same tick silently drops the speak across
+  // iPad Safari, desktop Safari, and Chrome.
   var u = new SpeechSynthesisUtterance(prepTTS(text));
   u.rate = 1; u.lang = 'en-US'; u.volume = 1;
   var voice = getBestVoice();
@@ -1980,7 +1982,9 @@ function showListenLearn(fid) {
   function playVerse() {
     if (!window.speechSynthesis) return;
     try { window.speechSynthesis.resume(); } catch (e) {}
-    try { window.speechSynthesis.cancel(); } catch (e) {}
+    // No cancel() here — Web Speech cancel() is async and racing it
+    // with speak() in the same tick silently drops the speak. Stop
+    // paths elsewhere call cancel when interruption is intended.
     var card = document.getElementById('ll-card');
     if (card) card.classList.add('ll-speaking');
     var btn = document.getElementById('b-ll-play');

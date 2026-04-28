@@ -1217,7 +1217,9 @@ function getBestVoice() {
 function speakText(text) {
   if (!window.speechSynthesis) return;
   try { window.speechSynthesis.resume(); } catch (e) {}
-  try { window.speechSynthesis.cancel(); } catch (e) {}
+  // No cancel() here — Web Speech cancel() is async and racing it with
+  // speak() in the same tick silently drops the speak across iPad Safari,
+  // desktop Safari, and Chrome. Use stopSpeech() if you need to interrupt.
   var u = new SpeechSynthesisUtterance(text);
   u.rate = 1; u.lang = 'en-US'; u.volume = 1;
   var voice = getBestVoice();
