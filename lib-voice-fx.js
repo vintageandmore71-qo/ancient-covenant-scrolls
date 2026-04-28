@@ -18,15 +18,15 @@
     { key: 'none',       label: 'No effect',  icon: '🎙', note: 'Original recording' },
     { key: 'chipmunk',   label: 'Chipmunk',   icon: '🐿', note: 'High-pitch, fast' },
     { key: 'helium',     label: 'Helium',     icon: '🎈', note: 'Squeaky balloon voice' },
+    { key: 'baby',       label: 'Baby',       icon: '👶', note: 'Tiny + soft + sing-song' },
     { key: 'child',      label: 'Child',      icon: '🧒', note: 'Slightly higher + brighter' },
+    { key: 'cartoon',    label: 'Cartoon',    icon: '🎬', note: 'Bouncy, bright, character-y' },
     { key: 'woman',      label: 'Woman',      icon: '👩', note: 'Softer + slightly higher' },
     { key: 'man',        label: 'Man',        icon: '👨', note: 'Lower, fuller' },
     { key: 'deep',       label: 'Deep voice', icon: '🦁', note: 'Big, deep, slow' },
-    { key: 'elder',      label: 'Elder',      icon: '👴', note: 'Lower with slight tremor' },
-    { key: 'robot',      label: 'Robot',      icon: '🤖', note: 'Ring-modulated' },
-    { key: 'alien',      label: 'Alien',      icon: '👽', note: 'High pitch + ring mod' },
-    { key: 'monster',    label: 'Monster',    icon: '👹', note: 'Very deep + distortion' },
-    { key: 'ghost',      label: 'Ghost',      icon: '👻', note: 'Pitch down + reverb tail' },
+    { key: 'grandma',    label: 'Grandma',    icon: '👵', note: 'Warm voice with gentle quaver' },
+    { key: 'grandpa',    label: 'Grandpa',    icon: '👴', note: 'Lower, warm, gentle quaver' },
+    { key: 'elder',      label: 'Elder',      icon: '🧓', note: 'Slow, warm, slight tremor' },
     { key: 'echo',       label: 'Echo',       icon: '🔁', note: 'Repeating decay' },
     { key: 'cathedral',  label: 'Cathedral',  icon: '⛪', note: 'Long reverb' },
     { key: 'telephone',  label: 'Telephone',  icon: '☎️', note: 'Bandpassed 300-3400 Hz' },
@@ -67,47 +67,75 @@
     }
     if (key === 'chipmunk')      rate = 1.6;
     else if (key === 'helium')   rate = 1.8;
+    else if (key === 'baby')     rate = 1.55;
     else if (key === 'child')    rate = 1.25;
+    else if (key === 'cartoon')  rate = 1.4;
     else if (key === 'woman')    rate = 1.12;
     else if (key === 'man')      rate = 0.88;
     else if (key === 'deep')     rate = 0.7;
+    else if (key === 'grandma')  rate = 1.05;
+    else if (key === 'grandpa')  rate = 0.9;
     else if (key === 'elder')    rate = 0.85;
-    else if (key === 'monster')  rate = 0.55;
-    else if (key === 'ghost')    rate = 0.78;
-    else if (key === 'alien')    rate = 1.3;
 
-    if (key === 'robot' || key === 'alien') {
-      var ringFreq = key === 'alien' ? 200 : 80;
-      var osc = ctx.createOscillator(); osc.frequency.value = ringFreq; osc.type = 'sine';
-      var ring = ctx.createGain(); ring.gain.value = 0;
-      osc.connect(ring.gain);
-      srcNode.connect(ring);
-      var hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 200;
-      chain(ring, hp, outNode);
-      try { osc.start(); } catch (_) {}
-      return { rate: rate, _stopOsc: osc };
-    }
-    if (key === 'monster') {
-      var ws = ctx.createWaveShaper();
-      var curve = new Float32Array(1024);
-      for (var i = 0; i < 1024; i++) {
-        var x = i / 512 - 1;
-        curve[i] = Math.tanh(x * 2.5);
-      }
-      ws.curve = curve; ws.oversample = '4x';
-      var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 600;
-      chain(srcNode, ws, lp, outNode);
+    // Baby — high pitch + soft brightness, slight breathy highpass
+    if (key === 'baby') {
+      var bHp = ctx.createBiquadFilter(); bHp.type = 'highpass'; bHp.frequency.value = 250;
+      var bGain = ctx.createGain(); bGain.gain.value = 0.85;
+      chain(srcNode, bHp, bGain, outNode);
       return { rate: rate };
     }
-    if (key === 'ghost' || key === 'cathedral' || key === 'cave') {
+    // Cartoon — bright + light wobble (chorus-style short delay) for
+    // a bouncy, character-y feel.
+    if (key === 'cartoon') {
+      var cHp = ctx.createBiquadFilter(); cHp.type = 'peaking'; cHp.frequency.value = 3000; cHp.gain.value = 4; cHp.Q.value = 0.7;
+      var cDel = ctx.createDelay(); cDel.delayTime.value = 0.012;
+      var cLfo = ctx.createOscillator(); cLfo.frequency.value = 4;
+      var cLfoGain = ctx.createGain(); cLfoGain.gain.value = 0.005;
+      cLfo.connect(cLfoGain); cLfoGain.connect(cDel.delayTime);
+      var cDry = ctx.createGain(); cDry.gain.value = 0.7;
+      var cWet = ctx.createGain(); cWet.gain.value = 0.5;
+      srcNode.connect(cHp);
+      cHp.connect(cDry); cDry.connect(outNode);
+      cHp.connect(cDel); cDel.connect(cWet); cWet.connect(outNode);
+      try { cLfo.start(); } catch (_) {}
+      return { rate: rate, _stopOsc: cLfo };
+    }
+    // Grandma / Grandpa — warm tone (lowpass) + gentle tremor
+    // (LFO-modulated gain ~5-6 Hz, depth 0.12-0.15).
+    if (key === 'grandma' || key === 'grandpa') {
+      var ageLp = ctx.createBiquadFilter(); ageLp.type = 'lowpass';
+      ageLp.frequency.value = (key === 'grandma') ? 3000 : 2500;
+      var ageGain = ctx.createGain(); ageGain.gain.value = 1;
+      var trLfo = ctx.createOscillator();
+      trLfo.frequency.value = (key === 'grandma') ? 6 : 5;
+      var trDepth = ctx.createGain();
+      trDepth.gain.value = (key === 'grandma') ? 0.15 : 0.12;
+      trLfo.connect(trDepth); trDepth.connect(ageGain.gain);
+      chain(srcNode, ageLp, ageGain, outNode);
+      try { trLfo.start(); } catch (_) {}
+      return { rate: rate, _stopOsc: trLfo };
+    }
+    // Elder — slow + warm + slight tremor (existing pitch-only path
+    // boosted with a touch of warmth and a softer LFO).
+    if (key === 'elder') {
+      var elLp = ctx.createBiquadFilter(); elLp.type = 'lowpass'; elLp.frequency.value = 2800;
+      var elGain = ctx.createGain(); elGain.gain.value = 1;
+      var elLfo = ctx.createOscillator(); elLfo.frequency.value = 4.5;
+      var elDepth = ctx.createGain(); elDepth.gain.value = 0.10;
+      elLfo.connect(elDepth); elDepth.connect(elGain.gain);
+      chain(srcNode, elLp, elGain, outNode);
+      try { elLfo.start(); } catch (_) {}
+      return { rate: rate, _stopOsc: elLfo };
+    }
+    if (key === 'cathedral' || key === 'cave') {
       var conv = ctx.createConvolver();
       conv.buffer = buildIR(ctx,
-        key === 'cathedral' ? 4 : key === 'cave' ? 3 : 2.4,
+        key === 'cathedral' ? 4 : 3,
         key === 'cave' ? 1.2 : 1.5,
-        key === 'ghost' ? 0.7 : 0.4
+        0.4
       );
-      var dry = ctx.createGain(); dry.gain.value = key === 'ghost' ? 0.4 : 0.6;
-      var wet = ctx.createGain(); wet.gain.value = key === 'ghost' ? 0.9 : 0.7;
+      var dry = ctx.createGain(); dry.gain.value = 0.6;
+      var wet = ctx.createGain(); wet.gain.value = 0.7;
       srcNode.connect(dry); dry.connect(outNode);
       srcNode.connect(conv); conv.connect(wet); wet.connect(outNode);
       return { rate: rate };
