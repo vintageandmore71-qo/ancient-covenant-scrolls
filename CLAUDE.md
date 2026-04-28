@@ -46,6 +46,12 @@ serve stale cached code.
 ## Verification before pushing "fix" claims
 
 The user has explicit rules from past frustration:
+- **No more guessing.** Every factual claim about state — version
+  number, commit hash, file contents, deployed URL, working/broken
+  status — must come from a tool call (Read, Bash, MCP) or from text
+  the user wrote in this session. Don't infer from commit titles or
+  memory; verify against the actual file. If you can't, say "I don't
+  know" and run the check.
 - **No "try a refresh" or "clear Safari data" advice unless I can prove
   the deployed file is the broken one.** Cache is a guess until proven.
 - Never repeat or slightly modify a fix that already failed. Find a
