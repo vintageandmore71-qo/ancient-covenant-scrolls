@@ -5842,8 +5842,27 @@ window.LoadAudioFix = {
           var helpBtn = document.querySelector('[data-tool="help"]');
           if (helpBtn) helpBtn.click();
         }
+        else if (act === 'cvs') {
+          if (window.CharacterVoiceStudio && typeof CharacterVoiceStudio.open === 'function') {
+            // The studio's bridge callbacks talk to the active editor
+            // through window.__loadVeBridge. Editor populates this
+            // when openVideoEditor mounts; nulls it on teardown. If
+            // no editor is open the studio shows a helpful message
+            // and the user is sent back to Library to pick a video.
+            CharacterVoiceStudio.open({
+              onAddTextLines: (window.__loadVeBridge && window.__loadVeBridge.addTextLines) || null,
+              onAddAudioBlob: (window.__loadVeBridge && window.__loadVeBridge.addAudioBlob) || null
+            });
+          } else {
+            toast('Voice Studio module didn\'t load.', true);
+          }
+        }
       });
     });
+    // Hide the Voice Studio tile if the lib failed to load (e.g., the
+    // file was removed or blocked). Keeps the home grid clean.
+    var cvsTile = $('home-ws-cvs');
+    if (cvsTile && !window.CharacterVoiceStudio) cvsTile.style.display = 'none';
     // Optional PWA-help modal kept wired (used when user picks Web Apps card)
     var pc = $('pwa-modal-cancel'); if (pc) pc.addEventListener('click', function () { $('pwa-modal').classList.remove('on'); });
     var pp = $('pwa-modal-pick'); if (pp) pp.addEventListener('click', function () {
@@ -9003,7 +9022,7 @@ window.LoadAudioFix = {
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17cg</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ch</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -10929,6 +10948,50 @@ window.LoadAudioFix = {
         try { renderStickerOverlaysAt(engine.t || 0); } catch (_) {}
       }
     }
+    // Bridge for Character Voice Studio. Lets the studio (which lives
+    // outside the editor IIFE) add subtitle blocks or a single audio
+    // music track to THIS editor's timeline by reusing addTrackItem.
+    // Cleared on editor teardown (ve-back handler).
+    window.__loadVeBridge = {
+      addTextLines: function (lines) {
+        if (!Array.isArray(lines) || !lines.length) return;
+        var t0 = engine.t || 0;
+        lines.forEach(function (l) {
+          // Re-uses the existing 'text' track plumbing — produces real
+          // subtitle blocks with the speaker label baked in. We force
+          // each block's t0 so the cast plays sequentially from the
+          // current playhead instead of stacking at one point.
+          var savedT = engine.t;
+          engine.t = t0;
+          try { addTrackItem('text', { text: l.text, dur: l.dur || 3 }); }
+          finally { engine.t = savedT; }
+          t0 += (l.dur || 3);
+        });
+        toast(lines.length + ' line' + (lines.length === 1 ? '' : 's') + ' added as subtitles.', false);
+      },
+      addAudioBlob: function (blob, name) {
+        if (!blob) return;
+        try {
+          var ctx = audioCtx || (audioCtx = new (window.AudioContext || window.webkitAudioContext)());
+          blob.arrayBuffer().then(function (ab) {
+            return ctx.decodeAudioData(ab);
+          }).then(function (buf) {
+            musicBuffer = buf;
+            addTrackItem('music', {
+              name: name || 'voice-scene',
+              dur: Math.min(buf.duration, engine.duration() || buf.duration),
+              buffer: buf
+            });
+            try { renderWaveformFor && renderWaveformFor(buf); } catch (_) {}
+            toast('Voice audio added to music track (' + buf.duration.toFixed(1) + 's).', false);
+          }).catch(function (e) {
+            toast('Could not decode recorded audio: ' + ((e && e.message) || e), true);
+          });
+        } catch (e) {
+          toast('Audio bridge failed: ' + ((e && e.message) || e), true);
+        }
+      }
+    };
     function renderTracks() {
       ensureTracks();
       if (!engine || !engine.tracks) return;
@@ -12690,6 +12753,9 @@ window.LoadAudioFix = {
     bindEd('ve-back', 'click', function () {
       var existing = document.getElementById('__loadVideoEdit');
       if (existing) existing.remove();
+      // Tear down the Character Voice Studio bridge so the home-screen
+      // tile stops trying to add items to a closed editor.
+      try { delete window.__loadVeBridge; } catch (_) { window.__loadVeBridge = null; }
     });
     bindEd('ve-refresh', 'click', async function () {
       try {

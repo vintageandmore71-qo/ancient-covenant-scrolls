@@ -132,6 +132,11 @@
           <span class="home-ws-label">Help</span>
           <span class="home-ws-dir">Tour every Load feature</span>
         </button>
+        <button class="home-ws-tile" data-home-ws="cvs" id="home-ws-cvs">
+          <span class="home-ws-icon">&#127917;</span>
+          <span class="home-ws-label">Voice Studio</span>
+          <span class="home-ws-dir">Cast a script: assign voices to characters</span>
+        </button>
       </div>
     </section>
 
@@ -1815,6 +1820,10 @@
      pays the download once, every other reads from cache). Failure to
      load is non-fatal: Load just falls back to Safari speechSynthesis. -->
 <script src="../lib-piper.js"></script>
+<!-- Character Voice Studio — script parser + voice profiles +
+     mic-recording bridge. Self-contained; window.CharacterVoiceStudio.
+     Failure to load is non-fatal: the Studio tile just hides itself. -->
+<script src="../lib-character-voice-studio.js"></script>
 <script>
 /* Configure pdf.js worker from our locally-served worker file. */
 if (window.pdfjsLib) {
