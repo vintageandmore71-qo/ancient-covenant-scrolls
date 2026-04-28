@@ -36,40 +36,43 @@
     { key: 'robot',    label: 'Robot',      icon: '🤖', vals: { pitchSemitones: -3, speed: 1.0,  eqLow: -2, eqMid: 4, eqHigh: 2,  reverb: 0,   echo: 0.25, distortion: 0.55, wet: 1 } },
     { key: 'narrator', label: 'Narrator',   icon: '🎙', vals: { pitchSemitones: -1, speed: 0.97, eqLow: 2,  eqMid: 2, eqHigh: 1,  reverb: 0.18,echo: 0,    distortion: 0,    wet: 1 } },
     { key: 'cartoon',  label: 'Cartoon',    icon: '🎬', vals: { pitchSemitones: 5,  speed: 1.1,  eqLow: -1, eqMid: 3, eqHigh: 4,  reverb: 0.05,echo: 0.1,  distortion: 0,    wet: 1 } },
-    { key: 'creature', label: 'Creature',   icon: '👹', vals: { pitchSemitones: -8, speed: 0.85, eqLow: 6,  eqMid: -3,eqHigh: -4, reverb: 0.25,echo: 0.15, distortion: 0.7,  wet: 1 } }
+    { key: 'creature', label: 'Creature',   icon: '🐲', vals: { pitchSemitones: -8, speed: 0.85, eqLow: 6,  eqMid: -3,eqHigh: -4, reverb: 0.25,echo: 0.15, distortion: 0.7,  wet: 1 } }
   ];
 
-  /* Granular pitch shift — preserves duration, shifts pitch by N
-   * semitones. rate = 2^(N/12). Re-samples each grain by rate while
-   * placing grains at original timing. */
-  function pitchShift(buf, semitones, ctx) {
+  /* Pitch shift WITH formant shift (resample + granular stretch).
+   * This is the transformation that actually changes voice character
+   * (man ↔ woman ↔ child) instead of just sounding like a chipmunk
+   * at a different pitch. Two stages:
+   *
+   *   1. Resample by `rate` via OfflineAudioContext + playbackRate.
+   *      This shifts pitch AND formants (vocal-tract resonances) AND
+   *      compresses/expands duration. Sounds like a different person.
+   *
+   *   2. Granular time stretch by `1/rate` to restore the original
+   *      duration. Granular stretch preserves whatever pitch +
+   *      formants are in the input — so the voice keeps its new
+   *      character but the timing matches the original.
+   */
+  async function pitchShift(buf, semitones) {
     semitones = +semitones || 0;
     if (semitones === 0) return buf;
     var rate = Math.pow(2, semitones / 12);
     var sr = buf.sampleRate;
-    var nCh = buf.numberOfChannels;
-    var inLen = buf.length;
-    var grain = Math.max(256, Math.floor(sr * 0.05)); // 50 ms grains
-    var hop = Math.floor(grain * 0.5);
-    var out = (ctx || new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(nCh, inLen, sr)).createBuffer(nCh, inLen, sr);
-    var win = new Float32Array(grain);
-    for (var i = 0; i < grain; i++) win[i] = 0.5 * (1 - Math.cos(2 * Math.PI * i / (grain - 1)));
-    for (var c = 0; c < nCh; c++) {
-      var src = buf.getChannelData(c);
-      var dst = out.getChannelData(c);
-      for (var pos = 0; pos < inLen; pos += hop) {
-        for (var k = 0; k < grain; k++) {
-          var srcIdx = pos + k * rate;
-          var i0 = Math.floor(srcIdx);
-          if (i0 < 0 || i0 >= inLen - 1) continue;
-          var frac = srcIdx - i0;
-          var s = src[i0] * (1 - frac) + src[i0 + 1] * frac;
-          var d = pos + k;
-          if (d >= 0 && d < inLen) dst[d] += s * win[k];
-        }
-      }
-    }
-    return out;
+    var nCh = Math.min(2, buf.numberOfChannels || 1);
+
+    // Stage 1 — resample via playbackRate
+    var resampledLen = Math.max(1, Math.floor(buf.length / rate));
+    var oCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(nCh, resampledLen, sr);
+    var src = oCtx.createBufferSource();
+    src.buffer = buf;
+    src.playbackRate.value = rate;
+    src.connect(oCtx.destination);
+    src.start();
+    var resampled = await oCtx.startRendering();
+
+    // Stage 2 — granular stretch back to original duration. Preserves
+    // the pitch+formants of the resampled buffer.
+    return timeStretch(resampled, 1 / rate);
   }
 
   /* Granular time stretch — preserves pitch, scales duration. rate
@@ -203,7 +206,7 @@
     var stage = buf;
     var pitch = +opts.pitchSemitones || 0;
     var speed = +opts.speed || 1;
-    if (pitch !== 0) stage = pitchShift(stage, pitch);
+    if (pitch !== 0) stage = await pitchShift(stage, pitch);
     if (speed !== 1) stage = timeStretch(stage, speed);
     if (opts.eqLow || opts.eqMid || opts.eqHigh ||
         opts.reverb || opts.echo || opts.distortion ||
