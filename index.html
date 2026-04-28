@@ -375,6 +375,8 @@ body.dark #home p{color:#888}
 <select id="vc"><option value="">Loading...</option></select>
 <button id="b-pv" title="Preview voice">&#9654;&#9654;</button>
 <select id="vm"><option value="verses">Verses</option><option value="notes">Notes</option><option value="all">All</option></select>
+<button id="b-rc" title="Record this chapter in your own voice — plays your recording instead of the TTS voice when set">&#127908;</button>
+<button id="b-rcd" title="Use TTS voice instead (delete this chapter's recording)" style="display:none;">&#128465;</button>
 <span id="vst">Ready</span>
 </div>
 
@@ -726,6 +728,13 @@ function startPlayback(){
 if(!window.speechSynthesis){alert('Voice reader not supported in this browser.');return false;}
 if(pa){window.speechSynthesis.resume();pa=false;document.getElementById('b-pl').style.display='none';document.getElementById('b-pa').style.display='inline';document.getElementById('vst').textContent='Reading...';return true;}
 if(cur<0){document.getElementById('vst').textContent='Open a section first';return false;}
+// Per-chapter recording — if the user has recorded their own voice
+// for THIS chapter, play that audio file instead of the TTS engine.
+// Falls through to TTS when no recording is found.
+if(typeof tryPlayChapterRecording==='function'){
+var ok=tryPlayChapterRecording();
+if(ok){sp=true;document.getElementById('b-pl').style.display='none';document.getElementById('b-pa').style.display='inline';document.getElementById('vst').textContent='Reading (your voice)…';return true;}
+}
 ps=gps();
 if(!ps.length){document.getElementById('vst').textContent='No content';return false;}
 if(pi>=ps.length)pi=0;
@@ -757,8 +766,114 @@ speakCurrent();
 document.getElementById('b-pa').addEventListener('click',function(){window.speechSynthesis.pause();pa=true;this.style.display='none';document.getElementById('b-pl').style.display='inline';document.getElementById('vst').textContent='Paused';});
 document.getElementById('b-st').addEventListener('click',stp);
 
-function stp(){sp=false;pa=false;speakSeq++;clearWatchdog();if(window.speechSynthesis)window.speechSynthesis.cancel();pi=0;if(cp)cp.classList.remove('sp');cp=null;document.getElementById('b-pl').style.display='inline';document.getElementById('b-pa').style.display='none';document.getElementById('vst').textContent='Ready';}
+function stp(){sp=false;pa=false;speakSeq++;clearWatchdog();if(window.speechSynthesis)window.speechSynthesis.cancel();try{if(typeof crStop==='function')crStop();}catch(e){}pi=0;if(cp)cp.classList.remove('sp');cp=null;document.getElementById('b-pl').style.display='inline';document.getElementById('b-pa').style.display='none';document.getElementById('vst').textContent='Ready';}
 function dn(){sp=false;speakSeq++;clearWatchdog();pi=0;if(cp)cp.classList.remove('sp');cp=null;document.getElementById('b-pl').style.display='inline';document.getElementById('b-pa').style.display='none';document.getElementById('vst').textContent='Done';}
+
+/* Per-chapter voice recording.
+ *
+ * IndexedDB store: db 'acr-chapter-recordings', store 'recs', key = fid.
+ * Each rec: { fid, blob, mime, durationSec, createdAt }.
+ * UI buttons: b-rc (record toggle), b-rcd (delete this chapter's rec).
+ * When a recording exists for IDS[cur], startPlayback() routes through
+ * tryPlayChapterRecording() instead of speechSynthesis. */
+var crDB=null;
+function crOpen(){
+  return new Promise(function(res,rej){
+    if(crDB){res(crDB);return;}
+    var r=indexedDB.open('acr-chapter-recordings',1);
+    r.onupgradeneeded=function(){var db=r.result;if(!db.objectStoreNames.contains('recs'))db.createObjectStore('recs',{keyPath:'fid'});};
+    r.onsuccess=function(){crDB=r.result;res(crDB);};
+    r.onerror=function(){rej(r.error);};
+  });
+}
+function crGet(fid){return crOpen().then(function(db){return new Promise(function(res,rej){var t=db.transaction('recs','readonly').objectStore('recs').get(fid);t.onsuccess=function(){res(t.result||null);};t.onerror=function(){rej(t.error);};});});}
+function crPut(rec){return crOpen().then(function(db){return new Promise(function(res,rej){var t=db.transaction('recs','readwrite').objectStore('recs').put(rec);t.onsuccess=function(){res();};t.onerror=function(){rej(t.error);};});});}
+function crDel(fid){return crOpen().then(function(db){return new Promise(function(res,rej){var t=db.transaction('recs','readwrite').objectStore('recs').delete(fid);t.onsuccess=function(){res();};t.onerror=function(){rej(t.error);};});});}
+var crAudio=null;
+function crStop(){try{if(crAudio){crAudio.pause();crAudio=null;}}catch(e){}}
+function tryPlayChapterRecording(){
+  if(cur<0||!IDS[cur])return false;
+  // Synchronous "have we got one?" — we cache the answer per chapter
+  // load via crSetButtons(). If null/unknown, return false.
+  if(!window.__crCache||!window.__crCache[IDS[cur]])return false;
+  var rec=window.__crCache[IDS[cur]];
+  crStop();
+  var url=URL.createObjectURL(rec.blob);
+  crAudio=new Audio(url);
+  crAudio.volume=1;crAudio.muted=false;
+  crAudio.onended=function(){URL.revokeObjectURL(url);crAudio=null;dn();};
+  crAudio.onerror=function(){URL.revokeObjectURL(url);crAudio=null;document.getElementById('vst').textContent='Recording failed to play.';};
+  crAudio.play().catch(function(e){document.getElementById('vst').textContent='Play failed: '+(e&&e.message||e);});
+  return true;
+}
+window.__crCache=window.__crCache||{};
+function crSetButtons(){
+  var rcBtn=document.getElementById('b-rc'),rcdBtn=document.getElementById('b-rcd');
+  if(!rcBtn)return;
+  if(cur<0||!IDS[cur]){rcBtn.style.display='none';rcdBtn.style.display='none';return;}
+  rcBtn.style.display='inline';
+  // Load cache state if not already known
+  var fid=IDS[cur];
+  if(window.__crCache[fid]===undefined){
+    crGet(fid).then(function(rec){window.__crCache[fid]=rec||null;crSetButtons();});
+    rcBtn.textContent='\u{1F3A4}';rcdBtn.style.display='none';
+    return;
+  }
+  if(window.__crCache[fid]){rcBtn.textContent='\u{1F3A4}★';rcdBtn.style.display='inline';}
+  else{rcBtn.textContent='\u{1F3A4}';rcdBtn.style.display='none';}
+}
+// Re-evaluate the recording buttons whenever the chapter changes.
+// `go()` sets cur — we hook the original. Defensive: only wrap once.
+(function(){
+  if(window.__crGoWrapped)return;
+  window.__crGoWrapped=true;
+  var origGo=window.go;
+  if(typeof origGo!=='function')return;
+  window.go=function(){var r=origGo.apply(this,arguments);try{crSetButtons();}catch(e){}return r;};
+})();
+// Wire record / delete buttons
+(function(){
+  var rcBtn=document.getElementById('b-rc'),rcdBtn=document.getElementById('b-rcd');
+  if(!rcBtn||!rcdBtn)return;
+  var rec=null,recStream=null,recChunks=[];
+  rcBtn.addEventListener('click',function(){
+    if(cur<0||!IDS[cur]){alert('Open a chapter first.');return;}
+    var fid=IDS[cur];
+    if(rec&&rec.state==='recording'){
+      try{rec.stop();}catch(e){}
+      if(recStream){recStream.getTracks().forEach(function(t){t.stop();});recStream=null;}
+      rcBtn.textContent='\u{1F3A4}';
+      document.getElementById('vst').textContent='Saving recording…';
+      return;
+    }
+    if(window.__crCache[fid]){
+      if(!confirm('Replace your existing recording for this chapter?'))return;
+    }
+    if(!navigator.mediaDevices||!window.MediaRecorder){alert('Microphone recording is not supported on this device.');return;}
+    navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+      recStream=stream;recChunks=[];
+      var mime=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':MediaRecorder.isTypeSupported('audio/mp4')?'audio/mp4':'';
+      rec=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);
+      rec.ondataavailable=function(e){if(e.data&&e.data.size)recChunks.push(e.data);};
+      rec.onstop=function(){
+        var blob=new Blob(recChunks,{type:rec&&rec.mimeType?rec.mimeType:'audio/webm'});
+        var rrec={fid:fid,blob:blob,mime:blob.type,createdAt:Date.now()};
+        crPut(rrec).then(function(){window.__crCache[fid]=rrec;crSetButtons();document.getElementById('vst').textContent='Saved your recording for this chapter. Tap ▶ to play.';}).catch(function(e){document.getElementById('vst').textContent='Save failed: '+(e&&e.message||e);});
+      };
+      rec.start();
+      rcBtn.textContent='■';
+      document.getElementById('vst').textContent='Recording — tap ■ to stop.';
+    }).catch(function(e){alert('Mic permission denied: '+(e&&e.message||e));});
+  });
+  rcdBtn.addEventListener('click',function(){
+    if(cur<0||!IDS[cur])return;
+    if(!confirm('Delete your recording for this chapter? The TTS voice will be used again.'))return;
+    var fid=IDS[cur];
+    crDel(fid).then(function(){window.__crCache[fid]=null;crSetButtons();document.getElementById('vst').textContent='Recording removed. Using TTS voice.';});
+  });
+  // Initial state
+  setTimeout(crSetButtons,500);
+})();
 
 window.onscroll=function(){var s=window.scrollY||0,h=document.documentElement.scrollHeight-window.innerHeight;document.getElementById('pf').style.width=(h>0?Math.round(s/h*100):0)+'%';document.getElementById('tb2').style.display=s>300?'block':'none';};
 (function(){

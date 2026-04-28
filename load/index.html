@@ -147,6 +147,11 @@
           <span class="home-ws-label">Voice Manipulator</span>
           <span class="home-ws-dir">Pitch · speed · EQ · reverb · echo · presets</span>
         </button>
+        <button class="home-ws-tile" data-home-ws="vlib" id="home-ws-vlib">
+          <span class="home-ws-icon">&#128218;</span>
+          <span class="home-ws-label">Voice Library</span>
+          <span class="home-ws-dir">Saved clips · play, share, add to timeline</span>
+        </button>
       </div>
     </section>
 
@@ -1837,6 +1842,9 @@
 <!-- Voice Manipulator — granular pitch shift + time stretch + EQ +
      reverb + echo + distortion. Pure Web Audio, no external libs. -->
 <script src="../lib-voice-manipulator.js"></script>
+<!-- Voice Library — IndexedDB store of saved voice clips, shared
+     across all five ACR apps on this origin. -->
+<script src="../lib-voice-library.js"></script>
 <!-- Character Voice Studio — script parser + voice profiles +
      mic-recording bridge. Self-contained; window.CharacterVoiceStudio.
      Failure to load is non-fatal: the Studio tile just hides itself. -->

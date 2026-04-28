@@ -454,6 +454,7 @@
           '<button id="cvsfx-add" style="background:#1d6fff;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer;flex:1;min-width:130px;" disabled>＋ Add to timeline</button>' +
           '<button id="cvsfx-save" style="background:#fbbf24;color:#1a1a26;border:none;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer;flex:1;min-width:130px;" disabled>💾 Save file</button>' +
           '<button id="cvsfx-share" style="background:#a855f7;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer;flex:1;min-width:130px;" disabled>↗ Share</button>' +
+          '<button id="cvsfx-lib" style="background:#0e0e18;color:#fbbf24;border:1px solid #fbbf24;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer;flex:1;min-width:140px;" disabled>📚 Save to Library</button>' +
         '</div>' +
       '</div>';
     document.body.appendChild(modal);
@@ -472,6 +473,7 @@
     var addBtn   = modal.querySelector('#cvsfx-add');
     var saveBtn  = modal.querySelector('#cvsfx-save');
     var shareBtn = modal.querySelector('#cvsfx-share');
+    var libBtn   = modal.querySelector('#cvsfx-lib');
     var importBtn= modal.querySelector('#cvsfx-import');
     var importFile=modal.querySelector('#cvsfx-import-file');
 
@@ -509,6 +511,7 @@
         statusEl.textContent = 'Ready — preview, save, share, or add to timeline.';
         playBtn.disabled = false; addBtn.disabled = false; saveBtn.disabled = false;
         shareBtn.disabled = !(navigator.share && (lastFxBuffer || lastBuffer));
+        if (libBtn) libBtn.disabled = !window.VoiceLibrary;
       } catch (e) {
         statusEl.textContent = 'FX failed: ' + ((e && e.message) || e);
       }
@@ -573,6 +576,16 @@
         // Fall back: just trigger download
         saveBtn.click();
       }
+    });
+    if (libBtn) libBtn.addEventListener('click', async function () {
+      if (!lastFxBuffer || !window.VoiceLibrary) return;
+      var name = prompt('Save as (name this voice clip):', 'Voice ' + lastFxKey + ' ' + new Date().toLocaleString());
+      if (name == null) return;
+      try {
+        var blob = bufToWavBlob(lastFxBuffer);
+        await VoiceLibrary.save(blob, { name: name.trim() || ('Voice ' + lastFxKey), durationSec: lastFxBuffer.duration, mime: 'audio/wav' });
+        statusEl.textContent = '✓ Saved to Voice Library.';
+      } catch (e) { statusEl.textContent = 'Save failed: ' + ((e && e.message) || e); }
     });
 
     function startRec() {
@@ -717,6 +730,7 @@
           '<button id="vm-stop" style="background:#2a2a40;color:#fff;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;">■</button>' +
           '<button id="vm-apply" style="background:#1d6fff;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer;flex:1;min-width:140px;" disabled>＋ Apply to timeline</button>' +
           '<button id="vm-save" style="background:#fbbf24;color:#1a1a26;border:none;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer;" disabled>💾 Save</button>' +
+          '<button id="vm-lib" style="background:#0e0e18;color:#fbbf24;border:1px solid #fbbf24;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer;" disabled>📚 Library</button>' +
         '</div>' +
       '</div>';
     document.body.appendChild(modal);
@@ -761,6 +775,7 @@
     var previewBtn = modal.querySelector('#vm-preview');
     var applyBtn   = modal.querySelector('#vm-apply');
     var saveBtn    = modal.querySelector('#vm-save');
+    var libBtn     = modal.querySelector('#vm-lib');
 
     function ensureCtx() { if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); return ctx; }
 
@@ -771,6 +786,7 @@
       statusEl.textContent = 'Source loaded — drag any slider to shape the voice.';
       ctrlsEl.style.display = '';
       previewBtn.disabled = false; applyBtn.disabled = false; saveBtn.disabled = false;
+      if (libBtn) libBtn.disabled = !window.VoiceLibrary;
       renderPresets();
       schedulePreview();
     }
@@ -886,6 +902,16 @@
       a.download = 'voice-manipulated-' + Date.now() + '.wav';
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
+    });
+    if (libBtn) libBtn.addEventListener('click', async function () {
+      if (!processedBuf || !window.VoiceLibrary) return;
+      var name = prompt('Save to Voice Library — name this clip:', 'Voice ' + new Date().toLocaleString());
+      if (name == null) return;
+      try {
+        var blob = bufToWavBlob(processedBuf);
+        await VoiceLibrary.save(blob, { name: name.trim() || 'Voice', durationSec: processedBuf.duration, mime: 'audio/wav' });
+        statusEl.textContent = '✓ Saved to Voice Library.';
+      } catch (e) { statusEl.textContent = 'Save failed: ' + ((e && e.message) || e); }
     });
 
     // Recording
