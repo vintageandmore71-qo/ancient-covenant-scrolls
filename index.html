@@ -462,6 +462,7 @@ localStorage.setItem('acr_last',fid);
 if(window.innerWidth<=700)document.getElementById('sb').classList.remove('m');
 var vpos=JSON.parse(localStorage.getItem('acr_vpos')||'null');
 if(vpos&&vpos.fid===fid&&vpos.pi>0){pi=vpos.pi;document.getElementById('vst').textContent='Resume v'+(pi+1);}else{pi=0;}
+try{if(typeof crSetButtons==='function')crSetButtons();}catch(e){}
 })
 .catch(function(e){document.getElementById('content').innerHTML='<p style="color:#888;padding:40px;text-align:center">Error: '+e.message+'</p>';});
 }
@@ -822,15 +823,9 @@ function crSetButtons(){
   if(window.__crCache[fid]){rcBtn.textContent='\u{1F3A4}★';rcdBtn.style.display='inline';}
   else{rcBtn.textContent='\u{1F3A4}';rcdBtn.style.display='none';}
 }
-// Re-evaluate the recording buttons whenever the chapter changes.
-// `go()` sets cur — we hook the original. Defensive: only wrap once.
-(function(){
-  if(window.__crGoWrapped)return;
-  window.__crGoWrapped=true;
-  var origGo=window.go;
-  if(typeof origGo!=='function')return;
-  window.go=function(){var r=origGo.apply(this,arguments);try{crSetButtons();}catch(e){}return r;};
-})();
+// crSetButtons() is called from inside go() itself (after the
+// chapter content has loaded), so the buttons reflect the active
+// chapter the moment it's open. No wrap-window-go needed.
 // Wire record / delete buttons
 (function(){
   var rcBtn=document.getElementById('b-rc'),rcdBtn=document.getElementById('b-rcd');
