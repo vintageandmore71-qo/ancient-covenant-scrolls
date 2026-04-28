@@ -350,7 +350,6 @@
     // hand off to Load's timeline. iPad-compatible (MediaRecorder +
     // getUserMedia).
     modal.querySelector('#cvs-add-audio').addEventListener('click', async function () {
-      if (!parsed.length) { alert('Detect characters first.'); return; }
       if (typeof opts.onAddAudioBlob !== 'function') { alert('No editor open. Open a video in the editor first, then re-open the studio from there to add audio to its timeline.'); return; }
       if (!navigator.mediaDevices || !window.MediaRecorder) { alert('Microphone recording is not supported on this device.'); return; }
       var btn = this;
@@ -365,21 +364,33 @@
         var rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
         rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
         var stopped = new Promise(function (res) { rec.onstop = res; });
-        for (var i = 0; i < parsed.length; i++) {
-          var l = parsed[i];
-          btn.textContent = 'Recording line ' + (i + 1) + '/' + parsed.length + ' …';
-          var ok = confirm('Line ' + (i + 1) + ' / ' + parsed.length + '\n' +
-            l.speaker + ': ' + l.text + '\n\nTap OK to start recording, then OK again to stop.');
-          if (!ok) { rec.stop(); stream.getTracks().forEach(function (t) { t.stop(); }); btn.textContent = orig; btn.disabled = false; return; }
-          if (rec.state === 'inactive') rec.start();
-          // Single-utterance gate — user controls stop with confirm
+        if (!parsed.length) {
+          // FREE-RECORDING path — no script needed. One start, one
+          // stop, one audio clip. The user gets a confirm to start
+          // and a second confirm to stop.
+          btn.textContent = 'Recording…';
+          var goAhead = confirm('No script detected.\n\nTap OK to start a free recording, then OK again to stop.');
+          if (!goAhead) { stream.getTracks().forEach(function (t) { t.stop(); }); btn.textContent = orig; btn.disabled = false; return; }
+          rec.start();
           alert('Recording: speak now. Tap OK when done.');
+          rec.stop();
+        } else {
+          // SCRIPTED path — record line by line.
+          for (var i = 0; i < parsed.length; i++) {
+            var l = parsed[i];
+            btn.textContent = 'Recording line ' + (i + 1) + '/' + parsed.length + ' …';
+            var ok = confirm('Line ' + (i + 1) + ' / ' + parsed.length + '\n' +
+              l.speaker + ': ' + l.text + '\n\nTap OK to start recording, then OK again to stop.');
+            if (!ok) { rec.stop(); stream.getTracks().forEach(function (t) { t.stop(); }); btn.textContent = orig; btn.disabled = false; return; }
+            if (rec.state === 'inactive') rec.start();
+            alert('Recording: speak now. Tap OK when done.');
+          }
+          rec.stop();
         }
-        rec.stop();
         stream.getTracks().forEach(function (t) { t.stop(); });
         await stopped;
         var blob = new Blob(chunks, { type: mime || 'audio/webm' });
-        opts.onAddAudioBlob(blob, 'voice-scene-' + Date.now() + (mime.indexOf('mp4') >= 0 ? '.m4a' : '.webm'));
+        opts.onAddAudioBlob(blob, 'voice-' + (parsed.length ? 'scene' : 'clip') + '-' + Date.now() + (mime.indexOf('mp4') >= 0 ? '.m4a' : '.webm'));
         close();
       } catch (e) {
         alert('Recording failed: ' + ((e && e.message) || e));
