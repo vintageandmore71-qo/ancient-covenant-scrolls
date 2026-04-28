@@ -135,6 +135,50 @@ Phase 2 sub-decisions to make next session:
 Don't start Phase 2 until Phase 1 is shipped and the user has used it
 for a few days — usage will reshape what's worth building.
 
+### Free AI / open-source options (user-provided list)
+
+Vetted these against PWA-on-iPad-Safari constraints. ✅ = runs fully
+client-side in the browser; ⚠ = needs network or server; ❌ = doesn't
+fit the iPad-Safari-PWA model.
+
+**Open-source JS libraries (drop into the codebase):**
+
+| Tool | Fits PWA? | Best use in Load |
+| --- | --- | --- |
+| **Jimp** | ✅ pure JS, in-browser | Resize / crop / blur / filter — fastest path to "client-side image edits". Zero network. |
+| **OpenCV.js** | ✅ runs in-browser (large WASM ~8 MB) | Face detection, feature tracking, segmentation — enables "remove background", "find faces" without an API |
+| **Anime.js** | ✅ tiny | UI animations, transitions on rendered images |
+| **Lottie.js** | ✅ tiny | Render lightweight JSON animations alongside generated images |
+| **Graphite** | ⚠ partly — desktop-first; web build experimental | Vector / raster editing — keep an eye on web-stable releases |
+
+**External web-based editors (open in iframe or as Workspace tile):**
+
+| Tool | Fits PWA? | Notes |
+| --- | --- | --- |
+| **Wick Editor** | ⚠ web-based, opens in iframe | Animation + game creation. Could embed as a tile like Image Prompt. |
+| **Motionity** | ⚠ web-based | After-Effects-style motion graphics. iframe candidate. |
+| **SadTalker** | ❌ Python/server-only today | Talking-avatar from still image. Would need a hosted endpoint (HF Spaces, Replicate). Not client-side. |
+
+**Recommended Phase-2 build order using these:**
+
+1. **Jimp** first (smallest add) — gives instant client-side filters,
+   crop, blur. No API key needed. Pure-JS = works fully offline.
+2. **OpenCV.js** for "remove background" + face detection (powers
+   future hairstyle/headshot features). Heavy WASM but a one-time load.
+3. **Lottie.js** + **Anime.js** for the UX layer — make the editing
+   feel responsive without a backend.
+4. **Wick / Motionity** as iframe Workspace tiles only if the user
+   wants timeline-style animation editing.
+5. **SadTalker** is the only true AI animation in the list — and it
+   requires a server. Defer until Phase 2's API decisions are made.
+6. AI generation/edit (Gemini Imagen, FLUX, SDXL inpaint, etc.) layers
+   on top — the open-source libs handle pre/post-processing locally,
+   the API handles the actual gen/edit step.
+
+This staging keeps Load's "work offline" tagline intact for as much
+as possible — the network only gets touched when the user explicitly
+asks for AI generation.
+
 ---
 
 ## Open questions to resolve before building Phase 1
