@@ -9003,7 +9003,7 @@ window.LoadAudioFix = {
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17cf</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17cg</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -10750,8 +10750,14 @@ window.LoadAudioFix = {
           var dur = video.duration;
           var srcTime = srcOffset;
           if (dur && isFinite(dur)) srcTime = Math.max(0, Math.min(srcTime, dur - 0.001));
-          if (Math.abs((video.currentTime || 0) - srcTime) > 0.015) {
-            video.currentTime = srcTime;
+          // Don't seek video.currentTime during playback — the media
+          // element advances on its own clock, and writing currentTime
+          // each rAF tick is what was chopping the audio. Only seek
+          // when paused (user scrub), or when drift exceeds 500ms
+          // (recovered from a stall).
+          var drift = Math.abs((video.currentTime || 0) - srcTime);
+          if (!isPlaying || drift > 0.5) {
+            if (drift > 0.015) video.currentTime = srcTime;
           }
           if (isPlaying && video.paused) { video.play().catch(function () {}); }
           else if (!isPlaying && !video.paused) { try { video.pause(); } catch (_) {} }
@@ -10797,8 +10803,12 @@ window.LoadAudioFix = {
       if (clip.kind === 'video' && clip._previewEl.tagName === 'VIDEO') {
         var local = srcOffset;
         try {
-          if (Math.abs((clip._previewEl.currentTime || 0) - local) > 0.05) {
-            clip._previewEl.currentTime = Math.max(0, local);
+          // Same rule as the original branch: never seek currentTime
+          // during playback — the per-clip <video> advances on its
+          // own. Only seek on pause/scrub or major drift (>500ms).
+          var pcDrift = Math.abs((clip._previewEl.currentTime || 0) - local);
+          if (!isPlaying || pcDrift > 0.5) {
+            if (pcDrift > 0.05) clip._previewEl.currentTime = Math.max(0, local);
           }
         } catch (_) {}
         if (isPlaying) { try { clip._previewEl.play().catch(function () {}); } catch (_) {} }
