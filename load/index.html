@@ -142,6 +142,11 @@
           <span class="home-ws-label">Sound Studio</span>
           <span class="home-ws-dir">Record + 20 funny voice effects</span>
         </button>
+        <button class="home-ws-tile" data-home-ws="cvsvm" id="home-ws-cvsvm">
+          <span class="home-ws-icon">&#127934;</span>
+          <span class="home-ws-label">Voice Manipulator</span>
+          <span class="home-ws-dir">Pitch · speed · EQ · reverb · echo · presets</span>
+        </button>
       </div>
     </section>
 
@@ -1829,6 +1834,9 @@
      the Character Voice Studio so Sound Studio can pick up the FX
      preset list as soon as the studio mounts. -->
 <script src="../lib-voice-fx.js"></script>
+<!-- Voice Manipulator — granular pitch shift + time stretch + EQ +
+     reverb + echo + distortion. Pure Web Audio, no external libs. -->
+<script src="../lib-voice-manipulator.js"></script>
 <!-- Character Voice Studio — script parser + voice profiles +
      mic-recording bridge. Self-contained; window.CharacterVoiceStudio.
      Failure to load is non-fatal: the Studio tile just hides itself. -->

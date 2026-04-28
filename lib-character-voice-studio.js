@@ -634,9 +634,320 @@
     });
   }
 
+  /* Voice Manipulator — dedicated panel for fine-grained control
+   * (pitch -12..+12, speed 0.5..2x, 3-band EQ, reverb/echo/dist
+   * + dry/wet, style presets, real-time preview, Apply, Reset).
+   * Uses lib-voice-manipulator.js for the DSP. */
+  function openManipulator(opts) {
+    opts = opts || {};
+    if (!window.VoiceManipulator) { alert('Voice Manipulator module did not load.'); return; }
+    var prev = document.getElementById('cvs-vm-modal');
+    if (prev) prev.remove();
+
+    var sourceBuf = null;     // original recorded/imported buffer
+    var processedBuf = null;  // most-recent rendered output
+    var ctx = null;
+    var playingSrc = null;
+    var renderToken = 0;      // bumps per render; older renders self-cancel
+
+    var state = {
+      pitchSemitones: 0, speed: 1.0,
+      eqLow: 0, eqMid: 0, eqHigh: 0,
+      reverb: 0, echo: 0, distortion: 0, wet: 1
+    };
+
+    var modal = document.createElement('div');
+    modal.id = 'cvs-vm-modal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(10,10,20,0.78);z-index:9550;display:flex;align-items:center;justify-content:center;padding:20px;';
+    modal.innerHTML =
+      '<div style="background:#1a1a26;color:#fff;border-radius:18px;width:100%;max-width:760px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.55);border:1px solid #2a2a40;overflow:hidden;">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #2a2a40;flex-shrink:0;">' +
+          '<h2 style="margin:0;font-size:18px;font-weight:800;">🎚 Voice Manipulator</h2>' +
+          '<button id="vm-close" style="background:transparent;border:none;color:#cfcfdc;font-size:24px;cursor:pointer;line-height:1;">×</button>' +
+        '</div>' +
+        '<div id="vm-body" style="overflow-y:auto;padding:14px 18px;flex:1;">' +
+          '<div id="vm-source" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;">' +
+            '<button id="vm-rec" style="background:#ff3b5c;color:#fff;border:none;border-radius:50%;width:56px;height:56px;font-size:22px;cursor:pointer;flex-shrink:0;">⏺</button>' +
+            '<div style="flex:1;min-width:160px;">' +
+              '<div id="vm-status" style="font-size:13px;font-weight:700;">Tap ⏺ to record, or import audio.</div>' +
+              '<div id="vm-info" style="font-size:12px;color:#a8a8c4;font-variant-numeric:tabular-nums;">No source loaded</div>' +
+            '</div>' +
+            '<button id="vm-import" style="background:#2a2a40;color:#fff;border:none;border-radius:8px;padding:9px 12px;font-weight:700;cursor:pointer;">📂 Import</button>' +
+            '<input id="vm-import-file" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg,.flac,.aiff,.aif,.webm,.weba,.opus" style="display:none;">' +
+          '</div>' +
+          '<div id="vm-controls" style="display:none;">' +
+            '<div class="vm-section">' +
+              '<h3>Pitch & Speed</h3>' +
+              vmSliderHtml('pitchSemitones', 'Pitch', -12, 12, 1, 0, 'st', 'Lower deeper · Higher higher') +
+              vmSliderHtml('speed', 'Speed', 0.5, 2, 0.05, 1, '×', 'Tortoise → Rabbit (timing only — pitch preserved)') +
+            '</div>' +
+            '<div class="vm-section">' +
+              '<h3>Tone (EQ)</h3>' +
+              vmSliderHtml('eqLow', 'Low', -12, 12, 1, 0, 'dB', 'Bass / warmth') +
+              vmSliderHtml('eqMid', 'Mid', -12, 12, 1, 0, 'dB', 'Clarity / presence') +
+              vmSliderHtml('eqHigh', 'High', -12, 12, 1, 0, 'dB', 'Air / brightness') +
+            '</div>' +
+            '<div class="vm-section">' +
+              '<h3>Effects</h3>' +
+              vmSliderHtml('reverb', 'Reverb', 0, 1, 0.05, 0, '', 'Room size feel') +
+              vmSliderHtml('echo', 'Echo', 0, 1, 0.05, 0, '', 'Delay repeats') +
+              vmSliderHtml('distortion', 'Distortion', 0, 1, 0.05, 0, '', 'Grit / robot edge') +
+              vmSliderHtml('wet', 'Dry / Wet', 0, 1, 0.05, 1, '', '0 = original · 1 = full effect') +
+            '</div>' +
+            '<div class="vm-section">' +
+              '<h3>Voice style presets</h3>' +
+              '<div id="vm-presets" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px;"></div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="padding:12px 18px;border-top:1px solid #2a2a40;display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0;">' +
+          '<button id="vm-reset" style="background:transparent;color:#a8a8c4;border:1px solid #2a2a40;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;">↺ Reset</button>' +
+          '<button id="vm-preview" style="background:#22c55e;color:#0a0a14;border:none;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer;flex:1;min-width:120px;" disabled>▶ Preview</button>' +
+          '<button id="vm-stop" style="background:#2a2a40;color:#fff;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;">■</button>' +
+          '<button id="vm-apply" style="background:#1d6fff;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer;flex:1;min-width:140px;" disabled>＋ Apply to timeline</button>' +
+          '<button id="vm-save" style="background:#fbbf24;color:#1a1a26;border:none;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer;" disabled>💾 Save</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(modal);
+
+    // Inline styles for the Manipulator's own classes
+    if (!document.getElementById('vm-style')) {
+      var st = document.createElement('style');
+      st.id = 'vm-style';
+      st.textContent =
+        '.vm-section{margin-bottom:14px;}' +
+        '.vm-section h3{margin:0 0 8px;font-size:12px;color:#fbbf24;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;}' +
+        '.vm-row{display:grid;grid-template-columns:90px 1fr 60px;align-items:center;gap:10px;margin-bottom:6px;}' +
+        '.vm-row label{font-size:13px;font-weight:700;}' +
+        '.vm-row .vm-hint{font-size:10px;color:#a8a8c4;font-weight:500;display:block;margin-top:1px;}' +
+        '.vm-row input[type=range]{width:100%;accent-color:#fbbf24;}' +
+        '.vm-row .vm-val{font-size:12px;color:#cfcfdc;text-align:right;font-variant-numeric:tabular-nums;}' +
+        '.vm-preset{background:#0e0e18;border:1px solid #2a2a40;border-radius:10px;padding:8px 6px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;color:#fff;font-family:inherit;}' +
+        '.vm-preset:hover{border-color:#fbbf24;}' +
+        '.vm-preset .ic{font-size:20px;}' +
+        '.vm-preset .lb{font-size:11px;font-weight:700;}';
+      document.head.appendChild(st);
+    }
+
+    function vmSliderHtml(field, label, min, max, step, val, unit, hint) {
+      return (
+        '<div class="vm-row">' +
+          '<label>' + label + '<span class="vm-hint">' + (hint || '') + '</span></label>' +
+          '<input type="range" data-vm-field="' + field + '" min="' + min + '" max="' + max + '" step="' + step + '" value="' + val + '">' +
+          '<span class="vm-val" data-vm-val="' + field + '">' + val + (unit || '') + '</span>' +
+        '</div>'
+      );
+    }
+
+    function close() { stopPlay(); try { modal.remove(); } catch (_) {} }
+    modal.querySelector('#vm-close').addEventListener('click', close);
+    modal.addEventListener('click', function (e) { if (e.target === modal) close(); });
+
+    var statusEl = modal.querySelector('#vm-status');
+    var infoEl   = modal.querySelector('#vm-info');
+    var ctrlsEl  = modal.querySelector('#vm-controls');
+    var presetEl = modal.querySelector('#vm-presets');
+    var previewBtn = modal.querySelector('#vm-preview');
+    var applyBtn   = modal.querySelector('#vm-apply');
+    var saveBtn    = modal.querySelector('#vm-save');
+
+    function ensureCtx() { if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); return ctx; }
+
+    function setSourceBuffer(buf, label) {
+      sourceBuf = buf;
+      processedBuf = buf;
+      infoEl.textContent = (label || 'Audio') + ' · ' + buf.duration.toFixed(2) + 's · ' + buf.sampleRate + ' Hz · ' + buf.numberOfChannels + 'ch';
+      statusEl.textContent = 'Source loaded — drag any slider to shape the voice.';
+      ctrlsEl.style.display = '';
+      previewBtn.disabled = false; applyBtn.disabled = false; saveBtn.disabled = false;
+      renderPresets();
+      schedulePreview();
+    }
+
+    function renderPresets() {
+      presetEl.innerHTML = '';
+      VoiceManipulator.STYLE_PRESETS.forEach(function (p) {
+        var b = document.createElement('button');
+        b.className = 'vm-preset';
+        b.innerHTML = '<span class="ic">' + p.icon + '</span><span class="lb">' + p.label + '</span>';
+        b.addEventListener('click', function () { applyPresetVals(p.vals); });
+        presetEl.appendChild(b);
+      });
+    }
+    function applyPresetVals(vals) {
+      Object.keys(vals).forEach(function (k) { state[k] = vals[k]; });
+      Array.prototype.forEach.call(modal.querySelectorAll('[data-vm-field]'), function (el) {
+        var f = el.getAttribute('data-vm-field');
+        el.value = state[f];
+        var lbl = modal.querySelector('[data-vm-val="' + f + '"]');
+        if (lbl) lbl.textContent = formatVal(f, state[f]);
+      });
+      schedulePreview();
+    }
+    function formatVal(field, val) {
+      if (field === 'pitchSemitones') return (val > 0 ? '+' : '') + val + ' st';
+      if (field === 'speed')          return (+val).toFixed(2) + '×';
+      if (field === 'eqLow' || field === 'eqMid' || field === 'eqHigh') return (val > 0 ? '+' : '') + val + ' dB';
+      return Math.round((+val) * 100) + '%';
+    }
+
+    // Slider events
+    Array.prototype.forEach.call(modal.querySelectorAll('[data-vm-field]'), function (el) {
+      el.addEventListener('input', function () {
+        var f = el.getAttribute('data-vm-field');
+        var v = parseFloat(el.value);
+        state[f] = v;
+        var lbl = modal.querySelector('[data-vm-val="' + f + '"]');
+        if (lbl) lbl.textContent = formatVal(f, v);
+        schedulePreview();
+      });
+    });
+
+    // Debounced render. Cancels stale renders so the latest slider
+    // value wins. Auto-plays when the new buffer is ready (only if
+    // user is currently previewing or hasn't scrubbed).
+    var renderTimer = null;
+    function schedulePreview() {
+      if (!sourceBuf) return;
+      if (renderTimer) { clearTimeout(renderTimer); renderTimer = null; }
+      renderTimer = setTimeout(runRender, 300);
+    }
+    async function runRender() {
+      if (!sourceBuf) return;
+      var token = ++renderToken;
+      try {
+        var out = await VoiceManipulator.process(sourceBuf, Object.assign({}, state));
+        if (token !== renderToken) return; // stale
+        processedBuf = out;
+        // Auto-play newly-rendered buffer
+        playProcessed();
+      } catch (e) {
+        statusEl.textContent = 'Render failed: ' + ((e && e.message) || e);
+      }
+    }
+    function playProcessed() {
+      if (!processedBuf) return;
+      stopPlay();
+      var c = ensureCtx();
+      try { c.resume(); } catch (_) {}
+      var s = c.createBufferSource(); s.buffer = processedBuf; s.connect(c.destination); s.start(); playingSrc = s;
+      s.onended = function () { if (playingSrc === s) playingSrc = null; };
+    }
+    function stopPlay() {
+      if (playingSrc) { try { playingSrc.stop(); } catch (_) {} try { playingSrc.disconnect(); } catch (_) {} playingSrc = null; }
+    }
+    previewBtn.addEventListener('click', playProcessed);
+    modal.querySelector('#vm-stop').addEventListener('click', stopPlay);
+
+    modal.querySelector('#vm-reset').addEventListener('click', function () {
+      applyPresetVals({ pitchSemitones: 0, speed: 1.0, eqLow: 0, eqMid: 0, eqHigh: 0, reverb: 0, echo: 0, distortion: 0, wet: 1 });
+    });
+
+    function bufToWavBlob(buf) {
+      var nCh = buf.numberOfChannels, sr = buf.sampleRate, len = buf.length * nCh * 2 + 44;
+      var ab = new ArrayBuffer(len), v = new DataView(ab), off = 0;
+      function ws(s) { for (var i = 0; i < s.length; i++) v.setUint8(off++, s.charCodeAt(i)); }
+      function w16(n) { v.setUint16(off, n, true); off += 2; }
+      function w32(n) { v.setUint32(off, n, true); off += 4; }
+      ws('RIFF'); w32(len - 8); ws('WAVE'); ws('fmt '); w32(16); w16(1); w16(nCh); w32(sr); w32(sr * nCh * 2); w16(nCh * 2); w16(16); ws('data'); w32(buf.length * nCh * 2);
+      var chs = []; for (var c = 0; c < nCh; c++) chs.push(buf.getChannelData(c));
+      for (var i = 0; i < buf.length; i++) {
+        for (var ch2 = 0; ch2 < nCh; ch2++) {
+          var s = Math.max(-1, Math.min(1, chs[ch2][i]));
+          v.setInt16(off, s < 0 ? s * 32768 : s * 32767, true); off += 2;
+        }
+      }
+      return new Blob([ab], { type: 'audio/wav' });
+    }
+    applyBtn.addEventListener('click', function () {
+      if (!processedBuf || typeof opts.onAddAudioBlob !== 'function') {
+        if (!opts.onAddAudioBlob) alert('Open a video in the editor first to add audio to its timeline.');
+        return;
+      }
+      opts.onAddAudioBlob(bufToWavBlob(processedBuf), 'voice-' + Date.now() + '.wav');
+      close();
+    });
+    saveBtn.addEventListener('click', function () {
+      if (!processedBuf) return;
+      var blob = bufToWavBlob(processedBuf);
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'voice-manipulated-' + Date.now() + '.wav';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
+    });
+
+    // Recording
+    var rec = null, recStream = null, recChunks = [];
+    function startRec() {
+      if (!navigator.mediaDevices || !window.MediaRecorder) { statusEl.textContent = 'Recording not supported.'; return; }
+      var mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus'
+               : MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : '';
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+        recStream = stream;
+        recChunks = [];
+        rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+        rec.ondataavailable = function (e) { if (e.data && e.data.size) recChunks.push(e.data); };
+        rec.onstop = onRecStopped;
+        rec.start();
+        statusEl.textContent = 'Recording…';
+        modal.querySelector('#vm-rec').textContent = '■';
+        modal.querySelector('#vm-rec').style.background = '#fbbf24';
+        modal.querySelector('#vm-rec').style.color = '#1a1a26';
+      }).catch(function (e) {
+        statusEl.textContent = 'Mic permission denied: ' + ((e && e.message) || e);
+      });
+    }
+    function stopRec() {
+      if (rec && rec.state !== 'inactive') { try { rec.stop(); } catch (_) {} }
+      if (recStream) { try { recStream.getTracks().forEach(function (t) { t.stop(); }); } catch (_) {} recStream = null; }
+      modal.querySelector('#vm-rec').textContent = '⏺';
+      modal.querySelector('#vm-rec').style.background = '#ff3b5c';
+      modal.querySelector('#vm-rec').style.color = '#fff';
+    }
+    async function onRecStopped() {
+      var blob = new Blob(recChunks, { type: rec && rec.mimeType ? rec.mimeType : 'audio/webm' });
+      statusEl.textContent = 'Decoding…';
+      try {
+        var c = ensureCtx();
+        var buf = await c.decodeAudioData(await blob.arrayBuffer());
+        setSourceBuffer(buf, 'Recording');
+      } catch (e) {
+        statusEl.textContent = 'Decode failed: ' + ((e && e.message) || e);
+      }
+    }
+    modal.querySelector('#vm-rec').addEventListener('click', function () {
+      if (rec && rec.state === 'recording') stopRec(); else startRec();
+    });
+
+    var importBtn = modal.querySelector('#vm-import');
+    var importFile= modal.querySelector('#vm-import-file');
+    importBtn.addEventListener('click', function () { importFile.click(); });
+    importFile.addEventListener('change', async function (e) {
+      var f = e.target.files && e.target.files[0];
+      if (!f) return;
+      statusEl.textContent = 'Decoding ' + f.name + '…';
+      try {
+        var c = ensureCtx();
+        var buf = await c.decodeAudioData(await f.arrayBuffer());
+        setSourceBuffer(buf, f.name);
+      } catch (err) {
+        statusEl.textContent = 'Could not decode: ' + ((err && err.message) || err);
+      }
+      importFile.value = '';
+    });
+
+    // If caller handed us a starting buffer, load it now
+    if (opts.sourceBuffer) {
+      try { setSourceBuffer(opts.sourceBuffer, opts.sourceLabel || 'Audio'); }
+      catch (_) {}
+    }
+  }
+
   global.CharacterVoiceStudio = {
     open: open,
     openSoundStudio: openSoundStudio,
+    openManipulator: openManipulator,
     parseScript: parseScript,
     estimateSeconds: estimateSeconds
   };

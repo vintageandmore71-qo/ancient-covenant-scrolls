@@ -5866,6 +5866,15 @@ window.LoadAudioFix = {
             toast('Sound Studio module didn\'t load.', true);
           }
         }
+        else if (act === 'cvsvm') {
+          if (window.CharacterVoiceStudio && typeof CharacterVoiceStudio.openManipulator === 'function' && window.VoiceManipulator) {
+            CharacterVoiceStudio.openManipulator({
+              onAddAudioBlob: (window.__loadVeBridge && window.__loadVeBridge.addAudioBlob) || null
+            });
+          } else {
+            toast('Voice Manipulator module didn\'t load.', true);
+          }
+        }
       });
     });
     // Hide tiles whose backing library didn't load.
@@ -5873,6 +5882,8 @@ window.LoadAudioFix = {
     if (cvsTile && !window.CharacterVoiceStudio) cvsTile.style.display = 'none';
     var cvsFxTile = $('home-ws-cvsfx');
     if (cvsFxTile && !(window.CharacterVoiceStudio && typeof CharacterVoiceStudio.openSoundStudio === 'function')) cvsFxTile.style.display = 'none';
+    var cvsVmTile = $('home-ws-cvsvm');
+    if (cvsVmTile && !(window.CharacterVoiceStudio && typeof CharacterVoiceStudio.openManipulator === 'function' && window.VoiceManipulator)) cvsVmTile.style.display = 'none';
     // Optional PWA-help modal kept wired (used when user picks Web Apps card)
     var pc = $('pwa-modal-cancel'); if (pc) pc.addEventListener('click', function () { $('pwa-modal').classList.remove('on'); });
     var pp = $('pwa-modal-pick'); if (pp) pp.addEventListener('click', function () {
@@ -9032,7 +9043,7 @@ window.LoadAudioFix = {
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ck</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17cl</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
