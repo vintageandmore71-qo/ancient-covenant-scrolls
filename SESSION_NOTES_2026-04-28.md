@@ -2,14 +2,26 @@
 
 ## Current state
 
-- Working branch: `claude/fix-session-sending-TVMbW` (per session task config)
-- Load is at **v17cq** (`load/sw.js` `CACHE = 'load-v17cq'`, on-screen badge `v17cq`).
-  v17cq adds Library auto-cleanup (one-prompt consent) + manual Clear Library button + per-tile favorite toggle.
-  The earlier v17cp bump landed inside commit `34f9127` (Voice Library + ACR per-chapter
-  recording) — the title doesn't say "Load" so don't be misled by `git log` greps.
+- Working branch: `claude/fix-session-sending-TVMbW` (per session task config); `main` fast-forwarded to match after each shipped build.
+- Load is at **v17cs** (`load/sw.js` `CACHE = 'load-v17cs'`, on-screen badge `v17cs`).
+  - v17cq: Library auto-cleanup (one-prompt consent) + manual Clear Library button + per-tile favorite toggle.
+  - v17cr: visible labeled red "🗑 Clear Library" button above the grid + item count.
+  - v17cs: Video → Audio quick-extract Workspace tile (pick a video, save as WAV or M4A directly into the Library).
+  - Earlier v17cp landed inside commit `34f9127` (Voice Library + ACR per-chapter recording) — the title doesn't say "Load" so don't be misled by `git log` greps.
 - ACR is at **acr-v15** (latest standalone ACR commit `33d8ac3`).
-- Latest commit before this turn: `624996f` — Add CLAUDE.md (project rules + session-logging mandate)
-- v17cq commit pending push to `claude/fix-session-sending-TVMbW`
+- HEAD: `654dbd1` (Load v17cs); `main` and `claude/fix-session-sending-TVMbW` are aligned.
+
+## Backups (recoverable forever)
+
+Stable-state backup branches on origin. To recover any of these states:
+`git checkout backup/<name>` then optionally fast-forward main.
+
+| Branch | SHA | Captures |
+| --- | --- | --- |
+| `backup/2026-04-28-v17cq` | `ae12454` | Library auto-cleanup + favorites + Clear Library |
+| `backup/2026-04-28-v17cs` | `654dbd1` | + Video → Audio quick-extract (current verified-working tip) |
+| `backup/main-2026-04-28` | `6ac256c` | Clean main pre-v17cq (just before today's Library work) |
+| `backup/remote-claude-fix-session-pre-v17cq` | `86a36d9` | The April-27 v17ab/v17ac WIP that lived on the dev branch before force-push |
 
 ## Live verification
 

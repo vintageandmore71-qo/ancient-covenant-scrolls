@@ -33,6 +33,30 @@ short steps, never overpromise.
    waiting for the end. The user has lost work to "where are we"
    confusion before. Bias toward over-logging.
 
+## Stable-state backups (mandatory)
+
+Every session that ships at least one feature/fix verified working by
+the user MUST end by creating a backup branch on the remote so the
+working state is recoverable forever:
+
+- Branch name: `backup/<YYYY-MM-DD>-<lastCacheVersion>` (e.g.
+  `backup/2026-04-28-v17cs`). If the day already has a backup, append
+  the cache version of the *new* tip — never overwrite a previous
+  backup branch.
+- Point it at the current `main` HEAD after the last verified-working
+  commit, NOT at unstable WIP.
+- Push it: `git push -u origin backup/<name>`.
+- Mention the new backup branch name + SHA in `SESSION_NOTES_*.md`
+  under a "Backups" subsection so future sessions can find it.
+
+Mid-session, also create a fresh backup any time the user explicitly
+confirms something is working ("perfect", "that fixed it", "working
+right now") — these are the stable points worth preserving. Don't ask
+permission for backup-branch creation; new refs are non-destructive.
+
+Recovery is `git checkout backup/<name>` — surface this in session
+notes any time you make a backup so the user knows the magic words.
+
 ## Cache version discipline
 
 Every Load build that ships JS/HTML/CSS edits must bump:
