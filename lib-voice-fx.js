@@ -194,9 +194,12 @@
     return { rate: rate };
   }
 
-  async function applyToBuffer(buf, key) {
+  async function applyToBuffer(buf, key, opts) {
     if (!buf) return null;
-    if (!key || key === 'none') return buf;
+    opts = opts || {};
+    var rateMul = (typeof opts.rateMultiplier === 'number' && opts.rateMultiplier > 0) ? opts.rateMultiplier : 1;
+    var toneShift = (typeof opts.toneShift === 'number') ? opts.toneShift : 0; // -1 (warm) .. +1 (bright)
+    if ((!key || key === 'none') && rateMul === 1 && toneShift === 0) return buf;
     var rateGuess = 1;
     // First-pass estimate of length (preset's playbackRate compresses
     // the rendered output, except for pure-FX presets where rate=1).
@@ -204,7 +207,7 @@
     var probeCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 1, buf.sampleRate);
     var probeSrc = probeCtx.createBufferSource(); probeSrc.buffer = buf;
     probe = buildGraph(probeCtx, probeSrc, probeCtx.destination, key) || { rate: 1 };
-    rateGuess = probe.rate || 1;
+    rateGuess = (probe.rate || 1) * rateMul;
     if (probe._stopOsc) try { probe._stopOsc.stop(); } catch (_) {}
 
     var renderDur = (buf.duration || 0) / rateGuess + 1; // +1s for FX tails
@@ -212,8 +215,30 @@
     var outLen = Math.max(1, Math.floor(buf.sampleRate * renderDur));
     var ctx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(ch, outLen, buf.sampleRate);
     var src = ctx.createBufferSource(); src.buffer = buf;
-    var info = buildGraph(ctx, src, ctx.destination, key);
-    if (info.rate && info.rate !== 1) src.playbackRate.value = info.rate;
+    // Insert a tone-shaper between the preset graph and the destination
+    // so the user's Tone slider is applied consistently regardless of
+    // which preset is active. Negative tone darkens (lowpass), positive
+    // brightens (peaking shelf around 4 kHz).
+    var toneIn = ctx.createGain();
+    var toneOut = ctx.createGain();
+    if (toneShift < 0) {
+      var lp = ctx.createBiquadFilter(); lp.type = 'lowpass';
+      lp.frequency.value = 800 + (1 + toneShift) * 11000; // -1 → 800Hz, 0 → 11.8kHz
+      toneIn.connect(lp); lp.connect(toneOut);
+    } else if (toneShift > 0) {
+      var pk = ctx.createBiquadFilter(); pk.type = 'peaking';
+      pk.frequency.value = 4000;
+      pk.gain.value = toneShift * 9; // up to +9 dB
+      pk.Q.value = 0.7;
+      toneIn.connect(pk); pk.connect(toneOut);
+    } else {
+      toneIn.connect(toneOut);
+    }
+    var info = buildGraph(ctx, src, toneIn, key);
+    if (info.rate || rateMul !== 1) {
+      src.playbackRate.value = (info.rate || 1) * rateMul;
+    }
+    toneOut.connect(ctx.destination);
     src.start();
     var rendered = await ctx.startRendering();
     return rendered;
