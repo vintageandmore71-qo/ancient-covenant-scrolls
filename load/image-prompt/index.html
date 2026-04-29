@@ -460,16 +460,16 @@ button,[role="button"]{min-height:48px}
     <div class="url-pill"><span style="flex:1">fal.ai/dashboard/keys</span><button class="copy-btn" onclick="cpURL(this,'https://fal.ai/dashboard/keys')">Copy</button></div>
     <input class="settings-input" id="k-fal" type="password" placeholder="Fal.ai API key">
 
-    <p class="panel-hint" style="color:var(--ink-hi);font-weight:700;margin-top:14px">6. AI Horde (no key needed)</p>
-    <p class="panel-hint" style="font-size:11px">Free volunteer GPU pool. Slow (~1-3 min per image) but truly unlimited. Anonymous mode used by default.</p>
+    <p class="panel-hint" style="color:var(--ink-hi);font-weight:700;margin-top:14px">6. AI Horde — TRULY FREE (no key, no signup) ⭐</p>
+    <p class="panel-hint" style="font-size:11px">Free volunteer GPU pool. <strong>Supports both text-to-image AND img2img edit</strong> — when you have an image attached and refine it, AI Horde preserves your photo via real img2img. Slow (~1-3 min per image) but truly unlimited. <strong>This is your free editing path. No key required.</strong></p>
 
-    <p class="panel-hint" style="color:var(--ink-hi);font-weight:700;margin-top:14px">7. Replicate (small free credit on signup)</p>
+    <p class="panel-hint" style="color:var(--ink-hi);font-weight:700;margin-top:14px">7. Replicate (default OFF — pay-per-use)</p>
     <div class="url-pill"><span style="flex:1">replicate.com/account/api-tokens</span><button class="copy-btn" onclick="cpURL(this,'https://replicate.com/account/api-tokens')">Copy</button></div>
     <input class="settings-input" id="k-replicate" type="password" placeholder="r8_…">
-    <p class="panel-hint" style="font-size:11px;margin-top:4px">Note: $0.10 free credit then pay-as-you-go. Use sparingly.</p>
+    <p class="panel-hint" style="font-size:11px;margin-top:4px">Tiny $0.10 free credit then paid. <strong>Default OFF</strong>. Toggle ON below only if you understand it costs money.</p>
 
-    <p class="panel-hint" style="color:var(--ink-hi);font-weight:700;margin-top:14px">8. Google Gemini Image (uses your Gemini key)</p>
-    <p class="panel-hint" style="font-size:11px">Once you've added a Gemini key in Step 1, this provider does <strong>both text-to-image AND true pixel-edit</strong> via Gemini 2.5 Flash Image. Auto-prioritized when you upload a photo — preserves face, pose, and composition far better than the no-key providers. <strong>Recommended for refinements.</strong></p>
+    <p class="panel-hint" style="color:var(--ink-hi);font-weight:700;margin-top:14px">8. Google Gemini Image (default OFF — opt-in)</p>
+    <p class="panel-hint" style="font-size:11px">Uses your Gemini key. Does <strong>both text-to-image AND true pixel-edit</strong> via Gemini 2.5 Flash Image — preserves face, pose, and composition very well. <strong>Free tier is tight</strong> (~500 requests/day, 10/min), easy to burn through during testing. <strong>Default OFF</strong>. Toggle ON below when you're ready to use it. Until then, AI Horde img2img (#6) is your truly-free editing path.</p>
 
     <p class="panel-hint" style="color:var(--ink-hi);font-weight:700;margin-top:14px">9. DeepInfra (free trial credit, FLUX-schnell)</p>
     <div class="url-pill"><span style="flex:1">deepinfra.com/dash/api_keys</span><button class="copy-btn" onclick="cpURL(this,'https://deepinfra.com/dash/api_keys')">Copy</button></div>
@@ -645,8 +645,12 @@ let C = {
     together:     LS.getItem('ps_use_tg')   !== '0',
     fal:          LS.getItem('ps_use_fal')  !== '0',
     horde:        LS.getItem('ps_use_horde')!== '0',
-    replicate:    LS.getItem('ps_use_rep')  !== '0',
-    imagen:       LS.getItem('ps_use_img')  !== '0',
+    // Replicate defaults OFF — pay-per-use after a tiny free credit.
+    // Gemini Image defaults OFF too — its free tier (~500/day, 10/min)
+    // is tighter than chat and easy to burn through during testing.
+    // Both opt-in via Settings > Provider toggles.
+    replicate:    LS.getItem('ps_use_rep')  === '1',
+    imagen:       LS.getItem('ps_use_img')  === '1',
     deepinfra:    LS.getItem('ps_use_di')   !== '0',
     stability:    LS.getItem('ps_use_st')   !== '0',
     deepai:       LS.getItem('ps_use_dai')  !== '0',
@@ -1458,23 +1462,36 @@ const IMAGE_PROVIDERS = [
       return URL.createObjectURL(b);
     }
   },
-  // 6. AI Horde — anonymous mode (no key); volunteer GPUs, slow but
-  //    truly free. Async submit + poll. Best as last-resort fallback.
+  // 6. AI Horde — anonymous mode (no key, no signup); volunteer GPUs,
+  //    slow but truly free. Supports BOTH text-to-image and img2img
+  //    when source_image + source_processing='img2img' are provided.
+  //    Best free no-signup path for actual photo editing.
   {
     id: 'horde',
     name: 'AI Horde',
     needsKey: false,
     enabled: () => C.useProvider.horde !== false,
-    gen: async (prompt) => {
+    supportsImg2Img: true,
+    gen: async (prompt, imgData) => {
+      const isImg2Img = !!(imgData && imgData.base64);
+      const body = {
+        prompt: prompt.slice(0, 1500),
+        params: {
+          sampler_name: 'k_euler_a', cfg_scale: 7, steps: 20,
+          width: 512, height: 512, n: 1
+        },
+        nsfw: false, censor_nsfw: true,
+        models: ['stable_diffusion']
+      };
+      if (isImg2Img) {
+        body.source_image = imgData.base64;
+        body.source_processing = 'img2img';
+        body.params.denoising_strength = 0.55; // 0=preserve original, 1=full regen
+      }
       const sub = await fetch('https://stablehorde.net/api/v2/generate/async', {
         method: 'POST',
         headers: { 'apikey': '0000000000', 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: prompt.slice(0, 1500),
-          params: { sampler_name: 'k_euler_a', cfg_scale: 7, steps: 20,
-                    width: 512, height: 512, n: 1 },
-          nsfw: false, censor_nsfw: true, models: ['stable_diffusion']
-        })
+        body: JSON.stringify(body)
       });
       if (!sub.ok) throw new Error(await readError(sub, 'AI Horde'));
       const { id } = await sub.json();
@@ -1799,26 +1816,34 @@ function isHealthy(id) {
    always included as a final no-key backstop. */
 async function imageGenWithFallback(prompt, imgData) {
   let providers = IMAGE_PROVIDERS.filter(p => p.enabled() && isHealthy(p.id));
-  // Move AI Horde to the end (slow async polling)
-  const horde = providers.find(p => p.id === 'horde');
-  if (horde) providers = providers.filter(p => p.id !== 'horde').concat(horde);
   // Always include Pollinations as backstop, even if marked unhealthy,
   // because it needs no key — it's the only thing guaranteed to work.
   if (!providers.find(p => p.id === 'pollinations'))
     providers.push(IMAGE_PROVIDERS[0]);
-  // Prefer img2img-capable providers when the user attached an image.
-  // Within img2img, Gemini Image (id 'imagen') goes first because its
-  // 2.5-Flash-Image model preserves face/pose much more faithfully
-  // than HF's strength=0.65 SDXL img2img.
   if (imgData) {
+    // Image attached → prefer img2img-capable providers in this order:
+    //   1. Gemini Image (free w/ key, fast, best face preservation)
+    //   2. Hugging Face (free w/ key, fast SDXL img2img strength=0.65)
+    //   3. AI Horde (NO KEY, no signup, truly free img2img — slow)
+    //   4. Any other img2img providers
+    //   5. Text-to-image providers as last resort
     const gemini = providers.find(p => p.id === 'imagen');
-    const otherImg2Img = providers.filter(p => p.supportsImg2Img && p.id !== 'imagen');
-    const textOnly  = providers.filter(p => !p.supportsImg2Img);
+    const hf     = providers.find(p => p.id === 'huggingface');
+    const horde  = providers.find(p => p.id === 'horde');
+    const skip = new Set(['imagen', 'huggingface', 'horde']);
+    const otherImg2Img = providers.filter(p => p.supportsImg2Img && !skip.has(p.id));
+    const textOnly = providers.filter(p => !p.supportsImg2Img);
     providers = [
       ...(gemini ? [gemini] : []),
+      ...(hf     ? [hf]     : []),
       ...otherImg2Img,
+      ...(horde  ? [horde]  : []),
       ...textOnly
     ];
+  } else {
+    // Text-only turn → push AI Horde to the end (slow async polling)
+    const horde = providers.find(p => p.id === 'horde');
+    if (horde) providers = providers.filter(p => p.id !== 'horde').concat(horde);
   }
   let lastErr = null;
   for (const p of providers) {
