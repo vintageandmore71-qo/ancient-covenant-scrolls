@@ -168,6 +168,57 @@ window.LoadAudioFix = {
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
+
+  /* ---------- Custom monoline icon system ---------- */
+  // Single source of truth for every topbar icon. Boot calls
+  // installCustomIcons() once which finds every [data-nav] / [data-tool]
+  // button across all six topbar instances (home, library, viewer,
+  // editor, notes, note-editor screens) and swaps the placeholder
+  // emoji with hand-drawn SVG. Cohesive with the Workspace tile icons.
+  var SVG_HEAD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">';
+  var NAV_SVG = {
+    home:        SVG_HEAD + '<path d="M3 12l9-8 9 8"/><path d="M5 11v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/><path d="M10 21v-6h4v6"/></svg>',
+    library:     SVG_HEAD + '<path d="M4 4h6v16H4z"/><path d="M14 4h6v16h-6z"/><path d="M10 8h4M10 12h4M10 16h4"/></svg>',
+    import:      SVG_HEAD + '<path d="M12 4v12"/><path d="M7 9l5-5 5 5"/><path d="M5 20h14"/></svg>',
+    settings:    SVG_HEAD + '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M2 12h3M19 12h3M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>',
+    'hard-refresh': SVG_HEAD + '<path d="M3 12a9 9 0 0 1 15.5-6.3"/><path d="M21 4v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.3"/><path d="M3 20v-5h5"/></svg>',
+    theme:       SVG_HEAD + '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" fill="#fde68a" stroke="currentColor"/></svg>',
+    font:        SVG_HEAD + '<path d="M4 18l5-12 5 12"/><path d="M5.5 14h7"/><path d="M18 13v5"/><path d="M16 16h4"/><circle cx="20" cy="6" r="1.2" fill="#fde68a" stroke="none"/></svg>',
+    notes:       SVG_HEAD + '<path d="M5 3h11l4 4v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M16 3v4h4"/><path d="M8 12h8M8 15h8M8 18h5"/></svg>',
+    audio:       SVG_HEAD + '<path d="M11 5L6 9H3v6h3l5 4z"/><path d="M16 9a4 4 0 0 1 0 6"/><path d="M19 6a8 8 0 0 1 0 12"/></svg>',
+    helper:      SVG_HEAD + '<path d="M5 4h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-9l-4 3v-3H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M12 8.5l1.1 2.4 2.4 1.1-2.4 1.1-1.1 2.4-1.1-2.4-2.4-1.1 2.4-1.1z" fill="#fde68a" stroke="none"/></svg>',
+    devconsole:  SVG_HEAD + '<path d="M14.7 6.3a3 3 0 0 1 4 4l-2 2-4-4z"/><path d="M12.7 8.3l-8 8v4h4l8-8"/></svg>',
+    help:        SVG_HEAD + '<circle cx="12" cy="12" r="9"/><path d="M9 9.5a3 3 0 0 1 6 0c0 2-3 2-3 4"/><circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none"/></svg>'
+  };
+  function installCustomIcons() {
+    // Labeled buttons (data-nav with .nav-icon span)
+    var labeled = document.querySelectorAll('button[data-nav]');
+    for (var i = 0; i < labeled.length; i++) {
+      var key = labeled[i].getAttribute('data-nav');
+      var span = labeled[i].querySelector('.nav-icon');
+      if (span && NAV_SVG[key]) span.innerHTML = NAV_SVG[key];
+    }
+    // Icon-only buttons (data-tool, no label)
+    var tools = document.querySelectorAll('button.icon-only[data-tool]');
+    for (var j = 0; j < tools.length; j++) {
+      var tk = tools[j].getAttribute('data-tool');
+      // Keep A− / A+ as text; size buttons are clearer that way.
+      if (tk === 'size-down' || tk === 'size-up') continue;
+      if (NAV_SVG[tk]) tools[j].innerHTML = NAV_SVG[tk];
+    }
+    // Special-ID library buttons
+    var sb = $('library-search-btn');
+    if (sb) sb.innerHTML = SVG_HEAD + '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/></svg>';
+    var cb = $('library-clear-btn');
+    if (cb) cb.innerHTML = SVG_HEAD + '<path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M5 6l1 14a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1l1-14"/></svg>';
+    // Editor topbar themes
+    var eds = document.querySelectorAll('button[data-editor-theme]');
+    for (var k = 0; k < eds.length; k++) {
+      var t = eds[k].getAttribute('data-editor-theme');
+      if (t === 'dark')  eds[k].innerHTML = SVG_HEAD + '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+      if (t === 'cream') eds[k].innerHTML = SVG_HEAD + '<circle cx="12" cy="12" r="4" fill="#fde68a" stroke="currentColor"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg>';
+    }
+  }
   /* ---------- Toast notification ---------- */
   var toastTimer = null;
   function toast(msg, isError) {
@@ -3943,6 +3994,7 @@ window.LoadAudioFix = {
     try {
       safe('applySettings', applySettings);
       safe('fixStuckZoom', fixStuckZoom);
+      safe('installCustomIcons', installCustomIcons);
       // Fire-and-forget: ask iOS to keep our storage. Home-screen PWAs
       // on iOS 17+ usually get granted without a prompt. If denied we
       // keep going — install UI will surface the real state later.
@@ -9063,7 +9115,7 @@ window.LoadAudioFix = {
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17cv</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17cw</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -15475,20 +15527,22 @@ window.LoadAudioFix = {
     var menu = document.createElement('div');
     menu.className = 'context-menu';
     var menuApp = apps.find(function (x) { return x.id === id; });
+    var SP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ctx-icn">';
+    var favIcon = SP + '<path d="M12 3l2.7 5.5 6.1.9-4.4 4.3 1 6-5.4-2.8-5.4 2.8 1-6L3.2 9.4l6.1-.9z" fill="#fbbf24" stroke="#fbbf24"/></svg>';
     var favLabel = (menuApp && menuApp.favorite)
-      ? '&#11088; Unfavorite (allow auto-cleanup)'
-      : '&#11088; Favorite (keep during auto-cleanup)';
+      ? favIcon + ' Unfavorite (allow auto-cleanup)'
+      : favIcon + ' Favorite (keep during auto-cleanup)';
     menu.innerHTML =
-      '<button data-act="open">&#128065; View</button>' +
+      '<button data-act="open">' + SP + '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg> View</button>' +
       '<button data-act="favorite">' + favLabel + '</button>' +
-      '<button data-act="notes">&#128221; Notes</button>' +
-      '<button data-act="folder">&#128193; Move to folder...</button>' +
-      '<button data-act="share">&#10150; Share (Text, Email, AirDrop)</button>' +
-      '<button data-act="edit">&#9998; Edit HTML</button>' +
-      '<button data-act="home">&#127968; Add to Home Screen</button>' +
-      '<button data-act="rename">&#9999; Rename</button>' +
+      '<button data-act="notes">' + SP + '<path d="M5 3h11l4 4v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M16 3v4h4"/><path d="M8 12h8M8 15h8M8 18h5"/></svg> Notes</button>' +
+      '<button data-act="folder">' + SP + '<path d="M3 6a1 1 0 0 1 1-1h5l2 2h8a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg> Move to folder...</button>' +
+      '<button data-act="share">' + SP + '<path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 14v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5"/></svg> Share (Text, Email, AirDrop)</button>' +
+      '<button data-act="edit">' + SP + '<path d="M8 8l-4 4 4 4"/><path d="M16 8l4 4-4 4"/><path d="M14 6l-4 12"/></svg> Edit HTML</button>' +
+      '<button data-act="home">' + SP + '<path d="M3 12l9-8 9 8"/><path d="M5 11v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/><path d="M12 14v5M9.5 16.5h5"/></svg> Add to Home Screen</button>' +
+      '<button data-act="rename">' + SP + '<path d="M14.7 6.3a3 3 0 0 1 4 4l-10.7 10.7H4v-4z"/></svg> Rename</button>' +
       '<div class="menu-sep"></div>' +
-      '<button data-act="delete" class="danger">&#128465; Delete from Library</button>';
+      '<button data-act="delete" class="danger">' + SP + '<path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M5 6l1 14a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1l1-14"/></svg> Delete from Library</button>';
     // Append to body so tile overflow:hidden can't clip it, and so the
     // menu can extend past the tile into the viewport.
     document.body.appendChild(menu);

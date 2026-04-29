@@ -138,7 +138,9 @@ button, .tap, [role="button"] { min-height: 48px; }
   font-size: 15px; font-weight: 600;
   min-height: 44px;
 }
-.nav-btn .nav-icon { font-size: 18px; }
+.nav-btn .nav-icon { font-size: 18px; display: inline-flex; align-items: center; }
+.nav-btn .nav-icon svg { width: 22px; height: 22px; }
+.nav-btn.icon-only svg { width: 22px; height: 22px; vertical-align: middle; }
 .nav-btn .nav-label { font-size: 14px; }
 .nav-btn:active { background: var(--bg-3); }
 .nav-btn.active {
@@ -1905,10 +1907,13 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
   -webkit-overflow-scrolling: touch;
 }
 .context-menu button {
-  display: block; width: 100%; padding: 10px 14px; background: none; color: #e8e8ee;
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 10px 14px; background: none; color: #e8e8ee;
   border: none; text-align: left; font-size: 14px; min-height: 40px;
 }
 .context-menu button:active { background: #3a3a5a; }
+.context-menu .ctx-icn { width: 18px; height: 18px; flex-shrink: 0; color: var(--accent); }
+.context-menu button.danger .ctx-icn { color: #ff8a8a; }
 .context-menu button.danger {
   color: #ff8a8a;
   font-weight: 700;
