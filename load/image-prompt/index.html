@@ -468,8 +468,8 @@ button,[role="button"]{min-height:48px}
     <input class="settings-input" id="k-replicate" type="password" placeholder="r8_…">
     <p class="panel-hint" style="font-size:11px;margin-top:4px">Note: $0.10 free credit then pay-as-you-go. Use sparingly.</p>
 
-    <p class="panel-hint" style="color:var(--ink-hi);font-weight:700;margin-top:14px">8. Google Imagen (uses your Gemini key)</p>
-    <p class="panel-hint" style="font-size:11px">If you've added a Gemini key in Step 1, Imagen 3 generation is auto-enabled — no extra key needed.</p>
+    <p class="panel-hint" style="color:var(--ink-hi);font-weight:700;margin-top:14px">8. Google Gemini Image (uses your Gemini key)</p>
+    <p class="panel-hint" style="font-size:11px">Once you've added a Gemini key in Step 1, this provider does <strong>both text-to-image AND true pixel-edit</strong> via Gemini 2.5 Flash Image. Auto-prioritized when you upload a photo — preserves face, pose, and composition far better than the no-key providers. <strong>Recommended for refinements.</strong></p>
 
     <p class="panel-hint" style="color:var(--ink-hi);font-weight:700;margin-top:14px">9. DeepInfra (free trial credit, FLUX-schnell)</p>
     <div class="url-pill"><span style="flex:1">deepinfra.com/dash/api_keys</span><button class="copy-btn" onclick="cpURL(this,'https://deepinfra.com/dash/api_keys')">Copy</button></div>
@@ -498,7 +498,7 @@ button,[role="button"]{min-height:48px}
         <label><input type="checkbox" id="t-fal"> Fal.ai</label>
         <label><input type="checkbox" id="t-horde"> AI Horde</label>
         <label><input type="checkbox" id="t-rep"> Replicate</label>
-        <label><input type="checkbox" id="t-img"> Imagen</label>
+        <label><input type="checkbox" id="t-img"> Gemini Image</label>
         <label><input type="checkbox" id="t-di"> DeepInfra</label>
         <label><input type="checkbox" id="t-st"> Stability AI</label>
         <label><input type="checkbox" id="t-dai"> DeepAI</label>
@@ -1073,11 +1073,19 @@ async function pipeline(prompt, imgData, tid) {
       if (sdMatch) lastSDPrompt = sdMatch[1].trim();
       else if (prompt) lastSDPrompt = prompt;
       setCurrentImageFromUrl(resultUrl, 'Previous result — keep editing');
+      // Celebrate first true-edit (Gemini Image used with image attached)
+      if (imageProvUsed === 'Gemini Image' && imgData) {
+        showFirstUseHint('fu_gemini_edit_v1', {
+          icon: '✨', title: 'True image edit active',
+          body: 'Gemini 2.5 Flash Image is now editing your photo directly — face, pose, and composition are preserved across refinements. This is the closest free option to Glam-AI-style editing.',
+          cta: 'Got it'
+        });
+      }
       // One-time hint nudging the user to add a Gemini key for true
-      // pixel-edit fidelity. Without a vision LLM or img2img provider,
-      // multi-turn is "context-aware regen", not actual editing.
+      // pixel-edit fidelity. Skipped if they already have a vision/
+      // edit-capable provider configured.
       const hasVisionKey = !!(C.keys.gemini || C.keys.geminiFB || C.keys.anthropic || C.keys.anthropicFB);
-      const hasImg2Img = !!C.hfImgKey; // HF is the only img2img provider today
+      const hasImg2Img = !!C.hfImgKey || !!C.keys.gemini;
       if (!multiTurnHintShown && !hasVisionKey && !hasImg2Img) {
         multiTurnHintShown = true;
         setTimeout(function () {
@@ -1540,30 +1548,48 @@ const IMAGE_PROVIDERS = [
       return URL.createObjectURL(b);
     }
   },
-  // 8. Google Imagen 3 — uses the existing Gemini API key
+  // 8. Google Gemini Image — text-to-image AND true image-to-image
+  //    edit. Uses gemini-2.5-flash-image-preview which natively
+  //    supports multimodal input + image output. supportsImg2Img:
+  //    true means it auto-prioritizes when user has an image attached
+  //    — the only free option in our chain that preserves face/pose.
   {
     id: 'imagen',
-    name: 'Google Imagen',
+    name: 'Gemini Image',
     needsKey: true,
     enabled: () => !!C.keys.gemini && C.useProvider.imagen !== false,
-    gen: async (prompt) => {
-      const url = 'https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:generateImage?key=' + encodeURIComponent(C.keys.gemini);
+    supportsImg2Img: true,
+    gen: async (prompt, imgData) => {
+      const model = 'gemini-2.5-flash-image-preview';
+      const url = 'https://generativelanguage.googleapis.com/v1beta/models/' +
+        model + ':generateContent?key=' + encodeURIComponent(C.keys.gemini);
+      const parts = [{ text: prompt.slice(0, 1500) }];
+      if (imgData && imgData.base64) {
+        parts.push({ inlineData: {
+          mimeType: imgData.mime || 'image/png',
+          data: imgData.base64
+        }});
+      }
       const r = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: { text: prompt.slice(0, 1500) },
-          parameters: { sampleCount: 1, aspectRatio: '1:1' }
+          contents: [{ parts }],
+          generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
         })
       });
-      if (!r.ok) throw new Error(await readError(r, 'Imagen'));
+      if (!r.ok) throw new Error(await readError(r, 'Gemini Image'));
       const data = await r.json();
-      const b64 = data.generatedImages?.[0]?.image?.imageBytes;
-      if (!b64) throw new Error('Imagen empty result');
+      const respParts = data.candidates?.[0]?.content?.parts || [];
+      const imgPart = respParts.find(p => p.inlineData);
+      if (!imgPart) throw new Error('Gemini Image: no image in response (model may have refused)');
+      const b64 = imgPart.inlineData.data;
       const bin = atob(b64);
       const bytes = new Uint8Array(bin.length);
       for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-      return URL.createObjectURL(new Blob([bytes], { type: 'image/png' }));
+      return URL.createObjectURL(new Blob([bytes], {
+        type: imgPart.inlineData.mimeType || 'image/png'
+      }));
     }
   },
   // 9. DeepInfra — free trial credit, FLUX-schnell
@@ -1780,11 +1806,19 @@ async function imageGenWithFallback(prompt, imgData) {
   // because it needs no key — it's the only thing guaranteed to work.
   if (!providers.find(p => p.id === 'pollinations'))
     providers.push(IMAGE_PROVIDERS[0]);
-  // Prefer img2img-capable providers when the user attached an image
+  // Prefer img2img-capable providers when the user attached an image.
+  // Within img2img, Gemini Image (id 'imagen') goes first because its
+  // 2.5-Flash-Image model preserves face/pose much more faithfully
+  // than HF's strength=0.65 SDXL img2img.
   if (imgData) {
-    const img2img = providers.filter(p => p.supportsImg2Img);
-    const others  = providers.filter(p => !p.supportsImg2Img);
-    providers = [...img2img, ...others];
+    const gemini = providers.find(p => p.id === 'imagen');
+    const otherImg2Img = providers.filter(p => p.supportsImg2Img && p.id !== 'imagen');
+    const textOnly  = providers.filter(p => !p.supportsImg2Img);
+    providers = [
+      ...(gemini ? [gemini] : []),
+      ...otherImg2Img,
+      ...textOnly
+    ];
   }
   let lastErr = null;
   for (const p of providers) {
