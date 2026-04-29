@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#14142a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Image Prompt">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<title>Image Prompt — AI Chat</title>
+<style>
+@font-face{font-family:"AH";font-weight:400;font-display:swap;src:url("fonts/atkinson-400.woff2") format("woff2")}
+@font-face{font-family:"AH";font-weight:700;font-display:swap;src:url("fonts/atkinson-700.woff2") format("woff2")}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-0:#14142a;--bg-1:#1a1a2e;--bg-2:#222238;--bg-3:#2d2d55;
+  --border:#2a2a42;--ink-hi:#f5f5f8;--ink-mid:#c8c8dc;--ink-low:#8a8aa6;
+  --accent:#7c7cff;--accent-hi:#9c9cff;--good:#4aa04a;--danger:#cc3f55;--warn:#f59e0b;
+}
+html,body{height:100%;width:100%;background:var(--bg-0);color:var(--ink-hi);
+  font-family:"AH",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:17px;line-height:1.75;letter-spacing:.015em;word-spacing:.1em;
+  -webkit-text-size-adjust:100%;overflow:hidden}
+button{font-family:inherit;cursor:pointer;font-size:inherit}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button,[role="button"]{min-height:48px}
+
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;
+  background:linear-gradient(160deg,#0f0f2e 0%,#1a1a3e 40%,#2a1a3e 100%)}
+
+/* ── Topbar ── */
+.app-topbar{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:6px;
+  padding:10px 14px;padding-top:max(10px,env(safe-area-inset-top));
+  border-bottom:1px solid var(--border);background:rgba(20,20,42,.88);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+  -webkit-mask-image:linear-gradient(to right,#000 92%,rgba(0,0,0,.35) 100%);
+  mask-image:linear-gradient(to right,#000 92%,rgba(0,0,0,.35) 100%)}
+.app-topbar::-webkit-scrollbar{display:none}
+.app-topbar>*{flex-shrink:0}
+.topbar-title{flex:1;font-size:16px;font-weight:700;color:var(--ink-hi);letter-spacing:.3px;display:flex;align-items:center;gap:8px}
+.topbar-title .ac{color:var(--accent)}
+.nav-btn{display:inline-flex;align-items:center;justify-content:center;padding:10px;border-radius:10px;
+  background:transparent;color:var(--ink-mid);border:none;font-size:18px;min-height:44px;min-width:44px}
+.nav-btn:active{background:var(--bg-3)}
+.provider-pill{display:inline-flex;align-items:center;gap:5px;
+  background:rgba(124,124,255,.15);border:1px solid rgba(124,124,255,.3);
+  border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700;color:var(--accent);
+  cursor:pointer;min-height:32px}
+.provider-pill:active{background:rgba(124,124,255,.25)}
+
+/* ── Banners ── */
+.banner{display:none;padding:10px 16px;font-size:13px;
+  align-items:center;gap:10px;flex-wrap:wrap}
+.banner.on{display:flex}
+.banner.setup{background:rgba(124,124,255,.10);border-bottom:1px solid var(--accent);color:var(--ink-mid)}
+.banner.fallback{background:rgba(245,158,11,.10);border-bottom:1px solid var(--warn);color:var(--warn)}
+.banner button{background:linear-gradient(135deg,var(--accent),#5a5ae0);color:#fff;border:none;
+  padding:8px 18px;border-radius:8px;font-size:14px;font-weight:700;min-height:38px}
+
+/* ── Chat ── */
+#chat-area{flex:1;overflow-y:auto;padding:16px 16px 8px;display:flex;flex-direction:column;gap:14px;
+  -webkit-overflow-scrolling:touch;scroll-behavior:smooth}
+#chat-area::-webkit-scrollbar{width:4px}
+#chat-area::-webkit-scrollbar-thumb{background:var(--bg-3);border-radius:4px}
+
+/* welcome */
+#welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;gap:12px;padding:32px 20px;flex:1}
+#welcome.hidden{display:none}
+.welcome-icon{font-size:48px}
+.welcome-title{font-size:22px;font-weight:700;
+  background:linear-gradient(135deg,var(--accent),var(--accent-hi));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.welcome-sub{font-size:15px;color:var(--ink-mid);max-width:380px;line-height:1.65}
+.starter-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:8px;max-width:460px}
+.chip{background:var(--bg-2);color:var(--ink-hi);border:1px solid var(--border);
+  border-radius:999px;padding:8px 16px;font-size:14px;font-weight:600;min-height:40px;
+  transition:border-color .15s,background .15s}
+.chip:hover{border-color:var(--accent);background:var(--bg-3)}
+.chip:active{transform:scale(.97)}
+
+/* messages */
+.msg{display:flex;gap:10px;max-width:100%;animation:msgIn .2s ease}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{flex-direction:row-reverse}
+.msg-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:16px;flex-shrink:0;margin-top:2px;background:var(--bg-3)}
+.msg.ai .msg-avatar{background:linear-gradient(135deg,var(--accent),#5a5ae0)}
+.msg-content{max-width:calc(100% - 50px);display:flex;flex-direction:column;gap:6px}
+.msg.user .msg-content{align-items:flex-end}
+.bubble{padding:12px 16px;border-radius:16px;font-size:16px;line-height:1.65;word-break:break-word}
+.msg.user .bubble{background:linear-gradient(135deg,var(--accent),#5a5ae0);color:#fff;border-bottom-right-radius:4px}
+.msg.ai .bubble{background:var(--bg-2);color:var(--ink-hi);border:1px solid var(--border);border-bottom-left-radius:4px}
+.bubble-img{width:100%;max-width:320px;border-radius:10px;display:block;margin-top:8px;border:1px solid var(--border)}
+
+/* fallback notice inside bubble */
+.fallback-note{display:inline-flex;align-items:center;gap:6px;
+  background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.4);
+  color:var(--warn);border-radius:8px;padding:6px 10px;font-size:12px;
+  margin-bottom:8px;width:fit-content}
+
+.upload-prev{display:flex;align-items:center;gap:10px;background:var(--bg-2);
+  border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:14px;color:var(--ink-mid)}
+.upload-prev img{width:48px;height:48px;border-radius:6px;object-fit:cover}
+.upload-prev .upn{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.upload-prev .upr{background:none;border:none;color:var(--danger);font-size:18px;padding:4px;min-height:32px}
+
+.typing-indicator{display:flex;gap:4px;align-items:center;padding:6px 0}
+.typing-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);opacity:.6;animation:tb 1.2s infinite}
+.typing-dot:nth-child(2){animation-delay:.2s}.typing-dot:nth-child(3){animation-delay:.4s}
+@keyframes tb{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
+
+.dl-btn{display:inline-flex;align-items:center;gap:6px;
+  background:linear-gradient(135deg,#059669,#0891b2);color:#fff;border:none;
+  border-radius:8px;padding:8px 16px;font-size:14px;font-weight:700;
+  min-height:38px;cursor:pointer;margin-top:6px;text-decoration:none}
+.dl-btn:active{transform:scale(.97)}
+.error-bubble{background:rgba(204,63,85,.15);border:1px solid var(--danger);
+  color:#ff8a8a;border-radius:10px;padding:10px 14px;font-size:14px;line-height:1.5}
+.model-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(124,124,255,.15);
+  color:var(--accent);border:1px solid rgba(124,124,255,.3);border-radius:999px;
+  padding:2px 10px;font-size:11px;font-weight:700;margin-top:4px;width:fit-content}
+
+/* ── Input bar ── */
+#input-bar{background:rgba(20,20,42,.95);border-top:1px solid var(--border);
+  padding:10px 12px;padding-bottom:max(12px,env(safe-area-inset-bottom));
+  display:flex;flex-direction:column;gap:8px;
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+#img-preview-bar{display:none}
+#img-preview-bar.on{display:flex}
+.input-row{display:flex;align-items:flex-end;gap:8px}
+#prompt-input{flex:1;background:var(--bg-2);color:var(--ink-hi);border:2px solid var(--border);
+  border-radius:14px;padding:12px 16px;font-size:16px;line-height:1.5;font-family:inherit;
+  letter-spacing:inherit;resize:none;-webkit-appearance:none;max-height:140px;min-height:48px}
+#prompt-input:focus{outline:none;border-color:var(--accent)}
+#prompt-input::placeholder{color:var(--ink-low)}
+.ia{background:var(--bg-3);color:var(--ink-mid);border:1px solid var(--border);
+  border-radius:12px;width:48px;height:48px;min-height:48px;display:flex;
+  align-items:center;justify-content:center;font-size:20px;padding:0;flex-shrink:0}
+.ia:active{transform:scale(.94)}
+#send-btn{background:linear-gradient(135deg,var(--accent),#5a5ae0);color:#fff;border:none;
+  width:48px;height:48px;min-height:48px;border-radius:12px;display:flex;
+  align-items:center;justify-content:center;font-size:20px;padding:0;flex-shrink:0;
+  box-shadow:0 4px 12px rgba(124,124,255,.3)}
+#send-btn:active{transform:scale(.94);box-shadow:none}
+#send-btn:disabled{opacity:.4;pointer-events:none}
+#file-input{display:none}
+
+/* ── Settings panel ── */
+#settings-panel{position:fixed;right:-460px;top:0;bottom:0;width:min(440px,92vw);
+  background:var(--bg-1);border-left:1px solid var(--border);z-index:110;
+  padding:20px 22px;overflow-y:auto;transition:right .25s ease;
+  padding-top:max(20px,env(safe-area-inset-top))}
+#settings-panel.on{right:0}
+#settings-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:109}
+#settings-overlay.on{display:block}
+.panel-head{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.panel-head h3{margin:0;font-size:18px;color:var(--accent);flex:1}
+.panel-close{background:none;border:none;color:var(--ink-low);font-size:22px;min-height:44px;padding:0 8px}
+.panel-section{padding:16px 0;border-bottom:1px solid var(--border)}
+.panel-section:last-of-type{border-bottom:none}
+.panel-section h4{margin:0 0 4px;font-size:15px;color:var(--ink-hi)}
+.panel-hint{margin:0 0 10px;font-size:13px;color:var(--ink-mid);line-height:1.6}
+
+/* fallback chain display */
+.fallback-chain{background:var(--bg-0);border:1px solid var(--border);border-radius:10px;
+  padding:12px 14px;margin-bottom:10px;font-size:13px;line-height:1.8;color:var(--ink-mid)}
+.fallback-chain .fc-row{display:flex;align-items:center;gap:8px}
+.fc-arrow{color:var(--ink-low);font-size:11px}
+.fc-badge{background:var(--bg-3);border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700;color:var(--ink-hi)}
+.fc-badge.vision{background:rgba(74,160,74,.2);color:var(--good)}
+.fc-badge.text{background:rgba(124,124,255,.2);color:var(--accent)}
+.fc-badge.image{background:rgba(8,145,178,.2);color:#38bdf8}
+
+.url-pill{display:inline-flex;align-items:center;gap:8px;background:var(--bg-0);
+  border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:10px;width:100%;
+  font-family:"SFMono-Regular",Menlo,monospace;font-size:12px;color:var(--accent);
+  user-select:all;-webkit-user-select:all;word-break:break-all}
+.url-pill .copy-btn{background:var(--bg-3);color:var(--ink-mid);border:none;border-radius:6px;
+  padding:4px 10px;font-size:11px;font-weight:700;min-height:28px;flex-shrink:0;cursor:pointer}
+.url-pill .copy-btn:active{background:var(--accent);color:#fff}
+
+.provider-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.pc{background:var(--bg-2);border:2px solid var(--border);border-radius:12px;
+  padding:12px 14px;cursor:pointer;text-align:left;display:flex;flex-direction:column;
+  gap:3px;min-height:72px;transition:border-color .15s,background .15s}
+.pc:active{transform:scale(.97)}
+.pc.active{border-color:var(--accent);background:rgba(124,124,255,.12)}
+.pc-name{font-size:13px;font-weight:700;color:var(--ink-hi)}
+.pc-model{font-size:11px;color:var(--ink-mid)}
+.free-tag{font-size:10px;font-weight:700;color:var(--good);background:rgba(74,160,74,.15);
+  border:1px solid var(--good);border-radius:4px;padding:1px 5px;width:fit-content;margin-top:2px}
+.vision-tag{font-size:10px;font-weight:700;color:#38bdf8;background:rgba(56,189,248,.12);
+  border:1px solid rgba(56,189,248,.4);border-radius:4px;padding:1px 5px;width:fit-content;margin-top:2px}
+
+.settings-input{width:100%;padding:12px 14px;background:var(--bg-0);color:var(--ink-hi);
+  border:2px solid var(--border);border-radius:10px;
+  font-family:"SFMono-Regular",Menlo,monospace;font-size:13px;
+  -webkit-appearance:none;margin-bottom:6px}
+.settings-input:focus{outline:none;border-color:var(--accent)}
+.key-section{display:none;flex-direction:column;gap:4px}
+.key-section.on{display:flex}
+.seg-btns{display:flex;gap:8px;flex-wrap:wrap}
+.seg-btn{flex:1 0 auto;padding:10px 14px;background:var(--bg-2);color:var(--ink-hi);
+  border:2px solid var(--border);border-radius:10px;font-size:13px;font-weight:600;min-height:44px}
+.seg-btn:active{transform:scale(.97)}
+.seg-btn.active{background:var(--accent);color:var(--bg-0);border-color:var(--accent)}
+.save-btn{width:100%;margin-top:12px;background:linear-gradient(135deg,var(--accent),#5a5ae0);
+  color:#fff;border:none;border-radius:10px;padding:14px;font-size:16px;font-weight:700;min-height:50px}
+.save-btn:active{transform:scale(.98)}
+.panel-footer{margin-top:20px;padding-top:16px;border-top:1px solid var(--border);
+  font-size:12px;color:var(--ink-low);text-align:center;line-height:1.8}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="app-topbar">
+    <div class="topbar-title">✦ Prompt <span class="ac">Studio</span></div>
+    <button class="provider-pill" id="pill" onclick="openSettings()">⚡ Free</button>
+    <button class="nav-btn" id="clear-btn" title="Clear">🗑</button>
+    <button class="nav-btn" onclick="openSettings()" title="Settings">⚙️</button>
+  </div>
+
+  <!-- Setup banner -->
+  <div id="setup-banner" class="banner setup on">
+    <span>🔑</span>
+    <span>Choose a free AI provider to begin</span>
+    <button onclick="openSettings()">Set Up Free</button>
+  </div>
+
+  <!-- Fallback banner (shown when a fallback was used) -->
+  <div id="fallback-banner" class="banner fallback">
+    <span>⚡</span>
+    <span id="fallback-msg">Switched provider for this request</span>
+  </div>
+
+  <div id="chat-area">
+    <div id="welcome">
+      <div class="welcome-icon">✦</div>
+      <div class="welcome-title">Image Prompt</div>
+      <div class="welcome-sub">Describe photos, styles, or effects you want — upload an image and let AI transform it exactly how you envision.</div>
+      <div class="starter-chips">
+        <button class="chip" onclick="useStarter(this)">Make me a professional headshot</button>
+        <button class="chip" onclick="useStarter(this)">Add a fantasy theme</button>
+        <button class="chip" onclick="useStarter(this)">Change background to sunset</button>
+        <button class="chip" onclick="useStarter(this)">Vintage film style</button>
+        <button class="chip" onclick="useStarter(this)">Make it look cinematic</button>
+        <button class="chip" onclick="useStarter(this)">Watercolor painting style</button>
+        <button class="chip" onclick="useStarter(this)">Neon cyberpunk edit</button>
+        <button class="chip" onclick="useStarter(this)">Oil painting portrait</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="input-bar">
+    <div id="img-preview-bar">
+      <div class="upload-prev">
+        <img id="img-thumb" src="" alt="">
+        <span class="upn" id="img-name"></span>
+        <button class="upr" onclick="clearImage()">✕</button>
+      </div>
+    </div>
+    <div class="input-row">
+      <button class="ia" onclick="document.getElementById('file-input').click()" title="Upload image">🖼</button>
+      <input type="file" id="file-input" accept="image/*">
+      <textarea id="prompt-input" rows="1" placeholder="Describe what you want…"></textarea>
+      <button id="send-btn" disabled>↑</button>
+    </div>
+  </div>
+</div>
+
+<div id="settings-overlay" onclick="closeSettings()"></div>
+<div id="settings-panel">
+  <div class="panel-head">
+    <h3>⚙️ Settings</h3>
+    <button class="panel-close" onclick="closeSettings()">✕</button>
+  </div>
+
+  <!-- Fallback chain info -->
+  <div class="panel-section">
+    <h4>Auto-Fallback System</h4>
+    <p class="panel-hint">Image Prompt automatically routes each request to the best available provider. If your chosen provider can't handle something (e.g. image input), it silently switches to one that can.</p>
+    <div class="fallback-chain">
+      <div class="fc-row">
+        <span class="fc-badge text">Text prompt</span>
+        <span class="fc-arrow">→</span>
+        <span style="font-size:12px;color:var(--ink-mid)">Your chosen provider</span>
+      </div>
+      <div class="fc-row" style="margin-top:6px">
+        <span class="fc-badge vision">Image + prompt</span>
+        <span class="fc-arrow">→</span>
+        <span style="font-size:12px;color:var(--ink-mid)">Gemini → Anthropic → HF Chat</span>
+      </div>
+      <div class="fc-row" style="margin-top:6px">
+        <span class="fc-badge image">Image transform</span>
+        <span class="fc-arrow">→</span>
+        <span style="font-size:12px;color:var(--ink-mid)">HF SDXL → SD1.5 → FLUX</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 1: Primary provider -->
+  <div class="panel-section">
+    <h4>Step 1 — Primary AI Provider</h4>
+    <p class="panel-hint">Pick your preferred provider. For image uploads, the app auto-routes to a vision-capable provider if needed.</p>
+    <div class="provider-grid">
+      <button class="pc" data-p="puter" onclick="selP(this)">
+        <span class="pc-name">☁️ Puter.js</span>
+        <span class="pc-model">500+ models, no key</span>
+        <span class="free-tag">FREE — No key</span>
+      </button>
+      <button class="pc" data-p="gemini" onclick="selP(this)">
+        <span class="pc-name">🟣 Google AI Studio</span>
+        <span class="pc-model">Gemini 2.5 Flash</span>
+        <span class="free-tag">FREE — No CC</span>
+        <span class="vision-tag">✦ Vision</span>
+      </button>
+      <button class="pc" data-p="openrouter" onclick="selP(this)">
+        <span class="pc-name">🔀 OpenRouter</span>
+        <span class="pc-model">DeepSeek · Mistral · Gemma</span>
+        <span class="free-tag">FREE — No CC</span>
+      </button>
+      <button class="pc" data-p="cerebras" onclick="selP(this)">
+        <span class="pc-name">⚡ Cerebras</span>
+        <span class="pc-model">Llama 3.1 fast</span>
+        <span class="free-tag">FREE tier</span>
+      </button>
+      <button class="pc" data-p="anthropic" onclick="selP(this)">
+        <span class="pc-name">🤖 Anthropic</span>
+        <span class="pc-model">Claude Haiku</span>
+        <span class="free-tag">Free credits</span>
+        <span class="vision-tag">✦ Vision</span>
+      </button>
+      <button class="pc" data-p="hfchat" onclick="selP(this)">
+        <span class="pc-name">🤗 Hugging Face</span>
+        <span class="pc-model">Mistral · Llama</span>
+        <span class="free-tag">FREE token</span>
+      </button>
+    </div>
+
+    <div class="key-section" id="ks-puter">
+      <p class="panel-hint">✅ No key needed. Works immediately.<br>
+      For image uploads, the app will auto-use Gemini or Anthropic if you add those keys below.</p>
+    </div>
+    <div class="key-section" id="ks-gemini">
+      <p class="panel-hint">Get free key — copy this into your browser:</p>
+      <div class="url-pill"><span style="flex:1">aistudio.google.com/app/apikey</span><button class="copy-btn" onclick="cpURL(this,'https://aistudio.google.com/app/apikey')">Copy</button></div>
+      <input class="settings-input" id="k-gemini" type="password" placeholder="AIza…">
+    </div>
+    <div class="key-section" id="ks-openrouter">
+      <p class="panel-hint">Get free key — copy this into your browser:</p>
+      <div class="url-pill"><span style="flex:1">openrouter.ai/keys</span><button class="copy-btn" onclick="cpURL(this,'https://openrouter.ai/keys')">Copy</button></div>
+      <input class="settings-input" id="k-openrouter" type="password" placeholder="sk-or-…">
+      <div class="seg-btns" style="margin-top:4px">
+        <button class="seg-btn active" data-orm="deepseek/deepseek-r1:free" onclick="setORM(this)">DeepSeek R1</button>
+        <button class="seg-btn" data-orm="mistralai/mistral-7b-instruct:free" onclick="setORM(this)">Mistral 7B</button>
+        <button class="seg-btn" data-orm="google/gemma-3-12b-it:free" onclick="setORM(this)">Gemma 3</button>
+      </div>
+    </div>
+    <div class="key-section" id="ks-cerebras">
+      <p class="panel-hint">Get free key — copy this into your browser:</p>
+      <div class="url-pill"><span style="flex:1">cloud.cerebras.ai</span><button class="copy-btn" onclick="cpURL(this,'https://cloud.cerebras.ai')">Copy</button></div>
+      <input class="settings-input" id="k-cerebras" type="password" placeholder="csk-…">
+    </div>
+    <div class="key-section" id="ks-anthropic">
+      <p class="panel-hint">Get free credits — copy this into your browser:</p>
+      <div class="url-pill"><span style="flex:1">console.anthropic.com</span><button class="copy-btn" onclick="cpURL(this,'https://console.anthropic.com')">Copy</button></div>
+      <input class="settings-input" id="k-anthropic" type="password" placeholder="sk-ant-…">
+    </div>
+    <div class="key-section" id="ks-hfchat">
+      <p class="panel-hint">Get free token — copy this into your browser:</p>
+      <div class="url-pill"><span style="flex:1">huggingface.co/settings/tokens</span><button class="copy-btn" onclick="cpURL(this,'https://huggingface.co/settings/tokens')">Copy</button></div>
+      <input class="settings-input" id="k-hfchat" type="password" placeholder="hf_…">
+    </div>
+  </div>
+
+  <!-- Step 2: Vision fallback keys -->
+  <div class="panel-section">
+    <h4>Step 2 — Vision Fallback Keys</h4>
+    <p class="panel-hint">When you upload an image and your primary provider can't see it, the app falls back to these vision providers automatically. Add at least one.</p>
+    <p class="panel-hint" style="color:var(--ink-hi);font-weight:700">Gemini (recommended — free)</p>
+    <input class="settings-input" id="k-gemini-fb" type="password" placeholder="AIza… (same key as above if using Gemini)">
+    <p class="panel-hint" style="color:var(--ink-hi);font-weight:700;margin-top:6px">Anthropic Claude (fallback #2)</p>
+    <input class="settings-input" id="k-anthropic-fb" type="password" placeholder="sk-ant-… (same key as above if using Anthropic)">
+  </div>
+
+  <!-- Step 3: Image transformer -->
+  <div class="panel-section">
+    <h4>Step 3 — Image Transformer (optional)</h4>
+    <p class="panel-hint">Free Hugging Face token to enable actual image transformation. The app tries SDXL → SD 1.5 → FLUX automatically if one fails.</p>
+    <div class="url-pill"><span style="flex:1">huggingface.co/settings/tokens</span><button class="copy-btn" onclick="cpURL(this,'https://huggingface.co/settings/tokens')">Copy</button></div>
+    <input class="settings-input" id="k-hf-img" type="password" placeholder="hf_…">
+    <p class="panel-hint" style="margin-top:6px">Preferred model (auto-falls back if unavailable):</p>
+    <div class="seg-btns">
+      <button class="seg-btn active" data-hm="stabilityai/stable-diffusion-xl-base-1.0" onclick="setHM(this)">SDXL</button>
+      <button class="seg-btn" data-hm="runwayml/stable-diffusion-v1-5" onclick="setHM(this)">SD 1.5</button>
+      <button class="seg-btn" data-hm="black-forest-labs/FLUX.1-schnell" onclick="setHM(this)">FLUX</button>
+    </div>
+  </div>
+
+  <!-- Step 4: Style -->
+  <div class="panel-section">
+    <h4>Step 4 — Default Style</h4>
+    <div class="seg-btns">
+      <button class="seg-btn active" data-mode="realistic" onclick="setMode(this)">Realistic</button>
+      <button class="seg-btn" data-mode="artistic" onclick="setMode(this)">Artistic</button>
+      <button class="seg-btn" data-mode="anime" onclick="setMode(this)">Anime</button>
+      <button class="seg-btn" data-mode="cinematic" onclick="setMode(this)">Cinematic</button>
+    </div>
+  </div>
+
+  <button class="save-btn" onclick="saveSettings()">✓ Save &amp; Start</button>
+  <div class="panel-footer">Image Prompt — Part of Load<br>Auto-fallback routing · All providers free<br>Built into the Load suite</div>
+</div>
+
+<script>
+/* ── Puter.js ── */
+(function(){const s=document.createElement('script');s.src='https://js.puter.com/v2/';s.async=true;document.head.appendChild(s);})();
+
+/* ── Service Worker ── */
+if('serviceWorker' in navigator)
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+
+/* ────────────────────────────────────────
+   PROVIDER CAPABILITY MAP
+   vision: can accept image input
+   textOnly: text prompts only
+──────────────────────────────────────── */
+const CAPS = {
+  puter:      { vision: false },
+  gemini:     { vision: true  },
+  openrouter: { vision: false },
+  cerebras:   { vision: false },
+  anthropic:  { vision: true  },
+  hfchat:     { vision: false },
+};
+
+/* ── STATE ── */
+const LS = localStorage;
+let C = {
+  provider:    LS.getItem('ps_prov')     || '',
+  keys: {
+    gemini:    LS.getItem('ps_k_gemini') || '',
+    openrouter:LS.getItem('ps_k_or')     || '',
+    cerebras:  LS.getItem('ps_k_cbr')    || '',
+    anthropic: LS.getItem('ps_k_ant')    || '',
+    hfchat:    LS.getItem('ps_k_hfc')    || '',
+    geminiFB:  LS.getItem('ps_k_gfb')    || '',
+    anthropicFB:LS.getItem('ps_k_afb')   || '',
+  },
+  orModel:    LS.getItem('ps_orm')  || 'deepseek/deepseek-r1:free',
+  hfModel:    LS.getItem('ps_hfm') || 'stabilityai/stable-diffusion-xl-base-1.0',
+  hfImgKey:   LS.getItem('ps_hfimg')|| '',
+  mode:       LS.getItem('ps_mode') || 'realistic',
+};
+
+/* HF model fallback chain */
+const HF_MODELS = [
+  'stabilityai/stable-diffusion-xl-base-1.0',
+  'runwayml/stable-diffusion-v1-5',
+  'black-forest-labs/FLUX.1-schnell',
+];
+
+let img = null, generating = false, history = [];
+
+/* ── INIT ── */
+(function(){
+  if(C.provider){const c=document.querySelector(`[data-p="${C.provider}"]`);if(c){c.classList.add('active');showKS(C.provider);}}
+  const km={gemini:'k-gemini',openrouter:'k-openrouter',cerebras:'k-cerebras',anthropic:'k-anthropic',hfchat:'k-hfchat'};
+  Object.entries(km).forEach(([k,id])=>{const el=document.getElementById(id);if(el&&C.keys[k])el.value=C.keys[k];});
+  if(C.keys.geminiFB)   document.getElementById('k-gemini-fb').value=C.keys.geminiFB;
+  if(C.keys.anthropicFB)document.getElementById('k-anthropic-fb').value=C.keys.anthropicFB;
+  if(C.hfImgKey)document.getElementById('k-hf-img').value=C.hfImgKey;
+  document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===C.mode));
+  document.querySelectorAll('[data-orm]').forEach(b=>b.classList.toggle('active',b.dataset.orm===C.orModel));
+  document.querySelectorAll('[data-hm]').forEach(b=>b.classList.toggle('active',b.dataset.hm===C.hfModel));
+  updatePill();
+  if(C.provider && hasProviderAccess(C.provider))
+    document.getElementById('setup-banner').classList.remove('on');
+
+  const ta=document.getElementById('prompt-input');
+  ta.addEventListener('input',()=>{ta.style.height='auto';ta.style.height=Math.min(ta.scrollHeight,140)+'px';updSend();});
+  ta.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
+  document.getElementById('file-input').addEventListener('change',onFile);
+  document.getElementById('send-btn').addEventListener('click',send);
+  document.getElementById('clear-btn').addEventListener('click',clearChat);
+})();
+
+function updSend(){
+  const ta=document.getElementById('prompt-input');
+  document.getElementById('send-btn').disabled=generating||(!ta.value.trim()&&!img);
+}
+function updatePill(){
+  const n={puter:'Puter.js',gemini:'Google AI',openrouter:'OpenRouter',cerebras:'Cerebras',anthropic:'Anthropic',hfchat:'HF Chat'};
+  document.getElementById('pill').textContent='⚡ '+(C.provider?n[C.provider]||C.provider:'Free');
+}
+
+function keyForProvider(provider){
+  if(provider==='puter') return 'puter';
+  return C.keys[provider] || '';
+}
+function hasProviderAccess(provider){
+  return provider==='puter' || !!keyForProvider(provider);
+}
+function hasAnyVisionKey(){
+  return !!(C.keys.gemini || C.keys.geminiFB || C.keys.anthropic || C.keys.anthropicFB);
+}
+async function readError(res, label){
+  const text = await res.text().catch(()=> '');
+  if(!text) return `${label}: request failed (${res.status})`;
+  try{
+    const j = JSON.parse(text);
+    return `${label}: ${j.error?.message || j.error || j.message || res.status}`;
+  }catch(_){
+    return `${label}: ${text.slice(0,160)}`;
+  }
+}
+
+/* ── SETTINGS ── */
+function openSettings(){document.getElementById('settings-panel').classList.add('on');document.getElementById('settings-overlay').classList.add('on');}
+function closeSettings(){document.getElementById('settings-panel').classList.remove('on');document.getElementById('settings-overlay').classList.remove('on');}
+function selP(btn){document.querySelectorAll('.pc').forEach(c=>c.classList.remove('active'));btn.classList.add('active');C.provider=btn.dataset.p;showKS(C.provider);}
+function showKS(p){document.querySelectorAll('.key-section').forEach(el=>el.classList.remove('on'));const el=document.getElementById('ks-'+p);if(el)el.classList.add('on');}
+function setMode(b){document.querySelectorAll('[data-mode]').forEach(x=>x.classList.remove('active'));b.classList.add('active');C.mode=b.dataset.mode;}
+function setORM(b){document.querySelectorAll('[data-orm]').forEach(x=>x.classList.remove('active'));b.classList.add('active');C.orModel=b.dataset.orm;}
+function setHM(b){document.querySelectorAll('[data-hm]').forEach(x=>x.classList.remove('active'));b.classList.add('active');C.hfModel=b.dataset.hm;}
+function cpURL(btn,url){
+  const done=()=>{btn.textContent='✓ Copied';setTimeout(()=>btn.textContent='Copy',2000);};
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(url).then(done).catch(()=>{prompt('Copy this link:',url);done();});
+  }else{
+    prompt('Copy this link:',url);done();
+  }
+}
+
+function saveSettings(){
+  C.keys.gemini     =document.getElementById('k-gemini').value.trim();
+  C.keys.openrouter =document.getElementById('k-openrouter').value.trim();
+  C.keys.cerebras   =document.getElementById('k-cerebras').value.trim();
+  C.keys.anthropic  =document.getElementById('k-anthropic').value.trim();
+  C.keys.hfchat     =document.getElementById('k-hfchat').value.trim();
+  C.keys.geminiFB   =document.getElementById('k-gemini-fb').value.trim();
+  C.keys.anthropicFB=document.getElementById('k-anthropic-fb').value.trim();
+  C.hfImgKey        =document.getElementById('k-hf-img').value.trim();
+  LS.setItem('ps_prov',C.provider); LS.setItem('ps_k_gemini',C.keys.gemini);
+  LS.setItem('ps_k_or',C.keys.openrouter); LS.setItem('ps_k_cbr',C.keys.cerebras);
+  LS.setItem('ps_k_ant',C.keys.anthropic); LS.setItem('ps_k_hfc',C.keys.hfchat);
+  LS.setItem('ps_k_gfb',C.keys.geminiFB); LS.setItem('ps_k_afb',C.keys.anthropicFB);
+  LS.setItem('ps_hfimg',C.hfImgKey); LS.setItem('ps_orm',C.orModel);
+  LS.setItem('ps_hfm',C.hfModel); LS.setItem('ps_mode',C.mode);
+  updatePill();
+  if(C.provider && hasProviderAccess(C.provider))
+    document.getElementById('setup-banner').classList.remove('on');
+  closeSettings(); toast('Settings saved ✓');
+}
+
+/* ── IMAGE ── */
+function onFile(e){
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    const d=ev.target.result;
+    img={dataUrl:d,base64:d.split(',')[1],mime:file.type||'image/jpeg',name:file.name};
+    document.getElementById('img-thumb').src=d;
+    document.getElementById('img-name').textContent=file.name;
+    document.getElementById('img-preview-bar').classList.add('on');
+    updSend();
+  };
+  r.readAsDataURL(file);e.target.value='';
+}
+function clearImage(){img=null;document.getElementById('img-preview-bar').classList.remove('on');document.getElementById('img-thumb').src='';updSend();}
+
+/* ── SEND ── */
+function useStarter(btn){const ta=document.getElementById('prompt-input');ta.value=btn.textContent;ta.dispatchEvent(new Event('input'));ta.focus();}
+
+function send(){
+  if(generating)return;
+  const ta=document.getElementById('prompt-input');const p=ta.value.trim();
+  if(!p&&!img)return;
+
+  const available = getAvailableProviders();
+  if(!available.length){
+    openSettings();
+    toast('Add at least one provider key or use Puter.js');
+    return;
+  }
+  if(!C.provider) C.provider = available[0];
+
+  document.getElementById('welcome').classList.add('hidden');
+  document.getElementById('fallback-banner').classList.remove('on');
+  const snap=img?{...img}:null;
+  addUserMsg(p,snap);
+  history.push({role:'user',content:p||(snap?'(image)':'')});
+  ta.value='';ta.style.height='auto';clearImage();
+  generating=true;updSend();
+  const tid=addTyping();
+  pipeline(p,snap,tid);
+}
+
+/* ────────────────────────────────────────
+   PIPELINE WITH FULL AUTO-FALLBACK
+──────────────────────────────────────── */
+async function pipeline(prompt, imgData, tid) {
+  let usedProvider = C.provider;
+  let fallbackNote = null;
+  let reply = '';
+  const needsVision = !!imgData;
+
+  try {
+    const primary = (C.provider && hasProviderAccess(C.provider)) ? C.provider : getAvailableProviders()[0];
+    if(!primary) throw new Error('No active provider found. Add a provider key in Settings.');
+    usedProvider = primary;
+
+    let providerToCall = primary;
+    let imageForCall = imgData;
+
+    if(needsVision && !CAPS[primary]?.vision){
+      const vf = getVisionFallback(primary);
+      if(vf){
+        providerToCall = vf.id;
+        usedProvider = vf.id;
+        fallbackNote = `${providerName(primary)} cannot read images, used ${vf.name} for image understanding`;
+        showFallbackBanner(fallbackNote);
+      } else {
+        imageForCall = null;
+        fallbackNote = `${providerName(primary)} cannot read images and no vision key is saved, continuing with text-only routing`;
+        showFallbackBanner(fallbackNote);
+      }
+    }
+
+    try {
+      reply = await callProvider(providerToCall, prompt, imageForCall);
+    } catch(e) {
+      const fallback = await tryProviderFallbackChain(prompt, imgData, providerToCall);
+      if (fallback) {
+        usedProvider = fallback.id;
+        fallbackNote = `${providerName(providerToCall)} unavailable or could not perform, used ${fallback.name} instead`;
+        showFallbackBanner(fallbackNote);
+        reply = fallback.reply;
+      } else {
+        throw e;
+      }
+    }
+
+    let resultUrl = null;
+    if (C.hfImgKey) {
+      resultUrl = await hfImageWithFallback(imgData, reply);
+    }
+
+    removeTyping(tid);
+    const displayText = reply.replace(/SD_PROMPT:[\s\S]*/,'').trim() || reply;
+    const finalText = resultUrl
+      ? `Here's your result!${prompt?' "'+prompt+'" applied.':''} Tap Save to keep it. Want refinements?`
+      : displayText;
+    addAIMsg(finalText, resultUrl, usedProvider, fallbackNote);
+    history.push({role:'assistant',content:finalText});
+
+  } catch(err) {
+    removeTyping(tid);
+    addError((err.message || 'Something went wrong. Check Settings and try again.') + `\n\nActive provider: ${providerName(usedProvider)}\nSelected model: ${activeModelLabel(usedProvider)}\nFallback order: ${getProviderOrder().map(providerName).join(' > ')}`);
+  } finally {
+    generating=false;updSend();
+  }
+}
+
+/* Provider order and fallback helpers */
+function getAvailableProviders(){
+  return getProviderOrder().filter(p => hasProviderAccess(p));
+}
+
+function getProviderOrder(){
+  const fallbackOrder = ['puter','openrouter','gemini','anthropic','cerebras','hfchat'];
+  const first = C.provider || 'puter';
+  return [first, ...fallbackOrder.filter(p => p !== first)];
+}
+
+function getVisionFallback(exclude) {
+  const order = getProviderOrder().filter(p => p !== exclude);
+  for (const p of order) {
+    if (CAPS[p]?.vision && hasProviderAccess(p)) {
+      if (p === 'gemini' && !(C.keys.geminiFB || C.keys.gemini)) continue;
+      if (p === 'anthropic' && !(C.keys.anthropicFB || C.keys.anthropic)) continue;
+      return { id:p, name:providerName(p) };
+    }
+  }
+  return null;
+}
+
+async function tryProviderFallbackChain(prompt, imgData, exclude) {
+  const chain = getProviderOrder()
+    .filter(p => p !== exclude)
+    .filter(p => hasProviderAccess(p));
+
+  let lastError = null;
+  for (const p of chain) {
+    try {
+      const usableImage = imgData && CAPS[p]?.vision ? imgData : null;
+      const r = await callProvider(p, prompt, usableImage);
+      return { id: p, name: providerName(p), reply: r };
+    } catch(e) {
+      lastError = e;
+    }
+  }
+  if(lastError) console.warn('All fallback providers failed:', lastError);
+  return null;
+}
+
+function providerName(p){
+  return {puter:'Puter.js',gemini:'Google Gemini',openrouter:'OpenRouter',cerebras:'Cerebras',anthropic:'Anthropic Claude',hfchat:'HF Mistral'}[p]||p;
+}
+
+function activeModelLabel(p){
+  return {
+    puter:'Puter.js auto model',
+    gemini:'gemini-2.5-flash',
+    openrouter:C.orModel,
+    cerebras:'llama-3.1-8b',
+    anthropic:'claude-3-5-haiku-latest',
+    hfchat:'mistralai/Mistral-7B-Instruct-v0.3'
+  }[p] || 'unknown';
+}
+
+function showFallbackBanner(msg) {
+  const b = document.getElementById('fallback-banner');
+  document.getElementById('fallback-msg').textContent = msg;
+  b.classList.add('on');
+  setTimeout(() => b.classList.remove('on'), 6000);
+}
+
+/* ── Unified provider caller ── */
+async function callProvider(provider, prompt, imgData) {
+  switch(provider){
+    case'puter':     return callPuter(prompt);
+    case'gemini':    return callGemini(prompt, imgData, C.keys.gemini);
+    case'openrouter':return callOR(prompt);
+    case'cerebras':  return callCerebras(prompt);
+    case'anthropic': return callAnthropic(prompt, imgData, C.keys.anthropic);
+    case'hfchat':    return callHFChat(prompt);
+    default: throw new Error('Unknown provider: '+provider);
+  }
+}
+
+async function callVisionProvider(providerId, prompt, imgData) {
+  const key = providerId === 'gemini'
+    ? (C.keys.geminiFB || C.keys.gemini)
+    : (C.keys.anthropicFB || C.keys.anthropic);
+  if (providerId === 'gemini')    return callGemini(prompt, imgData, key);
+  if (providerId === 'anthropic') return callAnthropic(prompt, imgData, key);
+  throw new Error('No vision provider');
+}
+
+/* ── System prompt ── */
+const SYS = () => `You are a creative AI assistant and image prompt engineer. When the user describes an image edit or style transformation, respond helpfully and conversationally. Also include a line starting with "SD_PROMPT:" followed by a detailed Stable Diffusion img2img prompt for the request. Style preference: ${C.mode}. Keep SD_PROMPT under 200 words.`;
+
+/* ── Individual providers ── */
+async function callPuter(prompt) {
+  if(typeof puter==='undefined') throw new Error('Puter.js is loading. Please try again in a moment.');
+  const resp = await puter.ai.chat(SYS()+'\n\nUser: '+prompt);
+  return resp?.message?.content || String(resp) || prompt;
+}
+
+async function callGemini(prompt, imgData, key) {
+  if(!key) throw new Error('No Gemini key');
+  const parts = [];
+  if(imgData) parts.push({inlineData:{mimeType:imgData.mime,data:imgData.base64}});
+  parts.push({text: SYS()+'\n\nUser: '+prompt});
+  const r = await fetch(
+    `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${key}`,
+    {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts}]})}
+  );
+  if(!r.ok) throw new Error(await readError(r,'Gemini'));
+  const d = await r.json();
+  return d.candidates?.[0]?.content?.parts?.[0]?.text || prompt;
+}
+
+async function callOR(prompt) {
+  if(!C.keys.openrouter) throw new Error('No OpenRouter key');
+  const r = await fetch('https://openrouter.ai/api/v1/chat/completions',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+C.keys.openrouter,
+             'HTTP-Referer':'https://dssorit.github.io/ancient-covenant-scrolls/load/image-prompt/','X-Title':'Image Prompt'},
+    body:JSON.stringify({model:C.orModel,messages:[{role:'system',content:SYS()},...history.slice(-6),{role:'user',content:prompt}]})
+  });
+  if(!r.ok) throw new Error(await readError(r,'OpenRouter'));
+  const d = await r.json();
+  return d.choices?.[0]?.message?.content || prompt;
+}
+
+async function callCerebras(prompt) {
+  if(!C.keys.cerebras) throw new Error('No Cerebras key');
+  const r = await fetch('https://api.cerebras.ai/v1/chat/completions',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+C.keys.cerebras},
+    body:JSON.stringify({model:'llama-3.1-8b',messages:[{role:'system',content:SYS()},{role:'user',content:prompt}],max_tokens:500})
+  });
+  if(!r.ok) throw new Error(await readError(r,'Cerebras'));
+  const d = await r.json();
+  return d.choices?.[0]?.message?.content || prompt;
+}
+
+async function callAnthropic(prompt, imgData, key) {
+  if(!key) throw new Error('No Anthropic key');
+  const content = [];
+  if(imgData) content.push({type:'image',source:{type:'base64',media_type:imgData.mime,data:imgData.base64}});
+  content.push({type:'text',text:prompt});
+  const r = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':key,
+             'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-3-5-haiku-latest',max_tokens:600,system:SYS(),messages:[{role:'user',content}]})
+  });
+  if(!r.ok) throw new Error(await readError(r,'Anthropic'));
+  const d = await r.json();
+  return d.content?.[0]?.text || prompt;
+}
+
+async function callHFChat(prompt) {
+  if(!C.keys.hfchat) throw new Error('No HF key');
+  const r = await fetch('https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3',{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+C.keys.hfchat,'Content-Type':'application/json'},
+    body:JSON.stringify({inputs:SYS()+'\n\nUser: '+prompt+'\nAssistant:',parameters:{max_new_tokens:400}})
+  });
+  if(!r.ok) throw new Error(await readError(r,'HF Chat'));
+  const d = await r.json();
+  return Array.isArray(d)?d[0]?.generated_text?.split('Assistant:').pop()?.trim()||prompt:prompt;
+}
+
+/* ── HF Image with model fallback chain ── */
+async function hfImageWithFallback(imgData, responseText) {
+  const m = responseText.match(/SD_PROMPT:\s*(.+)/s);
+  const p = m ? m[1].trim().slice(0,300) : responseText.slice(0,200);
+
+  /* Build ordered model list starting from preferred */
+  const preferred = C.hfModel;
+  const models = [preferred, ...HF_MODELS.filter(x => x !== preferred)];
+
+  for (const model of models) {
+    try {
+      const blob = await hfImageCall(model, p, imgData);
+      if (blob) return URL.createObjectURL(blob);
+    } catch(e) {
+      /* 503 = model loading, other errors = try next model */
+      if (e.message?.includes('cold start')) {
+        /* Re-throw cold start so user sees it — don't silently skip */
+        throw e;
+      }
+      /* Otherwise silently try next model */
+    }
+  }
+  return null; // all models failed silently — return no image
+}
+
+async function hfImageCall(model, prompt, imgData) {
+  const body = {inputs: prompt, parameters:{num_inference_steps:30,guidance_scale:7.5}};
+  if(imgData){body.parameters.image=imgData.base64;body.parameters.strength=0.65;}
+  const r = await fetch(`https://api-inference.huggingface.co/models/${model}`,{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+C.hfImgKey,'Content-Type':'application/json'},
+    body:JSON.stringify(body)
+  });
+  if(r.status===503) throw new Error('Image model loading (~30s cold start). Please wait and retry.');
+  if(!r.ok) throw new Error(await readError(r,'HF Image'));
+  const blob = await r.blob();
+  if(!blob.type.startsWith('image/')){
+    const txt=await blob.text();let msg='Image gen failed.';
+    try{msg=JSON.parse(txt)?.error||msg;}catch(_){}
+    throw new Error(msg);
+  }
+  return blob;
+}
+
+/* ── DOM ── */
+function addUserMsg(text,imgData){
+  const a=document.getElementById('chat-area');
+  const el=document.createElement('div');el.className='msg user';
+  el.innerHTML=`<div class="msg-avatar">👤</div><div class="msg-content"><div class="bubble">
+    ${imgData?`<img class="bubble-img" src="${imgData.dataUrl}" alt="">`:''} ${text?esc(text):''}</div></div>`;
+  a.appendChild(el);scrollBot();
+}
+
+function addAIMsg(text, imgUrl, provider, fallbackNote) {
+  const a=document.getElementById('chat-area');
+  const el=document.createElement('div');el.className='msg ai';
+  const names={puter:'Puter.js',gemini:'Google Gemini',openrouter:'OpenRouter',cerebras:'Cerebras',anthropic:'Claude',hfchat:'HF Mistral'};
+  const noteHtml = fallbackNote
+    ? `<div class="fallback-note">⚡ ${esc(fallbackNote)}</div>` : '';
+  el.innerHTML=`<div class="msg-avatar">✦</div><div class="msg-content">
+    ${noteHtml}
+    <div class="bubble">${imgUrl?`<img class="bubble-img" src="${imgUrl}" alt="result">`:''} ${esc(text)}</div>
+    ${imgUrl?`<a class="dl-btn" href="${imgUrl}" download="image-prompt.png" target="_blank" rel="noopener">⬇ Save Image</a>`:''}
+    <div class="model-badge">✦ ${names[provider]||provider}${C.hfImgKey?' + HF':''}</div>
+  </div>`;
+  a.appendChild(el);scrollBot();
+}
+
+function addError(msg){
+  const a=document.getElementById('chat-area');
+  const el=document.createElement('div');el.className='msg ai';
+  el.innerHTML=`<div class="msg-avatar">✦</div><div class="msg-content"><div class="error-bubble">⚠️ ${esc(msg)}</div></div>`;
+  a.appendChild(el);scrollBot();
+}
+
+function addTyping(){
+  const a=document.getElementById('chat-area');const id='t'+Date.now();
+  const el=document.createElement('div');el.className='msg ai';el.id=id;
+  el.innerHTML=`<div class="msg-avatar">✦</div><div class="msg-content"><div class="bubble" style="padding:10px 16px">
+    <div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
+  </div></div>`;
+  a.appendChild(el);scrollBot();return id;
+}
+
+function removeTyping(id){const el=document.getElementById(id);if(el)el.remove();}
+function scrollBot(){const a=document.getElementById('chat-area');setTimeout(()=>a.scrollTop=a.scrollHeight,50);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
+
+function toast(msg){
+  const t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--bg-3);color:var(--ink-hi);border:1px solid var(--border);padding:10px 22px;border-radius:999px;font-size:14px;font-weight:700;z-index:999;pointer-events:none;white-space:nowrap;animation:ft 2.2s ease forwards';
+  t.textContent=msg;
+  const s=document.createElement('style');s.textContent='@keyframes ft{0%{opacity:0;transform:translateX(-50%) translateY(8px)}15%{opacity:1;transform:translateX(-50%)}80%{opacity:1}100%{opacity:0}}';
+  document.head.appendChild(s);document.body.appendChild(t);setTimeout(()=>t.remove(),2400);
+}
+
+function clearChat(){
+  if(!confirm('Clear conversation?'))return;
+  const a=document.getElementById('chat-area');a.innerHTML='';
+  const w=document.createElement('div');w.id='welcome';
+  w.innerHTML=`<div class="welcome-icon">✦</div>
+    <div class="welcome-title">Image Prompt</div>
+    <div class="welcome-sub">Describe photos, styles, or effects you want — upload an image and let AI transform it.</div>
+    <div class="starter-chips">
+      <button class="chip" onclick="useStarter(this)">Make me a professional headshot</button>
+      <button class="chip" onclick="useStarter(this)">Add a fantasy theme</button>
+      <button class="chip" onclick="useStarter(this)">Change background to sunset</button>
+      <button class="chip" onclick="useStarter(this)">Vintage film style</button>
+      <button class="chip" onclick="useStarter(this)">Make it look cinematic</button>
+      <button class="chip" onclick="useStarter(this)">Watercolor painting style</button>
+      <button class="chip" onclick="useStarter(this)">Neon cyberpunk edit</button>
+      <button class="chip" onclick="useStarter(this)">Oil painting portrait</button>
+    </div>`;
+  a.appendChild(w);history=[];
+}
+</script>
+</body>
+</html>

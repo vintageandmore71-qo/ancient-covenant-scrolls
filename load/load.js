@@ -5890,6 +5890,9 @@ window.LoadAudioFix = {
         else if (act === 'vid2aud') {
           openVideoToAudioFlow();
         }
+        else if (act === 'imgprompt') {
+          openImagePrompt();
+        }
       });
     });
     // Hide tiles whose backing library didn't load.
@@ -9060,7 +9063,7 @@ window.LoadAudioFix = {
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17cs</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ct</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -17005,6 +17008,49 @@ window.LoadAudioFix = {
     var btn2 = $('library-clear-btn-inline');
     if (btn2) btn2.addEventListener('click', promptClearLibrary);
   })();
+
+  /* ---------- Image Prompt (workspace tile) ---------- */
+
+  // Mount the standalone Image Prompt PWA in a fullscreen iframe overlay.
+  // The PWA lives at load/image-prompt/ with its own SW scope so it
+  // doesn't fight Load's caching. iPad-Safari quirk: blob URLs and Web
+  // Speech inside an iframe behave fine when sandbox attr is omitted.
+  var _ipOverlay = null;
+  function openImagePrompt() {
+    if (_ipOverlay) { _ipOverlay.style.display = 'flex'; return; }
+    _ipOverlay = document.createElement('div');
+    _ipOverlay.id = 'image-prompt-overlay';
+    _ipOverlay.style.cssText =
+      'position:fixed;inset:0;z-index:9800;background:#14142a;' +
+      'display:flex;flex-direction:column;';
+    var bar = document.createElement('div');
+    bar.style.cssText =
+      'flex-shrink:0;display:flex;align-items:center;gap:10px;' +
+      'padding:8px 14px max(8px,env(safe-area-inset-top)) 14px;' +
+      'background:#0f0f24;border-bottom:1px solid #2a2a42;color:#fff;' +
+      'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;';
+    bar.innerHTML =
+      '<button id="ip-close" aria-label="Close Image Prompt" style="' +
+        'background:transparent;border:none;color:#cfcfdc;font-size:22px;' +
+        'min-width:44px;min-height:44px;cursor:pointer;">&times;</button>' +
+      '<span style="font-size:15px;font-weight:700;letter-spacing:0.3px;">' +
+        '&#127912; Image Prompt</span>' +
+      '<span style="flex:1"></span>' +
+      '<span style="font-size:11px;color:#7a7a8a;">part of Load</span>';
+    var iframe = document.createElement('iframe');
+    iframe.src = 'image-prompt/index.html';
+    iframe.title = 'Image Prompt';
+    iframe.style.cssText =
+      'flex:1;border:0;width:100%;background:#14142a;' +
+      'min-height:0;'; // min-height:0 lets flex children shrink properly
+    iframe.setAttribute('allow', 'clipboard-read; clipboard-write; microphone; camera');
+    _ipOverlay.appendChild(bar);
+    _ipOverlay.appendChild(iframe);
+    document.body.appendChild(_ipOverlay);
+    document.getElementById('ip-close').addEventListener('click', function () {
+      _ipOverlay.style.display = 'none';
+    });
+  }
 
   /* ---------- Video → Audio quick extract ---------- */
 

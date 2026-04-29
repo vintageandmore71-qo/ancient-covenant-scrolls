@@ -159,6 +159,53 @@ return a one-word intent + a structured payload. Keep falling back to
 8. **History gallery** — last 20 results in a strip; tap to re-edit /
    re-prompt / share / save. IndexedDB-stored so it survives refresh.
 
+### Tier 4 — biblical / cross-app innovations (only this project can do these)
+
+These are the features that make Image Prompt unique to your suite —
+no generic AI image app has them because they require an embedded
+biblical text library, an existing Cover Designer, an existing reader,
+and a multi-app PWA framework. We have all four.
+
+T4-1. **Verse → Scene** — paste any verse from ACR, AI generates the
+      scene. While reading, tap a verse → "Visualize this".
+T4-2. **Image → Verse reverse search** — upload an image, semantic
+      match against all 111 ACR chapters, return the closest passage.
+      Search by picture.
+T4-3. **Character consistency database** — define Paul / Moses / John /
+      Avraham *once* with a face reference. Every future gen reuses
+      that face via InstantID / IP-Adapter.
+T4-4. **"Visualize as I read" mode** — open a chapter in ACR, tap
+      "illustrate as I scroll", side-by-side reader auto-generates an
+      image per paragraph. Killer integration feature.
+T4-5. **Sketch-to-image** — draw rough lines on a canvas, AI fills in
+      the scene via ControlNet (free via HF).
+T4-6. **Style cloning** — upload 3-5 of your existing artwork pieces,
+      AI learns your style via IP-Adapter, applies to all future gens.
+T4-7. **Timeline scrubber + fork** — slide back through edit history,
+      branch a new direction at any earlier point.
+T4-8. **One-tap "Make a Book Cover"** — generated image → Load's
+      existing Cover Designer pre-loaded at 4x upscale + bleed
+      margins. Direct path from inspiration to finished book.
+T4-9. **Multi-language prompts + voice** — type or speak in English /
+      Spanish / Hebrew / Greek / Aramaic / Ge'ez. Whisper transcribes;
+      LLM translates if needed. For biblical scholars and bilingual
+      readers.
+T4-10. **Lockscreen wallpaper export** — tap "Set as wallpaper", get
+       installation instructions for iPad lock screen.
+T4-11. **Encrypted key vault** — optional passphrase-protected
+       localStorage for API keys. Hardens App Store submission.
+T4-12. **Daily inspiration card** — 3 fresh style ideas surface on
+       first open each day. Engagement loop, no server.
+T4-13. **Auto alt-text** — AI captions every result automatically.
+       Accessibility + dyslexia win.
+T4-14. **Offline queue** — queue gens while offline, auto-fire when
+       network returns. Matches Load's "work offline" tagline.
+T4-15. **Verse-to-storyboard video** — single verse → 5-shot animated
+       mini-film. Combines T4-1 + image-to-video. 30-second parable.
+T4-16. **Style translation across mediums** — tap a generated image:
+       "now in oil painting" / "now watercolor" / "now stained glass" —
+       explore the same scene across art mediums.
+
 ### Tier 3 — nice-to-have differentiators
 
 9. **Provider health-board** — track latency + success-rate per provider
@@ -209,14 +256,29 @@ Replace the current chat-only provider list with the **5+8 split**:
 - Save-to-Load-Library button.
 - Side-by-side A/B compare with slider.
 
-### Phase 3 — Glam-AI specialty modes (~6-8 hr)
+### ~~Phase 3 — Glam-AI specialty modes~~ ❌ CUT (2026-04-29 user direction)
 
-- Hairstyle try-on (HairFastGAN via Replicate).
-- Headshot mode (PhotoMaker / InstantID).
-- Background change (rembg + SDXL inpaint).
-- Retouch mode (GFPGAN / CodeFormer).
-- Upscale (Real-ESRGAN).
-- Image-to-video (SVD via Replicate).
+User explicitly chose to keep ONLY the conversational chat experience.
+No specialty mode UIs. Cut from scope:
+
+- ~~Hairstyle try-on~~
+- ~~Headshot mode~~
+- ~~Background change as a dedicated mode~~
+- ~~Retouch mode~~
+- ~~Upscale mode~~
+- ~~Image-to-video animation as a button~~ (the screenshot user shared
+  showed this in Glam, but user clarified they don't want it as a feature)
+
+Tier 4 cuts that follow the same rule (specialty UIs):
+- ~~T4-3 character consistency database~~
+- ~~T4-5 sketch-to-image~~
+- ~~T4-6 style cloning (IP-Adapter)~~
+- ~~T4-15 verse-to-storyboard video~~
+
+What stays in scope: text + image generation/edit purely through
+conversational chat. The chat itself can still send image-edit prompts
+to inpaint models — but only because the user typed an instruction, not
+through a specialty button.
 
 ### Phase 4 — polish (~2-3 hr)
 
