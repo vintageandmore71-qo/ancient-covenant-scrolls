@@ -280,6 +280,13 @@ conversational chat. The chat itself can still send image-edit prompts
 to inpaint models — but only because the user typed an instruction, not
 through a specialty button.
 
+**Note 2026-04-29 (later in session):** SadTalker reinstated to scope.
+User confirmed they want it kept. SadTalker is image-to-talking-avatar
+(server-side Python tool). Integration approach: hosted endpoint (e.g.
+HF Space) reachable from the chat, called when the user types something
+like "animate this photo speaking these words". Stays a chat-driven
+feature, not a button.
+
 ### Phase 4 — polish (~2-3 hr)
 
 - Local OpenCV.js + Jimp filters.

@@ -344,8 +344,10 @@ button,[role="button"]{min-height:48px}
     </div>
 
     <div class="key-section" id="ks-puter">
-      <p class="panel-hint">✅ No key needed. Works immediately.<br>
-      For image uploads, the app will auto-use Gemini or Anthropic if you add those keys below.</p>
+      <p class="panel-hint">✅ No key needed for Puter — it signs you in via popup the first time. <strong>Optional:</strong> paste a Puter API token below to skip the popup and use authenticated calls directly.</p>
+      <div class="url-pill"><span style="flex:1">puter.com → User Settings → API Tokens</span><button class="copy-btn" onclick="cpURL(this,'https://puter.com/?action=show-tokens')">Copy</button></div>
+      <input class="settings-input" id="k-puter" type="password" placeholder="Optional Puter API token">
+      <p class="panel-hint" style="font-size:11px;margin-top:4px">For image uploads, the app will auto-use Gemini or Anthropic if you add those keys below.</p>
     </div>
     <div class="key-section" id="ks-gemini">
       <p class="panel-hint">Get free key — copy this into your browser:</p>
@@ -495,6 +497,54 @@ button,[role="button"]{min-height:48px}
 /* ── Puter.js ── */
 (function(){const s=document.createElement('script');s.src='https://js.puter.com/v2/';s.async=true;document.head.appendChild(s);})();
 
+/* ── Local-first libraries (Phase 1B Part 4) ──
+   Eager: Jimp (~150 KB) + Anime.js (~15 KB) — small, used immediately
+   Lazy:  OpenCV.js (~8 MB) + Lottie.js (~250 KB) — only loaded when
+          a feature that needs them runs. Saves first-paint cost. */
+(function(){
+  // Jimp — pure JS image manipulation. Powers trivial-edit routing
+  // (rotate / blur / brightness / contrast / grayscale / sepia /
+  // sharpen / invert) so the user doesn't burn an AI provider call
+  // for things JS can do client-side, instantly, offline.
+  const j = document.createElement('script');
+  j.src = 'https://cdn.jsdelivr.net/npm/jimp@0.22.12/browser/lib/jimp.min.js';
+  j.async = true; document.head.appendChild(j);
+  // Anime.js — UI animation polish on chat result cards
+  const a = document.createElement('script');
+  a.src = 'https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js';
+  a.async = true; document.head.appendChild(a);
+})();
+async function loadOpenCV(){
+  if(window.cv && window.cv.imread) return window.cv;
+  if(window.__cvLoading) return window.__cvLoading;
+  window.__cvLoading = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://docs.opencv.org/4.10.0/opencv.js';
+    s.async = true;
+    s.onload = () => {
+      // OpenCV.js fires Module.onRuntimeInitialized when WASM is ready
+      const check = () => { if (window.cv && window.cv.imread) resolve(window.cv); else setTimeout(check, 100); };
+      check();
+    };
+    s.onerror = () => reject(new Error('OpenCV.js load failed'));
+    document.head.appendChild(s);
+  });
+  return window.__cvLoading;
+}
+async function loadLottie(){
+  if(window.lottie) return window.lottie;
+  if(window.__lottieLoading) return window.__lottieLoading;
+  window.__lottieLoading = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/lottie-web@5.12.2/build/player/lottie.min.js';
+    s.async = true;
+    s.onload = () => resolve(window.lottie);
+    s.onerror = () => reject(new Error('Lottie load failed'));
+    document.head.appendChild(s);
+  });
+  return window.__lottieLoading;
+}
+
 /* ── Service Worker ── */
 if('serviceWorker' in navigator)
   window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
@@ -518,6 +568,7 @@ const LS = localStorage;
 let C = {
   provider:    LS.getItem('ps_prov')     || '',
   keys: {
+    puter:     LS.getItem('ps_k_puter')  || '',
     gemini:    LS.getItem('ps_k_gemini') || '',
     openrouter:LS.getItem('ps_k_or')     || '',
     cerebras:  LS.getItem('ps_k_cbr')    || '',
@@ -574,7 +625,7 @@ let img = null, generating = false, history = [];
 /* ── INIT ── */
 (function(){
   if(C.provider){const c=document.querySelector(`[data-p="${C.provider}"]`);if(c){c.classList.add('active');showKS(C.provider);}}
-  const km={gemini:'k-gemini',openrouter:'k-openrouter',cerebras:'k-cerebras',anthropic:'k-anthropic',hfchat:'k-hfchat'};
+  const km={puter:'k-puter',gemini:'k-gemini',openrouter:'k-openrouter',cerebras:'k-cerebras',anthropic:'k-anthropic',hfchat:'k-hfchat'};
   Object.entries(km).forEach(([k,id])=>{const el=document.getElementById(id);if(el&&C.keys[k])el.value=C.keys[k];});
   if(C.keys.geminiFB)   document.getElementById('k-gemini-fb').value=C.keys.geminiFB;
   if(C.keys.anthropicFB)document.getElementById('k-anthropic-fb').value=C.keys.anthropicFB;
@@ -663,6 +714,7 @@ function cpURL(btn,url){
 }
 
 function saveSettings(){
+  C.keys.puter      =document.getElementById('k-puter').value.trim();
   C.keys.gemini     =document.getElementById('k-gemini').value.trim();
   C.keys.openrouter =document.getElementById('k-openrouter').value.trim();
   C.keys.cerebras   =document.getElementById('k-cerebras').value.trim();
@@ -692,7 +744,8 @@ function saveSettings(){
   C.useProvider.stability   = document.getElementById('t-st').checked;
   C.useProvider.deepai      = document.getElementById('t-dai').checked;
   C.useProvider.hyperbolic  = document.getElementById('t-hyp').checked;
-  LS.setItem('ps_prov',C.provider); LS.setItem('ps_k_gemini',C.keys.gemini);
+  LS.setItem('ps_prov',C.provider); LS.setItem('ps_k_puter',C.keys.puter);
+  LS.setItem('ps_k_gemini',C.keys.gemini);
   LS.setItem('ps_k_or',C.keys.openrouter); LS.setItem('ps_k_cbr',C.keys.cerebras);
   LS.setItem('ps_k_ant',C.keys.anthropic); LS.setItem('ps_k_hfc',C.keys.hfchat);
   LS.setItem('ps_k_gfb',C.keys.geminiFB); LS.setItem('ps_k_afb',C.keys.anthropicFB);
@@ -817,9 +870,18 @@ async function pipeline(prompt, imgData, tid) {
        gen for chitchat / questions / thanks. */
     let resultUrl = null;
     let imageProvUsed = null;
+    // Local-first router — try Jimp for trivial edits before any AI
+    // call. If matched + succeeded, skip the AI image path entirely.
+    if (imgData && prompt) {
+      const local = await tryLocalOp(prompt, imgData);
+      if (local) {
+        resultUrl = local.url;
+        imageProvUsed = 'Local (' + local.op + ')';
+      }
+    }
     const sdMatch = reply.match(/SD_PROMPT:\s*(.+)/s);
     const editVerb = prompt && /\b(make|create|generate|edit|change|add|remove|turn|transform|render|draw|paint|illustrate|design|stylize|convert|colour|color|crop|enhance|fix|retouch)\b/i.test(prompt);
-    const wantsImage = !!sdMatch || (imgData && editVerb);
+    const wantsImage = !resultUrl && (!!sdMatch || (imgData && editVerb));
     if (wantsImage) {
       const cleanPrompt = sdMatch
         ? sdMatch[1].trim().slice(0, 800)
@@ -955,6 +1017,35 @@ Default style preference: ${C.mode}.`;
 
 /* ── Individual providers ── */
 async function callPuter(prompt) {
+  // Optional API-token path: skip the popup sign-in flow when the
+  // user has pasted a Puter API token in settings. Hits the Puter
+  // REST endpoint directly with the token in the Authorization header.
+  if (C.keys.puter) {
+    const r = await fetch('https://api.puter.com/drivers/call', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + C.keys.puter,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        interface: 'puter-chat-completion',
+        method: 'complete',
+        args: { messages: [
+          { role: 'system', content: SYS() },
+          { role: 'user',   content: prompt }
+        ]}
+      })
+    });
+    if (!r.ok) throw new Error(await readError(r, 'Puter (token)'));
+    const data = await r.json();
+    const content = data.result?.message?.content
+                 || data.result?.content
+                 || data.result;
+    if (typeof content === 'string' && content) return content;
+    if (Array.isArray(content) && content[0]?.text) return content[0].text;
+    return prompt;
+  }
+  // SDK path: signed-in user via popup, no key needed
   if(typeof puter==='undefined') throw new Error('Puter.js is loading. Please try again in a moment.');
   const resp = await puter.ai.chat(SYS()+'\n\nUser: '+prompt);
   return resp?.message?.content || String(resp) || prompt;
@@ -1386,6 +1477,72 @@ const IMAGE_PROVIDERS = [
   }
 ];
 
+/* ── LOCAL_OPS — Jimp-powered trivial edits (no AI call) ──
+   When the user asks for a trivial edit ("rotate 90", "blur it",
+   "brighten this") AND has an image attached, we can do the edit
+   locally with Jimp. Saves API quota, runs offline, instant result.
+   Returns null if intent doesn't match — caller falls through to AI. */
+const LOCAL_OPS = [
+  { id: 'rotate', match: /\b(rotate|turn|spin)\b/i,
+    apply: async (j, p) => {
+      const m = p.match(/(\d+)\s*(deg|degree|°)?/i);
+      const angle = m ? parseInt(m[1]) : (/left|counter/i.test(p) ? -90 : 90);
+      j.rotate(angle); return j;
+    }
+  },
+  { id: 'blur', match: /\bblur\b/i,
+    apply: async (j, p) => {
+      const m = p.match(/\b(\d+)\s*(px|pixel)?\b/i);
+      j.blur(m ? Math.min(50, parseInt(m[1])) : 5); return j;
+    }
+  },
+  { id: 'brightness', match: /\b(bright(en|er)?|lighter)\b/i,
+    apply: async (j, p) => {
+      const m = p.match(/(\d+)/); const v = m ? parseInt(m[1])/100 : 0.25;
+      j.brightness(Math.max(-1, Math.min(1, v))); return j;
+    }
+  },
+  { id: 'darken', match: /\b(darker|darken|dim)\b/i,
+    apply: async (j) => { j.brightness(-0.25); return j; }
+  },
+  { id: 'contrast', match: /\b(contrast|punchier|punchy)\b/i,
+    apply: async (j) => { j.contrast(0.3); return j; }
+  },
+  { id: 'grayscale', match: /\b(grayscale|black\s*(and|\&)\s*white|b\s*(and|\&)\s*w|monochrome|desaturate)\b/i,
+    apply: async (j) => { j.grayscale(); return j; }
+  },
+  { id: 'sepia', match: /\bsepia\b/i,
+    apply: async (j) => { j.sepia(); return j; }
+  },
+  { id: 'sharpen', match: /\b(sharpen|sharper|crisp)\b/i,
+    apply: async (j) => {
+      // Jimp has no built-in sharpen; convolve with a sharpen kernel
+      j.convolute([[0,-1,0],[-1,5,-1],[0,-1,0]]);
+      return j;
+    }
+  },
+  { id: 'invert', match: /\binvert(ed)?\b/i,
+    apply: async (j) => { j.invert(); return j; }
+  }
+];
+
+async function tryLocalOp(prompt, imgData) {
+  if (!imgData || !prompt || typeof Jimp === 'undefined') return null;
+  const op = LOCAL_OPS.find(o => o.match.test(prompt));
+  if (!op) return null;
+  try {
+    const j = await Jimp.read(imgData.dataUrl);
+    await op.apply(j, prompt);
+    const dataUrl = await j.getBase64Async('image/png');
+    const r = await fetch(dataUrl);
+    const blob = await r.blob();
+    return { url: URL.createObjectURL(blob), op: op.id };
+  } catch (e) {
+    console.warn('[LocalOp] ' + op.id + ' failed:', e.message);
+    return null;
+  }
+}
+
 /* Provider health-board — circuit-breaker pattern.
    3+ failures in the last 5 minutes = skip this provider for the
    next 5 minutes. Auto-recovers when the failure window passes. */
@@ -1486,9 +1643,17 @@ function addAIMsg(text, imgUrl, provider, fallbackNote) {
     ${noteHtml}
     <div class="bubble">${imgUrl?`<img class="bubble-img" src="${imgUrl}" alt="result">`:''} ${esc(text)}</div>
     ${imgUrl?`<a class="dl-btn" href="${imgUrl}" download="image-prompt.png" target="_blank" rel="noopener">⬇ Save Image</a>`:''}
-    <div class="model-badge">✦ ${names[provider]||provider}${C.hfImgKey?' + HF':''}</div>
+    <div class="model-badge">✦ ${esc(names[provider]||provider)}</div>
   </div>`;
   a.appendChild(el);scrollBot();
+  // Anime.js — smooth fade-in + slight slide-up on the result card
+  if (typeof anime !== 'undefined') {
+    try {
+      el.style.opacity = '0';
+      anime({ targets: el, opacity: [0, 1], translateY: [8, 0],
+              duration: 350, easing: 'easeOutCubic' });
+    } catch(_){}
+  }
 }
 
 function addError(msg){
