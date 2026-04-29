@@ -821,6 +821,19 @@ async function showDebugStatus() {
     }
   } catch (e) { lines.push('  ERROR reading caches: ' + e.message); }
   lines.push('');
+  lines.push('LOCALSTORAGE TEST:');
+  const lsT = testLocalStorage();
+  lines.push('  ' + (lsT.ok ? '✓ working' : '✗ FAILED — ' + lsT.error));
+  if (!lsT.ok) {
+    lines.push('  → if you\'re in Safari Private Browsing, switch to a normal tab.');
+  }
+  lines.push('');
+  lines.push('SAVE HISTORY:');
+  const lastSave = LS.getItem('ps_last_save');
+  const saveCount = LS.getItem('ps_save_count') || '0';
+  lines.push('  total saves on this iPad: ' + saveCount);
+  lines.push('  last save: ' + (lastSave || 'never'));
+  lines.push('');
   lines.push('LOCALSTORAGE (Image Prompt keys only):');
   let psCount = 0, psSize = 0;
   for (let i = 0; i < localStorage.length; i++) {
@@ -859,8 +872,39 @@ async function forceRefresh() {
   location.replace(u.toString());
 }
 
+/* Quick localStorage health check — writes a marker key, reads it
+   back, deletes it. Returns { ok: bool, error: string }. */
+function testLocalStorage() {
+  try {
+    const k = '__ip_test_' + Date.now();
+    const v = 'test-' + Math.random();
+    localStorage.setItem(k, v);
+    const back = localStorage.getItem(k);
+    localStorage.removeItem(k);
+    if (back !== v) return { ok: false, error: 'wrote "' + v + '" but read back "' + back + '"' };
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: (e && e.message) || String(e) };
+  }
+}
+
 function saveSettings(){
-  C.keys.puter      =document.getElementById('k-puter').value.trim();
+  // v17dl — wrapped in try/catch with a giant visible banner so
+  // silent save failures are impossible. The original toast can be
+  // missed; this banner stays until the user dismisses it.
+  let savedCount = 0;
+  let savedChars = 0;
+  let errorMsg = '';
+  try {
+    // First — verify localStorage even works on this iPad
+    const lsTest = testLocalStorage();
+    if (!lsTest.ok) {
+      throw new Error('localStorage write failed: ' + lsTest.error +
+        '\n\nThis usually means your iPad is in Private Browsing. ' +
+        'Open Safari → tap the tabs icon → swipe to a non-Private tab. ' +
+        'Or close the Private window and use a regular tab.');
+    }
+    C.keys.puter      =document.getElementById('k-puter').value.trim();
   C.keys.gemini     =document.getElementById('k-gemini').value.trim();
   C.keys.openrouter =document.getElementById('k-openrouter').value.trim();
   C.keys.cerebras   =document.getElementById('k-cerebras').value.trim();
@@ -897,10 +941,58 @@ function saveSettings(){
   LS.setItem('ps_use_horde', C.useProvider.horde       ? '1' : '0');
   LS.setItem('ps_use_img',   C.useProvider.imagen      ? '1' : '0');
   LS.setItem('ps_use_dai',   C.useProvider.deepai      ? '1' : '0');
+    // Count what was persisted so the banner shows real numbers
+    Object.values(C.keys).forEach(v => { if (v) { savedCount++; savedChars += String(v).length; } });
+    if (C.hfImgKey)     { savedCount++; savedChars += C.hfImgKey.length; }
+    if (C.cfToken)      { savedCount++; savedChars += C.cfToken.length; }
+    if (C.cfAccount)    { savedCount++; savedChars += C.cfAccount.length; }
+    if (C.togetherKey)  { savedCount++; savedChars += C.togetherKey.length; }
+    if (C.daiKey)       { savedCount++; savedChars += C.daiKey.length; }
+    // Save trail so future Show Status reveals when the last save happened
+    LS.setItem('ps_last_save', new Date().toISOString());
+    LS.setItem('ps_save_count', String((parseInt(LS.getItem('ps_save_count')||'0',10) || 0) + 1));
+  } catch (e) {
+    errorMsg = (e && e.message) || String(e);
+  }
   updatePill();
-  if(C.provider && hasProviderAccess(C.provider))
+  if(!errorMsg && C.provider && hasProviderAccess(C.provider))
     document.getElementById('setup-banner').classList.remove('on');
-  closeSettings(); toast('Settings saved ✓');
+  // Big visible banner — replaces the easy-to-miss toast
+  showSaveBanner(errorMsg ? 'error' : 'success', savedCount, savedChars, errorMsg);
+  if (!errorMsg) {
+    closeSettings();
+    toast('Settings saved ✓');
+  }
+  // On error, leave Settings open so user can fix the issue.
+}
+
+/* Floating banner that survives the panel close so user sees the
+   result clearly. Tap to dismiss. */
+function showSaveBanner(state, count, chars, errorMsg) {
+  document.querySelectorAll('.save-banner').forEach(n => n.remove());
+  const b = document.createElement('div');
+  b.className = 'save-banner';
+  b.style.cssText =
+    'position:fixed;left:50%;top:14px;transform:translateX(-50%);' +
+    'z-index:9950;max-width:92vw;padding:14px 20px;border-radius:14px;' +
+    'font-size:14px;font-weight:700;line-height:1.45;cursor:pointer;' +
+    'box-shadow:0 12px 40px rgba(0,0,0,0.5);' +
+    (state === 'success'
+      ? 'background:linear-gradient(135deg,#059669,#047857);color:#fff;'
+      : 'background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;');
+  if (state === 'success') {
+    b.innerHTML = '✓ Saved — ' + count + ' setting' + (count === 1 ? '' : 's') +
+      ' (' + chars + ' chars) persisted to localStorage. Tap to dismiss.';
+  } else {
+    b.innerHTML = '⚠ SAVE FAILED — ' + esc(errorMsg).replace(/\n/g,'<br>') +
+      '<br><br>Tap to dismiss.';
+  }
+  b.addEventListener('click', () => b.remove());
+  document.body.appendChild(b);
+  if (state === 'success') {
+    setTimeout(() => { try { b.remove(); } catch(_){} }, 6000);
+  }
+  // closeSettings is now called by saveSettings on success only.
 }
 
 /* ── IMAGE ── */

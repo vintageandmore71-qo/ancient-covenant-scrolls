@@ -8,15 +8,20 @@ execute without asking the user to re-explain.
 
 ## ⚡ CURRENT STATE (updated after every verified milestone)
 
-**Last shipped tip (awaiting user verification):** `v17dk` — Wave 6.5 Part 1 + bug fixes + Debug panel & Force Refresh
+**Last shipped tip (awaiting user verification):** `v17dl` — bulletproof save banner + localStorage test + save trail
 **Last user-verified tip:** `v17dh` — Wave 6 Vision pipeline (image-prompt-v12)
 **Verified backup:** `backup/2026-04-29-v17dh`
 
-**Active diagnostic (2026-04-29 evening):** User reported keys not saving + bg-removal hanging. Code review showed save/load logic is correct (no bugs). Most likely cause: stale service worker on iPad serving old code. v17dk adds:
-- Debug panel in Settings showing app version, all saved keys (set/unset, no values), provider toggles, SW state, cache list, localStorage usage
-- "🔄 Force Refresh & Clear Cache" button — unregisters SWs + clears all caches + reloads (preserves localStorage so user's keys survive). Use this when iPad gets stuck on stale code.
+**Active diagnostic (2026-04-29 evening):** User ran v17dk Debug status. Output revealed `ps_* entries: 0` — localStorage entirely empty. Two scenarios: user wasn't actually clicking "Save & Start" (Save button hidden under iPad keyboard?), OR Safari Private Browsing was active (localStorage discarded between sessions).
 
-If next session inherits this issue: have user open Settings → Debug section → tap "Show status" first. The output reveals exactly which version is running and what's saved. Then "Force Refresh" if version is stale.
+v17dl adds:
+- `testLocalStorage()` health check — writes/reads/deletes a marker, surfaces the exact error if private mode blocks writes
+- saveSettings is now wrapped in try/catch; pre-flight tests localStorage
+- `showSaveBanner()` — giant fixed-position banner (centered top of screen) that shows result of every save (success: green with N keys/N chars persisted; error: red with full error message). Replaces easy-to-miss toast.
+- ps_last_save + ps_save_count localStorage trail so we can see if/when saves happened
+- Debug panel now shows: localStorage health check result, total save count, last save timestamp
+
+When next session inherits: have user open Settings → Debug → tap "Show status" again. New output will reveal localStorage health + save history. If `localStorage TEST: ✗ FAILED` shows, user is in Private Browsing.
 
 **Active project:** Image Prompt — multi-pipeline build per `PLAN_IMAGE_PROMPT_v3.md`. User direction (2026-04-29): build the full v3 spec in waves, never use pay-per-use providers, save ComfyUI server work for later.
 
