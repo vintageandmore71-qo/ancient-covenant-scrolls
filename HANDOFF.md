@@ -8,11 +8,15 @@ execute without asking the user to re-explain.
 
 ## ⚡ CURRENT STATE (updated after every verified milestone)
 
-**Last shipped tip (awaiting user verification):** `v17dj` — Wave 6.5 Part 1 + bug fixes (timeouts, stuck-state cleanup, no-token feedback as chat message)
+**Last shipped tip (awaiting user verification):** `v17dk` — Wave 6.5 Part 1 + bug fixes + Debug panel & Force Refresh
 **Last user-verified tip:** `v17dh` — Wave 6 Vision pipeline (image-prompt-v12)
 **Verified backup:** `backup/2026-04-29-v17dh`
 
-**Known issue v17di → fixed in v17dj:** "Analyzing image" pill could get stuck if vision call hung (no timeout). Bg-removal silently fell through to text-to-image when HF token was missing. v17dj adds 30s vision timeout, 90s HF specialty timeout, clears the analyzing pill on failure (shows filename + "(analysis unavailable)"), and renders missing-token feedback as a clear chat message (not just a toast).
+**Active diagnostic (2026-04-29 evening):** User reported keys not saving + bg-removal hanging. Code review showed save/load logic is correct (no bugs). Most likely cause: stale service worker on iPad serving old code. v17dk adds:
+- Debug panel in Settings showing app version, all saved keys (set/unset, no values), provider toggles, SW state, cache list, localStorage usage
+- "🔄 Force Refresh & Clear Cache" button — unregisters SWs + clears all caches + reloads (preserves localStorage so user's keys survive). Use this when iPad gets stuck on stale code.
+
+If next session inherits this issue: have user open Settings → Debug section → tap "Show status" first. The output reveals exactly which version is running and what's saved. Then "Force Refresh" if version is stale.
 
 **Active project:** Image Prompt — multi-pipeline build per `PLAN_IMAGE_PROMPT_v3.md`. User direction (2026-04-29): build the full v3 spec in waves, never use pay-per-use providers, save ComfyUI server work for later.
 

@@ -501,6 +501,18 @@ button,[role="button"]{min-height:48px}
     </label>
   </div>
 
+  <!-- Debug / Diagnostic — see what's actually loaded -->
+  <div class="panel-section" style="background:rgba(74,160,74,0.06);border:1px solid rgba(74,160,74,0.25);border-radius:8px">
+    <h4>Debug / Status</h4>
+    <p class="panel-hint" style="font-size:12px">Use this if something seems stuck or out of date.</p>
+    <pre id="debug-output" style="font-family:monospace;font-size:11px;color:var(--ink-mid);background:var(--bg-2);padding:8px;border-radius:6px;overflow:auto;margin-top:6px;max-height:240px;line-height:1.5">click "Show status" below…</pre>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+      <button onclick="showDebugStatus()" style="background:var(--bg-3);border:1px solid var(--border);color:var(--ink-hi);border-radius:6px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer">Show status</button>
+      <button onclick="forceRefresh()" style="background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer">🔄 Force Refresh &amp; Clear Cache</button>
+    </div>
+    <p class="panel-hint" style="font-size:11px;margin-top:6px">"Force Refresh" unregisters service workers, clears all caches, then reloads. Your saved API keys and toggles stay (they live in localStorage, untouched). Use this if your iPad is showing an old version.</p>
+  </div>
+
   <button class="save-btn" onclick="saveSettings()">✓ Save &amp; Start</button>
   <div class="panel-footer">Image Prompt — Part of Load<br>Auto-fallback routing · All providers free<br>Built into the Load suite</div>
 </div>
@@ -738,6 +750,113 @@ function cpURL(btn,url){
   }else{
     prompt('Copy this link:',url);done();
   }
+}
+
+/* Debug panel — shows what version is actually running, which keys
+   are saved (set / not set, no values revealed), and SW status. */
+async function showDebugStatus() {
+  const out = document.getElementById('debug-output');
+  if (!out) return;
+  const lines = [];
+  lines.push('IMAGE PROMPT — DEBUG STATUS');
+  lines.push('---------------------------');
+  lines.push('App version: v17dk / image-prompt-v15');
+  lines.push('Page URL: ' + location.href);
+  lines.push('User agent: ' + navigator.userAgent.slice(0, 80));
+  lines.push('');
+  lines.push('SAVED KEYS (set / not set — values hidden):');
+  const keys = [
+    ['Puter token (optional)',     C.keys.puter],
+    ['Gemini',                     C.keys.gemini],
+    ['OpenRouter',                 C.keys.openrouter],
+    ['Cerebras',                   C.keys.cerebras],
+    ['Anthropic',                  C.keys.anthropic],
+    ['HF Chat',                    C.keys.hfchat],
+    ['Gemini fallback',            C.keys.geminiFB],
+    ['HF Image (for rembg + img2img)', C.hfImgKey],
+    ['Cloudflare token + acct',    (C.cfToken && C.cfAccount) ? 'set' : (C.cfToken || C.cfAccount ? 'partial' : '')],
+    ['Together',                   C.togetherKey],
+    ['DeepAI',                     C.daiKey]
+  ];
+  keys.forEach(([name, val]) => {
+    const set = val && val.length > 0 && val !== 'partial';
+    const partial = val === 'partial';
+    lines.push('  ' + (set ? '✓' : (partial ? '⚠' : '✗')) + ' ' + name + ' — ' +
+      (set ? '(' + (typeof val === 'string' ? val.length : '?') + ' chars)' : (partial ? 'partial' : 'NOT SET')));
+  });
+  lines.push('');
+  lines.push('PROVIDER TOGGLES:');
+  Object.entries(C.useProvider).forEach(([k, v]) => {
+    lines.push('  ' + (v ? '✓' : '✗') + ' ' + k);
+  });
+  lines.push('');
+  lines.push('STATE:');
+  lines.push('  primary provider: ' + (C.provider || '(none — defaults to Puter)'));
+  lines.push('  allowAnthropic: ' + !!C.allowAnthropic);
+  lines.push('  scene lock: ' + sceneLocked);
+  lines.push('  current image: ' + (img ? (img.name || 'unnamed') : 'none'));
+  lines.push('  imageAnalysis: ' + (imageAnalysis ? 'set' : 'none'));
+  lines.push('  lastSDPrompt: ' + (lastSDPrompt ? '(' + lastSDPrompt.length + ' chars)' : 'none'));
+  lines.push('');
+  lines.push('SERVICE WORKERS:');
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      regs.forEach(r => {
+        lines.push('  ' + (r.active ? '●' : '○') + ' ' + r.scope + ' (state: ' +
+          (r.active ? r.active.state : (r.installing ? 'installing' : (r.waiting ? 'waiting' : 'unknown'))) + ')');
+      });
+      if (!regs.length) lines.push('  (none registered)');
+    } else {
+      lines.push('  (Service Worker API not supported)');
+    }
+  } catch (e) { lines.push('  ERROR reading SW: ' + e.message); }
+  lines.push('');
+  lines.push('CACHES:');
+  try {
+    if ('caches' in window) {
+      const ks = await caches.keys();
+      ks.forEach(k => lines.push('  • ' + k));
+      if (!ks.length) lines.push('  (none)');
+    }
+  } catch (e) { lines.push('  ERROR reading caches: ' + e.message); }
+  lines.push('');
+  lines.push('LOCALSTORAGE (Image Prompt keys only):');
+  let psCount = 0, psSize = 0;
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('ps_')) {
+      const v = localStorage.getItem(k);
+      psCount++;
+      psSize += (v ? v.length : 0);
+    }
+  }
+  lines.push('  ps_* entries: ' + psCount + ' (' + psSize + ' chars total)');
+
+  out.textContent = lines.join('\n');
+}
+
+/* Force a hard refresh — unregisters all service workers and deletes
+   all caches under this origin, then reloads. localStorage is
+   preserved so the user's keys/toggles aren't lost. */
+async function forceRefresh() {
+  if (!confirm('Unregister service workers + clear cache + reload?\n\n(Your saved keys and settings stay — only stale cached code is removed.)')) return;
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister().catch(() => {})));
+    }
+    if ('caches' in window) {
+      const ks = await caches.keys();
+      await Promise.all(ks.map(k => caches.delete(k).catch(() => {})));
+    }
+  } catch (e) { console.warn('[forceRefresh]', e); }
+  // Add a unique cache buster so the reload doesn't get the same
+  // stale response from the HTTP cache the browser holds outside
+  // the SW.
+  const u = new URL(location.href);
+  u.searchParams.set('_t', Date.now());
+  location.replace(u.toString());
 }
 
 function saveSettings(){
