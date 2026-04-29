@@ -1,0 +1,14 @@
+{
+  "id": "char_name_001",
+  "name": "",
+  "age": "",
+  "physicalDescription": "",
+  "skinTone": "",
+  "hair": "",
+  "clothingRules": "",
+  "personality": "",
+  "voiceProfile": "",
+  "referenceImage": "",
+  "masterPrompt": "",
+  "consistencyLock": true
+}

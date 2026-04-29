@@ -682,6 +682,94 @@ nothing breaks.
 
 ---
 
+---
+
+# Deeper Workarounds Addendum (user-supplied 2026-04-29)
+
+Companion notes to the main spec. Captures the deeper workaround
+layer: browser-side rescue tools, manual recovery flows, plug-in
+architecture, debugging logic, output verification, and combining
+free / free-tier / open-source tools as ONE practical creator system.
+
+## Core principle
+
+Load AI should behave like a **command center, not a single-model
+prompt box**. Each task should be split into smaller operations and
+routed to the best available tool.
+
+## Executive summary (16 directives)
+
+1. **Split image tasks into modules** — analyze, select, prompt-build, edit/generate, verify, retry
+2. **Use browser-side utilities first** — reduce cost and failure rate
+3. **Add Manual Rescue Mode** — let user recover failed AI edits with crop, mask, or manual selection
+4. **Add a provider router with strict capability checks** — text-only models never receive image-editing tasks
+5. **Add an AI Output Receipt and No Image Returned detector** — never falsely claim success
+6. **Support three operating modes** — Browser Mode, Free Provider Mode, Local Engine Mode
+7. **Build a plug-in registry** — modular ecosystem rather than a brittle one-provider product
+8. **Browser-first tools** — `browser-image-compression`, Canvas API, Fabric.js, Konva.js, Cropper.js, Transformers.js, manual crop/erase/mask/select
+9. **Local Engine companion** — iPad PWA → laptop/desktop running ComfyUI / IOPaint / rembg / SAM2 / Florence-2 / Qwen2.5-VL / IP-Adapter / ControlNet / InstantID / Real-ESRGAN / GFPGAN / CodeFormer / FFmpeg
+10. **Capability fields per provider** — text_only, vision_input, image_output, image_edit, image_to_image, inpainting, outpainting, background_removal, segmentation, object_detection, tts, stt, video, returns_file, returns_url, returns_blob, rate_limit_status, cost_status
+11. **Reference memory** — face, hair, clothing, skin tone, pose, style, lighting, palette, reference images, negative prompts, seed
+12. **Three consistency modes** — Strict / Moderate / Loose (already in main spec Pipeline B)
+13. **Image enhancement layer** — Real-ESRGAN, SwinIR, GFPGAN, CodeFormer, OpenCV
+14. **Audio/voice extension** — Piper TTS, eSpeak NG, Coqui, Whisper / Whisper.cpp, Vosk, Web Speech API
+15. **Image-to-video roadmap** — AnimateDiff, SVD, Deforum, RIFE, FFmpeg (backend phase)
+16. **Non-AI workarounds that make AI look better** — template-based editing for icons / splash / thumbnails / posters / book covers / lower thirds / title cards; layer-based editor; before/after comparison; prompt presets ("Keep Same Face" / "Replace Sky" / etc.); prompt debugger
+
+## Most-innovative ideas (8 high-leverage adds)
+
+1. **Ask two models, then choose** — one analyzes, another verifies
+2. **Cheap text AI before image AI** — clean prompts, choose right provider
+3. **Manual mask + free inpainting** — when vision/selection fails
+4. **Save character cards** — face, clothing, body profile, style profile, successful prompts, failed prompts
+5. **AI Output Receipt for every gen/edit** — prompt, provider, model, seed, reference image ID, consistency mode, source image, output file, verification result, datetime
+6. **No Image Returned detector** — block false success states; if provider returns text/JSON/markdown instead of an actual image file/blob/URL, mark as failed for that task and try next
+7. **Browser / Free Provider / Local Engine modes** — single dropdown, three lanes
+8. **Export prompts to external tools** — when free providers fail, return ready-to-use prompts for ComfyUI / Stable Diffusion / Leonardo / Midjourney / Runway / Kling / Pika
+
+## Plug-in registry shape (each plug-in stores)
+
+- provider name, task type
+- input type, output type
+- free / free-tier / open-source status
+- requires API key (yes/no)
+- runtime: browser / local / cloud
+- supports: image input, image output, masks, reference image, seed, batch
+- enabled / disabled state
+
+## MVP feature order (user's recommended phasing)
+
+This is an **alternative phasing** the user provided. Cross-reference
+with our wave plan; some overlap, some new ideas. Keep both in mind:
+
+- **Phase 1:** provider router, capability map, Puter, Pollinations, image upload, prompt builder, output verification, no-image-returned detector
+- **Phase 2:** browser compression, cropper, manual mask tool, rembg / local background removal, HF connector, Cloudflare Worker router
+- **Phase 3:** reference memory, character cards, consistency modes, vision verification, OpenRouter / Gemini vision fallback
+- **Phase 4:** Load AI Local Engine, ComfyUI API, IOPaint, SAM2, ControlNet, IP-Adapter, Real-ESRGAN
+- **Phase 5:** video / animation, voice tools, batch generation, plug-in marketplace
+
+## Mapping Workarounds → existing wave plan
+
+| Addendum item | Wave |
+| --- | --- |
+| Provider router with capability checks | W11 (Capability Registry cleanup) |
+| Output Receipt + No-Image-Returned detector | W9 (Verification) |
+| Browser-first tools (compression, Canvas, Fabric.js, Cropper.js) | W10 (Manipulation Tools UI) |
+| Manual Rescue Mode (paint mask, crop, lasso) | W10 (manipulation tools) |
+| Plug-in registry | W11 |
+| Reference memory + character cards | W8 (Continuity) |
+| Three consistency modes (Strict/Moderate/Loose) | W7 (Prompt Builder) |
+| Browser-side background removal (Transformers.js) | W6.5 |
+| HF rembg / Real-ESRGAN / GFPGAN / CodeFormer specialty endpoints | W6.5 |
+| ComfyUI / A1111 / IP-Adapter / InstantID / ControlNet | Deferred (server phase) |
+| Audio / voice tools | Separate scope (Voice tools, not Image Prompt) |
+| Image-to-video | Backend phase |
+| Template-based editing | Future polish |
+| Prompt debugger | W11 (debug rules) |
+| Export prompts to external tools | W11 (Pipeline F fallback) |
+
+---
+
 # Recommended Routing Order (user-supplied)
 
 Captured for the spec build:

@@ -6,6 +6,78 @@ execute without asking the user to re-explain.
 
 ---
 
+## ⚡ CURRENT STATE (updated after every verified milestone)
+
+**Last verified tip:** `v17dh` — Wave 6 Vision pipeline (image-prompt-v12)
+**SHA:** `86d3b46`
+**Backup:** `backup/2026-04-29-v17dh`
+
+**Active project:** Image Prompt — multi-pipeline build per `PLAN_IMAGE_PROMPT_v3.md`. User direction (2026-04-29): build the full v3 spec in waves, never use pay-per-use providers, save ComfyUI server work for later.
+
+**Wave progress:**
+
+| Wave | Description | Status |
+| --- | --- | --- |
+| W1 | P1 Scene Lock + first-use popup framework | ✅ v17dd |
+| W6 | Pipeline A — Vision / structured JSON | ✅ v17dh |
+| **W6.5** | **HF Inference specialty endpoints** (rembg / Real-ESRGAN / GFPGAN / Florence-2 / Qwen2.5-VL / SDXL inpaint) | 🔜 NEXT |
+| W7 | Pipeline B — Prompt Builder strict/moderate/loose | pending |
+| W8 | Pipeline D — Multi-image continuity + character profiles (subsumes original P2 batch + P3 dual-merge) | pending |
+| W9 | Pipeline E — Output Verification + auto-retry | pending |
+| W10 | Pipeline C — Manipulation Tools UI (region/mask) | pending |
+| W11 | Pipeline F + Capability Registry cleanup | pending |
+| W4 | Global help index | post-spec |
+| W5 | Encrypted key vault | post-spec |
+| W12 | Phase 4 polish (Lottie / OpenCV / etc.) | post-spec |
+
+**Pre-launch toggles to flip ON before shipping** (defaulted OFF during testing):
+- [ ] Gemini Image (`ps_use_img`) — best img2img edit, ~500 RPD free tier
+- [ ] Replicate — only if accepting pay-per-use (recommend stays off)
+
+**Deferred to ComfyUI-server phase:** ComfyUI / AUTOMATIC1111 / Forge / InvokeAI / IP-Adapter / InstantID / ControlNet / LoRA / DreamBooth / SD inpaint (proper) / Flux Fill / AnimateDiff / Deforum / SVD / Wan. Revisit when user wants to spin up a $5-10/mo GPU box. Full list captured in `PLAN_IMAGE_PROMPT_v3.md`.
+
+**Other open work referenced from plan docs:**
+
+- `PLAN_BOOK_TO_VIDEO.md` — Book-to-Video engine. Code dropped at `load/book-video/`, not yet wired into UI.
+- `SECURITY_PLAN.md` — GitHub security hardening. Recommend running before App Store submission.
+- `LOAD_FEATURES.md` — feature inventory (devs).
+- `LOAD_MARKETING.md` — App Store-ready marketing copy.
+- `PLAN_IMAGE_PROMPT.md` — original wave plan.
+- `PLAN_IMAGE_PROMPT_v3.md` — multi-pipeline architecture spec + 58-item provider list + addendum (deeper workarounds).
+- `designs/icon-concepts/` — 8 PNG icon concepts (4 base + 4 futuristic variants) for future asset slicing.
+
+**Repo conventions:**
+
+- Develop on `claude/fix-session-sending-TVMbW`; fast-forward `main` after every verified ship
+- Live URL pattern (cache-bust mandatory because of GitHub Pages CDN edge cache):
+  `https://dssorit.github.io/ancient-covenant-scrolls/load/?bust=<version>`
+- Cache version discipline: bump `load/sw.js` `var CACHE = 'load-vXXY'` AND `load/load.js` on-screen badge on EVERY JS/HTML/CSS edit (per CLAUDE.md). Image Prompt has its own cache at `load/image-prompt/sw.js`.
+- After every shipped feature: create `backup/<YYYY-MM-DD>-<cacheVer>` branch, push to origin, list it in this file
+- Update THIS file's "CURRENT STATE" block at the end of every verified milestone
+
+## Cold-start instructions for a new session
+
+If you're picking this up from zero:
+
+1. Read this file (HANDOFF.md), `CLAUDE.md`, `PLAN_IMAGE_PROMPT_v3.md`, most recent `SESSION_NOTES_*.md`
+2. `git log --oneline -30` — confirm tip matches "Last verified tip" above
+3. Check `inbox/` for any new files from the user (they upload specs/assets there)
+4. Identify next wave from "Wave progress" table
+5. Confirm with user before building (priority may have shifted)
+6. Build → cache bump → commit → push dev → fast-forward main → push main → backup branch → tell user the cache-bust URL to verify
+7. **Update THIS file** at the end of every verified milestone
+
+## Recent backups (full table in PLAN docs)
+
+Recovery: `git checkout backup/<name>`. Most useful recent backups:
+- `backup/2026-04-29-v17dh` — current verified tip (Wave 6 Vision)
+- `backup/2026-04-29-v17dg` — pre-Wave-6 stable (revert here if something breaks)
+- `backup/2026-04-29-v17cw` — last cohesive icon-system tip
+- `backup/2026-04-28-v17cs` — pre-Image-Prompt baseline (Load only)
+- `backup/2026-04-28-acr-v16` — ACR baseline (separate app)
+
+---
+
 ## LOCKED DELIVERABLE COMMITMENT
 
 **Attain and Attain Jr will both ultimately be delivered as
