@@ -431,6 +431,22 @@ button,[role="button"]{min-height:48px}
     <p class="panel-hint" style="color:var(--ink-hi);font-weight:700;margin-top:14px">8. Google Imagen (uses your Gemini key)</p>
     <p class="panel-hint" style="font-size:11px">If you've added a Gemini key in Step 1, Imagen 3 generation is auto-enabled — no extra key needed.</p>
 
+    <p class="panel-hint" style="color:var(--ink-hi);font-weight:700;margin-top:14px">9. DeepInfra (free trial credit, FLUX-schnell)</p>
+    <div class="url-pill"><span style="flex:1">deepinfra.com/dash/api_keys</span><button class="copy-btn" onclick="cpURL(this,'https://deepinfra.com/dash/api_keys')">Copy</button></div>
+    <input class="settings-input" id="k-deepinfra" type="password" placeholder="DeepInfra API key">
+
+    <p class="panel-hint" style="color:var(--ink-hi);font-weight:700;margin-top:14px">10. Stability AI (free credits on signup)</p>
+    <div class="url-pill"><span style="flex:1">platform.stability.ai/account/keys</span><button class="copy-btn" onclick="cpURL(this,'https://platform.stability.ai/account/keys')">Copy</button></div>
+    <input class="settings-input" id="k-stability" type="password" placeholder="sk-…">
+
+    <p class="panel-hint" style="color:var(--ink-hi);font-weight:700;margin-top:14px">11. DeepAI (free tier, rate-limited)</p>
+    <div class="url-pill"><span style="flex:1">deepai.org/dashboard/profile</span><button class="copy-btn" onclick="cpURL(this,'https://deepai.org/dashboard/profile')">Copy</button></div>
+    <input class="settings-input" id="k-deepai" type="password" placeholder="DeepAI API key">
+
+    <p class="panel-hint" style="color:var(--ink-hi);font-weight:700;margin-top:14px">12. Hyperbolic (free credits, FLUX)</p>
+    <div class="url-pill"><span style="flex:1">app.hyperbolic.xyz/settings</span><button class="copy-btn" onclick="cpURL(this,'https://app.hyperbolic.xyz/settings')">Copy</button></div>
+    <input class="settings-input" id="k-hyperbolic" type="password" placeholder="Hyperbolic API key">
+
     <div class="panel-section" style="background:rgba(124,124,255,0.06);border:1px solid rgba(124,124,255,0.2);border-radius:8px;padding:10px 12px;margin-top:14px">
       <h4 style="font-size:13px;margin:0 0 6px 0">Provider toggles</h4>
       <p class="panel-hint" style="font-size:11px;margin-bottom:8px">Turn off any provider you don't want in the fallback chain. Pollinations always stays on as the no-key backstop.</p>
@@ -443,6 +459,10 @@ button,[role="button"]{min-height:48px}
         <label><input type="checkbox" id="t-horde"> AI Horde</label>
         <label><input type="checkbox" id="t-rep"> Replicate</label>
         <label><input type="checkbox" id="t-img"> Imagen</label>
+        <label><input type="checkbox" id="t-di"> DeepInfra</label>
+        <label><input type="checkbox" id="t-st"> Stability AI</label>
+        <label><input type="checkbox" id="t-dai"> DeepAI</label>
+        <label><input type="checkbox" id="t-hyp"> Hyperbolic</label>
       </div>
     </div>
   </div>
@@ -516,6 +536,11 @@ let C = {
   // Phase 1B Part 2 — additional image providers
   falKey:     LS.getItem('ps_falk') || '',
   replicateKey: LS.getItem('ps_repk') || '',
+  // Phase 1B Part 3 — full 12-provider chain
+  diKey:        LS.getItem('ps_dik')  || '',  // DeepInfra
+  stabilityKey: LS.getItem('ps_stk')  || '',  // Stability AI
+  daiKey:       LS.getItem('ps_daik') || '',  // DeepAI
+  hyperbolicKey:LS.getItem('ps_hypk') || '',  // Hyperbolic
   // Anthropic excluded from default chat fallback chain because
   // requires anthropic-dangerous-direct-browser-access which exposes
   // the API key to anyone inspecting browser requests. Opt-in only.
@@ -528,7 +553,11 @@ let C = {
     fal:          LS.getItem('ps_use_fal')  !== '0',
     horde:        LS.getItem('ps_use_horde')!== '0',
     replicate:    LS.getItem('ps_use_rep')  !== '0',
-    imagen:       LS.getItem('ps_use_img')  !== '0'
+    imagen:       LS.getItem('ps_use_img')  !== '0',
+    deepinfra:    LS.getItem('ps_use_di')   !== '0',
+    stability:    LS.getItem('ps_use_st')   !== '0',
+    deepai:       LS.getItem('ps_use_dai')  !== '0',
+    hyperbolic:   LS.getItem('ps_use_hyp')  !== '0'
   },
   mode:       LS.getItem('ps_mode') || 'realistic',
 };
@@ -555,6 +584,10 @@ let img = null, generating = false, history = [];
   if(C.togetherKey)     document.getElementById('k-together').value=C.togetherKey;
   if(C.falKey)          document.getElementById('k-fal').value=C.falKey;
   if(C.replicateKey)    document.getElementById('k-replicate').value=C.replicateKey;
+  if(C.diKey)           document.getElementById('k-deepinfra').value=C.diKey;
+  if(C.stabilityKey)    document.getElementById('k-stability').value=C.stabilityKey;
+  if(C.daiKey)          document.getElementById('k-deepai').value=C.daiKey;
+  if(C.hyperbolicKey)   document.getElementById('k-hyperbolic').value=C.hyperbolicKey;
   document.getElementById('t-hf').checked    = C.useProvider.huggingface;
   document.getElementById('t-cf').checked    = C.useProvider.cloudflare;
   document.getElementById('t-tg').checked    = C.useProvider.together;
@@ -562,6 +595,10 @@ let img = null, generating = false, history = [];
   document.getElementById('t-horde').checked = C.useProvider.horde;
   document.getElementById('t-rep').checked   = C.useProvider.replicate;
   document.getElementById('t-img').checked   = C.useProvider.imagen;
+  document.getElementById('t-di').checked    = C.useProvider.deepinfra;
+  document.getElementById('t-st').checked    = C.useProvider.stability;
+  document.getElementById('t-dai').checked   = C.useProvider.deepai;
+  document.getElementById('t-hyp').checked   = C.useProvider.hyperbolic;
   document.getElementById('opt-allow-ant').checked = !!C.allowAnthropic;
   document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===C.mode));
   document.querySelectorAll('[data-orm]').forEach(b=>b.classList.toggle('active',b.dataset.orm===C.orModel));
@@ -639,6 +676,10 @@ function saveSettings(){
   C.togetherKey     =document.getElementById('k-together').value.trim();
   C.falKey          =document.getElementById('k-fal').value.trim();
   C.replicateKey    =document.getElementById('k-replicate').value.trim();
+  C.diKey           =document.getElementById('k-deepinfra').value.trim();
+  C.stabilityKey    =document.getElementById('k-stability').value.trim();
+  C.daiKey          =document.getElementById('k-deepai').value.trim();
+  C.hyperbolicKey   =document.getElementById('k-hyperbolic').value.trim();
   C.allowAnthropic  =document.getElementById('opt-allow-ant').checked;
   C.useProvider.huggingface = document.getElementById('t-hf').checked;
   C.useProvider.cloudflare  = document.getElementById('t-cf').checked;
@@ -647,6 +688,10 @@ function saveSettings(){
   C.useProvider.horde       = document.getElementById('t-horde').checked;
   C.useProvider.replicate   = document.getElementById('t-rep').checked;
   C.useProvider.imagen      = document.getElementById('t-img').checked;
+  C.useProvider.deepinfra   = document.getElementById('t-di').checked;
+  C.useProvider.stability   = document.getElementById('t-st').checked;
+  C.useProvider.deepai      = document.getElementById('t-dai').checked;
+  C.useProvider.hyperbolic  = document.getElementById('t-hyp').checked;
   LS.setItem('ps_prov',C.provider); LS.setItem('ps_k_gemini',C.keys.gemini);
   LS.setItem('ps_k_or',C.keys.openrouter); LS.setItem('ps_k_cbr',C.keys.cerebras);
   LS.setItem('ps_k_ant',C.keys.anthropic); LS.setItem('ps_k_hfc',C.keys.hfchat);
@@ -656,6 +701,10 @@ function saveSettings(){
   LS.setItem('ps_cfac',C.cfAccount); LS.setItem('ps_cftk',C.cfToken);
   LS.setItem('ps_tgk',C.togetherKey); LS.setItem('ps_falk',C.falKey);
   LS.setItem('ps_repk',C.replicateKey);
+  LS.setItem('ps_dik', C.diKey);
+  LS.setItem('ps_stk', C.stabilityKey);
+  LS.setItem('ps_daik',C.daiKey);
+  LS.setItem('ps_hypk',C.hyperbolicKey);
   LS.setItem('ps_allow_ant', C.allowAnthropic ? '1' : '0');
   LS.setItem('ps_use_hf',    C.useProvider.huggingface ? '1' : '0');
   LS.setItem('ps_use_cf',    C.useProvider.cloudflare  ? '1' : '0');
@@ -664,6 +713,10 @@ function saveSettings(){
   LS.setItem('ps_use_horde', C.useProvider.horde       ? '1' : '0');
   LS.setItem('ps_use_rep',   C.useProvider.replicate   ? '1' : '0');
   LS.setItem('ps_use_img',   C.useProvider.imagen      ? '1' : '0');
+  LS.setItem('ps_use_di',    C.useProvider.deepinfra   ? '1' : '0');
+  LS.setItem('ps_use_st',    C.useProvider.stability   ? '1' : '0');
+  LS.setItem('ps_use_dai',   C.useProvider.deepai      ? '1' : '0');
+  LS.setItem('ps_use_hyp',   C.useProvider.hyperbolic  ? '1' : '0');
   updatePill();
   if(C.provider && hasProviderAccess(C.provider))
     document.getElementById('setup-banner').classList.remove('on');
@@ -1218,6 +1271,113 @@ const IMAGE_PROVIDERS = [
       const data = await r.json();
       const b64 = data.generatedImages?.[0]?.image?.imageBytes;
       if (!b64) throw new Error('Imagen empty result');
+      const bin = atob(b64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return URL.createObjectURL(new Blob([bytes], { type: 'image/png' }));
+    }
+  },
+  // 9. DeepInfra — free trial credit, FLUX-schnell
+  {
+    id: 'deepinfra',
+    name: 'DeepInfra',
+    needsKey: true,
+    enabled: () => !!C.diKey && C.useProvider.deepinfra !== false,
+    gen: async (prompt) => {
+      const r = await fetch('https://api.deepinfra.com/v1/inference/black-forest-labs/FLUX-1-schnell', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'bearer ' + C.diKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          prompt: prompt.slice(0, 1500),
+          num_images: 1,
+          num_inference_steps: 4
+        })
+      });
+      if (!r.ok) throw new Error(await readError(r, 'DeepInfra'));
+      const data = await r.json();
+      const u = (data.images && data.images[0]) || (data.output && data.output[0]);
+      if (!u) throw new Error('DeepInfra empty result');
+      // DeepInfra usually returns a data: URL with base64
+      const r2 = await fetch(u);
+      const b = await r2.blob();
+      return URL.createObjectURL(b);
+    }
+  },
+  // 10. Stability AI — free credits on signup, official SD/Stable Image Core
+  {
+    id: 'stability',
+    name: 'Stability AI',
+    needsKey: true,
+    enabled: () => !!C.stabilityKey && C.useProvider.stability !== false,
+    gen: async (prompt) => {
+      const fd = new FormData();
+      fd.append('prompt', prompt.slice(0, 1500));
+      fd.append('output_format', 'png');
+      fd.append('aspect_ratio', '1:1');
+      const r = await fetch('https://api.stability.ai/v2beta/stable-image/generate/core', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + C.stabilityKey,
+          'Accept': 'image/*'
+        },
+        body: fd
+      });
+      if (!r.ok) throw new Error(await readError(r, 'Stability'));
+      const b = await r.blob();
+      if (!b.type.startsWith('image/')) throw new Error('Stability non-image response');
+      return URL.createObjectURL(b);
+    }
+  },
+  // 11. DeepAI — free tier with rate limits
+  {
+    id: 'deepai',
+    name: 'DeepAI',
+    needsKey: true,
+    enabled: () => !!C.daiKey && C.useProvider.deepai !== false,
+    gen: async (prompt) => {
+      const fd = new FormData();
+      fd.append('text', prompt.slice(0, 1500));
+      const r = await fetch('https://api.deepai.org/api/text2img', {
+        method: 'POST',
+        headers: { 'api-key': C.daiKey },
+        body: fd
+      });
+      if (!r.ok) throw new Error(await readError(r, 'DeepAI'));
+      const data = await r.json();
+      const u = data.output_url;
+      if (!u) throw new Error('DeepAI empty');
+      const r2 = await fetch(u);
+      const b = await r2.blob();
+      return URL.createObjectURL(b);
+    }
+  },
+  // 12. Hyperbolic — free credits, FLUX-schnell available
+  {
+    id: 'hyperbolic',
+    name: 'Hyperbolic',
+    needsKey: true,
+    enabled: () => !!C.hyperbolicKey && C.useProvider.hyperbolic !== false,
+    gen: async (prompt) => {
+      const r = await fetch('https://api.hyperbolic.xyz/v1/image/generation', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + C.hyperbolicKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model_name: 'FLUX.1-dev',
+          prompt: prompt.slice(0, 1500),
+          height: 1024, width: 1024,
+          steps: 4, seed: Math.floor(Math.random() * 999999)
+        })
+      });
+      if (!r.ok) throw new Error(await readError(r, 'Hyperbolic'));
+      const data = await r.json();
+      const b64 = data.images?.[0]?.image;
+      if (!b64) throw new Error('Hyperbolic empty result');
       const bin = atob(b64);
       const bytes = new Uint8Array(bin.length);
       for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
