@@ -8,20 +8,25 @@ execute without asking the user to re-explain.
 
 ## ⚡ CURRENT STATE (updated after every verified milestone)
 
-**Last shipped tip (awaiting user verification):** `v17dl` — bulletproof save banner + localStorage test + save trail
+**Last shipped tip:** `v17dl` — bulletproof save banner + Debug panel (image-prompt-v16)
 **Last user-verified tip:** `v17dh` — Wave 6 Vision pipeline (image-prompt-v12)
 **Verified backup:** `backup/2026-04-29-v17dh`
+**Session-end backup:** `backup/2026-04-29-session-end` at v17dl tip
 
-**Active diagnostic (2026-04-29 evening):** User ran v17dk Debug status. Output revealed `ps_* entries: 0` — localStorage entirely empty. Two scenarios: user wasn't actually clicking "Save & Start" (Save button hidden under iPad keyboard?), OR Safari Private Browsing was active (localStorage discarded between sessions).
+**🚨 OUTSTANDING — RESOLVE BEFORE NEXT BUILD:**
 
-v17dl adds:
-- `testLocalStorage()` health check — writes/reads/deletes a marker, surfaces the exact error if private mode blocks writes
-- saveSettings is now wrapped in try/catch; pre-flight tests localStorage
-- `showSaveBanner()` — giant fixed-position banner (centered top of screen) that shows result of every save (success: green with N keys/N chars persisted; error: red with full error message). Replaces easy-to-miss toast.
-- ps_last_save + ps_save_count localStorage trail so we can see if/when saves happened
-- Debug panel now shows: localStorage health check result, total save count, last save timestamp
+Save / localStorage persistence issue. User reports keys stopped saving after testing HF / bg-removal in v17di-v17dk. v17dk Debug status showed `ps_* entries: 0`. User runs DuckDuckGo browser on iPad — past sessions worked, today's HF testing surfaced the issue.
 
-When next session inherits: have user open Settings → Debug → tap "Show status" again. New output will reveal localStorage health + save history. If `localStorage TEST: ✗ FAILED` shows, user is in Private Browsing.
+Code review confirmed `saveSettings` logic has no bugs. Cause unconfirmed. v17dl shipped a bulletproof save with `testLocalStorage()` health check, giant green/red result banner, and save trail (ps_last_save + ps_save_count) for diagnosis.
+
+**To resolve tomorrow** (see SESSION_NOTES_2026-04-29.md "Outstanding" section for full detail):
+1. User opens Image Prompt in **Safari** (not DDG) at `https://dssorit.github.io/ancient-covenant-scrolls/load/?bust=v17dl&_t=fresh`
+2. Paste any one key → tap Save → report banner color + text
+3. Open Settings → Debug → Show status → paste output
+4. Three lines settle the question: `localStorage TEST: ✓/✗`, `total saves: N`, `last save: ts`
+5. If save works in Safari but not DDG → ship v17dm with IndexedDB backup (DDG-resistant)
+6. If save fails in Safari too → real bug to fix
+7. Don't ship Wave 6.5 Part 2 until this is resolved — those features need keys; testing with broken save is wasted effort.
 
 **Active project:** Image Prompt — multi-pipeline build per `PLAN_IMAGE_PROMPT_v3.md`. User direction (2026-04-29): build the full v3 spec in waves, never use pay-per-use providers, save ComfyUI server work for later.
 
@@ -31,8 +36,9 @@ When next session inherits: have user open Settings → Debug → tap "Show stat
 | --- | --- | --- |
 | W1 | P1 Scene Lock + first-use popup framework | ✅ v17dd |
 | W6 | Pipeline A — Vision / structured JSON | ✅ v17dh |
-| **W6.5 Part 1** | **HF rembg (background removal) + manipulation intent router** | 🚀 v17di shipped, awaiting verify |
-| W6.5 Part 2 | Real-ESRGAN / GFPGAN / Florence-2 / Qwen2.5-VL / SDXL inpaint | 🔜 NEXT |
+| W6.5 Part 1 | HF rembg + manipulation intent router | 🚀 v17di shipped, blocked on save issue |
+| W6.5 diagnostics | Timeouts + Debug panel + bulletproof save | 🚀 v17dj-v17dl shipped, awaiting verify |
+| **W6.5 Part 2** | **Real-ESRGAN / GFPGAN / Florence-2 / Qwen2.5-VL / SDXL inpaint** | 🔜 NEXT (after save issue resolved) |
 | W7 | Pipeline B — Prompt Builder strict/moderate/loose | pending |
 | W8 | Pipeline D — Multi-image continuity + character profiles (subsumes original P2 batch + P3 dual-merge) | pending |
 | W9 | Pipeline E — Output Verification + auto-retry | pending |
