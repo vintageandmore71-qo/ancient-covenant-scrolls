@@ -438,3 +438,30 @@ The 950-line `index.html` inside is the starting point. v1 plan said
 "copy + rename"; v2 plan says "copy → rename → rebuild provider list →
 add intent router → add multi-turn state". Phase 1A still ships first as a
 drop-in to validate the integration.
+
+---
+
+## ⚠ PRE-LAUNCH CHECKLIST — toggle these back ON before shipping
+
+These provider toggles were defaulted **OFF** on 2026-04-29 to avoid
+burning free-tier credits during heavy build/test iteration. Flip them
+back ON via Image Prompt → Settings → Provider toggles once the build
+is stable and the feature work is done.
+
+- [ ] **Gemini Image (Imagen toggle)** — user-flagged for re-enable.
+      Free tier ~500 requests/day, 10/min — easy to burn during
+      testing but generous for normal use. Best img2img edit fidelity
+      in the entire free tier (Gemini 2.5 Flash Image preserves face/
+      pose). localStorage key: `ps_use_img`. Code default change:
+      `index.html` state init reads `=== '1'` (defaults false); revert
+      to `!== '0'` for default-on if preferred.
+- [ ] **Replicate** — only flip ON if you accept pay-per-use ($0.10
+      free credit then paid). Stays OFF if Load is 100% free. Key:
+      `ps_use_rep`.
+
+Verification after re-enable:
+1. Open Image Prompt → Settings → Provider toggles
+2. Check the Gemini Image / Replicate boxes
+3. Tap Save & Start
+4. Refinement turns should now route through the higher-quality
+   provider before falling back to AI Horde.
