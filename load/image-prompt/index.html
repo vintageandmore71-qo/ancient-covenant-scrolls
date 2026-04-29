@@ -650,6 +650,13 @@ let multiTurnHintShown = false;
 // scene/character/setting/mood and only modify what the user asks for.
 // When OFF, each prompt regenerates from scratch ignoring prior context.
 let sceneLocked = LS.getItem('ps_scene_lock') !== '0';
+// Wave 6 / Spec Pipeline A — Vision Analysis
+// imageAnalysis holds the structured JSON profile extracted from the
+// current image by a vision-capable LLM. Becomes the input for the
+// prompt builder (Pipeline B) and continuity engine (Pipeline D).
+// Reset on fresh upload, set on auto-analysis after upload.
+let imageAnalysis = null;
+let analyzing = false;
 
 /* ── INIT ── */
 (function(){
@@ -782,6 +789,7 @@ function onFile(e){
   const file=e.target.files[0];if(!file)return;
   // Fresh upload — reset multi-turn chain (no longer a "previous result")
   lastSDPrompt = '';
+  imageAnalysis = null;
   const r=new FileReader();
   r.onload=ev=>{
     const d=ev.target.result;
@@ -790,12 +798,16 @@ function onFile(e){
     document.getElementById('img-name').textContent=file.name;
     document.getElementById('img-preview-bar').classList.add('on');
     updSend();
+    // Wave 6 — kick off vision analysis in the background. The user
+    // can start typing their prompt while we analyze.
+    autoAnalyzeCurrentImage();
   };
   r.readAsDataURL(file);e.target.value='';
 }
 function clearImage(){
   img=null;
   lastSDPrompt = '';
+  imageAnalysis = null;
   document.getElementById('img-preview-bar').classList.remove('on');
   document.getElementById('img-thumb').src='';
   updSend();
@@ -866,10 +878,14 @@ async function setCurrentImageFromUrl(url, name){
       mime: blob.type || 'image/png',
       name: name || 'previous-result.png'
     };
+    // Wave 6 — result becomes new analyzed image; reset prior analysis
+    // and re-analyze so the next refinement uses the fresh profile.
+    imageAnalysis = null;
     document.getElementById('img-thumb').src = dataUrl;
     document.getElementById('img-name').textContent = '↻ ' + (name || 'Previous result — keep editing');
     document.getElementById('img-preview-bar').classList.add('on');
     updSend();
+    autoAnalyzeCurrentImage();
   } catch (e) { console.warn('[setCurrentImageFromUrl]', e); }
 }
 
@@ -899,26 +915,30 @@ function send(){
   ta.value='';ta.style.height='auto';
   generating=true;updSend();
   const tid=addTyping();
-  // Multi-turn context — when Scene Lock is ON AND the current image
-  // is a previous gen result (lastSDPrompt set), inject the previous
-  // scene description as context so the LLM writes a *combined*
-  // SD_PROMPT that preserves subject/setting/mood and only modifies
-  // what the user asked for. When Scene Lock is OFF, pass the prompt
-  // as-is and let the LLM start fresh.
+  // Multi-turn context — Scene Lock ON + image attached. Build a
+  // rich preservation prompt. v17dh upgrade: prefer the structured
+  // imageAnalysis profile (Wave 6 / Pipeline A) when available, fall
+  // back to lastSDPrompt only when no analysis ran (e.g. vision
+  // provider failed or hasn't finished yet).
   let augmentedPrompt = p;
-  if (sceneLocked && lastSDPrompt && snap) {
-    augmentedPrompt =
-      'SCENE LOCK ENABLED — preserve the previous image\'s subject, character, setting, and mood.\n' +
-      'PREVIOUS SCENE DESCRIPTION: "' + lastSDPrompt.slice(0, 300) + '"\n' +
-      'USER REQUEST (refinement to apply on top of the locked scene): ' + p + '\n\n' +
-      'Write a NEW SD_PROMPT that keeps every element of the previous scene EXACTLY THE SAME unless the user explicitly asked to change it. Only modify what the user requested. Do not start over.';
-    // First-use popup — fires on the first refinement turn so the
-    // user understands the chained-context behavior.
-    showFirstUseHint('fu_scene_lock_v1', {
-      icon: '🔒', title: 'Scene Lock',
-      body: 'Refinements automatically preserve the previous image\'s subject, setting, and mood. To start fresh instead, tap the 🔒 Scene pill on the preview bar to turn it off.',
-      cta: 'Got it'
-    });
+  if (sceneLocked && snap) {
+    const richCtx = buildPreservationContext();
+    const fallbackCtx = lastSDPrompt ? lastSDPrompt.slice(0, 300) : '';
+    const preservation = richCtx || fallbackCtx;
+    if (preservation) {
+      augmentedPrompt =
+        'SCENE LOCK ENABLED — preserve the previous image\'s subject, character, setting, and mood.\n' +
+        'PREVIOUS IMAGE PROFILE: ' + preservation + '\n' +
+        'USER REQUEST (refinement to apply on top of the locked scene): ' + p + '\n\n' +
+        'Write a NEW SD_PROMPT that keeps every element of the previous image EXACTLY THE SAME unless the user explicitly asked to change it. Only modify what the user requested. Do not start over. Be specific about preserved character traits (face shape, skin tone, hair, eyes, body type, clothing) and preserved scene details (style, lighting, palette, composition).';
+      // First-use popup — fires on the first refinement turn so the
+      // user understands the chained-context behavior.
+      showFirstUseHint('fu_scene_lock_v1', {
+        icon: '🔒', title: 'Scene Lock',
+        body: 'Refinements automatically preserve the previous image\'s subject, setting, and mood. To start fresh instead, tap the 🔒 Scene pill on the preview bar to turn it off.',
+        cta: 'Got it'
+      });
+    }
   }
   pipeline(augmentedPrompt, snap, tid);
 }
@@ -1590,6 +1610,124 @@ function isHealthy(id) {
     return true;
   }
   return h.fail < 3;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Wave 6 — SPEC PIPELINE A: Vision / Image Analysis
+   ──────────────────────────────────────────────────────────────
+   When the user uploads an image (or a generation result becomes
+   the next input), we ask a vision-capable LLM to return a
+   structured JSON profile: character traits, style, palette,
+   composition, problems detected, recommended edit prompt.
+
+   This profile is the input to Pipeline B (prompt builder) and
+   Pipeline D (multi-image continuity). Without it, multi-turn
+   refinement is just text speculation.
+
+   Vision providers (all multimodal, all currently free-tier
+   accessible without paying — Puter is default and uses GPT-4o-
+   mini class which sees images):
+   - puter (free, default, no key)
+   - gemini  (free key, opt-in via Settings)
+   - anthropic (opt-in only via Advanced)
+*/
+async function analyzeImageWithVision(imgData) {
+  if (!imgData || !imgData.dataUrl) return null;
+  // Pick the first vision-capable provider with access
+  const order = getProviderOrder().filter(p =>
+    CAPS[p] && CAPS[p].vision && hasProviderAccess(p)
+  );
+  if (!order.length) return null;
+  const provider = order[0];
+  const visionPrompt =
+    'You are an image analysis system. Look at the attached image and return ONE JSON object only. No prose, no markdown fences. Use this exact schema (fill in what you can see, use empty string or empty array if unknown):\n\n' +
+    '{\n' +
+    '  "image_description": "1-2 sentence overview",\n' +
+    '  "subjects": [],\n' +
+    '  "character_count": 0,\n' +
+    '  "character_profiles": [{\n' +
+    '    "name_or_label": "", "gender_presentation": "", "estimated_age_range": "",\n' +
+    '    "skin_tone": "", "face_shape": "", "eye_shape": "", "hair_color": "",\n' +
+    '    "hair_style": "", "body_type": "", "distinctive_features": [],\n' +
+    '    "clothing": [], "pose": "", "expression": "", "accessories": []\n' +
+    '  }],\n' +
+    '  "objects": [], "background": "", "style": "", "palette": [],\n' +
+    '  "composition": "", "lighting": "", "problems_detected": [],\n' +
+    '  "recommended_edit_prompt": "", "can_edit_directly": true\n' +
+    '}';
+  try {
+    const reply = await callProvider(provider, visionPrompt, imgData);
+    // LLMs often wrap JSON in ```json ... ``` fences or add
+    // commentary. Extract the first {...} block we find.
+    const m = reply.match(/\{[\s\S]*\}/);
+    if (!m) return null;
+    return JSON.parse(m[0]);
+  } catch (e) {
+    console.warn('[VisionAnalysis] failed:', e.message || e);
+    return null;
+  }
+}
+
+/* Auto-analyze the current image and update preview-bar UI.
+   Called from onFile (fresh upload) and after a successful gen
+   (so the result becomes the next-turn analyzed image). */
+async function autoAnalyzeCurrentImage() {
+  if (!img) return;
+  analyzing = true;
+  imageAnalysis = null;
+  refreshAnalyzePill('analyzing');
+  showFirstUseHint('fu_vision_v1', {
+    icon: '✨', title: 'Image analysis',
+    body: 'Image Prompt now reads each photo you upload and builds a structured profile (face, hair, clothing, style, palette). Refinements use that profile so character identity and style stay consistent across turns.',
+    cta: 'Got it'
+  });
+  const analysis = await analyzeImageWithVision(img);
+  imageAnalysis = analysis;
+  analyzing = false;
+  refreshAnalyzePill(analysis ? 'ready' : 'failed');
+}
+
+function refreshAnalyzePill(state) {
+  const lbl = document.getElementById('img-name');
+  if (!lbl) return;
+  if (state === 'analyzing') {
+    lbl.textContent = '✨ Analyzing image…';
+  } else if (state === 'ready') {
+    lbl.textContent = '✓ Profile ready — refining';
+  } else if (state === 'failed') {
+    // Silent fail — leave the existing label, fall back to old behavior
+  }
+}
+
+/* Build a rich preservation context from imageAnalysis for the
+   prompt builder. Replaces the simpler v17dd lastSDPrompt-only
+   augmentation when we have a structured profile available. */
+function buildPreservationContext() {
+  if (!imageAnalysis) return null;
+  const a = imageAnalysis;
+  const parts = [];
+  if (a.image_description) parts.push('Scene: ' + a.image_description);
+  if (a.style) parts.push('Style: ' + a.style);
+  if (a.lighting) parts.push('Lighting: ' + a.lighting);
+  if (Array.isArray(a.palette) && a.palette.length) parts.push('Palette: ' + a.palette.join(', '));
+  if (a.composition) parts.push('Composition: ' + a.composition);
+  if (a.background) parts.push('Background: ' + a.background);
+  // First character profile (most images have just one subject)
+  const cp = (a.character_profiles || [])[0];
+  if (cp) {
+    const cParts = [];
+    if (cp.gender_presentation) cParts.push(cp.gender_presentation);
+    if (cp.estimated_age_range) cParts.push(cp.estimated_age_range);
+    if (cp.skin_tone) cParts.push(cp.skin_tone + ' skin');
+    if (cp.face_shape) cParts.push(cp.face_shape + ' face');
+    if (cp.eye_shape) cParts.push(cp.eye_shape + ' eyes');
+    if (cp.hair_color || cp.hair_style) cParts.push((cp.hair_color || '') + ' ' + (cp.hair_style || '') + ' hair');
+    if (cp.body_type) cParts.push(cp.body_type + ' body');
+    if (Array.isArray(cp.clothing) && cp.clothing.length) cParts.push('wearing ' + cp.clothing.join(', '));
+    if (Array.isArray(cp.distinctive_features) && cp.distinctive_features.length) cParts.push('distinctive: ' + cp.distinctive_features.join(', '));
+    if (cParts.length) parts.push('Character: ' + cParts.join(', '));
+  }
+  return parts.join(' | ');
 }
 
 /* Try each enabled+healthy provider in order; silent skip on failure
