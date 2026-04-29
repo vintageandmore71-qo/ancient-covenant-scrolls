@@ -108,6 +108,29 @@ button,[role="button"]{min-height:48px}
 .upload-prev img{width:48px;height:48px;border-radius:6px;object-fit:cover}
 .upload-prev .upn{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .upload-prev .upr{background:none;border:none;color:var(--danger);font-size:18px;padding:4px;min-height:32px}
+/* P1 — Scene Lock pill (sits inside the preview bar, left of the × close button) */
+.scene-lock-btn{display:inline-flex;align-items:center;gap:4px;background:rgba(124,124,255,0.14);
+  border:1px solid rgba(124,124,255,0.35);color:var(--accent);
+  border-radius:999px;padding:4px 10px;font-size:11px;font-weight:700;
+  cursor:pointer;min-height:32px;flex-shrink:0;font-family:inherit}
+.scene-lock-btn.off{background:rgba(200,200,220,0.06);border-color:var(--border);color:var(--ink-low);text-decoration:line-through}
+.scene-lock-btn:active{transform:scale(.94)}
+/* First-use popup card — full overlay, dismiss with "Got it" or backdrop */
+.fu-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9900;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.fu-card{background:var(--bg-2);color:var(--ink-hi);border:1px solid var(--border);
+  border-radius:16px;max-width:380px;width:100%;padding:22px 22px 18px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.fu-card h3{margin:0 0 8px 0;font-size:18px;font-weight:800;display:flex;
+  align-items:center;gap:8px;color:var(--accent)}
+.fu-card p{margin:0 0 14px 0;font-size:14px;color:var(--ink-mid);line-height:1.6}
+.fu-card .fu-actions{display:flex;gap:10px;justify-content:flex-end}
+.fu-card .fu-cta{background:linear-gradient(135deg,var(--accent),#5a5ae0);color:#fff;
+  border:none;border-radius:8px;padding:10px 22px;font-size:14px;font-weight:700;
+  min-height:42px;cursor:pointer}
+.fu-card .fu-skip{background:none;border:none;color:var(--ink-low);font-size:13px;
+  padding:10px 12px;cursor:pointer}
 
 .typing-indicator{display:flex;gap:4px;align-items:center;padding:6px 0}
 .typing-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);opacity:.6;animation:tb 1.2s infinite}
@@ -276,6 +299,7 @@ button,[role="button"]{min-height:48px}
       <div class="upload-prev">
         <img id="img-thumb" src="" alt="">
         <span class="upn" id="img-name"></span>
+        <button id="scene-lock-btn" class="scene-lock-btn" type="button" onclick="toggleSceneLock()" aria-label="Toggle Scene Lock"><span id="scene-lock-icon">🔒</span> <span id="scene-lock-lbl">Scene</span></button>
         <button class="upr" onclick="clearImage()">✕</button>
       </div>
     </div>
@@ -644,6 +668,10 @@ let img = null, generating = false, history = [];
 // vision-capable LLM. Reset when user uploads a new image or starts over.
 let lastSDPrompt = '';
 let multiTurnHintShown = false;
+// P1 — Scene Lock. When ON (default), refinements preserve the previous
+// scene/character/setting/mood and only modify what the user asks for.
+// When OFF, each prompt regenerates from scratch ignoring prior context.
+let sceneLocked = LS.getItem('ps_scene_lock') !== '0';
 
 /* ── INIT ── */
 (function(){
@@ -674,6 +702,7 @@ let multiTurnHintShown = false;
   document.getElementById('t-dai').checked   = C.useProvider.deepai;
   document.getElementById('t-hyp').checked   = C.useProvider.hyperbolic;
   document.getElementById('opt-allow-ant').checked = !!C.allowAnthropic;
+  refreshSceneLockUI();
   document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===C.mode));
   document.querySelectorAll('[data-orm]').forEach(b=>b.classList.toggle('active',b.dataset.orm===C.orModel));
   document.querySelectorAll('[data-hm]').forEach(b=>b.classList.toggle('active',b.dataset.hm===C.hfModel));
@@ -822,6 +851,52 @@ function clearImage(){
   document.getElementById('img-thumb').src='';
   updSend();
 }
+
+/* P1 — Scene Lock toggle.
+   When ON (default), refinements preserve previous scene/character/
+   setting/mood. When OFF, each prompt regenerates from scratch. */
+function toggleSceneLock(){
+  sceneLocked = !sceneLocked;
+  try { LS.setItem('ps_scene_lock', sceneLocked ? '1' : '0'); } catch(_){}
+  refreshSceneLockUI();
+  toast(sceneLocked
+    ? '🔒 Scene locked — refinements preserve the previous image'
+    : '🔓 Scene lock off — each prompt starts fresh');
+}
+function refreshSceneLockUI(){
+  const btn = document.getElementById('scene-lock-btn');
+  const icn = document.getElementById('scene-lock-icon');
+  const lbl = document.getElementById('scene-lock-lbl');
+  if (!btn) return;
+  btn.classList.toggle('off', !sceneLocked);
+  icn.textContent = sceneLocked ? '🔒' : '🔓';
+  lbl.textContent = sceneLocked ? 'Scene' : 'Scene off';
+  btn.title = sceneLocked
+    ? 'Scene Lock ON — keeps subject, setting, and mood across refinements'
+    : 'Scene Lock OFF — each prompt regenerates from scratch';
+}
+
+/* First-use popup framework — show a one-time tutorial card the
+   first time a feature is used. localStorage tracks whether the user
+   has dismissed it so we never show twice. */
+function showFirstUseHint(key, opts){
+  if (!key || LS.getItem(key)) return;
+  const ov = document.createElement('div'); ov.className = 'fu-overlay';
+  const card = document.createElement('div'); card.className = 'fu-card';
+  card.innerHTML =
+    '<h3>' + (opts.icon ? opts.icon + ' ' : '') + esc(opts.title || 'New feature') + '</h3>' +
+    '<p>' + esc(opts.body || '') + '</p>' +
+    '<div class="fu-actions">' +
+      '<button class="fu-skip" data-fu-skip>Don\'t show again</button>' +
+      '<button class="fu-cta"  data-fu-cta>' + esc(opts.cta || 'Got it') + '</button>' +
+    '</div>';
+  ov.appendChild(card);
+  document.body.appendChild(ov);
+  const dismiss = () => { try { LS.setItem(key, '1'); } catch(_){} ov.remove(); };
+  card.querySelector('[data-fu-cta]').addEventListener('click', dismiss);
+  card.querySelector('[data-fu-skip]').addEventListener('click', dismiss);
+  ov.addEventListener('click', e => { if (e.target === ov) dismiss(); });
+}
 /* Phase 2 — set the chat's "current image" state from a Blob URL or
    data URL. After every successful image gen, the result becomes the
    next turn's input automatically (multi-turn refinement). User can
@@ -875,17 +950,26 @@ function send(){
   ta.value='';ta.style.height='auto';
   generating=true;updSend();
   const tid=addTyping();
-  // Multi-turn context — when the current image is a previous gen
-  // result (lastSDPrompt set), inject what was generated as context
-  // so the LLM writes a *combined* SD_PROMPT even if it can't see
-  // the image. Works with text-only providers like Cerebras / HF.
+  // Multi-turn context — when Scene Lock is ON AND the current image
+  // is a previous gen result (lastSDPrompt set), inject the previous
+  // scene description as context so the LLM writes a *combined*
+  // SD_PROMPT that preserves subject/setting/mood and only modifies
+  // what the user asked for. When Scene Lock is OFF, pass the prompt
+  // as-is and let the LLM start fresh.
   let augmentedPrompt = p;
-  if (lastSDPrompt && snap) {
+  if (sceneLocked && lastSDPrompt && snap) {
     augmentedPrompt =
-      'CONTEXT: Continuing to refine an image. Previous scene description: "' +
-      lastSDPrompt.slice(0, 300) + '".\n' +
-      'USER REQUEST (refinement to apply): ' + p + '\n\n' +
-      'Write a NEW SD_PROMPT that combines the previous scene with the user\'s requested change. Do not start fresh — keep the previous subject, setting, and mood, only modify what the user asked for.';
+      'SCENE LOCK ENABLED — preserve the previous image\'s subject, character, setting, and mood.\n' +
+      'PREVIOUS SCENE DESCRIPTION: "' + lastSDPrompt.slice(0, 300) + '"\n' +
+      'USER REQUEST (refinement to apply on top of the locked scene): ' + p + '\n\n' +
+      'Write a NEW SD_PROMPT that keeps every element of the previous scene EXACTLY THE SAME unless the user explicitly asked to change it. Only modify what the user requested. Do not start over.';
+    // First-use popup — fires on the first refinement turn so the
+    // user understands the chained-context behavior.
+    showFirstUseHint('fu_scene_lock_v1', {
+      icon: '🔒', title: 'Scene Lock',
+      body: 'Refinements automatically preserve the previous image\'s subject, setting, and mood. To start fresh instead, tap the 🔒 Scene pill on the preview bar to turn it off.',
+      cta: 'Got it'
+    });
   }
   pipeline(augmentedPrompt, snap, tid);
 }
