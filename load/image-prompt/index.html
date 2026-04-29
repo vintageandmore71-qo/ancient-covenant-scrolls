@@ -569,7 +569,11 @@ if('serviceWorker' in navigator)
    textOnly: text prompts only
 ──────────────────────────────────────── */
 const CAPS = {
-  puter:      { vision: false },
+  // Puter routes to GPT-4o-mini-class multimodal models by default,
+  // so it CAN accept an image when we pass it through correctly. We
+  // turned this on in v17dc once callPuter was rewritten to use the
+  // messages-array API form with image_url content blocks.
+  puter:      { vision: true  },
   gemini:     { vision: true  },
   openrouter: { vision: false },
   cerebras:   { vision: false },
@@ -635,6 +639,11 @@ const HF_MODELS = [
 ];
 
 let img = null, generating = false, history = [];
+// Phase 2 — track the SD_PROMPT that produced the current image so we
+// can build contextual prompts when refining across turns without a
+// vision-capable LLM. Reset when user uploads a new image or starts over.
+let lastSDPrompt = '';
+let multiTurnHintShown = false;
 
 /* ── INIT ── */
 (function(){
@@ -793,6 +802,8 @@ function saveSettings(){
 /* ── IMAGE ── */
 function onFile(e){
   const file=e.target.files[0];if(!file)return;
+  // Fresh upload — reset multi-turn chain (no longer a "previous result")
+  lastSDPrompt = '';
   const r=new FileReader();
   r.onload=ev=>{
     const d=ev.target.result;
@@ -806,6 +817,7 @@ function onFile(e){
 }
 function clearImage(){
   img=null;
+  lastSDPrompt = '';
   document.getElementById('img-preview-bar').classList.remove('on');
   document.getElementById('img-thumb').src='';
   updSend();
@@ -863,7 +875,19 @@ function send(){
   ta.value='';ta.style.height='auto';
   generating=true;updSend();
   const tid=addTyping();
-  pipeline(p,snap,tid);
+  // Multi-turn context — when the current image is a previous gen
+  // result (lastSDPrompt set), inject what was generated as context
+  // so the LLM writes a *combined* SD_PROMPT even if it can't see
+  // the image. Works with text-only providers like Cerebras / HF.
+  let augmentedPrompt = p;
+  if (lastSDPrompt && snap) {
+    augmentedPrompt =
+      'CONTEXT: Continuing to refine an image. Previous scene description: "' +
+      lastSDPrompt.slice(0, 300) + '".\n' +
+      'USER REQUEST (refinement to apply): ' + p + '\n\n' +
+      'Write a NEW SD_PROMPT that combines the previous scene with the user\'s requested change. Do not start fresh — keep the previous subject, setting, and mood, only modify what the user asked for.';
+  }
+  pipeline(augmentedPrompt, snap, tid);
 }
 
 /* ────────────────────────────────────────
@@ -958,9 +982,24 @@ async function pipeline(prompt, imgData, tid) {
       : [];
     addAIMsg(finalText, resultUrl, providerBadge, fallbackNote, chips);
     history.push({role:'assistant',content:finalText});
-    // Phase 2: result becomes the next-turn input image automatically
+    // Phase 2: result becomes the next-turn input image automatically.
+    // Also stash the SD_PROMPT used so the next turn can reference it
+    // for non-vision LLMs (multi-turn refinement context augmentation).
     if (resultUrl) {
+      if (sdMatch) lastSDPrompt = sdMatch[1].trim();
+      else if (prompt) lastSDPrompt = prompt;
       setCurrentImageFromUrl(resultUrl, 'Previous result — keep editing');
+      // One-time hint nudging the user to add a Gemini key for true
+      // pixel-edit fidelity. Without a vision LLM or img2img provider,
+      // multi-turn is "context-aware regen", not actual editing.
+      const hasVisionKey = !!(C.keys.gemini || C.keys.geminiFB || C.keys.anthropic || C.keys.anthropicFB);
+      const hasImg2Img = !!C.hfImgKey; // HF is the only img2img provider today
+      if (!multiTurnHintShown && !hasVisionKey && !hasImg2Img) {
+        multiTurnHintShown = true;
+        setTimeout(function () {
+          toast('Tip: add a free Gemini key in Settings for pixel-accurate edits across turns. Without it, each refinement re-generates the scene.');
+        }, 1500);
+      }
     }
 
   } catch(err) {
@@ -1043,7 +1082,7 @@ function showFallbackBanner(msg) {
 /* ── Unified provider caller ── */
 async function callProvider(provider, prompt, imgData) {
   switch(provider){
-    case'puter':     return callPuter(prompt);
+    case'puter':     return callPuter(prompt, imgData);
     case'gemini':    return callGemini(prompt, imgData, C.keys.gemini);
     case'openrouter':return callOR(prompt);
     case'cerebras':  return callCerebras(prompt);
@@ -1074,10 +1113,20 @@ After producing an image-related reply, on a new line emit a "CHIPS:" line with 
 Default style preference: ${C.mode}.`;
 
 /* ── Individual providers ── */
-async function callPuter(prompt) {
+async function callPuter(prompt, imgData) {
+  // Build user content. When an image is attached, use the messages-
+  // array form with both text + image_url content blocks so Puter's
+  // multimodal model can actually see the picture (default GPT-4o-mini
+  // supports vision).
+  const userContent = imgData
+    ? [
+        { type: 'text', text: prompt },
+        { type: 'image_url', image_url: { url: imgData.dataUrl } }
+      ]
+    : prompt;
+
   // Optional API-token path: skip the popup sign-in flow when the
-  // user has pasted a Puter API token in settings. Hits the Puter
-  // REST endpoint directly with the token in the Authorization header.
+  // user has pasted a Puter API token in settings.
   if (C.keys.puter) {
     const r = await fetch('https://api.puter.com/drivers/call', {
       method: 'POST',
@@ -1090,7 +1139,7 @@ async function callPuter(prompt) {
         method: 'complete',
         args: { messages: [
           { role: 'system', content: SYS() },
-          { role: 'user',   content: prompt }
+          { role: 'user',   content: userContent }
         ]}
       })
     });
@@ -1105,7 +1154,14 @@ async function callPuter(prompt) {
   }
   // SDK path: signed-in user via popup, no key needed
   if(typeof puter==='undefined') throw new Error('Puter.js is loading. Please try again in a moment.');
-  const resp = await puter.ai.chat(SYS()+'\n\nUser: '+prompt);
+  // Two-form SDK API: (string, imageUrl) for simple cases, or
+  // (messagesArray) for richer content. Image case uses array form.
+  const resp = imgData
+    ? await puter.ai.chat([
+        { role: 'system', content: SYS() },
+        { role: 'user',   content: userContent }
+      ])
+    : await puter.ai.chat(SYS() + '\n\nUser: ' + prompt);
   return resp?.message?.content || String(resp) || prompt;
 }
 
