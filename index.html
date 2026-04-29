@@ -377,6 +377,8 @@ body.dark #home p{color:#888}
 <select id="vm"><option value="verses">Verses</option><option value="notes">Notes</option><option value="all">All</option></select>
 <button id="b-rc" title="Record this chapter in your own voice — plays your recording instead of the TTS voice when set">&#127908;</button>
 <button id="b-rcd" title="Use TTS voice instead (delete this chapter's recording)" style="display:none;">&#128465;</button>
+<button id="b-lp" title="Loop this chapter — replays automatically when finished">&#128257;</button>
+<button id="b-cn" title="Play only the COMPARATIVE MANUSCRIPT NOTES of this section">&#128221;</button>
 <span id="vst">Ready</span>
 </div>
 
@@ -756,9 +758,16 @@ return true;
 return speakCurrent();
 }
 document.getElementById('b-pl').addEventListener('click',startPlayback);
+// Loop state — when on, the current chapter replays from the start instead
+// of auto-advancing. notesOnly is set when the user hit the COMPARATIVE
+// MANUSCRIPT NOTES button; it's a one-shot, so loop does NOT apply there.
+var loop=true;try{var s=localStorage.getItem('acr_loop');if(s!==null)loop=s==='1';}catch(e){}
+var notesOnly=false;
 function rn(){
 if(!sp)return;
 if(pi>=ps.length){
+if(notesOnly){dn();return;}
+if(loop){pi=0;document.getElementById('vst').textContent='Looping…';setTimeout(function(){if(sp)speakCurrent();},250);return;}
 if(cur<IDS.length-1){var nextFid=IDS[cur+1];pi=0;go(nextFid);setTimeout(function(){ps=gps();if(ps.length&&sp)rn();else dn();},900);}
 else dn();return;
 }
@@ -766,8 +775,57 @@ speakCurrent();
 }
 document.getElementById('b-pa').addEventListener('click',function(){window.speechSynthesis.pause();pa=true;this.style.display='none';document.getElementById('b-pl').style.display='inline';document.getElementById('vst').textContent='Paused';});
 document.getElementById('b-st').addEventListener('click',stp);
+// Loop toggle — when on, the current chapter replays automatically.
+function refreshLoopBtn(){
+  var b=document.getElementById('b-lp');if(!b)return;
+  b.style.opacity=loop?'1':'0.4';
+  b.title=(loop?'Loop ON — chapter replays when finished. Tap to turn off.':'Loop OFF — auto-advances to next chapter. Tap to turn on.');
+}
+refreshLoopBtn();
+document.getElementById('b-lp').addEventListener('click',function(){
+  loop=!loop;
+  try{localStorage.setItem('acr_loop',loop?'1':'0');}catch(e){}
+  refreshLoopBtn();
+  document.getElementById('vst').textContent=loop?'Loop on':'Loop off';
+});
+// Comparative manuscript notes — speak only the [DSS]/[ORIT GE'EZ]/etc.
+// entries that follow each "COMPARATIVE MANUSCRIPT NOTES" heading. Skips
+// [CRITICAL NOTE] paragraphs (those are translator commentary, not
+// manuscript comparisons).
+function gatherCompNotes(){
+  var heads=document.querySelectorAll('#content p.dp');
+  var blocks=[];
+  for(var i=0;i<heads.length;i++){
+    if((heads[i].textContent||'').trim()==='COMPARATIVE MANUSCRIPT NOTES'){
+      var sib=heads[i].nextElementSibling;
+      while(sib&&sib.tagName==='P'){
+        var pt=sib.getAttribute('data-ptype');
+        var text=(sib.textContent||'').trim();
+        if(pt!=='note')break;
+        if(/^\[\s*CRITICAL/i.test(text))break;
+        if(text)blocks.push(sib);
+        sib=sib.nextElementSibling;
+      }
+    }
+  }
+  return blocks;
+}
+document.getElementById('b-cn').addEventListener('click',function(){
+  if(!window.speechSynthesis){alert('Voice reader not supported in this browser.');return;}
+  if(cur<0){document.getElementById('vst').textContent='Open a section first';return;}
+  var blocks=gatherCompNotes();
+  if(!blocks.length){document.getElementById('vst').textContent='No comparative notes here.';return;}
+  stp();
+  ps=blocks;pi=0;sp=true;notesOnly=true;
+  document.getElementById('b-pl').style.display='none';
+  document.getElementById('b-pa').style.display='inline';
+  document.getElementById('vst').textContent='Comparative notes — '+blocks.length;
+  try{window.speechSynthesis.resume();}catch(e){}
+  try{window.speechSynthesis.cancel();}catch(e){}
+  speakCurrent();
+});
 
-function stp(){sp=false;pa=false;speakSeq++;clearWatchdog();if(window.speechSynthesis)window.speechSynthesis.cancel();try{if(typeof crStop==='function')crStop();}catch(e){}pi=0;if(cp)cp.classList.remove('sp');cp=null;document.getElementById('b-pl').style.display='inline';document.getElementById('b-pa').style.display='none';document.getElementById('vst').textContent='Ready';}
+function stp(){sp=false;pa=false;speakSeq++;clearWatchdog();if(window.speechSynthesis)window.speechSynthesis.cancel();try{if(typeof crStop==='function')crStop();}catch(e){}pi=0;notesOnly=false;if(cp)cp.classList.remove('sp');cp=null;document.getElementById('b-pl').style.display='inline';document.getElementById('b-pa').style.display='none';document.getElementById('vst').textContent='Ready';}
 function dn(){sp=false;speakSeq++;clearWatchdog();pi=0;if(cp)cp.classList.remove('sp');cp=null;document.getElementById('b-pl').style.display='inline';document.getElementById('b-pa').style.display='none';document.getElementById('vst').textContent='Done';}
 
 /* Per-chapter voice recording.
@@ -802,8 +860,37 @@ function tryPlayChapterRecording(){
   var url=URL.createObjectURL(rec.blob);
   crAudio=new Audio(url);
   crAudio.volume=1;crAudio.muted=false;
-  crAudio.onended=function(){URL.revokeObjectURL(url);crAudio=null;dn();};
+  // Inline playsinline + autoplay-friendly settings so iPad Safari keeps
+  // playing when the user switches apps or locks the screen (only works
+  // when the page was launched from the Home Screen as a PWA).
+  try{crAudio.setAttribute('playsinline','');crAudio.setAttribute('webkit-playsinline','');}catch(e){}
+  crAudio.onended=function(){
+    if(loop&&sp){
+      // Replay the same recording. Re-create the Audio object since some
+      // mobile browsers don't reliably restart a finished Audio.
+      try{URL.revokeObjectURL(url);}catch(e){}
+      crAudio=null;
+      document.getElementById('vst').textContent='Looping your recording…';
+      setTimeout(function(){if(sp&&typeof tryPlayChapterRecording==='function')tryPlayChapterRecording();},250);
+      return;
+    }
+    URL.revokeObjectURL(url);crAudio=null;dn();
+  };
   crAudio.onerror=function(){URL.revokeObjectURL(url);crAudio=null;document.getElementById('vst').textContent='Recording failed to play.';};
+  // Media Session — gives lock-screen / Control Center playback controls
+  // and helps iOS keep audio alive when the page goes to background.
+  try{
+    if('mediaSession' in navigator){
+      navigator.mediaSession.metadata=new MediaMetadata({
+        title:(typeof LBL!=='undefined'&&cur>=0?LBL[cur]:'ACR Reader')||'ACR Reader',
+        artist:'Ancient Covenant Record',
+        album:'Your recording'
+      });
+      navigator.mediaSession.setActionHandler('play',function(){if(crAudio)crAudio.play();});
+      navigator.mediaSession.setActionHandler('pause',function(){if(crAudio)crAudio.pause();});
+      navigator.mediaSession.setActionHandler('stop',function(){stp();});
+    }
+  }catch(e){}
   crAudio.play().catch(function(e){document.getElementById('vst').textContent='Play failed: '+(e&&e.message||e);});
   return true;
 }
