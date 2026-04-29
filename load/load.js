@@ -9115,7 +9115,7 @@ window.LoadAudioFix = {
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17da</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17db</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -17064,6 +17064,39 @@ window.LoadAudioFix = {
   })();
 
   /* ---------- Image Prompt (workspace tile) ---------- */
+
+  // Phase 2 — listen for save-to-library messages from the embedded
+  // Image Prompt iframe. Same-origin, so this is safe. Posts arrive
+  // as { type, name, dataUrl, mime, size }.
+  window.addEventListener('message', async function (ev) {
+    var msg = ev && ev.data;
+    if (!msg || msg.type !== 'image-prompt-save-to-library') return;
+    if (!msg.dataUrl) return;
+    try {
+      var resp = await fetch(msg.dataUrl);
+      var blob = await resp.blob();
+      var rec = {
+        id: newId(),
+        name: msg.name || ('Image Prompt result ' + Date.now()),
+        kind: 'media',
+        subKind: 'image',
+        mime: msg.mime || blob.type || 'image/png',
+        binary: blob,
+        dateAdded: Date.now(),
+        lastOpened: null,
+        sizeBytes: blob.size || (msg.size || 0)
+      };
+      await putApp(rec);
+      apps.push(rec);
+      try { renderLibrary(); } catch (e) {}
+      try { updateHomeCounts(); } catch (e) {}
+      try { renderRecent(); } catch (e) {}
+      try { renderLibraryChips(); } catch (e) {}
+      toast('✓ Saved to Library: ' + rec.name);
+    } catch (e) {
+      toast('Save failed: ' + (e && e.message || e), true);
+    }
+  });
 
   // Mount the standalone Image Prompt PWA in a fullscreen iframe overlay.
   // The PWA lives at load/image-prompt/ with its own SW scope so it

@@ -115,10 +115,24 @@ button,[role="button"]{min-height:48px}
 @keyframes tb{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
 
 .dl-btn{display:inline-flex;align-items:center;gap:6px;
+  background:transparent;color:var(--ink-mid);border:1px solid var(--border);
+  border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;
+  min-height:38px;cursor:pointer;text-decoration:none}
+.dl-btn:active{transform:scale(.97)}
+/* Phase 2 — result-card actions row + Save to Library button */
+.result-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.save-lib-btn{display:inline-flex;align-items:center;gap:6px;
   background:linear-gradient(135deg,#059669,#0891b2);color:#fff;border:none;
   border-radius:8px;padding:8px 16px;font-size:14px;font-weight:700;
-  min-height:38px;cursor:pointer;margin-top:6px;text-decoration:none}
-.dl-btn:active{transform:scale(.97)}
+  min-height:38px;cursor:pointer}
+.save-lib-btn:active{transform:scale(.97)}
+.save-lib-btn:disabled{opacity:.6}
+/* Continue chips — tappable follow-up suggestions under each result */
+.suggest-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;max-width:520px}
+.suggest-chips .chip{font-size:12px;padding:6px 12px;min-height:32px;
+  background:rgba(124,124,255,0.08);border:1px solid rgba(124,124,255,0.25);
+  color:var(--accent);border-radius:999px;font-weight:600;cursor:pointer}
+.suggest-chips .chip:active{transform:scale(.96);background:rgba(124,124,255,0.18)}
 .error-bubble{background:rgba(204,63,85,.15);border:1px solid var(--danger);
   color:#ff8a8a;border-radius:10px;padding:10px 14px;font-size:14px;line-height:1.5}
 .model-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(124,124,255,.15);
@@ -790,7 +804,38 @@ function onFile(e){
   };
   r.readAsDataURL(file);e.target.value='';
 }
-function clearImage(){img=null;document.getElementById('img-preview-bar').classList.remove('on');document.getElementById('img-thumb').src='';updSend();}
+function clearImage(){
+  img=null;
+  document.getElementById('img-preview-bar').classList.remove('on');
+  document.getElementById('img-thumb').src='';
+  updSend();
+}
+/* Phase 2 — set the chat's "current image" state from a Blob URL or
+   data URL. After every successful image gen, the result becomes the
+   next turn's input automatically (multi-turn refinement). User can
+   tap × on the preview bar to start over. */
+async function setCurrentImageFromUrl(url, name){
+  try {
+    const r = await fetch(url);
+    const blob = await r.blob();
+    const dataUrl = await new Promise((resolve, reject) => {
+      const fr = new FileReader();
+      fr.onload = () => resolve(fr.result);
+      fr.onerror = () => reject(fr.error);
+      fr.readAsDataURL(blob);
+    });
+    img = {
+      dataUrl: dataUrl,
+      base64: dataUrl.split(',')[1],
+      mime: blob.type || 'image/png',
+      name: name || 'previous-result.png'
+    };
+    document.getElementById('img-thumb').src = dataUrl;
+    document.getElementById('img-name').textContent = '↻ ' + (name || 'Previous result — keep editing');
+    document.getElementById('img-preview-bar').classList.add('on');
+    updSend();
+  } catch (e) { console.warn('[setCurrentImageFromUrl]', e); }
+}
 
 /* ── SEND ── */
 function useStarter(btn){const ta=document.getElementById('prompt-input');ta.value=btn.textContent;ta.dispatchEvent(new Event('input'));ta.focus();}
@@ -813,7 +858,9 @@ function send(){
   const snap=img?{...img}:null;
   addUserMsg(p,snap);
   history.push({role:'user',content:p||(snap?'(image)':'')});
-  ta.value='';ta.style.height='auto';clearImage();
+  // Phase 2 — keep the image as next-turn input. Don't auto-clear.
+  // User can tap × on the preview bar to start over.
+  ta.value='';ta.style.height='auto';
   generating=true;updSend();
   const tid=addTyping();
   pipeline(p,snap,tid);
@@ -904,8 +951,17 @@ async function pipeline(prompt, imgData, tid) {
     const providerBadge = resultUrl
       ? usedProvider + ' + ' + (imageProvUsed || 'image')
       : usedProvider;
-    addAIMsg(finalText, resultUrl, providerBadge, fallbackNote);
+    // Parse Continue chips emitted by the LLM (CHIPS: "Try X | Try Y | Try Z")
+    const chipsMatch = reply.match(/CHIPS:\s*(.+)/i);
+    const chips = chipsMatch
+      ? chipsMatch[1].split('|').map(s => s.trim().replace(/^["'`]|["'`]$/g,'')).filter(Boolean).slice(0,3)
+      : [];
+    addAIMsg(finalText, resultUrl, providerBadge, fallbackNote, chips);
     history.push({role:'assistant',content:finalText});
+    // Phase 2: result becomes the next-turn input image automatically
+    if (resultUrl) {
+      setCurrentImageFromUrl(resultUrl, 'Previous result — keep editing');
+    }
 
   } catch(err) {
     removeTyping(tid);
@@ -1011,7 +1067,9 @@ const SYS = () => `You are a creative AI assistant for Image Prompt — a chat-b
 
 When the user clearly wants an image generated, edited, or restyled — or has uploaded one with a clear edit instruction — include a SINGLE line starting exactly with "SD_PROMPT:" followed by a detailed image-generation prompt suitable for Stable Diffusion or FLUX. Keep that line under 200 words. Be specific about subject, lighting, lens, mood.
 
-If the user is just chatting, asking a question, replying with thanks, or has not asked for an image, do NOT include SD_PROMPT. They don't want an image yet.
+If the user is just chatting, asking a question, replying with thanks, or has not asked for an image, do NOT include SD_PROMPT.
+
+After producing an image-related reply, on a new line emit a "CHIPS:" line with 2–3 short, specific follow-up suggestions separated by " | ". Examples: "CHIPS: Try at sunset | Add fog | Make it cinematic" or "CHIPS: Brighter colors | Different angle | Add a person". Keep each chip under 25 characters. Skip CHIPS for pure chitchat.
 
 Default style preference: ${C.mode}.`;
 
@@ -1633,19 +1691,44 @@ function addUserMsg(text,imgData){
   a.appendChild(el);scrollBot();
 }
 
-function addAIMsg(text, imgUrl, provider, fallbackNote) {
+function addAIMsg(text, imgUrl, provider, fallbackNote, chips) {
   const a=document.getElementById('chat-area');
   const el=document.createElement('div');el.className='msg ai';
   const names={puter:'Puter.js',gemini:'Google Gemini',openrouter:'OpenRouter',cerebras:'Cerebras',anthropic:'Claude',hfchat:'HF Mistral'};
   const noteHtml = fallbackNote
     ? `<div class="fallback-note">⚡ ${esc(fallbackNote)}</div>` : '';
+  // Strip CHIPS: line from the displayed text — chips render as buttons below
+  const cleanText = text.replace(/CHIPS:[\s\S]*$/i, '').trim();
+  // Action buttons row — Save to Library (Load) + ⬇ Download
+  const actionsHtml = imgUrl ? `
+    <div class="result-actions">
+      <button class="save-lib-btn" data-img-url="${esc(imgUrl)}">💾 Save to Library</button>
+      <a class="dl-btn" href="${imgUrl}" download="image-prompt.png" target="_blank" rel="noopener">⬇ Download</a>
+    </div>` : '';
+  // Continue chips (Phase 2)
+  const chipsHtml = (chips && chips.length) ? `
+    <div class="suggest-chips">
+      ${chips.map(c => `<button class="chip" data-chip="${esc(c)}">${esc(c)}</button>`).join('')}
+    </div>` : '';
   el.innerHTML=`<div class="msg-avatar">✦</div><div class="msg-content">
     ${noteHtml}
-    <div class="bubble">${imgUrl?`<img class="bubble-img" src="${imgUrl}" alt="result">`:''} ${esc(text)}</div>
-    ${imgUrl?`<a class="dl-btn" href="${imgUrl}" download="image-prompt.png" target="_blank" rel="noopener">⬇ Save Image</a>`:''}
+    <div class="bubble">${imgUrl?`<img class="bubble-img" src="${imgUrl}" alt="result">`:''} ${esc(cleanText)}</div>
+    ${actionsHtml}
+    ${chipsHtml}
     <div class="model-badge">✦ ${esc(names[provider]||provider)}</div>
   </div>`;
   a.appendChild(el);scrollBot();
+  // Wire chip clicks: fill prompt input + focus
+  el.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => {
+    const ta=document.getElementById('prompt-input');
+    ta.value = b.getAttribute('data-chip');
+    ta.dispatchEvent(new Event('input'));
+    ta.focus();
+  }));
+  // Wire Save-to-Library button (postMessage to Load parent frame)
+  el.querySelectorAll('.save-lib-btn').forEach(b => b.addEventListener('click', () => {
+    saveToLoadLibrary(b.getAttribute('data-img-url'), b);
+  }));
   // Anime.js — smooth fade-in + slight slide-up on the result card
   if (typeof anime !== 'undefined') {
     try {
@@ -1653,6 +1736,43 @@ function addAIMsg(text, imgUrl, provider, fallbackNote) {
       anime({ targets: el, opacity: [0, 1], translateY: [8, 0],
               duration: 350, easing: 'easeOutCubic' });
     } catch(_){}
+  }
+}
+
+/* Phase 2 — Save generated image to Load's main Library.
+   Image Prompt runs inside an iframe in Load. Same-origin → can post
+   the image bytes to the parent which calls putApp(). */
+async function saveToLoadLibrary(imgUrl, btn) {
+  if (!imgUrl) return;
+  try {
+    if (btn) { btn.textContent = '… saving'; btn.disabled = true; }
+    const r = await fetch(imgUrl);
+    const blob = await r.blob();
+    const dataUrl = await new Promise(res => {
+      const fr = new FileReader();
+      fr.onload = () => res(fr.result);
+      fr.readAsDataURL(blob);
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'image-prompt-save-to-library',
+        name: 'Image Prompt — ' + new Date().toLocaleString(),
+        dataUrl: dataUrl,
+        mime: blob.type || 'image/png',
+        size: blob.size
+      }, '*');
+      if (btn) { btn.textContent = '✓ Saved to Library'; }
+      setTimeout(() => { if (btn) { btn.textContent = '💾 Save to Library'; btn.disabled = false; } }, 2200);
+    } else {
+      // Standalone (not inside Load) — fall back to download
+      const a = document.createElement('a');
+      a.href = imgUrl; a.download = 'image-prompt.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      if (btn) { btn.textContent = '⬇ Downloaded'; setTimeout(()=>{ btn.textContent='💾 Save to Library'; btn.disabled=false; }, 2200); }
+    }
+  } catch (e) {
+    if (btn) { btn.textContent = '⚠ Failed'; setTimeout(()=>{ btn.textContent='💾 Save to Library'; btn.disabled=false; }, 2200); }
+    console.warn('[saveToLoadLibrary]', e);
   }
 }
 
