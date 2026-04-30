@@ -656,7 +656,7 @@ async function checkOneKey(provider, key) {
     if (r.network) return Object.assign(base, { status: 'network', label: STATUS_ICONS.network + ' Network blocked' });
     if (r.status === 401) return Object.assign(base, { status: 'invalid', label: STATUS_ICONS.invalid + ' Invalid key' });
     if (r.status === 429) return Object.assign(base, { status: 'rateLimited', label: STATUS_ICONS.rateLimited + ' Rate limited' });
-    if (r.ok) return Object.assign(base, { status: 'ready', label: STATUS_ICONS.ready + ' Ready (chat only — text-only)' });
+    if (r.ok) return Object.assign(base, { status: 'textOnly', label: STATUS_ICONS.textOnly + ' TEXT-ONLY — blocked from images. Used only for chat.' });
     return Object.assign(base, { status: 'unknown', label: STATUS_ICONS.unknown + ' HTTP ' + r.status });
   }
   if (provider === 'cerebras') {
@@ -664,7 +664,7 @@ async function checkOneKey(provider, key) {
     const r = await pingAuth('https://api.cerebras.ai/v1/models', { 'Authorization': 'Bearer ' + key });
     if (r.network) return Object.assign(base, { status: 'network', label: STATUS_ICONS.network + ' Network blocked' });
     if (r.status === 401) return Object.assign(base, { status: 'invalid', label: STATUS_ICONS.invalid + ' Invalid key' });
-    if (r.ok) return Object.assign(base, { status: 'ready', label: STATUS_ICONS.ready + ' Ready (chat only — text-only)' });
+    if (r.ok) return Object.assign(base, { status: 'textOnly', label: STATUS_ICONS.textOnly + ' TEXT-ONLY — blocked from images. Used only for chat.' });
     return Object.assign(base, { status: 'unknown', label: STATUS_ICONS.unknown + ' HTTP ' + r.status });
   }
   if (provider === 'anthropic') {
@@ -677,7 +677,16 @@ async function checkOneKey(provider, key) {
     if (r.network) return Object.assign(base, { status: 'network', label: STATUS_ICONS.network + ' Network blocked' });
     if (r.status === 401) return Object.assign(base, { status: 'invalid', label: STATUS_ICONS.invalid + ' Invalid key' });
     if (r.ok) {
-      if (provider === 'hfchat') return Object.assign(base, { status: 'textOnly', label: STATUS_ICONS.ready + ' Ready (chat / Mistral — text-only)' });
+      if (provider === 'hfchat') {
+        // Per build plan + Lock Providers Correctly directive: HF
+        // Mistral is text-only and is BLOCKED from image generation
+        // and image editing routes. Surface this loudly so the user
+        // never thinks Mistral is doing image work.
+        return Object.assign(base, {
+          status: 'textOnly',
+          label: STATUS_ICONS.textOnly + ' TEXT-ONLY — blocked from images. Used only for chat / prompt building.'
+        });
+      }
       return Object.assign(base, { status: 'ready', label: STATUS_ICONS.ready + ' Ready (image gen + img2img)' });
     }
     return Object.assign(base, { status: 'unknown', label: STATUS_ICONS.unknown + ' HTTP ' + r.status });
@@ -748,14 +757,30 @@ async function runKeyDiagnostic() {
   const labels = {
     puter: 'Puter.js', gemini: 'Google Gemini', openrouter: 'OpenRouter',
     cerebras: 'Cerebras', anthropic: 'Anthropic Claude',
-    hfchat: 'Hugging Face (chat / Mistral)', 'hf-img': 'Hugging Face (image gen)'
+    hfchat: 'Hugging Face (Mistral chat)', 'hf-img': 'Hugging Face (image)'
   };
-  out.innerHTML = results.map(r => (
+  // Group by image vs chat capability per Lock-Providers directive
+  const imgCapable = ['puter','gemini','anthropic','hf-img'];
+  const isImg = (id) => imgCapable.indexOf(id) !== -1;
+  const ready = results.filter(r => r.status === 'ready');
+  const saved = results.filter(r => r.status !== 'missing');
+  const headerHtml =
+    '<div style="margin-bottom:10px;padding:8px;background:var(--bg-3);border-radius:6px;font-size:12px">' +
+    '<strong>' + saved.length + ' of ' + results.length + ' keys saved</strong> • ' +
+    ready.length + ' image-capable ready' +
+    '</div>';
+  const rowHtml = (r) => (
     '<div style="display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">' +
-    '<div><strong>' + (labels[r.provider] || r.provider) + '</strong>' +
+    '<div><strong>' + (labels[r.provider] || r.provider) + '</strong> ' +
+    '<span style="font-size:10px;opacity:0.6">' + (isImg(r.provider) ? 'image' : 'chat-only') + '</span>' +
     '<div style="opacity:0.7;font-size:11px">' + r.masked + '</div></div>' +
-    '<div style="text-align:right">' + r.label + '</div></div>'
-  )).join('');
+    '<div style="text-align:right;font-size:12px;max-width:60%">' + r.label + '</div></div>'
+  );
+  const sectImage = '<div style="margin:6px 0 2px;font-size:11px;opacity:0.6;text-transform:uppercase;letter-spacing:0.06em">Image-capable</div>';
+  const sectChat  = '<div style="margin:14px 0 2px;font-size:11px;opacity:0.6;text-transform:uppercase;letter-spacing:0.06em">Chat / prompt-building only</div>';
+  out.innerHTML = headerHtml +
+    sectImage + results.filter(r => isImg(r.provider)).map(rowHtml).join('') +
+    sectChat  + results.filter(r => !isImg(r.provider)).map(rowHtml).join('');
   btn.disabled = false; btn.textContent = 'Test Keys';
 }
 
