@@ -1,0 +1,19 @@
+# Files excluded from GitHub "Download ZIP" archive — keep them in
+# normal git so existing references work, but ship a slimmer zip.
+inbox/deliverable_premium_icon_pack*.zip   export-ignore
+inbox/Load_Book_to_Video_*.zip             export-ignore
+inbox/Load_GitHub_Security_Developer_Prompt.zip export-ignore
+inbox/3rd*.zip                             export-ignore
+inbox/load_ai_character_consistency_with_code.zip export-ignore
+inbox/Load_AI_Glam_Style_System_Research_and_Developer_Plan.zip export-ignore
+load/splash\ .png                          export-ignore
+Load-PWA.zip                               export-ignore
+Attain-PWA.zip                             export-ignore
+attain-standalone.zip                      export-ignore
+acr-htmlq-standalone.zip                   export-ignore
+load-standalone.zip                        export-ignore
+Load-Standalone.html                       export-ignore
+Attain-Standalone.html                     export-ignore
+ACR-Records-Standalone.html                export-ignore
+GreatE/splash.PNG                          export-ignore
+GreatE/cover.png                           export-ignore
