@@ -95,6 +95,23 @@ but should not be treated as known-good baselines.
   → returns live to v17dm. Or `git checkout backup/2026-04-29-v17dg`
   for clean v17dg baseline.
 
+### v17e0 — `593d410` — 2026-04-30
+
+- **Status:** Roadmap item #1 (Manual Mask painter) — verified working by user.
+- **Browser/device:** iPad Safari
+- **Test run:** Uploaded a photo, tapped 🖌, painted a mask over the face/eyes region, tapped Done, sent a prompt to add sunglasses.
+- **User words:** "Created sunglasses. Verified"
+- **Confirmed working:**
+  - 🖌 button enabled once image is attached
+  - Mask painter overlay opens, brush + Done flow operates
+  - `currentMask` populated; pipeline forced `taskType='inpaint'`
+  - HF inpainting model returned a result with sunglasses on the masked region; un-painted area preserved
+- **NOT tested in this run:**
+  - Eraser tool / Clear button
+  - Local SD inpaint path (`/sdapi/v1/img2img` with mask)
+  - "Image-edit provider needed" fallback (not triggered — HF token configured)
+- **Recovery:** `git checkout backup/2026-04-30-v17e0`
+
 ### v17dn (built) — `<pending>` — 2026-04-30 — original built-state row
 
 ### v17dn (built) — `<pending>` — 2026-04-30 — original built-state row
