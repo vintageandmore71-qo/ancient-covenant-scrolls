@@ -276,8 +276,10 @@ before opening more than one in flight.
 | # | Source | Item | Why this slot | Acceptance test |
 |---|--------|------|----|----|
 | 1 | spec Ph 2 + Anti-Blur + Fix-Hang | **Manual Mask painter** (Canvas brush overlay → send mask + image to Local SD `/img2img`; for HF inpainting models pass mask via `parameters.mask`) | Unblocks real ADD_OBJECT and inpaint without character drift | Paint over an area, ask "remove this", non-mask area is pixel-identical |
-| 2 | original K | **OpenCV.js wired for "remove background"** (call existing `loadOpenCV()` lazy stub; threshold + edge mask) | Free, browser-only, no key | "remove background" returns transparent PNG offline |
-| 3 | spec Ph 2 | **rembg via Transformers.js (briaai/RMBG-1.4) + WebGPU when available** | Better cutouts than OpenCV; still in browser | Same prompt produces cleaner mask than OpenCV path |
+| ~~2~~ | original K | ~~**OpenCV.js wired for "remove background"**~~ — **PARKED v17e3.** 8 MB WASM crashed iPad Safari. Held until lighter path is available. | — | — |
+| ~~2-alt~~ | hotfix v17e2 | ~~HF briaai/RMBG-1.4 inference route~~ — **PARKED v17e3.** Also crashed iPad. | — | — |
+| 3 | spec Ph 2 | **rembg via Transformers.js (briaai/RMBG-1.4) + WebGPU when available** — re-attempt browser-side bg-removal with the lightest possible model + WebGPU acceleration. Strict iPad memory test before promoting. | After two prior crashes, this is the next attempt at the bg-removal feature | Tab survives loading + running; transparent PNG returned |
+| 2-workaround | v17e0 verified | **Manual Mask painter + "remove this" prompt** — paint over the background, send "remove this" → routes to inpaint. Already works as of v17e0. Documented as the interim path until #3 lands. | User confirmed the mask path produces correct edits | (already verified v17e0) |
 | 4 | original K | **More Jimp ops in `LOCAL_OPS`** — resize, crop, flip, compose | Cheap offline wins; no AI quota burn | "resize to 512", "flip horizontally" route to Jimp, no provider call |
 | 5 | spec Ph 1.E | **Output Verification** (vision LLM compares result vs source → identity / style / instruction match scores → auto-retry once if below threshold) | Closes Pipeline E | Verification line appears in Receipt; auto-retry triggers when score < 0.7 |
 | 6 | spec Ph 3 + character-zip | **Character Cards** (multi-profile store: name + reference image + full schema; Settings panel "Cards" section with quick-pick) | Productizes the single CHAR slot; matches inbox schema | Save 2 cards, switch active card, prompt picks up correct profile |

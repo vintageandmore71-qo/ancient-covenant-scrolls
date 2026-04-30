@@ -1460,7 +1460,14 @@ async function pipeline(prompt, imgData, tid) {
           timedOut: false
         });
       } catch (e) {
-        if (e && e.message === 'NO_EDIT_PROVIDER') {
+        if (e && e.message === 'FEATURE_PARKED_BG_REMOVAL') {
+          exportPromptText =
+            '🚧 Background removal is parked.\n\n' +
+            'Both the browser-side OpenCV path and the HF briaai/RMBG-1.4 path ' +
+            'crashed Safari on iPad. Held for a later ship with Transformers.js + WebGPU. ' +
+            'For now, use the Manual Mask painter to paint over the background, then say ' +
+            '"remove this" — that path is verified working (v17e0).';
+        } else if (e && e.message === 'NO_EDIT_PROVIDER') {
           exportPromptText = buildSDExportPrompt(cleanPrompt, lastSDPrompt);
         } else if (e && e.message === 'MANUAL_MASK_NEEDED') {
           // add_object / inpaint without an img2img-class provider.
@@ -1842,17 +1849,15 @@ async function runImageTask(opts) {
   // near-identical to the source (i.e. provider returned a blurred
   // copy without adding the object).
   // ── BACKGROUND_REMOVAL —
-  // OpenCV.js path disabled v17e2: 8 MB WASM blew up iPad Safari.
-  // Will revisit with Transformers.js + briaai/RMBG-1.4 (item #3).
-  // For now, route through the AI image chain — `huggingface` gen()
-  // recognises the task and calls the briaai/RMBG-1.4 inference
-  // endpoint when an HF token is configured. If not, the existing
-  // capability gate shows the user "image-edit provider needed".
+  // PARKED v17e3 per user 2026-04-30: both OpenCV (8 MB WASM) and HF
+  // briaai/RMBG-1.4 routes crashed iPad Safari. Held for a later ship
+  // with Transformers.js + WebGPU (lighter footprint) per build plan
+  // item #3. Until then, surface a parked-feature message so a stray
+  // "remove background" prompt cannot crash the tab.
   if (taskType === 'background_removal' && sourceImage) {
-    return await imageGenWithFallback(prompt, sourceImage, {
-      taskType: 'background_removal',
-      mask: opts.mask || null
-    });
+    const err = new Error('FEATURE_PARKED_BG_REMOVAL');
+    err.task = 'background_removal';
+    throw err;
   }
   if (taskType === 'add_object' && sourceImage) {
     const objectMatch = prompt.match(/\b(?:add|put|place|insert|include)\s+(?:a\s+|an\s+|another\s+|some\s+)?([a-z][a-z\s]*?)(?:\s+(?:to|in|on|at|near|behind|in front of|above|below)\b|[\.\!\?,]|$)/i);
