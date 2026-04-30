@@ -364,6 +364,7 @@ button,[role="button"]{min-height:48px}
     <p class="panel-hint">Client-side editing libraries — they prepare <code>sourceImage + mask + prompt</code> for an AI provider. They do NOT generate or edit pixels themselves. Listed separately from AI providers per build plan.</p>
     <div style="font-size:13px;line-height:1.7">
       <div>✓ <strong>Canvas API</strong> — mask painter, eraser, brush size, clear (wired v17e0)</div>
+      <div>✓ <strong>OpenCV.js</strong> — browser-side background removal via GrabCut, no key, offline-after-first-load (wired v17e1)</div>
       <div style="opacity:0.55">○ Fabric.js — object/area selection + layers (planned)</div>
       <div style="opacity:0.55">○ Konva.js — alt layer toolkit (optional)</div>
       <div style="opacity:0.55">○ Cropper.js — tap-friendly crop (planned)</div>
@@ -1840,6 +1841,25 @@ async function runImageTask(opts) {
   // bug). Quality check after generation rejects results that are
   // near-identical to the source (i.e. provider returned a blurred
   // copy without adding the object).
+  // ── BACKGROUND_REMOVAL — browser-side first via OpenCV.js GrabCut.
+  // Free, no key, no AI provider needed. Falls through to AI providers
+  // only if OpenCV fails (e.g. first-load network issue).
+  if (taskType === 'background_removal' && sourceImage) {
+    try {
+      const url = await removeBackgroundLocal(sourceImage);
+      if (url) {
+        return {
+          url: url,
+          providerId: 'localbg',
+          providerName: 'Browser (OpenCV)',
+          task: 'background_removal',
+          skipped: []
+        };
+      }
+    } catch (e) {
+      console.warn('[OpenCV bg-removal] failed, falling through to AI:', e.message);
+    }
+  }
   if (taskType === 'add_object' && sourceImage) {
     const objectMatch = prompt.match(/\b(?:add|put|place|insert|include)\s+(?:a\s+|an\s+|another\s+|some\s+)?([a-z][a-z\s]*?)(?:\s+(?:to|in|on|at|near|behind|in front of|above|below)\b|[\.\!\?,]|$)/i);
     const object = objectMatch ? objectMatch[1].trim() : 'the requested object';
@@ -1928,6 +1948,64 @@ function autoPlaceForObject(object) {
    8x8 grayscale pixel comparison. Returns 0..1, where 1 = identical.
    Used by add_object quality check: if result is too close to source,
    the provider didn't actually add anything and we reject. */
+/* ── removeBackgroundLocal — browser-side OpenCV.js GrabCut.
+   No key, no AI provider, runs entirely in iPad Safari (lazy-loads
+   ~8 MB of opencv.js the first time). Returns a transparent PNG with
+   the foreground subject preserved. Per build plan item #2: free,
+   browser-only, works offline after first load. */
+async function removeBackgroundLocal(sourceImage) {
+  const cv = await withTimeout(loadOpenCV(), 30000, 'OpenCV load');
+  return await new Promise((resolve, reject) => {
+    const im = new Image();
+    im.onload = () => {
+      let src, mask, bgdModel, fgdModel, binMask, channels, out;
+      try {
+        const W = im.naturalWidth, H = im.naturalHeight;
+        const canvas = document.createElement('canvas');
+        canvas.width = W; canvas.height = H;
+        canvas.getContext('2d').drawImage(im, 0, 0);
+        src      = cv.imread(canvas);                 // RGBA
+        mask     = new cv.Mat();
+        bgdModel = new cv.Mat();
+        fgdModel = new cv.Mat();
+        // Assume subject is roughly centred — 80% inset rectangle.
+        const rect = new cv.Rect(
+          Math.floor(W * 0.10), Math.floor(H * 0.10),
+          Math.floor(W * 0.80), Math.floor(H * 0.80)
+        );
+        cv.grabCut(src, mask, rect, bgdModel, fgdModel, 5, cv.GC_INIT_WITH_RECT);
+        // GrabCut result codes: 0 BG, 1 FG, 2 PR_BG, 3 PR_FG.
+        // Build a binary alpha: 255 where 1 or 3, else 0.
+        binMask = cv.Mat.zeros(mask.rows, mask.cols, cv.CV_8UC1);
+        for (let i = 0; i < mask.data.length; i++) {
+          const v = mask.data[i];
+          if (v === 1 || v === 3) binMask.data[i] = 255;
+        }
+        channels = new cv.MatVector();
+        cv.split(src, channels);
+        channels.set(3, binMask);
+        out = new cv.Mat();
+        cv.merge(channels, out);
+        const outCanvas = document.createElement('canvas');
+        outCanvas.width = W; outCanvas.height = H;
+        cv.imshow(outCanvas, out);
+        outCanvas.toBlob((b) => {
+          [src, mask, bgdModel, fgdModel, binMask, out].forEach(m => { try { m && m.delete(); } catch (_){} });
+          try { channels && channels.delete(); } catch (_){}
+          if (!b) return reject(new Error('toBlob failed'));
+          resolve(URL.createObjectURL(b));
+        }, 'image/png');
+      } catch (e) {
+        [src, mask, bgdModel, fgdModel, binMask, out].forEach(m => { try { m && m.delete(); } catch (_){} });
+        try { channels && channels.delete(); } catch (_){}
+        reject(e);
+      }
+    };
+    im.onerror = () => reject(new Error('image decode failed'));
+    im.src = sourceImage.dataUrl;
+  });
+}
+
 async function imageSimilarity(sourceUrl, resultUrl) {
   try {
     const [src, res] = await Promise.all([
