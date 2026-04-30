@@ -1371,7 +1371,16 @@ async function pipeline(prompt, imgData, tid) {
 
   } catch(err) {
     removeTyping(tid);
-    addError((err.message || 'Something went wrong. Check Settings and try again.') + `\n\nActive provider: ${providerName(usedProvider)}\nSelected model: ${activeModelLabel(usedProvider)}\nFallback order: ${getProviderOrder().map(providerName).join(' > ')}`);
+    // Show only providers that can actually handle the current task.
+    // When an image is attached, text-only providers (HF Mistral,
+    // OpenRouter, Cerebras) can't do anything — they must NOT appear
+    // in the displayed fallback order. Per user directive 2026-04-30.
+    const visibleChain = getProviderOrder().filter(p => {
+      if (!hasProviderAccess(p)) return false;
+      if (imgData && !CAPS[p]?.vision) return false;
+      return true;
+    });
+    addError((err.message || 'Something went wrong. Check Settings and try again.') + `\n\nActive provider: ${providerName(usedProvider)}\nSelected model: ${activeModelLabel(usedProvider)}\nFallback order: ${visibleChain.map(providerName).join(' > ') || '(none — add a free Gemini or Puter key)'}`);
   } finally {
     generating=false;updSend();
   }
@@ -1383,14 +1392,23 @@ function getAvailableProviders(){
 }
 
 function getProviderOrder(){
-  // Anthropic intentionally excluded from default chain. Its
-  // browser-direct API needs the dangerous-direct-browser-access
-  // flag which exposes the key to anyone inspecting requests.
-  // Power users can opt-in via Advanced settings (allowAnthropic).
+  // Chat / prompt-building chain. HF Mistral (hfchat) is text-only
+  // and stays near the END of the chain — never elevated to the front
+  // unless the user has explicitly chosen it AND saved a key. Per
+  // user directive 2026-04-30 ("Why is HF Mistral STILL showing up as
+  // a fallback order?"): a provider must have a saved key to appear
+  // in the displayed chain at all.
   const base = ['puter','openrouter','gemini','cerebras','hfchat'];
   if (C.allowAnthropic && C.keys.anthropic) base.push('anthropic');
-  const first = C.provider || 'puter';
-  return [first, ...base.filter(p => p !== first)];
+  // Only promote chosen provider to first if it actually has access
+  // (Puter has no key requirement; everything else needs a saved key).
+  const chosen = C.provider;
+  const chosenHasAccess = chosen && hasProviderAccess(chosen);
+  const first = chosenHasAccess ? chosen : 'puter';
+  // Filter out any provider with no access — they can't be called and
+  // shouldn't appear in the user-visible fallback list either.
+  return [first, ...base.filter(p => p !== first)]
+    .filter(p => hasProviderAccess(p));
 }
 
 function getVisionFallback(exclude) {
