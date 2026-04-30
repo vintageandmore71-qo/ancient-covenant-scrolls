@@ -64,27 +64,38 @@ but should not be treated as known-good baselines.
 
 ### v17dn — `36a2387` — 2026-04-30
 
-- **Status:** Image creation **partially verified** by user this date.
-- **Test run:** image generation prompt (specifics not captured by
-  user — going forward we'll record the exact prompt). Image
-  successfully returned from chain.
-- **Confirmed working:** image generation pipeline reaches a result
-  on whichever provider was tried first (default = Pollinations).
-- **Known issue raised in same session:** **face quality blurry on
-  the default provider's output.** Multi-turn refinement was not
-  attempted because the base image quality wasn't acceptable.
-- **NOT verified yet:**
-  - Which specific provider returned the blurry result (default
-    chain order: Pollinations first, so most likely Pollinations)
-  - The 4 sharper SDXL-class providers added in this build
-    (Pollinations Flux #8, AI Horde SDXL #10, Cloudflare SDXL-Lightning
-    #11, HF SDXL-Turbo #12) — none tried in this run
-  - Multi-turn refinement (Scene Lock + use-result-as-next-input)
-  - Save to Library
+- **Status:** Core image-loop **verified working** by user this date.
+  Quality issue logged but functional pipeline confirmed end-to-end.
+- **Browser/device:** iPad (Safari assumed — confirm next session)
+- **Test 1 (image creation):** prompt = "a woman on a boat".
+  Result: image returned, woman on a boat as requested. **Face
+  rendered blurry.**
+- **Test 2 (multi-turn refinement):** with the turn-1 result as
+  input, prompt = "add a bird". Result: image returned with the
+  bird **added** to the existing scene. **Slight blur retained**
+  in the second output.
+- **Confirmed working:**
+  - Image creation reaches a result via the chain (likely Pollinations
+    default, since user did not configure additional keys)
+  - Multi-turn refinement / "promote to add to that exact image" —
+    turn-1 result fed into turn-2 prompt and the bird appeared
+    in the same scene
+  - Scene preservation across turns (boat scene retained)
+- **Known issue:** face quality and overall sharpness is poor on
+  the default provider. None of the 4 SDXL-class slots added in
+  this build (Pollinations Flux #8, AI Horde SDXL #10, Cloudflare
+  SDXL-Lightning #11, HF SDXL-Turbo #12) were exercised — the
+  chain stopped on Pollinations' first-success.
+- **NOT tested in this run:**
+  - Save to Library button
   - Continue chips
+  - Sharper SDXL-class providers (8 / 10 / 11 / 12)
+  - Console errors / network anomalies (not reported)
 - **Recovery if needed:** `git revert 36a2387 && git push origin main`
   → returns live to v17dm. Or `git checkout backup/2026-04-29-v17dg`
   for clean v17dg baseline.
+
+### v17dn (built) — `<pending>` — 2026-04-30 — original built-state row
 
 ### v17dn (built) — `<pending>` — 2026-04-30 — original built-state row
 
