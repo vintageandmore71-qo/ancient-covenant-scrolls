@@ -67,6 +67,49 @@ Same pattern for ACR (`sw.js` `acr-vNN`), Attain (`attain-vNN`), Attain Jr
 (`attainjr-vNN`), Study (`acr-study-vNN`). Skipping the bump = users
 serve stale cached code.
 
+## Reverts must NEVER lose verified-working features (mandatory)
+
+Per user direction 2026-04-30, after a session where a revert wiped
+shipped work. **Surgical revert only — never blanket revert.**
+
+When a recently-shipped feature is broken and we need to roll back:
+
+1. **Identify the broken commit precisely.** `git log` + `git diff` to
+   pin the exact file(s) + function(s) that broke. Don't assume the
+   whole tree is bad.
+
+2. **Revert ONLY the broken file(s) or function(s).** Use
+   `git checkout <good-sha> -- <specific files>` not a wholesale
+   `git reset --hard`. Verified-working features in OTHER files stay.
+
+3. **If the bad change touched a shared file:**
+   - Cherry-pick or hand-port the un-broken parts forward
+   - Use `git diff <good-sha>..<bad-sha> -- <file>` to see exactly
+     what changed; reverse only the breaking hunks
+
+4. **Before touching `main`, list the verified-working features
+   between the target version and current HEAD.** Source: rows in
+   `VERIFIED_LOG.md` with status "✓ verified". Each one must either
+   survive the revert or be re-applied on top — they cannot be
+   silently dropped.
+
+5. **Cache strings must always go FORWARD, never backward.** Lower
+   cache numbers (e.g. v17e4 → v17e0) can leave iOS Safari with the
+   broken old SW still active. Always bump past the highest version
+   ever shipped.
+
+6. **Document the revert in `VERIFIED_LOG.md`** with: what was
+   reverted, what was preserved, why the surgical approach was used,
+   and the recovery commands.
+
+7. **If a full-tree revert is genuinely the only option**, FIRST
+   create a `pre-revert-<date>-<version>` branch on the current HEAD
+   so nothing is permanently lost — then revert main.
+
+The cost of a careful surgical revert is minutes. The cost of
+silently dropping shipped work is days of re-building features the
+user already verified.
+
 ## Verification before pushing "fix" claims
 
 The user has explicit rules from past frustration:
