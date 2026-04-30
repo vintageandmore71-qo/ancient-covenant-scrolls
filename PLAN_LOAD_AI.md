@@ -39,21 +39,34 @@ Update this file at the end of every shipped version.
 
 `text_only · vision_input · image_output · image_edit · image_to_image · inpainting · outpainting · background_removal · segmentation · object_detection · returns_file · returns_url · returns_blob · rate_limit_status · cost_status`
 
-## Routing order (free-tier priority)
+## Hard constraint — iPad-runnable + free only
 
-1. Local SD (ComfyUI / A1111 / Fooocus) — when configured
-2. Hugging Face Spaces / Inference (free tier)
-3. Gemini image edit (free tier only if confirmed)
-4. Pollinations — generation only, never preservation
-5. Cloudflare Workers AI free tier
-6. Replicate / Together / DeepInfra — only when free credits exist
-7. Optimized export-prompt fallback for ComfyUI / A1111 / Fooocus
+The PWA runs entirely in iPad Safari. Every feature must work via:
 
-## Operating modes
+1. **Browser (client-side)** — Jimp, OpenCV.js, Transformers.js+WebGPU, Canvas API, Web Speech API, FFmpeg.wasm, browser-image-compression
+2. **Free public APIs (no GPU at user's house)** — Pollinations, AI Horde anonymous, Hugging Face Inference + Spaces (free tier), Cloudflare Workers AI free tier, Puter.js, Google Gemini free tier, OpenRouter free models
 
-- **Browser Mode** — client-side only edits (compression, crop, mask paint, OpenCV, Jimp, browser background removal)
-- **Free Provider Mode** — Puter / Pollinations / HF / Cloudflare / Together / Horde / Imagen / DeepAI
-- **Local Engine Mode** — companion ComfyUI / A1111 / Fooocus on user's machine
+Tools that require Python + a local GPU (ComfyUI, AUTOMATIC1111, Fooocus, InvokeAI) **cannot run on iPad** and are therefore NOT part of the core plan. They remain available as an *optional companion-machine* path for power users only — not a default route.
+
+## Routing order (iPad + free only)
+
+1. **Browser-side first** (Jimp / OpenCV / Transformers.js) — for compression, crop, flip, simple masks, background removal where the model fits in memory
+2. **Pollinations** — text-to-image, no key, no preservation
+3. **Hugging Face Inference / Spaces** (free tier with HF token) — img2img, inpainting, face restoration, upscale, vision
+4. **Cloudflare Workers AI** (free tier with CF token) — SDXL-Lightning, FLUX-schnell
+5. **Puter.js** — vision LLM, no key
+6. **Google Gemini** (free key) — vision + image edit on free tier
+7. **AI Horde anonymous** — last-resort, slow but truly free
+8. **Optimized export-prompt fallback** — when no online provider can do the requested edit
+
+(ComfyUI / A1111 / Fooocus on a companion machine = optional only, gated behind explicit `localSdUrl` setting. Default is OFF.)
+
+## Operating modes (iPad-runnable)
+
+- **Browser Mode** — client-side only (compression, crop, mask paint, OpenCV, Jimp, Transformers.js background removal, FFmpeg.wasm video encode)
+- **Free Provider Mode** — Puter / Pollinations / HF / Cloudflare / Horde / Gemini / DeepAI
+
+(*Local Engine Mode* — optional, requires user to run a Mac/PC alongside the iPad; not a default path.)
 
 ## Consistency modes
 
@@ -162,22 +175,24 @@ before opening more than one in flight.
 | 11 | original L (T4-2) | **Image → Verse** (upload image → semantic match against 111 ACR chapters) | Biblical differentiator; reverse search | Upload mountain image, top match returns a Sinai / Horeb passage |
 | 12 | original L (T4-4) | **Visualize as I read** (ACR chapter scroll triggers per-paragraph gen) | Biggest cross-app integration | Scrolling past a paragraph kicks off async gen, image renders inline |
 | 13 | original L (T4-8) | **One-tap Make a Book Cover** (gen result → existing Cover Designer at 4× upscale) | Cross-app integration | "Make book cover" button on result opens Cover Designer pre-loaded |
-| 14 | spec Ph 4 | **ComfyUI workflow JSON** in Local SD slot (replace A1111-only `/sdapi/v1/img2img` with ComfyUI `/prompt`; ship default workflows for img2img, inpaint, IP-Adapter, ControlNet) | Real character lock via local engine | User configures ComfyUI URL, IP-Adapter workflow runs |
-| 15 | spec Ph 2 | **HF Spaces connector** (public Gradio APIs for Florence-2, Qwen2.5-VL, SDXL inpaint) | More truly-free img2img options | Spaces models appear as separate slots |
+| 14a | Glam parity | **Curated local style library** (~50 hand-picked style prompts in JSON; replace 8 hardcoded chips) | Glam-AI "2,000+ community styles" parity, browser-only | Tap "watercolor" chip, prompt expands and routes |
+| 14b | Glam parity | **Face restoration / photo retouch** via HF Inference (GFPGAN + CodeFormer); chat phrases "smooth skin", "fix my face", "retouch this" | Glam-AI photo-retouch parity, free with HF token | "smooth my face" returns a restored portrait |
+| 14c | Glam parity | **Real-ESRGAN upscale engine** wired to HF Inference; chat phrase "upscale this 4×" | Glam-AI upscale parity, free with HF token | "upscale 4x" returns 4× larger PNG |
+| 15 | spec Ph 2 | **HF Spaces connector** (public Gradio APIs for Florence-2, Qwen2.5-VL, SDXL inpaint, GFPGAN, Real-ESRGAN — many require no token) | More truly-free img2img/inpaint paths | Spaces models appear as separate slots |
 | 16 | original E | **Cohesive icon set across ACR / Attain / Attain Jr / Study** | Unblocked now that Phase 1B + 2 are done | Brand consistency across all 5 apps |
 | 17 | original N | **App Store readiness** — NSFW / safety filter, watermark toggle, privacy text, encrypted key vault, install banner | Submission gate | App Store screening passes |
-| 18 | user direction 2026-04-30 | **Image → Video clip (downloadable .mp4/.webm file)** — every generated/edited image can be brought alive as a short motion clip via SVD / AnimateDiff / Deforum (HF Spaces or Local SD) → encoded with FFmpeg.wasm → exported as a video file the user saves to camera roll / Library. Promoted from deferred Ph 5 to first-class output. | User explicit: "the image editor/generator should not only animate but should be able to be brought alive as a video clip, i.e file" | Tap "Animate" on any result → 3-5 s mp4 downloads / shares via PWA share sheet |
+| 18 | user direction 2026-04-30 | **Image → Video clip (downloadable .mp4/.webm file)** — every generated/edited image can be brought alive as a short motion clip. iPad path: HF Space hosting **Stable Video Diffusion** or **AnimateDiff** (free, no GPU at user's house) → returned frames encoded in-browser via **FFmpeg.wasm** → saved to camera roll / Load Library. | User explicit: "the image editor/generator should not only animate but should be able to be brought alive as a video clip, i.e file" | Tap "Animate" on any result → 3-5 s mp4 downloads / shares via PWA share sheet |
 | 19 | spec Ph 5 | Voice tools, batch generation, plug-in marketplace | Deferred until 1–18 land | n/a |
+| OPT | optional companion | **ComfyUI / A1111 / Fooocus on user's Mac/PC** — IP-Adapter, InstantID, ControlNet, LoRA workflows. Requires the user to run Python + GPU on a separate machine; iPad just sends requests. NOT a default path; gated behind explicit `localSdUrl` setting in Settings. Already wired (A1111-compat) at v17dq. | Power-user-only; iPad alone cannot do this | User points iPad at `http://192.168.x.x:7860`, edits route via local HTTP |
 
-**Recommended order:** 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13 → 14 → 15 → 16 → 17 → 18 → 19.
+**Recommended order:** 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13 → 14a → 14b → 14c → 15 → 16 → 17 → 18 → 19. OPT is unblocked at any point but never required.
 
-**Video pipeline (item 18) — engines to wire:**
-- **Stable Video Diffusion** via HF Space (free, image → 14-frame clip)
-- **AnimateDiff** via HF Space or Local SD (motion module on top of SDXL)
-- **Deforum** via Local SD (prompt-driven camera movement)
-- **RIFE** for frame interpolation (smooth 8 fps → 24 fps)
-- **FFmpeg.wasm** for in-browser encode → .mp4/.webm
+**Video pipeline (item 18) — iPad-only path:**
+- **Stable Video Diffusion** via HF Space (free, image → ~14-frame clip)
+- **AnimateDiff** via HF Space (motion on top of SDXL, free token)
+- **FFmpeg.wasm** in-browser encode → `.mp4` / `.webm`
 - **Save to Library** + PWA share-target so the file lands as a normal asset alongside images
+- *(Deforum / RIFE require local GPU — companion-machine only, optional)*
 
 Any of those can be reordered if a user request shifts priority — but
 each one stays a single small commit, with cache bump and an entry
