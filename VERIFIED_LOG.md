@@ -106,8 +106,15 @@ but should not be treated as known-good baselines.
 
 ### v17e4 — `2fff569` — 2026-04-30
 
-- **Status:** Built. Awaiting user verification that the site loads again on iPad.
-- **Test plan:** Hard-refresh, badge reads v17e4, Manual Mask painter still works (paint mask → "add sunglasses" → result), no crash.
+- **Status:** Failed — code was correct (byte-identical to v17e0) but iPad's stuck v17e3 service worker prevented load.
+- **Resolution:** Rolled forward to commit `165e0b0` (revert to v17e0 cache strings + source).
+
+### Restoration to v17e0 — `165e0b0` — 2026-04-30
+
+- **Status:** Loading confirmed by user ("Working now").
+- **State:** Byte-identical to v17e0 (`593d410`) — Manual Mask painter, 12-provider chain, runImageTask, character slot, Output Receipts, Test Keys diagnostic. Cache strings: `load-v17e0` / `image-prompt-v31`.
+- **Lesson logged:** No more iPad-side WASM/heavy-model experiments without a memory-budget test on a real device first. Background removal stays parked.
+- **Recovery:** `git checkout backup/2026-04-30-v17e0`
 
 ### v17e0 — `593d410` — 2026-04-30
 
