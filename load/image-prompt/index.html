@@ -501,18 +501,6 @@ button,[role="button"]{min-height:48px}
     </label>
   </div>
 
-  <!-- Debug / Diagnostic — see what's actually loaded -->
-  <div class="panel-section" style="background:rgba(74,160,74,0.06);border:1px solid rgba(74,160,74,0.25);border-radius:8px">
-    <h4>Debug / Status</h4>
-    <p class="panel-hint" style="font-size:12px">Use this if something seems stuck or out of date.</p>
-    <pre id="debug-output" style="font-family:monospace;font-size:11px;color:var(--ink-mid);background:var(--bg-2);padding:8px;border-radius:6px;overflow:auto;margin-top:6px;max-height:240px;line-height:1.5">click "Show status" below…</pre>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
-      <button onclick="showDebugStatus()" style="background:var(--bg-3);border:1px solid var(--border);color:var(--ink-hi);border-radius:6px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer">Show status</button>
-      <button onclick="forceRefresh()" style="background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer">🔄 Force Refresh &amp; Clear Cache</button>
-    </div>
-    <p class="panel-hint" style="font-size:11px;margin-top:6px">"Force Refresh" unregisters service workers, clears all caches, then reloads. Your saved API keys and toggles stay (they live in localStorage, untouched). Use this if your iPad is showing an old version.</p>
-  </div>
-
   <button class="save-btn" onclick="saveSettings()">✓ Save &amp; Start</button>
   <div class="panel-footer">Image Prompt — Part of Load<br>Auto-fallback routing · All providers free<br>Built into the Load suite</div>
 </div>
@@ -640,7 +628,12 @@ let C = {
     deepinfra:    LS.getItem('ps_use_di')   !== '0',
     stability:    LS.getItem('ps_use_st')   !== '0',
     deepai:       LS.getItem('ps_use_dai')  !== '0',
-    hyperbolic:   LS.getItem('ps_use_hyp')  !== '0'
+    hyperbolic:   LS.getItem('ps_use_hyp')  !== '0',
+    pollflux:     LS.getItem('ps_use_pflux')   !== '0',
+    pollturbo:    LS.getItem('ps_use_pturbo')  !== '0',
+    hordesdxl:    LS.getItem('ps_use_hsdxl')   !== '0',
+    cfsdxllight:  LS.getItem('ps_use_cfsdxl')  !== '0',
+    hfsdxlturbo:  LS.getItem('ps_use_hfturbo') !== '0'
   },
   mode:       LS.getItem('ps_mode') || 'realistic',
 };
@@ -662,13 +655,6 @@ let multiTurnHintShown = false;
 // scene/character/setting/mood and only modify what the user asks for.
 // When OFF, each prompt regenerates from scratch ignoring prior context.
 let sceneLocked = LS.getItem('ps_scene_lock') !== '0';
-// Wave 6 / Spec Pipeline A — Vision Analysis
-// imageAnalysis holds the structured JSON profile extracted from the
-// current image by a vision-capable LLM. Becomes the input for the
-// prompt builder (Pipeline B) and continuity engine (Pipeline D).
-// Reset on fresh upload, set on auto-analysis after upload.
-let imageAnalysis = null;
-let analyzing = false;
 
 /* ── INIT ── */
 (function(){
@@ -752,159 +738,8 @@ function cpURL(btn,url){
   }
 }
 
-/* Debug panel — shows what version is actually running, which keys
-   are saved (set / not set, no values revealed), and SW status. */
-async function showDebugStatus() {
-  const out = document.getElementById('debug-output');
-  if (!out) return;
-  const lines = [];
-  lines.push('IMAGE PROMPT — DEBUG STATUS');
-  lines.push('---------------------------');
-  lines.push('App version: v17dk / image-prompt-v15');
-  lines.push('Page URL: ' + location.href);
-  lines.push('User agent: ' + navigator.userAgent.slice(0, 80));
-  lines.push('');
-  lines.push('SAVED KEYS (set / not set — values hidden):');
-  const keys = [
-    ['Puter token (optional)',     C.keys.puter],
-    ['Gemini',                     C.keys.gemini],
-    ['OpenRouter',                 C.keys.openrouter],
-    ['Cerebras',                   C.keys.cerebras],
-    ['Anthropic',                  C.keys.anthropic],
-    ['HF Chat',                    C.keys.hfchat],
-    ['Gemini fallback',            C.keys.geminiFB],
-    ['HF Image (for rembg + img2img)', C.hfImgKey],
-    ['Cloudflare token + acct',    (C.cfToken && C.cfAccount) ? 'set' : (C.cfToken || C.cfAccount ? 'partial' : '')],
-    ['Together',                   C.togetherKey],
-    ['DeepAI',                     C.daiKey]
-  ];
-  keys.forEach(([name, val]) => {
-    const set = val && val.length > 0 && val !== 'partial';
-    const partial = val === 'partial';
-    lines.push('  ' + (set ? '✓' : (partial ? '⚠' : '✗')) + ' ' + name + ' — ' +
-      (set ? '(' + (typeof val === 'string' ? val.length : '?') + ' chars)' : (partial ? 'partial' : 'NOT SET')));
-  });
-  lines.push('');
-  lines.push('PROVIDER TOGGLES:');
-  Object.entries(C.useProvider).forEach(([k, v]) => {
-    lines.push('  ' + (v ? '✓' : '✗') + ' ' + k);
-  });
-  lines.push('');
-  lines.push('STATE:');
-  lines.push('  primary provider: ' + (C.provider || '(none — defaults to Puter)'));
-  lines.push('  allowAnthropic: ' + !!C.allowAnthropic);
-  lines.push('  scene lock: ' + sceneLocked);
-  lines.push('  current image: ' + (img ? (img.name || 'unnamed') : 'none'));
-  lines.push('  imageAnalysis: ' + (imageAnalysis ? 'set' : 'none'));
-  lines.push('  lastSDPrompt: ' + (lastSDPrompt ? '(' + lastSDPrompt.length + ' chars)' : 'none'));
-  lines.push('');
-  lines.push('SERVICE WORKERS:');
-  try {
-    if ('serviceWorker' in navigator) {
-      const regs = await navigator.serviceWorker.getRegistrations();
-      regs.forEach(r => {
-        lines.push('  ' + (r.active ? '●' : '○') + ' ' + r.scope + ' (state: ' +
-          (r.active ? r.active.state : (r.installing ? 'installing' : (r.waiting ? 'waiting' : 'unknown'))) + ')');
-      });
-      if (!regs.length) lines.push('  (none registered)');
-    } else {
-      lines.push('  (Service Worker API not supported)');
-    }
-  } catch (e) { lines.push('  ERROR reading SW: ' + e.message); }
-  lines.push('');
-  lines.push('CACHES:');
-  try {
-    if ('caches' in window) {
-      const ks = await caches.keys();
-      ks.forEach(k => lines.push('  • ' + k));
-      if (!ks.length) lines.push('  (none)');
-    }
-  } catch (e) { lines.push('  ERROR reading caches: ' + e.message); }
-  lines.push('');
-  lines.push('LOCALSTORAGE TEST:');
-  const lsT = testLocalStorage();
-  lines.push('  ' + (lsT.ok ? '✓ working' : '✗ FAILED — ' + lsT.error));
-  if (!lsT.ok) {
-    lines.push('  → if you\'re in Safari Private Browsing, switch to a normal tab.');
-  }
-  lines.push('');
-  lines.push('SAVE HISTORY:');
-  const lastSave = LS.getItem('ps_last_save');
-  const saveCount = LS.getItem('ps_save_count') || '0';
-  lines.push('  total saves on this iPad: ' + saveCount);
-  lines.push('  last save: ' + (lastSave || 'never'));
-  lines.push('');
-  lines.push('LOCALSTORAGE (Image Prompt keys only):');
-  let psCount = 0, psSize = 0;
-  for (let i = 0; i < localStorage.length; i++) {
-    const k = localStorage.key(i);
-    if (k && k.startsWith('ps_')) {
-      const v = localStorage.getItem(k);
-      psCount++;
-      psSize += (v ? v.length : 0);
-    }
-  }
-  lines.push('  ps_* entries: ' + psCount + ' (' + psSize + ' chars total)');
-
-  out.textContent = lines.join('\n');
-}
-
-/* Force a hard refresh — unregisters all service workers and deletes
-   all caches under this origin, then reloads. localStorage is
-   preserved so the user's keys/toggles aren't lost. */
-async function forceRefresh() {
-  if (!confirm('Unregister service workers + clear cache + reload?\n\n(Your saved keys and settings stay — only stale cached code is removed.)')) return;
-  try {
-    if ('serviceWorker' in navigator) {
-      const regs = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(regs.map(r => r.unregister().catch(() => {})));
-    }
-    if ('caches' in window) {
-      const ks = await caches.keys();
-      await Promise.all(ks.map(k => caches.delete(k).catch(() => {})));
-    }
-  } catch (e) { console.warn('[forceRefresh]', e); }
-  // Add a unique cache buster so the reload doesn't get the same
-  // stale response from the HTTP cache the browser holds outside
-  // the SW.
-  const u = new URL(location.href);
-  u.searchParams.set('_t', Date.now());
-  location.replace(u.toString());
-}
-
-/* Quick localStorage health check — writes a marker key, reads it
-   back, deletes it. Returns { ok: bool, error: string }. */
-function testLocalStorage() {
-  try {
-    const k = '__ip_test_' + Date.now();
-    const v = 'test-' + Math.random();
-    localStorage.setItem(k, v);
-    const back = localStorage.getItem(k);
-    localStorage.removeItem(k);
-    if (back !== v) return { ok: false, error: 'wrote "' + v + '" but read back "' + back + '"' };
-    return { ok: true };
-  } catch (e) {
-    return { ok: false, error: (e && e.message) || String(e) };
-  }
-}
-
 function saveSettings(){
-  // v17dl — wrapped in try/catch with a giant visible banner so
-  // silent save failures are impossible. The original toast can be
-  // missed; this banner stays until the user dismisses it.
-  let savedCount = 0;
-  let savedChars = 0;
-  let errorMsg = '';
-  try {
-    // First — verify localStorage even works on this iPad
-    const lsTest = testLocalStorage();
-    if (!lsTest.ok) {
-      throw new Error('localStorage write failed: ' + lsTest.error +
-        '\n\nThis usually means your iPad is in Private Browsing. ' +
-        'Open Safari → tap the tabs icon → swipe to a non-Private tab. ' +
-        'Or close the Private window and use a regular tab.');
-    }
-    C.keys.puter      =document.getElementById('k-puter').value.trim();
+  C.keys.puter      =document.getElementById('k-puter').value.trim();
   C.keys.gemini     =document.getElementById('k-gemini').value.trim();
   C.keys.openrouter =document.getElementById('k-openrouter').value.trim();
   C.keys.cerebras   =document.getElementById('k-cerebras').value.trim();
@@ -941,58 +776,10 @@ function saveSettings(){
   LS.setItem('ps_use_horde', C.useProvider.horde       ? '1' : '0');
   LS.setItem('ps_use_img',   C.useProvider.imagen      ? '1' : '0');
   LS.setItem('ps_use_dai',   C.useProvider.deepai      ? '1' : '0');
-    // Count what was persisted so the banner shows real numbers
-    Object.values(C.keys).forEach(v => { if (v) { savedCount++; savedChars += String(v).length; } });
-    if (C.hfImgKey)     { savedCount++; savedChars += C.hfImgKey.length; }
-    if (C.cfToken)      { savedCount++; savedChars += C.cfToken.length; }
-    if (C.cfAccount)    { savedCount++; savedChars += C.cfAccount.length; }
-    if (C.togetherKey)  { savedCount++; savedChars += C.togetherKey.length; }
-    if (C.daiKey)       { savedCount++; savedChars += C.daiKey.length; }
-    // Save trail so future Show Status reveals when the last save happened
-    LS.setItem('ps_last_save', new Date().toISOString());
-    LS.setItem('ps_save_count', String((parseInt(LS.getItem('ps_save_count')||'0',10) || 0) + 1));
-  } catch (e) {
-    errorMsg = (e && e.message) || String(e);
-  }
   updatePill();
-  if(!errorMsg && C.provider && hasProviderAccess(C.provider))
+  if(C.provider && hasProviderAccess(C.provider))
     document.getElementById('setup-banner').classList.remove('on');
-  // Big visible banner — replaces the easy-to-miss toast
-  showSaveBanner(errorMsg ? 'error' : 'success', savedCount, savedChars, errorMsg);
-  if (!errorMsg) {
-    closeSettings();
-    toast('Settings saved ✓');
-  }
-  // On error, leave Settings open so user can fix the issue.
-}
-
-/* Floating banner that survives the panel close so user sees the
-   result clearly. Tap to dismiss. */
-function showSaveBanner(state, count, chars, errorMsg) {
-  document.querySelectorAll('.save-banner').forEach(n => n.remove());
-  const b = document.createElement('div');
-  b.className = 'save-banner';
-  b.style.cssText =
-    'position:fixed;left:50%;top:14px;transform:translateX(-50%);' +
-    'z-index:9950;max-width:92vw;padding:14px 20px;border-radius:14px;' +
-    'font-size:14px;font-weight:700;line-height:1.45;cursor:pointer;' +
-    'box-shadow:0 12px 40px rgba(0,0,0,0.5);' +
-    (state === 'success'
-      ? 'background:linear-gradient(135deg,#059669,#047857);color:#fff;'
-      : 'background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;');
-  if (state === 'success') {
-    b.innerHTML = '✓ Saved — ' + count + ' setting' + (count === 1 ? '' : 's') +
-      ' (' + chars + ' chars) persisted to localStorage. Tap to dismiss.';
-  } else {
-    b.innerHTML = '⚠ SAVE FAILED — ' + esc(errorMsg).replace(/\n/g,'<br>') +
-      '<br><br>Tap to dismiss.';
-  }
-  b.addEventListener('click', () => b.remove());
-  document.body.appendChild(b);
-  if (state === 'success') {
-    setTimeout(() => { try { b.remove(); } catch(_){} }, 6000);
-  }
-  // closeSettings is now called by saveSettings on success only.
+  closeSettings(); toast('Settings saved ✓');
 }
 
 /* ── IMAGE ── */
@@ -1000,7 +787,6 @@ function onFile(e){
   const file=e.target.files[0];if(!file)return;
   // Fresh upload — reset multi-turn chain (no longer a "previous result")
   lastSDPrompt = '';
-  imageAnalysis = null;
   const r=new FileReader();
   r.onload=ev=>{
     const d=ev.target.result;
@@ -1009,16 +795,12 @@ function onFile(e){
     document.getElementById('img-name').textContent=file.name;
     document.getElementById('img-preview-bar').classList.add('on');
     updSend();
-    // Wave 6 — kick off vision analysis in the background. The user
-    // can start typing their prompt while we analyze.
-    autoAnalyzeCurrentImage();
   };
   r.readAsDataURL(file);e.target.value='';
 }
 function clearImage(){
   img=null;
   lastSDPrompt = '';
-  imageAnalysis = null;
   document.getElementById('img-preview-bar').classList.remove('on');
   document.getElementById('img-thumb').src='';
   updSend();
@@ -1089,14 +871,10 @@ async function setCurrentImageFromUrl(url, name){
       mime: blob.type || 'image/png',
       name: name || 'previous-result.png'
     };
-    // Wave 6 — result becomes new analyzed image; reset prior analysis
-    // and re-analyze so the next refinement uses the fresh profile.
-    imageAnalysis = null;
     document.getElementById('img-thumb').src = dataUrl;
     document.getElementById('img-name').textContent = '↻ ' + (name || 'Previous result — keep editing');
     document.getElementById('img-preview-bar').classList.add('on');
     updSend();
-    autoAnalyzeCurrentImage();
   } catch (e) { console.warn('[setCurrentImageFromUrl]', e); }
 }
 
@@ -1126,30 +904,26 @@ function send(){
   ta.value='';ta.style.height='auto';
   generating=true;updSend();
   const tid=addTyping();
-  // Multi-turn context — Scene Lock ON + image attached. Build a
-  // rich preservation prompt. v17dh upgrade: prefer the structured
-  // imageAnalysis profile (Wave 6 / Pipeline A) when available, fall
-  // back to lastSDPrompt only when no analysis ran (e.g. vision
-  // provider failed or hasn't finished yet).
+  // Multi-turn context — when Scene Lock is ON AND the current image
+  // is a previous gen result (lastSDPrompt set), inject the previous
+  // scene description as context so the LLM writes a *combined*
+  // SD_PROMPT that preserves subject/setting/mood and only modifies
+  // what the user asked for. When Scene Lock is OFF, pass the prompt
+  // as-is and let the LLM start fresh.
   let augmentedPrompt = p;
-  if (sceneLocked && snap) {
-    const richCtx = buildPreservationContext();
-    const fallbackCtx = lastSDPrompt ? lastSDPrompt.slice(0, 300) : '';
-    const preservation = richCtx || fallbackCtx;
-    if (preservation) {
-      augmentedPrompt =
-        'SCENE LOCK ENABLED — preserve the previous image\'s subject, character, setting, and mood.\n' +
-        'PREVIOUS IMAGE PROFILE: ' + preservation + '\n' +
-        'USER REQUEST (refinement to apply on top of the locked scene): ' + p + '\n\n' +
-        'Write a NEW SD_PROMPT that keeps every element of the previous image EXACTLY THE SAME unless the user explicitly asked to change it. Only modify what the user requested. Do not start over. Be specific about preserved character traits (face shape, skin tone, hair, eyes, body type, clothing) and preserved scene details (style, lighting, palette, composition).';
-      // First-use popup — fires on the first refinement turn so the
-      // user understands the chained-context behavior.
-      showFirstUseHint('fu_scene_lock_v1', {
-        icon: '🔒', title: 'Scene Lock',
-        body: 'Refinements automatically preserve the previous image\'s subject, setting, and mood. To start fresh instead, tap the 🔒 Scene pill on the preview bar to turn it off.',
-        cta: 'Got it'
-      });
-    }
+  if (sceneLocked && lastSDPrompt && snap) {
+    augmentedPrompt =
+      'SCENE LOCK ENABLED — preserve the previous image\'s subject, character, setting, and mood.\n' +
+      'PREVIOUS SCENE DESCRIPTION: "' + lastSDPrompt.slice(0, 300) + '"\n' +
+      'USER REQUEST (refinement to apply on top of the locked scene): ' + p + '\n\n' +
+      'Write a NEW SD_PROMPT that keeps every element of the previous scene EXACTLY THE SAME unless the user explicitly asked to change it. Only modify what the user requested. Do not start over.';
+    // First-use popup — fires on the first refinement turn so the
+    // user understands the chained-context behavior.
+    showFirstUseHint('fu_scene_lock_v1', {
+      icon: '🔒', title: 'Scene Lock',
+      body: 'Refinements automatically preserve the previous image\'s subject, setting, and mood. To start fresh instead, tap the 🔒 Scene pill on the preview bar to turn it off.',
+      cta: 'Got it'
+    });
   }
   pipeline(augmentedPrompt, snap, tid);
 }
@@ -1186,14 +960,7 @@ async function pipeline(prompt, imgData, tid) {
     }
 
     try {
-      // v17dm — wrap with 45s timeout so a hung Puter (or any
-      // provider that never responds) falls through to the fallback
-      // chain instead of locking the pipeline forever.
-      reply = await withTimeout(
-        callProvider(providerToCall, prompt, imageForCall),
-        45000,
-        providerName(providerToCall)
-      );
+      reply = await callProvider(providerToCall, prompt, imageForCall);
     } catch(e) {
       const fallback = await tryProviderFallbackChain(prompt, imgData, providerToCall);
       if (fallback) {
@@ -1220,59 +987,6 @@ async function pipeline(prompt, imgData, tid) {
         resultUrl = local.url;
         imageProvUsed = 'Local (' + local.op + ')';
       }
-    }
-    // Wave 6.5 — Specialty manipulation router. Detects bg-remove /
-    // upscale / face-restore intents and routes to dedicated HF
-    // Inference endpoints. Runs BEFORE the AI image path so a "remove
-    // background" request never gets sent to Pollinations as a text-
-    // to-image prompt.
-    let manipBlocked = false;
-    let manipBlockedMsg = '';
-    if (!resultUrl && imgData && prompt) {
-      const manipOp = detectManipulation(prompt);
-      if (manipOp) {
-        if (!manipOp.needsKey()) {
-          // No HF token — surface as a clear chat message instead of
-          // silently falling through to text-to-image generation
-          manipBlocked = true;
-          manipBlockedMsg = manipOp.keyHint || ('Sorry — ' + manipOp.name +
-            ' needs a free Hugging Face token. Add one in Settings → Step 2.');
-        } else {
-          // Update status while the model warms up (HF cold start ~20s)
-          const tEl = document.getElementById(tid);
-          if (tEl) {
-            const bub = tEl.querySelector('.bubble');
-            if (bub) bub.innerHTML = '<div style="color:var(--ink-mid);font-size:13px">' +
-              esc(manipOp.statusText) + '</div>';
-          }
-          try {
-            const manip = await tryManipulation(prompt, imgData);
-            if (manip) {
-              resultUrl = manip.url;
-              imageProvUsed = manip.opName + ' (HF)';
-            } else {
-              // tryManipulation returned null → op missed or failed
-              // silently. Block the text-to-image fallthrough since
-              // the user clearly wanted the specialty op.
-              manipBlocked = true;
-              manipBlockedMsg = manipOp.name + ' didn\'t return a result. Try again in a few seconds — HF models go cold after idle and the first call wakes them up.';
-            }
-          } catch (e) {
-            manipBlocked = true;
-            manipBlockedMsg = manipOp.name + ' failed: ' +
-              ((e && e.message) || 'unknown error') +
-              '. Try again, or remove the keywords to use generic image gen instead.';
-          }
-        }
-      }
-    }
-    // If a specialty op was attempted but blocked, short-circuit the
-    // pipeline — render the blocked message as the AI reply so the
-    // user sees clear feedback instead of a confused gen.
-    if (manipBlocked) {
-      removeTyping(tid);
-      addAIMsg(manipBlockedMsg, null, 'system', null, []);
-      return; // finally block handles generating=false + updSend()
     }
     const sdMatch = reply.match(/SD_PROMPT:\s*(.+)/s);
     const editVerb = prompt && /\b(make|create|generate|edit|change|add|remove|turn|transform|render|draw|paint|illustrate|design|stylize|convert|colour|color|crop|enhance|fix|retouch)\b/i.test(prompt);
@@ -1379,12 +1093,7 @@ async function tryProviderFallbackChain(prompt, imgData, exclude) {
   for (const p of chain) {
     try {
       const usableImage = imgData && CAPS[p]?.vision ? imgData : null;
-      // v17dm — 45s timeout per fallback try (matches primary call)
-      const r = await withTimeout(
-        callProvider(p, prompt, usableImage),
-        45000,
-        providerName(p)
-      );
+      const r = await callProvider(p, prompt, usableImage);
       return { id: p, name: providerName(p), reply: r };
     } catch(e) {
       lastError = e;
@@ -1793,6 +1502,164 @@ const IMAGE_PROVIDERS = [
       const b = await r2.blob();
       return URL.createObjectURL(b);
     }
+  },
+  // 8. Pollinations Flux variant — same free endpoint as #1, but
+  //    requests the flux model for sharper photoreal output. No key.
+  {
+    id: 'pollflux',
+    name: 'Pollinations Flux',
+    needsKey: false,
+    enabled: () => C.useProvider.pollflux !== false,
+    gen: async (prompt) => {
+      const seed = Math.floor(Math.random() * 999999);
+      const params = new URLSearchParams({
+        model: 'flux', width: '1024', height: '1024',
+        nologo: 'true', seed: String(seed)
+      });
+      const url = 'https://image.pollinations.ai/prompt/' +
+        encodeURIComponent(prompt.slice(0,1500)) + '?' + params;
+      const r = await fetch(url);
+      if (!r.ok) throw new Error('Pollinations Flux ' + r.status);
+      const b = await r.blob();
+      if (!b.type.startsWith('image/')) throw new Error('Pollinations Flux non-image');
+      return URL.createObjectURL(b);
+    }
+  },
+  // 9. Pollinations Turbo — same free endpoint, fastest path
+  //    (low-step model) for quick draft renders. No key.
+  {
+    id: 'pollturbo',
+    name: 'Pollinations Turbo',
+    needsKey: false,
+    enabled: () => C.useProvider.pollturbo !== false,
+    gen: async (prompt) => {
+      const seed = Math.floor(Math.random() * 999999);
+      const params = new URLSearchParams({
+        model: 'turbo', width: '1024', height: '1024',
+        nologo: 'true', seed: String(seed)
+      });
+      const url = 'https://image.pollinations.ai/prompt/' +
+        encodeURIComponent(prompt.slice(0,1500)) + '?' + params;
+      const r = await fetch(url);
+      if (!r.ok) throw new Error('Pollinations Turbo ' + r.status);
+      const b = await r.blob();
+      if (!b.type.startsWith('image/')) throw new Error('Pollinations Turbo non-image');
+      return URL.createObjectURL(b);
+    }
+  },
+  // 10. AI Horde — SDXL model slot. Same anonymous endpoint as #5
+  //     but requests stable_diffusion_xl for higher-quality output.
+  //     Still no key, still volunteer GPUs (slow ~1-3 min).
+  {
+    id: 'hordesdxl',
+    name: 'AI Horde SDXL',
+    needsKey: false,
+    enabled: () => C.useProvider.hordesdxl !== false,
+    gen: async (prompt) => {
+      const body = {
+        prompt: prompt.slice(0, 1500),
+        params: {
+          sampler_name: 'k_euler_a', cfg_scale: 7, steps: 25,
+          width: 1024, height: 1024, n: 1
+        },
+        nsfw: false, censor_nsfw: true,
+        models: ['SDXL 1.0']
+      };
+      const sub = await fetch('https://stablehorde.net/api/v2/generate/async', {
+        method: 'POST',
+        headers: { 'apikey': '0000000000', 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!sub.ok) throw new Error(await readError(sub, 'AI Horde SDXL'));
+      const { id } = await sub.json();
+      if (!id) throw new Error('AI Horde SDXL no id');
+      for (let i = 0; i < 36; i++) {
+        await new Promise(r => setTimeout(r, 5000));
+        const ck = await fetch('https://stablehorde.net/api/v2/generate/check/' + id);
+        if (!ck.ok) continue;
+        const st = await ck.json();
+        if (st.done) {
+          const fin = await fetch('https://stablehorde.net/api/v2/generate/status/' + id);
+          const data = await fin.json();
+          const g = data.generations?.[0]?.img;
+          if (!g) throw new Error('AI Horde SDXL empty result');
+          if (/^https?:\/\//i.test(g)) {
+            const r2 = await fetch(g);
+            const b = await r2.blob();
+            return URL.createObjectURL(b);
+          }
+          const bin = atob(g);
+          const bytes = new Uint8Array(bin.length);
+          for (let j = 0; j < bin.length; j++) bytes[j] = bin.charCodeAt(j);
+          return URL.createObjectURL(new Blob([bytes], { type: 'image/webp' }));
+        }
+      }
+      throw new Error('AI Horde SDXL timeout (~3 min)');
+    }
+  },
+  // 11. Cloudflare SDXL-Lightning — same free CF account/token as #3
+  //     but a different model (bytedance/stable-diffusion-xl-lightning).
+  //     Sharper than flux-schnell for photoreal subjects.
+  {
+    id: 'cfsdxllight',
+    name: 'Cloudflare SDXL-Lightning',
+    needsKey: true,
+    enabled: () => !!(C.cfToken && C.cfAccount) && C.useProvider.cfsdxllight !== false,
+    gen: async (prompt) => {
+      const url = 'https://api.cloudflare.com/client/v4/accounts/' +
+        C.cfAccount + '/ai/run/@cf/bytedance/stable-diffusion-xl-lightning';
+      const r = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + C.cfToken,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ prompt: prompt.slice(0,1500) })
+      });
+      if (!r.ok) throw new Error(await readError(r, 'Cloudflare SDXL-Lightning'));
+      const ct = r.headers.get('content-type') || '';
+      if (ct.includes('image/')) {
+        const b = await r.blob();
+        return URL.createObjectURL(b);
+      }
+      const data = await r.json();
+      const b64 = data.result?.image;
+      if (!b64) throw new Error('Cloudflare SDXL-Lightning empty result');
+      const bin = atob(b64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return URL.createObjectURL(new Blob([bytes], { type: 'image/png' }));
+    }
+  },
+  // 12. Hugging Face SDXL-Turbo — same free HF token as #2 but a
+  //     dedicated single-model slot. Useful when the main HF cascade
+  //     is failing — this slot tries SDXL-Turbo directly.
+  {
+    id: 'hfsdxlturbo',
+    name: 'HF SDXL-Turbo',
+    needsKey: true,
+    enabled: () => !!C.hfImgKey && C.useProvider.hfsdxlturbo !== false,
+    gen: async (prompt) => {
+      const r = await fetch('https://api-inference.huggingface.co/models/stabilityai/sdxl-turbo', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + C.hfImgKey,
+          'Content-Type': 'application/json',
+          'Accept': 'image/png'
+        },
+        body: JSON.stringify({
+          inputs: prompt.slice(0,1500),
+          parameters: { num_inference_steps: 4, guidance_scale: 0 }
+        })
+      });
+      if (!r.ok) throw new Error(await readError(r, 'HF SDXL-Turbo'));
+      const ct = r.headers.get('content-type') || '';
+      if (!ct.startsWith('image/')) {
+        throw new Error('HF SDXL-Turbo non-image response');
+      }
+      const b = await r.blob();
+      return URL.createObjectURL(b);
+    }
   }
 ];
 
@@ -1862,92 +1729,6 @@ async function tryLocalOp(prompt, imgData) {
   }
 }
 
-/* ──────────────────────────────────────────────────────────────
-   Wave 6.5 — SPEC PIPELINE C (specialty manipulation routing)
-   ──────────────────────────────────────────────────────────────
-   When the user asks for a SPECIALTY image edit that has its own
-   dedicated free model (background removal, upscale, face restore,
-   inpainting), route to that model directly via Hugging Face
-   Inference instead of treating it as a generic prompt-to-image
-   task.
-
-   Each MANIPULATION_OP defines:
-   - intent keywords to match
-   - HF model ID (free Inference API)
-   - request shape (binary vs JSON, mime types)
-   - response parser
-
-   Wave 6.5 Part 1 ships background removal. Part 2 will add upscale,
-   face restoration, Florence-2 vision, Qwen2.5-VL.
-*/
-const MANIPULATION_OPS = [
-  {
-    id: 'bg-remove',
-    name: 'Background removal',
-    statusText: 'Removing background via HF rembg…',
-    keywords: /\b(remove\s+(the\s+)?(bg|background)|background\s+remove|cut\s*out|transparent|isolate\s+(the\s+)?subject|make\s+it\s+(transparent|cutout))\b/i,
-    needsKey: () => !!C.hfImgKey,
-    keyHint: 'Add a free Hugging Face token in Settings → Step 2 to enable background removal.',
-    run: async (imgData) => {
-      // briaai/RMBG-1.4 — most-popular open-source bg removal model.
-      // Free tier on HF Inference; takes binary image, returns
-      // RGBA PNG with alpha channel. 90s timeout covers HF cold start.
-      const reqBlob = await (await fetch(imgData.dataUrl)).blob();
-      const r = await withTimeout(fetch(
-        'https://api-inference.huggingface.co/models/briaai/RMBG-1.4',
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer ' + C.hfImgKey,
-            'Content-Type': imgData.mime || 'image/png'
-          },
-          body: reqBlob
-        }
-      ), 90000, 'rembg');
-      if (r.status === 503) {
-        throw new Error('rembg model warming up (~20s cold start). Try again in a few seconds.');
-      }
-      if (!r.ok) throw new Error(await readError(r, 'rembg'));
-      const blob = await r.blob();
-      if (!blob.type.startsWith('image/')) {
-        throw new Error('rembg returned non-image response');
-      }
-      return URL.createObjectURL(blob);
-    }
-  }
-];
-
-/* Detect specialty manipulation intent. Returns the matched op or null. */
-function detectManipulation(prompt) {
-  if (!prompt) return null;
-  for (const op of MANIPULATION_OPS) {
-    if (op.keywords.test(prompt)) return op;
-  }
-  return null;
-}
-
-/* Try to run the specialty op. Returns { url, opId } on success or
-   null on miss; throws on actual failure (so pipeline can show the
-   error rather than silently fall through to wrong-tool generation). */
-async function tryManipulation(prompt, imgData) {
-  if (!imgData || !prompt) return null;
-  const op = detectManipulation(prompt);
-  if (!op) return null;
-  // Capability check — never call a model the user can't access
-  if (!op.needsKey()) {
-    if (op.keyHint) toast(op.keyHint);
-    return null;
-  }
-  try {
-    const url = await op.run(imgData);
-    if (url) return { url, opId: op.id, opName: op.name };
-  } catch (e) {
-    console.warn('[Manipulation] ' + op.id + ' failed:', e.message);
-    toast(op.name + ' failed: ' + (e.message || 'unknown error'));
-  }
-  return null;
-}
-
 /* Provider health-board — circuit-breaker pattern.
    3+ failures in the last 5 minutes = skip this provider for the
    next 5 minutes. Auto-recovers when the failure window passes. */
@@ -1972,150 +1753,6 @@ function isHealthy(id) {
     return true;
   }
   return h.fail < 3;
-}
-
-/* Promise timeout helper — wraps an awaitable so a stuck network /
-   sleeping HF Space / unresponsive LLM doesn't freeze the UI forever.
-   On timeout, throws a clean message the caller can surface. */
-function withTimeout(promise, ms, label) {
-  return new Promise(function (resolve, reject) {
-    var timer = setTimeout(function () {
-      reject(new Error((label || 'request') + ' timed out after ' + Math.round(ms/1000) + 's'));
-    }, ms);
-    Promise.resolve(promise).then(
-      function (v) { clearTimeout(timer); resolve(v); },
-      function (e) { clearTimeout(timer); reject(e); }
-    );
-  });
-}
-
-/* ──────────────────────────────────────────────────────────────
-   Wave 6 — SPEC PIPELINE A: Vision / Image Analysis
-   ──────────────────────────────────────────────────────────────
-   When the user uploads an image (or a generation result becomes
-   the next input), we ask a vision-capable LLM to return a
-   structured JSON profile: character traits, style, palette,
-   composition, problems detected, recommended edit prompt.
-
-   This profile is the input to Pipeline B (prompt builder) and
-   Pipeline D (multi-image continuity). Without it, multi-turn
-   refinement is just text speculation.
-
-   Vision providers (all multimodal, all currently free-tier
-   accessible without paying — Puter is default and uses GPT-4o-
-   mini class which sees images):
-   - puter (free, default, no key)
-   - gemini  (free key, opt-in via Settings)
-   - anthropic (opt-in only via Advanced)
-*/
-async function analyzeImageWithVision(imgData) {
-  if (!imgData || !imgData.dataUrl) return null;
-  // Pick the first vision-capable provider with access
-  const order = getProviderOrder().filter(p =>
-    CAPS[p] && CAPS[p].vision && hasProviderAccess(p)
-  );
-  if (!order.length) return null;
-  const provider = order[0];
-  const visionPrompt =
-    'You are an image analysis system. Look at the attached image and return ONE JSON object only. No prose, no markdown fences. Use this exact schema (fill in what you can see, use empty string or empty array if unknown):\n\n' +
-    '{\n' +
-    '  "image_description": "1-2 sentence overview",\n' +
-    '  "subjects": [],\n' +
-    '  "character_count": 0,\n' +
-    '  "character_profiles": [{\n' +
-    '    "name_or_label": "", "gender_presentation": "", "estimated_age_range": "",\n' +
-    '    "skin_tone": "", "face_shape": "", "eye_shape": "", "hair_color": "",\n' +
-    '    "hair_style": "", "body_type": "", "distinctive_features": [],\n' +
-    '    "clothing": [], "pose": "", "expression": "", "accessories": []\n' +
-    '  }],\n' +
-    '  "objects": [], "background": "", "style": "", "palette": [],\n' +
-    '  "composition": "", "lighting": "", "problems_detected": [],\n' +
-    '  "recommended_edit_prompt": "", "can_edit_directly": true\n' +
-    '}';
-  try {
-    // 30s timeout — Puter / Gemini vision should reply well under that.
-    // Without a timeout, a stuck call freezes the "Analyzing image" pill.
-    const reply = await withTimeout(
-      callProvider(provider, visionPrompt, imgData),
-      30000,
-      'Vision analysis'
-    );
-    // LLMs often wrap JSON in ```json ... ``` fences or add
-    // commentary. Extract the first {...} block we find.
-    const m = reply.match(/\{[\s\S]*\}/);
-    if (!m) return null;
-    return JSON.parse(m[0]);
-  } catch (e) {
-    console.warn('[VisionAnalysis] failed:', e.message || e);
-    return null;
-  }
-}
-
-/* Auto-analyze the current image and update preview-bar UI.
-   Called from onFile (fresh upload) and after a successful gen
-   (so the result becomes the next-turn analyzed image). */
-async function autoAnalyzeCurrentImage() {
-  if (!img) return;
-  analyzing = true;
-  imageAnalysis = null;
-  refreshAnalyzePill('analyzing');
-  showFirstUseHint('fu_vision_v1', {
-    icon: '✨', title: 'Image analysis',
-    body: 'Image Prompt now reads each photo you upload and builds a structured profile (face, hair, clothing, style, palette). Refinements use that profile so character identity and style stay consistent across turns.',
-    cta: 'Got it'
-  });
-  const analysis = await analyzeImageWithVision(img);
-  imageAnalysis = analysis;
-  analyzing = false;
-  refreshAnalyzePill(analysis ? 'ready' : 'failed');
-}
-
-function refreshAnalyzePill(state) {
-  const lbl = document.getElementById('img-name');
-  if (!lbl) return;
-  if (state === 'analyzing') {
-    lbl.textContent = '✨ Analyzing image…';
-  } else if (state === 'ready') {
-    lbl.textContent = '✓ Profile ready — refining';
-  } else if (state === 'failed') {
-    // v17dj fix — was silently leaving "✨ Analyzing image…" frozen
-    // on screen forever. Now revert to the source filename or a clear
-    // "ready (no profile)" label so user knows analysis stopped.
-    lbl.textContent = (img && img.name)
-      ? img.name + ' (analysis unavailable)'
-      : 'Image ready';
-  }
-}
-
-/* Build a rich preservation context from imageAnalysis for the
-   prompt builder. Replaces the simpler v17dd lastSDPrompt-only
-   augmentation when we have a structured profile available. */
-function buildPreservationContext() {
-  if (!imageAnalysis) return null;
-  const a = imageAnalysis;
-  const parts = [];
-  if (a.image_description) parts.push('Scene: ' + a.image_description);
-  if (a.style) parts.push('Style: ' + a.style);
-  if (a.lighting) parts.push('Lighting: ' + a.lighting);
-  if (Array.isArray(a.palette) && a.palette.length) parts.push('Palette: ' + a.palette.join(', '));
-  if (a.composition) parts.push('Composition: ' + a.composition);
-  if (a.background) parts.push('Background: ' + a.background);
-  // First character profile (most images have just one subject)
-  const cp = (a.character_profiles || [])[0];
-  if (cp) {
-    const cParts = [];
-    if (cp.gender_presentation) cParts.push(cp.gender_presentation);
-    if (cp.estimated_age_range) cParts.push(cp.estimated_age_range);
-    if (cp.skin_tone) cParts.push(cp.skin_tone + ' skin');
-    if (cp.face_shape) cParts.push(cp.face_shape + ' face');
-    if (cp.eye_shape) cParts.push(cp.eye_shape + ' eyes');
-    if (cp.hair_color || cp.hair_style) cParts.push((cp.hair_color || '') + ' ' + (cp.hair_style || '') + ' hair');
-    if (cp.body_type) cParts.push(cp.body_type + ' body');
-    if (Array.isArray(cp.clothing) && cp.clothing.length) cParts.push('wearing ' + cp.clothing.join(', '));
-    if (Array.isArray(cp.distinctive_features) && cp.distinctive_features.length) cParts.push('distinctive: ' + cp.distinctive_features.join(', '));
-    if (cParts.length) parts.push('Character: ' + cParts.join(', '));
-  }
-  return parts.join(' | ');
 }
 
 /* Try each enabled+healthy provider in order; silent skip on failure
@@ -2162,14 +1799,7 @@ async function imageGenWithFallback(prompt, imgData) {
   let lastErr = null;
   for (const p of providers) {
     try {
-      // v17dm — 90s per-provider timeout (covers HF cold start ~30s
-      // + actual gen). AI Horde has its own 3-min internal poll loop;
-      // we let it self-manage. Without this, a hung Pollinations or
-      // sleeping HF Space could lock the pipeline forever.
-      const isHorde = p.id === 'horde';
-      const url = isHorde
-        ? await p.gen(prompt, imgData)
-        : await withTimeout(p.gen(prompt, imgData), 90000, p.name);
+      const url = await p.gen(prompt, imgData);
       if (url) {
         recordSuccess(p.id);
         return { url, providerId: p.id, providerName: p.name };
