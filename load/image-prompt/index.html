@@ -561,6 +561,38 @@ async function loadLottie(){
 if('serviceWorker' in navigator)
   window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 
+/* ── withTimeout — every provider call must have a hard deadline.
+   Hung Puter/HF/CF requests with no timeout were the root cause of
+   the spinner-forever hang. Uses AbortController where available to
+   actually cancel the network request, not just abandon the promise. */
+function withTimeout(promiseOrThunk, ms, label) {
+  const ac = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  const p = (typeof promiseOrThunk === 'function')
+    ? promiseOrThunk(ac ? ac.signal : null)
+    : promiseOrThunk;
+  let to;
+  const timer = new Promise((_, reject) => {
+    to = setTimeout(() => {
+      if (ac) try { ac.abort(); } catch(_){}
+      const err = new Error((label || 'Operation') + ' timed out after ' + (ms/1000) + 's');
+      err.timedOut = true;
+      reject(err);
+    }, ms);
+  });
+  return Promise.race([
+    Promise.resolve(p).finally(() => clearTimeout(to)),
+    timer
+  ]);
+}
+
+/* ── maskKey — never log/show full keys. Render as hf_****abcd. */
+function maskKey(k) {
+  if (!k) return '(empty)';
+  const s = String(k);
+  if (s.length <= 8) return '****';
+  return s.slice(0, 3) + '****' + s.slice(-4);
+}
+
 /* ────────────────────────────────────────
    PROVIDER CAPABILITY MAP
    vision: can accept image input
@@ -975,12 +1007,20 @@ async function pipeline(prompt, imgData, tid) {
     }
 
     try {
-      reply = await callProvider(providerToCall, prompt, imageForCall);
+      reply = await withTimeout(
+        callProvider(providerToCall, prompt, imageForCall),
+        45000,
+        providerName(providerToCall)
+      );
     } catch(e) {
-      const fallback = await tryProviderFallbackChain(prompt, imgData, providerToCall);
+      const fallback = await withTimeout(
+        tryProviderFallbackChain(prompt, imgData, providerToCall),
+        60000,
+        'fallback chain'
+      ).catch(() => null);
       if (fallback) {
         usedProvider = fallback.id;
-        fallbackNote = `${providerName(providerToCall)} unavailable or could not perform, used ${fallback.name} instead`;
+        fallbackNote = `${providerName(providerToCall)} ${e.timedOut ? 'timed out' : 'unavailable'}, used ${fallback.name} instead`;
         showFallbackBanner(fallbackNote);
         reply = fallback.reply;
       } else {
@@ -1029,16 +1069,28 @@ async function pipeline(prompt, imgData, tid) {
         // profile if active, routes to img2img-class providers first,
         // soft-falls to text-to-image with Scene Lock context if no
         // img2img provider is configured.
-        const result = await runImageTask({
-          prompt: cleanPrompt,
-          sourceImage: imgData,
-          characterProfile: CHAR.mode ? {
-            description: CHAR.description, outfit: CHAR.outfit,
-            style: CHAR.style, seed: CHAR.seed
-          } : null
-        });
+        const result = await withTimeout(
+          runImageTask({
+            prompt: cleanPrompt,
+            sourceImage: imgData,
+            characterProfile: CHAR.mode ? {
+              description: CHAR.description, outfit: CHAR.outfit,
+              style: CHAR.style, seed: CHAR.seed
+            } : null
+          }),
+          120000,
+          'Image generation'
+        );
         resultUrl = result.url;
         imageProvUsed = result.providerName;
+        if (result.skipped && result.skipped.length) {
+          fallbackNote = (fallbackNote ? fallbackNote + ' • ' : '') + result.skipped.join(' • ');
+        }
+        // Debug line per build plan: taskType | provider | canEditImage | timedOut | outputChanged
+        console.log('[Image] task=' + (result.task||'?') +
+          ' | provider=' + result.providerName +
+          ' | canEditImage=' + ((IMAGE_PROVIDERS.find(p=>p.id===result.providerId)||{}).supportsImg2Img===true) +
+          ' | timedOut=false | outputChanged=true');
       } catch (e) {
         if (e && e.message === 'NO_EDIT_PROVIDER') {
           exportPromptText = buildSDExportPrompt(cleanPrompt, lastSDPrompt);
