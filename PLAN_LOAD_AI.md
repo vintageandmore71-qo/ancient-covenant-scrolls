@@ -54,10 +54,11 @@ Tools that require Python + a local GPU (ComfyUI, AUTOMATIC1111, Fooocus, Invoke
 2. **Pollinations** — text-to-image, no key, no preservation
 3. **Hugging Face Inference / Spaces** (free tier with HF token) — img2img, inpainting, face restoration, upscale, vision
 4. **Cloudflare Workers AI** (free tier with CF token) — SDXL-Lightning, FLUX-schnell
-5. **Puter.js** — vision LLM, no key
-6. **Google Gemini** (free key) — vision + image edit on free tier
-7. **AI Horde anonymous** — last-resort, slow but truly free
-8. **Optimized export-prompt fallback** — when no online provider can do the requested edit
+5. **SiliconFlow** (free tier with key — hosts FLUX, Stable Diffusion 3, Qwen vision, image edit, image-to-video) — added per user 2026-04-30
+6. **Puter.js** — vision LLM, no key
+7. **Google Gemini** (free key) — vision + image edit on free tier
+8. **AI Horde anonymous** — last-resort, slow but truly free
+9. **Optimized export-prompt fallback** — when no online provider can do the requested edit
 
 (ComfyUI / A1111 / Fooocus on a companion machine = optional only, gated behind explicit `localSdUrl` setting. Default is OFF.)
 
@@ -228,6 +229,7 @@ before opening more than one in flight.
 | 14a | Glam parity | **Curated local style library** (~50 hand-picked style prompts in JSON; replace 8 hardcoded chips) | Glam-AI "2,000+ community styles" parity, browser-only | Tap "watercolor" chip, prompt expands and routes |
 | 14b | Glam parity | **Face restoration / photo retouch** via HF Inference (GFPGAN + CodeFormer); chat phrases "smooth skin", "fix my face", "retouch this" | Glam-AI photo-retouch parity, free with HF token | "smooth my face" returns a restored portrait |
 | 14c | Glam parity | **Real-ESRGAN upscale engine** wired to HF Inference; chat phrase "upscale this 4×" | Glam-AI upscale parity, free with HF token | "upscale 4x" returns 4× larger PNG |
+| 14d | user 2026-04-30 | **SiliconFlow connector** — free-tier inference platform hosting FLUX, Stable Diffusion 3, Qwen vision, image edit, image-to-video. Wired as a 13th image-chain slot (text-to-image + img2img + video) and as an additional vision LLM in the chat chain. Endpoint pattern: `https://api.siliconflow.cn/v1/...` with bearer key. Treated as a free public API alongside HF / Cloudflare. | Adds SD3 / FLUX with a different rate-limit budget than HF; free image-to-video without GPU at user's house | Set SiliconFlow key in Settings → image gen + animate routes through it as a separate provider with capability flags `supportsImageOutput / supportsImg2Img / supportsImageToVideo` |
 | 15 | spec Ph 2 | **HF Spaces connector** (public Gradio APIs for Florence-2, Qwen2.5-VL, SDXL inpaint, GFPGAN, Real-ESRGAN — many require no token) | More truly-free img2img/inpaint paths | Spaces models appear as separate slots |
 | 16 | original E | **Cohesive icon set across ACR / Attain / Attain Jr / Study** | Unblocked now that Phase 1B + 2 are done | Brand consistency across all 5 apps |
 | 17 | original N | **App Store readiness** — NSFW / safety filter, watermark toggle, privacy text, encrypted key vault, install banner | Submission gate | App Store screening passes |
@@ -246,7 +248,7 @@ before opening more than one in flight.
 | 5b | user 2026-04-30 | **Identity Lock — face/style embedding** via IP-Adapter FaceID + InstantID through HF Spaces. Stores reference embedding via `CHAR.refImage` (browser-only); calls public Gradio Space for the actual lock. | "Same face / same style / same identity across edits" requires real embeddings, not just re-uploading the prior image | Save a face card → 5 successive edits keep the same face |
 | 5c | user 2026-04-30 | **Prompt-rewriting layer** (already partially shipped via Scene Lock LLM SD_PROMPT). Promote to explicit pre-pass: every user prompt + image goes through a vision-LLM rewrite that emits a structured `{positive, negative, preserve, region, taskType}` JSON object before routing. | "Add a bird" → structured edit instruction with preservation directives, not raw text. This is the AI Chat secret sauce. | Console shows structured JSON; the JSON is what reaches the provider, not raw user text |
 
-**Recommended order:** 1 → 2 → 3 → 4 → 5 → 5b → 5c → 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13 → 14a → 14b → 14c → 15 → 16 → 17 → 18a → 18b → 18c → 18d → 18e → 19. OPT is unblocked at any point but never required.
+**Recommended order:** 1 → 2 → 3 → 4 → 5 → 5b → 5c → 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13 → 14a → 14b → 14c → 14d → 15 → 16 → 17 → 18a → 18b → 18c → 18d → 18e → 19. OPT is unblocked at any point but never required.
 
 Any of those can be reordered if a user request shifts priority — but
 each one stays a single small commit, with cache bump and an entry
