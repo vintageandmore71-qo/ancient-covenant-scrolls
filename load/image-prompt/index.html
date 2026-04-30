@@ -1425,6 +1425,13 @@ async function pipeline(prompt, imgData, tid) {
         imageProvUsed = 'Local (' + local.op + ')';
       }
     }
+    // Coerce reply to string defensively — some Puter responses return
+    // an object (e.g. {message:{content:'...'}} or {text:'...'}).
+    if (reply && typeof reply !== 'string') {
+      reply = (reply.message && reply.message.content) || reply.content || reply.text ||
+              (Array.isArray(reply) ? reply.join('\n') : '') || JSON.stringify(reply);
+    }
+    reply = String(reply || '');
     const sdMatch = reply.match(/SD_PROMPT:\s*(.+)/s);
     const editVerb = prompt && /\b(make|create|generate|edit|change|add|remove|turn|transform|render|draw|paint|illustrate|design|stylize|convert|colour|color|crop|enhance|fix|retouch)\b/i.test(prompt);
     const wantsImage = !resultUrl && (!!sdMatch || (imgData && editVerb));
