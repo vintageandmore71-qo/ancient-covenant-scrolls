@@ -22,6 +22,7 @@ Update this file at the end of every shipped version.
 | `Fix Hang & regeneration errors.docx` | 30 s timeout per provider, AbortController, always clear loading in `finally{}`, ADD_OBJECT must route only to image-input + image-output + inpainting providers |
 | `AI Key Diagnostic.docx` | Test Keys button, masked key display, status icons (✅⚠️❌⏳🌐), block invalid / text-only providers from image tasks |
 | `load_ai_character_consistency_with_code.zip` | Reference JS modules (provider-registry, character-memory, prompt-builder, output-verifier, image-router) + character-profile JSON schema |
+| `Load_AI_Glam_Style_System_Research_and_Developer_Plan.zip` | 7-layer Glam clone architecture (chat input → classifier → prompt builder → mask editor → router → verifier → image-to-video), expanded capability flags, named future models (Step1X-Edit, Qwen-Image-Edit, FLUX Kontext, Stable Diffusion / SDXL Inpainting), external-prompt fallback for video (Runway / Kling / Pika / Luma / Wan), source URLs to HF docs |
 
 ---
 
@@ -99,7 +100,11 @@ will also lay down this structural separation in Settings.
 
 ## Capability fields (per provider)
 
-`text_only · vision_input · image_output · image_edit · image_to_image · inpainting · outpainting · background_removal · segmentation · object_detection · returns_file · returns_url · returns_blob · rate_limit_status · cost_status`
+Expanded per Glam Style doc (2026-04-30):
+
+`enabled · requiresKey · keyPresent · textOnly · canRewritePrompt · canClassifyTask · canReadImage · canGenerateImage · canEditImage · canInpaint · canUseMask · canReturnImageUrl · canReturnBlob · canReturnVideo · canImageToVideo · maxDurationSeconds · supportsSeed · freeStatus (free / free-tier / paid / unknown) · rate_limit_status`
+
+(legacy synonyms still in code: `text_only · vision_input · image_output · image_edit · image_to_image · inpainting · outpainting · background_removal · segmentation · object_detection · returns_file · returns_url · returns_blob · cost_status`)
 
 ## Hard constraint — iPad-runnable + free only
 
@@ -297,6 +302,7 @@ before opening more than one in flight.
 | 15 | spec Ph 2 | **HF Spaces connector** (public Gradio APIs for Florence-2, Qwen2.5-VL, SDXL inpaint, GFPGAN, Real-ESRGAN — many require no token) | More truly-free img2img/inpaint paths | Spaces models appear as separate slots |
 | 16 | original E | **Cohesive icon set across ACR / Attain / Attain Jr / Study** | Unblocked now that Phase 1B + 2 are done | Brand consistency across all 5 apps |
 | 17 | original N | **App Store readiness** — NSFW / safety filter, watermark toggle, privacy text, encrypted key vault, install banner | Submission gate | App Store screening passes |
+| 18-fallback | Glam doc 2026-04-30 | **External video-prompt fallback** — when no `canReturnVideo` provider is configured, surface a ready-to-paste prompt for **Runway / Kling / Pika / Luma / Wan** (alongside ComfyUI for image edits). Mirrors the existing `buildSDExportPrompt` for the video path. | "Do not pretend success" — Glam doc explicit rule for video | Ask "animate this" with no video provider → external-prompt panel appears with prompt + provider buttons |
 | 18a | user direction 2026-04-30 | **Image → Video tier 1 — basic motion** (browser-only): pan, zoom, parallax, slow Ken-Burns drift on a single still. Canvas + Anime.js + FFmpeg.wasm → exports `.mp4` / `.webm` file. No AI call required. | First win, zero cost, works offline | Tap "Animate" → choose Pan / Zoom / Parallax → 3-5 s clip downloads |
 | 18b | user direction 2026-04-30 | **Image → Video tier 2 — Stable Video Diffusion via HF Space** (free, no key for many public Spaces; HF token for rate-limited ones). Image → ~14-frame motion clip → FFmpeg.wasm encode. | Real generative motion (water, wind, hair, slight character motion) | Tap "Animate" → SVD → 3-5 s mp4 |
 | 18c | user direction 2026-04-30 | **Image → Video tier 3 — AnimateDiff via HF Space**. Motion module on top of SDXL. Adds prompt-driven camera move + scene motion. | Cinematic 5-15 s clips with prompted motion | "Animate with slow zoom and rain" returns a clip |
@@ -333,7 +339,8 @@ before opening more than one in flight.
 | 33 | T3-15 | **PWA share-target manifest** — share an image to Image Prompt from Photos / Safari | One-tap input |
 | 34 | T3-17 | **Recipe export** — save edit chain as one-tap recipe, share via JSON | Power user |
 | 35 | T3-9  | **Provider health dashboard UI** (data already collected by `PROVIDER_HEALTH`) | Surface hidden state |
-| OPT | optional companion | **ComfyUI / A1111 / Fooocus on user's Mac/PC** — IP-Adapter, InstantID, ControlNet, LoRA workflows. Requires the user to run Python + GPU on a separate machine; iPad just sends requests. NOT a default path; gated behind explicit `localSdUrl` setting in Settings. Already wired (A1111-compat) at v17dq. | Power-user-only; iPad alone cannot do this | User points iPad at `http://192.168.x.x:7860`, edits route via local HTTP |
+| OPT | optional companion | **ComfyUI / A1111 / Fooocus / InvokeAI on user's Mac/PC** — IP-Adapter, InstantID, ControlNet, LoRA workflows. Requires the user to run Python + GPU on a separate machine; iPad just sends requests. NOT a default path; gated behind explicit `localSdUrl` setting in Settings. Already wired (A1111-compat) at v17dq. | Power-user-only; iPad alone cannot do this | User points iPad at `http://192.168.x.x:7860`, edits route via local HTTP |
+| OPT-track | Glam doc 2026-04-30 | **Future-track edit models** to evaluate as soon as a free public endpoint becomes available: **Step1X-Edit** (open-source, GPT-4o-class instruction edit), **Qwen-Image-Edit** (semantic + appearance control), **FLUX Kontext** (instruction edit; SiliconFlow hosts), **HF SDXL Inpainting** (`diffusers/stable-diffusion-xl-1.0-inpainting-0.1`), **HF SD-1.5 Inpainting** (`stable-diffusion-v1-5/stable-diffusion-inpainting`). Tracking-only — not in roadmap until free / iPad-callable. | Glam-quality edit fidelity once one of these has a sustained-free endpoint | Provider entry added with capability flags when available |
 
 **New pre-18 items added per user direction 2026-04-30:**
 
