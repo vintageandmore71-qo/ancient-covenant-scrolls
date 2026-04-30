@@ -62,7 +62,31 @@ Shipped after v17dg without explicit sign-off. Caused churn. Backups
 exist (`backup/2026-04-29-v17dh` through `backup/2026-04-30-v17dm`)
 but should not be treated as known-good baselines.
 
-### v17dn — `<pending>` — 2026-04-30
+### v17dn — `36a2387` — 2026-04-30
+
+- **Status:** Image creation **partially verified** by user this date.
+- **Test run:** image generation prompt (specifics not captured by
+  user — going forward we'll record the exact prompt). Image
+  successfully returned from chain.
+- **Confirmed working:** image generation pipeline reaches a result
+  on whichever provider was tried first (default = Pollinations).
+- **Known issue raised in same session:** **face quality blurry on
+  the default provider's output.** Multi-turn refinement was not
+  attempted because the base image quality wasn't acceptable.
+- **NOT verified yet:**
+  - Which specific provider returned the blurry result (default
+    chain order: Pollinations first, so most likely Pollinations)
+  - The 4 sharper SDXL-class providers added in this build
+    (Pollinations Flux #8, AI Horde SDXL #10, Cloudflare SDXL-Lightning
+    #11, HF SDXL-Turbo #12) — none tried in this run
+  - Multi-turn refinement (Scene Lock + use-result-as-next-input)
+  - Save to Library
+  - Continue chips
+- **Recovery if needed:** `git revert 36a2387 && git push origin main`
+  → returns live to v17dm. Or `git checkout backup/2026-04-29-v17dg`
+  for clean v17dg baseline.
+
+### v17dn (built) — `<pending>` — 2026-04-30 — original built-state row
 
 - **Status:** Built. Awaiting user verification.
 - **Base:** v17dg restored
