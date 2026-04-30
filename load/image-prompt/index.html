@@ -2163,7 +2163,38 @@ async function imageGenWithFallback(prompt, imgData, opts) {
       '; falling back to text-to-image with Scene Lock + character context');
   }
   let lastErr = null;
+  const skipped = [];
   for (const p of providers) {
+    // ── Capability gate (per build plan: never call a provider whose
+    //    capabilities do not match the task) ──
+    // Image gen requires supportsImageOutput. Edits also require
+    // supportsImageInput OR supportsInpainting. Text-only routes
+    // (e.g. HF Mistral, OpenRouter chat) must never reach this loop —
+    // they live in the chat fallback chain only. This gate is a
+    // defensive backstop in case a text-only entry slips into
+    // IMAGE_PROVIDERS.
+    const capImageOutput = p.supportsImageOutput !== false; // default true for image providers
+    if (!capImageOutput) {
+      const msg = 'Skipped ' + p.name + ': text-only model';
+      console.warn('[Image] ' + msg);
+      skipped.push(msg);
+      continue;
+    }
+    if (editClass) {
+      const capImageInput = p.supportsImageInput === true || p.supportsImg2Img === true;
+      const capInpaint    = p.supportsInpainting  === true;
+      if (!capImageInput && !capInpaint) {
+        // For edit tasks, only skip with a status when we have OTHER
+        // edit-capable providers available; otherwise allow soft
+        // text-to-image fallback (already handled above).
+        if (filtered.length) {
+          const msg = 'Skipped ' + p.name + ': no image-input / inpainting support for ' + task;
+          console.warn('[Image] ' + msg);
+          skipped.push(msg);
+          continue;
+        }
+      }
+    }
     try {
       const url = await p.gen(prompt, imgData);
       // Output rule: provider must return an image URL/blob — empty,
@@ -2171,7 +2202,7 @@ async function imageGenWithFallback(prompt, imgData, opts) {
       if (typeof url === 'string' && url.length > 0) {
         recordSuccess(p.id);
         const finalUrl = await sharpenImageUrl(url, p.id);
-        return { url: finalUrl, providerId: p.id, providerName: p.name, task: task };
+        return { url: finalUrl, providerId: p.id, providerName: p.name, task: task, skipped: skipped };
       }
       throw new Error(p.name + ' returned no image');
     } catch (e) {
@@ -2180,10 +2211,23 @@ async function imageGenWithFallback(prompt, imgData, opts) {
       lastErr = e;
     }
   }
-  throw lastErr || new Error('All image providers failed');
+  if (lastErr) {
+    lastErr.skipped = skipped;
+    throw lastErr;
+  }
+  const finalErr = new Error('All image providers failed');
+  finalErr.skipped = skipped;
+  throw finalErr;
 }
 
+// Known text-only HF models that must NEVER be used for image
+// generation/editing. Per build plan: capability check before call.
+const HF_TEXT_ONLY_MODELS = /\b(mistral|llama|gpt|qwen|gemma|phi|falcon|mpt|flan|t5|bart|pythia|deepseek|yi|olmo)\b/i;
+
 async function hfImageCall(model, prompt, imgData) {
+  if (HF_TEXT_ONLY_MODELS.test(model)) {
+    throw new Error('Skipped ' + model + ': text-only model (cannot generate images)');
+  }
   const body = {inputs: prompt, parameters:{num_inference_steps:30,guidance_scale:7.5}};
   if(imgData){body.parameters.image=imgData.base64;body.parameters.strength=0.65;}
   const r = await fetch(`https://api-inference.huggingface.co/models/${model}`,{
@@ -2195,8 +2239,12 @@ async function hfImageCall(model, prompt, imgData) {
   if(!r.ok) throw new Error(await readError(r,'HF Image'));
   const blob = await r.blob();
   if(!blob.type.startsWith('image/')){
-    const txt=await blob.text();let msg='Image gen failed.';
-    try{msg=JSON.parse(txt)?.error||msg;}catch(_){}
+    const txt = await blob.text();
+    // Text/JSON response from an image endpoint = wrong model (likely
+    // text-only). Per build plan: skip and continue fallback, never
+    // return text as image-gen success.
+    let msg = 'Skipped ' + model + ': returned ' + (blob.type || 'non-image response') + ' (likely text-only model)';
+    try { const j = JSON.parse(txt); if (j && j.error) msg += ' — ' + j.error; } catch(_){}
     throw new Error(msg);
   }
   return blob;
