@@ -212,7 +212,18 @@ a{color:inherit;text-decoration:none}
 }
 @media(max-width:640px){
   .video-grid{grid-template-columns:1fr;gap:12px}
-  .sidebar{display:none}
+  /* Sidebar becomes a slide-in drawer on phone/iPad-portrait. The
+     hamburger only adds .open (loadplay2's behavior, untouched), so
+     these rules turn .open into a full drawer without any JS change. */
+  .sidebar{
+    position:fixed;top:var(--nav-h);left:0;bottom:0;z-index:90;
+    width:var(--sidebar-w);
+    transform:translateX(-100%);
+    box-shadow:4px 0 20px rgba(0,0,0,.5);
+    transition:transform .22s ease;
+    background:var(--bg);
+  }
+  .sidebar.open{transform:translateX(0)}
   .nav-left{min-width:auto}
 }
 @media(min-width:641px) and (max-width:1024px){
@@ -768,6 +779,47 @@ a{color:inherit;text-decoration:none}
 .lp-feature-section .nav-item{cursor:pointer;width:100%;text-align:left;background:none;border:0}
 .lp-feature-section .nav-item .label{font-size:13.5px}
 .lp-feature-badge{margin-left:auto;font-size:10px;padding:2px 6px;border-radius:10px;background:rgba(0,229,255,.16);color:var(--cyan);font-weight:700}
+
+/* ── SPLASH FRONT PAGE (matches mockup; ends at footer) ───────── */
+.lp-hero-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px 18px;pointer-events:none}
+.lp-hero-mark{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+.lp-hero-mark img{width:72px;height:72px;border-radius:18px;box-shadow:0 6px 24px rgba(255,60,60,.45)}
+.lp-hero-wordmark{font-size:64px;font-weight:900;letter-spacing:-.02em;color:#fff;text-shadow:0 4px 24px rgba(0,0,0,.7)}
+.lp-hero-wordmark em{font-style:normal;background:linear-gradient(90deg,#ff5a5a,#ff3838);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lp-hero-tag{font-size:18px;color:#e9e9e9;font-weight:500;text-shadow:0 2px 12px rgba(0,0,0,.7);max-width:540px;line-height:1.4}
+.lp-hero-tag strong{color:#ff6e6e;font-weight:800}
+@media (max-width:600px){
+  .lp-hero-mark img{width:54px;height:54px;border-radius:14px}
+  .lp-hero-wordmark{font-size:42px}
+  .lp-hero-tag{font-size:14px}
+}
+
+/* 4-column feature row beneath the hero (Stream Anywhere / Creator
+   Channels / Digital Cinema / Private & Secure) */
+.lp-feature-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:18px 16px 6px;max-width:1100px;margin:0 auto}
+@media (min-width:760px){.lp-feature-row{grid-template-columns:repeat(4,1fr)}}
+.lp-feat{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 12px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;min-height:120px}
+.lp-feat-ic{width:42px;height:42px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1.5px dashed rgba(255,90,90,.55);color:#ff6e6e;background:rgba(255,90,90,.08)}
+.lp-feat-ic svg{width:22px;height:22px}
+.lp-feat-name{font-size:13.5px;font-weight:800;color:#fff;letter-spacing:-.005em}
+.lp-feat-sub{font-size:11.5px;color:var(--text2);line-height:1.45}
+
+/* Dedicated PART OF LOAD footer — splash ends here, no auto-flow */
+.lp-footer{position:relative;margin-top:18px;padding:24px 16px 28px;border-top:1px solid var(--border);text-align:center;background:#0c0c0c}
+.lp-footer-tag{font-size:10.5px;letter-spacing:.22em;color:var(--cyan);font-weight:700;text-transform:uppercase}
+.lp-footer-mark{font-size:32px;font-weight:900;color:#fff;letter-spacing:-.02em;margin:6px 0 4px}
+.lp-footer-tagline{font-size:13.5px;color:var(--text2);margin:0 0 14px}
+.lp-footer-links{display:flex;justify-content:center;gap:18px;align-items:center;flex-wrap:wrap}
+.lp-footer-links a{color:var(--cyan);font-weight:700;font-size:13.5px;padding:8px 12px;border-radius:8px;border:1px solid rgba(0,229,255,.28);background:rgba(0,229,255,.05)}
+.lp-footer-links a:hover{background:rgba(0,229,255,.12);border-color:var(--cyan)}
+
+/* Stream view toggle — chips + grid hidden by default; Browse reveals it */
+#lp-stream-view{display:none}
+#lp-stream-view.on{display:block}
+body.lp-streaming #lp-home,
+body.lp-streaming .lp-install-banner{display:none}
+.lp-stream-back{position:sticky;top:0;z-index:6;display:flex;align-items:center;gap:8px;padding:10px 16px;background:rgba(15,15,15,.92);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-bottom:1px solid var(--border);font-size:13px;color:var(--cyan);font-weight:600;cursor:pointer;border:0;width:100%;text-align:left}
+.lp-stream-back:hover{background:var(--bg2)}
 </style>
 </head>
 <body>
@@ -1073,22 +1125,54 @@ a{color:inherit;text-decoration:none}
 
       <!-- ── LOAD-STYLE SPLASH HOME (scrolls into the streaming app) ── -->
   <section id="lp-home" class="lp-home-screen">
+
+    <!-- Cinematic hero with logo + wordmark + tagline overlay -->
     <div class="lp-splash-wrap">
       <img class="lp-splash-img"
            src="load-play-splash-768w-compressed.jpg"
-           alt="LoadPlay — stream the Load way"
+           alt="LoadPlay — Stream Digital Cinema Anywhere"
            onload="this.parentElement.classList.add('loaded')">
       <div class="lp-splash-overlay"></div>
-      <div class="lp-splash-bottom"><span class="lp-bottom-title">Load</span></div>
+      <div class="lp-hero-overlay">
+        <div class="lp-hero-mark">
+          <img src="icon.png" alt="" width="72" height="72">
+          <span class="lp-hero-wordmark">Load <em>Play</em></span>
+        </div>
+        <p class="lp-hero-tag">Stream <strong>Digital Cinema</strong> Anywhere</p>
+      </div>
     </div>
 
-    <!-- Get-started action buttons (Load-style, in LoadPlay color scheme) -->
+    <!-- 4 feature cards (Stream Anywhere / Creator Channels / Digital Cinema / Private & Secure) -->
+    <div class="lp-feature-row">
+      <div class="lp-feat">
+        <span class="lp-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span>
+        <span class="lp-feat-name">Stream Anywhere</span>
+        <span class="lp-feat-sub">Your shows, movies &amp; shorts on any device, anytime, anywhere.</span>
+      </div>
+      <div class="lp-feat">
+        <span class="lp-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="3.5"/><circle cx="17" cy="11" r="2.5"/><path d="M3 19c0-3 2.5-5 6-5s6 2 6 5"/><path d="M14 19c0-2 1.5-3.5 3.5-3.5S21 17 21 19"/><polygon points="11 7 13 6 11 5" fill="currentColor"/></svg></span>
+        <span class="lp-feat-name">Creator Channels</span>
+        <span class="lp-feat-sub">Discover original creators &amp; premium channels you love to watch.</span>
+      </div>
+      <div class="lp-feat">
+        <span class="lp-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8c0-1 .8-2 2-2h10c1.2 0 2 1 2 2v8H5z"/><path d="M3 16h18"/><path d="M8 19h8"/><circle cx="12" cy="12" r="2"/></svg></span>
+        <span class="lp-feat-name">Digital Cinema</span>
+        <span class="lp-feat-sub">Curated films, series &amp; shorts. Watch in high quality, always.</span>
+      </div>
+      <div class="lp-feat">
+        <span class="lp-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="11" width="12" height="9" rx="2"/><path d="M9 11V8a3 3 0 0 1 6 0v3"/><circle cx="12" cy="15.5" r="1.2" fill="currentColor"/></svg></span>
+        <span class="lp-feat-name">Private &amp; Secure</span>
+        <span class="lp-feat-sub">Your data stays on your device. Always yours.</span>
+      </div>
+    </div>
+
+    <!-- 3 action buttons (Start Watching / Browse / Creator Upload) -->
     <div class="lp-actions">
       <button class="lp-big primary" id="lp-get-started" data-lp-modal="lp-auth-modal" data-lp-tab="signup" data-lp-tour="1">
         <span class="lp-big-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="6,4 20,12 6,20" fill="currentColor" stroke="none"/></svg></span>
-        <span class="lp-big-lbl">Get Started</span>
+        <span class="lp-big-lbl">Start Watching</span>
       </button>
-      <button class="lp-big secondary" id="lp-browse" onclick="document.getElementById('chipsBar').scrollIntoView({behavior:'smooth',block:'start'})">
+      <button class="lp-big secondary" id="lp-browse" data-lp-act="browse">
         <span class="lp-big-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><circle cx="12" cy="14.5" r="1.4" fill="currentColor" stroke="none"/></svg></span>
         <span class="lp-big-lbl">Browse</span>
       </button>
@@ -1098,46 +1182,58 @@ a{color:inherit;text-decoration:none}
       </button>
     </div>
 
-    <!-- Workspace tiles (Load-style monoline SVG icons) -->
+    <!-- 2x2 workspace tiles (Viewer Profiles / Creator Upload / Clean Stream Rules / Developer Lab) -->
     <div id="lp-workspace" class="lp-workspace">
       <div class="lp-ws-row">
 
-        <button class="lp-ws-tile" data-tile="viewer">
+        <button class="lp-ws-tile" data-tile="viewer" data-lp-act="profiles">
           <span class="lp-ws-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/><circle cx="12" cy="8" r="1.4" fill="#00e5ff" stroke="none"/></svg></span>
           <span class="lp-ws-label">Viewer Profiles</span>
           <span class="lp-ws-sub">Profile photo, banner, My List, watch history</span>
         </button>
 
-        <button class="lp-ws-tile" data-tile="creator">
+        <button class="lp-ws-tile" data-tile="creator" data-lp-act="upload">
           <span class="lp-ws-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M12 16V8"/><polyline points="8,12 12,8 16,12"/><circle cx="20" cy="6.5" r="1.2" fill="#00c853" stroke="none"/></svg></span>
           <span class="lp-ws-label">Creator Upload</span>
           <span class="lp-ws-sub">Upload videos, PWA cinema, HTML packages</span>
         </button>
 
-        <button class="lp-ws-tile" data-tile="cleanstream">
+        <button class="lp-ws-tile" data-tile="cleanstream" data-lp-act="clean-stream">
           <span class="lp-ws-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
           <span class="lp-ws-label">Clean Stream Rules</span>
           <span class="lp-ws-sub">No profanity, no nudity, safe thumbnails</span>
         </button>
 
-        <button class="lp-ws-tile" data-tile="devlab">
+        <button class="lp-ws-tile" data-tile="devlab" data-lp-modal="lp-dev-modal">
           <span class="lp-ws-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v4l4 10a3 3 0 0 1-3 4H8a3 3 0 0 1-3-4l4-10z"/><path d="M9 11h6"/><circle cx="11" cy="16" r="1.1" fill="#00c853" stroke="none"/><circle cx="14" cy="14" r="0.8" fill="#00e5ff" stroke="none"/></svg></span>
           <span class="lp-ws-label">Developer Lab</span>
           <span class="lp-ws-sub">PWA diagnostics, API keys, package checks</span>
         </button>
 
       </div>
-
-      <h2 class="lp-channels-heading">Load Play</h2>
-      <p class="lp-channels-hint">Browse genre rails below — featured, originals, documentaries, kids, and more.</p>
-
-      <div class="lp-back-to-load-row">
-        <a href="../load/" class="lp-back-load">← Return to Main Load</a>
-        <span class="lp-divider">·</span>
-        <a href="../LoadStudio/" class="lp-to-studio">Open Load Studio →</a>
-      </div>
     </div>
+
+    <!-- PART OF LOAD footer — splash ends here, no auto-flow -->
+    <footer class="lp-footer">
+      <div class="lp-footer-tag">Part of Load</div>
+      <div class="lp-footer-mark">LoadPlay</div>
+      <p class="lp-footer-tagline">Stream, create, publish — clean, free, offline-ready.</p>
+      <div class="lp-footer-links">
+        <a href="../load/">← Return to Main Load</a>
+        <a href="../LoadStudio/">Open Load Studio →</a>
+      </div>
+    </footer>
+
   </section>
+
+      <!-- Loadplay2 streaming UI — preserved intact, wrapped so it stays
+           hidden behind the splash front page and only appears when the
+           Browse button or sidebar Browse/Start Watching is tapped. -->
+      <div id="lp-stream-view">
+        <button class="lp-stream-back" data-lp-act="home" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          <span>Back to LoadPlay home</span>
+        </button>
 
         <!-- Chips -->
         <div class="chips-bar" id="chipsBar">
@@ -1164,6 +1260,7 @@ a{color:inherit;text-decoration:none}
           <!-- Main grid -->
           <div class="video-grid" id="videoGrid"></div>
         </div>
+      </div>
       </div>
 
       <!-- PLAYER VIEW -->
@@ -2070,9 +2167,22 @@ window.addEventListener('online',  () => toast('✅ Back online'));
     'kids':          'all',
     'news':          'news'
   };
+  // Splash <-> stream view swap. Splash ends at the footer; tapping
+  // Browse / a content-section / Start Watching opens loadplay2's
+  // streaming UI in place. Tap Home / "Back to LoadPlay home" to return.
+  function showSplash() {
+    document.body.classList.remove('lp-streaming');
+    var sv = $$('lp-stream-view'); if (sv) sv.classList.remove('on');
+    var home = $$('lp-home'); if (home) home.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function showStream() {
+    document.body.classList.add('lp-streaming');
+    var sv = $$('lp-stream-view'); if (sv) sv.classList.add('on');
+    var c = $$('chipsBar'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
   function runChip(key) {
     closeSidebarSafe();
-    scrollEl('chipsBar');
+    showStream();
     clickChip(CHIP_MAP[key] || 'all');
     if (window.toast) window.toast('Showing ' + key.replace(/-/g, ' '));
   }
@@ -2090,12 +2200,14 @@ window.addEventListener('online',  () => toast('✅ Back online'));
   function runAct(key) {
     closeSidebarSafe();
     switch (key) {
-      case 'home':           scrollEl('lp-home'); return;
-      case 'start-watching': scrollEl('chipsBar'); clickChip('all'); return;
-      case 'continue':       if (!scrollEl('recentRow')) scrollEl('chipsBar'); return;
-      case 'mylist':         if (!scrollEl('recentRow')) scrollEl('chipsBar');
+      case 'home':           showSplash(); return;
+      case 'browse':         showStream(); clickChip('all'); return;
+      case 'start-watching': showStream(); clickChip('all'); return;
+      case 'continue':       showStream(); clickChip('all');
+                              if (window.toast) window.toast('Continue Watching'); return;
+      case 'mylist':         showStream(); clickChip('all');
                               if (window.toast) window.toast('My List — saved items'); return;
-      case 'clips':          scrollEl('chipsBar');
+      case 'clips':          showStream(); clickChip('all');
                               if (window.toast) window.toast('Clips'); return;
       case 'upload':
       case 'upload-wizard': {
@@ -2302,7 +2414,7 @@ window.addEventListener('online',  () => toast('✅ Back online'));
   var tn = $$('lp-tour-next');
   if (tn) tn.addEventListener('click', function () {
     if (tourIdx < TOUR.length - 1) { tourIdx++; renderTour(); }
-    else { closeModal('lp-auth-modal'); switchAuthTab('signup'); var c = $$('chipsBar'); if (c) c.scrollIntoView({behavior:'smooth',block:'start'}); }
+    else { closeModal('lp-auth-modal'); showStream(); clickChip('all'); }
   });
   var tp = $$('lp-tour-prev');
   if (tp) tp.addEventListener('click', function () { if (tourIdx > 0) { tourIdx--; renderTour(); } });
