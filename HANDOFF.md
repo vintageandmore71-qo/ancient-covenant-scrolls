@@ -6,6 +6,55 @@ execute without asking the user to re-explain.
 
 ---
 
+## REMINDER (added 2026-05-01) — rotate the legacy "acr2026" gate password
+
+The user asked to be reminded later that three standalone gate files still
+compare a plaintext password (`acr2026`) with `===`, and that password has
+been publicly readable on the deployed Pages site for some time. They are
+NOT yet hashed:
+
+  - `ACR-Study-Standalone.html` line ~186 — `var PASSWORD = "acr2026";`
+  - `ACR-Records-Standalone.html` line ~243 — `var PASSWORD = "acr2026";`
+  - `Attain-Standalone.html` line ~1597 — `var PASSWORD = "acr2026";`
+
+Already hashed (good): root `index.html` (ACR Reader, uses `ACR_HASH`)
+and `LoadPlay/index.html` (Developer Lab, uses `DEV_USER` + `DEV_HASH`).
+
+Per-device only (no shared secret in repo): `attain-jr/attain-jr.js`
+parent gate — first PIN entered is saved to that device's localStorage.
+
+User-supplied (no baked-in keys): all the API-key inputs in
+`load/index.html`, `load/image-prompt/index.html`, `Load-Standalone.html`.
+
+**Action when picked up:**
+1. Ask the user for the new password (or confirm reuse of the existing
+   root ACR password).
+2. Compute its SHA-256 (`node -e "console.log(require('crypto').createHash('sha256').update('PASSWORD_HERE').digest('hex'))"`).
+3. Replace each `var PASSWORD = "acr2026";` with `var PWD_HASH = "<hash>";`
+   and rewrite the comparison to use a SHA-256 helper, mirroring the
+   pattern in root `index.html` (`function sha256(s){...}` + `if (h === ACR_HASH)`).
+4. Bump per-app cache versions (acr-vNN, attain-vNN, etc.) so iOS Safari
+   refetches.
+5. Push to `claude/<branch>` AND fast-forward `main` (Pages serves from
+   main, not the feature branch — see Branch/Pages note below).
+
+---
+
+## NOTE — Branch vs main / Pages deployment
+
+The `claude/fix-session-sending-TVMbW` branch instructions say "develop
+and push to that branch only". GitHub Pages, however, serves from
+`main`. So pushes to the feature branch are invisible to the deployed
+site until `main` is fast-forwarded.
+
+When the user reports "you didn't change anything" and the diff is real
+on the feature branch, the cause is almost certainly that `main` is
+still on the previous tip. Resolution: `git push origin <branch>:main`
+once HEAD on the branch is verified clean. This was the cause of the
+v8→v11 invisibility window during the 2026-05-01 LoadPlay session.
+
+---
+
 ## ⚡ CURRENT STATE (updated after every verified milestone)
 
 **Last shipped tip:** `v17dm` — wrap every provider call with timeout (image-prompt-v17)

@@ -488,7 +488,7 @@ a{color:inherit;text-decoration:none}
 .action-pill.red:hover{background:#cc0028}
 .action-divider{width:1px;height:24px;background:var(--bg4);margin:0 2px}
 
-.channel-card{
+.creator-card{
   display:flex;align-items:center;gap:14px;
   padding:14px 0;border-bottom:1px solid var(--border);margin-bottom:14px;
 }
@@ -683,8 +683,8 @@ a{color:inherit;text-decoration:none}
 .lp-ws-label{font-size:14px;font-weight:700;color:#fff;line-height:1.3}
 .lp-ws-sub{font-size:12px;color:#a0a0a0;line-height:1.4}
 
-.lp-channels-heading{font-size:24px;font-weight:800;color:#fff;margin:18px 0 4px;letter-spacing:-.01em}
-.lp-channels-hint{font-size:13px;color:#888;margin:0 0 18px}
+.lp-creators-heading{font-size:24px;font-weight:800;color:#fff;margin:18px 0 4px;letter-spacing:-.01em}
+.lp-creators-hint{font-size:13px;color:#888;margin:0 0 18px}
 
 .lp-back-to-load-row{display:flex;justify-content:center;gap:14px;align-items:center;padding:14px;font-size:13px;color:#888}
 .lp-back-load,.lp-to-studio{color:#00e5ff;text-decoration:none;font-weight:600}
@@ -766,7 +766,7 @@ a{color:inherit;text-decoration:none}
 .lp-tier-price small{font-size:12px;color:var(--text2);font-weight:500}
 .lp-tier ul{list-style:none;padding:0;margin:6px 0 0;font-size:12.5px;color:var(--text2);line-height:1.55}
 .lp-tier ul li{padding:3px 0;display:flex;gap:6px;align-items:flex-start}
-.lp-tier ul li::before{content:"✓";color:var(--cyan);font-weight:700;flex-shrink:0}
+.lp-tier ul li::before{content:"·";color:var(--cyan);font-weight:900;flex-shrink:0;font-size:18px;line-height:1;margin-right:2px}
 .lp-tier .lp-btn{margin-top:auto;font-size:13px;padding:8px 12px;width:100%;text-align:center;justify-content:center}
 
 /* Developer modal */
@@ -795,7 +795,7 @@ a{color:inherit;text-decoration:none}
 }
 
 /* 4-column feature row beneath the hero (Stream Anywhere / Creator
-   Channels / Digital Cinema / Private & Secure) */
+   Originals / Digital Cinema / Private & Secure) */
 .lp-feature-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:18px 16px 6px;max-width:1100px;margin:0 auto}
 @media (min-width:760px){.lp-feature-row{grid-template-columns:repeat(4,1fr)}}
 .lp-feat{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 12px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;min-height:120px}
@@ -817,9 +817,75 @@ a{color:inherit;text-decoration:none}
 #lp-stream-view{display:none}
 #lp-stream-view.on{display:block}
 body.lp-streaming #lp-home,
-body.lp-streaming .lp-install-banner{display:none}
+body.lp-streaming .lp-install-banner,
+body.lp-streaming #lp-page{display:none}
 .lp-stream-back{position:sticky;top:0;z-index:6;display:flex;align-items:center;gap:8px;padding:10px 16px;background:rgba(15,15,15,.92);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-bottom:1px solid var(--border);font-size:13px;color:var(--cyan);font-weight:600;cursor:pointer;border:0;width:100%;text-align:left}
 .lp-stream-back:hover{background:var(--bg2)}
+
+/* Active chip header above the grid */
+.lp-now-showing{padding:18px 16px 4px;max-width:1200px;margin:0 auto}
+.lp-now-showing h2{font-size:22px;font-weight:900;color:#fff;letter-spacing:-.01em;margin:0}
+.lp-now-showing p{font-size:13px;color:var(--text2);margin:4px 0 0}
+
+/* Generic placeholder page */
+#lp-page{display:none;padding:0 0 32px;min-height:50vh}
+body.lp-paging #lp-home,
+body.lp-paging #lp-stream-view,
+body.lp-paging .lp-install-banner{display:none}
+body.lp-paging #lp-page{display:block}
+.lp-page-body{max-width:980px;margin:24px auto 0;padding:0 16px}
+.lp-page-title{font-size:28px;font-weight:900;color:#fff;letter-spacing:-.01em;margin:0 0 6px}
+.lp-page-blurb{font-size:14.5px;color:var(--text2);margin:0 0 22px;line-height:1.6;max-width:720px}
+.lp-page-extra{display:flex;flex-direction:column;gap:14px}
+.lp-page-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px}
+.lp-page-card h3{font-size:15px;font-weight:700;color:#fff;margin:0 0 4px}
+.lp-page-card p{font-size:13px;color:var(--text2);line-height:1.55;margin:0}
+
+/* Marketplace tiles (Daz/Poser-style grid, our color scheme) */
+.lp-mp-cats{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}
+.lp-mp-cat{padding:6px 12px;border-radius:18px;background:var(--bg2);border:1px solid var(--border);color:var(--text2);font-size:12.5px;font-weight:600;cursor:pointer}
+.lp-mp-cat.active{background:var(--cyan);color:#000;border-color:var(--cyan)}
+.lp-mp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px}
+.lp-mp-tile{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:0;overflow:hidden;text-align:left;cursor:pointer;transition:transform .12s,border-color .12s}
+.lp-mp-tile:hover{border-color:var(--cyan)}
+.lp-mp-tile:active{transform:scale(.98)}
+.lp-mp-thumb{aspect-ratio:1;background:linear-gradient(135deg,#0d1b2a,#1a1a2e);display:flex;align-items:center;justify-content:center;color:rgba(0,229,255,.35)}
+.lp-mp-thumb svg{width:54%;height:54%}
+.lp-mp-meta{padding:10px 12px}
+.lp-mp-name{font-size:13.5px;color:#fff;font-weight:700;margin:0 0 3px;line-height:1.3}
+.lp-mp-by{font-size:11.5px;color:var(--text3);margin:0 0 6px}
+.lp-mp-price{font-size:13px;color:var(--cyan);font-weight:800}
+.lp-mp-price.free{color:var(--green)}
+
+/* Help page step list */
+.lp-help-step{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--border)}
+.lp-help-step:last-child{border-bottom:0}
+.lp-help-num{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:rgba(0,229,255,.14);color:var(--cyan);font-weight:800;display:flex;align-items:center;justify-content:center;font-size:13.5px}
+.lp-help-body{flex:1;min-width:0}
+.lp-help-body h4{font-size:14.5px;color:#fff;margin:0 0 4px;font-weight:700}
+.lp-help-body p{font-size:13px;color:var(--text2);line-height:1.55;margin:0}
+
+/* YouTube-style home feed */
+.lp-feed-greeting{font-size:24px;font-weight:900;color:#fff;margin:0 0 6px;letter-spacing:-.01em}
+.lp-feed-sub{font-size:13.5px;color:var(--text2);margin:0 0 22px}
+.lp-feed-rail{margin:18px 0 26px}
+.lp-feed-rail h3{font-size:16px;font-weight:800;color:#fff;margin:0 0 10px}
+.lp-feed-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.lp-feed-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .12s,border-color .12s}
+.lp-feed-card:hover{border-color:var(--cyan)}
+.lp-feed-thumb{aspect-ratio:16/9;background:linear-gradient(135deg,#0a1535,#1a1a2e);display:flex;align-items:center;justify-content:center;position:relative}
+.lp-feed-thumb-cat{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:3px 6px;border-radius:4px}
+.lp-feed-meta{padding:10px 12px}
+.lp-feed-title{font-size:13.5px;color:#fff;font-weight:700;margin:0 0 4px;line-height:1.35}
+.lp-feed-byline{font-size:12px;color:var(--text3);margin:0}
+
+/* Splash feature info popover (tap a card → blurb modal) */
+.lp-feat{cursor:pointer;font-family:inherit;color:inherit;border:none}
+
+/* LoadPlay copyright footer (always visible at very bottom of page) */
+.lp-copyright{padding:18px 16px 28px;text-align:center;font-size:11.5px;color:var(--text3);line-height:1.6;border-top:1px solid var(--border);background:#0a0a0a;margin-top:18px}
+.lp-copyright strong{color:var(--text2);font-weight:700}
+.lp-copyright a{color:var(--cyan);text-decoration:none}
 </style>
 </head>
 <body>
@@ -1113,7 +1179,7 @@ body.lp-streaming .lp-install-banner{display:none}
       <!-- A2HS install banner — hidden in standalone mode and after dismiss -->
       <div id="lp-install-banner" class="lp-install-banner" style="display:none">
         <div class="lp-ib-left">
-          <span class="lp-ib-icon" aria-hidden="true">📱</span>
+          <span class="lp-ib-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span>
           <div>
             <strong>Install LoadPlay on your iPad</strong>
             <span class="lp-ib-sub">Own icon, opens fullscreen, works offline.</span>
@@ -1142,28 +1208,29 @@ body.lp-streaming .lp-install-banner{display:none}
       </div>
     </div>
 
-    <!-- 4 feature cards (Stream Anywhere / Creator Channels / Digital Cinema / Private & Secure) -->
+    <!-- 4 feature cards: Stream Anywhere / Creators Originals / Digital Cinema / Private & Secure.
+         Tap any card → opens an info popover with a longer blurb. -->
     <div class="lp-feature-row">
-      <div class="lp-feat">
+      <button type="button" class="lp-feat" data-lp-info="stream-anywhere">
         <span class="lp-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span>
         <span class="lp-feat-name">Stream Anywhere</span>
         <span class="lp-feat-sub">Your shows, movies &amp; shorts on any device, anytime, anywhere.</span>
-      </div>
-      <div class="lp-feat">
+      </button>
+      <button type="button" class="lp-feat" data-lp-info="creators-originals">
         <span class="lp-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="3.5"/><circle cx="17" cy="11" r="2.5"/><path d="M3 19c0-3 2.5-5 6-5s6 2 6 5"/><path d="M14 19c0-2 1.5-3.5 3.5-3.5S21 17 21 19"/><polygon points="11 7 13 6 11 5" fill="currentColor"/></svg></span>
-        <span class="lp-feat-name">Creator Channels</span>
-        <span class="lp-feat-sub">Discover original creators &amp; premium channels you love to watch.</span>
-      </div>
-      <div class="lp-feat">
+        <span class="lp-feat-name">Creators Originals</span>
+        <span class="lp-feat-sub">Discover original creators &amp; premium series you love to watch.</span>
+      </button>
+      <button type="button" class="lp-feat" data-lp-info="digital-cinema">
         <span class="lp-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8c0-1 .8-2 2-2h10c1.2 0 2 1 2 2v8H5z"/><path d="M3 16h18"/><path d="M8 19h8"/><circle cx="12" cy="12" r="2"/></svg></span>
         <span class="lp-feat-name">Digital Cinema</span>
         <span class="lp-feat-sub">Curated films, series &amp; shorts. Watch in high quality, always.</span>
-      </div>
-      <div class="lp-feat">
+      </button>
+      <button type="button" class="lp-feat" data-lp-info="private-secure">
         <span class="lp-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="11" width="12" height="9" rx="2"/><path d="M9 11V8a3 3 0 0 1 6 0v3"/><circle cx="12" cy="15.5" r="1.2" fill="currentColor"/></svg></span>
         <span class="lp-feat-name">Private &amp; Secure</span>
         <span class="lp-feat-sub">Your data stays on your device. Always yours.</span>
-      </div>
+      </button>
     </div>
 
     <!-- 3 action buttons (Start Watching / Browse / Creator Upload) -->
@@ -1226,6 +1293,20 @@ body.lp-streaming .lp-install-banner{display:none}
 
   </section>
 
+      <!-- Generic placeholder page — sidebar items, Marketplace, Help,
+           and the post-sign-in home feed all render through here. -->
+      <div id="lp-page" hidden>
+        <button class="lp-stream-back" data-lp-act="home" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          <span>Back to LoadPlay home</span>
+        </button>
+        <div class="lp-page-body">
+          <h1 class="lp-page-title" id="lp-page-title"></h1>
+          <p class="lp-page-blurb" id="lp-page-blurb"></p>
+          <div class="lp-page-extra" id="lp-page-extra"></div>
+        </div>
+      </div>
+
       <!-- Loadplay2 streaming UI — preserved intact, wrapped so it stays
            hidden behind the splash front page and only appears when the
            Browse button or sidebar Browse/Start Watching is tapped. -->
@@ -1234,6 +1315,10 @@ body.lp-streaming .lp-install-banner{display:none}
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
           <span>Back to LoadPlay home</span>
         </button>
+        <div class="lp-now-showing" id="lpNowShowing">
+          <h2 id="lpNowTitle">All</h2>
+          <p id="lpNowBlurb">Browse everything LoadPlay has loaded.</p>
+        </div>
 
         <!-- Chips -->
         <div class="chips-bar" id="chipsBar">
@@ -1348,8 +1433,8 @@ body.lp-streaming .lp-install-banner{display:none}
               </div>
             </div>
 
-            <!-- Channel row -->
-            <div class="channel-card">
+            <!-- Creator row -->
+            <div class="creator-card">
               <div class="ch-avatar" id="chAvatar">A</div>
               <div class="ch-info">
                 <span class="ch-name" id="chName"></span>
@@ -1442,37 +1527,37 @@ const CH = [
 ];
 
 const VIDS = [
-  {id:1,  t:'Introduction to Offline-First PWA Development',            ch:0, v:'2.3M', a:'3 days ago',   d:'18:42', cat:'tech',        em:'💻', desc:'A deep dive into service workers, cache strategies, and building apps that work without a network connection. Covers Workbox, background sync, and IndexedDB.'},
-  {id:2,  t:'Ancient African Mathematics — Number Systems of the Nile', ch:2, v:'1.1M', a:'1 week ago',   d:'24:10', cat:'education',   em:'📐', desc:'Exploring ancient numeral systems from Egypt, Ethiopia, and Mali that predate Greek and Roman systems by thousands of years.'},
-  {id:3,  t:'Top 10 Open World Games You Must Play This Year',           ch:4, v:'4.5M', a:'2 days ago',   d:'15:33', cat:'gaming',     em:'🎮', desc:'The most immersive open-world titles of the year, ranked by world depth, freedom, and replay value.'},
-  {id:4,  t:'Ethiopian Jazz — Full Live Concert Session',                ch:6, v:'890K', a:'5 hours ago',  d:'52:18', cat:'music',      em:'🎷', live:true, desc:'Live concert recorded in Addis Ababa featuring some of the finest jazz musicians from across the continent.'},
-  {id:5,  t:'How Service Workers Enable Offline Web Experiences',        ch:1, v:'760K', a:'2 weeks ago',  d:'22:05', cat:'tech',       em:'⚙️', desc:'Understanding how service workers intercept network requests and enable advanced caching for truly offline-capable apps.'},
-  {id:6,  t:'The Nile Corridor — Origins of Civilization (Part 1)',      ch:2, v:'3.2M', a:'1 month ago',  d:'46:30', cat:'documentary',em:'🏛️', desc:'Archaeological evidence along the Nile Valley — from Nubia through Egypt — tracing the roots of organized civilization.'},
-  {id:7,  t:'Building Reactive UIs with Vanilla JavaScript Only',        ch:1, v:'430K', a:'4 days ago',   d:'31:14', cat:'tech',       em:'🖥️', desc:'Build fully interactive UIs without a framework — covers reactivity, state management, and DOM diffing from scratch.'},
-  {id:8,  t:'Afrobeats Production Masterclass — Drums, Bass & Groove',   ch:6, v:'2.1M', a:'6 days ago',   d:'38:55', cat:'music',      em:'🥁', desc:'Professional producers break down the science behind Afrobeats rhythm — beats, bass lines, and full arrangement workflow.'},
-  {id:9,  t:'AI Summit 2025 — Open Source Highlights & Key Takeaways',   ch:5, v:'980K', a:'1 hour ago',   d:'14:20', cat:'news',       em:'📰', live:true, desc:'Highlights and panel discussions from this year\'s open source AI summit featuring leading researchers and engineers.'},
-  {id:10, t:'Street Food Journey — Lagos to Accra',                      ch:8, v:'1.7M', a:'3 weeks ago',  d:'27:44', cat:'travel',     em:'🍜', desc:'A food and culture journey along the West African coast, exploring night markets, roadside chefs, and hidden kitchens.'},
-  {id:11, t:'WebAssembly in 2025 — Why It Changes Everything',           ch:0, v:'540K', a:'10 days ago',  d:'19:08', cat:'tech',       em:'🔬', desc:'How WebAssembly is enabling near-native performance in browsers and changing the landscape of web application development.'},
-  {id:12, t:'Kenyan Wildlife 4K — Maasai Mara Drone Footage',            ch:9, v:'5.6M', a:'2 months ago', d:'8:22',  cat:'travel',     em:'🦁', desc:'Breathtaking 4K aerial drone footage over the Maasai Mara during the Great Migration — wildebeest, lions, and more.'},
-  {id:13, t:'AFCON 2025 Quarter Final — Full Match Replay',              ch:5, v:'6.1M', a:'Yesterday',    d:'1:52:00',cat:'sports',    em:'⚽', desc:'Full replay of the AFCON 2025 quarter final — unedited, with original commentary.'},
-  {id:14, t:'Jollof Wars — Nigerian vs Ghanaian Blind Taste Test',       ch:8, v:'2.8M', a:'1 week ago',   d:'12:40', cat:'cooking',    em:'🍛', desc:'The definitive jollof rice blind taste test. Twelve judges, two countries, one winner — who will claim the crown?'},
-  {id:15, t:'TypeScript 5.5 New Features — Complete Deep Dive',          ch:0, v:'320K', a:'2 days ago',   d:'28:17', cat:'tech',       em:'📝', desc:'Every new feature in TypeScript 5.5 explained with real examples — inference improvements, const type params, and more.'},
-  {id:16, t:'Amharic For Beginners — Full 8 Hour Course',                ch:2, v:'940K', a:'5 months ago', d:'8:14:50',cat:'education', em:'📚', desc:'A complete beginner\'s course in Amharic, one of the oldest written languages still in use today.'},
-  {id:17, t:'Ultimate Suya Recipe — Authentic Hausa BBQ Technique',      ch:8, v:'1.3M', a:'3 days ago',   d:'16:22', cat:'cooking',    em:'🔥', desc:'Step-by-step guide to making authentic Nigerian Suya from scratch — marinade, skewering, and live fire grilling.'},
-  {id:18, t:'React vs Svelte vs SolidJS — 2025 Honest Comparison',       ch:1, v:'870K', a:'5 days ago',   d:'33:50', cat:'tech',       em:'⚡', desc:'An honest, benchmark-driven comparison of the three fastest-growing JavaScript UI frameworks in 2025.'},
-  {id:19, t:'Morocco Desert Trek — 3 Days Through the Sahara',           ch:9, v:'2.4M', a:'2 weeks ago',  d:'22:18', cat:'travel',     em:'🏜️', desc:'A solo 3-day trek through the Sahara Desert — camels, sand dunes, and sleeping under the stars near Merzouga.'},
-  {id:20, t:'Drum & Bass From Scratch — Studio Session Uncut',           ch:6, v:'660K', a:'8 days ago',   d:'44:33', cat:'music',      em:'🎵', desc:'Full uncut studio session building a Drum & Bass track from zero — sample selection, arrangement, mixdown.'},
+  {id:1,  t:'Introduction to Offline-First PWA Development',            ch:0, v:'2.3M', a:'3 days ago',   d:'18:42', cat:'tech',        em:'', desc:'A deep dive into service workers, cache strategies, and building apps that work without a network connection. Covers Workbox, background sync, and IndexedDB.'},
+  {id:2,  t:'Ancient African Mathematics — Number Systems of the Nile', ch:2, v:'1.1M', a:'1 week ago',   d:'24:10', cat:'education',   em:'', desc:'Exploring ancient numeral systems from Egypt, Ethiopia, and Mali that predate Greek and Roman systems by thousands of years.'},
+  {id:3,  t:'Top 10 Open World Games You Must Play This Year',           ch:4, v:'4.5M', a:'2 days ago',   d:'15:33', cat:'gaming',     em:'', desc:'The most immersive open-world titles of the year, ranked by world depth, freedom, and replay value.'},
+  {id:4,  t:'Ethiopian Jazz — Full Live Concert Session',                ch:6, v:'890K', a:'5 hours ago',  d:'52:18', cat:'music',      em:'', live:true, desc:'Live concert recorded in Addis Ababa featuring some of the finest jazz musicians from across the continent.'},
+  {id:5,  t:'How Service Workers Enable Offline Web Experiences',        ch:1, v:'760K', a:'2 weeks ago',  d:'22:05', cat:'tech',       em:'', desc:'Understanding how service workers intercept network requests and enable advanced caching for truly offline-capable apps.'},
+  {id:6,  t:'The Nile Corridor — Origins of Civilization (Part 1)',      ch:2, v:'3.2M', a:'1 month ago',  d:'46:30', cat:'documentary',em:'', desc:'Archaeological evidence along the Nile Valley — from Nubia through Egypt — tracing the roots of organized civilization.'},
+  {id:7,  t:'Building Reactive UIs with Vanilla JavaScript Only',        ch:1, v:'430K', a:'4 days ago',   d:'31:14', cat:'tech',       em:'', desc:'Build fully interactive UIs without a framework — covers reactivity, state management, and DOM diffing from scratch.'},
+  {id:8,  t:'Afrobeats Production Masterclass — Drums, Bass & Groove',   ch:6, v:'2.1M', a:'6 days ago',   d:'38:55', cat:'music',      em:'', desc:'Professional producers break down the science behind Afrobeats rhythm — beats, bass lines, and full arrangement workflow.'},
+  {id:9,  t:'AI Summit 2025 — Open Source Highlights & Key Takeaways',   ch:5, v:'980K', a:'1 hour ago',   d:'14:20', cat:'news',       em:'', live:true, desc:'Highlights and panel discussions from this year\'s open source AI summit featuring leading researchers and engineers.'},
+  {id:10, t:'Street Food Journey — Lagos to Accra',                      ch:8, v:'1.7M', a:'3 weeks ago',  d:'27:44', cat:'travel',     em:'', desc:'A food and culture journey along the West African coast, exploring night markets, roadside chefs, and hidden kitchens.'},
+  {id:11, t:'WebAssembly in 2025 — Why It Changes Everything',           ch:0, v:'540K', a:'10 days ago',  d:'19:08', cat:'tech',       em:'', desc:'How WebAssembly is enabling near-native performance in browsers and changing the landscape of web application development.'},
+  {id:12, t:'Kenyan Wildlife 4K — Maasai Mara Drone Footage',            ch:9, v:'5.6M', a:'2 months ago', d:'8:22',  cat:'travel',     em:'', desc:'Breathtaking 4K aerial drone footage over the Maasai Mara during the Great Migration — wildebeest, lions, and more.'},
+  {id:13, t:'AFCON 2025 Quarter Final — Full Match Replay',              ch:5, v:'6.1M', a:'Yesterday',    d:'1:52:00',cat:'sports',    em:'', desc:'Full replay of the AFCON 2025 quarter final — unedited, with original commentary.'},
+  {id:14, t:'Jollof Wars — Nigerian vs Ghanaian Blind Taste Test',       ch:8, v:'2.8M', a:'1 week ago',   d:'12:40', cat:'cooking',    em:'', desc:'The definitive jollof rice blind taste test. Twelve judges, two countries, one winner — who will claim the crown?'},
+  {id:15, t:'TypeScript 5.5 New Features — Complete Deep Dive',          ch:0, v:'320K', a:'2 days ago',   d:'28:17', cat:'tech',       em:'', desc:'Every new feature in TypeScript 5.5 explained with real examples — inference improvements, const type params, and more.'},
+  {id:16, t:'Amharic For Beginners — Full 8 Hour Course',                ch:2, v:'940K', a:'5 months ago', d:'8:14:50',cat:'education', em:'', desc:'A complete beginner\'s course in Amharic, one of the oldest written languages still in use today.'},
+  {id:17, t:'Ultimate Suya Recipe — Authentic Hausa BBQ Technique',      ch:8, v:'1.3M', a:'3 days ago',   d:'16:22', cat:'cooking',    em:'', desc:'Step-by-step guide to making authentic Nigerian Suya from scratch — marinade, skewering, and live fire grilling.'},
+  {id:18, t:'React vs Svelte vs SolidJS — 2025 Honest Comparison',       ch:1, v:'870K', a:'5 days ago',   d:'33:50', cat:'tech',       em:'', desc:'An honest, benchmark-driven comparison of the three fastest-growing JavaScript UI frameworks in 2025.'},
+  {id:19, t:'Morocco Desert Trek — 3 Days Through the Sahara',           ch:9, v:'2.4M', a:'2 weeks ago',  d:'22:18', cat:'travel',     em:'', desc:'A solo 3-day trek through the Sahara Desert — camels, sand dunes, and sleeping under the stars near Merzouga.'},
+  {id:20, t:'Drum & Bass From Scratch — Studio Session Uncut',           ch:6, v:'660K', a:'8 days ago',   d:'44:33', cat:'music',      em:'', desc:'Full uncut studio session building a Drum & Bass track from zero — sample selection, arrangement, mixdown.'},
 ];
 
 const SHORTS = [
-  {id:101, t:'PWA Install Prompt in 60 Sec', ch:0, v:'1.2M', d:'0:58', em:'⚡'},
-  {id:102, t:'Jollof Speed Cook Challenge',  ch:8, v:'3.4M', d:'0:45', em:'🍲'},
-  {id:103, t:'Nile Sunrise Timelapse',       ch:2, v:'8.1M', d:'0:52', em:'🌅'},
-  {id:104, t:'Goal of the Week — AFCON',     ch:5, v:'5.6M', d:'0:31', em:'⚽'},
-  {id:105, t:'JavaScript One-Liner Tricks',  ch:1, v:'990K', d:'0:55', em:'💡'},
-  {id:106, t:'Accra Street Food in 50 Sec',  ch:9, v:'2.3M', d:'0:47', em:'🍽️'},
-  {id:107, t:'Beat Drop Moment — Afrobeats', ch:6, v:'4.4M', d:'0:30', em:'🎶'},
-  {id:108, t:'Lion Cub Plays at Sunrise',    ch:9, v:'12M',  d:'0:38', em:'🦁'},
+  {id:101, t:'PWA Install Prompt in 60 Sec', ch:0, v:'1.2M', d:'0:58', em:''},
+  {id:102, t:'Jollof Speed Cook Challenge',  ch:8, v:'3.4M', d:'0:45', em:''},
+  {id:103, t:'Nile Sunrise Timelapse',       ch:2, v:'8.1M', d:'0:52', em:''},
+  {id:104, t:'Goal of the Week — AFCON',     ch:5, v:'5.6M', d:'0:31', em:''},
+  {id:105, t:'JavaScript One-Liner Tricks',  ch:1, v:'990K', d:'0:55', em:''},
+  {id:106, t:'Accra Street Food in 50 Sec',  ch:9, v:'2.3M', d:'0:47', em:''},
+  {id:107, t:'Beat Drop Moment — Afrobeats', ch:6, v:'4.4M', d:'0:30', em:''},
+  {id:108, t:'Lion Cub Plays at Sunrise',    ch:9, v:'12M',  d:'0:38', em:''},
 ];
 
 const TG = ['tg0','tg1','tg2','tg3','tg4','tg5','tg6','tg7'];
@@ -1667,7 +1752,7 @@ function openPlayer(v) {
   $('likeBtn').className = 'action-pill' + (S.liked.has(v.id) ? ' active' : '');
   $('saveBtn').className = 'action-pill' + (S.saved.has(v.id) ? ' active' : '');
   $('subBtn').className = 'sub-btn' + (S.subbed.has(v.ch) ? ' subbed' : '');
-  $('subBtn').textContent = S.subbed.has(v.ch) ? 'Subscribed ✓' : 'Subscribe';
+  $('subBtn').textContent = S.subbed.has(v.ch) ? 'Subscribed' : 'Subscribe';
 
   // Player controls reset
   $('progFilled').style.width = '0%';
@@ -1798,25 +1883,25 @@ $('likeBtn').addEventListener('click', () => {
   if (!S.currentVid) return;
   const id = S.currentVid.id;
   if (S.liked.has(id)) { S.liked.delete(id); toast('Removed from liked'); }
-  else { S.liked.add(id); toast('👍 Liked'); }
+  else { S.liked.add(id); toast('Liked'); }
   $('likeBtn').className = 'action-pill' + (S.liked.has(id) ? ' active' : '');
 });
 $('saveBtn').addEventListener('click', () => {
   if (!S.currentVid) return;
   const id = S.currentVid.id;
   if (S.saved.has(id)) { S.saved.delete(id); toast('Removed from Watch Later'); }
-  else { S.saved.add(id); toast('🔖 Saved to Watch Later'); }
+  else { S.saved.add(id); toast('Saved to Watch Later'); }
   $('saveBtn').className = 'action-pill' + (S.saved.has(id) ? ' active' : '');
 });
 $('shareBtn').addEventListener('click', () => {
   if (navigator.share) navigator.share({title: S.currentVid?.t, url: location.href}).catch(()=>{});
-  else { navigator.clipboard?.writeText(location.href).then(() => toast('🔗 Link copied!')); }
+  else { navigator.clipboard?.writeText(location.href).then(() => toast('Link copied')); }
 });
 $('subBtn').addEventListener('click', () => {
   if (!S.currentVid) return;
   const ch = S.currentVid.ch;
   if (S.subbed.has(ch)) { S.subbed.delete(ch); $('subBtn').textContent = 'Subscribe'; $('subBtn').className = 'sub-btn'; toast('Unsubscribed'); }
-  else { S.subbed.add(ch); $('subBtn').textContent = 'Subscribed ✓'; $('subBtn').className = 'sub-btn subbed'; toast(`🔔 Subscribed to ${CH[ch].n}`); }
+  else { S.subbed.add(ch); $('subBtn').textContent = 'Subscribed'; $('subBtn').className = 'sub-btn subbed'; toast(`Subscribed to ${CH[ch].n}`); }
 });
 
 // Import buttons
@@ -1846,8 +1931,8 @@ $('homeLink').addEventListener('click', e => { e.preventDefault(); goHome(); });
 // Sidebar nav items — skip the v9 categorized-menu items (those use
 // data-lp-act / data-lp-chip / data-lp-modal / data-lp-dev-tool and
 // are handled by the LoadPlay v9 IIFE later in this file). This guard
-// prevents the legacy "📂 Undefined" toast spam and stale active-state
-// changes on items that don't carry a dataset.view.
+// prevents toast spam and stale active-state changes on items that
+// don't carry a dataset.view.
 QQ('.nav-item').forEach(item => {
   item.addEventListener('click', () => {
     if (item.hasAttribute('data-lp-act') ||
@@ -1858,19 +1943,7 @@ QQ('.nav-item').forEach(item => {
     item.classList.add('active');
     const view = item.dataset.view;
     if (view === 'home') goHome();
-    else if (view) toast(`📂 ${view.charAt(0).toUpperCase()+view.slice(1)}`);
     if (S.sidebarDrawer) { $('sidebar').classList.remove('open'); $('drawerOverlay').classList.remove('show'); }
-  });
-});
-
-// Bottom nav
-QQ('.bnav-item[data-view]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    QQ('.bnav-item').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const view = btn.dataset.view;
-    if (view === 'home') goHome();
-    else toast(`📂 ${view.charAt(0).toUpperCase()+view.slice(1)}`);
   });
 });
 
@@ -1920,7 +1993,7 @@ document.addEventListener('keydown', e => {
     else if (S.currentVid) closePlayer();
     else if ($('sidebar').classList.contains('open')) { $('sidebar').classList.remove('open'); $('drawerOverlay').classList.remove('show'); }
   }
-  if (e.key === ' ' && S.currentVid && !$('importModal').classList.contains('open')) { e.preventDefault(); togglePlay(); }
+  if (e.key === '' && S.currentVid && !$('importModal').classList.contains('open')) { e.preventDefault(); togglePlay(); }
 });
 
 /* ── IMPORT ──────────────────────────────────────── */
@@ -1940,10 +2013,10 @@ dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
 dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
 
 function handleFile(file) {
-  if (!file || !file.type.startsWith('video/')) { toast('⚠️ Please choose a video file'); return; }
+  if (!file || !file.type.startsWith('video/')) { toast('Please choose a video file'); return; }
   closeImport();
   const url = URL.createObjectURL(file);
-  const fv = {id: Date.now(), t: file.name.replace(/\.[^/.]+$/,''), ch:0, v:'Local', a:'Just now', d:'--:--', cat:'local', em:'📁', desc:'Local video imported from your device.'};
+  const fv = {id: Date.now(), t: file.name.replace(/\.[^/.]+$/,''), ch:0, v:'Local', a:'Just now', d:'--:--', cat:'local', em:'', desc:'Local video imported from your device.'};
   openPlayer(fv);
   setTimeout(() => {
     const vel = $('videoEl');
@@ -1952,7 +2025,7 @@ function handleFile(file) {
     $('fakePlayer').style.display = 'none';
     vel.play().then(() => setPlayState(true)).catch(()=>{});
   }, 400);
-  toast('✅ Video loaded successfully');
+  toast('Video loaded');
 }
 
 /* ── TOAST ───────────────────────────────────────── */
@@ -1965,12 +2038,12 @@ function toast(msg) {
 
 /* ── PWA INSTALL ─────────────────────────────────── */
 let deferredInstall = null;
-window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; setTimeout(() => toast('📲 Install LoadPlay as an app!'), 4000); });
-window.addEventListener('appinstalled', () => toast('✅ LoadPlay installed!'));
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; setTimeout(() => toast('Install LoadPlay as an app'), 4000); });
+window.addEventListener('appinstalled', () => toast('LoadPlay installed'));
 
 /* ── ONLINE/OFFLINE ──────────────────────────────── */
-window.addEventListener('offline', () => toast('📡 Offline — cached content available'));
-window.addEventListener('online',  () => toast('✅ Back online'));
+window.addEventListener('offline', () => toast('Offline — cached content available'));
+window.addEventListener('online',  () => toast('Back online'));
 </script>
 
 <!-- ─────────────────────────────────────────────────────────────────
@@ -2050,7 +2123,7 @@ window.addEventListener('online',  () => toast('✅ Back online'));
   <div class="lp-modal-box creator">
     <button class="lp-modal-x" data-lp-close="lp-creator-modal" aria-label="Close">×</button>
     <h3>Become a LoadPlay Creator</h3>
-    <p class="lp-m-lead">Upload PWA cinema packages, HTML projects, MP4, audio stories, and book films. Get a creator channel, drafts, trailers, and project pages — like YouTube. Tubi-style genre rails distribute your work.</p>
+    <p class="lp-m-lead">Upload PWA cinema packages, HTML projects, MP4, audio stories, and book films. Get a creator page, drafts, trailers, and project pages — like YouTube. Tubi-style genre rails distribute your work.</p>
 
     <div class="lp-tier-grid">
       <div class="lp-tier">
@@ -2070,7 +2143,7 @@ window.addEventListener('online',  () => toast('✅ Back online'));
         <ul>
           <li>Upload videos, PWA &amp; HTML</li>
           <li>Drafts &amp; published projects</li>
-          <li>Creator channel + trailers</li>
+          <li>Creator page + trailers</li>
           <li>Project pages with credits</li>
           <li>Safety scan (no profanity / nudity)</li>
         </ul>
@@ -2126,6 +2199,26 @@ window.addEventListener('online',  () => toast('✅ Back online'));
   </div>
 </div>
 
+<!-- Splash feature info popover (Stream Anywhere / Creators Originals /
+     Digital Cinema / Private & Secure → tap card opens this) -->
+<div id="lp-info-modal" class="lp-modal" role="dialog" aria-label="Feature details">
+  <div class="lp-modal-box">
+    <button class="lp-modal-x" data-lp-close="lp-info-modal" aria-label="Close">×</button>
+    <h3 id="lp-info-title"></h3>
+    <p class="lp-m-lead" id="lp-info-blurb"></p>
+    <div class="lp-modal-actions">
+      <button class="lp-btn primary" data-lp-close="lp-info-modal">Got it</button>
+    </div>
+  </div>
+</div>
+
+<!-- Global LoadPlay copyright (matches Load main pattern) -->
+<footer class="lp-copyright">
+  <strong>Copyright &copy; 2026 LBond. All Rights Reserved.</strong><br>
+  LoadPlay — Stream Digital Cinema Anywhere. Runs on your iPad. No tracking, no accounts beyond this device.<br>
+  Part of the Load suite. <a href="../load/">Main Load</a> &middot; <a href="../LoadStudio/">Load Studio</a>
+</footer>
+
 <script>
 /* ─── LoadPlay v9 — A2HS + Auth + Creator + Developer wire-up ───
    Pure additive layer. Doesn't reach into loadplay2's state/render. */
@@ -2167,7 +2260,7 @@ window.addEventListener('online',  () => toast('✅ Back online'));
   }
   // Sidebar Content Section keys → matching chip data-cat. Re-aligned
   // for v14 chip renames: Originals → Load Originals, PWA Originals →
-  // Thrillers, Creator Channels → Creators Originals; Podcasts added.
+  // Thrillers, Creator label → Creators Originals; Podcasts added.
   // Sidebar still lists "PWA Originals" so we route it to "all" since
   // there's no longer a direct PWA Originals chip.
   var CHIP_MAP = {
@@ -2183,15 +2276,23 @@ window.addEventListener('online',  () => toast('✅ Back online'));
     'kids':          'kids',
     'news':          'news'
   };
-  // Splash <-> stream view swap. Splash ends at the footer; tapping
-  // Browse / a content-section / Start Watching opens loadplay2's
-  // streaming UI in place. Tap Home / "Back to LoadPlay home" to return.
-  function showSplash() {
-    document.body.classList.remove('lp-streaming');
+  // ── View swap (splash / stream / page) ───────────────────────
+  // Three view modes share #homeView. body classes drive visibility:
+  // none → splash. lp-streaming → loadplay2 stream view. lp-paging →
+  // generic placeholder page (Marketplace, Help, sidebar pages, post-
+  // sign-in home feed). Splash always ends at the footer; nothing
+  // auto-flows.
+  function clearViews() {
+    document.body.classList.remove('lp-streaming','lp-paging');
     var sv = $$('lp-stream-view'); if (sv) sv.classList.remove('on');
+    var pg = $$('lp-page'); if (pg) pg.hidden = true;
+  }
+  function showSplash() {
+    clearViews();
     var home = $$('lp-home'); if (home) home.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   function showStream() {
+    clearViews();
     document.body.classList.add('lp-streaming');
     var sv = $$('lp-stream-view'); if (sv) sv.classList.add('on');
     var c = $$('chipsBar'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -2200,58 +2301,332 @@ window.addEventListener('online',  () => toast('✅ Back online'));
     closeSidebarSafe();
     showStream();
     clickChip(CHIP_MAP[key] || 'all');
-    if (window.toast) window.toast('Showing ' + key.replace(/-/g, ' '));
   }
-  // Spec actions (Viewer / Creator / Safety / Platform).
-  var ACT_LABELS = {
-    'clean-stream':  'Clean Stream Rules — no profanity, no nudity, safe thumbnails on every upload.',
-    'safety-scan':   'Safety Scan runs on every upload before publishing.',
-    'content-rules': 'No profanity / no nudity across profiles, uploads, titles, bios, and thumbnails.',
-    'rights':        'Rights & Credits — declared in the upload wizard (creator-side metadata).',
-    'creator-profile': 'Creator Profile — display name, banner, channel, drafts, published projects.',
-    'drafts':        'Drafts — unpublished uploads live here before you publish.',
-    'favorites':     'Favorites — coming soon. Save items from the player.',
-    'profiles':      'Viewer Profiles — sign in or create an account to set yours up.'
+
+  // Generic page renderer: title + blurb + arbitrary innerHTML extra.
+  function showPage(opts) {
+    closeSidebarSafe();
+    clearViews();
+    document.body.classList.add('lp-paging');
+    var pg = $$('lp-page'); if (pg) pg.hidden = false;
+    $$('lp-page-title').textContent = opts.title || '';
+    $$('lp-page-blurb').textContent = opts.blurb || '';
+    $$('lp-page-extra').innerHTML   = opts.extra || '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── Page registry (generic cards) ────────────────────────────
+  function cards(arr) {
+    return arr.map(function (c) {
+      return '<div class="lp-page-card"><h3>' + c.t + '</h3><p>' + c.b + '</p></div>';
+    }).join('');
+  }
+  var PAGES = {
+    'continue': {
+      title: 'Continue Watching',
+      blurb: 'Pick up where you left off. Anything you started will appear here so you can resume in one tap.',
+      extra: cards([
+        { t: 'No items yet', b: 'When you start a video, LoadPlay remembers your spot. Open one from Browse to begin.' }
+      ])
+    },
+    'mylist': {
+      title: 'My List',
+      blurb: 'Items you save from the player land here.',
+      extra: cards([
+        { t: 'Empty list', b: 'Tap any video, then tap Save. Saved items show up here so you can find them later.' }
+      ])
+    },
+    'favorites': {
+      title: 'Favorites',
+      blurb: 'Tap the heart on any video to add it to your Favorites.',
+      extra: cards([
+        { t: 'No favorites yet', b: 'Heart your favorites in the player and they will collect here.' }
+      ])
+    },
+    'creator-profile': {
+      title: 'Creator Profile',
+      blurb: 'Your display name, banner, drafts, and published projects all live here. Sign up as a Creator to set one up.',
+      extra: cards([
+        { t: 'Display name & banner', b: 'A public name and a banner image people see on your creator page.' },
+        { t: 'Published projects',     b: 'Everything you have published shows up here, newest first.' },
+        { t: 'Drafts',                 b: 'Unpublished work you can keep iterating on before going live.' }
+      ])
+    },
+    'drafts': {
+      title: 'Drafts',
+      blurb: 'Unpublished uploads. Pick one to keep working on it, or start a new upload.',
+      extra: cards([
+        { t: 'No drafts', b: 'Use Creator Upload to start a new project. It saves as a draft until you publish.' }
+      ])
+    },
+    'rights': {
+      title: 'Rights & Credits',
+      blurb: 'Declared in the upload wizard. Owner, license, source material, and per-asset declarations — required before any project can publish to Load Play.',
+      extra: cards([
+        { t: 'Owner',           b: 'Creator name or company that holds rights to the project.' },
+        { t: 'License',         b: 'user-owned, public-domain, licensed, or platform-original.' },
+        { t: 'Source material', b: 'Book, script, public-domain source, or original manuscript.' },
+        { t: 'Asset declarations', b: 'Each image, audio, music file, and SFX gets a status (user-generated, user-recorded, licensed, public-domain).' }
+      ])
+    },
+    'clean-stream': {
+      title: 'Clean Stream Rules',
+      blurb: 'Every upload runs through a content scan before it can publish. No profanity, no nudity, safe thumbnails — across profiles, uploads, titles, bios, and creator surfaces.',
+      extra: cards([
+        { t: 'No profanity', b: 'Titles, captions, bios, comments, display names — all scanned.' },
+        { t: 'No nudity',     b: 'Cover images, thumbnails, and in-frame content are checked.' },
+        { t: 'Safe thumbnails', b: 'Auto-generated thumbnails are reviewed before they appear in any rail.' }
+      ])
+    },
+    'safety-scan': {
+      title: 'Safety Scan',
+      blurb: 'Each upload is scanned before it can publish. Failed scans return to Drafts with notes so you can fix and resubmit.',
+      extra: cards([
+        { t: 'Image scan',    b: 'Posters, scene images, and thumbnails are checked.' },
+        { t: 'Text scan',     b: 'Titles, descriptions, captions, and credits are scanned.' },
+        { t: 'Audio review',  b: 'Spoken words and lyrics are checked when a transcript is available.' }
+      ])
+    },
+    'content-rules': {
+      title: 'No Profanity / No Nudity',
+      blurb: 'Hard rules across every user-facing field. Load Play does not host adult content. These rules are enforced at upload, not after the fact.',
+      extra: cards([
+        { t: 'Why',  b: 'Load Play is family-safe by default, like Tubi for clean content.' },
+        { t: 'How',  b: 'Automated scan + a manual review queue for edge cases.' },
+        { t: 'When', b: 'Before publish — never after. Items that fail go back to Drafts.' }
+      ])
+    },
+    'subscriptions': {
+      title: 'Subscriptions',
+      blurb: 'Pages you follow appear here. Their newest videos and series load first.',
+      extra: cards([
+        { t: 'Not following anyone yet', b: 'Tap Subscribe on any creator page to start a feed.' }
+      ])
+    },
+    'library': {
+      title: 'Library',
+      blurb: 'Your imported videos, PWA cinema packages, and saved items.',
+      extra: cards([
+        { t: 'Imported videos', b: 'Local MP4, MOV, WebM, or MKV files you played in LoadPlay.' },
+        { t: 'PWA cinema',      b: 'Load Studio packages you opened in LoadPlay.' },
+        { t: 'Saved items',     b: 'Items you tapped Save on from any video page.' }
+      ])
+    }
   };
+
+  // ── Marketplace page (Daz/Poser-style merch grid, our colors) ─
+  var MP_DATA = [
+    { cat: 'characters', n: 'Narrator Voice — Warm Elder',  by: 'LoadPlay Originals', price: 'Free' },
+    { cat: 'characters', n: 'Child Voice Pack — Friendly',   by: 'LoadPlay Originals', price: 'Free' },
+    { cat: 'characters', n: 'Hero Lead Character Bible',     by: 'Studio Vault',       price: '$4.99' },
+    { cat: 'wardrobe',   n: 'Period Wardrobe — Edwardian',   by: 'Studio Vault',       price: '$2.99' },
+    { cat: 'wardrobe',   n: 'Modern Office Wardrobe Pack',   by: 'Studio Vault',       price: 'Free' },
+    { cat: 'wardrobe',   n: 'Sci-Fi Crew Uniforms',          by: 'Studio Vault',       price: '$3.49' },
+    { cat: 'props',      n: 'Cinematic Title Card Pack',     by: 'Load Originals',     price: 'Free' },
+    { cat: 'props',      n: 'Vintage Newsroom Props',        by: 'Studio Vault',       price: '$1.99' },
+    { cat: 'locations',  n: 'Coastal Town Backdrop Set',     by: 'Studio Vault',       price: '$5.99' },
+    { cat: 'locations',  n: 'Classroom & Library Locations', by: 'Studio Vault',       price: 'Free' },
+    { cat: 'voices',     n: 'Animated Storyteller Voices',   by: 'LoadPlay Originals', price: '$2.99' },
+    { cat: 'voices',     n: 'Documentary Narrator Pack',     by: 'LoadPlay Originals', price: 'Free' },
+    { cat: 'templates',  n: 'Book Cinema Starter Template',  by: 'Load Studio',        price: 'Free' },
+    { cat: 'templates',  n: 'Reality Pilot Template',        by: 'Load Studio',        price: '$3.99' },
+    { cat: 'asset-packs', n: 'Animation Asset Bundle',       by: 'Studio Vault',       price: '$7.99' },
+    { cat: 'asset-packs', n: 'Documentary B-Roll Pack',      by: 'Studio Vault',       price: '$4.99' }
+  ];
+  var MP_CATS = [
+    { id: 'all',         label: 'All' },
+    { id: 'characters',  label: 'Characters' },
+    { id: 'wardrobe',    label: 'Wardrobe' },
+    { id: 'props',       label: 'Props' },
+    { id: 'locations',   label: 'Locations' },
+    { id: 'voices',      label: 'Voices' },
+    { id: 'templates',   label: 'Templates' },
+    { id: 'asset-packs', label: 'Asset Packs' }
+  ];
+  function mpThumb() {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18l-1.5 9a2 2 0 0 1-2 1.7H6.5a2 2 0 0 1-2-1.7L3 7z"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>';
+  }
+  function renderMarketplace(activeCat) {
+    activeCat = activeCat || 'all';
+    var catBar = MP_CATS.map(function (c) {
+      return '<button class="lp-mp-cat' + (c.id === activeCat ? ' active' : '') + '" data-lp-mp-cat="' + c.id + '" type="button">' + c.label + '</button>';
+    }).join('');
+    var items = (activeCat === 'all') ? MP_DATA : MP_DATA.filter(function (i) { return i.cat === activeCat; });
+    var grid = items.map(function (i) {
+      var pc = i.price === 'Free' ? '<span class="lp-mp-price free">Free</span>' : '<span class="lp-mp-price">' + i.price + '</span>';
+      return '<button class="lp-mp-tile" data-lp-mp-item="' + i.n + '" type="button">' +
+             '<span class="lp-mp-thumb">' + mpThumb() + '</span>' +
+             '<span class="lp-mp-meta"><div class="lp-mp-name">' + i.n + '</div><div class="lp-mp-by">by ' + i.by + '</div>' + pc + '</span></button>';
+    }).join('');
+    showPage({
+      title: 'Marketplace',
+      blurb: 'Character packs, wardrobe, props, locations, voices, templates, and asset bundles for Load Studio creators. Free items are usable immediately; paid items unlock after checkout (coming soon).',
+      extra: '<div class="lp-mp-cats" id="lpMpCats">' + catBar + '</div><div class="lp-mp-grid">' + grid + '</div>'
+    });
+  }
+  // Marketplace category tab clicks
+  document.addEventListener('click', function (e) {
+    var c = e.target.closest('[data-lp-mp-cat]');
+    if (c) { e.preventDefault(); renderMarketplace(c.getAttribute('data-lp-mp-cat')); return; }
+    var i = e.target.closest('[data-lp-mp-item]');
+    if (i && window.toast) { window.toast(i.getAttribute('data-lp-mp-item') + ' — preview coming soon'); }
+  });
+
+  // ── Help page (step-by-step) ─────────────────────────────────
+  var HELP_STEPS = [
+    { t: 'Install LoadPlay on your iPad', b: 'Tap the Install banner up top. In Safari: Share → Add to Home Screen → Add. LoadPlay then opens fullscreen, even with Airplane Mode on.' },
+    { t: 'Sign up or sign in',            b: 'Tap Start Watching on the splash. Pick the Sign Up tab, fill in your details. Your account stays on this device — no server.' },
+    { t: 'Browse the genre rails',        b: 'Tap Browse to land on the streaming view. Use the chip row at the top — All, Featured, Movies, Series, Documentaries, Kids, and more.' },
+    { t: 'Save to My List',               b: 'In the player, tap Save. Saved items appear under My List in the side menu.' },
+    { t: 'Continue Watching',             b: 'Anything you started will appear under Continue Watching so you can resume in one tap.' },
+    { t: 'Become a Creator',              b: 'Tap Creator Upload on the splash. Pick the Creator tier (free) and sign up. You can then upload videos, PWA cinema packages, and HTML projects.' },
+    { t: 'Upload your first project',     b: 'Use the Upload button in the top bar (or Creator Upload tile). Add poster, trailer, category, rights, and credits — then publish or save as a draft.' },
+    { t: 'Marketplace',                   b: 'Open Marketplace in the side menu. Browse character packs, wardrobe, props, locations, voices, templates. Free items unlock instantly.' },
+    { t: 'Developer Lab',                 b: 'Open Developer Lab. Sign in with your developer credentials to unlock PWA diagnostics, manifest checker, service-worker checker, API keys, and the package validator.' },
+    { t: 'Hard refresh (last resort)',    b: 'If anything looks stale, tap the circular refresh button in the top toolbar. It clears caches and forces a fresh load.' }
+  ];
+  function renderHelp() {
+    var steps = HELP_STEPS.map(function (s, i) {
+      return '<div class="lp-help-step"><div class="lp-help-num">' + (i + 1) + '</div>' +
+             '<div class="lp-help-body"><h4>' + s.t + '</h4><p>' + s.b + '</p></div></div>';
+    }).join('');
+    showPage({
+      title: 'Help',
+      blurb: 'Step-by-step walkthrough of every LoadPlay feature.',
+      extra: steps
+    });
+  }
+
+  // ── YouTube-style home feed (post sign-in landing) ───────────
+  var FEED_RAILS = [
+    { title: 'Picked for you', cat: 'Originals', items: [
+      { t: 'Welcome to LoadPlay', by: 'LoadPlay' },
+      { t: 'Top Originals This Week', by: 'Load Originals' },
+      { t: 'New Documentaries', by: 'Load Originals' },
+      { t: 'Family-Safe Series', by: 'Load Originals' }
+    ]},
+    { title: 'Continue Watching', cat: 'Resume', items: [
+      { t: 'Nothing in progress yet', by: 'Tap any video to start' }
+    ]},
+    { title: 'Trending in Documentaries', cat: 'Docs', items: [
+      { t: 'Stories from the Coast', by: 'Documentaries' },
+      { t: 'Inside Book Cinema',     by: 'Documentaries' },
+      { t: 'Quiet Engineers',        by: 'Documentaries' },
+      { t: 'Voices of the Studio',   by: 'Documentaries' }
+    ]},
+    { title: 'Newly Added Movies', cat: 'Movies', items: [
+      { t: 'Coastal Light',  by: 'Movies' },
+      { t: 'Late Train',     by: 'Movies' },
+      { t: 'Echoes of May',  by: 'Movies' },
+      { t: 'The Quiet Hour', by: 'Movies' }
+    ]},
+    { title: 'Kids Picks', cat: 'Kids', items: [
+      { t: 'Story Time — Volume One', by: 'Kids' },
+      { t: 'Brave Little Sailor',     by: 'Kids' },
+      { t: 'Counting Stars',          by: 'Kids' },
+      { t: 'Tide Pool Friends',       by: 'Kids' }
+    ]}
+  ];
+  function feedThumb(cat) {
+    return '<div class="lp-feed-thumb"><span class="lp-feed-thumb-cat">' + cat + '</span></div>';
+  }
+  function renderHomeFeed() {
+    var u = loadUser() || {};
+    var name = u.name || u.user || 'friend';
+    var rails = FEED_RAILS.map(function (r) {
+      var cards = r.items.map(function (it) {
+        return '<button class="lp-feed-card" type="button">' + feedThumb(r.cat) +
+               '<div class="lp-feed-meta"><div class="lp-feed-title">' + it.t + '</div><div class="lp-feed-byline">' + it.by + '</div></div></button>';
+      }).join('');
+      return '<div class="lp-feed-rail"><h3>' + r.title + '</h3><div class="lp-feed-grid">' + cards + '</div></div>';
+    }).join('');
+    showPage({
+      title: '',
+      blurb: '',
+      extra: '<div class="lp-feed-greeting">Welcome, ' + name + '</div>' +
+             '<p class="lp-feed-sub">Your personalized LoadPlay home — like YouTube, just cleaner.</p>' +
+             rails
+    });
+  }
+
+  // ── Splash feature info popover ──────────────────────────────
+  var INFO = {
+    'stream-anywhere':  { title: 'Stream Anywhere', blurb: 'LoadPlay is offline-first. Once installed to your iPad home screen, it opens fullscreen and runs even with Airplane Mode on. Same content, any device, anywhere.' },
+    'creators-originals': { title: 'Creators Originals', blurb: 'Independent creators publish their original series, films, and shorts straight to LoadPlay. Sign up as a Creator to get a profile page, drafts, trailers, and your own project pages.' },
+    'digital-cinema':   { title: 'Digital Cinema', blurb: 'Curated films, series, and shorts presented in the highest quality your device can play. Includes the new PWA cinema format from Load Studio — playable like video, editable like a project.' },
+    'private-secure':   { title: 'Private & Secure', blurb: 'Everything stays on your device. No tracking, no analytics, no third-party data sharing. LoadPlay does not need an account to watch — sign-in only personalizes your home feed and creator surface.' }
+  };
+  document.addEventListener('click', function (e) {
+    var f = e.target.closest('[data-lp-info]');
+    if (!f) return;
+    e.preventDefault();
+    var k = f.getAttribute('data-lp-info');
+    var info = INFO[k]; if (!info) return;
+    $$('lp-info-title').textContent = info.title;
+    $$('lp-info-blurb').textContent = info.blurb;
+    openModal('lp-info-modal');
+  });
+
+  // ── Bottom-nav (mobile) — wired here because app.js uses the
+  // wrong selector .bnav-btn vs the markup's .bnav-item, and the
+  // inline handler only toasts. We route to real pages instead.
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('.bnav-item[data-view]');
+    if (!b) return;
+    e.preventDefault();
+    document.querySelectorAll('.bnav-item').forEach(function (x) { x.classList.remove('active'); });
+    b.classList.add('active');
+    switch (b.getAttribute('data-view')) {
+      case 'home':          showSplash(); return;
+      case 'shorts':        showStream(); clickChip('shorts'); return;
+      case 'subscriptions': showPage(PAGES.subscriptions); return;
+      case 'library':       showPage(PAGES.library); return;
+    }
+  });
+
+  // ── Chip "now showing" header — every chip click updates it ──
+  function chipLabel(cat) {
+    var btn = document.querySelector('.chip[data-cat="' + cat + '"]');
+    return btn ? btn.textContent.trim() : cat;
+  }
+  document.addEventListener('click', function (e) {
+    var c = e.target.closest('.chip[data-cat]');
+    if (!c) return;
+    var cat = c.getAttribute('data-cat');
+    var t = $$('lpNowTitle'); if (t) t.textContent = chipLabel(cat);
+    var b = $$('lpNowBlurb');
+    if (b) b.textContent = (cat === 'all')
+      ? 'Browse everything LoadPlay has loaded.'
+      : 'Showing ' + chipLabel(cat).toLowerCase() + '. Items in this section will appear as creators publish.';
+  });
+
   function runAct(key) {
     closeSidebarSafe();
     switch (key) {
       case 'home':           showSplash(); return;
       case 'browse':         showStream(); clickChip('all'); return;
       case 'start-watching': showStream(); clickChip('all'); return;
-      case 'continue':       showStream(); clickChip('all');
-                              if (window.toast) window.toast('Continue Watching'); return;
-      case 'mylist':         showStream(); clickChip('all');
-                              if (window.toast) window.toast('My List — saved items'); return;
-      case 'clips':          showStream(); clickChip('shorts');
-                              if (window.toast) window.toast('Clips → Shorts'); return;
+      case 'continue':       showPage(PAGES.continue); return;
+      case 'mylist':         showPage(PAGES.mylist); return;
+      case 'favorites':      showPage(PAGES.favorites); return;
+      case 'profiles':       openModal('lp-auth-modal', { tab: 'signin' }); return;
+      case 'clips':          showStream(); clickChip('shorts'); return;
       case 'upload':
-      case 'upload-wizard': {
-        var b = $$('uploadBtn'); if (b) b.click(); return;
-      }
-      case 'drafts': {
-        var b2 = $$('uploadBtn'); if (b2) b2.click();
-        if (window.toast) window.toast(ACT_LABELS.drafts); return;
-      }
-      case 'creator-profile': openModal('lp-creator-modal'); return;
-      case 'profiles':        openModal('lp-auth-modal', { tab: 'signin' }); return;
-      case 'favorites':       if (window.toast) window.toast(ACT_LABELS.favorites); return;
-      case 'rights':
-      case 'clean-stream':
-      case 'safety-scan':
-      case 'content-rules':
-        if (window.toast) window.toast(ACT_LABELS[key]); return;
-      case 'marketplace':
-        if (window.toast) window.toast('Marketplace — character packs, wardrobe, voices, templates. Coming soon.');
-        return;
-      case 'search': {
-        var s = $$('searchInput');
-        if (s) { s.focus(); s.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-        return;
-      }
-      case 'help': openModal('lp-auth-modal', { tab: 'signup', tour: true }); return;
+      case 'upload-wizard':  { var b = $$('uploadBtn'); if (b) b.click(); return; }
+      case 'drafts':         showPage(PAGES.drafts); return;
+      case 'creator-profile': showPage(PAGES['creator-profile']); return;
+      case 'rights':         showPage(PAGES.rights); return;
+      case 'clean-stream':   showPage(PAGES['clean-stream']); return;
+      case 'safety-scan':    showPage(PAGES['safety-scan']); return;
+      case 'content-rules':  showPage(PAGES['content-rules']); return;
+      case 'marketplace':    renderMarketplace(); return;
+      case 'help':           renderHelp(); return;
+      case 'home-feed':      renderHomeFeed(); return;
+      case 'search':         { var s = $$('searchInput'); if (s) { s.focus(); s.scrollIntoView({ behavior: 'smooth', block: 'start' }); } return; }
     }
   }
+  // Expose so the inline auth handlers can route post-sign-in.
+  window.__lpRunAct = runAct;
   function devToolLabel(k) {
     return {
       'diagnostics': 'PWA Diagnostics',
@@ -2347,6 +2722,7 @@ window.addEventListener('online',  () => toast('✅ Back online'));
     saveUser({ user: who, role: 'viewer', signedInAt: Date.now() });
     closeModal('lp-auth-modal');
     if (window.toast) window.toast('Signed in as ' + who);
+    renderHomeFeed();
   });
   var suf = $$('lp-signup-form');
   if (suf) suf.addEventListener('submit', function (e) {
@@ -2357,7 +2733,8 @@ window.addEventListener('online',  () => toast('✅ Back online'));
     if (!name || !user) return;
     saveUser({ user: user, name: name, email: email, role: 'viewer', createdAt: Date.now() });
     closeModal('lp-auth-modal');
-    if (window.toast) window.toast('Welcome to LoadPlay, ' + name + '!');
+    if (window.toast) window.toast('Welcome to LoadPlay, ' + name);
+    renderHomeFeed();
   });
 
   // ── Creator subscription actions ──────────────────────────────
@@ -2435,7 +2812,7 @@ window.addEventListener('online',  () => toast('✅ Back online'));
     { title: 'Browse like Tubi', body: 'Scroll the genre rails — Featured, Newly Added, Originals, Documentaries, Book Cinema, PWA Originals, Kids, News. Tap any tile to play.' },
     { title: 'Build your list', body: 'Save anything to My List, and Continue Watching keeps your spot — synced to this device, no account needed for basic use.' },
     { title: 'Watch anything Load creates', body: 'LoadPlay plays MP4, WebM, audio stories, HTML cinema packages, and Load Studio .cinepwa packages. The viewer just presses play.' },
-    { title: 'Become a creator', body: 'Sign up free, then upload your PWA cinema, HTML projects, or MP4. Get a creator channel, drafts, trailers, and project pages — like YouTube.' },
+    { title: 'Become a creator', body: 'Sign up free, then upload your PWA cinema, HTML projects, or MP4. Get a creator page, drafts, trailers, and project pages — like YouTube.' },
     { title: 'Developer mode', body: 'A separate Developer Lab unlocks PWA diagnostics, manifest tests, the package validator, and provider tests — for builders extending LoadPlay.' }
   ];
   var tourIdx = 0;
@@ -2460,7 +2837,7 @@ window.addEventListener('online',  () => toast('✅ Back online'));
   var tn = $$('lp-tour-next');
   if (tn) tn.addEventListener('click', function () {
     if (tourIdx < TOUR.length - 1) { tourIdx++; renderTour(); }
-    else { closeModal('lp-auth-modal'); showStream(); clickChip('all'); }
+    else { closeModal('lp-auth-modal'); renderHomeFeed(); }
   });
   var tp = $$('lp-tour-prev');
   if (tp) tp.addEventListener('click', function () { if (tourIdx > 0) { tourIdx--; renderTour(); } });

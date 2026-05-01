@@ -420,7 +420,7 @@ function closeImport() {
 
 function loadLocalFile(file) {
   if (!file || !file.type.startsWith('video/')) {
-    showToast('⚠️ Please select a valid video file');
+    showToast('️ Please select a valid video file');
     return;
   }
   closeImport();
@@ -437,7 +437,7 @@ function loadLocalFile(file) {
     fakeScreen.style.display = 'none';
     videoEl.play().catch(()=>{});
   }, 400);
-  showToast('✅ Video imported successfully');
+  showToast(' Video imported successfully');
 }
 
 /* ── DRAG & DROP ───────────────────────────────────── */
@@ -456,7 +456,7 @@ $('likeBtn')?.addEventListener('click', () => {
   if (!state.currentVideo) return;
   const id = state.currentVideo.id;
   if (state.likedVideos.has(id)) { state.likedVideos.delete(id); showToast('Removed from liked'); }
-  else { state.likedVideos.add(id); showToast('❤️ Added to liked'); }
+  else { state.likedVideos.add(id); showToast('️ Added to liked'); }
   $('likeBtn').classList.toggle('active', state.likedVideos.has(id));
 });
 
@@ -464,7 +464,7 @@ $('saveBtn')?.addEventListener('click', () => {
   if (!state.currentVideo) return;
   const id = state.currentVideo.id;
   if (state.savedVideos.has(id)) { state.savedVideos.delete(id); showToast('Removed from saved'); }
-  else { state.savedVideos.add(id); showToast('🔖 Saved to library'); }
+  else { state.savedVideos.add(id); showToast(' Saved to library'); }
   $('saveBtn').classList.toggle('active', state.savedVideos.has(id));
 });
 
@@ -480,7 +480,7 @@ $('subBtn')?.addEventListener('click', () => {
     state.subscribedCh.add(ch);
     $('subBtn').textContent = 'Subscribed';
     $('subBtn').classList.add('subbed');
-    showToast(`🔔 Subscribed to ${CHANNELS[ch].name}`);
+    showToast(` Subscribed to ${CHANNELS[ch].name}`);
   }
 });
 
@@ -488,7 +488,7 @@ $('shareBtn')?.addEventListener('click', () => {
   if (navigator.share) {
     navigator.share({ title: state.currentVideo?.title, url: location.href }).catch(()=>{});
   } else {
-    navigator.clipboard?.writeText(location.href).then(() => showToast('🔗 Link copied!'));
+    navigator.clipboard?.writeText(location.href).then(() => showToast(' Link copied!'));
   }
 });
 
@@ -537,7 +537,7 @@ function switchView(view) {
   mainContent.scrollTop = 0;
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (view !== 'home') {
-    showToast(`📂 ${view.charAt(0).toUpperCase()+view.slice(1)}`);
+    showToast(` ${view.charAt(0).toUpperCase()+view.slice(1)}`);
   }
 }
 
@@ -606,7 +606,7 @@ document.addEventListener('keydown', e => {
     else if (importModal.classList.contains('open')) closeImport();
     else if (state.sidebarOpen) closeSidebar();
   }
-  if (e.key === ' ' && state.playerOpen) { e.preventDefault(); togglePlay(); }
+  if (e.key === '' && state.playerOpen) { e.preventDefault(); togglePlay(); }
 });
 
 /* ── ONLINE/OFFLINE ──────────────────────────────── */
@@ -634,9 +634,9 @@ let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   deferredPrompt = e;
-  setTimeout(() => showToast('📲 Add LoadPlay to your home screen!'), 5000);
+  setTimeout(() => showToast(' Add LoadPlay to your home screen!'), 5000);
 });
-window.addEventListener('appinstalled', () => showToast('✅ LoadPlay installed!'));
+window.addEventListener('appinstalled', () => showToast(' LoadPlay installed!'));
 
 /* ── Load-style workspace tile routing (added v1.1) ───────────────────────── */
 (function () {
