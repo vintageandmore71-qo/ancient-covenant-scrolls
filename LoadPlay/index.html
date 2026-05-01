@@ -50,12 +50,13 @@ a{color:inherit;text-decoration:none}
   transition:opacity .4s ease, visibility .4s ease;
 }
 #splash.gone{opacity:0;visibility:hidden;pointer-events:none}
-.sp-logo{display:flex;align-items:center;gap:10px;animation:spIn .7s cubic-bezier(.34,1.56,.64,1) both}
+.sp-logo{display:flex;align-items:center;gap:14px;animation:spIn .7s cubic-bezier(.34,1.56,.64,1) both}
+.sp-icon{width:48px;height:48px;border-radius:10px;flex-shrink:0;object-fit:cover}
 @keyframes spIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:none}}
 .sp-wordmark{font-size:2.4rem;font-weight:700;letter-spacing:-1px;color:#fff}
-.sp-wordmark span{background:linear-gradient(90deg,#00e5ff,#00c853);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sp-wordmark span{background:none;-webkit-text-fill-color:inherit;color:inherit}
 .sp-bar{width:160px;height:3px;background:#2a2a2a;border-radius:3px;overflow:hidden}
-.sp-fill{height:100%;background:linear-gradient(90deg,#00e5ff,#00c853);border-radius:3px;animation:spLoad 2s ease forwards}
+.sp-fill{height:100%;background:linear-gradient(90deg,#ff5a5a,#ff8a8a);border-radius:3px;animation:spLoad 2s ease forwards}
 @keyframes spLoad{from{width:0}to{width:100%}}
 
 /* ── LAYOUT ────────────────────────────────────── */
@@ -631,8 +632,8 @@ a{color:inherit;text-decoration:none}
 @media (max-width:600px){.lp-toolrow{max-width:46vw;margin-left:6px}.lp-tool{width:34px;height:34px}}
 
 /* ── Load-style splash hero + workspace (added on top of YouTube-style streaming UI) ── */
-.lp-home-screen{position:relative;background:linear-gradient(180deg,#0f0f0f 0%,#0a0f17 50%,#0f0f0f 100%);padding-top:56px;padding-bottom:32px;border-bottom:1px solid var(--border)}
-.lp-splash-wrap{position:relative;width:100%;height:min(56vh,520px);min-height:280px;overflow:hidden;background:#000}
+.lp-home-screen{position:relative;background:linear-gradient(180deg,#0f0f0f 0%,#0a0f17 50%,#0f0f0f 100%);padding-bottom:32px;border-bottom:1px solid var(--border);margin-bottom:8px}
+.lp-splash-wrap{position:relative;width:100%;height:min(82vh,720px);min-height:420px;overflow:hidden;background:#000}
 .lp-splash-img{width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .8s ease}
 .lp-splash-wrap.loaded .lp-splash-img{opacity:1}
 .lp-splash-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,15,15,.0) 0%,rgba(15,15,15,.55) 65%,#0f0f0f 100%)}
@@ -690,19 +691,8 @@ a{color:inherit;text-decoration:none}
 <!-- SPLASH -->
 <div id="splash">
   <div class="sp-logo">
-    <svg width="36" height="36" viewBox="0 0 120 120" fill="none">
-      <defs>
-        <linearGradient id="sg" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stop-color="#00e5ff"/>
-          <stop offset="100%" stop-color="#00c853"/>
-        </linearGradient>
-      </defs>
-      <path d="M22 18 Q22 12 28 12 L72 12 Q96 12 96 36 L96 66 Q96 90 72 90 L52 90 L52 108 L28 90 Q22 90 22 84 Z"
-            stroke="url(#sg)" stroke-width="8" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
-      <circle cx="88" cy="72" r="5" fill="#00c8ff"/>
-      <path d="M94 66 Q102 58 102 48" stroke="#00c8ff" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-    </svg>
-    <div class="sp-wordmark">Load<span>Play</span></div>
+    <img class="sp-icon" src="icon.png" alt="LoadPlay" width="48" height="48">
+    <div class="sp-wordmark">LoadPlay</div>
   </div>
   <div class="sp-bar"><div class="sp-fill"></div></div>
 </div>
@@ -710,77 +700,6 @@ a{color:inherit;text-decoration:none}
 <!-- APP -->
 <div id="app">
 
-  <!-- ── LOAD-STYLE SPLASH HOME (scrolls into the streaming app) ── -->
-  <section id="lp-home" class="lp-home-screen">
-    <div class="lp-splash-wrap">
-      <img class="lp-splash-img"
-           src="load-play-splash-768w-compressed.jpg"
-           alt="LoadPlay — stream the Load way"
-           onload="this.parentElement.classList.add('loaded')">
-      <div class="lp-splash-overlay"></div>
-      <div class="lp-splash-text">
-        <div class="lp-tag">Part of Load</div>
-        <h1 class="lp-h1">LoadPlay</h1>
-        <p class="lp-sub">Stream, create, publish — clean, free, offline-ready.</p>
-      </div>
-    </div>
-
-    <!-- Get-started action buttons (Load-style, in LoadPlay color scheme) -->
-    <div class="lp-actions">
-      <button class="lp-big primary" id="lp-get-started" onclick="document.getElementById('lp-workspace').scrollIntoView({behavior:'smooth',block:'start'})">
-        <span class="lp-big-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="6,4 20,12 6,20" fill="currentColor" stroke="none"/></svg></span>
-        <span class="lp-big-lbl">Start Watching</span>
-      </button>
-      <button class="lp-big secondary" onclick="document.getElementById('lp-workspace').scrollIntoView({behavior:'smooth',block:'start'})">
-        <span class="lp-big-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><circle cx="12" cy="14.5" r="1.4" fill="currentColor" stroke="none"/></svg></span>
-        <span class="lp-big-lbl">Open Library</span>
-      </button>
-      <button class="lp-big tertiary" onclick="document.getElementById('uploadBtn').click()">
-        <span class="lp-big-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><polyline points="6,10 12,4 18,10"/><path d="M4 20h16"/></svg></span>
-        <span class="lp-big-lbl">Creator Upload</span>
-      </button>
-    </div>
-
-    <!-- Workspace tiles (Load-style monoline SVG icons) -->
-    <div id="lp-workspace" class="lp-workspace">
-      <div class="lp-ws-row">
-
-        <button class="lp-ws-tile" data-tile="viewer">
-          <span class="lp-ws-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/><circle cx="12" cy="8" r="1.4" fill="#00e5ff" stroke="none"/></svg></span>
-          <span class="lp-ws-label">Viewer Profiles</span>
-          <span class="lp-ws-sub">Profile photo, banner, My List, watch history</span>
-        </button>
-
-        <button class="lp-ws-tile" data-tile="creator">
-          <span class="lp-ws-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M12 16V8"/><polyline points="8,12 12,8 16,12"/><circle cx="20" cy="6.5" r="1.2" fill="#00c853" stroke="none"/></svg></span>
-          <span class="lp-ws-label">Creator Upload</span>
-          <span class="lp-ws-sub">Upload videos, PWA cinema, HTML packages</span>
-        </button>
-
-        <button class="lp-ws-tile" data-tile="cleanstream">
-          <span class="lp-ws-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
-          <span class="lp-ws-label">Clean Stream Rules</span>
-          <span class="lp-ws-sub">No profanity, no nudity, safe thumbnails</span>
-        </button>
-
-        <button class="lp-ws-tile" data-tile="devlab">
-          <span class="lp-ws-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v4l4 10a3 3 0 0 1-3 4H8a3 3 0 0 1-3-4l4-10z"/><path d="M9 11h6"/><circle cx="11" cy="16" r="1.1" fill="#00c853" stroke="none"/><circle cx="14" cy="14" r="0.8" fill="#00e5ff" stroke="none"/></svg></span>
-          <span class="lp-ws-label">Developer Lab</span>
-          <span class="lp-ws-sub">PWA diagnostics, API keys, package checks</span>
-        </button>
-
-      </div>
-
-      <h2 class="lp-channels-heading">Load Play</h2>
-      <p class="lp-channels-hint">Browse genre rails below — featured, originals, documentaries, kids, and more.</p>
-
-      <div class="lp-back-to-load-row">
-        <a href="../load/" class="lp-back-load">← Return to Main Load</a>
-        <span class="lp-divider">·</span>
-        <a href="../LoadStudio/" class="lp-to-studio">Open Load Studio →</a>
-      </div>
-    </div>
-  </section>
 
   <!-- TOP NAV -->
   <header class="topnav">
@@ -957,6 +876,79 @@ a{color:inherit;text-decoration:none}
 
       <!-- HOME VIEW -->
       <div id="homeView">
+
+      <!-- ── LOAD-STYLE SPLASH HOME (scrolls into the streaming app) ── -->
+  <section id="lp-home" class="lp-home-screen">
+    <div class="lp-splash-wrap">
+      <img class="lp-splash-img"
+           src="load-play-splash-768w-compressed.jpg"
+           alt="LoadPlay — stream the Load way"
+           onload="this.parentElement.classList.add('loaded')">
+      <div class="lp-splash-overlay"></div>
+      <div class="lp-splash-text">
+        <div class="lp-tag">Part of Load</div>
+        <h1 class="lp-h1">LoadPlay</h1>
+        <p class="lp-sub">Stream, create, publish — clean, free, offline-ready.</p>
+      </div>
+    </div>
+
+    <!-- Get-started action buttons (Load-style, in LoadPlay color scheme) -->
+    <div class="lp-actions">
+      <button class="lp-big primary" id="lp-get-started" onclick="document.getElementById('lp-workspace').scrollIntoView({behavior:'smooth',block:'start'})">
+        <span class="lp-big-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="6,4 20,12 6,20" fill="currentColor" stroke="none"/></svg></span>
+        <span class="lp-big-lbl">Start Watching</span>
+      </button>
+      <button class="lp-big secondary" onclick="document.getElementById('lp-workspace').scrollIntoView({behavior:'smooth',block:'start'})">
+        <span class="lp-big-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><circle cx="12" cy="14.5" r="1.4" fill="currentColor" stroke="none"/></svg></span>
+        <span class="lp-big-lbl">Load Browse</span>
+      </button>
+      <button class="lp-big tertiary" onclick="document.getElementById('uploadBtn').click()">
+        <span class="lp-big-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><polyline points="6,10 12,4 18,10"/><path d="M4 20h16"/></svg></span>
+        <span class="lp-big-lbl">Creator Upload</span>
+      </button>
+    </div>
+
+    <!-- Workspace tiles (Load-style monoline SVG icons) -->
+    <div id="lp-workspace" class="lp-workspace">
+      <div class="lp-ws-row">
+
+        <button class="lp-ws-tile" data-tile="viewer">
+          <span class="lp-ws-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/><circle cx="12" cy="8" r="1.4" fill="#00e5ff" stroke="none"/></svg></span>
+          <span class="lp-ws-label">Viewer Profiles</span>
+          <span class="lp-ws-sub">Profile photo, banner, My List, watch history</span>
+        </button>
+
+        <button class="lp-ws-tile" data-tile="creator">
+          <span class="lp-ws-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M12 16V8"/><polyline points="8,12 12,8 16,12"/><circle cx="20" cy="6.5" r="1.2" fill="#00c853" stroke="none"/></svg></span>
+          <span class="lp-ws-label">Creator Upload</span>
+          <span class="lp-ws-sub">Upload videos, PWA cinema, HTML packages</span>
+        </button>
+
+        <button class="lp-ws-tile" data-tile="cleanstream">
+          <span class="lp-ws-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
+          <span class="lp-ws-label">Clean Stream Rules</span>
+          <span class="lp-ws-sub">No profanity, no nudity, safe thumbnails</span>
+        </button>
+
+        <button class="lp-ws-tile" data-tile="devlab">
+          <span class="lp-ws-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v4l4 10a3 3 0 0 1-3 4H8a3 3 0 0 1-3-4l4-10z"/><path d="M9 11h6"/><circle cx="11" cy="16" r="1.1" fill="#00c853" stroke="none"/><circle cx="14" cy="14" r="0.8" fill="#00e5ff" stroke="none"/></svg></span>
+          <span class="lp-ws-label">Developer Lab</span>
+          <span class="lp-ws-sub">PWA diagnostics, API keys, package checks</span>
+        </button>
+
+      </div>
+
+      <h2 class="lp-channels-heading">Load Play</h2>
+      <p class="lp-channels-hint">Browse genre rails below — featured, originals, documentaries, kids, and more.</p>
+
+      <div class="lp-back-to-load-row">
+        <a href="../load/" class="lp-back-load">← Return to Main Load</a>
+        <span class="lp-divider">·</span>
+        <a href="../LoadStudio/" class="lp-to-studio">Open Load Studio →</a>
+      </div>
+    </div>
+  </section>
+
         <!-- Chips -->
         <div class="chips-bar" id="chipsBar">
           <button class="chip active" data-cat="all">All</button>
