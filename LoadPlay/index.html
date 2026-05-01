@@ -616,8 +616,22 @@ a{color:inherit;text-decoration:none}
   display:flex;align-items:center;justify-content:center;
 }
 
+/* ── Logo + scrollable Load-style toolrow (replaces green/cyan SVG) ── */
+.logo-img{width:28px;height:28px;border-radius:6px;flex-shrink:0;object-fit:cover}
+.logo-text{color:#f1f1f1}
+.logo-text em{background:none;-webkit-text-fill-color:inherit;color:inherit}
+.lp-toolrow{display:flex;align-items:center;gap:6px;margin-left:14px;padding:0 4px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;max-width:50vw}
+.lp-toolrow::-webkit-scrollbar{display:none}
+.lp-tool{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.04);color:#f1f1f1;border:1px solid transparent;cursor:pointer;font-size:13px;font-weight:700;transition:background .15s,border-color .15s,color .15s}
+.lp-tool svg{width:18px;height:18px}
+.lp-tool:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12)}
+.lp-tool:active{transform:scale(.94)}
+#lp-tool-refresh{color:#ff8a8a}
+#lp-tool-refresh:hover{background:rgba(255,90,90,.14);border-color:rgba(255,90,90,.35)}
+@media (max-width:600px){.lp-toolrow{max-width:46vw;margin-left:6px}.lp-tool{width:34px;height:34px}}
+
 /* ── Load-style splash hero + workspace (added on top of YouTube-style streaming UI) ── */
-.lp-home-screen{position:relative;background:linear-gradient(180deg,#0f0f0f 0%,#0a0f17 50%,#0f0f0f 100%);padding-bottom:32px;border-bottom:1px solid var(--border)}
+.lp-home-screen{position:relative;background:linear-gradient(180deg,#0f0f0f 0%,#0a0f17 50%,#0f0f0f 100%);padding-top:56px;padding-bottom:32px;border-bottom:1px solid var(--border)}
 .lp-splash-wrap{position:relative;width:100%;height:min(56vh,520px);min-height:280px;overflow:hidden;background:#000}
 .lp-splash-img{width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .8s ease}
 .lp-splash-wrap.loaded .lp-splash-img{opacity:1}
@@ -777,14 +791,36 @@ a{color:inherit;text-decoration:none}
         </svg>
       </button>
       <a class="logo-wrap" href="#" id="homeLink">
-        <svg class="logo-svg" width="24" height="24" viewBox="0 0 120 120" fill="none">
-          <defs><linearGradient id="lg" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#00e5ff"/><stop offset="100%" stop-color="#00c853"/></linearGradient></defs>
-          <path d="M22 18 Q22 12 28 12 L72 12 Q96 12 96 36 L96 66 Q96 90 72 90 L52 90 L52 108 L28 90 Q22 90 22 84 Z" stroke="url(#lg)" stroke-width="9" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
-          <circle cx="88" cy="72" r="5" fill="#00c8ff"/>
-          <path d="M94 66 Q102 58 102 48" stroke="#00c8ff" stroke-width="4" fill="none" stroke-linecap="round"/>
-        </svg>
-        <span class="logo-text">Load<em>Play</em></span>
+        <img class="logo-img" src="icon.png" alt="LoadPlay" width="28" height="28">
+        <span class="logo-text">LoadPlay</span>
       </a>
+      <!-- Scrollable Load-style icon row, sits beside the logo -->
+      <div class="lp-toolrow" role="toolbar" aria-label="LoadPlay tools">
+        <button class="lp-tool" id="lp-tool-back"    title="Back"     aria-label="Back" onclick="history.back()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="lp-tool" id="lp-tool-home"    title="Home"     aria-label="Home" onclick="document.getElementById('lp-home').scrollIntoView({behavior:'smooth',block:'start'})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>
+        </button>
+        <button class="lp-tool" id="lp-tool-refresh" title="Hard refresh" aria-label="Hard refresh"
+                onclick="(async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()));}catch(e){}location.reload(true);})()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3.5-7.1"/><polyline points="21 4 21 10 15 10"/></svg>
+        </button>
+        <button class="lp-tool" id="lp-tool-asize-down" title="Smaller text" aria-label="Smaller text" onclick="document.documentElement.style.fontSize=(parseFloat(getComputedStyle(document.documentElement).fontSize)-1)+'px'">A&minus;</button>
+        <button class="lp-tool" id="lp-tool-asize-up"   title="Larger text"  aria-label="Larger text"  onclick="document.documentElement.style.fontSize=(parseFloat(getComputedStyle(document.documentElement).fontSize)+1)+'px'">A&#43;</button>
+        <button class="lp-tool" id="lp-tool-theme"   title="Theme"    aria-label="Theme" onclick="document.body.classList.toggle('lp-light')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <button class="lp-tool" id="lp-tool-help"    title="Help"     aria-label="Help" onclick="alert('LoadPlay — stream and create. Tap a workspace tile to start, or use the sidebar to browse.');">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2-3 4"/><circle cx="12" cy="17" r="0.9" fill="currentColor"/></svg>
+        </button>
+        <button class="lp-tool" id="lp-tool-audio"   title="Audio"    aria-label="Audio">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        </button>
+        <button class="lp-tool" id="lp-tool-chat"    title="Chat / help"  aria-label="Chat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.5-.7L3 21l1.7-5.5A8.38 8.38 0 0 1 4 11.5 8.5 8.5 0 1 1 21 11.5z"/></svg>
+        </button>
+      </div>
     </div>
 
     <div class="nav-center">
@@ -829,15 +865,15 @@ a{color:inherit;text-decoration:none}
         </div>
         <div class="nav-item active" data-view="home" id="navHome">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-          <span class="label">Featured</span>
+          <span class="label">Home</span>
         </div>
         <div class="nav-item" data-view="shorts" id="navShorts">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
-          <span class="label">Newly Added</span>
+          <span class="label">Shorts</span>
         </div>
         <div class="nav-item" data-view="subscriptions">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg>
-          <span class="label">Originals</span>
+          <span class="label">Subscriptions</span>
         </div>
       </div>
       <div class="sidebar-divider"></div>
@@ -845,19 +881,19 @@ a{color:inherit;text-decoration:none}
         <div class="sidebar-heading">You</div>
         <div class="nav-item" data-view="library">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 12.5v-9l6 4.5-6 4.5z"/></svg>
-          <span class="label">Book Cinema</span>
+          <span class="label">Library</span>
         </div>
         <div class="nav-item" data-view="history">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
-          <span class="label">PWA Originals</span>
+          <span class="label">History</span>
         </div>
         <div class="nav-item" data-view="liked">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
-          <span class="label">Documentaries</span>
+          <span class="label">Liked Videos</span>
         </div>
         <div class="nav-item" data-view="watchlater">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>
-          <span class="label">Reality</span>
+          <span class="label">Watch Later</span>
         </div>
       </div>
       <div class="sidebar-divider"></div>
@@ -865,15 +901,15 @@ a{color:inherit;text-decoration:none}
         <div class="sidebar-heading">Explore</div>
         <div class="nav-item" data-view="trending">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
-          <span class="label">Biographies</span>
+          <span class="label">Trending</span>
         </div>
         <div class="nav-item" data-view="music">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-          <span class="label">Animations</span>
+          <span class="label">Music</span>
         </div>
         <div class="nav-item" data-view="gaming">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5S14.67 12 15.5 12s1.5.67 1.5 1.5S16.33 15 15.5 15zm3-3c-.83 0-1.5-.67-1.5-1.5S17.67 9 18.5 9s1.5.67 1.5 1.5S19.33 12 18.5 12z"/></svg>
-          <span class="label">Kids</span>
+          <span class="label">Gaming</span>
         </div>
         <div class="nav-item" data-view="news">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20 3H4v10c0 2.21 1.79 4 4 4h6c2.21 0 4-1.79 4-4v-3h2c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2zm0 5h-2V5h2v3zM4 19h16v2H4z"/></svg>
@@ -885,13 +921,13 @@ a{color:inherit;text-decoration:none}
         </div>
         <div class="nav-item" data-view="sports">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4.18 11c.19-1.14.72-2.18 1.49-3l1.63 1.63L6.04 11H4.18zm3.58 5.27L6.13 14.7 5 13.58l1.56-1.56 1.56 1.56.03.03-.39 2.66zm5.24 3.55l-1 .18-1-.18v-1.8l1-.22 1 .22v1.8zm3.52-3.55l-.39-2.66.03-.03L17.72 12 19.28 13.56l-1.12 1.12-1.64 1.59zM17.96 11h-1.86l-1.27-1.37L16.45 8c.76.82 1.28 1.86 1.51 3z"/></svg>
-          <span class="label">Marketplace</span>
+          <span class="label">Sports</span>
         </div>
       </div>
       <div class="sidebar-divider"></div>
       <div class="nav-item" id="importSidebarBtn">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
-        <span class="label">Upload to Load Play</span>
+        <span class="label">Import Video</span>
       </div>
     </nav>
 
