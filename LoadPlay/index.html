@@ -1507,15 +1507,13 @@ function detectLayout() {
   const w = window.innerWidth;
   const sidebar = $('sidebar');
   if (w >= 1025) {
-    sidebar.classList.remove('drawer','mini');
+    // Desktop / large iPad landscape: inline full sidebar.
+    sidebar.classList.remove('drawer','open','mini');
     S.sidebarDrawer = false;
     S.sidebarMini = false;
-  } else if (w >= 641) {
-    sidebar.classList.remove('drawer','open');
-    sidebar.classList.add('mini');
-    S.sidebarMini = true;
-    S.sidebarDrawer = false;
   } else {
+    // iPad (portrait + most landscape) + phone: hamburger opens a
+    // proper drawer overlay so the full categorized menu is visible.
     sidebar.classList.remove('mini');
     sidebar.classList.add('drawer');
     S.sidebarDrawer = true;
@@ -1837,14 +1835,22 @@ $('drawerOverlay').addEventListener('click', () => {
 // Home link
 $('homeLink').addEventListener('click', e => { e.preventDefault(); goHome(); });
 
-// Sidebar nav items
+// Sidebar nav items — skip the v9 categorized-menu items (those use
+// data-lp-act / data-lp-chip / data-lp-modal / data-lp-dev-tool and
+// are handled by the LoadPlay v9 IIFE later in this file). This guard
+// prevents the legacy "📂 Undefined" toast spam and stale active-state
+// changes on items that don't carry a dataset.view.
 QQ('.nav-item').forEach(item => {
   item.addEventListener('click', () => {
+    if (item.hasAttribute('data-lp-act') ||
+        item.hasAttribute('data-lp-chip') ||
+        item.hasAttribute('data-lp-modal') ||
+        item.hasAttribute('data-lp-dev-tool')) return;
     QQ('.nav-item').forEach(n => n.classList.remove('active'));
     item.classList.add('active');
     const view = item.dataset.view;
     if (view === 'home') goHome();
-    else toast(`📂 ${view.charAt(0).toUpperCase()+view.slice(1)}`);
+    else if (view) toast(`📂 ${view.charAt(0).toUpperCase()+view.slice(1)}`);
     if (S.sidebarDrawer) { $('sidebar').classList.remove('open'); $('drawerOverlay').classList.remove('show'); }
   });
 });
