@@ -9,7 +9,17 @@
 <meta name="apple-mobile-web-app-title" content="LoadPlay"/>
 <title>LoadPlay</title>
 <link rel="manifest" href="manifest.json"/>
-<link rel="apple-touch-icon" href="icons/icon-192.png"/>
+<!-- Standard favicon (browser tab) -->
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"/>
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png"/>
+<!-- iOS Add to Home Screen — multiple sizes so iOS picks the closest
+     match for each device (iPhone 180, iPad Pro 167, iPad 152, iPhone
+     legacy 120). The unsized fallback covers any other device. -->
+<link rel="apple-touch-icon" href="icons/icon-180.png"/>
+<link rel="apple-touch-icon" sizes="120x120" href="icons/icon-120.png"/>
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png"/>
+<link rel="apple-touch-icon" sizes="167x167" href="icons/icon-167.png"/>
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet"/>
@@ -1192,20 +1202,15 @@ body.lp-paging #lp-page{display:block}
       <!-- ── LOAD-STYLE SPLASH HOME (scrolls into the streaming app) ── -->
   <section id="lp-home" class="lp-home-screen">
 
-    <!-- Cinematic hero with logo + wordmark + tagline overlay -->
+    <!-- Cinematic hero — image only. Wordmark + tagline removed per user
+         2026-05-01: the topnav already shows the LoadPlay logo + name,
+         so the centered overlay was redundant. -->
     <div class="lp-splash-wrap">
       <img class="lp-splash-img"
            src="load-play-splash-768w-compressed.jpg"
            alt="LoadPlay — Stream Digital Cinema Anywhere"
            onload="this.parentElement.classList.add('loaded')">
       <div class="lp-splash-overlay"></div>
-      <div class="lp-hero-overlay">
-        <div class="lp-hero-mark">
-          <img src="icon.png" alt="" width="72" height="72">
-          <span class="lp-hero-wordmark">Load <em>Play</em></span>
-        </div>
-        <p class="lp-hero-tag">Stream <strong>Digital Cinema</strong> Anywhere</p>
-      </div>
     </div>
 
     <!-- 4 feature cards: Stream Anywhere / Creators Originals / Digital Cinema / Private & Secure.
