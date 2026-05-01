@@ -1238,16 +1238,23 @@ body.lp-streaming .lp-install-banner{display:none}
         <!-- Chips -->
         <div class="chips-bar" id="chipsBar">
           <button class="chip active" data-cat="all">All</button>
-          <button class="chip" data-cat="music">Music</button>
-          <button class="chip" data-cat="gaming">Gaming</button>
-          <button class="chip" data-cat="tech">Tech &amp; Science</button>
-          <button class="chip" data-cat="education">Education</button>
-          <button class="chip" data-cat="sports">Sports</button>
+          <button class="chip" data-cat="featured">Featured</button>
+          <button class="chip" data-cat="newly-added">Newly Added</button>
+          <button class="chip" data-cat="originals">Originals</button>
+          <button class="chip" data-cat="movies">Movies</button>
+          <button class="chip" data-cat="series">Series</button>
+          <button class="chip" data-cat="shorts">Shorts</button>
+          <button class="chip" data-cat="documentaries">Documentaries</button>
+          <button class="chip" data-cat="reality">Reality</button>
+          <button class="chip" data-cat="biography">Biography</button>
           <button class="chip" data-cat="news">News</button>
-          <button class="chip" data-cat="cooking">Cooking</button>
-          <button class="chip" data-cat="travel">Travel</button>
+          <button class="chip" data-cat="drama">Drama</button>
           <button class="chip" data-cat="comedy">Comedy</button>
-          <button class="chip" data-cat="documentary">Documentary</button>
+          <button class="chip" data-cat="animation">Animation</button>
+          <button class="chip" data-cat="kids">Kids</button>
+          <button class="chip" data-cat="book-cinema">Book Cinema</button>
+          <button class="chip" data-cat="pwa-originals">PWA Originals</button>
+          <button class="chip" data-cat="creator-channels">Creator Channels</button>
         </div>
 
         <div class="content-area">
@@ -2157,20 +2164,19 @@ window.addEventListener('online',  () => toast('✅ Back online'));
     if (all) all.click();
     return false;
   }
-  // Map our build-plan content section keys onto the closest loadplay2 chip.
-  // Keys with no direct chip fall back to "all" (full grid) so the user
-  // still lands somewhere meaningful instead of an empty filter.
+  // Sidebar Content Section keys → matching chip data-cat. Every entry
+  // now has a direct chip in the top row; nothing falls back to "all".
   var CHIP_MAP = {
-    'featured':      'all',
-    'newly-added':   'all',
-    'originals':     'all',
-    'book-cinema':   'all',
-    'pwa-originals': 'all',
-    'documentaries': 'documentary',
-    'reality':       'all',
-    'biographies':   'all',
-    'animations':    'all',
-    'kids':          'all',
+    'featured':      'featured',
+    'newly-added':   'newly-added',
+    'originals':     'originals',
+    'book-cinema':   'book-cinema',
+    'pwa-originals': 'pwa-originals',
+    'documentaries': 'documentaries',
+    'reality':       'reality',
+    'biographies':   'biography',
+    'animations':    'animation',
+    'kids':          'kids',
     'news':          'news'
   };
   // Splash <-> stream view swap. Splash ends at the footer; tapping
@@ -2213,8 +2219,8 @@ window.addEventListener('online',  () => toast('✅ Back online'));
                               if (window.toast) window.toast('Continue Watching'); return;
       case 'mylist':         showStream(); clickChip('all');
                               if (window.toast) window.toast('My List — saved items'); return;
-      case 'clips':          showStream(); clickChip('all');
-                              if (window.toast) window.toast('Clips'); return;
+      case 'clips':          showStream(); clickChip('shorts');
+                              if (window.toast) window.toast('Clips → Shorts'); return;
       case 'upload':
       case 'upload-wizard': {
         var b = $$('uploadBtn'); if (b) b.click(); return;
