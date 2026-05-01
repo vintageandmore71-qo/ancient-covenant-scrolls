@@ -628,25 +628,32 @@ a{color:inherit;text-decoration:none}
 .lp-h1 em{font-style:normal;color:#00c853}
 .lp-sub{font-size:16px;color:#e9e9e9;font-weight:400;margin:0;max-width:520px}
 
-.lp-actions{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;padding:24px 16px 8px}
-.lp-big{display:inline-flex;align-items:center;gap:10px;padding:14px 22px;border-radius:14px;border:none;font-size:15px;font-weight:600;cursor:pointer;min-height:52px;transition:transform .14s ease,box-shadow .14s ease}
-.lp-big-ic{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center}
+/* Smaller get-started buttons with reddish translucent glow per user 2026-05-01 */
+.lp-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;padding:18px 16px 4px}
+.lp-big{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:10px;border:1px solid rgba(255,90,90,.35);background:rgba(255,90,90,.10);color:#ffd6d6;font-size:13px;font-weight:600;cursor:pointer;min-height:36px;transition:transform .14s ease,box-shadow .14s ease,background .14s ease,border-color .14s ease;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);box-shadow:0 4px 16px rgba(255,90,90,.18),inset 0 1px 0 rgba(255,255,255,.04)}
+.lp-big-ic{width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;color:#ff8a8a}
 .lp-big-ic svg{width:100%;height:100%}
-.lp-big.primary{background:linear-gradient(135deg,#00e5ff 0%,#00c853 100%);color:#0a0a0a;box-shadow:0 8px 22px rgba(0,229,255,.32)}
-.lp-big.secondary{background:#272727;color:#f1f1f1;border:1px solid #3f3f3f}
-.lp-big.tertiary{background:transparent;color:#00e5ff;border:1.5px solid #00e5ff}
+.lp-big:hover{background:rgba(255,90,90,.18);border-color:rgba(255,90,90,.55);box-shadow:0 6px 22px rgba(255,90,90,.32)}
 .lp-big:active{transform:translateY(1px) scale(.98)}
-.lp-big.primary:hover{box-shadow:0 10px 28px rgba(0,229,255,.45)}
+.lp-big.primary{background:rgba(255,80,80,.18);border-color:rgba(255,90,90,.55);box-shadow:0 6px 22px rgba(255,90,90,.30),inset 0 1px 0 rgba(255,255,255,.06);color:#fff}
+.lp-big.primary .lp-big-ic{color:#ff6e6e}
 
-.lp-workspace{padding:36px 16px 8px;max-width:1100px;margin:0 auto}
-.lp-ws-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:28px}
-.lp-ws-tile{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:18px 20px;background:#1a1a1a;border:1px solid #2f2f2f;border-radius:14px;color:#f1f1f1;cursor:pointer;text-align:left;transition:transform .14s,border-color .14s,background .14s;min-height:118px}
-.lp-ws-tile:hover{border-color:#00e5ff;background:#1f1f1f}
-.lp-ws-tile:active{transform:translateY(1px) scale(.99)}
-.lp-ws-icon{width:34px;height:34px;color:#00e5ff;display:inline-flex;align-items:center;justify-content:center;background:rgba(0,229,255,.08);border-radius:9px;padding:6px;margin-bottom:4px}
-.lp-ws-icon svg{width:100%;height:100%}
-.lp-ws-label{font-size:17px;font-weight:700;color:#fff}
-.lp-ws-sub{font-size:13px;color:#a0a0a0;line-height:1.45}
+/* Compact 2x2 workspace tiles — Load main home-ws-tile pattern */
+.lp-workspace{padding:28px 16px 8px;max-width:1100px;margin:0 auto}
+.lp-ws-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+@media (min-width:820px){.lp-ws-row{grid-template-columns:repeat(4,1fr)}}
+.lp-ws-tile{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:12px 14px;background:#1a1a1a;border:1px solid #2f2f2f;border-radius:12px;color:#f1f1f1;cursor:pointer;text-align:left;font-family:inherit;min-height:88px;transition:transform .14s,border-color .14s}
+.lp-ws-tile:hover{border-color:#00e5ff}
+.lp-ws-tile:active{transform:scale(.97)}
+.lp-ws-icon{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;background:rgba(0,229,255,.10);color:#00e5ff;transition:transform .15s ease}
+.lp-ws-icon svg{width:22px;height:22px}
+.lp-ws-tile:active .lp-ws-icon{transform:scale(.92)}
+.lp-ws-tile[data-tile="viewer"]      .lp-ws-icon{color:#5eb4d6;background:rgba(94,180,214,.13)}
+.lp-ws-tile[data-tile="creator"]     .lp-ws-icon{color:#4ade80;background:rgba(74,222,128,.13)}
+.lp-ws-tile[data-tile="cleanstream"] .lp-ws-icon{color:#ff7a7a;background:rgba(255,122,122,.13)}
+.lp-ws-tile[data-tile="devlab"]      .lp-ws-icon{color:#9c9cff;background:rgba(156,156,255,.13)}
+.lp-ws-label{font-size:14px;font-weight:700;color:#fff;line-height:1.3}
+.lp-ws-sub{font-size:12px;color:#a0a0a0;line-height:1.4}
 
 .lp-channels-heading{font-size:24px;font-weight:800;color:#fff;margin:18px 0 4px;letter-spacing:-.01em}
 .lp-channels-hint{font-size:13px;color:#888;margin:0 0 18px}
