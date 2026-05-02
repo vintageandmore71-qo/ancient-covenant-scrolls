@@ -832,46 +832,10 @@ body.lp-streaming #lp-page{display:none}
 .lp-stream-back{position:sticky;top:0;z-index:6;display:flex;align-items:center;gap:8px;padding:10px 16px;background:rgba(15,15,15,.92);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-bottom:1px solid var(--border);font-size:13px;color:var(--cyan);font-weight:600;cursor:pointer;border:0;width:100%;text-align:left}
 .lp-stream-back:hover{background:var(--bg2)}
 
-/* Active chip header above the grid */
-.lp-now-showing{padding:18px 16px 4px;max-width:1400px;margin:0 auto}
-.lp-now-showing h2{font-size:26px;font-weight:900;color:#fff;letter-spacing:-.01em;margin:0}
-.lp-now-showing p{font-size:13.5px;color:var(--text2);margin:4px 0 0}
-
-/* Premium chip page — multi-row layout (YouTube structure, our colors).
-   Rendered into #lpChipContent on every chip tap. Replaces loadplay2's
-   empty hardcoded "Shorts" section + No-results placeholder. */
-.lp-chip-content{padding:0 16px 36px;max-width:1400px;margin:0 auto}
-.lp-chip-section{margin:18px 0 28px}
-.lp-chip-section h3{font-size:18px;font-weight:800;color:#fff;margin:0 0 12px;letter-spacing:-.005em;display:flex;align-items:baseline;gap:10px}
-.lp-chip-section h3 small{font-size:12px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.08em}
-.lp-chip-row{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 0 10px;-webkit-overflow-scrolling:touch}
-.lp-chip-row::-webkit-scrollbar{display:none}
-.lp-chip-card{flex:0 0 240px;scroll-snap-align:start;background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .14s,border-color .14s;text-align:left;font-family:inherit;color:inherit;padding:0;width:240px}
-.lp-chip-card:hover{border-color:var(--cyan);transform:translateY(-2px)}
-.lp-chip-thumb{aspect-ratio:16/9;position:relative;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.18)}
-.lp-chip-thumb svg{width:46%;height:46%;opacity:.7}
-.lp-chip-cat-badge{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.7);color:#fff;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:3px 8px;border-radius:4px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
-.lp-chip-runtime{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.85);color:#fff;font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;font-variant-numeric:tabular-nums}
-.lp-chip-meta{padding:10px 12px}
-.lp-chip-title{font-size:13.5px;color:#fff;font-weight:700;margin:0 0 4px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.lp-chip-byline{font-size:11.5px;color:var(--text3);margin:0;display:flex;gap:6px;align-items:center}
-.lp-chip-byline span+span::before{content:"·";margin-right:6px;color:var(--text3)}
-
-/* Top creators row (avatar tiles instead of poster cards) */
-.lp-chip-creators{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px}
-.lp-chip-creator{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px 12px;text-align:center;cursor:pointer;transition:border-color .14s;color:inherit;font-family:inherit}
-.lp-chip-creator:hover{border-color:var(--cyan)}
-.lp-chip-creator-avatar{width:54px;height:54px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:18px;margin-bottom:8px;letter-spacing:-.02em}
-.lp-chip-creator-name{font-size:13px;color:#fff;font-weight:700;margin:0 0 2px;display:block}
-.lp-chip-creator-sub{font-size:11.5px;color:var(--text3);display:block}
-
-/* Full grid */
-.lp-chip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
-.lp-chip-grid .lp-chip-card{flex:none;width:auto}
-
-/* Hide legacy content-area while in stream view (avoids the static
-   "Shorts" h2 + the loadplay2 empty-state from rendering) */
-body.lp-streaming .content-area{display:none}
+/* (v17 chip-page renderer removed in v18 per user 2026-05-02 — restored
+   loadplay2's original Shorts row + videoGrid layout. The empty-state
+   inside renderHome is patched in JS to fall back to the full list so
+   the "No videos in this category" message never appears.) */
 
 /* Generic placeholder page */
 #lp-page{display:none;padding:0 0 32px;min-height:50vh}
@@ -1356,10 +1320,6 @@ body.lp-paging #lp-page{display:block}
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
           <span>Back to LoadPlay home</span>
         </button>
-        <div class="lp-now-showing" id="lpNowShowing">
-          <h2 id="lpNowTitle">All</h2>
-          <p id="lpNowBlurb">Browse everything LoadPlay has loaded.</p>
-        </div>
 
         <!-- Chips -->
         <div class="chips-bar" id="chipsBar">
@@ -1384,15 +1344,12 @@ body.lp-paging #lp-page{display:block}
           <button class="chip" data-cat="creators-originals">Creators Originals</button>
         </div>
 
-        <!-- Premium chip page renderer (v17) — every chip click writes
-             multi-row content here (Trending / Newly added / Top creators
-             / All grid). The legacy loadplay2 content-area below is kept
-             in DOM but visually hidden so its renderHero/etc. don't fail. -->
-        <div id="lpChipContent" class="lp-chip-content"></div>
-
         <div class="content-area">
-          <!-- Legacy loadplay2 shorts section (kept for backwards-compat,
-               hidden via body.lp-streaming .content-area{display:none}). -->
+          <!-- Loadplay2 original layout — Shorts row + main video grid.
+               Reverted from v17 per user 2026-05-02: keep loadplay2's
+               look + functions, no extra "Top creators" section. Card
+               taps go through loadplay2's openPlayer to the real
+               player view, exactly like the original screenshots. -->
           <div id="shortsSection">
             <h2 class="section-title">Shorts</h2>
             <div class="shorts-row" id="shortsRow"></div>
@@ -1664,7 +1621,12 @@ function detectLayout() {
 
 /* ── RENDER HOME ──────────────────────────────────── */
 function renderHome(filter) {
-  const list = filter && filter !== 'all' ? VIDS.filter(v => v.cat === filter) : VIDS;
+  let list = filter && filter !== 'all' ? VIDS.filter(v => v.cat === filter) : VIDS;
+  // v18 — never show the "No videos in this category" empty state. If
+  // a chip filter has no direct matches in the loadplay2 VIDS sample
+  // data (the LoadPlay chip labels don't all map to loadplay2's source
+  // cats), fall back to the full catalog so the page is always full.
+  if (!list.length) list = VIDS;
 
   // Shorts
   const sr = $('shortsRow'); sr.innerHTML = '';
@@ -1672,13 +1634,7 @@ function renderHome(filter) {
 
   // Grid
   const grid = $('videoGrid'); grid.innerHTML = '';
-  if (list.length === 0) {
-    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px 0;color:#717171">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor" style="opacity:.3;display:block;margin:0 auto 12px"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-      No videos in this category</div>`;
-  } else {
-    list.forEach(v => grid.appendChild(makeVideoCard(v)));
-  }
+  list.forEach(v => grid.appendChild(makeVideoCard(v)));
 }
 
 function makeVideoCard(v) {
@@ -2343,9 +2299,12 @@ window.addEventListener('online',  () => toast('Back online'));
     clearViews();
     document.body.classList.add('lp-streaming');
     var sv = $$('lp-stream-view'); if (sv) sv.classList.add('on');
-    // Always make sure the page is populated (no empty "no videos" state).
-    var host = $$('lpChipContent');
-    if (host && !host.innerHTML.trim()) renderChipContent('all');
+    // Loadplay2 populates shortsRow + videoGrid via renderHome() in the
+    // inline script above. Force a fresh render so the streaming view
+    // is never empty.
+    if (typeof window.renderHome === 'function') {
+      try { window.renderHome(); } catch (e) {}
+    }
     var c = $$('chipsBar'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   function runChip(key) {
@@ -2635,163 +2594,15 @@ window.addEventListener('online',  () => toast('Back online'));
     }
   });
 
-  // ── Chip page renderer — premium multi-row layout per chip ───
+  // ── Chip helpers (kept for sidebar Content Sections) ─────────
+  // The v17 multi-row chip renderer + Top Creators section was removed
+  // in v18 per user 2026-05-02 — restored loadplay2's original Shorts
+  // row + videoGrid. Loadplay2's own chip handler (inline script,
+  // line ~2004) calls renderHome(cat) and that populates the page.
   function chipLabel(cat) {
     var btn = document.querySelector('.chip[data-cat="' + cat + '"]');
     return btn ? btn.textContent.trim() : cat;
   }
-
-  // Per-chip thumbnail gradient palette (so every chip looks distinct).
-  var THUMB_GRADIENTS = {
-    'all':                'linear-gradient(135deg,#0a1535,#1a1a2e,#0d1b2a)',
-    'featured':           'linear-gradient(135deg,#1a0f2e,#2a1858,#0d1b2a)',
-    'newly-added':        'linear-gradient(135deg,#0a2540,#0d3358,#0a1535)',
-    'load-originals':     'linear-gradient(135deg,#3a0e1f,#5a1a2e,#1a0a14)',
-    'movies':             'linear-gradient(135deg,#0a2030,#1f3a5e,#0a1020)',
-    'series':             'linear-gradient(135deg,#1a0a2e,#3a1858,#0a0a1a)',
-    'shorts':             'linear-gradient(135deg,#3a1a4e,#5a2a7e,#1a0a2a)',
-    'documentaries':      'linear-gradient(135deg,#0a2e2a,#1a4e3a,#0a1a14)',
-    'reality':            'linear-gradient(135deg,#3a2a0a,#5a4a1a,#1a1a0a)',
-    'biography':          'linear-gradient(135deg,#2a1a0a,#4a2a1a,#1a0e0a)',
-    'news':               'linear-gradient(135deg,#0a2030,#1a3a4e,#0a141a)',
-    'drama':              'linear-gradient(135deg,#3a0a0a,#5a1a2e,#1a0a0a)',
-    'comedy':             'linear-gradient(135deg,#3a2a0a,#5a3a1a,#1a140a)',
-    'animation':          'linear-gradient(135deg,#0a3a3a,#1a5e6a,#0a1a1a)',
-    'kids':               'linear-gradient(135deg,#3a3a0a,#6a5e1a,#1a1a0a)',
-    'book-cinema':        'linear-gradient(135deg,#2e1a0a,#5e3a1a,#1a0e0a)',
-    'thrillers':          'linear-gradient(135deg,#0a0a1a,#1a1a3a,#000010)',
-    'podcasts':           'linear-gradient(135deg,#1a0a3a,#3a1a5e,#0a0a1a)',
-    'creators-originals': 'linear-gradient(135deg,#2a1a3a,#4a2a5e,#1a0a2a)'
-  };
-
-  // Pool of plausible mock titles per chip (8 each — used for Trending
-  // and Newly Added rows). Where we don't have a hand-curated pool, we
-  // fall back to chip-name-prefixed numbered titles so every page is
-  // populated.
-  var TITLES = {
-    'movies':        ['Coastal Light', 'Late Train', 'Echoes of May', 'The Quiet Hour', 'Half-Lit Rooms', 'Northwind', 'Salt & Snow', 'Long Way Home'],
-    'series':        ['Heirs of the Tide', 'Garden Street', 'After Curfew', 'The Quiet District', 'Foundation Days', 'Unmarked Roads', 'Letterhouse', 'Westbridge'],
-    'shorts':        ['Three-Minute Tour', 'One Slow Sunrise', 'Pocket Cinema', 'A Walk to Work', 'Tide Pool', 'Library at Dusk', 'The Last Post', 'Last Light'],
-    'documentaries': ['Stories from the Coast', 'Inside Book Cinema', 'Quiet Engineers', 'Voices of the Studio', 'Maker Hours', 'Slow Light', 'The Public Path', 'Notes from a Garden'],
-    'reality':       ['House Rules', 'Rebuilders', 'Open Kitchen', 'The Big Move', 'Workshop Diaries', 'Dorm Year', 'Storefront', 'Family Flip'],
-    'biography':     ['A Working Life', 'Unlikely Founders', 'The Architect', 'Between Stages', 'Born Editor', 'The Steady Hand', 'A Quiet Voice', 'In Her Hours'],
-    'news':          ['Morning Brief', 'Midday Edition', 'After Hours', 'Long Read', 'On the Record', 'Beat Notes', 'Fact Friday', 'Year in Review'],
-    'drama':         ['House Without Doors', 'Slow Storm', 'The Quiet Sister', 'After the Bell', 'A Modest Inheritance', 'Cold Letter', 'The Long Apology', 'Last Tenant'],
-    'comedy':        ['Open Call', 'Office Hours', 'The Roommate Pilot', 'Two Stops Out', 'Catering', 'Side Project', 'Wrong Apartment', 'Group Text'],
-    'animation':     ['Tide Pool Friends', 'Paper City', 'The Star Pencil', 'Cloud Conductor', 'Lighthouse Mouse', 'Marble Run', 'Origami Crew', 'The Big Drawing'],
-    'kids':          ['Story Time — Volume One', 'Brave Little Sailor', 'Counting Stars', 'Tide Pool Friends', 'The Curious Pencil', 'Garden Helpers', 'Songs for Sleepy', 'Train of Wonders'],
-    'book-cinema':   ['First Pages', 'Chapter One Reads', 'A Quiet Library', 'The Margin Notes', 'Reader at Work', 'Open Spine', 'After the Last Page', 'Reading Aloud'],
-    'thrillers':     ['One Missed Train', 'House at the End', 'The Late Caller', 'Cold Apartment', 'Echo Tape', 'The Off Switch', 'Last Floor', 'Quiet Night'],
-    'podcasts':      ['Daily Loadcast', 'Studio Hours', 'Open Mic', 'Builder Notes', 'Fresh Pages', 'Long Reads Read Aloud', 'Slow Talk', 'Office Recap'],
-    'creators-originals': ['Studio Originals — Vol 1', 'Independent Hours', 'Fresh Cut', 'Maker Series', 'Indie Spotlight', 'New Voices', 'Originals Showcase', 'Solo Studio'],
-    'load-originals':     ['LoadPlay First — Pilot', 'Maker Hours: Day One', 'Fresh Cut Originals', 'Studio Sessions Vol 1', 'Indie Spotlight: Loaded', 'New Voices Showcase', 'Originals Lounge', 'After Hours Originals'],
-    'featured':           ['LoadPlay Picks This Week', 'Editor\'s Selection', 'Featured Tonight', 'Highlight Reel', 'Hand-Picked', 'Top of LoadPlay', 'Featured Originals', 'Featured Documentaries'],
-    'newly-added':        ['Just Added Today', 'Fresh on LoadPlay', 'New This Week', 'Latest Drops', 'New Originals', 'Just Released', 'New Movies', 'New Series']
-  };
-
-  // Mock creators per genre (avatar initials + accent gradient)
-  var CREATORS_POOL = [
-    { n: 'Olive Lane',    s: '12K viewers', g: 'linear-gradient(135deg,#7c3aed,#00e5ff)' },
-    { n: 'Studio North',  s: '8.4K viewers', g: 'linear-gradient(135deg,#ff6e6e,#7c3aed)' },
-    { n: 'Maker House',   s: '21K viewers', g: 'linear-gradient(135deg,#00c853,#00e5ff)' },
-    { n: 'Coast & Quiet', s: '4.2K viewers', g: 'linear-gradient(135deg,#00e5ff,#7c3aed)' },
-    { n: 'Page One',      s: '18K viewers', g: 'linear-gradient(135deg,#fbbf24,#ff6e6e)' },
-    { n: 'Long Read Co.', s: '6.7K viewers', g: 'linear-gradient(135deg,#a78bfa,#00e5ff)' }
-  ];
-
-  function getTitlePool(cat) {
-    return TITLES[cat] || (function () {
-      var lbl = chipLabel(cat) || cat;
-      var out = []; for (var i = 1; i <= 8; i++) { out.push(lbl + ' — Vol ' + i); }
-      return out;
-    })();
-  }
-
-  function makeCard(title, cat, runtime) {
-    var label = chipLabel(cat) || cat;
-    var grad  = THUMB_GRADIENTS[cat] || THUMB_GRADIENTS.all;
-    var iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20" fill="currentColor" stroke="none"/></svg>';
-    return '<button class="lp-chip-card" type="button" data-lp-card="' + title + '">' +
-           '<div class="lp-chip-thumb" style="background:' + grad + '">' +
-             '<span class="lp-chip-cat-badge">' + label + '</span>' +
-             iconSvg +
-             '<span class="lp-chip-runtime">' + runtime + '</span>' +
-           '</div>' +
-           '<div class="lp-chip-meta">' +
-             '<div class="lp-chip-title">' + title + '</div>' +
-             '<div class="lp-chip-byline"><span>' + (CREATORS_POOL[(title.length + cat.length) % CREATORS_POOL.length].n) + '</span><span>' + (Math.floor((title.length * 7) % 9 + 1) + '.' + (title.length % 9) + 'K views') + '</span></div>' +
-           '</div></button>';
-  }
-
-  function makeCreatorTile(c) {
-    var initial = (c.n[0] || '').toUpperCase();
-    return '<button class="lp-chip-creator" type="button">' +
-           '<span class="lp-chip-creator-avatar" style="background:' + c.g + '">' + initial + '</span>' +
-           '<span class="lp-chip-creator-name">' + c.n + '</span>' +
-           '<span class="lp-chip-creator-sub">' + c.s + '</span></button>';
-  }
-
-  function fmtRuntime(seed, cat) {
-    if (cat === 'shorts' || cat === 'podcasts') {
-      return ['0:32','0:45','0:58','1:12','0:41','0:55','1:04','0:50'][seed % 8];
-    }
-    if (cat === 'movies' || cat === 'documentaries' || cat === 'thrillers') {
-      var m = ['1:32','1:45','2:04','1:18','1:50','1:38','2:12','1:24'];
-      return m[seed % m.length];
-    }
-    return ['22:14','18:42','35:10','27:33','41:08','12:55','29:50','24:18'][seed % 8];
-  }
-
-  function renderChipContent(cat) {
-    var host = $$('lpChipContent'); if (!host) return;
-    var pool = getTitlePool(cat);
-    var label = chipLabel(cat);
-
-    function row(titlesA, prefix) {
-      return titlesA.map(function (t, i) {
-        return makeCard(t, cat, fmtRuntime(i + (prefix.length || 0), cat));
-      }).join('');
-    }
-
-    // Trending: first 8. Newly Added: last 8 reversed. (Same pool, two
-    // distinct orderings so each row feels different even with mock data.)
-    var trending = pool.slice(0, 8);
-    var newly    = pool.slice().reverse().slice(0, 8);
-
-    // Top creators — 6 mock tiles regardless of chip.
-    var creators = CREATORS_POOL.map(makeCreatorTile).join('');
-
-    // All grid — 12 cards, mixed pool.
-    var all = pool.concat(pool).slice(0, 12);
-
-    host.innerHTML =
-      '<div class="lp-chip-section"><h3>Trending in ' + label + ' <small>This week</small></h3>' +
-      '<div class="lp-chip-row">' + row(trending, 't') + '</div></div>' +
-      '<div class="lp-chip-section"><h3>Newly added — ' + label + ' <small>Fresh on LoadPlay</small></h3>' +
-      '<div class="lp-chip-row">' + row(newly, 'n') + '</div></div>' +
-      '<div class="lp-chip-section"><h3>Top creators — ' + label + '</h3>' +
-      '<div class="lp-chip-creators">' + creators + '</div></div>' +
-      '<div class="lp-chip-section"><h3>All ' + label + '</h3>' +
-      '<div class="lp-chip-grid">' + row(all, 'a') + '</div></div>';
-  }
-
-  document.addEventListener('click', function (e) {
-    var c = e.target.closest('.chip[data-cat]');
-    if (!c) return;
-    var cat = c.getAttribute('data-cat');
-    var t = $$('lpNowTitle'); if (t) t.textContent = chipLabel(cat);
-    var b = $$('lpNowBlurb');
-    if (b) b.textContent = (cat === 'all')
-      ? 'Browse everything LoadPlay has loaded.'
-      : 'Showing ' + chipLabel(cat).toLowerCase() + ' — trending, newly added, top creators, and the full catalog.';
-    renderChipContent(cat);
-  });
-
-  // Mock card click — toast a "Now playing" message.
-  document.addEventListener('click', function (e) {
-    var card = e.target.closest('[data-lp-card]');
-    if (card && window.toast) window.toast(card.getAttribute('data-lp-card') + ' — preview coming soon');
-  });
 
   function runAct(key) {
     closeSidebarSafe();
