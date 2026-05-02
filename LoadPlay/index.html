@@ -1351,7 +1351,7 @@ body.lp-paging #lp-page{display:block}
                taps go through loadplay2's openPlayer to the real
                player view, exactly like the original screenshots. -->
           <div id="shortsSection">
-            <h2 class="section-title">Shorts</h2>
+            <h2 class="section-title" id="lpSectionTitle">Shorts</h2>
             <div class="shorts-row" id="shortsRow"></div>
           </div>
 
@@ -2603,6 +2603,16 @@ window.addEventListener('online',  () => toast('Back online'));
     var btn = document.querySelector('.chip[data-cat="' + cat + '"]');
     return btn ? btn.textContent.trim() : cat;
   }
+  // v19 — every chip tap (top row OR sidebar Content Section, since
+  // sidebar items programmatically click the matching chip) replaces
+  // the static "Shorts" page heading with the active chip's label so
+  // the user sees they're on a different page.
+  document.addEventListener('click', function (e) {
+    var c = e.target.closest('.chip[data-cat]');
+    if (!c) return;
+    var h = $$('lpSectionTitle');
+    if (h) h.textContent = c.textContent.trim();
+  });
 
   function runAct(key) {
     closeSidebarSafe();
