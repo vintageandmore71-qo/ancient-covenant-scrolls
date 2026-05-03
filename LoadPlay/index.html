@@ -3362,6 +3362,92 @@ window.addEventListener('online',  () => toast('Back online'));
     medium: { members: 100, activity: 15, comments: 5 },
     large:  { members: 500, activity: 25, comments: 8 }
   };
+
+  // ── v22 — Pre-Built Mock Package loader (LITE) ───────────────
+  // Reads the user-supplied LITE package from data/demo-users.json +
+  // data/demo-activity.json (500 realistic mock identities + real
+  // CC-licensed headshots in assets/mock-users/avatars/). Adapts the
+  // LITE schema onto our v20 schema so existing UI keeps working.
+  function adaptLiteUser(u) {
+    var m = {
+      id: u.id,
+      isMock: true,
+      isDemo: true,
+      testModeOnly: true,
+      source: 'lite',
+      displayName: u.displayName,
+      username: u.username,
+      handle: u.handle || ('@' + (u.username || '').replace(/[^a-z0-9]/gi, '')),
+      avatar: u.avatar,
+      profileType: u.profileType || 'viewer',
+      ageBand: u.ageBand || 'adult',
+      gender: u.gender || 'neutral',
+      skinTone: u.skinTone || 'st3',
+      style: u.style || 'casual',
+      genrePrefs: (u.genrePreferences || []).map(function (g) { return String(g).toLowerCase(); }),
+      watchHistory: u.watchHistory || [],
+      likes: u.likes || [],
+      myList: u.myList || [],
+      follows: u.following || u.subscribedTo || [],
+      subscribers: u.subscriberCount || 0,
+      followingCount: u.followingCount || 0,
+      viewCount: u.viewCount || 0,
+      bio: u.bio || '',
+      email: (u.username || 'mock').replace(/[^a-z0-9.]/gi, '').toLowerCase() + '@mock.test',
+      createdAt: u.createdAt ? Date.parse(u.createdAt) : Date.now()
+    };
+    return m;
+  }
+  // Per-user LITE activity → flat event records compatible with our
+  // generateMockActivity output.
+  function adaptLiteActivity(record) {
+    var out = [];
+    var now = Date.now();
+    var counter = 0;
+    function pad6(n) { return String(n).padStart(6, '0'); }
+    function emit(type, contentId, extra) {
+      var ev = {
+        id: 'lite-' + record.userId + '-' + pad6(counter++),
+        isMock: true, isDemo: true, source: 'lite',
+        ts: now - Math.floor(Math.random() * 30 * 86400000),
+        memberId: record.userId, type: type,
+        videoId: contentId, progress: extra && extra.progress != null ? extra.progress : null,
+        targetUserId: extra && extra.targetUserId ? extra.targetUserId : null
+      };
+      out.push(ev);
+    }
+    (record.views || []).forEach(function (v) {
+      var n = (v.count || 1);
+      for (var i = 0; i < n; i++) emit('view', v.contentId);
+    });
+    (record.likes  || []).forEach(function (cid) { emit('like', cid); });
+    (record.saves  || []).forEach(function (cid) { emit('save', cid); });
+    (record.follows|| []).forEach(function (uid) { emit('follow', null, { targetUserId: uid }); });
+    return out;
+  }
+  function loadLitePackage() {
+    return Promise.all([
+      fetch('data/demo-users.json').then(function (r) { return r.json(); }),
+      fetch('data/demo-activity.json').then(function (r) { return r.json(); }).catch(function () { return { activity: [] }; })
+    ]).then(function (vals) {
+      var liteUsers = vals[0] || [];
+      var liteActivity = (vals[1] && vals[1].activity) || vals[1] || [];
+      var members = liteUsers.map(adaptLiteUser);
+      var flatActivity = [];
+      liteActivity.forEach(function (rec) { flatActivity = flatActivity.concat(adaptLiteActivity(rec)); });
+      return Promise.all([
+        idbSet(KEY_MEMBERS, members),
+        idbSet(KEY_ACTIVITY, flatActivity),
+        log('Loaded LITE pack: ' + members.length + ' members + ' + flatActivity.length + ' activity events (real CC-licensed portraits)')
+      ]).then(function () {
+        return recomputeTrending();
+      }).then(function () { return { members: members.length, events: flatActivity.length }; });
+    }).catch(function (err) {
+      log('LITE pack load failed: ' + (err && err.message ? err.message : 'unknown'));
+      lpToast('LITE pack load failed — check that LoadPlay/data/ files were deployed.');
+      throw err;
+    });
+  }
   function loadScenario(name) {
     var s = SCENARIOS[name]; if (!s) return Promise.resolve();
     log('Scenario "' + name + '" — seeding ' + s.members + ' members, ~' + s.activity + ' activity each, ~' + s.comments + ' comments per video');
@@ -3519,8 +3605,16 @@ window.addEventListener('online',  () => toast('Back online'));
         '</div>' +
 
         '<div class="lp-tm-section">' +
-          '<h3>Scenario Presets</h3>' +
-          '<p>One-click full seeding (members + activity + comments + Q&amp;A + trending). Use these instead of the granular buttons below.</p>' +
+          '<h3>Pre-Built Mock Package <span class="lp-mock-tag">LITE</span></h3>' +
+          '<p>Load the curated 500-member LITE package shipped in <code>LoadPlay/data/</code>. Real CC-licensed portraits, realistic display names from the build manual (Maya Brooks, Jordan Ellis, Amara Lewis, etc.), pre-populated activity (views, likes, saves, follows). Replaces the current mock data set.</p>' +
+          '<div class="lp-tm-actions">' +
+            '<button class="lp-btn primary" data-tm-act="load-lite" type="button">Load Pre-Built Mock Package</button>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="lp-tm-section">' +
+          '<h3>Scenario Presets <span class="lp-mock-tag">SYNTHETIC</span></h3>' +
+          '<p>One-click synthetic seeding (Faker-style names, SVG avatars, Q&amp;A + comments + trending). Use when you want a fresh fully-procedural set.</p>' +
           '<div class="lp-tm-actions">' +
             '<button class="lp-btn primary" data-tm-act="scenario-small" type="button">New site (25)</button>' +
             '<button class="lp-btn primary" data-tm-act="scenario-medium" type="button">Scaling (100)</button>' +
@@ -3644,7 +3738,13 @@ window.addEventListener('online',  () => toast('Back online'));
     if (!act) return;
     var key = act.getAttribute('data-tm-act');
     var preset = (function () { try { return parseInt(localStorage.getItem(KEY_PRESET) || '25', 10); } catch (err) { return 25; } })();
-    if (key === 'gen-members') {
+    if (key === 'load-lite') {
+      lpToast('Loading LITE pack…');
+      loadLitePackage().then(function (r) {
+        lpToast('LITE pack loaded — ' + r.members + ' members + ' + r.events + ' activity events');
+        renderTestModePage();
+      }).catch(function () { renderTestModePage(); });
+    } else if (key === 'gen-members') {
       generateMockMembers(preset).then(function (m) { lpToast('Generated ' + m.length + ' mock members'); renderTestModePage(); });
     } else if (key === 'gen-activity') {
       generateMockActivity(8).then(function (r) { if (r) { lpToast('Generated ' + r.acts + ' mock activity events'); renderTestModePage(); } });
