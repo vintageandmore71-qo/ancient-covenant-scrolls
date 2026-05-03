@@ -463,6 +463,53 @@ photos, no scraping, no public-user photos, royalty-free only.
 14. **Real Safety Scan** — text + image at upload time. Blocks
     publish for fails, returns to Drafts with notes.
 
+### Tier 5 — engagement & monetization (added 2026-05-02)
+
+15. **Member / Creator Inbox** — direct-message surface for both
+    members and creators. Honest current state: there is NO inbox /
+    messaging today. Comments + Q&A (v21 mock) are the only
+    creator-viewer surfaces. To build:
+    - Sidebar item under Viewer ("Inbox") and under Creator
+      ("Creator Inbox").
+    - IndexedDB `lp_test_messages` thread store, schema-versioned.
+    - Threads keyed by `{ memberId, peerId }`; messages with `ts`,
+      `from`, `to`, `text`, `read:false`, `isMock` for demo data.
+    - Notification dot on the topnav bell when unread > 0 (read
+      live from IDB, polled).
+    - Test Mode "Generate Mock Messages" button seeds 5–10 threads
+      per impersonated member from random other mock members.
+    - Production wipe (Tier 0 switch) removes all `isMock:true`
+      messages.
+    - Future: end-to-end-encrypted thread keys per member, server
+      relay only when online; offline-first the same as everything
+      else in Load.
+
+16. **Advertiser Console** (admin / developer-gated) — surface for
+    creating, scheduling, and assigning ads that play on, before, or
+    around videos. Lives inside Admin → Developer Lab next to Test
+    Mode. To build:
+    - Sidebar item under Developer ("Advertiser Console") gated by
+      the same SHA-256 dev login as the rest of Developer Lab.
+    - Ad object: id, name, type (`pre-roll` | `mid-roll` | `post-roll`
+      | `banner-card` | `companion`), durationSec, mediaSrc, clickUrl,
+      targeting (genre[], ageBand, kidsSafe forbidden), startDate,
+      endDate, budget, impressionsServed (mock), clicksServed (mock),
+      isMock, createdBy.
+    - IndexedDB `lp_test_ads` store with schema versioning + JSON /
+      CSV export + import.
+    - Scheduler view: list of campaigns, status (Draft / Scheduled /
+      Live / Ended), CTR + spend so far.
+    - Player wiring: when a video opens in `openPlayer`, the
+      Advertiser Console resolver picks an eligible ad (genre +
+      ageBand + kidsSafe match + within date window) and surfaces
+      a "Sponsored" overlay before play starts.
+    - Hard rule: kid / child profiles never receive ads (mirrors the
+      kids-profile filter from v23). Test Mode flag lets the admin
+      preview ads as any profile.
+    - Mock seeding: scenario presets ("Brand A — 5 ads / Brand B — 3
+      ads") so Test Mode can populate without manual entry.
+    - Production wipe (Tier 0 switch) clears all `isMock:true` ads.
+
 ### Outstanding decisions (carried)
 
 - **Inbox files privacy** — leave `inbox/` public on the repo, or
