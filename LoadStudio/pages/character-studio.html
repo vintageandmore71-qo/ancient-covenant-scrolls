@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Character Studio – Load Studio</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../assets/css/style.css" />
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
+    ></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <button class="menu-btn" aria-label="Open navigation menu">
+        <ion-icon name="menu-outline"></ion-icon>
+      </button>
+      <img src="../assets/images/icon.png" alt="Load Studio Logo" class="logo" />
+      <h1 class="title">Load Studio</h1>
+      <nav class="toolbar">
+        <a href="../index.html#workspace" title="Workspace">
+          <ion-icon name="grid-outline"></ion-icon>
+        </a>
+        <a href="../index.html#asset-doctor" title="Asset Doctor">
+          <ion-icon name="medkit-outline"></ion-icon>
+        </a>
+        <a href="../index.html#ai-copilot" title="AI Copilot">
+          <ion-icon name="chatbubbles-outline"></ion-icon>
+        </a>
+        <a href="character-studio.html" title="Character Studio">
+          <ion-icon name="person-outline"></ion-icon>
+        </a>
+        <a href="#" title="Casting">
+          <ion-icon name="people-outline"></ion-icon>
+        </a>
+        <a href="#" title="Voice Studio">
+          <ion-icon name="mic-outline"></ion-icon>
+        </a>
+        <a href="#" title="Sound Studio">
+          <ion-icon name="musical-notes-outline"></ion-icon>
+        </a>
+        <a href="#" title="Voice Manipulator">
+          <ion-icon name="options-outline"></ion-icon>
+        </a>
+        <a href="#" title="Wardrobe">
+          <ion-icon name="shirt-outline"></ion-icon>
+        </a>
+        <a href="#" title="Scene Builder">
+          <ion-icon name="film-outline"></ion-icon>
+        </a>
+        <a href="#" title="Look Lab">
+          <ion-icon name="aperture-outline"></ion-icon>
+        </a>
+        <a href="#" title="Editing Bay">
+          <ion-icon name="cut-outline"></ion-icon>
+        </a>
+        <a href="#" title="Export Studio">
+          <ion-icon name="download-outline"></ion-icon>
+        </a>
+        <a href="#" title="Marketplace">
+          <ion-icon name="storefront-outline"></ion-icon>
+        </a>
+        <a href="developer-lab.html" title="Developer Tools">
+          <ion-icon name="construct-outline"></ion-icon>
+        </a>
+      </nav>
+      <button class="icon-btn" aria-label="Refresh">
+        <ion-icon name="refresh-outline"></ion-icon>
+      </button>
+      <button class="icon-btn" aria-label="Search">
+        <ion-icon name="search-outline"></ion-icon>
+      </button>
+      <button class="icon-btn" aria-label="Help">
+        <ion-icon name="help-circle-outline"></ion-icon>
+      </button>
+      <button class="icon-btn" aria-label="Toggle dark mode">
+        <ion-icon name="moon-outline"></ion-icon>
+      </button>
+      <button class="icon-btn" aria-label="Volume">
+        <ion-icon name="volume-high-outline"></ion-icon>
+      </button>
+      <button class="icon-btn" aria-label="Text size">
+        <ion-icon name="text-outline"></ion-icon>
+      </button>
+      <button class="icon-btn" aria-label="Import / Upload">
+        <ion-icon name="cloud-upload-outline"></ion-icon>
+      </button>
+      <button class="icon-btn" aria-label="Export">
+        <ion-icon name="cloud-download-outline"></ion-icon>
+      </button>
+      <button class="icon-btn" aria-label="Diagnostics">
+        <ion-icon name="bug-outline"></ion-icon>
+      </button>
+      <button class="icon-btn" aria-label="API Keys">
+        <ion-icon name="key-outline"></ion-icon>
+      </button>
+      <button class="icon-btn" aria-label="Main Load">
+        <ion-icon name="home-outline"></ion-icon>
+      </button>
+      <button class="icon-btn" aria-label="Load Play">
+        <ion-icon name="play-circle-outline"></ion-icon>
+      </button>
+    </header>
+    <main style="padding: 2rem 1rem; max-width: 1200px; margin: 0 auto;">
+      <h2 style="margin-bottom: 1rem;">Character Studio</h2>
+      <p style="color: var(--muted-text); margin-bottom: 1.5rem;">
+        Create and manage your fictional cast with precision. Upload reference
+        images, generate new characters using AI prompts, edit appearances,
+        wardrobe, expressions and more. Save multiple versions, lock
+        identities, export character packs and reuse talent across projects.
+      </p>
+      <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
+        <a href="#" class="btn primary" style="flex: 1 1 200px; text-align: center;">New Character</a>
+        <a href="#" class="btn secondary" style="flex: 1 1 200px; text-align: center;">Import Character</a>
+      </div>
+      <h3 style="margin-bottom: 1rem;">Your Characters</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
+        <!-- Example character cards. Real implementation would load saved characters dynamically -->
+        <div class="card" style="padding: 1rem;">
+          <ion-icon name="person-circle-outline" style="font-size: 2rem;"></ion-icon>
+          <strong>Alexandra</strong>
+          <span style="color: var(--muted-text); font-size: 0.8rem;">Lead Protagonist</span>
+        </div>
+        <div class="card" style="padding: 1rem;">
+          <ion-icon name="person-circle-outline" style="font-size: 2rem;"></ion-icon>
+          <strong>Dr. Tarek</strong>
+          <span style="color: var(--muted-text); font-size: 0.8rem;">Supporting Character</span>
+        </div>
+        <div class="card" style="padding: 1rem;">
+          <ion-icon name="person-circle-outline" style="font-size: 2rem;"></ion-icon>
+          <strong>Luna</strong>
+          <span style="color: var(--muted-text); font-size: 0.8rem;">Narrator</span>
+        </div>
+      </div>
+    </main>
+    <footer class="footer">
+      <p>
+        &copy; 2026 Load Studio. All rights reserved.
+      </p>
+    </footer>
+    <script src="../assets/js/app.js"></script>
+  </body>
+</html>
