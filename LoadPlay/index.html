@@ -837,6 +837,53 @@ body.lp-streaming #lp-page{display:none}
    inside renderHome is patched in JS to fall back to the full list so
    the "No videos in this category" message never appears.) */
 
+/* ── TEST MODE — site-wide banner + admin page (v20) ─────────── */
+.lp-testmode-banner{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;gap:10px;padding:6px 14px;background:linear-gradient(90deg,#3a0e1f 0%,#5a1a2e 50%,#3a0e1f 100%);border-bottom:1px solid #ff6e6e;color:#fff;font-size:12px;font-weight:600}
+.lp-testmode-banner strong{font-weight:900;letter-spacing:.08em}
+.lp-testmode-banner .lp-testmode-sub{flex:1;color:#ffd0d0;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lp-testmode-dot{width:8px;height:8px;border-radius:50%;background:#ff6e6e;flex-shrink:0;box-shadow:0 0 8px #ff6e6e;animation:lpTmPulse 1.6s ease-in-out infinite}
+@keyframes lpTmPulse{0%,100%{opacity:.55}50%{opacity:1}}
+.lp-testmode-banner .lp-testmode-x{padding:4px 10px;background:#fff;color:#3a0e1f;font-weight:800;font-size:11px;border-radius:6px;border:0}
+body.lp-testmode-on .topnav{top:30px}
+body.lp-testmode-on .layout{margin-top:calc(var(--nav-h) + 30px)}
+body.lp-testmode-on .sidebar.drawer{top:calc(var(--nav-h) + 30px)}
+
+/* "ACTIVE" chip on the Developer sidebar item */
+#lpTestActiveBadge{background:#ff6e6e;color:#fff;font-weight:900;letter-spacing:.06em}
+
+/* Test Mode admin page (rendered into #lp-page) */
+.lp-tm-stat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin:0 0 18px}
+.lp-tm-stat{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px}
+.lp-tm-stat .n{font-size:24px;font-weight:900;color:#fff;line-height:1;letter-spacing:-.02em}
+.lp-tm-stat .l{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-top:4px}
+.lp-tm-toggle{display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;margin:0 0 18px}
+.lp-tm-toggle.on{border-color:#ff6e6e;background:linear-gradient(90deg,rgba(255,110,110,.12),var(--bg2))}
+.lp-tm-toggle-label{flex:1;min-width:0}
+.lp-tm-toggle-label strong{display:block;color:#fff;font-weight:800;font-size:14px;margin-bottom:2px}
+.lp-tm-toggle-label span{display:block;color:var(--text2);font-size:12.5px;line-height:1.5}
+.lp-tm-switch{position:relative;width:48px;height:28px;background:var(--bg4);border-radius:14px;cursor:pointer;flex-shrink:0;transition:background .15s}
+.lp-tm-switch::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s}
+.lp-tm-toggle.on .lp-tm-switch{background:#ff6e6e}
+.lp-tm-toggle.on .lp-tm-switch::after{left:23px}
+.lp-tm-section{margin:0 0 22px}
+.lp-tm-section h3{font-size:14.5px;font-weight:800;color:#fff;margin:0 0 8px;letter-spacing:-.005em}
+.lp-tm-section p{font-size:12.5px;color:var(--text2);margin:0 0 10px;line-height:1.55}
+.lp-tm-presets{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.lp-tm-preset{padding:6px 14px;border-radius:18px;background:var(--bg2);border:1px solid var(--border);color:var(--text2);font-size:12px;font-weight:700;cursor:pointer}
+.lp-tm-preset.active{background:var(--cyan);color:#000;border-color:var(--cyan)}
+.lp-tm-actions{display:flex;gap:8px;flex-wrap:wrap}
+.lp-tm-actions .lp-btn{flex:0 0 auto}
+.lp-tm-impersonate{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.lp-tm-impersonate select{flex:1;min-width:180px;padding:8px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px}
+.lp-tm-log{max-height:240px;overflow-y:auto;background:#0a0a0a;border:1px solid var(--border);border-radius:10px;padding:10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;line-height:1.55}
+.lp-tm-log .row{color:var(--text2);padding:1px 0;display:flex;gap:10px}
+.lp-tm-log .row .ts{color:var(--text3);flex-shrink:0;font-variant-numeric:tabular-nums}
+.lp-tm-log .row .ev{color:var(--cyan)}
+.lp-tm-empty{color:var(--text3);font-style:italic}
+
+/* "Mock" badge wherever demo content appears in the rest of the UI */
+.lp-mock-tag{display:inline-block;font-size:9.5px;font-weight:900;letter-spacing:.1em;padding:2px 6px;border-radius:4px;background:rgba(255,110,110,.18);color:#ff6e6e;border:1px solid rgba(255,110,110,.4);text-transform:uppercase;margin-left:6px;vertical-align:middle}
+
 /* Generic placeholder page */
 #lp-page{display:none;padding:0 0 32px;min-height:50vh}
 body.lp-paging #lp-home,
@@ -912,6 +959,14 @@ body.lp-paging #lp-page{display:block}
 <!-- APP -->
 <div id="app">
 
+
+  <!-- TEST MODE banner — visible site-wide whenever Test Mode is ACTIVE -->
+  <div id="lpTestModeBanner" class="lp-testmode-banner" hidden>
+    <span class="lp-testmode-dot" aria-hidden="true"></span>
+    <strong>TEST MODE</strong>
+    <span class="lp-testmode-sub">Mock Members &amp; Mock Activity only. No real users.</span>
+    <button class="lp-testmode-x" data-lp-act="test-mode" type="button">Open</button>
+  </div>
 
   <!-- TOP NAV -->
   <header class="topnav">
@@ -1146,6 +1201,11 @@ body.lp-paging #lp-page{display:block}
         <div class="nav-item" data-lp-dev-tool="validator">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 16l9 5 9-5"/><path d="M3 12l9 5 9-5"/></svg>
           <span class="label">Package Validator</span>
+        </div>
+        <div class="nav-item" data-lp-act="test-mode">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v3l4 4-4 4v7H9v-7l-4-4 4-4z"/><path d="M9 13h6"/></svg>
+          <span class="label">Admin &middot; Test Mode</span>
+          <span class="lp-feature-badge" id="lpTestActiveBadge" hidden>ACTIVE</span>
         </div>
       </div>
       <div class="sidebar-divider"></div>
@@ -2639,8 +2699,10 @@ window.addEventListener('online',  () => toast('Back online'));
       case 'search':         { var s = $$('searchInput'); if (s) { s.focus(); s.scrollIntoView({ behavior: 'smooth', block: 'start' }); } return; }
     }
   }
-  // Expose so the inline auth handlers can route post-sign-in.
-  window.__lpRunAct = runAct;
+  // Expose so the inline auth handlers + the v20 Test Mode module can
+  // route through the same dispatcher / page renderer.
+  window.__lpRunAct   = runAct;
+  window.__lpShowPage = showPage;
   function devToolLabel(k) {
     return {
       'diagnostics': 'PWA Diagnostics',
@@ -2861,6 +2923,508 @@ window.addEventListener('online',  () => toast('Back online'));
   document.addEventListener('DOMContentLoaded', updateInstallBanner);
   if (document.readyState !== 'loading') updateInstallBanner();
   window.addEventListener('appinstalled', updateInstallBanner);
+})();
+</script>
+
+<!-- ─────────────────────────────────────────────────────────────────
+     LoadPlay v20 — Test Mode (Admin)
+
+     Mock-only test-data system for verifying profiles, likes, views,
+     subscribers, watch history, My List, Continue Watching,
+     recommendations, and trending behavior before real launch.
+
+     Safety rules in code (do not violate):
+       - No real people's photos. Avatars are SVG-generated locally.
+       - No scraping. No public-user photos. Royalty-free only.
+       - Every mock record is tagged `isMock: true` so the launch flag
+         can hide or wipe all demo data in one switch.
+
+     Storage: IndexedDB (loadplay_test, store:'kv'), schema v1, with
+     localStorage fallback if IndexedDB is unavailable. JSON Export /
+     Import carries `schemaVersion` for migrations.
+     ───────────────────────────────────────────────────────────────── -->
+<script>
+(function () {
+  'use strict';
+  var $$ = function (id) { return document.getElementById(id); };
+  var SCHEMA = 1;
+  var DB_NAME = 'loadplay_test';
+  var STORE   = 'kv';
+  var LS_PREFIX = 'lp_test_';
+  var KEY_ACTIVE = LS_PREFIX + 'active';
+  var KEY_MEMBERS = LS_PREFIX + 'members';
+  var KEY_ACTIVITY = LS_PREFIX + 'activity';
+  var KEY_LOG = LS_PREFIX + 'log';
+  var KEY_LASTSEED = LS_PREFIX + 'seed';
+  var KEY_PRESET = LS_PREFIX + 'preset';
+  var DEFAULT_SEED = 'loadplay-test-mode-2026';
+
+  // ── Tiny seeded PRNG (Mulberry32) ─────────────────────────────
+  function strHash(s) {
+    var h = 2166136261 >>> 0;
+    for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return h >>> 0;
+  }
+  function makeRng(seedStr) {
+    var s = strHash(seedStr || DEFAULT_SEED);
+    return function () {
+      s |= 0; s = (s + 0x6D2B79F5) | 0;
+      var t = Math.imul(s ^ (s >>> 15), 1 | s);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function pick(arr, rng) { return arr[Math.floor(rng() * arr.length)]; }
+
+  // ── IndexedDB key/value helpers (with localStorage fallback) ──
+  function idbOpen() {
+    return new Promise(function (resolve, reject) {
+      try {
+        var req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = function () {
+          var db = req.result;
+          if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
+        };
+        req.onsuccess = function () { resolve(req.result); };
+        req.onerror = function () { reject(req.error); };
+      } catch (e) { reject(e); }
+    });
+  }
+  function idbGet(key) {
+    return idbOpen().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(STORE, 'readonly');
+        var req = tx.objectStore(STORE).get(key);
+        req.onsuccess = function () { resolve(req.result); };
+        req.onerror = function () { reject(req.error); };
+      });
+    }).catch(function () {
+      try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { return null; }
+    });
+  }
+  function idbSet(key, val) {
+    return idbOpen().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(STORE, 'readwrite');
+        tx.objectStore(STORE).put(val, key);
+        tx.oncomplete = function () { resolve(); };
+        tx.onerror = function () { reject(tx.error); };
+      });
+    }).catch(function () {
+      try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+    });
+  }
+  function idbDel(key) {
+    return idbOpen().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(STORE, 'readwrite');
+        tx.objectStore(STORE).delete(key);
+        tx.oncomplete = function () { resolve(); };
+        tx.onerror = function () { reject(tx.error); };
+      });
+    }).catch(function () {
+      try { localStorage.removeItem(key); } catch (e) {}
+    });
+  }
+
+  // ── Diversity-aware mock-member generator ─────────────────────
+  // Every field referenced by the build-plan diversity recommendation:
+  // age band, skin-tone tag, gender presentation, style, profile type,
+  // family / kid profiles, genre prefs.
+  var FIRST_NAMES = ['Aaliyah','Amara','Aiden','Bo','Carmen','Devi','Elena','Eli','Farai','Gita','Hana','Ibrahim','Jin','Jorge','Kenji','Lena','Mateo','Nia','Omar','Priya','Quinn','Rina','Saul','Tomi','Uma','Vera','Wren','Xiomara','Yara','Zane','Sage','River','Sky','Avery','Rowan','Phoenix','Indigo','Marlowe'];
+  var LAST_NAMES  = ['Lane','Park','Rivera','Okafor','Bennett','Hayashi','Fischer','Sutton','Khan','Reyes','Chen','Patel','Mensah','Larsen','Mwangi','Romero','Tan','Cohen','Nakamura','Pereira','Berhane','Olsen','Thomas','Diallo','Kapoor','Wong','Singh','Morales'];
+  var SKIN_TONES = [
+    { id: 'st1', hex: '#f8d7b5' }, { id: 'st2', hex: '#e7b58c' }, { id: 'st3', hex: '#c9925f' },
+    { id: 'st4', hex: '#a16b3c' }, { id: 'st5', hex: '#7c4a25' }, { id: 'st6', hex: '#4d2f18' }
+  ];
+  var GENDER_PRES = ['feminine','masculine','androgynous','neutral'];
+  var AGE_BANDS   = ['child','teen','young-adult','adult','senior'];
+  var STYLES      = ['casual','formal','artistic','professional','streetwear','classic'];
+  var PROFILE_TYPES = ['adult','adult','adult','adult','teen','kid','family']; // weighted toward adult
+  var GENRES = ['featured','load-originals','movies','series','shorts','documentaries','reality','biography','news','drama','comedy','animation','kids','book-cinema','thrillers','podcasts','creators-originals'];
+
+  // SVG avatar generator — diverse, deterministic per-member, fully
+  // offline. Outputs a data-URL safe to use as an <img src>.
+  function svgAvatar(member) {
+    var rng = makeRng('av-' + member.id);
+    var skin = SKIN_TONES.find(function (s) { return s.id === member.skinTone; }) || SKIN_TONES[2];
+    var bgHueA = Math.floor(rng() * 360);
+    var bgHueB = (bgHueA + 30 + Math.floor(rng() * 60)) % 360;
+    var styleAccent = { casual:'#7c3aed', formal:'#0a1535', artistic:'#ff6e6e', professional:'#0d3358', streetwear:'#fbbf24', classic:'#5a1a2e' }[member.style] || '#7c3aed';
+    var initials = (member.displayName.split(/\s+/).map(function (w) { return (w[0] || '').toUpperCase(); }).join('')).slice(0, 2);
+    // Clip-path silhouette varies subtly by gender presentation.
+    var hairTop = member.gender === 'feminine' ? 'M28 36 Q50 14 72 36 L72 50 L28 50 Z' :
+                  member.gender === 'masculine' ? 'M30 40 Q50 24 70 40 L70 50 L30 50 Z' :
+                  'M30 38 Q50 18 70 38 L70 50 L30 50 Z';
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">' +
+      '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+      '<stop offset="0%" stop-color="hsl(' + bgHueA + ',45%,28%)"/>' +
+      '<stop offset="100%" stop-color="hsl(' + bgHueB + ',55%,18%)"/>' +
+      '</linearGradient></defs>' +
+      '<rect width="100" height="100" fill="url(#g)"/>' +
+      '<circle cx="50" cy="44" r="16" fill="' + skin.hex + '"/>' +              // face
+      '<path d="' + hairTop + '" fill="' + styleAccent + '" opacity=".85"/>' +    // hair
+      '<rect x="22" y="62" width="56" height="34" rx="14" fill="' + skin.hex + '" opacity=".6"/>' + // shoulders
+      '<rect x="22" y="68" width="56" height="28" rx="6" fill="' + styleAccent + '" opacity=".75"/>' + // garment
+      '<text x="50" y="48" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="13" font-weight="800" fill="rgba(0,0,0,0.55)">' + initials + '</text>' +
+      '</svg>';
+    return 'data:image/svg+xml;base64,' + btoa(svg);
+  }
+
+  function genMember(rng, idx) {
+    var first = pick(FIRST_NAMES, rng);
+    var last  = pick(LAST_NAMES, rng);
+    var profileType = pick(PROFILE_TYPES, rng);
+    var ageBand = profileType === 'kid' ? 'child' : profileType === 'teen' ? 'teen' : pick(['young-adult','adult','adult','senior'], rng);
+    var prefs = [];
+    var n = 2 + Math.floor(rng() * 3);
+    while (prefs.length < n) { var g = pick(GENRES, rng); if (prefs.indexOf(g) === -1) prefs.push(g); }
+    var m = {
+      id: 'mock-' + (idx + 1).toString().padStart(4, '0'),
+      isMock: true,
+      displayName: first + ' ' + last,
+      username: (first + last).toLowerCase() + idx,
+      profileType: profileType,
+      ageBand: ageBand,
+      gender: pick(GENDER_PRES, rng),
+      skinTone: pick(SKIN_TONES, rng).id,
+      style: pick(STYLES, rng),
+      genrePrefs: prefs,
+      watchHistory: [],
+      likes: [],
+      myList: [],
+      follows: [],
+      subscribers: Math.floor(rng() * 50000),
+      createdAt: Date.now() - Math.floor(rng() * 365 * 24 * 60 * 60 * 1000)
+    };
+    m.avatar = svgAvatar(m);
+    return m;
+  }
+
+  function generateMockMembers(count) {
+    var seed = DEFAULT_SEED + ':n=' + count;
+    var rng = makeRng(seed);
+    var members = [];
+    for (var i = 0; i < count; i++) members.push(genMember(rng, i));
+    return Promise.all([
+      idbSet(KEY_MEMBERS, members),
+      idbSet(KEY_LASTSEED, seed),
+      log('Generated ' + count + ' mock members (seed=' + seed + ')')
+    ]).then(function () { return members; });
+  }
+
+  function generateMockActivity(perMember) {
+    perMember = perMember || 8;
+    return idbGet(KEY_MEMBERS).then(function (members) {
+      if (!members || !members.length) {
+        toast('Generate Mock Members first.');
+        return null;
+      }
+      var rng = makeRng(DEFAULT_SEED + ':a=' + members.length + 'x' + perMember);
+      var ACT_TYPES = ['view','view','view','view','like','save','follow','partial','complete'];
+      var acts = [];
+      var now = Date.now();
+      members.forEach(function (m) {
+        var k = perMember + Math.floor(rng() * 6);
+        for (var i = 0; i < k; i++) {
+          var ts = now - Math.floor(rng() * 30 * 24 * 60 * 60 * 1000);
+          var type = pick(ACT_TYPES, rng);
+          var act = {
+            id: 'act-' + acts.length.toString().padStart(6, '0'),
+            isMock: true, ts: ts, memberId: m.id,
+            type: type,
+            videoId: Math.floor(rng() * 200) + 1,
+            progress: type === 'partial' ? Math.floor(rng() * 75) + 10 : (type === 'complete' ? 100 : null)
+          };
+          // Mirror activity onto the member's own arrays
+          if (type === 'like')   m.likes.push(act.videoId);
+          if (type === 'save')   m.myList.push(act.videoId);
+          if (type === 'follow') m.follows.push('creator-' + (Math.floor(rng() * 50) + 1));
+          if (type === 'view' || type === 'partial' || type === 'complete') {
+            m.watchHistory.push({ videoId: act.videoId, ts: ts, progress: act.progress || 0 });
+          }
+          acts.push(act);
+        }
+      });
+      return Promise.all([
+        idbSet(KEY_ACTIVITY, acts),
+        idbSet(KEY_MEMBERS, members),
+        log('Generated ' + acts.length + ' mock activity events across ' + members.length + ' members')
+      ]).then(function () { return { acts: acts.length, members: members.length }; });
+    });
+  }
+
+  function trendingTop5() {
+    return idbGet(KEY_ACTIVITY).then(function (acts) {
+      acts = acts || [];
+      var now = Date.now();
+      var score = {};
+      acts.forEach(function (a) {
+        var weight = a.type === 'view' ? 1 : a.type === 'like' ? 3 : a.type === 'save' ? 4 : a.type === 'complete' ? 5 : a.type === 'partial' ? 2 : 0;
+        // Time decay (half-life 7 days)
+        var ageDays = (now - a.ts) / 86400000;
+        var decayed = weight * Math.pow(0.5, ageDays / 7);
+        score[a.videoId] = (score[a.videoId] || 0) + decayed;
+      });
+      return Object.keys(score).map(function (k) { return { videoId: +k, score: score[k] }; })
+                   .sort(function (a, b) { return b.score - a.score; }).slice(0, 5);
+    });
+  }
+
+  function resetDemoData() {
+    return Promise.all([
+      idbDel(KEY_MEMBERS), idbDel(KEY_ACTIVITY), idbDel(KEY_LOG), idbDel(KEY_LASTSEED), idbDel(KEY_PRESET),
+      log('Demo data reset')
+    ]);
+  }
+
+  function exportDemoData() {
+    return Promise.all([idbGet(KEY_MEMBERS), idbGet(KEY_ACTIVITY)]).then(function (vals) {
+      var blob = new Blob([JSON.stringify({
+        schemaVersion: SCHEMA,
+        exportedAt: Date.now(),
+        members: vals[0] || [],
+        activity: vals[1] || []
+      }, null, 2)], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'loadplay-test-export-' + new Date().toISOString().slice(0, 10) + '.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      return log('Exported demo data (' + (vals[0] ? vals[0].length : 0) + ' members, ' + (vals[1] ? vals[1].length : 0) + ' activity)');
+    });
+  }
+
+  function importDemoData(file) {
+    return file.text().then(function (txt) {
+      var data;
+      try { data = JSON.parse(txt); }
+      catch (e) { toast('Import failed: invalid JSON'); throw e; }
+      if (data.schemaVersion !== SCHEMA) {
+        toast('Schema mismatch (file=' + data.schemaVersion + ' app=' + SCHEMA + '). Aborted.');
+        return null;
+      }
+      return Promise.all([
+        idbSet(KEY_MEMBERS, data.members || []),
+        idbSet(KEY_ACTIVITY, data.activity || []),
+        log('Imported ' + (data.members || []).length + ' members + ' + (data.activity || []).length + ' activity events')
+      ]);
+    });
+  }
+
+  // ── Action log (last 50, IndexedDB) ───────────────────────────
+  function log(msg) {
+    return idbGet(KEY_LOG).then(function (rows) {
+      rows = rows || [];
+      rows.push({ ts: Date.now(), msg: msg });
+      while (rows.length > 50) rows.shift();
+      return idbSet(KEY_LOG, rows);
+    });
+  }
+
+  // ── Test Mode toggle ──────────────────────────────────────────
+  function getActive() { try { return localStorage.getItem(KEY_ACTIVE) === '1'; } catch (e) { return false; } }
+  function setActive(on) {
+    try { localStorage.setItem(KEY_ACTIVE, on ? '1' : '0'); } catch (e) {}
+    document.body.classList.toggle('lp-testmode-on', !!on);
+    var b = $$('lpTestModeBanner'); if (b) b.hidden = !on;
+    var badge = $$('lpTestActiveBadge'); if (badge) badge.hidden = !on;
+    log('Test Mode ' + (on ? 'ACTIVATED' : 'deactivated'));
+  }
+  // Apply on load
+  setActive(getActive());
+
+  // ── Test Mode admin page renderer ─────────────────────────────
+  // Rendered through the existing window.__lpRunAct dispatcher when
+  // sidebar "Admin · Test Mode" is tapped (data-lp-act="test-mode").
+  function ensureDevAuth() {
+    try {
+      var u = JSON.parse(localStorage.getItem('lp_user') || 'null');
+      return u && u.role === 'developer';
+    } catch (e) { return false; }
+  }
+  function lpToast(m) { try { window.toast(m); } catch (e) {} }
+
+  function html(strings) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    var out = '';
+    strings.forEach(function (s, i) { out += s + (i < args.length ? args[i] : ''); });
+    return out;
+  }
+
+  function fmtTs(ts) {
+    var d = new Date(ts);
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+
+  function renderTestModePage() {
+    if (!ensureDevAuth()) {
+      // Not signed in as developer — open the gate.
+      lpToast('Sign in as a developer to access Admin · Test Mode.');
+      var dm = $$('lp-dev-modal'); if (dm) dm.classList.add('on');
+      return;
+    }
+    var preset = (function () { try { return parseInt(localStorage.getItem(KEY_PRESET) || '25', 10); } catch (e) { return 25; } })();
+    Promise.all([
+      idbGet(KEY_MEMBERS), idbGet(KEY_ACTIVITY), idbGet(KEY_LOG), trendingTop5()
+    ]).then(function (r) {
+      var members = r[0] || [], activity = r[1] || [], rows = r[2] || [], top5 = r[3] || [];
+      var memberOptions = members.length
+        ? '<option value="">— Select mock member —</option>' + members.slice(0, 200).map(function (m) {
+            return '<option value="' + m.id + '">' + m.displayName + ' (' + m.profileType + ')</option>';
+          }).join('')
+        : '<option value="">No mock members yet</option>';
+      var logHtml = rows.length
+        ? rows.slice().reverse().map(function (l) {
+            return '<div class="row"><span class="ts">' + fmtTs(l.ts) + '</span><span class="ev">' + l.msg + '</span></div>';
+          }).join('')
+        : '<div class="lp-tm-empty">No activity yet. Generate mock data to populate this log.</div>';
+
+      var activeNow = getActive();
+
+      var extra =
+        '<div class="lp-tm-toggle' + (activeNow ? ' on' : '') + '" id="lpTmToggle">' +
+          '<div class="lp-tm-toggle-label"><strong>Test Mode <span class="lp-mock-tag">' + (activeNow ? 'ACTIVE' : 'OFF') + '</span></strong>' +
+          '<span>When ON, every page surface that touches mock data is tagged. The red top banner is visible site-wide so you never confuse demo with real.</span></div>' +
+          '<div class="lp-tm-switch" id="lpTmSwitch" role="switch" aria-checked="' + activeNow + '"></div>' +
+        '</div>' +
+
+        '<div class="lp-tm-stat-row">' +
+          '<div class="lp-tm-stat"><div class="n">' + members.length + '</div><div class="l">Mock Members</div></div>' +
+          '<div class="lp-tm-stat"><div class="n">' + activity.length + '</div><div class="l">Mock Activity</div></div>' +
+          '<div class="lp-tm-stat"><div class="n">' + activity.filter(function (a) { return a.type === 'view'; }).length + '</div><div class="l">Mock Views</div></div>' +
+          '<div class="lp-tm-stat"><div class="n">' + activity.filter(function (a) { return a.type === 'like'; }).length + '</div><div class="l">Mock Likes</div></div>' +
+          '<div class="lp-tm-stat"><div class="n">' + activity.filter(function (a) { return a.type === 'follow'; }).length + '</div><div class="l">Mock Follows</div></div>' +
+          '<div class="lp-tm-stat"><div class="n">' + top5.length + '</div><div class="l">Trending (top)</div></div>' +
+        '</div>' +
+
+        '<div class="lp-tm-section">' +
+          '<h3>Generate Mock Members</h3>' +
+          '<p>Synthetic members with diverse age, skin-tone, gender presentation, and style. Avatars are SVG, generated locally — no external photos, no API.</p>' +
+          '<div class="lp-tm-presets">' +
+            [25, 100, 500].map(function (n) {
+              return '<button class="lp-tm-preset' + (n === preset ? ' active' : '') + '" data-tm-preset="' + n + '" type="button">' + n + '</button>';
+            }).join('') +
+          '</div>' +
+          '<div class="lp-tm-actions">' +
+            '<button class="lp-btn primary" data-tm-act="gen-members" type="button">Generate Mock Members</button>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="lp-tm-section">' +
+          '<h3>Generate Mock Activity</h3>' +
+          '<p>Simulates views, likes, saves, follows, partial &amp; completed watches across all members. Trending recalculates on a 7-day half-life.</p>' +
+          '<div class="lp-tm-actions">' +
+            '<button class="lp-btn primary" data-tm-act="gen-activity" type="button">Generate Mock Activity</button>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="lp-tm-section">' +
+          '<h3>Sign in as a Mock Member</h3>' +
+          '<p>Switch the active session to any mock member to test their personalized home feed and recommendations from their POV.</p>' +
+          '<div class="lp-tm-impersonate">' +
+            '<select id="lpTmAsMember">' + memberOptions + '</select>' +
+            '<button class="lp-btn" data-tm-act="impersonate" type="button">Sign in as selected</button>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="lp-tm-section">' +
+          '<h3>Demo Data — Reset · Export · Import</h3>' +
+          '<p>Reset wipes all mock members + activity. Export downloads a JSON file with a schema version. Import restores from a previous export (matching schema only).</p>' +
+          '<div class="lp-tm-actions">' +
+            '<button class="lp-btn" data-tm-act="reset" type="button">Reset Demo Data</button>' +
+            '<button class="lp-btn" data-tm-act="export" type="button">Export Demo Data</button>' +
+            '<label class="lp-btn" style="cursor:pointer">Import Demo Data<input id="lpTmImportFile" type="file" accept="application/json" hidden></label>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="lp-tm-section">' +
+          '<h3>Action Log</h3>' +
+          '<p>Last 50 actions, timestamped. Useful for verifying generation counts and trending math.</p>' +
+          '<div class="lp-tm-log" id="lpTmLog">' + logHtml + '</div>' +
+        '</div>';
+
+      window.__lpShowPage({
+        title: 'Admin · Test Mode',
+        blurb: 'Mock-only environment for verifying every site feature before launch. All records carry isMock:true; production launch can hide or wipe them in one switch.',
+        extra: extra
+      });
+    });
+  }
+
+  // Expose page renderer for the existing IIFE's runAct dispatcher.
+  window.__lpRenderTestMode = renderTestModePage;
+
+  // Patch the existing runAct: when 'test-mode' is invoked, render us.
+  var prevAct = window.__lpRunAct;
+  window.__lpRunAct = function (key) {
+    if (key === 'test-mode') return renderTestModePage();
+    return prevAct ? prevAct(key) : undefined;
+  };
+  // Also intercept the document-level [data-lp-act="test-mode"] click
+  // (the v9 IIFE handler runs first; capture: true lets us pre-empt it
+  // when the act key is 'test-mode' so the page renders before any
+  // generic dispatch).
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-lp-act="test-mode"]');
+    if (!t) return;
+    e.preventDefault();
+    e.stopPropagation();
+    renderTestModePage();
+  }, true);
+
+  // ── Page button delegation ────────────────────────────────────
+  document.addEventListener('click', function (e) {
+    var p = e.target.closest('[data-tm-preset]');
+    if (p) {
+      var n = parseInt(p.getAttribute('data-tm-preset'), 10);
+      try { localStorage.setItem(KEY_PRESET, String(n)); } catch (err) {}
+      renderTestModePage();
+      return;
+    }
+    var act = e.target.closest('[data-tm-act]');
+    if (!act) return;
+    var key = act.getAttribute('data-tm-act');
+    var preset = (function () { try { return parseInt(localStorage.getItem(KEY_PRESET) || '25', 10); } catch (err) { return 25; } })();
+    if (key === 'gen-members') {
+      generateMockMembers(preset).then(function (m) { lpToast('Generated ' + m.length + ' mock members'); renderTestModePage(); });
+    } else if (key === 'gen-activity') {
+      generateMockActivity(8).then(function (r) { if (r) { lpToast('Generated ' + r.acts + ' mock activity events'); renderTestModePage(); } });
+    } else if (key === 'reset') {
+      if (!window.confirm('Wipe all mock members + activity? This cannot be undone (export first if needed).')) return;
+      resetDemoData().then(function () { lpToast('Demo data reset'); renderTestModePage(); });
+    } else if (key === 'export') {
+      exportDemoData().then(function () { lpToast('Exported demo data'); renderTestModePage(); });
+    } else if (key === 'impersonate') {
+      var sel = $$('lpTmAsMember'); if (!sel || !sel.value) { lpToast('Pick a mock member first'); return; }
+      idbGet(KEY_MEMBERS).then(function (members) {
+        var m = (members || []).find(function (x) { return x.id === sel.value; });
+        if (!m) return;
+        try { localStorage.setItem('lp_user', JSON.stringify({
+          user: m.username, name: m.displayName, role: 'mock-viewer', isMock: true, mockMemberId: m.id, signedInAt: Date.now()
+        })); } catch (err) {}
+        lpToast('Signed in as ' + m.displayName + ' (mock)');
+        log('Impersonating mock member ' + m.id + ' (' + m.displayName + ')');
+      });
+    }
+  });
+
+  // Test Mode toggle switch
+  document.addEventListener('click', function (e) {
+    var s = e.target.closest('#lpTmSwitch, #lpTmToggle');
+    if (!s) return;
+    setActive(!getActive());
+    renderTestModePage();
+  });
+
+  // Import file
+  document.addEventListener('change', function (e) {
+    if (e.target && e.target.id === 'lpTmImportFile') {
+      var f = e.target.files && e.target.files[0]; if (!f) return;
+      importDemoData(f).then(function (r) { if (r) { lpToast('Imported demo data'); renderTestModePage(); } });
+    }
+  });
 })();
 </script>
 </body>

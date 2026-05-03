@@ -382,3 +382,92 @@ nothing is silently dropped.
 
 `main` at v17dy. Backups for every shipped version exist as
 `backup/2026-04-30-v17d{n,o,p,q,r,s,t,u,v,w,x,y}` on origin.
+
+---
+
+## LoadPlay backlog (added 2026-05-02 — must complete before launch)
+
+Tracks the work derived from the Load Studio / Load Play Build Plan +
+the PWA Cinema Build Manual + every user request through 2026-05-02.
+Stable backup of the current LoadPlay tip:
+`backup/2026-05-02-loadplay-v19` → `ed355a7`. v20+ work continues on
+`claude/fix-session-sending-TVMbW` and is fast-forwarded to `main`
+after each push (Pages serves from `main`).
+
+### Tier 0 — admin / test infrastructure (in progress, v20)
+
+- [x] Admin · Test Mode area inside Developer Lab — gated by SHA-256
+  developer login (Devtest1 + hashed access key). Site-wide red TEST
+  MODE banner when ACTIVE; "ACTIVE" chip on the Developer sidebar item.
+- [x] Mock data engine — IndexedDB (`loadplay_test`, store `kv`),
+  schema v1, localStorage fallback. JSON Export / Import carries
+  `schemaVersion` for migrations. Mulberry32 PRNG, fixed seed for
+  repeatable generation.
+- [x] Generate Mock Members / Generate Mock Activity / Reset /
+  Export / Import buttons. Volume presets (25 / 100 / 500).
+- [x] Diverse SVG avatar generator (age band, skin-tone palette of 6,
+  gender presentation, style accent). 100% offline, royalty-free,
+  deterministic per member-id. Slot for future PNG/portrait overrides
+  in `LoadPlay/avatars/`.
+- [x] Mock activity simulates views, likes, saves, follows,
+  partial / completed watches. Trending = decayed sum (7-day half-life).
+- [x] Sign-in-as-Mock-Member picker (impersonate any generated
+  account; saves session as `role: 'mock-viewer'`, `isMock: true`).
+- [x] Action log panel (last 50 events, timestamped) for verifying
+  generation counts and trending math.
+- [x] Every demo record carries `isMock: true` so a future production
+  switch can hide or wipe demo data in one pass.
+
+Safety rules (locked in code comments + behavior): no real-people
+photos, no scraping, no public-user photos, royalty-free only.
+
+### Tier 1 — most-visible build-plan gaps (next up)
+
+1. **Profile editing page** — display name, banner upload, profile
+   image upload, bio. Reachable from sidebar Viewer · Viewer Profiles.
+2. **Watch History** sidebar item — Tubi/YouTube-style list of
+   recently-watched items, sortable, with resume support.
+3. **Settings page** in sidebar — surface subtitle preferences,
+   audio language, autoplay toggle, content-filter level.
+4. **Multi-step Upload Wizard** — replaces the single-step file
+   picker currently triggered by Creator Upload / Upload Wizard.
+   Steps: title details / poster / trailer / category / rights /
+   credits / safety scan / preview / publish or save draft. Saves
+   to `drafts` until published.
+
+### Tier 2 — playback shell expansion
+
+5. **HTML cinema package player** — open a `.cinepwa.zip`, render
+   via the PWA Cinema Build Manual's Scene JSON spec.
+6. **Audio-story playback** — non-video content type with cover art,
+   chapters, and progress.
+7. **Per-project pages** — dedicated landing for each published
+   item: description, credits, rights, related items.
+
+### Tier 3 — real implementations behind the Developer Lab gate
+
+8. **PWA Diagnostics** — manifest reachable, SW registered, icons
+   resolvable, scope OK, IndexedDB capacity check.
+9. **Manifest Checker** — fetch + parse manifest.json, surface issues.
+10. **Service Worker Checker** — list registered SWs, controllers,
+    cache contents, version of active SW.
+11. **API Keys panel** — per-provider key entry + local storage,
+    mirroring `load/image-prompt`'s pattern.
+12. **Package Validator** — open `.cinepwa.zip` / `.loadstudio.zip`,
+    validate structure against the manual's schema.
+
+### Tier 4 — marketplace & safety completion
+
+13. **Marketplace cart / checkout** for paid items (currently free
+    items unlock instantly; paid items toast "coming soon").
+14. **Real Safety Scan** — text + image at upload time. Blocks
+    publish for fails, returns to Drafts with notes.
+
+### Outstanding decisions (carried)
+
+- **Inbox files privacy** — leave `inbox/` public on the repo, or
+  scrub from history (destructive)?
+- **`acr2026` rotation** — three standalone HTMLs still use plaintext
+  `acr2026`. Awaiting new password to hash + replace across
+  `ACR-Study-Standalone.html`, `ACR-Records-Standalone.html`,
+  `Attain-Standalone.html`. Reminder lives in `HANDOFF.md`.
