@@ -17641,3 +17641,25 @@ window.LoadAudioFix = {
   /* ---------- Boot ---------- */
   boot();
 }());
+
+// === LoadStudio Editing Bay hook (added 2026-05-04) ===
+// When Load is opened with ?lsedit=1 (typical: from a LoadStudio
+// iframe pointing here), auto-open the video editor as soon as the
+// page is ready. No-op when the param isn't present.
+(function(){
+  try{
+    if(new URLSearchParams(location.search).get('lsedit')==='1'){
+      function tryOpen(){
+        if(typeof window.openVideoEditor==='function'){
+          try{window.openVideoEditor(null);}catch(e){}
+          return true;
+        }
+        return false;
+      }
+      if(!tryOpen()){
+        var t=setInterval(function(){if(tryOpen())clearInterval(t);},150);
+        setTimeout(function(){clearInterval(t);},10000);
+      }
+    }
+  }catch(_){}
+})();
