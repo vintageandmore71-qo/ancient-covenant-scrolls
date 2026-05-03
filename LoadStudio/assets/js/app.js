@@ -1,36 +1,48 @@
 /*
  * Load Studio PWA application logic
  *
- * This script adds interactivity to the Load Studio front‑end. It binds
- * click events to the menu button (reserved for future side navigation),
- * implements a dark mode toggle by toggling a data attribute on the body,
- * and handles simple smooth scrolling for internal anchors.
+ * Binds click events on the menu button and dark-mode toggle, smooth-
+ * scrolls internal anchors, and registers the service worker so Load
+ * Studio runs as a real offline PWA. Every selector is null-safe so a
+ * missing element never blocks the rest of the script.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
   const menuBtn = document.querySelector('.menu-btn');
   const darkToggle = document.querySelector('[aria-label="Toggle dark mode"]');
 
-  // Placeholder menu interaction: toggles a class on body for side nav
-  menuBtn.addEventListener('click', () => {
-    document.body.classList.toggle('menu-open');
-  });
+  if (menuBtn) {
+    menuBtn.addEventListener('click', () => {
+      document.body.classList.toggle('menu-open');
+    });
+  }
 
-  // Dark mode toggle flips a data attribute on the body
-  darkToggle.addEventListener('click', () => {
-    const isDark = document.body.dataset.theme === 'dark';
-    document.body.dataset.theme = isDark ? 'light' : 'dark';
-  });
+  if (darkToggle) {
+    darkToggle.addEventListener('click', () => {
+      const isDark = document.body.dataset.theme === 'dark';
+      document.body.dataset.theme = isDark ? 'light' : 'dark';
+    });
+  }
 
-  // Smooth scrolling for internal links on toolbar shortcuts
+  // Smooth scrolling for internal anchors.
   document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
     anchor.addEventListener('click', function (e) {
-      e.preventDefault();
       const targetId = this.getAttribute('href').substring(1);
+      if (!targetId) return;
       const target = document.getElementById(targetId);
       if (target) {
+        e.preventDefault();
         target.scrollIntoView({ behavior: 'smooth' });
       }
     });
   });
 });
+
+// Service worker registration (relative path so it resolves against
+// /LoadStudio/ wherever the site is deployed). Silently ignores
+// failures so a missing SW never blocks the page from loading.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js', { scope: './' }).catch(() => {});
+  });
+}
