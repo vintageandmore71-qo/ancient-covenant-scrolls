@@ -1710,6 +1710,8 @@ function makeVideoCard(v) {
   const ch = CH[v.ch];
   const tg = TG[v.id % TG.length];
   const glow = GLOW[v.ch];
+  const mockNum = String(((v.ch * 47 + (v.id || 0) * 7) % 500) + 1).padStart(3, '0');
+  const mockAv = `assets/mock-users/avatars/user_${mockNum}.jpg`;
   const div = document.createElement('div');
   div.className = 'vcard';
   div.innerHTML = `
@@ -1730,7 +1732,10 @@ function makeVideoCard(v) {
       ${v.live ? '<div class="thumb-live">● LIVE</div>' : `<div class="thumb-dur">${v.d}</div>`}
     </div>
     <div class="card-info">
-      <div class="card-avatar" style="background:linear-gradient(135deg,${ch.c[0]},${ch.c[1]})">${ch.n[0]}</div>
+      <div class="card-avatar" style="background:linear-gradient(135deg,${ch.c[0]},${ch.c[1]});overflow:hidden;color:transparent;position:relative">
+        <img src="${mockAv}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;position:absolute;inset:0" onerror="this.remove();this.parentElement.style.color='#fff'">
+        ${ch.n[0]}
+      </div>
       <div class="card-meta">
         <div class="card-title">${v.t}</div>
         <div class="card-ch">${ch.n}</div>
@@ -3960,27 +3965,43 @@ window.addEventListener('online',  () => toast('Back online'));
     return __lpMembersCache[i % __lpMembersCache.length];
   }
 
-  // Map loadplay2 channel index (0-9, ten built-in channels) to a
-  // deterministic mock member so the creator avatar in the player
-  // always shows the same real headshot for each channel.
+  // v25 — Always attach a real mock-user portrait to the player
+  // creator avatar. Uses a deterministic file path so it works WITHOUT
+  // the LITE pack having been loaded into IndexedDB. If the LITE
+  // pack IS loaded, also overrides the display name / subscribers
+  // with the real member record.
   window.__lpAttachMockCreator = function (v) {
-    if (!__lpMembersCache || !__lpMembersCache.length) return;
     var idx = (typeof v.ch === 'number' ? v.ch : 0);
-    var stride = Math.max(1, Math.floor(__lpMembersCache.length / 10));
-    var m = memberByIndex(idx * stride);
-    if (!m || !m.avatar) return;
+    var seed = (idx * 47 + ((v.id || 0) * 7)) % 500;
+    var num = String(seed + 1).padStart(3, '0');
+    var avatarPath = 'assets/mock-users/avatars/user_' + num + '.jpg';
+
     var av = document.getElementById('chAvatar');
     if (av) {
       av.textContent = '';
-      av.style.cssText = 'background-image:url(\'' + m.avatar + '\');background-size:cover;background-position:center';
+      av.style.background = 'transparent';
+      av.style.backgroundImage = 'url("' + avatarPath + '")';
+      av.style.backgroundSize = 'cover';
+      av.style.backgroundPosition = 'center';
+      av.style.backgroundRepeat = 'no-repeat';
     }
-    var nm = document.getElementById('chName');
-    if (nm) nm.textContent = m.displayName + (m.handle ? '  ' + m.handle : '');
-    var su = document.getElementById('chSubs');
-    if (su) {
-      var n = m.subscribers || 0;
-      var sub = (n >= 1000 ? (n / 1000).toFixed(1) + 'K' : n) + ' subscribers';
-      su.textContent = sub;
+    // Member-record overrides only if cache present.
+    if (__lpMembersCache && __lpMembersCache.length) {
+      var stride = Math.max(1, Math.floor(__lpMembersCache.length / 10));
+      var m = memberByIndex(idx * stride);
+      if (m) {
+        // Prefer the member-bound avatar URL if it's available
+        if (m.avatar && av) {
+          av.style.backgroundImage = 'url("' + m.avatar + '")';
+        }
+        var nm = document.getElementById('chName');
+        if (nm) nm.textContent = m.displayName + (m.handle ? '  ' + m.handle : '');
+        var su = document.getElementById('chSubs');
+        if (su) {
+          var n = m.subscribers || 0;
+          su.textContent = (n >= 1000 ? (n / 1000).toFixed(1) + 'K' : n) + ' subscribers';
+        }
+      }
     }
   };
 
