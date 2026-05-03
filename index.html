@@ -960,7 +960,7 @@ function crSetButtons(){
 window.onscroll=function(){var s=window.scrollY||0,h=document.documentElement.scrollHeight-window.innerHeight;document.getElementById('pf').style.width=(h>0?Math.round(s/h*100):0)+'%';document.getElementById('tb2').style.display=s>300?'block':'none';};
 (function(){
 if(!('serviceWorker' in navigator))return;
-var RESET_KEY='acr_sw_reset_v7';
+var RESET_KEY='acr_sw_reset_v8';
 if(!localStorage.getItem(RESET_KEY)){
 localStorage.setItem(RESET_KEY,'1');
 navigator.serviceWorker.getRegistrations().then(function(regs){

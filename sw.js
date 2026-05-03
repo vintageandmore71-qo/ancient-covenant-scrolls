@@ -5,7 +5,7 @@
 //   is available offline, not just the ones the user already visited.
 // - Leaves the /study/ sub-app's SW and cache alone.
 
-const CACHE = 'acr-v17';
+const CACHE = 'acr-v18';
 const SHELL = ['./', 'index.html', 'manifest.json', 'icon.png'];
 
 // All expected chapter files. file_65 and file_85 have historical
@@ -66,8 +66,19 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
-  // Let the /study/ sub-app's own service worker handle its own scope.
-  if (url.pathname.indexOf('/study/') >= 0) return;
+  // Let every sub-app's own service worker handle its own scope. Each
+  // of these directories ships its own sw.js with its own cache
+  // namespace; intercepting them here would (a) double-cache and (b)
+  // potentially serve a stale 404 that this root SW captured before
+  // the sub-app's directory existed (which is exactly the bug
+  // reported for /LoadStudio/ on 2026-05-02).
+  const SUBAPP_PATHS = [
+    '/study/', '/load/', '/LoadPlay/', '/LoadStudio/',
+    '/attain/', '/attain-jr/', '/GreatE/'
+  ];
+  for (let i = 0; i < SUBAPP_PATHS.length; i++) {
+    if (url.pathname.indexOf(SUBAPP_PATHS[i]) >= 0) return;
+  }
 
   // Network-first for the HTML shell so edits always take effect.
   // Append a unique cache-buster query string. iPad Safari has a
@@ -96,9 +107,15 @@ self.addEventListener('fetch', e => {
     e.respondWith(
       fetch(fresh).then(res => {
         // Cache under the original (un-busted) request key so future
-        // matches still find it.
-        const clone = res.clone();
-        caches.open(CACHE).then(c => c.put(req, clone)).catch(() => {});
+        // matches still find it. NEVER cache failure responses — a
+        // 404 cached here can resurface later (during transient
+        // network errors, while the SW is still installing the new
+        // version, etc.) and make the app look broken even after the
+        // missing path has been added back to the deploy.
+        if (res && res.ok) {
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put(req, clone)).catch(() => {});
+        }
         return res;
       }).catch(() =>
         caches.match(req).then(r =>
