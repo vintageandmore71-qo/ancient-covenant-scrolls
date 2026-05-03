@@ -994,7 +994,7 @@ body.lp-paging #lp-page{display:block}
         <button class="lp-tool" id="lp-tool-back"    title="Back"     aria-label="Back" onclick="history.back()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
-        <button class="lp-tool" id="lp-tool-home"    title="Home"     aria-label="Home" onclick="document.getElementById('lp-home').scrollIntoView({behavior:'smooth',block:'start'})">
+        <button class="lp-tool" id="lp-tool-home"    title="Home"     aria-label="Home" onclick="(window.__lpShowSplash?window.__lpShowSplash():document.getElementById('lp-home').scrollIntoView({behavior:'smooth',block:'start'}))">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>
         </button>
         <button class="lp-tool" id="lp-tool-refresh" title="Hard refresh" aria-label="Hard refresh"
@@ -2069,6 +2069,13 @@ function goHome() {
   renderHome();
   QQ('.nav-item')[0].classList.add('active');
   QQ('.bnav-item')[0].classList.add('active');
+  // v26 — also reset the v9 view state so the splash front page is
+  // restored. Without this, body.lp-streaming or body.lp-paging stays
+  // applied and the splash remains hidden under the now-rendered
+  // content area.
+  if (typeof window.__lpShowSplash === 'function') {
+    try { window.__lpShowSplash(); } catch (e) {}
+  }
 }
 
 // ESC / back
@@ -2821,8 +2828,10 @@ window.addEventListener('online',  () => toast('Back online'));
   }
   // Expose so the inline auth handlers + the v20 Test Mode module can
   // route through the same dispatcher / page renderer.
-  window.__lpRunAct   = runAct;
-  window.__lpShowPage = showPage;
+  window.__lpRunAct     = runAct;
+  window.__lpShowPage   = showPage;
+  window.__lpShowSplash = showSplash;
+  window.__lpShowStream = showStream;
   function devToolLabel(k) {
     return {
       'diagnostics': 'PWA Diagnostics',
