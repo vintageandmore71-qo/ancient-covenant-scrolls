@@ -837,16 +837,11 @@ body.lp-streaming #lp-page{display:none}
    inside renderHome is patched in JS to fall back to the full list so
    the "No videos in this category" message never appears.) */
 
-/* ── TEST MODE — site-wide banner + admin page (v20) ─────────── */
-.lp-testmode-banner{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;gap:10px;padding:6px 14px;background:linear-gradient(90deg,#3a0e1f 0%,#5a1a2e 50%,#3a0e1f 100%);border-bottom:1px solid #ff6e6e;color:#fff;font-size:12px;font-weight:600}
-.lp-testmode-banner strong{font-weight:900;letter-spacing:.08em}
-.lp-testmode-banner .lp-testmode-sub{flex:1;color:#ffd0d0;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lp-testmode-dot{width:8px;height:8px;border-radius:50%;background:#ff6e6e;flex-shrink:0;box-shadow:0 0 8px #ff6e6e;animation:lpTmPulse 1.6s ease-in-out infinite}
-@keyframes lpTmPulse{0%,100%{opacity:.55}50%{opacity:1}}
-.lp-testmode-banner .lp-testmode-x{padding:4px 10px;background:#fff;color:#3a0e1f;font-weight:800;font-size:11px;border-radius:6px;border:0}
-body.lp-testmode-on .topnav{top:30px}
-body.lp-testmode-on .layout{margin-top:calc(var(--nav-h) + 30px)}
-body.lp-testmode-on .sidebar.drawer{top:calc(var(--nav-h) + 30px)}
+/* ── TEST MODE — admin page styling only (banner removed v21) ───
+   The site-wide red banner was removed per user 2026-05-02 — it
+   shifted layout and broke some buttons. The discrete "ACTIVE" chip
+   on the Developer · Admin · Test Mode sidebar item is now the only
+   visual indicator that Test Mode is on. */
 
 /* "ACTIVE" chip on the Developer sidebar item */
 #lpTestActiveBadge{background:#ff6e6e;color:#fff;font-weight:900;letter-spacing:.06em}
@@ -959,14 +954,6 @@ body.lp-paging #lp-page{display:block}
 <!-- APP -->
 <div id="app">
 
-
-  <!-- TEST MODE banner — visible site-wide whenever Test Mode is ACTIVE -->
-  <div id="lpTestModeBanner" class="lp-testmode-banner" hidden>
-    <span class="lp-testmode-dot" aria-hidden="true"></span>
-    <strong>TEST MODE</strong>
-    <span class="lp-testmode-sub">Mock Members &amp; Mock Activity only. No real users.</span>
-    <button class="lp-testmode-x" data-lp-act="test-mode" type="button">Open</button>
-  </div>
 
   <!-- TOP NAV -->
   <header class="topnav">
@@ -2280,7 +2267,8 @@ window.addEventListener('online',  () => toast('Back online'));
 <footer class="lp-copyright">
   <strong>Copyright &copy; 2026 LBond. All Rights Reserved.</strong><br>
   LoadPlay — Stream Digital Cinema Anywhere. Runs on your iPad. No tracking, no accounts beyond this device.<br>
-  Part of the Load suite. <a href="../load/">Main Load</a> &middot; <a href="../LoadStudio/">Load Studio</a>
+  Part of the Load suite. <a href="../load/">Main Load</a> &middot; <a href="../LoadStudio/">Load Studio</a><br>
+  <span style="display:inline-block;margin-top:8px;padding:4px 8px;background:rgba(255,255,255,.04);border-radius:4px;font-size:10.5px;color:var(--text3)">Some profile data, comments, and activity shown during pre-launch testing are for demonstration purposes. No real names, emails, phone numbers, or addresses are stored.</span>
 </footer>
 
 <script>
@@ -2956,7 +2944,14 @@ window.addEventListener('online',  () => toast('Back online'));
   var KEY_ACTIVITY = LS_PREFIX + 'activity';
   var KEY_LOG = LS_PREFIX + 'log';
   var KEY_LASTSEED = LS_PREFIX + 'seed';
-  var KEY_PRESET = LS_PREFIX + 'preset';
+  var KEY_PRESET   = LS_PREFIX + 'preset';
+  var KEY_COMMENTS = LS_PREFIX + 'comments';
+  var KEY_QA       = LS_PREFIX + 'qa';
+  var KEY_TRENDS   = LS_PREFIX + 'trending';
+  var KEY_TRENDTS  = LS_PREFIX + 'trending_ts';
+  var KEY_PRODMODE = 'lp_production_mode';
+  var KEY_PORTRAITS_OPT = LS_PREFIX + 'use_portraits';
+  var KEY_PORTRAITS_CACHE = LS_PREFIX + 'portraits_cache';
   var DEFAULT_SEED = 'loadplay-test-mode-2026';
 
   // ── Tiny seeded PRNG (Mulberry32) ─────────────────────────────
@@ -3031,8 +3026,48 @@ window.addEventListener('online',  () => toast('Back online'));
   // Every field referenced by the build-plan diversity recommendation:
   // age band, skin-tone tag, gender presentation, style, profile type,
   // family / kid profiles, genre prefs.
-  var FIRST_NAMES = ['Aaliyah','Amara','Aiden','Bo','Carmen','Devi','Elena','Eli','Farai','Gita','Hana','Ibrahim','Jin','Jorge','Kenji','Lena','Mateo','Nia','Omar','Priya','Quinn','Rina','Saul','Tomi','Uma','Vera','Wren','Xiomara','Yara','Zane','Sage','River','Sky','Avery','Rowan','Phoenix','Indigo','Marlowe'];
-  var LAST_NAMES  = ['Lane','Park','Rivera','Okafor','Bennett','Hayashi','Fischer','Sutton','Khan','Reyes','Chen','Patel','Mensah','Larsen','Mwangi','Romero','Tan','Cohen','Nakamura','Pereira','Berhane','Olsen','Thomas','Diallo','Kapoor','Wong','Singh','Morales'];
+  // v21 — Faker-style enriched pools so mock identities have real
+  // variety. Names are stylistically diverse (Western, East Asian,
+  // South Asian, African, Latin American, gender-neutral). Emails
+  // are constructed against the RFC-2606 reserved TLD ".test" so the
+  // value is guaranteed never to resolve to a real address. No phone
+  // numbers, no street addresses — those would be PII even fake.
+  var FIRST_NAMES = ['Aaliyah','Aamir','Adaeze','Adrian','Agnes','Ahmad','Aiden','Akira','Alessa','Alex','Amara','Amaya','Amelie','Amira','Anders','Anika','Anita','Antonio','Aria','Arjun','Asha','Astrid','Athena','August','Avery','Bo','Brendan','Brigitta','Camila','Carmen','Cedric','Celeste','Cesar','Chen','Cleo','Colette','Cyrus','Dakota','Dante','Daria','Darius','Devi','Diana','Dmitri','Eero','Elena','Eli','Elif','Elise','Eloise','Emir','Esme','Eva','Faisal','Farai','Fatima','Felix','Finn','Frida','Gabriel','Genevieve','Gita','Greta','Hadley','Hana','Hanan','Harper','Hiroto','Ibrahim','Ilsa','Imani','Ingrid','Iris','Isabel','Isaiah','Ivan','Jade','Jameson','Jasmin','Javier','Jin','Jorge','Joon','Juno','Kaia','Kalani','Kamil','Kenji','Khalil','Kira','Klara','Kofi','Lakshmi','Lara','Layla','Lena','Leo','Levi','Linnea','Lucia','Luka','Maeve','Magnus','Maja','Malia','Mana','Marcus','Marek','Mateo','Maya','Mei','Melisande','Mira','Naila','Nash','Naveen','Nia','Niamh','Nikola','Noor','Nora','Octavia','Olu','Omar','Onyeka','Otto','Paloma','Penelope','Phoenix','Pietro','Priya','Quinn','Rafa','Rahel','Raina','Ravi','Reza','Rhea','Rina','River','Rohan','Rosa','Rowan','Saanvi','Sage','Salem','Sanaa','Saul','Selene','Senna','Shea','Sia','Sky','Sloane','Solveig','Soraya','Stellan','Sven','Tahir','Talia','Tariq','Tomi','Tycho','Uma','Vera','Vesna','Vidal','Vikram','Vivienne','Wren','Xiomara','Yara','Yusuf','Zane','Zoya'];
+  var LAST_NAMES = ['Adler','Akhtar','Alvarez','Andersson','Anwar','Asante','Bakr','Banerjee','Bennett','Berhane','Bianchi','Brennan','Cahill','Caldwell','Castaneda','Chen','Choi','Cohen','Costa','Cruz','Dahir','Davies','de Vries','Diallo','Donovan','Dragan','Eze','Faraj','Fernandez','Fischer','Fontaine','Fujita','Gallego','Garrido','Gomes','Hadid','Hagberg','Halvorsen','Hassan','Hayashi','Holm','Imani','Ito','Iversen','Jansen','Jokinen','Kaczmarek','Kaiser','Kapoor','Khan','Kimura','Klein','Kobayashi','Kovac','Larsen','Larsson','Laurent','Lin','Lindqvist','Mahmoud','Maki','Malik','Mancini','Marchetti','Marquez','Mensah','Mikkelsen','Moreau','Morales','Mwangi','Nakamura','Navarro','Nilsson','Novak','Obi','Okafor','Okonkwo','Olsen','Ortega','Otieno','Pereira','Park','Patel','Petrova','Quintero','Reyes','Ricci','Rivera','Romero','Rossi','Sato','Schmidt','Schneider','Singh','Suarez','Sutton','Suzuki','Takahashi','Tan','Tanaka','Tariq','Thomas','Toledo','Toure','Travers','Vargas','Vasquez','Vidal','Wang','Wong','Yamada','Yousef','Zaman','Zhao'];
+
+  // Bio generator — template-based, mix-and-match per genre prefs.
+  // No external API. Bios are 1-2 sentences, varied per member.
+  var BIO_OPENERS = ['Storyteller', 'Independent creator', 'Indie filmmaker', 'Documentary maker', 'PWA cinema fan', 'Casual viewer', 'Long-time subscriber', 'Curator', 'Editor', 'Sound designer', 'Reader & viewer', 'Voice actor', 'Maker', 'Quiet watcher', 'Late-night reviewer'];
+  var BIO_CONNECTORS = ['focused on', 'making', 'into', 'building', 'studying', 'collecting', 'documenting', 'sharing', 'reviewing'];
+  var BIO_GENRE_PHRASES = {
+    'movies': 'cinematic shorts and indie features', 'series': 'long-form storytelling and pilot episodes', 'shorts': 'three-minute pieces and pocket cinema',
+    'documentaries': 'documentary projects about everyday people', 'reality': 'real-life rebuilds and renovation stories', 'biography': 'biographies of working artists',
+    'news': 'slow journalism and beat notes', 'drama': 'character studies and quiet drama', 'comedy': 'sitcom pilots and improv shorts',
+    'animation': 'hand-drawn animation and motion shorts', 'kids': 'safe-for-kids storytelling', 'book-cinema': 'turning books into watchable cinema',
+    'thrillers': 'tight-suspense one-acts', 'podcasts': 'long-form audio storytelling',
+    'creators-originals': 'creator-owned originals', 'load-originals': 'LoadPlay originals', 'featured': 'curated picks', 'newly-added': 'fresh weekly drops'
+  };
+  var BIO_TAILS = ['No drama, just craft.', 'Family-safe by default.', 'Made on iPad, anywhere.', 'New uploads weekly.', 'Slow, steady, offline-first.', 'Quiet work, daily.', 'Subscribe if any of this looks like home.', ''];
+  function genBio(member, rng) {
+    var opener = pick(BIO_OPENERS, rng);
+    var conn = pick(BIO_CONNECTORS, rng);
+    var genrePref = member.genrePrefs[0] || 'creators-originals';
+    var phrase = BIO_GENRE_PHRASES[genrePref] || 'creator-owned work';
+    var tail = pick(BIO_TAILS, rng);
+    return opener + ' ' + conn + ' ' + phrase + '. ' + tail;
+  }
+
+  function fakeEmail(member) {
+    // RFC-2606 reserved .test TLD — never resolves. Safe for demo.
+    var local = (member.username || 'mock').replace(/[^a-z0-9.]/gi, '').toLowerCase();
+    return local + '@mock.test';
+  }
+
+  // Comment + Q&A templates (mix-and-match, deterministic per seed)
+  var COMMENT_OPENERS = ['Loved this.', 'Subscribing.', 'Bookmarked.', 'Watched twice.', 'Sharing with friends.', 'Quietly amazing.', 'This is the kind of thing I open LoadPlay for.', 'On my list.', 'Played it twice already.', 'Saved.', 'Cinematic.', 'Nice pacing.', 'Beautiful frames.', 'Sound design is on point.'];
+  var COMMENT_TAILS = ['', ' Looking forward to the next one.', ' More like this please.', ' Hope this gets a series.', ' My kid loved it too.', ' Watched offline on iPad — perfect.', ' The narration is great.', ' Already on my list.'];
+  var QA_QUESTIONS = ['How long did this take to make?', 'Where was this filmed?', 'Is there a part 2?', 'What software did you use?', 'Can I share this?', 'Is this safe for kids?', 'Will you publish a transcript?', 'Any plans for a sequel?', 'Where can I find more like this?'];
+  var QA_ANSWERS  = ['About six weeks start to finish.', 'Recorded around home.', 'Yes — coming soon.', 'LoadPlay + Load Studio.', 'Yes, sharing the link is fine.', 'Yes, family-safe by design.', 'Transcript is on the description page.', 'Considering it, depends on response.', 'Check the Originals rail.'];
   var SKIN_TONES = [
     { id: 'st1', hex: '#f8d7b5' }, { id: 'st2', hex: '#e7b58c' }, { id: 'st3', hex: '#c9925f' },
     { id: 'st4', hex: '#a16b3c' }, { id: 'st5', hex: '#7c4a25' }, { id: 'st6', hex: '#4d2f18' }
@@ -3083,7 +3118,7 @@ window.addEventListener('online',  () => toast('Back online'));
       id: 'mock-' + (idx + 1).toString().padStart(4, '0'),
       isMock: true,
       displayName: first + ' ' + last,
-      username: (first + last).toLowerCase() + idx,
+      username: (first + last).toLowerCase().replace(/[^a-z0-9]/g, '') + idx,
       profileType: profileType,
       ageBand: ageBand,
       gender: pick(GENDER_PRES, rng),
@@ -3097,6 +3132,8 @@ window.addEventListener('online',  () => toast('Back online'));
       subscribers: Math.floor(rng() * 50000),
       createdAt: Date.now() - Math.floor(rng() * 365 * 24 * 60 * 60 * 1000)
     };
+    m.email = fakeEmail(m);
+    m.bio = genBio(m, rng);
     m.avatar = svgAvatar(m);
     return m;
   }
@@ -3173,8 +3210,10 @@ window.addEventListener('online',  () => toast('Back online'));
 
   function resetDemoData() {
     return Promise.all([
-      idbDel(KEY_MEMBERS), idbDel(KEY_ACTIVITY), idbDel(KEY_LOG), idbDel(KEY_LASTSEED), idbDel(KEY_PRESET),
-      log('Demo data reset')
+      idbDel(KEY_MEMBERS), idbDel(KEY_ACTIVITY), idbDel(KEY_LOG), idbDel(KEY_LASTSEED),
+      idbDel(KEY_PRESET), idbDel(KEY_COMMENTS), idbDel(KEY_QA), idbDel(KEY_TRENDS), idbDel(KEY_TRENDTS),
+      idbDel(KEY_PORTRAITS_CACHE),
+      log('Demo data reset (members, activity, comments, Q&A, trending, portraits)')
     ]);
   }
 
@@ -3227,8 +3266,6 @@ window.addEventListener('online',  () => toast('Back online'));
   function getActive() { try { return localStorage.getItem(KEY_ACTIVE) === '1'; } catch (e) { return false; } }
   function setActive(on) {
     try { localStorage.setItem(KEY_ACTIVE, on ? '1' : '0'); } catch (e) {}
-    document.body.classList.toggle('lp-testmode-on', !!on);
-    var b = $$('lpTestModeBanner'); if (b) b.hidden = !on;
     var badge = $$('lpTestActiveBadge'); if (badge) badge.hidden = !on;
     log('Test Mode ' + (on ? 'ACTIVATED' : 'deactivated'));
   }
@@ -3258,6 +3295,180 @@ window.addEventListener('online',  () => toast('Back online'));
     return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   }
 
+  // ── v21 — Comments + Q&A engine ──────────────────────────────
+  function generateMockComments(perVideo) {
+    perVideo = perVideo || 4;
+    return Promise.all([idbGet(KEY_MEMBERS)]).then(function (vals) {
+      var members = vals[0] || [];
+      if (!members.length) { lpToast('Generate Mock Members first.'); return null; }
+      var rng = makeRng(DEFAULT_SEED + ':c=' + members.length);
+      var comments = [];
+      var qas = [];
+      var now = Date.now();
+      for (var vid = 1; vid <= 50; vid++) {
+        var k = perVideo + Math.floor(rng() * 4);
+        for (var i = 0; i < k; i++) {
+          var m = members[Math.floor(rng() * members.length)];
+          var openText = pick(COMMENT_OPENERS, rng);
+          var tail = pick(COMMENT_TAILS, rng);
+          comments.push({
+            id: 'cmt-' + comments.length.toString().padStart(6, '0'),
+            isMock: true,
+            ts: now - Math.floor(rng() * 30 * 86400000),
+            memberId: m.id,
+            memberName: m.displayName,
+            videoId: vid,
+            text: openText + tail,
+            likes: Math.floor(rng() * 200)
+          });
+        }
+        if (rng() < 0.4) {
+          var qm = members[Math.floor(rng() * members.length)];
+          qas.push({
+            id: 'qa-' + qas.length.toString().padStart(5, '0'),
+            isMock: true,
+            ts: now - Math.floor(rng() * 30 * 86400000),
+            memberId: qm.id,
+            memberName: qm.displayName,
+            videoId: vid,
+            question: pick(QA_QUESTIONS, rng),
+            answer: rng() < 0.6 ? pick(QA_ANSWERS, rng) : null
+          });
+        }
+      }
+      return Promise.all([
+        idbSet(KEY_COMMENTS, comments),
+        idbSet(KEY_QA, qas),
+        log('Generated ' + comments.length + ' mock comments + ' + qas.length + ' Q&A entries')
+      ]).then(function () { return { comments: comments.length, qas: qas.length }; });
+    });
+  }
+
+  // ── v21 — Trending recompute (with persisted timestamp) ──────
+  function recomputeTrending() {
+    return trendingTop5().then(function (top) {
+      var ts = Date.now();
+      return Promise.all([
+        idbSet(KEY_TRENDS, top),
+        idbSet(KEY_TRENDTS, ts),
+        log('Trending recomputed (top ' + top.length + ' videos)')
+      ]).then(function () { return { top: top, ts: ts }; });
+    });
+  }
+
+  // ── v21 — Scenario presets (one-click full seeding) ──────────
+  var SCENARIOS = {
+    small:  { members: 25,  activity: 8,  comments: 3 },
+    medium: { members: 100, activity: 15, comments: 5 },
+    large:  { members: 500, activity: 25, comments: 8 }
+  };
+  function loadScenario(name) {
+    var s = SCENARIOS[name]; if (!s) return Promise.resolve();
+    log('Scenario "' + name + '" — seeding ' + s.members + ' members, ~' + s.activity + ' activity each, ~' + s.comments + ' comments per video');
+    return generateMockMembers(s.members)
+      .then(function () { return generateMockActivity(s.activity); })
+      .then(function () { return generateMockComments(s.comments); })
+      .then(function () { return recomputeTrending(); });
+  }
+
+  // ── v21 — Production wipe (one-switch flip, blocks all isMock) ─
+  function isProductionMode() { try { return localStorage.getItem(KEY_PRODMODE) === '1'; } catch (e) { return false; } }
+  function setProductionMode(on) { try { localStorage.setItem(KEY_PRODMODE, on ? '1' : '0'); } catch (e) {} }
+  function wipeAllMockNow() {
+    return resetDemoData().then(function () {
+      setActive(false);
+      log('All mock data wiped (production wipe)');
+    });
+  }
+
+  // ── v21 — CSV export (RFC 4180 escaping) ─────────────────────
+  function csvEscape(v) {
+    if (v == null) return '';
+    var s = String(v);
+    if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+  function csvLine(arr) { return arr.map(csvEscape).join(',') + '\r\n'; }
+  function exportCSV() {
+    return Promise.all([idbGet(KEY_MEMBERS), idbGet(KEY_ACTIVITY)]).then(function (vals) {
+      var members = vals[0] || [], activity = vals[1] || [];
+      var memCsv = csvLine(['id','displayName','username','email','profileType','ageBand','gender','skinTone','style','genrePrefs','subscribers','bio','isMock']);
+      members.forEach(function (m) {
+        memCsv += csvLine([m.id, m.displayName, m.username, m.email, m.profileType, m.ageBand, m.gender, m.skinTone, m.style, (m.genrePrefs || []).join('|'), m.subscribers, m.bio, m.isMock]);
+      });
+      var actCsv = csvLine(['id','ts','memberId','type','videoId','progress','isMock']);
+      activity.forEach(function (a) {
+        actCsv += csvLine([a.id, new Date(a.ts).toISOString(), a.memberId, a.type, a.videoId, a.progress == null ? '' : a.progress, a.isMock]);
+      });
+      [{ name: 'members', csv: memCsv }, { name: 'activity', csv: actCsv }].forEach(function (f) {
+        var blob = new Blob([f.csv], { type: 'text/csv' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'loadplay-test-' + f.name + '-' + new Date().toISOString().slice(0, 10) + '.csv';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      });
+      return log('Exported CSV (' + members.length + ' members, ' + activity.length + ' activity)');
+    });
+  }
+
+  // ── v21 — randomuser.me opt-in portraits ─────────────────────
+  // Opt-in toggle. When ON and we generate members, fetch CC-licensed
+  // portraits from randomuser.me, convert to base64 data URLs, and
+  // cache in IndexedDB so they're available offline thereafter.
+  // Falls back to SVG avatars when offline or fetch fails.
+  function getPortraitsOpt() { try { return localStorage.getItem(KEY_PORTRAITS_OPT) === '1'; } catch (e) { return false; } }
+  function setPortraitsOpt(on) { try { localStorage.setItem(KEY_PORTRAITS_OPT, on ? '1' : '0'); } catch (e) {} }
+  function fetchPortraitsFor(members) {
+    if (!getPortraitsOpt()) return Promise.resolve(members);
+    if (!navigator.onLine) { log('Portrait fetch skipped — offline; using SVG avatars'); return Promise.resolve(members); }
+    return idbGet(KEY_PORTRAITS_CACHE).then(function (cache) {
+      cache = cache || {};
+      // Only fetch portraits for members that don't have one cached
+      var need = members.filter(function (m) { return !cache[m.id]; });
+      if (!need.length) return applyCache(members, cache);
+      var url = 'https://randomuser.me/api/?results=' + need.length + '&inc=picture&nat=us,gb,fr,de,br,in,jp,kr,no,nz';
+      return fetch(url).then(function (r) { return r.json(); }).then(function (data) {
+        var pics = (data && data.results) || [];
+        return Promise.all(pics.map(function (p, i) {
+          if (!p.picture || !p.picture.large) return null;
+          return fetch(p.picture.large)
+            .then(function (resp) { return resp.blob(); })
+            .then(function (blob) {
+              return new Promise(function (resolve) {
+                var fr = new FileReader();
+                fr.onloadend = function () { cache[need[i].id] = fr.result; resolve(); };
+                fr.readAsDataURL(blob);
+              });
+            }).catch(function () {});
+        }));
+      }).then(function () {
+        return idbSet(KEY_PORTRAITS_CACHE, cache).then(function () {
+          log('Fetched ' + need.length + ' portraits from randomuser.me (cached locally)');
+          return applyCache(members, cache);
+        });
+      }).catch(function (err) {
+        log('Portrait fetch failed (' + (err && err.message ? err.message : 'network') + ') — using SVG avatars');
+        return members;
+      });
+    });
+    function applyCache(arr, cache) {
+      arr.forEach(function (m) { if (cache[m.id]) m.avatar = cache[m.id]; });
+      return arr;
+    }
+  }
+
+  // Hook into existing generateMockMembers — wrap so portraits apply.
+  var _originalGenerateMembers = generateMockMembers;
+  generateMockMembers = function (count) {
+    return _originalGenerateMembers(count).then(function (members) {
+      return fetchPortraitsFor(members).then(function (m) {
+        return idbSet(KEY_MEMBERS, m).then(function () { return m; });
+      });
+    });
+  };
+
   function renderTestModePage() {
     if (!ensureDevAuth()) {
       // Not signed in as developer — open the gate.
@@ -3267,9 +3478,11 @@ window.addEventListener('online',  () => toast('Back online'));
     }
     var preset = (function () { try { return parseInt(localStorage.getItem(KEY_PRESET) || '25', 10); } catch (e) { return 25; } })();
     Promise.all([
-      idbGet(KEY_MEMBERS), idbGet(KEY_ACTIVITY), idbGet(KEY_LOG), trendingTop5()
+      idbGet(KEY_MEMBERS), idbGet(KEY_ACTIVITY), idbGet(KEY_LOG), trendingTop5(),
+      idbGet(KEY_COMMENTS), idbGet(KEY_QA), idbGet(KEY_TRENDTS)
     ]).then(function (r) {
       var members = r[0] || [], activity = r[1] || [], rows = r[2] || [], top5 = r[3] || [];
+      var comments = r[4] || [], qas = r[5] || [], trendTs = r[6];
       var memberOptions = members.length
         ? '<option value="">— Select mock member —</option>' + members.slice(0, 200).map(function (m) {
             return '<option value="' + m.id + '">' + m.displayName + ' (' + m.profileType + ')</option>';
@@ -3283,16 +3496,22 @@ window.addEventListener('online',  () => toast('Back online'));
 
       var activeNow = getActive();
 
+      var prodOn = isProductionMode();
+      var portraitsOn = getPortraitsOpt();
+      var trendStr = trendTs ? new Date(trendTs).toLocaleString() : 'never';
+
       var extra =
         '<div class="lp-tm-toggle' + (activeNow ? ' on' : '') + '" id="lpTmToggle">' +
           '<div class="lp-tm-toggle-label"><strong>Test Mode <span class="lp-mock-tag">' + (activeNow ? 'ACTIVE' : 'OFF') + '</span></strong>' +
-          '<span>When ON, every page surface that touches mock data is tagged. The red top banner is visible site-wide so you never confuse demo with real.</span></div>' +
+          '<span>Generates and stores synthetic Mock Members and Mock Activity for safe pre-launch testing. Every record carries isMock:true and is local-only.</span></div>' +
           '<div class="lp-tm-switch" id="lpTmSwitch" role="switch" aria-checked="' + activeNow + '"></div>' +
         '</div>' +
 
         '<div class="lp-tm-stat-row">' +
           '<div class="lp-tm-stat"><div class="n">' + members.length + '</div><div class="l">Mock Members</div></div>' +
           '<div class="lp-tm-stat"><div class="n">' + activity.length + '</div><div class="l">Mock Activity</div></div>' +
+          '<div class="lp-tm-stat"><div class="n">' + comments.length + '</div><div class="l">Mock Comments</div></div>' +
+          '<div class="lp-tm-stat"><div class="n">' + qas.length + '</div><div class="l">Mock Q&amp;A</div></div>' +
           '<div class="lp-tm-stat"><div class="n">' + activity.filter(function (a) { return a.type === 'view'; }).length + '</div><div class="l">Mock Views</div></div>' +
           '<div class="lp-tm-stat"><div class="n">' + activity.filter(function (a) { return a.type === 'like'; }).length + '</div><div class="l">Mock Likes</div></div>' +
           '<div class="lp-tm-stat"><div class="n">' + activity.filter(function (a) { return a.type === 'follow'; }).length + '</div><div class="l">Mock Follows</div></div>' +
@@ -3300,8 +3519,18 @@ window.addEventListener('online',  () => toast('Back online'));
         '</div>' +
 
         '<div class="lp-tm-section">' +
+          '<h3>Scenario Presets</h3>' +
+          '<p>One-click full seeding (members + activity + comments + Q&amp;A + trending). Use these instead of the granular buttons below.</p>' +
+          '<div class="lp-tm-actions">' +
+            '<button class="lp-btn primary" data-tm-act="scenario-small" type="button">New site (25)</button>' +
+            '<button class="lp-btn primary" data-tm-act="scenario-medium" type="button">Scaling (100)</button>' +
+            '<button class="lp-btn primary" data-tm-act="scenario-large" type="button">Launch-ready (500)</button>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="lp-tm-section">' +
           '<h3>Generate Mock Members</h3>' +
-          '<p>Synthetic members with diverse age, skin-tone, gender presentation, and style. Avatars are SVG, generated locally — no external photos, no API.</p>' +
+          '<p>Synthetic identities with diverse age, skin-tone, gender presentation, and style. Avatars are SVG, generated locally. Names use a Faker-style enriched pool. Emails use the RFC-2606 reserved <code>@mock.test</code> domain (never resolves to a real address). No phone numbers, no street addresses are ever stored.</p>' +
           '<div class="lp-tm-presets">' +
             [25, 100, 500].map(function (n) {
               return '<button class="lp-tm-preset' + (n === preset ? ' active' : '') + '" data-tm-preset="' + n + '" type="button">' + n + '</button>';
@@ -3317,6 +3546,24 @@ window.addEventListener('online',  () => toast('Back online'));
           '<p>Simulates views, likes, saves, follows, partial &amp; completed watches across all members. Trending recalculates on a 7-day half-life.</p>' +
           '<div class="lp-tm-actions">' +
             '<button class="lp-btn primary" data-tm-act="gen-activity" type="button">Generate Mock Activity</button>' +
+            '<button class="lp-btn primary" data-tm-act="gen-comments" type="button">Generate Mock Comments &amp; Q&amp;A</button>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="lp-tm-section">' +
+          '<h3>Trending</h3>' +
+          '<p>Top 5 weighted by view + like + save + completion, time-decayed (7-day half-life). Recompute to refresh after generating new activity. <strong>Last computed:</strong> ' + trendStr + '</p>' +
+          '<div class="lp-tm-actions">' +
+            '<button class="lp-btn" data-tm-act="trend-refresh" type="button">Recompute Trending</button>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="lp-tm-section">' +
+          '<h3>Real-Portrait Avatars (opt-in)</h3>' +
+          '<p>When enabled, member generation fetches CC-licensed portraits from <code>randomuser.me</code> (one-time online), converts to base64, and caches them locally so they work offline forever. Falls back to SVG avatars when offline or fetch fails. Off by default — strictly opt-in.</p>' +
+          '<div class="lp-tm-toggle' + (portraitsOn ? ' on' : '') + '" data-tm-act="toggle-portraits" id="lpTmPortraitsToggle" style="margin:0">' +
+            '<div class="lp-tm-toggle-label"><strong>Use real-portrait avatars</strong><span>' + (portraitsOn ? 'ON — next Generate Members will fetch portraits.' : 'OFF — using offline SVG avatars.') + '</span></div>' +
+            '<div class="lp-tm-switch" role="switch" aria-checked="' + portraitsOn + '"></div>' +
           '</div>' +
         '</div>' +
 
@@ -3331,11 +3578,21 @@ window.addEventListener('online',  () => toast('Back online'));
 
         '<div class="lp-tm-section">' +
           '<h3>Demo Data — Reset · Export · Import</h3>' +
-          '<p>Reset wipes all mock members + activity. Export downloads a JSON file with a schema version. Import restores from a previous export (matching schema only).</p>' +
+          '<p>Reset wipes mock members, activity, comments, Q&amp;A, trending, and portrait cache. Export downloads JSON (schema-versioned). CSV export downloads two files (members + activity).</p>' +
           '<div class="lp-tm-actions">' +
             '<button class="lp-btn" data-tm-act="reset" type="button">Reset Demo Data</button>' +
-            '<button class="lp-btn" data-tm-act="export" type="button">Export Demo Data</button>' +
-            '<label class="lp-btn" style="cursor:pointer">Import Demo Data<input id="lpTmImportFile" type="file" accept="application/json" hidden></label>' +
+            '<button class="lp-btn" data-tm-act="export" type="button">Export JSON</button>' +
+            '<button class="lp-btn" data-tm-act="export-csv" type="button">Export CSV</button>' +
+            '<label class="lp-btn" style="cursor:pointer">Import JSON<input id="lpTmImportFile" type="file" accept="application/json" hidden></label>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="lp-tm-section" style="border-top:1px solid var(--border);padding-top:18px;margin-top:6px">' +
+          '<h3 style="color:#ff6e6e">Production Switch</h3>' +
+          '<p>Flipping <strong>Production Mode</strong> ON deactivates Test Mode and wipes every record tagged <code>isMock:true</code> from this device. Use this once before public launch. This is destructive — Export your JSON / CSV first if you want a backup.</p>' +
+          '<div class="lp-tm-toggle' + (prodOn ? ' on' : '') + '" data-tm-act="toggle-prod" id="lpTmProdToggle" style="margin:0;border-color:#ff6e6e">' +
+            '<div class="lp-tm-toggle-label"><strong style="color:#ff6e6e">Production Mode</strong><span>' + (prodOn ? 'ON — all mock data is wiped from this device.' : 'OFF — mock data remains for testing.') + '</span></div>' +
+            '<div class="lp-tm-switch" role="switch" aria-checked="' + prodOn + '"></div>' +
           '</div>' +
         '</div>' +
 
@@ -3391,11 +3648,38 @@ window.addEventListener('online',  () => toast('Back online'));
       generateMockMembers(preset).then(function (m) { lpToast('Generated ' + m.length + ' mock members'); renderTestModePage(); });
     } else if (key === 'gen-activity') {
       generateMockActivity(8).then(function (r) { if (r) { lpToast('Generated ' + r.acts + ' mock activity events'); renderTestModePage(); } });
+    } else if (key === 'gen-comments') {
+      generateMockComments(4).then(function (r) { if (r) { lpToast('Generated ' + r.comments + ' comments + ' + r.qas + ' Q&A'); renderTestModePage(); } });
+    } else if (key === 'trend-refresh') {
+      recomputeTrending().then(function (r) { lpToast('Trending recomputed (top ' + r.top.length + ')'); renderTestModePage(); });
+    } else if (key === 'scenario-small') {
+      loadScenario('small').then(function () { lpToast('Scenario "small" loaded'); renderTestModePage(); });
+    } else if (key === 'scenario-medium') {
+      loadScenario('medium').then(function () { lpToast('Scenario "medium" loaded'); renderTestModePage(); });
+    } else if (key === 'scenario-large') {
+      loadScenario('large').then(function () { lpToast('Scenario "large" loaded — this may take a moment'); renderTestModePage(); });
     } else if (key === 'reset') {
-      if (!window.confirm('Wipe all mock members + activity? This cannot be undone (export first if needed).')) return;
+      if (!window.confirm('Wipe all mock members, activity, comments, Q&A, trending, and portrait cache? This cannot be undone (export first if needed).')) return;
       resetDemoData().then(function () { lpToast('Demo data reset'); renderTestModePage(); });
     } else if (key === 'export') {
-      exportDemoData().then(function () { lpToast('Exported demo data'); renderTestModePage(); });
+      exportDemoData().then(function () { lpToast('Exported JSON'); renderTestModePage(); });
+    } else if (key === 'export-csv') {
+      exportCSV().then(function () { lpToast('Exported CSV (members + activity)'); renderTestModePage(); });
+    } else if (key === 'toggle-portraits') {
+      setPortraitsOpt(!getPortraitsOpt());
+      lpToast('Real-portrait avatars ' + (getPortraitsOpt() ? 'ON' : 'OFF'));
+      renderTestModePage();
+    } else if (key === 'toggle-prod') {
+      var goingOn = !isProductionMode();
+      if (goingOn) {
+        if (!window.confirm('Flip Production Mode ON?\n\nThis will DEACTIVATE Test Mode and WIPE every record tagged isMock:true from this device. This is destructive. Export your JSON / CSV first if you want a backup.')) return;
+        setProductionMode(true);
+        wipeAllMockNow().then(function () { lpToast('Production Mode ON — all mock data wiped'); renderTestModePage(); });
+      } else {
+        setProductionMode(false);
+        lpToast('Production Mode OFF — Test Mode available again');
+        renderTestModePage();
+      }
     } else if (key === 'impersonate') {
       var sel = $$('lpTmAsMember'); if (!sel || !sel.value) { lpToast('Pick a mock member first'); return; }
       idbGet(KEY_MEMBERS).then(function (members) {

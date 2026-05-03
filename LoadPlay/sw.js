@@ -1,4 +1,4 @@
-const CACHE = 'loadplay-v20';
+const CACHE = 'loadplay-v21';
 const SHELL = ['./', './index.html', './manifest.json', './icon.png', './load-play-splash-768w-compressed.jpg'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL).catch(()=>{})));
