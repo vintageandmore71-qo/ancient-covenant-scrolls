@@ -27,7 +27,43 @@
      back to the in-app CSS splash below. -->
 <link rel="apple-touch-startup-image" href="splash.png">
 <title>Load</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&display=swap">
 <link rel="stylesheet" href="load.css">
+<style id="load-v17ea-skin">
+/* v17ea — premium modern skin: Inter slender body font + transparent
+   front-screen action buttons with blue highlights to match the rest
+   of the Load suite. Atkinson Hyperlegible stays available via the
+   dyslexia-font toggle. */
+html,body{font-family:'Inter',-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI','Helvetica Neue',Arial,sans-serif !important;font-weight:400 !important;letter-spacing:-.005em !important}
+body.dyslexic-font{font-family:'OpenDyslexic','Atkinson Hyperlegible','Inter',-apple-system,sans-serif !important}
+h1,h2,h3,h4,h5{font-weight:600;letter-spacing:-.012em}
+.app-topbar{background:rgba(10,10,22,.92) !important;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(70,140,255,.18)}
+.nav-btn{font-weight:500;font-size:13.5px;background:transparent;border:1px solid transparent;border-radius:10px;color:#d8e3ff}
+.nav-btn:hover{background:rgba(70,140,255,.08);border-color:rgba(70,140,255,.22)}
+.nav-btn.active{background:rgba(70,140,255,.14) !important;color:#fff !important;border-color:rgba(70,140,255,.45)}
+.nav-btn .nav-icon svg,.nav-btn.icon-only svg{width:20px;height:20px;color:currentColor}
+/* Transparent front-screen action buttons with blue highlights */
+.home-buttons{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;padding:18px 16px 8px;max-width:760px;margin:0 auto}
+.big-action{background:rgba(70,140,255,.10) !important;color:#dde6ff !important;border:1px solid rgba(70,140,255,.42) !important;padding:11px 18px !important;border-radius:12px !important;font-size:14px !important;font-weight:500 !important;min-height:44px !important;box-shadow:0 4px 20px rgba(70,140,255,.20),inset 0 1px 0 rgba(255,255,255,.06) !important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:transform .14s,background .14s,border-color .14s,box-shadow .14s;letter-spacing:0 !important}
+.big-action:hover{background:rgba(70,140,255,.18) !important;border-color:rgba(70,140,255,.62) !important;box-shadow:0 6px 26px rgba(70,140,255,.34),inset 0 1px 0 rgba(255,255,255,.08) !important}
+.big-action:active{transform:scale(.97)}
+.big-action.primary{background:rgba(70,140,255,.22) !important;border-color:rgba(70,140,255,.62) !important;color:#fff !important;font-weight:600 !important;box-shadow:0 6px 28px rgba(70,140,255,.42),inset 0 1px 0 rgba(255,255,255,.08) !important}
+.big-action.create{background:rgba(70,140,255,.10) !important;border-color:rgba(70,140,255,.42) !important;color:#dde6ff !important;box-shadow:0 4px 20px rgba(70,140,255,.20) !important}
+.big-action.secondary{background:rgba(70,140,255,.06) !important;border-color:rgba(70,140,255,.32) !important;color:#bccef0 !important;box-shadow:0 3px 14px rgba(70,140,255,.14) !important}
+.big-action .ba-icon{display:inline-flex;align-items:center;justify-content:center;color:#9ec4ff;width:16px;height:16px}
+.big-action .ba-icon svg{width:100%;height:100%}
+.big-action.primary .ba-icon{color:#fff}
+.splash-arrow{color:#9ec4ff !important}
+.splash-arrow svg{width:22px;height:22px}
+/* Splash title slender + uppercase tracking */
+.splash-title{font-weight:200 !important;letter-spacing:-.03em !important}
+.splash-title em{font-weight:600 !important}
+.splash-tag{font-weight:300 !important;color:#bccef0}
+/* Settings + label tweaks for slender feel */
+.nav-btn .nav-label{font-weight:500}
+</style>
 </head>
 <body>
 
@@ -35,27 +71,27 @@
 <div id="home-screen" class="screen on">
   <header class="app-topbar">
     <button class="nav-btn active" data-nav="home" aria-label="Home" title="Home">
-      <span class="nav-icon">&#127968;</span><span class="nav-label">Home</span>
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></span><span class="nav-label">Home</span>
     </button>
     <button class="nav-btn" data-nav="library" aria-label="Library" title="Library">
-      <span class="nav-icon">&#128218;</span><span class="nav-label">Library</span>
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h6v16H4z"/><path d="M10 4h6v16h-6z"/><path d="M16 5l4 1-3 14-4-1z"/></svg></span><span class="nav-label">Library</span>
     </button>
     <button class="nav-btn" data-nav="import" aria-label="Import" title="Import a file">
-      <span class="nav-icon">&#8682;</span><span class="nav-label">Import</span>
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><polyline points="6 10 12 4 18 10"/><path d="M4 20h16"/></svg></span><span class="nav-label">Import</span>
     </button>
-    <button class="nav-btn icon-only" data-tool="hard-refresh" aria-label="Force refresh — clears cache and reloads" title="Force refresh (purges cache)">&#8635;</button>
+    <button class="nav-btn icon-only" data-tool="hard-refresh" aria-label="Force refresh — clears cache and reloads" title="Force refresh (purges cache)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="21 4 21 10 15 10"/><polyline points="3 20 3 14 9 14"/><path d="M3.5 14a8.5 8.5 0 0 0 14.7 4.4M20.5 10a8.5 8.5 0 0 0-14.7-4.4"/></svg></button>
     <button class="nav-btn icon-only" data-tool="size-down" aria-label="Smaller text" title="Smaller text">A&#8722;</button>
     <button class="nav-btn icon-only" data-tool="size-up" aria-label="Larger text" title="Larger text">A&#43;</button>
-    <button class="nav-btn icon-only" data-tool="theme" aria-label="Toggle theme" title="Toggle theme">&#9680;</button>
-    <button class="nav-btn icon-only" data-tool="font" aria-label="Toggle dyslexia font" title="Dyslexia font">&#127752;</button>
-    <button class="nav-btn icon-only" data-tool="notes" aria-label="Notes" title="Notes">&#128221;</button>
-    <button class="nav-btn icon-only" data-tool="audio" aria-label="Audio / Read Aloud" title="Audio / Read Aloud">&#128266;</button>
-    <button class="nav-btn icon-only" data-tool="helper" aria-label="Load AI" title="Load AI — built-in coding &amp; reading assistant">&#128172;</button>
-    <button class="nav-btn icon-only" data-tool="devconsole" aria-label="Developer Console" title="Developer Console — scan, diagnose &amp; fix uploads">&#128295;</button>
+    <button class="nav-btn icon-only" data-tool="theme" aria-label="Toggle theme" title="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    <button class="nav-btn icon-only" data-tool="font" aria-label="Toggle dyslexia font" title="Dyslexia font"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 18l5-12 5 12"/><path d="M7 14h6"/><path d="M16 8h5"/><path d="M16 12h5"/><path d="M16 16h5"/></svg></button>
+    <button class="nav-btn icon-only" data-tool="notes" aria-label="Notes" title="Notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M16 4v3h3"/><path d="M8 12h8M8 16h6"/></svg></button>
+    <button class="nav-btn icon-only" data-tool="audio" aria-label="Audio / Read Aloud" title="Audio / Read Aloud"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9v6h3l5 4V5L8 9H5z"/><path d="M16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/></svg></button>
+    <button class="nav-btn icon-only" data-tool="helper" aria-label="Load AI" title="Load AI — built-in coding &amp; reading assistant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H8l-4 4z"/><circle cx="9" cy="11" r="1" fill="currentColor"/><circle cx="13" cy="11" r="1" fill="currentColor"/><circle cx="17" cy="11" r="1" fill="currentColor"/></svg></button>
+    <button class="nav-btn icon-only" data-tool="devconsole" aria-label="Developer Console" title="Developer Console — scan, diagnose &amp; fix uploads"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></button>
     <button class="nav-btn icon-only" data-tool="help" aria-label="Help" title="Help">?</button>
     <div class="spacer"></div>
     <button class="nav-btn" data-nav="settings" aria-label="Settings" title="Settings">
-      <span class="nav-icon">&#9881;</span><span class="nav-label">Aa</span>
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 0 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 0 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 0 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 0 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span><span class="nav-label">Aa</span>
     </button>
   </header>
 
@@ -64,7 +100,7 @@
        is in standalone mode, since Load is then already their app. -->
   <div id="install-banner" class="install-banner" style="display:none;">
     <div class="ib-left">
-      <div class="ib-icon" aria-hidden="true">&#128241;</div>
+      <div class="ib-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="2"/><circle cx="12" cy="18" r="1" fill="currentColor"/></svg></div>
       <div>
         <strong>Install Load as an app on your iPad.</strong>
         <span class="ib-sub">Own icon, opens fullscreen, works offline. Like HTMLq, but it IS your Load.</span>
@@ -83,25 +119,25 @@
          fallback so the CSS wordmark shows in place of a broken-image icon. -->
     <img id="home-splash-img" class="splash-img" alt="Load — Run Web Apps on iPad" src="splash.png" data-src-chain="splash.png|slash.png|splash%20.png|splash.PNG" onerror="(function(el){var chain=(el.dataset.srcChain||'').split('|');var next=chain.slice(chain.indexOf(el.getAttribute('src'))+1)[0];if(next){el.setAttribute('src',next);}else{el.style.display='none';el.parentElement.classList.add('fallback');}})(this)" onload="this.parentElement.classList.remove('fallback');">
     <div class="home-hero-fallback">
-      <div class="splash-arrow" aria-hidden="true">&#8595;</div>
+      <div class="splash-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><polyline points="6 13 12 19 18 13"/></svg></div>
       <h1 class="splash-title">Load<span class="tm-mark">&trade;</span></h1>
       <p class="splash-tag">Run Web Apps on iPad</p>
     </div>
     <!-- Resume reading — appears only when there's an app with a saved
          reading position. Tapping opens that app and jumps to the spot. -->
     <button id="home-resume" class="big-action resume" style="display:none;" aria-label="Resume reading">
-      <span class="ba-icon">&#9654;</span>
+      <span class="ba-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="6 4 20 12 6 20" fill="currentColor" stroke="none"/></svg></span>
       <span class="ba-text" id="home-resume-text">Continue reading</span>
     </button>
     <div class="home-buttons">
       <button id="home-get-started" class="big-action primary" aria-label="Get started">
-        <span class="ba-icon">&#43;</span><span class="ba-text">Get Started</span>
+        <span class="ba-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span><span class="ba-text">Get Started</span>
       </button>
       <button id="home-create" class="big-action create" aria-label="Create a new page">
-        <span class="ba-icon">&#10000;</span><span class="ba-text">Create New</span>
+        <span class="ba-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span><span class="ba-text">Create New</span>
       </button>
       <button id="home-library" class="big-action secondary" aria-label="Open library">
-        <span class="ba-text">Open Library</span><span class="ba-icon">&#9654;</span>
+        <span class="ba-text">Open Library</span><span class="ba-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg></span>
       </button>
     </div>
 
@@ -189,17 +225,17 @@
 <div id="create-screen" class="screen create-screen">
   <header class="app-topbar">
     <button class="nav-btn" data-nav="home" aria-label="Home" title="Home">
-      <span class="nav-icon">&#127968;</span><span class="nav-label">Home</span>
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></span><span class="nav-label">Home</span>
     </button>
     <button class="nav-btn" data-nav="library" aria-label="Library" title="Library">
-      <span class="nav-icon">&#128218;</span><span class="nav-label">Library</span>
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h6v16H4z"/><path d="M10 4h6v16h-6z"/><path d="M16 5l4 1-3 14-4-1z"/></svg></span><span class="nav-label">Library</span>
     </button>
     <span class="title-inline">Create a new page</span>
     <div class="spacer"></div>
     <button class="nav-btn icon-only" data-tool="helper" aria-label="Load AI" title="Load AI assistant">&#128172;</button>
     <button class="nav-btn icon-only" data-tool="help" aria-label="Help" title="Help">?</button>
     <button class="nav-btn" data-nav="settings" aria-label="Settings" title="Settings">
-      <span class="nav-icon">&#9881;</span><span class="nav-label">Aa</span>
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 0 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 0 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 0 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 0 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span><span class="nav-label">Aa</span>
     </button>
   </header>
 
@@ -208,12 +244,12 @@
 
     <label class="create-label">Template</label>
     <div class="seg-btns wrap create-templates" id="create-templates">
-      <button class="seg-btn active" data-template="article">&#128240; Article</button>
-      <button class="seg-btn" data-template="note">&#128221; Simple Note</button>
-      <button class="seg-btn" data-template="letter">&#9993; Letter</button>
-      <button class="seg-btn" data-template="recipe">&#127860; Recipe / Steps</button>
-      <button class="seg-btn" data-template="checklist">&#9989; Checklist</button>
-      <button class="seg-btn" data-template="acr">&#128218; ACR Reader Book</button>
+      <button class="seg-btn active" data-template="article">Article</button>
+      <button class="seg-btn" data-template="note">Simple Note</button>
+      <button class="seg-btn" data-template="letter">Letter</button>
+      <button class="seg-btn" data-template="recipe">Recipe / Steps</button>
+      <button class="seg-btn" data-template="checklist">Checklist</button>
+      <button class="seg-btn" data-template="acr">ACR Reader Book</button>
     </div>
 
     <!-- Options that apply to the ACR Reader Book template. Hidden for
@@ -221,13 +257,13 @@
          and off so the saved page matches the ACR reader's layout. -->
     <div id="acr-template-options" class="acr-template-options" style="display:none;">
       <p class="create-hint" style="margin-top:8px;"><strong>ACR Reader features</strong> (toggle what you want):</p>
-      <label class="tpl-opt"><input type="checkbox" id="acr-opt-toc" checked> &#128220; Chapter sidebar / table of contents</label>
-      <label class="tpl-opt"><input type="checkbox" id="acr-opt-search" checked> &#128269; In-page search</label>
+      <label class="tpl-opt"><input type="checkbox" id="acr-opt-toc" checked> Chapter sidebar / table of contents</label>
+      <label class="tpl-opt"><input type="checkbox" id="acr-opt-search" checked> In-page search</label>
       <label class="tpl-opt"><input type="checkbox" id="acr-opt-font-controls" checked> Aa Font-size + theme controls</label>
-      <label class="tpl-opt"><input type="checkbox" id="acr-opt-dyslexic" checked> &#127752; Dyslexia font toggle (Atkinson / OpenDyslexic)</label>
-      <label class="tpl-opt"><input type="checkbox" id="acr-opt-tts" checked> &#128266; Read-aloud (browser TTS)</label>
-      <label class="tpl-opt"><input type="checkbox" id="acr-opt-bookmarks" checked> &#11088; Per-section bookmarks</label>
-      <label class="tpl-opt"><input type="checkbox" id="acr-opt-progress"> &#9203; Reading progress bar</label>
+      <label class="tpl-opt"><input type="checkbox" id="acr-opt-dyslexic" checked> Dyslexia font toggle (Atkinson / OpenDyslexic)</label>
+      <label class="tpl-opt"><input type="checkbox" id="acr-opt-tts" checked> Read-aloud (browser TTS)</label>
+      <label class="tpl-opt"><input type="checkbox" id="acr-opt-bookmarks" checked> Per-section bookmarks</label>
+      <label class="tpl-opt"><input type="checkbox" id="acr-opt-progress"> Reading progress bar</label>
       <p class="create-hint" style="margin-top:6px;">Put <code>## Chapter title</code> at the start of a line to start a new chapter. Everything underneath becomes that chapter's body.</p>
     </div>
 
@@ -244,10 +280,10 @@
     <textarea id="create-body" class="create-body-input" placeholder="Write your content here..." spellcheck="true" autocapitalize="sentences"></textarea>
 
     <div class="create-actions">
-      <button id="create-preview-btn" class="secondary-btn">&#128065; Preview</button>
-      <button id="create-save-btn" class="primary-btn">&#128190; Save to Library</button>
-      <button id="create-share-btn" class="primary-btn" style="background:#0891b2;">&#10150; Save &amp; Share</button>
-      <button id="create-save-template-btn" class="secondary-btn">&#128196; Save as Template</button>
+      <button id="create-preview-btn" class="secondary-btn">Preview</button>
+      <button id="create-save-btn" class="primary-btn">Save to Library</button>
+      <button id="create-share-btn" class="primary-btn" style="background:#0891b2;">Save &amp; Share</button>
+      <button id="create-save-template-btn" class="secondary-btn">Save as Template</button>
     </div>
   </div>
 </div>
@@ -256,20 +292,20 @@
 <div id="import-screen" class="screen import-screen">
   <header class="app-topbar">
     <button class="nav-btn" data-nav="home" aria-label="Home" title="Home">
-      <span class="nav-icon">&#127968;</span><span class="nav-label">Home</span>
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></span><span class="nav-label">Home</span>
     </button>
     <button class="nav-btn" data-nav="library" aria-label="Library" title="Library">
-      <span class="nav-icon">&#128218;</span><span class="nav-label">Library</span>
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h6v16H4z"/><path d="M10 4h6v16h-6z"/><path d="M16 5l4 1-3 14-4-1z"/></svg></span><span class="nav-label">Library</span>
     </button>
     <button class="nav-btn active" data-nav="import" aria-label="Import" title="Import">
-      <span class="nav-icon">&#8682;</span><span class="nav-label">Import</span>
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><polyline points="6 10 12 4 18 10"/><path d="M4 20h16"/></svg></span><span class="nav-label">Import</span>
     </button>
     <div class="spacer"></div>
-    <button class="nav-btn icon-only" data-tool="audio" aria-label="Audio / Read Aloud" title="Audio / Read Aloud">&#128266;</button>
+    <button class="nav-btn icon-only" data-tool="audio" aria-label="Audio / Read Aloud" title="Audio / Read Aloud"></button>
     <button class="nav-btn icon-only" data-tool="helper" aria-label="Load AI" title="Load AI assistant">&#128172;</button>
     <button class="nav-btn icon-only" data-tool="help" aria-label="Help" title="Help">?</button>
     <button class="nav-btn" data-nav="settings" aria-label="Settings" title="Settings">
-      <span class="nav-icon">&#9881;</span><span class="nav-label">Aa</span>
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 0 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 0 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 0 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 0 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span><span class="nav-label">Aa</span>
     </button>
   </header>
 
@@ -346,28 +382,28 @@
 <div id="library-screen" class="screen">
   <header class="app-topbar">
     <button class="nav-btn" data-nav="home" aria-label="Home" title="Home">
-      <span class="nav-icon">&#127968;</span><span class="nav-label">Home</span>
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></span><span class="nav-label">Home</span>
     </button>
     <button class="nav-btn active" data-nav="library" aria-label="Library" title="Library">
-      <span class="nav-icon">&#128218;</span><span class="nav-label">Library</span>
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h6v16H4z"/><path d="M10 4h6v16h-6z"/><path d="M16 5l4 1-3 14-4-1z"/></svg></span><span class="nav-label">Library</span>
     </button>
     <button id="add-btn" class="nav-btn" data-nav="import" aria-label="Import" title="Import a file">
-      <span class="nav-icon">&#8682;</span><span class="nav-label">Import</span>
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><polyline points="6 10 12 4 18 10"/><path d="M4 20h16"/></svg></span><span class="nav-label">Import</span>
     </button>
     <button class="nav-btn icon-only" data-tool="hard-refresh" aria-label="Force refresh — clears cache and reloads" title="Force refresh (purges cache)">&#8635;</button>
     <button class="nav-btn icon-only" data-tool="size-down" aria-label="Smaller text" title="Smaller text">A&#8722;</button>
     <button class="nav-btn icon-only" data-tool="size-up" aria-label="Larger text" title="Larger text">A&#43;</button>
     <button class="nav-btn icon-only" data-tool="theme" aria-label="Toggle theme" title="Toggle theme">&#9680;</button>
-    <button class="nav-btn icon-only" data-tool="font" aria-label="Toggle dyslexia font" title="Dyslexia font">&#127752;</button>
-    <button class="nav-btn icon-only" data-tool="audio" aria-label="Audio / Read Aloud" title="Audio / Read Aloud">&#128266;</button>
+    <button class="nav-btn icon-only" data-tool="font" aria-label="Toggle dyslexia font" title="Dyslexia font"></button>
+    <button class="nav-btn icon-only" data-tool="audio" aria-label="Audio / Read Aloud" title="Audio / Read Aloud"></button>
     <div class="spacer"></div>
-    <button id="library-search-btn" class="nav-btn icon-only" aria-label="Search" title="Search library">&#128269;</button>
+    <button id="library-search-btn" class="nav-btn icon-only" aria-label="Search" title="Search library"></button>
     <button id="library-clear-btn" class="nav-btn icon-only" aria-label="Clear Library" title="Clear Library — delete all (favorites kept)">&#128465;</button>
     <button class="nav-btn icon-only" data-tool="helper" aria-label="Load AI" title="Load AI — built-in coding &amp; reading assistant">&#128172;</button>
     <button class="nav-btn icon-only" data-tool="devconsole" aria-label="Developer Console" title="Developer Console — scan, diagnose &amp; fix uploads">&#128295;</button>
     <button class="nav-btn icon-only" data-tool="help" aria-label="Help" title="Help">?</button>
     <button class="nav-btn" data-nav="settings" aria-label="Settings" title="Settings">
-      <span class="nav-icon">&#9881;</span><span class="nav-label">Aa</span>
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 0 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 0 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 0 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 0 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span><span class="nav-label">Aa</span>
     </button>
   </header>
   <!-- Search bar, hidden by default, toggled by Search button -->
@@ -412,7 +448,7 @@
   <header id="viewer-topbar" class="topbar viewer-topbar">
     <button id="back-btn" class="icon-btn" aria-label="Back to library">&larr;</button>
     <span id="viewer-title" class="title"></span>
-    <button id="tts-btn" class="icon-btn" aria-label="Read aloud" title="Read aloud">&#128266;</button>
+    <button id="tts-btn" class="icon-btn" aria-label="Read aloud" title="Read aloud"></button>
     <button id="bookmarks-btn" class="icon-btn" aria-label="Bookmarks" title="Bookmarks">&#9733;</button>
     <button id="save-template-btn" class="icon-btn" aria-label="Save as template" title="Save as template — reuse this page's layout to make new files">&#128190;</button>
     <button id="layout-btn" class="icon-btn" aria-label="Layout for print" title="Layout for KDP print (trim, bleed, margins, page numbers)">&#128208;</button>
@@ -601,7 +637,7 @@
     </div>
     <div class="mp-tabs" role="tablist">
       <button class="mp-tab on" data-mp-tab="recents" role="tab">&#127909; Recents</button>
-      <button class="mp-tab" data-mp-tab="stocks" role="tab">&#11088; Stocks</button>
+      <button class="mp-tab" data-mp-tab="stocks" role="tab">Stocks</button>
       <button class="mp-tab" data-mp-tab="subtitle" role="tab">&#128221; Subtitle</button>
     </div>
     <div class="mp-subtabs" id="mp-subtabs">
@@ -807,16 +843,16 @@
 <div id="notes-screen" class="screen">
   <header class="app-topbar">
     <button class="nav-btn" data-nav="home" aria-label="Home" title="Home">
-      <span class="nav-icon">&#127968;</span><span class="nav-label">Home</span>
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></span><span class="nav-label">Home</span>
     </button>
     <span class="title-inline">Notes</span>
     <div class="spacer"></div>
     <button id="notes-new-btn" class="primary-btn">
       <span class="icon">&#43;</span><span class="btn-label">New Note</span>
     </button>
-    <button class="nav-btn icon-only" data-tool="audio" aria-label="Audio / Read Aloud" title="Audio / Read Aloud">&#128266;</button>
+    <button class="nav-btn icon-only" data-tool="audio" aria-label="Audio / Read Aloud" title="Audio / Read Aloud"></button>
     <button class="nav-btn" data-nav="settings" aria-label="Settings" title="Settings">
-      <span class="nav-icon">&#9881;</span><span class="nav-label">Aa</span>
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 0 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 0 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 0 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 0 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span><span class="nav-label">Aa</span>
     </button>
   </header>
   <div id="notes-screen-body" class="notes-screen-body">
@@ -903,9 +939,9 @@
           <li><strong>&#8682;</strong> Import — add new files</li>
           <li><strong>A&minus;</strong> / <strong>A&#43;</strong> — make text smaller or bigger</li>
           <li><strong>&#9680;</strong> — change the color theme</li>
-          <li><strong>&#127752;</strong> — turn OpenDyslexic font on or off</li>
+          <li><strong></strong> — turn OpenDyslexic font on or off</li>
           <li><strong>&#128221;</strong> — go to your notes</li>
-          <li><strong>&#128266;</strong> — audio / Read Aloud settings</li>
+          <li><strong></strong> — audio / Read Aloud settings</li>
           <li><strong>&#128172;</strong> — Load AI (chat + slash commands)</li>
           <li><strong>&#128295;</strong> — Developer Console (Scan &amp; Fix for uploads)</li>
           <li><strong>?</strong> — this help window</li>
@@ -928,7 +964,7 @@
 
       <details>
         <summary>I can't read for long. Can the app read to me?</summary>
-        <p>Yes. Open any item. In the viewer, tap the <strong>&#128266; speaker icon</strong>. A small drawer slides up.</p>
+        <p>Yes. Open any item. In the viewer, tap the <strong>speaker icon</strong>. A small drawer slides up.</p>
         <ol>
           <li>Tap <strong>Play</strong>.</li>
           <li>Change <strong>Speed</strong> if it's too fast or slow.</li>
@@ -1022,7 +1058,7 @@
 
       <details>
         <summary>How do I use Read Aloud (TTS)?</summary>
-        <p>Open any imported app. In the viewer top bar, tap the <strong>&#128266; speaker icon</strong>. A drawer slides up with Play/Pause/Stop, speed, and a voice picker.</p>
+        <p>Open any imported app. In the viewer top bar, tap the <strong>speaker icon</strong>. A drawer slides up with Play/Pause/Stop, speed, and a voice picker.</p>
         <p>Enhanced (high-quality) voices are marked with <strong>&#9733;</strong> in the dropdown. To install more, open iPad <strong>Settings &rarr; Accessibility &rarr; Spoken Content &rarr; Voices</strong> and tap the &darr; icon next to any voice to download it.</p>
       </details>
 
@@ -1380,7 +1416,7 @@
           <li><strong>&#128240; Article</strong>, <strong>&#128221; Simple Note</strong>, <strong>&#9993; Letter</strong>, <strong>&#127860; Recipe</strong>, <strong>&#9989; Checklist</strong> &mdash; single-page layouts optimised for quick jotting.</li>
           <li><strong>&#128218; ACR Reader Book</strong> &mdash; a fully self-contained book with chapter sidebar, in-page search, font + theme controls, dyslexia font toggle, TTS, per-chapter bookmarks, and an optional reading-progress bar. Toggle each feature on or off; unchecked features are dropped from the output so the saved page stays small. Use <code>## Chapter title</code> on its own line to start a new chapter.</li>
         </ul>
-        <p>Tap <strong>&#128196; Save as Template</strong> to reuse any page you've built. Your templates appear as buttons above the body editor. Each has a &times; to remove it. Up to 30.</p>
+        <p>Tap <strong>Save as Template</strong> to reuse any page you've built. Your templates appear as buttons above the body editor. Each has a &times; to remove it. Up to 30.</p>
       </details>
 
       <details>
@@ -1472,7 +1508,7 @@
       <option value="1.5">1.5x</option>
       <option value="1.8">1.8x</option>
     </select>
-    <button id="settings-tts-test" class="seg-btn full" style="margin-top:4px;">&#128266; Test voice</button>
+    <button id="settings-tts-test" class="seg-btn full" style="margin-top:4px;">Test voice</button>
   </div>
 
   <div class="panel-section piper-section" id="piper-section">
@@ -1497,7 +1533,7 @@
 
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
       <button id="piper-install" class="seg-btn" style="flex:1;min-width:140px;">&#11015; Install voice</button>
-      <button id="piper-test" class="seg-btn" style="flex:1;min-width:140px;" disabled>&#128266; Test sound</button>
+      <button id="piper-test" class="seg-btn" style="flex:1;min-width:140px;" disabled>Test sound</button>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
       <button id="piper-repair" class="seg-btn" style="flex:1;min-width:140px;">&#129657; Repair voice</button>
@@ -1666,7 +1702,7 @@
 
   <div id="console-scan" class="console-scan on">
     <div class="scan-row">
-      <button id="console-scan-run" class="primary-btn">&#128269; Scan current page</button>
+      <button id="console-scan-run" class="primary-btn">Scan current page</button>
       <button id="console-scan-fix" class="seg-btn" disabled>&#128736; Auto-fix issues</button>
     </div>
     <p class="scan-hint" id="console-scan-hint">
