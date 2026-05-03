@@ -9115,7 +9115,7 @@ window.LoadAudioFix = {
         '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
         '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
         '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
-        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17e9</span>' +
+        '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ea</span>' +
         '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
           '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
           '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -17642,24 +17642,45 @@ window.LoadAudioFix = {
   boot();
 }());
 
-// === LoadStudio Editing Bay hook (added 2026-05-04) ===
-// When Load is opened with ?lsedit=1 (typical: from a LoadStudio
-// iframe pointing here), auto-open the video editor as soon as the
-// page is ready. No-op when the param isn't present.
+// === LoadStudio Editing Bay hook (rewritten 2026-05-04 v17ea) ===
+// When Load is opened with ?lsedit=1 (from the LoadStudio Editing Bay
+// iframe), navigate to Import and auto-trigger the Edit Video flow so
+// the user lands on the file picker, then on the actual editor when a
+// video is selected. Calling openVideoEditor(null) directly fails
+// because the editor needs a video file first.
 (function(){
   try{
-    if(new URLSearchParams(location.search).get('lsedit')==='1'){
-      function tryOpen(){
-        if(typeof window.openVideoEditor==='function'){
-          try{window.openVideoEditor(null);}catch(e){}
-          return true;
-        }
-        return false;
-      }
-      if(!tryOpen()){
-        var t=setInterval(function(){if(tryOpen())clearInterval(t);},150);
-        setTimeout(function(){clearInterval(t);},10000);
-      }
+    var p = new URLSearchParams(location.search);
+    var mode = p.get('lsedit'); // '1', 'video', 'image', 'create'
+    if(!mode) return;
+    function clickWhenReady(selector, after){
+      var el = document.querySelector(selector);
+      if(el){ try{el.click();}catch(_){} if(after) setTimeout(after, 80); return true; }
+      return false;
+    }
+    function start(){
+      // Step 1: navigate to import screen via the existing nav button.
+      var nav = document.querySelector('[data-nav="import"]');
+      if(!nav) return false;
+      try{ nav.click(); }catch(_){ return false; }
+      // Step 2: after the screen renders, click the matching type-card.
+      var sel = '[data-import-type="video-edit"]';
+      if(mode === 'image') sel = '[data-import-type="media"]';
+      setTimeout(function(){
+        var tries = 0;
+        var t = setInterval(function(){
+          tries++;
+          if(clickWhenReady(sel) || tries > 30) clearInterval(t);
+        }, 150);
+      }, 200);
+      return true;
+    }
+    if(!start()){
+      var tries = 0;
+      var t = setInterval(function(){
+        tries++;
+        if(start() || tries > 60) clearInterval(t);
+      }, 200);
     }
   }catch(_){}
 })();

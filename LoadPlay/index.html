@@ -1001,6 +1001,14 @@ body.lp-paging #lp-page{display:block}
 .lp-copyright{padding:18px 16px 28px;text-align:center;font-size:11.5px;color:var(--text3);line-height:1.6;border-top:1px solid var(--border);background:#0a0a0a;margin-top:18px}
 .lp-copyright strong{color:var(--text2);font-weight:700}
 .lp-copyright a{color:var(--cyan);text-decoration:none}
+
+/* v29 — LoadPlay splash fully visible: image natural aspect ratio, no overlay covering */
+html .lp-splash-wrap{position:relative !important;width:100% !important;height:auto !important;min-height:0 !important;max-height:none !important;background:#000}
+html .lp-splash-img{width:100% !important;height:auto !important;object-fit:contain !important;opacity:1 !important;display:block;transition:none !important}
+html .lp-splash-overlay{display:none !important}
+html .lp-splash-text{position:static !important;left:auto !important;right:auto !important;bottom:auto !important;padding:14px 18px 4px;text-shadow:none}
+html .lp-splash-bottom{position:static !important;text-align:center;padding:6px 16px 12px;pointer-events:auto}
+html .lp-bottom-title{font-size:30px;text-shadow:none}
 </style>
 </head>
 <body>
@@ -1408,10 +1416,7 @@ body.lp-paging #lp-page{display:block}
       <div class="lp-footer-tag">Part of Load</div>
       <div class="lp-footer-mark">LoadPlay</div>
       <p class="lp-footer-tagline">Stream, create, publish — clean, free, offline-ready.</p>
-      <div class="lp-footer-links">
-        <a href="../load/">← Return to Main Load</a>
-        <a href="../loadstudio/">Open Load Studio →</a>
-      </div>
+      <div class="lp-footer-links"><a href="../load/">Main Load</a><a href="../loadstudio/">LoadStudio</a><a href="../attain/">Attain</a><a href="../attain-jr/">Attain Jr</a><a href="../study/">Study</a></div>
     </footer>
 
   </section>
@@ -2357,7 +2362,7 @@ window.addEventListener('online',  () => toast('Back online'));
 <footer class="lp-copyright">
   <strong>Copyright &copy; 2026 LBond. All Rights Reserved.</strong><br>
   LoadPlay — Stream Digital Cinema Anywhere. Runs on your iPad. No tracking, no accounts beyond this device.<br>
-  Part of the Load suite. <a href="../load/">Main Load</a> &middot; <a href="../loadstudio/">Load Studio</a><br>
+  Part of the Load suite. <a href="../load/">Main Load</a> &middot; <a href="../loadstudio/">LoadStudio</a> &middot; <a href="../attain/">Attain</a> &middot; <a href="../attain-jr/">Attain Jr</a> &middot; <a href="../study/">Study</a><br>
   <span style="display:inline-block;margin-top:8px;padding:4px 8px;background:rgba(255,255,255,.04);border-radius:4px;font-size:10.5px;color:var(--text3)">Some profile data, comments, and activity shown during pre-launch testing are for demonstration purposes. No real names, emails, phone numbers, or addresses are stored.</span>
 </footer>
 
