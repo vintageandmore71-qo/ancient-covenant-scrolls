@@ -1,0 +1,71 @@
+{
+  "projects": [
+    {
+      "id": "project-001",
+      "title": "Untitled Load Studio Project",
+      "type": "Feature Film",
+      "status": "draft",
+      "folder": "Studio Projects",
+      "description": "Full production project ready for scenes, cast, voice, assets, rights and export."
+    }
+  ],
+  "scenes": [
+    {
+      "id": "scene-001",
+      "title": "Studio Title Card",
+      "chapter": "Opening",
+      "summary": "Opening title card",
+      "characters": "Narrator",
+      "location": "Studio stage",
+      "mood": "premium cinematic",
+      "duration": 8,
+      "status": "draft",
+      "narration": "Created with Load Studio.",
+      "dialogue": "",
+      "imagePrompt": "premium cinematic studio title card, violet glow, dark film studio",
+      "negativePrompt": "blurred text, distorted logo, clutter, low quality",
+      "subtitle": "Created with Load Studio.",
+      "transition": "fade",
+      "camera": "Ken Burns"
+    }
+  ],
+  "characters": [
+    {
+      "id": "character-001",
+      "name": "Narrator",
+      "role": "Narrator",
+      "ageRange": "adult",
+      "appearance": "Voice only narrator",
+      "hair": "",
+      "bodyType": "",
+      "wardrobe": "",
+      "era": "",
+      "personality": "clear and polished",
+      "voiceStyle": "Warm Narrator",
+      "accent": "neutral",
+      "consistency": "strict",
+      "rules": "Preserve voice tone and project identity.",
+      "forbidden": "Do not impersonate a real person."
+    }
+  ],
+  "assets": [],
+  "voices": [],
+  "wardrobe": [],
+  "props": [],
+  "locations": [],
+  "casts": [],
+  "listings": [],
+  "creations": [],
+  "logs": [
+    "Load Studio initialized."
+  ],
+  "settings": {
+    "theme": "dark",
+    "providerOrder": [
+      "Puter.js",
+      "Pollinations Flux",
+      "AI Horde",
+      "Gemini"
+    ]
+  }
+}

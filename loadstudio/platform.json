@@ -1,0 +1,13 @@
+{
+  "title": "",
+  "creator": "",
+  "description": "",
+  "category": "PWA Cinema",
+  "contentType": "load_studio_pwa_cinema",
+  "thumbnail": "assets/posters/poster.png",
+  "duration": 0,
+  "rating": "",
+  "tags": [],
+  "offlineCapable": true,
+  "videoExportAvailable": false
+}
