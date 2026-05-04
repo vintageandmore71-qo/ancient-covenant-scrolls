@@ -18,7 +18,7 @@
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Open+Sans:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=OpenDyslexic:wght@400;700&display=swap" rel="stylesheet">
 <title>ACR Study</title>
 <link rel="stylesheet" href="study.css">
@@ -26,22 +26,22 @@
 <body>
 
 <div id="topnav" role="navigation" aria-label="Main navigation">
-  <button id="b-sb" title="Toggle sidebar" aria-label="Toggle sidebar" aria-expanded="false">&#9776;</button>
-  <button id="b-home" title="Home" aria-label="Go to home screen">&#8962;</button>
-  <button id="b-refresh" title="Hard refresh — clear cache &amp; reload" aria-label="Hard refresh" onclick="(async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()));}catch(e){}location.reload(true);})()">&#8635;</button>
+  <button id="b-sb" title="Toggle sidebar" aria-label="Toggle sidebar" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <button id="b-home" title="Home" aria-label="Go to home screen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></button>
+  <button id="b-refresh" title="Hard refresh — clear cache &amp; reload" aria-label="Hard refresh" onclick="(async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()));}catch(e){}location.reload(true);})()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="21 4 21 10 15 10"/><polyline points="3 20 3 14 9 14"/><path d="M3.5 14a8.5 8.5 0 0 0 14.7 4.4M20.5 10a8.5 8.5 0 0 0-14.7-4.4"/></svg></button>
   <div id="tb" role="button" tabindex="0" title="Go to home screen" aria-label="Current section title">ACR Study</div>
   <div id="fc" role="group" aria-label="Font size controls">
     <button id="b-fs-" title="Smaller text" aria-label="Decrease font size">A&#8722;</button>
     <button id="b-fs+" title="Larger text" aria-label="Increase font size">A&#43;</button>
   </div>
-  <button id="b-theme" title="Theme: light / parchment / navy / amber" aria-label="Switch color theme">&#9680;</button>
-  <button id="b-beeline" title="BeeLine reading aid" aria-label="Toggle BeeLine reading gradient">&#127752;</button>
-  <button id="b-linefocus" title="Line focus mode" aria-label="Toggle line focus overlay">&#128065;</button>
-  <button id="b-child" title="Child mode" aria-label="Toggle child mode with larger text">&#129490;</button>
-  <button id="b-nt" title="Notes" aria-label="Open notes for this section">&#128221;</button>
-  <button id="b-nv" title="All notes" aria-label="View all saved notes">&#128196;</button>
-  <button id="b-vt" title="Voice reader" aria-label="Toggle voice reader panel">&#128266;</button>
-  <a href="../" class="lnk" title="Back to Reader" aria-label="Return to ACR Reader">&#8592;<span class="hide-mobile">&nbsp;Reader</span></a>
+  <button id="b-theme" title="Theme: light / parchment / navy / amber" aria-label="Switch color theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+  <button id="b-beeline" title="BeeLine reading aid" aria-label="Toggle BeeLine reading gradient"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h18M3 12h18M3 17h12"/></svg></button>
+  <button id="b-linefocus" title="Line focus mode" aria-label="Toggle line focus overlay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+  <button id="b-child" title="Child mode" aria-label="Toggle child mode with larger text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M5 21c0-3.5 3-6 7-6s7 2.5 7 6"/><path d="M9 4l3-2 3 2"/></svg></button>
+  <button id="b-nt" title="Notes" aria-label="Open notes for this section"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M16 4v3h3"/><path d="M8 12h8M8 16h6"/></svg></button>
+  <button id="b-nv" title="All notes" aria-label="View all saved notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 10h6M9 14h6M9 18h4"/></svg></button>
+  <button id="b-vt" title="Voice reader" aria-label="Toggle voice reader panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9v6h3l5 4V5L8 9H5z"/><path d="M16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/></svg></button>
+  <a href="../" class="lnk" title="Back to Reader" aria-label="Return to ACR Reader"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg><span class="hide-mobile">&nbsp;Reader</span></a>
 </div>
 
 <div id="sb" role="navigation" aria-label="Volume and section navigation"></div>
@@ -49,14 +49,14 @@
 <div id="main" role="main">
   <div id="content" aria-live="polite" aria-atomic="false">
     <div id="home">
-      <div class="logo">&#x1F4D6;</div>
+      <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:64px;height:64px"><path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M7 4v13"/><path d="M11 8h4M11 12h4"/></svg></div>
       <h1>ACR STUDY</h1>
       <p class="tag">
         Spaced repetition study companion<br>
         for The Ancient Covenant Record
       </p>
       <div class="btns">
-        <button id="b-begin">Begin with Bereshit &#9654;</button>
+        <button id="b-begin" style="display:inline-flex;align-items:center;gap:8px">Begin with Bereshit <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="width:14px;height:14px"><polygon points="6 4 20 12 6 20"/></svg></button>
         <button id="b-resume" style="display:none">Resume where I left off</button>
       </div>
       <p class="small">
@@ -70,9 +70,9 @@
 
 <!-- Voice reader panel -->
 <div id="vr" role="region" aria-label="Voice reader controls">
-  <button id="b-pl" title="Play" aria-label="Play voice reader">&#9654;</button>
-  <button id="b-pa" style="display:none" title="Pause" aria-label="Pause voice reader">&#9646;&#9646;</button>
-  <button id="b-st" title="Stop" aria-label="Stop voice reader">&#9632;</button>
+  <button id="b-pl" title="Play" aria-label="Play voice reader"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20"/></svg></button>
+  <button id="b-pa" style="display:none" title="Pause" aria-label="Pause voice reader"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg></button>
+  <button id="b-st" title="Stop" aria-label="Stop voice reader"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="1"/></svg></button>
   <select id="vs" title="Speed" aria-label="Reading speed">
     <option value="0.7">0.7x</option>
     <option value="0.85">0.85x</option>
@@ -81,7 +81,7 @@
     <option value="1.5">1.5x</option>
   </select>
   <select id="vc" title="Voice" aria-label="Select voice"><option value="">Loading…</option></select>
-  <button id="b-pv" title="Preview voice" aria-label="Preview selected voice">&#9654;&#9654;</button>
+  <button id="b-pv" title="Preview voice" aria-label="Preview selected voice"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="4 4 13 12 4 20"/><polygon points="13 4 22 12 13 20"/></svg></button>
   <select id="vm" title="Mode" aria-label="Reading mode">
     <option value="verses">Verses</option>
     <option value="notes">Notes</option>
@@ -94,16 +94,16 @@
 <div id="np" role="region" aria-label="Section notes">
   <div id="np-head">
     <span id="np-lbl">Notes</span>
-    <button id="np-save" aria-label="Save notes">&#10003; Save</button>
+    <button id="np-save" aria-label="Save notes" style="display:inline-flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg> Save</button>
     <button id="np-clr" aria-label="Clear notes">Clear</button>
-    <button id="np-cls" aria-label="Close notes panel">&#10005;</button>
+    <button id="np-cls" aria-label="Close notes panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
   </div>
   <textarea id="np-ta" placeholder="Write your notes for this section…" aria-label="Notes text area"></textarea>
 </div>
 
 <!-- All-notes viewer -->
 <div id="nv" role="region" aria-label="All saved notes viewer">
-  <h2>&#128221; All Notes</h2>
+  <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-4px;width:20px;height:20px"><path d="M5 4h11l3 3v13H5z"/><path d="M16 4v3h3"/><path d="M8 12h8M8 16h6"/></svg> All Notes</h2>
   <div id="nv-list"></div>
 </div>
 

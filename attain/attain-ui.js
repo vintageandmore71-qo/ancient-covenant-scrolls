@@ -7,6 +7,47 @@
 // Attain Universal — UI Module
 // Screen navigation, library, upload, architecture, activities, settings, gamification
 
+// ---- Premium SVG icon set (matches Load family) ----
+// Single source of truth for inline icons used in library cards,
+// primary CTAs, banners, and the splash. Same monoline aesthetic as
+// Load Main / LoadStudio / LoadPlay.
+var ATTAIN_SVG_HEAD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+function lbIcon(name, sizePx) {
+  var size = sizePx || 18;
+  var inner = {
+    'book':       '<path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M7 4v13"/><path d="M11 8h4M11 12h4"/>',
+    'plus':       '<line x1="12" y1="4" x2="12" y2="20"/><line x1="4" y1="12" x2="20" y2="12"/>',
+    'rocket':     '<path d="M5 13c1.5 4 5 6 9 5 1-4-1-7.5-5-9-3.5-1.5-7 .5-7 4 0 0 2.5-1 3 0z"/><path d="M14 9l1-1c2-2 4-2 5-1s1 3-1 5l-1 1"/><circle cx="14.5" cy="9.5" r="1" fill="currentColor"/>',
+    'cards':      '<rect x="3" y="5" width="14" height="14" rx="1.5"/><path d="M7 5V3h10v2M7 19v2h10v-2M21 9v6"/>',
+    'flame':      '<path d="M12 3c2 4 5 5 5 9a5 5 0 1 1-10 0c0-3 2-3 2-6 1 1 1.5 2 1 3 1-1 2-2 2-6z"/>',
+    'shield':     '<path d="M12 3l8 4v5c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V7z"/><polyline points="8.5 12 11 14.5 16 9.5"/>',
+    'warn':       '<path d="M10.3 3.7L1.5 18a2 2 0 0 0 1.7 3h17.6a2 2 0 0 0 1.7-3L13.7 3.7a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r=".9" fill="currentColor"/>',
+    'check':      '<polyline points="20 6 9 17 4 12"/>',
+    'clock':      '<circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/>',
+    'hourglass':  '<path d="M6 3h12v3l-5 6 5 6v3H6v-3l5-6-5-6z"/>',
+    'gear':       '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+    'progress':   '<path d="M3 12h4l3-8 4 16 3-8h4"/>',
+    'download':   '<path d="M12 4v12"/><polyline points="6 14 12 20 18 14"/><line x1="4" y1="20" x2="20" y2="20"/>',
+    'refresh':    '<polyline points="21 4 21 10 15 10"/><polyline points="3 20 3 14 9 14"/><path d="M3.5 14a8.5 8.5 0 0 0 14.7 4.4M20.5 10a8.5 8.5 0 0 0-14.7-4.4"/>',
+    'trash':      '<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>',
+    'archive':    '<rect x="3" y="3" width="18" height="6" rx="1"/><path d="M5 9v11h14V9"/><line x1="10" y1="13" x2="14" y2="13"/>',
+    'folder':     '<path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+    'doc':        '<path d="M5 3h11l3 3v15H5z"/><path d="M16 3v3h3"/>',
+    'globe':      '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+    'keyboard':   '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M11 10h.01M15 10h.01M7 14h10"/>',
+    'lock':       '<rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+    'eye':        '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+    'speaker':    '<path d="M5 9v6h3l5 4V5L8 9H5z"/><path d="M16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/>',
+    'sun':        '<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M2 12h3M19 12h3M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>',
+    'moon':       '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
+    'sparkle':    '<path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/><path d="M19 17l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>',
+    'x':          '<line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>',
+    'list':       '<line x1="8" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="8" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1" fill="currentColor"/><circle cx="4" cy="12" r="1" fill="currentColor"/><circle cx="4" cy="18" r="1" fill="currentColor"/>'
+  }[name] || '';
+  return '<svg viewBox="0 0 24 24" width="' + size + '" height="' + size + '" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px;flex-shrink:0">' + inner + '</svg>';
+}
+try { window.lbIcon = lbIcon; } catch (e) {}
+
 // ---- Intro Splash Pages (first visit or tap logo) ----
 
 function showIntro(page) {
@@ -19,7 +60,7 @@ function showIntro(page) {
   if (page === 1) {
     h += '<button id="b-intro-next" style="background:linear-gradient(135deg,#059669,#0891b2);font-size:16px;padding:16px 40px" aria-label="Next page">Next Page \u25B6</button>';
   } else {
-    h += '<button id="b-intro-start" style="background:linear-gradient(135deg,#059669,#0891b2);font-size:16px;padding:16px 40px" aria-label="Get started">Get Started \u{1F680}</button>';
+    h += '<button id="b-intro-start" style="background:linear-gradient(135deg,#059669,#0891b2);font-size:16px;padding:16px 40px;display:inline-flex;align-items:center;gap:8px" aria-label="Get started">Get Started ' + lbIcon('rocket', 18) + '</button>';
   }
   h += '</div>';
 
@@ -77,8 +118,8 @@ function showLibrary() {
   // Stats bar
   if (totalDue > 0 || streak > 0 || (stats.xp || 0) > 0) {
     html += '<div class="home-stats">';
-    if (totalDue > 0) html += '<div class="home-stat home-due" role="status">\u{1F4DA} ' + totalDue + ' cards due</div>';
-    if (streak > 0) html += '<div class="home-stat home-streak">\u{1F525} ' + streak + ' day streak</div>';
+    if (totalDue > 0) html += '<div class="home-stat home-due" role="status">' + lbIcon('cards', 16) + ' ' + totalDue + ' cards due</div>';
+    if (streak > 0) html += '<div class="home-stat home-streak">' + lbIcon('flame', 16) + ' ' + streak + ' day streak</div>';
     html += '<div class="home-stat home-level">' + lvl.current.icon + ' ' + lvl.current.name + ' \u00B7 ' + (stats.xp || 0) + ' XP</div>';
     html += '</div>';
   }
@@ -90,34 +131,34 @@ function showLibrary() {
   var standalone = isStandalone();
   html += '<div id="storage-status" class="storage-status" role="status">';
   html += standalone
-    ? '<span class="storage-ok">\u2705 Storage protected \u2014 installed to home screen</span>'
-    : '<span class="storage-check">\u23F3 Checking storage protection...</span>';
+    ? '<span class="storage-ok">' + lbIcon('check', 16) + ' Storage protected \u2014 installed to home screen</span>'
+    : '<span class="storage-check">' + lbIcon('hourglass', 16) + ' Checking storage protection...</span>';
   html += '</div>';
 
   // Backup reminder — secondary safety net
   var daysSince = daysSinceLastBackup();
   if (daysSince === Infinity) {
     html += '<div class="backup-warn backup-warn-urgent" role="alert">';
-    html += '<div class="backup-warn-title">\u26A0\uFE0F Back up your library</div>';
+    html += '<div class="backup-warn-title" style="display:flex;align-items:center;gap:8px">' + lbIcon('warn', 18) + ' Back up your library</div>';
     html += '<div class="backup-warn-body">Your books live only in this browser. If you clear Safari data or the browser wipes them, they are gone. Export a sync file now.</div>';
-    html += '<button id="b-backup-now" class="backup-warn-btn">\u{1F4E5} Export now</button>';
+    html += '<button id="b-backup-now" class="backup-warn-btn" style="display:inline-flex;align-items:center;gap:6px">' + lbIcon('download', 16) + ' Export now</button>';
     html += '</div>';
   } else if (daysSince > 14) {
     html += '<div class="backup-warn" role="status">';
-    html += '<div class="backup-warn-title">\u{1F4BE} Backup is ' + Math.round(daysSince) + ' days old</div>';
+    html += '<div class="backup-warn-title" style="display:flex;align-items:center;gap:8px">' + lbIcon('archive', 18) + ' Backup is ' + Math.round(daysSince) + ' days old</div>';
     html += '<div class="backup-warn-body">Export a fresh sync file before clearing browser data.</div>';
-    html += '<button id="b-backup-now" class="backup-warn-btn">\u{1F4E5} Export now</button>';
+    html += '<button id="b-backup-now" class="backup-warn-btn" style="display:inline-flex;align-items:center;gap:6px">' + lbIcon('download', 16) + ' Export now</button>';
     html += '</div>';
   }
 
   // Primary action buttons
   html += '<div class="btns" style="margin-top:24px">';
   if (lib.length > 0) {
-    html += '<button id="b-lib-start" style="background:linear-gradient(135deg,#059669,#0891b2);font-size:18px;padding:20px 40px">\u{1F4D6} Get Started</button>';
+    html += '<button id="b-lib-start" style="background:linear-gradient(135deg,#059669,#0891b2);font-size:18px;padding:20px 40px;display:inline-flex;align-items:center;gap:10px">' + lbIcon('book', 22) + ' Get Started</button>';
   }
-  html += '<button id="b-lib-new-hero" style="background:linear-gradient(135deg,#7c3aed,#2563eb);font-size:16px;padding:16px 32px">\u2795 Upload a Book</button>';
+  html += '<button id="b-lib-new-hero" style="background:linear-gradient(135deg,#7c3aed,#2563eb);font-size:16px;padding:16px 32px;display:inline-flex;align-items:center;gap:8px">' + lbIcon('plus', 18) + ' Upload a Book</button>';
   if (totalDue > 0) {
-    html += '<button id="b-lib-review" style="background:linear-gradient(135deg,#059669,#0891b2)">\u{1F4DA} Review All Due (' + totalDue + ' cards)</button>';
+    html += '<button id="b-lib-review" style="background:linear-gradient(135deg,#059669,#0891b2);display:inline-flex;align-items:center;gap:8px">' + lbIcon('cards', 18) + ' Review All Due (' + totalDue + ' cards)</button>';
   }
   html += '</div>';
 
@@ -149,12 +190,12 @@ function showLibrary() {
     var expiryBadge = '';
     if (activeBooks[i].days <= 14 && activeBooks[i].days !== Infinity) {
       var dd = Math.ceil(activeBooks[i].days);
-      expiryBadge = '<div class="lib-expiry-soon">\u23F0 Expires in ' + dd + ' day' + (dd === 1 ? '' : 's') + '</div>';
+      expiryBadge = '<div class="lib-expiry-soon" style="display:inline-flex;align-items:center;gap:6px">' + lbIcon('clock', 14) + ' Expires in ' + dd + ' day' + (dd === 1 ? '' : 's') + '</div>';
     }
     var sampleTag = b.__sample ? '<div class="lib-sample-tag">Sample</div>' : '';
     var visual = b.cover
-      ? '<img class="lib-cover" src="' + b.cover.replace(/"/g, '&quot;') + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling&&(this.nextElementSibling.style.display=\'block\')"><div class="lib-icon" style="display:none">\u{1F4D6}</div>'
-      : '<div class="lib-icon">\u{1F4D6}</div>';
+      ? '<img class="lib-cover" src="' + b.cover.replace(/"/g, '&quot;') + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling&&(this.nextElementSibling.style.display=\'block\')"><div class="lib-icon" style="display:none">' + lbIcon('book', 48) + '</div>'
+      : '<div class="lib-icon">' + lbIcon('book', 48) + '</div>';
     var bg = b.cover ? 'background:#1f2937' : 'background:' + (b.color || '#2563eb');
     html += '<div class="lib-card' + (b.cover ? ' lib-card-cover' : '') + '" data-book="' + b.id + '" style="' + bg + '" role="button" tabindex="0" aria-label="Open book: ' + b.title + '">';
     html += sampleTag;
@@ -176,19 +217,19 @@ function showLibrary() {
   // Expired section — books that passed the user's freshness threshold.
   // Never auto-deleted; user taps Extend or Delete on each card.
   if (expiredBooks.length > 0) {
-    html += '<div class="activity-grid-header" style="color:#fca5a5;margin-top:32px">\u{1F4C1} Expired \u2014 ' + expiredBooks.length + ' book' + (expiredBooks.length === 1 ? '' : 's') + '</div>';
+    html += '<div class="activity-grid-header" style="color:#fca5a5;margin-top:32px;display:inline-flex;align-items:center;gap:8px">' + lbIcon('folder', 18) + ' Expired \u2014 ' + expiredBooks.length + ' book' + (expiredBooks.length === 1 ? '' : 's') + '</div>';
     html += '<p style="color:#fca5a5;font-size:.85em;margin:0 0 12px 0;line-height:1.6">These haven\'t been opened since the threshold you set in Settings. Extend to restore, or delete permanently to free space.</p>';
     html += '<div class="lib-grid">';
     for (var ei = 0; ei < expiredBooks.length; ei++) {
       var eb = expiredBooks[ei].book;
       var daysOver = -Math.floor(expiredBooks[ei].days);
       html += '<div class="lib-card lib-card-expired" style="background:#7f1d1d" aria-label="Expired book: ' + eb.title + '">';
-      html += '<div class="lib-icon">\u{1F5C3}\uFE0F</div>';
+      html += '<div class="lib-icon">' + lbIcon('archive', 42) + '</div>';
       html += '<div class="lib-title">' + eb.title + '</div>';
       html += '<div class="lib-meta">Expired ' + daysOver + ' day' + (daysOver === 1 ? '' : 's') + ' ago</div>';
       html += '<div class="lib-expired-actions">';
-      html += '<button class="lib-expired-btn lib-extend" data-extend="' + eb.id + '">\u{1F504} Extend</button>';
-      html += '<button class="lib-expired-btn lib-delete" data-delete="' + eb.id + '">\u{1F5D1}\uFE0F Delete</button>';
+      html += '<button class="lib-expired-btn lib-extend" data-extend="' + eb.id + '" style="display:inline-flex;align-items:center;gap:6px">' + lbIcon('refresh', 14) + ' Extend</button>';
+      html += '<button class="lib-expired-btn lib-delete" data-delete="' + eb.id + '" style="display:inline-flex;align-items:center;gap:6px">' + lbIcon('trash', 14) + ' Delete</button>';
       html += '</div>';
       html += '</div>';
     }
@@ -197,8 +238,8 @@ function showLibrary() {
 
   // Settings row
   html += '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:20px;padding-bottom:30px">';
-  html += '<button class="study-btn" id="b-lib-progress" aria-label="View progress and stats">\u{1F4CA} Progress</button>';
-  html += '<button class="study-btn" id="b-lib-settings" aria-label="Settings" style="background:#6b7280">\u2699\uFE0F Settings</button>';
+  html += '<button class="study-btn" id="b-lib-progress" aria-label="View progress and stats" style="display:inline-flex;align-items:center;gap:8px">' + lbIcon('progress', 16) + ' Progress</button>';
+  html += '<button class="study-btn" id="b-lib-settings" aria-label="Settings" style="background:#6b7280;display:inline-flex;align-items:center;gap:8px">' + lbIcon('gear', 16) + ' Settings</button>';
   html += '</div>';
 
   html += '</div></div>';
@@ -256,10 +297,10 @@ function showLibrary() {
   if (statusEl && !isStandalone()) {
     isPersistentStorage().then(function (persistent) {
       if (persistent) {
-        statusEl.innerHTML = '<span class="storage-ok">\u2705 Storage protected \u2014 browser granted persistent access</span>';
+        statusEl.innerHTML = '<span class="storage-ok" style="display:inline-flex;align-items:center;gap:6px">' + lbIcon('check', 16) + ' Storage protected \u2014 browser granted persistent access</span>';
       } else {
         statusEl.innerHTML =
-          '<span class="storage-warn">\u26A0\uFE0F Not installed \u2014 Safari may delete your books after 7 days of inactivity. ' +
+          '<span class="storage-warn" style="display:inline-flex;align-items:center;gap:6px">' + lbIcon('warn', 16) + ' Not installed \u2014 Safari may delete your books after 7 days of inactivity. ' +
           '<button id="b-install-how-inline" class="storage-install-btn">Install to Home Screen</button></span>';
         var btn = document.getElementById('b-install-how-inline');
         if (btn) btn.addEventListener('click', function () {
@@ -320,7 +361,7 @@ function confirmDeleteBook(bookId) {
   var book = getBook(bookId);
   if (!book) return;
   var h = '<div class="cloze-results">';
-  h += '<div class="cr-emoji">\u26A0\uFE0F</div>';
+  h += '<div class="cr-emoji">' + lbIcon('warn', 36) + '</div>';
   h += '<div class="cr-msg">Delete "' + book.title + '"?<br><span style="font-size:.8em;color:var(--text-muted)">This removes the book and all study progress for it. This cannot be undone.</span></div>';
   h += '<div class="cr-btns">';
   h += '<button class="study-btn" id="b-del-yes" style="background:#dc2626" aria-label="Confirm delete">Delete</button>';
@@ -481,7 +522,7 @@ function showUpload() {
 
   // Drop zone
   h += '<div class="upload-drop" id="upload-drop" role="button" tabindex="0" aria-label="Drop a file here or tap to browse">';
-  h += '<div class="upload-drop-icon">\u{1F4C4}</div>';
+  h += '<div class="upload-drop-icon">' + lbIcon('doc', 56) + '</div>';
   h += '<div class="upload-drop-text">Drop a file here or tap to browse</div>';
   h += '<div class="upload-drop-sub">PDF \u2022 EPUB \u2022 DOCX \u2022 TXT \u2022 HTML \u2022 ZIP / PWA</div>';
   h += '</div>';
@@ -491,7 +532,7 @@ function showUpload() {
   h += '<div class="upload-or">\u2014 or paste a URL \u2014</div>';
   h += '<div class="upload-url-wrap">';
   h += '<input type="url" id="upload-url" class="upload-url" placeholder="https://www.gutenberg.org/cache/epub/.../pg....txt" aria-label="Public URL to a text file">';
-  h += '<button class="study-btn" id="b-upload-url-fetch" aria-label="Fetch from URL">\u{1F310} Fetch</button>';
+  h += '<button class="study-btn" id="b-upload-url-fetch" aria-label="Fetch from URL" style="display:inline-flex;align-items:center;gap:6px">' + lbIcon('globe', 16) + ' Fetch</button>';
   h += '</div>';
   h += '<div class="upload-url-hint">Project Gutenberg plain-text URLs work. Most other sites block cross-browser fetching \u2014 if so, download the file and use the drop zone above.</div>';
 
@@ -503,7 +544,7 @@ function showUpload() {
 
   // Action buttons
   h += '<div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center">';
-  h += '<button class="study-btn sb-pri" id="b-upload-go" aria-label="Parse and import">\u{1F680} Import Book</button>';
+  h += '<button class="study-btn sb-pri" id="b-upload-go" aria-label="Parse and import" style="display:inline-flex;align-items:center;gap:8px">' + lbIcon('rocket', 18) + ' Import Book</button>';
   h += '<button class="study-btn" id="b-upload-cancel" aria-label="Cancel and return to library">Cancel</button>';
   h += '</div>';
 

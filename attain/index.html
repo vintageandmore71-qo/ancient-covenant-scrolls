@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=OpenDyslexic:wght@400;700&display=swap" rel="stylesheet">
 <title>Attain</title>
 <link rel="stylesheet" href="attain.css">
@@ -25,20 +25,20 @@
 <body>
 
 <div id="topnav" role="navigation" aria-label="Main navigation">
-  <button id="b-sb" title="Toggle sidebar" aria-label="Toggle sidebar" aria-expanded="false">&#9776;</button>
-  <button id="b-attain-home" title="Home" aria-label="Go home">&#127968; Home</button>
-  <button id="b-attain-jr" title="Attain Jr — kid-friendly study companion" aria-label="Open Attain Jr" onclick="window.location.href='../attain-jr/'">&#129489;&#8205;&#127891; Attain Jr</button>
-  <button id="b-home" title="Library" aria-label="Go to library">&#128218; Library</button>
-  <button id="b-refresh" title="Hard refresh — clear cache &amp; reload" aria-label="Hard refresh" onclick="(async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()));}catch(e){}location.reload(true);})()">&#8635;</button>
-  <button id="b-fs-" aria-label="Decrease font size">A-</button>
-  <button id="b-fs+" aria-label="Increase font size">A+</button>
-  <button id="b-theme" aria-label="Switch color theme">&#9680;</button>
-  <button id="b-beeline" aria-label="Toggle BeeLine reading gradient">&#127752;</button>
-  <button id="b-linefocus" aria-label="Toggle line focus overlay">&#128065;</button>
-  <button id="b-nt" aria-label="Open notes">&#128221;</button>
-  <button id="b-nv" aria-label="View all notes">&#128196;</button>
-  <button id="b-vt" aria-label="Toggle voice reader">&#128266;</button>
-  <button id="b-sync" aria-label="Sync between devices" title="Sync">&#128260;</button>
+  <button id="b-sb" title="Toggle sidebar" aria-label="Toggle sidebar" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <button id="b-attain-home" title="Home" aria-label="Go home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/></svg><span class="lbl">Home</span></button>
+  <button id="b-attain-jr" title="Attain Jr — kid-friendly study companion" aria-label="Open Attain Jr" onclick="window.location.href='../attain-jr/'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M5 21c0-3.5 3-6 7-6s7 2.5 7 6"/><path d="M9 4l3-2 3 2"/></svg><span class="lbl">Attain Jr</span></button>
+  <button id="b-home" title="Library" aria-label="Go to library"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h6v16H4z"/><path d="M10 4h6v16h-6z"/><path d="M16 5l4 1-3 14-4-1z"/></svg><span class="lbl">Library</span></button>
+  <button id="b-refresh" title="Hard refresh — clear cache &amp; reload" aria-label="Hard refresh" onclick="(async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()));}catch(e){}location.reload(true);})()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="21 4 21 10 15 10"/><polyline points="3 20 3 14 9 14"/><path d="M3.5 14a8.5 8.5 0 0 0 14.7 4.4M20.5 10a8.5 8.5 0 0 0-14.7-4.4"/></svg></button>
+  <button id="b-fs-" aria-label="Decrease font size">A&#8722;</button>
+  <button id="b-fs+" aria-label="Increase font size">A&#43;</button>
+  <button id="b-theme" aria-label="Switch color theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+  <button id="b-beeline" aria-label="Toggle BeeLine reading gradient"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h18M3 12h18M3 17h12"/></svg></button>
+  <button id="b-linefocus" aria-label="Toggle line focus overlay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+  <button id="b-nt" aria-label="Open notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M16 4v3h3"/><path d="M8 12h8M8 16h6"/></svg></button>
+  <button id="b-nv" aria-label="View all notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 10h6M9 14h6M9 18h4"/></svg></button>
+  <button id="b-vt" aria-label="Toggle voice reader"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9v6h3l5 4V5L8 9H5z"/><path d="M16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/></svg></button>
+  <button id="b-sync" aria-label="Sync between devices" title="Sync"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 0-15.5-6.3"/><polyline points="21 4 21 9 16 9"/><path d="M3 12a9 9 0 0 0 15.5 6.3"/><polyline points="3 20 3 15 8 15"/></svg></button>
 </div>
 
 <div id="sb" role="navigation" aria-label="Book and chapter navigation"></div>
@@ -49,9 +49,9 @@
 
 <!-- Voice reader panel -->
 <div id="vr" role="region" aria-label="Voice reader controls">
-  <button id="b-pl" aria-label="Play">&#9654;</button>
-  <button id="b-pa" style="display:none" aria-label="Pause">&#9646;&#9646;</button>
-  <button id="b-st" aria-label="Stop">&#9632;</button>
+  <button id="b-pl" aria-label="Play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20"/></svg></button>
+  <button id="b-pa" style="display:none" aria-label="Pause"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg></button>
+  <button id="b-st" aria-label="Stop"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="1"/></svg></button>
   <select id="vs" aria-label="Reading speed">
     <option value="0.7">0.7x</option><option value="0.85">0.85x</option>
     <option value="1" selected>1x</option><option value="1.2">1.2x</option><option value="1.5">1.5x</option>
@@ -67,16 +67,16 @@
 <div id="np" role="region" aria-label="Section notes">
   <div id="np-head">
     <span id="np-lbl">Notes</span>
-    <button id="np-save" aria-label="Save notes">&#10003; Save</button>
+    <button id="np-save" aria-label="Save notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px;width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg> Save</button>
     <button id="np-clr" aria-label="Clear notes">Clear</button>
-    <button id="np-cls" aria-label="Close notes">&#10005;</button>
+    <button id="np-cls" aria-label="Close notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
   </div>
   <textarea id="np-ta" placeholder="Write your notes..." aria-label="Notes text area"></textarea>
 </div>
 
 <!-- All-notes viewer -->
 <div id="nv" role="region" aria-label="All saved notes">
-  <h2>&#128221; All Notes</h2>
+  <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-4px;width:20px;height:20px"><path d="M5 4h11l3 3v13H5z"/><path d="M16 4v3h3"/><path d="M8 12h8M8 16h6"/></svg> All Notes</h2>
   <div id="nv-list"></div>
 </div>
 

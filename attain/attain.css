@@ -12,6 +12,7 @@
 
 :root{
   --font-main:'Atkinson Hyperlegible','Open Sans',Arial,sans-serif;
+  --font-ui:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
   --font-dyslexic:'OpenDyslexic','Atkinson Hyperlegible',Arial,sans-serif;
   --bg-warm:#faf6f0;
   --bg-card:#ffffff;
@@ -73,14 +74,17 @@ body.theme-amber .act-card{box-shadow:0 4px 14px rgba(0,0,0,.3)}
 #topnav>*{flex-shrink:0}
 #topnav button,#topnav a.lnk{
   background:none;border:none;color:#c8c8e8;cursor:pointer;
-  padding:8px 10px;border-radius:8px;font-size:15px;font-family:var(--font-main);
-  text-decoration:none;display:inline-flex;align-items:center;
+  padding:8px 10px;border-radius:8px;font-size:13px;font-family:var(--font-ui);font-weight:500;
+  text-decoration:none;display:inline-flex;align-items:center;gap:6px;
   min-width:44px;min-height:44px;justify-content:center;
   transition:background .15s;
 }
 #topnav button:hover,#topnav button.on,#topnav a.lnk:hover{
   background:rgba(255,255,255,.12);color:#fff;
 }
+#topnav button svg,#topnav a.lnk svg{width:20px;height:20px;flex-shrink:0}
+#topnav .lbl{font-weight:600;letter-spacing:.01em}
+@media (max-width:540px){#topnav .lbl{display:none}}
 #tb{
   flex:1 1 auto;min-width:80px;max-width:320px;
   color:#b8b8d8;font-size:13px;

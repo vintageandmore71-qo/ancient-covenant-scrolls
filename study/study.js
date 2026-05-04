@@ -9,6 +9,45 @@
 // Voice reader and notes panels are wired up to empty handlers here;
 // actual logic lands in follow-up commits one function at a time.
 
+// ---- Premium SVG icon set (matches Load family) ----
+function lbIcon(name, sizePx) {
+  var size = sizePx || 18;
+  var inner = {
+    'book':       '<path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M7 4v13"/><path d="M11 8h4M11 12h4"/>',
+    'cards':      '<rect x="3" y="5" width="14" height="14" rx="1.5"/><path d="M7 5V3h10v2M7 19v2h10v-2M21 9v6"/>',
+    'flame':      '<path d="M12 3c2 4 5 5 5 9a5 5 0 1 1-10 0c0-3 2-3 2-6 1 1 1.5 2 1 3 1-1 2-2 2-6z"/>',
+    'lightbulb':  '<path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3 11c.6.6 1 1.4 1 2.3V18h4v-1.7c0-.9.4-1.7 1-2.3a6 6 0 0 0-3-11z"/>',
+    'puzzle':     '<path d="M10 4a2 2 0 0 1 4 0v3h3a2 2 0 0 1 0 4h0a2 2 0 0 0 0 4h0v3H4v-3a2 2 0 1 0 0-4h0a2 2 0 0 1 0-4h3V4z"/>',
+    'speaker':    '<path d="M5 9v6h3l5 4V5L8 9H5z"/><path d="M16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/>',
+    'pencil':     '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+    'chat':       '<path d="M5 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H8l-4 4z"/>',
+    'scale':      '<path d="M12 4v16"/><path d="M5 8h14"/><path d="M5 8l-3 6h6z"/><path d="M19 8l3 6h-6z"/>',
+    'shuffle':    '<path d="M16 3l5 5-5 5"/><path d="M21 8H8a5 5 0 0 0 0 10h0"/><path d="M3 16l5 5 5-5"/>',
+    'headphones': '<path d="M3 14a9 9 0 0 1 18 0"/><rect x="3" y="13" width="4" height="7" rx="1"/><rect x="17" y="13" width="4" height="7" rx="1"/>',
+    'arrows':     '<path d="M3 6h18"/><polyline points="17 2 21 6 17 10"/><path d="M21 18H3"/><polyline points="7 14 3 18 7 22"/>',
+    'eye':        '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+    'music':      '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+    'brain':      '<path d="M9 4a3 3 0 0 0-3 3v0a3 3 0 0 0-3 3 3 3 0 0 0 1 2 3 3 0 0 0 0 4 3 3 0 0 0 3 3 3 3 0 0 0 5-1V4z"/><path d="M15 4a3 3 0 0 1 3 3v0a3 3 0 0 1 3 3 3 3 0 0 1-1 2 3 3 0 0 1 0 4 3 3 0 0 1-3 3 3 3 0 0 1-5-1V4z"/>',
+    'web':        '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+    'calendar':   '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M8 3v4M16 3v4"/>',
+    'cards2':     '<rect x="6" y="3" width="12" height="18" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/>',
+    'sparkle':    '<path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/>',
+    'globe':      '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+    'mountain':   '<path d="M3 19l6-10 4 6 3-4 5 8z"/>',
+    'scroll':     '<path d="M5 4h11l3 3v13H5z"/><path d="M5 4v16h-2v-2"/><path d="M9 9h7M9 13h7M9 17h5"/>',
+    'baby':       '<circle cx="12" cy="9" r="4"/><path d="M5 21c0-3 3-6 7-6s7 3 7 6"/>',
+    'sword':      '<path d="M14 5l5-2-2 5-9 9-3 1 1-3z"/><path d="M11 14l3 3"/>',
+    'compass':    '<circle cx="12" cy="12" r="9"/><polygon points="13 8 17 16 8 12"/>',
+    'target':     '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/>',
+    'shield':     '<path d="M12 3l8 4v5c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V7z"/>',
+    'trophy':     '<path d="M7 4h10v3a5 5 0 0 1-10 0V4z"/><path d="M7 6H4a3 3 0 0 0 3 3M17 6h3a3 3 0 0 1-3 3"/><path d="M9 13h6v3H9z"/><path d="M8 20h8"/>',
+    'medal':      '<circle cx="12" cy="14" r="6"/><path d="M9 8L7 4h10l-2 4"/>',
+    'search':     '<circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/>'
+  }[name] || '';
+  return '<svg viewBox="0 0 24 24" width="' + size + '" height="' + size + '" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px;flex-shrink:0">' + inner + '</svg>';
+}
+try { window.lbIcon = lbIcon; } catch (e) {}
+
 // All 46 volumes / 111 sections matching the ACR reader
 var IDS=[];for(var _i=1;_i<=111;_i++)IDS.push('file_'+_i);
 
@@ -687,7 +726,7 @@ function buildTOC() {
   var sb = document.getElementById('sb');
   var intro = document.createElement('div');
   intro.className = 'sb-intro';
-  intro.textContent = '\u{1F4D6} ACR STUDY — 8 VOLUMES';
+  intro.innerHTML = lbIcon('book', 22) + ' ACR STUDY — 8 VOLUMES';
   sb.appendChild(intro);
 
   var idx = 0;
@@ -700,7 +739,7 @@ function buildTOC() {
     h.style.color = 'var(' + volColorVars[g % 8] + ')';
     var mastered = isVolumeMastered(group.vol);
     h.innerHTML = group.title +
-      (mastered ? ' <span class="vol-badge">\u{1F3C6}</span>' : '') +
+      (mastered ? ' <span class="vol-badge">' + lbIcon('trophy', 14) + '</span>' : '') +
       (group.eng ? '<span class="vol-eng">' + group.eng + '</span>' : '');
     sb.appendChild(h);
     for (var i = 0; i < group.count; i++) {
@@ -749,7 +788,7 @@ function go(fid) {
   h += '<div class="activity-grid-header">' + LBL[i] + '</div>';
   if (dueCount > 0 || totalDue > 0) {
     h += '<div class="due-banner">';
-    if (dueCount > 0) h += '<span class="due-badge">\u{1F4DA} ' + dueCount + ' cards due for review in this section</span>';
+    if (dueCount > 0) h += '<span class="due-badge" style="display:inline-flex;align-items:center;gap:6px">' + lbIcon('cards', 14) + ' ' + dueCount + ' cards due for review in this section</span>';
     if (totalDue > dueCount) h += '<span class="due-total">' + totalDue + ' total due across all sections</span>';
     h += '</div>';
   }
@@ -761,34 +800,34 @@ function go(fid) {
       '<div class="prog-bar-wrap"><div class="prog-bar" style="width:' + secMastery.pct + '%"></div></div></div>';
   }
   h += '<div class="activity-grid">';
-  h += actCard('\u{1F4D6}', 'Chapter Summary', '#2563eb', 'summary', fid);
-  h += actCard('\u{1F9E9}', 'Fill in the Blank', '#059669', 'filblank', fid);
-  h += actCard('\u{1F50A}', 'Audio Fill the Gap', '#16a34a', 'audio-filblank', fid);
-  h += actCard('\u270F\uFE0F', 'Multiple Choice', '#7c3aed', 'mc', fid);
-  h += actCard('\u{1F4AC}', 'Who Said It', '#a855f7', 'whosaidit', fid);
-  h += actCard('\u2696\uFE0F', 'True or False', '#0ea5e9', 'truefalse', fid);
-  h += actCard('\u{1F501}', 'Story Sequence', '#ea580c', 'sequence', fid);
-  h += actCard('\u21AA', 'Cause & Effect', '#be185d', 'causeeffect', fid);
-  h += actCard('\u{1F3A7}', 'Dictation', '#0891b2', 'dictation', fid);
-  h += actCard('\u{1F500}', 'Word Morph', '#4338ca', 'morph', fid);
-  h += actCard('\u{1F441}\uFE0F', 'Syllable Tap', '#f59e0b', 'syllable', fid);
-  h += actCard('\u{1F3B6}', 'Rhyme Chain', '#0891b2', 'rhyme', fid);
-  h += actCard('\u{1F9E0}', 'Mind Map', '#7c3aed', 'mindmap', fid);
-  h += actCard('\u{1F578}️', 'Concept Web', '#9333ea', 'conceptweb', fid);
-  h += actCard('\u{1F4C5}', 'Timeline', '#0284c7', 'timeline', fid);
-  h += actCard('\u{1F0CF}', 'Flashcards', '#d97706', 'flash', fid);
-  h += actCard('\u{1F4DA}', 'Key Terms', '#0891b2', 'terms', fid);
-  h += actCard('\u2753', 'FAQ', '#ea580c', 'faq', fid);
-  h += actCard('\u{1F9E0}', 'Memory Match', '#dc2626', 'memory', fid);
-  h += actCard('\u{1F50A}', 'Listen & Learn', '#4f46e5', 'listen', fid);
-  h += actCard('\u{1F3C6}', 'Progress', '#b8860b', 'progress', fid);
-  h += actCard('\u{1F9E9}', 'Verse Builder', '#e91e90', 'versebuild', fid);
-  h += actCard('\u{1F517}', 'Word Match', '#6d28d9', 'wordmatch', fid);
-  h += actCard('\u2694\uFE0F', 'Challenge', '#b91c1c', 'challenge', fid);
+  h += actCard(lbIcon('book',          32), 'Chapter Summary', '#2563eb', 'summary', fid);
+  h += actCard(lbIcon('puzzle',        32), 'Fill in the Blank', '#059669', 'filblank', fid);
+  h += actCard(lbIcon('headphones',    32), 'Audio Fill the Gap', '#16a34a', 'audio-filblank', fid);
+  h += actCard(lbIcon('pencil',        32), 'Multiple Choice', '#7c3aed', 'mc', fid);
+  h += actCard(lbIcon('chat',          32), 'Who Said It', '#a855f7', 'whosaidit', fid);
+  h += actCard(lbIcon('scale',         32), 'True or False', '#0ea5e9', 'truefalse', fid);
+  h += actCard(lbIcon('shuffle',       32), 'Story Sequence', '#ea580c', 'sequence', fid);
+  h += actCard(lbIcon('arrows',        32), 'Cause & Effect', '#be185d', 'causeeffect', fid);
+  h += actCard(lbIcon('headphones',    32), 'Dictation', '#0891b2', 'dictation', fid);
+  h += actCard(lbIcon('shuffle',       32), 'Word Morph', '#4338ca', 'morph', fid);
+  h += actCard(lbIcon('eye',           32), 'Syllable Tap', '#f59e0b', 'syllable', fid);
+  h += actCard(lbIcon('music',         32), 'Rhyme Chain', '#0891b2', 'rhyme', fid);
+  h += actCard(lbIcon('brain',         32), 'Mind Map', '#7c3aed', 'mindmap', fid);
+  h += actCard(lbIcon('web', 32), 'Concept Web', '#9333ea', 'conceptweb', fid);
+  h += actCard(lbIcon('calendar',      32), 'Timeline', '#0284c7', 'timeline', fid);
+  h += actCard(lbIcon('cards2',        32), 'Flashcards', '#d97706', 'flash', fid);
+  h += actCard(lbIcon('cards',         32), 'Key Terms', '#0891b2', 'terms', fid);
+  h += actCard(lbIcon('lightbulb',     32), 'FAQ', '#ea580c', 'faq', fid);
+  h += actCard(lbIcon('puzzle',        32), 'Memory Match', '#dc2626', 'memory', fid);
+  h += actCard(lbIcon('speaker',       32), 'Listen & Learn', '#4f46e5', 'listen', fid);
+  h += actCard(lbIcon('trophy',        32), 'Progress', '#b8860b', 'progress', fid);
+  h += actCard(lbIcon('puzzle',        32), 'Verse Builder', '#e91e90', 'versebuild', fid);
+  h += actCard(lbIcon('puzzle',        32), 'Word Match', '#6d28d9', 'wordmatch', fid);
+  h += actCard(lbIcon('shield',        32), 'Challenge', '#b91c1c', 'challenge', fid);
   var remixN = getRemixCount(fid);
   if (remixN > 0) {
     h += '<div class="act-card act-card-remix" data-mode="remix" role="button" tabindex="0" aria-label="Remix Round activity, ' + remixN + ' due">' +
-      '<div class="act-icon" aria-hidden="true">\u{1F504}</div>' +
+      '<div class="act-icon" aria-hidden="true">' + lbIcon('shuffle', 32) + '</div>' +
       '<div class="act-label">Remix Round<br><span class="act-remix-badge">' + remixN + ' due</span></div>' +
       '</div>';
   }
