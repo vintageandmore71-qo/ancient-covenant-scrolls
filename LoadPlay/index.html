@@ -1291,6 +1291,14 @@ html .lp-bottom-title{font-size:30px;text-shadow:none}
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l9 4v6c0 5-4 9-9 10-5-1-9-5-9-10V6z"/><path d="M9 12l2 2 4-4"/></svg>
           <span class="label">Rights &amp; Credits</span>
         </div>
+        <div class="nav-item" data-lp-act="inbox">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+          <span class="label">Inbox <span id="lpInboxBadge" style="display:none;margin-left:6px;background:var(--red);color:#fff;font-size:10px;font-weight:800;padding:1px 6px;border-radius:10px"></span></span>
+        </div>
+        <div class="nav-item" data-lp-act="advertiser">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v3a1 1 0 0 0 1 1h3l4 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M16 8a5 5 0 0 1 0 8"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>
+          <span class="label">Advertiser Console</span>
+        </div>
       </div>
       <div class="sidebar-divider"></div>
 
@@ -3808,6 +3816,270 @@ window.addEventListener('online',  () => toast('Back online'));
   function mpThumb() {
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18l-1.5 9a2 2 0 0 1-2 1.7H6.5a2 2 0 0 1-2-1.7L3 7z"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>';
   }
+  // ── Tier 5.15 — Member / Creator Inbox ───────────────────────
+  // Two-pane mailbox: left = thread list, right = open thread.
+  // Threads cover platform notices, advertiser pitches, viewer
+  // questions, and creator collaboration. Stored in lp_inbox; new
+  // ones seeded the first time the inbox opens so the surface isn't
+  // empty for first-run users.
+  function readInbox() {
+    try {
+      var a = JSON.parse(localStorage.getItem('lp_inbox') || 'null');
+      if (Array.isArray(a)) return a;
+    } catch (e) {}
+    var seed = [
+      { id: 'm1', from: 'LoadPlay Team',     fromKind: 'platform', subject: 'Welcome to your Inbox',
+        body: 'This is where platform notices, viewer messages, and advertiser inquiries land. Replies stay on this device unless you turn on cloud sync.',
+        ts: Date.now() - 1000 * 60 * 60 * 12, read: false, replies: [] },
+      { id: 'm2', from: 'Brand Studio',      fromKind: 'advertiser', subject: 'Sponsorship inquiry — your Originals series',
+        body: 'Hi — we run a small brand-safety-focused agency and would like to talk about a 6-week mid-roll partnership across your Originals rail. Indicative budget: $1,800–$3,500. Reply if interested.',
+        ts: Date.now() - 1000 * 60 * 60 * 36, read: false, replies: [] },
+      { id: 'm3', from: 'Viewer · Avery T.', fromKind: 'viewer',     subject: 'Loved the cinema package',
+        body: 'Just watched your latest book-cinema project — the offline mode worked perfectly on the train. Will there be a sequel?',
+        ts: Date.now() - 1000 * 60 * 60 * 60, read: true, replies: [] }
+    ];
+    try { localStorage.setItem('lp_inbox', JSON.stringify(seed)); } catch (e) {}
+    return seed;
+  }
+  function writeInbox(a) { try { localStorage.setItem('lp_inbox', JSON.stringify(a)); } catch (e) {} updateInboxBadge(); }
+  function updateInboxBadge() {
+    var n = readInbox().filter(function (m) { return !m.read; }).length;
+    var b = document.getElementById('lpInboxBadge');
+    if (b) { b.textContent = n; b.style.display = n ? 'inline-flex' : 'none'; }
+  }
+  function fmtDate(ts) {
+    var d = new Date(ts);
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' +
+           d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  }
+  function renderInbox(activeId) {
+    closeSidebarSafe();
+    clearViews();
+    document.body.classList.add('lp-paging');
+    var pg = $$('lp-page'); if (pg) pg.hidden = false;
+    $$('lp-page-title').textContent = 'Inbox';
+    $$('lp-page-blurb').textContent = 'Messages from viewers, advertisers, and the LoadPlay platform. Stored on this device.';
+    var msgs = readInbox().slice().sort(function (a, b) { return b.ts - a.ts; });
+    if (!msgs.length) {
+      $$('lp-page-extra').innerHTML = cards([{ t: 'Nothing here yet', b: 'Your inbox is empty.' }]);
+      return;
+    }
+    var open = msgs.filter(function (m) { return m.id === activeId; })[0] || msgs[0];
+    if (!open.read) {
+      open.read = true;
+      var all = readInbox();
+      for (var i = 0; i < all.length; i++) if (all[i].id === open.id) { all[i].read = true; break; }
+      writeInbox(all);
+    }
+    var list = msgs.map(function (m) {
+      var dot = m.read ? '' : '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--cyan);margin-right:6px;flex-shrink:0"></span>';
+      var kindColor = m.fromKind === 'advertiser' ? '#facc15' : m.fromKind === 'platform' ? 'var(--cyan)' : '#a78bfa';
+      var active = m.id === open.id;
+      return '<button type="button" class="lp-page-card" data-lp-inbox-open="' + m.id + '" style="text-align:left;cursor:pointer;width:100%;border-color:' + (active ? 'var(--cyan)' : 'var(--border)') + ';background:' + (active ? 'rgba(0,229,255,.06)' : 'var(--bg2)') + '">' +
+        '<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:4px"><div style="display:flex;align-items:center;font-size:13px;font-weight:700;color:#fff">' + dot + m.from + '</div><div style="font-size:11px;color:var(--text3)">' + fmtDate(m.ts) + '</div></div>' +
+        '<div style="font-size:13px;color:var(--text)">' + m.subject + '</div>' +
+        '<div style="font-size:11px;color:' + kindColor + ';font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-top:4px">' + m.fromKind + '</div>' +
+      '</button>';
+    }).join('');
+    var replies = (open.replies || []).map(function (r) {
+      return '<div class="lp-page-card" style="background:rgba(0,229,255,.06);border-color:rgba(0,229,255,.3)"><div style="font-size:11.5px;color:var(--cyan);font-weight:700;margin-bottom:4px">You — ' + fmtDate(r.ts) + '</div><div style="font-size:13px;color:var(--text)">' + r.body.replace(/</g, '&lt;') + '</div></div>';
+    }).join('');
+    var threadHtml =
+      '<div class="lp-page-card" style="background:var(--bg2)">' +
+        '<div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:8px"><div style="font-weight:800;font-size:15px;color:#fff">' + open.subject + '</div><div style="font-size:11.5px;color:var(--text3)">' + fmtDate(open.ts) + '</div></div>' +
+        '<div style="font-size:12.5px;color:var(--text2);margin-bottom:10px">From <strong style="color:#fff">' + open.from + '</strong></div>' +
+        '<div style="font-size:13.5px;color:var(--text);line-height:1.6;white-space:pre-wrap">' + open.body.replace(/</g, '&lt;') + '</div>' +
+      '</div>' +
+      replies +
+      '<div class="lp-page-card" style="margin-top:10px">' +
+        '<label class="lp-pe-label" for="lpInboxReply">Reply</label>' +
+        '<textarea class="lp-pe-input lp-pe-textarea" id="lpInboxReply" placeholder="Type a reply…"></textarea>' +
+        '<div class="lp-pe-save-row" style="margin-top:8px">' +
+          '<button class="lp-pe-btn danger" type="button" data-lp-inbox-del="' + open.id + '">Delete thread</button>' +
+          '<button class="lp-pe-cancel" type="button" data-lp-inbox-archive="' + open.id + '">Mark unread</button>' +
+          '<button class="lp-pe-save" type="button" id="lpInboxSend">Send reply</button>' +
+        '</div>' +
+      '</div>';
+    $$('lp-page-extra').innerHTML =
+      '<div style="display:grid;grid-template-columns:280px 1fr;gap:14px;align-items:flex-start">' +
+        '<div style="display:flex;flex-direction:column;gap:8px;max-height:70vh;overflow-y:auto">' + list + '</div>' +
+        '<div>' + threadHtml + '</div>' +
+      '</div>';
+    $$('lp-page-extra').addEventListener('click', function (e) {
+      var open2 = e.target.closest('[data-lp-inbox-open]');
+      if (open2) { renderInbox(open2.getAttribute('data-lp-inbox-open')); return; }
+      var del = e.target.closest('[data-lp-inbox-del]');
+      if (del) {
+        var id = del.getAttribute('data-lp-inbox-del');
+        var arr = readInbox().filter(function (m) { return m.id !== id; });
+        writeInbox(arr);
+        renderInbox();
+        return;
+      }
+      var arc = e.target.closest('[data-lp-inbox-archive]');
+      if (arc) {
+        var id2 = arc.getAttribute('data-lp-inbox-archive');
+        var all2 = readInbox();
+        for (var i2 = 0; i2 < all2.length; i2++) if (all2[i2].id === id2) all2[i2].read = false;
+        writeInbox(all2);
+        renderInbox(id2);
+        return;
+      }
+    });
+    var send = $$('lpInboxSend');
+    if (send) send.addEventListener('click', function () {
+      var t = ($$('lpInboxReply').value || '').trim();
+      if (!t) { try { window.toast('Reply is empty.'); } catch (e) {} return; }
+      var all3 = readInbox();
+      for (var i3 = 0; i3 < all3.length; i3++) {
+        if (all3[i3].id === open.id) {
+          all3[i3].replies = all3[i3].replies || [];
+          all3[i3].replies.push({ body: t, ts: Date.now() });
+          break;
+        }
+      }
+      writeInbox(all3);
+      try { window.toast('Reply saved locally.'); } catch (e) {}
+      renderInbox(open.id);
+    });
+  }
+  // Initial badge paint at boot.
+  try { updateInboxBadge(); } catch (e) {}
+  window.__lpRenderInbox = renderInbox;
+
+  // ── Tier 5.16 — Advertiser Console ───────────────────────────
+  // Lightweight ad-buyer surface: budget, target rails, run dates,
+  // creative, status. Saves campaigns in lp_ad_campaigns.
+  function readCampaigns()    { try { var a = JSON.parse(localStorage.getItem('lp_ad_campaigns') || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+  function writeCampaigns(a)  { try { localStorage.setItem('lp_ad_campaigns', JSON.stringify(a)); } catch (e) {} }
+  function renderAdvertiser() {
+    closeSidebarSafe();
+    clearViews();
+    document.body.classList.add('lp-paging');
+    var pg = $$('lp-page'); if (pg) pg.hidden = false;
+    $$('lp-page-title').textContent = 'Advertiser Console';
+    $$('lp-page-blurb').textContent = 'Family-safe ads only. Create a campaign, target a content rail, set a budget, and submit for approval.';
+    var camps = readCampaigns();
+    var listHtml = camps.length
+      ? camps.map(function (c) {
+          var statusColor = c.status === 'active' ? '#4ade80' : c.status === 'submitted' ? '#facc15' : c.status === 'rejected' ? '#ff6e6e' : 'var(--text3)';
+          return '<div class="lp-page-card" style="display:flex;gap:14px;align-items:flex-start">' +
+            (c.creative ? '<img src="' + c.creative + '" style="width:120px;aspect-ratio:16/9;object-fit:cover;border-radius:8px;flex-shrink:0">' : '<div style="width:120px;aspect-ratio:16/9;background:var(--bg3);border-radius:8px;flex-shrink:0"></div>') +
+            '<div style="flex:1;min-width:0">' +
+              '<div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:2px">' + c.name + '</div>' +
+              '<div style="font-size:12px;color:var(--text3);margin-bottom:6px">' + c.advertiser + ' · ' + c.rail + ' · ' + c.startDate + ' → ' + c.endDate + '</div>' +
+              '<div style="font-size:13px;color:var(--text2);margin-bottom:6px">Budget: <strong style="color:#fff">$' + c.budget + '</strong> · CPM: $' + (c.cpm || '6') + '</div>' +
+              '<div style="font-size:11.5px;font-weight:800;color:' + statusColor + ';letter-spacing:.05em;text-transform:uppercase">' + c.status + '</div>' +
+            '</div>' +
+            '<button class="lp-pe-btn danger" type="button" data-lp-camp-del="' + c.id + '">Delete</button>' +
+          '</div>';
+        }).join('')
+      : cards([{ t: 'No campaigns yet', b: 'Create your first campaign below — saved as a draft until you submit.' }]);
+    var rails = MP_CATS.slice(1).map(function (c) { return c.label; });
+    var formHtml =
+      '<div class="lp-pe-form" style="margin-top:18px">' +
+        '<h3 style="margin:0 0 8px;color:#fff;font-size:15px">New campaign</h3>' +
+        '<div class="lp-pe-field"><label class="lp-pe-label" for="lpAdName">Campaign name</label><input class="lp-pe-input" id="lpAdName" maxlength="60" placeholder="Spring Brand Push 2026"></div>' +
+        '<div class="lp-pe-field"><label class="lp-pe-label" for="lpAdAdvertiser">Advertiser / brand</label><input class="lp-pe-input" id="lpAdAdvertiser" maxlength="60" placeholder="Acme Family Co."></div>' +
+        '<div class="lp-pe-field"><label class="lp-pe-label" for="lpAdRail">Target rail</label>' +
+          '<select class="lp-pe-input" id="lpAdRail">' +
+            '<option value="">Pick a rail</option>' +
+            ['Featured', 'Originals', 'Documentaries', 'Animation', 'Family', 'Music', 'Learning', 'Travel', 'Games', 'Cinema', 'Shorts', 'Kids']
+              .map(function (r) { return '<option value="' + r + '">' + r + '</option>'; }).join('') +
+          '</select></div>' +
+        '<div style="display:flex;gap:10px"><div class="lp-pe-field" style="flex:1"><label class="lp-pe-label" for="lpAdStart">Start date</label><input class="lp-pe-input" id="lpAdStart" type="date"></div>' +
+          '<div class="lp-pe-field" style="flex:1"><label class="lp-pe-label" for="lpAdEnd">End date</label><input class="lp-pe-input" id="lpAdEnd" type="date"></div></div>' +
+        '<div style="display:flex;gap:10px"><div class="lp-pe-field" style="flex:1"><label class="lp-pe-label" for="lpAdBudget">Budget (USD)</label><input class="lp-pe-input" id="lpAdBudget" inputmode="numeric" placeholder="2500"></div>' +
+          '<div class="lp-pe-field" style="flex:1"><label class="lp-pe-label" for="lpAdCpm">CPM target</label><input class="lp-pe-input" id="lpAdCpm" inputmode="numeric" placeholder="6"></div></div>' +
+        '<div class="lp-pe-field"><label class="lp-pe-label">Creative (16:9 image)</label>' +
+          '<div class="lp-pe-banner" style="aspect-ratio:16/9;max-width:360px"><div class="lp-pe-banner-empty" id="lpAdCreativePrev">No creative</div></div>' +
+          '<div class="lp-pe-actions" style="margin-top:6px"><label class="lp-pe-btn"><input type="file" accept="image/*" id="lpAdCreativeInput">Upload creative</label></div></div>' +
+        '<div class="lp-pe-help" style="background:var(--bg3);padding:10px;border-radius:8px;color:var(--text2)">Submitting runs Clean Stream + Safety Scan against the creative + name + advertiser fields. Failures route back here with notes.</div>' +
+        '<div class="lp-pe-save-row" style="margin-top:10px">' +
+          '<button class="lp-pe-cancel" type="button" id="lpAdSaveDraft">Save draft</button>' +
+          '<button class="lp-pe-save" type="button" id="lpAdSubmit">Submit for approval</button>' +
+        '</div>' +
+      '</div>';
+    $$('lp-page-extra').innerHTML =
+      '<div style="display:flex;flex-direction:column;gap:10px">' + listHtml + '</div>' + formHtml;
+    var creativeData = '';
+    var ci = $$('lpAdCreativeInput');
+    if (ci) ci.addEventListener('change', function (e) {
+      var f = e.target.files && e.target.files[0]; if (!f) return;
+      readFileAsDataURL(f, function (data) {
+        if (!data) return;
+        creativeData = data;
+        var prev = $$('lpAdCreativePrev');
+        if (prev && prev.parentElement) prev.parentElement.innerHTML = '<img src="' + data + '" alt="">';
+      });
+    });
+    function collect() {
+      return {
+        id: 'c_' + Date.now().toString(36) + '_' + Math.floor(Math.random() * 1e6).toString(36),
+        name: ($$('lpAdName').value || '').trim(),
+        advertiser: ($$('lpAdAdvertiser').value || '').trim(),
+        rail: $$('lpAdRail').value,
+        startDate: $$('lpAdStart').value || '',
+        endDate: $$('lpAdEnd').value || '',
+        budget: ($$('lpAdBudget').value || '').replace(/[^0-9]/g, ''),
+        cpm: ($$('lpAdCpm').value || '').replace(/[^0-9.]/g, ''),
+        creative: creativeData,
+        createdAt: Date.now()
+      };
+    }
+    function validate(c) {
+      if (!c.name) return 'Campaign name is required.';
+      if (!c.advertiser) return 'Advertiser / brand is required.';
+      if (!c.rail) return 'Pick a target rail.';
+      if (!c.startDate || !c.endDate) return 'Pick start + end dates.';
+      if (new Date(c.endDate) < new Date(c.startDate)) return 'End date must be after start date.';
+      if (!c.budget || parseInt(c.budget, 10) < 50) return 'Minimum budget is $50.';
+      if (__LP_BAD.test(c.name + ' ' + c.advertiser)) return 'Disallowed language found in name/advertiser.';
+      return null;
+    }
+    $$('lpAdSaveDraft').addEventListener('click', function () {
+      var c = collect();
+      var v = validate(c);
+      if (v) { try { window.toast(v); } catch (e) {} return; }
+      c.status = 'draft';
+      var arr = readCampaigns(); arr.unshift(c); writeCampaigns(arr);
+      try { window.toast('Draft saved.'); } catch (e) {}
+      renderAdvertiser();
+    });
+    $$('lpAdSubmit').addEventListener('click', function () {
+      var c = collect();
+      var v = validate(c);
+      if (v) { try { window.toast(v); } catch (e) {} return; }
+      c.status = 'submitted';
+      c.submittedAt = Date.now();
+      var arr = readCampaigns(); arr.unshift(c); writeCampaigns(arr);
+      try { window.toast('Submitted — you will hear back via Inbox.'); } catch (e) {}
+      // Drop a synthetic platform message into Inbox so the loop closes.
+      var inbox = readInbox();
+      inbox.unshift({
+        id: 'm_' + Date.now().toString(36),
+        from: 'LoadPlay Ad Review',
+        fromKind: 'platform',
+        subject: 'Campaign received — ' + c.name,
+        body: 'Thanks — we received "' + c.name + '" for ' + c.rail + '. Clean Stream + Safety Scan run automatically. Approval typically within 24 hours.',
+        ts: Date.now(),
+        read: false,
+        replies: []
+      });
+      writeInbox(inbox);
+      renderAdvertiser();
+    });
+    $$('lp-page-extra').addEventListener('click', function (e) {
+      var del = e.target.closest('[data-lp-camp-del]');
+      if (!del) return;
+      var id = del.getAttribute('data-lp-camp-del');
+      var arr = readCampaigns().filter(function (c) { return c.id !== id; });
+      writeCampaigns(arr);
+      renderAdvertiser();
+    });
+  }
+  window.__lpRenderAdvertiser = renderAdvertiser;
+
   // ── Tier 4.13 — Marketplace cart + checkout ──────────────────
   // Items the user adds go to lp_cart; on checkout they move to
   // lp_purchased and become "Owned" everywhere they appear.
@@ -4297,6 +4569,8 @@ window.addEventListener('online',  () => toast('Back online'));
       case 'marketplace':    renderMarketplace(); return;
       case 'cart':           renderCart(); return;
       case 'checkout':       renderCheckout(); return;
+      case 'inbox':          renderInbox(); return;
+      case 'advertiser':     renderAdvertiser(); return;
       case 'help':           renderHelp(); return;
       case 'home-feed':      renderHomeFeed(); return;
       case 'search':         { var s = $$('searchInput'); if (s) { s.focus(); s.scrollIntoView({ behavior: 'smooth', block: 'start' }); } return; }
