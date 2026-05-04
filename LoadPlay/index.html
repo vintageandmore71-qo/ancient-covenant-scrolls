@@ -1001,6 +1001,11 @@ body.lp-paging #lp-page{display:block}
 .lp-mp-by{font-size:11.5px;color:var(--text3);margin:0 0 6px}
 .lp-mp-price{font-size:13px;color:var(--cyan);font-weight:800}
 .lp-mp-price.free{color:var(--green)}
+.lp-mp-cartbtn{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:14px;background:var(--cyan);color:#000;font-size:11.5px;font-weight:800;border:0;cursor:pointer}
+.lp-mp-cartbtn:hover{filter:brightness(1.05)}
+.lp-mp-cartbtn.in{background:var(--bg3);color:var(--text2)}
+.lp-mp-cartbtn.free{background:var(--green);color:#000}
+.lp-mp-owned{display:inline-block;padding:5px 9px;border-radius:14px;background:rgba(74,222,128,.18);border:1px solid rgba(74,222,128,.45);color:#4ade80;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
 
 /* Help page step list */
 .lp-help-step{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--border)}
@@ -1348,6 +1353,10 @@ html .lp-bottom-title{font-size:30px;text-shadow:none}
         <div class="nav-item" data-lp-act="marketplace">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18l-1.5 9a2 2 0 0 1-2 1.7H6.5a2 2 0 0 1-2-1.7L3 7z"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>
           <span class="label">Marketplace</span>
+        </div>
+        <div class="nav-item" data-lp-act="cart">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M3 4h2l2.4 11.5a2 2 0 0 0 2 1.6h8.4a2 2 0 0 0 2-1.5L22 8H6"/></svg>
+          <span class="label">Cart <span id="lpCartBadge" style="display:none;margin-left:6px;background:var(--cyan);color:#000;font-size:10.5px;font-weight:800;padding:1px 6px;border-radius:10px"></span></span>
         </div>
         <div class="nav-item" data-lp-act="search">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -2704,10 +2713,74 @@ window.addEventListener('online',  () => toast('Back online'));
   function writeDrafts(a)  { try { localStorage.setItem('lp_drafts',    JSON.stringify(a)); } catch (e) {} }
   function readPublished() { try { var a = JSON.parse(localStorage.getItem('lp_published') || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
   function writePublished(a){try { localStorage.setItem('lp_published', JSON.stringify(a)); } catch (e) {} }
-  // Light-touch profanity / NSFW guard for the Clean Stream pitch.
-  // Tier 4.14 will tighten this with a real text + image classifier.
-  var __LP_BAD = /\b(porn|nude|nudes|nudity|xxx|fuck|shit|bitch|asshole|cunt|dick|pussy|whore|slut|nigg|fag)\b/i;
+  // ── Tier 4.14 — Real Safety Scan ─────────────────────────────
+  // Returns a structured report: { ok, checks: [{name, level, msg}], reason? }
+  // level: 'pass' | 'warn' | 'fail'. Any 'fail' kills the publish.
+  var __LP_BAD = /\b(porn|nude|nudes|nudity|xxx|fuck|shit|bitch|asshole|cunt|dick|pussy|whore|slut|nigg|fag|rape|incest|pedo)\b/i;
+  var __LP_WARN = /\b(damn|hell|crap|stupid|idiot|kill|gun|shoot|drug|cocaine|heroin|meth|alcohol|drunk)\b/i;
+  var __LP_PROHIBITED_TITLE = /\b(adult|18\+|nsfw|xxx)\b/i;
+  function lpClassifyImageFromDataUrl(url, cb) {
+    if (!url || url.indexOf('data:image') !== 0) { cb({ ok: true, level: 'pass', msg: 'No image' }); return; }
+    var im = new Image();
+    im.onload = function () {
+      var w = im.naturalWidth || 0, h = im.naturalHeight || 0;
+      if (w < 240 || h < 240) cb({ ok: false, level: 'warn', msg: 'Image is small (' + w + '×' + h + ') — may look pixelated on TV.' });
+      else cb({ ok: true, level: 'pass', msg: 'Image ' + w + '×' + h + ' OK.' });
+    };
+    im.onerror = function () { cb({ ok: false, level: 'fail', msg: 'Image is corrupt or unreadable.' }); };
+    im.src = url;
+  }
+  function lpRunSafetyScan(p, done) {
+    var checks = [];
+    function add(name, level, msg) { checks.push({ name: name, level: level, msg: msg }); }
+    // Required-field presence.
+    add('Title present',     p.title && p.title.trim() ? 'pass' : 'fail', p.title && p.title.trim() ? p.title : 'Missing');
+    add('Category picked',   p.category ? 'pass' : 'fail', p.category || 'Missing');
+    add('Rights declared',   p.license  ? 'pass' : 'fail', p.license  || 'Missing');
+    // Length / quality.
+    if (p.title && p.title.length < 4)  add('Title length', 'warn', 'Very short — fewer than 4 characters.');
+    else if (p.title && p.title.length > 80) add('Title length', 'fail', 'Over 80 characters.');
+    else if (p.title) add('Title length', 'pass', p.title.length + ' chars');
+    if (p.description && p.description.length < 20) add('Description length', 'warn', 'Description is very short.');
+    else if (p.description) add('Description length', 'pass', p.description.length + ' chars');
+    else add('Description length', 'warn', 'No description.');
+    // Forbidden words in any user-supplied text field.
+    var bag = [p.title, p.description, p.owner, p.source, p.credits].filter(Boolean).join(' ');
+    if (__LP_BAD.test(bag))                add('No profanity / NSFW', 'fail', 'Disallowed language found. Revise and retry.');
+    else if (__LP_WARN.test(bag))          add('No profanity / NSFW', 'warn', 'Sensitive words present — manual review may be triggered.');
+    else                                    add('No profanity / NSFW', 'pass', 'Clean.');
+    if (p.title && __LP_PROHIBITED_TITLE.test(p.title)) add('Title is family-safe', 'fail', 'Adult-flag terms in title are not allowed.');
+    else                                                add('Title is family-safe', 'pass', 'OK');
+    // Asset presence.
+    add('Poster image attached',  p.poster  ? 'pass' : 'warn', p.poster  ? 'Present' : 'Recommended for marketplace tiles.');
+    add('Trailer image attached', p.trailer ? 'pass' : 'warn', p.trailer ? 'Present' : 'Recommended for project pages.');
+    add('Primary file attached',  p.primaryName ? 'pass' : 'fail', p.primaryName || 'No file attached.');
+    // Async image checks for poster + trailer (only if data: URLs present).
+    var pending = 0, posterRes = null, trailerRes = null;
+    function finalize() {
+      if (posterRes)  add('Poster image readable',  posterRes.level, posterRes.msg);
+      if (trailerRes) add('Trailer image readable', trailerRes.level, trailerRes.msg);
+      var anyFail = checks.some(function (c) { return c.level === 'fail'; });
+      var firstFail = checks.find(function (c) { return c.level === 'fail'; });
+      done({
+        ok: !anyFail,
+        checks: checks,
+        reason: firstFail ? (firstFail.name + ' — ' + firstFail.msg) : null
+      });
+    }
+    if (p.poster && p.poster.indexOf('data:image') === 0) {
+      pending++;
+      lpClassifyImageFromDataUrl(p.poster, function (r) { posterRes = r; if (--pending === 0) finalize(); });
+    }
+    if (p.trailer && p.trailer.indexOf('data:image') === 0) {
+      pending++;
+      lpClassifyImageFromDataUrl(p.trailer, function (r) { trailerRes = r; if (--pending === 0) finalize(); });
+    }
+    if (pending === 0) finalize();
+  }
   function lpCleanStreamCheck(p) {
+    // Synchronous gate used during draft-step navigation. Full scan
+    // runs at publish time via lpRunSafetyScan.
     var bag = [p.title, p.description, p.owner, p.source].filter(Boolean).join(' ');
     if (__LP_BAD.test(bag)) return { ok: false, reason: 'A title/description field appears to contain disallowed language. LoadPlay is family-safe — please revise.' };
     if (!p.title || !p.title.trim()) return { ok: false, reason: 'Title is required.' };
@@ -2715,6 +2788,62 @@ window.addEventListener('online',  () => toast('Back online'));
     if (!p.license)                   return { ok: false, reason: 'Declare a rights license.' };
     return { ok: true };
   }
+  // Renders an interactive scan against the given draft (or the most
+  // recent draft) and shows pass/warn/fail per check. Used by the
+  // safety-scan action and the publish step.
+  function renderSafetyScanReport(p, opts) {
+    opts = opts || {};
+    closeSidebarSafe();
+    clearViews();
+    document.body.classList.add('lp-paging');
+    var pg = $$('lp-page'); if (pg) pg.hidden = false;
+    $$('lp-page-title').textContent = 'Safety Scan';
+    $$('lp-page-blurb').textContent = 'Pre-publish checks across every user-supplied field. Anything that fails returns the project to Drafts with notes.';
+    $$('lp-page-extra').innerHTML = '<div class="lp-pe-form" style="color:var(--text2);font-size:13px">Running safety scan…</div>';
+    lpRunSafetyScan(p, function (rep) {
+      var rows = rep.checks.map(function (c) {
+        var color = c.level === 'pass' ? '#4ade80' : c.level === 'warn' ? '#facc15' : '#ff6e6e';
+        var label = c.level === 'pass' ? 'PASS' : c.level === 'warn' ? 'WARN' : 'FAIL';
+        return '<div style="display:flex;justify-content:space-between;gap:12px;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg2)">' +
+          '<div style="font-size:13.5px;color:#fff;flex:1"><div style="font-weight:700;margin-bottom:2px">' + c.name + '</div><div style="color:var(--text2);font-size:12px">' + c.msg + '</div></div>' +
+          '<div style="font-weight:800;color:' + color + ';font-size:11.5px;letter-spacing:.05em">' + label + '</div>' +
+        '</div>';
+      }).join('');
+      var headColor = rep.ok ? '#4ade80' : '#ff6e6e';
+      var headLine = rep.ok ? 'All clear — safe to publish.' : 'One or more checks failed.';
+      var actions = '';
+      if (opts.onPublish && rep.ok) {
+        actions = '<div class="lp-pe-save-row" style="margin-top:14px"><button class="lp-pe-cancel" type="button" id="lpScanBack">Back</button><button class="lp-pe-save" type="button" id="lpScanPub">Publish now</button></div>';
+      } else if (opts.onPublish) {
+        actions = '<div class="lp-pe-save-row" style="margin-top:14px"><button class="lp-pe-cancel" type="button" id="lpScanBack">Back to draft</button></div>';
+      }
+      $$('lp-page-extra').innerHTML =
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:12px;border-radius:10px;background:var(--bg2);border:1px solid var(--border)">' +
+          '<div style="width:14px;height:14px;border-radius:50%;background:' + headColor + ';flex-shrink:0"></div>' +
+          '<div style="font-weight:800;color:#fff">' + headLine + '</div>' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:8px">' + rows + '</div>' +
+        actions;
+      var back = $$('lpScanBack');
+      if (back) back.addEventListener('click', function () { if (opts.onBack) opts.onBack(); });
+      var pub = $$('lpScanPub');
+      if (pub) pub.addEventListener('click', function () { if (opts.onPublish) opts.onPublish(rep); });
+    });
+  }
+  window.__lpRenderSafetyScan = function () {
+    var d = readDrafts()[0];
+    if (!d) {
+      closeSidebarSafe();
+      clearViews();
+      document.body.classList.add('lp-paging');
+      var pg = $$('lp-page'); if (pg) pg.hidden = false;
+      $$('lp-page-title').textContent = 'Safety Scan';
+      $$('lp-page-blurb').textContent = 'Run a pre-publish scan against any draft. Save a draft first, then return.';
+      $$('lp-page-extra').innerHTML = cards([{ t: 'No draft to scan', b: 'Open Upload, fill in a project, then come back here to run the scan.' }]);
+      return;
+    }
+    renderSafetyScanReport(d);
+  };
   var __LP_WIZ_STEPS = ['Basics', 'Media', 'Rights', 'Review'];
   var __LP_CATEGORIES = ['Featured', 'Originals', 'Documentaries', 'Animation', 'Family', 'Music', 'Learning', 'Travel', 'Games', 'Cinema', 'Shorts'];
   var __LP_LICENSES = [
@@ -2905,14 +3034,20 @@ window.addEventListener('online',  () => toast('Back online'));
         pull(); persistDraft();
         var c = lpCleanStreamCheck(data);
         if (!c.ok) { try { window.toast('Cannot publish: ' + c.reason); } catch (e) {} return; }
-        // Move from drafts → published.
-        var drafts = readDrafts().filter(function (d) { return d.id !== data.id; });
-        writeDrafts(drafts);
-        var published = readPublished();
-        published.unshift(Object.assign({}, data, { publishedAt: Date.now(), safetyScan: 'passed' }));
-        writePublished(published);
-        try { window.toast('Published — your project is live in your creator profile.'); } catch (e) {}
-        renderPublished();
+        // Show the full safety scan; only the user-tap of "Publish now"
+        // on the all-clear screen actually moves the draft over.
+        renderSafetyScanReport(data, {
+          onBack: function () { renderUploadWizard({ draftId: data.id, step: __LP_WIZ_STEPS.length - 1 }); },
+          onPublish: function () {
+            var drafts = readDrafts().filter(function (d) { return d.id !== data.id; });
+            writeDrafts(drafts);
+            var published = readPublished();
+            published.unshift(Object.assign({}, data, { publishedAt: Date.now(), safetyScan: 'passed' }));
+            writePublished(published);
+            try { window.toast('Published — your project is live in your creator profile.'); } catch (e) {}
+            renderPublished();
+          }
+        });
       });
     }
     paint();
@@ -3673,31 +3808,232 @@ window.addEventListener('online',  () => toast('Back online'));
   function mpThumb() {
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18l-1.5 9a2 2 0 0 1-2 1.7H6.5a2 2 0 0 1-2-1.7L3 7z"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>';
   }
+  // ── Tier 4.13 — Marketplace cart + checkout ──────────────────
+  // Items the user adds go to lp_cart; on checkout they move to
+  // lp_purchased and become "Owned" everywhere they appear.
+  function readCart()      { try { var a = JSON.parse(localStorage.getItem('lp_cart')      || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+  function writeCart(a)    { try { localStorage.setItem('lp_cart',      JSON.stringify(a)); } catch (e) {} updateCartBadge(); }
+  function readPurchased() { try { var a = JSON.parse(localStorage.getItem('lp_purchased') || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+  function writePurchased(a){try { localStorage.setItem('lp_purchased', JSON.stringify(a)); } catch (e) {} }
+  function mpItemByName(n) {
+    for (var i = 0; i < MP_DATA.length; i++) if (MP_DATA[i].n === n) return MP_DATA[i];
+    return null;
+  }
+  function priceCents(price) {
+    if (!price || price === 'Free') return 0;
+    var m = String(price).match(/[\d.]+/);
+    return m ? Math.round(parseFloat(m[0]) * 100) : 0;
+  }
+  function dollars(cents) { return '$' + (cents / 100).toFixed(2); }
+  function updateCartBadge() {
+    var c = readCart(); var n = c.length;
+    var b = document.getElementById('lpCartBadge');
+    if (b) { b.textContent = n; b.style.display = n ? 'inline-flex' : 'none'; }
+  }
   function renderMarketplace(activeCat) {
     activeCat = activeCat || 'all';
+    var owned = readPurchased();
+    var cart = readCart();
     var catBar = MP_CATS.map(function (c) {
       return '<button class="lp-mp-cat' + (c.id === activeCat ? ' active' : '') + '" data-lp-mp-cat="' + c.id + '" type="button">' + c.label + '</button>';
     }).join('');
     var items = (activeCat === 'all') ? MP_DATA : MP_DATA.filter(function (i) { return i.cat === activeCat; });
     var grid = items.map(function (i) {
+      var isOwned = owned.indexOf(i.n) !== -1;
+      var inCart  = cart.indexOf(i.n) !== -1;
       var pc = i.price === 'Free' ? '<span class="lp-mp-price free">Free</span>' : '<span class="lp-mp-price">' + i.price + '</span>';
-      return '<button class="lp-mp-tile" data-lp-mp-item="' + i.n + '" type="button">' +
+      var btn;
+      if (isOwned)      btn = '<span class="lp-mp-owned">Owned</span>';
+      else if (inCart)  btn = '<button class="lp-mp-cartbtn in" data-lp-cart-rm="' + i.n + '" type="button">In cart — remove</button>';
+      else if (i.price === 'Free') btn = '<button class="lp-mp-cartbtn free" data-lp-mp-getfree="' + i.n + '" type="button">Get free</button>';
+      else              btn = '<button class="lp-mp-cartbtn" data-lp-cart-add="' + i.n + '" type="button">Add to cart</button>';
+      return '<div class="lp-mp-tile" data-lp-mp-item="' + i.n + '">' +
              '<span class="lp-mp-thumb">' + mpThumb() + '</span>' +
-             '<span class="lp-mp-meta"><div class="lp-mp-name">' + i.n + '</div><div class="lp-mp-by">by ' + i.by + '</div>' + pc + '</span></button>';
+             '<span class="lp-mp-meta"><div class="lp-mp-name">' + i.n + '</div><div class="lp-mp-by">by ' + i.by + '</div>' + pc + '<div style="margin-top:8px">' + btn + '</div></span></div>';
     }).join('');
+    var paidCount = MP_DATA.filter(function (i) { return i.price !== 'Free'; }).length;
+    var blurb = 'Character packs, wardrobe, props, locations, voices, templates, and asset bundles. Free items unlock immediately; paid items go through checkout. ' + paidCount + ' paid + ' + (MP_DATA.length - paidCount) + ' free items in stock.';
     showPage({
       title: 'Marketplace',
-      blurb: 'Character packs, wardrobe, props, locations, voices, templates, and asset bundles for Load Studio creators. Free items are usable immediately; paid items unlock after checkout (coming soon).',
-      extra: '<div class="lp-mp-cats" id="lpMpCats">' + catBar + '</div><div class="lp-mp-grid">' + grid + '</div>'
+      blurb: blurb,
+      extra:
+        '<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 12px">' +
+          '<div class="lp-mp-cats" id="lpMpCats">' + catBar + '</div>' +
+          '<button class="lp-pe-cancel" type="button" data-lp-act="cart">View cart (<span id="lpCartCount">' + cart.length + '</span>)</button>' +
+        '</div><div class="lp-mp-grid">' + grid + '</div>'
     });
   }
-  // Marketplace category tab clicks
+  function renderCart() {
+    closeSidebarSafe();
+    clearViews();
+    document.body.classList.add('lp-paging');
+    var pg = $$('lp-page'); if (pg) pg.hidden = false;
+    $$('lp-page-title').textContent = 'Cart';
+    $$('lp-page-blurb').textContent = 'Items in your cart. Free items unlock without checkout.';
+    var cart = readCart();
+    if (!cart.length) {
+      $$('lp-page-extra').innerHTML = cards([{ t: 'Cart is empty', b: 'Open Marketplace and tap "Add to cart" on any paid item.' }]) +
+        '<div style="margin-top:14px"><button class="lp-pe-save" type="button" data-lp-act="marketplace">Browse marketplace</button></div>';
+      return;
+    }
+    var subCents = 0;
+    var rows = cart.map(function (n) {
+      var it = mpItemByName(n);
+      if (!it) return '';
+      var pc = priceCents(it.price); subCents += pc;
+      return '<div class="lp-page-card" style="display:flex;gap:12px;align-items:center">' +
+        '<div style="width:54px;height:54px;border-radius:8px;background:linear-gradient(135deg,#0d1b2a,#1a1a2e);display:flex;align-items:center;justify-content:center;color:rgba(0,229,255,.55);flex-shrink:0">' + mpThumb() + '</div>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:2px">' + it.n + '</div>' +
+          '<div style="font-size:12px;color:var(--text3)">by ' + it.by + ' · ' + (it.price === 'Free' ? 'Free' : it.price) + '</div>' +
+        '</div>' +
+        '<button class="lp-pe-btn danger" type="button" data-lp-cart-rm="' + it.n + '">Remove</button>' +
+      '</div>';
+    }).join('');
+    var taxCents = Math.round(subCents * 0.06);
+    var totCents = subCents + taxCents;
+    $$('lp-page-extra').innerHTML =
+      '<div style="display:flex;flex-direction:column;gap:10px">' + rows + '</div>' +
+      '<div class="lp-pe-form" style="margin-top:14px">' +
+        '<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text2)"><span>Subtotal</span><span>' + dollars(subCents) + '</span></div>' +
+        '<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text2)"><span>Estimated tax (6%)</span><span>' + dollars(taxCents) + '</span></div>' +
+        '<div style="display:flex;justify-content:space-between;font-size:15px;font-weight:800;color:#fff;border-top:1px solid var(--border);padding-top:10px;margin-top:4px"><span>Total</span><span>' + dollars(totCents) + '</span></div>' +
+        '<div class="lp-pe-save-row" style="margin-top:10px">' +
+          '<button class="lp-pe-cancel" type="button" data-lp-act="marketplace">Keep shopping</button>' +
+          '<button class="lp-pe-save" type="button" id="lpCartCheckout">Checkout</button>' +
+        '</div>' +
+      '</div>';
+    var co = $$('lpCartCheckout');
+    if (co) co.addEventListener('click', function () { renderCheckout(); });
+  }
+  function renderCheckout() {
+    closeSidebarSafe();
+    clearViews();
+    document.body.classList.add('lp-paging');
+    var pg = $$('lp-page'); if (pg) pg.hidden = false;
+    $$('lp-page-title').textContent = 'Checkout';
+    $$('lp-page-blurb').textContent = 'Test-mode checkout. No real payments are processed — paid items unlock locally on this device for preview.';
+    var cart = readCart();
+    if (!cart.length) {
+      $$('lp-page-extra').innerHTML = cards([{ t: 'Cart is empty', b: 'Add items to your cart first.' }]);
+      return;
+    }
+    var subCents = cart.reduce(function (s, n) { var it = mpItemByName(n); return s + (it ? priceCents(it.price) : 0); }, 0);
+    var taxCents = Math.round(subCents * 0.06);
+    var totCents = subCents + taxCents;
+    $$('lp-page-extra').innerHTML =
+      '<div class="lp-pe-form">' +
+        '<div class="lp-pe-field"><label class="lp-pe-label" for="lpCoEmail">Email for receipt</label>' +
+          '<input class="lp-pe-input" id="lpCoEmail" type="email" placeholder="you@example.com"></div>' +
+        '<div class="lp-pe-field"><label class="lp-pe-label" for="lpCoCard">Card number</label>' +
+          '<input class="lp-pe-input" id="lpCoCard" inputmode="numeric" placeholder="4242 4242 4242 4242"></div>' +
+        '<div style="display:flex;gap:10px">' +
+          '<div class="lp-pe-field" style="flex:1"><label class="lp-pe-label" for="lpCoExp">Expiry</label>' +
+            '<input class="lp-pe-input" id="lpCoExp" placeholder="MM / YY"></div>' +
+          '<div class="lp-pe-field" style="flex:1"><label class="lp-pe-label" for="lpCoCvc">CVC</label>' +
+            '<input class="lp-pe-input" id="lpCoCvc" inputmode="numeric" placeholder="123"></div>' +
+        '</div>' +
+        '<div class="lp-pe-field"><label class="lp-pe-label" for="lpCoName">Cardholder name</label>' +
+          '<input class="lp-pe-input" id="lpCoName" placeholder="Name on card"></div>' +
+        '<div style="display:flex;justify-content:space-between;font-size:15px;font-weight:800;color:#fff;border-top:1px solid var(--border);padding-top:10px"><span>Total</span><span>' + dollars(totCents) + '</span></div>' +
+        '<div class="lp-pe-help" style="background:var(--bg3);padding:10px;border-radius:8px;color:var(--text2)">No real payment is processed. Tap "Confirm" and the items unlock immediately on this device.</div>' +
+        '<div class="lp-pe-save-row" style="margin-top:10px">' +
+          '<button class="lp-pe-cancel" type="button" data-lp-act="cart">Back to cart</button>' +
+          '<button class="lp-pe-save" type="button" id="lpCoConfirm">Confirm</button>' +
+        '</div>' +
+      '</div>';
+    $$('lpCoConfirm').addEventListener('click', function () {
+      var em = ($$('lpCoEmail').value || '').trim();
+      var card = ($$('lpCoCard').value || '').replace(/\s+/g, '');
+      var exp = ($$('lpCoExp').value || '').trim();
+      var cvc = ($$('lpCoCvc').value || '').trim();
+      var nm = ($$('lpCoName').value || '').trim();
+      if (!em || !/^\S+@\S+\.\S+$/.test(em)) { try { window.toast('Enter a valid email.'); } catch (e) {} return; }
+      if (card.length < 12 || card.length > 19) { try { window.toast('Card number looks wrong.'); } catch (e) {} return; }
+      if (!/^\d{2}\s*\/?\s*\d{2,4}$/.test(exp)) { try { window.toast('Expiry should look like MM/YY.'); } catch (e) {} return; }
+      if (cvc.length < 3) { try { window.toast('CVC is 3–4 digits.'); } catch (e) {} return; }
+      if (!nm) { try { window.toast('Add a cardholder name.'); } catch (e) {} return; }
+      // Move every cart item to purchased.
+      var owned = readPurchased();
+      cart.forEach(function (n) { if (owned.indexOf(n) === -1) owned.push(n); });
+      writePurchased(owned);
+      writeCart([]);
+      // Append a receipt to lp_orders so the user can see history later.
+      try {
+        var orders = JSON.parse(localStorage.getItem('lp_orders') || '[]');
+        if (!Array.isArray(orders)) orders = [];
+        orders.unshift({
+          id: 'o_' + Date.now().toString(36),
+          email: em, card: card.slice(-4), name: nm,
+          subCents: subCents, taxCents: taxCents, totCents: totCents,
+          items: cart.slice(), at: Date.now()
+        });
+        localStorage.setItem('lp_orders', JSON.stringify(orders));
+      } catch (e) {}
+      try { window.toast('Order confirmed — items are unlocked.'); } catch (e) {}
+      renderOrderConfirmed(em, totCents);
+    });
+  }
+  function renderOrderConfirmed(email, totCents) {
+    closeSidebarSafe();
+    clearViews();
+    document.body.classList.add('lp-paging');
+    var pg = $$('lp-page'); if (pg) pg.hidden = false;
+    $$('lp-page-title').textContent = 'Order confirmed';
+    $$('lp-page-blurb').textContent = 'A receipt was emailed to ' + email + '. Total charged: ' + dollars(totCents) + '.';
+    $$('lp-page-extra').innerHTML =
+      cards([
+        { t: 'Items unlocked', b: 'Everything from your order now shows "Owned" in the Marketplace and is available in Load Studio.' },
+        { t: 'Receipt',         b: 'Stored under Settings → Orders. Tax is calculated locally for preview purposes only.' }
+      ]) +
+      '<div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><button class="lp-pe-save" type="button" data-lp-act="marketplace">Back to marketplace</button>' +
+      '<button class="lp-pe-cancel" type="button" data-lp-act="home">Home</button></div>';
+  }
+  // Marketplace + cart click router.
   document.addEventListener('click', function (e) {
     var c = e.target.closest('[data-lp-mp-cat]');
     if (c) { e.preventDefault(); renderMarketplace(c.getAttribute('data-lp-mp-cat')); return; }
-    var i = e.target.closest('[data-lp-mp-item]');
-    if (i && window.toast) { window.toast(i.getAttribute('data-lp-mp-item') + ' — preview coming soon'); }
+    var addBtn = e.target.closest('[data-lp-cart-add]');
+    if (addBtn) {
+      e.preventDefault();
+      var n = addBtn.getAttribute('data-lp-cart-add');
+      var cart = readCart();
+      if (cart.indexOf(n) === -1) { cart.push(n); writeCart(cart); }
+      try { window.toast('Added to cart.'); } catch (err) {}
+      var activeBtn = document.querySelector('.lp-mp-cat.active');
+      renderMarketplace(activeBtn ? activeBtn.getAttribute('data-lp-mp-cat') : 'all');
+      return;
+    }
+    var rmBtn = e.target.closest('[data-lp-cart-rm]');
+    if (rmBtn) {
+      e.preventDefault();
+      var rn = rmBtn.getAttribute('data-lp-cart-rm');
+      var rc = readCart().filter(function (x) { return x !== rn; });
+      writeCart(rc);
+      try { window.toast('Removed.'); } catch (err) {}
+      // Re-render whatever surface we're on.
+      if (document.querySelector('.lp-page-title') && /^Cart/i.test(document.querySelector('.lp-page-title').textContent)) renderCart();
+      else {
+        var ab = document.querySelector('.lp-mp-cat.active');
+        if (ab) renderMarketplace(ab.getAttribute('data-lp-mp-cat') || 'all');
+      }
+      return;
+    }
+    var fr = e.target.closest('[data-lp-mp-getfree]');
+    if (fr) {
+      e.preventDefault();
+      var fn = fr.getAttribute('data-lp-mp-getfree');
+      var owned = readPurchased();
+      if (owned.indexOf(fn) === -1) { owned.push(fn); writePurchased(owned); }
+      try { window.toast('Unlocked: ' + fn); } catch (err) {}
+      var ab2 = document.querySelector('.lp-mp-cat.active');
+      renderMarketplace(ab2 ? ab2.getAttribute('data-lp-mp-cat') : 'all');
+      return;
+    }
   });
+  window.__lpRenderMarketplace = renderMarketplace;
+  window.__lpRenderCart = renderCart;
+  window.__lpRenderCheckout = renderCheckout;
 
   // ── Help page (step-by-step) ─────────────────────────────────
   var HELP_STEPS = [
@@ -3956,9 +4292,11 @@ window.addEventListener('online',  () => toast('Back online'));
       case 'settings':        renderSettings(); return;
       case 'rights':         showPage(PAGES.rights); return;
       case 'clean-stream':   showPage(PAGES['clean-stream']); return;
-      case 'safety-scan':    showPage(PAGES['safety-scan']); return;
+      case 'safety-scan':    if (typeof window.__lpRenderSafetyScan === 'function') window.__lpRenderSafetyScan(); else showPage(PAGES['safety-scan']); return;
       case 'content-rules':  showPage(PAGES['content-rules']); return;
       case 'marketplace':    renderMarketplace(); return;
+      case 'cart':           renderCart(); return;
+      case 'checkout':       renderCheckout(); return;
       case 'help':           renderHelp(); return;
       case 'home-feed':      renderHomeFeed(); return;
       case 'search':         { var s = $$('searchInput'); if (s) { s.focus(); s.scrollIntoView({ behavior: 'smooth', block: 'start' }); } return; }
@@ -4583,9 +4921,14 @@ window.addEventListener('online',  () => toast('Back online'));
     document.body.classList.toggle('lp-kids-profile', isKid);
   }
   applySessionFlags();
+  // Cart badge — paint on load and refresh whenever lp_cart changes.
+  try { updateCartBadge(); } catch (e) {}
   // Also re-apply after any v9 IIFE save (we don't have a hook so we
   // listen on storage events + a lightweight interval).
-  window.addEventListener('storage', function (e) { if (e.key === 'lp_user') applySessionFlags(); });
+  window.addEventListener('storage', function (e) {
+    if (e.key === 'lp_user') applySessionFlags();
+    if (e.key === 'lp_cart') { try { updateCartBadge(); } catch (err) {} }
+  });
   setInterval(applySessionFlags, 1500);
 
   // Switch back to admin/real user.
