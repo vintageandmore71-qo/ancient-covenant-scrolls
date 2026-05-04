@@ -1017,6 +1017,26 @@ html .lp-bottom-title{font-size:30px;text-shadow:none}
 .lp-install-banner .lp-ib-btn:hover{background:linear-gradient(135deg,#ff2828,#ff4a4a) !important}
 .lp-install-banner .lp-ib-x{color:#c2a8a8 !important}
 .lp-install-banner .lp-ib-x:hover{background:rgba(255,90,90,.18) !important;color:#fff !important}
+
+/* v30 — LoadPlay guided tour */
+#lp-tour{position:fixed;inset:0;z-index:9100;font-family:Inter,system-ui,sans-serif}
+#lp-tour .lt-scrim{position:absolute;inset:0;background:rgba(10,5,5,.78);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);transition:opacity .25s}
+#lp-tour .lt-ring{position:absolute;border:3px solid #ff5a5a;border-radius:14px;box-shadow:0 0 0 9999px rgba(10,5,5,.78),0 0 24px 4px rgba(255,90,90,.5);transition:all .35s cubic-bezier(.2,.7,.2,1);pointer-events:none;display:none}
+#lp-tour .lt-card{position:absolute;background:#161616;color:#fff;border-radius:18px;padding:22px 22px 18px;max-width:440px;width:calc(100% - 32px);box-shadow:0 18px 50px rgba(0,0,0,.6);border:1px solid rgba(255,90,90,.32);transition:top .35s cubic-bezier(.2,.7,.2,1),left .35s cubic-bezier(.2,.7,.2,1)}
+#lp-tour .lt-dots{display:flex;gap:6px;margin-bottom:12px}
+#lp-tour .lt-dots span{width:8px;height:8px;border-radius:50%;background:rgba(255,90,90,.22);transition:background .2s,transform .2s}
+#lp-tour .lt-dots span.on{background:#ff5a5a;transform:scale(1.25)}
+#lp-tour .lt-title{margin:0 0 8px;font:600 20px Inter,system-ui,sans-serif;line-height:1.2;letter-spacing:-0.01em;color:#fff}
+#lp-tour .lt-body{margin:0 0 18px;font:300 15px Inter,system-ui,sans-serif;line-height:1.55;color:#e6dada}
+#lp-tour .lt-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#lp-tour .lt-spacer{flex:1}
+#lp-tour .lt-btn{background:rgba(255,90,90,.14);color:#ffd6d6;border:1px solid rgba(255,90,90,.4);border-radius:10px;padding:10px 16px;font:600 14px Inter,system-ui,sans-serif;cursor:pointer;min-height:42px}
+#lp-tour .lt-btn:active{transform:scale(.97)}
+#lp-tour .lt-skip{background:transparent;color:#c2a8a8;border-color:transparent;font-weight:500}
+#lp-tour .lt-back:disabled{opacity:.35;cursor:not-allowed}
+#lp-tour .lt-primary{background:linear-gradient(135deg,#ff3838 0%,#ff5a5a 100%);color:#fff;border:0;font-weight:600;box-shadow:0 4px 16px rgba(255,80,80,.42)}
+#lp-tour .lt-primary:hover{filter:brightness(1.08)}
+@media(max-width:520px){#lp-tour .lt-title{font-size:18px}#lp-tour .lt-body{font-size:14px}}
 </style>
 </head>
 <body>
@@ -1424,6 +1444,7 @@ html .lp-bottom-title{font-size:30px;text-shadow:none}
       <div class="lp-footer-tag">Part of Load</div>
       <div class="lp-footer-mark">LoadPlay</div>
       <p class="lp-footer-tagline">Stream, create, publish — clean, free, offline-ready.</p>
+      <div class="lp-footer-replay" style="text-align:center;margin:0 0 12px"><a href="#" data-lp-replay-tour="1" style="color:#ff8a8a;font-size:13px;font-weight:600">Replay site tour</a></div>
       <div class="lp-footer-links">
         <a href="../load/">Main Load</a>
         <a href="../loadstudio/">LoadStudio</a>
@@ -4311,6 +4332,62 @@ window.addEventListener('online',  () => toast('Back online'));
   });
 })();
 </script>
+<script id="lp-v30-tour">(function(){
+var KEY='lp_tour_seen_v1';
+var STEPS=[
+  {anchor:null,title:'Welcome to LoadPlay',body:"I'll show you around in under a minute. Tap Next to begin."},
+  {anchor:'.lp-splash-img',title:'The lobby',body:'This splash is the front of LoadPlay. Everything else lives below it.'},
+  {anchor:'.lp-feature-row .lp-feat:first-child',title:'Feature highlights',body:'Tap any of the four cards for a longer description of what LoadPlay does.'},
+  {anchor:'.lp-actions',title:'Three main actions',body:'Start Watching, Browse, and Creator Upload — your three doors into the app.'},
+  {anchor:'.lp-workspace',title:'Workspace tiles',body:'Quick shortcuts into Viewer, Creator Studio, Cleanstream, and the Dev Lab.'},
+  {anchor:'#lp-tool-home',title:'Top toolbar',body:'Home / refresh / theme controls live here on every screen.'},
+  {anchor:'.lp-footer',title:'Part of Load',body:'LoadPlay is part of the Load suite. Cross-suite links sit in the footer.'},
+  {anchor:null,title:"You're ready",body:'Enjoy LoadPlay. You can replay this tour anytime from the Help page.'}
+];
+function startTour(){
+  var prev=document.getElementById('lp-tour'); if(prev)prev.remove();
+  var idx=0;
+  var root=document.createElement('div'); root.id='lp-tour';
+  root.innerHTML='<div class="lt-scrim"></div><div class="lt-ring" aria-hidden="true"></div><div class="lt-card" role="dialog" aria-modal="true"><div class="lt-dots"></div><h2 class="lt-title"></h2><p class="lt-body"></p><div class="lt-controls"><button class="lt-btn lt-skip" type="button">Skip</button><div class="lt-spacer"></div><button class="lt-btn lt-back" type="button">Back</button><button class="lt-btn lt-next lt-primary" type="button">Next</button></div></div>';
+  document.body.appendChild(root);
+  var ring=root.querySelector('.lt-ring'),card=root.querySelector('.lt-card'),title=root.querySelector('.lt-title'),body=root.querySelector('.lt-body'),dots=root.querySelector('.lt-dots'),back=root.querySelector('.lt-back'),next=root.querySelector('.lt-next'),skip=root.querySelector('.lt-skip');
+  STEPS.forEach(function(){var d=document.createElement('span');dots.appendChild(d);});
+  function position(){
+    var s=STEPS[idx],el=s.anchor?document.querySelector(s.anchor):null;
+    Array.prototype.forEach.call(dots.children,function(d,i){d.classList.toggle('on',i===idx);});
+    title.textContent=s.title; body.textContent=s.body;
+    back.disabled=idx===0; next.textContent=idx===STEPS.length-1?'Done':'Next';
+    if(el){
+      var r=el.getBoundingClientRect();
+      ring.style.display='block';
+      ring.style.top=(r.top-6)+'px'; ring.style.left=(r.left-6)+'px';
+      ring.style.width=(r.width+12)+'px'; ring.style.height=(r.height+12)+'px';
+      try{el.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){}
+      var cardTop=r.bottom+12;
+      if(cardTop+260>window.innerHeight) cardTop=Math.max(20,r.top-260);
+      card.style.top=cardTop+'px';
+      card.style.left=Math.max(16,Math.min(window.innerWidth-456,r.left))+'px';
+    } else {
+      ring.style.display='none';
+      card.style.top=(window.innerHeight/2-160)+'px';
+      card.style.left=Math.max(16,(window.innerWidth-440)/2)+'px';
+    }
+  }
+  function close(){try{localStorage.setItem(KEY,'1');}catch(_){}root.remove();}
+  back.addEventListener('click',function(){if(idx>0){idx--;position();}});
+  next.addEventListener('click',function(){if(idx<STEPS.length-1){idx++;position();}else close();});
+  skip.addEventListener('click',close);
+  document.addEventListener('keydown',function(ev){if(!document.getElementById('lp-tour'))return;if(ev.key==='Escape')close();else if(ev.key==='ArrowRight')next.click();else if(ev.key==='ArrowLeft')back.click();});
+  position();
+  window.addEventListener('resize',position);
+}
+window.lpStartTour=startTour;
+try{if(!localStorage.getItem(KEY))setTimeout(startTour,900);}catch(_){}
+document.addEventListener('click',function(e){
+  var h=e.target.closest('[data-lp-replay-tour]');
+  if(h){e.preventDefault();e.stopPropagation();startTour();}
+},true);
+})();</script>
 <div id="lpZoomBanner" hidden style="position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:9700;display:flex;align-items:center;gap:10px;padding:10px 14px;background:#161616;border:1px solid rgba(255,90,90,.4);border-radius:12px;color:#fff;font:500 13px Inter,system-ui,sans-serif;box-shadow:0 14px 36px rgba(0,0,0,.6);max-width:520px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:18px;height:18px;color:#ff8a8a;flex-shrink:0"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/><line x1="8" y1="11" x2="14" y2="11"/></svg><span>Page is zoomed in. Pinch out to reset, or tap Fix.</span><button id="lpZoomFix" type="button" style="margin-left:auto;padding:6px 12px;border-radius:8px;border:0;background:linear-gradient(135deg,#ff3838,#ff5a5a);color:#fff;font:600 12px Inter,system-ui,sans-serif;cursor:pointer">Fix</button><button id="lpZoomDismiss" type="button" aria-label="Dismiss" style="background:transparent;border:0;color:#c2a8a8;font-size:18px;line-height:1;cursor:pointer;padding:0 4px">&times;</button></div>
 <script id="lp-v32-zoom">(function(){
   function lpFixZoom(showBanner){
