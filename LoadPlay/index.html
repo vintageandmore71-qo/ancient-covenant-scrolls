@@ -2864,7 +2864,25 @@ window.addEventListener('online',  () => toast('Back online'));
         var f = e.target.files && e.target.files[0]; if (!f) return;
         data.primaryName = f.name;
         var fn = $$('lpUwFileName'); if (fn) fn.value = f.name;
-        persistDraft();
+        // Inline the file content for kinds the project page can play
+        // back directly. Anything bigger than 12 MB skips inlining
+        // (still saved as a name reference) so localStorage doesn't
+        // explode on large videos.
+        var nm = (f.name || '').toLowerCase();
+        var inline = false;
+        if (/\.(mp3|m4a|ogg|wav|aac|flac)$/.test(nm)) inline = 'audio';
+        else if (/\.(zip|cinepwa)$/.test(nm))         inline = 'cinema';
+        if (inline && f.size <= 12 * 1024 * 1024) {
+          var rd = new FileReader();
+          rd.onload = function () {
+            if (inline === 'audio')  data.audioSrc = rd.result;
+            if (inline === 'cinema') data.packageDataUrl = rd.result;
+            persistDraft();
+          };
+          rd.readAsDataURL(f);
+        } else {
+          persistDraft();
+        }
       });
       var back = $$('lpUwBack');
       if (back) back.addEventListener('click', function () { pull(); persistDraft(); step--; paint(); });
@@ -2949,7 +2967,7 @@ window.addEventListener('online',  () => toast('Back online'));
     document.body.classList.add('lp-paging');
     var pg = $$('lp-page'); if (pg) pg.hidden = false;
     $$('lp-page-title').textContent = 'Published projects';
-    $$('lp-page-blurb').textContent = 'Everything you have published shows up here, newest first. Tap one to edit a copy as a new draft.';
+    $$('lp-page-blurb').textContent = 'Everything you have published shows up here, newest first. Tap one to open its project page.';
     var pub = readPublished();
     if (!pub.length) {
       $$('lp-page-extra').innerHTML = cards([{ t: 'Nothing published yet', b: 'Use the Upload Wizard to publish your first project.' }]);
@@ -2959,20 +2977,189 @@ window.addEventListener('online',  () => toast('Back online'));
       var posterCell = p.poster
         ? '<img src="' + p.poster + '" style="width:90px;aspect-ratio:2/3;object-fit:cover;border-radius:6px;flex-shrink:0">'
         : '<div style="width:90px;aspect-ratio:2/3;background:var(--bg3);border-radius:6px;flex-shrink:0"></div>';
-      return '<div class="lp-page-card" style="display:flex;gap:14px;align-items:flex-start">' +
+      return '<button type="button" class="lp-page-card" data-lp-project="' + p.id + '" style="display:flex;gap:14px;align-items:flex-start;text-align:left;cursor:pointer;width:100%">' +
         posterCell +
         '<div style="flex:1;min-width:0">' +
           '<div style="font-size:14.5px;font-weight:700;color:#fff;margin-bottom:3px">' + (p.title || '(untitled)') + '</div>' +
           '<div style="font-size:12px;color:var(--text3);margin-bottom:8px">' + (p.category || '') + ' · published ' + fmtRel(p.publishedAt || Date.now()) + '</div>' +
           '<div style="font-size:11.5px;color:#4ade80;font-weight:700">' + (p.safetyScan === 'passed' ? 'Safety scan passed' : 'Pending review') + '</div>' +
         '</div>' +
-      '</div>';
+      '</button>';
     }).join('');
     $$('lp-page-extra').innerHTML = '<div style="display:flex;flex-direction:column;gap:10px">' + rows + '</div>';
+    $$('lp-page-extra').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-lp-project]');
+      if (!b) return;
+      renderProjectPage(b.getAttribute('data-lp-project'));
+    });
+  }
+  // ── Per-project page (Tier 2.7) ──────────────────────────────
+  // Renders a single published project: banner trailer, poster, title,
+  // owner, category, license, description, credits, and a Play button
+  // that routes to the right player (.cinepwa.zip → cinema player,
+  // audio → audio player, otherwise the existing fake player).
+  function findPublishedById(id) {
+    var all = readPublished();
+    for (var i = 0; i < all.length; i++) if (all[i].id === id) return all[i];
+    return null;
+  }
+  function renderProjectPage(projectId) {
+    closeSidebarSafe();
+    clearViews();
+    document.body.classList.add('lp-paging');
+    var pg = $$('lp-page'); if (pg) pg.hidden = false;
+    var p = findPublishedById(projectId);
+    if (!p) {
+      $$('lp-page-title').textContent = 'Project not found';
+      $$('lp-page-blurb').textContent = '';
+      $$('lp-page-extra').innerHTML = cards([{ t: 'Removed', b: 'The project was deleted or has not been published yet.' }]);
+      return;
+    }
+    $$('lp-page-title').textContent = p.title || '(untitled)';
+    $$('lp-page-blurb').textContent = (p.category || '') + (p.owner ? ' · by ' + p.owner : '') + ' · ' + fmtRel(p.publishedAt || Date.now());
+    var rights = __LP_LICENSES.filter(function (l) { return l[0] === p.license; })[0];
+    var ext = (p.primaryName || '').toLowerCase();
+    var kind = 'video';
+    if (/\.cinepwa(\.zip)?$/.test(ext) || /\.zip$/.test(ext)) kind = 'cinema';
+    else if (/\.(mp3|m4a|ogg|wav|aac|flac)$/.test(ext)) kind = 'audio';
+    else if (/\.html?$/.test(ext)) kind = 'html';
+    var creditsHtml = (p.credits || '').split(/\n/).map(function (s) { return s.trim(); }).filter(Boolean)
+      .map(function (line) { return '<div style="font-size:13px;color:var(--text2)">' + line.replace(/</g, '&lt;') + '</div>'; }).join('');
+    var html =
+      (p.trailer
+        ? '<div class="lp-pe-banner" style="aspect-ratio:5/2;margin-bottom:0"><img src="' + p.trailer + '"></div>'
+        : '<div class="lp-pe-banner" style="aspect-ratio:5/2;margin-bottom:0"><div class="lp-pe-banner-empty">No trailer image</div></div>') +
+      '<div style="display:flex;gap:18px;margin:14px 0;flex-wrap:wrap">' +
+        (p.poster
+          ? '<img src="' + p.poster + '" alt="" style="width:160px;aspect-ratio:2/3;object-fit:cover;border-radius:10px;flex-shrink:0;box-shadow:0 6px 20px rgba(0,0,0,.45)">'
+          : '<div style="width:160px;aspect-ratio:2/3;background:var(--bg3);border-radius:10px;flex-shrink:0"></div>') +
+        '<div style="flex:1;min-width:240px">' +
+          '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 12px">' +
+            '<button class="lp-pe-save" type="button" id="lpProjPlay">' + (kind === 'cinema' ? 'Open cinema package' : kind === 'audio' ? 'Play audio' : kind === 'html' ? 'Open project' : 'Play') + '</button>' +
+            '<button class="lp-pe-cancel" type="button" id="lpProjShare">Share</button>' +
+          '</div>' +
+          '<div style="font-size:14px;color:var(--text2);line-height:1.6;white-space:pre-wrap">' + (p.description ? p.description.replace(/</g, '&lt;') : '<span style="color:var(--text3)">No description.</span>') + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="lp-page-card"><h3>Rights &amp; credits</h3>' +
+        '<div style="font-size:13px;color:var(--text2);margin:4px 0 6px">License: ' + (rights ? rights[1] : '—') + ' · Source: ' + (p.source || '—') + '</div>' +
+        (creditsHtml || '<div style="font-size:13px;color:var(--text3)">No additional credits listed.</div>') +
+      '</div>';
+    $$('lp-page-extra').innerHTML = html;
+    var playBtn = $$('lpProjPlay');
+    if (playBtn) playBtn.addEventListener('click', function () {
+      if (kind === 'cinema') { openCinemaPlayer(p); return; }
+      if (kind === 'audio')  { openAudioPlayer(p);  return; }
+      // Fall back to the existing fake player so video / html projects
+      // get the same chrome users already know.
+      var fakeVid = {
+        id: 9000 + (parseInt((p.id || '').replace(/\D/g, '').slice(-4), 10) || 0),
+        t: p.title || 'Project',
+        ch: 0, v: '0', a: 'just now',
+        d: '0:00', cat: 'projects', em: '▶',
+        desc: p.description || ''
+      };
+      try {
+        document.body.classList.remove('lp-paging');
+        showStream();
+        setTimeout(function () { openPlayer(fakeVid); }, 0);
+      } catch (e) {}
+    });
+    var shareBtn = $$('lpProjShare');
+    if (shareBtn) shareBtn.addEventListener('click', function () {
+      var url = location.origin + location.pathname + '?project=' + encodeURIComponent(p.id);
+      try {
+        if (navigator.share) navigator.share({ title: p.title, url: url });
+        else if (navigator.clipboard) navigator.clipboard.writeText(url).then(function () { try { window.toast('Link copied'); } catch (e) {} });
+      } catch (e) {}
+    });
+  }
+  // ── Audio-story playback (Tier 2.6) ──────────────────────────
+  function openAudioPlayer(p) {
+    var existing = document.getElementById('lpAudioOverlay');
+    if (existing) existing.remove();
+    var overlay = document.createElement('div');
+    overlay.id = 'lpAudioOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px';
+    overlay.innerHTML =
+      '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;max-width:520px;width:100%">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin:0 0 12px"><div style="font-size:15px;font-weight:800;color:#fff">' + (p.title || 'Audio') + '</div>' +
+          '<button type="button" id="lpAudioClose" style="background:transparent;border:0;color:var(--text2);font-size:20px;cursor:pointer">&times;</button></div>' +
+        (p.poster ? '<img src="' + p.poster + '" alt="" style="width:100%;max-height:260px;object-fit:cover;border-radius:10px;margin:0 0 14px">' : '') +
+        '<div style="background:var(--bg3);border-radius:10px;padding:14px;text-align:center;color:var(--text2);font-size:13.5px">' +
+          'Audio file: <strong style="color:#fff">' + (p.primaryName || 'attached audio') + '</strong>' +
+          '<div style="margin:10px 0 0;color:var(--text3);font-size:11.5px">Audio playback uses your device picker. Tap "Play" to load the source you uploaded.</div>' +
+        '</div>' +
+        '<audio controls preload="none" style="width:100%;margin-top:14px;display:block">' +
+          '<source src="' + (p.audioSrc || '') + '">' +
+          'Your browser does not support audio playback.' +
+        '</audio>' +
+      '</div>';
+    document.body.appendChild(overlay);
+    document.getElementById('lpAudioClose').addEventListener('click', function () { overlay.remove(); });
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) overlay.remove(); });
+  }
+  // ── Cinema package player (Tier 2.5) ─────────────────────────
+  // Loads a .cinepwa.zip (Load Studio package) and renders its
+  // entrypoint inside a sandboxed iframe. JSZip is loaded on demand
+  // from the existing attain-jr lib so we don't add a new dep.
+  function ensureJSZip(cb) {
+    if (typeof JSZip === 'function') { cb(JSZip); return; }
+    var s = document.createElement('script');
+    s.src = '../attain-jr/lib-jszip.min.js';
+    s.onload = function () { cb(typeof JSZip === 'function' ? JSZip : null); };
+    s.onerror = function () { cb(null); };
+    document.head.appendChild(s);
+  }
+  function openCinemaPlayer(p) {
+    var existing = document.getElementById('lpCinemaOverlay');
+    if (existing) existing.remove();
+    var overlay = document.createElement('div');
+    overlay.id = 'lpCinemaOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:#000;z-index:300;display:flex;flex-direction:column';
+    overlay.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,0,0,.85);color:#fff">' +
+        '<div style="font-weight:800;font-size:14px">' + (p.title || 'Cinema package') + '</div>' +
+        '<button type="button" id="lpCinemaClose" style="background:transparent;border:0;color:#fff;font-size:22px;cursor:pointer">&times;</button>' +
+      '</div>' +
+      '<div id="lpCinemaStage" style="flex:1;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:13px">Loading cinema package…</div>';
+    document.body.appendChild(overlay);
+    document.getElementById('lpCinemaClose').addEventListener('click', function () { overlay.remove(); });
+    var stage = document.getElementById('lpCinemaStage');
+    if (!p.packageDataUrl) {
+      stage.textContent = 'No package data attached. Re-upload from the Upload Wizard with a .cinepwa.zip file selected.';
+      return;
+    }
+    ensureJSZip(function (Z) {
+      if (!Z) { stage.textContent = 'Cinema player needs JSZip — could not load it.'; return; }
+      try {
+        var raw = p.packageDataUrl.split(',')[1] || '';
+        var bin = atob(raw);
+        var bytes = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        new Z().loadAsync(bytes).then(function (zip) {
+          var entry = zip.file('index.html') || zip.file('index.htm');
+          if (!entry) { stage.textContent = 'Package has no index.html.'; return; }
+          return entry.async('string').then(function (htmlBody) {
+            stage.innerHTML = '';
+            var iframe = document.createElement('iframe');
+            iframe.style.cssText = 'width:100%;height:100%;border:0;background:#000';
+            iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+            iframe.srcdoc = htmlBody;
+            stage.appendChild(iframe);
+          });
+        }).catch(function (err) {
+          stage.textContent = 'Could not unpack cinema package: ' + (err && err.message ? err.message : 'unknown error');
+        });
+      } catch (e) {
+        stage.textContent = 'Cinema package is not a valid zip.';
+      }
+    });
   }
   window.__lpRenderUploadWizard = renderUploadWizard;
   window.__lpRenderDrafts = renderDrafts;
   window.__lpRenderPublished = renderPublished;
+  window.__lpRenderProjectPage = renderProjectPage;
 
   // ── Watch History (Tier 1.2) ─────────────────────────────────
   // Local-only history. openPlayer pushes onto lp_watch_history with
