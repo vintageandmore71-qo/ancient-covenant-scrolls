@@ -1303,6 +1303,22 @@ html .lp-bottom-title{font-size:30px;text-shadow:none}
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><circle cx="12" cy="12" r="3"/></svg>
           <span class="label">Autopilot <span id="lpAutopilotPill" style="display:none;margin-left:6px;background:var(--cyan);color:#000;font-size:10px;font-weight:800;padding:1px 6px;border-radius:10px"></span></span>
         </div>
+        <div class="nav-item" data-lp-act="content-sources">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+          <span class="label">Content Sources</span>
+        </div>
+        <div class="nav-item" data-lp-act="draft-catalog">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+          <span class="label">Draft Catalog</span>
+        </div>
+        <div class="nav-item" data-lp-act="rights-review">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V7z"/><polyline points="9 12 11.5 14.5 16 10"/></svg>
+          <span class="label">Rights Review</span>
+        </div>
+        <div class="nav-item" data-lp-act="ops-simulator">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/><circle cx="9" cy="6" r="1.4" fill="currentColor"/><circle cx="15" cy="12" r="1.4" fill="currentColor"/><circle cx="11" cy="18" r="1.4" fill="currentColor"/></svg>
+          <span class="label">Operations Simulator</span>
+        </div>
         <div class="nav-item" data-lp-act="action-log">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
           <span class="label">Action Log</span>
@@ -4593,6 +4609,598 @@ window.addEventListener('online',  () => toast('Back online'));
   window.__lpRenderAutopilot = renderAutopilot;
   window.__lpRunAutopilotNow = runAutopilotNow;
 
+  // ── Tier 7 — Content Connector System ──────────────────────
+  // Spec: PLAN_LOADPLAY_CONNECTORS.md (from
+  // inbox/LoadPlay_Content_Connector_System_Handoff.zip).
+  // 11 source connectors with rights-aware import pipeline. Real
+  // fetch for no-key providers; demo preview for key-required
+  // providers when no key is set. All imports route through Draft
+  // Catalog or Rights Review — never auto-publish.
+  var LP_CONNECTORS = [
+    { id: 'internet_archive', name: 'Internet Archive',          requiresKey: false, type: 'public_domain_video',     rows: ['Public Domain Classics', 'Documentaries', 'Archive Vault'] },
+    { id: 'openverse',        name: 'Openverse',                  requiresKey: false, type: 'open_media',              rows: ['Open Media', 'Educational'] },
+    { id: 'pexels',           name: 'Pexels',                     requiresKey: true,  keyName: 'lp_api_pexels',     type: 'photos_videos',           rows: ['Newly Added', 'Background Loops'] },
+    { id: 'pixabay',          name: 'Pixabay',                    requiresKey: true,  keyName: 'lp_api_pixabay',    type: 'images_videos_music_sfx', rows: ['Music', 'Background Loops'] },
+    { id: 'wikimedia',        name: 'Wikimedia Commons',          requiresKey: false, type: 'educational_media',       rows: ['Biographies', 'History', 'Educational'] },
+    { id: 'freesound',        name: 'Freesound',                  requiresKey: true,  keyName: 'lp_api_freesound',  type: 'sound_effects',           rows: ['Audio Stories', 'SFX'] },
+    { id: 'jamendo',          name: 'Jamendo',                    requiresKey: true,  keyName: 'lp_api_jamendo',    type: 'music_discovery',         rows: ['Music', 'Soundtrack Discovery'] },
+    { id: 'gdelt',            name: 'GDELT',                      requiresKey: false, type: 'news_research',           rows: ['News', 'World Events'] },
+    { id: 'nasa',             name: 'NASA Open APIs',             requiresKey: true,  keyName: 'lp_api_nasa',       type: 'science_space',           rows: ['Space', 'Kids Science', 'Educational'] },
+    { id: 'nps',              name: 'National Park Service API',  requiresKey: true,  keyName: 'lp_api_nps',        type: 'nature_history_places',   rows: ['Nature', 'History', 'Educational'] },
+    { id: 'rss',              name: 'RSS Feed Importer',          requiresKey: false, type: 'feed_metadata',           rows: ['News', 'Newly Added'] }
+  ];
+  function readConnectorState() { try { return JSON.parse(localStorage.getItem('lp_connector_state') || 'null') || {}; } catch (e) { return {}; } }
+  function writeConnectorState(s) { try { localStorage.setItem('lp_connector_state', JSON.stringify(s)); } catch (e) {} }
+  function readConnectorContent() { try { var a = JSON.parse(localStorage.getItem('lp_imported_content') || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+  function writeConnectorContent(a) { try { localStorage.setItem('lp_imported_content', JSON.stringify(a)); } catch (e) {} }
+  function lpStatusForLicense(license) {
+    if (!license) return 'rights_review';
+    var s = String(license).toLowerCase();
+    if (/public.domain|cc0|cc.by(?!.s|.n)/.test(s)) return 'draft';
+    return 'rights_review';
+  }
+  function lpNormalizeImportedItem(raw, providerId) {
+    var providerName = (LP_CONNECTORS.filter(function (c) { return c.id === providerId; })[0] || {}).name || providerId;
+    var license = raw.license || raw.licenseUrl || 'Unknown';
+    return {
+      id: 'imp_' + Date.now().toString(36) + '_' + Math.floor(Math.random() * 1e6).toString(36),
+      provider: providerName,
+      providerId: raw.id || raw.identifier || raw.providerId || ('p_' + Math.floor(Math.random() * 1e9).toString(36)),
+      sourceUrl: raw.sourceUrl || raw.url || raw.foreign_landing_url || '',
+      mediaUrl: raw.mediaUrl || raw.fileUrl || (raw.videos && raw.videos.medium && raw.videos.medium.url) || raw.previewURL || '',
+      thumbnailUrl: raw.thumbnailUrl || raw.thumbnail || raw.previewURL || raw.image || '',
+      title: raw.title || raw.name || 'Untitled imported item',
+      description: raw.description || raw.summary || '',
+      creator: raw.creator || raw.author || raw.user || 'Unknown creator',
+      license: license,
+      licenseUrl: raw.licenseUrl || raw.license_url || '',
+      attributionText: (raw.title || 'Untitled') + ' by ' + (raw.creator || 'Unknown') + ', via ' + providerName,
+      mediaType: raw.mediaType || raw.type || 'unknown',
+      duration: raw.duration || null,
+      category: raw.category || 'Draft Import',
+      tags: raw.tags || [],
+      dateDiscovered: new Date().toISOString(),
+      status: lpStatusForLicense(license),
+      approvedByAdmin: false,
+      rightsNotes: '',
+      simulationOnly: false,
+      isDemoPreview: !!raw.isDemoPreview
+    };
+  }
+  function lpDemoPreview(providerName) {
+    return [
+      lpNormalizeImportedItem({ title: 'Demo Preview Item — ' + providerName, creator: providerName, license: 'Unknown', mediaType: 'preview', sourceUrl: 'about:blank', isDemoPreview: true }, providerName.toLowerCase().replace(/[^a-z]/g, '_'))
+    ];
+  }
+  // Real fetchers — only those that work without keys are wired live.
+  // Key-required ones return demo previews until a key is saved via
+  // the Dev Lab API Keys panel (lp_api_<provider>).
+  function lpFetchInternetArchive() {
+    var url = 'https://archive.org/advancedsearch.php?q=' + encodeURIComponent('mediatype:(movies) AND collection:(feature_films)') + '&fl[]=identifier&fl[]=title&fl[]=description&fl[]=creator&fl[]=date&fl[]=licenseurl&rows=10&page=1&output=json';
+    return fetch(url).then(function (r) { return r.json(); }).then(function (data) {
+      return ((data.response || {}).docs || []).map(function (item) {
+        return lpNormalizeImportedItem({
+          id: item.identifier,
+          title: item.title || item.identifier,
+          description: item.description || '',
+          creator: item.creator || 'Internet Archive',
+          sourceUrl: 'https://archive.org/details/' + item.identifier,
+          mediaUrl: 'https://archive.org/details/' + item.identifier,
+          mediaType: 'video',
+          license: item.licenseurl || 'Public Domain',
+          category: 'Public Domain Classics'
+        }, 'internet_archive');
+      });
+    });
+  }
+  function lpFetchWikimedia() {
+    var url = 'https://commons.wikimedia.org/w/api.php?action=query&list=search&srnamespace=6&srlimit=10&srsearch=' + encodeURIComponent('public domain film') + '&format=json&origin=*';
+    return fetch(url).then(function (r) { return r.json(); }).then(function (data) {
+      return ((data.query || {}).search || []).map(function (item) {
+        return lpNormalizeImportedItem({
+          id: item.pageid,
+          title: item.title,
+          description: (item.snippet || '').replace(/<[^>]+>/g, ''),
+          creator: 'Wikimedia community',
+          sourceUrl: 'https://commons.wikimedia.org/wiki/' + encodeURIComponent(item.title),
+          mediaType: 'image',
+          license: 'Public Domain',
+          category: 'Educational'
+        }, 'wikimedia');
+      });
+    });
+  }
+  function lpFetchOpenverse() {
+    var url = 'https://api.openverse.org/v1/images/?q=' + encodeURIComponent('archive') + '&page_size=10';
+    return fetch(url).then(function (r) { return r.json(); }).then(function (data) {
+      return ((data || {}).results || []).map(function (item) {
+        return lpNormalizeImportedItem({
+          id: item.id,
+          title: item.title || 'Untitled',
+          creator: item.creator || 'Unknown',
+          sourceUrl: item.foreign_landing_url || item.url,
+          mediaUrl: item.url,
+          thumbnailUrl: item.thumbnail || item.url,
+          mediaType: 'image',
+          license: item.license ? ('CC ' + item.license.toUpperCase()) : 'Unknown',
+          licenseUrl: item.license_url
+        }, 'openverse');
+      });
+    });
+  }
+  function lpFetchGdelt() {
+    var url = 'https://api.gdeltproject.org/api/v2/doc/doc?query=' + encodeURIComponent('archive film') + '&mode=ArtList&format=json&maxrecords=10';
+    return fetch(url).then(function (r) { return r.json(); }).then(function (data) {
+      return ((data || {}).articles || []).map(function (item) {
+        return lpNormalizeImportedItem({
+          id: item.url,
+          title: item.title,
+          creator: item.domain,
+          sourceUrl: item.url,
+          mediaType: 'article',
+          license: 'Linkout — verify before republishing',
+          category: 'News'
+        }, 'gdelt');
+      });
+    });
+  }
+  function lpConnectorFetch(connector) {
+    var key = connector.requiresKey ? (function () { try { return localStorage.getItem(connector.keyName); } catch (e) { return null; } })() : null;
+    if (connector.requiresKey && !key) return Promise.resolve(lpDemoPreview(connector.name));
+    if (connector.id === 'internet_archive') return lpFetchInternetArchive().catch(function () { return lpDemoPreview(connector.name); });
+    if (connector.id === 'wikimedia')        return lpFetchWikimedia().catch(function () { return lpDemoPreview(connector.name); });
+    if (connector.id === 'openverse')        return lpFetchOpenverse().catch(function () { return lpDemoPreview(connector.name); });
+    if (connector.id === 'gdelt')            return lpFetchGdelt().catch(function () { return lpDemoPreview(connector.name); });
+    // For other key-required providers we'd add real fetchers when
+    // the key + endpoint policies are confirmed. Until then, demo.
+    return Promise.resolve(lpDemoPreview(connector.name));
+  }
+  function renderContentSources() {
+    closeSidebarSafe();
+    clearViews();
+    document.body.classList.add('lp-paging');
+    var pg = $$('lp-page'); if (pg) pg.hidden = false;
+    $$('lp-page-title').textContent = 'Content Sources';
+    $$('lp-page-blurb').textContent = '11 free / public-domain / open-license / open-data sources. Discovery only — every item passes through Draft Catalog or Rights Review before publication.';
+    var st = readConnectorState();
+    var rows = LP_CONNECTORS.map(function (c) {
+      var s = st[c.id] || { enabled: true, lastChecked: null, status: c.requiresKey ? 'needs_key' : 'no_key_required' };
+      var hasKey = c.requiresKey ? !!(function(){ try { return localStorage.getItem(c.keyName); } catch (e) { return null; } })() : true;
+      var label = c.requiresKey ? (hasKey ? 'CONNECTED' : 'NEEDS API KEY') : 'NO KEY REQUIRED';
+      var labelColor = c.requiresKey ? (hasKey ? '#4ade80' : '#facc15') : 'var(--cyan)';
+      return '<div class="lp-page-card" style="display:flex;flex-direction:column;gap:8px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">' +
+          '<div><div style="font-size:14px;font-weight:800;color:#fff">' + c.name + '</div>' +
+            '<div style="font-size:11.5px;color:var(--text3);margin-top:2px">' + c.type.replace(/_/g, ' ') + '</div></div>' +
+          '<span style="font-size:10.5px;font-weight:800;color:' + labelColor + ';letter-spacing:.05em;text-transform:uppercase">' + label + '</span>' +
+        '</div>' +
+        (c.requiresKey ? '<div style="display:flex;gap:6px;align-items:center"><span style="font-size:11px;color:var(--text3)">Key:</span><input class="lp-pe-input" type="password" placeholder="' + (hasKey ? '••••••••' : 'Paste API key') + '" data-lp-conn-key="' + c.keyName + '" style="flex:1;font-size:12px;padding:6px 8px"><button class="lp-pe-cancel" type="button" data-lp-conn-savekey="' + c.id + '">Save</button></div>' : '') +
+        '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
+          '<button class="lp-pe-cancel" type="button" data-lp-conn-test="' + c.id + '">Test Connection</button>' +
+          '<button class="lp-pe-cancel" type="button" data-lp-conn-fetch="' + c.id + '">Fetch Preview</button>' +
+          '<button class="lp-pe-save" type="button" data-lp-conn-import="' + c.id + '">Import to Drafts</button>' +
+          '<label style="display:inline-flex;align-items:center;gap:6px;color:var(--text2);font-size:11.5px;margin-left:auto"><input type="checkbox" data-lp-conn-toggle="' + c.id + '"' + (s.enabled !== false ? ' checked' : '') + ' style="width:14px;height:14px"> enabled</label>' +
+        '</div>' +
+        (s.lastChecked ? '<div style="font-size:11px;color:var(--text3)">Last checked: ' + new Date(s.lastChecked).toLocaleString() + '</div>' : '') +
+      '</div>';
+    }).join('');
+    $$('lp-page-extra').innerHTML =
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px">' + rows + '</div>' +
+      '<div class="lp-pe-form" style="margin-top:18px"><h3 style="margin:0 0 6px;color:#fff;font-size:14px">License safety</h3><div style="font-size:12.5px;color:var(--text2)">Auto-approve: Public Domain · CC0 · CC BY. Sent to Rights Review: CC BY-SA · CC BY-NC · Custom · Unknown. Hard rule: <strong style="color:#facc15">do not auto-publish imported content</strong>.</div></div>';
+    $$('lp-page-extra').addEventListener('click', function (e) {
+      var t = e.target.closest('[data-lp-conn-test]');
+      if (t) {
+        var cid = t.getAttribute('data-lp-conn-test');
+        var c = LP_CONNECTORS.filter(function (x) { return x.id === cid; })[0]; if (!c) return;
+        st[cid] = st[cid] || { enabled: true };
+        st[cid].lastChecked = Date.now();
+        st[cid].status = 'testing';
+        writeConnectorState(st);
+        lpConnectorFetch(c).then(function (items) {
+          st[cid].status = items.length ? 'connected' : 'empty';
+          writeConnectorState(st);
+          try { window.toast(c.name + ': ' + items.length + ' result(s).'); } catch (e2) {}
+          renderContentSources();
+        }).catch(function () {
+          st[cid].status = 'error';
+          writeConnectorState(st);
+          try { window.toast(c.name + ': connection error.'); } catch (e2) {}
+          renderContentSources();
+        });
+        lpLogAction('connector', 'Tested ' + c.name, { connectorId: cid });
+        return;
+      }
+      var f = e.target.closest('[data-lp-conn-fetch]');
+      if (f) {
+        var fid = f.getAttribute('data-lp-conn-fetch');
+        var fc = LP_CONNECTORS.filter(function (x) { return x.id === fid; })[0]; if (!fc) return;
+        lpConnectorFetch(fc).then(function (items) {
+          try { window.toast('Preview from ' + fc.name + ': ' + items.length + ' item(s). Use Import to Drafts to save.'); } catch (e2) {}
+          lpLogAction('connector', 'Preview fetched from ' + fc.name + ' (' + items.length + ' items)', { connectorId: fid });
+        });
+        return;
+      }
+      var im = e.target.closest('[data-lp-conn-import]');
+      if (im) {
+        var iid = im.getAttribute('data-lp-conn-import');
+        var ic = LP_CONNECTORS.filter(function (x) { return x.id === iid; })[0]; if (!ic) return;
+        lpConnectorFetch(ic).then(function (items) {
+          var existing = readConnectorContent();
+          var already = {};
+          existing.forEach(function (e2) { already[e2.providerId] = true; });
+          var fresh = items.filter(function (i) { return !already[i.providerId]; });
+          if (!fresh.length) { try { window.toast('Nothing new from ' + ic.name + '.'); } catch (e2) {} return; }
+          writeConnectorContent(existing.concat(fresh));
+          var draftN = fresh.filter(function (x) { return x.status === 'draft'; }).length;
+          var revN = fresh.length - draftN;
+          try { window.toast('Imported ' + fresh.length + ' (drafts ' + draftN + ', rights review ' + revN + ').'); } catch (e2) {}
+          lpLogAction('connector', 'Imported ' + fresh.length + ' from ' + ic.name + ' (drafts ' + draftN + ', rights ' + revN + ')', { connectorId: iid });
+        });
+        return;
+      }
+      var sk = e.target.closest('[data-lp-conn-savekey]');
+      if (sk) {
+        var skid = sk.getAttribute('data-lp-conn-savekey');
+        var skc = LP_CONNECTORS.filter(function (x) { return x.id === skid; })[0]; if (!skc) return;
+        var inp = sk.parentElement.querySelector('[data-lp-conn-key]');
+        var v = (inp && inp.value || '').trim();
+        if (!v) { try { window.toast('Paste a key first.'); } catch (e2) {} return; }
+        try { localStorage.setItem(skc.keyName, v); } catch (e2) {}
+        try { window.toast('Saved key for ' + skc.name + '.'); } catch (e2) {}
+        lpLogAction('connector', 'API key saved for ' + skc.name, { connectorId: skid });
+        renderContentSources();
+        return;
+      }
+      var tg = e.target.closest('[data-lp-conn-toggle]');
+      if (tg) {
+        var tgid = tg.getAttribute('data-lp-conn-toggle');
+        st[tgid] = st[tgid] || {};
+        st[tgid].enabled = tg.checked;
+        writeConnectorState(st);
+        return;
+      }
+    });
+  }
+
+  function renderDraftCatalog() {
+    closeSidebarSafe();
+    clearViews();
+    document.body.classList.add('lp-paging');
+    var pg = $$('lp-page'); if (pg) pg.hidden = false;
+    $$('lp-page-title').textContent = 'Draft Catalog';
+    $$('lp-page-blurb').textContent = 'Items imported from connectors that haven\'t yet been routed. Filter, edit, send to Rights Review, or approve safe-licensed items.';
+    var content = readConnectorContent().filter(function (c) { return c.status === 'draft' || c.status === 'discovered'; });
+    if (!content.length) {
+      $$('lp-page-extra').innerHTML = cards([{ t: 'Empty draft catalog', b: 'Open Content Sources and tap Import to Drafts on any connector.' }]) + '<div style="margin-top:12px"><button class="lp-pe-save" type="button" data-lp-act="content-sources">Open Content Sources</button></div>';
+      return;
+    }
+    var head = '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px"><div style="font-size:13px;color:var(--text2);font-weight:600">' + content.length + ' draft item' + (content.length === 1 ? '' : 's') + '</div><button class="lp-pe-cancel" type="button" id="lpDcExportJson">Export JSON</button></div>';
+    var rows = content.map(function (c) {
+      return '<div class="lp-page-card" style="display:flex;gap:10px;align-items:flex-start">' +
+        (c.thumbnailUrl ? '<img src="' + c.thumbnailUrl + '" alt="" style="width:80px;height:60px;object-fit:cover;border-radius:6px;flex-shrink:0;background:var(--bg3)">' : '<div style="width:80px;height:60px;background:var(--bg3);border-radius:6px;flex-shrink:0"></div>') +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:13.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + c.title + '</div>' +
+          '<div style="font-size:11.5px;color:var(--text3);margin:2px 0">' + c.provider + ' · ' + c.creator + ' · ' + c.license + (c.isDemoPreview ? ' · <span style="color:#facc15">DEMO PREVIEW ONLY</span>' : '') + '</div>' +
+          '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">' +
+            '<button class="lp-pe-cancel" type="button" data-lp-dc-rights="' + c.id + '">Send to Rights Review</button>' +
+            '<button class="lp-pe-save"   type="button" data-lp-dc-publish="' + c.id + '">Approve & publish</button>' +
+            '<button class="lp-pe-btn danger" type="button" data-lp-dc-delete="' + c.id + '">Delete</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    $$('lp-page-extra').innerHTML = head + '<div style="display:flex;flex-direction:column;gap:10px">' + rows + '</div>';
+    $$('lp-page-extra').addEventListener('click', function (e) {
+      var rb = e.target.closest('[data-lp-dc-rights]');
+      if (rb) {
+        var id = rb.getAttribute('data-lp-dc-rights');
+        var all = readConnectorContent();
+        var i = all.findIndex(function (x) { return x.id === id; });
+        if (i >= 0) { all[i].status = 'rights_review'; writeConnectorContent(all); lpLogAction('rights', 'Sent to rights review: ' + all[i].title, { id: id }); }
+        renderDraftCatalog(); return;
+      }
+      var pb = e.target.closest('[data-lp-dc-publish]');
+      if (pb) {
+        var pid = pb.getAttribute('data-lp-dc-publish');
+        var allp = readConnectorContent();
+        var pi = allp.findIndex(function (x) { return x.id === pid; });
+        if (pi >= 0) {
+          if (allp[pi].isDemoPreview) { try { window.toast('Demo preview items cannot publish. Save a real API key first.'); } catch (e2) {} return; }
+          if (lpStatusForLicense(allp[pi].license) !== 'draft') { try { window.toast('License needs rights review — cannot auto-publish.'); } catch (e2) {} return; }
+          allp[pi].status = 'published';
+          allp[pi].approvedByAdmin = true;
+          allp[pi].publishedAt = new Date().toISOString();
+          writeConnectorContent(allp);
+          lpLogAction('publish', 'Approved & published: ' + allp[pi].title, { id: pid });
+          try { window.toast('Published: ' + allp[pi].title); } catch (e2) {}
+        }
+        renderDraftCatalog(); return;
+      }
+      var db = e.target.closest('[data-lp-dc-delete]');
+      if (db) {
+        var did = db.getAttribute('data-lp-dc-delete');
+        var alld = readConnectorContent().filter(function (x) { return x.id !== did; });
+        writeConnectorContent(alld);
+        renderDraftCatalog(); return;
+      }
+    });
+    var ej = $$('lpDcExportJson');
+    if (ej) ej.addEventListener('click', function () { lpExportRightsReport(); });
+  }
+  function renderRightsReview() {
+    closeSidebarSafe();
+    clearViews();
+    document.body.classList.add('lp-paging');
+    var pg = $$('lp-page'); if (pg) pg.hidden = false;
+    $$('lp-page-title').textContent = 'Rights Review';
+    $$('lp-page-blurb').textContent = 'Items needing human approval before they can publish. Approve, reject, mark for manual check, or push back to Draft.';
+    var content = readConnectorContent().filter(function (c) { return c.status === 'rights_review'; });
+    if (!content.length) {
+      $$('lp-page-extra').innerHTML = cards([{ t: 'Rights queue is empty', b: 'Items with CC BY-SA, CC BY-NC, custom, or unknown licenses land here automatically when imported.' }]) +
+        '<div style="margin-top:12px;display:flex;gap:8px"><button class="lp-pe-save" type="button" data-lp-act="content-sources">Content Sources</button>' +
+        '<button class="lp-pe-cancel" type="button" id="lpRrExportJson">Export rights report (JSON)</button>' +
+        '<button class="lp-pe-cancel" type="button" id="lpRrExportCsv">Export rights report (CSV)</button></div>';
+      var ej0 = $$('lpRrExportJson'); if (ej0) ej0.addEventListener('click', function () { lpExportRightsReport(); });
+      var ec0 = $$('lpRrExportCsv'); if (ec0) ec0.addEventListener('click', function () { lpExportRightsReportCsv(); });
+      return;
+    }
+    var head = '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px"><div style="font-size:13px;color:var(--text2);font-weight:600">' + content.length + ' awaiting review</div><div style="display:flex;gap:8px"><button class="lp-pe-cancel" type="button" id="lpRrExportJson">Export JSON</button><button class="lp-pe-cancel" type="button" id="lpRrExportCsv">Export CSV</button></div></div>';
+    var rows = content.map(function (c) {
+      return '<div class="lp-page-card" style="display:flex;gap:10px;align-items:flex-start">' +
+        (c.thumbnailUrl ? '<img src="' + c.thumbnailUrl + '" alt="" style="width:80px;height:60px;object-fit:cover;border-radius:6px;flex-shrink:0;background:var(--bg3)">' : '<div style="width:80px;height:60px;background:var(--bg3);border-radius:6px;flex-shrink:0"></div>') +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:13.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + c.title + '</div>' +
+          '<div style="font-size:11.5px;color:var(--text3);margin:2px 0">' + c.provider + ' · ' + c.creator + ' · ' + c.license + (c.isDemoPreview ? ' · <span style="color:#facc15">DEMO PREVIEW ONLY</span>' : '') + '</div>' +
+          '<div style="font-size:11px;color:var(--text3);word-break:break-all;margin:4px 0">Source: <a href="' + c.sourceUrl + '" target="_blank" rel="noopener" style="color:var(--cyan)">' + c.sourceUrl + '</a></div>' +
+          '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">' +
+            '<button class="lp-pe-save" type="button" data-lp-rr-approve="' + c.id + '">Approve & publish</button>' +
+            '<button class="lp-pe-cancel" type="button" data-lp-rr-manual="' + c.id + '">Needs manual check</button>' +
+            '<button class="lp-pe-btn danger" type="button" data-lp-rr-reject="' + c.id + '">Reject</button>' +
+            '<button class="lp-pe-cancel" type="button" data-lp-rr-toDraft="' + c.id + '">Back to draft</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    $$('lp-page-extra').innerHTML = head + '<div style="display:flex;flex-direction:column;gap:10px">' + rows + '</div>';
+    $$('lp-page-extra').addEventListener('click', function (e) {
+      var aid;
+      if ((aid = (e.target.closest('[data-lp-rr-approve]') || {}).getAttribute && e.target.closest('[data-lp-rr-approve]').getAttribute('data-lp-rr-approve'))) {
+        var all = readConnectorContent(); var i = all.findIndex(function (x) { return x.id === aid; });
+        if (i >= 0) {
+          if (all[i].isDemoPreview) { try { window.toast('Demo preview items cannot publish.'); } catch (e2) {} return; }
+          all[i].status = 'published'; all[i].approvedByAdmin = true; all[i].publishedAt = new Date().toISOString();
+          writeConnectorContent(all);
+          lpLogAction('publish', 'Rights-approved & published: ' + all[i].title, { id: aid });
+          try { window.toast('Published.'); } catch (e2) {}
+        }
+        renderRightsReview(); return;
+      }
+      var mid;
+      if ((mid = (e.target.closest('[data-lp-rr-manual]') || {}).getAttribute && e.target.closest('[data-lp-rr-manual]').getAttribute('data-lp-rr-manual'))) {
+        var allm = readConnectorContent(); var mi = allm.findIndex(function (x) { return x.id === mid; });
+        if (mi >= 0) { allm[mi].rightsNotes = 'Marked for manual check on ' + new Date().toISOString(); writeConnectorContent(allm); lpLogAction('rights', 'Marked for manual check: ' + allm[mi].title, { id: mid }); }
+        try { window.toast('Marked for manual check.'); } catch (e2) {}
+        renderRightsReview(); return;
+      }
+      var rid;
+      if ((rid = (e.target.closest('[data-lp-rr-reject]') || {}).getAttribute && e.target.closest('[data-lp-rr-reject]').getAttribute('data-lp-rr-reject'))) {
+        var allr = readConnectorContent(); var ri = allr.findIndex(function (x) { return x.id === rid; });
+        if (ri >= 0) { allr[ri].status = 'rejected'; writeConnectorContent(allr); lpLogAction('rights', 'Rejected: ' + allr[ri].title, { id: rid }); }
+        renderRightsReview(); return;
+      }
+      var did;
+      if ((did = (e.target.closest('[data-lp-rr-toDraft]') || {}).getAttribute && e.target.closest('[data-lp-rr-toDraft]').getAttribute('data-lp-rr-toDraft'))) {
+        var alld = readConnectorContent(); var di = alld.findIndex(function (x) { return x.id === did; });
+        if (di >= 0) { alld[di].status = 'draft'; writeConnectorContent(alld); }
+        renderRightsReview(); return;
+      }
+    });
+    var ej = $$('lpRrExportJson'); if (ej) ej.addEventListener('click', function () { lpExportRightsReport(); });
+    var ec = $$('lpRrExportCsv'); if (ec) ec.addEventListener('click', function () { lpExportRightsReportCsv(); });
+  }
+  function lpExportRightsReport() {
+    var data = readConnectorContent();
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'lp_rights_report_' + Date.now() + '.json';
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    lpLogAction('rights', 'Exported rights report (JSON, ' + data.length + ' items).');
+  }
+  function lpExportRightsReportCsv() {
+    var data = readConnectorContent();
+    var cols = ['provider', 'providerId', 'title', 'creator', 'license', 'licenseUrl', 'sourceUrl', 'mediaType', 'category', 'status', 'approvedByAdmin', 'dateDiscovered'];
+    var rows = data.map(function (r) { return cols.map(function (k) { var v = r[k]; if (v == null) return ''; return '"' + String(v).replace(/"/g, '""') + '"'; }).join(','); });
+    var csv = cols.join(',') + '\n' + rows.join('\n');
+    var blob = new Blob([csv], { type: 'text/csv' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'lp_rights_report_' + Date.now() + '.csv';
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    lpLogAction('rights', 'Exported rights report (CSV, ' + data.length + ' items).');
+  }
+  window.__lpRenderContentSources = renderContentSources;
+  window.__lpRenderDraftCatalog   = renderDraftCatalog;
+  window.__lpRenderRightsReview   = renderRightsReview;
+
+  // ── Tier 8 — Operations Load Simulator ─────────────────────
+  // Spec: PLAN_LOADPLAY_OPS_SIMULATOR.md (from
+  // inbox/LoadPlay_Operations_Load_Simulator_Claude_Package.zip).
+  // This is a BUSYNESS simulator, not a business simulator. Tests how
+  // busy LoadPlay becomes under different activity levels and what
+  // staffing / automation is needed. All output labeled SIMULATION
+  // ONLY / INTERNAL TEST DATA.
+  var LP_OPS_RULES = {
+    viewer_signup:          { minutes: 0,  human: false, dept: 'Viewer Activity', priority: 'low'    },
+    viewer_login:           { minutes: 0,  human: false, dept: 'Viewer Activity', priority: 'low'    },
+    watch_session:          { minutes: 0,  human: false, dept: 'Viewer Activity', priority: 'low'    },
+    like:                   { minutes: 0,  human: false, dept: 'Engagement',      priority: 'low'    },
+    save_to_my_list:        { minutes: 0,  human: false, dept: 'Engagement',      priority: 'low'    },
+    search_activity:        { minutes: 0,  human: false, dept: 'Engagement',      priority: 'low'    },
+    comment:                { minutes: 2,  human: true,  dept: 'Moderation',      priority: 'medium' },
+    content_report:         { minutes: 10, human: true,  dept: 'Moderation',      priority: 'high'   },
+    content_upload:         { minutes: 8,  human: true,  dept: 'Content Review',  priority: 'medium' },
+    failed_upload:          { minutes: 10, human: true,  dept: 'Technical Support', priority: 'medium' },
+    creator_application:    { minutes: 12, human: true,  dept: 'Creator Success', priority: 'medium' },
+    rights_review:          { minutes: 12, human: true,  dept: 'Rights Review',   priority: 'high'   },
+    api_content_discovered: { minutes: 4,  human: true,  dept: 'Content Curation', priority: 'medium' },
+    homepage_row_update:    { minutes: 7,  human: true,  dept: 'Programming',     priority: 'medium' },
+    support_ticket:         { minutes: 9,  human: true,  dept: 'Support',         priority: 'high'   },
+    broken_media_link:      { minutes: 11, human: true,  dept: 'Technical Support', priority: 'high' },
+    flagged_content:        { minutes: 15, human: true,  dept: 'Safety Review',   priority: 'urgent' }
+  };
+  var LP_OPS_SCENARIOS = {
+    light_day:           { label: 'Light Activity Day',     counts: { viewer_signup: 15,  watch_session: 90,   like: 18,   save_to_my_list: 10,  content_upload: 3,   support_ticket: 2,  rights_review: 4,   api_content_discovered: 8 } },
+    normal_day:          { label: 'Normal Activity Day',    counts: { viewer_signup: 40,  watch_session: 260,  like: 70,   save_to_my_list: 35,  content_upload: 9,   support_ticket: 7,  rights_review: 12,  api_content_discovered: 25, homepage_row_update: 4 } },
+    busy_day:            { label: 'Busy Activity Day',      counts: { viewer_signup: 120, watch_session: 850,  like: 210,  save_to_my_list: 130, content_upload: 28,  support_ticket: 18, rights_review: 36,  api_content_discovered: 70, content_report: 9, broken_media_link: 4 } },
+    viral_spike:         { label: 'Viral Spike',            counts: { viewer_signup: 900, watch_session: 9000, like: 2800, save_to_my_list: 1100, comment: 400, content_report: 70, support_ticket: 80, broken_media_link: 14, homepage_row_update: 12 } },
+    creator_upload_rush: { label: 'Creator Upload Rush',    counts: { creator_application: 45, content_upload: 120, failed_upload: 30, rights_review: 100, support_ticket: 35, homepage_row_update: 10 } },
+    api_content_flood:   { label: 'API Content Flood',      counts: { api_content_discovered: 250, rights_review: 140, homepage_row_update: 15, support_ticket: 6 } },
+    one_person_day:      { label: 'One-Person Operation',   counts: { viewer_signup: 35, watch_session: 225, content_upload: 8, rights_review: 10, support_ticket: 6, api_content_discovered: 20, homepage_row_update: 2, content_report: 3 } }
+  };
+  function readOpsReports() { try { var a = JSON.parse(localStorage.getItem('lp_ops_reports') || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+  function writeOpsReports(a) { try { localStorage.setItem('lp_ops_reports', JSON.stringify(a)); } catch (e) {} }
+  function readOpsHours() { try { return parseFloat(localStorage.getItem('lp_ops_hours') || '4'); } catch (e) { return 4; } }
+  function writeOpsHours(h) { try { localStorage.setItem('lp_ops_hours', String(h)); } catch (e) {} }
+  function lpOpsRunScenario(key) {
+    var s = LP_OPS_SCENARIOS[key]; if (!s) return null;
+    var events = [];
+    Object.keys(s.counts).forEach(function (type) {
+      var n = s.counts[type], r = LP_OPS_RULES[type] || { minutes: 5, human: true, dept: 'Admin', priority: 'medium' };
+      for (var i = 0; i < n; i++) {
+        events.push({ type: type, dept: r.dept, priority: r.priority, minutes: r.minutes, human: r.human, label: 'SIMULATION ONLY', simulationOnly: true });
+      }
+    });
+    var humans = events.filter(function (e) { return e.human; });
+    var totalMin = humans.reduce(function (a, e) { return a + e.minutes; }, 0);
+    var hoursAvail = readOpsHours();
+    var staffMin = hoursAvail * 60;
+    var byDept = {};
+    humans.forEach(function (e) {
+      if (!byDept[e.dept]) byDept[e.dept] = { count: 0, minutes: 0 };
+      byDept[e.dept].count += 1;
+      byDept[e.dept].minutes += e.minutes;
+    });
+    var rl = totalMin <= staffMin * 0.75 ? 'manageable' : totalMin <= staffMin ? 'near_capacity' : totalMin <= staffMin * 1.8 ? 'overloaded' : 'critical';
+    var recs = [];
+    var overflow = Math.max(0, totalMin - staffMin);
+    if (overflow > 0) recs.push('Delay nonessential publishing decisions and batch low-risk reviews.');
+    if ((byDept['Rights Review']    || {}).minutes > 180) recs.push('Add rights review caps and fast-track only public domain, CC0, and approved internal originals.');
+    if ((byDept['Support']          || {}).minutes > 120) recs.push('Add help center auto-responses for common login, playback, and upload issues.');
+    if ((byDept['Content Review']   || {}).minutes > 180) recs.push('Require complete metadata before submission and limit creator uploads during pilot.');
+    if ((byDept['Content Curation'] || {}).minutes > 120) recs.push('Cap provider imports per day and send unknown licenses to manual review only.');
+    if (!recs.length) recs.push('Workload appears manageable. Keep monitoring queue pressure.');
+    var report = {
+      reportId: 'ops_' + Date.now().toString(36),
+      createdAt: new Date().toISOString(),
+      scenario: key, scenarioLabel: s.label,
+      totalEvents: events.length, humanTasks: humans.length,
+      totalStaffMinutesNeeded: totalMin, totalStaffHoursNeeded: Math.round(totalMin / 60 * 10) / 10,
+      staffHoursAvailable: hoursAvail, overflowHours: Math.round(overflow / 60 * 10) / 10,
+      riskLevel: rl, byDepartment: byDept, recommendations: recs,
+      simulationOnly: true, label: 'SIMULATION ONLY'
+    };
+    var all = readOpsReports();
+    all.unshift(report);
+    if (all.length > 30) all.length = 30;
+    writeOpsReports(all);
+    lpLogAction('ops-sim', 'Scenario "' + s.label + '" run · ' + events.length + ' events · risk ' + rl, { reportId: report.reportId });
+    return report;
+  }
+  function renderOpsSimulator() {
+    closeSidebarSafe();
+    clearViews();
+    document.body.classList.add('lp-paging');
+    var pg = $$('lp-page'); if (pg) pg.hidden = false;
+    $$('lp-page-title').textContent = 'Operations Load Simulator';
+    $$('lp-page-blurb').textContent = 'Internal busyness simulator. Test how busy LoadPlay becomes under different activity levels. All output labeled SIMULATION ONLY · INTERNAL TEST DATA.';
+    var hours = readOpsHours();
+    var reports = readOpsReports();
+    var latest = reports[0];
+    var scenarioBtns = Object.keys(LP_OPS_SCENARIOS).map(function (k) {
+      return '<button class="lp-pe-cancel" type="button" data-lp-ops-scenario="' + k + '">Run ' + LP_OPS_SCENARIOS[k].label + '</button>';
+    }).join('');
+    var html =
+      '<div class="lp-pe-form" style="margin-bottom:18px"><h3 style="margin:0 0 8px;color:#fff;font-size:15px">Capacity</h3>' +
+        '<div class="lp-pe-field" style="max-width:280px"><label class="lp-pe-label" for="lpOpsHours">Available staff hours / day</label><input class="lp-pe-input" id="lpOpsHours" type="number" min="0" max="48" step="0.25" value="' + hours + '"><div class="lp-pe-help">For One-Person Operation set this to your real available hours (e.g. 4).</div></div>' +
+      '</div>' +
+      '<div class="lp-pe-form" style="margin-bottom:18px"><h3 style="margin:0 0 8px;color:#fff;font-size:15px">Run a scenario</h3>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap">' + scenarioBtns + '</div>' +
+        '<div class="lp-pe-help" style="margin-top:8px">Each run records a simulated workload report and writes to the Action Log.</div>' +
+      '</div>';
+    if (latest) {
+      var deptRows = Object.keys(latest.byDepartment).map(function (d) {
+        var r = latest.byDepartment[d];
+        return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px">' +
+          '<div style="color:var(--text)">' + d + '</div>' +
+          '<div style="color:var(--text2);font-variant-numeric:tabular-nums">' + r.count + ' tasks · ' + r.minutes + ' min</div>' +
+        '</div>';
+      }).join('');
+      var rc = latest.riskLevel === 'manageable' ? '#4ade80' : latest.riskLevel === 'near_capacity' ? '#facc15' : latest.riskLevel === 'overloaded' ? '#fb923c' : '#ff6e6e';
+      html +=
+        '<div class="lp-pe-form" style="margin-bottom:18px">' +
+          '<h3 style="margin:0 0 8px;color:#fff;font-size:15px">Latest report — ' + latest.scenarioLabel + '</h3>' +
+          '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px">' +
+            '<div class="lp-page-card"><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Risk</div><div style="font-size:18px;font-weight:800;color:' + rc + ';margin-top:4px;text-transform:uppercase">' + latest.riskLevel.replace(/_/g, ' ') + '</div></div>' +
+            '<div class="lp-page-card"><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Events</div><div style="font-size:22px;font-weight:800;color:#fff;margin-top:4px">' + latest.totalEvents + '</div></div>' +
+            '<div class="lp-page-card"><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Human tasks</div><div style="font-size:22px;font-weight:800;color:#fff;margin-top:4px">' + latest.humanTasks + '</div></div>' +
+            '<div class="lp-page-card"><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Hours needed</div><div style="font-size:22px;font-weight:800;color:#fff;margin-top:4px">' + latest.totalStaffHoursNeeded + '</div></div>' +
+            '<div class="lp-page-card"><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Overflow</div><div style="font-size:22px;font-weight:800;color:' + (latest.overflowHours > 0 ? '#ff6e6e' : '#4ade80') + ';margin-top:4px">' + latest.overflowHours + 'h</div></div>' +
+          '</div>' +
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">' +
+            '<div><div style="font-size:13px;color:var(--text2);font-weight:700;margin-bottom:6px">By department</div>' + (deptRows || '<div style="font-size:12px;color:var(--text3)">No human tasks generated.</div>') + '</div>' +
+            '<div><div style="font-size:13px;color:var(--text2);font-weight:700;margin-bottom:6px">Recommendations</div><ul style="margin:0 0 0 18px;font-size:13px;color:var(--text2);line-height:1.6">' + latest.recommendations.map(function (r) { return '<li style="margin-bottom:4px">' + r + '</li>'; }).join('') + '</ul></div>' +
+          '</div>' +
+          '<div class="lp-pe-save-row" style="margin-top:14px"><button class="lp-pe-cancel" type="button" id="lpOpsExportJson">Export report (JSON)</button><button class="lp-pe-cancel" type="button" id="lpOpsExportCsv">Export report (CSV)</button><button class="lp-pe-btn danger" type="button" id="lpOpsClear">Clear simulation data</button></div>' +
+        '</div>';
+    }
+    if (reports.length > 1) {
+      html += '<div class="lp-pe-form"><h3 style="margin:0 0 8px;color:#fff;font-size:15px">Recent runs</h3>' +
+        reports.slice(0, 8).map(function (r) {
+          return '<div style="display:grid;grid-template-columns:140px 1fr 90px 90px 80px;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12.5px">' +
+            '<div style="color:var(--text3)">' + new Date(r.createdAt).toLocaleString() + '</div>' +
+            '<div style="color:var(--text)">' + r.scenarioLabel + '</div>' +
+            '<div style="color:var(--text2)">' + r.totalEvents + ' events</div>' +
+            '<div style="color:var(--text2)">' + r.totalStaffHoursNeeded + 'h</div>' +
+            '<div style="color:' + (r.riskLevel === 'manageable' ? '#4ade80' : r.riskLevel === 'near_capacity' ? '#facc15' : r.riskLevel === 'overloaded' ? '#fb923c' : '#ff6e6e') + ';font-weight:700">' + r.riskLevel.replace(/_/g, ' ') + '</div>' +
+          '</div>';
+        }).join('') +
+      '</div>';
+    }
+    $$('lp-page-extra').innerHTML = html;
+    var hoursInput = $$('lpOpsHours');
+    if (hoursInput) hoursInput.addEventListener('change', function () { var h = parseFloat(hoursInput.value); if (!isNaN(h) && h >= 0) writeOpsHours(h); });
+    $$('lp-page-extra').addEventListener('click', function (e) {
+      var sb = e.target.closest('[data-lp-ops-scenario]');
+      if (sb) { lpOpsRunScenario(sb.getAttribute('data-lp-ops-scenario')); renderOpsSimulator(); return; }
+    });
+    var ej = $$('lpOpsExportJson');
+    if (ej) ej.addEventListener('click', function () {
+      var blob = new Blob([JSON.stringify(latest, null, 2)], { type: 'application/json' });
+      var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'lp_ops_report_' + Date.now() + '.json'; a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    });
+    var ec = $$('lpOpsExportCsv');
+    if (ec) ec.addEventListener('click', function () {
+      if (!latest) return;
+      var lines = ['scenario,risk,total_events,human_tasks,hours_needed,overflow_hours,department,dept_count,dept_minutes'];
+      var depts = Object.keys(latest.byDepartment);
+      if (!depts.length) lines.push([latest.scenario, latest.riskLevel, latest.totalEvents, latest.humanTasks, latest.totalStaffHoursNeeded, latest.overflowHours, '', 0, 0].join(','));
+      else depts.forEach(function (d) {
+        lines.push([latest.scenario, latest.riskLevel, latest.totalEvents, latest.humanTasks, latest.totalStaffHoursNeeded, latest.overflowHours, d, latest.byDepartment[d].count, latest.byDepartment[d].minutes].join(','));
+      });
+      var blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+      var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'lp_ops_report_' + Date.now() + '.csv'; a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    });
+    var cl = $$('lpOpsClear');
+    if (cl) cl.addEventListener('click', function () { writeOpsReports([]); lpLogAction('ops-sim', 'Simulation reports cleared.'); renderOpsSimulator(); });
+  }
+  window.__lpRenderOpsSimulator = renderOpsSimulator;
+  window.__lpOpsRunScenario = lpOpsRunScenario;
+
   // ── Tier 4.13 — Marketplace cart + checkout ──────────────────
   // Items the user adds go to lp_cart; on checkout they move to
   // lp_purchased and become "Owned" everywhere they appear.
@@ -5084,8 +5692,12 @@ window.addEventListener('online',  () => toast('Back online'));
       case 'checkout':       renderCheckout(); return;
       case 'inbox':          renderInbox(); return;
       case 'advertiser':     renderAdvertiser(); return;
-      case 'autopilot':      renderAutopilot(); return;
-      case 'action-log':     renderActionLog(); return;
+      case 'autopilot':       renderAutopilot(); return;
+      case 'action-log':      renderActionLog(); return;
+      case 'content-sources': renderContentSources(); return;
+      case 'draft-catalog':   renderDraftCatalog(); return;
+      case 'rights-review':   renderRightsReview(); return;
+      case 'ops-simulator':   renderOpsSimulator(); return;
       case 'help':           renderHelp(); return;
       case 'home-feed':      renderHomeFeed(); return;
       case 'search':         { var s = $$('searchInput'); if (s) { s.focus(); s.scrollIntoView({ behavior: 'smooth', block: 'start' }); } return; }

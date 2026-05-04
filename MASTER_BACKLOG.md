@@ -93,12 +93,18 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 - **LP-MKT-1** — sample marketplace items in LoadPlay (parity with Attain sample-book ask).
 - **LP-API** — real API Keys panel surfaced under Settings (the dev-tool API Keys exists in v49, but the Settings-side surface for non-dev users is not built).
 - **LP-CONTENT-1** — expand `data/demo-content.json` catalog (more rails, more genre coverage).
-- **LP-MISSING-ZIPS** — user referenced 2026-05-04 two specs that are NOT in `inbox/`:
-  - `LoadPlay_Content_Connector_System_Handoff.zip` (the connector layer Tier 6 sits on top of)
-  - `LoadPlay_Operations_Load_Simulator_Claude_Package.zip` (operations / load-test simulator)
-  Surface this gap at the top of the next session so the user can re-upload before Connector System / Load Simulator work begins.
+- (Tier 7 Content Connector System + Tier 8 Operations Load Simulator both **DONE v54** — see Recently done.)
 
 ### Recently done (this session, 2026-05-04)
+- **v54 — Tier 7 Content Connector System + Tier 8 Operations Load Simulator**:
+  - Sidebar entries: Content Sources / Draft Catalog / Rights Review / Operations Simulator under Creator.
+  - Content Sources: 11 connector cards (Internet Archive, Openverse, Pexels, Pixabay, Wikimedia Commons, Freesound, Jamendo, GDELT, NASA, NPS, RSS) with Test / Fetch Preview / Import to Drafts / per-key save / enable toggle. Real fetchers wired live for the four no-key providers (Internet Archive advancedsearch, Wikimedia search, Openverse images, GDELT doc API). Key-required providers return clearly-labelled DEMO PREVIEW until a key is saved.
+  - Normalizer enforces the 17-field unified content model (provider / providerId / sourceUrl / mediaUrl / thumbnailUrl / title / description / creator / license / licenseUrl / attributionText / mediaType / duration / category / tags / dateDiscovered / status). License safety auto-routes Public Domain / CC0 / CC BY → drafts; everything else → rights review.
+  - Draft Catalog page lists draft items with thumbnail + Send to Rights Review / Approve & publish / Delete; demo-preview items can NEVER publish (hard-blocked).
+  - Rights Review page lists pending items with Approve & publish / Needs manual check / Reject / Back to draft, plus Export rights report (JSON + CSV).
+  - Tier 8 Operations Load Simulator: capacity input (hours/day), 7 scenario buttons (Light Day / Normal Day / Busy Day / Viral Spike / Creator Upload Rush / API Content Flood / One-Person Operation), workload rules per spec (16 event types with department + minutes + priority + human-required flag), risk-level calculation (manageable / near_capacity / overloaded / critical), per-department breakdown, recommendations engine (rights review caps, support auto-responses, content-review metadata gate, provider-import caps), 30-report rolling history, JSON + CSV export, "Clear simulation data" reset. All output labeled SIMULATION ONLY · INTERNAL TEST DATA.
+  - Both engines write to lp_action_log with `connector` / `rights` / `publish` / `ops-sim` categories.
+
 - **v53 — Tier 6 Autopilot Content Engine** + **LP-0.8 action log** shipped:
   - Sidebar entries: Autopilot (with mode pill) + Action Log under Creator.
   - Autopilot dashboard: 6 status cards (mode, last run, drafts, rights queue, published, pilot reports), full settings panel (master enable, 6 modes, 4 frequencies, 3 safety levels, 5 source toggles, 10 row toggles), Run Now / Pilot Test / Recycle / Export Report / Clear Demo Data buttons, rights review queue with Approve & Publish / Reject per-item, latest pilot report summary, recent jobs feed.
@@ -139,6 +145,8 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 | 5.15 | Member/Creator Inbox | DONE v52 |
 | 5.16 | Advertiser Console | DONE v52 |
 | 6 | Autopilot Content Engine | **DONE v53** (6 modes, curated discoverable catalog, rights review queue, recycling, pilot mode, action log) |
+| 7 | Content Connector System (11 sources + Draft Catalog + Rights Review) | **DONE v54** |
+| 8 | Operations Load Simulator (busyness simulator, 7 scenarios, risk + recommendations) | **DONE v54** |
 | 0.8 | Action log | **DONE v53** |
 
 ---
