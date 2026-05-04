@@ -1148,7 +1148,7 @@ async function pickAndOpen(mode){
     toast('Building a blank 16:9 canvas...',false);
     try{
       var blob=await makeBlankBlob();
-      window.openVideoEditor({id:'untitled-'+Date.now(),kind:'media',subKind:'video',name:'Untitled Project',binary:blob,dateAdded:Date.now(),mime:blob.type});
+      mountEditor({id:'untitled-'+Date.now(),kind:'media',subKind:'video',name:'Untitled Project',binary:blob,dateAdded:Date.now(),mime:blob.type});
     }catch(e){ toast('Create blank failed: '+e.message,true); }
     return;
   }
@@ -1176,17 +1176,42 @@ async function pickAndOpen(mode){
           var t0=Date.now(); while(Date.now()-t0<5000){ctx.drawImage(img,0,0,c.width,c.height); await new Promise(function(r){setTimeout(r,33);});}
           mr.stop(); await stopped;
           var blob=new Blob(chunks,{type:mt||'video/webm'});
-          window.openVideoEditor({id:'img-'+Date.now(),kind:'media',subKind:'video',name:f.name,binary:blob,dateAdded:Date.now(),mime:blob.type});
+          mountEditor({id:'img-'+Date.now(),kind:'media',subKind:'video',name:f.name,binary:blob,dateAdded:Date.now(),mime:blob.type});
         }catch(err){ toast('Could not wrap image: '+err.message,true); }
         URL.revokeObjectURL(url);
       };
       img.onerror=function(){ toast('Could not read image',true); URL.revokeObjectURL(url); };
       img.src=url;
     } else {
-      window.openVideoEditor({id:'vid-'+Date.now(),kind:'media',subKind:'video',name:f.name,binary:f,dateAdded:Date.now(),mime:f.type||'video/mp4'});
+      mountEditor({id:'vid-'+Date.now(),kind:'media',subKind:'video',name:f.name,binary:f,dateAdded:Date.now(),mime:f.type||'video/mp4'});
     }
   });
   pk.click();
+}
+function mountEditor(app){
+  toast('Opening Editing Bay...',false);
+  try{
+    if(typeof window.openVideoEditor!=='function'){
+      toast('Editor not available — lseditor.js failed to load',true);
+      return;
+    }
+    window.openVideoEditor(app);
+    setTimeout(function(){
+      var ed=document.getElementById('__loadVideoEdit');
+      if(!ed){
+        toast('openVideoEditor ran but no __loadVideoEdit appeared. Check console.',true);
+        return;
+      }
+      // Force the editor on top + visible inside LoadStudio
+      ed.style.zIndex='9500';
+      ed.style.background='#0a0a14';
+      ed.style.display='flex';
+      ed.style.flexDirection='column';
+    },120);
+  }catch(err){
+    toast('Editor crashed: '+(err&&err.message||err),true);
+    console.error('mountEditor failed', err);
+  }
 }
 document.addEventListener('click',function(e){
   var b=e.target.closest('[data-eb-native]');

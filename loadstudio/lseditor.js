@@ -143,6 +143,11 @@ window.LoadAudioFix = {
 
 (function () {
  'use strict';
+ // LoadStudio host: hoisted-function exports BEFORE any other code
+ // runs so that even if downstream init throws on Load Main DOM
+ // that doesn't exist here, window.openVideoEditor is still callable.
+ try { window.openVideoEditor = openVideoEditor; } catch (_) {}
+ try { window.openMediaPicker = openMediaPicker; } catch (_) {}
 
  /* Password removed for personal-use offline build. All data stays on
  * the device; no auth layer needed. If you ever want to re-lock the
