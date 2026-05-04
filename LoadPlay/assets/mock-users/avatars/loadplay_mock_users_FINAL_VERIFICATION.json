@@ -1,0 +1,69 @@
+{
+  "loadplay_mock_users_FINAL_001_100.zip": {
+    "size_mb": 4.36,
+    "avatar_count": 100,
+    "json_files": [
+      "data/demo-users-001-100.json"
+    ],
+    "readme": true,
+    "preview_count": 1
+  },
+  "loadplay_mock_users_FINAL_101_200.zip": {
+    "size_mb": 4.4,
+    "avatar_count": 100,
+    "json_files": [
+      "data/demo-users-101-200.json"
+    ],
+    "readme": true,
+    "preview_count": 1
+  },
+  "loadplay_mock_users_FINAL_201_300.zip": {
+    "size_mb": 4.31,
+    "avatar_count": 100,
+    "json_files": [
+      "data/demo-users-201-300.json"
+    ],
+    "readme": true,
+    "preview_count": 1
+  },
+  "loadplay_mock_users_FINAL_301_400.zip": {
+    "size_mb": 4.56,
+    "avatar_count": 100,
+    "json_files": [
+      "data/demo-users-301-400.json"
+    ],
+    "readme": true,
+    "preview_count": 1
+  },
+  "loadplay_mock_users_FINAL_401_500.zip": {
+    "size_mb": 4.76,
+    "avatar_count": 100,
+    "json_files": [
+      "data/demo-users-401-500.json"
+    ],
+    "readme": true,
+    "preview_count": 1
+  },
+  "loadplay_mock_users_FINAL_data_instructions.zip": {
+    "size_mb": 3.06,
+    "avatar_count": 0,
+    "json_files": [
+      "data/demo-users.json",
+      "data/demo-activity.json",
+      "data/source-log.json"
+    ],
+    "readme": true,
+    "preview_count": 5
+  },
+  "loadplay_mock_users_FINAL_full_500.zip": {
+    "size_mb": 22.38,
+    "avatar_count": 500,
+    "json_files": [
+      "data/demo-users.json",
+      "data/demo-activity.json",
+      "data/source-log.json"
+    ],
+    "readme": true,
+    "preview_count": 5
+  }
+}
