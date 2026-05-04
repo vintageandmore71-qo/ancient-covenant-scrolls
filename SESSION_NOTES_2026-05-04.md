@@ -143,3 +143,59 @@ da4f706 loadstudio v19d: front scroll stops at footer (lock .content + .ls-wsp b
 58e8d66 loadstudio v19c: fix front splash leaking dept page + topbar logo
 a7a80a4 loadstudio v19: splash uncovered + buttons below + 8-box block + footer + dept drill-down workspace + scrub external product names
 ```
+---
+
+## Pickup list for next session (saved 2026-05-04 end-of-day)
+
+Single source of truth: `MASTER_BACKLOG.md`. This is the at-a-glance
+working list distilled from there. Cross-reference each item there
+for source spec / inbox file / acceptance criteria.
+
+### LoadPlay (`/LoadPlay/`, cache `loadplay-v55`) — finishing polish
+
+- **LP-MKT-1** — sample marketplace items (parity with Attain sample-book ask).
+- **LP-API** — surface the Dev Lab API Keys panel under Settings for non-dev users.
+- **LP-CONTENT-1** — expand `data/demo-content.json` catalog (more rails / genres).
+
+### LoadStudio (`/loadstudio/`, cache `loadstudio-complete-v42`) — biggest backlog
+
+- **LS-Backend** (NEW) — audit every drawer item / tile / form button against the build manual + plan, wire any dead links. Discovered after the v41/v42 regressions revealed how many sections are still stubs.
+- **LS-1** — finish dyslexia rework on remaining sections (29 done in v39; some bespoke sections remain).
+- **LS-2** — end-to-end Import Center wiring (thumbnail extraction, type routing, asset-library tile render, duplicate detection).
+- **LS-3** — Envato-style stock library (search UI + license metadata + asset checkout).
+- **LS-4** — Help & Guided Tour content per section.
+- **LS-5** — `lseditor.js` extraction cleanup (currently a verbatim 870 KB copy of `load/load.js`).
+- **LS-6** — Cover button on editor track rail wired to a real LoadStudio cover designer (or hidden in `body.ls-host`).
+- **LS-7** — IDB schema sync between Load Main and LoadStudio (drafts currently isolated).
+- **LS-MKT-1** — sample marketplace items.
+
+### Cross-suite (touch multiple apps)
+
+- **X-B2V** Book-to-Video wiring — files dropped at `load/book-video/` (8 JS files + CSS + schemas), not yet loaded by `load/index.html`. Add CSS link + 7 script tags + button + `window.LoadBookToVideo.open()` handler. Acceptance: TXT/HTML/PDF/EPUB → editable Scene Cards.
+- **X-V2V** Verse-to-Video — ACR Study verses → 5–10 second clips. Reuses Book-to-Video pipeline. Originally a Claude suggestion the user adopted.
+- **X-P2V** Photo-to-Video promotion — currently partial inside LoadStudio Editing Bay (`pickAndOpen('image')` wraps a still). Promote to first-class `load/book-video/photo-to-video.js`, add motion presets (Ken Burns / parallax / pan), surface in Load main.
+- **X-AI-CORE** — **DONE**, no work needed unless user reports a specific issue (provider router + capability map + output validation + Test Keys + Output Receipt all shipped in `load/load.js` v17dq–v17dy).
+- **X-AI-14** — Tier 14 Glam-parity add-ons on top of the shipped core: 14a curated style library (~50 styles), 14b face restoration (GFPGAN/CodeFormer), 14c Real-ESRGAN upscale, 14d SiliconFlow connector (FLUX.1 Kontext + image-to-video), 15 HF Spaces connector, 18-fallback external video-prompt panel, 18a-c Image→Video tiers (basic motion canvas / SVD / AnimateDiff). Plus the 7-layer "AI Style Chat" chrome.
+- **X-AI-MASK** — Browser mask editor (Canvas / Fabric / Konva) for inpaint / ADD_OBJECT precision. Single biggest unlock for true edit support.
+- **X-CC** Character Consistency — modules in `inbox/load_ai_character_consistency_with_code.zip` (`provider-registry / character-memory / prompt-builder / output-verifier / image-router`) not wired. Reuses across Book-to-Video + LoadStudio Character Studio + Attain story illustrator.
+- **X-PIPER** Piper TTS — Stage 1 parked since 2026-04-27. Engine ships, Settings UI exists, falling through to Web Speech cleanly. Blocked on the post-install `play()` exception text. Tap Settings → Premium voice — Piper → Repair voice and report the exact error to unblock. Stage 2 (ACR Reader / Attain / Attain Jr / Study read-aloud routed through Piper) is blocked on Stage 1 working.
+
+### Per-app pending
+
+- **Attain** (`/attain/`, cache `attain-v67`) — AT-V2V (passage → clip), AT-PWA-IMPORT (generic PWA-book parser), AT-MEMORY (cadence learner — parked).
+- **Attain Jr** (`/attain-jr/`, cache `attainjr-v1t`) — JR-IMG (SVG icon parity pass), JR-FONT (Inter chrome parity).
+- **Study** (`/study/`, cache `acr-study-v78`) — ST-V2V (verse → clip), ST-INNER-EMOJI (deeper modals + stage labels), ST-CONCEPT-MAP (parked).
+- **ACR Reader** (root `/`) — **LOCKED, do not edit** until user explicitly unlocks. AR-EMOJI / AR-INTER deferred indefinitely (CLAUDE.md rule #7, 2026-05-04).
+
+### Parked (review 2026-05-25)
+
+`SUGGESTIONS_PARKED.md` — the brainstorm of innovative ideas the user
+asked to revisit in a few weeks: voice command bar, shared knowledge
+graph, color-of-meaning palette, cross-app reading handoff, cadence
+learner, visual save-history; plus per-app innovations.
+
+### Outstanding inbox / waiting on user
+
+- **New PWA book sample for Attain** — user is uploading tonight. Will replace `attain/data/sample-book.json` + `attain/data/sample-cover.jpg` (currently "How To Flip, Abroad — Portugal Edition"). Reason: current sample doesn't have enough text for quizzes to work.
+- **Piper play() exception text** — needed to unblock Stage 1.
+
