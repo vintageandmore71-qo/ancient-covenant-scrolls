@@ -9115,7 +9115,7 @@ window.LoadAudioFix = {
  '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
  '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
  '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
- '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ej</span>' +
+ '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ek</span>' +
  '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
  '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
  '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -17646,6 +17646,55 @@ window.LoadAudioFix = {
  /* ---------- Boot ---------- */
  boot();
 }());
+
+// === LoadStudio purple-theme injector ============================
+// When the page is opened with ?theme=purple (the LoadStudio iframe
+// always passes this), inject a high-specificity stylesheet that
+// recolors the video editor's blue accent to LoadStudio purple
+// (#b388ff). Same code, different paint.
+(function(){
+  try{
+    var qp = new URLSearchParams(location.search);
+    if(qp.get('theme') !== 'purple') return;
+    var id = '__lsPurpleSkin';
+    if(document.getElementById(id)) return;
+    var st = document.createElement('style');
+    st.id = id;
+    st.textContent = [
+      // Editor selected clip rings, handles, snap, popover, trim, slider accents.
+      '#__loadVideoEdit .ve-clip-block{box-shadow:0 0 0 2px #b388ff !important;}',
+      '#__loadVideoEdit .ve-clip-block.on{box-shadow:0 0 0 3px #fff, 0 0 0 5px #b388ff, 0 0 18px rgba(179,136,255,0.6) !important;}',
+      '#__loadVideoEdit .ve-block-handle{background:#b388ff !important;color:#1a1026 !important;}',
+      '#__loadVideoEdit .ve-clip-strip.ve-selected{box-shadow:0 0 0 3px #b388ff, 0 0 24px rgba(179,136,255,0.55) !important;}',
+      '#__loadVideoEdit .ve-clip-trim{border:2px solid #b388ff !important;}',
+      '#__loadVideoEdit .ve-clip-quick{background:#b388ff !important;color:#1a1026 !important;}',
+      '#__loadVideoEdit .ve-clip-quick::after{border-top-color:#b388ff !important;}',
+      '#__loadVideoEdit .ve-clip-handle{background:#b388ff !important;color:#1a1026 !important;}',
+      '#__loadVideoEdit .ve-clip-handle::before{color:#b388ff !important;}',
+      '#__loadVideoEdit #ve-snap.on{background:#b388ff !important;color:#1a1026 !important;}',
+      '#__loadVideoEdit .ve-clip-duration{color:#b388ff !important;}',
+      // Slider accent + readouts (audio vol / speed / opacity).
+      '#__loadVideoEdit input[type=range]{accent-color:#b388ff !important;}',
+      '#__loadVideoEdit #ve-speed-val,#__loadVideoEdit #ve-opacity-val{color:#b388ff !important;}',
+      // Subtitle/text track block gradient.
+      '#__loadVideoEdit .ve-track-row[data-track="text"] .ve-track-block{background:linear-gradient(180deg,#b388ff,#7d2ae8) !important;color:#fff !important;}',
+      // Waveform — recolor audio bars to purple. The canvas paints
+      // strokes via context.fillStyle in renderWaveformFor, so we
+      // override at the canvas wrapper level via a tinted overlay.
+      '#__loadVideoEdit #ve-waveform{filter:hue-rotate(258deg) saturate(1.4) brightness(1.05) !important;}',
+      '#__loadVideoEdit .waveform-track{filter:hue-rotate(258deg) saturate(1.4) brightness(1.05) !important;}',
+      // Export button + topbar accent.
+      '#__loadVideoEdit #ve-export{background:linear-gradient(135deg,#7d2ae8 0%,#b388ff 100%) !important;}',
+      // Action.on chip color (the active toolbar tool highlight).
+      '#__loadVideoEdit .ve-action.on .ve-act-icon{color:#b388ff !important;}',
+      // ve-context-done button (the blue check at the end of clip ctx menu).
+      '#__loadVideoEdit .ve-context-done .ve-act-icon{color:#b388ff !important;}',
+      // Progress bar fill.
+      '#__loadVideoEdit #ve-progress-fill{background:linear-gradient(90deg,#b388ff,#7d2ae8,#9c9cff,#c9a0ff) !important;}'
+    ].join('');
+    (document.head||document.documentElement).appendChild(st);
+  }catch(_){}
+})();
 
 // === LoadStudio Editing Bay hook (rewritten 2026-05-04 v17ef) ===
 // When Load is opened with ?lsedit=NN (from the LoadStudio Editing Bay
