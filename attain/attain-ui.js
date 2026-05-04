@@ -1651,16 +1651,18 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   // Recover library from Cache Storage/Cookies if localStorage was purged
   getLibraryAsync().then(function () {
+    try { ensureAttainSampleInLibrary(); } catch (e) {}
     initNav();
     addDyslexicToggle();
     setTimeout(showInstallPrompt, 3000);
   }).catch(function () {
+    try { ensureAttainSampleInLibrary(); } catch (e) {}
     initNav();
     addDyslexicToggle();
     setTimeout(showInstallPrompt, 3000);
   });
 });
-if (document.readyState !== 'loading') initNav();
+if (document.readyState !== 'loading') { try { ensureAttainSampleInLibrary(); } catch (e) {} initNav(); }
 
 // ---- Progress Screen — XP, streaks, levels, session history, export/import ----
 
