@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=yes"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#0f0f0f"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
@@ -1001,59 +1001,6 @@ body.lp-paging #lp-page{display:block}
 .lp-copyright{padding:18px 16px 28px;text-align:center;font-size:11.5px;color:var(--text3);line-height:1.6;border-top:1px solid var(--border);background:#0a0a0a;margin-top:18px}
 .lp-copyright strong{color:var(--text2);font-weight:700}
 .lp-copyright a{color:var(--cyan);text-decoration:none}
-
-/* v29 — LoadPlay splash fully visible: image natural aspect ratio, no overlay covering */
-html .lp-splash-wrap{position:relative !important;width:100% !important;height:auto !important;min-height:0 !important;max-height:none !important;background:#000}
-html .lp-splash-img{width:100% !important;height:auto !important;object-fit:contain !important;opacity:1 !important;display:block;transition:none !important}
-html .lp-splash-overlay{display:none !important}
-html .lp-splash-text{position:static !important;left:auto !important;right:auto !important;bottom:auto !important;padding:14px 18px 4px;text-shadow:none}
-html .lp-splash-bottom{position:static !important;text-align:center;padding:6px 16px 12px;pointer-events:auto}
-html .lp-bottom-title{font-size:30px;text-shadow:none}
-
-/* v30 — LoadPlay guided tour */
-#lp-tour{position:fixed;inset:0;z-index:9100;font-family:Inter,system-ui,sans-serif}
-#lp-tour .lt-scrim{position:absolute;inset:0;background:rgba(10,5,5,.78);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);transition:opacity .25s}
-#lp-tour .lt-ring{position:absolute;border:3px solid #ff5a5a;border-radius:14px;box-shadow:0 0 0 9999px rgba(10,5,5,.78),0 0 24px 4px rgba(255,90,90,.5);transition:all .35s cubic-bezier(.2,.7,.2,1);pointer-events:none;display:none}
-#lp-tour .lt-card{position:absolute;background:#161616;color:#fff;border-radius:18px;padding:22px 22px 18px;max-width:440px;width:calc(100% - 32px);box-shadow:0 18px 50px rgba(0,0,0,.6);border:1px solid rgba(255,90,90,.32);transition:top .35s cubic-bezier(.2,.7,.2,1),left .35s cubic-bezier(.2,.7,.2,1)}
-#lp-tour .lt-dots{display:flex;gap:6px;margin-bottom:12px}
-#lp-tour .lt-dots span{width:8px;height:8px;border-radius:50%;background:rgba(255,90,90,.22);transition:background .2s,transform .2s}
-#lp-tour .lt-dots span.on{background:#ff5a5a;transform:scale(1.25)}
-#lp-tour .lt-title{margin:0 0 8px;font:600 20px Inter,system-ui,sans-serif;line-height:1.2;letter-spacing:-0.01em;color:#fff}
-#lp-tour .lt-body{margin:0 0 18px;font:300 15px Inter,system-ui,sans-serif;line-height:1.55;color:#e6dada}
-#lp-tour .lt-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-#lp-tour .lt-spacer{flex:1}
-#lp-tour .lt-btn{background:rgba(255,90,90,.14);color:#ffd6d6;border:1px solid rgba(255,90,90,.4);border-radius:10px;padding:10px 16px;font:600 14px Inter,system-ui,sans-serif;cursor:pointer;min-height:42px}
-#lp-tour .lt-btn:active{transform:scale(.97)}
-#lp-tour .lt-skip{background:transparent;color:#c2a8a8;border-color:transparent;font-weight:500}
-#lp-tour .lt-back:disabled{opacity:.35;cursor:not-allowed}
-#lp-tour .lt-primary{background:linear-gradient(135deg,#ff3838 0%,#ff5a5a 100%);color:#fff;border:0;font-weight:600;box-shadow:0 4px 16px rgba(255,80,80,.42)}
-#lp-tour .lt-primary:hover{filter:brightness(1.08)}
-@media(max-width:520px){#lp-tour .lt-title{font-size:18px}#lp-tour .lt-body{font-size:14px}}
-
-/* v31 — install banner + modal */
-.lp-install-banner{position:fixed;left:12px;right:12px;bottom:14px;z-index:8000;display:flex;align-items:center;gap:12px;padding:12px 14px;background:#161616;border:1px solid rgba(255,90,90,.32);border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.6);font-family:Inter,system-ui,sans-serif;color:#fff}
-.lp-install-banner[hidden]{display:none !important}
-.lp-ib-left{flex:1;display:flex;align-items:center;gap:10px;min-width:0}
-.lp-ib-icon{flex:0 0 32px;height:32px;display:flex;align-items:center;justify-content:center;color:#ff8a8a;background:rgba(255,90,90,.14);border-radius:9px}
-.lp-ib-icon svg{width:18px;height:18px}
-.lp-ib-left strong{display:block;font:600 14px Inter,system-ui,sans-serif;color:#fff}
-.lp-ib-sub{display:block;font:300 12.5px Inter,system-ui,sans-serif;color:#e6dada;margin-top:1px}
-.lp-install-btn{background:linear-gradient(135deg,#ff3838 0%,#ff5a5a 100%);color:#fff;border:0;border-radius:9px;padding:8px 14px;font:600 13px Inter,system-ui,sans-serif;cursor:pointer;flex-shrink:0;box-shadow:0 4px 14px rgba(255,80,80,.42)}
-.lp-install-x{background:transparent;color:#c2a8a8;border:0;font-size:22px;line-height:1;cursor:pointer;padding:0 4px;flex-shrink:0}
-.lp-install-x:hover{color:#fff}
-.lp-install-modal{position:fixed;inset:0;z-index:8100;display:flex;align-items:center;justify-content:center;background:rgba(10,5,5,.78);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:18px;font-family:Inter,system-ui,sans-serif}
-.lp-install-modal[hidden]{display:none !important}
-.lp-install-box{position:relative;max-width:520px;width:100%;background:#161616;border:1px solid rgba(255,90,90,.32);border-radius:18px;padding:22px 22px 20px;color:#fff;box-shadow:0 18px 48px rgba(0,0,0,.6)}
-.lp-install-close{position:absolute;top:10px;right:12px;background:none;border:0;color:#c2a8a8;font-size:24px;line-height:1;cursor:pointer;padding:4px 8px;border-radius:8px}
-.lp-install-close:hover{background:rgba(255,255,255,.06);color:#fff}
-.lp-install-box h3{margin:0 28px 10px 0;font:600 19px Inter,system-ui,sans-serif;color:#fff;letter-spacing:-.01em}
-.lp-install-lead{margin:0 0 14px;font:300 14px Inter,system-ui,sans-serif;color:#e6dada;line-height:1.55}
-.lp-install-steps{margin:0 0 14px;padding:0 0 0 24px;font:400 14px Inter,system-ui,sans-serif;color:#e6dada;line-height:1.7}
-.lp-install-steps li{margin-bottom:8px}
-.lp-install-shareic{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;color:#ff8a8a;vertical-align:middle;margin:0 2px}
-.lp-install-shareic svg{width:100%;height:100%}
-.lp-install-actions{display:flex;justify-content:flex-end;margin-top:8px}
-.lp-install-cta{padding:10px 22px;border-radius:10px;border:0;background:linear-gradient(135deg,#ff3838 0%,#ff5a5a 100%);color:#fff;font:600 14px Inter,system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 16px rgba(255,80,80,.42)}
 </style>
 </head>
 <body>
@@ -1461,7 +1408,10 @@ html .lp-bottom-title{font-size:30px;text-shadow:none}
       <div class="lp-footer-tag">Part of Load</div>
       <div class="lp-footer-mark">LoadPlay</div>
       <p class="lp-footer-tagline">Stream, create, publish — clean, free, offline-ready.</p>
-      <div class="lp-footer-replay" style="text-align:center;margin:0 0 12px"><a href="#" data-lp-replay-tour="1" style="color:#ff8a8a;font-size:13px;font-weight:600">Replay site tour</a></div><div class="lp-footer-links"><a href="../load/">Main Load</a><a href="../loadstudio/">LoadStudio</a></div>
+      <div class="lp-footer-links">
+        <a href="../load/">← Return to Main Load</a>
+        <a href="../loadstudio/">Open Load Studio →</a>
+      </div>
     </footer>
 
   </section>
@@ -1757,7 +1707,7 @@ const QQ = s => document.querySelectorAll(s);
 /* ── BOOT ────────────────────────────────────────── */
 window.addEventListener('load', () => {
   // Register SW
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
 
   setTimeout(() => {
     $('splash').classList.add('gone');
@@ -2407,7 +2357,7 @@ window.addEventListener('online',  () => toast('Back online'));
 <footer class="lp-copyright">
   <strong>Copyright &copy; 2026 LBond. All Rights Reserved.</strong><br>
   LoadPlay — Stream Digital Cinema Anywhere. Runs on your iPad. No tracking, no accounts beyond this device.<br>
-  Part of the Load suite. <a href="../load/">Main Load</a> &middot; <a href="../loadstudio/">LoadStudio</a><br>
+  Part of the Load suite. <a href="../load/">Main Load</a> &middot; <a href="../loadstudio/">Load Studio</a><br>
   <span style="display:inline-block;margin-top:8px;padding:4px 8px;background:rgba(255,255,255,.04);border-radius:4px;font-size:10.5px;color:var(--text3)">Some profile data, comments, and activity shown during pre-launch testing are for demonstration purposes. No real names, emails, phone numbers, or addresses are stored.</span>
 </footer>
 
@@ -4345,101 +4295,5 @@ window.addEventListener('online',  () => toast('Back online'));
   });
 })();
 </script>
-<script id="lp-v30-tour">(function(){
-var KEY='lp_tour_seen_v1';
-var STEPS=[
-  {anchor:null,title:'Welcome to LoadPlay',body:"I'll show you around in under a minute. Tap Next to begin."},
-  {anchor:'.lp-splash-img',title:'The lobby',body:'This splash is the front of LoadPlay. Everything else lives below it.'},
-  {anchor:'.lp-feature-row .lp-feat:first-child',title:'Feature highlights',body:'Tap any of the four cards for a longer description of what LoadPlay does.'},
-  {anchor:'.lp-actions',title:'Three main actions',body:'Start Watching, Browse, and Creator Upload — your three doors into the app.'},
-  {anchor:'.lp-workspace',title:'Workspace tiles',body:'Quick shortcuts into Viewer, Creator Studio, Cleanstream, and the Dev Lab.'},
-  {anchor:'#lp-tool-home',title:'Top toolbar',body:'Home / refresh / theme controls live here on every screen.'},
-  {anchor:'.lp-footer',title:'Part of Load',body:'LoadPlay is part of the Load suite. Cross-suite links sit in the footer.'},
-  {anchor:null,title:"You're ready",body:'Enjoy LoadPlay. You can replay this tour anytime from the Help page.'}
-];
-function startTour(){
-  var prev=document.getElementById('lp-tour'); if(prev)prev.remove();
-  var idx=0;
-  var root=document.createElement('div'); root.id='lp-tour';
-  root.innerHTML='<div class="lt-scrim"></div><div class="lt-ring" aria-hidden="true"></div><div class="lt-card" role="dialog" aria-modal="true"><div class="lt-dots"></div><h2 class="lt-title"></h2><p class="lt-body"></p><div class="lt-controls"><button class="lt-btn lt-skip" type="button">Skip</button><div class="lt-spacer"></div><button class="lt-btn lt-back" type="button">Back</button><button class="lt-btn lt-next lt-primary" type="button">Next</button></div></div>';
-  document.body.appendChild(root);
-  var ring=root.querySelector('.lt-ring'),card=root.querySelector('.lt-card'),title=root.querySelector('.lt-title'),body=root.querySelector('.lt-body'),dots=root.querySelector('.lt-dots'),back=root.querySelector('.lt-back'),next=root.querySelector('.lt-next'),skip=root.querySelector('.lt-skip');
-  STEPS.forEach(function(){var d=document.createElement('span');dots.appendChild(d);});
-  function position(){
-    var s=STEPS[idx],el=s.anchor?document.querySelector(s.anchor):null;
-    Array.prototype.forEach.call(dots.children,function(d,i){d.classList.toggle('on',i===idx);});
-    title.textContent=s.title; body.textContent=s.body;
-    back.disabled=idx===0; next.textContent=idx===STEPS.length-1?'Done':'Next';
-    if(el){
-      var r=el.getBoundingClientRect();
-      ring.style.display='block';
-      ring.style.top=(r.top-6)+'px'; ring.style.left=(r.left-6)+'px';
-      ring.style.width=(r.width+12)+'px'; ring.style.height=(r.height+12)+'px';
-      try{el.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){}
-      var cardTop=r.bottom+12;
-      if(cardTop+260>window.innerHeight) cardTop=Math.max(20,r.top-260);
-      card.style.top=cardTop+'px';
-      card.style.left=Math.max(16,Math.min(window.innerWidth-456,r.left))+'px';
-    } else {
-      ring.style.display='none';
-      card.style.top=(window.innerHeight/2-160)+'px';
-      card.style.left=Math.max(16,(window.innerWidth-440)/2)+'px';
-    }
-  }
-  function close(){try{localStorage.setItem(KEY,'1');}catch(_){}root.remove();}
-  back.addEventListener('click',function(){if(idx>0){idx--;position();}});
-  next.addEventListener('click',function(){if(idx<STEPS.length-1){idx++;position();}else close();});
-  skip.addEventListener('click',close);
-  document.addEventListener('keydown',function(ev){if(!document.getElementById('lp-tour'))return;if(ev.key==='Escape')close();else if(ev.key==='ArrowRight')next.click();else if(ev.key==='ArrowLeft')back.click();});
-  position();
-  window.addEventListener('resize',position);
-}
-window.lpStartTour=startTour;
-try{if(!localStorage.getItem(KEY))setTimeout(startTour,900);}catch(_){}
-// Replay via existing help anchors (lp-tool-home is the home button —
-// not ideal). Add a replay link at the bottom of the page footer.
-document.addEventListener('click',function(e){
-  var h=e.target.closest('[data-lp-replay-tour]');
-  if(h){e.preventDefault();e.stopPropagation();startTour();}
-},true);
-})();</script>
-<div id="lpZoomBanner" hidden style="position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:9700;display:flex;align-items:center;gap:10px;padding:10px 14px;background:#161616;border:1px solid rgba(255,90,90,.4);border-radius:12px;color:#fff;font:500 13px Inter,system-ui,sans-serif;box-shadow:0 14px 36px rgba(0,0,0,.6);max-width:520px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:18px;height:18px;color:#ff8a8a;flex-shrink:0"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/><line x1="8" y1="11" x2="14" y2="11"/></svg><span>Page is zoomed in. Pinch out to reset, or tap Fix.</span><button id="lpZoomFix" type="button" style="margin-left:auto;padding:6px 12px;border-radius:8px;border:0;background:linear-gradient(135deg,#ff3838,#ff5a5a);color:#fff;font:600 12px Inter,system-ui,sans-serif;cursor:pointer">Fix</button><button id="lpZoomDismiss" type="button" aria-label="Dismiss" style="background:transparent;border:0;color:#c2a8a8;font-size:18px;line-height:1;cursor:pointer;padding:0 4px">&times;</button></div>
-<script id="lp-v32-zoom">(function(){
-  function lpFixZoom(showBanner){
-    try{
-      var meta=document.querySelector('meta[name="viewport"]');
-      if(!meta) return;
-      var scale=(window.visualViewport && window.visualViewport.scale)||1;
-      var stuck = scale < 0.92 || scale > 1.08;
-      if(!stuck && !showBanner) return;
-      var original=meta.getAttribute('content');
-      meta.setAttribute('content','width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover');
-      void document.body.offsetHeight;
-      setTimeout(function(){
-        meta.setAttribute('content', original || 'width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=yes');
-        var now=(window.visualViewport && window.visualViewport.scale)||1;
-        if(now>1.05 || now<0.95){
-          var b=document.getElementById('lpZoomBanner'); if(b) b.removeAttribute('hidden');
-        } else {
-          var b2=document.getElementById('lpZoomBanner'); if(b2) b2.setAttribute('hidden','');
-        }
-      },420);
-    }catch(_){}
-  }
-  window.lpFixZoom=lpFixZoom;
-  setTimeout(function(){lpFixZoom(false);},900);
-  if(window.visualViewport){
-    window.visualViewport.addEventListener('resize',function(){
-      var scale=window.visualViewport.scale||1;
-      var b=document.getElementById('lpZoomBanner');
-      if(scale>1.08){ if(b) b.removeAttribute('hidden'); }
-      else { if(b) b.setAttribute('hidden',''); }
-    });
-  }
-  document.addEventListener('click',function(e){
-    if(e.target.closest('#lpZoomFix')){ e.preventDefault(); lpFixZoom(true); return; }
-    if(e.target.closest('#lpZoomDismiss')){ e.preventDefault(); var b=document.getElementById('lpZoomBanner'); if(b) b.setAttribute('hidden',''); }
-  },true);
-})();</script>
 </body>
 </html>
