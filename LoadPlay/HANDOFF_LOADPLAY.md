@@ -7,13 +7,15 @@ can pick up without scrolling the whole repo plan.
 
 ---
 
-## Current state (as of last commit)
+## Current state (updated 2026-05-04, tip 4826b1b)
 
-- **Live tip on `main`:** see `git log --oneline -1 -- LoadPlay/` for
-  the latest LoadPlay-touching commit. Latest version shipped: **v26**.
-- **Cache namespace:** `loadplay-v26` (`LoadPlay/sw.js`).
-- **Stable backup branch:** `backup/2026-05-02-loadplay-v19` →
-  `ed355a7`. Recovery: `git checkout backup/2026-05-02-loadplay-v19`.
+- **Live tip on `main`:** `4826b1b` — "LoadStudio v37 + LoadPlay v32:
+  Reset Page Zoom (Load Main pattern ported)".
+- **Cache namespace:** `loadplay-v32` (`LoadPlay/sw.js`).
+- **Stable backup branches:**
+  - `backup/2026-05-02-loadplay-v19` → `ed355a7` (older snapshot)
+  - `backup/2026-05-04-loadplay-v32` → `4826b1b` (current tip)
+- Recovery: `git checkout backup/2026-05-04-loadplay-v32`.
 - **Branch policy:** push every change to BOTH
   `claude/fix-session-sending-TVMbW` AND `main`. Pages serves from
   `main`. The branch-only push pattern from v8–v11 is the canonical
@@ -125,6 +127,31 @@ LoadPlay/
    topnav avatar, Featured Creators strip).
 
 ---
+
+## Built since v26 (this session, 2026-05-04)
+
+- **v28** — Avatar realism: per-user procedural variation everywhere a
+  portrait renders (no more 100 identical avatars).
+- **v29** — Splash hero fully visible (`object-fit:contain`,
+  height:auto, gradient overlay hidden); cross-suite footer links
+  pruned to Load-only (Main Load + LoadStudio).
+- **v30** — Interactive guided tour (`#lp-v30-tour`): auto-runs on
+  first visit, 8 steps, red `#ff5a5a` ring + card. "Replay site
+  tour" link at top of `lp-footer-links`.
+- **v31** — Install banner + How-to-install modal (Load Main pattern).
+  Detects standalone PWA, only shows in Safari, persists dismiss in
+  `lp_install_dismissed_v1`.
+- **v32** — Reset Page Zoom auto-banner (`#lpZoomBanner`) + viewport
+  meta now `user-scalable=yes`. `window.lpFixZoom` exposed for any
+  other script to call. Triggered when `visualViewport.scale > 1.08`.
+
+## What's still pending for LoadPlay
+
+| ID | Item | Notes |
+|---|---|---|
+| LP-1 | **No interactive intro on Load Main** | Load Main has its own `#load-tour`. LoadPlay's new tour is independent. Cross-app tour continuity is not done. |
+| LP-2 | **Creator dashboard data wiring** | Tour mentions Creator Studio but the dashboard tiles still render mock data. |
+| LP-3 | **Tier 0–5 backlog below** | Pre-existing roadmap, see next section. |
 
 ## Backlog — Tier 0 → Tier 5
 
