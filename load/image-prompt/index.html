@@ -352,7 +352,7 @@ button,[role="button"]{min-height:48px}
 
   <!-- Key health diagnostic -->
   <div class="panel-section">
-    <h4>🔑 Key Health</h4>
+    <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;vertical-align:-3px"><circle cx="8" cy="14" r="4"/><path d="M11 11l9-9"/><path d="M18 4l3 3"/><path d="M15 7l3 3"/></svg> Key Health</h4>
     <p class="panel-hint">Lightweight check of every saved key. Verifies the key reaches the provider and the selected model is image-capable. Full generation tests are not run.</p>
     <button id="test-keys-btn" onclick="runKeyDiagnostic()" style="background:linear-gradient(135deg,var(--accent),#5a5ae0);color:#fff;border:none;padding:10px 16px;border-radius:8px;font-weight:600;cursor:pointer;min-height:44px;width:100%;margin-bottom:10px">Test Keys</button>
     <div id="key-health-results" style="display:none;font-size:13px;line-height:1.5;background:var(--bg-2);border:1px solid var(--border);border-radius:8px;padding:10px;margin-top:8px;max-height:280px;overflow-y:auto"></div>
@@ -360,7 +360,7 @@ button,[role="button"]{min-height:48px}
 
   <!-- Editor Tools / Mask Tools (NOT AI providers) -->
   <div class="panel-section">
-    <h4>🖌 Editor Tools / Mask Tools</h4>
+    <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;vertical-align:-3px"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg> Editor Tools / Mask Tools</h4>
     <p class="panel-hint">Client-side editing libraries — they prepare <code>sourceImage + mask + prompt</code> for an AI provider. They do NOT generate or edit pixels themselves. Listed separately from AI providers per build plan.</p>
     <div style="font-size:13px;line-height:1.7">
       <div>✓ <strong>Canvas API</strong> — mask painter, eraser, brush size, clear (wired v17e0)</div>
@@ -373,7 +373,7 @@ button,[role="button"]{min-height:48px}
 
   <!-- Output receipts -->
   <div class="panel-section">
-    <h4>🧾 Output Receipts</h4>
+    <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;vertical-align:-3px"><path d="M5 3h11l3 3v15H5z"/><path d="M16 3v3h3"/><path d="M8 10h8M8 14h8M8 18h5"/></svg> Output Receipts</h4>
     <p class="panel-hint">Last 20 image tasks. Shows provider, prompt, seed, consistency mode, similarity, and any skipped providers — the audit trail for debugging unexpected results.</p>
     <div style="display:flex;gap:8px;margin-bottom:8px">
       <button onclick="(function(){document.getElementById('receipts-list').style.display='block';renderReceipts();})()" style="flex:1;background:var(--bg-3);color:var(--ink-hi);border:1px solid var(--border);padding:8px;border-radius:8px;min-height:44px">View</button>
@@ -411,41 +411,41 @@ button,[role="button"]{min-height:48px}
     <p class="panel-hint">Pick your preferred provider. For image uploads, the app auto-routes to a vision-capable provider if needed.</p>
     <div class="provider-grid">
       <button class="pc" data-p="puter" onclick="selP(this)">
-        <span class="pc-name">☁️ Puter.js</span>
+        <span class="pc-name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px"><path d="M7 18a4 4 0 1 1 1-7.9A6 6 0 0 1 20 12a4 4 0 0 1 0 8z"/></svg> Puter.js</span>
         <span class="pc-model">500+ models, no key</span>
         <span class="free-tag">FREE — No key</span>
       </button>
       <button class="pc" data-p="gemini" onclick="selP(this)">
-        <span class="pc-name">🟣 Google AI Studio</span>
+        <span class="pc-name"><svg viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px;vertical-align:-1px;color:#a78bfa"><circle cx="12" cy="12" r="6"/></svg> Google AI Studio</span>
         <span class="pc-model">Gemini 2.5 Flash</span>
         <span class="free-tag">FREE — No CC</span>
-        <span class="vision-tag">✦ Vision</span>
+        <span class="vision-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;vertical-align:-1px"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg> Vision</span>
       </button>
       <button class="pc" data-p="openrouter" onclick="selP(this)">
-        <span class="pc-name">🔀 OpenRouter</span>
+        <span class="pc-name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px"><path d="M16 3l5 5-5 5"/><path d="M21 8H8a5 5 0 0 0 0 10h0"/><path d="M3 16l5 5 5-5"/></svg> OpenRouter</span>
         <span class="pc-model">DeepSeek · Mistral · Gemma</span>
         <span class="free-tag">FREE — No CC</span>
       </button>
       <button class="pc" data-p="cerebras" onclick="selP(this)">
-        <span class="pc-name">⚡ Cerebras</span>
+        <span class="pc-name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px"><polygon points="13 2 4 14 12 14 11 22 20 10 12 10"/></svg> Cerebras</span>
         <span class="pc-model">Llama 3.1 fast</span>
         <span class="free-tag">FREE tier</span>
       </button>
       <button class="pc" data-p="anthropic" onclick="selP(this)">
-        <span class="pc-name">🤖 Anthropic</span>
+        <span class="pc-name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px"><rect x="6" y="3" width="12" height="14" rx="3"/><circle cx="9.5" cy="9" r="1.2" fill="currentColor"/><circle cx="14.5" cy="9" r="1.2" fill="currentColor"/><path d="M9 13c1 1 2 1.5 3 1.5s2-.5 3-1.5"/><path d="M9 17v3M15 17v3"/></svg> Anthropic</span>
         <span class="pc-model">Claude Haiku</span>
         <span class="free-tag">Free credits</span>
-        <span class="vision-tag">✦ Vision</span>
+        <span class="vision-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;vertical-align:-1px"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg> Vision</span>
       </button>
       <button class="pc" data-p="hfchat" onclick="selP(this)">
-        <span class="pc-name">🤗 Hugging Face</span>
+        <span class="pc-name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="10" r="1" fill="currentColor"/><circle cx="15" cy="10" r="1" fill="currentColor"/><path d="M8 14c1 2 2.5 3 4 3s3-1 4-3"/></svg> Hugging Face</span>
         <span class="pc-model">Mistral · Llama</span>
         <span class="free-tag">FREE token</span>
       </button>
     </div>
 
     <div class="key-section" id="ks-puter">
-      <p class="panel-hint">✅ No key needed for Puter — it signs you in via popup the first time. <strong>Optional:</strong> paste a Puter API token below to skip the popup and use authenticated calls directly.</p>
+      <p class="panel-hint" style="display:flex;align-items:flex-start;gap:6px"><svg viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0;margin-top:3px"><polyline points="20 6 9 17 4 12"/></svg> No key needed for Puter — it signs you in via popup the first time. <strong>Optional:</strong> paste a Puter API token below to skip the popup and use authenticated calls directly.</p>
       <div class="url-pill"><span style="flex:1">puter.com → User Settings → API Tokens</span><button class="copy-btn" onclick="cpURL(this,'https://puter.com/?action=show-tokens')">Copy</button></div>
       <input class="settings-input" id="k-puter" type="password" placeholder="Optional Puter API token">
       <p class="panel-hint" style="font-size:11px;margin-top:4px">For image uploads, the app will auto-use Gemini or Anthropic if you add those keys below.</p>
@@ -573,7 +573,7 @@ button,[role="button"]{min-height:48px}
     </label>
   </div>
 
-  <button class="save-btn" onclick="saveSettings()">✓ Save &amp; Start</button>
+  <button class="save-btn" onclick="saveSettings()" style="display:inline-flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg> Save &amp; Start</button>
   <div class="panel-footer">Image Prompt — Part of Load<br>Auto-fallback routing · All providers free<br>Built into the Load suite</div>
 </div>
 
@@ -671,14 +671,14 @@ function maskKey(k) {
    list of {provider, masked, status, label, detail} for the UI to
    render with status icons. */
 const STATUS_ICONS = {
-  ready:        '✅',
-  missing:      '⚠️',
-  invalid:      '❌',
-  textOnly:     '❌',
-  noEdit:       '❌',
-  rateLimited:  '⏳',
-  network:      '🌐',
-  unknown:      '❓'
+  ready:        '<span style="color:#4ade80;font-weight:800">OK</span>',
+  missing:      '<span style="color:#facc15;font-weight:800">!</span>',
+  invalid:      '<span style="color:#ff6e6e;font-weight:800">X</span>',
+  textOnly:     '<span style="color:#ff6e6e;font-weight:800">X</span>',
+  noEdit:       '<span style="color:#ff6e6e;font-weight:800">X</span>',
+  rateLimited:  '<span style="color:#facc15;font-weight:800">…</span>',
+  network:      '<span style="color:#94a3b8;font-weight:800">~</span>',
+  unknown:      '<span style="color:#94a3b8;font-weight:800">?</span>'
 };
 
 async function pingAuth(url, headers) {
@@ -992,7 +992,7 @@ function updSend(){
 }
 function updatePill(){
   const n={puter:'Puter.js',gemini:'Google AI',openrouter:'OpenRouter',cerebras:'Cerebras',anthropic:'Anthropic',hfchat:'HF Chat'};
-  document.getElementById('pill').textContent='⚡ '+(C.provider?n[C.provider]||C.provider:'Free');
+  document.getElementById('pill').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:-2px"><polygon points="13 2 4 14 12 14 11 22 20 10 12 10"/></svg> '+(C.provider?n[C.provider]||C.provider:'Free');
 }
 
 function keyForProvider(provider){
@@ -1025,7 +1025,7 @@ function setMode(b){document.querySelectorAll('[data-mode]').forEach(x=>x.classL
 function setORM(b){document.querySelectorAll('[data-orm]').forEach(x=>x.classList.remove('active'));b.classList.add('active');C.orModel=b.dataset.orm;}
 function setHM(b){document.querySelectorAll('[data-hm]').forEach(x=>x.classList.remove('active'));b.classList.add('active');C.hfModel=b.dataset.hm;}
 function cpURL(btn,url){
-  const done=()=>{btn.textContent='✓ Copied';setTimeout(()=>btn.textContent='Copy',2000);};
+  const done=()=>{btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:-1px"><polyline points="20 6 9 17 4 12"/></svg> Copied';setTimeout(()=>btn.textContent='Copy',2000);};
   if(navigator.clipboard && window.isSecureContext){
     navigator.clipboard.writeText(url).then(done).catch(()=>{prompt('Copy this link:',url);done();});
   }else{
@@ -1084,7 +1084,7 @@ function saveSettings(){
   updatePill();
   if(C.provider && hasProviderAccess(C.provider))
     document.getElementById('setup-banner').classList.remove('on');
-  closeSettings(); toast('Settings saved ✓');
+  closeSettings(); toast('Settings saved');
 }
 
 /* ── IMAGE ── */
@@ -1101,7 +1101,7 @@ function onFile(e){
     document.getElementById('img-name').textContent=file.name;
     document.getElementById('img-preview-bar').classList.add('on');
     const mb = document.getElementById('mask-btn');
-    if (mb) { mb.disabled = false; mb.textContent = '🖌'; }
+    if (mb) { mb.disabled = false; mb.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>'; }
     updSend();
   };
   r.readAsDataURL(file);e.target.value='';
@@ -1214,7 +1214,7 @@ function doneMask() {
   };
   // Reflect in input bar
   const btn = document.getElementById('mask-btn');
-  if (btn) btn.textContent = '🖌✓';
+  if (btn) btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/><polyline points="3 12 6 15 11 9" stroke="#4ade80" stroke-width="2"/></svg>';
   closeMask();
 }
 
@@ -1226,8 +1226,8 @@ function toggleSceneLock(){
   try { LS.setItem('ps_scene_lock', sceneLocked ? '1' : '0'); } catch(_){}
   refreshSceneLockUI();
   toast(sceneLocked
-    ? '🔒 Scene locked — refinements preserve the previous image'
-    : '🔓 Scene lock off — each prompt starts fresh');
+    ? 'Scene locked — refinements preserve the previous image'
+    : 'Scene lock off — each prompt starts fresh');
 }
 function refreshSceneLockUI(){
   const btn = document.getElementById('scene-lock-btn');
@@ -1235,7 +1235,9 @@ function refreshSceneLockUI(){
   const lbl = document.getElementById('scene-lock-lbl');
   if (!btn) return;
   btn.classList.toggle('off', !sceneLocked);
-  icn.textContent = sceneLocked ? '🔒' : '🔓';
+  icn.innerHTML = sceneLocked
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V8a4 4 0 0 1 7 0"/></svg>';
   lbl.textContent = sceneLocked ? 'Scene' : 'Scene off';
   btn.title = sceneLocked
     ? 'Scene Lock ON — keeps subject, setting, and mood across refinements'
@@ -1288,7 +1290,7 @@ async function setCurrentImageFromUrl(url, name){
     document.getElementById('img-preview-bar').classList.add('on');
     currentMask = null;
     const mb = document.getElementById('mask-btn');
-    if (mb) { mb.disabled = false; mb.textContent = '🖌'; }
+    if (mb) { mb.disabled = false; mb.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>'; }
     updSend();
   } catch (e) { console.warn('[setCurrentImageFromUrl]', e); }
 }
@@ -1348,8 +1350,8 @@ function send(){
     // First-use popup — fires on the first refinement turn so the
     // user understands the chained-context behavior.
     showFirstUseHint('fu_scene_lock_v1', {
-      icon: '🔒', title: 'Scene Lock',
-      body: 'Refinements automatically preserve the previous image\'s subject, setting, and mood. To start fresh instead, tap the 🔒 Scene pill on the preview bar to turn it off.',
+      icon: 'lock', title: 'Scene Lock',
+      body: 'Refinements automatically preserve the previous image\'s subject, setting, and mood. To start fresh instead, tap the Scene pill on the preview bar to turn it off.',
       cta: 'Got it'
     });
   }
@@ -1503,7 +1505,7 @@ async function pipeline(prompt, imgData, tid) {
           // tell the user a manual mask is needed and offer the
           // export prompt for a real inpaint tool.
           exportPromptText =
-            '🖌 Manual mask needed.\n\n' +
+            'Manual mask needed.\n\n' +
             'Adding "' + (e.object || 'an object') + '" to a specific area requires an inpainting provider, ' +
             'and none is currently configured. Two ways forward:\n\n' +
             '1) Add a free Hugging Face token in Settings (HF SDXL inpainting will be unlocked).\n' +
@@ -1514,7 +1516,7 @@ async function pipeline(prompt, imgData, tid) {
           // object was added. Reject and surface a clear message
           // instead of showing the user a blurry duplicate.
           exportPromptText =
-            '⚠ The provider returned an image that is nearly identical to the source. ' +
+            'Note: The provider returned an image that is nearly identical to the source. ' +
             '"' + (e.object || 'the object') + '" was not actually added. ' +
             'This usually means the chain only has text-to-image providers and cannot do localized edits. ' +
             'Add a free Hugging Face token in Settings for SDXL inpainting, or use the export prompt below in a local SD tool.\n\n' +
@@ -1552,7 +1554,7 @@ async function pipeline(prompt, imgData, tid) {
       // Celebrate first true-edit (Gemini Image used with image attached)
       if (imageProvUsed === 'Gemini Image' && imgData) {
         showFirstUseHint('fu_gemini_edit_v1', {
-          icon: '✨', title: 'True image edit active',
+          icon: 'sparkle', title: 'True image edit active',
           body: 'Gemini 2.5 Flash Image is now editing your photo directly — face, pose, and composition are preserved across refinements. This is the closest free option to Glam-AI-style editing.',
           cta: 'Got it'
         });
@@ -2086,7 +2088,7 @@ function buildSDExportPrompt(userRequest, prevSDPrompt) {
     ? 'SEED: ' + CHAR.seed + '   (locked for character consistency)'
     : 'SEED: random — once you find a face you like, lock the seed and re-use it';
   return [
-    '⚠ No free image-to-image provider is configured, so I cannot pixel-edit your image directly. ',
+    'Note: No free image-to-image provider is configured, so I cannot pixel-edit your image directly. ',
     'Paste the prompt below into a local Stable Diffusion tool (ComfyUI / Automatic1111 / Fooocus) ',
     'to keep the character consistent.\n',
     '── POSITIVE PROMPT ──',
@@ -2908,7 +2910,7 @@ async function hfImageCall(model, prompt, imgData, mask) {
 function addUserMsg(text,imgData){
   const a=document.getElementById('chat-area');
   const el=document.createElement('div');el.className='msg user';
-  el.innerHTML=`<div class="msg-avatar">👤</div><div class="msg-content"><div class="bubble">
+  el.innerHTML=`<div class="msg-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg></div><div class="msg-content"><div class="bubble">
     ${imgData?`<img class="bubble-img" src="${imgData.dataUrl}" alt="">`:''} ${text?esc(text):''}</div></div>`;
   a.appendChild(el);scrollBot();
 }
@@ -2918,13 +2920,13 @@ function addAIMsg(text, imgUrl, provider, fallbackNote, chips) {
   const el=document.createElement('div');el.className='msg ai';
   const names={puter:'Puter.js',gemini:'Google Gemini',openrouter:'OpenRouter',cerebras:'Cerebras',anthropic:'Claude',hfchat:'HF Mistral'};
   const noteHtml = fallbackNote
-    ? `<div class="fallback-note">⚡ ${esc(fallbackNote)}</div>` : '';
+    ? `<div class="fallback-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:-2px"><polygon points="13 2 4 14 12 14 11 22 20 10 12 10"/></svg> ${esc(fallbackNote)}</div>` : '';
   // Strip CHIPS: line from the displayed text — chips render as buttons below
   const cleanText = text.replace(/CHIPS:[\s\S]*$/i, '').trim();
   // Action buttons row — Save to Library (Load) + ⬇ Download
   const actionsHtml = imgUrl ? `
     <div class="result-actions">
-      <button class="save-lib-btn" data-img-url="${esc(imgUrl)}">💾 Save to Library</button>
+      <button class="save-lib-btn" data-img-url="${esc(imgUrl)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save to Library</button>
       <a class="dl-btn" href="${imgUrl}" download="image-prompt.png" target="_blank" rel="noopener">⬇ Download</a>
     </div>` : '';
   // Continue chips (Phase 2)
@@ -2932,12 +2934,12 @@ function addAIMsg(text, imgUrl, provider, fallbackNote, chips) {
     <div class="suggest-chips">
       ${chips.map(c => `<button class="chip" data-chip="${esc(c)}">${esc(c)}</button>`).join('')}
     </div>` : '';
-  el.innerHTML=`<div class="msg-avatar">✦</div><div class="msg-content">
+  el.innerHTML=`<div class="msg-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/></svg></div><div class="msg-content">
     ${noteHtml}
     <div class="bubble">${imgUrl?`<img class="bubble-img" src="${imgUrl}" alt="result">`:''} ${esc(cleanText)}</div>
     ${actionsHtml}
     ${chipsHtml}
-    <div class="model-badge">✦ ${esc(names[provider]||provider)}</div>
+    <div class="model-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;vertical-align:-1px"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/></svg> ${esc(names[provider]||provider)}</div>
   </div>`;
   a.appendChild(el);scrollBot();
   // Wire chip clicks: fill prompt input + focus
@@ -2983,17 +2985,17 @@ async function saveToLoadLibrary(imgUrl, btn) {
         mime: blob.type || 'image/png',
         size: blob.size
       }, '*');
-      if (btn) { btn.textContent = '✓ Saved to Library'; }
-      setTimeout(() => { if (btn) { btn.textContent = '💾 Save to Library'; btn.disabled = false; } }, 2200);
+      if (btn) { btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:-1px"><polyline points="20 6 9 17 4 12"/></svg> Saved to Library'; }
+      setTimeout(() => { if (btn) { btn.textContent = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save to Library'; btn.disabled = false; } }, 2200);
     } else {
       // Standalone (not inside Load) — fall back to download
       const a = document.createElement('a');
       a.href = imgUrl; a.download = 'image-prompt.png';
       document.body.appendChild(a); a.click(); a.remove();
-      if (btn) { btn.textContent = '⬇ Downloaded'; setTimeout(()=>{ btn.textContent='💾 Save to Library'; btn.disabled=false; }, 2200); }
+      if (btn) { btn.textContent = '⬇ Downloaded'; setTimeout(()=>{ btn.textContent='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save to Library'; btn.disabled=false; }, 2200); }
     }
   } catch (e) {
-    if (btn) { btn.textContent = '⚠ Failed'; setTimeout(()=>{ btn.textContent='💾 Save to Library'; btn.disabled=false; }, 2200); }
+    if (btn) { btn.textContent = 'Failed'; setTimeout(()=>{ btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save to Library'; btn.disabled=false; }, 2200); }
     console.warn('[saveToLoadLibrary]', e);
   }
 }
@@ -3001,14 +3003,14 @@ async function saveToLoadLibrary(imgUrl, btn) {
 function addError(msg){
   const a=document.getElementById('chat-area');
   const el=document.createElement('div');el.className='msg ai';
-  el.innerHTML=`<div class="msg-avatar">✦</div><div class="msg-content"><div class="error-bubble">⚠️ ${esc(msg)}</div></div>`;
+  el.innerHTML=`<div class="msg-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/></svg></div><div class="msg-content"><div class="error-bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px"><path d="M10.3 3.7L1.5 18a2 2 0 0 0 1.7 3h17.6a2 2 0 0 0 1.7-3L13.7 3.7a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r=".9" fill="currentColor"/></svg> ${esc(msg)}</div></div>`;
   a.appendChild(el);scrollBot();
 }
 
 function addTyping(){
   const a=document.getElementById('chat-area');const id='t'+Date.now();
   const el=document.createElement('div');el.className='msg ai';el.id=id;
-  el.innerHTML=`<div class="msg-avatar">✦</div><div class="msg-content"><div class="bubble" style="padding:10px 16px">
+  el.innerHTML=`<div class="msg-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/></svg></div><div class="msg-content"><div class="bubble" style="padding:10px 16px">
     <div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
   </div></div>`;
   a.appendChild(el);scrollBot();return id;

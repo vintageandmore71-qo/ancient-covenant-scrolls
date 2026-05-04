@@ -2877,7 +2877,7 @@ function showChapterTimeline(bookId, chIdx) {
       h += '<div class="tl-detail-text">' + ev.preview + '</div>';
       h += '<div class="tl-detail-nav">';
       if (selectedIdx > 0) h += '<button class="study-btn" id="b-tl-prev">◀ Previous</button>';
-      h += '<button class="cloze-audio" id="b-tl-hear">🔊 Listen</button>';
+      h += '<button class="cloze-audio" id="b-tl-hear" style="display:inline-flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M5 9v6h3l5 4V5L8 9H5z"/><path d="M16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/></svg> Listen</button>';
       if (selectedIdx < events.length - 1) h += '<button class="study-btn" id="b-tl-next">Next ▶</button>';
       h += '</div>';
       h += '</div>';

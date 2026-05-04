@@ -15030,7 +15030,7 @@ window.LoadAudioFix = {
  // Even when cached, expose Re-install so a corrupt cache
  // can be flushed with one tap (no need to Remove + Install
  // separately).
- installEl.textContent = '⟲ Re-install';
+ installEl.textContent = 'Re-install';
  installEl.disabled = false;
  testEl.disabled = false;
  uninstallEl.style.display = '';

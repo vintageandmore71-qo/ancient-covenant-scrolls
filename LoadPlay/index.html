@@ -2966,8 +2966,8 @@ window.addEventListener('online',  () => toast('Back online'));
             '<div class="lp-pe-field"><label class="lp-pe-label">Category</label><div style="color:var(--text2)">' + (data.category || '<span style="color:#ff6e6e">Missing</span>') + '</div></div>' +
             '<div class="lp-pe-field"><label class="lp-pe-label">Description</label><div style="color:var(--text2);line-height:1.55">' + (data.description ? data.description.replace(/</g, '&lt;') : '<span style="color:var(--text3)">No description</span>') + '</div></div>' +
             '<div class="lp-pe-field"><label class="lp-pe-label">Media</label><div style="color:var(--text2)">' +
-              (data.poster ? 'Poster ✓ ' : 'No poster · ') +
-              (data.trailer ? 'Trailer ✓ ' : 'No trailer · ') +
+              (data.poster ? 'Poster present · ' : 'No poster · ') +
+              (data.trailer ? 'Trailer present · ' : 'No trailer · ') +
               (data.primaryName ? 'Primary file: ' + data.primaryName : '<span style="color:#ff6e6e">No primary file selected</span>') +
             '</div></div>' +
             '<div class="lp-pe-field"><label class="lp-pe-label">Rights</label><div style="color:var(--text2)">' +

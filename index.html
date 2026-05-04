@@ -167,24 +167,25 @@ body.dark #home p{color:#888}
 
 <div id="prog"><div id="pf"></div></div>
 <div id="topnav">
-<button id="b-sb">&#9776;</button>
+<button id="b-sb" title="Toggle sidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
 <div id="tb">The Ancient Covenant Record</div>
-<div id="fc"><button id="b-fa" title="Font smaller">A-</button><button id="b-fb" title="Font larger">A+</button></div>
-<div id="lhc"><button id="b-lhd" title="Less spacing">&#8597;</button><button id="b-lhu" title="More spacing">&#8645;</button></div>
+<div id="fc"><button id="b-fa" title="Font smaller">A&#8722;</button><button id="b-fb" title="Font larger">A&#43;</button></div>
+<div id="lhc"><button id="b-lhd" title="Less spacing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><polyline points="8 17 12 21 16 17"/><polyline points="8 7 12 3 16 7"/><line x1="12" y1="3" x2="12" y2="21"/></svg></button><button id="b-lhu" title="More spacing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><polyline points="3 6 7 2 11 6"/><polyline points="3 18 7 22 11 18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="13" y1="6" x2="21" y2="6"/><line x1="13" y1="12" x2="21" y2="12"/><line x1="13" y1="18" x2="21" y2="18"/></svg></button></div>
 <input id="sq" type="text" placeholder="Search...">
-<button id="b-bm" title="Bookmark">&#9734;</button>
-<button id="b-cj" title="Jump to chapter">&#9654;&#9654;</button>
-<button id="b-nt" title="Notes">&#128221;</button>
-<button id="b-nv" title="All notes">&#128196;</button>
-<button id="b-rec" title="Recently read">&#128336;</button>
-<button id="b-sep" title="Sepia mode">&#9728;</button>
-<button id="b-dk" title="Dark mode">&#9685;</button>
-<button id="b-rd" title="Reading mode">&#8865;</button>
-<button id="b-vt" title="Voice reader">&#128266;</button>
+<button id="b-bm" title="Bookmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><polygon points="12 3 14.6 9 21 9.6 16 14 17.5 20.5 12 17 6.5 20.5 8 14 3 9.6 9.4 9"/></svg></button>
+<button id="b-cj" title="Jump to chapter"><svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><polygon points="4 4 12 12 4 20"/><polygon points="13 4 21 12 13 20"/></svg></button>
+<button id="b-nt" title="Notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M5 4h11l3 3v13H5z"/><path d="M16 4v3h3"/><path d="M8 12h8M8 16h6"/></svg></button>
+<button id="b-nv" title="All notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 10h6M9 14h6M9 18h4"/></svg></button>
+<button id="b-rec" title="Recently read"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></button>
+<button id="b-refresh" title="Hard refresh — clear cache &amp; reload" onclick="(async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()));}catch(e){}location.reload(true);})()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><polyline points="21 4 21 10 15 10"/><polyline points="3 20 3 14 9 14"/><path d="M3.5 14a8.5 8.5 0 0 0 14.7 4.4M20.5 10a8.5 8.5 0 0 0-14.7-4.4"/></svg></button>
+<button id="b-sep" title="Sepia mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M2 12h3M19 12h3M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg></button>
+<button id="b-dk" title="Dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+<button id="b-rd" title="Reading mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+<button id="b-vt" title="Voice reader"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M5 9v6h3l5 4V5L8 9H5z"/><path d="M16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/></svg></button>
 </div>
 
 <div id="sb">
-<div style="padding:8px 12px 6px;color:#555;font-size:9px;letter-spacing:.05em;border-bottom:1px solid #333">&#128214; THE ANCIENT COVENANT RECORD &#8212; 46 VOLUMES</div>
+<div style="padding:8px 12px 6px;color:#555;font-size:9px;letter-spacing:.05em;border-bottom:1px solid #333;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;flex-shrink:0"><path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M7 4v13"/></svg>THE ANCIENT COVENANT RECORD &#8212; 46 VOLUMES</div>
 <div class="toc-vol">Vol 1</div>
 <div class="toc-file" data-id="file_1">Bereshit (Genesis) — Part 1 — Chapters 1–11</div>
 <div class="toc-file" data-id="file_2">Bereshit (Genesis) — Part 2 — Chapters 12–25</div>
@@ -352,7 +353,7 @@ body.dark #home p{color:#888}
 <div class="ph">&#x10909;&#x10904;&#x10905;&#x10904;</div>
 <h1>THE ANCIENT COVENANT RECORD</h1>
 <p>46 Volumes &#183; 111 Parts<br>Dead Sea Scrolls &#183; Orit Ge&#39;ez &#183; Ancient Hebrew<br>DSS Primary &#183; No Western Bias &#183; No Christian Framing</p>
-<button id="b-start">Begin with Bereshit &#9654;</button>
+<button id="b-start" style="display:inline-flex;align-items:center;gap:8px">Begin with Bereshit <svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><polygon points="6 4 20 12 6 20"/></svg></button>
 </div>
 </div>
 </div>
@@ -369,17 +370,17 @@ body.dark #home p{color:#888}
 </div>
 
 <div id="vr">
-<button id="b-pl">&#9654;</button>
-<button id="b-pa" style="display:none">&#9646;&#9646;</button>
-<button id="b-st">&#9632;</button>
+<button id="b-pl" title="Play"><svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><polygon points="6 4 20 12 6 20"/></svg></button>
+<button id="b-pa" style="display:none" title="Pause"><svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg></button>
+<button id="b-st" title="Stop"><svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><rect x="5" y="5" width="14" height="14" rx="1"/></svg></button>
 <select id="vs"><option value="0.7">0.7x</option><option value="0.85">0.85x</option><option value="1" selected>1x</option><option value="1.2">1.2x</option><option value="1.5">1.5x</option></select>
 <select id="vc"><option value="">Loading...</option></select>
-<button id="b-pv" title="Preview voice">&#9654;&#9654;</button>
+<button id="b-pv" title="Preview voice"><svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px"><polygon points="4 4 13 12 4 20"/><polygon points="13 4 22 12 13 20"/></svg></button>
 <select id="vm"><option value="verses">Verses</option><option value="notes">Notes</option><option value="all">All</option></select>
-<button id="b-rc" title="Record this chapter in your own voice — plays your recording instead of the TTS voice when set">&#127908;</button>
-<button id="b-rcd" title="Use TTS voice instead (delete this chapter's recording)" style="display:none;">&#128465;</button>
-<button id="b-lp" title="Loop this chapter — replays automatically when finished">&#128257;</button>
-<button id="b-cn" title="Play only the COMPARATIVE MANUSCRIPT NOTES of this section">&#128221;</button>
+<button id="b-rc" title="Record this chapter in your own voice — plays your recording instead of the TTS voice when set"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg></button>
+<button id="b-rcd" title="Use TTS voice instead (delete this chapter's recording)" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button>
+<button id="b-lp" title="Loop this chapter — replays automatically when finished"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
+<button id="b-cn" title="Play only the COMPARATIVE MANUSCRIPT NOTES of this section"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M5 4h11l3 3v13H5z"/><path d="M16 4v3h3"/><path d="M8 12h8M8 16h6"/></svg></button>
 <span id="vst">Ready</span>
 </div>
 
@@ -407,9 +408,9 @@ body.dark #home p{color:#888}
 </div>
 
 <div id="bn">
-<button id="b-pv2" disabled>&#9664; Prev</button>
+<button id="b-pv2" disabled style="display:inline-flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px"><polygon points="18 4 4 12 18 20"/></svg> Prev</button>
 <span id="pl">&#8212;</span>
-<button id="b-nx">Next &#9654;</button>
+<button id="b-nx" style="display:inline-flex;align-items:center;gap:6px">Next <svg viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px"><polygon points="6 4 20 12 6 20"/></svg></button>
 </div>
 <button id="tb2">&#8593;</button>
 
@@ -456,7 +457,7 @@ var a=document.querySelector('.toc-file.on');if(a)a.scrollIntoView({block:'neare
 document.getElementById('b-pv2').disabled=i<=0;
 document.getElementById('b-nx').disabled=i>=IDS.length-1;
 document.getElementById('pl').textContent=(i+1)+' of '+IDS.length;
-document.getElementById('b-bm').textContent=bms.indexOf(fid)>=0?'★':'☆';
+document.getElementById('b-bm').innerHTML=bms.indexOf(fid)>=0?'<svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><polygon points="12 3 14.6 9 21 9.6 16 14 17.5 20.5 12 17 6.5 20.5 8 14 3 9.6 9.4 9"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><polygon points="12 3 14.6 9 21 9.6 16 14 17.5 20.5 12 17 6.5 20.5 8 14 3 9.6 9.4 9"/></svg>';
 document.getElementById('np-lbl').textContent='Notes — '+LBL[i];
 document.getElementById('np-ta').value=getNote(fid)||'';
 restoreHL(fid);
@@ -626,7 +627,7 @@ document.getElementById('b-fa').addEventListener('click',function(){fs=Math.max(
 document.getElementById('b-fb').addEventListener('click',function(){fs=Math.min(20,fs+1);document.getElementById('content').style.fontSize=fs+'pt';localStorage.setItem('acr_fs',fs);});
 document.getElementById('b-lhd').addEventListener('click',function(){lh=Math.max(1.2,parseFloat((lh-.1).toFixed(1)));document.documentElement.style.setProperty('--lh',lh);localStorage.setItem('acr_lh',lh);});
 document.getElementById('b-lhu').addEventListener('click',function(){lh=Math.min(2.5,parseFloat((lh+.1).toFixed(1)));document.documentElement.style.setProperty('--lh',lh);localStorage.setItem('acr_lh',lh);});
-document.getElementById('b-bm').addEventListener('click',function(){var fid=IDS[cur];if(!fid)return;var i=bms.indexOf(fid);if(i>=0){bms.splice(i,1);this.textContent='☆';}else{bms.push(fid);this.textContent='★';}localStorage.setItem('acr_bms',JSON.stringify(bms));});
+document.getElementById('b-bm').addEventListener('click',function(){var fid=IDS[cur];if(!fid)return;var i=bms.indexOf(fid);if(i>=0){bms.splice(i,1);this.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><polygon points="12 3 14.6 9 21 9.6 16 14 17.5 20.5 12 17 6.5 20.5 8 14 3 9.6 9.4 9"/></svg>';}else{bms.push(fid);this.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><polygon points="12 3 14.6 9 21 9.6 16 14 17.5 20.5 12 17 6.5 20.5 8 14 3 9.6 9.4 9"/></svg>';}localStorage.setItem('acr_bms',JSON.stringify(bms));});
 document.getElementById('sq').addEventListener('input',function(){document.querySelectorAll('mark').forEach(function(m){m.outerHTML=m.innerHTML;});var q=this.value;if(!q||q.length<3)return;var c=document.getElementById('content'),ql=q.toLowerCase(),w=document.createTreeWalker(c,NodeFilter.SHOW_TEXT,null,false),ns=[],n,f=null;while(n=w.nextNode())ns.push(n);ns.forEach(function(n){var t=n.textContent,i=t.toLowerCase().indexOf(ql);if(i>=0){var r=document.createRange();r.setStart(n,i);r.setEnd(n,i+q.length);try{var m=document.createElement('mark');r.surroundContents(m);if(!f)f=m;}catch(e){}}} );if(f)window.scrollTo(0,f.getBoundingClientRect().top+(window.pageYOffset||0)-80);});
 
 function prepTTS(txt){
@@ -908,7 +909,7 @@ function crSetButtons(){
     rcBtn.textContent='\u{1F3A4}';rcdBtn.style.display='none';
     return;
   }
-  if(window.__crCache[fid]){rcBtn.textContent='\u{1F3A4}★';rcdBtn.style.display='inline';}
+  if(window.__crCache[fid]){rcBtn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg><svg viewBox="0 0 24 24" fill="#facc15" style="width:10px;height:10px;margin-left:-2px;vertical-align:6px"><polygon points="12 3 14.6 9 21 9.6 16 14 17.5 20.5 12 17 6.5 20.5 8 14 3 9.6 9.4 9"/></svg>';rcdBtn.style.display='inline';}
   else{rcBtn.textContent='\u{1F3A4}';rcdBtn.style.display='none';}
 }
 // crSetButtons() is called from inside go() itself (after the
