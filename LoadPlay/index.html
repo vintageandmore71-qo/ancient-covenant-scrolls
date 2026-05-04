@@ -1194,6 +1194,14 @@ html .lp-bottom-title{font-size:30px;text-shadow:none}
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6C19 16.5 12 21 12 21z"/></svg>
           <span class="label">Favorites</span>
         </div>
+        <div class="nav-item" data-lp-act="watch-history">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+          <span class="label">Watch History</span>
+        </div>
+        <div class="nav-item" data-lp-act="settings">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+          <span class="label">Settings</span>
+        </div>
         <div class="nav-item" data-lp-act="profiles">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>
           <span class="label">Viewer Profiles</span>
@@ -1914,6 +1922,17 @@ function openPlayer(v) {
   S.playing = false;
   S.progress = 0;
   clearInterval(S.pInterval);
+  // v45 — Tier 1.2: append to local watch history (most-recent first,
+  // dedupe by id, cap at 200). Stored in lp_watch_history.
+  try {
+    var raw = localStorage.getItem('lp_watch_history');
+    var hist = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(hist)) hist = [];
+    hist = hist.filter(function (e) { return e.id !== v.id; });
+    hist.unshift({ id: v.id, t: v.t, ch: v.ch, v: v.v, a: v.a, d: v.d, cat: v.cat, em: v.em, desc: v.desc, ts: Date.now() });
+    if (hist.length > 200) hist.length = 200;
+    localStorage.setItem('lp_watch_history', JSON.stringify(hist));
+  } catch (e) {}
 
   const ch = CH[v.ch];
   const tg = TG[v.id % TG.length];
@@ -2678,6 +2697,161 @@ window.addEventListener('online',  () => toast('Back online'));
   // Expose so other modules can deep-link.
   window.__lpRenderProfileEdit = renderProfileEdit;
 
+  // ── Watch History (Tier 1.2) ─────────────────────────────────
+  // Local-only history. openPlayer pushes onto lp_watch_history with
+  // most-recent first, deduped by id, capped at 200. This page lists
+  // them with thumbnail + title + channel + a clear-history button.
+  function readWatchHistory() {
+    try { var a = JSON.parse(localStorage.getItem('lp_watch_history') || '[]'); return Array.isArray(a) ? a : []; }
+    catch (e) { return []; }
+  }
+  function clearWatchHistory() { try { localStorage.removeItem('lp_watch_history'); } catch (e) {} }
+  function fmtRel(ts) {
+    var s = Math.max(1, Math.floor((Date.now() - ts) / 1000));
+    if (s < 60) return s + 's ago';
+    if (s < 3600) return Math.floor(s / 60) + 'm ago';
+    if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+    return Math.floor(s / 86400) + 'd ago';
+  }
+  function renderWatchHistory() {
+    closeSidebarSafe();
+    clearViews();
+    document.body.classList.add('lp-paging');
+    var pg = $$('lp-page'); if (pg) pg.hidden = false;
+    $$('lp-page-title').textContent = 'Watch History';
+    $$('lp-page-blurb').textContent = 'Everything you have played on this device, most recent first. History stays on this device only.';
+    var hist = readWatchHistory();
+    if (!hist.length) {
+      $$('lp-page-extra').innerHTML = cards([{ t: 'No history yet', b: 'Anything you tap to play will show up here.' }]);
+      return;
+    }
+    var head = '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 14px"><div style="font-size:13px;color:var(--text2);font-weight:600">' + hist.length + ' item' + (hist.length === 1 ? '' : 's') + '</div><button class="lp-pe-cancel" type="button" id="lpHistClear">Clear watch history</button></div>';
+    var rows = hist.map(function (v) {
+      var emoji = v.em || '▶';
+      return '<button type="button" class="lp-page-card" data-lp-hist="' + v.id + '" style="display:flex;gap:14px;align-items:center;text-align:left;cursor:pointer;width:100%">' +
+        '<div style="width:140px;aspect-ratio:16/9;border-radius:8px;background:linear-gradient(135deg,#0a1535,#1a1a2e);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:34px;color:rgba(255,255,255,.65)">' + emoji + '</div>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:14.5px;color:#fff;font-weight:700;line-height:1.35;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (v.t || 'Untitled') + '</div>' +
+          '<div style="font-size:12.5px;color:var(--text2);margin-bottom:2px">' + (v.v ? v.v + ' views · ' : '') + (v.a || 'recent') + '</div>' +
+          '<div style="font-size:11.5px;color:var(--text3)">Watched ' + fmtRel(v.ts || Date.now()) + ' · ' + (v.d || '') + '</div>' +
+        '</div></button>';
+    }).join('');
+    $$('lp-page-extra').innerHTML = head + '<div style="display:flex;flex-direction:column;gap:10px">' + rows + '</div>';
+    var clearBtn = $$('lpHistClear');
+    if (clearBtn) clearBtn.addEventListener('click', function () {
+      clearWatchHistory();
+      renderWatchHistory();
+    });
+    $$('lp-page-extra').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-lp-hist]');
+      if (!b) return;
+      var id = parseInt(b.getAttribute('data-lp-hist'), 10);
+      var v = (typeof VIDS !== 'undefined' ? VIDS : []).find(function (x) { return x.id === id; });
+      if (!v) {
+        var rec = hist.find(function (x) { return x.id === id; });
+        if (rec) v = rec;
+      }
+      if (v && typeof openPlayer === 'function') {
+        document.body.classList.remove('lp-paging');
+        showStream();
+        setTimeout(function () { openPlayer(v); }, 0);
+      }
+    });
+  }
+  window.__lpRenderWatchHistory = renderWatchHistory;
+
+  // ── Settings (Tier 1.3) ──────────────────────────────────────
+  var LP_SETTINGS_KEY = 'lp_settings';
+  function readLpSettings() {
+    try { return JSON.parse(localStorage.getItem(LP_SETTINGS_KEY) || 'null') || {}; }
+    catch (e) { return {}; }
+  }
+  function writeLpSettings(s) { try { localStorage.setItem(LP_SETTINGS_KEY, JSON.stringify(s)); } catch (e) {} }
+  function renderSettings() {
+    closeSidebarSafe();
+    clearViews();
+    document.body.classList.add('lp-paging');
+    var pg = $$('lp-page'); if (pg) pg.hidden = false;
+    $$('lp-page-title').textContent = 'Settings';
+    $$('lp-page-blurb').textContent = 'Playback preferences for this device.';
+    var s = readLpSettings();
+    var subLang   = s.subtitleLanguage || 'off';
+    var audLang   = s.audioLanguage    || 'en';
+    var autoplay  = s.autoplay !== false;
+    var content   = s.contentFilter    || 'all';
+    var dataSaver = !!s.dataSaver;
+    var langOpts = [
+      ['off','Off'], ['en','English'], ['es','Spanish'], ['fr','French'],
+      ['de','German'], ['it','Italian'], ['pt','Portuguese'], ['ja','Japanese'],
+      ['ko','Korean'], ['zh','Chinese'], ['ar','Arabic'], ['hi','Hindi']
+    ];
+    var audOpts = langOpts.filter(function (o) { return o[0] !== 'off'; });
+    function makeSelect(id, value, options) {
+      return '<select class="lp-pe-input" id="' + id + '">' +
+        options.map(function (o) {
+          return '<option value="' + o[0] + '"' + (o[0] === value ? ' selected' : '') + '>' + o[1] + '</option>';
+        }).join('') + '</select>';
+    }
+    var html =
+      '<div class="lp-pe-form">' +
+        '<div class="lp-pe-field">' +
+          '<label class="lp-pe-label" for="lpSetSubLang">Subtitle language</label>' +
+          makeSelect('lpSetSubLang', subLang, langOpts) +
+          '<div class="lp-pe-help">Default subtitle track to load when you start a video.</div>' +
+        '</div>' +
+        '<div class="lp-pe-field">' +
+          '<label class="lp-pe-label" for="lpSetAudLang">Audio language</label>' +
+          makeSelect('lpSetAudLang', audLang, audOpts) +
+          '<div class="lp-pe-help">Preferred audio track when a video has multiple.</div>' +
+        '</div>' +
+        '<div class="lp-pe-field">' +
+          '<label class="lp-pe-label">Autoplay next video</label>' +
+          '<label style="display:flex;align-items:center;gap:10px;color:var(--text2);font-size:13.5px"><input type="checkbox" id="lpSetAutoplay"' + (autoplay ? ' checked' : '') + ' style="width:18px;height:18px;cursor:pointer"> Play the next video automatically when one ends.</label>' +
+        '</div>' +
+        '<div class="lp-pe-field">' +
+          '<label class="lp-pe-label">Data saver</label>' +
+          '<label style="display:flex;align-items:center;gap:10px;color:var(--text2);font-size:13.5px"><input type="checkbox" id="lpSetDataSaver"' + (dataSaver ? ' checked' : '') + ' style="width:18px;height:18px;cursor:pointer"> Default to lower video quality on cellular.</label>' +
+        '</div>' +
+        '<div class="lp-pe-field">' +
+          '<label class="lp-pe-label" for="lpSetContent">Content filter</label>' +
+          makeSelect('lpSetContent', content, [['all','All audiences'], ['family','Family safe (hide drama, news, reality)'], ['kids','Kids only (animation, learning)']]) +
+          '<div class="lp-pe-help">Hides categories from rails and the chip bar. Same logic the kids profile uses.</div>' +
+        '</div>' +
+        '<div class="lp-pe-save-row">' +
+          '<button class="lp-pe-save" type="button" id="lpSetSave">Save settings</button>' +
+          '<span class="lp-pe-saved-flash" id="lpSetSaved">Saved</span>' +
+        '</div>' +
+      '</div>';
+    $$('lp-page-extra').innerHTML = html;
+    $$('lpSetSave').addEventListener('click', function () {
+      var s2 = {
+        subtitleLanguage: $$('lpSetSubLang').value,
+        audioLanguage:    $$('lpSetAudLang').value,
+        autoplay:         $$('lpSetAutoplay').checked,
+        dataSaver:        $$('lpSetDataSaver').checked,
+        contentFilter:    $$('lpSetContent').value,
+        updatedAt:        new Date().toISOString()
+      };
+      writeLpSettings(s2);
+      // Apply content-filter classes that were already used by the kids
+      // profile: family + kids both hide reality/news/drama tiles.
+      try {
+        document.body.classList.toggle('lp-kids-profile',
+          s2.contentFilter === 'kids' || s2.contentFilter === 'family');
+      } catch (e) {}
+      var f = $$('lpSetSaved');
+      if (f) { f.classList.add('on'); setTimeout(function () { f.classList.remove('on'); }, 1400); }
+    });
+  }
+  // Apply content-filter on first paint so nav respects saved choice.
+  try {
+    var __initSet = readLpSettings();
+    if (__initSet.contentFilter === 'kids' || __initSet.contentFilter === 'family') {
+      document.body.classList.add('lp-kids-profile');
+    }
+  } catch (e) {}
+  window.__lpRenderSettings = renderSettings;
+
   // ── Page registry (generic cards) ────────────────────────────
   function cards(arr) {
     return arr.map(function (c) {
@@ -3087,6 +3261,8 @@ window.addEventListener('online',  () => toast('Back online'));
       case 'drafts':         showPage(PAGES.drafts); return;
       case 'creator-profile': showPage(PAGES['creator-profile']); return;
       case 'profile-edit':    renderProfileEdit(); return;
+      case 'watch-history':   renderWatchHistory(); return;
+      case 'settings':        renderSettings(); return;
       case 'rights':         showPage(PAGES.rights); return;
       case 'clean-stream':   showPage(PAGES['clean-stream']); return;
       case 'safety-scan':    showPage(PAGES['safety-scan']); return;
