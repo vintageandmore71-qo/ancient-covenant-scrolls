@@ -38,7 +38,7 @@ Recovery: `git checkout backup/<name>`.
 
 ## Where work is going next
 
-See per-site handoffs:
+See per-site handoffs (LoadPlay now has a Tier 6 Autopilot Content Engine spec — see Tier 6 section in `HANDOFF_LOADPLAY.md` + full spec in `PLAN_LOADPLAY_AUTOPILOT.md`):
 
 - LoadStudio: `loadstudio/HANDOFF_LOADSTUDIO.md` §5 ("What's still
   pending") — 7 open items including Feature Tools dyslexia rework,

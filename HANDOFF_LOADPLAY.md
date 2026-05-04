@@ -309,3 +309,127 @@ git fetch origin main && git log --oneline origin/main -10 -- LoadPlay/
 # Visit:
 # https://raw.githubusercontent.com/DssOrit/ancient-covenant-scrolls/main/LoadPlay/sw.js
 ```
+
+
+---
+
+## Tier 6 — Autopilot Content Engine (added 2026-05-04, ZIP `LoadPlay_Autopilot_Content_Engine_Handoff`)
+
+Source-of-truth: `PLAN_LOADPLAY_AUTOPILOT.md` at repo root (full
+spec — 555 lines, copied verbatim from the user-supplied
+addendum). PRD also lives in
+`inbox/LoadPlay_Autopilot_Content_Engine_Handoff.zip` (.docx + .pdf
++ .txt formats).
+
+**Status: NOT STARTED.** New backlog tier added on top of Tier 5.
+Both this and the prerequisite Content Connector System are absent
+from current LoadPlay v43.
+
+### Prerequisite — Content Connector System
+
+The Autopilot doc assumes a Content Connector System already exists
+(connectors to Internet Archive, Wikimedia, NASA, NPS, Openverse,
+Pixabay, Pexels, etc.). That foundation is also NOT in current
+LoadPlay. Must be built BEFORE Autopilot.
+
+### Autopilot — what to build
+
+New Admin section: **Admin > Autopilot Content Engine** with
+subpages:
+- Autopilot Activity Log
+- Autopilot Pilot Report
+
+Six modes (selectable, mutually exclusive):
+- Off
+- Demo Mode
+- Draft Only
+- Rights Review Only
+- Publish Approved Only
+- Full Autopilot
+
+Required controls (admin dashboard buttons):
+- Enable/disable Autopilot
+- Select connected sources / target rows
+- Refresh frequency (manual / hourly / daily / weekly)
+- License safety level (strict / moderate / manual-only)
+- Run Autopilot Now / Pause / Resume / Preview Next Run
+- Generate Drafts Only / Send Safe Items to Rights Review
+- Publish Approved Items / Recycle Approved Content
+- Export Autopilot Report / Clear Demo Data
+
+Engine behavior:
+- Discover content from enabled connectors
+- Generate clean titles / descriptions / summaries / tags /
+  categories / suggested row placement
+- Send new content to **Draft Catalog** first
+- Send risky / unclear items to **Rights Review**
+- Publish only admin-approved items
+- Recycle approved content into new rows using honest labels
+  (Rediscovered, From the Archive, Staff Pick, Public Domain
+  Classic, Educational Pick, Historical Feature, Weekend Watch,
+  Recently Featured) — never "Brand New / Original / Exclusive /
+  Just Released" unless truly qualified
+- Fill empty rows with approved content suggestions
+- Detect duplicates by provider ID + source URL + title + media URL
+- Score content quality before suggesting for visible rows
+- Keep demo content strictly separate from production
+- Generate pilot reports (row population, rights blocking,
+  publishing, search, category filtering, player launch,
+  content-lifecycle changes)
+
+Safety rules (enforced server-side in production, locally on PWA
+MVP):
+- No blind publishing
+- No unknown-license publishing without admin approval
+- No demo content in production rows
+- No false-claim labels on recycled content
+- Every item must preserve provider, source URL, license, license
+  URL, creator, attribution text, import date, approval state
+
+Required data models (per spec):
+- `autopilotSettings`
+- `autopilotJob`
+- `autopilotGeneratedMetadata`
+- `recycledContentEvent`
+- `pilotReport`
+
+Required functions (18 total):
+- `getAutopilotSettings()` / `saveAutopilotSettings()`
+- `runAutopilotNow()` / `scheduleAutopilotRun()` / `stopAutopilot()`
+- `discoverContentFromEnabledSources()`
+- `generateContentMetadata()` / `suggestRowPlacement()`
+- `recycleApprovedContent()` / `createEditorialCollection()`
+- `runPilotSimulation()` / `fillEmptyRowsWithApprovedContent()`
+- `detectDuplicateContent()` / `scoreContentQuality()`
+- `sendAutopilotItemsToDraft()` / `sendAutopilotItemsToRightsReview()`
+- `publishApprovedAutopilotItems()`
+- `exportAutopilotActivityReport()`
+
+Scheduling — PWA MVP:
+- Manual Run Now button
+- Local scheduled checks while app is open
+- Visible warning: "Browser-only scheduling runs only while the app
+  is open"
+
+Scheduling — production:
+- Backend cron jobs / server-side workers
+- API keys server-side
+- Daily content discovery / weekly recycle refresh / weekly rights
+  report export
+- Manual publish approval / manual emergency stop
+
+Final acceptance gate (verify before delivering):
+1. Autopilot page exists
+2. Activity Log page exists
+3. Pilot Report page exists
+4. All six modes exist and are exclusive
+5. Run Autopilot Now works
+6. Draft generation works
+7. Rights Review handoff works
+8. Publish Approved only publishes approved items
+9. Recycle Approved Content works
+10. Demo content stays separate from production
+11. Unknown licenses are blocked
+12. Pilot report generates
+13. Existing LoadPlay pages still work
+14. Existing Content Connector System still works
