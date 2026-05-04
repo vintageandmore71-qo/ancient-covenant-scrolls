@@ -928,7 +928,7 @@ window.LoadAudioFix = {
  var box = $('console-scan-report');
  if (!box) return;
  if (!currentApp) {
- box.innerHTML = '<div class="scan-item warn"><div class="label"><span style="display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;color:#fbbf24;vertical-align:middle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="0.8" fill="currentColor"/></svg></span> No app is open.</div>' +
+ box.innerHTML = '<div class="scan-item warn"><div class="label"><span style="display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;color:#1d6fff;vertical-align:middle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="0.8" fill="currentColor"/></svg></span> No app is open.</div>' +
  '<div class="detail">Go to the Library, tap any tile to open it in the viewer, then come back here and tap <strong>Scan current page</strong>.</div></div>';
  $('console-scan-fix').disabled = true;
  return;
@@ -7930,7 +7930,7 @@ window.LoadAudioFix = {
  '<div style="font-weight:700;font-size:15px;margin-right:auto;">Book Check &mdash; ' + escHtml(app.name || 'Untitled') + '</div>' +
  '<div style="font-size:12.5px;color:#a0a0b0;">' +
  '<span style="color:#22c55e;"> ' + passCount + ' pass</span> &middot; ' +
- '<span style="color:#fbbf24;"> ' + warnCount + ' warn</span> &middot; ' +
+ '<span style="color:#1d6fff;"> ' + warnCount + ' warn</span> &middot; ' +
  '<span style="color:#ef4444;"> ' + failCount + ' fail</span>' +
  '</div>' +
  '</div>' +
@@ -9115,7 +9115,7 @@ window.LoadAudioFix = {
  '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
  '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
  '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
- '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ei</span>' +
+ '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ej</span>' +
  '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
  '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
  '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -9224,7 +9224,7 @@ window.LoadAudioFix = {
  '<input id="ve-audio-pick" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg,.flac,.aiff,.aif,.webm,.weba,.opus" style="font-size:13px;">' +
  '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;">' +
  '<label class="ve-lbl">Volume</label>' +
- '<input id="ve-audio-vol" type="range" min="0" max="1" step="0.05" value="0.35" style="flex:1;min-width:140px;accent-color:#fbbf24;">' +
+ '<input id="ve-audio-vol" type="range" min="0" max="1" step="0.05" value="0.35" style="flex:1;min-width:140px;accent-color:#1d6fff;">' +
  '<span id="ve-audio-vol-val" style="font-size:13px;color:#cfcfdc;font-weight:700;">35%</span>' +
  '</div>' +
  '<label class="ve-lbl" style="margin-top:8px;display:flex;align-items:center;gap:6px;"><input id="ve-mute-orig" type="checkbox"> Mute original audio</label>' +
@@ -9234,8 +9234,8 @@ window.LoadAudioFix = {
  '<div class="ve-panel-head"><span>Speed</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
  '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' +
  '<label class="ve-lbl">Playback rate</label>' +
- '<input id="ve-speed-range" type="range" min="0.25" max="4" step="0.25" value="1" style="flex:1;min-width:160px;accent-color:#fbbf24;">' +
- '<span id="ve-speed-val" style="font-size:14px;color:#fbbf24;font-weight:800;min-width:48px;text-align:right;">1.0x</span>' +
+ '<input id="ve-speed-range" type="range" min="0.25" max="4" step="0.25" value="1" style="flex:1;min-width:160px;accent-color:#1d6fff;">' +
+ '<span id="ve-speed-val" style="font-size:14px;color:#1d6fff;font-weight:800;min-width:48px;text-align:right;">1.0x</span>' +
  '</div>' +
  '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">' +
  '<button class="ve-speed-preset" data-speed="0.25">0.25x</button>' +
@@ -9251,8 +9251,8 @@ window.LoadAudioFix = {
  '<div class="ve-panel-head"><span>Opacity</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
  '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' +
  '<label class="ve-lbl">Transparency</label>' +
- '<input id="ve-opacity-range" type="range" min="0" max="100" step="5" value="100" style="flex:1;min-width:160px;accent-color:#fbbf24;">' +
- '<span id="ve-opacity-val" style="font-size:14px;color:#fbbf24;font-weight:800;min-width:48px;text-align:right;">100%</span>' +
+ '<input id="ve-opacity-range" type="range" min="0" max="100" step="5" value="100" style="flex:1;min-width:160px;accent-color:#1d6fff;">' +
+ '<span id="ve-opacity-val" style="font-size:14px;color:#1d6fff;font-weight:800;min-width:48px;text-align:right;">100%</span>' +
  '</div>' +
  '</div>' +
  // Hidden replace-media file picker (triggered from clip context menu)
@@ -9313,7 +9313,7 @@ window.LoadAudioFix = {
  '</div>' +
  // ===== Recording progress overlay =====
  '<div id="ve-progress" style="display:none;position:absolute;left:14px;right:14px;bottom:90px;align-items:center;gap:10px;background:rgba(26,26,38,0.95);border-radius:12px;padding:12px 14px;border:1px solid #2a2a40;backdrop-filter:blur(8px);z-index:5;">' +
- '<div style="flex:1;height:8px;background:#1a1a26;border-radius:4px;overflow:hidden;"><div id="ve-progress-fill" style="height:100%;width:0%;background:linear-gradient(90deg,#ff5ea3,#fbbf24,#22c55e,#4ea0ff,#a18cff);transition:width 0.15s;"></div></div>' +
+ '<div style="flex:1;height:8px;background:#1a1a26;border-radius:4px;overflow:hidden;"><div id="ve-progress-fill" style="height:100%;width:0%;background:linear-gradient(90deg,#ff5ea3,#1d6fff,#22c55e,#4ea0ff,#a18cff);transition:width 0.15s;"></div></div>' +
  '<span id="ve-progress-label" style="font-size:13px;color:#cfcfdc;white-space:nowrap;">Exporting…</span>' +
  '</div>';
 
@@ -9332,10 +9332,12 @@ window.LoadAudioFix = {
  '#__loadVideoEdit .timeline-engine{width:100%;height:260px;background:#101018;display:grid;grid-template-columns:92px 1fr;color:white;overflow:hidden;font-family:system-ui,sans-serif;}' +
  '#__loadVideoEdit .track-labels{padding-top:12px;display:flex;flex-direction:column;gap:10px;align-items:center;}' +
  '#__loadVideoEdit .track-add,#__loadVideoEdit .cover-btn{position:relative;width:64px;height:44px;border:none;border-radius:12px;background:#1e1e2a;color:#fff;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}' +
- '#__loadVideoEdit .track-add svg,#__loadVideoEdit .cover-btn svg{width:22px;height:22px;color:#fff;display:block;}' +
+ '#__loadVideoEdit .track-add svg,#__loadVideoEdit .cover-btn svg{width:22px;height:22px;color:#fff;display:block;pointer-events:none;}' +
+ '#__loadVideoEdit .track-add .ta-plus,#__loadVideoEdit .track-add .ta-lbl,#__loadVideoEdit .cover-btn .ta-lbl,#__loadVideoEdit .cover-btn .ta-plus{pointer-events:none;}' +
  '#__loadVideoEdit .track-add .ta-plus{position:absolute;right:6px;bottom:5px;background:#fff;color:#0a0a14;font-weight:700;font-size:10px;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;line-height:1;}' +
  '#__loadVideoEdit .cover-btn{height:54px;border:1px dashed rgba(255,255,255,0.45);flex-direction:column;gap:3px;}' +
  '#__loadVideoEdit .cover-btn .ta-lbl{font-size:10.5px;font-weight:600;color:#fff;}' +
+ '#__loadVideoEdit .ve-action svg,#__loadVideoEdit .ve-quick-btn svg,#__loadVideoEdit .ve-act-icon svg,#__loadVideoEdit .ve-qb-ic svg{pointer-events:none;}' +
  '#__loadVideoEdit .timeline-scroll{position:relative;overflow-x:auto;overflow-y:hidden;padding:12px 24px 0 0;}' +
  '#__loadVideoEdit .timeline-scroll::-webkit-scrollbar{display:none;}' +
  '#__loadVideoEdit .track{height:38px;margin-bottom:8px;border-radius:8px;background:#191923;color:#8f8f9d;display:flex;align-items:center;padding-left:18px;font-size:15px;cursor:pointer;}' +
@@ -9374,7 +9376,7 @@ window.LoadAudioFix = {
  '#__loadVideoEdit .ve-track-row .ve-track-block{position:absolute;top:3px;bottom:3px;border-radius:6px;display:flex;align-items:center;padding:0 8px;font-size:11px;font-weight:600;cursor:grab;color:#fff;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;touch-action:none;user-select:none;}' +
  '#__loadVideoEdit .ve-track-row .ve-track-block.dragging{cursor:grabbing;opacity:0.85;}' +
  '#__loadVideoEdit .ve-track-row[data-track="music"] .ve-track-block{background:linear-gradient(180deg,#1d6fff,#1456c4);}' +
- '#__loadVideoEdit .ve-track-row[data-track="text"] .ve-track-block{background:linear-gradient(180deg,#fbbf24,#d99a16);color:#1a1a26;}' +
+ '#__loadVideoEdit .ve-track-row[data-track="text"] .ve-track-block{background:linear-gradient(180deg,#1d6fff,#d99a16);color:#1a1a26;}' +
  '#__loadVideoEdit .ve-track-row[data-track="sticker"] .ve-track-block{background:linear-gradient(180deg,#a855f7,#7c3aed);}' +
  '#__loadVideoEdit .ve-track-row .ve-track-block .ve-tb-trim{position:absolute;top:0;bottom:0;width:8px;background:rgba(0,0,0,0.35);cursor:ew-resize;}' +
  '#__loadVideoEdit .ve-track-row .ve-track-block .ve-tb-trim.l{left:0;border-radius:6px 0 0 6px;}' +
@@ -9402,14 +9404,14 @@ window.LoadAudioFix = {
  // Legacy class shims (kept hidden so existing engine code that
  // queries them still finds something to bind to without throwing)
  '#__loadVideoEdit .ve-clip-strip{position:relative;flex:1;height:56px;background:transparent;cursor:ew-resize;touch-action:none;overflow:visible;}' +
- '#__loadVideoEdit .ve-clip-block{box-shadow:0 0 0 2px #fbbf24;cursor:pointer;}' +
- '#__loadVideoEdit .ve-clip-block.on{box-shadow:0 0 0 3px #fff, 0 0 0 5px #fbbf24, 0 0 18px rgba(251,191,36,0.6);}' +
+ '#__loadVideoEdit .ve-clip-block{box-shadow:0 0 0 2px #1d6fff;cursor:pointer;}' +
+ '#__loadVideoEdit .ve-clip-block.on{box-shadow:0 0 0 3px #fff, 0 0 0 5px #1d6fff, 0 0 18px rgba(29,111,255,0.6);}' +
  '#__loadVideoEdit .ve-block-thumbs{position:absolute;inset:0;display:flex;border-radius:4px;overflow:hidden;background:#1a1a26;}' +
  '#__loadVideoEdit .ve-block-thumbs img{flex:1;width:0;height:100%;object-fit:cover;display:block;border-right:1px solid rgba(0,0,0,0.30);}' +
  '#__loadVideoEdit .ve-block-thumbs img:last-child{border-right:none;}' +
  '#__loadVideoEdit .ve-block-border{position:absolute;inset:0;pointer-events:none;border-radius:4px;}' +
  '#__loadVideoEdit .ve-block-dur{position:absolute;left:6px;bottom:4px;background:rgba(0,0,0,0.7);color:#fff;font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px;font-variant-numeric:tabular-nums;pointer-events:none;}' +
- '#__loadVideoEdit .ve-block-handle{position:absolute;top:0;bottom:0;width:14px;background:#fbbf24;cursor:ew-resize;display:flex;align-items:center;justify-content:center;color:#1a1a26;font-weight:900;}' +
+ '#__loadVideoEdit .ve-block-handle{position:absolute;top:0;bottom:0;width:14px;background:#1d6fff;cursor:ew-resize;display:flex;align-items:center;justify-content:center;color:#1a1a26;font-weight:900;}' +
  '#__loadVideoEdit .ve-block-handle-l{left:0;border-radius:4px 0 0 4px;}' +
  '#__loadVideoEdit .ve-block-handle-r{right:0;border-radius:0 4px 4px 0;}' +
  '#__loadVideoEdit .ve-block-handle::after{content:"||";font-size:10px;letter-spacing:-1px;}' +
@@ -9417,17 +9419,17 @@ window.LoadAudioFix = {
  '#__loadVideoEdit .ve-block-add-l{left:-12px;}' +
  '#__loadVideoEdit .ve-block-add-r{right:-12px;}' +
  '#__loadVideoEdit .ve-empty-slot:hover{background:#15152a;color:#5a5a78;}' +
- '#__loadVideoEdit .ve-clip-strip.ve-selected{box-shadow:0 0 0 3px #fbbf24, 0 0 24px rgba(251,191,36,0.55);}' +
+ '#__loadVideoEdit .ve-clip-strip.ve-selected{box-shadow:0 0 0 3px #1d6fff, 0 0 24px rgba(29,111,255,0.55);}' +
  '#__loadVideoEdit .ve-clip-strip.ve-selected .ve-clip-trim{border-color:#fff;border-width:3px;}' +
  '#__loadVideoEdit .ve-clip-thumbs{position:absolute;top:0;bottom:0;left:0;right:0;display:flex;border-radius:6px;overflow:hidden;}' +
  '#__loadVideoEdit .ve-clip-thumbs img{flex:1;width:0;height:100%;object-fit:cover;display:block;border-right:1px solid rgba(0,0,0,0.30);}' +
  '#__loadVideoEdit .ve-clip-thumbs img:last-child{border-right:none;}' +
  '#__loadVideoEdit .ve-clip-thumbs.loading::before{content:"Loading frames…";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#888;font-size:12px;font-weight:600;letter-spacing:0.05em;}' +
- '#__loadVideoEdit .ve-clip-trim{position:absolute;top:0;bottom:0;left:0;right:0;border:2px solid #fbbf24;border-radius:6px;background:transparent;pointer-events:none;}' +
+ '#__loadVideoEdit .ve-clip-trim{position:absolute;top:0;bottom:0;left:0;right:0;border:2px solid #1d6fff;border-radius:6px;background:transparent;pointer-events:none;}' +
  // VN-style yellow popup: anchored to the selected clip via JS,
  // appears above the clip with a downward-pointing notch.
- '#__loadVideoEdit .ve-clip-quick{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);background:#fbbf24;border-radius:12px;padding:6px 4px;display:flex;gap:0;box-shadow:0 6px 18px rgba(0,0,0,0.55);z-index:25;animation:vePopIn 0.18s ease-out;white-space:nowrap;}' +
- '#__loadVideoEdit .ve-clip-quick::after{content:"";position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);border-left:7px solid transparent;border-right:7px solid transparent;border-top:7px solid #fbbf24;}' +
+ '#__loadVideoEdit .ve-clip-quick{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);background:#1d6fff;border-radius:12px;padding:6px 4px;display:flex;gap:0;box-shadow:0 6px 18px rgba(0,0,0,0.55);z-index:25;animation:vePopIn 0.18s ease-out;white-space:nowrap;}' +
+ '#__loadVideoEdit .ve-clip-quick::after{content:"";position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);border-left:7px solid transparent;border-right:7px solid transparent;border-top:7px solid #1d6fff;}' +
  '#__loadVideoEdit .ve-quick-btn{background:transparent;border:none;color:#1a1a26;font-size:16px;min-width:56px;height:46px;padding:2px 6px;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-family:inherit;font-weight:700;}' +
  '#__loadVideoEdit .ve-quick-btn:active{background:rgba(0,0,0,0.10);}' +
  '#__loadVideoEdit .ve-quick-btn .ve-qb-lbl{font-size:10px;font-weight:700;letter-spacing:0.02em;}' +
@@ -9467,17 +9469,17 @@ window.LoadAudioFix = {
  '#__loadVideoEdit .ve-context-done .ve-act-icon{color:#1d6fff;}' +
  '#__loadVideoEdit.ve-clip-active #ve-context{display:flex;}' +
  '#__loadVideoEdit.ve-clip-active #ve-actions{display:none;}' +
- '#__loadVideoEdit .ve-clip-handle{position:absolute;top:-3px;bottom:-3px;width:18px;background:#fbbf24;cursor:ew-resize;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#1a1a26;font-size:14px;font-weight:900;pointer-events:auto;touch-action:none;box-shadow:0 0 0 1px rgba(0,0,0,0.25);}' +
- '#__loadVideoEdit .ve-clip-handle::before{content:attr(data-time);position:absolute;top:-22px;background:#1a1a26;color:#fbbf24;font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap;pointer-events:none;}' +
+ '#__loadVideoEdit .ve-clip-handle{position:absolute;top:-3px;bottom:-3px;width:18px;background:#1d6fff;cursor:ew-resize;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#1a1a26;font-size:14px;font-weight:900;pointer-events:auto;touch-action:none;box-shadow:0 0 0 1px rgba(0,0,0,0.25);}' +
+ '#__loadVideoEdit .ve-clip-handle::before{content:attr(data-time);position:absolute;top:-22px;background:#1a1a26;color:#1d6fff;font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap;pointer-events:none;}' +
  '#__loadVideoEdit .ve-handle-left{left:-9px;}' +
  '#__loadVideoEdit .ve-handle-left::after{content:"\\\\\\\\";color:#1a1a26;}' +
  '#__loadVideoEdit .ve-handle-right{right:-9px;}' +
  '#__loadVideoEdit .ve-handle-right::after{content:"\\\\\\\\";color:#1a1a26;}' +
- '#__loadVideoEdit #ve-snap.on{background:#fbbf24;color:#1a1a26;}' +
+ '#__loadVideoEdit #ve-snap.on{background:#1d6fff;color:#1a1a26;}' +
  '#__loadVideoEdit .ve-snap-grid{position:absolute;top:0;bottom:0;left:0;right:0;pointer-events:none;z-index:4;}' +
  '#__loadVideoEdit .ve-snap-tick{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,0.18);}' +
  '#__loadVideoEdit .ve-snap-tick.major{background:rgba(255,255,255,0.40);}' +
- '#__loadVideoEdit .ve-clip-duration{position:absolute;left:6px;top:-18px;font-size:10px;color:#fbbf24;font-weight:700;background:#1a1a26;padding:1px 6px;border-radius:3px;}' +
+ '#__loadVideoEdit .ve-clip-duration{position:absolute;left:6px;top:-18px;font-size:10px;color:#1d6fff;font-weight:700;background:#1a1a26;padding:1px 6px;border-radius:3px;}' +
  '#__loadVideoEdit .ve-clip-playhead{position:absolute;top:-4px;bottom:-4px;width:2px;background:#fff;left:0;pointer-events:none;box-shadow:0 0 6px rgba(255,255,255,0.6);}' +
  '#__loadVideoEdit .ve-clip-playhead::before{content:"";position:absolute;top:-3px;left:-5px;width:12px;height:12px;background:#fff;border-radius:50%;box-shadow:0 0 0 2px #1a1a26;}' +
  '#__loadVideoEdit .ve-track-audio .ve-track-body{background:transparent;}' +
@@ -9495,7 +9497,7 @@ window.LoadAudioFix = {
  '#__loadVideoEdit .ve-action:active{transform:scale(0.94);}' +
  '#__loadVideoEdit .ve-act-icon{width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;color:#fff;line-height:1;background:transparent;border:0;}' +'#__loadVideoEdit .ve-act-icon svg{width:24px;height:24px;display:block;}' +
  '#__loadVideoEdit .ve-act-lbl{font-size:9.5px;color:#cfcfdc;text-align:center;line-height:1.15;letter-spacing:0.01em;white-space:nowrap;}' +
- '#__loadVideoEdit .ve-action.on .ve-act-icon{color:#fbbf24;}' +
+ '#__loadVideoEdit .ve-action.on .ve-act-icon{color:#1d6fff;}' +
  '#__loadVideoEdit #ve-actions{gap:6px !important;padding:6px 8px max(6px,env(safe-area-inset-bottom)) !important;}' +
  '#__loadVideoEdit .ve-action-sep{flex:0 0 auto;width:1px;height:36px;background:#2a2a40;margin:0 4px;display:inline-block;}' +
  // Panel sits above the bottom action toolbar, with safe-area
@@ -9514,7 +9516,7 @@ window.LoadAudioFix = {
  '#__loadVideoEdit .ve-input{display:block;width:100%;margin-top:4px;padding:6px 8px;background:#0e0e18;color:#fff;border:1px solid #2a2a40;border-radius:6px;font-size:13px;}' +
  '#__loadVideoEdit .ve-color{display:block;width:100%;height:34px;margin-top:4px;border:none;background:transparent;cursor:pointer;}' +
  '#__loadVideoEdit .ve-speed-preset{background:#0e0e18;color:#cfcfdc;border:1px solid #2a2a40;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}' +
- '#__loadVideoEdit .ve-speed-preset:hover{background:#1a1a26;color:#fff;border-color:#fbbf24;}' +
+ '#__loadVideoEdit .ve-speed-preset:hover{background:#1a1a26;color:#fff;border-color:#1d6fff;}' +
  '#__loadVideoEdit .ve-speed-preset:active{transform:scale(0.97);}';
  wrap.appendChild(styleTag);
 
@@ -9696,7 +9698,7 @@ window.LoadAudioFix = {
  var menu = document.createElement('div');
  menu.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:3500;display:flex;align-items:flex-end;justify-content:center;padding:0;';
  var grid = options.map(function (o) {
- var on = (o.key === currentKey) ? ' style="background:#fbbf24;color:#1a1a26;border-color:#fbbf24;"' : '';
+ var on = (o.key === currentKey) ? ' style="background:#1d6fff;color:#1a1a26;border-color:#1d6fff;"' : '';
  return '<button class="ve-sheet-opt" data-key="' + o.key + '"' + on + '><span class="ve-sheet-icon">' + (o.icon || '•') + '</span><span class="ve-sheet-lbl">' + o.label + '</span></button>';
  }).join('');
  menu.innerHTML =
@@ -9865,7 +9867,7 @@ window.LoadAudioFix = {
  '<div id="vesm-prov" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>' +
  '<div style="display:flex;gap:6px;margin-bottom:8px;">' +
  '<input id="vesm-q" type="search" placeholder="Search…" style="flex:1;padding:9px 11px;background:#0e0e18;border:1px solid #2a2a40;color:#fff;border-radius:8px;font-size:14px;">' +
- '<button id="vesm-go" style="background:#fbbf24;color:#1a1a26;border:none;font-weight:800;padding:0 14px;border-radius:8px;cursor:pointer;">Search</button>' +
+ '<button id="vesm-go" style="background:#1d6fff;color:#1a1a26;border:none;font-weight:800;padding:0 14px;border-radius:8px;cursor:pointer;">Search</button>' +
  '</div>' +
  '<div id="vesm-info" style="font-size:11px;color:#a8a8c4;margin-bottom:6px;"></div>' +
  '<div id="vesm-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;overflow-y:auto;flex:1;align-content:start;"></div>' +
@@ -9893,7 +9895,7 @@ window.LoadAudioFix = {
  var on = state.type === t.key;
  b.textContent = t.label;
  b.style.cssText = 'flex:1;padding:9px;border-radius:8px;border:none;cursor:pointer;font-weight:700;font-size:13px;' +
- (on ? 'background:#fbbf24;color:#1a1a26;' : 'background:#2a2a40;color:#fff;');
+ (on ? 'background:#1d6fff;color:#1a1a26;' : 'background:#2a2a40;color:#fff;');
  b.addEventListener('click', function () {
  if (state.type === t.key) return;
  state.type = t.key;
@@ -10009,7 +10011,7 @@ window.LoadAudioFix = {
  rows +=
  '<div style="background:#0e0e18;border:1px solid #2a2a40;border-radius:10px;padding:10px;margin-bottom:8px;">' +
  '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;">' +
- '<div style="font-weight:700;font-size:14px;">' + p.name + (v ? ' <span style="color:#22c55e;font-size:11px;"> saved</span>' : ' <span style="color:#fbbf24;font-size:11px;">— no key</span>') + '</div>' +
+ '<div style="font-weight:700;font-size:14px;">' + p.name + (v ? ' <span style="color:#22c55e;font-size:11px;"> saved</span>' : ' <span style="color:#1d6fff;font-size:11px;">— no key</span>') + '</div>' +
  '<div style="display:flex;gap:6px;">' +
  '<button class="vesm-signup" data-url="' + p.signup + '" style="background:#1d6fff;color:#fff;border:none;border-radius:6px;font-size:11px;padding:4px 8px;cursor:pointer;font-weight:700;">↗ Get free key</button>' +
  '<button class="vesm-docs" data-url="' + p.keyDocs + '" style="background:#2a2a40;color:#cfcfdc;border:none;border-radius:6px;font-size:11px;padding:4px 8px;cursor:pointer;">Docs</button>' +
@@ -10605,7 +10607,7 @@ window.LoadAudioFix = {
  { key: '#000', label: 'Black', icon: '' },
  { key: '#fff', label: 'White', icon: '' },
  { key: '#1d6fff', label: 'Blue', icon: '' },
- { key: '#fbbf24', label: 'Yellow', icon: '' },
+ { key: '#1d6fff', label: 'Yellow', icon: '' },
  { key: '#dc2626', label: 'Red', icon: '' },
  { key: '#10b981', label: 'Green', icon: '' },
  { key: '#7c3aed', label: 'Purple', icon: '' },
@@ -11030,7 +11032,7 @@ window.LoadAudioFix = {
  if (k === 'add-image') { el = document.createElement('img'); el.src = fr.result; }
  else { el = document.createElement('video'); el.src = fr.result; el.autoplay = true; el.loop = true; el.muted = true; el.playsInline = true; }
  el.className = 've-pip-overlay';
- el.style.cssText = 'position:absolute;top:20px;right:20px;width:30%;max-height:30%;border:2px solid #fbbf24;border-radius:6px;z-index:5;cursor:move;';
+ el.style.cssText = 'position:absolute;top:20px;right:20px;width:30%;max-height:30%;border:2px solid #1d6fff;border-radius:6px;z-index:5;cursor:move;';
  stage.appendChild(el);
  toast('PiP added. Drag on the preview.', false);
  };
@@ -11242,7 +11244,7 @@ window.LoadAudioFix = {
  'position:absolute;top:' + top + ';' +
  (right ? 'right:' + right + ';' : '') +
  (left ? 'left:' + left + ';' : '') +
- 'width:' + width + ';max-height:50%;border:2px solid #fbbf24;' +
+ 'width:' + width + ';max-height:50%;border:2px solid #1d6fff;' +
  'border-radius:6px;z-index:5;pointer-events:auto;cursor:move;';
  stage.appendChild(el);
  }
@@ -11886,7 +11888,7 @@ window.LoadAudioFix = {
  imgT.alt = '';
  imgT.style.cssText = 'flex:1 1 auto;width:100%;height:100%;object-fit:cover;object-position:center;display:block;';
  imgT.addEventListener('error', function () {
- container.innerHTML = '<div style="flex:1;display:flex;align-items:center;justify-content:center;background:#3a3a55;color:#fbbf24;font-size:11px;font-weight:700;">image</div>';
+ container.innerHTML = '<div style="flex:1;display:flex;align-items:center;justify-content:center;background:#3a3a55;color:#1d6fff;font-size:11px;font-weight:700;">image</div>';
  });
  container.appendChild(imgT);
  return;
@@ -13036,7 +13038,7 @@ window.LoadAudioFix = {
  var step = Math.max(1, Math.floor((endSamp - startSamp) / bars));
  var midY = canvas.height / 2;
  var barW = canvas.width / bars;
- ctx2.fillStyle = 'rgba(251,191,36,0.95)';
+ ctx2.fillStyle = 'rgba(29,111,255,0.95)';
  for (var b = 0; b < bars; b++) {
  var max = 0;
  var s0 = startSamp + b * step;
@@ -13073,7 +13075,7 @@ window.LoadAudioFix = {
  var step = Math.max(1, Math.floor(data.length / bars));
  var midY = c.height / 2;
  var barW = c.width / bars;
- ctx.fillStyle = '#fbbf24';
+ ctx.fillStyle = '#1d6fff';
  for (var b = 0; b < bars; b++) {
  // Peak amplitude in this bucket (cheap RMS would also work).
  var max = 0;
@@ -13346,7 +13348,7 @@ window.LoadAudioFix = {
  var btn = document.getElementById('ve-link');
  if (btn) {
  btn.classList.toggle('on', window.__veLinked);
- btn.style.background = window.__veLinked ? '#fbbf24' : '';
+ btn.style.background = window.__veLinked ? '#1d6fff' : '';
  btn.style.color = window.__veLinked ? '#1a1a26' : '';
  btn.title = 'Link timeline elements (' + (window.__veLinked ? 'on' : 'off') + ')';
  }
@@ -13610,7 +13612,7 @@ window.LoadAudioFix = {
  if (muteEl) muteEl.checked = true;
  try { video.muted = true; } catch (_) {}
  btn.classList.add('on');
- btn.style.background = '#fbbf24';
+ btn.style.background = '#1d6fff';
  btn.style.color = '#1a1a26';
  btn.innerHTML = '';
  try { renderWaveformFor(musicBuffer); } catch (_) {}
@@ -13706,7 +13708,7 @@ window.LoadAudioFix = {
  function rowHtml(group, list, sel) {
  return '<div style="display:flex;flex-wrap:wrap;gap:6px;">' +
  list.map(function (o) {
- var on = (o.key === sel) ? 'background:#fbbf24;color:#1a1a26;border-color:#fbbf24;' : '';
+ var on = (o.key === sel) ? 'background:#1d6fff;color:#1a1a26;border-color:#1d6fff;' : '';
  var note = o.note ? '<div style="font-size:9.5px;opacity:0.7;font-weight:400;line-height:1.2;margin-top:2px;">' + o.note + '</div>' : '';
  return '<button class="ve-exp-opt" data-group="' + group + '" data-key="' + o.key + '" style="' + on + '">' +
  '<div style="font-weight:700;">' + o.label + '</div>' + note + '</button>';
@@ -13738,7 +13740,7 @@ window.LoadAudioFix = {
  '<button id="ve-exp-go" style="flex:1;background:#1d6fff;color:#fff;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;"> Export now</button>' +
  '<button id="ve-exp-queue" style="flex:1;background:#2a2a40;color:#fff;border:1.5px solid #3a3a55;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">＋ Add to queue</button>' +
  '</div>' +
- '<button id="ve-exp-runqueue" style="background:#fbbf24;color:#1a1a26;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;">▶ Run queue (' + ((window.__veQueue && window.__veQueue.length) || 0) + ')</button>' +
+ '<button id="ve-exp-runqueue" style="background:#1d6fff;color:#1a1a26;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;">▶ Run queue (' + ((window.__veQueue && window.__veQueue.length) || 0) + ')</button>' +
  '<button id="ve-exp-clearqueue" style="background:transparent;color:#cfcfdc;border:none;padding:8px;border-radius:10px;font-size:12px;cursor:pointer;">Clear queue</button>' +
  '</div>' +
  '</div>' +
@@ -15256,7 +15258,7 @@ window.LoadAudioFix = {
  function setResult(id, kind, html) {
  var el = $(id);
  if (!el) return;
- var color = kind === 'pass' ? '#22c55e' : kind === 'fail' ? '#ff6b8a' : '#fbbf24';
+ var color = kind === 'pass' ? '#22c55e' : kind === 'fail' ? '#ff6b8a' : '#1d6fff';
  el.innerHTML = '<span style="color:' + color + ';font-weight:700;">' + (kind === 'pass' ? ' ' : kind === 'fail' ? ' ' : '… ') + '</span><span style="font-size:12px;line-height:1.4;">' + html + '</span>';
  el.style.cssText = 'padding:6px 10px;background:var(--bg-2);border-radius:6px;font-family:ui-monospace,Menlo,monospace;';
  }
@@ -15531,7 +15533,7 @@ window.LoadAudioFix = {
  menu.className = 'context-menu';
  var menuApp = apps.find(function (x) { return x.id === id; });
  var SP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ctx-icn">';
- var favIcon = SP + '<path d="M12 3l2.7 5.5 6.1.9-4.4 4.3 1 6-5.4-2.8-5.4 2.8 1-6L3.2 9.4l6.1-.9z" fill="#fbbf24" stroke="#fbbf24"/></svg>';
+ var favIcon = SP + '<path d="M12 3l2.7 5.5 6.1.9-4.4 4.3 1 6-5.4-2.8-5.4 2.8 1-6L3.2 9.4l6.1-.9z" fill="#1d6fff" stroke="#1d6fff"/></svg>';
  var favLabel = (menuApp && menuApp.favorite)
  ? favIcon + ' Unfavorite (allow auto-cleanup)'
  : favIcon + ' Favorite (keep during auto-cleanup)';
