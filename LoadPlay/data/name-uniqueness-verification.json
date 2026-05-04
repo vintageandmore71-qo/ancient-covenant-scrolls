@@ -1,0 +1,60 @@
+{
+  "totalUsers": 500,
+  "uniqueDisplayNames": 500,
+  "uniqueUsernames": 500,
+  "uniqueHandles": 500,
+  "duplicateDisplayNames": [],
+  "duplicateUsernames": [],
+  "duplicateHandles": [],
+  "nonHumanRange": "301-400",
+  "nonHumanExamples": [
+    {
+      "user": 301,
+      "displayName": "Midnight Coupe",
+      "username": "midnight_coupe",
+      "handle": "@midnightcoupe",
+      "profileType": "object_pet_car_travel",
+      "avatar": "/assets/mock-users/avatars/user_301.jpg"
+    },
+    {
+      "user": 310,
+      "displayName": "Luxury Bag Archive",
+      "username": "luxury_bag_archive",
+      "handle": "@luxurybagarchive",
+      "profileType": "object_pet_car_travel",
+      "avatar": "/assets/mock-users/avatars/user_310.jpg"
+    },
+    {
+      "user": 325,
+      "displayName": "Beach Villa View",
+      "username": "beach_villa_view",
+      "handle": "@beachvillaview",
+      "profileType": "object_pet_car_travel",
+      "avatar": "/assets/mock-users/avatars/user_325.jpg"
+    },
+    {
+      "user": 350,
+      "displayName": "Gallery Walk Style",
+      "username": "gallery_walk_style",
+      "handle": "@gallerywalkstyle",
+      "profileType": "object_pet_car_travel",
+      "avatar": "/assets/mock-users/avatars/user_350.jpg"
+    },
+    {
+      "user": 375,
+      "displayName": "Pearl Handbag Edit",
+      "username": "pearl_handbag_edit",
+      "handle": "@pearlhandbagedit",
+      "profileType": "object_pet_car_travel",
+      "avatar": "/assets/mock-users/avatars/user_375.jpg"
+    },
+    {
+      "user": 400,
+      "displayName": "Cozy Blanket Corner",
+      "username": "cozy_blanket_corner",
+      "handle": "@cozyblanketcorner",
+      "profileType": "object_pet_car_travel",
+      "avatar": "/assets/mock-users/avatars/user_400.jpg"
+    }
+  ]
+}

@@ -7212,9 +7212,9 @@
   },
   {
     "id": "mock_user_302",
-    "displayName": "Golden Retriever Bailey",
-    "username": "golden_retriever_bailey",
-    "handle": "@goldenretrieverbailey",
+    "displayName": "Bailey Pup",
+    "username": "bailey_pup",
+    "handle": "@baileypup",
     "avatar": "/assets/mock-users/avatars/user_302.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -7236,9 +7236,9 @@
   },
   {
     "id": "mock_user_303",
-    "displayName": "Studio Cat Luna",
-    "username": "studio_cat_luna",
-    "handle": "@studiocatluna",
+    "displayName": "Luna Studio Cat",
+    "username": "luna_studio_cat",
+    "handle": "@lunastudiocat",
     "avatar": "/assets/mock-users/avatars/user_303.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -7282,7 +7282,7 @@
   },
   {
     "id": "mock_user_305",
-    "displayName": "Coffee & Pages",
+    "displayName": "Coffee And Pages",
     "username": "coffee_and_pages",
     "handle": "@coffeeandpages",
     "avatar": "/assets/mock-users/avatars/user_305.jpg",
@@ -7305,9 +7305,9 @@
   },
   {
     "id": "mock_user_306",
-    "displayName": "Santorini View",
-    "username": "santorini_view",
-    "handle": "@santoriniview",
+    "displayName": "Santorini Window",
+    "username": "santorini_window",
+    "handle": "@santoriniwindow",
     "avatar": "/assets/mock-users/avatars/user_306.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -7542,7 +7542,7 @@
   },
   {
     "id": "mock_user_316",
-    "displayName": "Quiet Reading Chair",
+    "displayName": "Quiet Reading Chair 316",
     "username": "quiet_reading_chair_316",
     "handle": "@quietreadingchair316",
     "avatar": "/assets/mock-users/avatars/user_316.jpg",
@@ -7565,7 +7565,7 @@
   },
   {
     "id": "mock_user_317",
-    "displayName": "Blue Water Escape",
+    "displayName": "Blue Water Escape 317",
     "username": "blue_water_escape_317",
     "handle": "@bluewaterescape317",
     "avatar": "/assets/mock-users/avatars/user_317.jpg",
@@ -7613,9 +7613,9 @@
   },
   {
     "id": "mock_user_319",
-    "displayName": "The Travel Window",
-    "username": "the_travel_window_319",
-    "handle": "@thetravelwindow319",
+    "displayName": "Travel Window",
+    "username": "travel_window",
+    "handle": "@travelwindow",
     "avatar": "/assets/mock-users/avatars/user_319.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -7922,7 +7922,7 @@
   },
   {
     "id": "mock_user_332",
-    "displayName": "City Nightline",
+    "displayName": "City Nightline 332",
     "username": "city_nightline_332",
     "handle": "@citynightline332",
     "avatar": "/assets/mock-users/avatars/user_332.jpg",
@@ -8297,9 +8297,9 @@
   },
   {
     "id": "mock_user_348",
-    "displayName": "The Watch Box",
-    "username": "the_watch_box",
-    "handle": "@thewatchbox",
+    "displayName": "Watch Box Journal",
+    "username": "watch_box_journal",
+    "handle": "@watchboxjournal",
     "avatar": "/assets/mock-users/avatars/user_348.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8369,9 +8369,9 @@
   },
   {
     "id": "mock_user_351",
-    "displayName": "Midnight Coupe",
-    "username": "midnight_coupe_351",
-    "handle": "@midnightcoupe351",
+    "displayName": "Red Sports Coupe",
+    "username": "red_sports_coupe",
+    "handle": "@redsportscoupe",
     "avatar": "/assets/mock-users/avatars/user_351.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8393,9 +8393,9 @@
   },
   {
     "id": "mock_user_352",
-    "displayName": "Golden Retriever Bailey",
-    "username": "golden_retriever_bailey_352",
-    "handle": "@goldenretrieverbailey352",
+    "displayName": "Velvet Heel Edit",
+    "username": "velvet_heel_edit",
+    "handle": "@velvetheeledit",
     "avatar": "/assets/mock-users/avatars/user_352.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8417,9 +8417,9 @@
   },
   {
     "id": "mock_user_353",
-    "displayName": "Studio Cat Luna",
-    "username": "studio_cat_luna_353",
-    "handle": "@studiocatluna353",
+    "displayName": "Indigo Travel Bag",
+    "username": "indigo_travel_bag",
+    "handle": "@indigotravelbag",
     "avatar": "/assets/mock-users/avatars/user_353.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8440,9 +8440,9 @@
   },
   {
     "id": "mock_user_354",
-    "displayName": "Camera Notes",
-    "username": "camera_notes_354",
-    "handle": "@cameranotes354",
+    "displayName": "Marble Coffee Cup",
+    "username": "marble_coffee_cup",
+    "handle": "@marblecoffeecup",
     "avatar": "/assets/mock-users/avatars/user_354.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8463,9 +8463,9 @@
   },
   {
     "id": "mock_user_355",
-    "displayName": "Coffee & Pages",
-    "username": "coffee_and_pages_355",
-    "handle": "@coffeeandpages355",
+    "displayName": "Sunny Dog Walk",
+    "username": "sunny_dog_walk",
+    "handle": "@sunnydogwalk",
     "avatar": "/assets/mock-users/avatars/user_355.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8486,9 +8486,9 @@
   },
   {
     "id": "mock_user_356",
-    "displayName": "Santorini View",
-    "username": "santorini_view_356",
-    "handle": "@santoriniview356",
+    "displayName": "Black Cat Window",
+    "username": "black_cat_window",
+    "handle": "@blackcatwindow",
     "avatar": "/assets/mock-users/avatars/user_356.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8510,9 +8510,9 @@
   },
   {
     "id": "mock_user_357",
-    "displayName": "White Sneaker Edit",
-    "username": "white_sneaker_edit_357",
-    "handle": "@whitesneakeredit357",
+    "displayName": "Film Camera Roll",
+    "username": "film_camera_roll",
+    "handle": "@filmcameraroll",
     "avatar": "/assets/mock-users/avatars/user_357.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8533,9 +8533,9 @@
   },
   {
     "id": "mock_user_358",
-    "displayName": "City Skyline Files",
-    "username": "city_skyline_files_358",
-    "handle": "@cityskylinefiles358",
+    "displayName": "Bookshop Corner",
+    "username": "bookshop_corner",
+    "handle": "@bookshopcorner",
     "avatar": "/assets/mock-users/avatars/user_358.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8556,9 +8556,9 @@
   },
   {
     "id": "mock_user_359",
-    "displayName": "Mountain Lake Journal",
-    "username": "mountain_lake_journal_359",
-    "handle": "@mountainlakejournal359",
+    "displayName": "Desert Road View",
+    "username": "desert_road_view",
+    "handle": "@desertroadview",
     "avatar": "/assets/mock-users/avatars/user_359.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8579,9 +8579,9 @@
   },
   {
     "id": "mock_user_360",
-    "displayName": "Luxury Bag Archive",
-    "username": "luxury_bag_archive_360",
-    "handle": "@luxurybagarchive360",
+    "displayName": "Silk Scarf Profile",
+    "username": "silk_scarf_profile",
+    "handle": "@silkscarfprofile",
     "avatar": "/assets/mock-users/avatars/user_360.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8602,9 +8602,9 @@
   },
   {
     "id": "mock_user_361",
-    "displayName": "Morning Latte Club",
-    "username": "morning_latte_club_361",
-    "handle": "@morninglatteclub361",
+    "displayName": "Candlelit Desk",
+    "username": "candlelit_desk",
+    "handle": "@candlelitdesk",
     "avatar": "/assets/mock-users/avatars/user_361.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8626,9 +8626,9 @@
   },
   {
     "id": "mock_user_362",
-    "displayName": "Vintage Lens Studio",
-    "username": "vintage_lens_studio_362",
-    "handle": "@vintagelensstudio362",
+    "displayName": "Silver Sedan Notes",
+    "username": "silver_sedan_notes",
+    "handle": "@silversedannotes",
     "avatar": "/assets/mock-users/avatars/user_362.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8650,9 +8650,9 @@
   },
   {
     "id": "mock_user_363",
-    "displayName": "Fresh Flowers Daily",
-    "username": "fresh_flowers_daily_363",
-    "handle": "@freshflowersdaily363",
+    "displayName": "Studio Microphone",
+    "username": "studio_microphone",
+    "handle": "@studiomicrophone",
     "avatar": "/assets/mock-users/avatars/user_363.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8673,9 +8673,9 @@
   },
   {
     "id": "mock_user_364",
-    "displayName": "Coastal Road Drive",
-    "username": "coastal_road_drive_364",
-    "handle": "@coastalroaddrive364",
+    "displayName": "Paris Balcony View",
+    "username": "paris_balcony_view",
+    "handle": "@parisbalconyview",
     "avatar": "/assets/mock-users/avatars/user_364.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8696,9 +8696,9 @@
   },
   {
     "id": "mock_user_365",
-    "displayName": "Art Palette Corner",
-    "username": "art_palette_corner_365",
-    "handle": "@artpalettecorner365",
+    "displayName": "Sunday Brunch Plate",
+    "username": "sunday_brunch_plate",
+    "handle": "@sundaybrunchplate",
     "avatar": "/assets/mock-users/avatars/user_365.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8720,9 +8720,9 @@
   },
   {
     "id": "mock_user_366",
-    "displayName": "Quiet Reading Chair",
-    "username": "quiet_reading_chair_366",
-    "handle": "@quietreadingchair366",
+    "displayName": "Denim Jacket Edit",
+    "username": "denim_jacket_edit",
+    "handle": "@denimjacketedit",
     "avatar": "/assets/mock-users/avatars/user_366.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8743,9 +8743,9 @@
   },
   {
     "id": "mock_user_367",
-    "displayName": "Blue Water Escape",
-    "username": "blue_water_escape_367",
-    "handle": "@bluewaterescape367",
+    "displayName": "Sunset Surfboard",
+    "username": "sunset_surfboard",
+    "handle": "@sunsetsurfboard",
     "avatar": "/assets/mock-users/avatars/user_367.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8766,9 +8766,9 @@
   },
   {
     "id": "mock_user_368",
-    "displayName": "Classic Watch Vault",
-    "username": "classic_watch_vault_368",
-    "handle": "@classicwatchvault368",
+    "displayName": "Greenhouse Corner",
+    "username": "greenhouse_corner",
+    "handle": "@greenhousecorner",
     "avatar": "/assets/mock-users/avatars/user_368.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8790,9 +8790,9 @@
   },
   {
     "id": "mock_user_369",
-    "displayName": "The Travel Window",
-    "username": "the_travel_window_369",
-    "handle": "@thetravelwindow369",
+    "displayName": "Vinyl Record Shelf",
+    "username": "vinyl_record_shelf",
+    "handle": "@vinylrecordshelf",
     "avatar": "/assets/mock-users/avatars/user_369.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8814,9 +8814,9 @@
   },
   {
     "id": "mock_user_370",
-    "displayName": "Pancake Morning",
-    "username": "pancake_morning_370",
-    "handle": "@pancakemorning370",
+    "displayName": "Skateboard Lane",
+    "username": "skateboard_lane",
+    "handle": "@skateboardlane",
     "avatar": "/assets/mock-users/avatars/user_370.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8837,9 +8837,9 @@
   },
   {
     "id": "mock_user_371",
-    "displayName": "Black Car Diary",
-    "username": "black_car_diary_371",
-    "handle": "@blackcardiary371",
+    "displayName": "Amber Sunglasses",
+    "username": "amber_sunglasses",
+    "handle": "@ambersunglasses",
     "avatar": "/assets/mock-users/avatars/user_371.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8861,9 +8861,9 @@
   },
   {
     "id": "mock_user_372",
-    "displayName": "Garden Bloom Notes",
-    "username": "garden_bloom_notes_372",
-    "handle": "@gardenbloomnotes372",
+    "displayName": "Notebook And Pen",
+    "username": "notebook_and_pen",
+    "handle": "@notebookandpen",
     "avatar": "/assets/mock-users/avatars/user_372.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8884,9 +8884,9 @@
   },
   {
     "id": "mock_user_373",
-    "displayName": "Soft Candle Room",
-    "username": "soft_candle_room_373",
-    "handle": "@softcandleroom373",
+    "displayName": "Mountain Bike Trail",
+    "username": "mountain_bike_trail",
+    "handle": "@mountainbiketrail",
     "avatar": "/assets/mock-users/avatars/user_373.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8907,9 +8907,9 @@
   },
   {
     "id": "mock_user_374",
-    "displayName": "Old Books Archive",
-    "username": "old_books_archive_374",
-    "handle": "@oldbooksarchive374",
+    "displayName": "Cream Couch Corner",
+    "username": "cream_couch_corner",
+    "handle": "@creamcouchcorner",
     "avatar": "/assets/mock-users/avatars/user_374.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8931,9 +8931,9 @@
   },
   {
     "id": "mock_user_375",
-    "displayName": "Beach Villa View",
-    "username": "beach_villa_view_375",
-    "handle": "@beachvillaview375",
+    "displayName": "Pearl Handbag Edit",
+    "username": "pearl_handbag_edit",
+    "handle": "@pearlhandbagedit",
     "avatar": "/assets/mock-users/avatars/user_375.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8954,9 +8954,9 @@
   },
   {
     "id": "mock_user_376",
-    "displayName": "Leather Weekender",
-    "username": "leather_weekender_376",
-    "handle": "@leatherweekender376",
+    "displayName": "Electric Guitar Wall",
+    "username": "electric_guitar_wall",
+    "handle": "@electricguitarwall",
     "avatar": "/assets/mock-users/avatars/user_376.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -8978,9 +8978,9 @@
   },
   {
     "id": "mock_user_377",
-    "displayName": "Road Trip Mood",
-    "username": "road_trip_mood_377",
-    "handle": "@roadtripmood377",
+    "displayName": "Rainy Window Coffee",
+    "username": "rainy_window_coffee",
+    "handle": "@rainywindowcoffee",
     "avatar": "/assets/mock-users/avatars/user_377.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -9001,9 +9001,9 @@
   },
   {
     "id": "mock_user_378",
-    "displayName": "Ocean Coffee Table",
-    "username": "ocean_coffee_table_378",
-    "handle": "@oceancoffeetable378",
+    "displayName": "Flower Market Basket",
+    "username": "flower_market_basket",
+    "handle": "@flowermarketbasket",
     "avatar": "/assets/mock-users/avatars/user_378.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -9024,9 +9024,9 @@
   },
   {
     "id": "mock_user_379",
-    "displayName": "Creative Desk Setup",
-    "username": "creative_desk_setup_379",
-    "handle": "@creativedesksetup379",
+    "displayName": "Classic Car Keys",
+    "username": "classic_car_keys",
+    "handle": "@classiccarkeys",
     "avatar": "/assets/mock-users/avatars/user_379.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -9047,9 +9047,9 @@
   },
   {
     "id": "mock_user_380",
-    "displayName": "Golden Pup Profile",
-    "username": "golden_pup_profile_380",
-    "handle": "@goldenpupprofile380",
+    "displayName": "Palm Tree View",
+    "username": "palm_tree_view",
+    "handle": "@palmtreeview",
     "avatar": "/assets/mock-users/avatars/user_380.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -9070,9 +9070,9 @@
   },
   {
     "id": "mock_user_381",
-    "displayName": "Grey Cat Corner",
-    "username": "grey_cat_corner_381",
-    "handle": "@greycatcorner381",
+    "displayName": "Ceramic Vase Notes",
+    "username": "ceramic_vase_notes",
+    "handle": "@ceramicvasenotes",
     "avatar": "/assets/mock-users/avatars/user_381.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -9094,9 +9094,9 @@
   },
   {
     "id": "mock_user_382",
-    "displayName": "City Nightline",
-    "username": "city_nightline_382",
-    "handle": "@citynightline382",
+    "displayName": "Library Lamp Profile",
+    "username": "library_lamp_profile",
+    "handle": "@librarylampprofile",
     "avatar": "/assets/mock-users/avatars/user_382.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -9117,9 +9117,9 @@
   },
   {
     "id": "mock_user_383",
-    "displayName": "Fashion Flatlay",
-    "username": "fashion_flatlay_383",
-    "handle": "@fashionflatlay383",
+    "displayName": "Golden Hour Street",
+    "username": "golden_hour_street",
+    "handle": "@goldenhourstreet",
     "avatar": "/assets/mock-users/avatars/user_383.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -9141,9 +9141,9 @@
   },
   {
     "id": "mock_user_384",
-    "displayName": "Minimal Bedroom",
-    "username": "minimal_bedroom_384",
-    "handle": "@minimalbedroom384",
+    "displayName": "Sneaker Wall Edit",
+    "username": "sneaker_wall_edit",
+    "handle": "@sneakerwalledit",
     "avatar": "/assets/mock-users/avatars/user_384.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -9165,9 +9165,9 @@
   },
   {
     "id": "mock_user_385",
-    "displayName": "Paintbrush Stories",
-    "username": "paintbrush_stories_385",
-    "handle": "@paintbrushstories385",
+    "displayName": "Pet Collar Charm",
+    "username": "pet_collar_charm",
+    "handle": "@petcollarcharm",
     "avatar": "/assets/mock-users/avatars/user_385.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -9188,9 +9188,9 @@
   },
   {
     "id": "mock_user_386",
-    "displayName": "Spa Calm Edit",
-    "username": "spa_calm_edit_386",
-    "handle": "@spacalmedit386",
+    "displayName": "Blue Bicycle Basket",
+    "username": "blue_bicycle_basket",
+    "handle": "@bluebicyclebasket",
     "avatar": "/assets/mock-users/avatars/user_386.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -9212,9 +9212,9 @@
   },
   {
     "id": "mock_user_387",
-    "displayName": "Yacht Afternoon",
-    "username": "yacht_afternoon_387",
-    "handle": "@yachtafternoon387",
+    "displayName": "Tea Cup Journal",
+    "username": "tea_cup_journal",
+    "handle": "@teacupjournal",
     "avatar": "/assets/mock-users/avatars/user_387.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -9236,9 +9236,9 @@
   },
   {
     "id": "mock_user_388",
-    "displayName": "Mountain Trail View",
-    "username": "mountain_trail_view_388",
-    "handle": "@mountaintrailview388",
+    "displayName": "Camera Strap Story",
+    "username": "camera_strap_story",
+    "handle": "@camerastrapstory",
     "avatar": "/assets/mock-users/avatars/user_388.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -9260,9 +9260,9 @@
   },
   {
     "id": "mock_user_389",
-    "displayName": "Cafe Dessert Plate",
-    "username": "cafe_dessert_plate_389",
-    "handle": "@cafedessertplate389",
+    "displayName": "Woven Hat Archive",
+    "username": "woven_hat_archive",
+    "handle": "@wovenhatarchive",
     "avatar": "/assets/mock-users/avatars/user_389.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -9284,9 +9284,9 @@
   },
   {
     "id": "mock_user_390",
-    "displayName": "Home Design Notes",
-    "username": "home_design_notes_390",
-    "handle": "@homedesignnotes390",
+    "displayName": "Backpack Travel Log",
+    "username": "backpack_travel_log",
+    "handle": "@backpacktravellog",
     "avatar": "/assets/mock-users/avatars/user_390.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -9308,9 +9308,9 @@
   },
   {
     "id": "mock_user_391",
-    "displayName": "Sourdough Table",
-    "username": "sourdough_table_391",
-    "handle": "@sourdoughtable391",
+    "displayName": "City Bike Rack",
+    "username": "city_bike_rack",
+    "handle": "@citybikerack",
     "avatar": "/assets/mock-users/avatars/user_391.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -9332,9 +9332,9 @@
   },
   {
     "id": "mock_user_392",
-    "displayName": "Camera Tabletop",
-    "username": "camera_tabletop_392",
-    "handle": "@cameratabletop392",
+    "displayName": "Beach Towel View",
+    "username": "beach_towel_view",
+    "handle": "@beachtowelview",
     "avatar": "/assets/mock-users/avatars/user_392.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -9356,9 +9356,9 @@
   },
   {
     "id": "mock_user_393",
-    "displayName": "Hydrangea House",
-    "username": "hydrangea_house_393",
-    "handle": "@hydrangeahouse393",
+    "displayName": "Brown Leather Boots",
+    "username": "brown_leather_boots",
+    "handle": "@brownleatherboots",
     "avatar": "/assets/mock-users/avatars/user_393.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -9380,9 +9380,9 @@
   },
   {
     "id": "mock_user_394",
-    "displayName": "Green Matcha Cup",
-    "username": "green_matcha_cup_394",
-    "handle": "@greenmatchacup394",
+    "displayName": "Piano Room Profile",
+    "username": "piano_room_profile",
+    "handle": "@pianoroomprofile",
     "avatar": "/assets/mock-users/avatars/user_394.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -9403,9 +9403,9 @@
   },
   {
     "id": "mock_user_395",
-    "displayName": "White Villa Sunset",
-    "username": "white_villa_sunset_395",
-    "handle": "@whitevillasunset395",
+    "displayName": "Food Truck Plate",
+    "username": "food_truck_plate",
+    "handle": "@foodtruckplate",
     "avatar": "/assets/mock-users/avatars/user_395.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -9427,9 +9427,9 @@
   },
   {
     "id": "mock_user_396",
-    "displayName": "Cycling Gear Profile",
-    "username": "cycling_gear_profile_396",
-    "handle": "@cyclinggearprofile396",
+    "displayName": "Sunlit Workspace",
+    "username": "sunlit_workspace",
+    "handle": "@sunlitworkspace",
     "avatar": "/assets/mock-users/avatars/user_396.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -9450,9 +9450,9 @@
   },
   {
     "id": "mock_user_397",
-    "displayName": "Guitar Room",
-    "username": "guitar_room_397",
-    "handle": "@guitarroom397",
+    "displayName": "Rooftop Plant Shelf",
+    "username": "rooftop_plant_shelf",
+    "handle": "@rooftopplantshelf",
     "avatar": "/assets/mock-users/avatars/user_397.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -9473,9 +9473,9 @@
   },
   {
     "id": "mock_user_398",
-    "displayName": "The Watch Box",
-    "username": "the_watch_box_398",
-    "handle": "@thewatchbox398",
+    "displayName": "Harbor Sail View",
+    "username": "harbor_sail_view",
+    "handle": "@harborsailview",
     "avatar": "/assets/mock-users/avatars/user_398.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -9497,9 +9497,9 @@
   },
   {
     "id": "mock_user_399",
-    "displayName": "Ocean Hammock View",
-    "username": "ocean_hammock_view_399",
-    "handle": "@oceanhammockview399",
+    "displayName": "Makeup Vanity Edit",
+    "username": "makeup_vanity_edit",
+    "handle": "@makeupvanityedit",
     "avatar": "/assets/mock-users/avatars/user_399.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -9520,9 +9520,9 @@
   },
   {
     "id": "mock_user_400",
-    "displayName": "Gallery Walk Style",
-    "username": "gallery_walk_style_400",
-    "handle": "@gallerywalkstyle400",
+    "displayName": "Cozy Blanket Corner",
+    "username": "cozy_blanket_corner",
+    "handle": "@cozyblanketcorner",
     "avatar": "/assets/mock-users/avatars/user_400.jpg",
     "profileType": "object_pet_car_travel",
     "genrePreferences": [
@@ -9952,9 +9952,9 @@
   },
   {
     "id": "mock_user_418",
-    "displayName": "Road Trip Mood",
-    "username": "road_trip_mood_418",
-    "handle": "@roadtripmood418",
+    "displayName": "Road Trip Mood Studio 418",
+    "username": "road_trip_mood_studio_418",
+    "handle": "@roadtripmoodstudio418",
     "avatar": "/assets/mock-users/avatars/user_418.jpg",
     "profileType": "mixed_platform_profile",
     "genrePreferences": [
@@ -11029,9 +11029,9 @@
   },
   {
     "id": "mock_user_463",
-    "displayName": "Camera Tabletop",
-    "username": "camera_tabletop_463",
-    "handle": "@cameratabletop463",
+    "displayName": "Camera Tabletop Studio 463",
+    "username": "camera_tabletop_studio_463",
+    "handle": "@cameratabletopstudio463",
     "avatar": "/assets/mock-users/avatars/user_463.jpg",
     "profileType": "mixed_platform_profile",
     "genrePreferences": [
