@@ -4388,7 +4388,7 @@ document.addEventListener('click',function(e){
   if(h){e.preventDefault();e.stopPropagation();startTour();}
 },true);
 })();</script>
-<div id="lpZoomBanner" hidden style="position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:9700;display:flex;align-items:center;gap:10px;padding:10px 14px;background:#161616;border:1px solid rgba(255,90,90,.4);border-radius:12px;color:#fff;font:500 13px Inter,system-ui,sans-serif;box-shadow:0 14px 36px rgba(0,0,0,.6);max-width:520px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:18px;height:18px;color:#ff8a8a;flex-shrink:0"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/><line x1="8" y1="11" x2="14" y2="11"/></svg><span>Page is zoomed in. Pinch out to reset, or tap Fix.</span><button id="lpZoomFix" type="button" style="margin-left:auto;padding:6px 12px;border-radius:8px;border:0;background:linear-gradient(135deg,#ff3838,#ff5a5a);color:#fff;font:600 12px Inter,system-ui,sans-serif;cursor:pointer">Fix</button><button id="lpZoomDismiss" type="button" aria-label="Dismiss" style="background:transparent;border:0;color:#c2a8a8;font-size:18px;line-height:1;cursor:pointer;padding:0 4px">&times;</button></div>
+<div id="lpZoomBanner" style="display:none;position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:9700;align-items:center;gap:10px;padding:10px 14px;background:#161616;border:1px solid rgba(255,90,90,.4);border-radius:12px;color:#fff;font:500 13px Inter,system-ui,sans-serif;box-shadow:0 14px 36px rgba(0,0,0,.6);max-width:520px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:18px;height:18px;color:#ff8a8a;flex-shrink:0"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/><line x1="8" y1="11" x2="14" y2="11"/></svg><span>Page is zoomed in. Pinch out to reset, or tap Fix.</span><button id="lpZoomFix" type="button" style="margin-left:auto;padding:6px 12px;border-radius:8px;border:0;background:linear-gradient(135deg,#ff3838,#ff5a5a);color:#fff;font:600 12px Inter,system-ui,sans-serif;cursor:pointer">Fix</button><button id="lpZoomDismiss" type="button" aria-label="Dismiss" style="background:transparent;border:0;color:#c2a8a8;font-size:18px;line-height:1;cursor:pointer;padding:0 4px">&times;</button></div>
 <script id="lp-v32-zoom">(function(){
   // Session-scoped dismiss flag so a user-dismissed banner does NOT
   // auto-reappear on every visualViewport resize while the page is
@@ -4403,7 +4403,7 @@ document.addEventListener('click',function(e){
       var scale=(window.visualViewport && window.visualViewport.scale)||1;
       var stuck = scale < 0.92 || scale > 1.08;
       if(!stuck && !showBanner){
-        var b0=document.getElementById('lpZoomBanner'); if(b0) b0.setAttribute('hidden','');
+        var b0=document.getElementById('lpZoomBanner'); if(b0) b0.style.display='none';
         return;
       }
       var original=meta.getAttribute('content');
@@ -4414,9 +4414,9 @@ document.addEventListener('click',function(e){
         var now=(window.visualViewport && window.visualViewport.scale)||1;
         var b=document.getElementById('lpZoomBanner');
         if((now>1.05 || now<0.95) && !dismissed){
-          if(b) b.removeAttribute('hidden');
+          if(b) b.style.display='flex';
         } else {
-          if(b) b.setAttribute('hidden','');
+          if(b) b.style.display='none';
         }
       },420);
     }catch(_){}
@@ -4429,7 +4429,7 @@ document.addEventListener('click',function(e){
       var b=document.getElementById('lpZoomBanner');
       if(!b) return;
       if(scale>1.08 && !dismissed){
-        b.removeAttribute('hidden');
+        b.style.display='flex';
       } else {
         b.setAttribute('hidden','');
       }
@@ -4444,7 +4444,7 @@ document.addEventListener('click',function(e){
     if(dis){
       e.preventDefault(); e.stopPropagation();
       dismissed=true;
-      var b=document.getElementById('lpZoomBanner'); if(b) b.setAttribute('hidden','');
+      var b=document.getElementById('lpZoomBanner'); if(b) b.style.display='none';
     }
   }
   document.addEventListener('click',handleZoomClick,true);
