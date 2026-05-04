@@ -148,16 +148,16 @@
     modal.innerHTML =
       '<div style="background:#1a1a26;color:#fff;border-radius:18px;width:100%;max-width:680px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.55);border:1px solid #2a2a40;overflow:hidden;">' +
         '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #2a2a40;flex-shrink:0;">' +
-          '<h2 style="margin:0;font-size:18px;font-weight:800;">📚 Voice Library</h2>' +
+          '<h2 style="margin:0;font-size:18px;font-weight:800;display:inline-flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px"><path d="M4 4h6v16H4z"/><path d="M10 4h6v16h-6z"/><path d="M16 5l4 1-3 14-4-1z"/></svg> Voice Library</h2>' +
           '<button id="vl-close" style="background:transparent;border:none;color:#cfcfdc;font-size:24px;cursor:pointer;line-height:1;">×</button>' +
         '</div>' +
         '<p style="margin:0;padding:10px 18px;color:#a8a8c4;font-size:12px;">Saved here once → available across ACR, Attain, Attain Jr, Study, and Load on this device.</p>' +
         '<div id="vl-list" style="overflow-y:auto;padding:10px 18px;flex:1;"></div>' +
         '<div style="padding:12px 18px;border-top:1px solid #2a2a40;display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0;">' +
-          '<button id="vl-import" style="background:#2a2a40;color:#fff;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;">📂 Import audio file</button>' +
+          '<button id="vl-import" style="background:#2a2a40;color:#fff;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Import audio file</button>' +
           '<input id="vl-import-file" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg,.flac,.aiff,.aif,.webm,.weba,.opus" style="display:none;">' +
           '<div style="flex:1;"></div>' +
-          '<button id="vl-clear" style="background:transparent;color:#ff6b8a;border:1px solid #2a2a40;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;">🗑 Clear all</button>' +
+          '<button id="vl-clear" style="background:transparent;color:#ff6b8a;border:1px solid #2a2a40;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg> Clear all</button>' +
         '</div>' +
       '</div>';
     document.body.appendChild(modal);
@@ -174,7 +174,7 @@
       try {
         var items = await list();
         if (!items.length) {
-          listEl.innerHTML = '<p style="color:#a8a8c4;font-size:13px;">No saved voices yet. Record one in Sound Studio or Voice Manipulator and tap 💾 Save to Library.</p>';
+          listEl.innerHTML = '<p style="color:#a8a8c4;font-size:13px;">No saved voices yet. Record one in Sound Studio or Voice Manipulator and tap Save to Library.</p>';
           return;
         }
         listEl.innerHTML = '';
@@ -190,9 +190,9 @@
               '<button data-vl-act="play"   data-id="' + it.id + '" style="background:#22c55e;color:#0a0a14;border:none;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer;">▶ Play</button>' +
               '<button data-vl-act="stop"   data-id="' + it.id + '" style="background:#2a2a40;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer;">■</button>' +
               '<button data-vl-act="add"    data-id="' + it.id + '" style="background:#1d6fff;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer;">＋ Add to timeline</button>' +
-              '<button data-vl-act="save"   data-id="' + it.id + '" style="background:#fbbf24;color:#1a1a26;border:none;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer;">💾 Download</button>' +
-              '<button data-vl-act="rename" data-id="' + it.id + '" style="background:transparent;color:#cfcfdc;border:1px solid #2a2a40;border-radius:8px;padding:7px 10px;cursor:pointer;">✎</button>' +
-              '<button data-vl-act="delete" data-id="' + it.id + '" style="background:transparent;color:#ff6b8a;border:1px solid #2a2a40;border-radius:8px;padding:7px 10px;cursor:pointer;">🗑</button>' +
+              '<button data-vl-act="save"   data-id="' + it.id + '" style="background:#fbbf24;color:#1a1a26;border:none;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><path d="M12 4v12"/><polyline points="6 14 12 20 18 14"/><line x1="4" y1="20" x2="20" y2="20"/></svg> Download</button>' +
+              '<button data-vl-act="rename" data-id="' + it.id + '" title="Rename" style="background:transparent;color:#cfcfdc;border:1px solid #2a2a40;border-radius:8px;padding:7px 10px;cursor:pointer;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;display:block"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>' +
+              '<button data-vl-act="delete" data-id="' + it.id + '" title="Delete" style="background:transparent;color:#ff6b8a;border:1px solid #2a2a40;border-radius:8px;padding:7px 10px;cursor:pointer;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;display:block"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button>' +
             '</div>';
           listEl.appendChild(row);
         });

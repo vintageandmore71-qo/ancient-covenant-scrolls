@@ -143,7 +143,7 @@
     modal.innerHTML =
       '<div id="cvs-box" style="background:#1a1a26;color:#fff;border-radius:18px;width:100%;max-width:780px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.55);border:1px solid #2a2a40;overflow:hidden;">' +
         '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #2a2a40;flex-shrink:0;">' +
-          '<h2 style="margin:0;font-size:18px;font-weight:800;">🎭 Character Voice Studio</h2>' +
+          '<h2 style="margin:0;font-size:18px;font-weight:800;display:inline-flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px"><circle cx="8" cy="10" r="4"/><circle cx="16" cy="10" r="4"/><path d="M4 21c1-2 2-3 4-3s3 1 4 3"/><path d="M12 21c1-2 2-3 4-3s3 1 4 3"/></svg> Character Voice Studio</h2>' +
           '<button id="cvs-close" style="background:transparent;border:none;color:#cfcfdc;font-size:24px;cursor:pointer;line-height:1;">×</button>' +
         '</div>' +
         '<div style="overflow-y:auto;padding:14px 18px;flex:1;">' +
@@ -152,7 +152,7 @@
             '<textarea id="cvs-script" rows="6" placeholder="Paste a script. Use NAME: or Name: prefixes for character lines, e.g.&#10;&#10;NARRATOR: It was a stormy night.&#10;JONAH: I will not go to Nineveh.&#10;CAPTAIN: Wake up, sleeper!" style="width:100%;background:#0e0e18;color:#fff;border:1px solid #2a2a40;border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;resize:vertical;margin-top:6px;"></textarea>' +
             '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">' +
               '<button id="cvs-parse" style="background:#fbbf24;color:#1a1a26;border:none;border-radius:8px;padding:8px 14px;font-weight:800;cursor:pointer;">↻ Detect characters</button>' +
-              '<label style="background:#2a2a40;color:#cfcfdc;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:600;font-size:13px;">📄 Import .txt<input id="cvs-file" type="file" accept=".txt,text/plain" style="display:none;"></label>' +
+              '<label style="background:#2a2a40;color:#cfcfdc;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:600;font-size:13px;display:inline-flex;align-items:center;gap:6px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M5 3h11l3 3v15H5z"/><path d="M16 3v3h3"/></svg> Import .txt<input id="cvs-file" type="file" accept=".txt,text/plain" style="display:none;"></label>' +
               '<button id="cvs-clear" style="background:transparent;color:#a8a8c4;border:1px solid #2a2a40;border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer;">Clear</button>' +
             '</div>' +
           '</div>' +
@@ -163,7 +163,7 @@
           '<button id="cvs-preview-scene" style="background:#22c55e;color:#0a0a14;border:none;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer;flex:1;min-width:160px;">▶ Preview full scene</button>' +
           '<button id="cvs-stop" style="background:#2a2a40;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer;">■ Stop</button>' +
           '<button id="cvs-add-text" style="background:#1d6fff;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer;flex:1;min-width:160px;">＋ Add to timeline (text)</button>' +
-          '<button id="cvs-add-audio" style="background:#a855f7;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer;flex:1;min-width:160px;">🎙 Record + add audio</button>' +
+          '<button id="cvs-add-audio" style="background:#a855f7;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer;flex:1;min-width:160px;display:inline-flex;align-items:center;justify-content:center;gap:8px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg> Record + add audio</button>' +
         '</div>' +
       '</div>';
     document.body.appendChild(modal);
@@ -199,7 +199,7 @@
         row.style.cssText = 'background:#0e0e18;border:1px solid #2a2a40;border-radius:12px;padding:10px 12px;margin-bottom:8px;';
         row.innerHTML =
           '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px;">' +
-            '<strong style="font-size:14px;">' + (name === 'Narrator' ? '📖 ' : '🗣 ') + escHtml(name) + '</strong>' +
+            '<strong style="font-size:14px;display:inline-flex;align-items:center;gap:6px;">' + (name === 'Narrator' ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0"><path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M7 4v13"/></svg>' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0"><path d="M5 9v6h3l5 4V5L8 9H5z"/><path d="M16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/></svg>') + escHtml(name) + '</strong>' +
             '<button data-cvs-preview-char="' + escAttr(name) + '" style="background:#2a2a40;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;">▶ Preview</button>' +
           '</div>' +
           '<label style="font-size:11px;color:#a8a8c4;display:block;margin-bottom:4px;">Voice</label>' +
@@ -422,7 +422,7 @@
     var ctx = null;
     var playingSrc = null;       // current preview BufferSource
 
-    var presets = (window.VoiceFX && window.VoiceFX.PRESETS) || [{ key: 'none', label: 'No effect', icon: '🎙', note: '' }];
+    var presets = (window.VoiceFX && window.VoiceFX.PRESETS) || [{ key: 'none', label: 'No effect', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;display:block"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>', note: '' }];
 
     var modal = document.createElement('div');
     modal.id = 'cvs-fx-modal';
@@ -430,17 +430,17 @@
     modal.innerHTML =
       '<div style="background:#1a1a26;color:#fff;border-radius:18px;width:100%;max-width:720px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.55);border:1px solid #2a2a40;overflow:hidden;">' +
         '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #2a2a40;flex-shrink:0;">' +
-          '<h2 style="margin:0;font-size:18px;font-weight:800;">🎤 Sound Studio · Voice FX</h2>' +
+          '<h2 style="margin:0;font-size:18px;font-weight:800;display:inline-flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg> Sound Studio · Voice FX</h2>' +
           '<button id="cvsfx-close" style="background:transparent;border:none;color:#cfcfdc;font-size:24px;cursor:pointer;line-height:1;">×</button>' +
         '</div>' +
         '<div style="overflow-y:auto;padding:14px 18px;flex:1;">' +
           '<div id="cvsfx-rec-row" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;">' +
-            '<button id="cvsfx-rec" style="background:#ff3b5c;color:#fff;border:none;border-radius:50%;width:64px;height:64px;font-size:24px;cursor:pointer;flex-shrink:0;">⏺</button>' +
+            '<button id="cvsfx-rec" style="background:#ff3b5c;color:#fff;border:none;border-radius:50%;width:64px;height:64px;font-size:24px;cursor:pointer;flex-shrink:0;"></button>' +
             '<div style="flex:1;min-width:180px;">' +
-              '<div id="cvsfx-status" style="font-size:14px;font-weight:700;">Tap ⏺ to record. Speak, then tap ■ to stop.</div>' +
+              '<div id="cvsfx-status" style="font-size:14px;font-weight:700;">Tap the red button to record. Speak, then tap stop.</div>' +
               '<div id="cvsfx-time" style="font-size:13px;color:#a8a8c4;font-variant-numeric:tabular-nums;">0:00</div>' +
             '</div>' +
-            '<button id="cvsfx-import" style="background:#2a2a40;color:#fff;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;">📂 Import audio</button>' +
+            '<button id="cvsfx-import" style="background:#2a2a40;color:#fff;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Import audio</button>' +
             '<input id="cvsfx-import-file" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg,.flac,.aiff,.aif,.webm,.weba,.opus" style="display:none;">' +
           '</div>' +
           '<div id="cvsfx-fx-section" style="display:none;">' +
@@ -452,9 +452,9 @@
           '<button id="cvsfx-play" style="background:#22c55e;color:#0a0a14;border:none;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer;flex:1;min-width:130px;" disabled>▶ Preview</button>' +
           '<button id="cvsfx-stop" style="background:#2a2a40;color:#fff;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;">■</button>' +
           '<button id="cvsfx-add" style="background:#1d6fff;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer;flex:1;min-width:130px;" disabled>＋ Add to timeline</button>' +
-          '<button id="cvsfx-save" style="background:#fbbf24;color:#1a1a26;border:none;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer;flex:1;min-width:130px;" disabled>💾 Save file</button>' +
+          '<button id="cvsfx-save" style="background:#fbbf24;color:#1a1a26;border:none;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer;flex:1;min-width:130px;" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save file</button>' +
           '<button id="cvsfx-share" style="background:#a855f7;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer;flex:1;min-width:130px;" disabled>↗ Share</button>' +
-          '<button id="cvsfx-lib" style="background:#0e0e18;color:#fbbf24;border:1px solid #fbbf24;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer;flex:1;min-width:140px;" disabled>📚 Save to Library</button>' +
+          '<button id="cvsfx-lib" style="background:#0e0e18;color:#fbbf24;border:1px solid #fbbf24;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer;flex:1;min-width:140px;" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px"><path d="M4 4h6v16H4z"/><path d="M10 4h6v16h-6z"/><path d="M16 5l4 1-3 14-4-1z"/></svg> Save to Library</button>' +
         '</div>' +
       '</div>';
     document.body.appendChild(modal);
@@ -584,7 +584,7 @@
       try {
         var blob = bufToWavBlob(lastFxBuffer);
         await VoiceLibrary.save(blob, { name: name.trim() || ('Voice ' + lastFxKey), durationSec: lastFxBuffer.duration, mime: 'audio/wav' });
-        statusEl.textContent = '✓ Saved to Voice Library.';
+        statusEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px"><polyline points="20 6 9 17 4 12"/></svg> Saved to Voice Library.';
       } catch (e) { statusEl.textContent = 'Save failed: ' + ((e && e.message) || e); }
     });
 
@@ -612,7 +612,7 @@
       if (recTimer) { clearInterval(recTimer); recTimer = null; }
       if (rec && rec.state !== 'inactive') { try { rec.stop(); } catch (_) {} }
       if (recStream) { try { recStream.getTracks().forEach(function (t) { t.stop(); }); } catch (_) {} recStream = null; }
-      recBtn.textContent = '⏺'; recBtn.style.background = '#ff3b5c'; recBtn.style.color = '#fff';
+      recBtn.textContent = ''; recBtn.style.background = '#ff3b5c'; recBtn.style.color = '#fff';
     }
     var recTimer = null, recStartedAt = 0;
     function updateTime() {
@@ -686,17 +686,17 @@
     modal.innerHTML =
       '<div style="background:#1a1a26;color:#fff;border-radius:18px;width:100%;max-width:760px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.55);border:1px solid #2a2a40;overflow:hidden;">' +
         '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #2a2a40;flex-shrink:0;">' +
-          '<h2 style="margin:0;font-size:18px;font-weight:800;">🎚 Voice Manipulator</h2>' +
+          '<h2 style="margin:0;font-size:18px;font-weight:800;display:inline-flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px"><line x1="4" y1="6" x2="4" y2="18"/><line x1="9" y1="6" x2="9" y2="18"/><line x1="14" y1="6" x2="14" y2="18"/><line x1="19" y1="6" x2="19" y2="18"/><circle cx="9" cy="10" r="1.6" fill="currentColor"/><circle cx="14" cy="14" r="1.6" fill="currentColor"/></svg> Voice Manipulator</h2>' +
           '<button id="vm-close" style="background:transparent;border:none;color:#cfcfdc;font-size:24px;cursor:pointer;line-height:1;">×</button>' +
         '</div>' +
         '<div id="vm-body" style="overflow-y:auto;padding:14px 18px;flex:1;">' +
           '<div id="vm-source" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;">' +
-            '<button id="vm-rec" style="background:#ff3b5c;color:#fff;border:none;border-radius:50%;width:56px;height:56px;font-size:22px;cursor:pointer;flex-shrink:0;">⏺</button>' +
+            '<button id="vm-rec" style="background:#ff3b5c;color:#fff;border:none;border-radius:50%;width:56px;height:56px;font-size:22px;cursor:pointer;flex-shrink:0;"></button>' +
             '<div style="flex:1;min-width:160px;">' +
-              '<div id="vm-status" style="font-size:13px;font-weight:700;">Tap ⏺ to record, or import audio.</div>' +
+              '<div id="vm-status" style="font-size:13px;font-weight:700;">Tap the red button to record, or import audio.</div>' +
               '<div id="vm-info" style="font-size:12px;color:#a8a8c4;font-variant-numeric:tabular-nums;">No source loaded</div>' +
             '</div>' +
-            '<button id="vm-import" style="background:#2a2a40;color:#fff;border:none;border-radius:8px;padding:9px 12px;font-weight:700;cursor:pointer;">📂 Import</button>' +
+            '<button id="vm-import" style="background:#2a2a40;color:#fff;border:none;border-radius:8px;padding:9px 12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Import</button>' +
             '<input id="vm-import-file" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg,.flac,.aiff,.aif,.webm,.weba,.opus" style="display:none;">' +
           '</div>' +
           '<div id="vm-controls" style="display:none;">' +
@@ -729,8 +729,8 @@
           '<button id="vm-preview" style="background:#22c55e;color:#0a0a14;border:none;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer;flex:1;min-width:120px;" disabled>▶ Preview</button>' +
           '<button id="vm-stop" style="background:#2a2a40;color:#fff;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;">■</button>' +
           '<button id="vm-apply" style="background:#1d6fff;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer;flex:1;min-width:140px;" disabled>＋ Apply to timeline</button>' +
-          '<button id="vm-save" style="background:#fbbf24;color:#1a1a26;border:none;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer;" disabled>💾 Save</button>' +
-          '<button id="vm-lib" style="background:#0e0e18;color:#fbbf24;border:1px solid #fbbf24;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer;" disabled>📚 Library</button>' +
+          '<button id="vm-save" style="background:#fbbf24;color:#1a1a26;border:none;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save</button>' +
+          '<button id="vm-lib" style="background:#0e0e18;color:#fbbf24;border:1px solid #fbbf24;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M4 4h6v16H4z"/><path d="M10 4h6v16h-6z"/><path d="M16 5l4 1-3 14-4-1z"/></svg> Library</button>' +
         '</div>' +
       '</div>';
     document.body.appendChild(modal);
@@ -910,7 +910,7 @@
       try {
         var blob = bufToWavBlob(processedBuf);
         await VoiceLibrary.save(blob, { name: name.trim() || 'Voice', durationSec: processedBuf.duration, mime: 'audio/wav' });
-        statusEl.textContent = '✓ Saved to Voice Library.';
+        statusEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px"><polyline points="20 6 9 17 4 12"/></svg> Saved to Voice Library.';
       } catch (e) { statusEl.textContent = 'Save failed: ' + ((e && e.message) || e); }
     });
 
@@ -938,7 +938,7 @@
     function stopRec() {
       if (rec && rec.state !== 'inactive') { try { rec.stop(); } catch (_) {} }
       if (recStream) { try { recStream.getTracks().forEach(function (t) { t.stop(); }); } catch (_) {} recStream = null; }
-      modal.querySelector('#vm-rec').textContent = '⏺';
+      modal.querySelector('#vm-rec').textContent = '';
       modal.querySelector('#vm-rec').style.background = '#ff3b5c';
       modal.querySelector('#vm-rec').style.color = '#fff';
     }

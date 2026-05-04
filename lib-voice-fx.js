@@ -14,27 +14,50 @@
   'use strict';
   if (global.VoiceFX) return;
 
+  function _svg(inner, sz) { var s = sz || 22; return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:' + s + 'px;height:' + s + 'px;display:block">' + inner + '</svg>'; }
+  var IC = {
+    mic:        _svg('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/>'),
+    chipmunk:   _svg('<path d="M5 21c0-3 3-6 7-6s7 3 7 6"/><circle cx="12" cy="9" r="3"/><path d="M9 5l1-3M15 5l-1-3"/>'),
+    balloon:    _svg('<path d="M12 3a7 7 0 0 1 7 7c0 4-3.5 7-7 7s-7-3-7-7a7 7 0 0 1 7-7z"/><path d="M11 17l-1 4M13 17l1 4M11 21h2"/>'),
+    baby:       _svg('<circle cx="12" cy="9" r="4"/><path d="M5 21c0-3.5 3-6 7-6s7 2.5 7 6"/><path d="M9 9.5h.01M15 9.5h.01"/>'),
+    child:      _svg('<circle cx="12" cy="9" r="3"/><path d="M5 21c0-3.5 3-6 7-6s7 2.5 7 6"/><path d="M9 4l3-2 3 2"/>'),
+    cartoon:    _svg('<rect x="3" y="6" width="14" height="12" rx="1.5"/><path d="M17 10l5-3v10l-5-3"/><circle cx="8" cy="10" r="1" fill="currentColor"/><circle cx="13" cy="10" r="1" fill="currentColor"/>'),
+    woman:      _svg('<circle cx="12" cy="8" r="3.5"/><path d="M9 13h6l-1 8h-4z"/>'),
+    man:        _svg('<circle cx="12" cy="8" r="3.5"/><path d="M7 21v-4a5 5 0 0 1 10 0v4"/>'),
+    deep:       _svg('<path d="M3 12h2l3-7 4 14 3-9 2 4h4"/>'),
+    grandma:    _svg('<circle cx="12" cy="9" r="3.2"/><path d="M5 21c0-3.5 3-6 7-6s7 2.5 7 6"/><path d="M8 6c1-2 7-2 8 0"/>'),
+    grandpa:    _svg('<circle cx="12" cy="9" r="3.2"/><path d="M5 21c0-3.5 3-6 7-6s7 2.5 7 6"/><path d="M9 12h6"/>'),
+    elder:      _svg('<circle cx="12" cy="9" r="3.2"/><path d="M5 21c0-3.5 3-6 7-6s7 2.5 7 6"/><path d="M9 5l-1-2M15 5l1-2"/>'),
+    echo:       _svg('<polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>'),
+    cathedral:  _svg('<path d="M12 2v8M9 5h6"/><path d="M5 22V11l7-4 7 4v11"/><path d="M9 22v-6h6v6"/>'),
+    telephone:  _svg('<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.2 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.4 2.1L8 9.5a16 16 0 0 0 6 6l1.1-1.1a2 2 0 0 1 2.1-.4 13 13 0 0 0 2.6.6 2 2 0 0 1 1.7 2z"/>'),
+    walkie:     _svg('<rect x="6" y="3" width="12" height="18" rx="2"/><circle cx="12" cy="18" r="1" fill="currentColor"/><line x1="9" y1="7" x2="15" y2="7"/><path d="M12 1v3"/>'),
+    underwater: _svg('<path d="M2 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M2 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M2 7c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/>'),
+    whisper:    _svg('<path d="M5 9v6h3l5 4V5L8 9H5z"/><path d="M16 8a5 5 0 0 1 0 8" stroke-dasharray="2 2"/>'),
+    megaphone:  _svg('<path d="M3 11v3a1 1 0 0 0 1 1h3l4 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/>'),
+    cave:       _svg('<ellipse cx="12" cy="14" rx="9" ry="7"/><ellipse cx="12" cy="14" rx="5" ry="4" fill="currentColor"/>')
+  };
   var PRESETS = [
-    { key: 'none',       label: 'No effect',  icon: '🎙', note: 'Original recording' },
-    { key: 'chipmunk',   label: 'Chipmunk',   icon: '🐿', note: 'High-pitch, fast' },
-    { key: 'helium',     label: 'Helium',     icon: '🎈', note: 'Squeaky balloon voice' },
-    { key: 'baby',       label: 'Baby',       icon: '👶', note: 'Tiny + soft + sing-song' },
-    { key: 'child',      label: 'Child',      icon: '🧒', note: 'Slightly higher + brighter' },
-    { key: 'cartoon',    label: 'Cartoon',    icon: '🎬', note: 'Bouncy, bright, character-y' },
-    { key: 'woman',      label: 'Woman',      icon: '👩', note: 'Softer + slightly higher' },
-    { key: 'man',        label: 'Man',        icon: '👨', note: 'Lower, fuller' },
-    { key: 'deep',       label: 'Deep voice', icon: '🦁', note: 'Big, deep, slow' },
-    { key: 'grandma',    label: 'Grandma',    icon: '👵', note: 'Warm voice with gentle quaver' },
-    { key: 'grandpa',    label: 'Grandpa',    icon: '👴', note: 'Lower, warm, gentle quaver' },
-    { key: 'elder',      label: 'Elder',      icon: '🧓', note: 'Slow, warm, slight tremor' },
-    { key: 'echo',       label: 'Echo',       icon: '🔁', note: 'Repeating decay' },
-    { key: 'cathedral',  label: 'Cathedral',  icon: '⛪', note: 'Long reverb' },
-    { key: 'telephone',  label: 'Telephone',  icon: '☎️', note: 'Bandpassed 300-3400 Hz' },
-    { key: 'walkietalkie',label:'Walkie-talkie',icon:'📻', note: 'Crunchy + static' },
-    { key: 'underwater', label: 'Underwater', icon: '🌊', note: 'Lowpass + slow chorus' },
-    { key: 'whisper',    label: 'Whisper',    icon: '🤫', note: 'Quiet, breathy highs' },
-    { key: 'megaphone',  label: 'Megaphone',  icon: '📣', note: 'Boosted mids, slight clip' },
-    { key: 'cave',       label: 'Cave',       icon: '🕳', note: 'Long delay + low cut' }
+    { key: 'none',       label: 'No effect',  icon: IC.mic,        note: 'Original recording' },
+    { key: 'chipmunk',   label: 'Chipmunk',   icon: IC.chipmunk,   note: 'High-pitch, fast' },
+    { key: 'helium',     label: 'Helium',     icon: IC.balloon,    note: 'Squeaky balloon voice' },
+    { key: 'baby',       label: 'Baby',       icon: IC.baby,       note: 'Tiny + soft + sing-song' },
+    { key: 'child',      label: 'Child',      icon: IC.child,      note: 'Slightly higher + brighter' },
+    { key: 'cartoon',    label: 'Cartoon',    icon: IC.cartoon,    note: 'Bouncy, bright, character-y' },
+    { key: 'woman',      label: 'Woman',      icon: IC.woman,      note: 'Softer + slightly higher' },
+    { key: 'man',        label: 'Man',        icon: IC.man,        note: 'Lower, fuller' },
+    { key: 'deep',       label: 'Deep voice', icon: IC.deep,       note: 'Big, deep, slow' },
+    { key: 'grandma',    label: 'Grandma',    icon: IC.grandma,    note: 'Warm voice with gentle quaver' },
+    { key: 'grandpa',    label: 'Grandpa',    icon: IC.grandpa,    note: 'Lower, warm, gentle quaver' },
+    { key: 'elder',      label: 'Elder',      icon: IC.elder,      note: 'Slow, warm, slight tremor' },
+    { key: 'echo',       label: 'Echo',       icon: IC.echo,       note: 'Repeating decay' },
+    { key: 'cathedral',  label: 'Cathedral',  icon: IC.cathedral,  note: 'Long reverb' },
+    { key: 'telephone',  label: 'Telephone',  icon: IC.telephone,  note: 'Bandpassed 300-3400 Hz' },
+    { key: 'walkietalkie',label:'Walkie-talkie',icon:IC.walkie,    note: 'Crunchy + static' },
+    { key: 'underwater', label: 'Underwater', icon: IC.underwater, note: 'Lowpass + slow chorus' },
+    { key: 'whisper',    label: 'Whisper',    icon: IC.whisper,    note: 'Quiet, breathy highs' },
+    { key: 'megaphone',  label: 'Megaphone',  icon: IC.megaphone,  note: 'Boosted mids, slight clip' },
+    { key: 'cave',       label: 'Cave',       icon: IC.cave,       note: 'Long delay + low cut' }
   ];
 
   // Build a synthesised impulse response for ConvolverNode (no external

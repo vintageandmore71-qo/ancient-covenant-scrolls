@@ -28,15 +28,27 @@
   'use strict';
   if (global.VoiceManipulator) return;
 
+  // Inline monoline SVG icons (matches Load family aesthetic).
+  function _svg(inner, sz) { var s = sz || 22; return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:' + s + 'px;height:' + s + 'px;display:block">' + inner + '</svg>'; }
+  var ICONS = {
+    flat:     _svg('<circle cx="12" cy="12" r="8"/>'),
+    child:    _svg('<circle cx="12" cy="9" r="3"/><path d="M5 21c0-3.5 3-6 7-6s7 2.5 7 6"/><path d="M9 4l3-2 3 2"/>'),
+    deepmale: _svg('<path d="M3 12h2l3-7 4 14 3-9 2 4h4"/>'),
+    elder:    _svg('<circle cx="12" cy="9" r="3.2"/><path d="M5 21c0-3.5 3-6 7-6s7 2.5 7 6"/><path d="M9 5l-1-2M15 5l1-2"/>'),
+    robot:    _svg('<rect x="5" y="6" width="14" height="12" rx="2"/><circle cx="9" cy="12" r="1.2" fill="currentColor"/><circle cx="15" cy="12" r="1.2" fill="currentColor"/><line x1="12" y1="3" x2="12" y2="6"/>'),
+    narrator: _svg('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/>'),
+    cartoon:  _svg('<rect x="3" y="6" width="14" height="12" rx="1.5"/><path d="M17 10l5-3v10l-5-3"/><circle cx="8" cy="10" r="1" fill="currentColor"/><circle cx="13" cy="10" r="1" fill="currentColor"/>'),
+    creature: _svg('<path d="M5 14c0-3 3-6 7-6s7 3 7 6c0 1.5-1 3-3 3l-1-2-3 2-3-2-1 2c-2 0-3-1.5-3-3z"/><circle cx="9" cy="13" r="1" fill="currentColor"/><circle cx="15" cy="13" r="1" fill="currentColor"/>')
+  };
   var STYLE_PRESETS = [
-    { key: 'flat',     label: 'Flat',       icon: '⚪', vals: { pitchSemitones: 0,  speed: 1.0, eqLow: 0, eqMid: 0, eqHigh: 0, reverb: 0, echo: 0, distortion: 0, wet: 1 } },
-    { key: 'child',    label: 'Child',      icon: '🧒', vals: { pitchSemitones: 6,  speed: 1.05, eqLow: -2, eqMid: 1, eqHigh: 4, reverb: 0.1, echo: 0,    distortion: 0,    wet: 1 } },
-    { key: 'deepmale', label: 'Deep male',  icon: '🦁', vals: { pitchSemitones: -5, speed: 0.95, eqLow: 4,  eqMid: 1, eqHigh: -2, reverb: 0.1, echo: 0,    distortion: 0,    wet: 1 } },
-    { key: 'elder',    label: 'Elder',      icon: '🧓', vals: { pitchSemitones: -2, speed: 0.92, eqLow: 1,  eqMid: -1,eqHigh: -3, reverb: 0.15,echo: 0,    distortion: 0.05, wet: 1 } },
-    { key: 'robot',    label: 'Robot',      icon: '🤖', vals: { pitchSemitones: -3, speed: 1.0,  eqLow: -2, eqMid: 4, eqHigh: 2,  reverb: 0,   echo: 0.25, distortion: 0.55, wet: 1 } },
-    { key: 'narrator', label: 'Narrator',   icon: '🎙', vals: { pitchSemitones: -1, speed: 0.97, eqLow: 2,  eqMid: 2, eqHigh: 1,  reverb: 0.18,echo: 0,    distortion: 0,    wet: 1 } },
-    { key: 'cartoon',  label: 'Cartoon',    icon: '🎬', vals: { pitchSemitones: 5,  speed: 1.1,  eqLow: -1, eqMid: 3, eqHigh: 4,  reverb: 0.05,echo: 0.1,  distortion: 0,    wet: 1 } },
-    { key: 'creature', label: 'Creature',   icon: '🤡', vals: { pitchSemitones: -8, speed: 0.85, eqLow: 6,  eqMid: -3,eqHigh: -4, reverb: 0.25,echo: 0.15, distortion: 0.7,  wet: 1 } }
+    { key: 'flat',     label: 'Flat',       icon: ICONS.flat,     vals: { pitchSemitones: 0,  speed: 1.0, eqLow: 0, eqMid: 0, eqHigh: 0, reverb: 0, echo: 0, distortion: 0, wet: 1 } },
+    { key: 'child',    label: 'Child',      icon: ICONS.child,    vals: { pitchSemitones: 6,  speed: 1.05, eqLow: -2, eqMid: 1, eqHigh: 4, reverb: 0.1, echo: 0,    distortion: 0,    wet: 1 } },
+    { key: 'deepmale', label: 'Deep male',  icon: ICONS.deepmale, vals: { pitchSemitones: -5, speed: 0.95, eqLow: 4,  eqMid: 1, eqHigh: -2, reverb: 0.1, echo: 0,    distortion: 0,    wet: 1 } },
+    { key: 'elder',    label: 'Elder',      icon: ICONS.elder,    vals: { pitchSemitones: -2, speed: 0.92, eqLow: 1,  eqMid: -1,eqHigh: -3, reverb: 0.15,echo: 0,    distortion: 0.05, wet: 1 } },
+    { key: 'robot',    label: 'Robot',      icon: ICONS.robot,    vals: { pitchSemitones: -3, speed: 1.0,  eqLow: -2, eqMid: 4, eqHigh: 2,  reverb: 0,   echo: 0.25, distortion: 0.55, wet: 1 } },
+    { key: 'narrator', label: 'Narrator',   icon: ICONS.narrator, vals: { pitchSemitones: -1, speed: 0.97, eqLow: 2,  eqMid: 2, eqHigh: 1,  reverb: 0.18,echo: 0,    distortion: 0,    wet: 1 } },
+    { key: 'cartoon',  label: 'Cartoon',    icon: ICONS.cartoon,  vals: { pitchSemitones: 5,  speed: 1.1,  eqLow: -1, eqMid: 3, eqHigh: 4,  reverb: 0.05,echo: 0.1,  distortion: 0,    wet: 1 } },
+    { key: 'creature', label: 'Creature',   icon: ICONS.creature, vals: { pitchSemitones: -8, speed: 0.85, eqLow: 6,  eqMid: -3,eqHigh: -4, reverb: 0.25,echo: 0.15, distortion: 0.7,  wet: 1 } }
   ];
 
   /* Pitch shift WITH formant shift (resample + granular stretch).
