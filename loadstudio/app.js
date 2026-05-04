@@ -106,6 +106,7 @@ function _origControlsFor(sec){
  var __dys = lsDysActions(id); if(__dys){ return __dys + '<p class="lead" style="margin-top:10px">'+statusText(sec)+'</p>'; }
  return common;
 }
+function controlsFor(sec){try{return lsFrame(sec.id,_origControlsFor(sec));}catch(e){return _origControlsFor(sec);}}
 function renderControls(){featureData.sections.forEach(sec=>{let box=document.querySelector(`[data-controls="${sec.id}"]`); if(box) box.innerHTML=controlsFor(sec);});}
 function renderLists(){featureData.sections.forEach(sec=>{let list=$('#list-'+sec.id); if(!list) return; let items=[]; if(sec.id.includes('project')||sec.id==='dashboard') items=state.projects.map(x=>item(x.title,x.type+' · '+x.status,'duplicate-project',x.id)); else if(sec.id==='scene-builder'||sec.id==='timeline-editor') items=state.scenes.map(x=>item(x.title,x.chapter+' · '+x.status,'preview-scene',x.id)); else if(sec.id==='character-studio'||sec.id==='casting') items=state.characters.map(x=>item(x.name,x.role+' · '+x.consistency,'duplicate-character',x.id)); else if(sec.id==='asset-library'||sec.id==='import-center') items=state.assets.map(x=>item(x.name,x.category+' · '+(x.type||'asset'),'preview-asset',x.id)); else items=(state[sec.id]||[]).map(x=>item(x.title||x.name||x.label||sec.title,x.status||'saved','preview-generic',x.id)); list.innerHTML=items.join('')||'<p class="lead">No saved local items yet. Use the section controls to add or configure items.</p>';});}
 function item(title,sub,action,id){return `<div class="item"><div><b>${esc(title)}</b><br><small>${esc(sub)}</small></div><button class="mini" data-action="${action}" data-id="${id}">Open</button></div>`}
@@ -136,5 +137,3 @@ document.addEventListener('click',e=>{let s=e.target.closest('[data-section]'); 
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
 render();
 })();
-
-function controlsFor(sec){try{return lsFrame(sec.id,_origControlsFor(sec));}catch(e){return _origControlsFor(sec);}}
