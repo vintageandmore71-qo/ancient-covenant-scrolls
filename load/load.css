@@ -1259,7 +1259,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
   background: var(--accent, #4ea0ff);
 }
 .mp-tile.on .mp-pick::before {
-  content: '✓'; color: #fff;
+  content: ''; color: #fff;
   font-size: 13px; font-weight: 800;
   position: absolute; left: 50%; top: 50%;
   transform: translate(-50%, -50%);
