@@ -1430,9 +1430,22 @@ body.beeline-on .ch-question{
 .lib-icon{font-size:3em;margin-bottom:10px}
 .lib-title{font-size:.9em;font-weight:700;line-height:1.3;font-family:var(--font-main);position:relative;z-index:2}
 .lib-meta{font-size:.7em;opacity:.8;margin-top:6px;position:relative;z-index:2}
-.lib-cover{display:block;width:auto;max-width:100%;height:auto;max-height:240px;aspect-ratio:2/3;object-fit:contain;
-  border-radius:8px;margin:-4px auto 12px;box-shadow:0 6px 18px rgba(0,0,0,.45);position:relative;z-index:1;background:#0a0a14}
-.lib-card-cover{padding:14px 12px 12px;min-height:300px;justify-content:flex-start;align-items:center;background:#1f2937}
+/* Premium streaming-tile look: cover fills the entire card face,
+   title sits on a dark gradient overlay at the bottom. Same pattern
+   the LoadPlay vcard uses, applied to library books. */
+.lib-card-cover{position:relative;padding:0;aspect-ratio:2/3;min-height:0;border-radius:14px;overflow:hidden;
+  align-items:stretch;justify-content:flex-end;background:#0a0a14;color:#fff}
+.lib-cover{position:absolute !important;inset:0;width:100%;height:100%;object-fit:cover;
+  border-radius:14px;background:#0a0a14;display:block;z-index:1}
+.lib-card-cover::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(to top,rgba(0,0,0,.92) 0%,rgba(0,0,0,.55) 30%,rgba(0,0,0,0) 60%);border-radius:14px}
+.lib-card-cover .lib-title{position:relative;z-index:3;padding:0 14px 0;text-align:left;
+  font-size:1em;font-weight:800;line-height:1.25;text-shadow:0 2px 8px rgba(0,0,0,.6)}
+.lib-card-cover .lib-meta{position:relative;z-index:3;padding:6px 14px 14px;text-align:left;
+  font-size:.7em;opacity:.92;text-shadow:0 1px 4px rgba(0,0,0,.7)}
+.lib-card-cover .lib-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.35);z-index:1}
+.lib-card-cover .lib-sample-tag{z-index:4}
+.lib-card-cover .lib-expiry-soon{position:relative;z-index:3;padding:0 14px 10px;text-align:left}
 .lib-sample-tag{position:absolute;top:8px;right:8px;font-size:.62em;font-weight:800;letter-spacing:.08em;
   text-transform:uppercase;padding:3px 8px;border-radius:6px;background:#7c3aed;color:#fff;z-index:3}
 .lib-add{border:3px dashed rgba(255,255,255,.3);background:rgba(255,255,255,.05)}

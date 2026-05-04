@@ -409,7 +409,7 @@ window.LoadAudioFix = {
  wrap.innerHTML = list.map(function (t) {
  // Raw-HTML templates get the floppy icon so the user can tell at
  // a glance which entries came from "Save as template" on an open
- // file versus which came from Create-wizard drafts.
+ // file versus which came from Create-flow drafts.
  var icon = t.type === 'raw' ? '' : '';
  return '<button class="seg-btn" data-user-template="' + escHtml(t.id) + '">' +
  icon + ' ' + escHtml(t.name) +
@@ -434,7 +434,7 @@ window.LoadAudioFix = {
  var t = list.find(function (x) { return x.id === id; });
  if (!t) return;
  // Raw-HTML templates saved from an open file bypass the Create
- // wizard and open directly in the HTML editor as a new scratch
+ // flow and open directly in the HTML editor as a new scratch
  // app. Nothing is persisted until the user taps Save.
  if (t.type === 'raw') {
  var scratch = {
@@ -949,7 +949,7 @@ window.LoadAudioFix = {
  fixBtn.disabled = false;
  fixBtn.textContent = report.fixable === 0
  ? ' Nothing to auto-fix'
- : '\u{1F528} Auto-fix issues (' + report.fixable + ')';
+ : 'Auto-fix issues (' + report.fixable + ')';
  }
  }
  function renderScanReport(report) {
@@ -3337,7 +3337,7 @@ window.LoadAudioFix = {
  setProviderStatus('local', 'ok', 'Ready offline');
  clearInterval(tick);
  } else if (!localAiInitPromise) {
- if (install) { install.disabled = false; install.textContent = '↻ Reinstall (cache may be gone)'; }
+ if (install) { install.disabled = false; install.textContent = 'Reinstall (cache may be gone)'; }
  clearInterval(tick);
  }
  }, 1500);
@@ -11906,7 +11906,7 @@ window.LoadAudioFix = {
  }
  var ph = document.createElement('div');
  ph.style.cssText = 'flex:1;display:flex;align-items:center;justify-content:center;background:#1d6fff;color:#fff;font-size:11px;font-weight:700;';
- ph.textContent = '◰ video';
+ ph.textContent = 'video';
  container.appendChild(ph);
  // Async: extract first frame, cache as data URL, refresh.
  try {
@@ -13764,7 +13764,7 @@ window.LoadAudioFix = {
  // Update the button label without closing the sheet so the user
  // can queue up more variants in one session.
  var btn = document.getElementById('ve-exp-runqueue');
- if (btn) btn.textContent = '▶ Run queue (' + window.__veQueue.length + ')';
+ if (btn) btn.textContent = 'Run queue (' + window.__veQueue.length + ')';
  });
  document.getElementById('ve-exp-runqueue').addEventListener('click', async function () {
  var q = (window.__veQueue || []).slice();
@@ -13782,7 +13782,7 @@ window.LoadAudioFix = {
  document.getElementById('ve-exp-clearqueue').addEventListener('click', function () {
  window.__veQueue = [];
  var btn = document.getElementById('ve-exp-runqueue');
- if (btn) btn.textContent = '▶ Run queue (0)';
+ if (btn) btn.textContent = 'Run queue (0)';
  toast('Queue cleared.', false);
  });
  }

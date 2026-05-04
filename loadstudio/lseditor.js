@@ -960,7 +960,7 @@ window.LoadAudioFix = {
  fixBtn.disabled = false;
  fixBtn.textContent = report.fixable === 0
  ? ' Nothing to auto-fix'
- : '\u{1F528} Auto-fix issues (' + report.fixable + ')';
+ : 'Auto-fix issues (' + report.fixable + ')';
  }
  }
  function renderScanReport(report) {
@@ -15041,7 +15041,7 @@ window.LoadAudioFix = {
  // Even when cached, expose Re-install so a corrupt cache
  // can be flushed with one tap (no need to Remove + Install
  // separately).
- installEl.textContent = '⟲ Re-install';
+ installEl.textContent = 'Re-install';
  installEl.disabled = false;
  testEl.disabled = false;
  uninstallEl.style.display = '';

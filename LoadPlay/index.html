@@ -1283,7 +1283,7 @@ html .lp-bottom-title{font-size:30px;text-shadow:none}
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
           <span class="label">Drafts</span>
         </div>
-        <div class="nav-item" data-lp-act="upload-wizard">
+        <div class="nav-item" data-lp-act="upload">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.5 5 5.5.5-4 4 1 5.5L12 14.5 7 17l1-5.5-4-4 5.5-.5z"/></svg>
           <span class="label">Upload</span>
         </div>
@@ -2738,7 +2738,7 @@ window.addEventListener('online',  () => toast('Back online'));
   // Expose so other modules can deep-link.
   window.__lpRenderProfileEdit = renderProfileEdit;
 
-  // ── Upload Wizard (Tier 1.4) ─────────────────────────────────
+  // ── Upload (Tier 1.4) — multi-step creator upload flow ───────
   // Multi-step creator upload flow. Saves to lp_drafts; publish moves
   // to lp_published after a Clean Stream check.
   function readDrafts()    { try { var a = JSON.parse(localStorage.getItem('lp_drafts')    || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
@@ -2876,7 +2876,7 @@ window.addEventListener('online',  () => toast('Back online'));
     }
     renderSafetyScanReport(d);
   };
-  var __LP_WIZ_STEPS = ['Basics', 'Media', 'Rights', 'Review'];
+  var __LP_UPLOAD_STEPS = ['Basics', 'Media', 'Rights', 'Review'];
   var __LP_CATEGORIES = ['Featured', 'Originals', 'Documentaries', 'Animation', 'Family', 'Music', 'Learning', 'Travel', 'Games', 'Cinema', 'Shorts'];
   var __LP_LICENSES = [
     ['user-owned',    'I own this work'],
@@ -2884,7 +2884,7 @@ window.addEventListener('online',  () => toast('Back online'));
     ['licensed',      'Licensed (paid or attribution)'],
     ['original',      'Platform original — only my creator account can publish']
   ];
-  function renderUploadWizard(opts) {
+  function renderUpload(opts) {
     closeSidebarSafe();
     clearViews();
     document.body.classList.add('lp-paging');
@@ -2909,8 +2909,8 @@ window.addEventListener('online',  () => toast('Back online'));
       writeDrafts(all);
     }
     function paint() {
-      var pct = Math.round(((step + 1) / __LP_WIZ_STEPS.length) * 100);
-      var stepsBar = '<div style="display:flex;gap:8px;align-items:center;margin:0 0 18px"><div style="flex:1;height:6px;background:var(--bg3);border-radius:6px;overflow:hidden"><div style="width:' + pct + '%;height:100%;background:var(--cyan);transition:width .25s"></div></div><span style="font-size:12px;color:var(--text3);font-weight:700">Step ' + (step + 1) + ' of ' + __LP_WIZ_STEPS.length + ' — ' + __LP_WIZ_STEPS[step] + '</span></div>';
+      var pct = Math.round(((step + 1) / __LP_UPLOAD_STEPS.length) * 100);
+      var stepsBar = '<div style="display:flex;gap:8px;align-items:center;margin:0 0 18px"><div style="flex:1;height:6px;background:var(--bg3);border-radius:6px;overflow:hidden"><div style="width:' + pct + '%;height:100%;background:var(--cyan);transition:width .25s"></div></div><span style="font-size:12px;color:var(--text3);font-weight:700">Step ' + (step + 1) + ' of ' + __LP_UPLOAD_STEPS.length + ' — ' + __LP_UPLOAD_STEPS[step] + '</span></div>';
       var body = '';
       if (step === 0) {
         body =
@@ -2981,7 +2981,7 @@ window.addEventListener('online',  () => toast('Back online'));
       var nav = '<div class="lp-pe-save-row" style="margin-top:14px">' +
         (step > 0 ? '<button class="lp-pe-cancel" type="button" id="lpUwBack">Back</button>' : '<button class="lp-pe-cancel" type="button" id="lpUwExit">Save &amp; exit</button>') +
         '<button class="lp-pe-cancel" type="button" id="lpUwSaveDraft">Save draft</button>' +
-        (step < __LP_WIZ_STEPS.length - 1
+        (step < __LP_UPLOAD_STEPS.length - 1
           ? '<button class="lp-pe-save" type="button" id="lpUwNext">Next</button>'
           : '<button class="lp-pe-save" type="button" id="lpUwPublish">Publish</button>') +
         '<span class="lp-pe-saved-flash" id="lpUwSaved">Saved</span>' +
@@ -3069,7 +3069,7 @@ window.addEventListener('online',  () => toast('Back online'));
         // Show the full safety scan; only the user-tap of "Publish now"
         // on the all-clear screen actually moves the draft over.
         renderSafetyScanReport(data, {
-          onBack: function () { renderUploadWizard({ draftId: data.id, step: __LP_WIZ_STEPS.length - 1 }); },
+          onBack: function () { renderUpload({ draftId: data.id, step: __LP_UPLOAD_STEPS.length - 1 }); },
           onPublish: function () {
             var drafts = readDrafts().filter(function (d) { return d.id !== data.id; });
             writeDrafts(drafts);
@@ -3094,7 +3094,7 @@ window.addEventListener('online',  () => toast('Back online'));
     var drafts = readDrafts();
     var startBtn = '<div style="margin:0 0 14px"><button class="lp-pe-save" type="button" id="lpDrNew">+ New upload</button></div>';
     if (!drafts.length) {
-      $$('lp-page-extra').innerHTML = startBtn + cards([{ t: 'No drafts', b: 'Tap "New upload" to start one. Drafts auto-save as you fill out the wizard.' }]);
+      $$('lp-page-extra').innerHTML = startBtn + cards([{ t: 'No drafts', b: 'Tap "New upload" to start one. Drafts auto-save as you fill out the upload steps.' }]);
     } else {
       var rows = drafts.map(function (d) {
         var posterCell = d.poster
@@ -3115,10 +3115,10 @@ window.addEventListener('online',  () => toast('Back online'));
       $$('lp-page-extra').innerHTML = startBtn + '<div style="display:flex;flex-direction:column;gap:10px">' + rows + '</div>';
     }
     var addBtn = $$('lpDrNew');
-    if (addBtn) addBtn.addEventListener('click', function () { renderUploadWizard(); });
+    if (addBtn) addBtn.addEventListener('click', function () { renderUpload(); });
     $$('lp-page-extra').addEventListener('click', function (e) {
       var ed = e.target.closest('[data-lp-draft-edit]');
-      if (ed) { renderUploadWizard({ draftId: ed.getAttribute('data-lp-draft-edit') }); return; }
+      if (ed) { renderUpload({ draftId: ed.getAttribute('data-lp-draft-edit') }); return; }
       var dl = e.target.closest('[data-lp-draft-del]');
       if (dl) {
         var id = dl.getAttribute('data-lp-draft-del');
@@ -3323,7 +3323,7 @@ window.addEventListener('online',  () => toast('Back online'));
       }
     });
   }
-  window.__lpRenderUploadWizard = renderUploadWizard;
+  window.__lpRenderUploadFlow = renderUpload;
   window.__lpRenderDrafts = renderDrafts;
   window.__lpRenderPublished = renderPublished;
   window.__lpRenderProjectPage = renderProjectPage;
@@ -3755,7 +3755,7 @@ window.addEventListener('online',  () => toast('Back online'));
     },
     'rights': {
       title: 'Rights & Credits',
-      blurb: 'Declared in the upload wizard. Owner, license, source material, and per-asset declarations — required before any project can publish to Load Play.',
+      blurb: 'Declared during upload. Owner, license, source material, and per-asset declarations — required before any project can publish to Load Play.',
       extra: cards([
         { t: 'Owner',           b: 'Creator name or company that holds rights to the project.' },
         { t: 'License',         b: 'user-owned, public-domain, licensed, or platform-original.' },
@@ -5674,8 +5674,7 @@ window.addEventListener('online',  () => toast('Back online'));
       case 'favorites':      showPage(PAGES.favorites); return;
       case 'profiles':       openModal('lp-auth-modal', { tab: 'signin' }); return;
       case 'clips':          showStream(); clickChip('shorts'); return;
-      case 'upload':
-      case 'upload-wizard':  renderUploadWizard(); return;
+      case 'upload':         renderUpload(); return;
       case 'import-local':   { var b = $$('uploadBtn'); if (b) b.click(); return; }
       case 'drafts':         renderDrafts(); return;
       case 'published':      renderPublished(); return;

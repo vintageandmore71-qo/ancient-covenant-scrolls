@@ -138,7 +138,7 @@
     position: relative;
   }
   .before li::before {
-    content: '✓';
+    content: '\\2713';
     position: absolute;
     left: 0; top: 6px;
     color: var(--warn);
@@ -429,7 +429,7 @@
       if (s[key]) {
         checks[i].classList.add('on');
         checks[i].setAttribute('aria-checked', 'true');
-        checks[i].textContent = '✓';
+        checks[i].innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg>';
         step.classList.add('done');
         done++;
       } else {
