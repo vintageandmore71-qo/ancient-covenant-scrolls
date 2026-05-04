@@ -152,11 +152,11 @@ Always send generated scene assets THROUGH `timeline-bridge.js` into Load's exis
 
 ---
 
-## Companion engines (added 2026-05-04 per user direction)
+## Companion engines (added 2026-05-04)
 
 Same Scene-Card → assets → timeline pipeline, different inputs.
 
-### Verse-to-Video (ACR Study)
+### Verse-to-Video (ACR Study) — originally a Claude suggestion that should have been tracked earlier; captured here after user correction 2026-05-04
 
 Take a verse from `study/content/` JSON and turn it into a 5–10 second
 visual simulation of the verse — "bringing the words to life in clips".
