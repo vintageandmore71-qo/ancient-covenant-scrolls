@@ -9115,7 +9115,7 @@ window.LoadAudioFix = {
  '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
  '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
  '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
- '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17eh</span>' +
+ '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17ei</span>' +
  '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
  '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
  '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -9161,12 +9161,12 @@ window.LoadAudioFix = {
  // all rows. Markup mirrors the user's locked-in spec.
  '<div class="timeline-engine" id="timelineEngine">' +
  '<div class="track-labels">' +
- '<button class="track-add" data-add="music" aria-label="Add music">+</button>' +
- '<button class="track-add" data-add="text" aria-label="Add subtitle">T+</button>' +
- '<button class="track-add" data-add="sticker" aria-label="Add sticker / PiP">+</button>' +
- '<button class="cover-btn" id="ve-cover">Cover</button>' +
- '<button class="track-add" data-add="media" aria-label="Add image or video to timeline">+</button>' +
- '<button class="track-add" data-add="audio-orig" aria-label="Original audio"></button>' +
+ '<button class="track-add" data-add="music" aria-label="Add music"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span class="ta-plus">+</span></button>' +
+ '<button class="track-add" data-add="text" aria-label="Add subtitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg><span class="ta-plus">+</span></button>' +
+ '<button class="track-add" data-add="sticker" aria-label="Add sticker / PiP"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="1.5"/><rect x="12" y="11" width="7" height="5" rx="0.8" fill="currentColor" stroke="none"/></svg><span class="ta-plus">+</span></button>' +
+ '<button class="cover-btn" id="ve-cover" aria-label="Cover"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="3 2"/><path d="M8 14l3-3 5 5"/><circle cx="9" cy="8" r="1.4" fill="currentColor"/></svg><span class="ta-lbl">Cover</span></button>' +
+ '<button class="track-add" data-add="media" aria-label="Add image or video to timeline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M7 4v16M17 4v16"/><path d="M3 9h4M17 9h4M3 15h4M17 15h4"/></svg><span class="ta-plus">+</span></button>' +
+ '<button class="track-add" data-add="audio-orig" aria-label="Original audio track"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="10" x2="4" y2="14"/><line x1="7" y1="8" x2="7" y2="16"/><line x1="10" y1="6" x2="10" y2="18"/><line x1="13" y1="8" x2="13" y2="16"/><line x1="16" y1="10" x2="16" y2="14"/><line x1="19" y1="11" x2="19" y2="13"/></svg></button>' +
  '</div>' +
  '<div class="timeline-scroll" id="timelineScroll">' +
  // Empty tracks for music / subtitle / sticker
@@ -9331,8 +9331,11 @@ window.LoadAudioFix = {
  // ===== TIMELINE CSS — user-locked spec (verbatim) =====
  '#__loadVideoEdit .timeline-engine{width:100%;height:260px;background:#101018;display:grid;grid-template-columns:92px 1fr;color:white;overflow:hidden;font-family:system-ui,sans-serif;}' +
  '#__loadVideoEdit .track-labels{padding-top:12px;display:flex;flex-direction:column;gap:10px;align-items:center;}' +
- '#__loadVideoEdit .track-add,#__loadVideoEdit .cover-btn{width:64px;height:44px;border:none;border-radius:12px;background:#1e1e2a;color:white;font-size:18px;cursor:pointer;font-family:inherit;}' +
- '#__loadVideoEdit .cover-btn{height:54px;font-size:14px;border:1px dashed #555;}' +
+ '#__loadVideoEdit .track-add,#__loadVideoEdit .cover-btn{position:relative;width:64px;height:44px;border:none;border-radius:12px;background:#1e1e2a;color:#fff;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}' +
+ '#__loadVideoEdit .track-add svg,#__loadVideoEdit .cover-btn svg{width:22px;height:22px;color:#fff;display:block;}' +
+ '#__loadVideoEdit .track-add .ta-plus{position:absolute;right:6px;bottom:5px;background:#fff;color:#0a0a14;font-weight:700;font-size:10px;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;line-height:1;}' +
+ '#__loadVideoEdit .cover-btn{height:54px;border:1px dashed rgba(255,255,255,0.45);flex-direction:column;gap:3px;}' +
+ '#__loadVideoEdit .cover-btn .ta-lbl{font-size:10.5px;font-weight:600;color:#fff;}' +
  '#__loadVideoEdit .timeline-scroll{position:relative;overflow-x:auto;overflow-y:hidden;padding:12px 24px 0 0;}' +
  '#__loadVideoEdit .timeline-scroll::-webkit-scrollbar{display:none;}' +
  '#__loadVideoEdit .track{height:38px;margin-bottom:8px;border-radius:8px;background:#191923;color:#8f8f9d;display:flex;align-items:center;padding-left:18px;font-size:15px;cursor:pointer;}' +
