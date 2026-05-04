@@ -37,6 +37,13 @@ training. Treat them as hard constraints, not preferences.
    - `SESSION_NOTES_*.md` (most recent date wins) — current state, blocking
      questions, pending features
    - `HANDOFF.md` — long-running architectural state
+   - `MASTER_BACKLOG.md` — single source of truth for what's done vs.
+     left across every site (ACR, Load, LoadStudio, LoadPlay, Attain,
+     Attain Jr, Study). The user's lock-rule: nothing they've asked
+     for should fall off the list.
+   - `SUGGESTIONS_PARKED.md` — exploratory ideas the user asked me to
+     hold. **If today's date is on or after the "review by" date in
+     that file, surface those suggestions to the user.**
    - `git log --oneline -30` — recent commit detail
    Do NOT ask the user to re-explain context that's in those files.
 

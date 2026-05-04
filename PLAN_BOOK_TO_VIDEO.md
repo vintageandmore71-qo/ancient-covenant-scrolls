@@ -149,3 +149,90 @@ Then Book-to-Video becomes its own wave (~3-5 hr to wire UI + test).
 > "Do not replace the existing sound or video editor. Use the existing systems as the final assembly layer."
 
 Always send generated scene assets THROUGH `timeline-bridge.js` into Load's existing Video Editor. Don't reimplement timeline / mixing / export.
+
+---
+
+## Companion engines (added 2026-05-04 per user direction)
+
+Same Scene-Card → assets → timeline pipeline, different inputs.
+
+### Verse-to-Video (ACR Study)
+
+Take a verse from `study/content/` JSON and turn it into a 5–10 second
+visual simulation of the verse — "bringing the words to life in clips".
+
+Pipeline:
+
+```
+SELECT VERSE → AUTO-PARSE (subjects / actions / setting / time-of-day)
+  → BUILD SCENE CARD (single-scene cinema beat: stage description,
+    visual prompt, narration = verse text, character list when known,
+    suggested music mood from chapter context)
+  → GENERATE COVER IMAGE (X-AI image gen, locked character bible
+    when verse references named figures)
+  → ANIMATE COVER (X-P2V / image-to-video provider when X-AI 14d
+    SiliconFlow connector or HF SVD lands; until then, Ken Burns
+    auto-pan via canvas.captureStream)
+  → SEND TO LOAD TIMELINE (existing timeline-bridge.js)
+  → INLINE PLAYBACK in ACR Study activity card
+```
+
+Trigger surfaces in Study UI:
+
+- New "Animate this verse" button on every chapter activity card.
+- Bulk "Animate this section" on the section header — produces a
+  back-to-back chain of per-verse clips.
+- Output saved to `lp_published`-style local store so the user can
+  rewatch / re-export without re-rendering.
+
+Source files:
+
+- ACR Study text: `study/content/<volume>/<section>.json`
+- Engine reuse: `load/book-video/scene-card-engine.js`,
+  `book-text-extractor.js` (with a `study-verse-extractor.js`
+  variant), `character-bible.js`, `ai-provider-router.js`,
+  `timeline-bridge.js`.
+
+Acceptance test:
+
+- Open Bereshit chapter 1 verse 1 in Study → tap "Animate this
+  verse" → within ~30 seconds a 5–10 second clip plays inline with
+  generated cover + verse narration + suggested music bed.
+- Bulk "Animate section" on Bereshit ch1 produces a chained playlist.
+
+### Photo-to-Video (single-image clip)
+
+Already partially implemented in LoadStudio Editing Bay
+(`pickAndOpen('image')` wraps a still in a `MediaRecorder`
+`canvas.captureStream` capture for ~5 seconds). Needs:
+
+1. **Promote to a first-class engine.** Move the wrap logic into
+   `load/book-video/photo-to-video.js` so Load main + Attain (verse
+   cover → opening clip) can call it.
+2. **Add motion presets:** Ken Burns zoom-in, Ken Burns zoom-out,
+   slow pan-left, slow pan-right, parallax (foreground/background
+   split via mask). All run on canvas — no AI provider required for
+   the basic motions.
+3. **Optional AI motion:** when X-AI 14d SiliconFlow image-to-video
+   connector lands (or HF SVD becomes free), fall through to a real
+   image-to-video model for a more cinematic clip.
+4. **Surface in Load main:** a "Photo to Video" tile on the import
+   grid (next to "Edit Video"). One-tap → file picker → motion preset
+   → clip drops into Load's editor.
+
+Acceptance test:
+
+- Pick a photo in Load main → "Photo to Video" → choose Ken Burns
+  zoom-in → 5-second MP4 plays in the editor preview.
+- LoadStudio Editing Bay's existing "Upload Image" flow keeps
+  working unchanged (it now calls the shared engine internally).
+
+---
+
+## Cross-references
+
+- `MASTER_BACKLOG.md` — X-B2V / X-V2V / X-P2V / X-AI rows.
+- `PLAN_LOAD_AI.md` — Tier 14d SiliconFlow connector + 18-fallback
+  external video-prompt panel cover the AI image-to-video gap.
+- `inbox/Load_AI_Glam_Style_System_Research_and_Developer_Plan.zip`
+  — 7-layer chat-driven flow the AI Style Chat will implement.
