@@ -1029,6 +1029,31 @@ html .lp-bottom-title{font-size:30px;text-shadow:none}
 #lp-tour .lt-primary{background:linear-gradient(135deg,#ff3838 0%,#ff5a5a 100%);color:#fff;border:0;font-weight:600;box-shadow:0 4px 16px rgba(255,80,80,.42)}
 #lp-tour .lt-primary:hover{filter:brightness(1.08)}
 @media(max-width:520px){#lp-tour .lt-title{font-size:18px}#lp-tour .lt-body{font-size:14px}}
+
+/* v31 — install banner + modal */
+.lp-install-banner{position:fixed;left:12px;right:12px;bottom:14px;z-index:8000;display:flex;align-items:center;gap:12px;padding:12px 14px;background:#161616;border:1px solid rgba(255,90,90,.32);border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.6);font-family:Inter,system-ui,sans-serif;color:#fff}
+.lp-install-banner[hidden]{display:none !important}
+.lp-ib-left{flex:1;display:flex;align-items:center;gap:10px;min-width:0}
+.lp-ib-icon{flex:0 0 32px;height:32px;display:flex;align-items:center;justify-content:center;color:#ff8a8a;background:rgba(255,90,90,.14);border-radius:9px}
+.lp-ib-icon svg{width:18px;height:18px}
+.lp-ib-left strong{display:block;font:600 14px Inter,system-ui,sans-serif;color:#fff}
+.lp-ib-sub{display:block;font:300 12.5px Inter,system-ui,sans-serif;color:#e6dada;margin-top:1px}
+.lp-install-btn{background:linear-gradient(135deg,#ff3838 0%,#ff5a5a 100%);color:#fff;border:0;border-radius:9px;padding:8px 14px;font:600 13px Inter,system-ui,sans-serif;cursor:pointer;flex-shrink:0;box-shadow:0 4px 14px rgba(255,80,80,.42)}
+.lp-install-x{background:transparent;color:#c2a8a8;border:0;font-size:22px;line-height:1;cursor:pointer;padding:0 4px;flex-shrink:0}
+.lp-install-x:hover{color:#fff}
+.lp-install-modal{position:fixed;inset:0;z-index:8100;display:flex;align-items:center;justify-content:center;background:rgba(10,5,5,.78);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:18px;font-family:Inter,system-ui,sans-serif}
+.lp-install-modal[hidden]{display:none !important}
+.lp-install-box{position:relative;max-width:520px;width:100%;background:#161616;border:1px solid rgba(255,90,90,.32);border-radius:18px;padding:22px 22px 20px;color:#fff;box-shadow:0 18px 48px rgba(0,0,0,.6)}
+.lp-install-close{position:absolute;top:10px;right:12px;background:none;border:0;color:#c2a8a8;font-size:24px;line-height:1;cursor:pointer;padding:4px 8px;border-radius:8px}
+.lp-install-close:hover{background:rgba(255,255,255,.06);color:#fff}
+.lp-install-box h3{margin:0 28px 10px 0;font:600 19px Inter,system-ui,sans-serif;color:#fff;letter-spacing:-.01em}
+.lp-install-lead{margin:0 0 14px;font:300 14px Inter,system-ui,sans-serif;color:#e6dada;line-height:1.55}
+.lp-install-steps{margin:0 0 14px;padding:0 0 0 24px;font:400 14px Inter,system-ui,sans-serif;color:#e6dada;line-height:1.7}
+.lp-install-steps li{margin-bottom:8px}
+.lp-install-shareic{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;color:#ff8a8a;vertical-align:middle;margin:0 2px}
+.lp-install-shareic svg{width:100%;height:100%}
+.lp-install-actions{display:flex;justify-content:flex-end;margin-top:8px}
+.lp-install-cta{padding:10px 22px;border-radius:10px;border:0;background:linear-gradient(135deg,#ff3838 0%,#ff5a5a 100%);color:#fff;font:600 14px Inter,system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 16px rgba(255,80,80,.42)}
 </style>
 </head>
 <body>
@@ -1436,7 +1461,7 @@ html .lp-bottom-title{font-size:30px;text-shadow:none}
       <div class="lp-footer-tag">Part of Load</div>
       <div class="lp-footer-mark">LoadPlay</div>
       <p class="lp-footer-tagline">Stream, create, publish — clean, free, offline-ready.</p>
-      <div class="lp-footer-replay" style="text-align:center;margin:0 0 12px"><a href="#" data-lp-replay-tour="1" style="color:#ff8a8a;font-size:13px;font-weight:600">Replay site tour</a></div><div class="lp-footer-links"><a href="../load/">Main Load</a><a href="../loadstudio/">LoadStudio</a><a href="../attain/">Attain</a><a href="../attain-jr/">Attain Jr</a><a href="../study/">Study</a></div>
+      <div class="lp-footer-replay" style="text-align:center;margin:0 0 12px"><a href="#" data-lp-replay-tour="1" style="color:#ff8a8a;font-size:13px;font-weight:600">Replay site tour</a></div><div class="lp-footer-links"><a href="../load/">Main Load</a><a href="../loadstudio/">LoadStudio</a></div>
     </footer>
 
   </section>
@@ -2382,7 +2407,7 @@ window.addEventListener('online',  () => toast('Back online'));
 <footer class="lp-copyright">
   <strong>Copyright &copy; 2026 LBond. All Rights Reserved.</strong><br>
   LoadPlay — Stream Digital Cinema Anywhere. Runs on your iPad. No tracking, no accounts beyond this device.<br>
-  Part of the Load suite. <a href="../load/">Main Load</a> &middot; <a href="../loadstudio/">LoadStudio</a> &middot; <a href="../attain/">Attain</a> &middot; <a href="../attain-jr/">Attain Jr</a> &middot; <a href="../study/">Study</a><br>
+  Part of the Load suite. <a href="../load/">Main Load</a> &middot; <a href="../loadstudio/">LoadStudio</a><br>
   <span style="display:inline-block;margin-top:8px;padding:4px 8px;background:rgba(255,255,255,.04);border-radius:4px;font-size:10.5px;color:var(--text3)">Some profile data, comments, and activity shown during pre-launch testing are for demonstration purposes. No real names, emails, phone numbers, or addresses are stored.</span>
 </footer>
 
