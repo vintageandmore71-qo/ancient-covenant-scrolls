@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Project Backup &mdash; Load</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<script src="../lib-jszip.min.js"></script>
+<script src="../lib-export-receipt.js"></script>
+<style>
+:root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--border:#2a2a40}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;font-size:14px;-webkit-font-smoothing:antialiased}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#150a28 0,#0a0514 100%);border-bottom:1px solid var(--border)}
+header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)}
+header h1{margin:0;font-size:16px;font-weight:800;flex:1}
+.wrap{max-width:980px;margin:0 auto;padding:24px 18px 80px}
+.intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin:0 0 18px}
+.intro h2{margin:0 0 6px;font-size:18px;font-weight:800}
+.intro p{margin:0;color:var(--mute);font-size:13.5px}
+.section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin:14px 0}
+.section h3{margin:0 0 10px;font-size:14px;font-weight:800}
+.kv{display:grid;grid-template-columns:1fr auto;gap:6px 14px;font-size:13px}
+.kv .k{color:var(--mute)}
+.kv .v{font-weight:700;font-variant-numeric:tabular-nums}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-weight:700;font-size:13px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent)}
+.btn.danger{border-color:rgba(255,110,110,.4);color:var(--err)}
+.dz{position:relative;border:2px dashed var(--border);background:#0a0e18;border-radius:14px;padding:34px 18px;text-align:center;color:var(--mute)}
+.dz input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.dz strong{display:block;font-size:15px;color:#fff;margin-bottom:4px}
+.warn{background:rgba(250,204,21,.12);border:1px solid rgba(250,204,21,.4);border-radius:10px;padding:12px 14px;margin:12px 0;font-size:12.5px}
+.warn strong{color:var(--warn)}
+.log{background:#0a0e18;border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;color:var(--mute);max-height:240px;overflow:auto;white-space:pre-wrap;line-height:1.5;margin-top:10px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1a1a26;color:#fff;padding:10px 16px;border-radius:8px;border:1px solid var(--border);font-size:13px;z-index:50;box-shadow:0 6px 24px rgba(0,0,0,.4);display:none}
+.toast.on{display:block}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="../">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Back to Load
+  </a>
+  <h1>Project Backup</h1>
+  <a class="back" href="./help.html#backup" title="How it works">How it works</a>
+</header>
+<div class="wrap">
+<div class="intro">
+  <h2>One-tap backup of everything Load knows about</h2>
+  <p>Bundle the entire library, every saved receipt, every character, every acceptance result, AI provider keys (masked), and your settings into one ZIP. Restore on the same iPad after a reset, or carry it to another device.</p>
+</div>
+
+<div class="section">
+  <h3>What's on this device right now</h3>
+  <div class="kv" id="counts">
+    <div class="k">Library files (IndexedDB)</div><div class="v" id="cn-apps">&hellip;</div>
+    <div class="k">Export receipts</div><div class="v" id="cn-rcpt">&hellip;</div>
+    <div class="k">Character bible profiles</div><div class="v" id="cn-char">&hellip;</div>
+    <div class="k">Acceptance results</div><div class="v" id="cn-acc">&hellip;</div>
+    <div class="k">AI provider statuses</div><div class="v" id="cn-ai">&hellip;</div>
+    <div class="k">Other localStorage keys</div><div class="v" id="cn-ls">&hellip;</div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Backup</h3>
+  <p style="color:var(--mute);font-size:12.5px;margin:0 0 6px">Bundles the items above into a single timestamped ZIP. Binary library blobs are included.</p>
+  <div class="bar">
+    <button class="btn primary" id="backupBtn">Build backup ZIP</button>
+    <button class="btn" id="lightBtn" title="Skip the binary blobs in the library">Build lite backup (metadata only)</button>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Restore</h3>
+  <p style="color:var(--mute);font-size:12.5px;margin:0 0 8px">Drop a backup ZIP made by this tool. Existing items with matching ids are overwritten.</p>
+  <div class="dz">
+    <input id="restoreFile" type="file" accept=".zip,application/zip">
+    <strong>Drop a load-backup-*.zip or tap to pick</strong>
+    Restore writes back to IndexedDB + localStorage. Reload Load after restore.
+  </div>
+  <div class="warn"><strong>Heads up:</strong> Restore overwrites items with the same id. Existing items not in the backup are kept. To wipe everything first, use Settings &rarr; Clear data on Load.</div>
+</div>
+
+<div class="log" id="log">Ready.</div>
+
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+(function(){
+  if (!window.JSZip) { document.body.innerHTML = '<div style="padding:30px;color:#ff6e6e">JSZip failed to load.</div>'; return; }
+  var $ = function(id){ return document.getElementById(id); };
+  var toastEl = $('toast'), logEl = $('log');
+  function toast(m){ toastEl.textContent = m; toastEl.classList.add('on'); setTimeout(function(){ toastEl.classList.remove('on'); }, 1800); }
+  function log(s){ logEl.textContent = (new Date().toLocaleTimeString()) + ' ' + s + '\n' + logEl.textContent; }
+  function downloadBlob(blob, name){ var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 100); }
+
+  var DB_NAME = 'load-db';
+  var STORE_APPS = 'apps';
+
+  function openDB(){
+    return new Promise(function(resolve, reject){
+      var req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = function(){
+        var d = req.result;
+        if (!d.objectStoreNames.contains(STORE_APPS)) {
+          var store = d.createObjectStore(STORE_APPS, { keyPath: 'id' });
+          store.createIndex('dateAdded', 'dateAdded');
+        }
+      };
+      req.onsuccess = function(){ resolve(req.result); };
+      req.onerror = function(){ reject(req.error); };
+    });
+  }
+  function listAll(db){
+    return new Promise(function(resolve, reject){
+      var t = db.transaction([STORE_APPS], 'readonly').objectStore(STORE_APPS);
+      var req = t.getAll();
+      req.onsuccess = function(){ resolve(req.result || []); };
+      req.onerror = function(){ reject(req.error); };
+    });
+  }
+  function putAll(db, items){
+    return new Promise(function(resolve, reject){
+      var tx = db.transaction([STORE_APPS], 'readwrite');
+      var s = tx.objectStore(STORE_APPS);
+      items.forEach(function(it){ try { s.put(it); } catch(e){} });
+      tx.oncomplete = function(){ resolve(); };
+      tx.onerror = function(){ reject(tx.error); };
+    });
+  }
+
+  function localStorageMap(){
+    var out = {};
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (!k) continue;
+        out[k] = localStorage.getItem(k);
+      }
+    } catch(e){}
+    return out;
+  }
+
+  async function refreshCounts(){
+    try {
+      var db = await openDB();
+      var apps = await listAll(db);
+      $('cn-apps').textContent = apps.length;
+    } catch(e){ $('cn-apps').textContent = 'IDB error'; }
+    var ls = localStorageMap();
+    var rcpt = ls['load_receipts_v1'] ? (function(){ try { return JSON.parse(ls['load_receipts_v1']).length; } catch(e){ return 0; } })() : 0;
+    var ch = ls['load_character_bible_v1'] ? (function(){ try { return JSON.parse(ls['load_character_bible_v1']).length; } catch(e){ return 0; } })() : 0;
+    var acc = ls['load_acceptance_v1'] ? (function(){ try { return Object.keys(JSON.parse(ls['load_acceptance_v1'])).length; } catch(e){ return 0; } })() : 0;
+    var ai = Object.keys(ls).filter(function(k){ return /^load_ai_status_/.test(k); }).length;
+    var others = Object.keys(ls).filter(function(k){
+      return !/^load_(receipts_v1|character_bible_v1|acceptance_v1|ai_status_)/.test(k);
+    }).length;
+    $('cn-rcpt').textContent = rcpt;
+    $('cn-char').textContent = ch;
+    $('cn-acc').textContent = acc;
+    $('cn-ai').textContent = ai;
+    $('cn-ls').textContent = others;
+  }
+  refreshCounts();
+
+  async function backup(includeBinary){
+    log(includeBinary ? 'Starting full backup...' : 'Starting lite backup (metadata only)...');
+    var zip = new JSZip();
+    var manifest = { schemaVersion: 1, generatedAt: new Date().toISOString(), tool: 'load-project-backup', mode: includeBinary ? 'full' : 'lite' };
+
+    // localStorage dump
+    var ls = localStorageMap();
+    zip.file('localStorage.json', JSON.stringify(ls, null, 2));
+    log('localStorage: ' + Object.keys(ls).length + ' key(s)');
+
+    // IndexedDB library
+    try {
+      var db = await openDB();
+      var apps = await listAll(db);
+      var meta = apps.map(function(a){
+        var copy = {};
+        Object.keys(a).forEach(function(k){
+          if (k === 'binary') return;
+          copy[k] = a[k];
+        });
+        return copy;
+      });
+      zip.file('library/apps-metadata.json', JSON.stringify(meta, null, 2));
+      log('Library entries: ' + apps.length);
+      if (includeBinary) {
+        for (var i = 0; i < apps.length; i++) {
+          var a = apps[i];
+          if (a && a.binary) {
+            try { zip.folder('library/binary').file(a.id, a.binary); }
+            catch (e) { log('skip binary ' + a.id + ': ' + e.message); }
+          }
+        }
+      }
+    } catch (e) { log('IDB read failed: ' + e.message); }
+
+    zip.file('manifest.json', JSON.stringify(manifest, null, 2));
+    var blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+    var name = 'load-backup-' + (includeBinary ? 'full' : 'lite') + '-' + new Date().toISOString().slice(0,10) + '.zip';
+    downloadBlob(blob, name);
+    log('Done: ' + name + ' (' + (blob.size/1024).toFixed(0) + ' KB)');
+    if (window.LoadReceipt) {
+      var rcpt = window.LoadReceipt.create({
+        exportType: 'Backup',
+        fileName: name,
+        fileSize: blob.size,
+        nextAction: 'Save the ZIP to iCloud Drive or transfer to another device.',
+        notes: includeBinary ? 'Full backup including library binary blobs.' : 'Metadata-only backup.'
+      });
+      window.LoadReceipt.save(rcpt);
+    }
+    toast('Backup ZIP saved.');
+  }
+
+  $('backupBtn').addEventListener('click', function(){ backup(true); });
+  $('lightBtn').addEventListener('click', function(){ backup(false); });
+
+  $('restoreFile').addEventListener('change', async function(e){
+    var f = e.target.files && e.target.files[0]; if (!f) return;
+    log('Reading ' + f.name + '...');
+    var zip;
+    try { zip = await JSZip.loadAsync(f); }
+    catch (err) { log('Not a valid ZIP: ' + err.message); toast('Invalid ZIP'); return; }
+    if (!zip.files['manifest.json']) {
+      log('manifest.json missing &mdash; not a Load backup ZIP.');
+      toast('Not a Load backup ZIP'); return;
+    }
+    if (!confirm('Restore from ' + f.name + '? Items with matching ids will be overwritten.')) return;
+    // localStorage
+    if (zip.files['localStorage.json']) {
+      try {
+        var lsTxt = await zip.files['localStorage.json'].async('string');
+        var lsObj = JSON.parse(lsTxt);
+        var n = 0;
+        Object.keys(lsObj).forEach(function(k){ try { localStorage.setItem(k, lsObj[k]); n++; } catch(e){} });
+        log('localStorage restored: ' + n + ' key(s)');
+      } catch(e){ log('localStorage restore failed: ' + e.message); }
+    }
+    // Apps metadata + binaries
+    if (zip.files['library/apps-metadata.json']) {
+      try {
+        var metaTxt = await zip.files['library/apps-metadata.json'].async('string');
+        var meta = JSON.parse(metaTxt);
+        if (Array.isArray(meta) && meta.length) {
+          var db = await openDB();
+          var binFolder = zip.folder('library/binary');
+          var items = [];
+          for (var i = 0; i < meta.length; i++) {
+            var m = meta[i];
+            if (binFolder && zip.files['library/binary/' + m.id]) {
+              try { m.binary = await zip.files['library/binary/' + m.id].async('blob'); }
+              catch(e){ log('binary read fail for ' + m.id); }
+            }
+            items.push(m);
+          }
+          await putAll(db, items);
+          log('Library restored: ' + items.length + ' entries');
+        }
+      } catch (e) { log('library restore failed: ' + e.message); }
+    }
+    log('Restore complete. Reload Load to see changes.');
+    toast('Restore complete &mdash; reload Load.');
+    refreshCounts();
+    e.target.value = '';
+  });
+})();
+</script>
+</body>
+</html>

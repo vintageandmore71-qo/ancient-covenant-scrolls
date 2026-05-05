@@ -90,6 +90,8 @@ code,kbd{background:#1a1a26;padding:2px 6px;border-radius:4px;font-family:ui-mon
   <a href="#upscale">Image Upscaler</a>
   <a href="#verse">Verse to Video</a>
   <a href="#prompt">AI Prompt Builder</a>
+  <a href="#palette">Palette Extractor</a>
+  <a href="#backup">Project Backup</a>
   <a href="#acceptance">Acceptance Criteria</a>
 </nav>
 
@@ -374,6 +376,30 @@ code,kbd{background:#1a1a26;padding:2px 6px;border-radius:4px;font-family:ui-mon
   <li>The Generated prompt panel updates live. Tap <strong>Copy</strong> or <strong>Download .txt</strong>. Paste into any AI image provider.</li>
 </ol>
 <a class="open" href="./prompt-builder.html">Open AI Prompt Builder</a>
+</div>
+
+<div class="tool" id="palette">
+<h3>Palette Extractor</h3>
+<ol>
+  <li>Tap <strong>Palette Extractor</strong> in workspace Section 6.</li>
+  <li>Drop a cover image, photo, or screenshot.</li>
+  <li>The tool returns the eight most-prevalent colors with prevalence percentages.</li>
+  <li>Tap any swatch to copy that color hex.</li>
+  <li>Tap <strong>Copy manifest theme_color</strong> for the primary, <strong>Copy CSS palette</strong> for a complete <code>:root</code> block, or <strong>Copy JSON</strong> for the full palette.</li>
+</ol>
+<a class="open" href="./palette-extractor.html">Open Palette Extractor</a>
+</div>
+
+<div class="tool" id="backup">
+<h3>Project Backup</h3>
+<ol>
+  <li>Tap <strong>Project Backup</strong> in workspace Section 6.</li>
+  <li>The page lists what's on this device: library count, receipts, characters, acceptance results, AI statuses, other localStorage keys.</li>
+  <li>Tap <strong>Build backup ZIP</strong> for a full backup including library binary blobs, or <strong>Build lite backup</strong> for metadata only (smaller).</li>
+  <li>Save the resulting <code>load-backup-*.zip</code> to iCloud Drive or AirDrop to another device.</li>
+  <li>To restore: drop the ZIP on the Restore drop zone. Items with matching ids are overwritten; existing items not in the backup are kept. Reload Load after restore.</li>
+</ol>
+<a class="open" href="./project-backup.html">Open Project Backup</a>
 </div>
 
 <div class="tool" id="acceptance">

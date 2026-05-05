@@ -40,7 +40,7 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 
 ## Load main (`/load/`)
 
-**Cache:** `load-v17ey`. **Tip status spec:** `PLAN_LOAD_AI.md`,
+**Cache:** `load-v17ez`. **Tip status spec:** `PLAN_LOAD_AI.md`,
 `PLAN_IMAGE_PROMPT_v3.md`, `PLAN_BOOK_TO_VIDEO.md`,
 `MEDIA_MODULE_SPEC.md`, `LOAD_FEATURES.md`, `LOAD_MARKETING.md`.
 
@@ -50,6 +50,14 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 - **Character Consistency module** — see X-CC.
 - **Piper TTS Stage 1 unblock + Stage 2 rollout** — see X-PIPER. Stage 1 shipped but not playing; blocked on the play() error text from the user. Resilience panel (Part 9) shipped in v17er gives an in-app diagnostic + recovery path.
 - **LOAD-ECO acceptance test pass** (Build Plan Part 13). Every part now has a tool surface, but the user-validation pass is still needed: open each tool, confirm PASS/FAIL/WARN labels render, run a sample export, save a receipt, check it appears in the Receipts library. Parts 1, 2, 3, 14-17 shipped in v17eq. Parts 4, 7, 9 + Book-to-Video wiring shipped in v17er. Parts 5, 6, 8, 10 shipped in v17es. Parts 11-13 are housekeeping/acceptance and are met by the existing tool surfaces.
+
+### Recently done (this session, 2026-05-05 — backup + palette)
+- **v17ez — Project Backup + Palette Extractor**:
+  - **Project Backup:** new tool at `load/tools/project-backup.html`. Counts library entries (IndexedDB `load-db` `apps` store), receipts, characters, acceptance results, AI provider statuses, other localStorage keys. Two backup modes: full (includes binary blobs from library) or lite (metadata only). Output is a single `load-backup-<mode>-<date>.zip` with `manifest.json`, `localStorage.json`, `library/apps-metadata.json`, and per-id binary files under `library/binary/`. Restore reads any backup ZIP and writes back to localStorage + IDB; matching ids are overwritten, existing items not in the backup are kept. Auto-saves a Part 5 export receipt. Live-counts panel + log of every operation.
+  - **Palette Extractor:** new tool at `load/tools/palette-extractor.html`. Drop any image. Pixel-quantized to 24-step buckets, near-white and near-black filtered, returns the 8 most-prevalent colors with prevalence percentages. Per-swatch tap-to-copy hex. One-tap copy of: manifest `theme_color`, complete `:root` CSS palette block (`--c1` through `--c8` plus semantic `--primary` / `--accent` / `--bg` / `--ink`), or full JSON. Drops directly into the One-Click PWA Builder's theme color field.
+  - Help page updated with new TOC entries + per-tool cards.
+  - Workspace hub Section 6 now has 21 tiles.
+  - Cache `load-v17ey` -> `load-v17ez`. Version badge bumped in `load/load.js`.
 
 ### Recently done (this session, 2026-05-05 — verse-to-video + prompt builder)
 - **v17ey — Verse to Video (X-V2V) + AI Prompt Builder**:
