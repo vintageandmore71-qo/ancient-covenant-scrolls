@@ -624,7 +624,7 @@ window.LoadAudioFix = {
  '<style>' + styleBase + extraStyle + '</style></head>' +
  '<body>' + content + '</body></html>';
  }
- /* ---------- ACR Reader Book template ----------
+ /* ---------- PWA Reader Book template ----------
  * Produces a fully self-contained HTML page modelled on the ACR study
  * reader layout: chapter sidebar, search, font/theme controls,
  * dyslexia font toggle, TTS, bookmarks, optional progress bar. User
@@ -741,8 +741,8 @@ window.LoadAudioFix = {
  '<body>' + progressHtml + controlsHtml +
  '<div class="layout">' + tocHtml +
  '<main class="main">' +
- '<h1>' + esc(title || 'ACR Reader Book') + '</h1>' +
- '<p class="sub">ACR Reader Book &middot; created in Load</p>' +
+ '<h1>' + esc(title || 'PWA Reader Book') + '</h1>' +
+ '<p class="sub">PWA Reader Book &middot; created in Load</p>' +
  chaptersHtml +
  '</main></div>' +
  '<script>' + script + '</script>' +
