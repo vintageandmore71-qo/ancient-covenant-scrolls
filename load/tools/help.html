@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>How to use Load &mdash; step by step</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<style>
+:root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--border:#2a2a40}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.65;font-size:15px;-webkit-font-smoothing:antialiased}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#150a28 0,#0a0514 100%);border-bottom:1px solid var(--border)}
+header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)}
+header h1{margin:0;font-size:16px;font-weight:800;flex:1}
+.layout{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:260px 1fr;gap:0}
+@media (max-width:820px){.layout{grid-template-columns:1fr}}
+nav.toc{padding:24px 14px 80px;border-right:1px solid var(--border);position:sticky;top:48px;align-self:start;max-height:calc(100vh - 48px);overflow:auto}
+nav.toc h3{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin:18px 0 8px}
+nav.toc h3:first-child{margin-top:0}
+nav.toc a{display:block;padding:6px 10px;color:var(--fg);text-decoration:none;border-radius:6px;font-size:13.5px}
+nav.toc a:hover{background:var(--bg3)}
+@media (max-width:820px){nav.toc{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--border)}}
+main{padding:28px 28px 80px}
+h2{font-size:24px;font-weight:800;margin:28px 0 8px;scroll-margin-top:60px}
+h2:first-child{margin-top:0}
+h3{font-size:17px;font-weight:800;margin:22px 0 6px;scroll-margin-top:60px}
+p{margin:0 0 12px;color:#d8d8e6}
+ol,ul{margin:0 0 14px;padding-left:22px;color:#d8d8e6}
+li{margin-bottom:5px}
+code,kbd{background:#1a1a26;padding:2px 6px;border-radius:4px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92em}
+.tool{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin:14px 0}
+.tool h3{margin-top:0}
+.tool .open{display:inline-block;margin-top:6px;padding:7px 14px;background:var(--accent);color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:13px}
+.kbd{display:inline-block;padding:1px 6px;background:#1a1a26;border:1px solid var(--border);border-radius:4px;font-size:.85em;color:#fff}
+.callout{background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.4);border-radius:10px;padding:12px 14px;margin:14px 0}
+.callout strong{color:#fff}
+.warn{background:rgba(250,204,21,.1);border:1px solid rgba(250,204,21,.4);border-radius:10px;padding:12px 14px;margin:14px 0}
+.warn strong{color:var(--warn)}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="../">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Back to Load
+  </a>
+  <h1>How to use Load &mdash; step by step</h1>
+</header>
+<div class="layout">
+
+<nav class="toc">
+  <h3>Get started</h3>
+  <a href="#about">What Load is</a>
+  <a href="#install">Install on iPad</a>
+  <a href="#refresh">Force a fresh build</a>
+
+  <h3>Core flow</h3>
+  <a href="#import">Import a file</a>
+  <a href="#library">Library &amp; search</a>
+  <a href="#preview">Preview &amp; sandbox</a>
+  <a href="#repair">Repair &amp; diagnose</a>
+
+  <h3>Make &amp; export</h3>
+  <a href="#pwa-builder">One-Click PWA Builder</a>
+  <a href="#book-pwa">Book PWA Validator</a>
+  <a href="#export">Export receipts</a>
+  <a href="#standalone">Standalone HTML / PDF / EPUB</a>
+
+  <h3>Validate</h3>
+  <a href="#diagnostics">Diagnostics dashboard</a>
+  <a href="#loadstudio">LoadStudio Validator</a>
+  <a href="#safety">Safety &amp; Rights</a>
+
+  <h3>Routing</h3>
+  <a href="#ecosystem">Ecosystem Routing</a>
+  <a href="#samples">Sample Test Projects</a>
+
+  <h3>AI &amp; voice</h3>
+  <a href="#ai">AI Provider Status</a>
+  <a href="#voice">Voice Diagnostics</a>
+
+  <h3>Edit</h3>
+  <a href="#file-editor">PWA File Editor</a>
+</nav>
+
+<main>
+
+<h2 id="about">What Load is</h2>
+<p>Load is an offline-first iPad workspace for opening, testing, repairing, exporting and routing PWAs, HTML projects, ZIP bundles, books (EPUB / PDF / DOCX / TXT / Markdown), images, audio and video. The core works without an internet connection. Optional cloud AI providers are off by default.</p>
+
+<h2 id="install">Install on iPad</h2>
+<ol>
+  <li>Open the Load page in <strong>Safari</strong> on iPad.</li>
+  <li>Tap the <strong>Share</strong> button (the box with the up arrow).</li>
+  <li>Scroll down and tap <strong>Add to Home Screen</strong>.</li>
+  <li>Tap <strong>Add</strong>. The Load icon appears on your Home Screen and now opens like an app.</li>
+</ol>
+
+<h2 id="refresh">Force a fresh build</h2>
+<p>If the version number on screen is older than the latest, the cached service worker is holding the old build. To force a refresh:</p>
+<ol>
+  <li>Open Load.</li>
+  <li>Tap the circular arrow icon in the top bar (titled <em>Force refresh &mdash; clears cache and reloads</em>).</li>
+  <li>Wait for the page to reload. The version badge in the corner should bump.</li>
+</ol>
+<p>If that doesn't work, fully close Load (swipe up in the App Switcher), then reopen. Last resort: delete the icon and re-add to Home Screen.</p>
+
+<h2 id="import">Import a file</h2>
+<ol>
+  <li>From the home screen tap <strong>Import</strong>, or open the workspace and tap a file-type tile (HTML, PWA / ZIP, PDFs, Books, Manuscript, Media, Edit Video, Workspace).</li>
+  <li>Pick from On My iPad, iCloud Drive, Dropbox, Google Drive or OneDrive.</li>
+  <li>Wait for the spinner. PDFs and EPUBs need a few seconds to parse.</li>
+  <li>The file lands in the <strong>Library</strong> (your local file shelf).</li>
+</ol>
+<div class="warn"><strong>Kindle books:</strong> <code>.azw</code> / <code>.mobi</code> / <code>.kfx</code> are DRM-locked. Convert to EPUB on a computer first using Calibre.</div>
+
+<h2 id="library">Library &amp; search</h2>
+<ol>
+  <li>Tap the <strong>Library</strong> tab in the top bar.</li>
+  <li>Tap the magnifying-glass icon to open the search bar.</li>
+  <li>Type any keyword. Search runs across the file name, your notes, the file kind (pdf / epub / html / zip / media), the folder name, and a preview of the inlined HTML.</li>
+  <li>Tap the <strong>x</strong> Clear button on the search bar to reset.</li>
+  <li>Use the chips below the search bar to filter by file type or folder.</li>
+</ol>
+<div class="callout"><strong>If the search bar doesn't open:</strong> hard refresh (above), then try again. The button toggles a hidden bar; if your version is stale the bar element may be missing.</div>
+
+<h2 id="preview">Preview &amp; sandbox</h2>
+<ol>
+  <li>From the Library, tap any tile to open the file in the in-app viewer.</li>
+  <li>HTML / PWA files render inside a sandboxed iframe.</li>
+  <li>For an even stricter sandbox (no same-origin), open the <strong>Safety &amp; Rights</strong> tool below and use the <em>Reload as strict</em> button.</li>
+</ol>
+
+<h2 id="repair">Repair &amp; diagnose</h2>
+<ol>
+  <li>From the workspace, tap <strong>Asset Doctor</strong>.</li>
+  <li>It scans the open project for missing images, broken links, missing manifest, missing service worker.</li>
+  <li>Tap <strong>Fix</strong> per finding to apply the suggested repair.</li>
+  <li>Use <strong>Manifest</strong> to auto-build or repair <code>manifest.json</code>.</li>
+  <li>Use <strong>Service Worker</strong> to generate an offline cache.</li>
+</ol>
+
+<div class="tool" id="pwa-builder">
+<h3>One-Click PWA Builder</h3>
+<p>Type a project, tap one button, get an installable PWA ZIP with manifest, service worker, icons, safety scan, receipt &mdash; and now optional <strong>photos and video clips</strong> bundled in.</p>
+<ol>
+  <li>Tap <strong>One-Click PWA Builder</strong> in workspace Section 6.</li>
+  <li>Fill in <em>Project name</em>, <em>Short name</em>, <em>Theme color</em>, <em>Project type</em> (app / book / reader / checklist).</li>
+  <li>(Optional) Pick a 512x512 icon. If skipped, Load generates one from the project's first letter.</li>
+  <li>Type your content in the textarea. For a book, start chapters with <code>## Chapter title</code>.</li>
+  <li><strong>Photos:</strong> tap the photos box, multi-select PNG/JPEG/WEBP/GIF/SVG. They land in <code>assets/images/</code>.</li>
+  <li><strong>Video clips:</strong> tap the clips box, multi-select MP4/WEBM/MOV. They land in <code>assets/clips/</code>.</li>
+  <li>To embed a photo or clip <em>inline</em> in the body, write <code>[image: name.jpg]</code> or <code>[clip: name.mp4]</code> on its own line. Anything not inlined goes to a gallery / clips section at the bottom.</li>
+  <li>Tap <strong>Build Standalone PWA ZIP</strong>. Watch the 15-step pipeline.</li>
+  <li>If the safety scan flags a BLOCKER (credential / executable / hidden .env), the build stops &mdash; fix the input and rebuild.</li>
+  <li>Tap <strong>Download ZIP</strong>. Unzip and host the folder, or open <code>index.html</code> on a local server to install as a PWA.</li>
+</ol>
+<a class="open" href="./pwa-builder.html">Open the PWA Builder</a>
+</div>
+
+<div class="tool" id="book-pwa">
+<h3>Book PWA Validator</h3>
+<p>Confirm an exported book PWA opens as a real app (not raw code).</p>
+<ol>
+  <li>Tap <strong>Book PWA Validator</strong> in workspace Section 6.</li>
+  <li>Drop the book PWA <code>.zip</code> file.</li>
+  <li>Read each section (required files, required folders, manifest, service worker, book content, cover image, index.html, asset paths). Each row is PASS / WARN / FAIL.</li>
+  <li>Tap <strong>Save export receipt</strong> to log this validation in the Receipts library.</li>
+  <li>Tap <strong>Download JSON report</strong> to keep the full report.</li>
+</ol>
+<a class="open" href="./book-pwa-validator.html">Open the Book PWA Validator</a>
+</div>
+
+<div class="tool" id="export">
+<h3>Export receipts</h3>
+<p>Every export logged through <code>window.LoadReceipt.save()</code> appears here.</p>
+<ol>
+  <li>Tap <strong>Export Receipts</strong> in workspace Section 6.</li>
+  <li>The library lists every saved receipt with status pills (manifest / service worker / rights / offline / safety) and the next recommended action.</li>
+  <li>Tap a receipt's <strong>Download JSON</strong> to keep the proof.</li>
+  <li>Tap <strong>New receipt</strong> to log a manual entry for a legacy export that didn't auto-generate one.</li>
+  <li>Tap <strong>Export all (JSON)</strong> to dump everything in a single file.</li>
+</ol>
+<a class="open" href="./export-receipts.html">Open Export Receipts</a>
+</div>
+
+<h2 id="standalone">Standalone HTML / PDF / EPUB</h2>
+<ol>
+  <li>Open a project from the Library.</li>
+  <li>Use the <strong>Share</strong> button in the viewer top bar.</li>
+  <li>Pick the export format. Each export hands you a file you can save, AirDrop or email.</li>
+</ol>
+
+<div class="tool" id="diagnostics">
+<h3>Diagnostics dashboard (43 tests)</h3>
+<ol>
+  <li>Tap <strong>Diagnostics</strong> in workspace Section 6.</li>
+  <li>Tap <strong>Run All Tests</strong> for a full sweep, or tap a single Run button per test.</li>
+  <li>Tests that need a file picker stay <strong>NOT TESTED</strong> until you tap them and pick a file &mdash; the dashboard will not falsely claim a file imported.</li>
+  <li>Tap <strong>Export JSON</strong> or <strong>Export plain text</strong> to keep the report.</li>
+</ol>
+<a class="open" href="./feature-tests.html">Open Diagnostics</a>
+</div>
+
+<div class="tool" id="loadstudio">
+<h3>LoadStudio Validator</h3>
+<ol>
+  <li>Tap <strong>LoadStudio Validator</strong>.</li>
+  <li>Drop a <code>.loadstudio.zip</code> or <code>.cinepwa.zip</code>.</li>
+  <li>Read the report: 11 required files, 6 required folders, full <code>rights.json</code> validation, embedded safety regex sweep.</li>
+  <li>If publish-prep is blocked by missing rights, fix <code>rights.json</code> and re-validate.</li>
+</ol>
+<a class="open" href="./loadstudio-validator.html">Open LoadStudio Validator</a>
+</div>
+
+<div class="tool" id="safety">
+<h3>Safety &amp; Rights</h3>
+<ol>
+  <li>Tap <strong>Safety &amp; Rights</strong>.</li>
+  <li>Drop any HTML or ZIP.</li>
+  <li>The tool scans for credentials, external scripts, javascript: URLs, path traversal, executable files, hidden <code>.env</code>.</li>
+  <li>For a ZIP, it also validates rights metadata (owner / license / sourceMaterial / assetDeclarations).</li>
+  <li>Toggle <strong>Reload as strict</strong> to drop the iframe's same-origin permission for a stricter preview.</li>
+</ol>
+<a class="open" href="./safety-rights.html">Open Safety &amp; Rights</a>
+</div>
+
+<div class="tool" id="ecosystem">
+<h3>Ecosystem Routing</h3>
+<ol>
+  <li>Tap <strong>Ecosystem Routing</strong>.</li>
+  <li>Drop any file <em>or</em> tap a type chip below.</li>
+  <li>The tool detects the file type and shows the right next-step buttons (Open Reader, Send to LoadStudio, Prepare for LoadPlay, Validate Rights, etc.).</li>
+  <li>Each button links to the matching Load tool. Nothing uploads or transmits.</li>
+</ol>
+<a class="open" href="./ecosystem-router.html">Open Ecosystem Routing</a>
+</div>
+
+<div class="tool" id="samples">
+<h3>Sample Test Projects</h3>
+<ol>
+  <li>Tap <strong>Sample Test Projects</strong>.</li>
+  <li>Each card has Open / Test / Export / Reset.</li>
+  <li>Tap <strong>Export</strong> to download a sample file you can then drop into Ecosystem Routing or any validator to confirm the flow.</li>
+</ol>
+<a class="open" href="./samples.html">Open Sample Test Projects</a>
+</div>
+
+<div class="tool" id="ai">
+<h3>AI Provider Status</h3>
+<ol>
+  <li>Tap <strong>AI Provider Status</strong>.</li>
+  <li>Each row shows one of six pills: <em>Not configured</em> / <em>Ready</em> / <em>Failed</em> / <em>Rate limited</em> / <em>Unsupported request</em> / <em>Returned no file</em>.</li>
+  <li>Paste an API key in the password field, tap <strong>Save key</strong>.</li>
+  <li>Tap <strong>Test</strong>. The pill flips to Ready (or to Failed with the HTTP status, or to Unsupported if the browser blocks the request).</li>
+  <li>If the browser CORS-blocks a real working key (common on iPad Safari for some endpoints), tap <strong>Mark Ready</strong> after you confirmed the key works through the Load AI panel itself.</li>
+</ol>
+<div class="warn"><strong>Lock rule:</strong> Load never claims an image or audio was generated unless an actual file blob exists. The <em>Returned no file</em> pill is the visible surface for that &mdash; it appears when a provider answered without a usable file.</div>
+<a class="open" href="./ai-provider-status.html">Open AI Provider Status</a>
+</div>
+
+<div class="tool" id="voice">
+<h3>Voice Diagnostics (Piper + browser TTS)</h3>
+<ol>
+  <li>Tap <strong>Voice Diagnostics</strong>.</li>
+  <li>Tap each test in order: Raw audio &rarr; Browser voice &rarr; Piper generate &rarr; Piper play. Each step reports PASS / FAIL / SKIP with the actual error text.</li>
+  <li>If Piper is not installed, the Piper tests show SKIP and the explanation says <em>Piper not installed or not connected</em> &mdash; this is correct, not a bug.</li>
+  <li>To install Piper: open Load Settings &rarr; Premium voice &rarr; Piper &rarr; Install.</li>
+  <li>If Piper is installed but won't play, run <strong>Reset Piper Settings</strong>, then <strong>Clear Corrupt Piper Config</strong>, then <strong>Rebuild Voice Cache</strong>. <strong>Hard Reset</strong> is the last resort &mdash; it drops localStorage piper keys, Cache Storage piper caches, and IndexedDB databases matching <code>/piper/i</code>.</li>
+  <li>If Piper still won't play, copy the visible error from the Piper-play test and send it &mdash; Stage 1 unblock is waiting on that exact text.</li>
+</ol>
+<a class="open" href="./piper-resilience.html">Open Voice Diagnostics</a>
+</div>
+
+<div class="tool" id="file-editor">
+<h3>PWA File Editor</h3>
+<ol>
+  <li>Tap <strong>PWA File Editor</strong>.</li>
+  <li>Drop any <code>.zip</code> (PWA bundle, book PWA, LoadStudio package).</li>
+  <li>The tree on the left lists every file. Tap a text file (HTML, CSS, JS, JSON, Markdown, TXT) to edit it inline.</li>
+  <li>Tap <strong>Save</strong> to keep the change in memory.</li>
+  <li>Tap <strong>Replace</strong> next to any image / audio / video to swap the binary asset.</li>
+  <li>Tap <strong>Add file</strong> to add a new file at any path.</li>
+  <li>Tap <strong>Download ZIP</strong> to repack and save the modified bundle. Original file on iPad is untouched.</li>
+</ol>
+<a class="open" href="./pwa-file-editor.html">Open PWA File Editor</a>
+</div>
+
+</main>
+</div>
+</body>
+</html>

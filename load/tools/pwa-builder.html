@@ -124,8 +124,26 @@ header h1{margin:0;font-size:16px;font-weight:800;letter-spacing:-.01em;flex:1}
 
 <div class="field">
   <label for="proj-body">Project content</label>
-  <textarea id="proj-body" placeholder="Type your content here. Use ## Chapter title to break a book into chapters. For other types, write the body the way you want it to appear."></textarea>
-  <div class="help">For "Digital book" and "Reader page" types, lines starting with <code>## </code> create chapters in a sidebar.</div>
+  <textarea id="proj-body" placeholder="Type your content here. Use ## Chapter title to break a book into chapters. To insert a photo or clip, write [image: filename.jpg] or [clip: filename.mp4] on its own line — the file must be picked below."></textarea>
+  <div class="help">For "Digital book" and "Reader page" types, lines starting with <code>## </code> create chapters in a sidebar. To embed a photo or clip inline, write <code>[image: name.jpg]</code> or <code>[clip: name.mp4]</code> on its own line — the file must be picked below.</div>
+</div>
+
+<div class="field">
+  <label for="proj-photos">Photos (optional, multi-select)</label>
+  <div class="dz" id="photos-dz">
+    <input id="proj-photos" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" multiple>
+    <strong>Drop photos or tap to pick</strong><br>
+    <span id="photos-name">Bundled into <code>assets/images/</code> and shown in a gallery (or inline where referenced).</span>
+  </div>
+</div>
+
+<div class="field">
+  <label for="proj-clips">Video clips (optional, multi-select)</label>
+  <div class="dz" id="clips-dz">
+    <input id="proj-clips" type="file" accept="video/mp4,video/webm,video/quicktime,video/*" multiple>
+    <strong>Drop video clips or tap to pick</strong><br>
+    <span id="clips-name">Bundled into <code>assets/clips/</code> and shown with native HTML5 controls.</span>
+  </div>
 </div>
 
 <div class="actions" style="margin-bottom:24px">
@@ -317,6 +335,22 @@ function buildStyles(color) {
     "main p { margin: 0 0 14px; color: #d8d8e6; }",
     ".chapter { margin-bottom: 32px; padding-bottom: 22px; border-bottom: 1px solid var(--border); }",
     ".chapter:last-child { border-bottom: 0; }",
+    ".embed { margin: 16px 0; }",
+    ".embed img, .embed video { display: block; max-width: 100%; height: auto; border-radius: 12px; background: #000; }",
+    ".embed video { width: 100%; }",
+    ".embed-caption { color: var(--mute); font-size: 13px; margin-top: 6px; }",
+    ".gallery { margin: 24px 0 32px; }",
+    ".gallery h3 { font-size: 16px; margin: 0 0 12px; color: #fff; }",
+    ".gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }",
+    ".gallery-grid figure { margin: 0; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }",
+    ".gallery-grid img { width: 100%; height: 140px; object-fit: cover; display: block; background: #000; }",
+    ".gallery-grid figcaption { padding: 8px 10px; font-size: 12px; color: var(--mute); }",
+    ".clips { margin: 24px 0 32px; }",
+    ".clips h3 { font-size: 16px; margin: 0 0 12px; color: #fff; }",
+    ".clips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }",
+    ".clips-grid figure { margin: 0; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }",
+    ".clips-grid video { width: 100%; display: block; background: #000; }",
+    ".clips-grid figcaption { padding: 8px 10px; font-size: 12px; color: var(--mute); }",
     "@media (max-width: 720px) { aside { display: none; } main { padding: 20px 18px; } }"
   ].join('\n');
 }
@@ -355,19 +389,71 @@ function splitChapters(body) {
   if (current.body.trim() || !chapters.length) chapters.push(current);
   return chapters;
 }
-function chaptersToHtml(chapters) {
+function paragraphToHtml(p, mediaIndex) {
+  var trimmed = p.trim();
+  // Inline media markers: [image: name.jpg] or [clip: name.mp4]
+  var mImg = trimmed.match(/^\[image:\s*([^\]]+?)\s*\]$/i);
+  var mClip = trimmed.match(/^\[(?:clip|video):\s*([^\]]+?)\s*\]$/i);
+  if (mImg) {
+    var iname = mImg[1];
+    if (mediaIndex.images[iname]) {
+      return '<div class="embed"><img src="assets/images/' + escHtml(iname) + '" alt="' + escHtml(iname) + '"><div class="embed-caption">' + escHtml(iname) + '</div></div>';
+    }
+    return '<p><em>[missing image: ' + escHtml(iname) + ']</em></p>';
+  }
+  if (mClip) {
+    var cname = mClip[1];
+    if (mediaIndex.clips[cname]) {
+      return '<div class="embed"><video controls preload="metadata" playsinline src="assets/clips/' + escHtml(cname) + '"></video><div class="embed-caption">' + escHtml(cname) + '</div></div>';
+    }
+    return '<p><em>[missing clip: ' + escHtml(cname) + ']</em></p>';
+  }
+  return '<p>' + escHtml(trimmed) + '</p>';
+}
+function chaptersToHtml(chapters, mediaIndex) {
+  mediaIndex = mediaIndex || { images: {}, clips: {} };
   return chapters.map(function (c, i) {
     var id = 'ch-' + (i + 1);
     var html = '<section class="chapter" id="' + id + '"><h2>' + escHtml(c.title) + '</h2>';
-    c.body.trim().split(/\n\s*\n/).forEach(function (p) { if (p.trim()) html += '<p>' + escHtml(p.trim()) + '</p>'; });
+    c.body.trim().split(/\n\s*\n/).forEach(function (p) { if (p.trim()) html += paragraphToHtml(p, mediaIndex); });
     html += '</section>';
     return html;
   }).join('\n');
 }
-function buildIndexHtml(meta, chapters) {
+function galleryHtml(mediaIndex, body) {
+  // Show any photo not already inlined via [image: ...] marker.
+  var inlined = {};
+  (body.match(/\[image:\s*([^\]]+?)\s*\]/gi) || []).forEach(function (m) {
+    var n = m.replace(/^\[image:\s*/i,'').replace(/\s*\]$/,'').trim();
+    inlined[n] = true;
+  });
+  var leftover = Object.keys(mediaIndex.images).filter(function (n) { return !inlined[n]; });
+  if (!leftover.length) return '';
+  var grid = leftover.map(function (n) {
+    return '<figure><img src="assets/images/' + escHtml(n) + '" alt="' + escHtml(n) + '"><figcaption>' + escHtml(n) + '</figcaption></figure>';
+  }).join('');
+  return '<section class="gallery"><h3>Photos</h3><div class="gallery-grid">' + grid + '</div></section>';
+}
+function clipsBlockHtml(mediaIndex, body) {
+  var inlined = {};
+  (body.match(/\[(?:clip|video):\s*([^\]]+?)\s*\]/gi) || []).forEach(function (m) {
+    var n = m.replace(/^\[(?:clip|video):\s*/i,'').replace(/\s*\]$/,'').trim();
+    inlined[n] = true;
+  });
+  var leftover = Object.keys(mediaIndex.clips).filter(function (n) { return !inlined[n]; });
+  if (!leftover.length) return '';
+  var grid = leftover.map(function (n) {
+    return '<figure><video controls preload="metadata" playsinline src="assets/clips/' + escHtml(n) + '"></video><figcaption>' + escHtml(n) + '</figcaption></figure>';
+  }).join('');
+  return '<section class="clips"><h3>Video clips</h3><div class="clips-grid">' + grid + '</div></section>';
+}
+function buildIndexHtml(meta, chapters, mediaIndex) {
+  mediaIndex = mediaIndex || { images: {}, clips: {} };
   var sidebar = chapters.length > 1
     ? '<aside><h3>Chapters</h3><ul>' + chapters.map(function (c, i) { return '<li><a href="#ch-' + (i + 1) + '">' + escHtml(c.title) + '</a></li>'; }).join('') + '</ul></aside>'
     : '';
+  var bodyText = (meta.body || '');
+  var trailing = galleryHtml(mediaIndex, bodyText) + clipsBlockHtml(mediaIndex, bodyText);
   return [
     '<!doctype html>',
     '<html lang="en">',
@@ -387,7 +473,8 @@ function buildIndexHtml(meta, chapters) {
     '<div class="layout">',
     sidebar,
     '<main>',
-    chaptersToHtml(chapters),
+    chaptersToHtml(chapters, mediaIndex),
+    trailing,
     '</main>',
     '</div>',
     '<script src="./app.js"></' + 'script>',
@@ -494,6 +581,47 @@ $('proj-icon').addEventListener('change', function (e) {
   $('icon-name').textContent = f.name + ' selected.';
 });
 
+// ── Photos & video clips pickers ────────────────────────────
+var pickedPhotos = [];
+var pickedClips = [];
+function uniqueFilename(name, taken) {
+  var safe = name.replace(/[^A-Za-z0-9._-]+/g, '-');
+  if (!taken[safe]) return safe;
+  var i = 1, dot = safe.lastIndexOf('.');
+  var base = dot > 0 ? safe.slice(0, dot) : safe;
+  var ext = dot > 0 ? safe.slice(dot) : '';
+  while (taken[base + '-' + i + ext]) i++;
+  return base + '-' + i + ext;
+}
+$('proj-photos').addEventListener('change', function (e) {
+  var files = Array.from(e.target.files || []);
+  var taken = {};
+  pickedPhotos.forEach(function (p) { taken[p.name] = true; });
+  files.forEach(function (f) {
+    if (!/^image\//.test(f.type) && !/\.(png|jpe?g|webp|gif|svg)$/i.test(f.name)) return;
+    var name = uniqueFilename(f.name, taken);
+    taken[name] = true;
+    pickedPhotos.push({ name: name, blob: f });
+  });
+  $('photos-name').textContent = pickedPhotos.length
+    ? pickedPhotos.length + ' photo(s) ready: ' + pickedPhotos.map(function (p) { return p.name; }).join(', ')
+    : 'Bundled into assets/images/ and shown in a gallery (or inline where referenced).';
+});
+$('proj-clips').addEventListener('change', function (e) {
+  var files = Array.from(e.target.files || []);
+  var taken = {};
+  pickedClips.forEach(function (p) { taken[p.name] = true; });
+  files.forEach(function (f) {
+    if (!/^video\//.test(f.type) && !/\.(mp4|webm|mov|m4v|ogv)$/i.test(f.name)) return;
+    var name = uniqueFilename(f.name, taken);
+    taken[name] = true;
+    pickedClips.push({ name: name, blob: f });
+  });
+  $('clips-name').textContent = pickedClips.length
+    ? pickedClips.length + ' clip(s) ready: ' + pickedClips.map(function (p) { return p.name; }).join(', ')
+    : 'Bundled into assets/clips/ and shown with native HTML5 controls.';
+});
+
 // ── Main build ──────────────────────────────────────────────
 $('build').addEventListener('click', function () {
   var btn = this;
@@ -553,8 +681,11 @@ $('build').addEventListener('click', function () {
     })
     .then(function () {
       setStep('index', 'run', '');
-      indexHtml = buildIndexHtml(meta, chapters);
-      setStep('index', 'pass', indexHtml.length + ' bytes');
+      var mediaIndex = { images: {}, clips: {} };
+      pickedPhotos.forEach(function (p) { mediaIndex.images[p.name] = true; });
+      pickedClips.forEach(function (p) { mediaIndex.clips[p.name] = true; });
+      indexHtml = buildIndexHtml(meta, chapters, mediaIndex);
+      setStep('index', 'pass', indexHtml.length + ' bytes' + (pickedPhotos.length || pickedClips.length ? ' (+ ' + pickedPhotos.length + ' photos, ' + pickedClips.length + ' clips)' : ''));
     })
     .then(function () {
       setStep('styles', 'run', '');
@@ -617,6 +748,18 @@ $('build').addEventListener('click', function () {
       zip.folder('assets/icons').file('icon-192.png', icon192Blob);
       zip.folder('assets/icons').file('icon-512.png', icon512Blob);
       zip.folder('assets/images').file('.keep', '');
+      pickedPhotos.forEach(function (p) {
+        zip.folder('assets/images').file(p.name, p.blob);
+        includedFiles.push('assets/images/' + p.name);
+      });
+      if (pickedClips.length) {
+        zip.folder('assets/clips').file('.keep', '');
+        includedFiles.push('assets/clips/.keep');
+        pickedClips.forEach(function (p) {
+          zip.folder('assets/clips').file(p.name, p.blob);
+          includedFiles.push('assets/clips/' + p.name);
+        });
+      }
       // Receipt + security report go in the ZIP itself.
       var receipt = {
         exportType:           'PWA ZIP',
@@ -674,6 +817,8 @@ $('reset').addEventListener('click', function () {
   $('proj-color').value = '#7c3aed';
   $('proj-type').value = 'app';
   $('proj-icon').value = ''; pickedIconBlob = null; $('icon-name').textContent = 'Load will generate one if you skip this.';
+  $('proj-photos').value = ''; pickedPhotos = []; $('photos-name').textContent = 'Bundled into assets/images/ and shown in a gallery (or inline where referenced).';
+  $('proj-clips').value = ''; pickedClips = []; $('clips-name').textContent = 'Bundled into assets/clips/ and shown with native HTML5 controls.';
   $('steps-host').hidden = true; $('security-host').hidden = true; $('receipt-host').hidden = true;
   lastZipBlob = null; lastReceipt = null; lastSecurity = null;
 });

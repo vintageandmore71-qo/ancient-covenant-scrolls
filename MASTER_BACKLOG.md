@@ -40,7 +40,7 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 
 ## Load main (`/load/`)
 
-**Cache:** `load-v17es`. **Tip status spec:** `PLAN_LOAD_AI.md`,
+**Cache:** `load-v17et`. **Tip status spec:** `PLAN_LOAD_AI.md`,
 `PLAN_IMAGE_PROMPT_v3.md`, `PLAN_BOOK_TO_VIDEO.md`,
 `MEDIA_MODULE_SPEC.md`, `LOAD_FEATURES.md`, `LOAD_MARKETING.md`.
 
@@ -50,6 +50,17 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 - **Character Consistency module** — see X-CC.
 - **Piper TTS Stage 1 unblock + Stage 2 rollout** — see X-PIPER. Stage 1 shipped but not playing; blocked on the play() error text from the user. Resilience panel (Part 9) shipped in v17er gives an in-app diagnostic + recovery path.
 - **LOAD-ECO acceptance test pass** (Build Plan Part 13). Every part now has a tool surface, but the user-validation pass is still needed: open each tool, confirm PASS/FAIL/WARN labels render, run a sample export, save a receipt, check it appears in the Receipts library. Parts 1, 2, 3, 14-17 shipped in v17eq. Parts 4, 7, 9 + Book-to-Video wiring shipped in v17er. Parts 5, 6, 8, 10 shipped in v17es. Parts 11-13 are housekeeping/acceptance and are met by the existing tool surfaces.
+
+### Recently done (this session, 2026-05-05 — fixes + media + editor + help)
+- **v17et — photos/clips in PWA builder, file editor, help, AI test fix, search hardening**:
+  - **Photos & video clips in the One-Click PWA Builder:** picker accepts multi-select images (PNG/JPEG/WEBP/GIF/SVG) into `assets/images/` and video clips (MP4/WEBM/MOV/M4V/OGV) into `assets/clips/`. Inline embedding via `[image: name.jpg]` / `[clip: name.mp4]` markers in the body; anything not inlined renders in a Photos gallery + Clips section at the bottom of the generated `index.html`. New CSS rules for `.embed`, `.gallery`, `.clips`. Filenames are sanitized + de-duped (`-1`, `-2`, ...). Reset clears both pickers. Receipt step still includes everything bundled.
+  - **PWA File Editor (new tool):** `load/tools/pwa-file-editor.html`. Drop a PWA / book PWA / LoadStudio ZIP, get a sortable file tree, edit text files inline (HTML/CSS/JS/JSON/Markdown/TXT/XML/SVG/webmanifest), preview / replace any image / audio / video binary, add new file at any path, add new folder (`.keep` marker), delete any file. Repacks via JSZip and downloads `<orig>-edited.zip`. Auto-saves a Part 5 export receipt with edited-file count. Original file on iPad is untouched.
+  - **AI Provider Status — test fix + Mark Ready override:** every test now runs through `safeFetch`, classifies fetch errors as UNSUPPORTED with a clear "Browser blocked the test (CORS / content-blocker / offline)" detail instead of failing silently. Switched OpenRouter test to `/api/v1/auth/key` (lighter, more CORS-friendly) and OpenAI / HF unchanged. Added a per-row **Mark Ready** button so users can manually flip a row to Ready when their key works through the Load AI panel but the static-page test is blocked. Status JSON export updated.
+  - **Library search hardening:** the magnifying-glass toggle now binds to both `pointerdown` + `click` with a 250 ms re-entry guard. iPad Safari sometimes drops synthesized clicks on icon-only nav buttons inside sticky headers; this restores the toggle.
+  - **How to use Load (new help page):** `load/tools/help.html`. Single comprehensive step-by-step guide with sticky table of contents and per-tool instruction cards covering: install, force refresh, import, library + search, preview, repair, One-Click PWA Builder (incl. new photos/clips), Book PWA Validator, Export Receipts, Standalone HTML/PDF/EPUB, Diagnostics dashboard, LoadStudio Validator, Safety & Rights, Ecosystem Routing, Sample Test Projects, AI Provider Status, Voice Diagnostics, PWA File Editor.
+  - Workspace hub Section 6 now has 12 tiles (added PWA File Editor + How to use Load).
+  - Cache `load-v17es` -> `load-v17et`. Version badge bumped in `load/load.js`.
+  - **Validation pending (user action):** confirm hard-refresh shows v17et badge; test the new photos+clips picker by building a small PWA with one photo + one clip; open the modified ZIP in PWA File Editor and edit a file; try the magnifying glass on Library; tap Test in AI Provider Status (Failed/Ready/Unsupported with detail) or use Mark Ready.
 
 ### Recently done (this session, 2026-05-05 — Load Main Next Build Plan finish)
 - **v17es — Parts 5, 6, 8, 10**:

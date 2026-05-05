@@ -99,51 +99,75 @@ details .body{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px
 
   function toast(m){ toastEl.textContent = m; toastEl.classList.add('on'); setTimeout(function(){ toastEl.classList.remove('on'); }, 1800); }
 
-  // Provider catalog. URLs intentionally use the public test endpoints.
-  // Each provider has: id, label, kind, keyStorage, testUrl, headers fn, expectedShape.
+  // Provider catalog. iPad Safari blocks many cross-origin preflights; we
+  // wrap every fetch in a defensive try/catch and report the actual error
+  // instead of silently failing. UNSUPPORTED is returned when the browser
+  // refuses the request (CORS, network, blocked by content-blocker).
+  function classifyFetchError(e) {
+    var m = String(e && (e.message || e) || '').toLowerCase();
+    if (m.indexOf('failed to fetch') >= 0 || m.indexOf('networkerror') >= 0 ||
+        m.indexOf('load failed') >= 0 || m.indexOf('cors') >= 0) {
+      return { status: 'UNSUPPORTED', detail: 'Browser blocked the test (CORS / content-blocker / offline). Real requests via the Load AI panel may still work; this test cannot reach the endpoint from a static page.' };
+    }
+    return { status: 'FAILED', detail: e && e.message || String(e) };
+  }
+  async function safeFetch(url, opts) {
+    try { return { ok: true, resp: await fetch(url, opts) }; }
+    catch (e) { return { ok: false, err: e }; }
+  }
   var PROVIDERS = [
     { id:'openrouter', label:'OpenRouter', kind:'chat', keyStorage:'load_ai_key_openrouter',
       test: async function(key){
-        var r = await fetch('https://openrouter.ai/api/v1/models', { headers: { 'Authorization': 'Bearer ' + key } });
-        if (r.status === 401 || r.status === 403) return { status: 'FAILED', detail: 'HTTP ' + r.status + ' (auth rejected)' };
-        if (r.status === 429) return { status: 'RATE_LIMITED', detail: 'HTTP 429' };
-        if (!r.ok) return { status: 'FAILED', detail: 'HTTP ' + r.status };
-        var j = await r.json().catch(function(){ return null; });
-        if (!j || !j.data) return { status: 'NO_FILE', detail: 'response had no .data array' };
-        return { status: 'READY', detail: j.data.length + ' models reachable' };
+        if (!key) return { status: 'NOT_CONFIGURED', detail: 'No key saved' };
+        var r = await safeFetch('https://openrouter.ai/api/v1/auth/key', { headers: { 'Authorization': 'Bearer ' + key } });
+        if (!r.ok) return classifyFetchError(r.err);
+        var resp = r.resp;
+        if (resp.status === 401 || resp.status === 403) return { status: 'FAILED', detail: 'HTTP ' + resp.status + ' (auth rejected)' };
+        if (resp.status === 429) return { status: 'RATE_LIMITED', detail: 'HTTP 429' };
+        if (!resp.ok) return { status: 'FAILED', detail: 'HTTP ' + resp.status };
+        var j = await resp.json().catch(function(){ return null; });
+        if (!j || !j.data) return { status: 'NO_FILE', detail: 'response had no .data field' };
+        return { status: 'READY', detail: 'auth ok' + (j.data.usage != null ? ', usage so far ' + j.data.usage : '') };
       }
     },
     { id:'huggingface', label:'Hugging Face', kind:'image+chat', keyStorage:'load_ai_key_hf',
       test: async function(key){
-        var r = await fetch('https://huggingface.co/api/whoami-v2', { headers: { 'Authorization': 'Bearer ' + key } });
-        if (r.status === 401 || r.status === 403) return { status: 'FAILED', detail: 'HTTP ' + r.status + ' (auth rejected)' };
-        if (r.status === 429) return { status: 'RATE_LIMITED', detail: 'HTTP 429' };
-        if (!r.ok) return { status: 'FAILED', detail: 'HTTP ' + r.status };
-        var j = await r.json().catch(function(){ return null; });
+        if (!key) return { status: 'NOT_CONFIGURED', detail: 'No key saved' };
+        var r = await safeFetch('https://huggingface.co/api/whoami-v2', { headers: { 'Authorization': 'Bearer ' + key } });
+        if (!r.ok) return classifyFetchError(r.err);
+        var resp = r.resp;
+        if (resp.status === 401 || resp.status === 403) return { status: 'FAILED', detail: 'HTTP ' + resp.status + ' (auth rejected)' };
+        if (resp.status === 429) return { status: 'RATE_LIMITED', detail: 'HTTP 429' };
+        if (!resp.ok) return { status: 'FAILED', detail: 'HTTP ' + resp.status };
+        var j = await resp.json().catch(function(){ return null; });
         if (!j || !j.name) return { status: 'NO_FILE', detail: 'whoami returned no name' };
         return { status: 'READY', detail: 'authenticated as ' + j.name };
       }
     },
     { id:'anthropic', label:'Anthropic', kind:'chat', keyStorage:'load_ai_key_anthropic',
       test: async function(key){
-        // No CORS-friendly test endpoint; surface that as Unsupported request.
-        return { status: 'UNSUPPORTED', detail: 'No browser-CORS test endpoint. Validation runs at first real request.' };
+        if (!key) return { status: 'NOT_CONFIGURED', detail: 'No key saved' };
+        return { status: 'UNSUPPORTED', detail: 'Anthropic API blocks browser-direct requests by design (no CORS). Validation runs at first real request through your proxy.' };
       }
     },
     { id:'openai', label:'OpenAI', kind:'chat+image', keyStorage:'load_ai_key_openai',
       test: async function(key){
-        var r = await fetch('https://api.openai.com/v1/models', { headers: { 'Authorization': 'Bearer ' + key } });
-        if (r.status === 401 || r.status === 403) return { status: 'FAILED', detail: 'HTTP ' + r.status + ' (auth rejected)' };
-        if (r.status === 429) return { status: 'RATE_LIMITED', detail: 'HTTP 429' };
-        if (!r.ok) return { status: 'FAILED', detail: 'HTTP ' + r.status };
-        var j = await r.json().catch(function(){ return null; });
+        if (!key) return { status: 'NOT_CONFIGURED', detail: 'No key saved' };
+        var r = await safeFetch('https://api.openai.com/v1/models', { headers: { 'Authorization': 'Bearer ' + key } });
+        if (!r.ok) return classifyFetchError(r.err);
+        var resp = r.resp;
+        if (resp.status === 401 || resp.status === 403) return { status: 'FAILED', detail: 'HTTP ' + resp.status + ' (auth rejected)' };
+        if (resp.status === 429) return { status: 'RATE_LIMITED', detail: 'HTTP 429' };
+        if (!resp.ok) return { status: 'FAILED', detail: 'HTTP ' + resp.status };
+        var j = await resp.json().catch(function(){ return null; });
         if (!j || !j.data) return { status: 'NO_FILE', detail: 'response had no .data array' };
         return { status: 'READY', detail: j.data.length + ' models reachable' };
       }
     },
     { id:'siliconflow', label:'SiliconFlow', kind:'image+video', keyStorage:'load_ai_key_siliconflow',
       test: async function(key){
-        return { status: 'UNSUPPORTED', detail: 'CORS-restricted; validated at first real request.' };
+        if (!key) return { status: 'NOT_CONFIGURED', detail: 'No key saved' };
+        return { status: 'UNSUPPORTED', detail: 'CORS-restricted from a static page; validated at first real request.' };
       }
     },
     { id:'piper-builtin', label:'Built-in helper (no key)', kind:'helper', keyStorage:null,
@@ -206,6 +230,7 @@ details .body{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px
           '<input id="key-' + p.id + '" type="password" value="' + escapeHtml(key) + '" placeholder="Paste API key">' +
           '<button class="btn" data-act="save" data-pid="' + p.id + '">Save key</button>' +
           '<button class="btn primary" data-act="test" data-pid="' + p.id + '">Test</button>' +
+          '<button class="btn" data-act="markready" data-pid="' + p.id + '" title="Mark Ready manually if you confirmed the key works elsewhere (e.g. browser-CORS blocks the test)">Mark Ready</button>' +
           '<button class="btn" data-act="clear" data-pid="' + p.id + '">Clear key</button>' +
           '</div>';
       } else {
@@ -263,6 +288,11 @@ details .body{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px
       saveStatus(pid, 'NOT_CONFIGURED', '');
       render();
       toast('Key cleared.');
+    } else if (act === 'markready') {
+      if (!loadKey(p.keyStorage)) { toast('Save a key first.'); return; }
+      saveStatus(pid, 'READY', 'Marked ready manually (test bypassed).');
+      render();
+      toast('Marked Ready.');
     } else if (act === 'test') {
       toast('Testing ' + p.label + ' ...');
       testProvider(pid);
