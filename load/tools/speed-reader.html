@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Speed Reader (RSVP) &mdash; Load</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+:root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--border:#2a2a40}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;font-size:14px;-webkit-font-smoothing:antialiased}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#150a28 0,#0a0514 100%);border-bottom:1px solid var(--border)}
+header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)}
+header h1{margin:0;font-size:16px;font-weight:800;flex:1}
+.wrap{max-width:920px;margin:0 auto;padding:24px 18px 80px}
+.intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin:0 0 18px}
+.intro h2{margin:0 0 6px;font-size:18px;font-weight:800}
+.intro p{margin:0;color:var(--mute);font-size:13.5px}
+.section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin:14px 0}
+.section h3{margin:0 0 10px;font-size:14px;font-weight:800}
+textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:#0a0e18;color:var(--fg);font-family:'Atkinson Hyperlegible',sans-serif;font-size:14px;line-height:1.6;min-height:140px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media (max-width:700px){.row{grid-template-columns:1fr 1fr}}
+label{display:block;font-size:11.5px;color:var(--mute);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+input,select{width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:#0a0e18;color:var(--fg);font:inherit;font-size:13px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-weight:700;font-size:13px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent)}
+.btn.danger{border-color:rgba(255,110,110,.4);color:var(--err)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.stage{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:60px 24px;text-align:center;min-height:240px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:14px}
+.stage .word{font-family:'Atkinson Hyperlegible',sans-serif;font-weight:700;color:#fff;letter-spacing:.01em;line-height:1.1}
+.stage .word .pivot{color:var(--accent)}
+.stage .meta{font-size:11.5px;color:var(--mute);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.stage .focusbar{display:block;height:2px;width:140px;background:var(--accent);opacity:.6}
+.stage.bg-cream{background:#f4eadc}
+.stage.bg-cream .word{color:#3a2e1e}
+.stage.bg-yellow{background:#fff4b8}
+.stage.bg-yellow .word{color:#3a2e1e}
+.stage.bg-blue{background:#d4e8f8}
+.stage.bg-blue .word{color:#1a3a52}
+.progress{height:6px;background:#0a0e18;border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-top:10px}
+.progress .bar2{height:100%;background:var(--accent);width:0;transition:width 60ms linear}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1a1a26;color:#fff;padding:10px 16px;border-radius:8px;border:1px solid var(--border);font-size:13px;z-index:50;box-shadow:0 6px 24px rgba(0,0,0,.4);display:none}
+.toast.on{display:block}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="../">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Back to Load
+  </a>
+  <h1>Speed Reader (RSVP)</h1>
+  <a class="back" href="./help.html#speedread" title="How it works">How it works</a>
+</header>
+<div class="wrap">
+<div class="intro">
+  <h2>Read at your own pace, one word at a time</h2>
+  <p>Rapid Serial Visual Presentation flashes one word at a time at a centered focus point. Eliminates eye-tracking effort &mdash; many dyslexic readers find this much easier than line-scanning. Adjustable WPM, pauses on punctuation, jump back / forward.</p>
+</div>
+
+<div class="section">
+  <h3>Text</h3>
+  <textarea id="text" placeholder="Paste a passage, page, chapter, or verse list."></textarea>
+</div>
+
+<div class="section">
+  <h3>Settings</h3>
+  <div class="row">
+    <div><label>Words per minute</label>
+      <input id="wpm" type="number" min="80" max="700" step="10" value="260">
+    </div>
+    <div><label>Word size</label>
+      <select id="size"><option value="48">48 px</option><option value="64" selected>64 px</option><option value="80">80 px</option><option value="100">100 px</option></select>
+    </div>
+    <div><label>Background</label>
+      <select id="bg"><option value="">Dark</option><option value="bg-cream">Cream</option><option value="bg-yellow">Yellow</option><option value="bg-blue">Blue</option></select>
+    </div>
+  </div>
+  <div class="row">
+    <div><label>Pause on punctuation</label>
+      <select id="pause"><option value="0">Off</option><option value="1" selected>On (1.6x at . ! ?)</option><option value="2">Strong (2.5x at . ! ?)</option></select>
+    </div>
+    <div><label>Pivot color</label>
+      <select id="pivot"><option value="1" selected>On (focus letter highlighted)</option><option value="0">Off</option></select>
+    </div>
+    <div><label>Skip empties</label>
+      <select id="skip"><option value="1" selected>On</option><option value="0">Off</option></select>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Reader</h3>
+  <div id="stage" class="stage">
+    <div class="meta" id="status">0 / 0</div>
+    <div class="word" id="word">Paste text and tap Play.</div>
+    <span class="focusbar"></span>
+  </div>
+  <div class="progress"><div class="bar2" id="prog"></div></div>
+  <div class="bar">
+    <button class="btn primary" id="play">Play</button>
+    <button class="btn" id="pause-btn">Pause</button>
+    <button class="btn" id="stop">Stop</button>
+    <button class="btn" id="back-10">&laquo; 10</button>
+    <button class="btn" id="back-1">&lsaquo; 1</button>
+    <button class="btn" id="fwd-1">1 &rsaquo;</button>
+    <button class="btn" id="fwd-10">10 &raquo;</button>
+    <span style="margin-left:auto;font-size:12px;color:var(--mute)" id="info">Idle</span>
+  </div>
+</div>
+
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+  function toast(m){ var t = $('toast'); if (!t) return; t.textContent = m; t.classList.add('on'); setTimeout(function(){ t.classList.remove('on'); }, 1800); }
+
+  var words = [];
+  var idx = 0;
+  var timer = null;
+  var playing = false;
+
+  function tokenize(t){
+    if (!t) return [];
+    return t.replace(/\r\n?/g,' ').split(/\s+/).filter(Boolean);
+  }
+
+  function pivotIndex(w){
+    var letters = w.replace(/[^A-Za-z]/g,'');
+    if (letters.length <= 1) return 0;
+    if (letters.length <= 3) return 1;
+    if (letters.length <= 6) return 2;
+    if (letters.length <= 9) return 3;
+    return 4;
+  }
+
+  function paintWord(w){
+    if (!w) { $('word').textContent = ''; return; }
+    if ($('pivot').value === '0') { $('word').textContent = w; return; }
+    var p = pivotIndex(w);
+    // Find absolute index in raw word matching the p-th letter
+    var letterCount = 0;
+    var pivotAt = 0;
+    for (var i = 0; i < w.length; i++) {
+      if (/[A-Za-z]/.test(w[i])) {
+        if (letterCount === p) { pivotAt = i; break; }
+        letterCount++;
+      }
+    }
+    var pre = w.slice(0, pivotAt);
+    var pivot = w[pivotAt] || '';
+    var post = w.slice(pivotAt + 1);
+    $('word').innerHTML = escapeHtml(pre) + '<span class="pivot">' + escapeHtml(pivot) + '</span>' + escapeHtml(post);
+  }
+
+  function applyStyle(){
+    $('word').style.fontSize = $('size').value + 'px';
+    var stage = $('stage');
+    stage.classList.remove('bg-cream','bg-yellow','bg-blue');
+    if ($('bg').value) stage.classList.add($('bg').value);
+  }
+
+  function delayFor(w){
+    var wpm = parseInt($('wpm').value, 10) || 260;
+    var base = 60000 / wpm;
+    var skip = $('skip').value === '1';
+    if (skip && !w.replace(/[^A-Za-z0-9]/g,'')) return base * 0.4;
+    var pauseMode = $('pause').value;
+    if (pauseMode !== '0') {
+      var mult = pauseMode === '2' ? 2.5 : 1.6;
+      if (/[.!?]$/.test(w)) return base * mult;
+      if (/[,;:]$/.test(w)) return base * 1.25;
+    }
+    return base;
+  }
+
+  function showCurrent(){
+    if (!words.length) {
+      $('word').textContent = 'Paste text and tap Play.';
+      $('status').textContent = '0 / 0';
+      $('prog').style.width = '0%';
+      return;
+    }
+    paintWord(words[idx]);
+    $('status').textContent = (idx+1) + ' / ' + words.length;
+    $('prog').style.width = ((idx / Math.max(1, words.length-1)) * 100).toFixed(1) + '%';
+  }
+
+  function tick(){
+    if (!playing) return;
+    var w = words[idx];
+    showCurrent();
+    timer = setTimeout(function(){
+      if (idx + 1 >= words.length) { stop(); $('info').textContent = 'Done.'; return; }
+      idx++; tick();
+    }, delayFor(w));
+  }
+
+  function play(){
+    if (!words.length) { words = tokenize($('text').value); idx = 0; }
+    if (!words.length) { toast('Paste text first.'); return; }
+    if (idx >= words.length) idx = 0;
+    playing = true;
+    $('info').textContent = 'Playing ' + ($('wpm').value) + ' wpm';
+    tick();
+  }
+  function pause(){ playing = false; if (timer) clearTimeout(timer); $('info').textContent = 'Paused'; }
+  function stop(){ playing = false; if (timer) clearTimeout(timer); idx = 0; showCurrent(); $('info').textContent = 'Stopped'; }
+  function step(d){ if (!words.length) words = tokenize($('text').value); idx = Math.max(0, Math.min(words.length-1, idx + d)); showCurrent(); }
+
+  $('play').addEventListener('click', play);
+  $('pause-btn').addEventListener('click', pause);
+  $('stop').addEventListener('click', stop);
+  $('back-10').addEventListener('click', function(){ step(-10); });
+  $('back-1').addEventListener('click', function(){ step(-1); });
+  $('fwd-1').addEventListener('click', function(){ step(1); });
+  $('fwd-10').addEventListener('click', function(){ step(10); });
+  ['wpm','size','bg','pause','pivot','skip'].forEach(function(id){
+    $(id).addEventListener('change', function(){ applyStyle(); showCurrent(); });
+    $(id).addEventListener('input', function(){ applyStyle(); showCurrent(); });
+  });
+  $('text').addEventListener('input', function(){ words = []; idx = 0; });
+
+  document.addEventListener('keydown', function(e){
+    if (e.target && (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT')) return;
+    if (e.key === ' ') { e.preventDefault(); playing ? pause() : play(); }
+    else if (e.key === 'ArrowLeft') step(-1);
+    else if (e.key === 'ArrowRight') step(1);
+  });
+
+  applyStyle();
+  showCurrent();
+})();
+</script>
+</body>
+</html>

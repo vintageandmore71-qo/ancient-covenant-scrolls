@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Reading Level Analyzer &mdash; Load</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+:root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--border:#2a2a40}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;font-size:14px;-webkit-font-smoothing:antialiased}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#150a28 0,#0a0514 100%);border-bottom:1px solid var(--border)}
+header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)}
+header h1{margin:0;font-size:16px;font-weight:800;flex:1}
+.wrap{max-width:1080px;margin:0 auto;padding:24px 18px 80px}
+.intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin:0 0 18px}
+.intro h2{margin:0 0 6px;font-size:18px;font-weight:800}
+.intro p{margin:0;color:var(--mute);font-size:13.5px}
+.section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin:14px 0}
+.section h3{margin:0 0 10px;font-size:14px;font-weight:800}
+textarea{width:100%;padding:11px 12px;border-radius:8px;border:1px solid var(--border);background:#0a0e18;color:var(--fg);font-family:'Atkinson Hyperlegible',sans-serif;font-size:14px;line-height:1.65;min-height:200px;resize:vertical}
+.dz{position:relative;border:2px dashed var(--border);background:#0a0e18;border-radius:12px;padding:18px 14px;text-align:center;color:var(--mute);margin-bottom:10px}
+.dz input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.dz strong{display:block;font-size:14px;color:#fff}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-weight:700;font-size:13px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent)}
+.btn.danger{border-color:rgba(255,110,110,.4);color:var(--err)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.card .v{font-size:24px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums}
+.card .l{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--mute);margin-top:2px}
+.card .h{font-size:11.5px;color:var(--mute);margin-top:4px;line-height:1.4}
+.card.PASS{border-color:rgba(74,222,128,.4)}
+.card.PASS .v{color:var(--ok)}
+.card.WARN{border-color:rgba(250,204,21,.4)}
+.card.WARN .v{color:var(--warn)}
+.card.FAIL{border-color:rgba(255,110,110,.4)}
+.card.FAIL .v{color:var(--err)}
+.hard{margin-top:14px}
+.hard h4{margin:0 0 6px;font-size:12.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--mute)}
+.hard ol{margin:0;padding-left:22px}
+.hard li{margin-bottom:6px;font-family:'Atkinson Hyperlegible',sans-serif;font-size:13.5px;line-height:1.55;color:#e0e0eb}
+.hard li .grade{display:inline-block;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;color:var(--err);font-weight:700;margin-left:6px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1a1a26;color:#fff;padding:10px 16px;border-radius:8px;border:1px solid var(--border);font-size:13px;z-index:50;box-shadow:0 6px 24px rgba(0,0,0,.4);display:none}
+.toast.on{display:block}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="../">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Back to Load
+  </a>
+  <h1>Reading Level Analyzer</h1>
+  <a class="back" href="./help.html#readlevel" title="How it works">How it works</a>
+</header>
+<div class="wrap">
+<div class="intro">
+  <h2>Word and sentence stats + Flesch readability</h2>
+  <p>Paste any passage or drop a TXT / Markdown / HTML file. Get word count, sentence count, syllable estimate, average sentence length, Flesch Reading Ease, Flesch-Kincaid grade level, and the ten hardest sentences highlighted by per-sentence grade level. Helpful for dyslexia-friendly editing.</p>
+</div>
+
+<div class="section">
+  <h3>Source</h3>
+  <div class="dz">
+    <input id="file" type="file" accept=".txt,.md,.markdown,.html,.htm,text/plain,text/markdown,text/html">
+    <strong>Drop a TXT / Markdown / HTML file (optional)</strong>
+    Or paste text below.
+  </div>
+  <textarea id="text" placeholder="Paste a paragraph, page, chapter, or whole manuscript."></textarea>
+  <div class="bar">
+    <button class="btn primary" id="analyze">Analyze</button>
+    <button class="btn" id="copyJson" disabled>Copy JSON</button>
+    <button class="btn danger" id="clear">Clear</button>
+  </div>
+</div>
+
+<div class="section" id="results" style="display:none">
+  <h3>Results</h3>
+  <div class="cards" id="cards"></div>
+  <div class="hard">
+    <h4>Hardest 10 sentences</h4>
+    <ol id="hardList"></ol>
+  </div>
+</div>
+
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var toastEl = $('toast');
+  function toast(m){ toastEl.textContent = m; toastEl.classList.add('on'); setTimeout(function(){ toastEl.classList.remove('on'); }, 1800); }
+  function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+
+  function syllableCount(w){
+    w = String(w || '').toLowerCase().replace(/[^a-z]/g,'');
+    if (!w) return 0;
+    if (w.length <= 3) return 1;
+    // Trailing silent e
+    w = w.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
+    w = w.replace(/^y/, '');
+    var groups = w.match(/[aeiouy]+/g);
+    return groups ? groups.length : 1;
+  }
+  function splitSentences(t){
+    if (!t) return [];
+    return (t.replace(/\r\n?/g,'\n').match(/[^.!?\n]+[.!?]+["')\]]*|[^.!?\n]+\n|[^.!?\n]+$/g) || [])
+      .map(function(s){ return s.trim(); }).filter(Boolean);
+  }
+  function words(s){ return (s || '').match(/[A-Za-z']+/g) || []; }
+
+  function fleschEase(syll, words, sents){
+    if (!words || !sents) return 0;
+    return 206.835 - 1.015 * (words / sents) - 84.6 * (syll / words);
+  }
+  function fleschKincaidGrade(syll, words, sents){
+    if (!words || !sents) return 0;
+    return 0.39 * (words / sents) + 11.8 * (syll / words) - 15.59;
+  }
+  function readingTimeMin(words){ return words / 220; }
+
+  function classifyEase(score){
+    if (score >= 90) return { lvl: '5th grade', cls: 'PASS', hint: 'Very easy.' };
+    if (score >= 80) return { lvl: '6th grade', cls: 'PASS', hint: 'Easy.' };
+    if (score >= 70) return { lvl: '7th grade', cls: 'PASS', hint: 'Fairly easy.' };
+    if (score >= 60) return { lvl: '8th-9th', cls: 'PASS', hint: 'Plain English.' };
+    if (score >= 50) return { lvl: '10th-12th', cls: 'WARN', hint: 'Fairly difficult.' };
+    if (score >= 30) return { lvl: 'College', cls: 'WARN', hint: 'Difficult.' };
+    return { lvl: 'College graduate', cls: 'FAIL', hint: 'Very confusing. Consider shorter sentences and simpler words.' };
+  }
+
+  function analyze(){
+    var t = $('text').value.replace(/<\/?[^>]+>/g, ' ');
+    if (!t.trim()) { toast('Paste text first.'); return; }
+    var sents = splitSentences(t);
+    var allWords = [];
+    var sentStats = sents.map(function(s){
+      var ws = words(s);
+      var syll = ws.reduce(function(sum, w){ return sum + syllableCount(w); }, 0);
+      var grade = fleschKincaidGrade(syll, ws.length, 1);
+      allWords = allWords.concat(ws);
+      return { text: s, words: ws.length, syllables: syll, grade: grade };
+    });
+    var totalWords = allWords.length;
+    var totalSyll = allWords.reduce(function(s, w){ return s + syllableCount(w); }, 0);
+    var totalSents = sents.length || 1;
+    var avgLen = totalWords / totalSents;
+    var ease = fleschEase(totalSyll, totalWords, totalSents);
+    var grade = fleschKincaidGrade(totalSyll, totalWords, totalSents);
+    var easeC = classifyEase(ease);
+
+    function card(label, value, hint, cls){
+      return '<div class="card '+(cls||'')+'"><div class="v">'+value+'</div><div class="l">'+label+'</div>'+(hint?'<div class="h">'+escapeHtml(hint)+'</div>':'')+'</div>';
+    }
+    $('cards').innerHTML =
+      card('Words', totalWords) +
+      card('Sentences', totalSents) +
+      card('Avg sentence length', avgLen.toFixed(1) + ' words', avgLen <= 18 ? 'Comfortable.' : avgLen <= 25 ? 'A little long.' : 'Long. Break up long sentences.') +
+      card('Syllables / word', (totalSyll/totalWords).toFixed(2)) +
+      card('Reading time', readingTimeMin(totalWords).toFixed(1) + ' min', '~220 wpm') +
+      card('Flesch Reading Ease', ease.toFixed(1), easeC.lvl + ' &middot; ' + easeC.hint, easeC.cls) +
+      card('Flesch-Kincaid grade', grade.toFixed(1), grade < 6 ? 'Elementary.' : grade < 9 ? 'Middle school.' : grade < 13 ? 'High school.' : 'College+', grade < 9 ? 'PASS' : grade < 13 ? 'WARN' : 'FAIL');
+
+    var hard = sentStats.filter(function(s){ return s.words >= 6; }).sort(function(a,b){ return b.grade - a.grade; }).slice(0, 10);
+    $('hardList').innerHTML = hard.map(function(s){
+      return '<li>' + escapeHtml(s.text) + ' <span class="grade">grade ' + s.grade.toFixed(1) + ', ' + s.words + ' words</span></li>';
+    }).join('');
+
+    $('results').style.display = '';
+    $('copyJson').disabled = false;
+    lastReport = {
+      generatedAt: new Date().toISOString(),
+      words: totalWords,
+      sentences: totalSents,
+      syllables: totalSyll,
+      averageSentenceLength: +avgLen.toFixed(2),
+      syllablesPerWord: +(totalSyll/totalWords).toFixed(3),
+      readingTimeMinutes: +readingTimeMin(totalWords).toFixed(2),
+      fleschReadingEase: +ease.toFixed(2),
+      fleschKincaidGrade: +grade.toFixed(2),
+      hardestSentences: hard.map(function(s){ return { text: s.text, grade: +s.grade.toFixed(2), words: s.words }; })
+    };
+  }
+  var lastReport = null;
+
+  $('analyze').addEventListener('click', analyze);
+  $('copyJson').addEventListener('click', function(){
+    if (!lastReport) return;
+    var t = JSON.stringify(lastReport, null, 2);
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function(){ toast('Copied.'); });
+    else toast('Clipboard unavailable.');
+  });
+  $('clear').addEventListener('click', function(){
+    $('text').value = '';
+    $('results').style.display = 'none';
+    $('copyJson').disabled = true;
+    lastReport = null;
+  });
+  $('file').addEventListener('change', function(e){
+    var f = e.target.files && e.target.files[0]; if (!f) return;
+    var r = new FileReader();
+    r.onload = function(ev){
+      var raw = ev.target.result;
+      if (/\.html?$/i.test(f.name)) raw = raw.replace(/<script[\s\S]*?<\/script>/gi,'').replace(/<style[\s\S]*?<\/style>/gi,'').replace(/<[^>]+>/g,'');
+      $('text').value = raw;
+      analyze();
+    };
+    r.readAsText(f);
+    e.target.value = '';
+  });
+})();
+</script>
+</body>
+</html>

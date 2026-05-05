@@ -40,7 +40,7 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 
 ## Load main (`/load/`)
 
-**Cache:** `load-v17fe`. **Tip status spec:** `PLAN_LOAD_AI.md`,
+**Cache:** `load-v17ff`. **Tip status spec:** `PLAN_LOAD_AI.md`,
 `PLAN_IMAGE_PROMPT_v3.md`, `PLAN_BOOK_TO_VIDEO.md`,
 `MEDIA_MODULE_SPEC.md`, `LOAD_FEATURES.md`, `LOAD_MARKETING.md`.
 
@@ -50,6 +50,14 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 - **Character Consistency module** — see X-CC.
 - **Piper TTS Stage 1 unblock + Stage 2 rollout** — see X-PIPER. Stage 1 shipped but not playing; blocked on the play() error text from the user. Resilience panel (Part 9) shipped in v17er gives an in-app diagnostic + recovery path.
 - **LOAD-ECO acceptance test pass** (Build Plan Part 13). Every part now has a tool surface, but the user-validation pass is still needed: open each tool, confirm PASS/FAIL/WARN labels render, run a sample export, save a receipt, check it appears in the Receipts library. Parts 1, 2, 3, 14-17 shipped in v17eq. Parts 4, 7, 9 + Book-to-Video wiring shipped in v17er. Parts 5, 6, 8, 10 shipped in v17es. Parts 11-13 are housekeeping/acceptance and are met by the existing tool surfaces.
+
+### Recently done (this session, 2026-05-05 — reading level + speed reader)
+- **v17ff — Reading Level Analyzer + Speed Reader (RSVP)**:
+  - **Reading Level Analyzer:** new tool at `load/tools/reading-level.html`. Drop TXT / Markdown / HTML or paste text. Computes word count, sentence count, average sentence length, syllables-per-word (basic English heuristic), reading time @ 220 wpm, Flesch Reading Ease (with school-grade label), Flesch-Kincaid grade level. Lists the ten hardest sentences (highest per-sentence grade) for targeted rewriting. Color-coded PASS / WARN / FAIL cards. JSON copy. Atkinson Hyperlegible body font in the textarea.
+  - **Speed Reader (RSVP):** new tool at `load/tools/speed-reader.html`. Rapid Serial Visual Presentation: one word at a time at the focus point, pivot letter highlighted in accent color (Bionic Reading style). Adjustable WPM 80-700, word size 48-100 px, background tint (Dark / Cream / Yellow / Blue). Pause-on-punctuation modes (off / 1.6x / 2.5x). Skip-empty-tokens toggle. Step buttons (+/- 1, +/- 10) and arrow-key shortcuts. Spacebar play / pause. Progress bar.
+  - Help page updated with new TOC entries + per-tool cards.
+  - Workspace hub Section 6 now has 33 tiles.
+  - Cache `load-v17fe` -> `load-v17ff`. Version badge bumped in `load/load.js`.
 
 ### Recently done (this session, 2026-05-05 — reel composer + contrast checker)
 - **v17fe — Reel Composer + Color Contrast Checker**:
