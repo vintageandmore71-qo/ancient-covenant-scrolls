@@ -40,7 +40,7 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 
 ## Load main (`/load/`)
 
-**Cache:** `load-v17et`. **Tip status spec:** `PLAN_LOAD_AI.md`,
+**Cache:** `load-v17ev`. **Tip status spec:** `PLAN_LOAD_AI.md`,
 `PLAN_IMAGE_PROMPT_v3.md`, `PLAN_BOOK_TO_VIDEO.md`,
 `MEDIA_MODULE_SPEC.md`, `LOAD_FEATURES.md`, `LOAD_MARKETING.md`.
 
@@ -50,6 +50,15 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 - **Character Consistency module** — see X-CC.
 - **Piper TTS Stage 1 unblock + Stage 2 rollout** — see X-PIPER. Stage 1 shipped but not playing; blocked on the play() error text from the user. Resilience panel (Part 9) shipped in v17er gives an in-app diagnostic + recovery path.
 - **LOAD-ECO acceptance test pass** (Build Plan Part 13). Every part now has a tool surface, but the user-validation pass is still needed: open each tool, confirm PASS/FAIL/WARN labels render, run a sample export, save a receipt, check it appears in the Receipts library. Parts 1, 2, 3, 14-17 shipped in v17eq. Parts 4, 7, 9 + Book-to-Video wiring shipped in v17er. Parts 5, 6, 8, 10 shipped in v17es. Parts 11-13 are housekeeping/acceptance and are met by the existing tool surfaces.
+
+### Recently done (this session, 2026-05-05 — acceptance + inline help)
+- **v17ev — acceptance dashboard + inline help links + search regression fix**:
+  - **Acceptance Criteria dashboard:** new tool at `load/tools/acceptance.html`. Walks the 23 acceptance criteria from Build Plan Part 13. Auto-checks where possible (Diagnostics tool reachable, Safety & Rights tool reachable, LoadStudio Validator references rights.json, Ecosystem Routing references LoadStudio + LoadPlay, PWA Builder runs `findingsBlocked` security gate, AI privacy copy doesn't contain banned absolutes in `load.js`, Voice Diagnostics surfaces recovery actions). Manual checks (navigation, import, library round-trip, viewer reopen, manifest repair, SW generation, PWA ZIP export, book PWA renders, export receipt, LoadStudio inspection, "no false complete claims", final report) get explicit Mark Pass / Mark Fail / Reset buttons. Results persist in localStorage `load_acceptance_v1`. JSON export, copy, reset all.
+  - **Inline "How it works" link** added to the header of every Section 6 tool: Export Receipts, Ecosystem Routing, Book PWA Validator, AI Provider Status, Safety & Rights, Sample Test Projects, Voice Diagnostics. Links to the matching anchor in `load/tools/help.html` so the step-by-step guide is one tap away from any tool.
+  - **v17eu — search icon fix:** reverted v17et's pointerdown experiment on the magnifying-glass toggle. SVG injection now writes explicit `width="22" height="22"` directly on the `<svg>` element so iPad Safari cannot collapse the icon during first paint. Library search bar also opens by default at boot so search is reachable even if the icon stays hidden on a particular Safari build.
+  - Workspace hub Section 6 now has 13 tiles (added Acceptance Criteria).
+  - Cache `load-v17et` -> `load-v17eu` -> `load-v17ev`. Version badge bumped in `load/load.js`.
+  - **Validation pending (user action):** open Acceptance Criteria, tap Run automatic checks, walk the manual rows on iPad and tap Mark Pass / Mark Fail per row, then Export JSON for the proof-of-pass record.
 
 ### Recently done (this session, 2026-05-05 — fixes + media + editor + help)
 - **v17et — photos/clips in PWA builder, file editor, help, AI test fix, search hardening**:
