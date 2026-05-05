@@ -40,7 +40,7 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 
 ## Load main (`/load/`)
 
-**Cache:** `load-v17fb`. **Tip status spec:** `PLAN_LOAD_AI.md`,
+**Cache:** `load-v17fc`. **Tip status spec:** `PLAN_LOAD_AI.md`,
 `PLAN_IMAGE_PROMPT_v3.md`, `PLAN_BOOK_TO_VIDEO.md`,
 `MEDIA_MODULE_SPEC.md`, `LOAD_FEATURES.md`, `LOAD_MARKETING.md`.
 
@@ -50,6 +50,14 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 - **Character Consistency module** — see X-CC.
 - **Piper TTS Stage 1 unblock + Stage 2 rollout** — see X-PIPER. Stage 1 shipped but not playing; blocked on the play() error text from the user. Resilience panel (Part 9) shipped in v17er gives an in-app diagnostic + recovery path.
 - **LOAD-ECO acceptance test pass** (Build Plan Part 13). Every part now has a tool surface, but the user-validation pass is still needed: open each tool, confirm PASS/FAIL/WARN labels render, run a sample export, save a receipt, check it appears in the Receipts library. Parts 1, 2, 3, 14-17 shipped in v17eq. Parts 4, 7, 9 + Book-to-Video wiring shipped in v17er. Parts 5, 6, 8, 10 shipped in v17es. Parts 11-13 are housekeeping/acceptance and are met by the existing tool surfaces.
+
+### Recently done (this session, 2026-05-05 — sentence reader + audio trim)
+- **v17fc — Sentence Reader + Audio Trim**:
+  - **Sentence Reader:** new tool at `load/tools/sentence-reader.html`. Paste text, splits on `.!?` + hard line breaks. One-sentence cards with big text, Atkinson Hyperlegible default, adjustable size (20-64 px), background tint (Dark / Cream / Yellow / Blue), bionic-bold prefix (off / 1 / 2 / 3 letters). Browser TTS read-aloud per sentence with voice picker, speed select, optional auto-advance. Arrow keys + spacebar shortcuts.
+  - **Audio Trim:** new tool at `load/tools/audio-trim.html`. Decodes any audio (WebM/OGG/MP3/M4A/WAV) via `AudioContext.decodeAudioData`. Live waveform render. Drag handles or type exact start / end seconds. Optional fade in / fade out. Preview the trimmed selection in-place. Export as universal 16-bit PCM WAV (RIFF byte-encoded inline; no library). Side-by-side info panel with file + duration + sample rate + channels.
+  - Help page updated with new TOC entries + per-tool cards.
+  - Workspace hub Section 6 now has 27 tiles.
+  - Cache `load-v17fb` -> `load-v17fc`. Version badge bumped in `load/load.js`.
 
 ### Recently done (this session, 2026-05-05 — manuscript-to-book + quote cards)
 - **v17fb — Manuscript to Book PWA + Quote Card Generator**:

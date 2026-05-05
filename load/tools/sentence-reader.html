@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sentence Reader &mdash; Load</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Inter:wght@400;700&display=swap">
+<style>
+:root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--border:#2a2a40}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Atkinson Hyperlegible','Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;font-size:15px;-webkit-font-smoothing:antialiased}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#150a28 0,#0a0514 100%);border-bottom:1px solid var(--border)}
+header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05);font-family:'Inter',sans-serif;font-size:13px}
+header h1{margin:0;font-size:16px;font-weight:800;flex:1;font-family:'Inter',sans-serif}
+.wrap{max-width:920px;margin:0 auto;padding:24px 18px 80px}
+.intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin:0 0 18px;font-family:'Inter',sans-serif;font-size:13.5px}
+.intro h2{margin:0 0 6px;font-size:18px;font-weight:800}
+.intro p{margin:0;color:var(--mute)}
+.section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin:14px 0;font-family:'Inter',sans-serif;font-size:13.5px}
+.section h3{margin:0 0 10px;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--mute)}
+label{display:block;font-size:11.5px;color:var(--mute);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-family:'Inter',sans-serif}
+input,select,textarea{width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:#0a0e18;color:var(--fg);font:inherit;font-size:13.5px}
+textarea{min-height:140px;resize:vertical;line-height:1.55;font-family:'Atkinson Hyperlegible',sans-serif}
+.row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media (max-width:700px){.row{grid-template-columns:1fr 1fr}}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-weight:700;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif}
+.btn.primary{background:var(--accent);border-color:var(--accent)}
+.btn.danger{border-color:rgba(255,110,110,.4);color:var(--err)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.reader{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:34px 28px;text-align:center;min-height:240px;display:flex;flex-direction:column;justify-content:center;gap:14px}
+.reader .progress{font-size:11px;color:var(--mute);font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-family:'Inter',sans-serif}
+.reader .sentence{font-size:30px;line-height:1.55;font-weight:400;color:#fff}
+.reader .controls{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;font-family:'Inter',sans-serif}
+.reader.bionic .b{font-weight:800}
+.bg-cream{background:#f4eadc;color:#3a2e1e}
+.bg-yellow{background:#fff4b8;color:#333}
+.bg-blue{background:#d4e8f8;color:#1a3a52}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1a1a26;color:#fff;padding:10px 16px;border-radius:8px;border:1px solid var(--border);font-size:13px;z-index:50;box-shadow:0 6px 24px rgba(0,0,0,.4);display:none;font-family:'Inter',sans-serif}
+.toast.on{display:block}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="../">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Back to Load
+  </a>
+  <h1>Sentence Reader</h1>
+  <a class="back" href="./help.html#sentence" title="How it works">How it works</a>
+</header>
+<div class="wrap">
+<div class="intro">
+  <h2>One sentence at a time, big text, with read-aloud</h2>
+  <p>Paste a passage. The tool splits it into one-sentence cards. Use Next / Back to read at your own pace, or tap Play to read each sentence aloud. Atkinson Hyperlegible font, soft overlay colors, optional bionic-bold prefix for dyslexia comfort.</p>
+</div>
+
+<div class="section">
+  <h3>Text</h3>
+  <textarea id="text" placeholder="Paste a paragraph, page, chapter, verse passage, or any text. The tool splits on . ! ? line breaks."></textarea>
+  <div class="bar">
+    <button class="btn" id="splitBtn">Split into sentences</button>
+    <button class="btn danger" id="clearBtn">Clear</button>
+    <span style="margin-left:auto;color:var(--mute);font-size:12px;align-self:center" id="count">0 sentences</span>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Reading aids</h3>
+  <div class="row">
+    <div><label>Text size</label><input id="sz" type="range" min="20" max="64" value="30"></div>
+    <div><label>Background</label>
+      <select id="bg"><option value="">Dark</option><option value="bg-cream">Cream</option><option value="bg-yellow">Yellow</option><option value="bg-blue">Blue</option></select>
+    </div>
+    <div><label>Bionic bold prefix</label>
+      <select id="bionic"><option value="0">Off</option><option value="1">First letter</option><option value="2">First 2 letters</option><option value="3">First 3 letters</option></select>
+    </div>
+  </div>
+  <div class="row">
+    <div><label>Voice (browser)</label><select id="voice"></select></div>
+    <div><label>Speed</label>
+      <select id="rate">
+        <option value="0.7">0.7x</option><option value="0.85">0.85x</option><option value="1" selected>1x</option><option value="1.15">1.15x</option><option value="1.3">1.3x</option><option value="1.5">1.5x</option>
+      </select>
+    </div>
+    <div><label>Auto-advance after read</label>
+      <select id="auto"><option value="0">Off</option><option value="1" selected>On</option></select>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Reader</h3>
+  <div id="reader" class="reader">
+    <div class="progress" id="prog">No text yet.</div>
+    <div class="sentence" id="sent">Paste text and tap "Split into sentences".</div>
+    <div class="controls">
+      <button class="btn" id="prev">&larr; Back</button>
+      <button class="btn primary" id="play">Play</button>
+      <button class="btn" id="stop">Stop</button>
+      <button class="btn" id="next">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var toastEl = $('toast');
+  function toast(m){ toastEl.textContent = m; toastEl.classList.add('on'); setTimeout(function(){ toastEl.classList.remove('on'); }, 1800); }
+  function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+
+  var sentences = [];
+  var idx = 0;
+  var voices = [];
+
+  function splitText(t){
+    if (!t) return [];
+    // Split on sentence-end punctuation followed by whitespace + capital, OR on hard line breaks.
+    var raw = t.replace(/\r\n?/g, '\n');
+    var pieces = [];
+    raw.split(/\n+/).forEach(function(para){
+      var seg = para.match(/[^.!?]+[.!?]+["')\]]*|[^.!?]+$/g) || [];
+      seg.forEach(function(s){ var trimmed = s.trim(); if (trimmed) pieces.push(trimmed); });
+    });
+    return pieces;
+  }
+
+  function applyBionic(text, n){
+    n = parseInt(n, 10) || 0;
+    if (!n) return escapeHtml(text);
+    return text.split(/(\s+)/).map(function(tok){
+      if (/^\s+$/.test(tok)) return tok;
+      var word = tok;
+      var prefix = word.slice(0, n);
+      var rest = word.slice(n);
+      return '<span class="b">' + escapeHtml(prefix) + '</span>' + escapeHtml(rest);
+    }).join('');
+  }
+
+  function refresh(){
+    var t = $('text').value;
+    sentences = splitText(t);
+    $('count').textContent = sentences.length + ' sentence' + (sentences.length === 1 ? '' : 's');
+    if (idx >= sentences.length) idx = 0;
+    paintReader();
+  }
+
+  function paintReader(){
+    var reader = $('reader');
+    reader.classList.remove('bg-cream','bg-yellow','bg-blue','bionic');
+    var bg = $('bg').value;
+    if (bg) reader.classList.add(bg);
+    var bionic = $('bionic').value;
+    if (parseInt(bionic,10) > 0) reader.classList.add('bionic');
+    $('sent').style.fontSize = $('sz').value + 'px';
+    if (!sentences.length) {
+      $('prog').textContent = 'No text yet.';
+      $('sent').innerHTML = 'Paste text and tap "Split into sentences".';
+      return;
+    }
+    $('prog').textContent = (idx+1) + ' of ' + sentences.length;
+    $('sent').innerHTML = applyBionic(sentences[idx], bionic);
+  }
+
+  function loadVoices(){
+    if (!('speechSynthesis' in window)) { $('voice').innerHTML = '<option>Browser TTS not available</option>'; return; }
+    voices = window.speechSynthesis.getVoices() || [];
+    $('voice').innerHTML = '<option value="">System default</option>' +
+      voices.map(function(v, i){ return '<option value="' + i + '">' + escapeHtml(v.name) + ' (' + escapeHtml(v.lang) + ')</option>'; }).join('');
+  }
+  if ('speechSynthesis' in window) {
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }
+
+  function speak(text, then){
+    if (!('speechSynthesis' in window)) { toast('Browser TTS not available.'); if (then) then(); return; }
+    try { window.speechSynthesis.cancel(); } catch(e){}
+    var u = new SpeechSynthesisUtterance(text);
+    u.rate = parseFloat($('rate').value) || 1;
+    var vIdx = $('voice').value;
+    if (vIdx !== '' && voices[vIdx]) u.voice = voices[vIdx];
+    u.onend = function(){ if (then) then(); };
+    u.onerror = function(){ if (then) then(); };
+    window.speechSynthesis.speak(u);
+  }
+
+  function play(){
+    if (!sentences.length) { toast('Split text first.'); return; }
+    speak(sentences[idx], function(){
+      if ($('auto').value === '1' && idx + 1 < sentences.length) {
+        idx++; paintReader(); play();
+      }
+    });
+  }
+  function stop(){ try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(e){} }
+  function next(){ if (idx + 1 < sentences.length) { idx++; paintReader(); } }
+  function prev(){ if (idx > 0) { idx--; paintReader(); } }
+
+  $('splitBtn').addEventListener('click', function(){ idx = 0; refresh(); });
+  $('clearBtn').addEventListener('click', function(){ $('text').value = ''; sentences = []; idx = 0; refresh(); });
+  $('text').addEventListener('input', function(){ /* don't auto-split until user taps */ });
+  $('sz').addEventListener('input', paintReader);
+  $('bg').addEventListener('change', paintReader);
+  $('bionic').addEventListener('change', paintReader);
+  $('play').addEventListener('click', play);
+  $('stop').addEventListener('click', stop);
+  $('next').addEventListener('click', function(){ next(); });
+  $('prev').addEventListener('click', function(){ prev(); });
+
+  document.addEventListener('keydown', function(e){
+    if (e.target && (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT')) return;
+    if (e.key === 'ArrowRight') next();
+    else if (e.key === 'ArrowLeft') prev();
+    else if (e.key === ' ') { e.preventDefault(); play(); }
+  });
+
+  refresh();
+})();
+</script>
+</body>
+</html>
