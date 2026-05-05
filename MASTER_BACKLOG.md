@@ -40,7 +40,7 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 
 ## Load main (`/load/`)
 
-**Cache:** `load-v17ff`. **Tip status spec:** `PLAN_LOAD_AI.md`,
+**Cache:** `load-v17fg`. **Tip status spec:** `PLAN_LOAD_AI.md`,
 `PLAN_IMAGE_PROMPT_v3.md`, `PLAN_BOOK_TO_VIDEO.md`,
 `MEDIA_MODULE_SPEC.md`, `LOAD_FEATURES.md`, `LOAD_MARKETING.md`.
 
@@ -50,6 +50,14 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 - **Character Consistency module** — see X-CC.
 - **Piper TTS Stage 1 unblock + Stage 2 rollout** — see X-PIPER. Stage 1 shipped but not playing; blocked on the play() error text from the user. Resilience panel (Part 9) shipped in v17er gives an in-app diagnostic + recovery path.
 - **LOAD-ECO acceptance test pass** (Build Plan Part 13). Every part now has a tool surface, but the user-validation pass is still needed: open each tool, confirm PASS/FAIL/WARN labels render, run a sample export, save a receipt, check it appears in the Receipts library. Parts 1, 2, 3, 14-17 shipped in v17eq. Parts 4, 7, 9 + Book-to-Video wiring shipped in v17er. Parts 5, 6, 8, 10 shipped in v17es. Parts 11-13 are housekeeping/acceptance and are met by the existing tool surfaces.
+
+### Recently done (this session, 2026-05-05 — cover designer + markdown preview)
+- **v17fg — Cover Designer + Markdown Preview**:
+  - **Cover Designer:** new tool at `load/tools/cover-designer.html`. Visual book-cover composer. Format presets: KDP 6x9 (1600x2400), KDP 5x8 (1500x2400), Square 2000, eBook 1600x2560, Audible 3000x3000, custom. Title / subtitle / author / series banner; per-element font (Cinzel / Playfair / Bebas Neue / Atkinson / Inter / Georgia), size, color, italic, position (top / center / bottom). Background: solid color, two-stop gradient, or image with adjustable dim + vignette. Frame: none / thin / double / ornament corners. Live canvas render. Export JPEG / PNG / WEBP with quality slider, or Copy image to clipboard.
+  - **Markdown Preview:** new tool at `load/tools/markdown-preview.html`. Inline pure-JS Markdown parser (no external library) supporting headings (#-######), Setext h1/h2, paragraphs, bold (`**` / `__`), italic (`*` / `_`), strikethrough (`~~`), inline code, code fences (with language tag), bulleted + ordered lists, blockquotes, horizontal rules, tables with alignment, links, images. Live two-pane render with Atkinson Hyperlegible body font. Export to complete styled HTML document, copy inner HTML, or download .md source.
+  - Help page updated with new TOC entries + per-tool cards.
+  - Workspace hub Section 6 now has 35 tiles.
+  - Cache `load-v17ff` -> `load-v17fg`. Version badge bumped in `load/load.js`.
 
 ### Recently done (this session, 2026-05-05 — reading level + speed reader)
 - **v17ff — Reading Level Analyzer + Speed Reader (RSVP)**:
