@@ -40,7 +40,7 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 
 ## Load main (`/load/`)
 
-**Cache:** `load-v17ev`. **Tip status spec:** `PLAN_LOAD_AI.md`,
+**Cache:** `load-v17ew`. **Tip status spec:** `PLAN_LOAD_AI.md`,
 `PLAN_IMAGE_PROMPT_v3.md`, `PLAN_BOOK_TO_VIDEO.md`,
 `MEDIA_MODULE_SPEC.md`, `LOAD_FEATURES.md`, `LOAD_MARKETING.md`.
 
@@ -50,6 +50,14 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 - **Character Consistency module** — see X-CC.
 - **Piper TTS Stage 1 unblock + Stage 2 rollout** — see X-PIPER. Stage 1 shipped but not playing; blocked on the play() error text from the user. Resilience panel (Part 9) shipped in v17er gives an in-app diagnostic + recovery path.
 - **LOAD-ECO acceptance test pass** (Build Plan Part 13). Every part now has a tool surface, but the user-validation pass is still needed: open each tool, confirm PASS/FAIL/WARN labels render, run a sample export, save a receipt, check it appears in the Receipts library. Parts 1, 2, 3, 14-17 shipped in v17eq. Parts 4, 7, 9 + Book-to-Video wiring shipped in v17er. Parts 5, 6, 8, 10 shipped in v17es. Parts 11-13 are housekeeping/acceptance and are met by the existing tool surfaces.
+
+### Recently done (this session, 2026-05-05 — mask editor + style library)
+- **v17ew — Mask Editor + Style Library**:
+  - **Mask Editor (X-AI-MASK):** new tool at `load/tools/mask-editor.html`. Drop a photo, paint a white mask with adjustable brush size / hardness / opacity, erase to undo a stroke, invert / clear / undo (12-step history), export a clean binary B/W PNG (white = paint region, black = leave alone). Layered canvas: source + 55%-opacity mask overlay + transparent input layer with pointer events. Source images auto-downscale to max 2048 px. "Download mask + source" button bundles both files for handoff to any inpaint-capable provider. Closes the biggest unlock listed in the Cross-suite features table.
+  - **Style Library (X-AI-14a curated styles):** new tool at `load/tools/style-library.html`. 50 curated AI-image styles across 7 categories (Cinema, Painted, Illustration, Photo, 3D, Genre, Crafty). Per-style keyword block. Tap Copy for a single style or Add to basket to combine multiple. Copy basket joins them with semicolons for paste at the end of any image prompt. Search field + category chip filter.
+  - Help page updated: new TOC entries + per-tool cards for Mask Editor, Style Library, Acceptance Criteria.
+  - Workspace hub Section 6 now has 15 tiles (added Mask Editor + Style Library).
+  - Cache `load-v17ev` -> `load-v17ew`. Version badge bumped in `load/load.js`.
 
 ### Recently done (this session, 2026-05-05 — acceptance + inline help)
 - **v17ev — acceptance dashboard + inline help links + search regression fix**:

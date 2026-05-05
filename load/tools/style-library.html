@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Style Library &mdash; Load</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<style>
+:root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--border:#2a2a40}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;font-size:14px;-webkit-font-smoothing:antialiased}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#150a28 0,#0a0514 100%);border-bottom:1px solid var(--border)}
+header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)}
+header h1{margin:0;font-size:16px;font-weight:800;flex:1}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 18px 80px}
+.intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin:0 0 18px}
+.intro h2{margin:0 0 6px;font-size:18px;font-weight:800}
+.intro p{margin:0;color:var(--mute);font-size:13.5px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.cats{display:flex;gap:6px;flex-wrap:wrap}
+.cat{padding:6px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:999px;color:var(--fg);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.cat.active{background:var(--accent);border-color:var(--accent)}
+.search{flex:1;min-width:160px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:#0a0e18;color:var(--fg);font:inherit;font-size:13px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-weight:700;font-size:12px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent)}
+.basket{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin:10px 0;font-size:12.5px;color:var(--mute);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.basket strong{color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.style{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.style h3{margin:0;font-size:14px;font-weight:800}
+.style .cat-tag{font-size:10.5px;color:var(--mute);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.style .keys{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;color:var(--mute);background:#0a0e18;padding:6px 8px;border-radius:6px;line-height:1.4}
+.style .row{display:flex;gap:6px;margin-top:6px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1a1a26;color:#fff;padding:10px 16px;border-radius:8px;border:1px solid var(--border);font-size:13px;z-index:50;box-shadow:0 6px 24px rgba(0,0,0,.4);display:none}
+.toast.on{display:block}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="../">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Back to Load
+  </a>
+  <h1>Style Library</h1>
+  <a class="back" href="./help.html#styles" title="How it works">How it works</a>
+</header>
+<div class="wrap">
+<div class="intro">
+  <h2>50 curated AI-image styles</h2>
+  <p>Tap a style to copy its keyword block to the clipboard. Tap <strong>Add to basket</strong> on multiple styles to combine them. Paste the result at the end of any image prompt in the Load AI panel.</p>
+</div>
+
+<div class="bar">
+  <input id="search" class="search" type="search" placeholder="Search 50 styles by name or keyword">
+  <button class="btn" id="clearBasket">Clear basket</button>
+  <button class="btn primary" id="copyBasket">Copy basket</button>
+</div>
+
+<div class="cats" id="cats"></div>
+
+<div class="basket" id="basket">
+  <strong>Basket:</strong>
+  <span id="basketContent">empty &mdash; tap "Add to basket" on any style</span>
+</div>
+
+<div class="grid" id="grid"></div>
+
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var toastEl = $('toast');
+  function toast(m){ toastEl.textContent = m; toastEl.classList.add('on'); setTimeout(function(){ toastEl.classList.remove('on'); }, 1800); }
+
+  var STYLES = [
+    { c:'Cinema', n:'Cinematic',          k:'cinematic, anamorphic lens, shallow depth of field, dramatic lighting, film grain, 35mm' },
+    { c:'Cinema', n:'Film noir',          k:'film noir, high-contrast black and white, venetian blind shadows, smoke, 1940s detective' },
+    { c:'Cinema', n:'Western',            k:'spaghetti western, sun-drenched dusty plains, wide vista, weathered textures, low golden sun' },
+    { c:'Cinema', n:'Sci-fi epic',        k:'sci-fi epic, monumental scale, neon-rim lighting, holographic UI overlays, cinematic composition' },
+    { c:'Cinema', n:'Cyberpunk',          k:'cyberpunk, neon signs, rain-slick streets, kanji billboards, cybernetic implants, ultra-detailed' },
+    { c:'Cinema', n:'Studio Ghibli',      k:'studio Ghibli style, hand-painted, pastoral, soft skies, warm sunlight, gentle wind' },
+    { c:'Cinema', n:'Anime key visual',   k:'anime key visual, sharp clean lineart, vibrant cel shading, expressive eyes' },
+    { c:'Cinema', n:'80s VHS',            k:'1980s VHS aesthetic, scanlines, chromatic aberration, neon palette, retrofuturism' },
+
+    { c:'Painted', n:'Oil painting',      k:'oil painting, thick impasto brush strokes, classical composition, museum lighting' },
+    { c:'Painted', n:'Watercolor',        k:'watercolor, wet-on-wet washes, soft pigment bleeds, rough cold-press paper' },
+    { c:'Painted', n:'Gouache',           k:'gouache, opaque flat color planes, painterly edges, muted palette' },
+    { c:'Painted', n:'Ink wash',          k:'sumi-e ink wash, sparse brush strokes, mountain mist, calligraphic' },
+    { c:'Painted', n:'Renaissance',       k:'Italian Renaissance painting, sfumato, chiaroscuro, religious iconography, gold leaf' },
+    { c:'Painted', n:'Impressionist',     k:'impressionist painting, dappled light, broken color, plein air, Monet-like' },
+    { c:'Painted', n:'Art nouveau',       k:'art nouveau, sinuous floral lines, decorative borders, gilded ornament, Mucha-style' },
+    { c:'Painted', n:'Ukiyo-e',           k:'ukiyo-e woodblock print, flat color planes, bold black outlines, kimono patterns, Hokusai-like' },
+
+    { c:'Illustration', n:'Storybook',    k:'children\'s storybook illustration, soft watercolor, friendly characters, warm color palette' },
+    { c:'Illustration', n:'Comic book',   k:'comic book, halftone dots, thick ink lines, bold primary colors, dynamic panel' },
+    { c:'Illustration', n:'Manga',        k:'manga, screentones, expressive linework, dramatic action lines, monochrome' },
+    { c:'Illustration', n:'Vector flat',  k:'flat vector illustration, minimal palette, geometric shapes, soft shadows' },
+    { c:'Illustration', n:'Isometric',    k:'isometric illustration, clean grid, soft shadows, miniature world' },
+    { c:'Illustration', n:'Sticker',      k:'die-cut sticker style, white outline, glossy sheen, bold mascot, simple background' },
+    { c:'Illustration', n:'Botanical',    k:'botanical illustration, scientific accuracy, ink and watercolor, vintage natural-history page' },
+    { c:'Illustration', n:'Concept art',  k:'concept art, painterly digital matte, environment design, professional production-ready' },
+
+    { c:'Photo', n:'Studio portrait',     k:'studio portrait, softbox lighting, 85mm f/1.4, sharp eyes, neutral seamless backdrop' },
+    { c:'Photo', n:'Golden hour',         k:'golden hour photography, low warm sunlight, long shadows, lens flare, summer evening' },
+    { c:'Photo', n:'Macro',               k:'macro photography, extreme close-up, shallow depth of field, dewdrops, water tension' },
+    { c:'Photo', n:'Drone aerial',        k:'aerial drone photo, top-down composition, geometric pattern from above, golden hour' },
+    { c:'Photo', n:'Polaroid',            k:'polaroid photograph, soft focus, faded color, white border, instant film grain' },
+    { c:'Photo', n:'Black and white',     k:'black and white photography, high contrast, fine grain, Ansel Adams composition' },
+    { c:'Photo', n:'Wide-angle landscape',k:'wide-angle landscape photo, 14mm lens, dramatic foreground, mountain range, blue hour' },
+    { c:'Photo', n:'Long exposure',       k:'long exposure photography, silky waterfall, light trails, tripod stability, neutral density filter' },
+
+    { c:'3D',    n:'Pixar look',          k:'Pixar-style 3D animation, expressive characters, soft global illumination, plush surfaces' },
+    { c:'3D',    n:'Clay render',         k:'clay render, matte gray, ambient occlusion, smooth subdivision surfaces, sculpted feel' },
+    { c:'3D',    n:'Blender Cycles',      k:'Blender Cycles render, physically-based materials, soft area lights, photorealistic detail' },
+    { c:'3D',    n:'Toy photography',     k:'toy photography, miniature figurine, plastic sheen, tilt-shift, diorama background' },
+    { c:'3D',    n:'Voxel',               k:'voxel art, blocky geometry, MagicaVoxel style, soft palette, isometric camera' },
+    { c:'3D',    n:'Low-poly',            k:'low-poly 3D, faceted geometry, flat shaded, pastel palette, stylized landscape' },
+
+    { c:'Genre', n:'Fantasy',             k:'high fantasy, ornate armor, glowing runes, mystical forest, dramatic sky' },
+    { c:'Genre', n:'Steampunk',           k:'steampunk, polished brass, exposed gears, leather straps, Victorian aesthetic' },
+    { c:'Genre', n:'Cosmic horror',       k:'cosmic horror, eldritch tentacles, deep ocean shadow, oppressive atmosphere, Lovecraftian' },
+    { c:'Genre', n:'Solarpunk',           k:'solarpunk, lush vertical gardens, sun-powered architecture, hopeful tone, warm palette' },
+    { c:'Genre', n:'Dieselpunk',          k:'dieselpunk, art-deco buildings, brass and chrome, biplane silhouettes, 1930s atmosphere' },
+    { c:'Genre', n:'Vaporwave',           k:'vaporwave, pastel pink and teal, marble busts, palm silhouettes, glitch grid horizon' },
+
+    { c:'Crafty', n:'Paper cut-out',      k:'layered paper cut-out, soft drop shadows, craft texture, handmade aesthetic' },
+    { c:'Crafty', n:'Felt diorama',       k:'felt diorama, soft fabric textures, hand-stitched seams, miniature scene' },
+    { c:'Crafty', n:'Stained glass',      k:'stained glass window, lead came outlines, jewel-toned panels, sunlight backlit' },
+    { c:'Crafty', n:'Embroidery',         k:'embroidered art, satin and chain stitch, fabric weave visible, hoop frame' },
+    { c:'Crafty', n:'Pixel art',          k:'16-bit pixel art, limited palette, dithering, sharp pixel edges, retro game aesthetic' },
+    { c:'Crafty', n:'Lego',               k:'LEGO brick build, plastic minifigure, modular geometry, toy advert lighting' }
+  ];
+
+  var basket = [];
+  var activeCat = 'All';
+  var query = '';
+
+  function renderCats(){
+    var cats = ['All'].concat(Array.from(new Set(STYLES.map(function(s){ return s.c; }))));
+    $('cats').innerHTML = cats.map(function(c){
+      return '<button class="cat'+(c===activeCat?' active':'')+'" data-c="'+c+'">'+c+'</button>';
+    }).join('');
+  }
+  renderCats();
+  $('cats').addEventListener('click', function(e){
+    var b = e.target.closest('.cat'); if (!b) return;
+    activeCat = b.getAttribute('data-c');
+    renderCats(); renderGrid();
+  });
+
+  function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+
+  function renderGrid(){
+    var q = query.toLowerCase();
+    var visible = STYLES.filter(function(s){
+      if (activeCat !== 'All' && s.c !== activeCat) return false;
+      if (!q) return true;
+      return (s.n + ' ' + s.k + ' ' + s.c).toLowerCase().indexOf(q) >= 0;
+    });
+    $('grid').innerHTML = visible.map(function(s){
+      return '<div class="style"><h3>'+escapeHtml(s.n)+'</h3>'+
+        '<div class="cat-tag">'+escapeHtml(s.c)+'</div>'+
+        '<div class="keys">'+escapeHtml(s.k)+'</div>'+
+        '<div class="row">'+
+          '<button class="btn" data-act="copy" data-n="'+escapeHtml(s.n)+'">Copy</button>'+
+          '<button class="btn primary" data-act="add" data-n="'+escapeHtml(s.n)+'">Add to basket</button>'+
+        '</div></div>';
+    }).join('');
+  }
+  renderGrid();
+
+  $('search').addEventListener('input', function(){ query = this.value; renderGrid(); });
+
+  function paintBasket(){
+    var content = basket.length ? basket.join('; ') : 'empty &mdash; tap "Add to basket" on any style';
+    $('basketContent').textContent = '';
+    $('basketContent').innerHTML = escapeHtml(content);
+  }
+  paintBasket();
+
+  function copyText(t){
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(t).then(function(){ toast('Copied.'); }).catch(function(){ toast('Clipboard blocked.'); });
+    } else {
+      toast('Clipboard unavailable.');
+    }
+  }
+
+  $('grid').addEventListener('click', function(e){
+    var b = e.target.closest('button[data-act]'); if (!b) return;
+    var name = b.getAttribute('data-n');
+    var s = STYLES.find(function(x){ return x.n === name; });
+    if (!s) return;
+    if (b.getAttribute('data-act') === 'copy') {
+      copyText(s.k);
+    } else {
+      if (basket.indexOf(s.k) === -1) basket.push(s.k);
+      paintBasket();
+      toast('Added: ' + s.n);
+    }
+  });
+
+  $('clearBasket').addEventListener('click', function(){ basket = []; paintBasket(); });
+  $('copyBasket').addEventListener('click', function(){
+    if (!basket.length) { toast('Basket is empty.'); return; }
+    copyText(basket.join('; '));
+  });
+})();
+</script>
+</body>
+</html>

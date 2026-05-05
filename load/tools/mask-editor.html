@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mask Editor &mdash; Load</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<style>
+:root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--border:#2a2a40}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;font-size:14px;-webkit-font-smoothing:antialiased;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#150a28 0,#0a0514 100%);border-bottom:1px solid var(--border);flex-shrink:0}
+header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)}
+header h1{margin:0;font-size:16px;font-weight:800;flex:1}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 16px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-weight:700;font-size:12.5px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent)}
+.btn.danger{border-color:rgba(255,110,110,.4);color:var(--err)}
+.btn.active{background:rgba(124,58,237,.3);border-color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.lbl{font-size:11.5px;color:var(--mute);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+input[type=range]{accent-color:var(--accent);width:140px}
+.dz{position:relative;border:2px dashed var(--border);background:#0a0e18;border-radius:12px;padding:34px 18px;text-align:center;color:var(--mute);margin:18px 16px}
+.dz input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.dz strong{display:block;font-size:15px;color:#fff;margin-bottom:4px}
+.stage{flex:1;position:relative;overflow:auto;background:repeating-conic-gradient(#0e0e18 0% 25%, #15151f 0% 50%) 0/16px 16px;display:flex;align-items:center;justify-content:center;padding:14px}
+.canvas-wrap{position:relative;display:inline-block;line-height:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:#000}
+canvas{display:block;touch-action:none}
+canvas.src{position:relative;z-index:1}
+canvas.mask{position:absolute;left:0;top:0;z-index:2;mix-blend-mode:normal;opacity:.55;pointer-events:none}
+canvas.input{position:absolute;left:0;top:0;z-index:3;cursor:crosshair}
+.intro{padding:14px 16px 0;color:var(--mute);font-size:12.5px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1a1a26;color:#fff;padding:10px 16px;border-radius:8px;border:1px solid var(--border);font-size:13px;z-index:50;box-shadow:0 6px 24px rgba(0,0,0,.4);display:none}
+.toast.on{display:block}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="../">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Back to Load
+  </a>
+  <h1>Mask Editor</h1>
+  <a class="back" href="./help.html#mask" title="How it works">How it works</a>
+</header>
+
+<div class="toolbar" id="tb" style="display:none">
+  <button class="btn active" id="brushBtn" data-mode="brush"><span>Brush</span></button>
+  <button class="btn" id="eraseBtn" data-mode="erase"><span>Erase</span></button>
+  <span class="lbl">Size</span>
+  <input id="size" type="range" min="6" max="160" value="38">
+  <span class="lbl">Hardness</span>
+  <input id="hard" type="range" min="0" max="100" value="80">
+  <span class="lbl">Opacity</span>
+  <input id="opacity" type="range" min="20" max="100" value="100">
+  <button class="btn" id="undoBtn">Undo</button>
+  <button class="btn" id="invertBtn">Invert</button>
+  <button class="btn danger" id="clearBtn">Clear mask</button>
+  <span style="margin-left:auto"></span>
+  <button class="btn" id="downloadMask">Download mask PNG</button>
+  <button class="btn primary" id="downloadBundle">Download mask + source</button>
+</div>
+
+<div class="dz" id="dz">
+  <input id="file" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+  <strong>Drop a photo or tap to pick</strong>
+  <div>White areas in the exported mask = the region you painted (subject for AI inpaint / ADD_OBJECT). Black = leave alone.</div>
+</div>
+
+<div class="intro" id="intro" style="display:none">Paint white where you want the AI to change the image. Erase to undo a stroke. Brush size scales with your finger / Apple Pencil pressure on supported devices.</div>
+
+<div class="stage" id="stage" style="display:none">
+  <div class="canvas-wrap" id="wrap">
+    <canvas id="srcCanvas" class="src"></canvas>
+    <canvas id="maskCanvas" class="mask"></canvas>
+    <canvas id="inputCanvas" class="input"></canvas>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var toastEl = $('toast');
+  function toast(m){ toastEl.textContent = m; toastEl.classList.add('on'); setTimeout(function(){ toastEl.classList.remove('on'); }, 1800); }
+
+  var srcCanvas = $('srcCanvas'), maskCanvas = $('maskCanvas'), inputCanvas = $('inputCanvas');
+  var srcCtx = srcCanvas.getContext('2d', { willReadFrequently: true });
+  var maskCtx = maskCanvas.getContext('2d', { willReadFrequently: true });
+  var inputCtx = inputCanvas.getContext('2d');
+  var imgW = 0, imgH = 0;
+  var mode = 'brush';
+  var brushSize = 38, brushHard = 80, brushOpacity = 100;
+  var drawing = false, last = null;
+  var history = [], MAX_HISTORY = 12;
+  var sourceImage = null;
+  var sourceFile = null;
+
+  function pushHistory(){
+    try {
+      history.push(maskCtx.getImageData(0,0,imgW,imgH));
+      if (history.length > MAX_HISTORY) history.shift();
+    } catch(e){}
+  }
+
+  function setupCanvases(w, h){
+    imgW = w; imgH = h;
+    [srcCanvas, maskCanvas, inputCanvas].forEach(function(c){ c.width = w; c.height = h; });
+    var maxW = Math.min(window.innerWidth - 60, 1400);
+    var maxH = window.innerHeight - 220;
+    var scale = Math.min(maxW / w, maxH / h, 1);
+    var dispW = Math.round(w * scale);
+    var dispH = Math.round(h * scale);
+    [srcCanvas, maskCanvas, inputCanvas].forEach(function(c){ c.style.width = dispW + 'px'; c.style.height = dispH + 'px'; });
+  }
+
+  function drawAt(ctx, x, y, prev){
+    var size = brushSize;
+    var hardness = brushHard / 100;
+    var opacity = brushOpacity / 100;
+    var color = mode === 'brush' ? 'rgba(255,255,255,1)' : 'rgba(0,0,0,1)';
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.globalCompositeOperation = mode === 'brush' ? 'source-over' : 'destination-out';
+    ctx.globalAlpha = mode === 'brush' ? opacity : 1;
+    ctx.strokeStyle = mode === 'brush' ? '#fff' : 'rgba(0,0,0,1)';
+    ctx.lineWidth = size;
+    if (prev) {
+      ctx.beginPath();
+      ctx.moveTo(prev.x, prev.y);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    } else {
+      ctx.beginPath();
+      ctx.arc(x, y, size/2, 0, Math.PI*2);
+      ctx.fillStyle = mode === 'brush' ? 'rgba(255,255,255,'+opacity+')' : '#000';
+      ctx.fill();
+    }
+    if (mode === 'brush' && hardness < 1) {
+      // soft edge: fade the stroke at lower alpha
+      ctx.globalAlpha = opacity * (1 - hardness) * 0.4;
+      ctx.lineWidth = size * 1.4;
+      if (prev) {
+        ctx.beginPath();
+        ctx.moveTo(prev.x, prev.y);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function localCoords(e, canvas){
+    var rect = canvas.getBoundingClientRect();
+    var p = e.touches ? e.touches[0] : e;
+    var x = (p.clientX - rect.left) * (canvas.width / rect.width);
+    var y = (p.clientY - rect.top) * (canvas.height / rect.height);
+    return { x: x, y: y };
+  }
+
+  function onDown(e){
+    e.preventDefault();
+    if (!imgW) return;
+    drawing = true;
+    pushHistory();
+    last = localCoords(e, inputCanvas);
+    drawAt(maskCtx, last.x, last.y, null);
+  }
+  function onMove(e){
+    if (!drawing) return;
+    e.preventDefault();
+    var p = localCoords(e, inputCanvas);
+    drawAt(maskCtx, p.x, p.y, last);
+    last = p;
+  }
+  function onUp(){ drawing = false; last = null; }
+
+  inputCanvas.addEventListener('pointerdown', onDown);
+  inputCanvas.addEventListener('pointermove', onMove);
+  inputCanvas.addEventListener('pointerup', onUp);
+  inputCanvas.addEventListener('pointercancel', onUp);
+  inputCanvas.addEventListener('pointerleave', onUp);
+
+  $('brushBtn').addEventListener('click', function(){ mode='brush'; this.classList.add('active'); $('eraseBtn').classList.remove('active'); });
+  $('eraseBtn').addEventListener('click', function(){ mode='erase'; this.classList.add('active'); $('brushBtn').classList.remove('active'); });
+  $('size').addEventListener('input', function(){ brushSize = +this.value; });
+  $('hard').addEventListener('input', function(){ brushHard = +this.value; });
+  $('opacity').addEventListener('input', function(){ brushOpacity = +this.value; });
+
+  $('undoBtn').addEventListener('click', function(){
+    if (!history.length) return;
+    var h = history.pop();
+    maskCtx.putImageData(h, 0, 0);
+  });
+  $('clearBtn').addEventListener('click', function(){
+    if (!confirm('Clear the entire mask?')) return;
+    pushHistory();
+    maskCtx.clearRect(0,0,imgW,imgH);
+  });
+  $('invertBtn').addEventListener('click', function(){
+    pushHistory();
+    var d = maskCtx.getImageData(0,0,imgW,imgH);
+    var p = d.data;
+    for (var i = 0; i < p.length; i += 4) {
+      // White-ish becomes transparent, transparent becomes white.
+      var on = p[i+3] > 0;
+      if (on) p[i+3] = 0;
+      else { p[i] = 255; p[i+1] = 255; p[i+2] = 255; p[i+3] = 255; }
+    }
+    maskCtx.putImageData(d, 0, 0);
+  });
+
+  function makeMaskPng(){
+    // Output binary B/W mask: white where alpha>0, black otherwise.
+    var out = document.createElement('canvas');
+    out.width = imgW; out.height = imgH;
+    var oc = out.getContext('2d');
+    oc.fillStyle = '#000';
+    oc.fillRect(0,0,imgW,imgH);
+    var d = maskCtx.getImageData(0,0,imgW,imgH);
+    var p = d.data;
+    var od = oc.getImageData(0,0,imgW,imgH);
+    var op = od.data;
+    for (var i = 0; i < p.length; i += 4) {
+      if (p[i+3] > 50) { op[i]=255; op[i+1]=255; op[i+2]=255; op[i+3]=255; }
+    }
+    oc.putImageData(od, 0, 0);
+    return new Promise(function(resolve){ out.toBlob(function(b){ resolve(b); }, 'image/png'); });
+  }
+
+  function downloadBlob(blob, name){
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a'); a.href = url; a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+  }
+
+  $('downloadMask').addEventListener('click', async function(){
+    if (!imgW) return;
+    var blob = await makeMaskPng();
+    downloadBlob(blob, 'mask.png');
+    toast('mask.png downloaded.');
+  });
+
+  $('downloadBundle').addEventListener('click', async function(){
+    if (!imgW || !sourceFile) return;
+    var blob = await makeMaskPng();
+    downloadBlob(blob, 'mask.png');
+    var srcUrl = URL.createObjectURL(sourceFile);
+    var a = document.createElement('a'); a.href = srcUrl; a.download = 'source-' + (sourceFile.name || 'image');
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(srcUrl); }, 200);
+    toast('mask.png + source downloaded.');
+  });
+
+  $('file').addEventListener('change', function(e){
+    var f = e.target.files && e.target.files[0]; if (!f) return;
+    sourceFile = f;
+    var img = new Image();
+    img.onload = function(){
+      sourceImage = img;
+      var maxDim = 2048;
+      var w = img.naturalWidth, h = img.naturalHeight;
+      if (w > maxDim || h > maxDim) {
+        var s = Math.min(maxDim/w, maxDim/h);
+        w = Math.round(w*s); h = Math.round(h*s);
+      }
+      setupCanvases(w, h);
+      srcCtx.clearRect(0,0,w,h);
+      srcCtx.drawImage(img, 0, 0, w, h);
+      maskCtx.clearRect(0,0,w,h);
+      $('dz').style.display = 'none';
+      $('tb').style.display = '';
+      $('intro').style.display = '';
+      $('stage').style.display = 'flex';
+      history = [];
+    };
+    img.src = URL.createObjectURL(f);
+  });
+})();
+</script>
+</body>
+</html>

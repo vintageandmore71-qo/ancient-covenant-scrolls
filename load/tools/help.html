@@ -84,6 +84,9 @@ code,kbd{background:#1a1a26;padding:2px 6px;border-radius:4px;font-family:ui-mon
 
   <h3>Edit</h3>
   <a href="#file-editor">PWA File Editor</a>
+  <a href="#mask">Mask Editor</a>
+  <a href="#styles">Style Library</a>
+  <a href="#acceptance">Acceptance Criteria</a>
 </nav>
 
 <main>
@@ -287,6 +290,44 @@ code,kbd{background:#1a1a26;padding:2px 6px;border-radius:4px;font-family:ui-mon
   <li>Tap <strong>Download ZIP</strong> to repack and save the modified bundle. Original file on iPad is untouched.</li>
 </ol>
 <a class="open" href="./pwa-file-editor.html">Open PWA File Editor</a>
+</div>
+
+<div class="tool" id="mask">
+<h3>Mask Editor</h3>
+<ol>
+  <li>Tap <strong>Mask Editor</strong> in workspace Section 6.</li>
+  <li>Drop a photo. The image loads onto a layered canvas.</li>
+  <li>Use <strong>Brush</strong> to paint white over the area you want the AI to change. Use <strong>Erase</strong> to undo a stroke.</li>
+  <li>Adjust Size, Hardness, Opacity. Tap <strong>Undo</strong> to step back, <strong>Invert</strong> to flip painted vs. untouched, <strong>Clear mask</strong> to start over.</li>
+  <li>Tap <strong>Download mask PNG</strong> for just the binary mask, or <strong>Download mask + source</strong> to grab both files. White = the region you painted; black = leave alone.</li>
+  <li>Hand the source + mask to any inpaint-capable AI provider (or use Load AI's ADD_OBJECT flow once it accepts a mask file).</li>
+</ol>
+<a class="open" href="./mask-editor.html">Open Mask Editor</a>
+</div>
+
+<div class="tool" id="styles">
+<h3>Style Library</h3>
+<ol>
+  <li>Tap <strong>Style Library</strong> in workspace Section 6.</li>
+  <li>Browse 50 curated styles across Cinema, Painted, Illustration, Photo, 3D, Genre, Crafty.</li>
+  <li>Tap <strong>Copy</strong> on any style to grab its keyword block.</li>
+  <li>Or tap <strong>Add to basket</strong> on multiple styles to combine. The basket joins them with semicolons.</li>
+  <li>Tap <strong>Copy basket</strong>, then paste at the end of any image prompt in the Load AI panel.</li>
+  <li>Use the search field or category chips to narrow down.</li>
+</ol>
+<a class="open" href="./style-library.html">Open Style Library</a>
+</div>
+
+<div class="tool" id="acceptance">
+<h3>Acceptance Criteria</h3>
+<ol>
+  <li>Tap <strong>Acceptance Criteria</strong> in workspace Section 6.</li>
+  <li>Tap <strong>Run automatic checks</strong> — 8 rows that verify file paths, code presence, and banned-absolute scans run instantly.</li>
+  <li>Walk through the manual rows on iPad. Each says <em>How to verify:</em>. Do the step, then tap <strong>Mark pass</strong> or <strong>Mark fail</strong>.</li>
+  <li>The dashboard never auto-passes a manual check. NOT TESTED stays NOT TESTED until you tap.</li>
+  <li>Tap <strong>Export JSON</strong> to keep the proof-of-pass record.</li>
+</ol>
+<a class="open" href="./acceptance.html">Open Acceptance Criteria</a>
 </div>
 
 </main>
