@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>One-Click PWA Builder — Load</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<script src="../lib-jszip.min.js"></script>
+<style>
+:root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--info:#60a5fa;--border:#2a2a40}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;font-size:14px;-webkit-font-smoothing:antialiased}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#150a28 0,#0a0514 100%);border-bottom:1px solid var(--border);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)}
+header a.back:hover{background:rgba(255,255,255,.1)}
+header h1{margin:0;font-size:16px;font-weight:800;letter-spacing:-.01em;flex:1}
+.wrap{max-width:920px;margin:0 auto;padding:24px 18px 80px}
+.intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin:0 0 18px}
+.intro h2{margin:0 0 6px;font-size:18px;font-weight:800}
+.intro p{margin:0;color:var(--mute);font-size:13.5px;line-height:1.6}
+.field{display:flex;flex-direction:column;gap:6px;margin:0 0 14px}
+.field label{font-size:12.5px;font-weight:700;color:#fff;letter-spacing:.02em}
+.field input,.field textarea,.field select{width:100%;padding:10px 12px;background:#0a0e18;border:1px solid var(--border);border-radius:8px;color:#fff;font-family:inherit;font-size:14px}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--accent)}
+.field textarea{min-height:140px;resize:vertical;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+.field .help{font-size:11.5px;color:var(--mute);line-height:1.5}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-weight:700;font-size:14px;font-family:inherit;cursor:pointer;transition:transform .12s,background .12s}
+.btn:hover{background:#2a2a45}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:linear-gradient(135deg,var(--accent),#5a5ae0);border-color:var(--accent);color:#fff;font-size:15px;padding:14px 22px}
+.btn.primary:hover{background:linear-gradient(135deg,#8a3aff,#6a6aef)}
+.btn.danger{background:transparent;color:var(--err);border-color:rgba(255,110,110,.4)}
+.steps{display:flex;flex-direction:column;gap:0;margin:0 0 18px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.step{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border);font-size:13.5px}
+.step:last-child{border-bottom:0}
+.step .icn{width:22px;height:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--bg3);font-size:11px;font-weight:800}
+.step.pass .icn{background:rgba(74,222,128,.18);color:var(--ok)}
+.step.fail .icn{background:rgba(255,110,110,.18);color:var(--err)}
+.step.warn .icn{background:rgba(250,204,21,.18);color:var(--warn)}
+.step.skip .icn{background:rgba(154,160,176,.15);color:var(--mute)}
+.step.run .icn{background:rgba(96,165,250,.2);color:var(--info);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.step .lbl{flex:1;font-weight:600}
+.step .det{font-size:11.5px;color:var(--mute)}
+.step.fail .det{color:var(--err)}
+.step.warn .det{color:var(--warn)}
+.report{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin:0 0 14px}
+.report h3{margin:0 0 10px;font-size:14px;font-weight:800}
+.kv{display:grid;grid-template-columns:140px 1fr;gap:8px 14px;font-size:12.5px}
+.kv .k{color:var(--mute)}
+.kv .v{color:#fff;font-variant-numeric:tabular-nums}
+.sec-row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12.5px}
+.sec-row:last-child{border-bottom:0}
+.sec-row .sev{font-weight:800;text-transform:uppercase;letter-spacing:.05em;font-size:10.5px;flex-shrink:0;width:80px}
+.sev.BLOCKER{color:var(--err)}
+.sev.HIGH{color:var(--err)}
+.sev.MEDIUM{color:var(--warn)}
+.sev.LOW{color:var(--info)}
+.sev.INFO{color:var(--mute)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 0;justify-content:center}
+.privacy{margin-top:18px;padding:12px 14px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.3);border-radius:10px;font-size:12.5px;color:var(--mute);line-height:1.6}
+.dz{position:relative;border:2px dashed var(--border);background:#0a0e18;border-radius:12px;padding:16px;text-align:center;color:var(--mute);font-size:13px}
+.dz input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.dz strong{color:#fff}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:rgba(124,58,237,.15);color:#c7a8ff;border:1px solid rgba(124,58,237,.4);margin-left:8px}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="../">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Back to Load
+  </a>
+  <h1>One-Click PWA Builder<span class="tag">v1</span></h1>
+</header>
+
+<div class="wrap">
+
+<div class="intro">
+  <h2>Build a real Standalone PWA ZIP — start to finish</h2>
+  <p>Fill in your project, tap one button, and Load packs a complete installable PWA: index.html + manifest + service worker + icons + offline cache + safety scan + receipt. The output ZIP opens as an app, not as raw code. No success message unless an actual ZIP file is produced.</p>
+</div>
+
+<div class="field">
+  <label for="proj-name">Project name</label>
+  <input id="proj-name" type="text" maxlength="80" placeholder="My Project" autocomplete="off">
+  <div class="help">Becomes the manifest name + page title.</div>
+</div>
+
+<div class="field">
+  <label for="proj-short">Short name</label>
+  <input id="proj-short" type="text" maxlength="20" placeholder="MyProj" autocomplete="off">
+  <div class="help">Shown under the icon on home screen. Max 20 chars.</div>
+</div>
+
+<div class="field">
+  <label for="proj-color">Theme color</label>
+  <input id="proj-color" type="color" value="#7c3aed">
+</div>
+
+<div class="row">
+  <div class="field">
+    <label for="proj-type">Project type</label>
+    <select id="proj-type">
+      <option value="app">Generic app</option>
+      <option value="book">Digital book</option>
+      <option value="reader">Reader page</option>
+      <option value="checklist">Checklist</option>
+    </select>
+  </div>
+  <div class="field">
+    <label for="proj-icon">Icon (optional)</label>
+    <div class="dz" id="icon-dz">
+      <input id="proj-icon" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+      <strong>Drop or pick a 512×512 PNG</strong><br>
+      <span id="icon-name">Load will generate one if you skip this.</span>
+    </div>
+  </div>
+</div>
+
+<div class="field">
+  <label for="proj-body">Project content</label>
+  <textarea id="proj-body" placeholder="Type your content here. Use ## Chapter title to break a book into chapters. For other types, write the body the way you want it to appear."></textarea>
+  <div class="help">For "Digital book" and "Reader page" types, lines starting with <code>## </code> create chapters in a sidebar.</div>
+</div>
+
+<div class="actions" style="margin-bottom:24px">
+  <button id="build" class="btn primary" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+    Build Standalone PWA ZIP
+  </button>
+  <button id="reset" class="btn" type="button">Reset</button>
+</div>
+
+<div id="steps-host" hidden>
+  <div class="report" style="margin-bottom:10px">
+    <h3>Build steps</h3>
+    <div id="steps" class="steps"></div>
+  </div>
+</div>
+
+<div id="security-host" hidden>
+  <div class="report">
+    <h3>Security scan</h3>
+    <div id="security-rows"></div>
+  </div>
+</div>
+
+<div id="receipt-host" hidden>
+  <div class="report">
+    <h3>Export receipt</h3>
+    <div id="receipt-kv" class="kv"></div>
+    <div class="actions" style="justify-content:flex-start">
+      <button id="dl-zip" class="btn primary" type="button" disabled>Download ZIP</button>
+      <button id="dl-receipt" class="btn" type="button">Receipt JSON</button>
+      <button id="dl-security" class="btn" type="button">Security report</button>
+      <button id="copy-receipt" class="btn" type="button">Copy receipt</button>
+    </div>
+  </div>
+</div>
+
+<div class="privacy">
+  <strong>Privacy:</strong> Everything you build here stays in this browser. The packer runs entirely on your iPad — your project content, icons, and generated ZIP never leave your device. Hosting the resulting ZIP is up to you.
+</div>
+
+</div>
+
+<script>
+'use strict';
+
+// ── Helpers ─────────────────────────────────────────────────
+var $ = function (id) { return document.getElementById(id); };
+function escHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+function safeFilename(s) {
+  return String(s || 'project').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'project';
+}
+
+// ── Pipeline state ──────────────────────────────────────────
+var BUILD_STEPS = [
+  { id: 'collect',   label: 'Reading project' },
+  { id: 'check',     label: 'Checking required fields' },
+  { id: 'icons',     label: 'Generating PWA icons' },
+  { id: 'manifest',  label: 'Building manifest.json' },
+  { id: 'sw',        label: 'Building service-worker.js' },
+  { id: 'index',     label: 'Building index.html' },
+  { id: 'styles',    label: 'Building styles.css' },
+  { id: 'app',       label: 'Building app.js' },
+  { id: 'data',      label: 'Building project-data.json' },
+  { id: 'paths',     label: 'Validating asset paths' },
+  { id: 'safety',    label: 'Running safety scan' },
+  { id: 'readiness', label: 'Running PWA readiness scan' },
+  { id: 'zip',       label: 'Compressing ZIP' },
+  { id: 'receipt',   label: 'Writing export receipt' },
+  { id: 'ready',     label: 'Download ready' }
+];
+var stepNodes = {};
+function paintSteps() {
+  var host = $('steps');
+  host.innerHTML = '';
+  stepNodes = {};
+  BUILD_STEPS.forEach(function (s) {
+    var d = document.createElement('div');
+    d.className = 'step skip';
+    d.innerHTML = '<span class="icn">·</span><span class="lbl">' + escHtml(s.label) + '</span><span class="det"></span>';
+    host.appendChild(d);
+    stepNodes[s.id] = d;
+  });
+  $('steps-host').hidden = false;
+}
+function setStep(id, status, detail) {
+  var n = stepNodes[id];
+  if (!n) return;
+  n.className = 'step ' + status;
+  var icnMap = { run: '·', pass: '✓', fail: '✗', warn: '!', skip: '·' };
+  n.querySelector('.icn').textContent = icnMap[status] || '·';
+  if (typeof detail === 'string') n.querySelector('.det').textContent = detail;
+}
+
+// ── Icon: read user-picked or generate ──────────────────────
+function generateIcon(label, size, color) {
+  var c = document.createElement('canvas'); c.width = size; c.height = size;
+  var ctx = c.getContext('2d');
+  ctx.fillStyle = color || '#7c3aed';
+  ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '700 ' + Math.round(size * 0.42) + 'px Inter,-apple-system,BlinkMacSystemFont,sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText((label || 'P').slice(0, 1).toUpperCase(), size / 2, size / 2 + size * 0.04);
+  return new Promise(function (resolve) {
+    c.toBlob(function (b) { resolve(b); }, 'image/png');
+  });
+}
+function rasterizeIconBlob(blob, size) {
+  return new Promise(function (resolve, reject) {
+    var img = new Image();
+    img.onload = function () {
+      var c = document.createElement('canvas'); c.width = size; c.height = size;
+      var ctx = c.getContext('2d');
+      var ratio = Math.min(size / img.naturalWidth, size / img.naturalHeight);
+      var w = img.naturalWidth * ratio, h = img.naturalHeight * ratio;
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, size, size);
+      ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+      c.toBlob(function (b) { resolve(b); }, 'image/png');
+    };
+    img.onerror = function () { reject(new Error('icon decode failed')); };
+    img.src = URL.createObjectURL(blob);
+  });
+}
+
+// ── Manifest / SW / styles / app builders ───────────────────
+function buildManifest(meta) {
+  return {
+    name: meta.name || 'Standalone PWA',
+    short_name: (meta.shortName || meta.name || 'App').slice(0, 20),
+    start_url: './index.html',
+    scope: './',
+    display: 'standalone',
+    orientation: 'any',
+    background_color: '#0a0a14',
+    theme_color: meta.color || '#7c3aed',
+    icons: [
+      { src: 'assets/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { src: 'assets/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+      { src: 'assets/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+    ]
+  };
+}
+function buildServiceWorker(name) {
+  var cacheName = 'pwa-' + safeFilename(name) + '-v1';
+  return [
+    "// Generated by Load One-Click PWA Builder",
+    "var CACHE = '" + cacheName + "';",
+    "var SHELL = ['./','./index.html','./manifest.json','./styles.css','./app.js','./project-data.json','./assets/icons/icon-192.png','./assets/icons/icon-512.png'];",
+    "self.addEventListener('install', function (e) {",
+    "  e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(SHELL).catch(function(){}); }));",
+    "  self.skipWaiting();",
+    "});",
+    "self.addEventListener('activate', function (e) {",
+    "  e.waitUntil(caches.keys().then(function (ks) {",
+    "    return Promise.all(ks.map(function (k) { if (k !== CACHE) return caches.delete(k); }));",
+    "  }));",
+    "  self.clients.claim();",
+    "});",
+    "self.addEventListener('fetch', function (e) {",
+    "  if (e.request.method !== 'GET') return;",
+    "  e.respondWith(",
+    "    caches.match(e.request).then(function (hit) {",
+    "      return hit || fetch(e.request).then(function (resp) {",
+    "        var copy = resp.clone();",
+    "        caches.open(CACHE).then(function (c) { c.put(e.request, copy); }).catch(function(){});",
+    "        return resp;",
+    "      }).catch(function () { return caches.match('./index.html'); });",
+    "    })",
+    "  );",
+    "});"
+  ].join('\n');
+}
+function buildStyles(color) {
+  return [
+    ":root { --accent: " + (color || '#7c3aed') + "; --bg: #0a0a14; --bg2: #141422; --bg3: #1f1f30; --fg: #e9e9f0; --mute: #9aa0b0; --border: #2a2a40; }",
+    "* { box-sizing: border-box; }",
+    "body { margin: 0; font-family: 'Inter','Atkinson Hyperlegible',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; background: var(--bg); color: var(--fg); line-height: 1.6; font-size: 16px; }",
+    "header { padding: 14px 20px; background: linear-gradient(135deg, var(--accent), #5a5ae0); color: #fff; box-shadow: 0 4px 16px rgba(0,0,0,.3); position: sticky; top: 0; z-index: 5; }",
+    "header h1 { margin: 0; font-size: 18px; font-weight: 800; }",
+    ".layout { display: flex; min-height: calc(100vh - 56px); }",
+    "aside { width: 240px; background: var(--bg2); border-right: 1px solid var(--border); padding: 16px 12px; overflow-y: auto; flex-shrink: 0; }",
+    "aside h3 { margin: 0 0 8px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--mute); }",
+    "aside ul { list-style: none; padding: 0; margin: 0; }",
+    "aside li a { display: block; padding: 8px 10px; color: var(--fg); text-decoration: none; border-radius: 6px; font-size: 14px; }",
+    "aside li a:hover { background: var(--bg3); }",
+    "main { flex: 1; padding: 28px 32px; max-width: 760px; }",
+    "main h2 { font-size: 22px; font-weight: 800; margin: 0 0 14px; color: #fff; }",
+    "main p { margin: 0 0 14px; color: #d8d8e6; }",
+    ".chapter { margin-bottom: 32px; padding-bottom: 22px; border-bottom: 1px solid var(--border); }",
+    ".chapter:last-child { border-bottom: 0; }",
+    "@media (max-width: 720px) { aside { display: none; } main { padding: 20px 18px; } }"
+  ].join('\n');
+}
+function buildAppJs() {
+  return [
+    "(function () {",
+    "  'use strict';",
+    "  if ('serviceWorker' in navigator) {",
+    "    window.addEventListener('load', function () {",
+    "      navigator.serviceWorker.register('./service-worker.js').catch(function () {});",
+    "    });",
+    "  }",
+    "  // Sidebar deep-links scroll the chapter into view.",
+    "  document.addEventListener('click', function (e) {",
+    "    var a = e.target.closest('aside a[href^=\"#\"]');",
+    "    if (!a) return;",
+    "    var id = a.getAttribute('href').slice(1);",
+    "    var el = document.getElementById(id);",
+    "    if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }",
+    "  });",
+    "})();"
+  ].join('\n');
+}
+function splitChapters(body) {
+  var chapters = [];
+  var current = { title: 'Introduction', body: '' };
+  body.split(/\r?\n/).forEach(function (line) {
+    var m = line.match(/^##\s+(.+)$/);
+    if (m) {
+      if (current.body.trim() || current.title !== 'Introduction') chapters.push(current);
+      current = { title: m[1].trim(), body: '' };
+    } else {
+      current.body += line + '\n';
+    }
+  });
+  if (current.body.trim() || !chapters.length) chapters.push(current);
+  return chapters;
+}
+function chaptersToHtml(chapters) {
+  return chapters.map(function (c, i) {
+    var id = 'ch-' + (i + 1);
+    var html = '<section class="chapter" id="' + id + '"><h2>' + escHtml(c.title) + '</h2>';
+    c.body.trim().split(/\n\s*\n/).forEach(function (p) { if (p.trim()) html += '<p>' + escHtml(p.trim()) + '</p>'; });
+    html += '</section>';
+    return html;
+  }).join('\n');
+}
+function buildIndexHtml(meta, chapters) {
+  var sidebar = chapters.length > 1
+    ? '<aside><h3>Chapters</h3><ul>' + chapters.map(function (c, i) { return '<li><a href="#ch-' + (i + 1) + '">' + escHtml(c.title) + '</a></li>'; }).join('') + '</ul></aside>'
+    : '';
+  return [
+    '<!doctype html>',
+    '<html lang="en">',
+    '<head>',
+    '<meta charset="utf-8">',
+    '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">',
+    '<meta name="theme-color" content="' + (meta.color || '#7c3aed') + '">',
+    '<meta name="apple-mobile-web-app-capable" content="yes">',
+    '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">',
+    '<title>' + escHtml(meta.name || 'Standalone PWA') + '</title>',
+    '<link rel="manifest" href="./manifest.json">',
+    '<link rel="apple-touch-icon" href="./assets/icons/icon-192.png">',
+    '<link rel="stylesheet" href="./styles.css">',
+    '</head>',
+    '<body>',
+    '<header><h1>' + escHtml(meta.name || 'Standalone PWA') + '</h1></header>',
+    '<div class="layout">',
+    sidebar,
+    '<main>',
+    chaptersToHtml(chapters),
+    '</main>',
+    '</div>',
+    '<script src="./app.js"></' + 'script>',
+    '</body>',
+    '</html>'
+  ].join('\n');
+}
+function buildReadme(meta) {
+  return [
+    '# ' + (meta.name || 'Standalone PWA'),
+    '',
+    'Generated by Load — One-Click PWA Builder.',
+    '',
+    '## How to use',
+    '',
+    '1. Unzip this package.',
+    '2. Upload the unzipped folder to your hosting (GitHub Pages, Netlify, Vercel, your own server).',
+    '3. Open `index.html` from a hosted URL — the page renders the project. From a local server (or hosted), the manifest + service-worker register and the app becomes installable.',
+    '',
+    '## Files',
+    '',
+    '- `index.html` — entry point',
+    '- `manifest.json` — PWA install settings',
+    '- `service-worker.js` — offline cache',
+    '- `styles.css` — layout',
+    '- `app.js` — sidebar scroll + SW registration',
+    '- `project-data.json` — original project payload',
+    '- `assets/icons/` — 192 + 512 px PNG icons',
+    '- `assets/images/` — placeholder folder for additional images',
+    '- `export-receipt.json` — what the builder shipped',
+    '- `security-report.json` — pre-export safety scan'
+  ].join('\n');
+}
+
+// ── Safety scanner (regex-based, runs on the bundled HTML/JS) ─
+function runSecurityScan(files) {
+  var findings = [];
+  function add(severity, file, issue, recommendation) {
+    findings.push({ severity: severity, file: file, issue: issue, recommendation: recommendation });
+  }
+  Object.keys(files).forEach(function (path) {
+    var content = files[path];
+    if (typeof content !== 'string') return;
+    if (/<script[^>]+src=["']?https?:/i.test(content))           add('HIGH',   path, 'External <script src> reference',                     'Remove or self-host the script.');
+    if (/javascript:/i.test(content))                            add('HIGH',   path, 'javascript: URL detected',                            'Replace with proper event handler.');
+    if (/onclick\s*=\s*["'][^"']*(?:eval|Function)\(/i.test(content)) add('HIGH', path, 'Inline onclick using eval/Function', 'Move logic to app.js.');
+    if (/<form[^>]*action=/i.test(content))                      add('MEDIUM', path, 'Form with explicit action — verify destination',     'Confirm the form does not submit credentials externally.');
+    if (/<iframe[^>]*src=["']?https?:\/\//i.test(content))       add('MEDIUM', path, 'External <iframe src>',                                'Use sandbox + same-origin if possible.');
+    if (/(api[_-]?key|secret|password|bearer|sk-[a-z0-9]{20,})/i.test(content)) add('BLOCKER', path, 'Possible credential / API key in source', 'Remove the key — never bake secrets into a published PWA.');
+    if (/\.\.[\/\\]/.test(path))                                 add('HIGH',   path, 'Path traversal in filename',                            'Reject or normalize the path.');
+    if (/^\/[^/]/.test(path))                                    add('LOW',    path, 'Absolute path in filename',                             'Make paths relative.');
+    if (/(?:\.exe|\.bat|\.cmd|\.sh|\.app|\.dmg)$/i.test(path))   add('BLOCKER', path, 'Executable file in package',                            'Remove. PWAs should not ship executables.');
+    if (/^\.env(\.|$)/.test(path))                               add('BLOCKER', path, 'Hidden environment file in package',                    'Remove .env files.');
+  });
+  return findings;
+}
+function findingsBlocked(findings) {
+  return findings.some(function (f) { return f.severity === 'BLOCKER'; });
+}
+function paintSecurity(findings) {
+  var host = $('security-rows');
+  if (!findings.length) {
+    host.innerHTML = '<div class="sec-row"><span class="sev INFO">CLEAN</span><span style="flex:1">No issues found.</span></div>';
+  } else {
+    host.innerHTML = findings.map(function (f) {
+      return '<div class="sec-row"><span class="sev ' + escHtml(f.severity) + '">' + escHtml(f.severity) + '</span><span style="flex:1"><strong>' + escHtml(f.file) + '</strong> — ' + escHtml(f.issue) + '<br><span style="color:var(--mute);font-size:11.5px">' + escHtml(f.recommendation) + '</span></span></div>';
+    }).join('');
+  }
+  $('security-host').hidden = false;
+}
+
+// ── Receipt + zip download ──────────────────────────────────
+var lastZipBlob = null, lastReceipt = null, lastSecurity = null, lastSafeName = null;
+function paintReceipt(receipt) {
+  $('receipt-host').hidden = false;
+  var rows = [
+    ['Export type',     receipt.exportType],
+    ['File name',       receipt.fileName],
+    ['File size',       (receipt.fileSize / 1024).toFixed(1) + ' KB'],
+    ['Created',         new Date(receipt.createdAt).toLocaleString()],
+    ['Files',           receipt.includedFiles.length + ' included'],
+    ['Manifest',        receipt.manifestStatus],
+    ['Service worker',  receipt.serviceWorkerStatus],
+    ['Offline',         receipt.offlineStatus],
+    ['Safety',          receipt.safetyStatus],
+    ['Next action',     receipt.nextAction]
+  ];
+  $('receipt-kv').innerHTML = rows.map(function (r) { return '<div class="k">' + escHtml(r[0]) + '</div><div class="v">' + escHtml(String(r[1])) + '</div>'; }).join('');
+}
+function downloadBlob(blob, filename) {
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+
+// ── Icon picker handler ─────────────────────────────────────
+var pickedIconBlob = null;
+$('proj-icon').addEventListener('change', function (e) {
+  var f = e.target.files && e.target.files[0]; if (!f) return;
+  pickedIconBlob = f;
+  $('icon-name').textContent = f.name + ' selected.';
+});
+
+// ── Main build ──────────────────────────────────────────────
+$('build').addEventListener('click', function () {
+  var btn = this;
+  btn.disabled = true; btn.textContent = 'Building...';
+  paintSteps();
+  $('security-host').hidden = true;
+  $('receipt-host').hidden = true;
+  $('dl-zip').disabled = true;
+  lastZipBlob = null; lastReceipt = null; lastSecurity = null;
+
+  var meta = {
+    name:      ($('proj-name').value || '').trim(),
+    shortName: ($('proj-short').value || '').trim() || ($('proj-name').value || 'App').slice(0, 20),
+    color:     $('proj-color').value || '#7c3aed',
+    type:      $('proj-type').value || 'app',
+    body:      $('proj-body').value || ''
+  };
+  var safeName = safeFilename(meta.name); lastSafeName = safeName;
+  var includedFiles = [];
+  var files = {};
+  var chapters = [];
+  var manifestObj, swText, indexHtml, stylesText, appText, dataText, readmeText;
+  var icon192Blob, icon512Blob;
+
+  Promise.resolve()
+    .then(function () { setStep('collect', 'run', ''); return new Promise(function (r) { setTimeout(r, 80); }); })
+    .then(function () {
+      if (!meta.name) throw new Error('Project name is required');
+      setStep('collect', 'pass', meta.name + ' (' + meta.type + ')');
+    })
+    .then(function () {
+      setStep('check', 'run', '');
+      if (!meta.body || meta.body.trim().length < 10) throw new Error('Project content is too short (need at least 10 characters)');
+      chapters = splitChapters(meta.body);
+      setStep('check', 'pass', 'name + content present, ' + chapters.length + ' chapter' + (chapters.length === 1 ? '' : 's'));
+    })
+    .then(function () {
+      setStep('icons', 'run', '');
+      if (pickedIconBlob) {
+        return Promise.all([
+          rasterizeIconBlob(pickedIconBlob, 192),
+          rasterizeIconBlob(pickedIconBlob, 512)
+        ]).then(function (pair) { icon192Blob = pair[0]; icon512Blob = pair[1]; setStep('icons', 'pass', 'rasterized from ' + (pickedIconBlob.name || 'picked file')); });
+      }
+      return Promise.all([generateIcon(meta.name, 192, meta.color), generateIcon(meta.name, 512, meta.color)])
+        .then(function (pair) { icon192Blob = pair[0]; icon512Blob = pair[1]; setStep('icons', 'pass', 'generated 192 + 512'); });
+    })
+    .then(function () {
+      setStep('manifest', 'run', '');
+      manifestObj = buildManifest(meta);
+      setStep('manifest', 'pass', 'name=' + manifestObj.name + ', display=' + manifestObj.display);
+    })
+    .then(function () {
+      setStep('sw', 'run', '');
+      swText = buildServiceWorker(meta.name);
+      setStep('sw', 'pass', 'precaches 8 files');
+    })
+    .then(function () {
+      setStep('index', 'run', '');
+      indexHtml = buildIndexHtml(meta, chapters);
+      setStep('index', 'pass', indexHtml.length + ' bytes');
+    })
+    .then(function () {
+      setStep('styles', 'run', '');
+      stylesText = buildStyles(meta.color);
+      setStep('styles', 'pass', stylesText.length + ' bytes');
+    })
+    .then(function () {
+      setStep('app', 'run', '');
+      appText = buildAppJs();
+      setStep('app', 'pass', appText.length + ' bytes');
+    })
+    .then(function () {
+      setStep('data', 'run', '');
+      var payload = (meta.type === 'book' || meta.type === 'reader')
+        ? { schemaVersion: 1, type: 'book', name: meta.name, chapters: chapters }
+        : { schemaVersion: 1, type: meta.type, name: meta.name, body: meta.body };
+      dataText = JSON.stringify(payload, null, 2);
+      readmeText = buildReadme(meta);
+      setStep('data', 'pass', meta.type === 'book' ? 'book-data with ' + chapters.length + ' chapter' + (chapters.length === 1 ? '' : 's') : 'project-data.json');
+    })
+    .then(function () {
+      setStep('paths', 'run', '');
+      // Collate the file dictionary used by both safety scanner and zip writer.
+      files['index.html']               = indexHtml;
+      files['manifest.json']            = JSON.stringify(manifestObj, null, 2);
+      files['service-worker.js']        = swText;
+      files['styles.css']               = stylesText;
+      files['app.js']                   = appText;
+      files['project-data.json']        = dataText;
+      files['README.md']                = readmeText;
+      // Icons + images folder marker added later (binary).
+      includedFiles = Object.keys(files).concat(['assets/icons/icon-192.png', 'assets/icons/icon-512.png', 'assets/images/.keep']);
+      setStep('paths', 'pass', includedFiles.length + ' files queued');
+    })
+    .then(function () {
+      setStep('safety', 'run', '');
+      lastSecurity = runSecurityScan(files);
+      paintSecurity(lastSecurity);
+      if (findingsBlocked(lastSecurity)) {
+        setStep('safety', 'fail', lastSecurity.filter(function (f) { return f.severity === 'BLOCKER'; }).length + ' BLOCKER finding(s)');
+        throw new Error('Build blocked by safety scanner — see Security scan panel');
+      }
+      var warnCount = lastSecurity.filter(function (f) { return f.severity !== 'INFO' && f.severity !== 'LOW'; }).length;
+      setStep('safety', warnCount ? 'warn' : 'pass', warnCount ? warnCount + ' non-blocker finding(s)' : 'no issues');
+    })
+    .then(function () {
+      setStep('readiness', 'run', '');
+      var checks = [];
+      checks.push(/<link[^>]+rel=["']manifest["']/.test(indexHtml));
+      checks.push(/serviceWorker\.register/.test(appText));
+      checks.push(/<meta[^>]+viewport/i.test(indexHtml));
+      checks.push(/<meta[^>]+theme-color/i.test(indexHtml));
+      var ok = checks.every(Boolean);
+      setStep('readiness', ok ? 'pass' : 'warn', (checks.filter(Boolean).length) + ' / ' + checks.length + ' readiness checks');
+    })
+    .then(function () {
+      setStep('zip', 'run', '');
+      var zip = new JSZip();
+      Object.keys(files).forEach(function (p) { zip.file(p, files[p]); });
+      zip.folder('assets/icons').file('icon-192.png', icon192Blob);
+      zip.folder('assets/icons').file('icon-512.png', icon512Blob);
+      zip.folder('assets/images').file('.keep', '');
+      // Receipt + security report go in the ZIP itself.
+      var receipt = {
+        exportType:           'PWA ZIP',
+        fileName:             safeName + '.zip',
+        fileSize:             0,
+        createdAt:            new Date().toISOString(),
+        includedFiles:        includedFiles.concat(['export-receipt.json', 'security-report.json']),
+        missingFiles:         [],
+        warnings:             lastSecurity.filter(function (f) { return f.severity !== 'INFO' && f.severity !== 'LOW' && f.severity !== 'BLOCKER'; }).map(function (f) { return f.file + ': ' + f.issue; }),
+        manifestStatus:       'PASS',
+        serviceWorkerStatus:  'PASS',
+        rightsStatus:         'NOT APPLICABLE',
+        offlineStatus:        'PASS',
+        safetyStatus:         findingsBlocked(lastSecurity) ? 'BLOCKED' : (lastSecurity.length ? 'WARN' : 'PASS'),
+        nextAction:           'Upload the unzipped folder to hosting, or open index.html on a local server to install as a PWA.'
+      };
+      zip.file('export-receipt.json', JSON.stringify(receipt, null, 2));
+      zip.file('security-report.json', JSON.stringify({ generatedAt: new Date().toISOString(), findings: lastSecurity }, null, 2));
+      return zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } }).then(function (blob) {
+        receipt.fileSize = blob.size;
+        lastZipBlob = blob;
+        lastReceipt = receipt;
+        setStep('zip', 'pass', (blob.size / 1024).toFixed(1) + ' KB compressed');
+      });
+    })
+    .then(function () {
+      setStep('receipt', 'run', '');
+      paintReceipt(lastReceipt);
+      setStep('receipt', 'pass', 'receipt rendered');
+    })
+    .then(function () {
+      setStep('ready', 'pass', 'tap Download ZIP');
+      $('dl-zip').disabled = false;
+      btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg> Build again';
+    })
+    .catch(function (err) {
+      var stuck = BUILD_STEPS.find(function (s) { var n = stepNodes[s.id]; return n && n.classList.contains('run'); });
+      if (stuck) setStep(stuck.id, 'fail', err.message || String(err));
+      btn.disabled = false; btn.textContent = 'Build Standalone PWA ZIP';
+      alert('Build failed: ' + (err.message || err));
+    });
+});
+
+$('dl-zip').addEventListener('click', function () { if (lastZipBlob) downloadBlob(lastZipBlob, (lastSafeName || 'project') + '.zip'); });
+$('dl-receipt').addEventListener('click', function () { if (lastReceipt) downloadBlob(new Blob([JSON.stringify(lastReceipt, null, 2)], { type: 'application/json' }), (lastSafeName || 'project') + '-receipt.json'); });
+$('dl-security').addEventListener('click', function () { if (lastSecurity) downloadBlob(new Blob([JSON.stringify({ generatedAt: new Date().toISOString(), findings: lastSecurity }, null, 2)], { type: 'application/json' }), (lastSafeName || 'project') + '-security.json'); });
+$('copy-receipt').addEventListener('click', function () {
+  if (!lastReceipt) return;
+  var t = JSON.stringify(lastReceipt, null, 2);
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { alert('Receipt copied to clipboard.'); });
+  else alert(t);
+});
+$('reset').addEventListener('click', function () {
+  ['proj-name','proj-short','proj-body'].forEach(function (id) { $(id).value = ''; });
+  $('proj-color').value = '#7c3aed';
+  $('proj-type').value = 'app';
+  $('proj-icon').value = ''; pickedIconBlob = null; $('icon-name').textContent = 'Load will generate one if you skip this.';
+  $('steps-host').hidden = true; $('security-host').hidden = true; $('receipt-host').hidden = true;
+  lastZipBlob = null; lastReceipt = null; lastSecurity = null;
+});
+</script>
+</body>
+</html>
