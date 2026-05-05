@@ -1,0 +1,9 @@
+FIX THIS LOAD BUILD WITHOUT FALSE POSITIVES
+
+Do not redesign unless requested.
+Preserve existing working features.
+Return a complete standalone PWA ZIP.
+Include index.html, manifest.json, service-worker.js, CSS, JS, assets, icons, README, and security notes.
+Confirm only what can be verified from files.
+If a function cannot be completed, label it incomplete.
+The build must open as an app or site, not raw code.
