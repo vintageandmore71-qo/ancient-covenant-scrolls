@@ -40,7 +40,7 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 
 ## Load main (`/load/`)
 
-**Cache:** `load-v17ez`. **Tip status spec:** `PLAN_LOAD_AI.md`,
+**Cache:** `load-v17fa`. **Tip status spec:** `PLAN_LOAD_AI.md`,
 `PLAN_IMAGE_PROMPT_v3.md`, `PLAN_BOOK_TO_VIDEO.md`,
 `MEDIA_MODULE_SPEC.md`, `LOAD_FEATURES.md`, `LOAD_MARKETING.md`.
 
@@ -50,6 +50,14 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 - **Character Consistency module** — see X-CC.
 - **Piper TTS Stage 1 unblock + Stage 2 rollout** — see X-PIPER. Stage 1 shipped but not playing; blocked on the play() error text from the user. Resilience panel (Part 9) shipped in v17er gives an in-app diagnostic + recovery path.
 - **LOAD-ECO acceptance test pass** (Build Plan Part 13). Every part now has a tool surface, but the user-validation pass is still needed: open each tool, confirm PASS/FAIL/WARN labels render, run a sample export, save a receipt, check it appears in the Receipts library. Parts 1, 2, 3, 14-17 shipped in v17eq. Parts 4, 7, 9 + Book-to-Video wiring shipped in v17er. Parts 5, 6, 8, 10 shipped in v17es. Parts 11-13 are housekeeping/acceptance and are met by the existing tool surfaces.
+
+### Recently done (this session, 2026-05-05 — voice + subtitles)
+- **v17fa — Voice Recorder + Subtitle Generator**:
+  - **Voice Recorder:** new tool at `load/tools/voice-recorder.html`. `getUserMedia` + MediaRecorder. Live timer + analyser-driven level meter. Per-take playback (HTML5 `<audio controls>`), rename inline, download, delete. MIME negotiation across `audio/webm;codecs=opus`, `audio/webm`, `audio/mp4`, `audio/ogg;codecs=opus`, `audio/wav` (whichever the browser supports). Optional script panel for the read-along text. Files never leave the device.
+  - **Subtitle Generator:** new tool at `load/tools/subtitle-generator.html`. Paste lines (one cue per line) or drop a Verse-to-Video scene-cards JSON / TXT / SRT / VTT. Three timing modes: fixed seconds per cue, words per minute, or per-cue durations from JSON. Start offset, inter-cue gap, minimum-seconds-per-cue clamps. Outputs both SRT and WebVTT side-by-side; preview toggle, copy, download for either format. Smart import: detects JSON shape (Verse-to-Video schema with `scenes[].verse` + `durationSeconds`), falls back to SRT/VTT cue extraction, finally to plain text.
+  - Help page updated with new TOC entries + per-tool cards.
+  - Workspace hub Section 6 now has 23 tiles.
+  - Cache `load-v17ez` -> `load-v17fa`. Version badge bumped in `load/load.js`.
 
 ### Recently done (this session, 2026-05-05 — backup + palette)
 - **v17ez — Project Backup + Palette Extractor**:

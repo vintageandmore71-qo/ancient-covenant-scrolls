@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Subtitle Generator &mdash; Load</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<style>
+:root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--border:#2a2a40}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;font-size:14px;-webkit-font-smoothing:antialiased}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#150a28 0,#0a0514 100%);border-bottom:1px solid var(--border)}
+header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)}
+header h1{margin:0;font-size:16px;font-weight:800;flex:1}
+.wrap{max-width:1080px;margin:0 auto;padding:24px 18px 80px}
+.intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin:0 0 18px}
+.intro h2{margin:0 0 6px;font-size:18px;font-weight:800}
+.intro p{margin:0;color:var(--mute);font-size:13.5px}
+.section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin:14px 0}
+.section h3{margin:0 0 10px;font-size:14px;font-weight:800}
+.row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:8px}
+@media (max-width:700px){.row{grid-template-columns:1fr}}
+label{display:block;font-size:11.5px;color:var(--mute);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+input,select,textarea{width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:#0a0e18;color:var(--fg);font:inherit;font-size:13px}
+textarea{min-height:140px;resize:vertical;line-height:1.55}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-weight:700;font-size:13px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent)}
+.btn.danger{border-color:rgba(255,110,110,.4);color:var(--err)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.preview{background:#0a0e18;border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:#dcdce8;line-height:1.65;white-space:pre-wrap;min-height:200px;max-height:480px;overflow:auto}
+.dz{position:relative;border:2px dashed var(--border);background:#0a0e18;border-radius:12px;padding:18px 14px;text-align:center;color:var(--mute);margin-bottom:14px}
+.dz input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.dz strong{display:block;font-size:14px;color:#fff}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1a1a26;color:#fff;padding:10px 16px;border-radius:8px;border:1px solid var(--border);font-size:13px;z-index:50;box-shadow:0 6px 24px rgba(0,0,0,.4);display:none}
+.toast.on{display:block}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="../">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Back to Load
+  </a>
+  <h1>Subtitle Generator</h1>
+  <a class="back" href="./help.html#subtitles" title="How it works">How it works</a>
+</header>
+<div class="wrap">
+<div class="intro">
+  <h2>Lines &rarr; timed SRT or WebVTT</h2>
+  <p>Paste lines (one per cue), or load a Verse-to-Video scene-cards JSON. Pick a duration scheme &mdash; fixed seconds per cue, words-per-minute, or per-cue durations from the JSON &mdash; and the tool produces a clean SRT and WebVTT file.</p>
+</div>
+
+<div class="section">
+  <h3>1. Source</h3>
+  <div class="dz">
+    <input id="file" type="file" accept=".json,application/json,.txt,.srt,.vtt,text/plain">
+    <strong>Drop scene-cards JSON or a TXT/SRT/VTT file (optional)</strong>
+    Or paste lines directly below. JSON loads each scene's <code>verse</code> + <code>durationSeconds</code>.
+  </div>
+  <label>Lines (one cue per line)</label>
+  <textarea id="lines" placeholder="Paste lines &mdash; one cue per line. Empty lines split paragraphs but don't create cues."></textarea>
+</div>
+
+<div class="section">
+  <h3>2. Timing</h3>
+  <div class="row">
+    <div><label>Mode</label>
+      <select id="mode">
+        <option value="fixed" selected>Fixed seconds per cue</option>
+        <option value="wpm">Words per minute</option>
+        <option value="json">Per-cue durations from JSON</option>
+      </select>
+    </div>
+    <div><label>Seconds per cue (fixed)</label><input id="seconds" type="number" min="1" max="20" step="0.5" value="3"></div>
+    <div><label>Words per minute</label><input id="wpm" type="number" min="80" max="240" value="150"></div>
+  </div>
+  <div class="row">
+    <div><label>Start offset (seconds)</label><input id="offset" type="number" min="0" max="600" step="0.1" value="0"></div>
+    <div><label>Gap between cues (seconds)</label><input id="gap" type="number" min="0" max="5" step="0.05" value="0.1"></div>
+    <div><label>Min seconds per cue</label><input id="minSec" type="number" min="0.5" max="10" step="0.1" value="1.0"></div>
+  </div>
+</div>
+
+<div class="bar">
+  <button class="btn primary" id="buildBtn">Build subtitles</button>
+  <button class="btn" id="downloadSrt" disabled>Download .srt</button>
+  <button class="btn" id="downloadVtt" disabled>Download .vtt</button>
+  <button class="btn" id="copySrt" disabled>Copy SRT</button>
+  <button class="btn" id="copyVtt" disabled>Copy VTT</button>
+  <button class="btn danger" id="clearBtn">Clear</button>
+</div>
+
+<div class="section">
+  <h3>3. Preview</h3>
+  <select id="fmt" style="width:auto;display:inline-block;margin-bottom:8px"><option value="srt">SRT</option><option value="vtt">WebVTT</option></select>
+  <div class="preview" id="preview">No subtitles yet.</div>
+</div>
+
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var toastEl = $('toast');
+  function toast(m){ toastEl.textContent = m; toastEl.classList.add('on'); setTimeout(function(){ toastEl.classList.remove('on'); }, 1800); }
+  function downloadBlob(blob, name){ var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 100); }
+  function pad(n, w){ return String(Math.floor(n)).padStart(w||2, '0'); }
+  function fmtSrt(seconds){
+    var ms = Math.round(seconds * 1000);
+    var h = Math.floor(ms / 3600000); ms -= h*3600000;
+    var m = Math.floor(ms / 60000); ms -= m*60000;
+    var s = Math.floor(ms / 1000); ms -= s*1000;
+    return pad(h) + ':' + pad(m) + ':' + pad(s) + ',' + pad(ms,3);
+  }
+  function fmtVtt(seconds){
+    var ms = Math.round(seconds * 1000);
+    var h = Math.floor(ms / 3600000); ms -= h*3600000;
+    var m = Math.floor(ms / 60000); ms -= m*60000;
+    var s = Math.floor(ms / 1000); ms -= s*1000;
+    return pad(h) + ':' + pad(m) + ':' + pad(s) + '.' + pad(ms,3);
+  }
+
+  var lastSrt = '', lastVtt = '';
+
+  function build(){
+    var raw = $('lines').value.split(/\r?\n/).map(function(s){ return s.trim(); }).filter(Boolean);
+    if (!raw.length) { toast('Paste lines first.'); return; }
+    var mode = $('mode').value;
+    var fixed = parseFloat($('seconds').value) || 3;
+    var wpm = parseFloat($('wpm').value) || 150;
+    var offset = parseFloat($('offset').value) || 0;
+    var gap = parseFloat($('gap').value) || 0;
+    var minSec = parseFloat($('minSec').value) || 1.0;
+
+    var cues = [];
+    var t = offset;
+    for (var i = 0; i < raw.length; i++) {
+      var text = raw[i];
+      var dur;
+      if (mode === 'fixed') dur = fixed;
+      else if (mode === 'wpm') {
+        var words = (text.match(/\S+/g) || []).length || 1;
+        dur = (words / wpm) * 60;
+      } else if (mode === 'json' && jsonScenes && jsonScenes[i]) {
+        dur = parseFloat(jsonScenes[i].durationSeconds) || fixed;
+      } else dur = fixed;
+      if (dur < minSec) dur = minSec;
+      cues.push({ start: t, end: t + dur, text: text });
+      t += dur + gap;
+    }
+
+    var srt = cues.map(function(c, i){
+      return (i+1) + '\n' + fmtSrt(c.start) + ' --> ' + fmtSrt(c.end) + '\n' + c.text + '\n';
+    }).join('\n');
+    var vtt = 'WEBVTT\n\n' + cues.map(function(c, i){
+      return 'cue-' + (i+1) + '\n' + fmtVtt(c.start) + ' --> ' + fmtVtt(c.end) + '\n' + c.text + '\n';
+    }).join('\n');
+
+    lastSrt = srt; lastVtt = vtt;
+    paintPreview();
+    ['downloadSrt','downloadVtt','copySrt','copyVtt'].forEach(function(id){ $(id).disabled = false; });
+    toast('Built ' + cues.length + ' cue(s).');
+  }
+
+  function paintPreview(){
+    $('preview').textContent = $('fmt').value === 'srt' ? lastSrt : lastVtt;
+  }
+
+  $('fmt').addEventListener('change', paintPreview);
+  $('buildBtn').addEventListener('click', build);
+
+  function copyText(t){
+    if (!t) { toast('Build first.'); return; }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function(){ toast('Copied.'); });
+    else toast('Clipboard unavailable.');
+  }
+  $('copySrt').addEventListener('click', function(){ copyText(lastSrt); });
+  $('copyVtt').addEventListener('click', function(){ copyText(lastVtt); });
+  $('downloadSrt').addEventListener('click', function(){
+    if (!lastSrt) return;
+    downloadBlob(new Blob([lastSrt], { type:'application/x-subrip' }), 'subtitles-' + new Date().toISOString().slice(0,10) + '.srt');
+  });
+  $('downloadVtt').addEventListener('click', function(){
+    if (!lastVtt) return;
+    downloadBlob(new Blob([lastVtt], { type:'text/vtt' }), 'subtitles-' + new Date().toISOString().slice(0,10) + '.vtt');
+  });
+  $('clearBtn').addEventListener('click', function(){
+    $('lines').value = '';
+    lastSrt = ''; lastVtt = '';
+    $('preview').textContent = 'No subtitles yet.';
+    ['downloadSrt','downloadVtt','copySrt','copyVtt'].forEach(function(id){ $(id).disabled = true; });
+    jsonScenes = null;
+  });
+
+  var jsonScenes = null;
+  $('file').addEventListener('change', function(e){
+    var f = e.target.files && e.target.files[0]; if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      var raw = ev.target.result;
+      // Try JSON first
+      try {
+        var data = JSON.parse(raw);
+        var scenes = Array.isArray(data) ? data : (Array.isArray(data.scenes) ? data.scenes : null);
+        if (scenes) {
+          jsonScenes = scenes;
+          $('lines').value = scenes.map(function(s){ return s.verse || s.text || ''; }).filter(Boolean).join('\n');
+          $('mode').value = 'json';
+          toast('Loaded ' + scenes.length + ' scene(s) from JSON.');
+          e.target.value = '';
+          return;
+        }
+      } catch(e1) {}
+      // SRT/VTT detection
+      if (/-->/.test(raw)) {
+        var lines = raw.replace(/\r/g,'').split('\n');
+        var cues = [];
+        var current = '';
+        for (var i = 0; i < lines.length; i++) {
+          var ln = lines[i];
+          if (/-->/.test(ln) || /^\s*\d+\s*$/.test(ln) || /^WEBVTT/.test(ln)) { if (current) { cues.push(current); current = ''; } continue; }
+          if (!ln.trim()) { if (current) { cues.push(current); current = ''; } continue; }
+          current = current ? (current + ' ' + ln.trim()) : ln.trim();
+        }
+        if (current) cues.push(current);
+        jsonScenes = null;
+        $('lines').value = cues.join('\n');
+        toast('Loaded ' + cues.length + ' cue(s) from subtitle file.');
+      } else {
+        // Plain TXT
+        jsonScenes = null;
+        $('lines').value = raw;
+        toast('Loaded plain text.');
+      }
+      e.target.value = '';
+    };
+    reader.readAsText(f);
+  });
+})();
+</script>
+</body>
+</html>

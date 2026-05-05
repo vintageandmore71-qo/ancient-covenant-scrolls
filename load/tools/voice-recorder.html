@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Voice Recorder &mdash; Load</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<style>
+:root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--border:#2a2a40}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;font-size:14px;-webkit-font-smoothing:antialiased}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#150a28 0,#0a0514 100%);border-bottom:1px solid var(--border)}
+header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)}
+header h1{margin:0;font-size:16px;font-weight:800;flex:1}
+.wrap{max-width:880px;margin:0 auto;padding:24px 18px 80px}
+.intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin:0 0 18px}
+.intro h2{margin:0 0 6px;font-size:18px;font-weight:800}
+.intro p{margin:0;color:var(--mute);font-size:13.5px}
+.section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;margin:14px 0}
+.section h3{margin:0 0 10px;font-size:14px;font-weight:800}
+.recorder{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-weight:700;font-size:13px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent)}
+.btn.danger{background:#c0392b;border-color:#c0392b;color:#fff}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.recBtn{width:60px;height:60px;border-radius:50%;background:#c0392b;border:0;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
+.recBtn.live{background:#ff4444;animation:pulse 1.2s infinite}
+.recBtn:disabled{opacity:.5;cursor:not-allowed}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,68,68,.6)}50%{box-shadow:0 0 0 14px rgba(255,68,68,0)}}
+.timer{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:24px;font-weight:800;color:#fff}
+.level{flex:1;height:10px;background:#0a0e18;border-radius:6px;overflow:hidden;border:1px solid var(--border)}
+.level .bar{height:100%;background:linear-gradient(90deg,var(--ok),var(--warn),var(--err));width:0;transition:width 60ms linear}
+.takes{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.take{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.take .nm{flex:1;font-size:13px;font-weight:600;min-width:120px}
+.take input.nm-input{flex:1;background:#0a0e18;border:1px solid var(--border);color:var(--fg);padding:5px 8px;border-radius:6px;font:inherit;font-size:13px;min-width:120px}
+.take audio{flex:2;min-width:200px;height:32px}
+label{display:block;font-size:11.5px;color:var(--mute);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:#0a0e18;color:var(--fg);font:inherit;font-size:13px;line-height:1.55;min-height:80px;resize:vertical}
+.callout{background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.4);border-radius:10px;padding:12px 14px;font-size:12.5px;line-height:1.5}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1a1a26;color:#fff;padding:10px 16px;border-radius:8px;border:1px solid var(--border);font-size:13px;z-index:50;box-shadow:0 6px 24px rgba(0,0,0,.4);display:none}
+.toast.on{display:block}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="../">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Back to Load
+  </a>
+  <h1>Voice Recorder</h1>
+  <a class="back" href="./help.html#voicerec" title="How it works">How it works</a>
+</header>
+<div class="wrap">
+<div class="intro">
+  <h2>Record narration takes for verses, scenes, or whole chapters</h2>
+  <p>Tap the red dot to start. Tap again to stop. Each take is saved in this tab with a live waveform meter, name, playback, rename, and download. Files never leave the device.</p>
+</div>
+
+<div class="section">
+  <label>Optional &mdash; script to read</label>
+  <textarea id="script" placeholder="Paste the verse, scene line, or chapter passage you're going to read so it stays on screen while recording."></textarea>
+</div>
+
+<div class="section">
+  <h3>Recorder</h3>
+  <div class="recorder">
+    <button class="recBtn" id="rec" aria-label="Record" title="Record">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="6"/></svg>
+    </button>
+    <span class="timer" id="timer">00:00</span>
+    <div class="level"><div class="bar" id="lvl"></div></div>
+  </div>
+  <p class="callout" style="margin-top:10px"><strong>Permission:</strong> the first tap will ask iPad Safari for microphone access. If you blocked it earlier, open <strong>Settings &rarr; Safari &rarr; Microphone</strong> and allow this site.</p>
+</div>
+
+<div class="section">
+  <h3>Takes</h3>
+  <div id="takes" class="takes"></div>
+  <p id="emptyMsg" style="color:var(--mute);font-size:12.5px">No takes yet.</p>
+</div>
+
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var toastEl = $('toast');
+  function toast(m){ toastEl.textContent = m; toastEl.classList.add('on'); setTimeout(function(){ toastEl.classList.remove('on'); }, 1800); }
+  function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+  function downloadBlob(blob, name){ var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 100); }
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function fmtTime(ms){ var s = Math.floor(ms/1000); return pad(Math.floor(s/60)) + ':' + pad(s%60); }
+
+  var stream = null, recorder = null, chunks = [], startedAt = 0, tick = null;
+  var audioCtx = null, analyser = null, source = null, lvlRaf = 0;
+  var takes = [];
+
+  async function ensureStream(){
+    if (stream) return stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      return stream;
+    } catch (e) {
+      throw new Error('Microphone permission denied or unavailable: ' + (e.message || e.name || 'unknown'));
+    }
+  }
+
+  function pickMime(){
+    var candidates = ['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus','audio/wav'];
+    for (var i = 0; i < candidates.length; i++) {
+      try { if (window.MediaRecorder && MediaRecorder.isTypeSupported(candidates[i])) return candidates[i]; } catch(e){}
+    }
+    return '';
+  }
+
+  function startMeter(){
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      source = audioCtx.createMediaStreamSource(stream);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 512;
+      source.connect(analyser);
+      var data = new Uint8Array(analyser.frequencyBinCount);
+      function loop(){
+        analyser.getByteTimeDomainData(data);
+        var max = 0;
+        for (var i = 0; i < data.length; i++) {
+          var v = Math.abs(data[i] - 128);
+          if (v > max) max = v;
+        }
+        $('lvl').style.width = Math.min(100, (max/64)*100) + '%';
+        lvlRaf = requestAnimationFrame(loop);
+      }
+      loop();
+    } catch(e){}
+  }
+  function stopMeter(){
+    if (lvlRaf) cancelAnimationFrame(lvlRaf);
+    lvlRaf = 0;
+    try { if (source) source.disconnect(); } catch(e){}
+    $('lvl').style.width = '0';
+  }
+
+  async function startRec(){
+    try {
+      await ensureStream();
+    } catch (e) { toast(e.message); return; }
+    var mime = pickMime();
+    chunks = [];
+    try {
+      recorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+    } catch (e) {
+      toast('MediaRecorder failed: ' + e.message); return;
+    }
+    recorder.ondataavailable = function(e){ if (e.data && e.data.size) chunks.push(e.data); };
+    recorder.onstop = function(){
+      var blob = new Blob(chunks, { type: recorder.mimeType || mime || 'audio/webm' });
+      var t = {
+        id: 't_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+        name: 'take-' + (takes.length + 1),
+        durationMs: Date.now() - startedAt,
+        size: blob.size,
+        type: blob.type,
+        blob: blob,
+        url: URL.createObjectURL(blob)
+      };
+      takes.unshift(t);
+      paintTakes();
+      toast('Saved take.');
+    };
+    recorder.start();
+    startedAt = Date.now();
+    $('rec').classList.add('live');
+    $('rec').setAttribute('aria-label','Stop');
+    $('timer').textContent = '00:00';
+    tick = setInterval(function(){ $('timer').textContent = fmtTime(Date.now() - startedAt); }, 250);
+    startMeter();
+  }
+
+  function stopRec(){
+    if (recorder && recorder.state !== 'inactive') recorder.stop();
+    if (tick) clearInterval(tick); tick = null;
+    $('rec').classList.remove('live');
+    $('rec').setAttribute('aria-label','Record');
+    stopMeter();
+  }
+
+  $('rec').addEventListener('click', function(){
+    if (recorder && recorder.state === 'recording') stopRec();
+    else startRec();
+  });
+
+  function paintTakes(){
+    var host = $('takes');
+    if (!takes.length) { host.innerHTML = ''; $('emptyMsg').style.display = ''; return; }
+    $('emptyMsg').style.display = 'none';
+    host.innerHTML = takes.map(function(t){
+      var ext = (t.type.indexOf('mp4') >= 0 ? 'm4a' : t.type.indexOf('ogg') >= 0 ? 'ogg' : t.type.indexOf('wav') >= 0 ? 'wav' : 'webm');
+      return '<div class="take" data-id="'+t.id+'">'+
+        '<input class="nm-input" data-act="rename" value="'+escapeHtml(t.name)+'">'+
+        '<audio controls preload="metadata" src="'+t.url+'"></audio>'+
+        '<span style="font-size:11px;color:var(--mute);font-variant-numeric:tabular-nums">'+fmtTime(t.durationMs)+' &middot; '+(t.size/1024).toFixed(0)+' KB</span>'+
+        '<button class="btn" data-act="dl" data-ext="'+ext+'">Download</button>'+
+        '<button class="btn danger" data-act="del">Delete</button>'+
+      '</div>';
+    }).join('');
+  }
+
+  $('takes').addEventListener('click', function(e){
+    var b = e.target.closest('button[data-act]'); if (!b) return;
+    var t = takes.find(function(x){ return x.id === b.closest('.take').getAttribute('data-id'); });
+    if (!t) return;
+    var act = b.getAttribute('data-act');
+    if (act === 'dl') {
+      var ext = b.getAttribute('data-ext') || 'webm';
+      downloadBlob(t.blob, (t.name || 'take').replace(/[^A-Za-z0-9._-]+/g,'-') + '.' + ext);
+    } else if (act === 'del') {
+      if (!confirm('Delete this take?')) return;
+      try { URL.revokeObjectURL(t.url); } catch(e){}
+      takes = takes.filter(function(x){ return x.id !== t.id; });
+      paintTakes();
+    }
+  });
+  $('takes').addEventListener('input', function(e){
+    var inp = e.target.closest('input[data-act="rename"]'); if (!inp) return;
+    var t = takes.find(function(x){ return x.id === inp.closest('.take').getAttribute('data-id'); });
+    if (t) t.name = inp.value;
+  });
+
+  paintTakes();
+})();
+</script>
+</body>
+</html>

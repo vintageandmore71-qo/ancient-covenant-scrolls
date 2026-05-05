@@ -92,6 +92,8 @@ code,kbd{background:#1a1a26;padding:2px 6px;border-radius:4px;font-family:ui-mon
   <a href="#prompt">AI Prompt Builder</a>
   <a href="#palette">Palette Extractor</a>
   <a href="#backup">Project Backup</a>
+  <a href="#voicerec">Voice Recorder</a>
+  <a href="#subtitles">Subtitle Generator</a>
   <a href="#acceptance">Acceptance Criteria</a>
 </nav>
 
@@ -400,6 +402,32 @@ code,kbd{background:#1a1a26;padding:2px 6px;border-radius:4px;font-family:ui-mon
   <li>To restore: drop the ZIP on the Restore drop zone. Items with matching ids are overwritten; existing items not in the backup are kept. Reload Load after restore.</li>
 </ol>
 <a class="open" href="./project-backup.html">Open Project Backup</a>
+</div>
+
+<div class="tool" id="voicerec">
+<h3>Voice Recorder</h3>
+<ol>
+  <li>Tap <strong>Voice Recorder</strong> in workspace Section 6.</li>
+  <li>(Optional) Paste the verse / scene / chapter you'll read into the script box.</li>
+  <li>Tap the red dot. iPad Safari will ask for microphone permission the first time.</li>
+  <li>Read your line. The timer + level meter run live. Tap the dot again to stop.</li>
+  <li>The take appears below with playback, rename, download, delete.</li>
+  <li>Repeat for as many takes as you want. All takes live in this tab; close the tab to clear them.</li>
+</ol>
+<a class="open" href="./voice-recorder.html">Open Voice Recorder</a>
+</div>
+
+<div class="tool" id="subtitles">
+<h3>Subtitle Generator</h3>
+<ol>
+  <li>Tap <strong>Subtitle Generator</strong> in workspace Section 6.</li>
+  <li>Paste lines (one cue per line), or drop a Verse-to-Video scene-cards JSON / TXT / SRT / VTT file.</li>
+  <li>Pick a timing mode: <em>Fixed seconds per cue</em>, <em>Words per minute</em>, or <em>Per-cue durations from JSON</em>.</li>
+  <li>Tweak start offset, gap between cues, and minimum seconds per cue.</li>
+  <li>Tap <strong>Build subtitles</strong>. The preview shows SRT or WebVTT (toggle the format).</li>
+  <li>Tap <strong>Download .srt</strong> or <strong>Download .vtt</strong> to save the subtitle file.</li>
+</ol>
+<a class="open" href="./subtitle-generator.html">Open Subtitle Generator</a>
 </div>
 
 <div class="tool" id="acceptance">
