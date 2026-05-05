@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Piper TTS Resilience — Load</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<script src="../../lib-piper.js"></script>
+<style>
+:root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--info:#60a5fa;--border:#2a2a40}
+*{box-sizing:border-box}body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;font-size:14px;-webkit-font-smoothing:antialiased}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#150a28 0,#0a0514 100%);border-bottom:1px solid var(--border)}
+header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)}
+header h1{margin:0;font-size:16px;font-weight:800;flex:1}
+.wrap{max-width:880px;margin:0 auto;padding:24px 18px 80px}
+.intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin:0 0 18px}
+.intro h2{margin:0 0 6px;font-size:18px;font-weight:800}
+.intro p{margin:0;color:var(--mute);font-size:13.5px}
+.section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin:14px 0}
+.section h3{margin:0 0 10px;font-size:14px;font-weight:800}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.danger{color:var(--err);border-color:rgba(255,110,110,.4);background:transparent}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.test-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.test-row:last-child{border-bottom:0}
+.result{font-size:11.5px;color:var(--mute);font-family:ui-monospace,Menlo,Consolas,monospace;background:#0a0e18;padding:6px 10px;border-radius:6px;margin-top:4px;white-space:pre-wrap;word-break:break-word}
+.result.ok{color:var(--ok)}
+.result.err{color:var(--err)}
+.result.warn{color:var(--warn)}
+.env{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;background:#0a0e18;border-radius:6px;padding:8px 10px;color:var(--mute);white-space:pre-wrap}
+audio{margin-top:8px;width:100%}
+input[type=text]{width:100%;padding:9px 11px;background:#0a0e18;border:1px solid var(--border);border-radius:8px;color:#fff;font-family:inherit;font-size:14px}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="../">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Back to Load
+  </a>
+  <h1>Piper TTS Resilience</h1>
+</header>
+<div class="wrap">
+<div class="intro">
+  <h2>Diagnose every audio layer, separately</h2>
+  <p>If Piper isn't playing, work from top to bottom — Raw audio first, then Browser voice, then Piper Generate, then Piper Playback. Each test reports the exact failure reason. Reset / Repair / Clear-Config buttons live below the diagnostic panel.</p>
+</div>
+
+<div class="section">
+  <h3>Environment</h3>
+  <div id="env" class="env"></div>
+</div>
+
+<div class="section">
+  <h3>Diagnostics — run in order</h3>
+  <div class="test-row">
+    <div><strong>1. Raw audio test (synthetic WAV)</strong><div style="font-size:11.5px;color:var(--mute)">Plays a tiny in-memory WAV. Confirms the audio output device works at all.</div></div>
+    <button class="btn" type="button" id="t-raw">Run</button>
+  </div>
+  <div id="r-raw" class="result">Not yet run.</div>
+
+  <div class="test-row">
+    <div><strong>2. Browser voice test (speechSynthesis)</strong><div style="font-size:11.5px;color:var(--mute)">Tries the iOS / Safari built-in voice list with the input text. Confirms Web Speech works.</div></div>
+    <button class="btn" type="button" id="t-speech">Run</button>
+  </div>
+  <div id="r-speech" class="result">Not yet run.</div>
+
+  <div class="test-row">
+    <div><strong>3. Piper generate (no playback)</strong><div style="font-size:11.5px;color:var(--mute)">Asks the installed Piper engine to produce a WAV blob. Reports size or the exact error.</div></div>
+    <button class="btn" type="button" id="t-gen">Run</button>
+  </div>
+  <div id="r-gen" class="result">Not yet run.</div>
+
+  <div class="test-row">
+    <div><strong>4. Piper generate + play (visible audio element)</strong><div style="font-size:11.5px;color:var(--mute)">Renders the WAV into a visible <code>&lt;audio&gt;</code>. Confirms playback path end-to-end.</div></div>
+    <button class="btn" type="button" id="t-play">Run</button>
+  </div>
+  <div id="r-play" class="result">Not yet run.</div>
+  <div id="r-play-host"></div>
+
+  <div class="row" style="margin-top:14px">
+    <input id="t-text" type="text" value="Bereshit bara Elohim et hashamayim ve'et ha'aretz." />
+    <span style="font-size:11.5px;color:var(--mute);align-self:center">Pronunciation prompt for tests 2–4.</span>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Recovery controls</h3>
+  <div class="row">
+    <button class="btn" type="button" id="reset-settings">Reset Piper Settings</button>
+    <button class="btn" type="button" id="clear-config">Clear Corrupt Piper Config</button>
+    <button class="btn primary" type="button" id="rebuild-cache">Rebuild Voice Cache</button>
+    <button class="btn danger" type="button" id="hard-reset">Hard reset (removes all Piper data)</button>
+  </div>
+  <div id="r-recover" class="result" style="margin-top:10px">Recovery actions report here.</div>
+</div>
+
+<div class="section">
+  <h3>Export</h3>
+  <div class="row">
+    <button class="btn" type="button" id="export-report">Export Voice Diagnostic Report (JSON)</button>
+    <button class="btn" type="button" id="copy-report">Copy report</button>
+  </div>
+</div>
+
+</div>
+<script>
+'use strict';
+var $ = function (id) { return document.getElementById(id); };
+function set(id, msg, cls) { var e = $(id); e.textContent = msg; e.className = 'result' + (cls ? ' ' + cls : ''); }
+function getText() { return ($('t-text').value || 'Hello.').trim(); }
+
+var report = { generatedAt: null, env: {}, tests: {} };
+
+function paintEnv() {
+  var info = {
+    userAgent: navigator.userAgent,
+    online: navigator.onLine,
+    audioContext: !!(window.AudioContext || window.webkitAudioContext),
+    speechSynthesis: 'speechSynthesis' in window,
+    voicesAvailable: ('speechSynthesis' in window) ? window.speechSynthesis.getVoices().length : 0,
+    indexedDB: 'indexedDB' in window,
+    LoadPiperPresent: typeof window.LoadPiper !== 'undefined',
+    LoadPiperKeys: typeof window.LoadPiper === 'object' && window.LoadPiper ? Object.keys(window.LoadPiper) : [],
+    pageHostScope: location.pathname
+  };
+  report.env = info;
+  $('env').textContent = Object.keys(info).map(function (k) { return k + ': ' + (Array.isArray(info[k]) ? info[k].join(', ') || '(none)' : String(info[k])); }).join('\n');
+}
+paintEnv();
+setTimeout(paintEnv, 800); // voices populate async
+
+function recordTest(id, status, detail) {
+  report.tests[id] = { status: status, detail: detail, ts: new Date().toISOString() };
+}
+
+// 1. Raw audio
+$('t-raw').addEventListener('click', function () {
+  set('r-raw', 'Running…');
+  try {
+    var sr = 22050, dur = 0.4, n = sr * dur;
+    var buf = new ArrayBuffer(44 + n * 2);
+    var v = new DataView(buf);
+    function ws(o, s) { for (var i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); }
+    ws(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); ws(8, 'WAVE'); ws(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); ws(36, 'data'); v.setUint32(40, n * 2, true);
+    for (var i = 0; i < n; i++) { v.setInt16(44 + i * 2, Math.sin(2 * Math.PI * 440 * i / sr) * 0x4000, true); }
+    var blob = new Blob([buf], { type: 'audio/wav' });
+    var au = new Audio(URL.createObjectURL(blob));
+    au.oncanplaythrough = function () { au.play().then(function () { set('r-raw', 'PASS — audio output works (440 Hz tone, 0.4 s).', 'ok'); recordTest('raw', 'PASS', '440Hz tone played'); }).catch(function (e) { set('r-raw', 'FAIL — play() rejected: ' + (e.message || e), 'err'); recordTest('raw', 'FAIL', String(e)); }); };
+    au.onerror = function () { set('r-raw', 'FAIL — <audio> reported an error.', 'err'); recordTest('raw', 'FAIL', 'audio onerror'); };
+  } catch (e) { set('r-raw', 'FAIL — ' + (e.message || e), 'err'); recordTest('raw', 'FAIL', String(e)); }
+});
+
+// 2. Browser voice
+$('t-speech').addEventListener('click', function () {
+  set('r-speech', 'Running…');
+  if (!('speechSynthesis' in window)) { set('r-speech', 'FAIL — speechSynthesis not supported.', 'err'); recordTest('speech', 'FAIL', 'unsupported'); return; }
+  try {
+    var u = new SpeechSynthesisUtterance(getText());
+    u.onend = function () { set('r-speech', 'PASS — utterance completed via speechSynthesis.', 'ok'); recordTest('speech', 'PASS', 'utterance ended'); };
+    u.onerror = function (e) { set('r-speech', 'FAIL — utterance error: ' + (e.error || 'unknown'), 'err'); recordTest('speech', 'FAIL', e.error || 'unknown'); };
+    window.speechSynthesis.speak(u);
+    setTimeout(function () { var el = $('r-speech'); if (el.textContent === 'Running…') set('r-speech', 'WARN — speak() did not fire onend within 8s.', 'warn'); }, 8000);
+  } catch (e) { set('r-speech', 'FAIL — ' + (e.message || e), 'err'); recordTest('speech', 'FAIL', String(e)); }
+});
+
+// 3. Piper generate
+$('t-gen').addEventListener('click', function () {
+  set('r-gen', 'Running…');
+  var P = window.LoadPiper;
+  if (!P) { set('r-gen', 'NOT INSTALLED — LoadPiper global not found. Install Piper from Settings → Premium voice first.', 'warn'); recordTest('gen', 'NOT-INSTALLED', 'no global'); return; }
+  if (typeof P.generate !== 'function' && typeof P.synthesize !== 'function' && typeof P.tts !== 'function') {
+    set('r-gen', 'FAIL — LoadPiper.generate / synthesize / tts not exposed. Engine present but API mismatch.', 'err');
+    recordTest('gen', 'FAIL', 'no callable API');
+    return;
+  }
+  var fn = P.generate || P.synthesize || P.tts;
+  Promise.resolve().then(function () { return fn.call(P, getText()); }).then(function (out) {
+    if (out instanceof Blob) { set('r-gen', 'PASS — Blob returned (' + Math.round(out.size / 1024) + ' KB, type ' + out.type + ').', 'ok'); recordTest('gen', 'PASS', { size: out.size, type: out.type }); }
+    else if (out instanceof ArrayBuffer) { set('r-gen', 'PASS — ArrayBuffer returned (' + Math.round(out.byteLength / 1024) + ' KB).', 'ok'); recordTest('gen', 'PASS', { size: out.byteLength }); }
+    else if (out && typeof out === 'object' && (out.url || out.blob)) { set('r-gen', 'PASS — engine returned URL/Blob handle.', 'ok'); recordTest('gen', 'PASS', { keys: Object.keys(out) }); }
+    else { set('r-gen', 'WARN — engine returned ' + typeof out + '. Cannot confirm audio data.', 'warn'); recordTest('gen', 'WARN', { type: typeof out }); }
+  }).catch(function (e) { set('r-gen', 'FAIL — ' + (e.message || e), 'err'); recordTest('gen', 'FAIL', String(e)); });
+});
+
+// 4. Piper play
+$('t-play').addEventListener('click', function () {
+  set('r-play', 'Running…');
+  $('r-play-host').innerHTML = '';
+  var P = window.LoadPiper;
+  if (!P) { set('r-play', 'NOT INSTALLED — LoadPiper global not found.', 'warn'); recordTest('play', 'NOT-INSTALLED', 'no global'); return; }
+  var fn = P.generate || P.synthesize || P.tts;
+  if (!fn) { set('r-play', 'FAIL — engine present but no generate/synthesize/tts.', 'err'); recordTest('play', 'FAIL', 'no callable API'); return; }
+  Promise.resolve().then(function () { return fn.call(P, getText()); }).then(function (out) {
+    var blob = out instanceof Blob ? out : (out instanceof ArrayBuffer ? new Blob([out], { type: 'audio/wav' }) : (out && out.blob ? out.blob : null));
+    if (!blob) { set('r-play', 'FAIL — engine output not a Blob/ArrayBuffer; cannot play.', 'err'); recordTest('play', 'FAIL', 'unrecognized output'); return; }
+    var url = URL.createObjectURL(blob);
+    var au = document.createElement('audio'); au.controls = true; au.src = url;
+    $('r-play-host').appendChild(au);
+    au.play().then(function () { set('r-play', 'PASS — Piper WAV decoded and started playback.', 'ok'); recordTest('play', 'PASS', { size: blob.size }); }).catch(function (e) { set('r-play', 'FAIL — play() rejected: ' + (e.message || e), 'err'); recordTest('play', 'FAIL', String(e)); });
+  }).catch(function (e) { set('r-play', 'FAIL — generate threw: ' + (e.message || e), 'err'); recordTest('play', 'FAIL', String(e)); });
+});
+
+// Recovery
+function recoverMsg(msg, cls) { set('r-recover', msg, cls); }
+$('reset-settings').addEventListener('click', function () {
+  var keys = Object.keys(localStorage).filter(function (k) { return /^load_?piper|^piper_/i.test(k) || k === 'piper_settings'; });
+  keys.forEach(function (k) { try { localStorage.removeItem(k); } catch (e) {} });
+  recoverMsg('Reset ' + keys.length + ' Piper localStorage keys: ' + (keys.join(', ') || '(none)'), 'ok');
+});
+$('clear-config').addEventListener('click', function () {
+  var raw = null;
+  try { raw = localStorage.getItem('piper_config'); } catch (e) {}
+  if (!raw) { recoverMsg('No piper_config key present.', 'warn'); return; }
+  try { JSON.parse(raw); recoverMsg('piper_config parses cleanly — no corruption to clear.', 'ok'); }
+  catch (e) {
+    try { localStorage.removeItem('piper_config'); } catch (e2) {}
+    recoverMsg('Corrupt piper_config removed: ' + e.message, 'ok');
+  }
+});
+$('rebuild-cache').addEventListener('click', function () {
+  if (!('caches' in window)) { recoverMsg('Cache Storage not supported.', 'warn'); return; }
+  caches.keys().then(function (ks) {
+    var piperCaches = ks.filter(function (k) { return /piper/i.test(k); });
+    return Promise.all(piperCaches.map(function (k) { return caches.delete(k); })).then(function () { return piperCaches; });
+  }).then(function (deleted) {
+    recoverMsg('Cleared ' + deleted.length + ' Piper cache(s): ' + (deleted.join(', ') || '(none)') + '. Re-install from Settings to rebuild.', 'ok');
+  });
+});
+$('hard-reset').addEventListener('click', function () {
+  if (!confirm('Hard reset removes ALL Piper localStorage keys + Piper IndexedDB databases + Piper caches. Continue?')) return;
+  // localStorage
+  var lsKeys = Object.keys(localStorage).filter(function (k) { return /piper/i.test(k); });
+  lsKeys.forEach(function (k) { try { localStorage.removeItem(k); } catch (e) {} });
+  // caches
+  var p1 = ('caches' in window)
+    ? caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return /piper/i.test(k); }).map(function (k) { return caches.delete(k); })); })
+    : Promise.resolve([]);
+  // IndexedDB (best-effort enumeration)
+  var p2 = (indexedDB && indexedDB.databases ? indexedDB.databases() : Promise.resolve([])).then(function (dbs) {
+    return Promise.all((dbs || []).filter(function (d) { return d && d.name && /piper/i.test(d.name); }).map(function (d) { return new Promise(function (r) { var rq = indexedDB.deleteDatabase(d.name); rq.onsuccess = rq.onerror = function () { r(d.name); }; }); }));
+  }).catch(function () { return []; });
+  Promise.all([p1, p2]).then(function () { recoverMsg('Hard reset complete. Reload Load and re-install Piper from Settings.', 'ok'); });
+});
+
+$('export-report').addEventListener('click', function () {
+  report.generatedAt = new Date().toISOString();
+  var blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'piper-diagnostic-' + Date.now() + '.json'; a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); }, 1500);
+});
+$('copy-report').addEventListener('click', function () {
+  report.generatedAt = new Date().toISOString();
+  var t = JSON.stringify(report, null, 2);
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { alert('Diagnostic report copied.'); });
+  else alert(t);
+});
+</script>
+</body>
+</html>

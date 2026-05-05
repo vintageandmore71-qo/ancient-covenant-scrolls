@@ -25,7 +25,7 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 
 | ID | Item | Source | Status | Notes |
 |---|---|---|---|---|
-| X-B2V | **Book-to-Video engine** — import book → text → scene cards → assets → Load timeline | `inbox/Load_Book_to_Video_Spec.zip` + `inbox/Load_Book_to_Video_Implementation.zip` → `PLAN_BOOK_TO_VIDEO.md` | **Pending — files dropped, not wired.** Code lives at `load/book-video/` (8 JS files + CSS + schemas). Not loaded by `load/index.html`. No "Book to Video" button in Load UI. | Per integration steps: add CSS link, 7 script tags, button + `window.LoadBookToVideo.open()` handler. Acceptance: TXT/HTML/PDF/EPUB → editable Scene Cards. |
+| X-B2V | **Book-to-Video engine** — import book → text → scene cards → assets → Load timeline | `inbox/Load_Book_to_Video_Spec.zip` + `inbox/Load_Book_to_Video_Implementation.zip` → `PLAN_BOOK_TO_VIDEO.md` | **Wired in v17er.** CSS link + 7 script tags loaded from `load/book-video/`, "Book to Video" tile added to workspace hub Section 4 with `data-open-book-to-video` handler that calls `window.LoadBookToVideo.open()`. | Acceptance: TXT/HTML/PDF/EPUB → editable Scene Cards. Engine modules live under `load/book-video/`. |
 | X-V2V | **Verse-to-Video** — turn ACR Study verses into visual simulations of the verse (clips that bring the words to life) | Originally a Claude suggestion (should have been on this list earlier — captured 2026-05-04 after user correction). ChatGPT prompt note also in `inbox/`. | **Not started.** | Source verses from `study/content/` JSON. Reuse Book-to-Video scene-card pipeline + character-bible engine + image generator. Per-verse output: 5–10 second clip. Will need image-to-video provider gate (see X-AI). |
 | X-P2V | **Photo-to-Video** — single photo → 5s synthetic clip | Already partially implemented in LoadStudio Editing Bay (`pickAndOpen('image')` wraps a still in a `MediaRecorder` capture). | **Partial.** LoadStudio uses `canvas.captureStream()` + `MediaRecorder` to wrap a single image into a synthetic 5-second video. Works on iPad. | Needs: extension to AI-driven motion (Ken Burns auto-pan, parallax, image-to-video model when X-AI lands), reuse from Load main + Attain (verse cover → opening clip). |
 | X-AI-CORE | **Load AI Image system core** — chat-driven image gen, provider router, capability map, output validation, no-image-returned detector, Output Receipt audit log | `PLAN_LOAD_AI.md` Tier 1 status table line 254: ✓ shipped | **DONE** in `load/load.js` v17dq–v17dy (provider router, capability registry, `HF_TEXT_ONLY_MODELS` regex pre-call block, `filterImageProvidersForTask`, `imageGenWithFallback` with skip reasons, `runImageTask` facade, soft img2img → text-to-image fallback, `cleanPrompt` extraction, ADD_OBJECT auto-placement bbox, withTimeout / AbortController, Test Keys diagnostic with masked keys + status icons, Output Receipt audit log, Test Keys grouped by image-vs-chat). | No further work needed unless user reports a specific issue. |
@@ -40,17 +40,25 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 
 ## Load main (`/load/`)
 
-**Cache:** `load-v17el`. **Tip status spec:** `PLAN_LOAD_AI.md`,
+**Cache:** `load-v17er`. **Tip status spec:** `PLAN_LOAD_AI.md`,
 `PLAN_IMAGE_PROMPT_v3.md`, `PLAN_BOOK_TO_VIDEO.md`,
 `MEDIA_MODULE_SPEC.md`, `LOAD_FEATURES.md`, `LOAD_MARKETING.md`.
 
 ### Pending
-- **Book-to-Video wiring** — see X-B2V above.
 - **Load AI Tier 14 / 18-fallback add-ons** — see X-AI-14 (the core X-AI-CORE is **shipped** in v17dq–v17dy; only the Glam-parity layer remains).
 - **Browser mask editor** — see X-AI-MASK.
 - **Character Consistency module** — see X-CC.
-- **Piper TTS Stage 1 unblock + Stage 2 rollout** — see X-PIPER. Stage 1 shipped but not playing; blocked on the play() error text from the user.
-- **LOAD-ECO follow-on items** (from `inbox/Load Main Next Build Plan.docx` Parts 4-13 not yet wired): full ecosystem routing buttons per file type (Part 6), the 9 sample test projects (Part 7), tighter PWA Book Export validator (Part 8), Piper resilience controls panel (Part 9), AI provider routing "Returned no file" rule (Part 10). Parts 1, 2, 3, and 14-17 are **shipped in v17eq**.
+- **Piper TTS Stage 1 unblock + Stage 2 rollout** — see X-PIPER. Stage 1 shipped but not playing; blocked on the play() error text from the user. Resilience panel (Part 9) shipped in v17er gives an in-app diagnostic + recovery path.
+- **LOAD-ECO follow-on items** (from `inbox/Load Main Next Build Plan.docx` Parts 5, 6, 8, 10, 11, 12, 13 not yet wired): export receipts pattern extended to all export paths (Part 5), full ecosystem routing button strips per file type (Part 6), tighter PWA Book Export validator (Part 8), AI provider routing "Returned no file" rule (Part 10), Parts 11-13 housekeeping. Parts 1, 2, 3, 14-17 shipped in v17eq. Parts 4, 7, 9 + Book-to-Video wiring shipped in v17er.
+
+### Recently done (this session, 2026-05-05 — Load Main Next Build Plan continued)
+- **v17er — Parts 4, 7, 9 + Book-to-Video wiring**:
+  - **Part 4 — Safety & Rights validator (generic):** new tool at `load/tools/safety-rights.html`. Drop any HTML or ZIP and it scans for credentials, hard-coded API keys, external `<script src>` URLs, javascript:/data:html URLs, path traversal, executable-extension files, and `.env` exposure. For ZIPs it also validates the rights metadata block (owner, license, sourceMaterial, assetDeclarations array). HTML preview runs inside a strict-sandbox `<iframe sandbox="allow-scripts">` with a one-tap "Reload as strict (no same-origin)" toggle. JSON export of every finding.
+  - **Part 7 — Sample Test Projects:** new tool at `load/tools/samples.html`. Nine ready-made files: minimal HTML page, installable PWA ZIP (manifest + service worker + icons), EPUB 3 zip, valid PDF byte-stream, JPEG image, 1-second 440 Hz WAV (RIFF byte-encoded), 2-second canvas-recorded WebM video, `.loadstudio.zip` pack with rights.json + scenes/characters/credits, and a book-PWA bundle. Per-card buttons: Open, Test (sends through Safety & Rights), Export (downloads the file), Reset.
+  - **Part 9 — Piper TTS Resilience panel:** new tool at `load/tools/piper-resilience.html`. Four sequential diagnostics: raw audio (synthetic WAV through `<audio>`), browser voice (`speechSynthesis`), Piper generate (no playback), Piper generate + play. Each step reports PASS / FAIL / SKIP with the actual error text surfaced so we can finally pin Stage 1's playback failure. Recovery actions: Reset Piper Settings (clears prefs), Clear Corrupt Piper Config, Rebuild Voice Cache (purges Cache Storage entries matching `/piper/i`), Hard Reset (drops localStorage piper keys + Cache Storage piper caches + IndexedDB databases matching `/piper/i`).
+  - **X-B2V — Book-to-Video engine wired into Load main:** added the CSS link, all 7 module script tags (`book-text-extractor`, `scene-card-engine`, `character-bible`, `ai-provider-router`, `timeline-bridge`, `book-to-video-engine`, `book-to-video-ui`), and a global click handler that opens `window.LoadBookToVideo` when any element with `data-open-book-to-video` is tapped. New "Book to Video" tile lives in workspace hub Section 4 next to Video Editor.
+  - Workspace hub Section 6 now has six tiles: One-Click PWA Builder, Diagnostics, LoadStudio Validator, Safety & Rights, Sample Test Projects, Voice Diagnostics.
+  - Cache `load-v17eq` -> `load-v17er`. Version badge bumped in `load/load.js`.
 
 ### Recently done (this session, 2026-05-04 — Load Main Next Build Plan)
 - **v17eq — `inbox/Load Main Next Build Plan.docx` Parts 1, 2, 3 + `inbox/PWA One Click Create.docx` Parts 14-17 shipped**:

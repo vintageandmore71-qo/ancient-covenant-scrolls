@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sample Test Projects — Load</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<script src="../lib-jszip.min.js"></script>
+<style>
+:root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--info:#60a5fa;--border:#2a2a40}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;font-size:14px;-webkit-font-smoothing:antialiased}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#150a28 0,#0a0514 100%);border-bottom:1px solid var(--border)}
+header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)}
+header h1{margin:0;font-size:16px;font-weight:800;flex:1}
+.wrap{max-width:1000px;margin:0 auto;padding:24px 18px 80px}
+.intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin:0 0 18px}
+.intro h2{margin:0 0 6px;font-size:18px;font-weight:800}
+.intro p{margin:0;color:var(--mute);font-size:13.5px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.card h3{margin:0;font-size:14.5px;font-weight:800}
+.card .ext{font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--accent);text-transform:uppercase}
+.card .desc{font-size:12.5px;color:var(--mute);line-height:1.55;flex:1}
+.card .row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 11px;border-radius:7px;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-weight:600;font-size:12px;cursor:pointer;font-family:inherit}
+.btn:hover{background:#2a2a45}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.danger{color:var(--err);border-color:rgba(255,110,110,.3);background:transparent}
+.status{font-size:11px;color:var(--mute);min-height:14px;font-variant-numeric:tabular-nums}
+.status.ok{color:var(--ok)}
+.status.err{color:var(--err)}
+.status.warn{color:var(--warn)}
+.preview{background:#0a0e18;border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:6px;max-height:160px;overflow:auto;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;white-space:pre-wrap;word-break:break-word;display:none}
+.preview.on{display:block}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="../">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Back to Load
+  </a>
+  <h1>Sample Test Projects</h1>
+</header>
+<div class="wrap">
+<div class="intro">
+  <h2>Test Load without uploading anything</h2>
+  <p>Nine sample types built on demand. Open in the viewer, run the Asset Doctor, or download a real ZIP. Nothing leaves the device.</p>
+</div>
+<div class="grid" id="grid"></div>
+</div>
+
+<script>
+'use strict';
+var $ = function (id) { return document.getElementById(id); };
+function escHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+// ── Sample factories: each returns a Promise<{ name, mime, blob, preview }> ──
+function genHtml() {
+  var html = '<!doctype html><html><head><meta charset="utf-8"><title>Sample HTML</title><style>body{font-family:system-ui;background:#101820;color:#fff;padding:24px}h1{color:#7c3aed}</style></head><body><h1>Sample HTML App</h1><p>This is a single-file HTML test page generated locally by Load.</p><p>It contains no scripts, no external assets, and no tracking. Useful for testing the import / preview / Asset Doctor flow.</p><button onclick="alert(\'It works.\')">Click me</button></body></html>';
+  return Promise.resolve({ name: 'sample-html.html', mime: 'text/html', blob: new Blob([html], { type: 'text/html' }), preview: html.slice(0, 600) + '...' });
+}
+function genPwaZip() {
+  var zip = new JSZip();
+  zip.file('index.html', '<!doctype html><html><head><meta charset="utf-8"><title>Sample PWA</title><link rel="manifest" href="manifest.json"></head><body><h1>Sample PWA</h1><p>Open index.html via a local server to test the manifest + service worker.</p><script src="app.js"><\/script></body></html>');
+  zip.file('manifest.json', JSON.stringify({ name: 'Sample PWA', short_name: 'Sample', start_url: './index.html', display: 'standalone', background_color: '#101820', theme_color: '#7c3aed', icons: [] }, null, 2));
+  zip.file('service-worker.js', "var CACHE='sample-pwa-v1';self.addEventListener('install',function(e){e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(['./','./index.html','./manifest.json']);}));self.skipWaiting();});self.addEventListener('fetch',function(e){e.respondWith(caches.match(e.request).then(function(h){return h||fetch(e.request);}));});");
+  zip.file('app.js', "if('serviceWorker' in navigator){navigator.serviceWorker.register('./service-worker.js').catch(function(){});}");
+  zip.file('README.md', '# Sample PWA\n\nGenerated by Load Sample Test Projects.\n');
+  return zip.generateAsync({ type: 'blob' }).then(function (b) { return { name: 'sample-pwa.zip', mime: 'application/zip', blob: b, preview: 'Contents:\n  index.html\n  manifest.json\n  service-worker.js\n  app.js\n  README.md' }; });
+}
+function genEpub() {
+  var zip = new JSZip();
+  zip.file('mimetype', 'application/epub+zip');
+  zip.folder('META-INF').file('container.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">\n  <rootfiles>\n    <rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>\n  </rootfiles>\n</container>');
+  zip.folder('OEBPS').file('content.opf', '<?xml version="1.0" encoding="UTF-8"?>\n<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="bookid" version="3.0">\n  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">\n    <dc:title>Sample EPUB</dc:title>\n    <dc:identifier id="bookid">sample-epub-001</dc:identifier>\n    <dc:language>en</dc:language>\n  </metadata>\n  <manifest>\n    <item id="ch1" href="ch1.xhtml" media-type="application/xhtml+xml"/>\n  </manifest>\n  <spine>\n    <itemref idref="ch1"/>\n  </spine>\n</package>');
+  zip.folder('OEBPS').file('ch1.xhtml', '<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Chapter 1</title></head><body><h1>Chapter 1</h1><p>Sample EPUB chapter generated locally for Load testing. It is intentionally short.</p></body></html>');
+  return zip.generateAsync({ type: 'blob', mimeType: 'application/epub+zip' }).then(function (b) { return { name: 'sample.epub', mime: 'application/epub+zip', blob: b, preview: 'Valid EPUB 3 with one chapter (ch1.xhtml).' }; });
+}
+function genPdfPlaceholder() {
+  // Minimal valid PDF (single blank page).
+  var pdf = '%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Count 1/Kids[3 0 R]>>endobj\n3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]/Contents 4 0 R/Resources<<>>>>endobj\n4 0 obj<</Length 44>>stream\nBT /F1 24 Tf 100 700 Td (Sample PDF) Tj ET\nendstream endobj\nxref\n0 5\n0000000000 65535 f\n0000000010 00000 n\n0000000054 00000 n\n0000000098 00000 n\n0000000178 00000 n\ntrailer<</Size 5/Root 1 0 R>>\nstartxref\n255\n%%EOF';
+  return Promise.resolve({ name: 'sample.pdf', mime: 'application/pdf', blob: new Blob([pdf], { type: 'application/pdf' }), preview: 'Minimal PDF 1.4, single page, "Sample PDF" text.' });
+}
+function genImage() {
+  return new Promise(function (resolve) {
+    var c = document.createElement('canvas'); c.width = 800; c.height = 600;
+    var ctx = c.getContext('2d');
+    var grad = ctx.createLinearGradient(0, 0, 800, 600);
+    grad.addColorStop(0, '#7c3aed'); grad.addColorStop(.5, '#3b82f6'); grad.addColorStop(1, '#0a0a14');
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, 800, 600);
+    ctx.fillStyle = '#fff'; ctx.font = '700 64px Inter,sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('Sample Image', 400, 300); ctx.font = '400 24px Inter,sans-serif'; ctx.fillText('800 × 600 PNG', 400, 350);
+    c.toBlob(function (b) { resolve({ name: 'sample.png', mime: 'image/png', blob: b, preview: '800 × 600 PNG, gradient + label.' }); }, 'image/png');
+  });
+}
+function genAudio() {
+  // 1-second 440 Hz tone WAV, 16-bit mono, 22050 Hz.
+  var sr = 22050, dur = 1.0, nSamples = sr * dur;
+  var buf = new ArrayBuffer(44 + nSamples * 2);
+  var v = new DataView(buf);
+  function ws(o, s) { for (var i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); }
+  ws(0, 'RIFF'); v.setUint32(4, 36 + nSamples * 2, true); ws(8, 'WAVE'); ws(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); ws(36, 'data'); v.setUint32(40, nSamples * 2, true);
+  for (var i = 0; i < nSamples; i++) { v.setInt16(44 + i * 2, Math.sin(2 * Math.PI * 440 * i / sr) * 0x4000, true); }
+  return Promise.resolve({ name: 'sample.wav', mime: 'audio/wav', blob: new Blob([buf], { type: 'audio/wav' }), preview: '1-second 440 Hz tone, 22.05 kHz mono WAV.' });
+}
+function genVideo() {
+  return new Promise(function (resolve) {
+    if (typeof MediaRecorder === 'undefined') { resolve({ name: 'sample.txt', mime: 'text/plain', blob: new Blob(['MediaRecorder not supported on this browser. Skipping video sample.'], { type: 'text/plain' }), preview: 'MediaRecorder not supported on this browser.' }); return; }
+    var c = document.createElement('canvas'); c.width = 640; c.height = 360;
+    var ctx = c.getContext('2d');
+    function paint(t) {
+      ctx.fillStyle = '#0a0a14'; ctx.fillRect(0, 0, 640, 360);
+      ctx.fillStyle = '#7c3aed'; ctx.beginPath(); ctx.arc(320 + Math.sin(t / 200) * 120, 180, 40, 0, 2 * Math.PI); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.font = '700 28px Inter,sans-serif'; ctx.textAlign = 'center'; ctx.fillText('Sample Video', 320, 60);
+    }
+    paint(0);
+    var stream = c.captureStream(30);
+    var mimes = ['video/mp4;codecs=avc1', 'video/webm;codecs=vp9', 'video/webm'];
+    var mt = ''; for (var k = 0; k < mimes.length; k++) { if (MediaRecorder.isTypeSupported(mimes[k])) { mt = mimes[k]; break; } }
+    var chunks = []; var mr = new MediaRecorder(stream, mt ? { mimeType: mt } : undefined);
+    mr.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+    var stopped = new Promise(function (r) { mr.onstop = r; });
+    mr.start(100);
+    var t0 = Date.now();
+    (function tick() { paint(Date.now() - t0); if (Date.now() - t0 < 2000) requestAnimationFrame(tick); else { try { mr.stop(); } catch (e) {} } })();
+    stopped.then(function () {
+      var blob = new Blob(chunks, { type: mt || 'video/webm' });
+      resolve({ name: 'sample.' + (mt.indexOf('mp4') >= 0 ? 'mp4' : 'webm'), mime: blob.type, blob: blob, preview: '2-second animated canvas, ' + Math.round(blob.size / 1024) + ' KB ' + (mt.indexOf('mp4') >= 0 ? 'MP4' : 'WebM') });
+    });
+  });
+}
+function genLoadStudioPackage() {
+  var zip = new JSZip();
+  zip.file('index.html', '<!doctype html><html><head><meta charset="utf-8"><title>Sample LoadStudio Package</title></head><body><h1>Sample LoadStudio Package</h1><p>Open in LoadStudio to inspect.</p></body></html>');
+  zip.file('manifest.json', JSON.stringify({ name: 'Sample LoadStudio Package', short_name: 'SampleLS', start_url: './index.html', display: 'standalone', theme_color: '#b388ff', icons: [] }, null, 2));
+  zip.file('service-worker.js', "var CACHE='sample-ls-v1';self.addEventListener('install',function(e){self.skipWaiting();});self.addEventListener('activate',function(e){self.clients.claim();});");
+  zip.file('project.json', JSON.stringify({ schemaVersion: 1, projectId: 'sample-001', title: 'Sample LoadStudio Project', type: 'CinePWA Project', status: 'draft' }, null, 2));
+  zip.file('scenes.json', JSON.stringify({ schemaVersion: 1, scenes: [{ id: 's1', title: 'Scene 1', characters: ['Narrator'], duration: 8 }] }, null, 2));
+  zip.file('characters.json', JSON.stringify({ schemaVersion: 1, characters: [{ id: 'narrator', name: 'Narrator', voice: 'warm-elder' }] }, null, 2));
+  zip.file('rights.json', JSON.stringify({ schemaVersion: 1, owner: 'Sample Studio', license: 'platform-original', sourceMaterial: 'self', assetDeclarations: [], creatorConfirmation: 'I own this content' }, null, 2));
+  zip.file('credits.json', JSON.stringify({ schemaVersion: 1, credits: [{ role: 'Director', name: 'Sample Studio' }] }, null, 2));
+  zip.file('styles.css', "body{font-family:system-ui;background:#0a0a14;color:#fff;padding:24px}h1{color:#b388ff}");
+  zip.file('player.js', "console.log('Sample LoadStudio player');");
+  zip.file('editor.js', "console.log('Sample LoadStudio editor');");
+  ['images', 'audio', 'music', 'sfx', 'subtitles', 'icons'].forEach(function (f) { zip.folder('assets').folder(f).file('.keep', ''); });
+  return zip.generateAsync({ type: 'blob' }).then(function (b) {
+    var nb = new Blob([b], { type: 'application/zip' });
+    return { name: 'sample.loadstudio.zip', mime: 'application/zip', blob: nb, preview: 'Required files: index.html, manifest.json, service-worker.js, project.json, scenes.json, characters.json, rights.json, credits.json, styles.css, player.js, editor.js + 6 asset folders.' };
+  });
+}
+function genBookPwa() {
+  var zip = new JSZip();
+  var indexHtml = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sample Digital Book</title><link rel="manifest" href="./manifest.json"><link rel="stylesheet" href="./styles.css"></head><body><header><h1>Sample Digital Book</h1></header><div class="layout"><aside><h3>Chapters</h3><ul><li><a href="#ch-1">Chapter 1</a></li><li><a href="#ch-2">Chapter 2</a></li></ul></aside><main><section id="ch-1"><h2>Chapter 1</h2><p>The first sample chapter is intentionally short. It exists so the book validator has something to find.</p></section><section id="ch-2"><h2>Chapter 2</h2><p>The second chapter demonstrates that multiple chapters render in the sidebar.</p></section></main></div><script src="./app.js"><\/script></body></html>';
+  zip.file('index.html', indexHtml);
+  zip.file('manifest.json', JSON.stringify({ name: 'Sample Digital Book', short_name: 'SampleBook', start_url: './index.html', display: 'standalone', theme_color: '#7c3aed', background_color: '#0a0a14', icons: [] }, null, 2));
+  zip.file('service-worker.js', "var CACHE='sample-book-v1';self.addEventListener('install',function(e){self.skipWaiting();});self.addEventListener('activate',function(e){self.clients.claim();});");
+  zip.file('styles.css', "body{font-family:'Atkinson Hyperlegible',system-ui;background:#0a0a14;color:#e9e9f0;margin:0;line-height:1.7}header{padding:14px 22px;background:linear-gradient(135deg,#7c3aed,#5a5ae0)}h1{margin:0;font-size:18px;font-weight:800}.layout{display:flex;min-height:calc(100vh - 56px)}aside{width:220px;background:#141422;padding:16px 12px;border-right:1px solid #2a2a40}aside h3{margin:0 0 8px;font-size:12px;font-weight:700;text-transform:uppercase;color:#9aa0b0}aside ul{list-style:none;padding:0;margin:0}aside li a{display:block;padding:8px;color:#e9e9f0;text-decoration:none;border-radius:6px}aside li a:hover{background:#1f1f30}main{flex:1;padding:28px 32px;max-width:760px}main h2{font-size:22px;font-weight:800;margin:0 0 14px}main p{margin:0 0 14px}.chapter{margin-bottom:28px}");
+  zip.file('app.js', "if('serviceWorker' in navigator){navigator.serviceWorker.register('./service-worker.js').catch(function(){});}document.addEventListener('click',function(e){var a=e.target.closest('aside a[href^=\"#\"]');if(!a)return;var el=document.getElementById(a.getAttribute('href').slice(1));if(el){e.preventDefault();el.scrollIntoView({behavior:'smooth',block:'start'});}});");
+  zip.file('book-data.json', JSON.stringify({ schemaVersion: 1, type: 'book', title: 'Sample Digital Book', chapters: [{ title: 'Chapter 1', paragraphs: ['First sample paragraph.'] }, { title: 'Chapter 2', paragraphs: ['Second sample paragraph.'] }] }, null, 2));
+  zip.folder('assets/icons').file('.keep', '');
+  zip.folder('assets/images').file('.keep', '');
+  zip.file('README.md', '# Sample Digital Book PWA\n\nUpload to hosting and open index.html.\n');
+  return zip.generateAsync({ type: 'blob' }).then(function (b) { return { name: 'sample-digital-book.zip', mime: 'application/zip', blob: b, preview: 'PWA digital book with chapter sidebar, service worker, manifest, book-data.json.' }; });
+}
+
+var SAMPLES = [
+  { key: 'html',     ext: 'HTML',           title: '1. Sample HTML app',           desc: 'Single-file HTML page with inline CSS + a click-me button. No external assets, no scripts.', factory: genHtml },
+  { key: 'pwa',      ext: 'ZIP / PWA',      title: '2. Sample PWA ZIP',            desc: 'Minimal PWA bundle: index.html + manifest + service-worker + app.js. Drop into LoadStudio Validator to test the structure check.', factory: genPwaZip },
+  { key: 'epub',     ext: 'EPUB',           title: '3. Sample EPUB',               desc: 'Valid EPUB 3 container with one chapter. Tests the EPUB import path.', factory: genEpub },
+  { key: 'pdf',      ext: 'PDF',            title: '4. Sample PDF',                desc: 'Single-page PDF 1.4 with "Sample PDF" text. Tests the PDF import path.', factory: genPdfPlaceholder },
+  { key: 'image',    ext: 'PNG',            title: '5. Sample image',              desc: '800 × 600 gradient PNG with a label. Tests the image import path.', factory: genImage },
+  { key: 'audio',    ext: 'WAV',            title: '6. Sample audio',              desc: '1-second 440 Hz tone, 22.05 kHz mono WAV. Tests the audio import + playback path.', factory: genAudio },
+  { key: 'video',    ext: 'MP4 / WEBM',     title: '7. Sample video',              desc: '2-second canvas-recorded animation. Mp4 if Safari supports it, otherwise WebM. Tests the video import + playback path.', factory: genVideo },
+  { key: 'lspack',   ext: '.loadstudio.zip', title: '8. Sample LoadStudio package', desc: 'Full Cinema package: 11 required files + 6 required folders + valid rights.json. Drop into the LoadStudio Validator to confirm a PASS.', factory: genLoadStudioPackage },
+  { key: 'bookpwa',  ext: 'ZIP / PWA',      title: '9. Sample digital book PWA',   desc: 'Self-contained book with chapter sidebar, service worker, manifest, book-data.json. The exact format the One-Click PWA Builder produces.', factory: genBookPwa }
+];
+
+function paint() {
+  $('grid').innerHTML = SAMPLES.map(function (s) {
+    return '<div class="card" data-key="' + s.key + '">' +
+      '<div><span class="ext">' + escHtml(s.ext) + '</span></div>' +
+      '<h3>' + escHtml(s.title) + '</h3>' +
+      '<div class="desc">' + escHtml(s.desc) + '</div>' +
+      '<div class="row">' +
+        '<button class="btn primary" data-act="open" data-key="' + s.key + '">Open</button>' +
+        '<button class="btn"         data-act="test" data-key="' + s.key + '">Test</button>' +
+        '<button class="btn"         data-act="export" data-key="' + s.key + '">Export</button>' +
+        '<button class="btn danger"  data-act="reset" data-key="' + s.key + '">Reset</button>' +
+      '</div>' +
+      '<div class="status" data-status="' + s.key + '">Ready</div>' +
+      '<div class="preview" data-preview="' + s.key + '"></div>' +
+    '</div>';
+  }).join('');
+}
+function setStatus(key, msg, cls) {
+  var el = document.querySelector('[data-status="' + key + '"]');
+  if (el) { el.textContent = msg; el.className = 'status' + (cls ? ' ' + cls : ''); }
+}
+function showPreview(key, text) {
+  var el = document.querySelector('[data-preview="' + key + '"]');
+  if (!el) return;
+  el.textContent = text;
+  el.classList.add('on');
+}
+function clearPreview(key) {
+  var el = document.querySelector('[data-preview="' + key + '"]');
+  if (el) { el.textContent = ''; el.classList.remove('on'); }
+}
+function downloadBlob(blob, filename) {
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+document.addEventListener('click', function (e) {
+  var b = e.target.closest('[data-act]'); if (!b) return;
+  var act = b.getAttribute('data-act'), key = b.getAttribute('data-key');
+  var s = SAMPLES.find(function (x) { return x.key === key; }); if (!s) return;
+  if (act === 'reset') { clearPreview(key); setStatus(key, 'Ready'); return; }
+  setStatus(key, 'Generating…');
+  s.factory().then(function (out) {
+    if (act === 'open') {
+      if (/^image\//.test(out.mime)) {
+        var u = URL.createObjectURL(out.blob);
+        showPreview(key, ''); var img = new Image(); img.src = u; img.style.maxWidth = '100%';
+        document.querySelector('[data-preview="' + key + '"]').appendChild(img);
+        document.querySelector('[data-preview="' + key + '"]').classList.add('on');
+        setStatus(key, 'Opened image (' + Math.round(out.blob.size / 1024) + ' KB)', 'ok');
+      } else if (/^audio\//.test(out.mime)) {
+        var u2 = URL.createObjectURL(out.blob);
+        var au = document.createElement('audio'); au.controls = true; au.src = u2;
+        var p = document.querySelector('[data-preview="' + key + '"]');
+        p.innerHTML = ''; p.appendChild(au); p.classList.add('on');
+        setStatus(key, 'Audio loaded — tap Play above', 'ok');
+      } else if (/^video\//.test(out.mime)) {
+        var u3 = URL.createObjectURL(out.blob);
+        var vd = document.createElement('video'); vd.controls = true; vd.src = u3; vd.style.maxWidth = '100%';
+        var p2 = document.querySelector('[data-preview="' + key + '"]');
+        p2.innerHTML = ''; p2.appendChild(vd); p2.classList.add('on');
+        setStatus(key, 'Video loaded — tap Play above', 'ok');
+      } else if (out.mime === 'text/html') {
+        var p3 = document.querySelector('[data-preview="' + key + '"]');
+        var ifr = document.createElement('iframe');
+        ifr.sandbox = 'allow-scripts allow-same-origin';
+        ifr.style.cssText = 'width:100%;height:240px;border:1px solid #2a2a40;border-radius:6px;background:#fff';
+        out.blob.text().then(function (t) { ifr.srcdoc = t; });
+        p3.innerHTML = ''; p3.appendChild(ifr); p3.classList.add('on');
+        setStatus(key, 'Sandboxed preview rendered', 'ok');
+      } else {
+        showPreview(key, out.preview);
+        setStatus(key, 'Generated — see preview', 'ok');
+      }
+    } else if (act === 'test') {
+      // Quick sanity tests per kind.
+      if (out.blob.size > 0) {
+        showPreview(key, 'PASS — ' + out.name + ' (' + (out.blob.size / 1024).toFixed(1) + ' KB, ' + out.mime + ')\n' + (out.preview || ''));
+        setStatus(key, 'Test PASS', 'ok');
+      } else {
+        showPreview(key, 'FAIL — empty blob');
+        setStatus(key, 'Test FAIL', 'err');
+      }
+    } else if (act === 'export') {
+      downloadBlob(out.blob, out.name);
+      setStatus(key, 'Downloaded ' + out.name, 'ok');
+    }
+  }).catch(function (err) {
+    setStatus(key, 'Error: ' + (err.message || err), 'err');
+  });
+});
+paint();
+</script>
+</body>
+</html>
