@@ -1,0 +1,6 @@
+{
+  "Load Main": ["open PWA projects", "open HTML without raw code", "offline file support", "media playback", "book tools", "import export", "diagnostics"],
+  "LoadPlay": ["streaming rows", "creator upload", "viewer sign in", "developer sign in", "subscriber pages", "content guardrails", "test mode", "mock users"],
+  "LoadStudio": ["scene cards", "timeline", "character library", "voice tools", "AI image provider fallback", "package export", "reopen package", "diagnostics"],
+  "Load Tasks": ["validator", "fix studio", "version control", "developer handoff", "GitHub export", "dyslexia friendly mode"]
+}
