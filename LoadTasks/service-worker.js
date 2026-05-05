@@ -6,6 +6,7 @@ const APP_SHELL = [
   './app.js',
   './manifest.json',
   './favicon.ico',
+  './apple-touch-icon.png',
   './assets/images/LOAD_TASKS_SPLASH_1080.webp',
   './assets/images/LOAD_TASKS_SPLASH_1080.jpg',
   './assets/images/load-tasks-logo.png',

@@ -3,24 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Load Tasks validates, tracks, repairs, and exports PWA build work for Load, LoadPlay, LoadStudio, and standalone PWA projects.">
-<title>Load Tasks</title>
-  <!-- Load Tasks iOS and PWA icons -->
+  <meta name="theme-color" content="#ffd400">
+  <meta name="description" content="Load Tasks validates, tracks, repairs, and exports PWA build work for Load, LoadPlay, LoadStudio, and standalone PWA projects.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Load Tasks">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Load Tasks</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="favicon.ico">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="./assets/icons/load-tasks-icon-180x180.png">
-  <link rel="icon" href="./favicon.ico">
-  <link rel="icon" type="image/png" sizes="192x192" href="./assets/icons/load-tasks-icon-192x192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="./assets/icons/load-tasks-icon-512x512.png">
-  <meta name="apple-mobile-web-app-title" content="Load Tasks">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#FFD400">
-
-  <link rel="manifest" href="./manifest.json">
-<link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <a href="#main" class="skip-link">Skip to dashboard</a>
@@ -45,7 +39,7 @@
         <img src="assets/icons/load-tasks-icon-96x96.png" alt="" class="brand-icon">
         <div>
           <strong>Load Tasks</strong>
-          <span>Build Validator. Repair Tracker. Developer Handoff.</span>
+          <span>Build Validator. Repair Tracker. Project Memory.</span>
         </div>
       </div>
       <nav class="topnav" aria-label="Primary navigation">
@@ -54,6 +48,10 @@
         <button data-view="validator" data-route>Validator</button>
         <button data-view="fix" data-route>Fix Studio</button>
         <button data-view="versions" data-route>Versions</button>
+        <button data-view="vault" data-route>Vault</button>
+        <button data-view="library" data-route>Library</button>
+        <button data-view="certificate" data-route>Certificate</button>
+        <button data-view="focus" data-route>Focus</button>
         <button data-view="handoff" data-route>Handoff</button>
         <button data-view="github" data-route>GitHub</button>
         <button data-view="settings" data-route>Settings</button>
@@ -71,6 +69,10 @@
         <button data-view="validator" data-route><span class="rail-icon" data-icon="shield"></span><span>Run Validator</span></button>
         <button data-view="fix" data-route><span class="rail-icon" data-icon="wrench"></span><span>Fix Studio</span></button>
         <button data-view="versions" data-route><span class="rail-icon" data-icon="version"></span><span>Versions</span></button>
+        <button data-view="vault" data-route><span class="rail-icon" data-icon="vault"></span><span>Project Vault</span></button>
+        <button data-view="library" data-route><span class="rail-icon" data-icon="library"></span><span>Build Library</span></button>
+        <button data-view="certificate" data-route><span class="rail-icon" data-icon="certificate"></span><span>Certificate</span></button>
+        <button data-view="focus" data-route><span class="rail-icon" data-icon="focus"></span><span>Focus Mode</span></button>
         <button data-view="handoff" data-route><span class="rail-icon" data-icon="handoff"></span><span>Handoff</span></button>
         <button data-view="github" data-route><span class="rail-icon" data-icon="github"></span><span>GitHub Export</span></button>
       </aside>
@@ -116,6 +118,16 @@
               <span class="card-icon" data-icon="handoff"></span>
               <strong>Developer Handoff</strong>
               <span>Export Claude prompts, QA checklists, and reports.</span>
+            </button>
+            <button class="command-card" data-view="vault" data-route>
+              <span class="card-icon" data-icon="vault"></span>
+              <strong>Open Project Vault</strong>
+              <span>Protect stable builds and remember what broke.</span>
+            </button>
+            <button class="command-card" data-view="focus" data-route>
+              <span class="card-icon" data-icon="focus"></span>
+              <strong>Show Next Step</strong>
+              <span>Use the dyslexia-friendly guided workflow.</span>
             </button>
           </div>
 
@@ -203,13 +215,24 @@
 
         <section class="view" id="view-fix" data-view-panel="fix">
           <div class="section-head">
-            <p class="eyebrow">Fix Studio</p>
-            <h1>Repair what is safe. Document what needs a developer.</h1>
-            <p>Safe auto-fixes are limited to package structure, metadata, fallback files, and documentation. Risky features produce instructions.</p>
+            <p class="eyebrow">Repair Command Center</p>
+            <h1>Fix safe items. Prepare developer work. Verify before complete.</h1>
+            <p>Each issue has a confidence label and action buttons. Safe patches can be exported. Risky work becomes a developer task.</p>
           </div>
-          <div class="two-col">
+          <div class="repair-toolbar panel">
+            <div>
+              <h2>Guided repair wizard</h2>
+              <p id="repairWizardText">Run the validator first. Then follow the next safe step.</p>
+            </div>
+            <div class="button-row">
+              <button class="primary-action" id="guidedRepairBtn">Start Guided Repair</button>
+              <button class="secondary-action" id="createRepairPackBtn">Create Repair Pack</button>
+              <button class="secondary-action" id="applyAllSafeBtn">Apply Safe Patch Preview</button>
+            </div>
+          </div>
+          <div class="two-col repair-columns">
             <article class="panel">
-              <h2>Safe auto-fixes</h2>
+              <h2>Auto-fix now</h2>
               <div id="safeFixList" class="fix-list"></div>
               <div class="button-row">
                 <button class="primary-action" id="buildFixedZipBtn">Export Fixed ZIP</button>
@@ -217,10 +240,14 @@
               </div>
             </article>
             <article class="panel">
-              <h2>Developer-required fixes</h2>
+              <h2>Review or developer-required</h2>
               <div id="developerFixList" class="fix-list"></div>
               <button class="secondary-action" data-action="download-claude">Export Claude Repair Prompt</button>
             </article>
+          </div>
+          <div class="panel">
+            <h2>Repair log</h2>
+            <div id="repairLog" class="report-box">No repair action has been prepared yet.</div>
           </div>
         </section>
 
@@ -234,6 +261,8 @@
             <button class="primary-action" id="markStableBtn">Mark Current Stable</button>
             <button class="secondary-action" id="markBrokenBtn">Mark Current Broken</button>
             <button class="secondary-action" id="compareVersionsBtn">Compare Latest Two</button>
+            <button class="secondary-action" id="downloadProjectMemoryFromVersions">Export Memory</button>
+            <button class="secondary-action" id="downloadLaunchReadinessFromVersions">Launch Report</button>
           </div>
           <div id="versionList" class="version-list"></div>
           <div class="panel"><h2>Comparison</h2><div id="compareOutput" class="report-box">Upload at least two builds to compare versions.</div></div>
@@ -279,6 +308,117 @@
           </div>
           <div class="panel"><h2>GitHub push preview</h2><div id="githubPreview" class="report-box">No push preview generated.</div></div>
         </section>
+
+
+        <section class="view" id="view-vault" data-view-panel="vault">
+          <div class="section-head">
+            <p class="eyebrow">Project Vault</p>
+            <h1>Remember every build. Protect what works.</h1>
+            <p>Store project memory, version history, stable builds, broken features, live URLs, and repair history.</p>
+          </div>
+          <div class="vault-grid">
+            <article class="panel form-panel">
+              <h2>Active project memory</h2>
+              <label>Live site URL<input id="projectLiveUrl" placeholder="https://dssorit.github.io/ancient-covenant-scrolls/LoadTasks/"></label>
+              <label>GitHub path<input id="projectGithubPath" placeholder="ancient-covenant-scrolls / LoadTasks"></label>
+              <label>Known broken features<textarea id="projectBrokenNotes" class="mini-textarea" placeholder="Example: Home Screen icon, 404 path, missing splash, dead buttons"></textarea></label>
+              <div class="button-row">
+                <button class="primary-action" id="saveProjectMemoryBtn">Save Project Memory</button>
+                <button class="secondary-action" id="exportProjectMemoryBtn">Export Project Memory</button>
+              </div>
+            </article>
+            <article class="panel">
+              <h2>Stable Build Vault</h2>
+              <p class="warning-text">Stable builds are protected. Do not overwrite a known working build without a rollback.</p>
+              <div class="button-row">
+                <button class="primary-action" id="markVaultStableBtn">Protect Current as Stable</button>
+                <button class="secondary-action" id="exportStableVaultBtn">Export Stable Vault Report</button>
+              </div>
+              <div id="stableVaultList" class="version-list"></div>
+            </article>
+          </div>
+          <div class="panel">
+            <div class="panel-title"><h2>Version timeline</h2><button class="small-btn" id="generateChangelogBtn">Generate Changelog</button></div>
+            <div id="versionTimeline" class="timeline-list"></div>
+          </div>
+          <div class="panel">
+            <h2>Build comparison intelligence</h2>
+            <p>Compares recent versions and points to the likely break source.</p>
+            <div class="button-row">
+              <button class="primary-action" id="compareBuildsV4Btn">Compare Latest Two Builds</button>
+              <button class="secondary-action" id="exportRollbackV4Btn">Export Rollback Guide</button>
+            </div>
+            <div id="buildComparisonV4" class="report-box">Save at least two versions, then compare.</div>
+          </div>
+        </section>
+
+        <section class="view" id="view-library" data-view-panel="library">
+          <div class="section-head">
+            <p class="eyebrow">Master Build Plan Library</p>
+            <h1>Load-specific templates and acceptance tests.</h1>
+            <p>Use these templates to prevent missing features before the next developer handoff.</p>
+          </div>
+          <div class="button-row sticky-actions">
+            <button class="primary-action" id="auditPromisesBtn">Run Promise Audit v2</button>
+            <button class="secondary-action" id="exportFeatureMatrixBtn">Export Feature Matrix</button>
+            <button class="secondary-action" id="exportFalsePositiveBtn">Export False Positive Report</button>
+          </div>
+          <div id="buildPlanLibrary" class="library-grid"></div>
+          <div class="two-col">
+            <article class="panel">
+              <h2>Promise Audit v2</h2>
+              <div id="promiseAuditOutput" class="report-box">Paste notes or run the validator to audit promises against evidence.</div>
+            </article>
+            <article class="panel">
+              <h2>False Positive Detector v2</h2>
+              <div id="falsePositiveOutput" class="report-box">Developer claims will be marked verified, missing, or claim not proven.</div>
+            </article>
+          </div>
+        </section>
+
+        <section class="view" id="view-certificate" data-view-panel="certificate">
+          <div class="section-head">
+            <p class="eyebrow">Launch Readiness Certificate</p>
+            <h1>Only generate ready status when evidence supports it.</h1>
+            <p>The certificate summarizes PWA structure, assets, security, GitHub path, unresolved risks, and QA status.</p>
+          </div>
+          <div class="certificate-panel panel">
+            <div class="certificate-status" id="certificateStatus">Not Ready</div>
+            <div id="launchCertificateOutput" class="report-box">Run the validator to generate a launch readiness certificate.</div>
+            <div class="button-row">
+              <button class="primary-action" id="generateCertificateBtn">Generate Certificate</button>
+              <button class="secondary-action" id="downloadCertificateBtn">Download Certificate</button>
+              <button class="secondary-action" id="downloadLaunchChecklistBtn">Download Launch Checklist</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="view-focus" data-view-panel="focus">
+          <div class="section-head">
+            <p class="eyebrow">Focus Mode</p>
+            <h1>One clear step at a time.</h1>
+            <p>This view reduces clutter and gives one next action based on the current build state.</p>
+          </div>
+          <div class="focus-layout">
+            <article class="panel focus-card">
+              <h2>Next best action</h2>
+              <div id="focusNextAction" class="focus-action">Upload a build or run the validator.</div>
+              <div class="button-row">
+                <button class="primary-action" id="focusDoNextBtn">Take Me There</button>
+                <button class="secondary-action" id="focusRefreshBtn">Refresh Step</button>
+              </div>
+            </article>
+            <article class="panel">
+              <h2>Simple project health</h2>
+              <div id="focusHealth" class="focus-health"></div>
+            </article>
+          </div>
+          <div class="panel">
+            <h2>Plain language repair path</h2>
+            <ol id="focusSteps" class="focus-steps"></ol>
+          </div>
+        </section>
+
 
         <section class="view" id="view-settings" data-view-panel="settings">
           <div class="section-head">

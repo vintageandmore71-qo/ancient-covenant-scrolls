@@ -322,3 +322,136 @@ body.simple-mode .action-grid { grid-template-columns: repeat(2, minmax(0,1fr));
   .splash-actions { position: static; transform: none; margin-top: 12px; }
   .splash-screen { align-content: center; }
 }
+
+
+.repair-toolbar { display: flex; justify-content: space-between; gap: 18px; align-items: center; margin-bottom: 18px; }
+.repair-card { border-left: 4px solid var(--gold); }
+.repair-card.safe { border-left-color: var(--green); }
+.repair-card.safe-with-review { border-left-color: var(--gold); }
+.repair-card.instruction-only { border-left-color: var(--blue); }
+.repair-card.developer-required, .repair-card.blocked { border-left-color: var(--red); }
+.repair-card-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.repair-actions { margin-top: 12px; }
+#repairLog { white-space: pre-wrap; min-height: 130px; }
+body.dyslexia .repair-card p, body.dyslexia #repairLog { line-height: 1.85; }
+body.large-text .repair-actions .small-btn { min-height: 52px; padding: 12px 16px; }
+@media (max-width: 820px) { .repair-toolbar { display: block; } .repair-toolbar .button-row { margin-top: 14px; } }
+
+
+/* Project Intelligence v4 */
+.vault-grid, .focus-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 18px;
+  margin-bottom: 18px;
+}
+.mini-textarea {
+  min-height: 120px;
+  width: 100%;
+  resize: vertical;
+}
+.timeline-list {
+  display: grid;
+  gap: 12px;
+}
+.timeline-item {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 14px;
+  border: 1px solid var(--line-soft);
+  border-radius: 18px;
+  background: rgba(255,255,255,.035);
+}
+.timeline-dot {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255,212,0,.14);
+  border: 1px solid var(--line);
+  color: var(--gold);
+  font-weight: 900;
+}
+.stable-lock {
+  border-color: rgba(67,221,135,.45);
+  box-shadow: 0 0 26px rgba(67,221,135,.12);
+}
+.library-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.template-card ul {
+  padding-left: 20px;
+  color: var(--muted);
+}
+.audit-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.audit-row small {
+  grid-column: 1 / -1;
+  color: var(--muted);
+}
+.certificate-panel {
+  display: grid;
+  gap: 18px;
+}
+.certificate-status {
+  display: inline-flex;
+  width: fit-content;
+  padding: 12px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--gold);
+  font-weight: 900;
+  background: rgba(255,212,0,.10);
+}
+.certificate-status.good {
+  color: var(--green);
+  border-color: rgba(67,221,135,.45);
+  background: rgba(67,221,135,.12);
+}
+.certificate-status.bad {
+  color: var(--red);
+  border-color: rgba(255,77,77,.45);
+  background: rgba(255,77,77,.12);
+}
+.focus-card {
+  border-color: var(--line);
+  box-shadow: var(--shadow);
+}
+.focus-action {
+  font-size: clamp(1.3rem, 3vw, 2.1rem);
+  font-weight: 900;
+  line-height: 1.25;
+  color: var(--gold);
+  margin: 18px 0;
+}
+.focus-health {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+}
+.focus-steps {
+  font-size: 1.08rem;
+  line-height: 1.8;
+}
+body.simple-mode .library-grid,
+body.simple-mode .vault-grid,
+body.simple-mode .focus-layout {
+  grid-template-columns: 1fr;
+}
+@media (max-width: 900px) {
+  .vault-grid, .focus-layout {
+    grid-template-columns: 1fr;
+  }
+}

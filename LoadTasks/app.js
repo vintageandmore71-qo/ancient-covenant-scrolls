@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  const STORE_KEY = 'loadTasksWorkspaceV2';
+  const STORE_KEY = 'loadTasksWorkspaceV4';
   const SESSION_FILES = new Map();
 
   const PROJECT_TYPES = [
@@ -76,7 +76,7 @@
     } catch (error) {
       console.warn(error);
     }
-    return { projects: [], versions: [], tasks: [], reports: [], settings: {} };
+    return { projects: [], versions: [], stableBuilds: [], tasks: [], reports: [], buildMemory: {}, settings: {} };
   }
 
   function saveState() {
@@ -87,6 +87,7 @@
 
   function $(selector, root = document) { return root.querySelector(selector); }
   function $all(selector, root = document) { return Array.from(root.querySelectorAll(selector)); }
+  function bindIf(selector, eventName, handler) { const el = $(selector); if (el) el.addEventListener(eventName, handler); }
 
   function init() {
     injectIcons();
@@ -115,6 +116,11 @@
       const action = event.target.closest('[data-action]');
       if (action) {
         runAction(action.dataset.action);
+        event.preventDefault();
+      }
+      const repair = event.target.closest('[data-repair-action]');
+      if (repair) {
+        handleRepairCardAction(repair.dataset.repairAction, repair.dataset.repairId);
         event.preventDefault();
       }
     });
@@ -164,6 +170,9 @@
     $('#runValidatorBtn').addEventListener('click', runValidator);
     $('#buildFixedZipBtn').addEventListener('click', exportFixedZip);
     $('#exportRollbackBtn').addEventListener('click', exportRollbackZip);
+    $('#createRepairPackBtn').addEventListener('click', createRepairPack);
+    $('#guidedRepairBtn').addEventListener('click', startGuidedRepair);
+    $('#applyAllSafeBtn').addEventListener('click', previewSafePatch);
     $('#markStableBtn').addEventListener('click', () => markVersion('Stable'));
     $('#markBrokenBtn').addEventListener('click', () => markVersion('Broken'));
     $('#compareVersionsBtn').addEventListener('click', compareLatestVersions);
@@ -179,6 +188,24 @@
     $('#importWorkspaceBtn').addEventListener('click', () => $('#workspaceImportFile').click());
     $('#workspaceImportFile').addEventListener('change', importWorkspace);
     $('#resetWorkspaceBtn').addEventListener('click', resetWorkspace);
+
+    bindIf('#saveProjectMemoryBtn', 'click', saveProjectMemory);
+    bindIf('#exportProjectMemoryBtn', 'click', exportProjectMemory);
+    bindIf('#markVaultStableBtn', 'click', markVaultStable);
+    bindIf('#exportStableVaultBtn', 'click', exportStableVaultReport);
+    bindIf('#generateChangelogBtn', 'click', exportChangelog);
+    bindIf('#compareBuildsV4Btn', 'click', compareBuildsV4);
+    bindIf('#exportRollbackV4Btn', 'click', exportRollbackGuideV4);
+    bindIf('#auditPromisesBtn', 'click', runPromiseAuditV2);
+    bindIf('#exportFeatureMatrixBtn', 'click', exportFeatureMatrixV4);
+    bindIf('#exportFalsePositiveBtn', 'click', exportFalsePositiveReportV4);
+    bindIf('#generateCertificateBtn', 'click', () => renderLaunchCertificate(true));
+    bindIf('#downloadCertificateBtn', 'click', downloadLaunchCertificate);
+    bindIf('#downloadLaunchChecklistBtn', 'click', downloadLaunchChecklistV4);
+    bindIf('#focusDoNextBtn', 'click', goToFocusNextAction);
+    bindIf('#focusRefreshBtn', 'click', renderFocusMode);
+    bindIf('#downloadProjectMemoryFromVersions', 'click', exportProjectMemory);
+    bindIf('#downloadLaunchReadinessFromVersions', 'click', downloadLaunchCertificate);
   }
 
   function showView(view) {
@@ -186,6 +213,10 @@
     $all('[data-view-panel]').forEach(panel => panel.classList.toggle('active', panel.dataset.viewPanel === view));
     $all('[data-route]').forEach(button => button.classList.toggle('active', button.dataset.view === view));
     if (view === 'handoff') updateHandoffPreview();
+    if (view === 'vault') renderProjectVault();
+    if (view === 'library') { renderBuildPlanLibrary(); renderPromiseAudit(); }
+    if (view === 'certificate') renderLaunchCertificate();
+    if (view === 'focus') renderFocusMode();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -529,6 +560,11 @@
     renderFixes();
     renderVersions();
     updateHandoffPreview();
+    renderProjectVault();
+    renderBuildPlanLibrary();
+    renderPromiseAudit();
+    renderLaunchCertificate();
+    renderFocusMode();
   }
 
   function syncForm() {
@@ -600,8 +636,64 @@
 
   function renderFixes() {
     const analysis = current.analysis;
-    $('#safeFixList').innerHTML = analysis && analysis.safeFixes.length ? analysis.safeFixes.map(fix => `<div class="fix-item"><strong>${escapeHtml(fix.title)}</strong><p>${escapeHtml(fix.description)}</p><span class="badge ${fix.type === 'auto' ? 'good' : 'warn'}">${escapeHtml(fix.type)}</span></div>`).join('') : '<div class="empty-state">No safe auto-fixes available yet.</div>';
-    $('#developerFixList').innerHTML = analysis && analysis.developerFixes.length ? analysis.developerFixes.map(fix => `<div class="fix-item"><strong>${escapeHtml(fix.title)}</strong><p>${escapeHtml(fix.description)}</p></div>`).join('') : '<div class="empty-state">No developer-required fixes listed yet.</div>';
+    const safe = analysis ? buildRepairCommandItems('safe') : [];
+    const review = analysis ? buildRepairCommandItems('review') : [];
+    $('#safeFixList').innerHTML = safe.length ? safe.map(renderRepairCard).join('') : '<div class="empty-state">Run the validator to see safe repair actions.</div>';
+    $('#developerFixList').innerHTML = review.length ? review.map(renderRepairCard).join('') : '<div class="empty-state">No review or developer-required fixes listed yet.</div>';
+    $('#repairWizardText').textContent = analysis ? wizardTextForAnalysis(analysis) : 'Run the validator first. Then Load Tasks will show the next safe repair step.';
+  }
+
+  function renderRepairCard(item) {
+    const actions = item.actions.map(action => `<button class="small-btn" data-repair-action="${escapeHtml(action)}" data-repair-id="${escapeHtml(item.id)}">${escapeHtml(actionLabel(action))}</button>`).join('');
+    return `<div class="fix-item repair-card ${escapeHtml(item.levelClass)}">
+      <div class="repair-card-head"><strong>${escapeHtml(item.title)}</strong><span class="badge ${badgeClass(item.confidence)}">${escapeHtml(item.confidence)}</span></div>
+      <p>${escapeHtml(item.description)}</p>
+      <small>Acceptance test: ${escapeHtml(item.acceptance)}</small>
+      <div class="button-row repair-actions">${actions}</div>
+    </div>`;
+  }
+
+  function actionLabel(action) {
+    const labels = { explain: 'Explain', prepare: 'Prepare Fix', apply: 'Apply Safe Patch', task: 'Export Developer Task', issue: 'Create GitHub Issue' };
+    return labels[action] || action;
+  }
+
+  function buildRepairCommandItems(group) {
+    const analysis = current.analysis;
+    if (!analysis) return [];
+    const items = [];
+    const names = (current.zipEntries || []).map(e => normalizePath(e.name));
+    const hasNested = analysis.summary.hasIndex && !analysis.summary.rootIndex;
+    const hasHtml = names.some(n => /\.html?$/i.test(n));
+    const textMap = zipTextMap();
+    const duplicateCount = countDuplicateIdIssues(textMap);
+    const emptyLinkCount = countEmptyLinks(textMap);
+    const missingCsp = countMissingCsp(textMap);
+    const brokenRefs = findBrokenReferences(textMap, new Set(names));
+    const hasApple = names.includes('apple-touch-icon.png');
+
+    if (group === 'safe') {
+      if (hasNested) items.push(repairItem('flatten', 'Flatten for GitHub Pages', 'Move the real app root to the export root, add .nojekyll, add 404.html, and write upload instructions.', 'Safe with Review', 'index.html, manifest.json, service-worker.js, assets, .nojekyll, and 404.html exist at export root.', ['explain','prepare','apply','task']));
+      if (!analysis.summary.readmePath) items.push(repairItem('readme', 'Add README_OPEN_FIRST.md', 'Create clear opening, upload, and troubleshooting directions.', 'Safe', 'README_OPEN_FIRST.md exists in the export.', ['explain','prepare','apply']));
+      if (!analysis.summary.securityPath) items.push(repairItem('security', 'Add SECURITY.md', 'Create safe upload, CSP, token, and rollback rules.', 'Safe', 'SECURITY.md exists in the export.', ['explain','prepare','apply']));
+      if (!hasApple) items.push(repairItem('apple-icon', 'Fix iPad Home Screen icon', 'Copy an app icon to root as apple-touch-icon.png and add Apple icon metadata.', 'Safe with Review', 'apple-touch-icon.png opens directly from the hosted folder.', ['explain','prepare','apply','task']));
+      if (!analysis.summary.manifestPath) items.push(repairItem('manifest', 'Add manifest.json', 'Create a basic standalone PWA manifest.', 'Safe', 'manifest.json is valid JSON and display is standalone.', ['explain','prepare','apply']));
+      if (!analysis.summary.swPath) items.push(repairItem('sw', 'Add service-worker.js', 'Create a simple offline cache service worker.', 'Safe', 'service-worker.js has install, fetch, and cache logic.', ['explain','prepare','apply']));
+    } else {
+      if (duplicateCount) items.push(repairItem('duplicate-ids', 'Fix duplicate HTML IDs', `${duplicateCount} duplicate ID issue(s) found. Keep first ID and rename later duplicates.`, 'Safe with Review', 'No duplicate IDs remain and labels still point to valid IDs.', ['explain','prepare','apply','task','issue']));
+      if (emptyLinkCount) items.push(repairItem('empty-links', 'Convert placeholder links', `${emptyLinkCount} placeholder link(s) or empty actions found. Convert safe anchors to buttons and create handler stubs.`, 'Instruction Only', 'No href="#" links remain unless intentionally documented.', ['explain','prepare','apply','task','issue']));
+      if (missingCsp) items.push(repairItem('csp', 'Add Static PWA CSP', `${missingCsp} HTML file(s) have no visible Content Security Policy.`, 'Safe with Review', 'CSP meta tag exists and app still opens after upload.', ['explain','prepare','apply','task']));
+      if (brokenRefs.length) items.push(repairItem('asset-paths', 'Repair asset paths', `${brokenRefs.length} missing asset reference(s) found. Repair only where one clear file match exists.`, 'Safe with Review', 'All repaired references point to real files.', ['explain','prepare','apply','task','issue']));
+      (analysis.developerFixes || []).slice(0, 10).forEach((fix, index) => {
+        const id = 'dev-' + index;
+        if (!items.find(x => x.description === fix.description)) items.push(repairItem(id, fix.title, fix.description, 'Developer Required', 'Developer confirms implementation and QA passes.', ['explain','task','issue']));
+      });
+    }
+    return items;
+  }
+
+  function repairItem(id, title, description, confidence, acceptance, actions) {
+    return { id, title, description, confidence, acceptance, actions, levelClass: confidence.toLowerCase().replace(/\s+/g, '-') };
   }
 
   function renderVersions() {
@@ -703,6 +795,268 @@
     return `# Load build requires repair and verification\n\n${renderHandoffText()}\n\nAcceptance criteria:\n- App opens as a standalone PWA.\n- Splash image appears first.\n- Required files exist.\n- Buttons and navigation work.\n- Missing features are either implemented or labeled incomplete.\n- Security risks are documented.\n- Final ZIP is upload-ready.`;
   }
 
+
+  function zipTextMap() {
+    const map = new Map();
+    (current.zipEntries || []).forEach(entry => {
+      if (!entry.name.endsWith('/') && typeof entry.text === 'string') map.set(normalizePath(entry.name), entry.text);
+    });
+    return map;
+  }
+
+  function countDuplicateIdIssues(textMap) {
+    let count = 0;
+    for (const [name, text] of textMap) if (/\.html?$/i.test(name)) count += findDuplicateIds(text).length;
+    return count;
+  }
+
+  function countEmptyLinks(textMap) {
+    let count = 0;
+    for (const [name, text] of textMap) if (/\.html?$/i.test(name)) count += (text.match(/href=["']#(["'])/gi) || []).length + (text.match(/href=["']javascript:void\(0\)["']/gi) || []).length;
+    return count;
+  }
+
+  function countMissingCsp(textMap) {
+    let count = 0;
+    for (const [name, text] of textMap) if (/\.html?$/i.test(name) && !/Content-Security-Policy/i.test(text)) count++;
+    return count;
+  }
+
+  function wizardTextForAnalysis(analysis) {
+    if (!analysis) return 'Run the validator first.';
+    if (analysis.score < 50) return 'Stop deployment. Create a repair pack and restore the last stable version.';
+    if (analysis.safeFixes && analysis.safeFixes.length) return 'Apply safe patches first. Export a rollback ZIP before uploading changes.';
+    if (analysis.developerFixes && analysis.developerFixes.length) return 'Export developer tasks. Do not mark complete until a person verifies risky work.';
+    return 'Run hosted QA. Only mark complete after the live site opens and tests pass.';
+  }
+
+  function startGuidedRepair() {
+    if (!current.analysis) { showView('validator'); toast('Run the validator first.'); return; }
+    const lines = ['Guided Repair Wizard', '', 'Step 1: Export a rollback ZIP.', 'Step 2: Apply safe patches only.', 'Step 3: Create a repair pack.', 'Step 4: Upload repaired files to GitHub.', 'Step 5: Test the live URL.', 'Step 6: Mark verified only if the live test passes.', '', 'Next action: ' + wizardTextForAnalysis(current.analysis)];
+    $('#repairLog').textContent = lines.join('\n');
+    toast('Guided repair steps prepared.');
+  }
+
+  function handleRepairCardAction(action, id) {
+    const item = [...buildRepairCommandItems('safe'), ...buildRepairCommandItems('review')].find(x => x.id === id) || repairItem(id, id, 'Developer task selected.', 'Developer Required', 'Developer verifies fix.', ['task']);
+    if (action === 'explain') showRepairExplanation(item);
+    if (action === 'prepare') prepareRepair(item);
+    if (action === 'apply') applySingleRepair(item);
+    if (action === 'task') downloadText(`Load_Tasks_Task_${safeFileName(item.id)}.md`, buildDeveloperTask(item));
+    if (action === 'issue') downloadText(`GitHub_Issue_${safeFileName(item.id)}.md`, buildGithubIssueForItem(item));
+  }
+
+  function showRepairExplanation(item) {
+    $('#repairLog').textContent = `${item.title}\n\nWhy it matters:\n${item.description}\n\nConfidence: ${item.confidence}\n\nAcceptance test:\n${item.acceptance}\n\nStatus after patch: Patched, Needs QA. Do not mark Complete until tested.`;
+  }
+
+  async function prepareRepair(item) {
+    const files = await buildRepairedFiles([item.id], false);
+    const changed = Object.keys(files).sort().slice(0, 80);
+    $('#repairLog').textContent = `Prepared fix: ${item.title}\n\nFiles in preview:\n${changed.join('\n') || 'No files prepared.'}\n\nNo files have been uploaded yet. Export a repair pack or fixed ZIP after review.`;
+  }
+
+  async function applySingleRepair(item) {
+    if (/Developer Required|Instruction Only/i.test(item.confidence) && !confirm('This item may require developer review. Export a repair package anyway?')) return;
+    const files = await buildRepairedFiles([item.id], true);
+    downloadBlob(`Load_Tasks_${safeFileName(item.id)}_Patch.zip`, buildZipBlob(files));
+    $('#repairLog').textContent = `Patch exported for ${item.title}.\n\nStatus: Patched, Needs QA.\n\nUpload the patched files, then run the live site test before marking verified.`;
+  }
+
+  async function previewSafePatch() {
+    if (!current.analysis) { toast('Run validator first.'); return; }
+    const ids = buildRepairCommandItems('safe').map(i => i.id);
+    const files = await buildRepairedFiles(ids, false);
+    $('#repairLog').textContent = `Safe patch preview prepared.\n\nRepair IDs:\n${ids.join('\n') || 'None'}\n\nFiles that would be exported:\n${Object.keys(files).sort().join('\n')}`;
+  }
+
+  async function createRepairPack() {
+    if (!current.analysis) { toast('Run validator first.'); return; }
+    const ids = [...buildRepairCommandItems('safe'), ...buildRepairCommandItems('review')].filter(i => !/Developer Required/i.test(i.confidence)).map(i => i.id);
+    const repaired = await buildRepairedFiles(ids, true);
+    const pack = {};
+    Object.entries(repaired).forEach(([path, data]) => { pack['repaired-files/' + path] = data; });
+    pack['reports/repair-report.md'] = stringToBytes(buildMarkdownReport());
+    pack['reports/developer-required-fixes.md'] = stringToBytes(buildDeveloperRequiredReport());
+    pack['reports/qa-checklist.md'] = stringToBytes(buildRepairQaChecklist());
+    pack['reports/github-upload-instructions.md'] = stringToBytes(buildDeployChecklist());
+    pack['prompts/claude-repair-prompt.txt'] = stringToBytes(buildClaudePrompt());
+    pack['prompts/human-developer-task-list.txt'] = stringToBytes(buildHumanDeveloperTaskList());
+    pack['rollback/ROLLBACK_REPORT.md'] = stringToBytes(buildMarkdownReport());
+    pack['manifest-of-changes.json'] = stringToBytes(JSON.stringify({ createdAt: new Date().toISOString(), project: current.project.name, appliedRepairIds: ids, status: 'Patched, Needs QA' }, null, 2));
+    downloadBlob('Load_Tasks_Repair_Pack.zip', buildZipBlob(pack));
+    $('#repairLog').textContent = 'Repair Pack exported. Status remains Patched, Needs QA until live testing passes.';
+  }
+
+  async function buildRepairedFiles(ids, includeReports) {
+    let files = await currentFilesForExport(false);
+    if (!Object.keys(files).length) files['README_OPEN_FIRST.md'] = stringToBytes(buildOpeningGuide());
+    if (ids.includes('flatten')) files = applyFlattenForGithub(files);
+    if (ids.includes('manifest')) files['manifest.json'] = stringToBytes(JSON.stringify(sampleManifest(), null, 2));
+    if (ids.includes('sw')) files['service-worker.js'] = stringToBytes(sampleServiceWorker());
+    if (ids.includes('readme')) files['README_OPEN_FIRST.md'] = stringToBytes(buildOpeningGuide());
+    if (ids.includes('security')) files['SECURITY.md'] = stringToBytes(buildSecurityGuide());
+    if (ids.includes('apple-icon')) files = applyAppleIconFix(files);
+    if (ids.includes('duplicate-ids')) files = applyDuplicateIdFix(files);
+    if (ids.includes('empty-links')) files = applyPlaceholderLinkFix(files);
+    if (ids.includes('csp')) files = applyCspFix(files);
+    if (ids.includes('asset-paths')) files = applyAssetPathFix(files);
+    if (includeReports) {
+      files['LOAD_TASKS_REPAIR_REPORT.md'] = stringToBytes(buildRepairSummary(ids));
+      files['LOAD_TASKS_QA_CHECKLIST.md'] = stringToBytes(buildRepairQaChecklist());
+    }
+    return files;
+  }
+
+  function applyFlattenForGithub(files) {
+    const names = Object.keys(files);
+    if (files['index.html']) {
+      files['.nojekyll'] = stringToBytes('');
+      files['404.html'] = stringToBytes(simple404());
+      files['GITHUB_PAGES_FIX_README.md'] = stringToBytes(buildDeployChecklist());
+      return files;
+    }
+    const index = names.find(n => /\/index\.html$/i.test(n));
+    if (!index) return files;
+    const prefix = index.replace(/index\.html$/i, '');
+    const out = {};
+    Object.entries(files).forEach(([path, data]) => {
+      if (path.startsWith(prefix)) out[path.slice(prefix.length)] = data;
+      else out[path] = data;
+    });
+    out['.nojekyll'] = stringToBytes('');
+    out['404.html'] = stringToBytes(simple404());
+    out['GITHUB_PAGES_FIX_README.md'] = stringToBytes(buildDeployChecklist());
+    return out;
+  }
+
+  function simple404() {
+    return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=./index.html"><title>Load Tasks</title></head><body><p>Redirecting to the app.</p><p><a href="./index.html">Open app</a></p></body></html>';
+  }
+
+  function applyAppleIconFix(files) {
+    const iconPath = Object.keys(files).find(n => /apple-touch-icon\.png$/i.test(n)) || Object.keys(files).find(n => /(180x180|192x192|icon).*\.png$/i.test(n));
+    if (iconPath) files['apple-touch-icon.png'] = files[iconPath];
+    Object.keys(files).filter(n => /\.html?$/i.test(n)).forEach(path => {
+      let text = bytesToText(files[path]);
+      if (!/<head[\s>]/i.test(text)) return;
+      text = text.replace(/\s*<link[^>]+rel=["']apple-touch-icon["'][^>]*>\s*/gi, '\n');
+      text = text.replace(/\s*<meta[^>]+name=["']apple-mobile-web-app-title["'][^>]*>\s*/gi, '\n');
+      text = text.replace(/\s*<meta[^>]+name=["']apple-mobile-web-app-capable["'][^>]*>\s*/gi, '\n');
+      const block = '\n  <link rel="apple-touch-icon" href="apple-touch-icon.png">\n  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">\n  <meta name="apple-mobile-web-app-title" content="Load Tasks">\n  <meta name="apple-mobile-web-app-capable" content="yes">\n  <meta name="mobile-web-app-capable" content="yes">\n';
+      text = text.replace(/<\/head>/i, block + '</head>');
+      files[path] = stringToBytes(text);
+    });
+    return files;
+  }
+
+  function applyDuplicateIdFix(files) {
+    Object.keys(files).filter(n => /\.html?$/i.test(n)).forEach(path => {
+      let text = bytesToText(files[path]);
+      const seen = new Map();
+      const changes = [];
+      text = text.replace(/id=(["'])([^"']+)\1/gi, (m, quote, id) => {
+        const count = seen.get(id) || 0;
+        seen.set(id, count + 1);
+        if (count === 0) return m;
+        const next = `${id}_${count + 1}`;
+        changes.push([id, next]);
+        return `id=${quote}${next}${quote}`;
+      });
+      changes.forEach(([oldId, newId]) => {
+        const labelRegex = new RegExp(`for=(["'])${escapeRegExp(oldId)}\\1`, 'i');
+        text = text.replace(labelRegex, `for="${newId}"`);
+      });
+      if (changes.length) files[path] = stringToBytes(text);
+    });
+    return files;
+  }
+
+  function applyPlaceholderLinkFix(files) {
+    const stub = `\n<script>\ndocument.querySelectorAll('[data-action]').forEach(function(button){\n  button.addEventListener('click', function(){\n    console.warn('Action needs implementation:', button.dataset.action);\n  });\n});\n</script>\n`;
+    Object.keys(files).filter(n => /\.html?$/i.test(n)).forEach(path => {
+      let text = bytesToText(files[path]);
+      text = text.replace(/<a\b([^>]*)href=["']#(["'])([^>]*)>([\s\S]*?)<\/a>/gi, (m, before, q, after, label) => {
+        const clean = stripTags(label).trim() || 'Action';
+        const action = clean.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'unimplemented-action';
+        return `<button type="button" data-action="${action}"${before}${after}>${label}</button>`;
+      });
+      if (!/Action needs implementation/i.test(text) && text.includes('data-action=')) text = text.replace(/<\/body>/i, stub + '</body>');
+      files[path] = stringToBytes(text);
+    });
+    return files;
+  }
+
+  function applyCspFix(files) {
+    const csp = `<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; media-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://api.github.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self';">`;
+    Object.keys(files).filter(n => /\.html?$/i.test(n)).forEach(path => {
+      let text = bytesToText(files[path]);
+      if (!/Content-Security-Policy/i.test(text) && /<head[\s>]/i.test(text)) {
+        text = text.replace(/<head([^>]*)>/i, `<head$1>\n  ${csp}`);
+        files[path] = stringToBytes(text);
+      }
+    });
+    return files;
+  }
+
+  function applyAssetPathFix(files) {
+    const names = Object.keys(files).map(normalizePath);
+    const set = new Set(names);
+    Object.keys(files).filter(n => /\.(html?|css)$/i.test(n)).forEach(path => {
+      let text = bytesToText(files[path]);
+      text = text.replace(/(src|href)=(["'])([^"'#][^"']+)\2/gi, (m, attr, quote, ref) => {
+        if (/^(https?:|data:|mailto:|tel:|javascript:)/i.test(ref)) return m;
+        const clean = ref.split('?')[0].split('#')[0];
+        const resolved = normalizePath(resolvePath(path, clean));
+        if (set.has(resolved)) return m;
+        const base = normalizePath(clean).split('/').pop();
+        const matches = names.filter(n => n.endsWith('/' + base) || n === base);
+        if (matches.length === 1) return `${attr}=${quote}${relativeFrom(path, matches[0])}${quote}`;
+        return m;
+      });
+      files[path] = stringToBytes(text);
+    });
+    return files;
+  }
+
+  function relativeFrom(from, target) {
+    const fromParts = normalizePath(from).split('/'); fromParts.pop();
+    const targetParts = normalizePath(target).split('/');
+    while (fromParts.length && targetParts.length && fromParts[0] === targetParts[0]) { fromParts.shift(); targetParts.shift(); }
+    return '../'.repeat(fromParts.length) + targetParts.join('/');
+  }
+
+  function buildDeveloperTask(item) {
+    return `# Developer Task: ${item.title}\n\nStatus: ${item.confidence}\n\nProblem:\n${item.description}\n\nAcceptance test:\n${item.acceptance}\n\nRule:\nDo not mark Complete until the live app test passes. If patched but not tested, mark Patched, Needs QA.`;
+  }
+
+  function buildGithubIssueForItem(item) {
+    return `# ${item.title}\n\n## Evidence\n${item.description}\n\n## Confidence\n${item.confidence}\n\n## Acceptance criteria\n- ${item.acceptance}\n- Final status is not Complete until verification passes.\n\n## QA\n- Upload patched files.\n- Open the hosted site.\n- Test the affected feature.\n- Confirm no new break appeared.`;
+  }
+
+  function buildDeveloperRequiredReport() {
+    const items = buildRepairCommandItems('review').filter(i => /Developer Required|Instruction Only/i.test(i.confidence));
+    return '# Developer Required Fixes\n\n' + (items.length ? items.map(buildDeveloperTask).join('\n\n') : 'No developer-required fixes listed.');
+  }
+
+  function buildHumanDeveloperTaskList() {
+    const items = buildRepairCommandItems('review');
+    return items.length ? items.map(i => `- [ ] ${i.title}: ${i.description}. Acceptance: ${i.acceptance}`).join('\n') : 'No tasks generated.';
+  }
+
+  function buildRepairSummary(ids) {
+    return `# Load Tasks Repair Summary\n\nProject: ${current.project.name}\nGenerated: ${new Date().toISOString()}\nStatus: Patched, Needs QA\n\nApplied repair IDs:\n${ids.map(id => '- ' + id).join('\n')}\n\nLocked rule: Do not mark Complete until the hosted app test passes.`;
+  }
+
+  function buildRepairQaChecklist() {
+    return `# Repair QA Checklist\n\n- Open the hosted site over HTTPS.\n- Confirm index.html loads.\n- Confirm assets load.\n- Confirm PWA manifest loads.\n- Confirm service worker registers.\n- Confirm any repaired buttons are tested.\n- Confirm apple-touch-icon.png opens directly if icon repair was applied.\n- Confirm no duplicate IDs remain if duplicate ID repair was applied.\n- Confirm no href="#" placeholders remain unless documented.\n- Mark status Verified only after these tests pass.`;
+  }
+
+  function bytesToText(data) { return data instanceof Uint8Array ? decodeBytes(data) : String(data || ''); }
+  function safeFileName(name) { return String(name || 'repair').replace(/[^a-z0-9_-]+/gi, '_'); }
+  function escapeRegExp(value) { return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+  function stripTags(value) { return String(value).replace(/<[^>]+>/g, ' '); }
+
   function saveVersion(status) {
     const analysis = current.analysis || { score: 0, fileCount: current.zipEntries.length, categories: [] };
     const version = {
@@ -714,7 +1068,13 @@
       score: analysis.score || 0,
       fileCount: current.zipEntries.length,
       fileNames: current.zipEntries.map(e => e.name),
+      fileSizes: Object.fromEntries((current.zipEntries || []).map(e => [e.name, e.size || (e.text ? e.text.length : 0)])),
+      contentSignals: buildContentSignals(current.zipEntries || []),
       analysis,
+      projectId: current.project.id,
+      liveUrl: current.project.liveUrl || '',
+      githubPath: current.project.githubPath || '',
+      knownBroken: current.project.knownBroken || '',
       createdAt: new Date().toISOString()
     };
     state.versions.unshift(version);
@@ -737,11 +1097,457 @@
     $('#compareOutput').textContent = `Comparing ${a.name} to ${b.name}\n\nAdded files:\n${added.join('\n') || 'None'}\n\nRemoved files:\n${removed.join('\n') || 'None'}\n\nScore change: ${a.score - b.score}`;
   }
 
+
+  function buildContentSignals(entries) {
+    const signals = {};
+    (entries || []).forEach(entry => {
+      const name = normalizePath(entry.name);
+      const size = entry.size || (entry.text ? entry.text.length : 0);
+      const text = typeof entry.text === 'string' ? entry.text : '';
+      signals[name] = {
+        size,
+        hasText: !!text,
+        hasManifestLink: /rel=["']manifest["']/i.test(text),
+        hasAppleIcon: /apple-touch-icon/i.test(text),
+        hasCsp: /Content-Security-Policy/i.test(text),
+        placeholderLinks: (text.match(/href=["']#["']|javascript:void\(0\)/gi) || []).length,
+        buttonCount: (text.match(/<button\b/gi) || []).length,
+        imageRefs: (text.match(/\.(png|jpg|jpeg|webp|gif|svg)/gi) || []).length
+      };
+    });
+    return signals;
+  }
+
+  function saveProjectMemory() {
+    current.project.liveUrl = ($('#projectLiveUrl') || {}).value || current.project.liveUrl || '';
+    current.project.githubPath = ($('#projectGithubPath') || {}).value || current.project.githubPath || '';
+    current.project.knownBroken = ($('#projectBrokenNotes') || {}).value || current.project.knownBroken || '';
+    current.project.updatedAt = new Date().toISOString();
+    state.projects = state.projects || [];
+    const index = state.projects.findIndex(p => p.id === current.project.id);
+    if (index >= 0) state.projects[index] = current.project;
+    else state.projects.unshift(current.project);
+    state.buildMemory = state.buildMemory || {};
+    state.buildMemory[current.project.id] = {
+      project: current.project,
+      lastAnalysis: current.analysis || null,
+      lastUpdated: new Date().toISOString(),
+      tasks: (state.tasks || []).filter(t => t.projectType === current.project.type).slice(0, 80)
+    };
+    saveState();
+    toast('Project memory saved.');
+  }
+
+  function renderProjectVault() {
+    const live = $('#projectLiveUrl');
+    if (!live) return;
+    live.value = current.project.liveUrl || '';
+    $('#projectGithubPath').value = current.project.githubPath || '';
+    $('#projectBrokenNotes').value = current.project.knownBroken || '';
+
+    const stable = state.stableBuilds || [];
+    $('#stableVaultList').innerHTML = stable.length ? stable.map(item => `
+      <div class="version-item stable-lock">
+        <strong>${escapeHtml(item.name)}</strong>
+        <div class="badge-row"><span class="badge good">Stable</span><span class="badge info">Score ${escapeHtml(String(item.score || 0))}</span><span class="badge warn">${escapeHtml(item.project || current.project.name)}</span></div>
+        <small>${escapeHtml(new Date(item.createdAt).toLocaleString())}</small>
+      </div>`).join('') : '<div class="empty-state">No protected stable build yet.</div>';
+
+    $('#versionTimeline').innerHTML = (state.versions || []).length ? state.versions.map((version, index) => `
+      <div class="timeline-item">
+        <span class="timeline-dot">${index + 1}</span>
+        <div>
+          <strong>${escapeHtml(version.name)}</strong>
+          <div class="badge-row"><span class="badge ${badgeClass(version.status)}">${escapeHtml(version.status)}</span><span class="badge warn">Score ${escapeHtml(String(version.score || 0))}</span><span class="badge info">${escapeHtml(String(version.fileCount || 0))} files</span></div>
+          <small>${escapeHtml(new Date(version.createdAt).toLocaleString())}</small>
+        </div>
+      </div>`).join('') : '<div class="empty-state">No versions saved yet. Upload and analyze a build first.</div>';
+  }
+
+  function markVaultStable() {
+    if (!current.analysis) { toast('Run the validator before protecting a stable build.'); return; }
+    const stable = {
+      id: 'stable-' + cryptoRandom(),
+      name: current.project.versionName || 'Stable Build',
+      project: current.project.name,
+      type: current.project.type,
+      score: current.analysis.score || 0,
+      fileCount: current.zipEntries.length,
+      fileNames: current.zipEntries.map(e => e.name),
+      analysis: current.analysis,
+      createdAt: new Date().toISOString(),
+      warning: 'Protected stable build. Do not overwrite without rollback.'
+    };
+    state.stableBuilds = state.stableBuilds || [];
+    state.stableBuilds.unshift(stable);
+    saveVersion('Stable');
+    saveState();
+    toast('Current build protected in Stable Build Vault.');
+  }
+
+  function exportProjectMemory() {
+    saveProjectMemory();
+    const memory = {
+      project: current.project,
+      activeAnalysis: current.analysis,
+      versions: state.versions || [],
+      stableBuilds: state.stableBuilds || [],
+      tasks: state.tasks || [],
+      reports: state.reports || [],
+      exportedAt: new Date().toISOString()
+    };
+    downloadText('Load_Tasks_Project_Memory.json', JSON.stringify(memory, null, 2));
+  }
+
+  function exportStableVaultReport() {
+    const lines = ['# Stable Build Vault Report', '', `Project: ${current.project.name}`, `Generated: ${new Date().toISOString()}`, ''];
+    (state.stableBuilds || []).forEach(item => {
+      lines.push(`## ${item.name}`);
+      lines.push(`- Status: Stable`);
+      lines.push(`- Score: ${item.score}`);
+      lines.push(`- File count: ${item.fileCount}`);
+      lines.push(`- Date: ${item.createdAt}`);
+      lines.push('');
+    });
+    if (!(state.stableBuilds || []).length) lines.push('No stable builds protected yet.');
+    downloadText('Load_Tasks_Stable_Build_Vault_Report.md', lines.join('\n'));
+  }
+
+  function compareBuildsV4() {
+    const [latest, previous] = state.versions || [];
+    const box = $('#buildComparisonV4');
+    if (!latest || !previous) {
+      if (box) box.textContent = 'Save at least two analyzed versions first.';
+      toast('At least two versions are required.');
+      return;
+    }
+    const latestSet = new Set(latest.fileNames || []);
+    const previousSet = new Set(previous.fileNames || []);
+    const added = [...latestSet].filter(file => !previousSet.has(file));
+    const removed = [...previousSet].filter(file => !latestSet.has(file));
+    const common = [...latestSet].filter(file => previousSet.has(file));
+    const changedSize = common.filter(file => (latest.fileSizes || {})[file] !== (previous.fileSizes || {})[file]);
+    const likely = inferLikelyBreakSource(latest, previous, added, removed, changedSize);
+    const text = [
+      `Comparing latest: ${latest.name}`,
+      `Against previous: ${previous.name}`,
+      '',
+      `Score change: ${(latest.score || 0) - (previous.score || 0)}`,
+      '',
+      'Files added:',
+      added.length ? added.join('\n') : 'None',
+      '',
+      'Files removed:',
+      removed.length ? removed.join('\n') : 'None',
+      '',
+      'Files changed by size:',
+      changedSize.length ? changedSize.join('\n') : 'None',
+      '',
+      'Likely break source:',
+      likely,
+      '',
+      'Suggested repair order:',
+      '1. Restore missing root files first.',
+      '2. Check index.html, manifest.json, and service-worker.js.',
+      '3. Check assets and icon paths.',
+      '4. Run Repair Command Center.',
+      '5. Export rollback before upload.'
+    ].join('\n');
+    if (box) box.textContent = text;
+    return text;
+  }
+
+  function inferLikelyBreakSource(latest, previous, added, removed, changedSize) {
+    const important = ['index.html','manifest.json','service-worker.js','app.js','styles.css'];
+    const touchedImportant = important.filter(file => added.includes(file) || removed.includes(file) || changedSize.includes(file));
+    if (removed.includes('index.html')) return 'index.html was removed or moved. This can cause a 404 or raw file view.';
+    if (removed.some(file => /assets\/images|splash|cover/i.test(file))) return 'Splash, cover, or image asset may have been removed.';
+    if (touchedImportant.length) return `Core app file changed: ${touchedImportant.join(', ')}. Review these first.`;
+    if ((latest.score || 0) < (previous.score || 0)) return 'Validator score dropped. Review missing files and developer-required fixes.';
+    return 'No single break source proven. Run full validator and inspect changed files.';
+  }
+
+  function exportChangelog() {
+    const lines = ['# Load Tasks Version Changelog', '', `Generated: ${new Date().toISOString()}`, ''];
+    (state.versions || []).forEach(version => {
+      lines.push(`## ${version.name}`);
+      lines.push(`- Status: ${version.status}`);
+      lines.push(`- Score: ${version.score}`);
+      lines.push(`- Files: ${version.fileCount}`);
+      lines.push(`- Date: ${version.createdAt}`);
+      if (version.knownBroken) lines.push(`- Known broken: ${version.knownBroken}`);
+      lines.push('');
+    });
+    downloadText('Load_Tasks_Changelog.md', lines.join('\n'));
+  }
+
+  function exportRollbackGuideV4() {
+    const stable = (state.stableBuilds || [])[0];
+    const lines = ['# Rollback Guide', '', `Project: ${current.project.name}`, `Generated: ${new Date().toISOString()}`, ''];
+    if (stable) {
+      lines.push(`Last protected stable build: ${stable.name}`);
+      lines.push(`Stable score: ${stable.score}`);
+      lines.push('Use this stable build as the recovery target before applying new fixes.');
+    } else {
+      lines.push('No stable build has been protected yet. Mark a known working version stable before risky edits.');
+    }
+    lines.push('', 'Rollback steps:', '1. Stop uploading new fixes.', '2. Download or locate the last stable package.', '3. Replace the broken repo files with the stable files.', '4. Wait for GitHub Pages to rebuild.', '5. Test index.html, splash image, buttons, and Home Screen icon.', '6. Mark the restored version Stable only after live QA.');
+    downloadText('Load_Tasks_Rollback_Guide.md', lines.join('\n'));
+  }
+
+  const V4_TEMPLATES = {
+    'Load Main Master Plan': ['opens PWA projects like apps', 'opens HTML without raw code', 'offline workspace', 'media playback', 'book tools', 'export pipeline', 'splash page', 'hard refresh', 'diagnostics'],
+    'LoadPlay Master Plan': ['streaming browse rows', 'creator channels', 'viewer sign in', 'developer sign in', 'subscriber pages', 'YouTube compliant embed rules', 'profanity guardrails', 'nudity guardrails', 'test mode', 'mock activity'],
+    'LoadStudio Master Plan': ['scene cards', 'timeline playback', 'character library', 'voice manipulation', 'wardrobe tools', 'lighting filters', 'AI image proof rule', 'provider fallback', 'package export', 'reopen editable package'],
+    'Standalone Book PWA Plan': ['cover included', 'full text included', 'images included', 'charts included if promised', 'quizzes functional', 'manifest', 'service worker', 'offline cache', 'navigation works'],
+    'GitHub Pages Deployment Plan': ['index.html at published root', 'manifest at root', 'service worker at root', 'assets folder uploaded', '.nojekyll present', 'correct case-sensitive URL', '404 fallback present'],
+    'Security Checklist': ['CSP', 'no hidden redirects', 'no credential capture forms', 'no unsafe external scripts', 'token not stored', 'rollback before push'],
+    'Dyslexia-Friendly UX Checklist': ['large tap targets', 'plain labels', 'one task at a time', 'line spacing control', 'high contrast', 'reduced motion', 'next best action panel']
+  };
+
+  function renderBuildPlanLibrary() {
+    const box = $('#buildPlanLibrary');
+    if (!box) return;
+    box.innerHTML = Object.entries(V4_TEMPLATES).map(([name, items]) => `
+      <article class="panel template-card">
+        <h2>${escapeHtml(name)}</h2>
+        <ul>${items.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>
+        <div class="button-row">
+          <button class="secondary-action" data-template-name="${escapeHtml(name)}" onclick="window.dispatchEvent(new CustomEvent('loadtasks-template', { detail: '${escapeHtml(name)}' }))">Add to Notes</button>
+        </div>
+      </article>`).join('');
+  }
+
+  window.addEventListener('loadtasks-template', event => {
+    const name = event.detail;
+    const items = V4_TEMPLATES[name] || [];
+    const target = $('#notesInput');
+    if (target) {
+      target.value += `\n\n${name}\n` + items.map(item => `- ${item}`).join('\n');
+      extractTasks(target.value, false);
+      toast(`${name} added to notes.`);
+    }
+  });
+
+  const PROMISE_AUDIT_PATTERNS = [
+    { claim: 'Standalone PWA', terms: ['standalone pwa','installable','manifest','service worker'], evidence: () => current.analysis && current.analysis.summary.manifestPath && current.analysis.summary.swPath },
+    { claim: 'Splash page included', terms: ['splash','front screen','first screen'], evidence: () => hasFileMatch(/splash|LOAD_TASKS_SPLASH|cover/i) },
+    { claim: 'Icons included', terms: ['icon','icons','apple-touch-icon'], evidence: () => current.analysis && current.analysis.summary.iconCount > 0 },
+    { claim: 'Offline support', terms: ['offline','cache','service worker'], evidence: () => current.analysis && current.analysis.summary.swPath },
+    { claim: 'GitHub ready', terms: ['github ready','github pages','deploy'], evidence: () => hasFileMatch(/\.nojekyll|404\.html|GITHUB/i) },
+    { claim: 'All buttons work', terms: ['all buttons work','buttons functional','all pages functional'], evidence: () => current.analysis && !JSON.stringify(current.analysis.categories || []).match(/href=\"#\"|duplicate id|no handler/i) },
+    { claim: 'Images included', terms: ['images included','cover included','splash included'], evidence: () => current.analysis && current.analysis.summary.imageCount > 0 },
+    { claim: 'Charts included', terms: ['charts included','graphs included','survey charts'], evidence: () => hasFileMatch(/chart|graph|survey/i) },
+    { claim: 'Security added', terms: ['security added','csp','sandbox','safe upload'], evidence: () => hasTextMatch(/Content-Security-Policy|SECURITY|sandbox/i) },
+    { claim: 'Export working', terms: ['export working','download fixed','zip export'], evidence: () => hasTextMatch(/downloadBlob|buildZipBlob|Export Fixed ZIP/i) }
+  ];
+
+  function hasFileMatch(pattern) {
+    return (current.zipEntries || []).some(entry => pattern.test(normalizePath(entry.name)));
+  }
+
+  function hasTextMatch(pattern) {
+    return (current.zipEntries || []).some(entry => typeof entry.text === 'string' && pattern.test(entry.text));
+  }
+
+  function runPromiseAuditV2() {
+    const notes = (($('#notesInput') || {}).value || current.textNotes || '').toLowerCase();
+    const rows = PROMISE_AUDIT_PATTERNS.map(item => {
+      const claimed = item.terms.some(term => notes.includes(term));
+      const proven = !!item.evidence();
+      const status = !claimed ? 'Not claimed' : proven ? 'Verified' : 'Claim Not Proven';
+      if (claimed && !proven) {
+        const task = makeTask('Promise not proven: ' + item.claim, 'Critical', 'Find file evidence or mark incomplete.', 'Promise Audit v2');
+        if (!state.tasks.find(t => t.title === task.title)) state.tasks.push(task);
+      }
+      return { claim: item.claim, claimed, proven, status };
+    });
+    state.promiseAudit = { rows, generatedAt: new Date().toISOString() };
+    saveState();
+    toast('Promise Audit v2 complete.');
+  }
+
+  function renderPromiseAudit() {
+    const out = $('#promiseAuditOutput');
+    const falseOut = $('#falsePositiveOutput');
+    if (!out || !falseOut) return;
+    const audit = state.promiseAudit || { rows: [] };
+    out.innerHTML = audit.rows.length ? audit.rows.map(row => `
+      <div class="audit-row"><strong>${escapeHtml(row.claim)}</strong><span class="badge ${badgeClass(row.status)}">${escapeHtml(row.status)}</span></div>`).join('') : 'No promise audit has run yet.';
+    const claims = buildFalsePositiveRows();
+    falseOut.innerHTML = claims.length ? claims.map(row => `
+      <div class="audit-row"><strong>${escapeHtml(row.claim)}</strong><span class="badge ${badgeClass(row.status)}">${escapeHtml(row.status)}</span><small>${escapeHtml(row.evidence)}</small></div>`).join('') : 'No developer claims found in notes yet.';
+  }
+
+  function buildFalsePositiveRows() {
+    const notes = (($('#notesInput') || {}).value || current.textNotes || '');
+    const rows = [];
+    CLAIM_PATTERNS.forEach(claim => {
+      if (claim.pattern.test(notes)) {
+        let status = 'Claim Not Proven';
+        let evidence = 'No file evidence found yet.';
+        if (/buttons/i.test(claim.label)) {
+          const textMap = zipTextMap();
+          const empty = countEmptyLinks(textMap);
+          const dup = countDuplicateIdIssues(textMap);
+          status = empty || dup ? 'Claim Not Proven' : current.analysis ? 'Needs Human Test' : 'Not enough evidence';
+          evidence = `${empty} placeholder link issues and ${dup} duplicate ID issues detected.`;
+        } else if (/Standalone/i.test(claim.label)) {
+          const ok = current.analysis && current.analysis.summary.manifestPath && current.analysis.summary.swPath;
+          status = ok ? 'Verified' : 'Missing';
+          evidence = ok ? 'Manifest and service worker found.' : 'Manifest or service worker missing.';
+        } else if (/Images/i.test(claim.label)) {
+          const ok = current.analysis && current.analysis.summary.imageCount > 0;
+          status = ok ? 'Verified' : 'Missing';
+          evidence = ok ? `${current.analysis.summary.imageCount} image files found.` : 'No image assets found.';
+        } else if (/Security/i.test(claim.label)) {
+          const ok = hasTextMatch(/Content-Security-Policy|SECURITY|sandbox/i);
+          status = ok ? 'Partially Present' : 'Claim Not Proven';
+          evidence = ok ? 'Some security text or CSP found. Manual security review still required.' : 'No CSP or security file evidence found.';
+        }
+        rows.push({ claim: claim.label, status, evidence });
+      }
+    });
+    return rows;
+  }
+
+  function exportFeatureMatrixV4() {
+    const rows = [['Template','Required feature','Status']];
+    Object.entries(V4_TEMPLATES).forEach(([name, items]) => items.forEach(item => rows.push([name, item, 'Required'])));
+    downloadText('Load_Tasks_Feature_Matrix_v4.csv', rows.map(row => row.map(cell => `"${String(cell).replace(/"/g,'""')}"`).join(',')).join('\n'));
+  }
+
+  function exportFalsePositiveReportV4() {
+    const lines = ['# False Positive Detector v2 Report', '', `Generated: ${new Date().toISOString()}`, ''];
+    buildFalsePositiveRows().forEach(row => {
+      lines.push(`## ${row.claim}`);
+      lines.push(`- Status: ${row.status}`);
+      lines.push(`- Evidence: ${row.evidence}`);
+      lines.push('');
+    });
+    if (lines.length < 5) lines.push('No developer claims detected in pasted notes.');
+    downloadText('Load_Tasks_False_Positive_Report_v2.md', lines.join('\n'));
+  }
+
+  function renderLaunchCertificate(forceGenerate = false) {
+    const out = $('#launchCertificateOutput');
+    const statusEl = $('#certificateStatus');
+    if (!out || !statusEl) return;
+    const cert = buildLaunchCertificate();
+    statusEl.textContent = cert.status;
+    statusEl.className = 'certificate-status ' + badgeClass(cert.status);
+    out.textContent = cert.text;
+    if (forceGenerate) toast('Launch readiness certificate refreshed.');
+  }
+
+  function buildLaunchCertificate() {
+    const analysis = current.analysis;
+    const critical = [];
+    if (!analysis) critical.push('Validator has not run.');
+    if (analysis && !analysis.summary.rootIndex) critical.push('index.html is not confirmed at published root.');
+    if (analysis && !analysis.summary.manifestPath) critical.push('manifest.json is missing.');
+    if (analysis && !analysis.summary.swPath) critical.push('service-worker.js is missing.');
+    if (analysis && !analysis.summary.iconCount) critical.push('icons are missing.');
+    if (analysis && analysis.score < 85) critical.push('PWA Reality Score is below 85.');
+    const status = critical.length ? 'Not Ready' : 'Ready for Live QA';
+    const lines = [
+      '# Launch Readiness Certificate',
+      '',
+      `Project: ${current.project.name}`,
+      `Type: ${current.project.type}`,
+      `Version: ${current.project.versionName}`,
+      `Generated: ${new Date().toISOString()}`,
+      `Status: ${status}`,
+      '',
+      '## Evidence',
+      `- PWA score: ${analysis ? analysis.score : 'No score'}`,
+      `- index.html root: ${analysis && analysis.summary.rootIndex ? 'yes' : 'no'}`,
+      `- manifest: ${analysis && analysis.summary.manifestPath ? analysis.summary.manifestPath : 'missing'}`,
+      `- service worker: ${analysis && analysis.summary.swPath ? analysis.summary.swPath : 'missing'}`,
+      `- icons: ${analysis ? analysis.summary.iconCount : 0}`,
+      `- images: ${analysis ? analysis.summary.imageCount : 0}`,
+      '',
+      '## Critical blockers',
+      critical.length ? critical.map(item => `- ${item}`).join('\n') : '- None from automated scan. Manual QA still required.',
+      '',
+      '## Required live QA',
+      '- Open hosted site over HTTPS.',
+      '- Confirm splash screen appears first.',
+      '- Confirm navigation buttons work.',
+      '- Confirm Add to Home Screen icon appears.',
+      '- Confirm offline reload after first visit.',
+      '- Confirm export buttons download files.',
+      '',
+      'Locked rule: Do not mark Complete until live QA passes.'
+    ];
+    return { status, text: lines.join('\n') };
+  }
+
+  function downloadLaunchCertificate() {
+    downloadText('Load_Tasks_Launch_Readiness_Certificate.md', buildLaunchCertificate().text);
+  }
+
+  function downloadLaunchChecklistV4() {
+    const text = `# Load Tasks Launch Checklist\n\n- index.html at published root\n- manifest.json loads\n- service-worker.js loads\n- assets folder uploaded\n- splash image visible\n- Home Screen icon visible\n- dashboard opens\n- validator runs\n- Repair Command Center opens\n- Project Vault opens\n- Focus Mode opens\n- export buttons download files\n- no build marked Complete unless verified\n`;
+    downloadText('Load_Tasks_Launch_Checklist_v4.md', text);
+  }
+
+  function renderFocusMode() {
+    const action = computeFocusAction();
+    const target = $('#focusNextAction');
+    if (!target) return;
+    target.textContent = action.text;
+    target.dataset.nextView = action.view;
+    const health = $('#focusHealth');
+    if (health) {
+      const analysis = current.analysis;
+      health.innerHTML = [
+        ['Project', current.project.name],
+        ['Status', analysis ? analysis.status : 'Not validated'],
+        ['Score', analysis ? analysis.score : 0],
+        ['Versions', (state.versions || []).length],
+        ['Stable builds', (state.stableBuilds || []).length]
+      ].map(([label, value]) => `<div class="metric-card"><strong>${escapeHtml(String(value))}</strong><span>${escapeHtml(label)}</span></div>`).join('');
+    }
+    const steps = $('#focusSteps');
+    if (steps) {
+      steps.innerHTML = computeFocusSteps().map(step => `<li>${escapeHtml(step)}</li>`).join('');
+    }
+  }
+
+  function computeFocusAction() {
+    if (!current.uploadedFiles.length && !(current.zipEntries || []).length) return { view: 'intake', text: 'Upload the latest build ZIP first.' };
+    if (!current.analysis) return { view: 'validator', text: 'Run the validator so Load Tasks can see what is missing.' };
+    if (current.analysis.score < 70) return { view: 'fix', text: 'Open Repair Command Center and apply only safe patches.' };
+    if (!(state.stableBuilds || []).length) return { view: 'vault', text: 'Protect the current working version in the Stable Build Vault.' };
+    if (current.analysis.cannotComplete) return { view: 'library', text: 'Run Promise Audit v2 and check claims that are not proven.' };
+    return { view: 'certificate', text: 'Generate the Launch Readiness Certificate, then do live iPad QA.' };
+  }
+
+  function computeFocusSteps() {
+    const action = computeFocusAction();
+    const base = [
+      'Do one step at a time.',
+      action.text,
+      'Export a rollback before uploading a repair.',
+      'Test the hosted site after upload.',
+      'Mark Verified only after the live test passes.'
+    ];
+    return base;
+  }
+
+  function goToFocusNextAction() {
+    const action = computeFocusAction();
+    showView(action.view);
+  }
+
+
   async function exportFixedZip() {
-    const files = await currentFilesForExport(true);
+    const ids = current.analysis ? buildRepairCommandItems('safe').map(i => i.id) : ['manifest','sw','readme','security','apple-icon'];
+    const files = await buildRepairedFiles(ids, true);
     const blob = buildZipBlob(files);
     downloadBlob('Load_Tasks_Fixed_Package.zip', blob);
-    toast('Fixed ZIP exported. Safe fixes only were applied.');
+    toast('Fixed ZIP exported. Status remains Patched, Needs QA.');
   }
 
   async function exportRollbackZip() {
@@ -1027,7 +1833,11 @@
       version: '<path d="M12 8v5l3 2M4 12a8 8 0 1 0 2.3-5.7M4 4v6h6"/>',
       handoff: '<path d="M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3ZM8 11c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3Zm0 2c-2.7 0-5 1.3-5 3v2h10v-2c0-1.7-2.3-3-5-3Zm8 0c-.8 0-1.5.1-2.2.4 1.3.9 2.2 2 2.2 3.6v1h5v-2c0-1.7-2.3-3-5-3Z"/>',
       github: '<path d="M12 2a10 10 0 0 0-3.2 19c.5.1.7-.2.7-.5v-2c-2.9.6-3.5-1.2-3.5-1.2-.5-1.1-1.1-1.4-1.1-1.4-.9-.6.1-.6.1-.6 1 .1 1.6 1.1 1.6 1.1.9 1.6 2.4 1.1 3 .8.1-.7.4-1.1.7-1.4-2.3-.3-4.7-1.2-4.7-5A3.9 3.9 0 0 1 6.6 8c-.1-.3-.5-1.3.1-2.7 0 0 .9-.3 2.9 1.1A10 10 0 0 1 12 6c.8 0 1.7.1 2.4.3 2-1.4 2.9-1.1 2.9-1.1.6 1.4.2 2.4.1 2.7a3.9 3.9 0 0 1 1.1 2.8c0 3.9-2.4 4.7-4.7 5 .4.3.8 1 .8 2v2.9c0 .3.2.6.8.5A10 10 0 0 0 12 2Z"/>',
-      report: '<path d="M5 3h14v18H5V3Zm4 5h6M9 12h6M9 16h4"/>'
+      report: '<path d="M5 3h14v18H5V3Zm4 5h6M9 12h6M9 16h4"/>',
+      vault: '<path d="M5 21V7l7-4 7 4v14H5Zm4-9h6M9 16h6"/>',
+      library: '<path d="M4 5c2-1 4-1 6 0v14c-2-1-4-1-6 0V5Zm10 0c2-1 4-1 6 0v14c-2-1-4-1-6 0V5Z"/>',
+      certificate: '<path d="M6 3h12v18l-6-3-6 3V3Zm3 5h6M9 12h6"/>',
+      focus: '<path d="M12 3a9 9 0 1 0 9 9h-5a4 4 0 1 1-4-4V3Z"/>'
     };
     document.querySelectorAll('[data-icon]').forEach(el => {
       const path = icons[el.dataset.icon] || icons.dashboard;
