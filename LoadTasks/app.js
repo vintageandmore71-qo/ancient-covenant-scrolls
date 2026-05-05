@@ -206,6 +206,14 @@
     bindIf('#focusRefreshBtn', 'click', renderFocusMode);
     bindIf('#downloadProjectMemoryFromVersions', 'click', exportProjectMemory);
     bindIf('#downloadLaunchReadinessFromVersions', 'click', downloadLaunchCertificate);
+    bindIf('#askAiHelperBtn', 'click', askAiHelper);
+    bindIf('#downloadAiHelperAnswerBtn', 'click', downloadAiHelperAnswer);
+    bindIf('#copyAiHelperAnswerBtn', 'click', copyAiHelperAnswer);
+    bindIf('#helpGoNextBtn', 'click', goToFocusNextAction);
+    bindIf('#helpRefreshNextBtn', 'click', renderHelpPage);
+    bindIf('#downloadHelpGuideBtn', 'click', downloadHelpGuide);
+    bindIf('#downloadValidatorDirectionsBtn', 'click', downloadValidatorDirections);
+    bindIf('#copyNextStepsBtn', 'click', copyValidatorNextSteps);
   }
 
   function showView(view) {
@@ -217,6 +225,7 @@
     if (view === 'library') { renderBuildPlanLibrary(); renderPromiseAudit(); }
     if (view === 'certificate') renderLaunchCertificate();
     if (view === 'focus') renderFocusMode();
+    if (view === 'help') renderHelpPage();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -1491,6 +1500,213 @@
     const text = `# Load Tasks Launch Checklist\n\n- index.html at published root\n- manifest.json loads\n- service-worker.js loads\n- assets folder uploaded\n- splash image visible\n- Home Screen icon visible\n- dashboard opens\n- validator runs\n- Repair Command Center opens\n- Project Vault opens\n- Focus Mode opens\n- export buttons download files\n- no build marked Complete unless verified\n`;
     downloadText('Load_Tasks_Launch_Checklist_v4.md', text);
   }
+
+
+  function renderHelpPage() {
+    const next = typeof computeFocusAction === 'function' ? computeFocusAction() : { text: 'Run the validator, then open Repair Command Center.', view: 'validator' };
+    const nextBox = $('#helpNextBestAction');
+    if (nextBox) {
+      nextBox.textContent = next.text;
+      nextBox.dataset.nextView = next.view || 'validator';
+    }
+  }
+
+  function askAiHelper() {
+    const topic = ($('#aiHelperTopic') || {}).value || 'validator';
+    const question = (($('#aiHelperQuestion') || {}).value || '').trim();
+    const answer = buildAiHelperAnswer(topic, question);
+    const box = $('#aiHelperAnswer');
+    if (box) box.textContent = answer;
+    state.aiHelperLastAnswer = answer;
+    saveState();
+  }
+
+  function buildAiHelperAnswer(topic, question) {
+    const analysis = current.analysis;
+    const score = analysis ? analysis.score : 'not run yet';
+    const status = analysis ? analysis.status : 'not validated yet';
+    const base = {
+      validator: [
+        'Validator result explanation',
+        '',
+        `Current score: ${score}`,
+        `Current status: ${status}`,
+        '',
+        'A high score with Needs QA means the build has a strong structure, but warnings still need review.',
+        '',
+        'Do next:',
+        '1. Open Repair Command Center.',
+        '2. Prepare fixes before applying them.',
+        '3. Export a Repair Pack.',
+        '4. Upload repaired files.',
+        '5. Test the live site.',
+        '6. Mark stable only after live QA passes.'
+      ],
+      repair: [
+        'Repair order',
+        '',
+        '1. Fix GitHub Pages or nested folder issues first.',
+        '2. Fix duplicate IDs second.',
+        '3. Review placeholder links third.',
+        '4. Add CSP fourth.',
+        '5. Export a Repair Pack.',
+        '6. Re-run Validator.',
+        '',
+        'Do not mark Complete until the hosted site is tested.'
+      ],
+      github: [
+        'GitHub Pages help',
+        '',
+        'A 404 usually means index.html is not at the published path or the URL has the wrong folder case.',
+        '',
+        'Check:',
+        '1. index.html is inside the folder GitHub Pages serves.',
+        '2. Folder spelling and capitalization match the URL.',
+        '3. .nojekyll is present.',
+        '4. 404.html is present.',
+        '5. Wait 2 to 5 minutes after upload.'
+      ],
+      icon: [
+        'iPad Home Screen icon help',
+        '',
+        'If iPad shows a letter icon, Safari did not find apple-touch-icon.png.',
+        '',
+        'Check:',
+        '1. apple-touch-icon.png is beside index.html.',
+        '2. The direct icon URL opens.',
+        '3. index.html has apple-touch-icon links.',
+        '4. Delete the old Home Screen shortcut.',
+        '5. Add the site to Home Screen again.'
+      ],
+      stable: [
+        'Stable Build Vault help',
+        '',
+        'Mark a build stable only after it works live.',
+        '',
+        'Use Stable Build Vault to protect the last working version before risky fixes.'
+      ],
+      certificate: [
+        'Launch Readiness Certificate help',
+        '',
+        'Generate this after running the validator and applying safe repairs.',
+        '',
+        'If the certificate says Not Ready, follow the blockers listed before launch.'
+      ],
+      upload: [
+        'Upload test ZIP help',
+        '',
+        'Use one ZIP at a time.',
+        '',
+        '1. Go to Intake.',
+        '2. Upload one PWA ZIP.',
+        '3. Tap Analyze Upload.',
+        '4. Go to Validator.',
+        '5. Run Full Validator.'
+      ],
+      dyslexia: [
+        'Focus Mode help',
+        '',
+        'Use Focus Mode when the app feels like too much.',
+        '',
+        'It gives one next best action instead of a long list.'
+      ]
+    };
+    const lines = base[topic] || base.validator;
+    if (question) {
+      lines.push('', 'Your question:', question, '', 'Plain answer:', 'Use the topic steps above first. If the result does not match, take a screenshot and review the matching warning card in Repair Command Center.');
+    }
+    return lines.join('\n');
+  }
+
+  function validatorDirectionsText() {
+    return [
+      '# Load Tasks Validator Directions',
+      '',
+      '## What the screen means',
+      '',
+      'A high score with Needs QA means the build looks strong but still has warnings that must be reviewed.',
+      '',
+      '## Example result',
+      '',
+      '- Score: 95',
+      '- Status: Needs QA',
+      '- Complete allowed: No',
+      '',
+      '## What passed',
+      '',
+      '- Manifest readiness passed.',
+      '- Offline support passed.',
+      '- Assets and references passed.',
+      '- Promised features vs actual files passed.',
+      '',
+      '## What needs review',
+      '',
+      '1. Nested folder warning',
+      'The app may be inside a folder such as witness-chef/index.html. GitHub Pages may need the folder root adjusted.',
+      '',
+      '2. Placeholder links',
+      'href="#" links may look clickable but may not go anywhere.',
+      '',
+      '3. Duplicate ID',
+      'A repeated ID such as bookingOccasion can break forms or JavaScript.',
+      '',
+      '4. Missing CSP',
+      'A Content Security Policy should be added for stronger static-site security.',
+      '',
+      '## What to do next',
+      '',
+      '1. Open Repair Command Center.',
+      '2. Use Prepare Fix first.',
+      '3. Apply only safe patches.',
+      '4. Export a Repair Pack.',
+      '5. Upload repaired files.',
+      '6. Run the validator again.',
+      '7. Mark stable only after live QA passes.',
+      '',
+      'Locked rule: no build is complete unless verified.'
+    ].join('\n');
+  }
+
+  function downloadHelpGuide() {
+    downloadText('Load_Tasks_Help_Center_Guide.md', validatorDirectionsText());
+  }
+
+  function downloadValidatorDirections() {
+    downloadText('Load_Tasks_Validator_Directions.md', validatorDirectionsText());
+  }
+
+  function copyValidatorNextSteps() {
+    const text = [
+      'Next steps:',
+      '1. Open Repair Command Center.',
+      '2. Prepare the fix before applying it.',
+      '3. Fix nested folder first.',
+      '4. Fix duplicate IDs second.',
+      '5. Review placeholder links third.',
+      '6. Add CSP fourth.',
+      '7. Export Repair Pack.',
+      '8. Re-run Validator.',
+      '9. Mark stable only after live QA passes.'
+    ].join('\n');
+    navigator.clipboard && navigator.clipboard.writeText(text);
+    toast('Next steps copied.');
+  }
+
+  function downloadAiHelperAnswer() {
+    const answer = state.aiHelperLastAnswer || (($('#aiHelperAnswer') || {}).textContent || 'No helper answer generated yet.');
+    downloadText('Load_Tasks_AI_Helper_Answer.txt', answer);
+  }
+
+  function copyAiHelperAnswer() {
+    const answer = state.aiHelperLastAnswer || (($('#aiHelperAnswer') || {}).textContent || '');
+    if (navigator.clipboard && answer) {
+      navigator.clipboard.writeText(answer);
+      toast('Helper answer copied.');
+    } else {
+      toast('No helper answer to copy yet.');
+    }
+  }
+
 
   function renderFocusMode() {
     const action = computeFocusAction();

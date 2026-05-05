@@ -455,3 +455,89 @@ body.simple-mode .focus-layout {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Help Center v4.2 */
+.help-command-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(280px, .8fr);
+  gap: 18px;
+  margin-bottom: 18px;
+}
+.help-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 18px;
+}
+.help-card {
+  min-height: 220px;
+}
+.ai-helper-panel label {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0;
+}
+.ai-helper-panel select,
+.ai-helper-panel textarea {
+  width: 100%;
+  border: 1px solid var(--line-soft);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  border-radius: 16px;
+  padding: 14px;
+  font: inherit;
+}
+.ai-answer {
+  min-height: 260px;
+  white-space: pre-wrap;
+}
+.help-steps, .meaning-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+.help-steps div,
+.meaning-list div {
+  display: grid;
+  gap: 4px;
+  padding: 14px;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  background: rgba(255,255,255,.04);
+}
+.help-steps strong,
+.meaning-list strong {
+  color: var(--gold);
+}
+.help-steps span,
+.meaning-list span {
+  color: var(--muted);
+}
+.clean-list,
+.instruction-list {
+  padding-left: 22px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+.clean-list strong,
+.instruction-list strong {
+  color: var(--text);
+}
+.priority-help {
+  border-color: rgba(255,212,0,.45);
+}
+.warning-help {
+  border-color: rgba(255,196,0,.45);
+}
+.next-action-panel {
+  border-color: rgba(255,212,0,.40);
+}
+body.simple-mode .help-command-grid,
+body.simple-mode .help-grid {
+  grid-template-columns: 1fr;
+}
+@media (max-width: 900px) {
+  .help-command-grid {
+    grid-template-columns: 1fr;
+  }
+}

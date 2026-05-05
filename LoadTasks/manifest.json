@@ -1,7 +1,7 @@
 {
   "name": "Load Tasks",
   "short_name": "Load Tasks",
-  "description": "Load Tasks Project Intelligence validates, repairs, remembers versions, protects stable builds, and creates launch readiness reports.",
+  "description": "Load Tasks validates, repairs, remembers project builds, and includes a Help Center with Load AI Helper guidance.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

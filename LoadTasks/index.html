@@ -54,6 +54,7 @@
         <button data-view="focus" data-route>Focus</button>
         <button data-view="handoff" data-route>Handoff</button>
         <button data-view="github" data-route>GitHub</button>
+        <button data-view="help" data-route>Help</button>
         <button data-view="settings" data-route>Settings</button>
       </nav>
       <button class="icon-button" id="hardRefresh" aria-label="Hard refresh app state">
@@ -128,6 +129,11 @@
               <span class="card-icon" data-icon="focus"></span>
               <strong>Show Next Step</strong>
               <span>Use the dyslexia-friendly guided workflow.</span>
+            </button>
+            <button class="command-card" data-view="help" data-route>
+              <span class="card-icon" data-icon="help"></span>
+              <strong>Open Help Center</strong>
+              <span>Ask the Load AI Helper and follow step-by-step instructions.</span>
             </button>
           </div>
 
@@ -416,6 +422,147 @@
           <div class="panel">
             <h2>Plain language repair path</h2>
             <ol id="focusSteps" class="focus-steps"></ol>
+          </div>
+        </section>
+
+
+
+        <section class="view" id="view-help" data-view-panel="help">
+          <div class="section-head">
+            <p class="eyebrow">Help Center</p>
+            <h1>Load AI Helper and step-by-step support.</h1>
+            <p>Use this area when the validator gives warnings, a GitHub upload fails, an icon does not appear, or you need one clear next action.</p>
+          </div>
+
+          <div class="help-command-grid">
+            <article class="panel ai-helper-panel">
+              <div class="panel-title">
+                <h2>Load AI Helper</h2>
+                <span class="badge warn">Local guide</span>
+              </div>
+              <p>This helper gives built-in guidance from the Load Tasks rulebook. It does not send your files anywhere. Future versions can connect to a private AI provider if you choose.</p>
+              <label>What do you need help with?
+                <select id="aiHelperTopic">
+                  <option value="validator">Understanding validator results</option>
+                  <option value="repair">What to repair first</option>
+                  <option value="github">GitHub Pages or 404 issue</option>
+                  <option value="icon">iPad Home Screen icon</option>
+                  <option value="stable">Stable Build Vault</option>
+                  <option value="certificate">Launch Readiness Certificate</option>
+                  <option value="upload">Uploading a test ZIP</option>
+                  <option value="dyslexia">Use Focus Mode</option>
+                </select>
+              </label>
+              <label>Optional question
+                <textarea id="aiHelperQuestion" class="mini-textarea" placeholder="Example: My score is 95 but it says Needs QA. What do I do next?"></textarea>
+              </label>
+              <div class="button-row">
+                <button class="primary-action" id="askAiHelperBtn">Ask Helper</button>
+                <button class="secondary-action" id="downloadAiHelperAnswerBtn">Download Answer</button>
+                <button class="secondary-action" id="copyAiHelperAnswerBtn">Copy Answer</button>
+              </div>
+              <div id="aiHelperAnswer" class="report-box ai-answer">Choose a topic and tap Ask Helper.</div>
+            </article>
+
+            <article class="panel next-action-panel">
+              <h2>Next best action</h2>
+              <div id="helpNextBestAction" class="focus-action">Run the validator, then open Repair Command Center.</div>
+              <div class="button-row">
+                <button class="primary-action" id="helpGoNextBtn">Take Me There</button>
+                <button class="secondary-action" id="helpRefreshNextBtn">Refresh</button>
+              </div>
+            </article>
+          </div>
+
+          <div class="help-grid">
+            <article class="panel help-card priority-help">
+              <h2>Your current validator screen</h2>
+              <p>If the score is high but the status says <strong>Needs QA</strong>, that is correct. The build may be strong, but warnings still need review before the build can be called complete.</p>
+              <div class="help-steps">
+                <div><strong>Score 95</strong><span>Strong structure. Not automatic completion.</span></div>
+                <div><strong>Needs QA</strong><span>Review warnings before upload or launch.</span></div>
+                <div><strong>Complete allowed: No</strong><span>The no false complete rule is active.</span></div>
+              </div>
+            </article>
+
+            <article class="panel help-card">
+              <h2>What passed</h2>
+              <ul class="clean-list">
+                <li><strong>Manifest readiness passed.</strong> The app metadata looks correct.</li>
+                <li><strong>Offline support passed.</strong> Install, fetch, and cache logic were found.</li>
+                <li><strong>Assets passed.</strong> Images and references were detected.</li>
+                <li><strong>Promised files passed.</strong> No obvious missing promised file evidence was found.</li>
+              </ul>
+            </article>
+
+            <article class="panel help-card warning-help">
+              <h2>What needs review</h2>
+              <ul class="clean-list">
+                <li><strong>Nested folder warning.</strong> The app may be inside a folder like witness-chef/index.html. GitHub Pages may need the folder root adjusted.</li>
+                <li><strong>Placeholder links.</strong> href="#" links may look clickable but may not go anywhere.</li>
+                <li><strong>Duplicate ID.</strong> A repeated ID such as bookingOccasion can break forms or JavaScript.</li>
+                <li><strong>Missing CSP.</strong> A Content Security Policy should be added for stronger static-site security.</li>
+              </ul>
+            </article>
+
+            <article class="panel help-card">
+              <h2>What to do next</h2>
+              <ol class="instruction-list">
+                <li>Go to <strong>Fix Studio</strong> or <strong>Repair Command Center</strong>.</li>
+                <li>Look for cards about nested folder, duplicate ID, placeholder links, and CSP.</li>
+                <li>Use <strong>Prepare Fix</strong> first. This lets you preview what will happen.</li>
+                <li>Use <strong>Apply Safe Patch</strong> only for safe or safe-with-review items.</li>
+                <li>Use <strong>Create Repair Pack</strong> to download repaired files and reports.</li>
+                <li>Do not mark the build complete until the hosted site is tested.</li>
+              </ol>
+            </article>
+
+            <article class="panel help-card">
+              <h2>Safe repair order</h2>
+              <ol class="instruction-list">
+                <li>Fix nested folder or GitHub Pages path first.</li>
+                <li>Fix duplicate IDs second.</li>
+                <li>Review placeholder links third.</li>
+                <li>Add CSP fourth.</li>
+                <li>Export a Repair Pack.</li>
+                <li>Upload the repaired files.</li>
+                <li>Run the validator again.</li>
+                <li>Mark stable only after live QA passes.</li>
+              </ol>
+            </article>
+
+            <article class="panel help-card">
+              <h2>Plain meaning of each warning</h2>
+              <div class="meaning-list">
+                <div><strong>Nested folder</strong><span>The site may work only if uploaded to the right folder path.</span></div>
+                <div><strong>href="#" links</strong><span>Some buttons or links may not have real actions yet.</span></div>
+                <div><strong>Duplicate ID</strong><span>Two fields may share one name, which can confuse forms and scripts.</span></div>
+                <div><strong>No CSP</strong><span>The site needs a stronger browser security rule.</span></div>
+              </div>
+            </article>
+
+            <article class="panel help-card">
+              <h2>When can a build be marked stable?</h2>
+              <p>Only after these checks pass:</p>
+              <ul class="clean-list">
+                <li>The hosted page opens without a 404.</li>
+                <li>The splash page appears first.</li>
+                <li>The main buttons work.</li>
+                <li>The Home Screen icon is correct.</li>
+                <li>The validator no longer shows critical errors.</li>
+                <li>Any patched issue has been tested live.</li>
+              </ul>
+            </article>
+
+            <article class="panel help-card">
+              <h2>Download help files</h2>
+              <p>Use these when handing the build to Claude, a developer, or yourself later.</p>
+              <div class="button-row">
+                <button class="primary-action" id="downloadHelpGuideBtn">Download Help Guide</button>
+                <button class="secondary-action" id="downloadValidatorDirectionsBtn">Download Validator Directions</button>
+                <button class="secondary-action" id="copyNextStepsBtn">Copy Next Steps</button>
+              </div>
+            </article>
           </div>
         </section>
 
