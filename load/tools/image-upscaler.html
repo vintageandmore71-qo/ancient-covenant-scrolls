@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Image Upscaler &mdash; Load</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<style>
+:root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--border:#2a2a40}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;font-size:14px;-webkit-font-smoothing:antialiased}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#150a28 0,#0a0514 100%);border-bottom:1px solid var(--border)}
+header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)}
+header h1{margin:0;font-size:16px;font-weight:800;flex:1}
+.wrap{max-width:1080px;margin:0 auto;padding:24px 18px 80px}
+.intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin:0 0 18px}
+.intro h2{margin:0 0 6px;font-size:18px;font-weight:800}
+.intro p{margin:0;color:var(--mute);font-size:13.5px}
+.dz{position:relative;border:2px dashed var(--border);background:#0a0e18;border-radius:14px;padding:34px 18px;text-align:center;color:var(--mute)}
+.dz input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.dz strong{display:block;font-size:16px;color:#fff;margin-bottom:4px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+@media (max-width:640px){.row{grid-template-columns:1fr}}
+.section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin:14px 0}
+.section h3{margin:0 0 10px;font-size:14px;font-weight:800}
+label{display:block;font-size:11.5px;color:var(--mute);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+select,input{width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:#0a0e18;color:var(--fg);font:inherit;font-size:13px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-weight:700;font-size:13px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.preview{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+@media (max-width:640px){.preview{grid-template-columns:1fr}}
+.previewBox{background:#0a0e18;border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.previewBox img{max-width:100%;max-height:300px;border-radius:6px}
+.previewBox .lbl{font-size:11.5px;color:var(--mute);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.callout{background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.4);border-radius:10px;padding:12px 14px;font-size:12.5px;line-height:1.5}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1a1a26;color:#fff;padding:10px 16px;border-radius:8px;border:1px solid var(--border);font-size:13px;z-index:50;box-shadow:0 6px 24px rgba(0,0,0,.4);display:none}
+.toast.on{display:block}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="../">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Back to Load
+  </a>
+  <h1>Image Upscaler</h1>
+  <a class="back" href="./help.html#upscale" title="How it works">How it works</a>
+</header>
+<div class="wrap">
+<div class="intro">
+  <h2>Browser-side upscaler &mdash; offline-first</h2>
+  <p>Drop an image, pick a multiplier, get a higher-resolution version with smooth bicubic resampling. Runs entirely on this device. For AI-quality detail recovery (Real-ESRGAN, GFPGAN), the page includes a copy-paste handoff to Hugging Face Spaces below.</p>
+</div>
+
+<div class="dz">
+  <input id="file" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp">
+  <strong>Drop an image or tap to pick</strong>
+  PNG, JPEG, WEBP, GIF, BMP &middot; max 4096 px in either direction
+</div>
+
+<div class="section" id="optsHost" style="display:none">
+  <h3>Options</h3>
+  <div class="row">
+    <div><label>Multiplier</label>
+      <select id="mult">
+        <option value="2">2x</option>
+        <option value="3">3x</option>
+        <option value="4">4x</option>
+      </select>
+    </div>
+    <div><label>Output format</label>
+      <select id="fmt">
+        <option value="image/png">PNG (lossless)</option>
+        <option value="image/webp">WEBP (smaller)</option>
+        <option value="image/jpeg">JPEG (smallest)</option>
+      </select>
+    </div>
+  </div>
+  <div class="row">
+    <div><label>Quality (JPEG / WEBP only)</label><input id="quality" type="range" min="50" max="100" value="92"></div>
+    <div><label>Sharpening pass</label>
+      <select id="sharp">
+        <option value="0">None</option>
+        <option value="1" selected>Light</option>
+        <option value="2">Strong</option>
+      </select>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn primary" id="upscale">Upscale</button>
+    <button class="btn" id="reset">Pick another image</button>
+  </div>
+</div>
+
+<div class="preview" id="preview" style="display:none">
+  <div class="previewBox"><div class="lbl">Source</div><img id="srcImg" alt="source"></div>
+  <div class="previewBox"><div class="lbl">Upscaled</div><img id="outImg" alt="output"><div class="actions" style="justify-content:center;margin-top:10px"><button class="btn primary" id="dl" disabled>Download upscaled</button></div></div>
+</div>
+
+<div class="section">
+  <h3>For higher-quality AI upscaling</h3>
+  <div class="callout">
+    Browser bicubic is fast and offline, but it cannot invent detail.<br>
+    For face restoration use <strong>Hugging Face &rarr; CodeFormer / GFPGAN</strong> Spaces.<br>
+    For general 4x detail recovery use <strong>Hugging Face &rarr; Real-ESRGAN</strong> Spaces.<br>
+    Drop your source there, download the result, then if you still need a bigger size, run that result through this tool.
+  </div>
+</div>
+
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var toastEl = $('toast');
+  function toast(m){ toastEl.textContent = m; toastEl.classList.add('on'); setTimeout(function(){ toastEl.classList.remove('on'); }, 1800); }
+
+  var sourceFile = null, sourceImg = null;
+  var lastBlob = null, lastFilename = '';
+
+  function downloadBlob(blob, name){
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a'); a.href = url; a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+  }
+
+  function applySharpen(ctx, w, h, strength){
+    if (!strength) return;
+    var amt = strength === 1 ? 0.6 : 1.2;
+    var src = ctx.getImageData(0,0,w,h);
+    var out = ctx.createImageData(w,h);
+    var s = src.data, o = out.data;
+    var i, x, y, r, g, b;
+    for (y = 1; y < h-1; y++) {
+      for (x = 1; x < w-1; x++) {
+        i = (y*w + x) * 4;
+        // 3x3 unsharp mask kernel
+        for (var ch = 0; ch < 3; ch++) {
+          var c = s[i+ch];
+          var sum =
+            -1*s[((y-1)*w+(x-1))*4+ch] + -1*s[((y-1)*w+x)*4+ch] + -1*s[((y-1)*w+(x+1))*4+ch] +
+            -1*s[(y*w+(x-1))*4+ch] +  9*c                          + -1*s[(y*w+(x+1))*4+ch] +
+            -1*s[((y+1)*w+(x-1))*4+ch] + -1*s[((y+1)*w+x)*4+ch] + -1*s[((y+1)*w+(x+1))*4+ch];
+          var mixed = c + (sum - c) * amt * 0.1;
+          o[i+ch] = Math.max(0, Math.min(255, mixed));
+        }
+        o[i+3] = s[i+3];
+      }
+    }
+    ctx.putImageData(out, 0, 0);
+  }
+
+  $('file').addEventListener('change', function(e){
+    var f = e.target.files && e.target.files[0]; if (!f) return;
+    sourceFile = f;
+    var img = new Image();
+    img.onload = function(){
+      if (img.naturalWidth > 4096 || img.naturalHeight > 4096) { toast('Source larger than 4096 px &mdash; resize first.'); return; }
+      sourceImg = img;
+      $('srcImg').src = img.src;
+      $('optsHost').style.display = '';
+      $('preview').style.display = '';
+      $('outImg').removeAttribute('src');
+      $('dl').disabled = true;
+    };
+    img.src = URL.createObjectURL(f);
+  });
+
+  $('reset').addEventListener('click', function(){
+    sourceFile = null; sourceImg = null; lastBlob = null;
+    $('file').value = '';
+    $('optsHost').style.display = 'none';
+    $('preview').style.display = 'none';
+    $('dl').disabled = true;
+  });
+
+  $('upscale').addEventListener('click', function(){
+    if (!sourceImg) return;
+    var mult = parseInt($('mult').value, 10);
+    var fmt = $('fmt').value;
+    var q = parseInt($('quality').value, 10) / 100;
+    var sharp = parseInt($('sharp').value, 10);
+    var w = sourceImg.naturalWidth * mult;
+    var h = sourceImg.naturalHeight * mult;
+    if (w * h > 64 * 1024 * 1024) { toast('Output too large for browser memory. Lower the multiplier.'); return; }
+    var btn = $('upscale'); btn.disabled = true; btn.textContent = 'Upscaling...';
+    setTimeout(function(){
+      var c = document.createElement('canvas'); c.width = w; c.height = h;
+      var ctx = c.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(sourceImg, 0, 0, w, h);
+      try { applySharpen(ctx, w, h, sharp); } catch(e) {}
+      c.toBlob(function(blob){
+        if (!blob) { toast('toBlob failed.'); btn.disabled=false; btn.textContent='Upscale'; return; }
+        var url = URL.createObjectURL(blob);
+        $('outImg').src = url;
+        lastBlob = blob;
+        var ext = fmt === 'image/png' ? 'png' : fmt === 'image/webp' ? 'webp' : 'jpg';
+        var base = (sourceFile.name || 'image').replace(/\.[^.]+$/, '');
+        lastFilename = base + '-' + mult + 'x.' + ext;
+        $('dl').disabled = false;
+        btn.disabled = false; btn.textContent = 'Upscale';
+        toast('Upscaled to ' + w + 'x' + h + ' (' + (blob.size/1024).toFixed(0) + ' KB).');
+      }, fmt, q);
+    }, 30);
+  });
+
+  $('dl').addEventListener('click', function(){
+    if (!lastBlob) return;
+    downloadBlob(lastBlob, lastFilename);
+  });
+})();
+</script>
+</body>
+</html>

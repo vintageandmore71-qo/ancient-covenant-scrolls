@@ -86,6 +86,8 @@ code,kbd{background:#1a1a26;padding:2px 6px;border-radius:4px;font-family:ui-mon
   <a href="#file-editor">PWA File Editor</a>
   <a href="#mask">Mask Editor</a>
   <a href="#styles">Style Library</a>
+  <a href="#character">Character Bible</a>
+  <a href="#upscale">Image Upscaler</a>
   <a href="#acceptance">Acceptance Criteria</a>
 </nav>
 
@@ -316,6 +318,33 @@ code,kbd{background:#1a1a26;padding:2px 6px;border-radius:4px;font-family:ui-mon
   <li>Use the search field or category chips to narrow down.</li>
 </ol>
 <a class="open" href="./style-library.html">Open Style Library</a>
+</div>
+
+<div class="tool" id="character">
+<h3>Character Bible</h3>
+<ol>
+  <li>Tap <strong>Character Bible</strong> in workspace Section 6.</li>
+  <li>Tap <strong>New character</strong>. Enter a name.</li>
+  <li>Fill in Age, Physical description, Skin tone, Hair, Voice profile, Clothing rules, Personality, Master prompt.</li>
+  <li>Tap <strong>Pick image</strong> to attach a reference photo (kept on this device, max 1.5 MB).</li>
+  <li>Tap <strong>Save</strong>. The Generated character prompt panel auto-updates with the consistency-lock block.</li>
+  <li>Tap <strong>Copy character prompt</strong> to paste into any AI image prompt, or <strong>Download character JSON</strong> to keep the profile.</li>
+  <li>Use <strong>Export all</strong> / <strong>Import JSON</strong> to move profiles between devices.</li>
+</ol>
+<a class="open" href="./character-bible.html">Open Character Bible</a>
+</div>
+
+<div class="tool" id="upscale">
+<h3>Image Upscaler</h3>
+<ol>
+  <li>Tap <strong>Image Upscaler</strong> in workspace Section 6.</li>
+  <li>Drop an image (PNG / JPEG / WEBP / GIF / BMP, max 4096 px in either direction).</li>
+  <li>Pick a multiplier (2x / 3x / 4x), output format, quality, and optional sharpening pass.</li>
+  <li>Tap <strong>Upscale</strong>. The browser runs bicubic resampling locally &mdash; nothing leaves the device.</li>
+  <li>Tap <strong>Download upscaled</strong>.</li>
+  <li>For real detail recovery (face restoration, AI-style 4x), the page includes a copy-paste handoff to Hugging Face Spaces (CodeFormer / GFPGAN / Real-ESRGAN).</li>
+</ol>
+<a class="open" href="./image-upscaler.html">Open Image Upscaler</a>
 </div>
 
 <div class="tool" id="acceptance">

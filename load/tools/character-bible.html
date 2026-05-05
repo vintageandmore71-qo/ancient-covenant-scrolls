@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Character Bible &mdash; Load</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<script src="../book-video/character-bible.js"></script>
+<style>
+:root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--border:#2a2a40}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;font-size:14px;-webkit-font-smoothing:antialiased}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#150a28 0,#0a0514 100%);border-bottom:1px solid var(--border)}
+header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)}
+header h1{margin:0;font-size:16px;font-weight:800;flex:1}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 18px 80px}
+.intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin:0 0 18px}
+.intro h2{margin:0 0 6px;font-size:18px;font-weight:800}
+.intro p{margin:0;color:var(--mute);font-size:13.5px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-weight:700;font-size:13px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent)}
+.btn.danger{border-color:rgba(255,110,110,.4);color:var(--err)}
+.layout{display:grid;grid-template-columns:280px 1fr;gap:14px}
+@media (max-width:760px){.layout{grid-template-columns:1fr}}
+.list{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:10px;max-height:60vh;overflow:auto}
+.charpill{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px}
+.charpill:hover{background:var(--bg3)}
+.charpill.active{background:rgba(124,58,237,.2);color:#fff}
+.charpill .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.charpill .ag{color:var(--mute);font-size:11px}
+.editor{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px}
+.editor h3{margin:0 0 10px;font-size:15px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
+@media (max-width:640px){.row{grid-template-columns:1fr}}
+label{display:block;font-size:11.5px;color:var(--mute);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+input,textarea,select{width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:#0a0e18;color:var(--fg);font:inherit;font-size:13px}
+textarea{min-height:64px;resize:vertical;line-height:1.45}
+.refimg{display:flex;gap:10px;align-items:center;margin-top:6px}
+.refimg img{max-width:100px;max-height:120px;border-radius:8px;border:1px solid var(--border)}
+.preview{background:#0a0e18;border:1px solid var(--border);border-radius:8px;padding:10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;color:var(--mute);white-space:pre-wrap;max-height:240px;overflow:auto;margin-top:10px}
+.empty{color:var(--mute);text-align:center;padding:30px 10px;font-size:13px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1a1a26;color:#fff;padding:10px 16px;border-radius:8px;border:1px solid var(--border);font-size:13px;z-index:50;box-shadow:0 6px 24px rgba(0,0,0,.4);display:none}
+.toast.on{display:block}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="../">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Back to Load
+  </a>
+  <h1>Character Bible</h1>
+  <a class="back" href="./help.html#character" title="How it works">How it works</a>
+</header>
+<div class="wrap">
+<div class="intro">
+  <h2>Lock face / wardrobe / personality across scenes</h2>
+  <p>Build per-character profiles once. Reuse them in Book-to-Video, LoadStudio scenes, Verse-to-Video, or any AI image prompt. The exported JSON matches the existing <code>CharacterBibleEngine</code> schema, so it drops into the scene pipeline without conversion.</p>
+</div>
+
+<div class="bar">
+  <button class="btn primary" id="newChar">New character</button>
+  <button class="btn" id="exportAll">Export all (JSON)</button>
+  <button class="btn" id="importJson">Import JSON</button>
+  <input id="importInput" type="file" accept="application/json,.json" style="display:none">
+  <button class="btn danger" id="clearAll">Clear all</button>
+</div>
+
+<div class="layout">
+  <div class="list" id="list"><div class="empty">No characters yet. Tap <strong>New character</strong>.</div></div>
+  <div class="editor" id="editor"><div class="empty">Pick a character on the left, or create a new one.</div></div>
+</div>
+
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var toastEl = $('toast');
+  function toast(m){ toastEl.textContent = m; toastEl.classList.add('on'); setTimeout(function(){ toastEl.classList.remove('on'); }, 1800); }
+  function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+  function downloadBlob(blob, name){ var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 100); }
+
+  var STORAGE_KEY = 'load_character_bible_v1';
+  function loadAll(){ try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e){ return []; } }
+  function saveAll(arr){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); } catch(e){} }
+  var chars = loadAll();
+  var current = null;
+
+  function paintList(){
+    var host = $('list');
+    if (!chars.length) { host.innerHTML = '<div class="empty">No characters yet. Tap <strong>New character</strong>.</div>'; return; }
+    host.innerHTML = chars.map(function(c){
+      return '<div class="charpill'+(c.id===current?' active':'')+'" data-id="'+escapeHtml(c.id)+'">'+
+        '<div class="nm">'+escapeHtml(c.name||'(unnamed)')+'</div>'+
+        '<div class="ag">'+escapeHtml(c.age||'')+'</div>'+
+      '</div>';
+    }).join('');
+  }
+  $('list').addEventListener('click', function(e){
+    var p = e.target.closest('.charpill'); if (!p) return;
+    current = p.getAttribute('data-id');
+    paintList(); paintEditor();
+  });
+
+  function paintEditor(){
+    var host = $('editor');
+    if (!current) { host.innerHTML = '<div class="empty">Pick a character on the left, or create a new one.</div>'; return; }
+    var c = chars.find(function(x){ return x.id === current; }); if (!c) { current=null; paintEditor(); return; }
+    host.innerHTML =
+      '<h3>Character profile</h3>'+
+      '<div class="row"><div><label>Name</label><input id="f-name" value="'+escapeHtml(c.name||'')+'"></div>'+
+        '<div><label>Age</label><input id="f-age" value="'+escapeHtml(c.age||'')+'" placeholder="e.g. mid-30s"></div></div>'+
+      '<div class="row"><div><label>Physical description</label><textarea id="f-phys">'+escapeHtml(c.physicalDescription||'')+'</textarea></div>'+
+        '<div><label>Skin tone</label><input id="f-skin" value="'+escapeHtml(c.skinTone||'')+'" placeholder="e.g. warm olive"></div></div>'+
+      '<div class="row"><div><label>Hair</label><input id="f-hair" value="'+escapeHtml(c.hair||'')+'" placeholder="length, color, texture"></div>'+
+        '<div><label>Voice profile</label><input id="f-voice" value="'+escapeHtml(c.voiceProfile||'')+'" placeholder="warm tenor, slight rasp"></div></div>'+
+      '<div class="row"><div><label>Clothing rules</label><textarea id="f-cloth">'+escapeHtml(c.clothingRules||'')+'</textarea></div>'+
+        '<div><label>Personality</label><textarea id="f-pers">'+escapeHtml(c.personality||'')+'</textarea></div></div>'+
+      '<div><label>Master prompt (one line that captures everything)</label><textarea id="f-master">'+escapeHtml(c.masterPrompt||'')+'</textarea></div>'+
+      '<div><label>Reference image</label>'+
+        '<div class="refimg">'+(c.referenceImage?'<img id="f-ref" src="'+escapeHtml(c.referenceImage)+'" alt="ref">':'<span style="color:var(--mute);font-size:12px">No image picked yet</span>')+
+        '<input id="f-pickref" type="file" accept="image/*" style="display:none">'+
+        '<button class="btn" id="f-pickbtn">Pick image</button>'+
+        (c.referenceImage?'<button class="btn danger" id="f-delref">Remove</button>':'')+
+        '</div></div>'+
+      '<div class="bar" style="margin-top:14px">'+
+        '<button class="btn primary" id="saveBtn">Save</button>'+
+        '<button class="btn" id="copyPromptBtn">Copy character prompt</button>'+
+        '<button class="btn" id="downloadJsonBtn">Download character JSON</button>'+
+        '<button class="btn danger" id="deleteBtn">Delete character</button>'+
+      '</div>'+
+      '<div><label style="margin-top:8px">Generated character prompt (auto)</label>'+
+        '<div class="preview" id="promptPreview">'+escapeHtml(window.CharacterBibleEngine ? window.CharacterBibleEngine.characterPrompt(c) : '')+'</div></div>';
+
+    $('saveBtn').addEventListener('click', function(){
+      c.name = $('f-name').value.trim();
+      c.age = $('f-age').value.trim();
+      c.physicalDescription = $('f-phys').value.trim();
+      c.skinTone = $('f-skin').value.trim();
+      c.hair = $('f-hair').value.trim();
+      c.voiceProfile = $('f-voice').value.trim();
+      c.clothingRules = $('f-cloth').value.trim();
+      c.personality = $('f-pers').value.trim();
+      c.masterPrompt = $('f-master').value.trim();
+      saveAll(chars); paintList(); paintEditor();
+      toast('Saved.');
+    });
+    $('copyPromptBtn').addEventListener('click', function(){
+      if (!window.CharacterBibleEngine) return;
+      var t = window.CharacterBibleEngine.characterPrompt(c);
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function(){ toast('Copied.'); });
+      else toast('Clipboard unavailable.');
+    });
+    $('downloadJsonBtn').addEventListener('click', function(){
+      var blob = new Blob([JSON.stringify(c, null, 2)], { type:'application/json' });
+      downloadBlob(blob, 'character-' + (c.name||'unnamed').toLowerCase().replace(/[^a-z0-9]+/g,'-') + '.json');
+    });
+    $('deleteBtn').addEventListener('click', function(){
+      if (!confirm('Delete '+ (c.name||'this character') +'?')) return;
+      chars = chars.filter(function(x){ return x.id !== c.id; });
+      saveAll(chars); current = null; paintList(); paintEditor();
+      toast('Deleted.');
+    });
+    $('f-pickbtn').addEventListener('click', function(){ $('f-pickref').click(); });
+    $('f-pickref').addEventListener('change', function(e){
+      var f = e.target.files && e.target.files[0]; if (!f) return;
+      if (f.size > 1.5 * 1024 * 1024) { toast('Image larger than 1.5 MB &mdash; pick smaller.'); return; }
+      var reader = new FileReader();
+      reader.onload = function(ev){
+        c.referenceImage = ev.target.result;
+        saveAll(chars); paintEditor();
+      };
+      reader.readAsDataURL(f);
+    });
+    var del = $('f-delref'); if (del) del.addEventListener('click', function(){
+      c.referenceImage = ''; saveAll(chars); paintEditor();
+    });
+  }
+
+  $('newChar').addEventListener('click', function(){
+    if (!window.CharacterBibleEngine) { toast('CharacterBibleEngine not loaded.'); return; }
+    var name = prompt('Character name?', 'New character');
+    if (!name) return;
+    var c = window.CharacterBibleEngine.createCharacter(name, {});
+    chars.unshift(c);
+    saveAll(chars);
+    current = c.id;
+    paintList(); paintEditor();
+  });
+  $('exportAll').addEventListener('click', function(){
+    var blob = new Blob([JSON.stringify({ schemaVersion:1, generatedAt:new Date().toISOString(), characters:chars }, null, 2)], { type:'application/json' });
+    downloadBlob(blob, 'character-bible-' + new Date().toISOString().slice(0,10) + '.json');
+  });
+  $('importJson').addEventListener('click', function(){ $('importInput').click(); });
+  $('importInput').addEventListener('change', function(e){
+    var f = e.target.files && e.target.files[0]; if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      try {
+        var data = JSON.parse(ev.target.result);
+        var arr = Array.isArray(data) ? data : (Array.isArray(data.characters) ? data.characters : []);
+        if (!arr.length) { toast('No characters found in that file.'); return; }
+        arr.forEach(function(c){
+          if (!c.id) c.id = 'char_' + (c.name||'imported').toLowerCase().replace(/[^a-z0-9]+/g,'_') + '_' + Date.now() + '_' + Math.floor(Math.random()*1000);
+          chars.push(c);
+        });
+        saveAll(chars); paintList();
+        toast('Imported ' + arr.length + ' character(s).');
+      } catch (err) { toast('Import failed: ' + err.message); }
+    };
+    reader.readAsText(f);
+    e.target.value = '';
+  });
+  $('clearAll').addEventListener('click', function(){
+    if (!confirm('Delete every character on this device?')) return;
+    chars = []; current = null; saveAll(chars); paintList(); paintEditor();
+    toast('Cleared.');
+  });
+
+  paintList(); paintEditor();
+})();
+</script>
+</body>
+</html>

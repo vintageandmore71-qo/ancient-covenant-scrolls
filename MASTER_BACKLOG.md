@@ -40,7 +40,7 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 
 ## Load main (`/load/`)
 
-**Cache:** `load-v17ew`. **Tip status spec:** `PLAN_LOAD_AI.md`,
+**Cache:** `load-v17ex`. **Tip status spec:** `PLAN_LOAD_AI.md`,
 `PLAN_IMAGE_PROMPT_v3.md`, `PLAN_BOOK_TO_VIDEO.md`,
 `MEDIA_MODULE_SPEC.md`, `LOAD_FEATURES.md`, `LOAD_MARKETING.md`.
 
@@ -50,6 +50,14 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 - **Character Consistency module** — see X-CC.
 - **Piper TTS Stage 1 unblock + Stage 2 rollout** — see X-PIPER. Stage 1 shipped but not playing; blocked on the play() error text from the user. Resilience panel (Part 9) shipped in v17er gives an in-app diagnostic + recovery path.
 - **LOAD-ECO acceptance test pass** (Build Plan Part 13). Every part now has a tool surface, but the user-validation pass is still needed: open each tool, confirm PASS/FAIL/WARN labels render, run a sample export, save a receipt, check it appears in the Receipts library. Parts 1, 2, 3, 14-17 shipped in v17eq. Parts 4, 7, 9 + Book-to-Video wiring shipped in v17er. Parts 5, 6, 8, 10 shipped in v17es. Parts 11-13 are housekeeping/acceptance and are met by the existing tool surfaces.
+
+### Recently done (this session, 2026-05-05 — character bible + image upscaler)
+- **v17ex — Character Bible (X-CC) + Image Upscaler (X-AI-14c starter)**:
+  - **Character Bible (X-CC):** new tool at `load/tools/character-bible.html`. Wraps the existing `load/book-video/character-bible.js` engine with a full UI. Per-character profile: name, age, physical description, skin tone, hair, voice profile, clothing rules, personality, master prompt, reference image (max 1.5 MB, kept on device). Auto-rendered consistency-lock prompt block via `CharacterBibleEngine.characterPrompt()`. Save / Copy character prompt / Download character JSON / Delete per character. Bulk Export all / Import JSON / Clear all. Profiles persist to `localStorage` `load_character_bible_v1`.
+  - **Image Upscaler (X-AI-14c starter):** new tool at `load/tools/image-upscaler.html`. Drop an image (max 4096 px in either dimension). Pick 2x / 3x / 4x multiplier, PNG / WEBP / JPEG output, quality slider, optional 3x3 unsharp-mask sharpening pass (None / Light / Strong). Runs entirely in-browser via canvas with `imageSmoothingQuality: 'high'`. Memory guard rejects >64 megapixel outputs. Source + upscaled side-by-side preview. Honest copy: "Browser bicubic is fast and offline, but it cannot invent detail" with a handoff guide to Hugging Face Spaces (CodeFormer / GFPGAN / Real-ESRGAN) for AI-quality detail recovery.
+  - Help page updated with new TOC entries + per-tool cards for Character Bible and Image Upscaler.
+  - Workspace hub Section 6 now has 17 tiles.
+  - Cache `load-v17ew` -> `load-v17ex`. Version badge bumped in `load/load.js`.
 
 ### Recently done (this session, 2026-05-05 — mask editor + style library)
 - **v17ew — Mask Editor + Style Library**:
