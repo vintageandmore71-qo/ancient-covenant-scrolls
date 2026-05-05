@@ -40,7 +40,7 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 
 ## Load main (`/load/`)
 
-**Cache:** `load-v17fc`. **Tip status spec:** `PLAN_LOAD_AI.md`,
+**Cache:** `load-v17fd`. **Tip status spec:** `PLAN_LOAD_AI.md`,
 `PLAN_IMAGE_PROMPT_v3.md`, `PLAN_BOOK_TO_VIDEO.md`,
 `MEDIA_MODULE_SPEC.md`, `LOAD_FEATURES.md`, `LOAD_MARKETING.md`.
 
@@ -50,6 +50,14 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 - **Character Consistency module** — see X-CC.
 - **Piper TTS Stage 1 unblock + Stage 2 rollout** — see X-PIPER. Stage 1 shipped but not playing; blocked on the play() error text from the user. Resilience panel (Part 9) shipped in v17er gives an in-app diagnostic + recovery path.
 - **LOAD-ECO acceptance test pass** (Build Plan Part 13). Every part now has a tool surface, but the user-validation pass is still needed: open each tool, confirm PASS/FAIL/WARN labels render, run a sample export, save a receipt, check it appears in the Receipts library. Parts 1, 2, 3, 14-17 shipped in v17eq. Parts 4, 7, 9 + Book-to-Video wiring shipped in v17er. Parts 5, 6, 8, 10 shipped in v17es. Parts 11-13 are housekeeping/acceptance and are met by the existing tool surfaces.
+
+### Recently done (this session, 2026-05-05 — image resize + TTS voiceover)
+- **v17fd — Image Resize & Crop + TTS Voiceover**:
+  - **Image Resize & Crop:** new tool at `load/tools/image-resize.html`. Drop image (max 8192 px). Presets: Square 1080, Portrait 1080x1350, Story 1080x1920, Landscape 1920x1080, KDP cover 1600x2560, Thumbnail 512, PWA icons 192 / 512, Custom WxH, Scale-by-percent. Three fit modes: Cover (crop edges), Fit (letterbox with picker color), Stretch. PNG / JPEG / WEBP output with quality slider + optional 3x3 unsharp-mask sharpening pass. Source + output side-by-side preview, 64-megapixel memory guard.
+  - **TTS Voiceover:** new tool at `load/tools/tts-voiceover.html`. Pick browser voice / rate / pitch, type a script, tap "Speak & record" — `speechSynthesis` plays through speakers while a parallel `MediaRecorder` captures it via the microphone. Stop button, in-place preview, download recorded (WebM / M4A / OGG / WAV depending on browser) plus optional WAV re-encode via `AudioContext.decodeAudioData` + 16-bit PCM RIFF write. Honest copy: "browser TTS doesn't expose its audio stream directly" + room-noise warning.
+  - Help page updated with new TOC entries + per-tool cards.
+  - Workspace hub Section 6 now has 29 tiles.
+  - Cache `load-v17fc` -> `load-v17fd`. Version badge bumped in `load/load.js`.
 
 ### Recently done (this session, 2026-05-05 — sentence reader + audio trim)
 - **v17fc — Sentence Reader + Audio Trim**:

@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TTS Voiceover &mdash; Load</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
+<style>
+:root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--border:#2a2a40}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;font-size:14px;-webkit-font-smoothing:antialiased}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#150a28 0,#0a0514 100%);border-bottom:1px solid var(--border)}
+header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)}
+header h1{margin:0;font-size:16px;font-weight:800;flex:1}
+.wrap{max-width:920px;margin:0 auto;padding:24px 18px 80px}
+.intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin:0 0 18px}
+.intro h2{margin:0 0 6px;font-size:18px;font-weight:800}
+.intro p{margin:0;color:var(--mute);font-size:13.5px}
+.section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin:14px 0}
+.section h3{margin:0 0 10px;font-size:14px;font-weight:800}
+label{display:block;font-size:11.5px;color:var(--mute);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+input,select,textarea{width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:#0a0e18;color:var(--fg);font:inherit;font-size:13px}
+textarea{min-height:140px;resize:vertical;line-height:1.55}
+.row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media (max-width:700px){.row{grid-template-columns:1fr 1fr}}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-weight:700;font-size:13px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent)}
+.btn.danger{border-color:rgba(255,110,110,.4);color:var(--err)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.callout{background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.4);border-radius:10px;padding:12px 14px;font-size:12.5px;line-height:1.5}
+.warn{background:rgba(250,204,21,.12);border:1px solid rgba(250,204,21,.4);border-radius:10px;padding:12px 14px;font-size:12.5px;line-height:1.5;margin-top:10px}
+audio{width:100%;margin-top:10px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1a1a26;color:#fff;padding:10px 16px;border-radius:8px;border:1px solid var(--border);font-size:13px;z-index:50;box-shadow:0 6px 24px rgba(0,0,0,.4);display:none}
+.toast.on{display:block}
+.status{font-size:12.5px;color:var(--mute);margin-top:8px;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="../">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Back to Load
+  </a>
+  <h1>TTS Voiceover</h1>
+  <a class="back" href="./help.html#ttsvoice" title="How it works">How it works</a>
+</header>
+<div class="wrap">
+<div class="intro">
+  <h2>Browser text-to-speech &rarr; saved audio file</h2>
+  <p>Type or paste text, pick a browser voice + speed, tap <strong>Speak &amp; record</strong>. The Web Speech synthesizer plays through your speakers while a parallel <code>MediaRecorder</code> captures it through your microphone. Save the result as WAV / WebM. Useful when you want narration without your own voice.</p>
+</div>
+
+<div class="section">
+  <h3>1. Script</h3>
+  <textarea id="text" placeholder="Type or paste the line you want narrated.">The Lord is my shepherd; I shall not want.</textarea>
+</div>
+
+<div class="section">
+  <h3>2. Voice settings</h3>
+  <div class="row">
+    <div><label>Voice</label><select id="voice"></select></div>
+    <div><label>Rate</label>
+      <select id="rate"><option value="0.7">0.7x</option><option value="0.85">0.85x</option><option value="1" selected>1x</option><option value="1.15">1.15x</option><option value="1.3">1.3x</option></select>
+    </div>
+    <div><label>Pitch</label>
+      <select id="pitch"><option value="0.7">0.7</option><option value="1" selected>1.0</option><option value="1.3">1.3</option></select>
+    </div>
+  </div>
+  <div class="bar">
+    <button class="btn" id="previewBtn">Preview only (no recording)</button>
+  </div>
+</div>
+
+<div class="section">
+  <h3>3. Record</h3>
+  <div class="callout">
+    <strong>How recording works:</strong> Browser TTS doesn't expose its audio stream directly. To save it, this tool plays the speech aloud and captures the room audio through your microphone. <strong>Use a quiet room</strong>, set device volume reasonably high, and don't speak yourself during the take.
+  </div>
+  <div class="warn">
+    iPad Safari may ask for microphone permission first. The captured file is created locally; nothing is uploaded.
+  </div>
+  <div class="bar">
+    <button class="btn primary" id="recordBtn">Speak &amp; record</button>
+    <button class="btn danger" id="stopBtn" disabled>Stop</button>
+  </div>
+  <div class="status" id="status">Ready.</div>
+  <audio id="preview" controls></audio>
+  <div class="bar" id="exportBar" style="display:none">
+    <button class="btn" id="dlWebm">Download recorded</button>
+    <button class="btn" id="dlWav">Download as WAV</button>
+  </div>
+</div>
+
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var toastEl = $('toast');
+  function toast(m){ toastEl.textContent = m; toastEl.classList.add('on'); setTimeout(function(){ toastEl.classList.remove('on'); }, 1800); }
+  function downloadBlob(blob, name){ var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 100); }
+  function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+
+  var voices = [];
+  function loadVoices(){
+    if (!('speechSynthesis' in window)) { $('voice').innerHTML = '<option>Browser TTS not available</option>'; return; }
+    voices = window.speechSynthesis.getVoices() || [];
+    $('voice').innerHTML = '<option value="">System default</option>' +
+      voices.map(function(v, i){ return '<option value="' + i + '">' + escapeHtml(v.name) + ' (' + escapeHtml(v.lang) + ')' + (v.default ? ' &mdash; default' : '') + '</option>'; }).join('');
+  }
+  if ('speechSynthesis' in window) {
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  } else {
+    $('previewBtn').disabled = true; $('recordBtn').disabled = true;
+    toast('Browser TTS not available on this device.');
+  }
+
+  function buildUtter(){
+    var t = $('text').value;
+    var u = new SpeechSynthesisUtterance(t);
+    u.rate = parseFloat($('rate').value) || 1;
+    u.pitch = parseFloat($('pitch').value) || 1;
+    var vIdx = $('voice').value;
+    if (vIdx !== '' && voices[vIdx]) u.voice = voices[vIdx];
+    return u;
+  }
+
+  $('previewBtn').addEventListener('click', function(){
+    try { window.speechSynthesis.cancel(); } catch(e){}
+    window.speechSynthesis.speak(buildUtter());
+    toast('Previewing.');
+  });
+
+  var stream = null, recorder = null, chunks = [], lastBlob = null;
+  var audioCtx = null, decoded = null;
+
+  async function ensureMic(){
+    if (stream) return stream;
+    try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: true, autoGainControl: true } }); return stream; }
+    catch (e) { throw new Error('Microphone permission denied or unavailable: ' + (e.message || e.name || 'unknown')); }
+  }
+
+  function pickMime(){
+    var c = ['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus','audio/wav'];
+    for (var i = 0; i < c.length; i++) { try { if (window.MediaRecorder && MediaRecorder.isTypeSupported(c[i])) return c[i]; } catch(e){} }
+    return '';
+  }
+
+  $('recordBtn').addEventListener('click', async function(){
+    if (!('speechSynthesis' in window)) { toast('TTS not available.'); return; }
+    try { await ensureMic(); }
+    catch (e) { toast(e.message); return; }
+    chunks = []; lastBlob = null; decoded = null;
+    var mime = pickMime();
+    try { recorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream); }
+    catch (e) { toast('MediaRecorder failed: ' + e.message); return; }
+    recorder.ondataavailable = function(e){ if (e.data && e.data.size) chunks.push(e.data); };
+    recorder.onstop = async function(){
+      var blob = new Blob(chunks, { type: recorder.mimeType || mime || 'audio/webm' });
+      lastBlob = blob;
+      $('preview').src = URL.createObjectURL(blob);
+      $('exportBar').style.display = '';
+      $('status').textContent = 'Recorded ' + (blob.size/1024).toFixed(0) + ' KB.';
+      $('recordBtn').disabled = false;
+      $('stopBtn').disabled = true;
+      // Try to decode for WAV export
+      try {
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        var buf = await blob.arrayBuffer();
+        decoded = await audioCtx.decodeAudioData(buf);
+      } catch (e) { decoded = null; }
+    };
+    recorder.start();
+    $('recordBtn').disabled = true; $('stopBtn').disabled = false;
+    $('exportBar').style.display = 'none';
+    $('status').textContent = 'Recording...';
+    var u = buildUtter();
+    var done = function(){ try { if (recorder && recorder.state !== 'inactive') recorder.stop(); } catch(e){} };
+    u.onend = function(){ setTimeout(done, 250); };
+    u.onerror = function(){ setTimeout(done, 250); };
+    try { window.speechSynthesis.cancel(); } catch(e){}
+    window.speechSynthesis.speak(u);
+  });
+
+  $('stopBtn').addEventListener('click', function(){
+    try { window.speechSynthesis.cancel(); } catch(e){}
+    if (recorder && recorder.state !== 'inactive') recorder.stop();
+  });
+
+  $('dlWebm').addEventListener('click', function(){
+    if (!lastBlob) return;
+    var ext = (lastBlob.type.indexOf('mp4') >= 0 ? 'm4a' : lastBlob.type.indexOf('ogg') >= 0 ? 'ogg' : lastBlob.type.indexOf('wav') >= 0 ? 'wav' : 'webm');
+    downloadBlob(lastBlob, 'tts-voiceover-' + new Date().toISOString().slice(0,16).replace(/[:T]/g,'-') + '.' + ext);
+  });
+
+  function bufferToWav(buffer){
+    var nCh = buffer.numberOfChannels;
+    var len = buffer.length * nCh * 2 + 44;
+    var ab = new ArrayBuffer(len);
+    var view = new DataView(ab);
+    var sampleRate = buffer.sampleRate;
+    function writeStr(off, s){ for (var i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); }
+    writeStr(0, 'RIFF'); view.setUint32(4, len - 8, true); writeStr(8, 'WAVE');
+    writeStr(12, 'fmt '); view.setUint32(16, 16, true); view.setUint16(20, 1, true);
+    view.setUint16(22, nCh, true); view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * nCh * 2, true); view.setUint16(32, nCh * 2, true); view.setUint16(34, 16, true);
+    writeStr(36, 'data'); view.setUint32(40, len - 44, true);
+    var off = 44, channels = [];
+    for (var ch = 0; ch < nCh; ch++) channels.push(buffer.getChannelData(ch));
+    for (var i = 0; i < buffer.length; i++) {
+      for (var c = 0; c < nCh; c++) {
+        var s = Math.max(-1, Math.min(1, channels[c][i]));
+        view.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true); off += 2;
+      }
+    }
+    return new Blob([ab], { type: 'audio/wav' });
+  }
+  $('dlWav').addEventListener('click', function(){
+    if (!decoded) { toast('WAV conversion not available; download the recorded file instead.'); return; }
+    var blob = bufferToWav(decoded);
+    downloadBlob(blob, 'tts-voiceover-' + new Date().toISOString().slice(0,16).replace(/[:T]/g,'-') + '.wav');
+  });
+})();
+</script>
+</body>
+</html>
