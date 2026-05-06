@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Load &mdash; HTML Linter</title>
+<style>
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 0; background: #0a0a0f; color: #e8e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased; }
+header.top { display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px; border-bottom: 1px solid #1f1f2f; position: sticky; top: 0;
+  background: rgba(10,10,15,0.95); backdrop-filter: blur(8px); z-index: 5; }
+header.top a { color: #9ca3af; text-decoration: none; font-size: 13px;
+  padding: 6px 10px; border-radius: 6px; border: 1px solid #2a2a42; }
+header.top a:hover { color: #fff; border-color: #7c5cff; background: #1a1a2e; }
+header.top h1 { margin: 0; font-size: 18px; flex: 1; font-weight: 700; }
+main { max-width: 1200px; margin: 22px auto; padding: 0 20px 60px; }
+.intro { color: #9ca3af; font-size: 14px; line-height: 1.6; margin: 0 0 18px; }
+.card { background: #15152a; border: 1px solid #2a2a42; border-radius: 12px;
+  padding: 16px; margin-bottom: 16px; }
+.card h2 { margin: 0 0 12px; font-size: 14px; color: #9ca3af;
+  text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+.drop { display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 16px; border: 2px dashed #2a2a42;
+  border-radius: 10px; cursor: pointer; gap: 6px; color: #9ca3af; margin-bottom: 12px; }
+.drop:hover, .drop.over { border-color: #7c5cff; color: #fff; background: #1a1a2e; }
+textarea { width: 100%; min-height: 220px; padding: 12px; background: #0e0e1a;
+  border: 1px solid #2a2a42; border-radius: 8px; color: #e8e8f0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13px;
+  line-height: 1.55; resize: vertical; }
+button { font: inherit; padding: 9px 14px; border-radius: 8px; cursor: pointer;
+  border: 1px solid #2a2a42; background: #1a1a2e; color: #e8e8f0; font-size: 13px; }
+button:hover { border-color: #7c5cff; }
+button.primary { background: #7c5cff; border-color: #7c5cff; color: #fff;
+  font-weight: 700; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;
+  align-items: center; }
+.summary-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px; margin-top: 12px; }
+.stat { background: #0e0e1a; border: 1px solid #2a2a42; border-radius: 8px;
+  padding: 10px 12px; }
+.stat .lbl { font-size: 11px; color: #9ca3af; text-transform: uppercase;
+  letter-spacing: 0.05em; }
+.stat .val { font-size: 22px; font-weight: 800; color: #fff;
+  font-variant-numeric: tabular-nums; }
+.stat.pass .val { color: #4ade80; }
+.stat.fail .val { color: #f87171; }
+.stat.warn .val { color: #fbbf24; }
+.check-row { display: grid; grid-template-columns: 90px 1fr;
+  gap: 12px; padding: 10px 12px; align-items: baseline;
+  border: 1px solid #2a2a42; border-radius: 6px; margin-bottom: 6px;
+  background: #0e0e1a; font-size: 13px; }
+.check-row .badge { padding: 3px 9px; border-radius: 4px; font-size: 11px;
+  font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+  text-align: center; }
+.check-row.pass .badge { background: #14532d; color: #bbf7d0; }
+.check-row.fail .badge { background: #4c1212; color: #fca5a5; }
+.check-row.warn .badge { background: #4c3a12; color: #fcd34d; }
+.check-row .ttl { font-weight: 600; color: #e8e8f0; }
+.check-row .meta { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+.check-row .meta code { background: #15152a; padding: 1px 5px; border-radius: 3px;
+  font-family: ui-monospace, monospace; font-size: 11px; }
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+  background: #15152a; border: 1px solid #2a2a42; padding: 10px 16px;
+  border-radius: 8px; color: #e8e8f0; font-size: 13px; opacity: 0;
+  transition: opacity 0.2s; pointer-events: none; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<header class="top">
+<a href="./cat-build.html">&larr; Build &amp; validate</a>
+<h1>HTML Linter</h1>
+<a href="./help.html#htmllint">How it works</a>
+</header>
+<main>
+<p class="intro">Drop an HTML file or paste source. Tool runs 18 checks across accessibility, PWA basics, SEO basics, and security hygiene. Each check returns PASS / WARN / FAIL with a reason.</p>
+<div class="card">
+<h2>Source</h2>
+<div class="drop" id="drop">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+<span>Drop an .html file or paste below</span>
+<input id="file" type="file" accept=".html,.htm,text/html" style="display:none">
+</div>
+<textarea id="src" placeholder="<!doctype html>&#10;<html>&hellip;</html>" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+<div class="toolbar">
+<button class="primary" id="run">Run checks</button>
+<button id="exportJson">Export JSON</button>
+</div>
+</div>
+<div class="card" id="resultCard" style="display:none;">
+<h2>Results</h2>
+<div class="summary-bar" id="summary"></div>
+<div id="checks" style="margin-top:14px;"></div>
+</div>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+'use strict';
+var $ = function(id){ return document.getElementById(id); };
+var lastResults = null;
+function toast(m){ var t = $('toast'); t.textContent = m; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 1800); }
+
+function check(name, fn){ return { name: name, fn: fn }; }
+var CHECKS = [
+  check('Has doctype', function(html, doc){
+    if (/^\s*<!doctype/i.test(html)) return { st: 'pass', msg: 'Doctype declared.' };
+    return { st: 'fail', msg: 'Missing <!doctype html> at the top.' };
+  }),
+  check('Has <html lang>', function(html, doc){
+    var h = doc.documentElement;
+    var lang = h.getAttribute('lang');
+    if (lang) return { st: 'pass', msg: 'lang="' + lang + '"' };
+    return { st: 'fail', msg: 'Add lang="en" (or your language) to <html>.' };
+  }),
+  check('Has <meta charset>', function(html, doc){
+    if (doc.querySelector('meta[charset]')) return { st: 'pass', msg: 'Charset set.' };
+    return { st: 'fail', msg: 'Add <meta charset="utf-8"> to <head>.' };
+  }),
+  check('Has <meta viewport>', function(html, doc){
+    var m = doc.querySelector('meta[name="viewport"]');
+    if (m) return { st: 'pass', msg: m.getAttribute('content') };
+    return { st: 'fail', msg: 'Add <meta name="viewport" content="width=device-width,initial-scale=1">.' };
+  }),
+  check('Has <title>', function(html, doc){
+    var t = doc.querySelector('title');
+    if (t && t.textContent.trim()) return { st: 'pass', msg: '"' + t.textContent.trim() + '"' };
+    return { st: 'fail', msg: 'Page needs a non-empty <title>.' };
+  }),
+  check('Exactly one <h1>', function(html, doc){
+    var n = doc.querySelectorAll('h1').length;
+    if (n === 1) return { st: 'pass', msg: '1 h1 tag.' };
+    if (n === 0) return { st: 'warn', msg: 'No h1 found. Pages should usually have one main heading.' };
+    return { st: 'warn', msg: n + ' h1 tags. Best practice is one per page.' };
+  }),
+  check('Images have alt', function(html, doc){
+    var imgs = doc.querySelectorAll('img');
+    if (imgs.length === 0) return { st: 'pass', msg: 'No images.' };
+    var missing = 0;
+    imgs.forEach(function(i){ if (!i.hasAttribute('alt')) missing++; });
+    if (missing === 0) return { st: 'pass', msg: imgs.length + ' images, all with alt.' };
+    return { st: 'fail', msg: missing + ' of ' + imgs.length + ' images missing alt attribute.' };
+  }),
+  check('No empty links', function(html, doc){
+    var as = doc.querySelectorAll('a');
+    var empty = 0;
+    as.forEach(function(a){
+      var href = a.getAttribute('href');
+      if (!href || href.trim() === '' || href === '#') {
+        if (!a.textContent.trim() && !a.querySelector('img,svg')) empty++;
+      }
+    });
+    if (empty === 0) return { st: 'pass', msg: as.length + ' links checked.' };
+    return { st: 'warn', msg: empty + ' links have no href and no visible content.' };
+  }),
+  check('Anchor refs resolve', function(html, doc){
+    var as = doc.querySelectorAll('a[href^="#"]');
+    if (as.length === 0) return { st: 'pass', msg: 'No same-page anchors.' };
+    var bad = 0; var samples = [];
+    as.forEach(function(a){
+      var id = a.getAttribute('href').slice(1);
+      if (!id || id === 'top') return;
+      if (!doc.getElementById(id) && !doc.querySelector('[name="' + id + '"]')) {
+        bad++; if (samples.length < 3) samples.push('#' + id);
+      }
+    });
+    if (bad === 0) return { st: 'pass', msg: as.length + ' anchors all resolve.' };
+    return { st: 'fail', msg: bad + ' broken anchor refs: ' + samples.join(', ') };
+  }),
+  check('Has <meta description>', function(html, doc){
+    var m = doc.querySelector('meta[name="description"]');
+    if (m && m.getAttribute('content')) return { st: 'pass', msg: '"' + m.getAttribute('content').slice(0, 60) + '..."' };
+    return { st: 'warn', msg: 'No meta description. Add one for search engines and link previews.' };
+  }),
+  check('Has manifest reference', function(html, doc){
+    var m = doc.querySelector('link[rel="manifest"]');
+    if (m) return { st: 'pass', msg: 'href="' + m.getAttribute('href') + '"' };
+    return { st: 'warn', msg: 'No <link rel="manifest"> &mdash; required for installable PWAs.' };
+  }),
+  check('Has theme-color', function(html, doc){
+    if (doc.querySelector('meta[name="theme-color"]')) return { st: 'pass', msg: 'Theme color set.' };
+    return { st: 'warn', msg: 'No <meta name="theme-color">. Browsers use this for the address bar tint.' };
+  }),
+  check('Apple touch icon', function(html, doc){
+    if (doc.querySelector('link[rel*="apple-touch-icon"]')) return { st: 'pass', msg: 'iOS icon set.' };
+    return { st: 'warn', msg: 'No <link rel="apple-touch-icon">. iOS will fall back to a screenshot when added to Home Screen.' };
+  }),
+  check('Service worker registered', function(html, doc){
+    if (/navigator\.serviceWorker\.register/.test(html)) return { st: 'pass', msg: 'sw.register() found.' };
+    return { st: 'warn', msg: 'No serviceWorker.register call found inline. Required for offline PWA.' };
+  }),
+  check('No inline event handlers', function(html, doc){
+    var found = []; var inlineRx = /\son(click|change|input|load|error|submit|blur|focus|keydown|keyup)\s*=/gi;
+    var m; while ((m = inlineRx.exec(html))) {
+      if (found.length < 3) found.push(m[1]);
+      if (found.length >= 3) break;
+    }
+    if (found.length === 0) return { st: 'pass', msg: 'No inline event handlers.' };
+    return { st: 'warn', msg: 'Inline event handlers found (on' + found.join(', on') + ', &hellip;). Prefer addEventListener for CSP.' };
+  }),
+  check('No external scripts', function(html, doc){
+    var ss = doc.querySelectorAll('script[src]');
+    var ext = [];
+    ss.forEach(function(s){
+      var src = s.getAttribute('src') || '';
+      if (/^https?:\/\//.test(src)) ext.push(src);
+    });
+    if (ext.length === 0) return { st: 'pass', msg: ss.length + ' scripts, all relative.' };
+    return { st: 'warn', msg: ext.length + ' external scripts: ' + ext.slice(0, 2).join(', ') + (ext.length > 2 ? ', &hellip;' : '') };
+  }),
+  check('No external stylesheets', function(html, doc){
+    var ls = doc.querySelectorAll('link[rel="stylesheet"]');
+    var ext = [];
+    ls.forEach(function(l){
+      var href = l.getAttribute('href') || '';
+      if (/^https?:\/\//.test(href)) ext.push(href);
+    });
+    if (ext.length === 0) return { st: 'pass', msg: ls.length + ' stylesheets, all relative.' };
+    return { st: 'warn', msg: ext.length + ' external stylesheets &mdash; offline mode may break.' };
+  }),
+  check('Form labels', function(html, doc){
+    var inputs = doc.querySelectorAll('input:not([type=hidden]):not([type=submit]):not([type=button]), textarea, select');
+    if (inputs.length === 0) return { st: 'pass', msg: 'No form fields.' };
+    var unlabeled = 0;
+    inputs.forEach(function(i){
+      var id = i.getAttribute('id');
+      var aria = i.getAttribute('aria-label') || i.getAttribute('aria-labelledby');
+      if (i.closest('label')) return;
+      if (id && doc.querySelector('label[for="' + id + '"]')) return;
+      if (aria) return;
+      unlabeled++;
+    });
+    if (unlabeled === 0) return { st: 'pass', msg: inputs.length + ' fields, all labeled.' };
+    return { st: 'fail', msg: unlabeled + ' of ' + inputs.length + ' form fields have no label or aria-label.' };
+  })
+];
+
+function run(){
+  var html = $('src').value;
+  if (!html.trim()) { toast('Empty source'); return; }
+  var doc;
+  try { doc = new DOMParser().parseFromString(html, 'text/html'); }
+  catch(e) { toast('Parse failed: ' + e.message); return; }
+  var results = CHECKS.map(function(c){
+    try { var r = c.fn(html, doc); return { name: c.name, st: r.st, msg: r.msg }; }
+    catch(e) { return { name: c.name, st: 'fail', msg: 'Error: ' + e.message }; }
+  });
+  lastResults = results;
+  var pass = 0, warn = 0, fail = 0;
+  results.forEach(function(r){
+    if (r.st === 'pass') pass++; else if (r.st === 'warn') warn++; else fail++;
+  });
+  $('summary').innerHTML =
+    '<div class="stat"><div class="lbl">Total</div><div class="val">' + results.length + '</div></div>' +
+    '<div class="stat pass"><div class="lbl">Pass</div><div class="val">' + pass + '</div></div>' +
+    '<div class="stat warn"><div class="lbl">Warn</div><div class="val">' + warn + '</div></div>' +
+    '<div class="stat fail"><div class="lbl">Fail</div><div class="val">' + fail + '</div></div>';
+  $('checks').innerHTML = results.map(function(r){
+    return '<div class="check-row ' + r.st + '"><span class="badge">' + r.st + '</span><div><div class="ttl">' + esc(r.name) + '</div><div class="meta">' + r.msg + '</div></div></div>';
+  }).join('');
+  $('resultCard').style.display = 'block';
+}
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+$('run').addEventListener('click', run);
+$('exportJson').addEventListener('click', function(){
+  if (!lastResults) { toast('Run checks first'); return; }
+  var blob = new Blob([JSON.stringify(lastResults, null, 2)], { type: 'application/json' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'html-lint.json'; a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 200);
+  toast('JSON downloaded');
+});
+$('drop').addEventListener('click', function(){ $('file').click(); });
+['dragenter','dragover'].forEach(function(ev){
+  $('drop').addEventListener(ev, function(e){ e.preventDefault(); $('drop').classList.add('over'); });
+});
+['dragleave','drop'].forEach(function(ev){
+  $('drop').addEventListener(ev, function(e){ e.preventDefault(); $('drop').classList.remove('over'); });
+});
+$('drop').addEventListener('drop', function(e){
+  var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) loadFile(f);
+});
+$('file').addEventListener('change', function(e){
+  var f = e.target.files && e.target.files[0]; if (f) loadFile(f);
+});
+function loadFile(f){
+  var fr = new FileReader();
+  fr.onload = function(){ $('src').value = String(fr.result || ''); toast('Loaded ' + f.name); run(); };
+  fr.readAsText(f);
+}
+})();
+</script>
+</body>
+</html>

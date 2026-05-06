@@ -132,6 +132,8 @@ code,kbd{background:#1a1a26;padding:2px 6px;border-radius:4px;font-family:ui-mon
   <a href="#mstats">Manuscript Stats</a>
   <a href="#audwave">Audio Waveform</a>
   <a href="#datefmt">Date Formatter</a>
+  <a href="#imgmeta">Image Metadata</a>
+  <a href="#htmllint">HTML Linter</a>
   <a href="#acceptance">Acceptance Criteria</a>
 </nav>
 
@@ -960,6 +962,31 @@ code,kbd{background:#1a1a26;padding:2px 6px;border-radius:4px;font-family:ui-mon
   <li>Tap <strong>Copy</strong> on any row to grab that format.</li>
 </ol>
 <a class="open" href="./date-formatter.html">Open Date Formatter</a>
+</div>
+
+<div class="tool" id="imgmeta">
+<h3>Image Metadata</h3>
+<ol>
+  <li>Open <strong>Workspace Tools &rarr; Media &rarr; Image Metadata</strong>.</li>
+  <li>Drop a JPG, PNG, WEBP, or GIF.</li>
+  <li>Tool reads file headers and renders: file info (name, size, type, last-modified), dimensions (width / height / megapixels / aspect ratio), format details (kind, signature, bit depth, color type for PNG).</li>
+  <li>For JPEGs with EXIF: camera Make / Model, capture date, exposure time, f-number, ISO, focal length, orientation, flash, and full GPS (latitude / longitude / altitude) when present.</li>
+  <li>If GPS coordinates are present, a yellow warning recommends stripping metadata before public sharing.</li>
+  <li>Tap <strong>Strip metadata + download clean copy</strong> to re-encode the image with no EXIF, or <strong>Export JSON</strong> to keep the report.</li>
+</ol>
+<a class="open" href="./image-metadata.html">Open Image Metadata</a>
+</div>
+
+<div class="tool" id="htmllint">
+<h3>HTML Linter</h3>
+<ol>
+  <li>Open <strong>Workspace Tools &rarr; Build &amp; validate &rarr; HTML Linter</strong>.</li>
+  <li>Drop an `.html` file or paste HTML source.</li>
+  <li>Tap <strong>Run checks</strong>. You get a Total / Pass / Warn / Fail summary plus 18 individual rows: doctype, html lang, meta charset, viewport, title, h1 count, image alt, empty links, anchor refs, meta description, manifest link, theme-color, apple-touch-icon, service worker registration, inline event handlers, external scripts, external stylesheets, form labels.</li>
+  <li>Each row shows PASS / WARN / FAIL with a short reason or count.</li>
+  <li>Tap <strong>Export JSON</strong> to keep the report as a checked-in artifact.</li>
+</ol>
+<a class="open" href="./html-linter.html">Open HTML Linter</a>
 </div>
 
 <div class="tool" id="acceptance">

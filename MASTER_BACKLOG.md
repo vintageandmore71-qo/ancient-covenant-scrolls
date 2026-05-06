@@ -40,7 +40,7 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 
 ## Load main (`/load/`)
 
-**Cache:** `load-v17fv`. **Tip status spec:** `PLAN_LOAD_AI.md`,
+**Cache:** `load-v17fw`. **Tip status spec:** `PLAN_LOAD_AI.md`,
 `PLAN_IMAGE_PROMPT_v3.md`, `PLAN_BOOK_TO_VIDEO.md`,
 `MEDIA_MODULE_SPEC.md`, `LOAD_FEATURES.md`, `LOAD_MARKETING.md`.
 
@@ -50,6 +50,15 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 - **Character Consistency module** — see X-CC.
 - **Piper TTS Stage 1 unblock + Stage 2 rollout** — see X-PIPER. Stage 1 shipped but not playing; blocked on the play() error text from the user. Resilience panel (Part 9) shipped in v17er gives an in-app diagnostic + recovery path.
 - **LOAD-ECO acceptance test pass** (Build Plan Part 13). Every part now has a tool surface, but the user-validation pass is still needed: open each tool, confirm PASS/FAIL/WARN labels render, run a sample export, save a receipt, check it appears in the Receipts library. Parts 1, 2, 3, 14-17 shipped in v17eq. Parts 4, 7, 9 + Book-to-Video wiring shipped in v17er. Parts 5, 6, 8, 10 shipped in v17es. Parts 11-13 are housekeeping/acceptance and are met by the existing tool surfaces.
+
+### Recently done (this session, 2026-05-06 — Image Metadata + HTML Linter)
+- **v17fw &mdash; Image Metadata + HTML Linter**:
+  - **Image Metadata:** new tool at `load/tools/image-metadata.html`. Drop a JPG / PNG / WEBP / GIF. Reads file headers and (for JPEG) parses EXIF: dimensions, megapixels, aspect ratio, format kind + signature, PNG bit depth + color type, EXIF Make/Model, capture date, exposure time, f-number, ISO, focal length, orientation, flash, GPS lat/lon/altitude. GPS warning recommends stripping before public sharing. **Strip metadata + download clean copy** re-encodes the image with no EXIF. Export JSON.
+  - **HTML Linter:** new tool at `load/tools/html-linter.html`. Drop or paste HTML. 18 checks: doctype, `html lang`, meta charset, viewport, title, h1 count, image alt, empty links, anchor refs, meta description, manifest link, theme-color, apple-touch-icon, service worker registration, inline event handlers, external scripts, external stylesheets, form labels. Per-check PASS / WARN / FAIL with reason. Total / Pass / Warn / Fail summary. Export JSON.
+  - cat-media.html and cat-build.html each gained one tile.
+  - Workspace tile description bumped to 63 tools.
+  - Help page updated with new TOC entries + per-tool cards.
+  - Cache `load-v17fv` -&gt; `load-v17fw`. Version badge bumped.
 
 ### Recently done (this session, 2026-05-06 — Audio Waveform + Date Formatter)
 - **v17fv &mdash; Audio Waveform + Date Formatter**:
