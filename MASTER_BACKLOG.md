@@ -40,7 +40,7 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 
 ## Load main (`/load/`)
 
-**Cache:** `load-v17fg`. **Tip status spec:** `PLAN_LOAD_AI.md`,
+**Cache:** `load-v17fh`. **Tip status spec:** `PLAN_LOAD_AI.md`,
 `PLAN_IMAGE_PROMPT_v3.md`, `PLAN_BOOK_TO_VIDEO.md`,
 `MEDIA_MODULE_SPEC.md`, `LOAD_FEATURES.md`, `LOAD_MARKETING.md`.
 
@@ -50,6 +50,14 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 - **Character Consistency module** — see X-CC.
 - **Piper TTS Stage 1 unblock + Stage 2 rollout** — see X-PIPER. Stage 1 shipped but not playing; blocked on the play() error text from the user. Resilience panel (Part 9) shipped in v17er gives an in-app diagnostic + recovery path.
 - **LOAD-ECO acceptance test pass** (Build Plan Part 13). Every part now has a tool surface, but the user-validation pass is still needed: open each tool, confirm PASS/FAIL/WARN labels render, run a sample export, save a receipt, check it appears in the Receipts library. Parts 1, 2, 3, 14-17 shipped in v17eq. Parts 4, 7, 9 + Book-to-Video wiring shipped in v17er. Parts 5, 6, 8, 10 shipped in v17es. Parts 11-13 are housekeeping/acceptance and are met by the existing tool surfaces.
+
+### Recently done (this session, 2026-05-06 — EPUB builder + find-and-replace)
+- **v17fh — EPUB Builder + Find &amp; Replace**:
+  - **EPUB Builder:** new tool at `load/tools/epub-builder.html`. Drop a manuscript file (TXT / Markdown / HTML) or paste text. Same chapter-detection options as Manuscript-to-Book (Markdown headings, &quot;Chapter N&quot; lines, ALL-CAPS lines, blank-line gaps, single-chapter). Inputs: title, author, language, optional publisher, optional description, optional cover image. Output: valid EPUB 3 — `mimetype` (STORE compression, first entry), `META-INF/container.xml`, `OEBPS/content.opf` with dc:identifier (UUID v4) + dc:title + dc:creator + dc:language + dcterms:modified, `OEBPS/toc.ncx` (legacy NCX), `OEBPS/nav.xhtml` (EPUB 3 nav with `epub:type=&quot;toc&quot;`), `OEBPS/styles.css`, per-chapter `OEBPS/ch{N}.xhtml`, optional `OEBPS/cover.{ext}` with `properties=&quot;cover-image&quot;`. Auto-saves a Part 5 export receipt.
+  - **Find &amp; Replace:** new tool at `load/tools/find-replace.html`. Drop a text file or paste a manuscript. Add multiple find/replace rules; per-rule toggles for case-insensitive, whole-word, regex. One-tap &quot;Common typos preset&quot; injects ten cleanup rules (extra space before punctuation, em-dash conversion, ellipsis, smart quotes). Live diff preview using red-strikethrough + green-add markup. Per-rule replacement counts. Undo restores the prior text. Export as `.txt` or copy to clipboard. Live word + character stats.
+  - Help page updated with new TOC entries + per-tool cards.
+  - Workspace hub Section 6 now has 37 tiles.
+  - Cache `load-v17fg` -> `load-v17fh`. Version badge bumped in `load/load.js`.
 
 ### Recently done (this session, 2026-05-05 — cover designer + markdown preview)
 - **v17fg — Cover Designer + Markdown Preview**:

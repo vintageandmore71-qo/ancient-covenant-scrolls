@@ -106,6 +106,8 @@ code,kbd{background:#1a1a26;padding:2px 6px;border-radius:4px;font-family:ui-mon
   <a href="#speedread">Speed Reader (RSVP)</a>
   <a href="#cover">Cover Designer</a>
   <a href="#markdown">Markdown Preview</a>
+  <a href="#epub">EPUB Builder</a>
+  <a href="#findreplace">Find &amp; Replace</a>
   <a href="#acceptance">Acceptance Criteria</a>
 </nav>
 
@@ -596,6 +598,33 @@ code,kbd{background:#1a1a26;padding:2px 6px;border-radius:4px;font-family:ui-mon
   <li>Tap <strong>Download HTML</strong> for a complete styled HTML file, <strong>Copy HTML</strong> for the inner HTML, or <strong>Download Markdown</strong> to keep your source.</li>
 </ol>
 <a class="open" href="./markdown-preview.html">Open Markdown Preview</a>
+</div>
+
+<div class="tool" id="epub">
+<h3>EPUB Builder</h3>
+<ol>
+  <li>Tap <strong>EPUB Builder</strong> in workspace Section 6.</li>
+  <li>Drop a manuscript file (TXT / Markdown / HTML) or paste text into the editor.</li>
+  <li>Set the title, author, language, optional publisher, and optional description.</li>
+  <li>Pick a chapter detection mode: Markdown headings, &quot;Chapter N&quot; lines, ALL-CAPS lines, blank-line gaps, or single-chapter.</li>
+  <li>(Optional) Drop a cover image. JPG, PNG, WEBP all work.</li>
+  <li>Tap <strong>Build EPUB</strong>. Tool generates a valid EPUB 3 file with mimetype, container, package, NCX, nav, styles, and per-chapter XHTML.</li>
+  <li>An export receipt is saved automatically so you can verify the build later.</li>
+</ol>
+<a class="open" href="./epub-builder.html">Open EPUB Builder</a>
+</div>
+
+<div class="tool" id="findreplace">
+<h3>Find &amp; Replace</h3>
+<ol>
+  <li>Tap <strong>Find &amp; Replace</strong> in workspace Section 6.</li>
+  <li>Drop a text file or paste your manuscript into the source pane.</li>
+  <li>Tap <strong>Add rule</strong> for each find/replace pair. Toggle case-insensitive, whole-word, or regex per rule.</li>
+  <li>Tap <strong>Common typos preset</strong> to inject ten cleanup rules (extra space before punctuation, em-dash, ellipsis, smart quotes).</li>
+  <li>Tap <strong>Preview</strong> to see a diff (red strikethrough = removed, green = added) and a per-rule replacement count.</li>
+  <li>Tap <strong>Apply</strong> to commit. <strong>Undo</strong> restores the prior text. <strong>Download .txt</strong> or <strong>Copy</strong> exports the result.</li>
+</ol>
+<a class="open" href="./find-replace.html">Open Find &amp; Replace</a>
 </div>
 
 <div class="tool" id="acceptance">
