@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Load &mdash; HTML to Markdown</title>
+<style>
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 0; background: #0a0a0f; color: #e8e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased; }
+header.top { display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px; border-bottom: 1px solid #1f1f2f; position: sticky; top: 0;
+  background: rgba(10,10,15,0.95); backdrop-filter: blur(8px); z-index: 5; }
+header.top a { color: #9ca3af; text-decoration: none; font-size: 13px;
+  padding: 6px 10px; border-radius: 6px; border: 1px solid #2a2a42; }
+header.top a:hover { color: #fff; border-color: #7c5cff; background: #1a1a2e; }
+header.top h1 { margin: 0; font-size: 18px; flex: 1; font-weight: 700; }
+main { max-width: 1300px; margin: 22px auto; padding: 0 20px 60px; }
+.intro { color: #9ca3af; font-size: 14px; line-height: 1.6; margin: 0 0 18px; }
+.row { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+@media (max-width: 800px) { .row { grid-template-columns: 1fr; } }
+.card { background: #15152a; border: 1px solid #2a2a42; border-radius: 12px;
+  padding: 14px; margin-bottom: 16px; }
+.card h2 { margin: 0 0 12px; font-size: 14px; color: #9ca3af;
+  text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+textarea { width: 100%; min-height: 320px; padding: 12px; background: #0e0e1a;
+  border: 1px solid #2a2a42; border-radius: 8px; color: #e8e8f0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13px;
+  line-height: 1.55; resize: vertical; }
+button { font: inherit; padding: 9px 14px; border-radius: 8px; cursor: pointer;
+  border: 1px solid #2a2a42; background: #1a1a2e; color: #e8e8f0; font-size: 13px; }
+button:hover { border-color: #7c5cff; }
+button.primary { background: #7c5cff; border-color: #7c5cff; color: #fff;
+  font-weight: 700; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px;
+  align-items: center; }
+label.toggle { display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; color: #9ca3af; }
+.drop { display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 18px 16px; border: 2px dashed #2a2a42;
+  border-radius: 10px; cursor: pointer; gap: 6px; color: #9ca3af;
+  margin-bottom: 12px; }
+.drop:hover, .drop.over { border-color: #7c5cff; color: #fff; background: #1a1a2e; }
+.summary { color: #9ca3af; font-size: 12px; margin-top: 12px; }
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+  background: #15152a; border: 1px solid #2a2a42; padding: 10px 16px;
+  border-radius: 8px; color: #e8e8f0; font-size: 13px; opacity: 0;
+  transition: opacity 0.2s; pointer-events: none; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<header class="top">
+<a href="./cat-books.html">&larr; Books &amp; writing</a>
+<h1>HTML to Markdown</h1>
+<a href="./help.html#htm2md">How it works</a>
+</header>
+<main>
+<p class="intro">Drop an HTML file or paste HTML on the left. Get clean Markdown on the right. Headings, paragraphs, bold, italic, links, images, lists, blockquotes, code, horizontal rules, and tables (basic).</p>
+<div class="row">
+<div class="card">
+<h2>HTML in</h2>
+<div class="drop" id="drop">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+<span>Drop an .html file or paste below</span>
+<input id="file" type="file" accept=".html,.htm,text/html" style="display:none">
+</div>
+<textarea id="in" placeholder="<h1>Heading</h1>&#10;<p>Paragraph with <strong>bold</strong>...</p>" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+<div class="toolbar">
+<button id="paste">Paste from clipboard</button>
+<button id="clear">Clear</button>
+<button class="primary" id="convert">Convert &rarr;</button>
+</div>
+</div>
+<div class="card">
+<h2>Markdown out</h2>
+<textarea id="out" readonly placeholder="Markdown output appears here&hellip;"></textarea>
+<div class="toolbar">
+<label class="toggle"><input id="useStar" type="checkbox" checked> Use *italic / **bold</label>
+<label class="toggle"><input id="atxClose" type="checkbox"> ATX headings closed (### Title ###)</label>
+<label class="toggle"><input id="bodyOnly" type="checkbox" checked> Convert &lt;body&gt; only</label>
+<button id="copy">Copy</button>
+<button id="download">Download .md</button>
+</div>
+<div class="summary" id="summary">Drop or paste HTML, then tap Convert.</div>
+</div>
+</div>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+'use strict';
+var $ = function(id){ return document.getElementById(id); };
+function toast(m){ var t = $('toast'); t.textContent = m; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 1800); }
+
+function nodeToMd(node, ctx){
+  if (node.nodeType === 3) {
+    return ctx.inPre ? node.nodeValue : node.nodeValue.replace(/\s+/g, ' ');
+  }
+  if (node.nodeType !== 1) return '';
+  var tag = node.tagName.toLowerCase();
+  if (tag === 'script' || tag === 'style' || tag === 'noscript' || tag === 'iframe' ||
+      tag === 'svg' || tag === 'canvas' || tag === 'object' || tag === 'embed') return '';
+  var children = Array.from(node.childNodes);
+  function inner(){
+    return children.map(function(c){ return nodeToMd(c, ctx); }).join('');
+  }
+  function trim(s){ return s.replace(/\s+$/,'').replace(/^\s+/,''); }
+  switch (tag) {
+    case 'h1': case 'h2': case 'h3': case 'h4': case 'h5': case 'h6':
+      var n = parseInt(tag[1], 10);
+      var hashes = '#'.repeat(n);
+      var content = trim(inner());
+      var line = hashes + ' ' + content;
+      if (ctx.atxClose) line += ' ' + hashes;
+      return '\n\n' + line + '\n\n';
+    case 'p':
+      return '\n\n' + trim(inner()) + '\n\n';
+    case 'br':
+      return '  \n';
+    case 'hr':
+      return '\n\n---\n\n';
+    case 'strong': case 'b':
+      return ctx.useStar ? '**' + inner() + '**' : '__' + inner() + '__';
+    case 'em': case 'i':
+      return ctx.useStar ? '*' + inner() + '*' : '_' + inner() + '_';
+    case 'del': case 's': case 'strike':
+      return '~~' + inner() + '~~';
+    case 'code':
+      if (node.parentNode && node.parentNode.tagName &&
+          node.parentNode.tagName.toLowerCase() === 'pre') {
+        return inner();
+      }
+      return '`' + node.textContent + '`';
+    case 'pre':
+      var inP = { inPre: true, useStar: ctx.useStar, atxClose: ctx.atxClose };
+      var raw = children.map(function(c){ return nodeToMd(c, inP); }).join('');
+      var lang = '';
+      var codeChild = node.querySelector && node.querySelector('code');
+      if (codeChild) {
+        var cls = codeChild.className || '';
+        var m = /language-(\S+)/.exec(cls);
+        if (m) lang = m[1];
+      }
+      return '\n\n```' + lang + '\n' + raw.replace(/\n+$/,'') + '\n```\n\n';
+    case 'a':
+      var href = node.getAttribute('href') || '';
+      var t = inner();
+      if (!href) return t;
+      return '[' + t + '](' + href + ')';
+    case 'img':
+      var src = node.getAttribute('src') || '';
+      var alt = node.getAttribute('alt') || '';
+      return '![' + alt + '](' + src + ')';
+    case 'blockquote':
+      var bq = trim(inner()).split('\n').map(function(l){ return '> ' + l; }).join('\n');
+      return '\n\n' + bq + '\n\n';
+    case 'ul':
+      var ulItems = Array.from(node.children).filter(function(c){
+        return c.tagName && c.tagName.toLowerCase() === 'li';
+      });
+      var ulStr = ulItems.map(function(li){
+        return '- ' + trim(Array.from(li.childNodes).map(function(c){
+          return nodeToMd(c, ctx);
+        }).join('')).replace(/\n/g, '\n  ');
+      }).join('\n');
+      return '\n\n' + ulStr + '\n\n';
+    case 'ol':
+      var olItems = Array.from(node.children).filter(function(c){
+        return c.tagName && c.tagName.toLowerCase() === 'li';
+      });
+      var olStr = olItems.map(function(li, i){
+        return (i+1) + '. ' + trim(Array.from(li.childNodes).map(function(c){
+          return nodeToMd(c, ctx);
+        }).join('')).replace(/\n/g, '\n   ');
+      }).join('\n');
+      return '\n\n' + olStr + '\n\n';
+    case 'li':
+      return inner();
+    case 'table':
+      var rows = Array.from(node.querySelectorAll('tr'));
+      if (!rows.length) return '';
+      var firstCells = Array.from(rows[0].children);
+      var header = firstCells.map(function(c){
+        return trim(nodeToMd(c, ctx));
+      });
+      var sep = firstCells.map(function(){ return '---'; });
+      var bodyRows = rows.slice(1).map(function(r){
+        return Array.from(r.children).map(function(c){
+          return trim(nodeToMd(c, ctx)).replace(/\|/g, '\\|');
+        });
+      });
+      var lines = ['| ' + header.join(' | ') + ' |'];
+      lines.push('| ' + sep.join(' | ') + ' |');
+      bodyRows.forEach(function(r){ lines.push('| ' + r.join(' | ') + ' |'); });
+      return '\n\n' + lines.join('\n') + '\n\n';
+    case 'th': case 'td':
+      return inner();
+    case 'tr': case 'thead': case 'tbody': case 'tfoot':
+      return inner();
+    default:
+      return inner();
+  }
+}
+
+function convert(){
+  var raw = $('in').value;
+  if (!raw.trim()) { toast('Empty input'); return; }
+  var ctx = {
+    inPre: false,
+    useStar: $('useStar').checked,
+    atxClose: $('atxClose').checked
+  };
+  var doc = new DOMParser().parseFromString(raw, 'text/html');
+  var root = $('bodyOnly').checked ? doc.body : doc.documentElement;
+  if (!root) root = doc.body;
+  var md = nodeToMd(root, ctx);
+  md = md.replace(/\n{3,}/g, '\n\n').replace(/^\n+|\n+$/g, '') + '\n';
+  $('out').value = md;
+  $('summary').textContent = md.split('\n').length + ' lines, ' + new Blob([md]).size + ' bytes.';
+  toast('Converted');
+}
+$('convert').addEventListener('click', convert);
+$('clear').addEventListener('click', function(){
+  $('in').value = ''; $('out').value = '';
+  $('summary').textContent = 'Drop or paste HTML, then tap Convert.';
+});
+$('paste').addEventListener('click', function(){
+  if (!navigator.clipboard || !navigator.clipboard.readText) {
+    toast('Clipboard read not supported'); return;
+  }
+  navigator.clipboard.readText().then(function(t){
+    $('in').value = t; toast('Pasted');
+  }).catch(function(){ toast('Paste blocked'); });
+});
+$('copy').addEventListener('click', function(){
+  if (!$('out').value) { toast('Nothing to copy'); return; }
+  if (navigator.clipboard) navigator.clipboard.writeText($('out').value).then(function(){ toast('Copied'); });
+  else { $('out').select(); document.execCommand('copy'); toast('Copied'); }
+});
+$('download').addEventListener('click', function(){
+  if (!$('out').value) { toast('Nothing to save'); return; }
+  var blob = new Blob([$('out').value], { type: 'text/markdown' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'converted.md'; a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 200);
+  toast('Downloaded');
+});
+$('drop').addEventListener('click', function(){ $('file').click(); });
+['dragenter','dragover'].forEach(function(ev){
+  $('drop').addEventListener(ev, function(e){ e.preventDefault(); $('drop').classList.add('over'); });
+});
+['dragleave','drop'].forEach(function(ev){
+  $('drop').addEventListener(ev, function(e){ e.preventDefault(); $('drop').classList.remove('over'); });
+});
+$('drop').addEventListener('drop', function(e){
+  var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) loadFile(f);
+});
+$('file').addEventListener('change', function(e){
+  var f = e.target.files && e.target.files[0]; if (f) loadFile(f);
+});
+function loadFile(f){
+  var fr = new FileReader();
+  fr.onload = function(){ $('in').value = String(fr.result || ''); toast('Loaded ' + f.name); };
+  fr.readAsText(f);
+}
+})();
+</script>
+</body>
+</html>

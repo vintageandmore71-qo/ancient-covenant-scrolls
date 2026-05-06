@@ -40,7 +40,7 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 
 ## Load main (`/load/`)
 
-**Cache:** `load-v17fn`. **Tip status spec:** `PLAN_LOAD_AI.md`,
+**Cache:** `load-v17fo`. **Tip status spec:** `PLAN_LOAD_AI.md`,
 `PLAN_IMAGE_PROMPT_v3.md`, `PLAN_BOOK_TO_VIDEO.md`,
 `MEDIA_MODULE_SPEC.md`, `LOAD_FEATURES.md`, `LOAD_MARKETING.md`.
 
@@ -50,6 +50,15 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 - **Character Consistency module** — see X-CC.
 - **Piper TTS Stage 1 unblock + Stage 2 rollout** — see X-PIPER. Stage 1 shipped but not playing; blocked on the play() error text from the user. Resilience panel (Part 9) shipped in v17er gives an in-app diagnostic + recovery path.
 - **LOAD-ECO acceptance test pass** (Build Plan Part 13). Every part now has a tool surface, but the user-validation pass is still needed: open each tool, confirm PASS/FAIL/WARN labels render, run a sample export, save a receipt, check it appears in the Receipts library. Parts 1, 2, 3, 14-17 shipped in v17eq. Parts 4, 7, 9 + Book-to-Video wiring shipped in v17er. Parts 5, 6, 8, 10 shipped in v17es. Parts 11-13 are housekeeping/acceptance and are met by the existing tool surfaces.
+
+### Recently done (this session, 2026-05-06 — HTML to Markdown + Image Compare)
+- **v17fo &mdash; HTML to Markdown + Image Compare**:
+  - **HTML to Markdown:** new tool at `load/tools/html-to-markdown.html`. Drop or paste HTML; convert to clean Markdown. Supports headings (h1-h6), paragraphs, bold / italic / strikethrough, links, images, ordered + unordered lists with nesting, blockquotes, inline code, fenced code blocks (with language), horizontal rules, tables (basic). Asterisk vs underscore style toggle, ATX-closed-headings toggle, body-only toggle. Copy or download .md.
+  - **Image Compare:** new tool at `load/tools/image-compare.html`. Drop image A and B. Four modes: slider left/right, slider up/down, side-by-side, pixel-difference. The slider has a draggable round handle (mouse + touch). Difference mode reports the percentage of changed pixels. Mismatched dimensions warn the user and recommend Image Resize first.
+  - cat-books.html and cat-media.html each gained one tile.
+  - Workspace tile description bumped to 47 tools.
+  - Help page updated with new TOC entries + per-tool cards.
+  - Cache `load-v17fn` -&gt; `load-v17fo`. Version badge bumped.
 
 ### Recently done (this session, 2026-05-06 — Palette Generator + Checksum)
 - **v17fn &mdash; Palette Generator + Checksum**:

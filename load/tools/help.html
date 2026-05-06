@@ -116,6 +116,8 @@ code,kbd{background:#1a1a26;padding:2px 6px;border-radius:4px;font-family:ui-mon
   <a href="#imgfilter">Image Filter</a>
   <a href="#palgen">Palette Generator</a>
   <a href="#checksum">Checksum</a>
+  <a href="#htm2md">HTML to Markdown</a>
+  <a href="#imgcmp">Image Compare</a>
   <a href="#acceptance">Acceptance Criteria</a>
 </nav>
 
@@ -736,6 +738,32 @@ code,kbd{background:#1a1a26;padding:2px 6px;border-radius:4px;font-family:ui-mon
   <li>To verify a published hash, paste it into <strong>Verify a published hash</strong> and tap <strong>Verify</strong>. The tool checks against all four computed hashes and tells you which algorithm matched (or NO MATCH).</li>
 </ol>
 <a class="open" href="./checksum.html">Open Checksum</a>
+</div>
+
+<div class="tool" id="htm2md">
+<h3>HTML to Markdown</h3>
+<ol>
+  <li>Open <strong>Workspace Tools &rarr; Books &amp; writing &rarr; HTML to Markdown</strong>.</li>
+  <li>Drop an `.html` file, paste HTML into the left box, or tap <strong>Paste from clipboard</strong>.</li>
+  <li>Toggle <strong>Use *italic / **bold</strong> for asterisk style or underscore style.</li>
+  <li>Toggle <strong>ATX headings closed</strong> if you want `### Title ###` instead of `### Title`.</li>
+  <li>Toggle <strong>Convert &lt;body&gt; only</strong> to skip head matter.</li>
+  <li>Tap <strong>Convert</strong>. Tap <strong>Copy</strong> or <strong>Download .md</strong>.</li>
+</ol>
+<a class="open" href="./html-to-markdown.html">Open HTML to Markdown</a>
+</div>
+
+<div class="tool" id="imgcmp">
+<h3>Image Compare</h3>
+<ol>
+  <li>Open <strong>Workspace Tools &rarr; Media &rarr; Image Compare</strong>.</li>
+  <li>Drop image <strong>A</strong> (before) and image <strong>B</strong> (after).</li>
+  <li>Pick a mode: <strong>Slider (left/right)</strong>, <strong>Slider (up/down)</strong>, <strong>Side by side</strong>, or <strong>Difference</strong>.</li>
+  <li>In slider modes, drag the round handle to wipe between A and B.</li>
+  <li>Difference mode highlights changed pixels &mdash; black means identical, brighter means bigger change. The summary line shows the percentage of changed pixels.</li>
+  <li>If A and B have different dimensions you get a warning. Resize first with the Image Resize tool for a pixel-accurate diff.</li>
+</ol>
+<a class="open" href="./image-compare.html">Open Image Compare</a>
 </div>
 
 <div class="tool" id="acceptance">

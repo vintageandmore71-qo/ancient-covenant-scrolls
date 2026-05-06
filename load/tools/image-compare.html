@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Load &mdash; Image Compare</title>
+<style>
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 0; background: #0a0a0f; color: #e8e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased; }
+header.top { display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px; border-bottom: 1px solid #1f1f2f; position: sticky; top: 0;
+  background: rgba(10,10,15,0.95); backdrop-filter: blur(8px); z-index: 5; }
+header.top a { color: #9ca3af; text-decoration: none; font-size: 13px;
+  padding: 6px 10px; border-radius: 6px; border: 1px solid #2a2a42; }
+header.top a:hover { color: #fff; border-color: #7c5cff; background: #1a1a2e; }
+header.top h1 { margin: 0; font-size: 18px; flex: 1; font-weight: 700; }
+main { max-width: 1200px; margin: 22px auto; padding: 0 20px 60px; }
+.intro { color: #9ca3af; font-size: 14px; line-height: 1.6; margin: 0 0 18px; }
+.row { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+.card { background: #15152a; border: 1px solid #2a2a42; border-radius: 12px;
+  padding: 14px; margin-bottom: 16px; }
+.card h2 { margin: 0 0 12px; font-size: 14px; color: #9ca3af;
+  text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700;
+  display: flex; align-items: center; gap: 10px; }
+.tag { padding: 2px 8px; border-radius: 4px; background: #1f1f2f;
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.04em; }
+.tag.a { background: #4c1212; color: #fca5a5; }
+.tag.b { background: #14532d; color: #bbf7d0; }
+.drop { display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 30px 16px; border: 2px dashed #2a2a42;
+  border-radius: 10px; cursor: pointer; gap: 6px; color: #9ca3af; min-height: 140px; }
+.drop:hover, .drop.over { border-color: #7c5cff; color: #fff; background: #1a1a2e; }
+.drop img { max-width: 100%; max-height: 120px; border-radius: 6px; }
+.drop .info { font-size: 11px; color: #9ca3af; }
+.modes { display: flex; gap: 6px; margin-bottom: 12px; }
+.mode { padding: 8px 14px; border: 1px solid #2a2a42; border-radius: 8px;
+  cursor: pointer; font-size: 13px; color: #9ca3af; background: #0e0e1a; }
+.mode.on { background: #7c5cff; border-color: #7c5cff; color: #fff; font-weight: 700; }
+.compare { position: relative; background:
+  repeating-conic-gradient(#1a1a2e 0% 25%, #15152a 0% 50%) 50% / 14px 14px;
+  border: 1px solid #2a2a42; border-radius: 8px; overflow: hidden;
+  user-select: none; touch-action: none; }
+.compare canvas { display: block; max-width: 100%; }
+.compare .above { position: absolute; top: 0; left: 0; height: 100%;
+  overflow: hidden; pointer-events: none; }
+.compare .above canvas { display: block; }
+.handle { position: absolute; top: 0; bottom: 0; width: 3px;
+  background: #7c5cff; cursor: ew-resize; pointer-events: none; }
+.handle::before { content: ''; position: absolute; top: 50%; left: -16px;
+  transform: translateY(-50%);
+  width: 35px; height: 35px; border-radius: 50%; background: #7c5cff;
+  border: 3px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+.handle::after { content: '\2194'; position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%); color: #fff; font-size: 18px;
+  font-weight: 700; pointer-events: none; }
+.cmp-h .handle { top: auto; left: 0; right: 0; height: 3px; bottom: 0;
+  width: auto; cursor: ns-resize; }
+.cmp-h .handle::before { left: 50%; top: -16px; transform: translateX(-50%); }
+.cmp-h .above { left: 0; top: 0; width: 100%; height: 50%; }
+.side-by-side { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.side-by-side > div { background:
+  repeating-conic-gradient(#1a1a2e 0% 25%, #15152a 0% 50%) 50% / 14px 14px;
+  border: 1px solid #2a2a42; border-radius: 8px; overflow: hidden; }
+.side-by-side img { width: 100%; display: block; }
+.summary { color: #9ca3af; font-size: 12px; margin-top: 12px; }
+.warn { background: #4c1212; color: #fca5a5; border: 1px solid #7f1d1d;
+  border-radius: 6px; padding: 8px 12px; margin-top: 10px; font-size: 12px; }
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+  background: #15152a; border: 1px solid #2a2a42; padding: 10px 16px;
+  border-radius: 8px; color: #e8e8f0; font-size: 13px; opacity: 0;
+  transition: opacity 0.2s; pointer-events: none; }
+.toast.show { opacity: 1; }
+.empty { color: #9ca3af; font-size: 13px; text-align: center; padding: 40px; }
+</style>
+</head>
+<body>
+<header class="top">
+<a href="./cat-media.html">&larr; Media</a>
+<h1>Image Compare</h1>
+<a href="./help.html#imgcmp">How it works</a>
+</header>
+<main>
+<p class="intro">Drop two images and slide a handle to reveal one through the other. Useful for before/after of upscale, mask, filter, or AI generation. Switch to side-by-side or overlay-difference.</p>
+<div class="row">
+<div class="card">
+<h2><span class="tag a">A</span> Before</h2>
+<div class="drop" id="dropA">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><polyline points="6 10 12 4 18 10"/><path d="M4 20h16"/></svg>
+<span>Drop image A</span>
+<input id="fileA" type="file" accept="image/*" style="display:none">
+</div>
+</div>
+<div class="card">
+<h2><span class="tag b">B</span> After</h2>
+<div class="drop" id="dropB">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><polyline points="6 10 12 4 18 10"/><path d="M4 20h16"/></svg>
+<span>Drop image B</span>
+<input id="fileB" type="file" accept="image/*" style="display:none">
+</div>
+</div>
+</div>
+<div class="card">
+<div class="modes">
+<div class="mode on" data-mode="slider-h">Slider (left/right)</div>
+<div class="mode" data-mode="slider-v">Slider (up/down)</div>
+<div class="mode" data-mode="side">Side by side</div>
+<div class="mode" data-mode="diff">Difference</div>
+</div>
+<div id="stage"><div class="empty">Drop both images to compare.</div></div>
+<div class="summary" id="summary"></div>
+<div id="warn"></div>
+</div>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+'use strict';
+var $ = function(id){ return document.getElementById(id); };
+var imgA = null, imgB = null;
+var mode = 'slider-h';
+var splitPct = 50;
+function toast(m){ var t = $('toast'); t.textContent = m; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 1800); }
+function loadFile(slot, f){
+  var fr = new FileReader();
+  fr.onload = function(){
+    var img = new Image();
+    img.onload = function(){
+      if (slot === 'A') { imgA = img; renderDrop('dropA', img, f); }
+      else { imgB = img; renderDrop('dropB', img, f); }
+      render();
+    };
+    img.src = fr.result;
+  };
+  fr.readAsDataURL(f);
+}
+function renderDrop(id, img, f){
+  var el = $(id);
+  el.innerHTML = '<img src="' + img.src + '"><div class="info">' +
+    img.naturalWidth + 'x' + img.naturalHeight + ' &middot; ' +
+    f.name + '</div>';
+  el.classList.remove('over');
+}
+['A','B'].forEach(function(slot){
+  var dropEl = $('drop' + slot), fileEl = $('file' + slot);
+  dropEl.addEventListener('click', function(){ fileEl.click(); });
+  ['dragenter','dragover'].forEach(function(ev){
+    dropEl.addEventListener(ev, function(e){ e.preventDefault(); dropEl.classList.add('over'); });
+  });
+  ['dragleave','drop'].forEach(function(ev){
+    dropEl.addEventListener(ev, function(e){ e.preventDefault(); dropEl.classList.remove('over'); });
+  });
+  dropEl.addEventListener('drop', function(e){
+    var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) loadFile(slot, f);
+  });
+  fileEl.addEventListener('change', function(e){
+    var f = e.target.files && e.target.files[0]; if (f) loadFile(slot, f);
+  });
+});
+document.querySelectorAll('.mode').forEach(function(el){
+  el.addEventListener('click', function(){
+    document.querySelectorAll('.mode').forEach(function(x){ x.classList.remove('on'); });
+    el.classList.add('on');
+    mode = el.dataset.mode; render();
+  });
+});
+function drawCanvas(canvas, img){
+  canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+  canvas.getContext('2d').drawImage(img, 0, 0);
+}
+function render(){
+  var stage = $('stage'), warn = $('warn'), summary = $('summary');
+  warn.innerHTML = ''; summary.textContent = '';
+  if (!imgA || !imgB) {
+    stage.innerHTML = '<div class="empty">Drop both images to compare.</div>'; return;
+  }
+  if (imgA.naturalWidth !== imgB.naturalWidth || imgA.naturalHeight !== imgB.naturalHeight) {
+    warn.innerHTML = '<div class="warn">A is ' + imgA.naturalWidth + 'x' + imgA.naturalHeight +
+      '. B is ' + imgB.naturalWidth + 'x' + imgB.naturalHeight +
+      '. The compare overlays B at A&apos;s size; for pixel-accurate diff, resize first with the Image Resize tool.</div>';
+  }
+  summary.textContent = mode === 'slider-h' ? 'Drag the handle left/right to wipe between A and B.' :
+    mode === 'slider-v' ? 'Drag the handle up/down to wipe between A and B.' :
+    mode === 'side' ? 'A on the left, B on the right.' :
+    'Difference: black = identical pixels, color = changes.';
+  if (mode === 'side') {
+    stage.innerHTML = '<div class="side-by-side"><div><img src="' + imgA.src + '"></div><div><img src="' + imgB.src + '"></div></div>';
+    return;
+  }
+  if (mode === 'diff') { renderDiff(); return; }
+  renderSlider();
+}
+function renderSlider(){
+  var stage = $('stage');
+  var orient = mode === 'slider-h' ? '' : 'cmp-h';
+  stage.innerHTML = '<div class="compare ' + orient + '" id="cmp">' +
+    '<canvas id="canvB"></canvas>' +
+    '<div class="above" id="above"><canvas id="canvA"></canvas></div>' +
+    '<div class="handle" id="handle"></div>' +
+    '</div>';
+  drawCanvas($('canvB'), imgB);
+  drawCanvas($('canvA'), imgA);
+  positionSplit();
+  var cmp = $('cmp');
+  function set(e){
+    var rect = cmp.getBoundingClientRect();
+    var pt = e.touches ? e.touches[0] : e;
+    if (mode === 'slider-h') splitPct = ((pt.clientX - rect.left) / rect.width) * 100;
+    else splitPct = ((pt.clientY - rect.top) / rect.height) * 100;
+    splitPct = Math.max(0, Math.min(100, splitPct));
+    positionSplit();
+  }
+  function start(e){ e.preventDefault(); set(e);
+    document.addEventListener('mousemove', set);
+    document.addEventListener('touchmove', set, { passive: false });
+    document.addEventListener('mouseup', end);
+    document.addEventListener('touchend', end);
+  }
+  function end(){
+    document.removeEventListener('mousemove', set);
+    document.removeEventListener('touchmove', set);
+    document.removeEventListener('mouseup', end);
+    document.removeEventListener('touchend', end);
+  }
+  cmp.addEventListener('mousedown', start);
+  cmp.addEventListener('touchstart', start, { passive: false });
+}
+function positionSplit(){
+  var above = $('above'), handle = $('handle');
+  if (!above || !handle) return;
+  if (mode === 'slider-h') {
+    above.style.width = splitPct + '%';
+    above.style.height = '100%';
+    handle.style.left = splitPct + '%';
+    handle.style.top = '0';
+  } else {
+    above.style.width = '100%';
+    above.style.height = splitPct + '%';
+    handle.style.top = splitPct + '%';
+    handle.style.left = '0';
+  }
+}
+function renderDiff(){
+  var stage = $('stage');
+  var w = imgA.naturalWidth, h = imgA.naturalHeight;
+  var ca = document.createElement('canvas'); ca.width = w; ca.height = h;
+  ca.getContext('2d').drawImage(imgA, 0, 0);
+  var cb = document.createElement('canvas'); cb.width = w; cb.height = h;
+  cb.getContext('2d').drawImage(imgB, 0, 0, w, h);
+  var ctx = ca.getContext('2d');
+  var dataA = ctx.getImageData(0, 0, w, h);
+  var dataB = cb.getContext('2d').getImageData(0, 0, w, h);
+  var changed = 0, total = w * h;
+  for (var i = 0; i < dataA.data.length; i += 4) {
+    var dr = Math.abs(dataA.data[i] - dataB.data[i]);
+    var dg = Math.abs(dataA.data[i+1] - dataB.data[i+1]);
+    var db = Math.abs(dataA.data[i+2] - dataB.data[i+2]);
+    var max = Math.max(dr, dg, db);
+    if (max > 4) changed++;
+    var v = Math.min(255, max * 3);
+    dataA.data[i] = v; dataA.data[i+1] = v >> 1; dataA.data[i+2] = v;
+    dataA.data[i+3] = 255;
+  }
+  ctx.putImageData(dataA, 0, 0);
+  var pct = ((changed / total) * 100).toFixed(2);
+  stage.innerHTML = '<div class="compare"></div>';
+  stage.querySelector('.compare').appendChild(ca);
+  $('summary').textContent = changed.toLocaleString() + ' / ' + total.toLocaleString() +
+    ' pixels differ (' + pct + '%). Brighter areas = bigger change.';
+}
+})();
+</script>
+</body>
+</html>
