@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html data-loadtasks-version="5.1" lang="en" data-loadtasks-version="5.2">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -14,7 +14,7 @@
   <link rel="icon" href="favicon.ico">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=5.2">
 </head>
 <body>
   <a href="#main" class="skip-link">Skip to dashboard</a>
@@ -746,7 +746,7 @@
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
   </div>
-  <script src="app.js"></script>
+  <script src="app.js?v=5.2"></script>
 
       <div class="notes-backdrop" id="notesBackdrop" hidden>
         <aside class="notes-panel" role="dialog" aria-modal="true" aria-labelledby="notesTitle">
@@ -816,6 +816,102 @@
           </div>
         </aside>
       </div>
+
+
+<script id="loadTasksHowToEmergencyFix">
+(function(){
+  const guides = {
+    dashboard: ['Dashboard','Use this as your home base.','Check the next best action.','Open Intake to upload a ZIP or Agent Lab to test a site.','Do not mark complete until Validator and live QA pass.'],
+    agentlab: ['Agent Lab','Use this to test any live PWA, site, or media package while Load Tasks is open.','Paste the live site link.','Choose the site type.','Select checks.','Tap Run Onsite Test.','Read the alert levels.','Create repair tasks or download the report.'],
+    intake: ['Upload and Intake','Use this to upload one PWA ZIP at a time.','Choose the project type.','Upload one ZIP.','Tap Analyze Upload.','Go to Validator.'],
+    validator: ['Validator','Use this to run hard truth checks.','Tap Run Full Validator.','Read the score and status.','If status is Needs QA, open Repair Command Center.','Do not mark complete just because the score is high.'],
+    fix: ['Repair Command Center','Use this to prepare and apply safe repairs.','Protect the current build in Stable Build Vault.','Tap Prepare Fix.','Confirm Repair Preview appears.','Apply only safe or safe-with-review patches.','Export Fixed ZIP.','Re-run Validator.'],
+    alerts: ['Alert Dashboard','Use this to see color-coded health results.','Run Validator or Agent Lab.','Review red first, then orange, then yellow.','Use Prepare Fix only when available.','Export the alert report.'],
+    notes: ['Notes','Use this to capture thoughts without leaving the current page.','Tap Notes.','Type or paste the note.','Choose a color and tags.','Attach an image if needed.','Save or export notes.'],
+    help: ['Help Center','Use this for plain-language support.','Choose a topic.','Tap Ask Helper.','Download or copy the answer if needed.'],
+    focus: ['Focus Mode','Use this when the app feels overwhelming.','Read one next best action.','Tap Take Me There.','Finish that one task before doing another.'],
+    github: ['GitHub Export','Use this only when you are ready to upload or push files.','Export a rollback first.','Export GitHub-ready ZIP.','Upload contents, not the ZIP itself.','Test the live link.'],
+    handoff: ['Developer Handoff','Use this to create exact instructions for a developer or builder.','Run Validator.','Prepare fixes.','Export Claude prompt, QA checklist, and report.'],
+    vault: ['Project Vault','Use this to protect working builds.','Run Validator.','If the current build is worth saving, tap Protect Current as Stable.','Export rollback reports before risky repairs.'],
+    certificate: ['Launch Certificate','Use this before launch or upload.','Run Validator.','Apply safe repairs.','Generate Certificate.','If not ready, fix blockers first.','Download Certificate after live QA.'],
+    settings: ['Settings','Use this to make the app easier to read.','Turn on dyslexia-friendly mode.','Increase text size if needed.','Use reduced motion if motion distracts you.']
+  };
+
+  function escapeHtml(value){
+    return String(value || '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+
+  function openGuide(key){
+    const guide = guides[key] || guides.dashboard;
+    const backdrop = document.getElementById('howToBackdrop');
+    const title = document.getElementById('howToTitle');
+    const content = document.getElementById('howToContent');
+    if (title) title.textContent = guide[0];
+    if (content) {
+      content.innerHTML = '<ol class="emergency-howto-list">' + guide.slice(1).map(step => '<li>' + escapeHtml(step) + '</li>').join('') + '</ol>';
+    }
+    window.__loadTasksHowTo = { title: guide[0], steps: guide.slice(1) };
+    if (backdrop) backdrop.hidden = false;
+  }
+
+  function closeGuide(){
+    const backdrop = document.getElementById('howToBackdrop');
+    if (backdrop) backdrop.hidden = true;
+  }
+
+  function downloadGuide(){
+    const item = window.__loadTasksHowTo || { title: 'How To', steps: ['No guide selected.'] };
+    const text = '# ' + item.title + '\n\n' + item.steps.map((s,i) => (i+1) + '. ' + s).join('\n');
+    const blob = new Blob([text], { type: 'text/markdown' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'Load_Tasks_How_To_' + item.title.replace(/[^a-z0-9]+/gi, '_') + '.md';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 300);
+  }
+
+  function copyGuide(){
+    const item = window.__loadTasksHowTo || { title: 'How To', steps: ['No guide selected.'] };
+    const text = item.title + '\n' + item.steps.map((s,i) => (i+1) + '. ' + s).join('\n');
+    if (navigator.clipboard) navigator.clipboard.writeText(text);
+  }
+
+  document.addEventListener('click', function(event){
+    const howto = event.target.closest('[data-howto]');
+    if (howto) {
+      event.preventDefault();
+      event.stopPropagation();
+      openGuide(howto.getAttribute('data-howto') || 'dashboard');
+      return;
+    }
+    if (event.target.closest('#closeHowToBtn')) {
+      event.preventDefault();
+      closeGuide();
+      return;
+    }
+    if (event.target.closest('#downloadHowToBtn')) {
+      event.preventDefault();
+      downloadGuide();
+      return;
+    }
+    if (event.target.closest('#copyHowToBtn')) {
+      event.preventDefault();
+      copyGuide();
+      return;
+    }
+  }, true);
+
+  document.addEventListener('DOMContentLoaded', function(){
+    const content = document.getElementById('howToContent');
+    const backdrop = document.getElementById('howToBackdrop');
+    if (content && !content.textContent.trim()) {
+      content.innerHTML = '<p>Tap a How-To button to load step-by-step help.</p>';
+    }
+    if (backdrop) backdrop.hidden = true;
+  });
+})();
+</script>
 
 </body>
 </html>

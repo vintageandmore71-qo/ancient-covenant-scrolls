@@ -780,3 +780,18 @@ body.simple-mode .notes-row {
     max-height: 96vh;
   }
 }
+
+/* v5.2 emergency howto */
+.emergency-howto-list {
+  line-height: 1.85;
+  font-size: 1.08rem;
+  color: var(--text);
+  padding-left: 26px;
+}
+.emergency-howto-list li {
+  margin-bottom: 10px;
+}
+#howToContent p {
+  color: var(--muted);
+  line-height: 1.7;
+}

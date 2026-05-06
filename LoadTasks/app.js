@@ -2581,3 +2581,73 @@
       toast('Repair task created.');
     });
   }
+
+
+
+/* v5.1 How-To and cache hotfix */
+(function installHowToHotfix(){
+  const guides = {
+    dashboard: ['Dashboard', 'Use this as your home base.', 'Check the next best action.', 'Open Intake to upload a ZIP or Agent Lab to test a site.', 'Do not mark complete until Validator and live QA pass.'],
+    agentlab: ['Agent Lab', 'Use this to test any live PWA, site, or media package while Load Tasks is open.', 'Paste the live site link.', 'Choose the site type.', 'Select checks.', 'Tap Run Onsite Test.', 'Read the alert levels.', 'Create repair tasks or download the report.'],
+    intake: ['Upload and Intake', 'Use this to upload one PWA ZIP at a time.', 'Choose the project type.', 'Upload one ZIP.', 'Tap Analyze Upload.', 'Go to Validator.'],
+    validator: ['Validator', 'Use this to run hard truth checks.', 'Tap Run Full Validator.', 'Read the score and status.', 'If status is Needs QA, open Repair Command Center.', 'Do not mark complete just because the score is high.'],
+    fix: ['Repair Command Center', 'Use this to prepare and apply safe repairs.', 'Protect the current build in Stable Build Vault.', 'Tap Prepare Fix.', 'Confirm Repair Preview appears.', 'Apply only safe or safe-with-review patches.', 'Export Fixed ZIP.', 'Re-run Validator.'],
+    alerts: ['Alert Dashboard', 'Use this to see color-coded health results.', 'Run Validator or Agent Lab.', 'Review red first, then orange, then yellow.', 'Use Prepare Fix only when available.', 'Export the alert report.'],
+    notes: ['Notes', 'Use this to capture thoughts without leaving the current page.', 'Tap Notes.', 'Type or paste the note.', 'Choose a color and tags.', 'Attach an image if needed.', 'Save or export notes.'],
+    help: ['Help Center', 'Use this for plain-language support.', 'Choose a topic.', 'Tap Ask Helper.', 'Download or copy the answer if needed.'],
+    focus: ['Focus Mode', 'Use this when the app feels overwhelming.', 'Read one next best action.', 'Tap Take Me There.', 'Finish that one task before doing another.'],
+    github: ['GitHub Export', 'Use this only when you are ready to upload or push files.', 'Export a rollback first.', 'Export GitHub-ready ZIP.', 'Upload contents, not the ZIP itself.', 'Test the live link.'],
+    settings: ['Settings', 'Use this to make the app easier to read.', 'Turn on dyslexia-friendly mode.', 'Increase text size if needed.', 'Use reduced motion if motion distracts you.']
+  };
+
+  function showGuide(key) {
+    const guide = guides[key] || guides.dashboard;
+    const title = document.getElementById('howToTitle');
+    const content = document.getElementById('howToContent');
+    const backdrop = document.getElementById('howToBackdrop');
+    if (title) title.textContent = guide[0];
+    if (content) {
+      content.innerHTML = '<ol>' + guide.slice(1).map(step => '<li>' + escapeHtmlLocal(step) + '</li>').join('') + '</ol>';
+    }
+    if (backdrop) backdrop.hidden = false;
+    window.__loadTasksCurrentHowTo = { title: guide[0], steps: guide.slice(1) };
+  }
+
+  function escapeHtmlLocal(value) {
+    return String(value || '').replace(/[&<>"']/g, function(ch) {
+      return ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[ch];
+    });
+  }
+
+  document.addEventListener('click', function(event) {
+    const howToButton = event.target.closest('[data-howto]');
+    if (howToButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      showGuide(howToButton.getAttribute('data-howto') || 'dashboard');
+    }
+
+    if (event.target && event.target.id === 'copyHowToBtn') {
+      const item = window.__loadTasksCurrentHowTo || { title: 'How To', steps: ['No guide selected.'] };
+      const text = item.title + '\n' + item.steps.map((step, index) => (index + 1) + '. ' + step).join('\n');
+      if (navigator.clipboard) navigator.clipboard.writeText(text);
+    }
+
+    if (event.target && event.target.id === 'downloadHowToBtn') {
+      const item = window.__loadTasksCurrentHowTo || { title: 'How To', steps: ['No guide selected.'] };
+      const text = '# ' + item.title + '\n\n' + item.steps.map((step, index) => (index + 1) + '. ' + step).join('\n');
+      const blob = new Blob([text], { type: 'text/markdown' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Load_Tasks_How_To_' + item.title.replace(/[^a-z0-9]+/gi, '_') + '.md';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 300);
+    }
+
+    if (event.target && event.target.id === 'closeHowToBtn') {
+      const backdrop = document.getElementById('howToBackdrop');
+      if (backdrop) backdrop.hidden = true;
+    }
+  }, true);
+})();

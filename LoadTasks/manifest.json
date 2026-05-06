@@ -1,7 +1,7 @@
 {
   "name": "Load Tasks",
   "short_name": "Load Tasks",
-  "description": "Load Tasks v5 Phase 1 adds onsite Agent Lab, floating notes, How-To help, alert dashboard, and dyslexia-friendly site testing workflows.",
+  "description": "Load Tasks v5.2 fixes How-To content display with an inline emergency loader and cache refresh.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
