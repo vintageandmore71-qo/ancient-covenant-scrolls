@@ -118,6 +118,8 @@ code,kbd{background:#1a1a26;padding:2px 6px;border-radius:4px;font-family:ui-mon
   <a href="#checksum">Checksum</a>
   <a href="#htm2md">HTML to Markdown</a>
   <a href="#imgcmp">Image Compare</a>
+  <a href="#mdtoc">Markdown TOC</a>
+  <a href="#textenc">Text Encoder</a>
   <a href="#acceptance">Acceptance Criteria</a>
 </nav>
 
@@ -764,6 +766,34 @@ code,kbd{background:#1a1a26;padding:2px 6px;border-radius:4px;font-family:ui-mon
   <li>If A and B have different dimensions you get a warning. Resize first with the Image Resize tool for a pixel-accurate diff.</li>
 </ol>
 <a class="open" href="./image-compare.html">Open Image Compare</a>
+</div>
+
+<div class="tool" id="mdtoc">
+<h3>Markdown TOC</h3>
+<ol>
+  <li>Open <strong>Workspace Tools &rarr; Books &amp; writing &rarr; Markdown TOC</strong>.</li>
+  <li>Drop a `.md` / `.markdown` / `.txt` file or paste Markdown.</li>
+  <li>Pick the <strong>Min level</strong> and <strong>Max level</strong> &mdash; e.g. H2 to H3 to skip the document title and stop at sections.</li>
+  <li>Pick a list style (bulleted with -, bulleted with *, or numbered) and the indent per level (2 / 3 / 4 spaces or tab).</li>
+  <li>Toggle <strong>Use anchor links</strong> for `[Title](#slug)` GitHub-style links.</li>
+  <li>Toggle <strong>Number entries</strong> for hierarchical numbering (1, 1.1, 1.1.1, &hellip;).</li>
+  <li>Toggle <strong>Skip headings inside fenced code</strong> if your manuscript has code samples.</li>
+  <li>Tap <strong>Build TOC</strong>. Tap <strong>Insert at top of source</strong> to prepend it as a `## Table of Contents` block.</li>
+</ol>
+<a class="open" href="./markdown-toc.html">Open Markdown TOC</a>
+</div>
+
+<div class="tool" id="textenc">
+<h3>Text Encoder</h3>
+<ol>
+  <li>Open <strong>Workspace Tools &rarr; Build &amp; validate &rarr; Text Encoder</strong>.</li>
+  <li>Pick a tab: Base64, URL, HTML entities, Hex (UTF-8), or Slug.</li>
+  <li>Pick <strong>Encode</strong> or <strong>Decode</strong>. Slugify is encode-only.</li>
+  <li>Type or paste in the input pane. The output appears live; tap <strong>Convert</strong> for a final pass.</li>
+  <li>Per-format options: <em>URL</em> can encode just the path or also reserved characters; <em>HTML</em> can use named or numeric entities; <em>Hex</em> can space-separate bytes; <em>Slug</em> picks separator and lowercase.</li>
+  <li>Tap <strong>Swap input &harr; output</strong> to round-trip, or <strong>Copy output</strong> to grab the result.</li>
+</ol>
+<a class="open" href="./text-encoder.html">Open Text Encoder</a>
 </div>
 
 <div class="tool" id="acceptance">

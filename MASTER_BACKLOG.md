@@ -40,7 +40,7 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 
 ## Load main (`/load/`)
 
-**Cache:** `load-v17fo`. **Tip status spec:** `PLAN_LOAD_AI.md`,
+**Cache:** `load-v17fp`. **Tip status spec:** `PLAN_LOAD_AI.md`,
 `PLAN_IMAGE_PROMPT_v3.md`, `PLAN_BOOK_TO_VIDEO.md`,
 `MEDIA_MODULE_SPEC.md`, `LOAD_FEATURES.md`, `LOAD_MARKETING.md`.
 
@@ -50,6 +50,15 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 - **Character Consistency module** — see X-CC.
 - **Piper TTS Stage 1 unblock + Stage 2 rollout** — see X-PIPER. Stage 1 shipped but not playing; blocked on the play() error text from the user. Resilience panel (Part 9) shipped in v17er gives an in-app diagnostic + recovery path.
 - **LOAD-ECO acceptance test pass** (Build Plan Part 13). Every part now has a tool surface, but the user-validation pass is still needed: open each tool, confirm PASS/FAIL/WARN labels render, run a sample export, save a receipt, check it appears in the Receipts library. Parts 1, 2, 3, 14-17 shipped in v17eq. Parts 4, 7, 9 + Book-to-Video wiring shipped in v17er. Parts 5, 6, 8, 10 shipped in v17es. Parts 11-13 are housekeeping/acceptance and are met by the existing tool surfaces.
+
+### Recently done (this session, 2026-05-06 — Markdown TOC + Text Encoder)
+- **v17fp &mdash; Markdown TOC + Text Encoder**:
+  - **Markdown TOC:** new tool at `load/tools/markdown-toc.html`. Drop or paste Markdown. Detect ATX headings (#, ##, &hellip;) and Setext headings (=, -). Choose min/max levels, list style (-, *, numbered), indent (2/3/4 spaces or tab). Toggles for GitHub-style anchor links, hierarchical numbering (1, 1.1, &hellip;), skip-headings-inside-fenced-code. **Insert at top of source** prepends a `## Table of Contents` block ready to ship.
+  - **Text Encoder:** new tool at `load/tools/text-encoder.html`. Five tabs: Base64, URL, HTML entities, Hex (UTF-8), Slug. Encode/decode toggles (Slug is encode-only). Per-format options (component vs URI, named vs numeric entities, space-separated bytes, slug separator). Live two-way conversion as you type, swap input/output, copy result.
+  - cat-books.html and cat-build.html each gained one tile.
+  - Workspace tile description bumped to 49 tools.
+  - Help page updated with new TOC entries + per-tool cards.
+  - Cache `load-v17fo` -&gt; `load-v17fp`. Version badge bumped.
 
 ### Recently done (this session, 2026-05-06 — HTML to Markdown + Image Compare)
 - **v17fo &mdash; HTML to Markdown + Image Compare**:

@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Load &mdash; Text Encoder</title>
+<style>
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 0; background: #0a0a0f; color: #e8e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased; }
+header.top { display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px; border-bottom: 1px solid #1f1f2f; position: sticky; top: 0;
+  background: rgba(10,10,15,0.95); backdrop-filter: blur(8px); z-index: 5; }
+header.top a { color: #9ca3af; text-decoration: none; font-size: 13px;
+  padding: 6px 10px; border-radius: 6px; border: 1px solid #2a2a42; }
+header.top a:hover { color: #fff; border-color: #7c5cff; background: #1a1a2e; }
+header.top h1 { margin: 0; font-size: 18px; flex: 1; font-weight: 700; }
+main { max-width: 1100px; margin: 22px auto; padding: 0 20px 60px; }
+.intro { color: #9ca3af; font-size: 14px; line-height: 1.6; margin: 0 0 18px; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.tab { padding: 8px 14px; border: 1px solid #2a2a42; border-radius: 8px;
+  cursor: pointer; font-size: 13px; color: #9ca3af; background: #15152a; }
+.tab.on { background: #7c5cff; border-color: #7c5cff; color: #fff; font-weight: 700; }
+.card { background: #15152a; border: 1px solid #2a2a42; border-radius: 12px;
+  padding: 14px; margin-bottom: 16px; }
+.card h2 { margin: 0 0 12px; font-size: 14px; color: #9ca3af;
+  text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+.row { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+@media (max-width: 800px) { .row { grid-template-columns: 1fr; } }
+textarea { width: 100%; min-height: 200px; padding: 12px; background: #0e0e1a;
+  border: 1px solid #2a2a42; border-radius: 8px; color: #e8e8f0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13px;
+  line-height: 1.55; resize: vertical; }
+button { font: inherit; padding: 9px 14px; border-radius: 8px; cursor: pointer;
+  border: 1px solid #2a2a42; background: #1a1a2e; color: #e8e8f0; font-size: 13px; }
+button:hover { border-color: #7c5cff; }
+button.primary { background: #7c5cff; border-color: #7c5cff; color: #fff;
+  font-weight: 700; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px;
+  align-items: center; }
+.intent { display: flex; gap: 6px; margin-bottom: 8px; }
+.intent button { flex: 1; padding: 7px; font-size: 12px; }
+.intent button.on { background: #7c5cff; border-color: #7c5cff; color: #fff;
+  font-weight: 700; }
+.summary { color: #9ca3af; font-size: 12px; margin-top: 10px; min-height: 16px; }
+.errbox { background: #4c1212; color: #fca5a5; border: 1px solid #7f1d1d;
+  border-radius: 6px; padding: 8px 12px; margin-top: 8px;
+  font-family: ui-monospace, monospace; font-size: 12px; }
+.options { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px; }
+label.toggle { display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; color: #9ca3af; }
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+  background: #15152a; border: 1px solid #2a2a42; padding: 10px 16px;
+  border-radius: 8px; color: #e8e8f0; font-size: 13px; opacity: 0;
+  transition: opacity 0.2s; pointer-events: none; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<header class="top">
+<a href="./cat-build.html">&larr; Build &amp; validate</a>
+<h1>Text Encoder</h1>
+<a href="./help.html#textenc">How it works</a>
+</header>
+<main>
+<p class="intro">Encode and decode text across five formats &mdash; Base64, URL, HTML entities, hex, and slugify. Live two-way conversion. Useful for inspecting data URLs, query strings, escaped HTML, and clean filenames.</p>
+<div class="tabs" id="tabs">
+<div class="tab on" data-mode="base64">Base64</div>
+<div class="tab" data-mode="url">URL</div>
+<div class="tab" data-mode="html">HTML entities</div>
+<div class="tab" data-mode="hex">Hex (UTF-8)</div>
+<div class="tab" data-mode="slug">Slug</div>
+</div>
+<div class="card">
+<div class="intent" id="intent">
+<button class="on" data-dir="enc">Encode &rarr;</button>
+<button data-dir="dec">&larr; Decode</button>
+</div>
+<div class="row">
+<div>
+<h2 style="margin-bottom:8px;">Input</h2>
+<textarea id="in" placeholder="paste text here&hellip;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+</div>
+<div>
+<h2 style="margin-bottom:8px;">Output</h2>
+<textarea id="out" readonly placeholder="result appears here"></textarea>
+</div>
+</div>
+<div class="options" id="options"></div>
+<div class="toolbar">
+<button class="primary" id="run">Convert</button>
+<button id="swap">Swap input &harr; output</button>
+<button id="copy">Copy output</button>
+<button id="clear">Clear</button>
+</div>
+<div class="summary" id="summary">Pick a format and direction, then tap Convert.</div>
+</div>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+'use strict';
+var $ = function(id){ return document.getElementById(id); };
+var mode = 'base64';
+var dir = 'enc';
+function toast(m){ var t = $('toast'); t.textContent = m; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 1800); }
+function showError(msg){
+  var s = $('summary');
+  s.innerHTML = '<div class="errbox">' + msg + '</div>';
+}
+
+function b64encode(s){
+  return btoa(unescape(encodeURIComponent(s)));
+}
+function b64decode(s){
+  try { return decodeURIComponent(escape(atob(s.replace(/\s+/g, '')))); }
+  catch(e) { throw new Error('Bad base64: ' + e.message); }
+}
+function urlEnc(s, comp){
+  return comp ? encodeURIComponent(s) : encodeURI(s);
+}
+function urlDec(s){
+  try { return decodeURIComponent(s.replace(/\+/g, ' ')); }
+  catch(e) { throw new Error('Bad URL encoding: ' + e.message); }
+}
+function htmlEnc(s, named){
+  if (named) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  return s.replace(/[ -香<>&"']/g, function(c){
+    return '&#' + c.charCodeAt(0) + ';';
+  });
+}
+function htmlDec(s){
+  var d = document.createElement('div');
+  d.innerHTML = s.replace(/<\/?[^>]+>/g, function(t){
+    return t.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  });
+  return d.textContent;
+}
+function hexEnc(s, sep){
+  var bytes = new TextEncoder().encode(s);
+  var out = [];
+  for (var i = 0; i < bytes.length; i++) out.push(bytes[i].toString(16).padStart(2,'0'));
+  return out.join(sep ? ' ' : '');
+}
+function hexDec(s){
+  var clean = s.replace(/[^0-9a-fA-F]/g, '');
+  if (clean.length % 2) throw new Error('Hex string must have even length.');
+  var bytes = new Uint8Array(clean.length / 2);
+  for (var i = 0; i < clean.length; i += 2) {
+    bytes[i/2] = parseInt(clean.slice(i, i+2), 16);
+  }
+  return new TextDecoder().decode(bytes);
+}
+function slugify(s, sep, low){
+  var out = (s || '').normalize ? s.normalize('NFKD').replace(/[̀-ͯ]/g, '') : s;
+  out = out.replace(/[^A-Za-z0-9\s-]/g, '').replace(/\s+/g, sep).replace(new RegExp(sep + '+','g'), sep);
+  out = out.replace(new RegExp('^' + sep + '+|' + sep + '+$','g'), '');
+  return low ? out.toLowerCase() : out;
+}
+
+function buildOptions(){
+  var html = '';
+  if (mode === 'url') {
+    html = '<label class="toggle"><input id="urlComp" type="checkbox" checked> Encode URI <em>component</em> (encodes &amp;, =, ?, /)</label>';
+  } else if (mode === 'html') {
+    html = '<label class="toggle"><input id="htmlNamed" type="checkbox" checked> Use named entities (&amp;amp;, &amp;lt;, &hellip;) instead of numeric</label>';
+  } else if (mode === 'hex') {
+    html = '<label class="toggle"><input id="hexSpace" type="checkbox"> Space-separated hex (1f 5d 6e&hellip;)</label>';
+  } else if (mode === 'slug') {
+    html = '<label class="toggle"><input id="slugLow" type="checkbox" checked> Lowercase</label>' +
+      '<label class="toggle">Separator: <select id="slugSep" style="background:#0e0e1a;border:1px solid #2a2a42;color:#e8e8f0;padding:4px 8px;border-radius:4px;font:inherit;font-size:12px;"><option value="-" selected>dash (-)</option><option value="_">underscore (_)</option><option value=".">dot (.)</option></select></label>';
+  }
+  $('options').innerHTML = html;
+}
+
+function run(){
+  var src = $('in').value;
+  if (!src) { $('out').value = ''; $('summary').textContent = 'Empty input.'; return; }
+  try {
+    var out;
+    if (mode === 'base64') {
+      out = dir === 'enc' ? b64encode(src) : b64decode(src);
+    } else if (mode === 'url') {
+      var comp = !$('urlComp') || $('urlComp').checked;
+      out = dir === 'enc' ? urlEnc(src, comp) : urlDec(src);
+    } else if (mode === 'html') {
+      var named = !$('htmlNamed') || $('htmlNamed').checked;
+      out = dir === 'enc' ? htmlEnc(src, named) : htmlDec(src);
+    } else if (mode === 'hex') {
+      var sp = $('hexSpace') && $('hexSpace').checked;
+      out = dir === 'enc' ? hexEnc(src, sp) : hexDec(src);
+    } else if (mode === 'slug') {
+      if (dir === 'dec') { $('summary').textContent = 'Slugify is one-way. There is no decode.'; return; }
+      var sep = ($('slugSep') ? $('slugSep').value : '-');
+      var low = !$('slugLow') || $('slugLow').checked;
+      out = slugify(src, sep, low);
+    }
+    $('out').value = out;
+    $('summary').textContent = 'Output: ' + out.length.toLocaleString() + ' chars, ' +
+      new Blob([out]).size.toLocaleString() + ' bytes.';
+  } catch (e) {
+    showError(e.message);
+  }
+}
+document.querySelectorAll('#tabs .tab').forEach(function(t){
+  t.addEventListener('click', function(){
+    document.querySelectorAll('#tabs .tab').forEach(function(x){ x.classList.remove('on'); });
+    t.classList.add('on'); mode = t.dataset.mode; buildOptions();
+    if ($('in').value) run(); else $('summary').textContent = 'Pick a format and direction, then tap Convert.';
+  });
+});
+document.querySelectorAll('#intent button').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('#intent button').forEach(function(x){ x.classList.remove('on'); });
+    b.classList.add('on'); dir = b.dataset.dir;
+    if ($('in').value) run();
+  });
+});
+$('run').addEventListener('click', run);
+$('swap').addEventListener('click', function(){
+  var a = $('in').value; $('in').value = $('out').value; $('out').value = a;
+  run();
+});
+$('clear').addEventListener('click', function(){
+  $('in').value = ''; $('out').value = ''; $('summary').textContent = 'Cleared.';
+});
+$('copy').addEventListener('click', function(){
+  if (!$('out').value) { toast('Nothing to copy'); return; }
+  if (navigator.clipboard) navigator.clipboard.writeText($('out').value).then(function(){ toast('Copied'); });
+  else { $('out').select(); document.execCommand('copy'); toast('Copied'); }
+});
+$('in').addEventListener('input', function(){
+  if ($('in').value) run();
+});
+buildOptions();
+})();
+</script>
+</body>
+</html>

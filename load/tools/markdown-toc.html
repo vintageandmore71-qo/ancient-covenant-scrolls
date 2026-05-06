@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Load &mdash; Markdown TOC</title>
+<style>
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 0; background: #0a0a0f; color: #e8e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased; }
+header.top { display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px; border-bottom: 1px solid #1f1f2f; position: sticky; top: 0;
+  background: rgba(10,10,15,0.95); backdrop-filter: blur(8px); z-index: 5; }
+header.top a { color: #9ca3af; text-decoration: none; font-size: 13px;
+  padding: 6px 10px; border-radius: 6px; border: 1px solid #2a2a42; }
+header.top a:hover { color: #fff; border-color: #7c5cff; background: #1a1a2e; }
+header.top h1 { margin: 0; font-size: 18px; flex: 1; font-weight: 700; }
+main { max-width: 1200px; margin: 22px auto; padding: 0 20px 60px; }
+.intro { color: #9ca3af; font-size: 14px; line-height: 1.6; margin: 0 0 18px; }
+.row { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+@media (max-width: 800px) { .row { grid-template-columns: 1fr; } }
+.card { background: #15152a; border: 1px solid #2a2a42; border-radius: 12px;
+  padding: 14px; margin-bottom: 16px; }
+.card h2 { margin: 0 0 12px; font-size: 14px; color: #9ca3af;
+  text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+.drop { display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 18px 16px; border: 2px dashed #2a2a42;
+  border-radius: 10px; cursor: pointer; gap: 6px; color: #9ca3af; margin-bottom: 12px; }
+.drop:hover, .drop.over { border-color: #7c5cff; color: #fff; background: #1a1a2e; }
+textarea { width: 100%; min-height: 280px; padding: 12px; background: #0e0e1a;
+  border: 1px solid #2a2a42; border-radius: 8px; color: #e8e8f0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13px;
+  line-height: 1.55; resize: vertical; }
+button { font: inherit; padding: 9px 14px; border-radius: 8px; cursor: pointer;
+  border: 1px solid #2a2a42; background: #1a1a2e; color: #e8e8f0; font-size: 13px; }
+button:hover { border-color: #7c5cff; }
+button.primary { background: #7c5cff; border-color: #7c5cff; color: #fff;
+  font-weight: 700; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px;
+  align-items: center; }
+label.field { display: inline-flex; flex-direction: column; gap: 4px;
+  font-size: 12px; color: #9ca3af; }
+label.toggle { display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; color: #9ca3af; }
+select, input[type=number] { background: #0e0e1a; border: 1px solid #2a2a42;
+  color: #e8e8f0; padding: 8px 10px; border-radius: 6px; font: inherit;
+  font-size: 13px; }
+.summary { color: #9ca3af; font-size: 12px; margin-top: 10px; }
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+  background: #15152a; border: 1px solid #2a2a42; padding: 10px 16px;
+  border-radius: 8px; color: #e8e8f0; font-size: 13px; opacity: 0;
+  transition: opacity 0.2s; pointer-events: none; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<header class="top">
+<a href="./cat-books.html">&larr; Books &amp; writing</a>
+<h1>Markdown TOC</h1>
+<a href="./help.html#mdtoc">How it works</a>
+</header>
+<main>
+<p class="intro">Drop or paste Markdown. Get a table of contents with GitHub-style anchor links. Choose levels, indent, list style, and whether to insert the TOC at the top of the source.</p>
+<div class="row">
+<div class="card">
+<h2>Markdown source</h2>
+<div class="drop" id="drop">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M16 4v3h3"/><path d="M8 11h6M8 14h8M8 17h5"/></svg>
+<span>Drop a .md file or paste below</span>
+<input id="file" type="file" accept=".md,.markdown,.txt,text/plain,text/markdown" style="display:none">
+</div>
+<textarea id="src" placeholder="# Title&#10;&#10;## Chapter 1&#10;&#10;### Section&#10;&#10;Body&hellip;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+</div>
+<div class="card">
+<h2>Settings</h2>
+<div style="display:grid;gap:10px;grid-template-columns:1fr 1fr;">
+<label class="field">Min level<select id="minLvl">
+<option value="1">H1</option>
+<option value="2" selected>H2</option>
+<option value="3">H3</option>
+</select></label>
+<label class="field">Max level<select id="maxLvl">
+<option value="2">H2</option>
+<option value="3" selected>H3</option>
+<option value="4">H4</option>
+<option value="5">H5</option>
+<option value="6">H6</option>
+</select></label>
+<label class="field">List style<select id="style">
+<option value="dash" selected>Bulleted (-)</option>
+<option value="numbered">Numbered (1.)</option>
+<option value="star">Bulleted (*)</option>
+</select></label>
+<label class="field">Indent per level<select id="indent">
+<option value="2" selected>2 spaces</option>
+<option value="3">3 spaces</option>
+<option value="4">4 spaces</option>
+<option value="tab">Tab</option>
+</select></label>
+</div>
+<div style="margin-top:10px;display:flex;flex-direction:column;gap:8px;">
+<label class="toggle"><input id="addAnchors" type="checkbox" checked> Use anchor links (#slug)</label>
+<label class="toggle"><input id="numberHdr" type="checkbox"> Number entries by heading depth (1.1, 1.2&hellip;)</label>
+<label class="toggle"><input id="includeCode" type="checkbox"> Skip headings inside fenced code</label>
+</div>
+<div class="toolbar" style="margin-top:14px;">
+<button class="primary" id="run">Build TOC</button>
+<button id="insert">Insert at top of source</button>
+</div>
+<div class="summary" id="summary">No TOC yet.</div>
+</div>
+</div>
+<div class="card">
+<h2>TOC output</h2>
+<textarea id="out" readonly placeholder="The Markdown TOC will appear here&hellip;"></textarea>
+<div class="toolbar">
+<button id="copy">Copy</button>
+<button id="download">Download .md</button>
+</div>
+</div>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+'use strict';
+var $ = function(id){ return document.getElementById(id); };
+function toast(m){ var t = $('toast'); t.textContent = m; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 1800); }
+function slug(s){
+  return s.toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+function getIndent(){
+  var v = $('indent').value;
+  if (v === 'tab') return '\t';
+  return ' '.repeat(parseInt(v, 10));
+}
+function detectHeadings(text, skipCode){
+  var lines = text.split('\n');
+  var inFence = false;
+  var out = [];
+  var seen = {};
+  for (var i = 0; i < lines.length; i++) {
+    var ln = lines[i];
+    if (/^```/.test(ln)) { inFence = !inFence; continue; }
+    if (skipCode && inFence) continue;
+    var m = /^(#{1,6})\s+(.+?)\s*#*\s*$/.exec(ln);
+    if (m) {
+      var lvl = m[1].length;
+      var title = m[2].trim();
+      var s = slug(title);
+      var key = s; var n = 1;
+      while (seen[key]) { n++; key = s + '-' + n; }
+      seen[key] = true;
+      out.push({ level: lvl, title: title, slug: key });
+      continue;
+    }
+    if (i + 1 < lines.length) {
+      if (/^=+\s*$/.test(lines[i+1]) && ln.trim()) {
+        out.push({ level: 1, title: ln.trim(), slug: slug(ln.trim()) });
+        i++; continue;
+      }
+      if (/^-+\s*$/.test(lines[i+1]) && ln.trim()) {
+        out.push({ level: 2, title: ln.trim(), slug: slug(ln.trim()) });
+        i++; continue;
+      }
+    }
+  }
+  return out;
+}
+function buildTOC(headings){
+  var minL = parseInt($('minLvl').value, 10);
+  var maxL = parseInt($('maxLvl').value, 10);
+  var style = $('style').value;
+  var indent = getIndent();
+  var anchors = $('addAnchors').checked;
+  var doNumber = $('numberHdr').checked;
+  var filtered = headings.filter(function(h){ return h.level >= minL && h.level <= maxL; });
+  var counters = [];
+  var lines = filtered.map(function(h){
+    var depth = h.level - minL;
+    var pad = indent.repeat(Math.max(0, depth));
+    var marker = style === 'numbered' ? '1.' : style === 'star' ? '*' : '-';
+    var prefix = '';
+    if (doNumber) {
+      while (counters.length < depth + 1) counters.push(0);
+      counters[depth]++;
+      counters = counters.slice(0, depth + 1);
+      prefix = counters.join('.') + ' ';
+    }
+    var text = anchors ? '[' + prefix + h.title + '](#' + h.slug + ')' : (prefix + h.title);
+    return pad + marker + ' ' + text;
+  });
+  return { lines: lines, total: filtered.length };
+}
+function run(){
+  var src = $('src').value;
+  if (!src.trim()) { toast('Empty source'); return null; }
+  var hs = detectHeadings(src, $('includeCode').checked);
+  if (!hs.length) {
+    $('out').value = '';
+    $('summary').textContent = 'No headings found.';
+    toast('No headings found');
+    return null;
+  }
+  var built = buildTOC(hs);
+  $('out').value = built.lines.join('\n') + '\n';
+  $('summary').textContent = built.total + ' heading' + (built.total === 1 ? '' : 's') + ' in TOC.';
+  return built;
+}
+$('run').addEventListener('click', run);
+$('insert').addEventListener('click', function(){
+  var built = run(); if (!built) return;
+  var src = $('src').value;
+  var insert = '## Table of Contents\n\n' + built.lines.join('\n') + '\n\n---\n\n';
+  $('src').value = insert + src;
+  toast('TOC inserted at top');
+});
+$('copy').addEventListener('click', function(){
+  if (!$('out').value) { toast('Nothing to copy'); return; }
+  if (navigator.clipboard) navigator.clipboard.writeText($('out').value).then(function(){ toast('Copied'); });
+  else { $('out').select(); document.execCommand('copy'); toast('Copied'); }
+});
+$('download').addEventListener('click', function(){
+  if (!$('out').value) { toast('Nothing to save'); return; }
+  var blob = new Blob([$('out').value], { type: 'text/markdown' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'toc.md'; a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 200);
+  toast('Downloaded');
+});
+$('drop').addEventListener('click', function(){ $('file').click(); });
+['dragenter','dragover'].forEach(function(ev){
+  $('drop').addEventListener(ev, function(e){ e.preventDefault(); $('drop').classList.add('over'); });
+});
+['dragleave','drop'].forEach(function(ev){
+  $('drop').addEventListener(ev, function(e){ e.preventDefault(); $('drop').classList.remove('over'); });
+});
+$('drop').addEventListener('drop', function(e){
+  var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) loadFile(f);
+});
+$('file').addEventListener('change', function(e){
+  var f = e.target.files && e.target.files[0]; if (f) loadFile(f);
+});
+function loadFile(f){
+  var fr = new FileReader();
+  fr.onload = function(){ $('src').value = String(fr.result || '').replace(/\r\n?/g,'\n');
+    toast('Loaded ' + f.name); };
+  fr.readAsText(f);
+}
+})();
+</script>
+</body>
+</html>
