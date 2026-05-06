@@ -1,0 +1,969 @@
+<!doctype html>
+<html lang="en" data-loadtasks-version="5.10-builder-inspector-external">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffd400">
+  <meta name="description" content="Load Tasks validates, tracks, repairs, and exports PWA build work for Load, LoadPlay, LoadStudio, and standalone PWA projects.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Load Tasks">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Load Tasks</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css?v=5.10">
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to dashboard</a>
+  <div id="app" class="app-shell">
+    <section id="splash" class="splash-screen" aria-label="Load Tasks front screen">
+      <picture>
+        <source srcset="assets/images/LOAD_TASKS_SPLASH_1080.webp" type="image/webp">
+        <img src="assets/images/LOAD_TASKS_SPLASH_1080.jpg" alt="Load Tasks build validator splash screen" class="splash-art">
+      </picture>
+      <div class="splash-actions">
+        <button class="primary-action" data-view="dashboard" data-route>Open Dashboard</button>
+        <button class="secondary-action" data-view="intake" data-route>Upload Build</button>
+        <button class="secondary-action" data-view="notes" data-route>Paste Notes</button>
+      </div>
+    </section>
+
+    <header class="topbar" id="topbar">
+      <button class="icon-button" id="homeButton" aria-label="Return to splash screen">
+        <span class="icon-mini" data-icon="home"></span>
+      </button>
+      <div class="brand-lockup">
+        <img src="assets/icons/load-tasks-icon-96x96.png" alt="" class="brand-icon">
+        <div>
+          <strong>Load Tasks</strong>
+          <span>Build Validator. Repair Tracker. Project Memory.</span>
+        </div>
+      </div>
+      <nav class="topnav" aria-label="Primary navigation">
+        <button data-view="dashboard" data-route>Dashboard</button>
+        <button data-view="agentlab" data-route>Agent Lab</button>
+        <button data-view="notescenter" data-route>Notes</button>
+        <button data-view="registration" data-route>Registration</button>
+        <button data-view="screening" data-route>Screening</button>
+        <button data-view="adminops" data-route>Admin Ops</button>
+        <button data-view="providers" data-route>Provider Center</button>
+        <button data-view="creative" data-route>Creative Tools</button>
+        <button data-view="moviepwa" data-route>MoviePWA</button>
+        <button data-view="builder" data-route>PWA Builder</button>
+        <button data-view="intake" data-route>Intake</button>
+        <button data-view="validator" data-route>Validator</button>
+        <button data-view="alerts" data-route>Alerts</button>
+        <button data-view="fix" data-route>Fix Studio</button>
+        <button data-view="versions" data-route>Versions</button>
+        <button data-view="vault" data-route>Vault</button>
+        <button data-view="library" data-route>Library</button>
+        <button data-view="certificate" data-route>Certificate</button>
+        <button data-view="focus" data-route>Focus</button>
+        <button data-view="handoff" data-route>Handoff</button>
+        <button data-view="github" data-route>GitHub</button>
+        <button data-view="help" data-route>Help</button>
+<button data-view="settings" data-route>Settings</button>
+      </nav>
+      <button class="icon-button" id="hardRefresh" aria-label="Hard refresh app state">
+        <span class="icon-mini" data-icon="refresh"></span>
+      </button>
+    </header>
+
+    <main id="main" class="main-shell">
+      <aside class="side-rail" aria-label="Build command rail">
+        <button data-view="dashboard" data-route><span class="rail-icon" data-icon="dashboard"></span><span>Dashboard</span></button>
+        <button data-view="agentlab" data-route><span class="rail-icon" data-icon="agent"></span><span>Agent Lab</span></button>
+        <button data-view="notescenter" data-route><span class="rail-icon" data-icon="shell"></span><span>Notes</span></button>
+        <button data-view="registration" data-route><span class="rail-icon" data-icon="shell"></span><span>Registration</span></button>
+        <button data-view="screening" data-route><span class="rail-icon" data-icon="shell"></span><span>Screening</span></button>
+        <button data-view="adminops" data-route><span class="rail-icon" data-icon="shell"></span><span>Admin Ops</span></button>
+        <button data-view="providers" data-route><span class="rail-icon" data-icon="shell"></span><span>Provider Center</span></button>
+        <button data-view="creative" data-route><span class="rail-icon" data-icon="shell"></span><span>Creative Tools</span></button>
+        <button data-view="moviepwa" data-route><span class="rail-icon" data-icon="shell"></span><span>MoviePWA</span></button>
+        <button data-view="builder" data-route><span class="rail-icon" data-icon="shell"></span><span>PWA Builder</span></button>
+        <button data-view="intake" data-route><span class="rail-icon" data-icon="upload"></span><span>Upload Build</span></button>
+        <button data-view="notes" data-route><span class="rail-icon" data-icon="notes"></span><span>Paste Notes</span></button>
+        <button data-view="validator" data-route><span class="rail-icon" data-icon="shield"></span><span>Run Validator</span></button>
+        <button data-view="fix" data-route><span class="rail-icon" data-icon="wrench"></span><span>Fix Studio</span></button>
+        <button data-view="versions" data-route><span class="rail-icon" data-icon="version"></span><span>Versions</span></button>
+        <button data-view="vault" data-route><span class="rail-icon" data-icon="vault"></span><span>Project Vault</span></button>
+        <button data-view="library" data-route><span class="rail-icon" data-icon="library"></span><span>Build Library</span></button>
+        <button data-view="certificate" data-route><span class="rail-icon" data-icon="certificate"></span><span>Certificate</span></button>
+        <button data-view="focus" data-route><span class="rail-icon" data-icon="focus"></span><span>Focus Mode</span></button>
+        <button data-view="handoff" data-route><span class="rail-icon" data-icon="handoff"></span><span>Handoff</span></button>
+        <button data-view="github" data-route><span class="rail-icon" data-icon="github"></span><span>GitHub Export</span></button>
+      </aside>
+
+      <section class="workspace">
+        <section class="view active" id="view-dashboard" data-view-panel="dashboard">
+          <div class="hero-panel">
+            <div>
+              <p class="eyebrow">Command center</p>
+              <h1>No build marked complete unless verified.</h1>
+              <p class="lede">Track Load, LoadPlay, LoadStudio, book PWAs, AI editor builds, mock test systems, and developer handoffs in one private local workspace.</p>
+            </div>
+            <div class="score-orb" aria-live="polite">
+              <span id="overallScore">0</span>
+              <small>PWA Reality Score</small>
+            </div>
+          </div>
+
+          <div class="metric-grid" id="dashboardMetrics"></div>
+
+          <div class="action-grid">
+            <button class="command-card" data-view="intake" data-route>
+              <span class="card-icon" data-icon="upload"></span>
+              <strong>Upload Build</strong>
+              <span>Upload ZIP, HTML, notes, reports, or manuals.</span>
+            </button>
+            <button class="command-card" data-view="notes" data-route>
+              <span class="card-icon" data-icon="notes"></span>
+              <strong>Paste Notes</strong>
+              <span>Extract tasks from ChatGPT, Claude, or developer instructions.</span>
+            </button>
+            <button class="command-card hot" data-view="validator" data-route>
+              <span class="card-icon" data-icon="shield"></span>
+              <strong>Run Validator</strong>
+              <span>Check PWA structure, assets, buttons, claims, and security.</span>
+            </button>
+            <button class="command-card" data-view="fix" data-route>
+              <span class="card-icon" data-icon="wrench"></span>
+              <strong>Fix and Repair</strong>
+              <span>Auto-fix safe issues or generate repair instructions.</span>
+            </button>
+            <button class="command-card" data-view="handoff" data-route>
+              <span class="card-icon" data-icon="handoff"></span>
+              <strong>Developer Handoff</strong>
+              <span>Export Claude prompts, QA checklists, and reports.</span>
+            </button>
+            <button class="command-card" data-view="vault" data-route>
+              <span class="card-icon" data-icon="vault"></span>
+              <strong>Open Project Vault</strong>
+              <span>Protect stable builds and remember what broke.</span>
+            </button>
+            <button class="command-card" data-view="focus" data-route>
+              <span class="card-icon" data-icon="focus"></span>
+              <strong>Show Next Step</strong>
+              <span>Use the dyslexia-friendly guided workflow.</span>
+            </button>
+            <button class="command-card" data-view="help" data-route>
+              <span class="card-icon" data-icon="help"></span>
+              <strong>Open Help Center</strong>
+              <span>Ask the Load AI Helper and follow step-by-step instructions.</span>
+            </button>
+          </div>
+
+          <div class="two-col">
+            <article class="panel">
+              <div class="panel-title"><h2>Current build</h2><button data-action="download-report" class="small-btn">Export Report</button></div>
+              <div id="currentBuildSummary" class="empty-state">No build uploaded yet. Start with Upload Build or Paste Notes.</div>
+            </article>
+            <article class="panel">
+              <div class="panel-title"><h2>Next best action</h2><button data-view="validator" data-route class="small-btn">Open Validator</button></div>
+              <div id="nextBestAction" class="next-action">Upload a PWA ZIP or paste a build plan to begin verification.</div>
+            </article>
+          </div>
+        </section>
+
+        <section class="view" id="view-intake" data-view-panel="intake">
+<div class="section-head">
+            <p class="eyebrow">Build intake</p>
+            <h1>Upload files and define the build.</h1>
+            <p>Accepts ZIP packages, HTML files, text notes, markdown, JSON reports, screenshots, and manuals for tracking.</p>
+          </div>
+
+          <div class="intake-grid">
+            <form class="panel form-panel" id="projectForm">
+              <h2>Project profile</h2>
+              <label>Project name<input id="projectName" value="Load Tasks" required></label>
+              <label>Project type<select id="projectType"></select></label>
+              <label>Version name<input id="versionName" value="v1"></label>
+              <label>Last known working version<input id="stableVersion" placeholder="Example: v17aa-sync"></label>
+              <label>Priority<select id="priority"><option>Critical</option><option>High</option><option selected>Normal</option><option>Low</option></select></label>
+              <label class="check-row"><input id="strictComplete" type="checkbox" checked> Do not mark complete unless verified</label>
+              <button class="primary-action" type="submit">Save Project Profile</button>
+            </form>
+
+            <div class="panel upload-panel">
+              <h2>Upload build package</h2>
+              <div class="drop-zone" id="dropZone">
+                <input type="file" id="fileInput" multiple accept=".zip,.html,.htm,.md,.txt,.json,.csv,.pdf,.docx,.png,.jpg,.jpeg,.webp">
+                <strong>Drop files here or choose files</strong>
+                <span>ZIP files are scanned for PWA structure, assets, paths, and security warnings.</span>
+              </div>
+              <div class="file-list" id="uploadedFilesList"></div>
+              <div class="button-row">
+                <button class="primary-action" id="analyzeFilesBtn">Analyze Upload</button>
+                <button class="secondary-action" id="loadSampleBtn">Load Sample Build</button>
+              </div>
+            
+            <button class="command-card" data-view="builder" data-route>
+              <span class="card-icon" data-icon="shell"></span>
+              <strong>PWA Builder Studio</strong>
+              <span>Upload, dismantle, edit, rebuild, and export PWA packages.</span>
+            </button>
+            <button class="command-card" data-view="moviepwa" data-route>
+              <span class="card-icon" data-icon="shell"></span>
+              <strong>MoviePWA Studio</strong>
+              <span>Validate and structure movie-style PWAs with poster, Play, Resume, and Rate.</span>
+            </button>
+            <button class="command-card" data-view="creative" data-route>
+              <span class="card-icon" data-icon="shell"></span>
+              <strong>Creative Tools</strong>
+              <span>VN-style editing, AI image, animation, voice, audio, and video tool shells.</span>
+            </button>
+            <button class="command-card" data-view="providers" data-route>
+              <span class="card-icon" data-icon="shell"></span>
+              <strong>Provider Center</strong>
+              <span>No-key, key-based, fallback, and proof-required provider management.</span>
+            </button>
+            <button class="command-card" data-view="adminops" data-route>
+              <span class="card-icon" data-icon="shell"></span>
+              <strong>Admin Operations</strong>
+              <span>Daily site health, security, sign-up, upload, and provider checks.</span>
+            </button>
+            <button class="command-card" data-view="notescenter" data-route>
+              <span class="card-icon" data-icon="shell"></span>
+              <strong>Notes Center</strong>
+              <span>Inline notes, tags, color labels, images, and project note exports.</span>
+            </button>
+
+          </div>
+        </section>
+
+        <section class="view" id="view-notes" data-view-panel="notes">
+          <div class="section-head">
+            <p class="eyebrow">Promise extractor</p>
+            <h1>Paste build notes, prompts, or developer reports.</h1>
+            <p>The app extracts promised features, tasks, claims, and acceptance criteria.</p>
+          </div>
+          <div class="panel">
+            <textarea id="notesInput" class="notes-box" placeholder="Paste ChatGPT notes, Claude prompt, developer report, build plan, or bug list here."></textarea>
+            <div class="button-row">
+              <button class="primary-action" id="extractTasksBtn">Extract Tasks</button>
+              <button class="secondary-action" id="appendLoadMasterBtn">Insert Load Master Checklist</button>
+              <button class="secondary-action" id="clearNotesBtn">Clear Notes</button>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-title"><h2>Extracted tasks</h2><button class="small-btn" data-action="download-csv">Export CSV</button></div>
+            <div id="taskList" class="task-list"></div>
+          </div>
+        </section>
+
+        <section class="view" id="view-validator" data-view-panel="validator">
+<div class="section-head">
+            <p class="eyebrow">Validator Lab</p>
+            <h1>Run hard truth checks.</h1>
+            <p>Checks PWA readiness, raw-code risk, missing files, broken paths, dead controls, promise gaps, and unsafe patterns.</p>
+          </div>
+          <div class="button-row sticky-actions">
+            <button class="primary-action" id="runValidatorBtn">Run Full Validator</button>
+            <button class="secondary-action" data-action="download-report">Download Report</button>
+            <button class="secondary-action" data-action="download-json">Download JSON</button>
+          </div>
+          <div class="score-board" id="scoreBoard"></div>
+          <div class="validation-grid" id="validationResults"></div>
+        </section>
+
+        <section class="view" id="view-fix" data-view-panel="fix">
+<div class="section-head">
+            <p class="eyebrow">Repair Command Center</p>
+            <h1>Fix safe items. Prepare developer work. Verify before complete.</h1>
+            <p>Each issue has a confidence label and action buttons. Safe patches can be exported. Risky work becomes a developer task.</p>
+          </div>
+          <div class="repair-toolbar panel">
+            <div>
+              <h2>Guided repair wizard</h2>
+              <p id="repairWizardText">Run the validator first. Then follow the next safe step.</p>
+            </div>
+            <div class="button-row">
+              <button class="primary-action" id="guidedRepairBtn">Start Guided Repair</button>
+              <button class="secondary-action" id="createRepairPackBtn">Create Repair Pack</button>
+              <button class="secondary-action" id="applyAllSafeBtn">Apply Safe Patch Preview</button>
+            </div>
+          </div>
+          <div class="two-col repair-columns">
+            <article class="panel">
+              <h2>Auto-fix now</h2>
+              <div id="safeFixList" class="fix-list"></div>
+              <div class="button-row">
+                <button class="primary-action" id="buildFixedZipBtn">Export Fixed ZIP</button>
+                <button class="secondary-action" id="exportRollbackBtn">Export Rollback ZIP</button>
+              </div>
+            </article>
+            <article class="panel">
+              <h2>Review or developer-required</h2>
+              <div id="developerFixList" class="fix-list"></div>
+              <button class="secondary-action" data-action="download-claude">Export Claude Repair Prompt</button>
+            </article>
+          </div>
+          <div class="panel">
+            <h2>Repair log</h2>
+            
+          <article class="panel repair-preview-panel" id="repairPreviewPanel">
+            <div class="panel-title">
+              <h2>Repair Preview</h2>
+              <span class="badge warn" id="repairPreviewStatus">Preview Required</span>
+            </div>
+            <p class="muted">For duplicate IDs, CSP, placeholder links, and other sensitive repairs, review the plan here before applying anything.</p>
+            <div id="repairPreviewOutput" class="repair-preview-output">No repair preview yet. Tap Prepare Fix on a repair card.</div>
+            <div class="button-row">
+              <button class="secondary-action" id="downloadRepairPreviewBtn">Download Preview</button>
+              <button class="secondary-action" id="clearRepairPreviewBtn">Clear Preview</button>
+            </div>
+          </article>
+
+          <div id="repairLog" class="report-box">No repair action has been prepared yet.</div>
+          </div>
+        </section>
+
+        <section class="view" id="view-versions" data-view-panel="versions">
+          <div class="section-head">
+            <p class="eyebrow">Version control</p>
+            <h1>Track stable, broken, and ready builds.</h1>
+            <p>Every analyzed build becomes a version record. Stable versions are protected from accidental overwrite.</p>
+          </div>
+          <div class="button-row">
+            <button class="primary-action" id="markStableBtn">Mark Current Stable</button>
+            <button class="secondary-action" id="markBrokenBtn">Mark Current Broken</button>
+            <button class="secondary-action" id="compareVersionsBtn">Compare Latest Two</button>
+            <button class="secondary-action" id="downloadProjectMemoryFromVersions">Export Memory</button>
+            <button class="secondary-action" id="downloadLaunchReadinessFromVersions">Launch Report</button>
+          </div>
+          <div id="versionList" class="version-list"></div>
+          <div class="panel"><h2>Comparison</h2><div id="compareOutput" class="report-box">Upload at least two builds to compare versions.</div></div>
+        </section>
+
+        <section class="view" id="view-handoff" data-view-panel="handoff">
+<div class="section-head">
+            <p class="eyebrow">Developer handoff</p>
+            <h1>Export exact instructions.</h1>
+            <p>Create Claude prompts, human developer checklists, QA reports, GitHub issue templates, and PR checklists.</p>
+          </div>
+          <div class="handoff-grid">
+            <button class="command-card" data-action="download-claude"><span class="card-icon" data-icon="notes"></span><strong>Claude Repair Prompt</strong><span>Copy-paste instructions with acceptance criteria.</span></button>
+            <button class="command-card" data-action="download-report"><span class="card-icon" data-icon="report"></span><strong>Markdown Report</strong><span>Files, risks, missing tasks, and next steps.</span></button>
+            <button class="command-card" data-action="download-qa"><span class="card-icon" data-icon="shield"></span><strong>QA Checklist</strong><span>Manual test script before upload.</span></button>
+            <button class="command-card" data-action="download-github-issue"><span class="card-icon" data-icon="github"></span><strong>GitHub Issue</strong><span>Ready-to-post issue body.</span></button>
+          </div>
+          <div class="panel"><h2>Live handoff preview</h2><pre id="handoffPreview" class="code-preview"></pre></div>
+        </section>
+
+        <section class="view" id="view-github" data-view-panel="github">
+<div class="section-head">
+            <p class="eyebrow">GitHub export</p>
+            <h1>Export safely, then deploy.</h1>
+            <p>Use ZIP export for safest workflow. Direct push is available with a session-only fine-grained token.</p>
+          </div>
+          <div class="two-col">
+            <article class="panel">
+              <h2>GitHub-ready package</h2>
+              <p>Exports the current build files plus Load Tasks reports, changelog, and deploy checklist.</p>
+              <button class="primary-action" id="exportGithubZipBtn">Export GitHub-ready ZIP</button>
+            </article>
+            <article class="panel">
+              <h2>Optional direct push</h2>
+              <p class="warning-text">Use only with a fine-grained token. The token is not saved to local storage.</p>
+              <label>Owner or organization<input id="ghOwner" placeholder="owner"></label>
+              <label>Repository<input id="ghRepo" placeholder="repo"></label>
+              <label>Branch<input id="ghBranch" value="main"></label>
+              <label>Folder path<input id="ghPath" placeholder="optional/folder"></label>
+              <label>Fine-grained token<input id="ghToken" type="password" autocomplete="off"></label>
+              <div class="button-row"><button class="secondary-action" id="previewGithubBtn">Preview Push</button><button class="danger-action" id="pushGithubBtn">Push Current Files</button></div>
+            </article>
+          </div>
+          <div class="panel"><h2>GitHub push preview</h2><div id="githubPreview" class="report-box">No push preview generated.</div></div>
+        </section>
+
+
+        <section class="view" id="view-vault" data-view-panel="vault">
+<div class="section-head">
+            <p class="eyebrow">Project Vault</p>
+            <h1>Remember every build. Protect what works.</h1>
+            <p>Store project memory, version history, stable builds, broken features, live URLs, and repair history.</p>
+          </div>
+          <div class="vault-grid">
+            <article class="panel form-panel">
+              <h2>Active project memory</h2>
+              <label>Live site URL<input id="projectLiveUrl" placeholder="https://dssorit.github.io/ancient-covenant-scrolls/LoadTasks/"></label>
+              <label>GitHub path<input id="projectGithubPath" placeholder="ancient-covenant-scrolls / LoadTasks"></label>
+              <label>Known broken features<textarea id="projectBrokenNotes" class="mini-textarea" placeholder="Example: Home Screen icon, 404 path, missing splash, dead buttons"></textarea></label>
+              <div class="button-row">
+                <button class="primary-action" id="saveProjectMemoryBtn">Save Project Memory</button>
+                <button class="secondary-action" id="exportProjectMemoryBtn">Export Project Memory</button>
+              </div>
+            </article>
+            <article class="panel">
+              <h2>Stable Build Vault</h2>
+              <p class="warning-text">Stable builds are protected. Do not overwrite a known working build without a rollback.</p>
+              <div class="button-row">
+                <button class="primary-action" id="markVaultStableBtn">Protect Current as Stable</button>
+                <button class="secondary-action" id="exportStableVaultBtn">Export Stable Vault Report</button>
+              </div>
+              <div id="stableVaultList" class="version-list"></div>
+            </article>
+          </div>
+          <div class="panel">
+            <div class="panel-title"><h2>Version timeline</h2><button class="small-btn" id="generateChangelogBtn">Generate Changelog</button></div>
+            <div id="versionTimeline" class="timeline-list"></div>
+          </div>
+          <div class="panel">
+            <h2>Build comparison intelligence</h2>
+            <p>Compares recent versions and points to the likely break source.</p>
+            <div class="button-row">
+              <button class="primary-action" id="compareBuildsV4Btn">Compare Latest Two Builds</button>
+              <button class="secondary-action" id="exportRollbackV4Btn">Export Rollback Guide</button>
+            </div>
+            <div id="buildComparisonV4" class="report-box">Save at least two versions, then compare.</div>
+          </div>
+        </section>
+
+        <section class="view" id="view-library" data-view-panel="library">
+<div class="section-head">
+            <p class="eyebrow">Master Build Plan Library</p>
+            <h1>Load-specific templates and acceptance tests.</h1>
+            <p>Use these templates to prevent missing features before the next developer handoff.</p>
+          </div>
+          <div class="button-row sticky-actions">
+            <button class="primary-action" id="auditPromisesBtn">Run Promise Audit v2</button>
+            <button class="secondary-action" id="exportFeatureMatrixBtn">Export Feature Matrix</button>
+            <button class="secondary-action" id="exportFalsePositiveBtn">Export False Positive Report</button>
+          </div>
+          <div id="buildPlanLibrary" class="library-grid"></div>
+          <div class="two-col">
+            <article class="panel">
+              <h2>Promise Audit v2</h2>
+              <div id="promiseAuditOutput" class="report-box">Paste notes or run the validator to audit promises against evidence.</div>
+            </article>
+            <article class="panel">
+              <h2>False Positive Detector v2</h2>
+              <div id="falsePositiveOutput" class="report-box">Developer claims will be marked verified, missing, or claim not proven.</div>
+            </article>
+          </div>
+        </section>
+
+        <section class="view" id="view-certificate" data-view-panel="certificate">
+<div class="section-head">
+            <p class="eyebrow">Launch Readiness Certificate</p>
+            <h1>Only generate ready status when evidence supports it.</h1>
+            <p>The certificate summarizes PWA structure, assets, security, GitHub path, unresolved risks, and QA status.</p>
+          </div>
+          <div class="certificate-panel panel">
+            <div class="certificate-status" id="certificateStatus">Not Ready</div>
+            <div id="launchCertificateOutput" class="report-box">Run the validator to generate a launch readiness certificate.</div>
+            <div class="button-row">
+              <button class="primary-action" id="generateCertificateBtn">Generate Certificate</button>
+              <button class="secondary-action" id="downloadCertificateBtn">Download Certificate</button>
+              <button class="secondary-action" id="downloadLaunchChecklistBtn">Download Launch Checklist</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="view-focus" data-view-panel="focus">
+<div class="section-head">
+            <p class="eyebrow">Focus Mode</p>
+            <h1>One clear step at a time.</h1>
+            <p>This view reduces clutter and gives one next action based on the current build state.</p>
+          </div>
+          <div class="focus-layout">
+            <article class="panel focus-card">
+              <h2>Next best action</h2>
+              <div id="focusNextAction" class="focus-action">Upload a build or run the validator.</div>
+              <div class="button-row">
+                <button class="primary-action" id="focusDoNextBtn">Take Me There</button>
+                <button class="secondary-action" id="focusRefreshBtn">Refresh Step</button>
+              </div>
+            </article>
+            <article class="panel">
+              <h2>Simple project health</h2>
+              <div id="focusHealth" class="focus-health"></div>
+            </article>
+          </div>
+          <div class="panel">
+            <h2>Plain language repair path</h2>
+            <ol id="focusSteps" class="focus-steps"></ol>
+          </div>
+        </section>
+
+
+
+        <section class="view" id="view-help" data-view-panel="help">
+<div class="section-head">
+            <p class="eyebrow">Help Center</p>
+            <h1>Load AI Helper and step-by-step support.</h1>
+            <p>Use this area when the validator gives warnings, a GitHub upload fails, an icon does not appear, or you need one clear next action.</p>
+          </div>
+
+          <div class="help-command-grid">
+            <article class="panel ai-helper-panel">
+              <div class="panel-title">
+                <h2>Load AI Helper</h2>
+                <span class="badge warn">Local guide</span>
+              </div>
+              <p>This helper gives built-in guidance from the Load Tasks rulebook. It does not send your files anywhere. Future versions can connect to a private AI provider if you choose.</p>
+              <label>What do you need help with?
+                <select id="aiHelperTopic">
+                  <option value="validator">Understanding validator results</option>
+                  <option value="repair">What to repair first</option>
+                  <option value="github">GitHub Pages or 404 issue</option>
+                  <option value="icon">iPad Home Screen icon</option>
+                  <option value="stable">Stable Build Vault</option>
+                  <option value="certificate">Launch Readiness Certificate</option>
+                  <option value="upload">Uploading a test ZIP</option>
+                  <option value="dyslexia">Use Focus Mode</option>
+                </select>
+              </label>
+              <label>Optional question
+                <textarea id="aiHelperQuestion" class="mini-textarea" placeholder="Example: My score is 95 but it says Needs QA. What do I do next?"></textarea>
+              </label>
+              <div class="button-row">
+                <button class="primary-action" id="askAiHelperBtn">Ask Helper</button>
+                <button class="secondary-action" id="downloadAiHelperAnswerBtn">Download Answer</button>
+                <button class="secondary-action" id="copyAiHelperAnswerBtn">Copy Answer</button>
+              </div>
+              <div id="aiHelperAnswer" class="report-box ai-answer">Choose a topic and tap Ask Helper.</div>
+            </article>
+
+            <article class="panel next-action-panel">
+              <h2>Next best action</h2>
+              <div id="helpNextBestAction" class="focus-action">Run the validator, then open Repair Command Center.</div>
+              <div class="button-row">
+                <button class="primary-action" id="helpGoNextBtn">Take Me There</button>
+                <button class="secondary-action" id="helpRefreshNextBtn">Refresh</button>
+              </div>
+            </article>
+          </div>
+
+          <div class="help-grid">
+            <article class="panel help-card priority-help">
+              <h2>Your current validator screen</h2>
+              <p>If the score is high but the status says <strong>Needs QA</strong>, that is correct. The build may be strong, but warnings still need review before the build can be called complete.</p>
+              <div class="help-steps">
+                <div><strong>Score 95</strong><span>Strong structure. Not automatic completion.</span></div>
+                <div><strong>Needs QA</strong><span>Review warnings before upload or launch.</span></div>
+                <div><strong>Complete allowed: No</strong><span>The no false complete rule is active.</span></div>
+              </div>
+            </article>
+
+            <article class="panel help-card">
+              <h2>What passed</h2>
+              <ul class="clean-list">
+                <li><strong>Manifest readiness passed.</strong> The app metadata looks correct.</li>
+                <li><strong>Offline support passed.</strong> Install, fetch, and cache logic were found.</li>
+                <li><strong>Assets passed.</strong> Images and references were detected.</li>
+                <li><strong>Promised files passed.</strong> No obvious missing promised file evidence was found.</li>
+              </ul>
+            </article>
+
+            <article class="panel help-card warning-help">
+              <h2>What needs review</h2>
+              <ul class="clean-list">
+                <li><strong>Nested folder warning.</strong> The app may be inside a folder like witness-chef/index.html. GitHub Pages may need the folder root adjusted.</li>
+                <li><strong>Placeholder links.</strong> href="#" links may look clickable but may not go anywhere.</li>
+                <li><strong>Duplicate ID.</strong> A repeated ID such as bookingOccasion can break forms or JavaScript.</li>
+                <li><strong>Missing CSP.</strong> A Content Security Policy should be added for stronger static-site security.</li>
+              </ul>
+            </article>
+
+            <article class="panel help-card">
+              <h2>What to do next</h2>
+              <ol class="instruction-list">
+                <li>Go to <strong>Fix Studio</strong> or <strong>Repair Command Center</strong>.</li>
+                <li>Look for cards about nested folder, duplicate ID, placeholder links, and CSP.</li>
+                <li>Use <strong>Prepare Fix</strong> first. This lets you preview what will happen.</li>
+                <li>Use <strong>Apply Safe Patch</strong> only for safe or safe-with-review items.</li>
+                <li>Use <strong>Create Repair Pack</strong> to download repaired files and reports.</li>
+                <li>Do not mark the build complete until the hosted site is tested.</li>
+              </ol>
+            </article>
+
+            <article class="panel help-card">
+              <h2>Safe repair order</h2>
+              <ol class="instruction-list">
+                <li>Fix nested folder or GitHub Pages path first.</li>
+                <li>Fix duplicate IDs second.</li>
+                <li>Review placeholder links third.</li>
+                <li>Add CSP fourth.</li>
+                <li>Export a Repair Pack.</li>
+                <li>Upload the repaired files.</li>
+                <li>Run the validator again.</li>
+                <li>Mark stable only after live QA passes.</li>
+              </ol>
+            </article>
+
+            <article class="panel help-card">
+              <h2>Plain meaning of each warning</h2>
+              <div class="meaning-list">
+                <div><strong>Nested folder</strong><span>The site may work only if uploaded to the right folder path.</span></div>
+                <div><strong>href="#" links</strong><span>Some buttons or links may not have real actions yet.</span></div>
+                <div><strong>Duplicate ID</strong><span>Two fields may share one name, which can confuse forms and scripts.</span></div>
+                <div><strong>No CSP</strong><span>The site needs a stronger browser security rule.</span></div>
+              </div>
+            </article>
+
+            <article class="panel help-card">
+              <h2>When can a build be marked stable?</h2>
+              <p>Only after these checks pass:</p>
+              <ul class="clean-list">
+                <li>The hosted page opens without a 404.</li>
+                <li>The splash page appears first.</li>
+                <li>The main buttons work.</li>
+                <li>The Home Screen icon is correct.</li>
+                <li>The validator no longer shows critical errors.</li>
+                <li>Any patched issue has been tested live.</li>
+              </ul>
+            </article>
+
+            <article class="panel help-card">
+              <h2>Download help files</h2>
+              <p>Use these when handing the build to Claude, a developer, or yourself later.</p>
+              <div class="button-row">
+                <button class="primary-action" id="downloadHelpGuideBtn">Download Help Guide</button>
+                <button class="secondary-action" id="downloadValidatorDirectionsBtn">Download Validator Directions</button>
+                <button class="secondary-action" id="copyNextStepsBtn">Copy Next Steps</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+
+
+        <section class="view" id="view-agentlab" data-view-panel="agentlab">
+          <div class="section-head">
+            <p class="eyebrow">Agent Lab</p>
+            <h1>Onsite tests for any PWA, site, or web package.</h1>
+            <p>Test live links, uploaded packages, media paths, admin flows, screening tasks, and provider evidence while you are using Load Tasks.</p>
+          </div>
+<div class="button-row sticky-actions"><button class="primary-action agent-run-button" id="runAgentLabBtn" type="button">Run Onsite Test</button><button class="secondary-action" id="downloadAgentReportBtn">Download Agent Report</button></div>
+          <div class="agent-grid">
+            <article class="panel">
+              <div class="panel-title">
+                <h2>Live site target</h2>
+                <span class="badge info">Onsite</span>
+              </div>
+              <label>Site or PWA link
+                <input id="agentTargetUrl" placeholder="https://example.com/loadtasks/">
+              </label>
+              <label>Site type
+                <select id="agentSiteType">
+                  <option value="general">General PWA or site</option>
+                  <option value="load">Load ecosystem site</option>
+                  <option value="moviepwa">MoviePWA or CinePWA</option>
+                  <option value="mediapwa">Media-heavy PWA</option>
+                  <option value="admin">Admin or membership site</option>
+                  <option value="provider">AI or provider tool site</option>
+                </select>
+              </label>
+              <label>Testing goal
+                <select id="agentTestGoal">
+                  <option value="basic">Basic open and navigation</option>
+                  <option value="media">Media, video, image, and audio checks</option>
+                  <option value="admin">Sign-up, registration, email, and admin checks</option>
+                  <option value="screening">Profanity, nudity, and content screening tasks</option>
+                  <option value="movie">Movie playback package checks</option>
+                  <option value="provider">AI and provider proof checks</option>
+                </select>
+              </label>
+            </article>
+
+            <article class="panel">
+              <div class="panel-title">
+                <h2>Test scope</h2>
+                <span class="badge warn">Select checks</span>
+              </div>
+              <div class="agent-action-bar">
+                <button class="primary-action agent-run-button" id="runAgentLabBtnTop" type="button">Run Onsite Test</button>
+              </div>
+              <div class="check-grid">
+                <label><input type="checkbox" class="agent-check" value="opens" checked> Site opens</label>
+                <label><input type="checkbox" class="agent-check" value="splash" checked> Splash or poster appears</label>
+                <label><input type="checkbox" class="agent-check" value="nav" checked> Navigation and buttons</label>
+                <label><input type="checkbox" class="agent-check" value="downloads" checked> Downloads and exports</label>
+                <label><input type="checkbox" class="agent-check" value="media" checked> Images, video, audio</label>
+                <label><input type="checkbox" class="agent-check" value="pwa" checked> Manifest and service worker</label>
+                <label><input type="checkbox" class="agent-check" value="forms"> Sign-up and email forms</label>
+                <label><input type="checkbox" class="agent-check" value="security"> Security checks</label>
+                <label><input type="checkbox" class="agent-check" value="screening"> Profanity/nudity screening tasks</label>
+                <label><input type="checkbox" class="agent-check" value="providers"> AI provider proof checks</label>
+              </div>
+            </article>
+          </div>
+
+          <div class="agent-grid">
+            <article class="panel">
+              <div class="panel-title">
+                <h2>Agent results</h2>
+                <span class="badge gray" id="agentLastRunStatus">Not Tested</span>
+              </div>
+              <div class="agent-action-bar">
+                <button class="primary-action agent-run-button" id="runAgentLabBtnResults" type="button">Run Onsite Test</button>
+              </div>
+              <div id="agentResults" class="alert-list">Run an onsite test to see results.</div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-title">
+                <h2>Agent next action</h2>
+                <span class="badge info">Focus</span>
+              </div>
+              <div id="agentNextAction" class="focus-action">Add a live link, choose checks, and run the onsite test.</div>
+              <div class="button-row">
+                <button class="primary-action agent-run-button" id="runAgentLabBtnNext" type="button">Run Onsite Test</button>
+                <button class="primary-action" id="agentCreateTasksBtn">Create Repair Tasks</button>
+                <button class="secondary-action" id="agentCopySummaryBtn">Copy Summary</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+
+
+        <section class="view" id="view-alerts" data-view-panel="alerts">
+          <div class="section-head">
+            <p class="eyebrow">Alert Dashboard</p>
+            <h1>Color-coded site health and repair actions.</h1>
+            <p>Every alert includes a level, risk, next best action, and fix type. Color is always paired with text.</p>
+          </div>
+<div class="alert-metrics">
+            <div class="metric-card alert-green"><strong id="greenAlertCount">0</strong><span>Green Passed</span></div>
+            <div class="metric-card alert-yellow"><strong id="yellowAlertCount">0</strong><span>Yellow Review</span></div>
+            <div class="metric-card alert-orange"><strong id="orangeAlertCount">0</strong><span>Orange Warning</span></div>
+            <div class="metric-card alert-red"><strong id="redAlertCount">0</strong><span>Red Broken</span></div>
+            <div class="metric-card alert-gray"><strong id="grayAlertCount">0</strong><span>Gray Not Tested</span></div>
+            <div class="metric-card alert-blue"><strong id="blueAlertCount">0</strong><span>Blue Info</span></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title">
+              <h2>Current alerts</h2>
+              <span class="badge warn" id="alertLastScan">No scan yet</span>
+            </div>
+            <div id="alertDashboardList" class="alert-list">Run Validator or Agent Lab to populate alerts.</div>
+          </div>
+        </section>
+
+
+
+        
+        <section class="view" id="view-builder" data-view-panel="builder">
+          <div class="section-head">
+            <p class="eyebrow">PWA Builder Studio</p>
+            <h1>Inspect a PWA ZIP before editing.</h1>
+            <p>This phase only reads and reports package contents. No files are changed.</p>
+          </div>
+
+          <div class="builder-safe-note panel">
+            <h2>Safe mode</h2>
+            <p>Status: File Inspector only. Editing, repair, rebuild, and export come later after this section is verified live.</p>
+            <div class="badge-row">
+              <span class="badge blue">Shell plus file inspector</span>
+              <span class="badge warn">No auto-repair yet</span>
+              <span class="badge gray">No file changes</span>
+            </div>
+          </div>
+
+          <div class="builder-grid">
+            <article class="panel">
+              <div class="panel-title">
+                <h2>Upload PWA ZIP</h2>
+                <span class="badge info">Inspector</span>
+              </div>
+              <label class="file-picker-label">
+                <span>Choose a ZIP package</span>
+                <input id="builderZipInput" type="file" accept=".zip,application/zip,application/x-zip-compressed">
+              </label>
+              <div id="builderVisibleStatus" class="builder-visible-status">Choose a ZIP package, then tap Inspect Package.</div>
+              <div class="button-row">
+                <button class="primary-action" id="builderInspectBtn" type="button" type="button" data-builder-inspector-action="inspect">Inspect Package</button>
+                <button class="secondary-action" id="builderClearBtn" type="button" type="button" data-builder-inspector-action="clear">Clear Inspector</button>
+              </div>
+              <p class="muted">Use one ZIP at a time. Large media packages may take longer on iPad.</p>
+            </article>
+
+            <article class="panel">
+              <div class="panel-title">
+                <h2>Package summary</h2>
+                <span class="badge gray" id="builderInspectStatus">Not inspected</span>
+              </div>
+              <div class="builder-summary-grid">
+                <div class="metric-card"><strong id="builderTotalFiles">0</strong><span>Total files</span></div>
+                <div class="metric-card"><strong id="builderImageFiles">0</strong><span>Images</span></div>
+                <div class="metric-card"><strong id="builderVideoFiles">0</strong><span>Videos</span></div>
+                <div class="metric-card"><strong id="builderAudioFiles">0</strong><span>Audio</span></div>
+                <div class="metric-card"><strong id="builderIconFiles">0</strong><span>Icons</span></div>
+                <div class="metric-card"><strong id="builderOtherFiles">0</strong><span>Other</span></div>
+              </div>
+            </article>
+          </div>
+
+          <div class="builder-grid">
+            <article class="panel">
+              <h2>Required PWA files</h2>
+              <div id="builderRequiredFiles" class="builder-check-list">
+                Upload and inspect a ZIP to check required files.
+              </div>
+            </article>
+
+            <article class="panel">
+              <h2>Detected app root</h2>
+              <div id="builderRootSummary" class="report-box">
+                No package inspected yet.
+              </div>
+            </article>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title">
+              <h2>File tree</h2>
+              <button class="secondary-action" id="builderDownloadInventoryBtn" type="button" type="button" data-builder-inspector-action="download">Download Inventory Report</button>
+            </div>
+            <div id="builderFileTree" class="file-tree-box">
+              Upload a ZIP and tap Inspect Package.
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title">
+              <h2>Inspector report</h2>
+              <span class="badge blue">Dyslexia-friendly summary</span>
+            </div>
+            <div id="builderInspectorReport" class="report-box">
+              No report yet.
+            </div>
+          </div>
+        </section>
+
+
+        <section class="view" id="view-moviepwa" data-view-panel="moviepwa">
+          <div class="section-head">
+            <p class="eyebrow">MoviePWA / CinePWA Studio</p>
+            <h1>Poster first. Then Play, Resume, Rate.</h1>
+            <p>This shell supports standalone movie-style PWA packages with images, video, audio, subtitles, and scene data.</p>
+          </div>
+          <div class="shell-grid">
+            <article class="panel shell-card"><h2>Poster front screen</h2><ul><li>Movie poster as front screen</li><li>Premium bottom buttons</li><li>Play</li><li>Resume</li><li>Rate</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>Movie package validation</h2><ul><li>movie.json or project.json</li><li>scenes.json</li><li>rights.json</li><li>assets/images, video, audio, subtitles</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>Playback checks</h2><ul><li>poster loads</li><li>movie starts</li><li>scene order works</li><li>media paths load</li><li>offline cache includes intended media</li></ul><span class="badge gray">Shell</span></article>
+          </div>
+        </section>
+
+        <section class="view" id="view-creative" data-view-panel="creative">
+          <div class="section-head">
+            <p class="eyebrow">Creative Tools</p>
+            <h1>Onsite creative repair and editing shells.</h1>
+            <p>Load Tasks must eventually include actual tool areas, not only reports. This phase places the shells.</p>
+          </div>
+          <div class="shell-grid">
+            <article class="panel shell-card"><h2>VN-style editing</h2><ul><li>Media import</li><li>Timeline references</li><li>Trim/edit checks</li><li>Preview test</li><li>Export and reopen checks</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>AI image and Glam-style workflow</h2><ul><li>Prompt box</li><li>Image provider test</li><li>Returned file/blob/URL proof</li><li>Save image into assets</li><li>Attach image to scene</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>Animation, voice, audio, video</h2><ul><li>Image-to-video clip proof</li><li>Voice/audio playback proof</li><li>Video clip save</li><li>Attach media to MoviePWA scene</li></ul><span class="badge gray">Shell</span></article>
+          </div>
+        </section>
+
+        <section class="view" id="view-providers" data-view-panel="providers">
+          <div class="section-head">
+            <p class="eyebrow">Provider Center</p>
+            <h1>No-key first. Keys where needed. Proof required.</h1>
+            <p>Provider tools will not be marked working unless a real response, file, blob, playable clip, or URL is returned.</p>
+          </div>
+          <div class="provider-shell-table">
+            <article class="panel shell-card"><h2>AI Help providers</h2><ul><li>Local helper fallback</li><li>OpenAI-compatible endpoint</li><li>OpenRouter-compatible endpoint</li><li>Custom endpoint</li><li>Test provider</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>AI image providers</h2><ul><li>No-key/free first where possible</li><li>ComfyUI/local option</li><li>Hugging Face option</li><li>Replicate fallback</li><li>Custom endpoint</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>Animation and video providers</h2><ul><li>Provider status</li><li>API key field where needed</li><li>Fallback order</li><li>Playable clip proof</li><li>Last error</li></ul><span class="badge gray">Shell</span></article>
+          </div>
+        </section>
+
+        <section class="view" id="view-adminops" data-view-panel="adminops">
+          <div class="section-head">
+            <p class="eyebrow">Admin Operations</p>
+            <h1>Automated site health and daily admin checks.</h1>
+            <p>This shell prepares automated checks with color-coded alerts and dyslexia-friendly reports.</p>
+          </div>
+          <div class="shell-grid">
+            <article class="panel shell-card"><h2>Daily admin checks</h2><ul><li>Site opens</li><li>Admin dashboard opens</li><li>New sign-ups</li><li>Failed registrations</li><li>Broken uploads</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>Security checks</h2><ul><li>CSP</li><li>Hidden redirects</li><li>Unsafe external scripts</li><li>Exposed API keys</li><li>Admin pages exposed</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>Reports</h2><ul><li>Daily Admin Report</li><li>Weekly Site Health Report</li><li>Security Risk Report</li><li>Provider Health Report</li></ul><span class="badge gray">Shell</span></article>
+          </div>
+        </section>
+
+        <section class="view" id="view-screening" data-view-panel="screening">
+          <div class="section-head">
+            <p class="eyebrow">Content Screening</p>
+            <h1>Profanity, nudity, and unsafe content review tasks.</h1>
+            <p>This shell flags items for review. It must not promise perfect moderation.</p>
+          </div>
+          <div class="shell-grid">
+            <article class="panel shell-card"><h2>Text screening</h2><ul><li>Profanity flags</li><li>Unsafe creator descriptions</li><li>Unsafe profile text</li><li>Unsafe comments</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>Media screening</h2><ul><li>Nudity review flags</li><li>Unsafe thumbnails</li><li>Unsafe uploaded media labels</li><li>Needs Human Review status</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>Child-safe notices</h2><ul><li>Missing labels</li><li>Missing warnings</li><li>Upload safety rules</li><li>Human review queue</li></ul><span class="badge gray">Shell</span></article>
+          </div>
+        </section>
+
+        <section class="view" id="view-registration" data-view-panel="registration">
+          <div class="section-head">
+            <p class="eyebrow">Registration and Email Validation</p>
+            <h1>Sign-up, login, admin access, and email flow checks.</h1>
+            <p>This shell checks frontend flows and labels backend-dependent features as not proven until connected.</p>
+          </div>
+          <div class="shell-grid">
+            <article class="panel shell-card"><h2>Sign-up and login</h2><ul><li>Sign-up form</li><li>Login form</li><li>Forgot password</li><li>Role labels</li><li>Terms and privacy checkbox</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>Email validation</h2><ul><li>Valid email accepted</li><li>Invalid email rejected</li><li>Required email field</li><li>Confirmation message</li><li>Backend required label</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>Admin access</h2><ul><li>Admin login link</li><li>Admin dashboard path</li><li>Upload permissions</li><li>Registration reports</li></ul><span class="badge gray">Shell</span></article>
+          </div>
+        </section>
+
+        <section class="view" id="view-notescenter" data-view-panel="notescenter">
+          <div class="section-head">
+            <p class="eyebrow">Notes Center</p>
+            <h1>Inline notes, tags, colors, images, and exports.</h1>
+            <p>This replaces unsafe pop-up notes. It is an inline shell and will not block the app.</p>
+          </div>
+          <div class="panel">
+            <h2>Notes shell</h2>
+            <div class="notes-inline-grid">
+              <label>Title<input placeholder="Example: Provider repair idea"></label>
+              <label>Tags<input placeholder="MoviePWA, provider, urgent"></label>
+              <label>Color<select><option>Yellow: general note</option><option>Blue: developer task</option><option>Red: urgent issue</option><option>Green: fixed or verified</option><option>Purple: creative idea</option><option>Orange: needs review</option><option>Gray: archive</option></select></label>
+              <label class="wide">Note<textarea placeholder="Type or paste note here."></textarea></label>
+            </div>
+            <div class="button-row"><button class="secondary-action" type="button" disabled>Save Note shell</button><button class="secondary-action" type="button" disabled>Export Notes shell</button></div>
+          </div>
+        </section>
+
+
+        <section class="view" id="view-settings" data-view-panel="settings">
+<div class="section-head">
+            <p class="eyebrow">Settings</p>
+            <h1>Dyslexia-friendly controls and data tools.</h1>
+            <p>Load Tasks is local-first. Your project data stays in this browser unless you export it.</p>
+          </div>
+          <div class="settings-grid">
+            <article class="panel">
+              <h2>Reading comfort</h2>
+              <label class="check-row"><input id="dyslexiaMode" type="checkbox"> Dyslexia-friendly mode</label>
+              <label class="check-row"><input id="largeTextMode" type="checkbox"> Larger text and tap targets</label>
+              <label class="check-row"><input id="reducedMotionMode" type="checkbox"> Reduced motion</label>
+              <label class="check-row"><input id="simpleMode" type="checkbox"> Simple dashboard mode</label>
+            </article>
+            <article class="panel">
+              <h2>Data tools</h2>
+              <button class="secondary-action" id="exportWorkspaceBtn">Export Workspace JSON</button>
+              <button class="secondary-action" id="importWorkspaceBtn">Import Workspace JSON</button>
+              <input type="file" id="workspaceImportFile" accept=".json" hidden>
+              <button class="danger-action" id="resetWorkspaceBtn">Reset Local Workspace</button>
+            </article>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </div>
+  <script src="app.js?v=5.10"></script>
+  <script src="builder-inspector.js?v=5.10" defer></script>
+</body>
+</html>
