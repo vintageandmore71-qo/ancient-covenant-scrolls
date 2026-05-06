@@ -1,7 +1,7 @@
 {
   "name": "Load Tasks",
   "short_name": "Load Tasks",
-  "description": "Load Tasks v5.7 adds visible shells for all requested v5 feature areas without blocking overlays.",
+  "description": "Load Tasks v5.8 adds a safe PWA Builder File Inspector that reads ZIP packages and reports structure without changing files.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

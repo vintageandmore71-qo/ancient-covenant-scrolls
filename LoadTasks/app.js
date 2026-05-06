@@ -87,6 +87,7 @@
     installRepairPreviewSafetyLayer();
     installHowToLayer();
     installAlertTaskLayer();
+    initBuilderInspectorBindings();
     renderAll();
   }
 
@@ -2068,6 +2069,257 @@
     const existing = state.alerts || [];
     return [...newAlerts, ...existing].slice(0, 200);
   }
+
+
+/* v5.8 PWA Builder File Inspector */
+let builderInspectorState = {
+  fileName: '',
+  entries: [],
+  summary: null,
+  reportText: ''
+};
+
+function initBuilderInspectorBindings() {
+  bindIf('#builderInspectBtn', 'click', inspectBuilderPackage);
+  bindIf('#builderClearBtn', 'click', clearBuilderInspector);
+  bindIf('#builderDownloadInventoryBtn', 'click', downloadBuilderInventoryReport);
+}
+
+async function inspectBuilderPackage() {
+  const input = document.querySelector('#builderZipInput');
+  if (!input || !input.files || !input.files[0]) {
+    toast('Choose one ZIP package first.');
+    return;
+  }
+
+  const file = input.files[0];
+  if (!file.name.toLowerCase().endsWith('.zip')) {
+    toast('Please choose a ZIP file.');
+    return;
+  }
+
+  if (typeof JSZip === 'undefined') {
+    toast('ZIP reader is not available yet. Refresh and try again.');
+    return;
+  }
+
+  setText('#builderInspectStatus', 'Reading');
+  const zip = await JSZip.loadAsync(file);
+  const entries = [];
+
+  zip.forEach((relativePath, zipEntry) => {
+    if (zipEntry.dir) return;
+    entries.push({
+      path: normalizePath(relativePath),
+      name: relativePath.split('/').pop(),
+      size: zipEntry._data && zipEntry._data.uncompressedSize ? zipEntry._data.uncompressedSize : 0,
+      type: classifyBuilderFile(relativePath)
+    });
+  });
+
+  const summary = buildBuilderSummary(file.name, entries);
+  builderInspectorState = {
+    fileName: file.name,
+    entries,
+    summary,
+    reportText: buildBuilderReportText(summary, entries)
+  };
+
+  renderBuilderInspector();
+  toast('PWA package inspected.');
+}
+
+function classifyBuilderFile(path) {
+  const lower = String(path || '').toLowerCase();
+  if (/\.(png|jpg|jpeg|webp|gif|svg|avif)$/.test(lower)) return lower.includes('icon') || lower.includes('favicon') ? 'icon' : 'image';
+  if (/\.(mp4|webm|mov|m4v|ogv)$/.test(lower)) return 'video';
+  if (/\.(mp3|wav|m4a|aac|ogg|flac)$/.test(lower)) return 'audio';
+  if (/\.(css)$/.test(lower)) return 'css';
+  if (/\.(js|mjs)$/.test(lower)) return 'js';
+  if (/\.(json|webmanifest)$/.test(lower)) return 'json';
+  if (/\.(html|htm)$/.test(lower)) return 'html';
+  return 'other';
+}
+
+function buildBuilderSummary(fileName, entries) {
+  const paths = entries.map(e => e.path);
+  const lowerPaths = paths.map(p => p.toLowerCase());
+  const root = detectBuilderRoot(paths);
+  const has = (name) => lowerPaths.some(p => p === name || p.endsWith('/' + name));
+  const countType = (type) => entries.filter(e => e.type === type).length;
+  const totalSize = entries.reduce((sum, e) => sum + (e.size || 0), 0);
+
+  return {
+    fileName,
+    totalFiles: entries.length,
+    totalSize,
+    root,
+    required: {
+      index: has('index.html'),
+      manifest: has('manifest.json') || has('manifest.webmanifest'),
+      serviceWorker: has('service-worker.js') || has('sw.js'),
+      assets: lowerPaths.some(p => p.includes('/assets/') || p.startsWith('assets/')),
+      icons: entries.some(e => e.type === 'icon'),
+      css: entries.some(e => e.type === 'css'),
+      js: entries.some(e => e.type === 'js')
+    },
+    counts: {
+      image: countType('image'),
+      video: countType('video'),
+      audio: countType('audio'),
+      icon: countType('icon'),
+      html: countType('html'),
+      css: countType('css'),
+      js: countType('js'),
+      json: countType('json'),
+      other: entries.filter(e => ['other'].includes(e.type)).length
+    }
+  };
+}
+
+function detectBuilderRoot(paths) {
+  const indexPaths = paths.filter(p => p.toLowerCase().endsWith('index.html'));
+  if (!indexPaths.length) return { path: '', message: 'No index.html found.', nested: false };
+  const first = indexPaths[0];
+  const parts = first.split('/');
+  if (parts.length === 1) return { path: '/', message: 'index.html is at the package root.', nested: false };
+  const rootPath = parts.slice(0, -1).join('/');
+  return { path: rootPath, message: 'index.html is inside a nested folder. GitHub or Cloudflare upload root may need review.', nested: true };
+}
+
+function renderBuilderInspector() {
+  const summary = builderInspectorState.summary;
+  if (!summary) return;
+
+  setText('#builderInspectStatus', summary.required.index ? 'Inspected' : 'Needs Review');
+  setText('#builderTotalFiles', summary.totalFiles);
+  setText('#builderImageFiles', summary.counts.image);
+  setText('#builderVideoFiles', summary.counts.video);
+  setText('#builderAudioFiles', summary.counts.audio);
+  setText('#builderIconFiles', summary.counts.icon);
+  setText('#builderOtherFiles', summary.counts.other);
+
+  const requiredBox = document.querySelector('#builderRequiredFiles');
+  if (requiredBox) {
+    requiredBox.innerHTML = [
+      renderBuilderRequirement('index.html', summary.required.index),
+      renderBuilderRequirement('manifest.json or manifest.webmanifest', summary.required.manifest),
+      renderBuilderRequirement('service-worker.js or sw.js', summary.required.serviceWorker),
+      renderBuilderRequirement('assets folder', summary.required.assets),
+      renderBuilderRequirement('icons', summary.required.icons),
+      renderBuilderRequirement('CSS file', summary.required.css),
+      renderBuilderRequirement('JavaScript file', summary.required.js)
+    ].join('');
+  }
+
+  const rootBox = document.querySelector('#builderRootSummary');
+  if (rootBox) {
+    rootBox.textContent = [
+      'Detected root: ' + (summary.root.path || 'Not found'),
+      summary.root.message,
+      summary.root.nested ? 'Next step later: use GitHub/Cloudflare flatten repair before deployment.' : 'Root placement looks clean.'
+    ].join('\n');
+  }
+
+  const tree = document.querySelector('#builderFileTree');
+  if (tree) {
+    const entries = builderInspectorState.entries.slice().sort((a,b) => a.path.localeCompare(b.path));
+    tree.innerHTML = entries.map(e => `
+      <div class="file-tree-row file-type-${escapeHtml(e.type)}">
+        <span>${escapeHtml(e.path)}</span>
+        <small>${escapeHtml(e.type)} · ${formatBuilderBytes(e.size || 0)}</small>
+      </div>
+    `).join('');
+  }
+
+  const report = document.querySelector('#builderInspectorReport');
+  if (report) {
+    report.textContent = builderInspectorState.reportText;
+  }
+}
+
+function renderBuilderRequirement(label, ok) {
+  return `<div class="builder-requirement ${ok ? 'pass' : 'warn'}"><strong>${ok ? 'Passed' : 'Needs Review'}</strong><span>${escapeHtml(label)}</span></div>`;
+}
+
+function buildBuilderReportText(summary, entries) {
+  const blockers = [];
+  if (!summary.required.index) blockers.push('index.html not found.');
+  if (!summary.required.manifest) blockers.push('manifest file not found.');
+  if (!summary.required.serviceWorker) blockers.push('service worker not found.');
+  if (!summary.required.icons) blockers.push('icons not found.');
+  if (summary.root.nested) blockers.push('index.html appears inside a nested folder.');
+
+  const lines = [
+    'PWA Builder Inspector Report',
+    '',
+    'Package: ' + summary.fileName,
+    'Total files: ' + summary.totalFiles,
+    'Total size: ' + formatBuilderBytes(summary.totalSize),
+    '',
+    'Detected root:',
+    summary.root.message,
+    '',
+    'Media counts:',
+    'Images: ' + summary.counts.image,
+    'Videos: ' + summary.counts.video,
+    'Audio: ' + summary.counts.audio,
+    'Icons: ' + summary.counts.icon,
+    '',
+    'Required file check:',
+    'index.html: ' + (summary.required.index ? 'Passed' : 'Needs Review'),
+    'manifest: ' + (summary.required.manifest ? 'Passed' : 'Needs Review'),
+    'service worker: ' + (summary.required.serviceWorker ? 'Passed' : 'Needs Review'),
+    'assets folder: ' + (summary.required.assets ? 'Passed' : 'Needs Review'),
+    'icons: ' + (summary.required.icons ? 'Passed' : 'Needs Review'),
+    '',
+    'Top issue summary:',
+    blockers.length ? blockers.slice(0, 3).map((b, i) => (i + 1) + '. ' + b).join('\n') : 'No critical package-structure blockers found by this inspector.',
+    '',
+    'Status:',
+    'Inspected only. No files were changed.'
+  ];
+  return lines.join('\n');
+}
+
+function formatBuilderBytes(bytes) {
+  const value = Number(bytes || 0);
+  if (value < 1024) return value + ' B';
+  if (value < 1024 * 1024) return (value / 1024).toFixed(1) + ' KB';
+  return (value / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function downloadBuilderInventoryReport() {
+  if (!builderInspectorState.reportText) {
+    toast('Inspect a package before downloading a report.');
+    return;
+  }
+  const fileList = builderInspectorState.entries.map(e => `- ${e.path} (${e.type}, ${formatBuilderBytes(e.size || 0)})`).join('\n');
+  downloadText('Load_Tasks_PWA_Builder_Inventory_Report.md', builderInspectorState.reportText + '\n\nFile inventory:\n' + fileList);
+}
+
+function clearBuilderInspector() {
+  builderInspectorState = { fileName: '', entries: [], summary: null, reportText: '' };
+  const input = document.querySelector('#builderZipInput');
+  if (input) input.value = '';
+  setText('#builderInspectStatus', 'Not inspected');
+  ['#builderTotalFiles','#builderImageFiles','#builderVideoFiles','#builderAudioFiles','#builderIconFiles','#builderOtherFiles'].forEach(sel => setText(sel, '0'));
+  const req = document.querySelector('#builderRequiredFiles');
+  if (req) req.textContent = 'Upload and inspect a ZIP to check required files.';
+  const root = document.querySelector('#builderRootSummary');
+  if (root) root.textContent = 'No package inspected yet.';
+  const tree = document.querySelector('#builderFileTree');
+  if (tree) tree.textContent = 'Upload a ZIP and tap Inspect Package.';
+  const report = document.querySelector('#builderInspectorReport');
+  if (report) report.textContent = 'No report yet.';
+  toast('PWA Builder Inspector cleared.');
+}
+
+function setText(selector, value) {
+  const el = document.querySelector(selector);
+  if (el) el.textContent = String(value);
+}
+
 
   function renderAgentLab() {
     const latest = (state.agentReports || [])[0];

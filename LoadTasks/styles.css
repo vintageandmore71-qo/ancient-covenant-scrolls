@@ -916,3 +916,88 @@ body.simple-mode .notes-row {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* v5.8 PWA Builder File Inspector */
+.builder-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 18px;
+  margin: 18px 0;
+}
+.builder-safe-note {
+  border-left: 6px solid rgba(115,183,255,.7);
+}
+.file-picker-label {
+  display: grid;
+  gap: 10px;
+  border: 1px dashed var(--line);
+  border-radius: 18px;
+  padding: 18px;
+  background: rgba(255,255,255,.04);
+}
+.file-picker-label input {
+  width: 100%;
+}
+.builder-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+.builder-check-list {
+  display: grid;
+  gap: 10px;
+}
+.builder-requirement {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  background: rgba(255,255,255,.04);
+}
+.builder-requirement.pass {
+  border-left: 6px solid rgba(67,221,135,.75);
+}
+.builder-requirement.warn {
+  border-left: 6px solid rgba(255,212,0,.75);
+}
+.file-tree-box {
+  max-height: 420px;
+  overflow: auto;
+  border: 1px solid var(--line-soft);
+  border-radius: 18px;
+  background: rgba(0,0,0,.20);
+}
+.file-tree-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.file-tree-row span {
+  overflow-wrap: anywhere;
+}
+.file-tree-row small {
+  color: var(--muted);
+}
+.file-type-video { border-left: 4px solid rgba(255,92,92,.7); }
+.file-type-audio { border-left: 4px solid rgba(178,140,255,.7); }
+.file-type-image { border-left: 4px solid rgba(67,221,135,.7); }
+.file-type-icon { border-left: 4px solid rgba(255,212,0,.7); }
+.file-type-html { border-left: 4px solid rgba(115,183,255,.7); }
+@media (max-width: 900px) {
+  .builder-grid,
+  .builder-summary-grid {
+    grid-template-columns: 1fr;
+  }
+  .builder-requirement {
+    grid-template-columns: 1fr;
+  }
+  .file-tree-row {
+    grid-template-columns: 1fr;
+  }
+}

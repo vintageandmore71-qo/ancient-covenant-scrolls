@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-loadtasks-version="5.7-feature-shell">
+<html lang="en" data-loadtasks-version="5.8-pwa-builder-inspector">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -14,7 +14,8 @@
   <link rel="icon" href="favicon.ico">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=5.7">
+  <link rel="stylesheet" href="styles.css?v=5.8">
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 </head>
 <body>
   <a href="#main" class="skip-link">Skip to dashboard</a>
@@ -748,18 +749,94 @@
 
 
 
+        
         <section class="view" id="view-builder" data-view-panel="builder">
           <div class="section-head">
             <p class="eyebrow">PWA Builder Studio</p>
-            <h1>Upload. Dismantle. Edit. Rebuild. Export.</h1>
-            <p>This is the shell for the onsite PWA creation and repair studio. Status: Shell in place, not complete.</p>
+            <h1>Inspect a PWA ZIP before editing.</h1>
+            <p>This phase only reads and reports package contents. No files are changed.</p>
           </div>
-          <div class="shell-grid">
-            <article class="panel shell-card"><h2>Upload and dismantle PWA</h2><ul><li>Unzip PWA package in-browser</li><li>Find index.html, manifest, service worker, assets</li><li>Show file tree</li><li>Detect media and paths</li></ul><span class="badge gray">Shell</span></article>
-            <article class="panel shell-card"><h2>Visual PWA editor</h2><ul><li>Edit title, subtitle, colors, logo</li><li>Replace splash, poster, icons</li><li>Edit manifest fields</li><li>Add README and SECURITY files</li></ul><span class="badge gray">Shell</span></article>
-            <article class="panel shell-card"><h2>Repair and rebuild</h2><ul><li>Repair missing root files</li><li>Repair asset paths</li><li>Add service worker</li><li>Export fixed ZIP</li></ul><span class="badge gray">Shell</span></article>
+
+          <div class="builder-safe-note panel">
+            <h2>Safe mode</h2>
+            <p>Status: File Inspector only. Editing, repair, rebuild, and export come later after this section is verified live.</p>
+            <div class="badge-row">
+              <span class="badge blue">Shell plus file inspector</span>
+              <span class="badge warn">No auto-repair yet</span>
+              <span class="badge gray">No file changes</span>
+            </div>
+          </div>
+
+          <div class="builder-grid">
+            <article class="panel">
+              <div class="panel-title">
+                <h2>Upload PWA ZIP</h2>
+                <span class="badge info">Inspector</span>
+              </div>
+              <label class="file-picker-label">
+                <span>Choose a ZIP package</span>
+                <input id="builderZipInput" type="file" accept=".zip,application/zip,application/x-zip-compressed">
+              </label>
+              <div class="button-row">
+                <button class="primary-action" id="builderInspectBtn" type="button">Inspect Package</button>
+                <button class="secondary-action" id="builderClearBtn" type="button">Clear Inspector</button>
+              </div>
+              <p class="muted">Use one ZIP at a time. Large media packages may take longer on iPad.</p>
+            </article>
+
+            <article class="panel">
+              <div class="panel-title">
+                <h2>Package summary</h2>
+                <span class="badge gray" id="builderInspectStatus">Not inspected</span>
+              </div>
+              <div class="builder-summary-grid">
+                <div class="metric-card"><strong id="builderTotalFiles">0</strong><span>Total files</span></div>
+                <div class="metric-card"><strong id="builderImageFiles">0</strong><span>Images</span></div>
+                <div class="metric-card"><strong id="builderVideoFiles">0</strong><span>Videos</span></div>
+                <div class="metric-card"><strong id="builderAudioFiles">0</strong><span>Audio</span></div>
+                <div class="metric-card"><strong id="builderIconFiles">0</strong><span>Icons</span></div>
+                <div class="metric-card"><strong id="builderOtherFiles">0</strong><span>Other</span></div>
+              </div>
+            </article>
+          </div>
+
+          <div class="builder-grid">
+            <article class="panel">
+              <h2>Required PWA files</h2>
+              <div id="builderRequiredFiles" class="builder-check-list">
+                Upload and inspect a ZIP to check required files.
+              </div>
+            </article>
+
+            <article class="panel">
+              <h2>Detected app root</h2>
+              <div id="builderRootSummary" class="report-box">
+                No package inspected yet.
+              </div>
+            </article>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title">
+              <h2>File tree</h2>
+              <button class="secondary-action" id="builderDownloadInventoryBtn" type="button">Download Inventory Report</button>
+            </div>
+            <div id="builderFileTree" class="file-tree-box">
+              Upload a ZIP and tap Inspect Package.
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title">
+              <h2>Inspector report</h2>
+              <span class="badge blue">Dyslexia-friendly summary</span>
+            </div>
+            <div id="builderInspectorReport" class="report-box">
+              No report yet.
+            </div>
           </div>
         </section>
+
 
         <section class="view" id="view-moviepwa" data-view-panel="moviepwa">
           <div class="section-head">
@@ -886,6 +963,6 @@
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
   </div>
-  <script src="app.js?v=5.7"></script>
+  <script src="app.js?v=5.8"></script>
 </body>
 </html>
