@@ -40,7 +40,7 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 
 ## Load main (`/load/`)
 
-**Cache:** `load-v17fy`. **Tip status spec:** `PLAN_LOAD_AI.md`,
+**Cache:** `load-v17fz`. **Tip status spec:** `PLAN_LOAD_AI.md`,
 `PLAN_IMAGE_PROMPT_v3.md`, `PLAN_BOOK_TO_VIDEO.md`,
 `MEDIA_MODULE_SPEC.md`, `LOAD_FEATURES.md`, `LOAD_MARKETING.md`.
 
@@ -50,6 +50,18 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 - **Character Consistency module** — see X-CC.
 - **Piper TTS Stage 1 unblock + Stage 2 rollout** — see X-PIPER. Stage 1 shipped but not playing; blocked on the play() error text from the user. Resilience panel (Part 9) shipped in v17er gives an in-app diagnostic + recovery path.
 - **LOAD-ECO acceptance test pass** (Build Plan Part 13). Every part now has a tool surface, but the user-validation pass is still needed: open each tool, confirm PASS/FAIL/WARN labels render, run a sample export, save a receipt, check it appears in the Receipts library. Parts 1, 2, 3, 14-17 shipped in v17eq. Parts 4, 7, 9 + Book-to-Video wiring shipped in v17er. Parts 5, 6, 8, 10 shipped in v17es. Parts 11-13 are housekeeping/acceptance and are met by the existing tool surfaces.
+
+### Recently done (this session, 2026-05-06 — Handoff Report Part E: Security Scanner)
+- **v17fz &mdash; Part E security scanner shipped as a reusable library**:
+  - New file `load/lib-security-scanner.js` exposes `window.LoadSafetyScanner` with three public functions: `scanFileName(name)`, `scanContent(name, text)`, `scanZip(zip, opts)`. Each issue follows the report&apos;s exact shape: `{ issue, file, severity, recommendedFix, blocksExport }`. Severity buckets: BLOCKER, HIGH, MEDIUM, LOW, INFO.
+  - **BLOCKER patterns** (export blocked by default): executable files (.exe/.bat/.cmd/.sh/.app/.dmg/.msi/.com/.scr/.jar/.ps1/.vbs/.wsf), hidden `.env` files, hard-coded API keys / secrets / access tokens, credential / payment / API-key capture forms, malicious-looking redirects (location reassign + verify/login/account language nearby), path traversal (`../../etc|root|home|var|users|...`), dangerous external `<script src="https://...">`, service-worker network hijacking (fetch handler forwarding every request to an external URL).
+  - **HIGH:** `javascript:` URLs, absolute local-filesystem paths (file:// / /Users/ / C:\\), very large embedded data: URLs (>150 KB).
+  - **MEDIUM:** hidden iframes, tracking-pixel patterns, external stylesheets.
+  - **LOW:** inline DOM event handlers, oversized files (>5 MB).
+  - **INFO:** OS / VCS metadata files (.DS_Store / Thumbs.db / .git/).
+  - `scanZip` returns `{ issues, byFile, blockers, blockExport, summary, securityReport }` where `securityReport` is the exact JSON shape the report calls for (Section 10), ready to bundle as `security-report.json` inside any export ZIP.
+  - **`load/tools/safety-rights.html` rewired** to call the new library. Visible safety report panel groups issues by severity with per-issue file path, recommended fix, and BLOCKS EXPORT indicator. Headline reads &quot;BLOCKED — N blocker issue(s) prevent export&quot; whenever blockExport is true. New **Download security-report.json** button writes the spec-shaped JSON. Cache shell now includes the scanner library.
+  - Cache `load-v17fy` -&gt; `load-v17fz`. Version badge bumped.
 
 ### Recently done (this session, 2026-05-06 — Handoff Report Part B: Feature Verification Dashboard 43→45)
 - **v17fy &mdash; Part B Feature Verification Dashboard upgraded to 45-test spec**:

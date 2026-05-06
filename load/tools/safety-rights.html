@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
 <script src="../lib-jszip.min.js"></script>
+<script src="../lib-security-scanner.js"></script>
 <style>
 :root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--border:#2a2a40}
 *{box-sizing:border-box}body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;font-size:14px;-webkit-font-smoothing:antialiased}
@@ -69,6 +70,7 @@ iframe.sandbox{width:100%;height:380px;border:1px solid var(--border);border-rad
   <div class="section"><h3>Rights metadata</h3><div id="rights"></div></div>
   <div class="actions">
     <button id="export-json" class="btn" type="button">Export validation JSON</button>
+    <button id="export-sec" class="btn" type="button">Download security-report.json</button>
     <button id="copy-json" class="btn" type="button">Copy JSON</button>
   </div>
 </div>
@@ -92,26 +94,13 @@ function validateRights(rights) {
   }
   return { errors: errors, warnings: warnings };
 }
-function scanText(path, txt) {
-  var f = [];
-  if (/<script[^>]+src=["']?https?:\/\//i.test(txt))                         f.push({ severity: 'HIGH',    file: path, issue: 'External <script src>' });
-  if (/javascript:/i.test(txt))                                              f.push({ severity: 'HIGH',    file: path, issue: 'javascript: URL' });
-  if (/(api[_-]?key|secret|password|sk-[a-z0-9]{20,})/i.test(txt))           f.push({ severity: 'BLOCKER', file: path, issue: 'Possible credential / API key in source' });
-  if (/<form[^>]*action=/i.test(txt))                                        f.push({ severity: 'MEDIUM',  file: path, issue: 'Form with explicit action — verify destination' });
-  if (/<iframe[^>]*src=["']?https?:\/\//i.test(txt))                         f.push({ severity: 'MEDIUM',  file: path, issue: 'External <iframe src>' });
-  if (/onclick\s*=\s*["'][^"']*(?:eval|Function)\(/i.test(txt))              f.push({ severity: 'HIGH',    file: path, issue: 'Inline onclick using eval/Function' });
-  return f;
-}
-function scanFilenames(paths) {
-  var f = [];
-  paths.forEach(function (p) {
-    if (/\.\.[\/\\]/.test(p))                                                f.push({ severity: 'HIGH',    file: p, issue: 'Path traversal in filename' });
-    if (/^\/[^/]/.test(p))                                                   f.push({ severity: 'LOW',     file: p, issue: 'Absolute path in filename' });
-    if (/(?:\.exe|\.bat|\.cmd|\.sh|\.app|\.dmg)$/i.test(p))                  f.push({ severity: 'BLOCKER', file: p, issue: 'Executable file' });
-    if (/^\.env(\.|$)/.test(p))                                              f.push({ severity: 'BLOCKER', file: p, issue: 'Hidden .env file' });
-  });
-  return f;
-}
+// Issue scanning is delegated to window.LoadSafetyScanner
+// (see ../lib-security-scanner.js — Section 10 / Part E spec).
+//
+// All issues come back in the report's exact shape:
+//   { issue, file, severity, recommendedFix, blocksExport }
+// Severity = BLOCKER | HIGH | MEDIUM | LOW | INFO.
+// blockExport is true when ANY issue.blocksExport is true.
 
 var lastReport = null, currentIndexHtml = null;
 
@@ -126,7 +115,7 @@ function handleHtml(file) {
   var rd = new FileReader();
   rd.onload = function () {
     var src = rd.result;
-    var safety = scanText(file.name, src);
+    var safety = window.LoadSafetyScanner.scanContent(file.name, src);
     var rights = { errors: ['No rights.json found (single HTML file).'], warnings: [] };
     finish({ kind: 'html', source: file.name, safety: safety, rights: rights, indexHtml: src });
   };
@@ -136,23 +125,31 @@ function handleZip(file) {
   var rd = new FileReader();
   rd.onload = function () {
     new JSZip().loadAsync(rd.result).then(function (zip) {
-      var entries = Object.keys(zip.files);
-      var safety = scanFilenames(entries);
-      var textEntries = entries.filter(function (p) { return /\.(html?|js|css|json|txt|md)$/.test(p); });
-      var indexHtml = null;
-      Promise.all(textEntries.map(function (p) {
-        return zip.file(p).async('string').then(function (txt) {
-          if (p === 'index.html' || p === 'index.htm') indexHtml = txt;
-          safety = safety.concat(scanText(p, txt));
-        });
-      })).then(function () {
+      var indexFile = zip.file('index.html') || zip.file('index.htm');
+      var indexPromise = indexFile ? indexFile.async('string') : Promise.resolve(null);
+      Promise.all([
+        window.LoadSafetyScanner.scanZip(zip),
+        indexPromise
+      ]).then(function (parts) {
+        var scan = parts[0];
+        var indexHtml = parts[1];
         var rightsP = zip.file('rights.json');
-        if (!rightsP) finish({ kind: 'zip', source: file.name, safety: safety, rights: { errors: ['rights.json missing — required for publish-prep.'], warnings: [] }, indexHtml: indexHtml });
-        else rightsP.async('string').then(function (txt) {
-          var rights;
-          try { rights = validateRights(JSON.parse(txt)); }
-          catch (e) { rights = { errors: ['rights.json is not valid JSON: ' + e.message], warnings: [] }; }
-          finish({ kind: 'zip', source: file.name, safety: safety, rights: rights, indexHtml: indexHtml });
+        var rightsPromise = rightsP
+          ? rightsP.async('string').then(function (txt) {
+              try { return validateRights(JSON.parse(txt)); }
+              catch (e) { return { errors: ['rights.json is not valid JSON: ' + e.message], warnings: [] }; }
+            })
+          : Promise.resolve({ errors: ['rights.json missing — required for publish-prep.'], warnings: [] });
+        rightsPromise.then(function (rights) {
+          finish({
+            kind: 'zip', source: file.name,
+            safety: scan.issues,
+            blockExport: scan.blockExport,
+            counts: scan.summary,
+            securityReport: scan.securityReport,
+            rights: rights,
+            indexHtml: indexHtml
+          });
         });
       });
     }).catch(function (err) {
@@ -165,22 +162,49 @@ function handleZip(file) {
 }
 
 function finish(rep) {
-  // Compute overall status.
-  var blocker = rep.safety.some(function (s) { return s.severity === 'BLOCKER'; });
-  var hi = rep.safety.some(function (s) { return s.severity === 'HIGH'; });
+  rep.safety = rep.safety || [];
+  if (rep.blockExport === undefined) {
+    rep.blockExport = rep.safety.some(function (s) { return s.blocksExport; });
+  }
+  if (!rep.counts) rep.counts = window.LoadSafetyScanner.summarize(rep.safety);
+  var blockExport = rep.blockExport;
+  var hi = (rep.counts.HIGH || 0) > 0;
+  var med = (rep.counts.MEDIUM || 0) > 0;
   var anyRightsErr = rep.rights.errors.length > 0;
   var anyRightsWarn = rep.rights.warnings.length > 0;
-  var anyMid = rep.safety.some(function (s) { return s.severity === 'MEDIUM'; });
-  rep.status = (blocker || hi || anyRightsErr) ? 'FAIL' : (anyMid || anyRightsWarn) ? 'WARN' : 'PASS';
+  rep.status = (blockExport || anyRightsErr) ? 'FAIL' : (hi || med || anyRightsWarn) ? 'WARN' : 'PASS';
   rep.generatedAt = new Date().toISOString();
   lastReport = rep;
   currentIndexHtml = rep.indexHtml;
   $('report').hidden = false;
+  var headline = blockExport
+    ? 'BLOCKED — ' + (rep.counts.BLOCKER || 0) + ' blocker issue(s) prevent export'
+    : (rep.status === 'PASS' ? 'PASS — safe to export' : rep.status === 'WARN' ? 'WARN — review before export' : 'FAIL — fix before export');
   $('summary').className = 'summary ' + rep.status;
-  $('summary').innerHTML = '<span class="icn"></span><span><strong>' + rep.status + '</strong> — ' + escHtml(rep.source) + ' (' + escHtml(rep.kind) + ')</span>';
-  $('safety').innerHTML = rep.safety.length
-    ? rep.safety.map(function (s) { return '<div class="row"><span style="flex:1"><strong>' + escHtml(s.file) + '</strong> — ' + escHtml(s.issue) + '</span><span class="sev ' + s.severity + '">' + s.severity + '</span></div>'; }).join('')
-    : '<div class="row"><span style="flex:1">No issues found.</span><span class="sev CLEAN">CLEAN</span></div>';
+  $('summary').innerHTML = '<span class="icn"></span><span><strong>' + escHtml(headline) + '</strong> — ' +
+    escHtml(rep.source) + ' (' + escHtml(rep.kind) + ')<br><span style="font-size:11.5px;color:var(--mute)">' +
+    'BLOCKER ' + (rep.counts.BLOCKER || 0) + ' &middot; HIGH ' + (rep.counts.HIGH || 0) +
+    ' &middot; MEDIUM ' + (rep.counts.MEDIUM || 0) + ' &middot; LOW ' + (rep.counts.LOW || 0) +
+    ' &middot; INFO ' + (rep.counts.INFO || 0) + '</span></span>';
+  // Group issues by severity for the visible safety panel.
+  var ORDER = ['BLOCKER', 'HIGH', 'MEDIUM', 'LOW', 'INFO'];
+  var grouped = {};
+  rep.safety.forEach(function (s) { (grouped[s.severity] = grouped[s.severity] || []).push(s); });
+  var safetyHtml = '';
+  ORDER.forEach(function (lvl) {
+    if (!grouped[lvl] || !grouped[lvl].length) return;
+    safetyHtml += '<div style="margin-top:10px"><div style="font-size:11px;font-weight:800;letter-spacing:.05em;color:var(--mute);margin-bottom:6px">' + lvl + ' &middot; ' + grouped[lvl].length + '</div>';
+    grouped[lvl].forEach(function (s) {
+      safetyHtml += '<div class="row"><span style="flex:1">' +
+        '<strong>' + escHtml(s.file || '(package)') + '</strong> &mdash; ' + escHtml(s.issue) +
+        (s.recommendedFix ? '<div style="font-size:12px;color:var(--mute);margin-top:3px">Fix: ' + escHtml(s.recommendedFix) + '</div>' : '') +
+        (s.blocksExport ? '<div style="font-size:11px;font-weight:700;color:var(--err);margin-top:3px">BLOCKS EXPORT</div>' : '') +
+        '</span><span class="sev ' + s.severity + '">' + s.severity + '</span></div>';
+    });
+    safetyHtml += '</div>';
+  });
+  if (!safetyHtml) safetyHtml = '<div class="row"><span style="flex:1">No issues found.</span><span class="sev CLEAN">CLEAN</span></div>';
+  $('safety').innerHTML = safetyHtml;
   $('rights').innerHTML = (rep.rights.errors.length || rep.rights.warnings.length)
     ? rep.rights.errors.map(function (e) { return '<div class="row"><span style="flex:1">' + escHtml(e) + '</span><span class="sev FAIL">FAIL</span></div>'; }).concat(
         rep.rights.warnings.map(function (w) { return '<div class="row"><span style="flex:1">' + escHtml(w) + '</span><span class="sev WARN">WARN</span></div>'; })
@@ -211,6 +235,21 @@ $('copy-json').addEventListener('click', function () {
   var t = JSON.stringify(lastReport, null, 2);
   if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { alert('Validation JSON copied.'); });
   else alert(t);
+});
+$('export-sec').addEventListener('click', function () {
+  if (!lastReport) return;
+  var report = lastReport.securityReport || {
+    tool: 'Load Safety Scanner',
+    spec: 'Load_Main_Claude_Handoff_Report Section 10 (Part E)',
+    generatedAt: lastReport.generatedAt,
+    blockExport: lastReport.blockExport,
+    counts: lastReport.counts,
+    blockers: (lastReport.safety || []).filter(function (s) { return s.blocksExport; }),
+    issues: lastReport.safety || []
+  };
+  var blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'security-report.json'; a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); }, 1500);
 });
 </script>
 </body>
