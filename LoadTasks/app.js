@@ -222,6 +222,10 @@
     bindIf('#downloadRepairPreviewBtn', 'click', downloadRepairPreview);
     bindIf('#clearRepairPreviewBtn', 'click', clearRepairPreview);
     bindIf('#runAgentLabBtn', 'click', runAgentLabTest);
+    bindIf('#runAgentLabBtnTop', 'click', runAgentLabTest);
+    bindIf('#runAgentLabBtnResults', 'click', runAgentLabTest);
+    bindIf('#runAgentLabBtnNext', 'click', runAgentLabTest);
+
     bindIf('#downloadAgentReportBtn', 'click', downloadAgentReport);
     bindIf('#agentCreateTasksBtn', 'click', agentCreateRepairTasks);
     bindIf('#agentCopySummaryBtn', 'click', copyAgentSummary);
@@ -2643,4 +2647,17 @@
   setTimeout(killBlockingOverlays, 250);
   setTimeout(killBlockingOverlays, 1000);
   setInterval(killBlockingOverlays, 3000);
+})();
+
+
+/* v5.6 Agent Lab run button guard */
+(function(){
+  document.addEventListener('click', function(event){
+    const btn = event.target.closest('#runAgentLabBtnTop, #runAgentLabBtnResults, #runAgentLabBtnNext, .agent-run-button');
+    if (!btn) return;
+    if (typeof runAgentLabTest === 'function') {
+      event.preventDefault();
+      runAgentLabTest();
+    }
+  }, true);
 })();

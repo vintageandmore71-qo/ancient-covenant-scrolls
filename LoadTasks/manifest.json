@@ -1,7 +1,7 @@
 {
   "name": "Load Tasks",
   "short_name": "Load Tasks",
-  "description": "Load Tasks v5.5 removes blocking How-To and Notes overlays while preserving Agent Lab, Alerts, Help, Validator, and Repair tools.",
+  "description": "Load Tasks v5.7 adds visible shells for all requested v5 feature areas without blocking overlays.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

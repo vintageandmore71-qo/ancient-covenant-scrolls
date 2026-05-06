@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-loadtasks-version="5.5-no-blocking-overlays">
+<html lang="en" data-loadtasks-version="5.7-feature-shell">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -14,7 +14,7 @@
   <link rel="icon" href="favicon.ico">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=5.5">
+  <link rel="stylesheet" href="styles.css?v=5.7">
 </head>
 <body>
   <a href="#main" class="skip-link">Skip to dashboard</a>
@@ -45,6 +45,14 @@
       <nav class="topnav" aria-label="Primary navigation">
         <button data-view="dashboard" data-route>Dashboard</button>
         <button data-view="agentlab" data-route>Agent Lab</button>
+        <button data-view="notescenter" data-route>Notes</button>
+        <button data-view="registration" data-route>Registration</button>
+        <button data-view="screening" data-route>Screening</button>
+        <button data-view="adminops" data-route>Admin Ops</button>
+        <button data-view="providers" data-route>Provider Center</button>
+        <button data-view="creative" data-route>Creative Tools</button>
+        <button data-view="moviepwa" data-route>MoviePWA</button>
+        <button data-view="builder" data-route>PWA Builder</button>
         <button data-view="intake" data-route>Intake</button>
         <button data-view="validator" data-route>Validator</button>
         <button data-view="alerts" data-route>Alerts</button>
@@ -68,6 +76,14 @@
       <aside class="side-rail" aria-label="Build command rail">
         <button data-view="dashboard" data-route><span class="rail-icon" data-icon="dashboard"></span><span>Dashboard</span></button>
         <button data-view="agentlab" data-route><span class="rail-icon" data-icon="agent"></span><span>Agent Lab</span></button>
+        <button data-view="notescenter" data-route><span class="rail-icon" data-icon="shell"></span><span>Notes</span></button>
+        <button data-view="registration" data-route><span class="rail-icon" data-icon="shell"></span><span>Registration</span></button>
+        <button data-view="screening" data-route><span class="rail-icon" data-icon="shell"></span><span>Screening</span></button>
+        <button data-view="adminops" data-route><span class="rail-icon" data-icon="shell"></span><span>Admin Ops</span></button>
+        <button data-view="providers" data-route><span class="rail-icon" data-icon="shell"></span><span>Provider Center</span></button>
+        <button data-view="creative" data-route><span class="rail-icon" data-icon="shell"></span><span>Creative Tools</span></button>
+        <button data-view="moviepwa" data-route><span class="rail-icon" data-icon="shell"></span><span>MoviePWA</span></button>
+        <button data-view="builder" data-route><span class="rail-icon" data-icon="shell"></span><span>PWA Builder</span></button>
         <button data-view="intake" data-route><span class="rail-icon" data-icon="upload"></span><span>Upload Build</span></button>
         <button data-view="notes" data-route><span class="rail-icon" data-icon="notes"></span><span>Paste Notes</span></button>
         <button data-view="validator" data-route><span class="rail-icon" data-icon="shield"></span><span>Run Validator</span></button>
@@ -183,7 +199,38 @@
                 <button class="primary-action" id="analyzeFilesBtn">Analyze Upload</button>
                 <button class="secondary-action" id="loadSampleBtn">Load Sample Build</button>
               </div>
-            </div>
+            
+            <button class="command-card" data-view="builder" data-route>
+              <span class="card-icon" data-icon="shell"></span>
+              <strong>PWA Builder Studio</strong>
+              <span>Upload, dismantle, edit, rebuild, and export PWA packages.</span>
+            </button>
+            <button class="command-card" data-view="moviepwa" data-route>
+              <span class="card-icon" data-icon="shell"></span>
+              <strong>MoviePWA Studio</strong>
+              <span>Validate and structure movie-style PWAs with poster, Play, Resume, and Rate.</span>
+            </button>
+            <button class="command-card" data-view="creative" data-route>
+              <span class="card-icon" data-icon="shell"></span>
+              <strong>Creative Tools</strong>
+              <span>VN-style editing, AI image, animation, voice, audio, and video tool shells.</span>
+            </button>
+            <button class="command-card" data-view="providers" data-route>
+              <span class="card-icon" data-icon="shell"></span>
+              <strong>Provider Center</strong>
+              <span>No-key, key-based, fallback, and proof-required provider management.</span>
+            </button>
+            <button class="command-card" data-view="adminops" data-route>
+              <span class="card-icon" data-icon="shell"></span>
+              <strong>Admin Operations</strong>
+              <span>Daily site health, security, sign-up, upload, and provider checks.</span>
+            </button>
+            <button class="command-card" data-view="notescenter" data-route>
+              <span class="card-icon" data-icon="shell"></span>
+              <strong>Notes Center</strong>
+              <span>Inline notes, tags, color labels, images, and project note exports.</span>
+            </button>
+
           </div>
         </section>
 
@@ -591,7 +638,8 @@
             <h1>Onsite tests for any PWA, site, or web package.</h1>
             <p>Test live links, uploaded packages, media paths, admin flows, screening tasks, and provider evidence while you are using Load Tasks.</p>
           </div>
-<div class="agent-grid">
+<div class="button-row sticky-actions"><button class="primary-action agent-run-button" id="runAgentLabBtn" type="button">Run Onsite Test</button><button class="secondary-action" id="downloadAgentReportBtn">Download Agent Report</button></div>
+          <div class="agent-grid">
             <article class="panel">
               <div class="panel-title">
                 <h2>Live site target</h2>
@@ -627,6 +675,9 @@
                 <h2>Test scope</h2>
                 <span class="badge warn">Select checks</span>
               </div>
+              <div class="agent-action-bar">
+                <button class="primary-action agent-run-button" id="runAgentLabBtnTop" type="button">Run Onsite Test</button>
+              </div>
               <div class="check-grid">
                 <label><input type="checkbox" class="agent-check" value="opens" checked> Site opens</label>
                 <label><input type="checkbox" class="agent-check" value="splash" checked> Splash or poster appears</label>
@@ -648,6 +699,9 @@
                 <h2>Agent results</h2>
                 <span class="badge gray" id="agentLastRunStatus">Not Tested</span>
               </div>
+              <div class="agent-action-bar">
+                <button class="primary-action agent-run-button" id="runAgentLabBtnResults" type="button">Run Onsite Test</button>
+              </div>
               <div id="agentResults" class="alert-list">Run an onsite test to see results.</div>
             </article>
 
@@ -658,6 +712,7 @@
               </div>
               <div id="agentNextAction" class="focus-action">Add a live link, choose checks, and run the onsite test.</div>
               <div class="button-row">
+                <button class="primary-action agent-run-button" id="runAgentLabBtnNext" type="button">Run Onsite Test</button>
                 <button class="primary-action" id="agentCreateTasksBtn">Create Repair Tasks</button>
                 <button class="secondary-action" id="agentCopySummaryBtn">Copy Summary</button>
               </div>
@@ -692,6 +747,117 @@
         </section>
 
 
+
+        <section class="view" id="view-builder" data-view-panel="builder">
+          <div class="section-head">
+            <p class="eyebrow">PWA Builder Studio</p>
+            <h1>Upload. Dismantle. Edit. Rebuild. Export.</h1>
+            <p>This is the shell for the onsite PWA creation and repair studio. Status: Shell in place, not complete.</p>
+          </div>
+          <div class="shell-grid">
+            <article class="panel shell-card"><h2>Upload and dismantle PWA</h2><ul><li>Unzip PWA package in-browser</li><li>Find index.html, manifest, service worker, assets</li><li>Show file tree</li><li>Detect media and paths</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>Visual PWA editor</h2><ul><li>Edit title, subtitle, colors, logo</li><li>Replace splash, poster, icons</li><li>Edit manifest fields</li><li>Add README and SECURITY files</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>Repair and rebuild</h2><ul><li>Repair missing root files</li><li>Repair asset paths</li><li>Add service worker</li><li>Export fixed ZIP</li></ul><span class="badge gray">Shell</span></article>
+          </div>
+        </section>
+
+        <section class="view" id="view-moviepwa" data-view-panel="moviepwa">
+          <div class="section-head">
+            <p class="eyebrow">MoviePWA / CinePWA Studio</p>
+            <h1>Poster first. Then Play, Resume, Rate.</h1>
+            <p>This shell supports standalone movie-style PWA packages with images, video, audio, subtitles, and scene data.</p>
+          </div>
+          <div class="shell-grid">
+            <article class="panel shell-card"><h2>Poster front screen</h2><ul><li>Movie poster as front screen</li><li>Premium bottom buttons</li><li>Play</li><li>Resume</li><li>Rate</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>Movie package validation</h2><ul><li>movie.json or project.json</li><li>scenes.json</li><li>rights.json</li><li>assets/images, video, audio, subtitles</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>Playback checks</h2><ul><li>poster loads</li><li>movie starts</li><li>scene order works</li><li>media paths load</li><li>offline cache includes intended media</li></ul><span class="badge gray">Shell</span></article>
+          </div>
+        </section>
+
+        <section class="view" id="view-creative" data-view-panel="creative">
+          <div class="section-head">
+            <p class="eyebrow">Creative Tools</p>
+            <h1>Onsite creative repair and editing shells.</h1>
+            <p>Load Tasks must eventually include actual tool areas, not only reports. This phase places the shells.</p>
+          </div>
+          <div class="shell-grid">
+            <article class="panel shell-card"><h2>VN-style editing</h2><ul><li>Media import</li><li>Timeline references</li><li>Trim/edit checks</li><li>Preview test</li><li>Export and reopen checks</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>AI image and Glam-style workflow</h2><ul><li>Prompt box</li><li>Image provider test</li><li>Returned file/blob/URL proof</li><li>Save image into assets</li><li>Attach image to scene</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>Animation, voice, audio, video</h2><ul><li>Image-to-video clip proof</li><li>Voice/audio playback proof</li><li>Video clip save</li><li>Attach media to MoviePWA scene</li></ul><span class="badge gray">Shell</span></article>
+          </div>
+        </section>
+
+        <section class="view" id="view-providers" data-view-panel="providers">
+          <div class="section-head">
+            <p class="eyebrow">Provider Center</p>
+            <h1>No-key first. Keys where needed. Proof required.</h1>
+            <p>Provider tools will not be marked working unless a real response, file, blob, playable clip, or URL is returned.</p>
+          </div>
+          <div class="provider-shell-table">
+            <article class="panel shell-card"><h2>AI Help providers</h2><ul><li>Local helper fallback</li><li>OpenAI-compatible endpoint</li><li>OpenRouter-compatible endpoint</li><li>Custom endpoint</li><li>Test provider</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>AI image providers</h2><ul><li>No-key/free first where possible</li><li>ComfyUI/local option</li><li>Hugging Face option</li><li>Replicate fallback</li><li>Custom endpoint</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>Animation and video providers</h2><ul><li>Provider status</li><li>API key field where needed</li><li>Fallback order</li><li>Playable clip proof</li><li>Last error</li></ul><span class="badge gray">Shell</span></article>
+          </div>
+        </section>
+
+        <section class="view" id="view-adminops" data-view-panel="adminops">
+          <div class="section-head">
+            <p class="eyebrow">Admin Operations</p>
+            <h1>Automated site health and daily admin checks.</h1>
+            <p>This shell prepares automated checks with color-coded alerts and dyslexia-friendly reports.</p>
+          </div>
+          <div class="shell-grid">
+            <article class="panel shell-card"><h2>Daily admin checks</h2><ul><li>Site opens</li><li>Admin dashboard opens</li><li>New sign-ups</li><li>Failed registrations</li><li>Broken uploads</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>Security checks</h2><ul><li>CSP</li><li>Hidden redirects</li><li>Unsafe external scripts</li><li>Exposed API keys</li><li>Admin pages exposed</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>Reports</h2><ul><li>Daily Admin Report</li><li>Weekly Site Health Report</li><li>Security Risk Report</li><li>Provider Health Report</li></ul><span class="badge gray">Shell</span></article>
+          </div>
+        </section>
+
+        <section class="view" id="view-screening" data-view-panel="screening">
+          <div class="section-head">
+            <p class="eyebrow">Content Screening</p>
+            <h1>Profanity, nudity, and unsafe content review tasks.</h1>
+            <p>This shell flags items for review. It must not promise perfect moderation.</p>
+          </div>
+          <div class="shell-grid">
+            <article class="panel shell-card"><h2>Text screening</h2><ul><li>Profanity flags</li><li>Unsafe creator descriptions</li><li>Unsafe profile text</li><li>Unsafe comments</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>Media screening</h2><ul><li>Nudity review flags</li><li>Unsafe thumbnails</li><li>Unsafe uploaded media labels</li><li>Needs Human Review status</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>Child-safe notices</h2><ul><li>Missing labels</li><li>Missing warnings</li><li>Upload safety rules</li><li>Human review queue</li></ul><span class="badge gray">Shell</span></article>
+          </div>
+        </section>
+
+        <section class="view" id="view-registration" data-view-panel="registration">
+          <div class="section-head">
+            <p class="eyebrow">Registration and Email Validation</p>
+            <h1>Sign-up, login, admin access, and email flow checks.</h1>
+            <p>This shell checks frontend flows and labels backend-dependent features as not proven until connected.</p>
+          </div>
+          <div class="shell-grid">
+            <article class="panel shell-card"><h2>Sign-up and login</h2><ul><li>Sign-up form</li><li>Login form</li><li>Forgot password</li><li>Role labels</li><li>Terms and privacy checkbox</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>Email validation</h2><ul><li>Valid email accepted</li><li>Invalid email rejected</li><li>Required email field</li><li>Confirmation message</li><li>Backend required label</li></ul><span class="badge gray">Shell</span></article>
+            <article class="panel shell-card"><h2>Admin access</h2><ul><li>Admin login link</li><li>Admin dashboard path</li><li>Upload permissions</li><li>Registration reports</li></ul><span class="badge gray">Shell</span></article>
+          </div>
+        </section>
+
+        <section class="view" id="view-notescenter" data-view-panel="notescenter">
+          <div class="section-head">
+            <p class="eyebrow">Notes Center</p>
+            <h1>Inline notes, tags, colors, images, and exports.</h1>
+            <p>This replaces unsafe pop-up notes. It is an inline shell and will not block the app.</p>
+          </div>
+          <div class="panel">
+            <h2>Notes shell</h2>
+            <div class="notes-inline-grid">
+              <label>Title<input placeholder="Example: Provider repair idea"></label>
+              <label>Tags<input placeholder="MoviePWA, provider, urgent"></label>
+              <label>Color<select><option>Yellow: general note</option><option>Blue: developer task</option><option>Red: urgent issue</option><option>Green: fixed or verified</option><option>Purple: creative idea</option><option>Orange: needs review</option><option>Gray: archive</option></select></label>
+              <label class="wide">Note<textarea placeholder="Type or paste note here."></textarea></label>
+            </div>
+            <div class="button-row"><button class="secondary-action" type="button" disabled>Save Note shell</button><button class="secondary-action" type="button" disabled>Export Notes shell</button></div>
+          </div>
+        </section>
+
+
         <section class="view" id="view-settings" data-view-panel="settings">
 <div class="section-head">
             <p class="eyebrow">Settings</p>
@@ -720,6 +886,6 @@
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
   </div>
-  <script src="app.js?v=5.5"></script>
+  <script src="app.js?v=5.7"></script>
 </body>
 </html>

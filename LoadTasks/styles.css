@@ -802,3 +802,117 @@ body.simple-mode .notes-row {
   visibility: hidden !important;
   pointer-events: none !important;
 }
+
+
+/* v5.6 Agent Lab iPad UI fix */
+.agent-action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 14px 0 16px;
+}
+.agent-run-button {
+  min-width: 220px;
+  justify-content: center;
+}
+.check-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
+  gap: 14px !important;
+  align-items: stretch !important;
+}
+.check-grid label {
+  display: grid !important;
+  grid-template-columns: 56px 1fr !important;
+  align-items: center !important;
+  gap: 14px !important;
+  min-height: 112px !important;
+  padding: 18px !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  word-break: normal !important;
+  line-height: 1.35 !important;
+}
+.check-grid input[type="checkbox"] {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  justify-self: center !important;
+  accent-color: #ffd400;
+}
+.check-grid label span,
+.check-grid label {
+  font-size: 1rem !important;
+}
+#agentResults,
+#agentNextAction,
+.alert-list {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 900px) {
+  .check-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .check-grid label {
+    grid-template-columns: 56px 1fr !important;
+    min-height: 96px !important;
+  }
+  .agent-run-button {
+    width: 100%;
+  }
+}
+
+
+/* v5.7 all requested feature shell */
+.shell-grid,
+.provider-shell-table {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+  margin: 18px 0;
+}
+.shell-card {
+  border-left: 6px solid rgba(255,212,0,.58);
+}
+.shell-card h2 {
+  margin-bottom: 12px;
+}
+.shell-card ul {
+  color: var(--muted);
+  line-height: 1.7;
+  padding-left: 22px;
+}
+.notes-inline-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+.notes-inline-grid label {
+  display: grid;
+  gap: 8px;
+}
+.notes-inline-grid .wide {
+  grid-column: 1 / -1;
+}
+.notes-inline-grid input,
+.notes-inline-grid select,
+.notes-inline-grid textarea {
+  width: 100%;
+  border: 1px solid var(--line-soft);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  border-radius: 16px;
+  padding: 14px;
+  font: inherit;
+}
+.notes-inline-grid textarea {
+  min-height: 160px;
+  resize: vertical;
+}
+@media (max-width: 900px) {
+  .shell-grid,
+  .provider-shell-table,
+  .notes-inline-grid {
+    grid-template-columns: 1fr;
+  }
+}
