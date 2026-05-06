@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Load &mdash; Logs &amp; routing</title>
+<style>
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 0; background: #0a0a0f; color: #e8e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased; }
+header.top { display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px; border-bottom: 1px solid #1f1f2f;
+  position: sticky; top: 0; background: rgba(10,10,15,0.95);
+  backdrop-filter: blur(8px); z-index: 5; }
+header.top a.back, header.top a.help {
+  color: #9ca3af; text-decoration: none; font-size: 13px;
+  padding: 6px 10px; border-radius: 6px; border: 1px solid #2a2a42; }
+header.top a.back:hover, header.top a.help:hover {
+  color: #fff; border-color: #7c5cff; background: #1a1a2e; }
+header.top h1 { margin: 0; font-size: 18px; flex: 1; font-weight: 700; }
+main.body { max-width: 1100px; margin: 22px auto; padding: 0 20px 40px; }
+.intro { color: #9ca3af; font-size: 14px; line-height: 1.6; margin: 0 0 18px; }
+.tiles { display: grid; gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.ws-tile { display: flex; flex-direction: column; align-items: flex-start;
+  gap: 6px; padding: 14px 16px; background: #1a1a2e;
+  border: 1px solid #2a2a42; border-radius: 10px; color: #e8e8f0;
+  text-align: left; cursor: pointer; font: inherit; min-height: 96px; }
+.ws-tile:active { transform: scale(0.97); }
+.ws-tile:hover { border-color: #7c5cff; }
+.ws-icon { color: #e8e8f0; }
+.ws-icon svg { width: 22px; height: 22px; }
+.ws-label { font-size: 15px; font-weight: 700; }
+.ws-dir { font-size: 12px; color: #9ca3af; line-height: 1.5; }
+.cats { display: grid; gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.cat { display: flex; flex-direction: column; gap: 8px;
+  padding: 22px 24px; background: #15152a; border: 1px solid #2a2a42;
+  border-radius: 14px; color: #e8e8f0; text-decoration: none;
+  min-height: 150px; }
+.cat:hover { border-color: #7c5cff; background: #1a1a2e; }
+.cat .cat-count { font-size: 11px; color: #7c5cff;
+  text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+.cat .cat-title { font-size: 20px; font-weight: 800; }
+.cat .cat-desc { font-size: 13px; color: #9ca3af; line-height: 1.5; }
+</style>
+</head>
+<body>
+<header class="top"><a class="back" href="./index.html">&larr; Tools</a><h1>Logs &amp; routing</h1><a class="help" href="./help.html">How it works</a></header><main class="body"><p class="intro">Export receipts, project backups, file-type routing, the master help.</p><div class="tiles"><button class="ws-tile" onclick="window.location.href='./export-receipts.html'"> <span class="ws-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h11l3 3v15H6z"/><path d="M9 8h7M9 12h7M9 16h5"/></svg></span> <span class="ws-label">Export Receipts</span> <span class="ws-dir">Every export is logged with file size, included files, manifest + service worker + rights + offline + safety status, and the next recommended step.</span> </button>
+<button class="ws-tile" onclick="window.location.href='./project-backup.html'"> <span class="ws-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M9 12v4M15 12v4"/></svg></span> <span class="ws-label">Project Backup</span> <span class="ws-dir">One-tap backup of the entire library, every receipt, every character, acceptance results, AI provider statuses, and settings into a single ZIP. Restore on any device.</span> </button>
+<button class="ws-tile" onclick="window.location.href='./ecosystem-router.html'"> <span class="ws-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h8M8 18h8M6 8v8M18 8v8"/></svg></span> <span class="ws-label">Ecosystem Routing</span> <span class="ws-dir">Drop any file. See the next steps across Load Main / LoadStudio / LoadPlay (Open in Reader, Send to LoadStudio, Prepare for LoadPlay, Validate Rights, etc.).</span> </button>
+<button class="ws-tile" onclick="window.location.href='./help.html'"> <span class="ws-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4"/><circle cx="12" cy="17" r=".8" fill="currentColor"/></svg></span> <span class="ws-label">How to use Load</span> <span class="ws-dir">Step-by-step guide for every tool: install, import, library, preview, builders, validators, routing, voice, AI providers, and the file editor.</span> </button></div></main>
+</body>
+</html>

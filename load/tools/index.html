@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Load &mdash; Tools</title>
+<style>
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 0; background: #0a0a0f; color: #e8e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased; }
+header.top { display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px; border-bottom: 1px solid #1f1f2f;
+  position: sticky; top: 0; background: rgba(10,10,15,0.95);
+  backdrop-filter: blur(8px); z-index: 5; }
+header.top a.back, header.top a.help {
+  color: #9ca3af; text-decoration: none; font-size: 13px;
+  padding: 6px 10px; border-radius: 6px; border: 1px solid #2a2a42; }
+header.top a.back:hover, header.top a.help:hover {
+  color: #fff; border-color: #7c5cff; background: #1a1a2e; }
+header.top h1 { margin: 0; font-size: 18px; flex: 1; font-weight: 700; }
+main.body { max-width: 1100px; margin: 22px auto; padding: 0 20px 40px; }
+.intro { color: #9ca3af; font-size: 14px; line-height: 1.6; margin: 0 0 18px; }
+.tiles { display: grid; gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.ws-tile { display: flex; flex-direction: column; align-items: flex-start;
+  gap: 6px; padding: 14px 16px; background: #1a1a2e;
+  border: 1px solid #2a2a42; border-radius: 10px; color: #e8e8f0;
+  text-align: left; cursor: pointer; font: inherit; min-height: 96px; }
+.ws-tile:active { transform: scale(0.97); }
+.ws-tile:hover { border-color: #7c5cff; }
+.ws-icon { color: #e8e8f0; }
+.ws-icon svg { width: 22px; height: 22px; }
+.ws-label { font-size: 15px; font-weight: 700; }
+.ws-dir { font-size: 12px; color: #9ca3af; line-height: 1.5; }
+.cats { display: grid; gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.cat { display: flex; flex-direction: column; gap: 8px;
+  padding: 22px 24px; background: #15152a; border: 1px solid #2a2a42;
+  border-radius: 14px; color: #e8e8f0; text-decoration: none;
+  min-height: 150px; }
+.cat:hover { border-color: #7c5cff; background: #1a1a2e; }
+.cat .cat-count { font-size: 11px; color: #7c5cff;
+  text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+.cat .cat-title { font-size: 20px; font-weight: 800; }
+.cat .cat-desc { font-size: 13px; color: #9ca3af; line-height: 1.5; }
+</style>
+</head>
+<body>
+<header class="top"><a class="back" href="../index.html">&larr; Workspace</a><h1>Tools</h1><a class="help" href="./help.html">How it works</a></header><main class="body"><p class="intro">Pick a category. Each one groups the tools by what they touch &mdash; media, AI prompts, book writing, building &amp; validating, or routing &amp; logs.</p><div class="cats"><a class="cat" href="./cat-media.html"><span class="cat-count">10 tools</span><span class="cat-title">Media</span><span class="cat-desc">Photos, audio, video, voice, masks, palettes &mdash; anything that touches a media file.</span></a>
+<a class="cat" href="./cat-ai.html"><span class="cat-count">5 tools</span><span class="cat-title">AI</span><span class="cat-desc">Prompts, styles, characters, provider status &mdash; every AI-flavored tool.</span></a>
+<a class="cat" href="./cat-books.html"><span class="cat-count">8 tools</span><span class="cat-title">Books &amp; writing</span><span class="cat-desc">Manuscripts, EPUB, covers, Markdown, reading-level, focus reading.</span></a>
+<a class="cat" href="./cat-build.html"><span class="cat-count">10 tools</span><span class="cat-title">Build &amp; validate</span><span class="cat-desc">PWA builders, validators, safety scans, diagnostics, samples.</span></a>
+<a class="cat" href="./cat-logs.html"><span class="cat-count">4 tools</span><span class="cat-title">Logs &amp; routing</span><span class="cat-desc">Export receipts, project backups, file-type routing, the master help.</span></a></div></main>
+</body>
+</html>

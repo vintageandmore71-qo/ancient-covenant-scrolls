@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Load &mdash; Books &amp; writing</title>
+<style>
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 0; background: #0a0a0f; color: #e8e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased; }
+header.top { display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px; border-bottom: 1px solid #1f1f2f;
+  position: sticky; top: 0; background: rgba(10,10,15,0.95);
+  backdrop-filter: blur(8px); z-index: 5; }
+header.top a.back, header.top a.help {
+  color: #9ca3af; text-decoration: none; font-size: 13px;
+  padding: 6px 10px; border-radius: 6px; border: 1px solid #2a2a42; }
+header.top a.back:hover, header.top a.help:hover {
+  color: #fff; border-color: #7c5cff; background: #1a1a2e; }
+header.top h1 { margin: 0; font-size: 18px; flex: 1; font-weight: 700; }
+main.body { max-width: 1100px; margin: 22px auto; padding: 0 20px 40px; }
+.intro { color: #9ca3af; font-size: 14px; line-height: 1.6; margin: 0 0 18px; }
+.tiles { display: grid; gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.ws-tile { display: flex; flex-direction: column; align-items: flex-start;
+  gap: 6px; padding: 14px 16px; background: #1a1a2e;
+  border: 1px solid #2a2a42; border-radius: 10px; color: #e8e8f0;
+  text-align: left; cursor: pointer; font: inherit; min-height: 96px; }
+.ws-tile:active { transform: scale(0.97); }
+.ws-tile:hover { border-color: #7c5cff; }
+.ws-icon { color: #e8e8f0; }
+.ws-icon svg { width: 22px; height: 22px; }
+.ws-label { font-size: 15px; font-weight: 700; }
+.ws-dir { font-size: 12px; color: #9ca3af; line-height: 1.5; }
+.cats { display: grid; gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.cat { display: flex; flex-direction: column; gap: 8px;
+  padding: 22px 24px; background: #15152a; border: 1px solid #2a2a42;
+  border-radius: 14px; color: #e8e8f0; text-decoration: none;
+  min-height: 150px; }
+.cat:hover { border-color: #7c5cff; background: #1a1a2e; }
+.cat .cat-count { font-size: 11px; color: #7c5cff;
+  text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+.cat .cat-title { font-size: 20px; font-weight: 800; }
+.cat .cat-desc { font-size: 13px; color: #9ca3af; line-height: 1.5; }
+</style>
+</head>
+<body>
+<header class="top"><a class="back" href="./index.html">&larr; Tools</a><h1>Books &amp; writing</h1><a class="help" href="./help.html">How it works</a></header><main class="body"><p class="intro">Manuscripts, EPUB, covers, Markdown, reading-level, focus reading.</p><div class="tiles"><button class="ws-tile" onclick="window.location.href='./manuscript-to-book.html'"> <span class="ws-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M16 4v3h3"/><path d="M8 11h8M8 14h8M8 17h5"/><polyline points="20 17 23 20 20 23" /></svg></span> <span class="ws-label">Manuscript to Book PWA</span> <span class="ws-dir">Drop a TXT / Markdown / HTML manuscript. Auto-detects chapters and produces a complete installable book PWA ZIP with cover, manifest, service worker, sidebar nav.</span> </button>
+<button class="ws-tile" onclick="window.location.href='./epub-builder.html'"> <span class="ws-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h11l3 3v15H6a2 2 0 0 1-2-2z"/><path d="M17 3v4h3"/><path d="M8 11h7M8 14h7M8 17h5"/></svg></span> <span class="ws-label">EPUB Builder</span> <span class="ws-dir">Drop a manuscript or paste text. Auto-detects chapters, builds a valid EPUB 3 file with cover, table of contents, and metadata. Saves an export receipt.</span> </button>
+<button class="ws-tile" onclick="window.location.href='./cover-designer.html'"> <span class="ws-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h14v18H5z"/><path d="M5 3a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2"/><path d="M9 7h6M9 11h6M9 15h4"/></svg></span> <span class="ws-label">Cover Designer</span> <span class="ws-dir">KDP / eBook / Audible / Square book covers with title, subtitle, author, optional image, gradient or solid background, ornament corners.</span> </button>
+<button class="ws-tile" onclick="window.location.href='./markdown-preview.html'"> <span class="ws-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="1.5"/><path d="M7 10v5l2-3 2 3v-5"/><path d="M14 10v5"/><path d="M14 13l2-3 2 3"/></svg></span> <span class="ws-label">Markdown Preview</span> <span class="ws-dir">Live two-pane Markdown editor. Headings, bold, italic, code, lists, blockquotes, tables, images, links. Export to HTML or .md.</span> </button>
+<button class="ws-tile" onclick="window.location.href='./find-replace.html'"> <span class="ws-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="M14.5 14.5L20 20"/><path d="M7 10h6M10 7v6"/></svg></span> <span class="ws-label">Find &amp; Replace</span> <span class="ws-dir">Bulk find-and-replace across a manuscript. Multiple rules, case sensitivity, whole-word, regex, common-typo presets. Live diff preview, undo, export.</span> </button>
+<button class="ws-tile" onclick="window.location.href='./reading-level.html'"> <span class="ws-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M16 4v3h3"/><path d="M8 11h6M8 14h8M8 17h5"/></svg></span> <span class="ws-label">Reading Level Analyzer</span> <span class="ws-dir">Word count, sentence length, syllables, Flesch Reading Ease, Flesch-Kincaid grade level, and the ten hardest sentences highlighted.</span> </button>
+<button class="ws-tile" onclick="window.location.href='./speed-reader.html'"> <span class="ws-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16"/><path d="M11 8l-3 4 3 4"/><path d="M13 8l3 4-3 4"/></svg></span> <span class="ws-label">Speed Reader</span> <span class="ws-dir">Rapid Serial Visual Presentation: one word at a time at adjustable WPM, pivot-letter focus, pause on punctuation. Dyslexia-friendly.</span> </button>
+<button class="ws-tile" onclick="window.location.href='./sentence-reader.html'"> <span class="ws-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5h14v14H5z"/><path d="M8 9h8M8 12h8M8 15h5"/></svg></span> <span class="ws-label">Sentence Reader</span> <span class="ws-dir">Paste a passage, the tool splits it into one-sentence cards with big text, background tints, and per-sentence read-aloud. Atkinson Hyperlegible default.</span> </button></div></main>
+</body>
+</html>
