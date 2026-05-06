@@ -1,7 +1,7 @@
 {
   "name": "Load Tasks",
   "short_name": "Load Tasks",
-  "description": "Load Tasks validates, repairs, remembers project builds, includes Help Center guidance, and requires visible repair previews before sensitive patches.",
+  "description": "Load Tasks v5.5 removes blocking How-To and Notes overlays while preserving Agent Lab, Alerts, Help, Validator, and Repair tools.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

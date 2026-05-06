@@ -578,3 +578,227 @@ body.simple-mode .repair-preview-output {
   font-size: 1.08rem;
   line-height: 1.8;
 }
+
+
+/* Load Tasks v5 Phase 1: Agent Lab, Notes, How-To, Alerts */
+.howto-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 10px 0 18px;
+}
+.agent-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 18px;
+  margin-bottom: 18px;
+}
+.check-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px;
+}
+.check-grid label {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  padding: 12px;
+  background: rgba(255,255,255,.04);
+}
+.alert-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.alert-list {
+  display: grid;
+  gap: 14px;
+}
+.alert-card {
+  border: 1px solid var(--line-soft);
+  border-left-width: 6px;
+  border-radius: 20px;
+  padding: 16px;
+  background: rgba(255,255,255,.04);
+}
+.alert-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: start;
+  margin-bottom: 10px;
+}
+.alert-card p {
+  margin: 8px 0;
+  color: var(--muted);
+}
+.alert-green { border-color: rgba(67,221,135,.65); }
+.alert-yellow { border-color: rgba(255,212,0,.65); }
+.alert-orange { border-color: rgba(255,145,0,.70); }
+.alert-red { border-color: rgba(255,77,77,.75); }
+.alert-gray { border-color: rgba(170,170,190,.55); }
+.alert-blue { border-color: rgba(87,170,255,.65); }
+
+.badge.green { color: var(--green); border-color: rgba(67,221,135,.45); }
+.badge.yellow { color: var(--gold); border-color: rgba(255,212,0,.45); }
+.badge.orange { color: #ff9b2f; border-color: rgba(255,155,47,.45); }
+.badge.red { color: #ff5c5c; border-color: rgba(255,92,92,.45); }
+.badge.gray { color: #b7bbcc; border-color: rgba(183,187,204,.35); }
+.badge.blue { color: #73b7ff; border-color: rgba(115,183,255,.45); }
+
+.notes-backdrop,
+.howto-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.notes-panel,
+.howto-panel {
+  width: min(880px, 96vw);
+  max-height: 92vh;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: linear-gradient(145deg, rgba(12,15,28,.98), rgba(5,7,18,.98));
+  box-shadow: 0 30px 100px rgba(0,0,0,.55), 0 0 60px rgba(255,212,0,.12);
+  padding: 22px;
+}
+.notes-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: start;
+  margin-bottom: 16px;
+}
+.icon-button {
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  border: 1px solid var(--line-soft);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  font-size: 1.6rem;
+  font-weight: 900;
+}
+.notes-body label,
+.notes-row label {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+}
+.notes-body input,
+.notes-body select,
+.notes-body textarea {
+  width: 100%;
+  border: 1px solid var(--line-soft);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  border-radius: 16px;
+  padding: 14px;
+  font: inherit;
+}
+.notes-textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+.notes-row {
+  display: grid;
+  grid-template-columns: minmax(160px,.6fr) minmax(200px,1fr);
+  gap: 14px;
+}
+.note-image-preview img,
+.note-card img {
+  max-width: 100%;
+  border-radius: 16px;
+  border: 1px solid var(--line-soft);
+  margin-top: 10px;
+}
+.notes-filter {
+  display: flex;
+  gap: 10px;
+  margin: 18px 0;
+}
+.notes-list {
+  display: grid;
+  gap: 12px;
+}
+.note-card {
+  border: 1px solid var(--line-soft);
+  border-left-width: 8px;
+  border-radius: 18px;
+  padding: 14px;
+  background: rgba(255,255,255,.04);
+}
+.note-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.note-yellow { border-left-color: #ffd400; }
+.note-blue { border-left-color: #73b7ff; }
+.note-red { border-left-color: #ff5c5c; }
+.note-green { border-left-color: #43dd87; }
+.note-purple { border-left-color: #b28cff; }
+.note-orange { border-left-color: #ff9b2f; }
+.note-gray { border-left-color: #9ca3b5; }
+
+.howto-content {
+  border: 1px solid var(--line-soft);
+  border-radius: 18px;
+  padding: 18px;
+  background: rgba(255,255,255,.04);
+}
+.howto-content ol {
+  line-height: 1.8;
+  font-size: 1.08rem;
+}
+body.simple-mode .agent-grid,
+body.simple-mode .notes-row {
+  grid-template-columns: 1fr;
+}
+@media (max-width: 900px) {
+  .agent-grid,
+  .notes-row {
+    grid-template-columns: 1fr;
+  }
+  .notes-backdrop,
+  .howto-backdrop {
+    padding: 10px;
+    place-items: stretch;
+  }
+  .notes-panel,
+  .howto-panel {
+    width: 100%;
+    max-height: 96vh;
+  }
+}
+
+/* v5.4 remove howto popup */
+#howToBackdrop,
+.howto-backdrop,
+#howToDrawer,
+.howto-drawer {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* v5.5 no blocking overlays */
+#howToBackdrop,
+.howto-backdrop,
+#howToDrawer,
+.howto-drawer,
+#notesBackdrop,
+.notes-backdrop {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
