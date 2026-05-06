@@ -2913,3 +2913,370 @@ function setText(selector, value) {
     }
   }, true);
 })();
+
+
+/* v5.9 PWA Builder Native ZIP Inspector, no external JSZip required */
+(function(){
+  let nativeBuilderState = {
+    fileName: '',
+    entries: [],
+    summary: null,
+    reportText: ''
+  };
+
+  function q(sel) { return document.querySelector(sel); }
+  function qa(sel) { return Array.from(document.querySelectorAll(sel)); }
+
+  function setBuilderStatus(message, level = 'info') {
+    const el = q('#builderVisibleStatus');
+    if (el) {
+      el.textContent = message;
+      el.className = 'builder-visible-status status-' + level;
+    }
+    const status = q('#builderInspectStatus');
+    if (status) {
+      status.textContent = message.length > 28 ? message.slice(0, 28) : message;
+      status.className = 'badge ' + (level === 'error' ? 'red' : level === 'warn' ? 'orange' : level === 'success' ? 'green' : 'blue');
+    }
+  }
+
+  function escapeHtmlLocal(value) {
+    return String(value || '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+
+  function normalizePathLocal(path) {
+    return String(path || '').replace(/\\/g, '/').replace(/^\/+/, '');
+  }
+
+  function readUInt16(view, offset) { return view.getUint16(offset, true); }
+  function readUInt32(view, offset) { return view.getUint32(offset, true); }
+
+  function decodeFileName(bytes) {
+    try {
+      return new TextDecoder('utf-8').decode(bytes);
+    } catch (error) {
+      let out = '';
+      for (let i = 0; i < bytes.length; i++) out += String.fromCharCode(bytes[i]);
+      return out;
+    }
+  }
+
+  function findEndOfCentralDirectory(view) {
+    const sig = 0x06054b50;
+    const min = Math.max(0, view.byteLength - 65557);
+    for (let i = view.byteLength - 22; i >= min; i--) {
+      if (readUInt32(view, i) === sig) return i;
+    }
+    return -1;
+  }
+
+  function parseZipEntriesNative(buffer) {
+    const view = new DataView(buffer);
+    const eocd = findEndOfCentralDirectory(view);
+    if (eocd < 0) throw new Error('ZIP central directory was not found. The file may not be a valid ZIP.');
+
+    const totalEntries = readUInt16(view, eocd + 10);
+    const centralSize = readUInt32(view, eocd + 12);
+    const centralOffset = readUInt32(view, eocd + 16);
+
+    if (!centralOffset || centralOffset >= view.byteLength) {
+      throw new Error('ZIP central directory offset is invalid.');
+    }
+
+    const entries = [];
+    let ptr = centralOffset;
+    const centralEnd = Math.min(view.byteLength, centralOffset + centralSize);
+
+    for (let i = 0; i < totalEntries && ptr < centralEnd; i++) {
+      const sig = readUInt32(view, ptr);
+      if (sig !== 0x02014b50) break;
+
+      const compression = readUInt16(view, ptr + 10);
+      const compressedSize = readUInt32(view, ptr + 20);
+      const uncompressedSize = readUInt32(view, ptr + 24);
+      const fileNameLength = readUInt16(view, ptr + 28);
+      const extraLength = readUInt16(view, ptr + 30);
+      const commentLength = readUInt16(view, ptr + 32);
+      const nameStart = ptr + 46;
+      const nameEnd = nameStart + fileNameLength;
+      const nameBytes = new Uint8Array(buffer.slice(nameStart, nameEnd));
+      const path = normalizePathLocal(decodeFileName(nameBytes));
+
+      if (path && !path.endsWith('/')) {
+        entries.push({
+          path,
+          name: path.split('/').pop(),
+          size: uncompressedSize,
+          compressedSize,
+          compression,
+          type: classifyBuilderFileNative(path)
+        });
+      }
+
+      ptr = nameEnd + extraLength + commentLength;
+    }
+
+    return entries;
+  }
+
+  function classifyBuilderFileNative(path) {
+    const lower = String(path || '').toLowerCase();
+    if (/\.(png|jpg|jpeg|webp|gif|svg|avif)$/.test(lower)) return lower.includes('icon') || lower.includes('favicon') ? 'icon' : 'image';
+    if (/\.(mp4|webm|mov|m4v|ogv)$/.test(lower)) return 'video';
+    if (/\.(mp3|wav|m4a|aac|ogg|flac)$/.test(lower)) return 'audio';
+    if (/\.(css)$/.test(lower)) return 'css';
+    if (/\.(js|mjs)$/.test(lower)) return 'js';
+    if (/\.(json|webmanifest)$/.test(lower)) return 'json';
+    if (/\.(html|htm)$/.test(lower)) return 'html';
+    return 'other';
+  }
+
+  function detectBuilderRootNative(paths) {
+    const indexPaths = paths.filter(p => p.toLowerCase().endsWith('index.html'));
+    if (!indexPaths.length) return { path: '', message: 'No index.html found.', nested: false };
+    const first = indexPaths[0];
+    const parts = first.split('/');
+    if (parts.length === 1) return { path: '/', message: 'index.html is at the package root.', nested: false };
+    const rootPath = parts.slice(0, -1).join('/');
+    return { path: rootPath, message: 'index.html is inside a nested folder. Upload root may need review.', nested: true };
+  }
+
+  function buildSummaryNative(fileName, entries) {
+    const paths = entries.map(e => e.path);
+    const lowerPaths = paths.map(p => p.toLowerCase());
+    const has = (name) => lowerPaths.some(p => p === name || p.endsWith('/' + name));
+    const countType = type => entries.filter(e => e.type === type).length;
+    const totalSize = entries.reduce((sum, e) => sum + (e.size || 0), 0);
+    return {
+      fileName,
+      totalFiles: entries.length,
+      totalSize,
+      root: detectBuilderRootNative(paths),
+      required: {
+        index: has('index.html'),
+        manifest: has('manifest.json') || has('manifest.webmanifest'),
+        serviceWorker: has('service-worker.js') || has('sw.js'),
+        assets: lowerPaths.some(p => p.includes('/assets/') || p.startsWith('assets/')),
+        icons: entries.some(e => e.type === 'icon'),
+        css: entries.some(e => e.type === 'css'),
+        js: entries.some(e => e.type === 'js')
+      },
+      counts: {
+        image: countType('image'),
+        video: countType('video'),
+        audio: countType('audio'),
+        icon: countType('icon'),
+        html: countType('html'),
+        css: countType('css'),
+        js: countType('js'),
+        json: countType('json'),
+        other: countType('other')
+      }
+    };
+  }
+
+  function formatBytesNative(bytes) {
+    const value = Number(bytes || 0);
+    if (value < 1024) return value + ' B';
+    if (value < 1024 * 1024) return (value / 1024).toFixed(1) + ' KB';
+    return (value / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  function requirementHtml(label, ok) {
+    return `<div class="builder-requirement ${ok ? 'pass' : 'warn'}"><strong>${ok ? 'Passed' : 'Needs Review'}</strong><span>${escapeHtmlLocal(label)}</span></div>`;
+  }
+
+  function buildReportTextNative(summary) {
+    const blockers = [];
+    if (!summary.required.index) blockers.push('index.html not found.');
+    if (!summary.required.manifest) blockers.push('manifest file not found.');
+    if (!summary.required.serviceWorker) blockers.push('service worker not found.');
+    if (!summary.required.icons) blockers.push('icons not found.');
+    if (summary.root.nested) blockers.push('index.html appears inside a nested folder.');
+
+    return [
+      'PWA Builder Inspector Report',
+      '',
+      'Package: ' + summary.fileName,
+      'Total files: ' + summary.totalFiles,
+      'Total size: ' + formatBytesNative(summary.totalSize),
+      '',
+      'Detected root:',
+      summary.root.message,
+      '',
+      'Media counts:',
+      'Images: ' + summary.counts.image,
+      'Videos: ' + summary.counts.video,
+      'Audio: ' + summary.counts.audio,
+      'Icons: ' + summary.counts.icon,
+      '',
+      'Required file check:',
+      'index.html: ' + (summary.required.index ? 'Passed' : 'Needs Review'),
+      'manifest: ' + (summary.required.manifest ? 'Passed' : 'Needs Review'),
+      'service worker: ' + (summary.required.serviceWorker ? 'Passed' : 'Needs Review'),
+      'assets folder: ' + (summary.required.assets ? 'Passed' : 'Needs Review'),
+      'icons: ' + (summary.required.icons ? 'Passed' : 'Needs Review'),
+      '',
+      'Top issue summary:',
+      blockers.length ? blockers.slice(0, 3).map((b, i) => (i + 1) + '. ' + b).join('\n') : 'No critical package-structure blockers found by this inspector.',
+      '',
+      'Status:',
+      'Inspected only. No files were changed.'
+    ].join('\n');
+  }
+
+  function renderInspectorNative() {
+    const summary = nativeBuilderState.summary;
+    if (!summary) return;
+
+    const set = (id, value) => { const el = q(id); if (el) el.textContent = String(value); };
+    set('#builderTotalFiles', summary.totalFiles);
+    set('#builderImageFiles', summary.counts.image);
+    set('#builderVideoFiles', summary.counts.video);
+    set('#builderAudioFiles', summary.counts.audio);
+    set('#builderIconFiles', summary.counts.icon);
+    set('#builderOtherFiles', summary.counts.other);
+
+    const req = q('#builderRequiredFiles');
+    if (req) {
+      req.innerHTML = [
+        requirementHtml('index.html', summary.required.index),
+        requirementHtml('manifest.json or manifest.webmanifest', summary.required.manifest),
+        requirementHtml('service-worker.js or sw.js', summary.required.serviceWorker),
+        requirementHtml('assets folder', summary.required.assets),
+        requirementHtml('icons', summary.required.icons),
+        requirementHtml('CSS file', summary.required.css),
+        requirementHtml('JavaScript file', summary.required.js)
+      ].join('');
+    }
+
+    const root = q('#builderRootSummary');
+    if (root) {
+      root.textContent = [
+        'Detected root: ' + (summary.root.path || 'Not found'),
+        summary.root.message,
+        summary.root.nested ? 'Next step later: use flatten repair before deployment.' : 'Root placement looks clean.'
+      ].join('\n');
+    }
+
+    const tree = q('#builderFileTree');
+    if (tree) {
+      const rows = nativeBuilderState.entries.slice().sort((a,b) => a.path.localeCompare(b.path)).map(e => `
+        <div class="file-tree-row file-type-${escapeHtmlLocal(e.type)}">
+          <span>${escapeHtmlLocal(e.path)}</span>
+          <small>${escapeHtmlLocal(e.type)} · ${formatBytesNative(e.size || 0)}</small>
+        </div>
+      `).join('');
+      tree.innerHTML = rows || 'No files found in ZIP.';
+    }
+
+    const report = q('#builderInspectorReport');
+    if (report) report.textContent = nativeBuilderState.reportText;
+  }
+
+  async function inspectPackageNative() {
+    const input = q('#builderZipInput');
+    if (!input || !input.files || !input.files[0]) {
+      setBuilderStatus('Choose one ZIP package first.', 'warn');
+      return;
+    }
+
+    const file = input.files[0];
+    if (!file.name.toLowerCase().endsWith('.zip')) {
+      setBuilderStatus('This is not a ZIP file.', 'error');
+      return;
+    }
+
+    try {
+      setBuilderStatus('Reading ZIP file...', 'info');
+      const buffer = await file.arrayBuffer();
+      const entries = parseZipEntriesNative(buffer);
+      const summary = buildSummaryNative(file.name, entries);
+      nativeBuilderState = {
+        fileName: file.name,
+        entries,
+        summary,
+        reportText: buildReportTextNative(summary)
+      };
+      renderInspectorNative();
+      setBuilderStatus('Package inspected.', summary.required.index ? 'success' : 'warn');
+    } catch (error) {
+      console.error(error);
+      setBuilderStatus('Could not inspect ZIP: ' + (error.message || error), 'error');
+      const report = q('#builderInspectorReport');
+      if (report) report.textContent = 'Could not inspect ZIP:\n' + (error.stack || error.message || error);
+    }
+  }
+
+  function clearInspectorNative() {
+    nativeBuilderState = { fileName: '', entries: [], summary: null, reportText: '' };
+    const input = q('#builderZipInput');
+    if (input) input.value = '';
+    setBuilderStatus('Choose a ZIP package, then tap Inspect Package.', 'info');
+    ['#builderTotalFiles','#builderImageFiles','#builderVideoFiles','#builderAudioFiles','#builderIconFiles','#builderOtherFiles'].forEach(id => { const el = q(id); if (el) el.textContent = '0'; });
+    const req = q('#builderRequiredFiles'); if (req) req.textContent = 'Upload and inspect a ZIP to check required files.';
+    const root = q('#builderRootSummary'); if (root) root.textContent = 'No package inspected yet.';
+    const tree = q('#builderFileTree'); if (tree) tree.textContent = 'Upload a ZIP and tap Inspect Package.';
+    const report = q('#builderInspectorReport'); if (report) report.textContent = 'No report yet.';
+  }
+
+  function downloadInventoryNative() {
+    if (!nativeBuilderState.reportText) {
+      setBuilderStatus('Inspect a package before downloading a report.', 'warn');
+      return;
+    }
+    const fileList = nativeBuilderState.entries.map(e => `- ${e.path} (${e.type}, ${formatBytesNative(e.size || 0)})`).join('\n');
+    const text = nativeBuilderState.reportText + '\n\nFile inventory:\n' + fileList;
+    const blob = new Blob([text], { type: 'text/markdown' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'Load_Tasks_PWA_Builder_Inventory_Report.md';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 300);
+  }
+
+  function bindNativeInspector() {
+    document.addEventListener('click', function(event) {
+      const inspect = event.target.closest('#builderInspectBtn');
+      if (inspect) {
+        event.preventDefault();
+        event.stopPropagation();
+        inspectPackageNative();
+        return false;
+      }
+
+      const clear = event.target.closest('#builderClearBtn');
+      if (clear) {
+        event.preventDefault();
+        clearInspectorNative();
+        return false;
+      }
+
+      const download = event.target.closest('#builderDownloadInventoryBtn');
+      if (download) {
+        event.preventDefault();
+        downloadInventoryNative();
+        return false;
+      }
+    }, true);
+
+    const input = q('#builderZipInput');
+    if (input) {
+      input.addEventListener('change', function() {
+        const file = input.files && input.files[0];
+        setBuilderStatus(file ? 'Selected: ' + file.name : 'Choose a ZIP package, then tap Inspect Package.', file ? 'info' : 'gray');
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindNativeInspector);
+  } else {
+    bindNativeInspector();
+  }
+
+  window.inspectBuilderPackage = inspectPackageNative;
+  window.clearBuilderInspector = clearInspectorNative;
+  window.downloadBuilderInventoryReport = downloadInventoryNative;
+})();

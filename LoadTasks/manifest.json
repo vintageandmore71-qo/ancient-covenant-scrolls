@@ -1,7 +1,7 @@
 {
   "name": "Load Tasks",
   "short_name": "Load Tasks",
-  "description": "Load Tasks v5.8 adds a safe PWA Builder File Inspector that reads ZIP packages and reports structure without changing files.",
+  "description": "Load Tasks v5.10 fixes PWA Builder inspection with a separate builder-inspector.js file and hard button binding.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

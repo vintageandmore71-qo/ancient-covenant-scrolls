@@ -1001,3 +1001,38 @@ body.simple-mode .notes-row {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* v5.9 native zip inspector status */
+.builder-visible-status {
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin: 12px 0 14px;
+  background: rgba(255,255,255,.05);
+  color: var(--muted);
+  line-height: 1.5;
+}
+.builder-visible-status.status-success {
+  border-color: rgba(67,221,135,.55);
+  color: var(--green);
+}
+.builder-visible-status.status-warn {
+  border-color: rgba(255,212,0,.55);
+  color: var(--gold);
+}
+.builder-visible-status.status-error {
+  border-color: rgba(255,92,92,.65);
+  color: #ff7474;
+}
+.builder-visible-status.status-info {
+  border-color: rgba(115,183,255,.55);
+  color: #9dccff;
+}
+
+/* v5.10 external builder inspector */
+.builder-visible-status { border: 1px solid var(--line-soft); border-radius: 16px; padding: 12px 14px; margin: 12px 0 14px; background: rgba(255,255,255,.05); color: var(--muted); line-height: 1.5; }
+.builder-visible-status.status-success { border-color: rgba(67,221,135,.55); color: var(--green); }
+.builder-visible-status.status-warn { border-color: rgba(255,212,0,.55); color: var(--gold); }
+.builder-visible-status.status-error { border-color: rgba(255,92,92,.65); color: #ff7474; }
+.builder-visible-status.status-info { border-color: rgba(115,183,255,.55); color: #9dccff; }

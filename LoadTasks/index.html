@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-loadtasks-version="5.8-pwa-builder-inspector">
+<html lang="en" data-loadtasks-version="5.10-builder-inspector-external">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -14,8 +14,7 @@
   <link rel="icon" href="favicon.ico">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=5.8">
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <link rel="stylesheet" href="styles.css?v=5.10">
 </head>
 <body>
   <a href="#main" class="skip-link">Skip to dashboard</a>
@@ -777,9 +776,10 @@
                 <span>Choose a ZIP package</span>
                 <input id="builderZipInput" type="file" accept=".zip,application/zip,application/x-zip-compressed">
               </label>
+              <div id="builderVisibleStatus" class="builder-visible-status">Choose a ZIP package, then tap Inspect Package.</div>
               <div class="button-row">
-                <button class="primary-action" id="builderInspectBtn" type="button">Inspect Package</button>
-                <button class="secondary-action" id="builderClearBtn" type="button">Clear Inspector</button>
+                <button class="primary-action" id="builderInspectBtn" type="button" type="button" data-builder-inspector-action="inspect">Inspect Package</button>
+                <button class="secondary-action" id="builderClearBtn" type="button" type="button" data-builder-inspector-action="clear">Clear Inspector</button>
               </div>
               <p class="muted">Use one ZIP at a time. Large media packages may take longer on iPad.</p>
             </article>
@@ -819,7 +819,7 @@
           <div class="panel">
             <div class="panel-title">
               <h2>File tree</h2>
-              <button class="secondary-action" id="builderDownloadInventoryBtn" type="button">Download Inventory Report</button>
+              <button class="secondary-action" id="builderDownloadInventoryBtn" type="button" type="button" data-builder-inspector-action="download">Download Inventory Report</button>
             </div>
             <div id="builderFileTree" class="file-tree-box">
               Upload a ZIP and tap Inspect Package.
@@ -963,6 +963,7 @@
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
   </div>
-  <script src="app.js?v=5.8"></script>
+  <script src="app.js?v=5.10"></script>
+  <script src="builder-inspector.js?v=5.10" defer></script>
 </body>
 </html>
