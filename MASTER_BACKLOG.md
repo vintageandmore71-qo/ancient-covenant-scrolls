@@ -40,7 +40,7 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 
 ## Load main (`/load/`)
 
-**Cache:** `load-v17g5`. **Tip status spec:** `PLAN_LOAD_AI.md`,
+**Cache:** `load-v17g6`. **Tip status spec:** `PLAN_LOAD_AI.md`,
 `PLAN_IMAGE_PROMPT_v3.md`, `PLAN_BOOK_TO_VIDEO.md`,
 `MEDIA_MODULE_SPEC.md`, `LOAD_FEATURES.md`, `LOAD_MARKETING.md`.
 
@@ -50,6 +50,13 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 - **Character Consistency module** — see X-CC.
 - **Piper TTS Stage 1 unblock + Stage 2 rollout** — see X-PIPER. Stage 1 shipped but not playing; blocked on the play() error text from the user. Resilience panel (Part 9) shipped in v17er gives an in-app diagnostic + recovery path.
 - **LOAD-ECO acceptance test pass** (Build Plan Part 13). Every part now has a tool surface, but the user-validation pass is still needed: open each tool, confirm PASS/FAIL/WARN labels render, run a sample export, save a receipt, check it appears in the Receipts library. Parts 1, 2, 3, 14-17 shipped in v17eq. Parts 4, 7, 9 + Book-to-Video wiring shipped in v17er. Parts 5, 6, 8, 10 shipped in v17es. Parts 11-13 are housekeeping/acceptance and are met by the existing tool surfaces.
+
+### Recently done (this session, 2026-05-06 — Handoff Report Part K: Sample test projects)
+- **v17g6 &mdash; Part K samples tightened to spec**:
+  - `load/tools/samples.html` already shipped all nine sample types from Section 16 (HTML, PWA ZIP, EPUB, PDF, image, audio, video, LoadStudio package, digital book PWA), each with the four required actions Open / Test / Export / Reset, all generated on-device with no upload required.
+  - Renamed the per-sample **Reset** button to **Reset sample** to match the spec wording exactly.
+  - Tightened the HTML-sample preview iframe to `sandbox=&quot;allow-scripts&quot;` only with `referrerpolicy=&quot;no-referrer&quot;`, removing `allow-same-origin` per Section 14 / Part I now that the strict default is the rule everywhere.
+  - Cache `load-v17g5` -&gt; `load-v17g6`. Version badge bumped.
 
 ### Recently done (this session, 2026-05-06 — Handoff Report Part J: Ecosystem routing)
 - **v17g5 &mdash; Part J ecosystem routing aligned to spec**:

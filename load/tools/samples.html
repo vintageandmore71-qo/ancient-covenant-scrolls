@@ -192,7 +192,7 @@ function paint() {
         '<button class="btn primary" data-act="open" data-key="' + s.key + '">Open</button>' +
         '<button class="btn"         data-act="test" data-key="' + s.key + '">Test</button>' +
         '<button class="btn"         data-act="export" data-key="' + s.key + '">Export</button>' +
-        '<button class="btn danger"  data-act="reset" data-key="' + s.key + '">Reset</button>' +
+        '<button class="btn danger"  data-act="reset" data-key="' + s.key + '">Reset sample</button>' +
       '</div>' +
       '<div class="status" data-status="' + s.key + '">Ready</div>' +
       '<div class="preview" data-preview="' + s.key + '"></div>' +
@@ -250,7 +250,9 @@ document.addEventListener('click', function (e) {
       } else if (out.mime === 'text/html') {
         var p3 = document.querySelector('[data-preview="' + key + '"]');
         var ifr = document.createElement('iframe');
-        ifr.sandbox = 'allow-scripts allow-same-origin';
+        // Section 14 / Part I — strict default for any HTML preview.
+        ifr.sandbox = 'allow-scripts';
+        ifr.referrerPolicy = 'no-referrer';
         ifr.style.cssText = 'width:100%;height:240px;border:1px solid #2a2a40;border-radius:6px;background:#fff';
         out.blob.text().then(function (t) { ifr.srcdoc = t; });
         p3.innerHTML = ''; p3.appendChild(ifr); p3.classList.add('on');
