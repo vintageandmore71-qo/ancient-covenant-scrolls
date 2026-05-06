@@ -40,7 +40,7 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 
 ## Load main (`/load/`)
 
-**Cache:** `load-v17g3`. **Tip status spec:** `PLAN_LOAD_AI.md`,
+**Cache:** `load-v17g4`. **Tip status spec:** `PLAN_LOAD_AI.md`,
 `PLAN_IMAGE_PROMPT_v3.md`, `PLAN_BOOK_TO_VIDEO.md`,
 `MEDIA_MODULE_SPEC.md`, `LOAD_FEATURES.md`, `LOAD_MARKETING.md`.
 
@@ -50,6 +50,17 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 - **Character Consistency module** — see X-CC.
 - **Piper TTS Stage 1 unblock + Stage 2 rollout** — see X-PIPER. Stage 1 shipped but not playing; blocked on the play() error text from the user. Resilience panel (Part 9) shipped in v17er gives an in-app diagnostic + recovery path.
 - **LOAD-ECO acceptance test pass** (Build Plan Part 13). Every part now has a tool surface, but the user-validation pass is still needed: open each tool, confirm PASS/FAIL/WARN labels render, run a sample export, save a receipt, check it appears in the Receipts library. Parts 1, 2, 3, 14-17 shipped in v17eq. Parts 4, 7, 9 + Book-to-Video wiring shipped in v17er. Parts 5, 6, 8, 10 shipped in v17es. Parts 11-13 are housekeeping/acceptance and are met by the existing tool surfaces.
+
+### Recently done (this session, 2026-05-06 — Handoff Report Part I: Safer Sandbox Preview)
+- **v17g4 &mdash; Part I strict-by-default sandbox + Trust Package flow**:
+  - **`load/index.html`** viewer iframe defaults are now strict per Section 14: `sandbox=&quot;allow-scripts&quot;` with `referrerpolicy=&quot;no-referrer&quot;`. The previous broad permission set (`allow-same-origin allow-forms allow-popups allow-modals allow-storage-access-by-user-activation`) is no longer the default.
+  - **`load/load.js`** ships the Trust Package flow:
+    - Per-app trust state stored in `localStorage` under `load_trust_apps_v1`.
+    - `applyViewerSandbox(app)` sets the iframe&apos;s sandbox tokens to `STRICT_SANDBOX` (allow-scripts only) or `TRUSTED_SANDBOX` (full broad set) based on the app&apos;s trust flag, called immediately before each viewer src navigation.
+    - New **shield-icon Trust button** injected into the viewer top bar. Tapping it shows the report&apos;s exact warning copy: &quot;This package may access browser storage, submit forms, open popups, or communicate with external services. Only trust files you created or fully reviewed.&quot; On confirm, trust is granted, the button turns amber, and the iframe reloads with `TRUSTED_SANDBOX`. Tap again to revoke.
+    - Three modes from Section 14 are reachable: **Strict Sandbox** (default), **Trusted Preview** (after Mark Package Trusted confirm), and **Blocked Preview** (existing &quot;Hide controls&quot; / closed-viewer state).
+  - **`load/tools/safety-rights.html`** sandboxed-preview block defaults to strict. The previous &quot;Reload as strict&quot; toggle was inverted into the spec wording: a **Mark Package Trusted** button shows the same warning text and grants `allow-scripts allow-same-origin allow-forms allow-popups`; a **Revoke trust** button takes it back to strict.
+  - Cache `load-v17g3` -&gt; `load-v17g4`. Version badge bumped.
 
 ### Recently done (this session, 2026-05-06 — Handoff Report Part H: Rights metadata validator)
 - **v17g3 &mdash; Part H rights validator shipped as a reusable library**:

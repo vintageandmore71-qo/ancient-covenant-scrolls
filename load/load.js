@@ -9123,7 +9123,7 @@ window.LoadAudioFix = {
  '<button id="ve-close" class="ve-iconbtn" aria-label="Close">&larr;</button>' +
  '<button id="ve-help" class="ve-iconbtn" aria-label="Help">?</button>' +
  '<button id="ve-refresh" class="ve-iconbtn" aria-label="Force refresh editor build" title="Force refresh">&#8635;</button>' +
- '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17g3</span>' +
+ '<span id="ve-version" style="font-size:10px;color:#7a7a8a;font-weight:600;letter-spacing:0.04em;padding:0 4px;font-variant-numeric:tabular-nums;">v17g4</span>' +
  '<div style="margin:0 auto;display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px;">' +
  '<span style="font-size:13px;color:#cfcfdc;">&#9633;</span>' +
  '<select id="ve-ratio" style="background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none;">' +
@@ -17385,6 +17385,11 @@ window.LoadAudioFix = {
  currentBlobUrl = URL.createObjectURL(htmlBlob);
  $('viewer-title').textContent = app.name;
  var frame = $('viewer-frame');
+ // Section 14 / Part I: strict sandbox by default. Apply per-app trust
+ // before the new srcdoc/src is loaded so the browser uses the right
+ // permission set on first parse.
+ try { applyViewerSandbox(app); } catch (e) {}
+ try { refreshTrustButton(app); } catch (e) {}
  frame.src = currentBlobUrl;
  show('viewer-screen');
  frame.addEventListener('load', onFrameLoaded, { once: true });
@@ -17449,6 +17454,102 @@ window.LoadAudioFix = {
  $('bookmarks-drawer').classList.remove('on');
  renderLibrary();
  }
+
+ // ── Section 14 / Part I — Safer Sandbox Preview ─────────────
+ // Strict default per the report:
+ //   <iframe sandbox="allow-scripts" referrerpolicy="no-referrer">
+ // No allow-same-origin, allow-forms, or allow-popups by default.
+ // Trust is per-app; users opt in after seeing the warning text.
+ var TRUST_KEY = 'load_trust_apps_v1';
+ var STRICT_SANDBOX = 'allow-scripts';
+ var TRUSTED_SANDBOX = 'allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-storage-access-by-user-activation';
+ function getTrust(id) {
+   if (!id) return false;
+   try { return !!(JSON.parse(localStorage.getItem(TRUST_KEY) || '{}')[id]); }
+   catch (e) { return false; }
+ }
+ function setTrust(id, val) {
+   if (!id) return;
+   try {
+     var m = JSON.parse(localStorage.getItem(TRUST_KEY) || '{}');
+     if (val) m[id] = true; else delete m[id];
+     localStorage.setItem(TRUST_KEY, JSON.stringify(m));
+   } catch (e) {}
+ }
+ function applyViewerSandbox(app) {
+   var frame = $('viewer-frame'); if (!frame) return;
+   var trusted = app && getTrust(app.id);
+   frame.setAttribute('sandbox', trusted ? TRUSTED_SANDBOX : STRICT_SANDBOX);
+   try { frame.referrerPolicy = 'no-referrer'; } catch (e) {}
+ }
+ function refreshTrustButton(app) {
+   var btn = $('trust-btn'); if (!btn) return;
+   var trusted = app && getTrust(app.id);
+   if (trusted) {
+     btn.title = 'Trusted Preview — broader iframe permissions are active. Tap to revoke trust.';
+     btn.setAttribute('aria-label', 'Trusted Preview (tap to revoke)');
+     btn.style.color = '#fbbf24';
+     btn.classList.add('on');
+   } else {
+     btn.title = 'Strict Sandbox — tap to mark this package trusted (warning prompts first).';
+     btn.setAttribute('aria-label', 'Strict Sandbox (tap to trust)');
+     btn.style.color = '';
+     btn.classList.remove('on');
+   }
+ }
+ function toggleTrust() {
+   if (!currentApp) {
+     try { toast('Open a project first.', true); } catch (e) {}
+     return;
+   }
+   var trusted = getTrust(currentApp.id);
+   if (trusted) {
+     setTrust(currentApp.id, false);
+     try { toast('Trust revoked. Reloading in strict sandbox.'); } catch (e) {}
+   } else {
+     var ok = window.confirm(
+       'Mark this package trusted?\n\n' +
+       'This package may access browser storage, submit forms, open popups, ' +
+       'or communicate with external services. Only trust files you created ' +
+       'or fully reviewed.'
+     );
+     if (!ok) return;
+     setTrust(currentApp.id, true);
+     try { toast('Trusted Preview enabled.'); } catch (e) {}
+   }
+   var ap = currentApp;
+   applyViewerSandbox(ap);
+   refreshTrustButton(ap);
+   var frame = $('viewer-frame');
+   if (frame && currentBlobUrl) {
+     // Reload the iframe so the new sandbox tokens take effect.
+     var saved = frame.src;
+     frame.src = 'about:blank';
+     setTimeout(function () { frame.src = saved; }, 60);
+   }
+ }
+ function ensureTrustButton() {
+   if ($('trust-btn')) return;
+   var topbar = $('viewer-topbar'); if (!topbar) return;
+   var btn = document.createElement('button');
+   btn.id = 'trust-btn';
+   btn.type = 'button';
+   btn.className = 'icon-btn';
+   btn.title = 'Strict Sandbox — tap to mark this package trusted (warning prompts first).';
+   btn.setAttribute('aria-label', 'Strict Sandbox (tap to trust)');
+   btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V6z"/><path d="M9 12l2.2 2.2L15 10.5"/></svg>';
+   var hideBtn = $('hide-ui-btn');
+   if (hideBtn && hideBtn.parentNode === topbar) topbar.insertBefore(btn, hideBtn);
+   else topbar.appendChild(btn);
+   btn.addEventListener('click', toggleTrust);
+ }
+ (function initTrustButton() {
+   if (document.readyState === 'loading') {
+     document.addEventListener('DOMContentLoaded', ensureTrustButton);
+   } else {
+     ensureTrustButton();
+   }
+ })();
 
  /* Extract theme-only class logic so we can override per-app without
  * clobbering saved settings.theme. */

@@ -66,7 +66,7 @@ iframe.sandbox{width:100%;height:380px;border:1px solid var(--border);border-rad
 </div>
 <div id="report" hidden>
   <div id="summary" class="summary"></div>
-  <div class="section"><h3>Sandboxed preview</h3><div id="sandbox-host"></div><div class="actions"><button id="strict" class="btn" type="button">Reload as strict (no allow-same-origin)</button><button id="off" class="btn" type="button">Hide preview</button></div></div>
+  <div class="section"><h3>Sandboxed preview</h3><div id="sandbox-host"></div><div style="font-size:11.5px;color:var(--mute);margin-top:6px"><strong style="color:#e9e9f0">Strict Sandbox</strong> &middot; <code>sandbox="allow-scripts"</code> &middot; <code>referrerpolicy="no-referrer"</code> &middot; no same-origin, no forms, no popups by default.</div><div class="actions"><button id="trust-pkg" class="btn" type="button">Mark Package Trusted</button><button id="strict" class="btn" type="button">Revoke trust (back to strict)</button><button id="off" class="btn" type="button">Hide preview</button></div></div>
   <div class="section"><h3>Safety scan</h3><div id="safety"></div></div>
   <div class="section"><h3>Rights metadata</h3><div id="rights"></div></div>
   <div class="actions">
@@ -210,17 +210,37 @@ function finish(rep) {
     : '<div class="row"><span style="flex:1">Rights metadata complete.</span><span class="sev PASS">PASS</span></div>';
   renderSandbox(false);
 }
-function renderSandbox(strict) {
+// Section 14 / Part I — strict by default. Trust is opt-in.
+var trustedPreview = false;
+function renderSandbox(forceStrict) {
   var host = $('sandbox-host'); host.innerHTML = '';
   if (!currentIndexHtml) { host.innerHTML = '<div style="font-size:12.5px;color:var(--mute)">No index.html found in this package — preview unavailable.</div>'; return; }
+  if (forceStrict) trustedPreview = false;
   var ifr = document.createElement('iframe');
   ifr.className = 'sandbox';
   ifr.referrerPolicy = 'no-referrer';
-  ifr.sandbox = strict ? 'allow-scripts' : 'allow-scripts allow-same-origin';
+  ifr.sandbox = trustedPreview
+    ? 'allow-scripts allow-same-origin allow-forms allow-popups'
+    : 'allow-scripts';
   ifr.srcdoc = currentIndexHtml;
   host.appendChild(ifr);
 }
-$('strict').addEventListener('click', function () { renderSandbox(true); });
+$('strict').addEventListener('click', function () {
+  trustedPreview = false;
+  renderSandbox();
+});
+$('trust-pkg').addEventListener('click', function () {
+  if (!currentIndexHtml) return;
+  var ok = window.confirm(
+    'Mark this package trusted?\n\n' +
+    'This package may access browser storage, submit forms, open popups, ' +
+    'or communicate with external services. Only trust files you created ' +
+    'or fully reviewed.'
+  );
+  if (!ok) return;
+  trustedPreview = true;
+  renderSandbox();
+});
 $('off').addEventListener('click', function () { $('sandbox-host').innerHTML = ''; });
 $('export-json').addEventListener('click', function () {
   if (!lastReport) return;
