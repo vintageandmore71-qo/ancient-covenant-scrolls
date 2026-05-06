@@ -1,5 +1,119 @@
 # Session notes — 2026-05-06
 
+## Plans for next session — read this first
+
+When this file is loaded at session start, do these in order. Don't
+start any of them until the user signs in and confirms.
+
+### Step 0 — confirm Pages is current
+
+User opens **`https://dssorit.github.io/ancient-covenant-scrolls/load/sw.js`**
+in Safari on iPad. The page must read `var CACHE = 'load-v17g8';` (or
+later). If it doesn't, Pages is stale — wait 60 s and reload. Don't
+build anything else until the cache string matches `main` HEAD.
+
+### Step 1 — iPad-side acceptance walkthrough
+
+Eight handoff features are deployed but not yet user-tapped. Walk
+the user through each, in this order, and mark each row in
+`LOAD_MAIN_HANDOFF_FINAL_REPORT.md` Section 18 as **VERIFIED** only
+when the user confirms a real PASS:
+
+1. Open `/load/tools/feature-tests.html` → tap **Run All Tests** →
+   confirm 45 rows render with PASS / FAIL / WARN / NOT TESTED.
+2. Tap **Export Diagnostic Report** → confirm a real `.json` file
+   downloads with the spec result shape.
+3. Open `/load/tools/pwa-builder.html` → fill in the form → tap
+   **Build Standalone PWA ZIP** → watch the 13-step live UI →
+   confirm the final ZIP downloads and contains `index.html`,
+   `manifest.json`, `service-worker.js`, `styles.css`, `app.js`,
+   project data, icons, README.md, `export-receipt.json`,
+   `security-report.json`.
+4. Inspect the produced ZIP on iPad (long-press → Show Package
+   Contents, or unzip on a desktop) and confirm both
+   `export-receipt.json` and `security-report.json` are inside.
+5. Open `/load/tools/safety-rights.html` → drop a known-bad ZIP
+   (e.g. one with `.exe` or hard-coded `apiKey="sk-..."`) →
+   confirm the headline reads `BLOCKED — N blocker issue(s)
+   prevent export`.
+6. Open `/load/tools/loadstudio-validator.html` → drop the
+   sample LoadStudio package from `/load/tools/samples.html` →
+   confirm validation envelope `{ valid, status, missingFiles,
+   missingFolders, warnings, errors }` renders → tap **Prepare for
+   LoadPlay** with `rights.json` removed → confirm it refuses.
+7. On the home page + FAQ → confirm the words "dyslexia" /
+   "dyslexic" are gone from user-facing text. (Internal class
+   `.dyslexic-font` and font family `OpenDyslexic` are intentionally
+   kept; they're not user-visible.)
+8. Optional iPad-only: `Settings → Premium voice → Piper → Repair
+   voice` → if Piper still fails to play, screenshot or copy the
+   visible error text. That unblocks **X-PIPER Stage 1** which is
+   waiting on this single piece of evidence.
+
+Each row that the user confirms becomes a one-line entry in
+`VERIFIED_LOG.md` (or wherever the project keeps verified-pass logs).
+
+### Step 2 — decide on a discoverability patch (optional)
+
+The above eight features live behind workspace navigation. Casual
+auditors (including ChatGPT pointed at the home URL) won't find
+them without entering the Workspace modal → Section 6 → Workspace
+Tools → category → tool. If the user wants the spec features
+visible directly on `/load/`, add a row of "Handoff features"
+shortcut tiles to the home screen with direct links to:
+
+- `tools/feature-tests.html` — Run All Tests
+- `tools/pwa-builder.html` — Build Standalone PWA ZIP
+- `tools/safety-rights.html` — Safety + Rights
+- `tools/loadstudio-validator.html` — LoadStudio Validator
+- `tools/samples.html` — Sample Test Projects
+
+Bump cache when this lands. Don't ship without user OK — they
+previously rejected one consolidation pass.
+
+### Step 3 — start one of the three VERY IMPORTANT specs
+
+User direction tonight: three new pending items are flagged
+**VERY IMPORTANT**. Pick exactly one to scope first based on user
+preference:
+
+- **X-VIDEO-AI — Advanced AI video generation.** Open scope to
+  resolve before any code: which provider chain (Runway / Kling /
+  Pika / Luma / Wan / SVD / AnimateDiff), key UI parity with the
+  image side, video Output Receipt schema, no-false-positive
+  verification of returned video files. Touches Load main
+  (Verse-to-Video tool), LoadStudio (scene rendering), and
+  `lib-export-receipt.js`.
+- **X-DB — Full production database.** Open scope: vendor
+  (Postgres / Firestore / Supabase), auth (Apple Sign-In / email
+  magic link), conflict resolution, GDPR delete, per-app vs shared
+  schema. This is the biggest of the three; it gates X-SUBS.
+- **X-SUBS — Subscription system.** Open scope: Stripe /
+  RevenueCat / App Store, per-app vs suite bundle, gated features,
+  receipt verification, family sharing, trial flow. Don't start
+  this before X-DB has a concrete plan — entitlements need
+  somewhere to live.
+
+Recommended order: capture the spec doc for X-VIDEO-AI first
+(smallest blast radius, builds on existing image-AI infra), then
+X-DB, then X-SUBS.
+
+### Step 4 — clear the five remaining Load main pending rows
+
+These existed before tonight's work and are still open:
+
+1. Load AI Tier 14 / 18-fallback add-ons (X-AI-14 Glam-parity layer)
+2. Browser mask editor — **shipped v17ew, mark closed in backlog**
+3. Character Consistency module — **shipped v17ex, mark closed in
+   backlog**
+4. Piper TTS Stage 1 unblock — depends on Step 1.8 above
+5. LOAD-ECO acceptance test pass — depends on Step 1 above
+
+Items 2 and 3 should be moved out of Pending into "Pending —
+closed" (already done in v17g7 commit `69895ba`).
+
+---
+
 ## Current state
 
 - **Branch:** `claude/fix-session-sending-TVMbW`
