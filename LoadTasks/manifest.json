@@ -1,7 +1,7 @@
 {
   "name": "Load Tasks",
   "short_name": "Load Tasks",
-  "description": "Load Tasks v5.4 removes the blocking How-To popup while keeping Agent Lab, Notes, Alerts, Help Center, and Repair tools.",
+  "description": "Load Tasks validates, repairs, remembers project builds, includes Help Center guidance, and requires visible repair previews before sensitive patches.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

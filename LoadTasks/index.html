@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-loadtasks-version="5.4-no-howto-popup">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -14,7 +14,7 @@
   <link rel="icon" href="favicon.ico">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=5.4">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <a href="#main" class="skip-link">Skip to dashboard</a>
@@ -44,10 +44,8 @@
       </div>
       <nav class="topnav" aria-label="Primary navigation">
         <button data-view="dashboard" data-route>Dashboard</button>
-        <button data-view="agentlab" data-route>Agent Lab</button>
         <button data-view="intake" data-route>Intake</button>
         <button data-view="validator" data-route>Validator</button>
-        <button data-view="alerts" data-route>Alerts</button>
         <button data-view="fix" data-route>Fix Studio</button>
         <button data-view="versions" data-route>Versions</button>
         <button data-view="vault" data-route>Vault</button>
@@ -57,7 +55,6 @@
         <button data-view="handoff" data-route>Handoff</button>
         <button data-view="github" data-route>GitHub</button>
         <button data-view="help" data-route>Help</button>
-        <button id="openNotesBtn" type="button">Notes</button>
         <button data-view="settings" data-route>Settings</button>
       </nav>
       <button class="icon-button" id="hardRefresh" aria-label="Hard refresh app state">
@@ -68,7 +65,6 @@
     <main id="main" class="main-shell">
       <aside class="side-rail" aria-label="Build command rail">
         <button data-view="dashboard" data-route><span class="rail-icon" data-icon="dashboard"></span><span>Dashboard</span></button>
-        <button data-view="agentlab" data-route><span class="rail-icon" data-icon="agent"></span><span>Agent Lab</span></button>
         <button data-view="intake" data-route><span class="rail-icon" data-icon="upload"></span><span>Upload Build</span></button>
         <button data-view="notes" data-route><span class="rail-icon" data-icon="notes"></span><span>Paste Notes</span></button>
         <button data-view="validator" data-route><span class="rail-icon" data-icon="shield"></span><span>Run Validator</span></button>
@@ -154,7 +150,7 @@
         </section>
 
         <section class="view" id="view-intake" data-view-panel="intake">
-<div class="section-head">
+          <div class="section-head">
             <p class="eyebrow">Build intake</p>
             <h1>Upload files and define the build.</h1>
             <p>Accepts ZIP packages, HTML files, text notes, markdown, JSON reports, screenshots, and manuals for tracking.</p>
@@ -209,7 +205,7 @@
         </section>
 
         <section class="view" id="view-validator" data-view-panel="validator">
-<div class="section-head">
+          <div class="section-head">
             <p class="eyebrow">Validator Lab</p>
             <h1>Run hard truth checks.</h1>
             <p>Checks PWA readiness, raw-code risk, missing files, broken paths, dead controls, promise gaps, and unsafe patterns.</p>
@@ -224,7 +220,7 @@
         </section>
 
         <section class="view" id="view-fix" data-view-panel="fix">
-<div class="section-head">
+          <div class="section-head">
             <p class="eyebrow">Repair Command Center</p>
             <h1>Fix safe items. Prepare developer work. Verify before complete.</h1>
             <p>Each issue has a confidence label and action buttons. Safe patches can be exported. Risky work becomes a developer task.</p>
@@ -293,7 +289,7 @@
         </section>
 
         <section class="view" id="view-handoff" data-view-panel="handoff">
-<div class="section-head">
+          <div class="section-head">
             <p class="eyebrow">Developer handoff</p>
             <h1>Export exact instructions.</h1>
             <p>Create Claude prompts, human developer checklists, QA reports, GitHub issue templates, and PR checklists.</p>
@@ -308,7 +304,7 @@
         </section>
 
         <section class="view" id="view-github" data-view-panel="github">
-<div class="section-head">
+          <div class="section-head">
             <p class="eyebrow">GitHub export</p>
             <h1>Export safely, then deploy.</h1>
             <p>Use ZIP export for safest workflow. Direct push is available with a session-only fine-grained token.</p>
@@ -335,7 +331,7 @@
 
 
         <section class="view" id="view-vault" data-view-panel="vault">
-<div class="section-head">
+          <div class="section-head">
             <p class="eyebrow">Project Vault</p>
             <h1>Remember every build. Protect what works.</h1>
             <p>Store project memory, version history, stable builds, broken features, live URLs, and repair history.</p>
@@ -377,7 +373,7 @@
         </section>
 
         <section class="view" id="view-library" data-view-panel="library">
-<div class="section-head">
+          <div class="section-head">
             <p class="eyebrow">Master Build Plan Library</p>
             <h1>Load-specific templates and acceptance tests.</h1>
             <p>Use these templates to prevent missing features before the next developer handoff.</p>
@@ -401,7 +397,7 @@
         </section>
 
         <section class="view" id="view-certificate" data-view-panel="certificate">
-<div class="section-head">
+          <div class="section-head">
             <p class="eyebrow">Launch Readiness Certificate</p>
             <h1>Only generate ready status when evidence supports it.</h1>
             <p>The certificate summarizes PWA structure, assets, security, GitHub path, unresolved risks, and QA status.</p>
@@ -418,7 +414,7 @@
         </section>
 
         <section class="view" id="view-focus" data-view-panel="focus">
-<div class="section-head">
+          <div class="section-head">
             <p class="eyebrow">Focus Mode</p>
             <h1>One clear step at a time.</h1>
             <p>This view reduces clutter and gives one next action based on the current build state.</p>
@@ -446,7 +442,7 @@
 
 
         <section class="view" id="view-help" data-view-panel="help">
-<div class="section-head">
+          <div class="section-head">
             <p class="eyebrow">Help Center</p>
             <h1>Load AI Helper and step-by-step support.</h1>
             <p>Use this area when the validator gives warnings, a GitHub upload fails, an icon does not appear, or you need one clear next action.</p>
@@ -585,116 +581,8 @@
         </section>
 
 
-
-        <section class="view" id="view-agentlab" data-view-panel="agentlab">
-          <div class="section-head">
-            <p class="eyebrow">Agent Lab</p>
-            <h1>Onsite tests for any PWA, site, or web package.</h1>
-            <p>Test live links, uploaded packages, media paths, admin flows, screening tasks, and provider evidence while you are using Load Tasks.</p>
-          </div>
-<div class="agent-grid">
-            <article class="panel">
-              <div class="panel-title">
-                <h2>Live site target</h2>
-                <span class="badge info">Onsite</span>
-              </div>
-              <label>Site or PWA link
-                <input id="agentTargetUrl" placeholder="https://example.com/loadtasks/">
-              </label>
-              <label>Site type
-                <select id="agentSiteType">
-                  <option value="general">General PWA or site</option>
-                  <option value="load">Load ecosystem site</option>
-                  <option value="moviepwa">MoviePWA or CinePWA</option>
-                  <option value="mediapwa">Media-heavy PWA</option>
-                  <option value="admin">Admin or membership site</option>
-                  <option value="provider">AI or provider tool site</option>
-                </select>
-              </label>
-              <label>Testing goal
-                <select id="agentTestGoal">
-                  <option value="basic">Basic open and navigation</option>
-                  <option value="media">Media, video, image, and audio checks</option>
-                  <option value="admin">Sign-up, registration, email, and admin checks</option>
-                  <option value="screening">Profanity, nudity, and content screening tasks</option>
-                  <option value="movie">Movie playback package checks</option>
-                  <option value="provider">AI and provider proof checks</option>
-                </select>
-              </label>
-            </article>
-
-            <article class="panel">
-              <div class="panel-title">
-                <h2>Test scope</h2>
-                <span class="badge warn">Select checks</span>
-              </div>
-              <div class="check-grid">
-                <label><input type="checkbox" class="agent-check" value="opens" checked> Site opens</label>
-                <label><input type="checkbox" class="agent-check" value="splash" checked> Splash or poster appears</label>
-                <label><input type="checkbox" class="agent-check" value="nav" checked> Navigation and buttons</label>
-                <label><input type="checkbox" class="agent-check" value="downloads" checked> Downloads and exports</label>
-                <label><input type="checkbox" class="agent-check" value="media" checked> Images, video, audio</label>
-                <label><input type="checkbox" class="agent-check" value="pwa" checked> Manifest and service worker</label>
-                <label><input type="checkbox" class="agent-check" value="forms"> Sign-up and email forms</label>
-                <label><input type="checkbox" class="agent-check" value="security"> Security checks</label>
-                <label><input type="checkbox" class="agent-check" value="screening"> Profanity/nudity screening tasks</label>
-                <label><input type="checkbox" class="agent-check" value="providers"> AI provider proof checks</label>
-              </div>
-            </article>
-          </div>
-
-          <div class="agent-grid">
-            <article class="panel">
-              <div class="panel-title">
-                <h2>Agent results</h2>
-                <span class="badge gray" id="agentLastRunStatus">Not Tested</span>
-              </div>
-              <div id="agentResults" class="alert-list">Run an onsite test to see results.</div>
-            </article>
-
-            <article class="panel">
-              <div class="panel-title">
-                <h2>Agent next action</h2>
-                <span class="badge info">Focus</span>
-              </div>
-              <div id="agentNextAction" class="focus-action">Add a live link, choose checks, and run the onsite test.</div>
-              <div class="button-row">
-                <button class="primary-action" id="agentCreateTasksBtn">Create Repair Tasks</button>
-                <button class="secondary-action" id="agentCopySummaryBtn">Copy Summary</button>
-              </div>
-            </article>
-          </div>
-        </section>
-
-
-
-        <section class="view" id="view-alerts" data-view-panel="alerts">
-          <div class="section-head">
-            <p class="eyebrow">Alert Dashboard</p>
-            <h1>Color-coded site health and repair actions.</h1>
-            <p>Every alert includes a level, risk, next best action, and fix type. Color is always paired with text.</p>
-          </div>
-<div class="alert-metrics">
-            <div class="metric-card alert-green"><strong id="greenAlertCount">0</strong><span>Green Passed</span></div>
-            <div class="metric-card alert-yellow"><strong id="yellowAlertCount">0</strong><span>Yellow Review</span></div>
-            <div class="metric-card alert-orange"><strong id="orangeAlertCount">0</strong><span>Orange Warning</span></div>
-            <div class="metric-card alert-red"><strong id="redAlertCount">0</strong><span>Red Broken</span></div>
-            <div class="metric-card alert-gray"><strong id="grayAlertCount">0</strong><span>Gray Not Tested</span></div>
-            <div class="metric-card alert-blue"><strong id="blueAlertCount">0</strong><span>Blue Info</span></div>
-          </div>
-
-          <div class="panel">
-            <div class="panel-title">
-              <h2>Current alerts</h2>
-              <span class="badge warn" id="alertLastScan">No scan yet</span>
-            </div>
-            <div id="alertDashboardList" class="alert-list">Run Validator or Agent Lab to populate alerts.</div>
-          </div>
-        </section>
-
-
         <section class="view" id="view-settings" data-view-panel="settings">
-<div class="section-head">
+          <div class="section-head">
             <p class="eyebrow">Settings</p>
             <h1>Dyslexia-friendly controls and data tools.</h1>
             <p>Load Tasks is local-first. Your project data stays in this browser unless you export it.</p>
@@ -721,57 +609,6 @@
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
   </div>
-  <script src="app.js?v=5.4"></script>
-
-      <div class="notes-backdrop" id="notesBackdrop" hidden>
-        <aside class="notes-panel" role="dialog" aria-modal="true" aria-labelledby="notesTitle">
-          <div class="notes-head">
-            <div>
-              <p class="eyebrow">Floating Notes</p>
-              <h2 id="notesTitle">Notes for this page</h2>
-            </div>
-            <button class="icon-button" id="closeNotesBtn" type="button" aria-label="Close notes">×</button>
-          </div>
-          <div class="notes-body">
-            <label>Note title
-              <input id="noteTitleInput" placeholder="Example: Duplicate ID repair note">
-            </label>
-            <label>Note text
-              <textarea id="noteBodyInput" class="notes-textarea" placeholder="Type or paste notes here."></textarea>
-            </label>
-            <div class="notes-row">
-              <label>Color
-                <select id="noteColorInput">
-                  <option value="yellow">Yellow: general note</option>
-                  <option value="blue">Blue: developer task</option>
-                  <option value="red">Red: urgent issue</option>
-                  <option value="green">Green: fixed or verified</option>
-                  <option value="purple">Purple: creative idea</option>
-                  <option value="orange">Orange: needs review</option>
-                  <option value="gray">Gray: archive or reference</option>
-                </select>
-              </label>
-              <label>Tags
-                <input id="noteTagsInput" placeholder="provider, MoviePWA, urgent">
-              </label>
-            </div>
-            <label>Attach image
-              <input id="noteImageInput" type="file" accept="image/*">
-            </label>
-            <div id="noteImagePreview" class="note-image-preview"></div>
-            <div class="button-row">
-              <button class="primary-action" id="saveNoteBtn">Save Note</button>
-              <button class="secondary-action" id="copyNoteBtn">Copy Note</button>
-              <button class="secondary-action" id="exportNotesBtn">Export Notes</button>
-              <button class="secondary-action" id="clearNoteFormBtn">Clear</button>
-            </div>
-            <div class="notes-filter">
-              <input id="notesSearchInput" placeholder="Search notes or tags">
-              <button class="secondary-action" id="searchNotesBtn">Search</button>
-            </div>
-            <div id="notesList" class="notes-list">No notes yet.</div>
-          </div>
-        </aside>
-      </div>
+  <script src="app.js"></script>
 </body>
 </html>
