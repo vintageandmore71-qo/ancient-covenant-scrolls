@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Load &mdash; PWA Icon Set</title>
+<style>
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 0; background: #0a0a0f; color: #e8e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased; }
+header.top { display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px; border-bottom: 1px solid #1f1f2f; position: sticky; top: 0;
+  background: rgba(10,10,15,0.95); backdrop-filter: blur(8px); z-index: 5; }
+header.top a { color: #9ca3af; text-decoration: none; font-size: 13px;
+  padding: 6px 10px; border-radius: 6px; border: 1px solid #2a2a42; }
+header.top a:hover { color: #fff; border-color: #7c5cff; background: #1a1a2e; }
+header.top h1 { margin: 0; font-size: 18px; flex: 1; font-weight: 700; }
+main { max-width: 1100px; margin: 22px auto; padding: 0 20px 60px; }
+.intro { color: #9ca3af; font-size: 14px; line-height: 1.6; margin: 0 0 18px; }
+.card { background: #15152a; border: 1px solid #2a2a42; border-radius: 12px;
+  padding: 16px; margin-bottom: 16px; }
+.card h2 { margin: 0 0 12px; font-size: 14px; color: #9ca3af;
+  text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+.drop { display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 30px 16px; border: 2px dashed #2a2a42;
+  border-radius: 10px; cursor: pointer; gap: 6px; color: #9ca3af; }
+.drop:hover, .drop.over { border-color: #7c5cff; color: #fff; background: #1a1a2e; }
+.options { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+label.field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #9ca3af; }
+label.toggle { display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; color: #9ca3af; }
+input[type=text], input[type=color] { background: #0e0e1a; border: 1px solid #2a2a42;
+  color: #e8e8f0; padding: 8px 10px; border-radius: 6px; font: inherit; font-size: 13px; }
+input[type=color] { padding: 4px; height: 36px; }
+button { font: inherit; padding: 9px 14px; border-radius: 8px; cursor: pointer;
+  border: 1px solid #2a2a42; background: #1a1a2e; color: #e8e8f0; font-size: 13px; }
+button:hover { border-color: #7c5cff; }
+button.primary { background: #7c5cff; border-color: #7c5cff; color: #fff;
+  font-weight: 700; }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.preview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 14px; margin-top: 12px; }
+.tile { background: #0e0e1a; border: 1px solid #2a2a42; border-radius: 8px;
+  padding: 10px; text-align: center; }
+.tile canvas { background:
+  repeating-conic-gradient(#1a1a2e 0% 25%, #15152a 0% 50%) 50% / 10px 10px;
+  border-radius: 6px; max-width: 100%; image-rendering: pixelated; }
+.tile .lbl { margin-top: 6px; font-size: 11px; color: #9ca3af;
+  font-family: ui-monospace, monospace; }
+.tile .lbl strong { color: #e8e8f0; font-weight: 700; }
+.summary { color: #9ca3af; font-size: 12px; margin-top: 10px; }
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+  background: #15152a; border: 1px solid #2a2a42; padding: 10px 16px;
+  border-radius: 8px; color: #e8e8f0; font-size: 13px; opacity: 0;
+  transition: opacity 0.2s; pointer-events: none; }
+.toast.show { opacity: 1; }
+pre.snippet { background: #0e0e1a; border: 1px solid #2a2a42; border-radius: 8px;
+  padding: 12px; font-size: 12px; overflow: auto; max-height: 240px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  color: #e8e8f0; line-height: 1.5; }
+</style>
+</head>
+<body>
+<header class="top">
+<a href="./cat-build.html">&larr; Build &amp; validate</a>
+<h1>PWA Icon Set</h1>
+<a href="./help.html#pwaicons">How it works</a>
+</header>
+<main>
+<p class="intro">Drop a square source image (1024x1024 ideal). Get every standard PWA / iOS / Android icon size in a ZIP, with optional rounded corners, background fill, and a maskable variant. Includes a ready-to-paste manifest <code>icons</code> array.</p>
+<div class="card">
+<h2>1. Source</h2>
+<div class="drop" id="drop">
+<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 12l3-3 3 3M12 9v6"/></svg>
+<span>Drop a square image (PNG, JPG, SVG, WEBP)</span>
+<input id="file" type="file" accept="image/*" style="display:none">
+</div>
+</div>
+<div class="card">
+<h2>2. Options</h2>
+<div class="options">
+<label class="field">Background<input id="bg" type="color" value="#7c5cff"></label>
+<label class="toggle"><input id="useBg" type="checkbox"> Fill transparent areas with background</label>
+<label class="toggle"><input id="rounded" type="checkbox"> Rounded corners (iOS-style)</label>
+<label class="field">Maskable safe-zone padding (%)<input id="mask" type="text" value="20" style="width:80px;"></label>
+<label class="toggle"><input id="emitMaskable" type="checkbox" checked> Emit maskable 192/512 variants</label>
+</div>
+<div class="toolbar">
+<button class="primary" id="generate" disabled>Generate icon set</button>
+<button id="downloadZip" disabled>Download ZIP</button>
+<button id="copyManifest" disabled>Copy manifest icons array</button>
+</div>
+<div class="summary" id="summary">Drop an image to enable icon generation.</div>
+</div>
+<div class="card" id="previewCard" style="display:none;">
+<h2>3. Preview</h2>
+<div class="preview-grid" id="grid"></div>
+</div>
+<div class="card" id="manifestCard" style="display:none;">
+<h2>4. Manifest snippet</h2>
+<pre class="snippet" id="snippet"></pre>
+</div>
+</main>
+<div class="toast" id="toast"></div>
+<script src="../lib-jszip.min.js"></script>
+<script>
+(function(){
+'use strict';
+var $ = function(id){ return document.getElementById(id); };
+var srcImg = null;
+var generated = [];
+var SIZES = [
+  { px: 16, name: 'icon-16.png', purpose: 'any' },
+  { px: 32, name: 'icon-32.png', purpose: 'any' },
+  { px: 48, name: 'icon-48.png', purpose: 'any' },
+  { px: 72, name: 'icon-72.png', purpose: 'any' },
+  { px: 96, name: 'icon-96.png', purpose: 'any' },
+  { px: 128, name: 'icon-128.png', purpose: 'any' },
+  { px: 144, name: 'icon-144.png', purpose: 'any' },
+  { px: 152, name: 'icon-152.png', purpose: 'any' },
+  { px: 167, name: 'icon-167.png', purpose: 'any' },
+  { px: 180, name: 'icon-180.png', purpose: 'any' },
+  { px: 192, name: 'icon-192.png', purpose: 'any' },
+  { px: 256, name: 'icon-256.png', purpose: 'any' },
+  { px: 384, name: 'icon-384.png', purpose: 'any' },
+  { px: 512, name: 'icon-512.png', purpose: 'any' },
+  { px: 1024, name: 'icon-1024.png', purpose: 'any' }
+];
+function toast(m){ var t = $('toast'); t.textContent = m; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 1800); }
+function loadFile(f){
+  var fr = new FileReader();
+  fr.onload = function(){
+    var img = new Image();
+    img.onload = function(){
+      srcImg = img;
+      $('generate').disabled = false;
+      $('summary').textContent = 'Loaded ' + f.name + ' (' +
+        img.naturalWidth + 'x' + img.naturalHeight + '). Ready to generate.';
+      toast('Loaded ' + f.name);
+    };
+    img.onerror = function(){ toast('Could not decode image'); };
+    img.src = fr.result;
+  };
+  fr.readAsDataURL(f);
+}
+function makeIcon(size, opts){
+  var c = document.createElement('canvas');
+  c.width = size; c.height = size;
+  var ctx = c.getContext('2d');
+  if (opts.rounded) {
+    var r = size * 0.22;
+    ctx.beginPath();
+    ctx.moveTo(r, 0);
+    ctx.arcTo(size, 0, size, size, r);
+    ctx.arcTo(size, size, 0, size, r);
+    ctx.arcTo(0, size, 0, 0, r);
+    ctx.arcTo(0, 0, size, 0, r);
+    ctx.closePath();
+    ctx.clip();
+  }
+  if (opts.useBg) {
+    ctx.fillStyle = opts.bg; ctx.fillRect(0, 0, size, size);
+  }
+  var pad = opts.maskable ? Math.round(size * (parseFloat($('mask').value) || 0) / 100) : 0;
+  var inner = size - pad * 2;
+  if (opts.maskable && !opts.useBg) {
+    ctx.fillStyle = opts.bg; ctx.fillRect(0, 0, size, size);
+  }
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(srcImg, pad, pad, inner, inner);
+  return c;
+}
+function generate(){
+  if (!srcImg) return;
+  generated = [];
+  $('grid').innerHTML = '';
+  var opts = {
+    rounded: $('rounded').checked,
+    useBg: $('useBg').checked,
+    bg: $('bg').value,
+    maskable: false
+  };
+  SIZES.forEach(function(s){
+    var c = makeIcon(s.px, opts);
+    addPreview(c, s.px, s.name);
+    generated.push({ canvas: c, size: s.px, name: s.name, purpose: 'any' });
+  });
+  if ($('emitMaskable').checked) {
+    [192, 512].forEach(function(px){
+      var c = makeIcon(px, { rounded: false, useBg: true, bg: opts.bg, maskable: true });
+      var name = 'icon-' + px + '-maskable.png';
+      addPreview(c, px, name + ' (maskable)');
+      generated.push({ canvas: c, size: px, name: name, purpose: 'maskable' });
+    });
+  }
+  $('previewCard').style.display = 'block';
+  $('downloadZip').disabled = false;
+  $('copyManifest').disabled = false;
+  renderManifest();
+  $('summary').textContent = 'Generated ' + generated.length + ' icons. Tap Download ZIP for the bundle.';
+}
+function addPreview(canvas, px, label){
+  var t = document.createElement('div');
+  t.className = 'tile';
+  var displayPx = Math.min(96, px);
+  var c = document.createElement('canvas');
+  c.width = displayPx; c.height = displayPx;
+  c.getContext('2d').drawImage(canvas, 0, 0, displayPx, displayPx);
+  t.appendChild(c);
+  var l = document.createElement('div');
+  l.className = 'lbl';
+  l.innerHTML = '<strong>' + px + '</strong><br>' + label;
+  t.appendChild(l);
+  $('grid').appendChild(t);
+}
+function renderManifest(){
+  var arr = generated.map(function(g){
+    return {
+      src: g.name,
+      sizes: g.size + 'x' + g.size,
+      type: 'image/png',
+      purpose: g.purpose
+    };
+  });
+  $('manifestCard').style.display = 'block';
+  $('snippet').textContent = '"icons": ' + JSON.stringify(arr, null, 2);
+}
+function canvasToBlob(c){
+  return new Promise(function(res){
+    c.toBlob(function(b){ res(b); }, 'image/png');
+  });
+}
+function downloadZip(){
+  if (!generated.length) return;
+  var zip = new JSZip();
+  Promise.all(generated.map(function(g){
+    return canvasToBlob(g.canvas).then(function(blob){ zip.file(g.name, blob); });
+  })).then(function(){
+    zip.file('manifest-icons.json', '"icons": ' + JSON.stringify(generated.map(function(g){
+      return { src: g.name, sizes: g.size + 'x' + g.size, type: 'image/png', purpose: g.purpose };
+    }), null, 2));
+    return zip.generateAsync({ type: 'blob' });
+  }).then(function(blob){
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'pwa-icons.zip'; a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 200);
+    toast('ZIP downloaded');
+  });
+}
+$('drop').addEventListener('click', function(){ $('file').click(); });
+['dragenter','dragover'].forEach(function(ev){
+  $('drop').addEventListener(ev, function(e){ e.preventDefault(); $('drop').classList.add('over'); });
+});
+['dragleave','drop'].forEach(function(ev){
+  $('drop').addEventListener(ev, function(e){ e.preventDefault(); $('drop').classList.remove('over'); });
+});
+$('drop').addEventListener('drop', function(e){
+  var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) loadFile(f);
+});
+$('file').addEventListener('change', function(e){
+  var f = e.target.files && e.target.files[0]; if (f) loadFile(f);
+});
+$('generate').addEventListener('click', generate);
+$('downloadZip').addEventListener('click', downloadZip);
+$('copyManifest').addEventListener('click', function(){
+  var t = $('snippet').textContent;
+  if (!t) return;
+  if (navigator.clipboard) navigator.clipboard.writeText(t).then(function(){ toast('Copied'); });
+  else { var ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); document.body.removeChild(ta); toast('Copied'); }
+});
+})();
+</script>
+</body>
+</html>

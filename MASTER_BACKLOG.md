@@ -40,7 +40,7 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 
 ## Load main (`/load/`)
 
-**Cache:** `load-v17fr`. **Tip status spec:** `PLAN_LOAD_AI.md`,
+**Cache:** `load-v17fs`. **Tip status spec:** `PLAN_LOAD_AI.md`,
 `PLAN_IMAGE_PROMPT_v3.md`, `PLAN_BOOK_TO_VIDEO.md`,
 `MEDIA_MODULE_SPEC.md`, `LOAD_FEATURES.md`, `LOAD_MARKETING.md`.
 
@@ -50,6 +50,15 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 - **Character Consistency module** — see X-CC.
 - **Piper TTS Stage 1 unblock + Stage 2 rollout** — see X-PIPER. Stage 1 shipped but not playing; blocked on the play() error text from the user. Resilience panel (Part 9) shipped in v17er gives an in-app diagnostic + recovery path.
 - **LOAD-ECO acceptance test pass** (Build Plan Part 13). Every part now has a tool surface, but the user-validation pass is still needed: open each tool, confirm PASS/FAIL/WARN labels render, run a sample export, save a receipt, check it appears in the Receipts library. Parts 1, 2, 3, 14-17 shipped in v17eq. Parts 4, 7, 9 + Book-to-Video wiring shipped in v17er. Parts 5, 6, 8, 10 shipped in v17es. Parts 11-13 are housekeeping/acceptance and are met by the existing tool surfaces.
+
+### Recently done (this session, 2026-05-06 — PWA Icon Set + Front Matter Builder)
+- **v17fs &mdash; PWA Icon Set + Front Matter Builder**:
+  - **PWA Icon Set:** new tool at `load/tools/pwa-icons.html`. Drop a square source image. Generates 15 standard sizes (16, 32, 48, 72, 96, 128, 144, 152, 167, 180, 192, 256, 384, 512, 1024) plus optional **maskable** 192/512 with safe-zone padding. Toggles for rounded corners (iOS-style), fill-transparent-with-background, and emit-maskable-variants. Live preview grid; ZIP bundle download; one-tap copy of the manifest `icons` JSON array.
+  - **Front Matter Builder:** new tool at `load/tools/front-matter.html`. Title page (title / subtitle / author / series), copyright (year / publisher / rights / license / ISBN), and optional dedication, epigraph (with attribution), preface, acknowledgments. Live print-style preview with proper typography. Output is a single `front-matter.md` ready to prepend to a manuscript or feed into EPUB Builder / Manuscript-to-Book.
+  - cat-build.html and cat-books.html each gained one tile.
+  - Workspace tile description bumped to 55 tools.
+  - Help page updated with new TOC entries + per-tool cards.
+  - Cache `load-v17fr` -&gt; `load-v17fs`. Version badge bumped.
 
 ### Recently done (this session, 2026-05-06 — Audio Concat + Outline Writer)
 - **v17fr &mdash; Audio Concat + Outline Writer**:

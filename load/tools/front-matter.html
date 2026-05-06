@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Load &mdash; Front Matter Builder</title>
+<style>
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 0; background: #0a0a0f; color: #e8e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased; }
+header.top { display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px; border-bottom: 1px solid #1f1f2f; position: sticky; top: 0;
+  background: rgba(10,10,15,0.95); backdrop-filter: blur(8px); z-index: 5; }
+header.top a { color: #9ca3af; text-decoration: none; font-size: 13px;
+  padding: 6px 10px; border-radius: 6px; border: 1px solid #2a2a42; }
+header.top a:hover { color: #fff; border-color: #7c5cff; background: #1a1a2e; }
+header.top h1 { margin: 0; font-size: 18px; flex: 1; font-weight: 700; }
+main { max-width: 1300px; margin: 22px auto; padding: 0 20px 60px; }
+.intro { color: #9ca3af; font-size: 14px; line-height: 1.6; margin: 0 0 18px; }
+.row { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+@media (max-width: 800px) { .row { grid-template-columns: 1fr; } }
+.card { background: #15152a; border: 1px solid #2a2a42; border-radius: 12px;
+  padding: 14px; margin-bottom: 16px; }
+.card h2 { margin: 0 0 12px; font-size: 14px; color: #9ca3af;
+  text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+.section { background: #0e0e1a; border: 1px solid #2a2a42; border-radius: 8px;
+  padding: 12px 14px; margin-bottom: 10px; }
+.section header { display: flex; align-items: center; gap: 10px;
+  margin-bottom: 10px; padding: 0; border: 0; position: static; background: none;
+  backdrop-filter: none; }
+.section header label { font-size: 13px; font-weight: 700; flex: 1; }
+input[type=text], textarea { width: 100%; background: #15152a; border: 1px solid #2a2a42;
+  color: #e8e8f0; padding: 8px 10px; border-radius: 6px; font: inherit;
+  font-size: 13px; }
+input[type=text]:focus, textarea:focus { outline: none; border-color: #7c5cff; }
+textarea { font-family: "Atkinson Hyperlegible", system-ui, sans-serif; min-height: 80px;
+  line-height: 1.5; resize: vertical; }
+label.field { display: flex; flex-direction: column; gap: 4px;
+  font-size: 11px; color: #9ca3af; margin-bottom: 8px; }
+label.toggle { display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; color: #9ca3af; }
+.row2 { display: grid; gap: 8px; grid-template-columns: 1fr 1fr; }
+.preview { min-height: 460px; padding: 18px 24px; background: #f7f3eb;
+  color: #1a1a1a; border: 1px solid #2a2a42; border-radius: 8px;
+  font-family: Georgia, "Times New Roman", serif; font-size: 14px;
+  line-height: 1.7; overflow: auto; }
+.preview .pg { padding: 30px 0; border-bottom: 1px dashed #b8b0a0;
+  text-align: center; }
+.preview .pg:last-child { border-bottom: 0; }
+.preview .pg h1 { font-size: 26px; margin: 30px 0 8px; line-height: 1.2; }
+.preview .pg .sub { font-size: 16px; color: #4b5563; margin-bottom: 24px;
+  font-style: italic; }
+.preview .pg .author { font-size: 16px; margin-top: 30px; }
+.preview .pg.copy { font-size: 12px; text-align: left; padding: 30px; line-height: 1.7; }
+.preview .pg.dedication { font-style: italic; padding: 60px 30px; }
+.preview .pg.epigraph { padding: 50px 30px; font-style: italic; }
+.preview .pg.epigraph .attr { font-style: normal; color: #4b5563;
+  margin-top: 12px; font-size: 12px; }
+.preview .pg.text { text-align: left; padding: 30px; }
+.preview .pg.text h2 { font-size: 20px; margin: 0 0 14px; text-align: center; }
+button { font: inherit; padding: 9px 14px; border-radius: 8px; cursor: pointer;
+  border: 1px solid #2a2a42; background: #1a1a2e; color: #e8e8f0; font-size: 13px; }
+button:hover { border-color: #7c5cff; }
+button.primary { background: #7c5cff; border-color: #7c5cff; color: #fff;
+  font-weight: 700; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;
+  align-items: center; }
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+  background: #15152a; border: 1px solid #2a2a42; padding: 10px 16px;
+  border-radius: 8px; color: #e8e8f0; font-size: 13px; opacity: 0;
+  transition: opacity 0.2s; pointer-events: none; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<header class="top">
+<a href="./cat-books.html">&larr; Books &amp; writing</a>
+<h1>Front Matter Builder</h1>
+<a href="./help.html#frontmatter">How it works</a>
+</header>
+<main>
+<p class="intro">Build the opening pages of a book &mdash; title page, copyright, dedication, epigraph, preface, acknowledgments &mdash; into a single Markdown file ready to prepend to a manuscript. Live print-style preview on the right.</p>
+<div class="row">
+<div>
+<div class="card">
+<h2>Title page</h2>
+<label class="field">Title<input id="title" type="text" value="Untitled"></label>
+<label class="field">Subtitle (optional)<input id="subtitle" type="text"></label>
+<label class="field">Author<input id="author" type="text"></label>
+<label class="field">Series (optional, e.g. &quot;Book Two of the Covenant Trilogy&quot;)<input id="series" type="text"></label>
+</div>
+<div class="card">
+<h2>Copyright</h2>
+<div class="row2">
+<label class="field">Year<input id="year" type="text"></label>
+<label class="field">Publisher (optional)<input id="publisher" type="text"></label>
+</div>
+<label class="field">Rights statement<input id="rights" type="text" value="All rights reserved."></label>
+<label class="field">License (optional, e.g. &quot;CC BY-SA 4.0&quot;)<input id="license" type="text"></label>
+<label class="field">ISBN (optional)<input id="isbn" type="text"></label>
+</div>
+<div class="card">
+<h2>Dedication</h2>
+<label class="toggle"><input id="useDed" type="checkbox"> Include a dedication page</label>
+<textarea id="dedication" placeholder="For Ada, who lit every page&hellip;"></textarea>
+</div>
+<div class="card">
+<h2>Epigraph</h2>
+<label class="toggle"><input id="useEpi" type="checkbox"> Include an epigraph</label>
+<textarea id="epigraph" placeholder="Quote text"></textarea>
+<label class="field" style="margin-top:8px;">Attribution<input id="epigraphAttr" type="text" placeholder="&mdash; Author, Source"></label>
+</div>
+<div class="card">
+<h2>Preface</h2>
+<label class="toggle"><input id="usePre" type="checkbox"> Include a preface</label>
+<label class="field">Heading<input id="prefaceHdr" type="text" value="Preface"></label>
+<textarea id="preface" placeholder="Body text&hellip;"></textarea>
+</div>
+<div class="card">
+<h2>Acknowledgments</h2>
+<label class="toggle"><input id="useAck" type="checkbox"> Include acknowledgments</label>
+<label class="field">Heading<input id="ackHdr" type="text" value="Acknowledgments"></label>
+<textarea id="ack" placeholder="Thanks to&hellip;"></textarea>
+</div>
+<div class="card">
+<div class="toolbar">
+<button class="primary" id="download">Download front-matter.md</button>
+<button id="copy">Copy Markdown</button>
+</div>
+</div>
+</div>
+<div>
+<div class="card" style="position:sticky;top:80px;">
+<h2>Preview</h2>
+<div class="preview" id="prev"></div>
+</div>
+</div>
+</div>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+'use strict';
+var $ = function(id){ return document.getElementById(id); };
+function toast(m){ var t = $('toast'); t.textContent = m; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 1800); }
+function val(id){ return ($(id).value || '').trim(); }
+function chk(id){ return $(id).checked; }
+function esc(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function buildMd(){
+  var parts = [];
+  var t = val('title') || 'Untitled';
+  var sub = val('subtitle');
+  var a = val('author');
+  var series = val('series');
+  parts.push('# ' + t);
+  if (sub) parts.push('### ' + sub);
+  if (a) parts.push('\nby ' + a);
+  if (series) parts.push('\n_' + series + '_');
+  parts.push('\n\n---\n');
+  var year = val('year');
+  var publisher = val('publisher');
+  var rights = val('rights') || 'All rights reserved.';
+  var license = val('license');
+  var isbn = val('isbn');
+  var copy = [];
+  copy.push('Copyright &copy; ' + (year || new Date().getFullYear()) + ' ' + (a || 'Author') + '.');
+  copy.push('');
+  copy.push(rights);
+  if (publisher) { copy.push(''); copy.push('Published by ' + publisher + '.'); }
+  if (license) { copy.push(''); copy.push('License: ' + license); }
+  if (isbn) { copy.push(''); copy.push('ISBN: ' + isbn); }
+  parts.push(copy.join('\n'));
+  parts.push('\n\n---\n');
+  if (chk('useDed') && val('dedication')) {
+    parts.push('## Dedication\n');
+    parts.push('_' + val('dedication') + '_');
+    parts.push('\n\n---\n');
+  }
+  if (chk('useEpi') && val('epigraph')) {
+    parts.push('## Epigraph\n');
+    parts.push('> ' + val('epigraph').split('\n').join('\n> '));
+    if (val('epigraphAttr')) {
+      parts.push('\n&mdash; ' + val('epigraphAttr'));
+    }
+    parts.push('\n\n---\n');
+  }
+  if (chk('usePre') && val('preface')) {
+    parts.push('## ' + (val('prefaceHdr') || 'Preface') + '\n');
+    parts.push(val('preface'));
+    parts.push('\n\n---\n');
+  }
+  if (chk('useAck') && val('ack')) {
+    parts.push('## ' + (val('ackHdr') || 'Acknowledgments') + '\n');
+    parts.push(val('ack'));
+    parts.push('\n\n---\n');
+  }
+  return parts.join('\n');
+}
+function update(){
+  var pages = [];
+  var t = esc(val('title') || 'Untitled');
+  var sub = val('subtitle') ? '<div class="sub">' + esc(val('subtitle')) + '</div>' : '';
+  var a = val('author') ? '<div class="author">' + esc(val('author')) + '</div>' : '';
+  var series = val('series') ? '<div class="sub">' + esc(val('series')) + '</div>' : '';
+  pages.push('<div class="pg"><h1>' + t + '</h1>' + sub + a + series + '</div>');
+  var year = val('year') || new Date().getFullYear();
+  var rights = esc(val('rights') || 'All rights reserved.');
+  var publisher = val('publisher') ? '<p>Published by ' + esc(val('publisher')) + '.</p>' : '';
+  var license = val('license') ? '<p>License: ' + esc(val('license')) + '</p>' : '';
+  var isbn = val('isbn') ? '<p>ISBN: ' + esc(val('isbn')) + '</p>' : '';
+  pages.push('<div class="pg copy"><p>Copyright &copy; ' + year + ' ' +
+    esc(val('author') || 'Author') + '.</p><p>' + rights + '</p>' + publisher + license + isbn + '</div>');
+  if (chk('useDed') && val('dedication')) {
+    pages.push('<div class="pg dedication">' + esc(val('dedication')).replace(/\n/g, '<br>') + '</div>');
+  }
+  if (chk('useEpi') && val('epigraph')) {
+    var attr = val('epigraphAttr') ? '<div class="attr">&mdash; ' + esc(val('epigraphAttr')) + '</div>' : '';
+    pages.push('<div class="pg epigraph">' + esc(val('epigraph')).replace(/\n/g, '<br>') + attr + '</div>');
+  }
+  if (chk('usePre') && val('preface')) {
+    pages.push('<div class="pg text"><h2>' + esc(val('prefaceHdr') || 'Preface') + '</h2>' +
+      esc(val('preface')).replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>') + '</div>');
+  }
+  if (chk('useAck') && val('ack')) {
+    pages.push('<div class="pg text"><h2>' + esc(val('ackHdr') || 'Acknowledgments') + '</h2>' +
+      esc(val('ack')).replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>') + '</div>');
+  }
+  $('prev').innerHTML = pages.join('');
+}
+function copy(){
+  var md = buildMd();
+  if (navigator.clipboard) navigator.clipboard.writeText(md).then(function(){ toast('Copied'); });
+  else { var ta = document.createElement('textarea'); ta.value = md;
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta); toast('Copied'); }
+}
+function download(){
+  var md = buildMd();
+  var blob = new Blob([md], { type: 'text/markdown' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'front-matter.md'; a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 200);
+  toast('Downloaded');
+}
+$('copy').addEventListener('click', copy);
+$('download').addEventListener('click', download);
+document.querySelectorAll('input, textarea').forEach(function(el){
+  el.addEventListener('input', update);
+  el.addEventListener('change', update);
+});
+update();
+})();
+</script>
+</body>
+</html>
