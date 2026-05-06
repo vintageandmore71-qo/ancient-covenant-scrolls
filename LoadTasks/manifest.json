@@ -1,7 +1,7 @@
 {
   "name": "Load Tasks",
   "short_name": "Load Tasks",
-  "description": "Load Tasks validates, repairs, remembers project builds, includes Help Center guidance, and requires visible repair previews before sensitive patches.",
+  "description": "Load Tasks v5 Phase 1 adds onsite Agent Lab, floating notes, How-To help, alert dashboard, and dyslexia-friendly site testing workflows.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
