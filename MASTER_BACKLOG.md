@@ -40,7 +40,7 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 
 ## Load main (`/load/`)
 
-**Cache:** `load-v17g4`. **Tip status spec:** `PLAN_LOAD_AI.md`,
+**Cache:** `load-v17g5`. **Tip status spec:** `PLAN_LOAD_AI.md`,
 `PLAN_IMAGE_PROMPT_v3.md`, `PLAN_BOOK_TO_VIDEO.md`,
 `MEDIA_MODULE_SPEC.md`, `LOAD_FEATURES.md`, `LOAD_MARKETING.md`.
 
@@ -50,6 +50,20 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 - **Character Consistency module** — see X-CC.
 - **Piper TTS Stage 1 unblock + Stage 2 rollout** — see X-PIPER. Stage 1 shipped but not playing; blocked on the play() error text from the user. Resilience panel (Part 9) shipped in v17er gives an in-app diagnostic + recovery path.
 - **LOAD-ECO acceptance test pass** (Build Plan Part 13). Every part now has a tool surface, but the user-validation pass is still needed: open each tool, confirm PASS/FAIL/WARN labels render, run a sample export, save a receipt, check it appears in the Receipts library. Parts 1, 2, 3, 14-17 shipped in v17eq. Parts 4, 7, 9 + Book-to-Video wiring shipped in v17er. Parts 5, 6, 8, 10 shipped in v17es. Parts 11-13 are housekeeping/acceptance and are met by the existing tool surfaces.
+
+### Recently done (this session, 2026-05-06 — Handoff Report Part J: Ecosystem routing)
+- **v17g5 &mdash; Part J ecosystem routing aligned to spec**:
+  - `load/tools/ecosystem-router.html` already surfaced five categories (HTML/PWA, Books, Media, LoadStudio package, LoadPlay prep) with the report&apos;s required actions.
+  - Renamed the HTML/PWA action **Export Standalone PWA** -&gt; **Build Standalone PWA ZIP** to match Section 15 wording exactly.
+  - Re-pointed **Prepare for LoadPlay** (HTML/PWA bucket) and **Generate Publish Package** (LoadPlay-prep bucket) to `loadstudio-validator.html` &mdash; that is now the canonical home of those flows since item 6 wired the seven required actions there.
+  - Tightened tooltips so each action explains the destination button to tap inside the next tool.
+  - All five spec action sets are reachable per the report:
+    - **HTML/PWA:** Preview Sandboxed, Repair Manifest, Repair Service Worker, Build Standalone PWA ZIP, Prepare for LoadStudio, Prepare for LoadPlay.
+    - **Books / documents:** Open Reader, Convert to Digital Book Project, Export EPUB, Export PDF, Export Standalone Book PWA, Send to LoadStudio as Source Material (plus an extra **Validate Book PWA** retained as a bonus).
+    - **Media:** Open Player, Add to Project, Send to LoadStudio.
+    - **LoadStudio package:** Open as Viewer, Open as Editable Project, Validate Package, Repair Package, Export Fixed Package, Prepare for LoadPlay.
+    - **LoadPlay prep:** Validate Rights, Validate Safety, Generate Publish Package, Export Publish Report.
+  - Cache `load-v17g4` -&gt; `load-v17g5`. Version badge bumped.
 
 ### Recently done (this session, 2026-05-06 — Handoff Report Part I: Safer Sandbox Preview)
 - **v17g4 &mdash; Part I strict-by-default sandbox + Trust Package flow**:

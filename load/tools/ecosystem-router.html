@@ -115,9 +115,9 @@ header h1{margin:0;font-size:16px;font-weight:800;flex:1}
         { label: 'Preview Sandboxed', href: './safety-rights.html', tip: 'Render in strict iframe.' },
         { label: 'Repair Manifest', href: '../#manifest', tip: 'Rebuild manifest.json.' },
         { label: 'Repair Service Worker', href: '../#sw', tip: 'Generate offline cache.' },
-        { label: 'Export Standalone PWA', href: './pwa-builder.html', tip: 'One-click PWA ZIP.' },
-        { label: 'Prepare for LoadStudio', href: './loadstudio-validator.html', tip: 'Validate LoadStudio shape.' },
-        { label: 'Prepare for LoadPlay', href: './safety-rights.html', tip: 'Rights + safety pre-publish.' }
+        { label: 'Build Standalone PWA ZIP', href: './pwa-builder.html', tip: 'One-click 13-step PWA build with safety scan + receipt.' },
+        { label: 'Prepare for LoadStudio', href: './loadstudio-validator.html', tip: 'Validate LoadStudio shape; tap "Prepare for LoadStudio" inside.' },
+        { label: 'Prepare for LoadPlay', href: './loadstudio-validator.html', tip: 'Rights + safety pre-publish; tap "Prepare for LoadPlay" inside.' }
       ]
     },
     'book': {
@@ -158,10 +158,10 @@ header h1{margin:0;font-size:16px;font-weight:800;flex:1}
       label: 'LoadPlay publish-prep',
       desc: 'Final pre-publish bundle.',
       actions: [
-        { label: 'Validate Rights', href: './safety-rights.html', tip: 'Check rights.json.' },
-        { label: 'Validate Safety', href: './safety-rights.html', tip: 'Run safety scan.' },
-        { label: 'Generate Publish Package', href: './pwa-builder.html', tip: 'Build the publish bundle.' },
-        { label: 'Export Publish Report', href: './export-receipts.html', tip: 'Log publish-prep receipt.' }
+        { label: 'Validate Rights', href: './safety-rights.html', tip: 'Eight-value enum check on owner / license / sourceMaterial / assetDeclarations.' },
+        { label: 'Validate Safety', href: './safety-rights.html', tip: 'Run the BLOCKER/HIGH/MEDIUM/LOW/INFO scan.' },
+        { label: 'Generate Publish Package', href: './loadstudio-validator.html', tip: 'Tap "Prepare for LoadPlay" inside the LoadStudio validator to bundle.' },
+        { label: 'Export Publish Report', href: './export-receipts.html', tip: 'Save the publish-prep receipt to the on-device library.' }
       ]
     }
   };
