@@ -40,16 +40,24 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 
 ## Load main (`/load/`)
 
-**Cache:** `load-v17g6`. **Tip status spec:** `PLAN_LOAD_AI.md`,
+**Cache:** `load-v17g7`. **Tip status spec:** `PLAN_LOAD_AI.md`,
 `PLAN_IMAGE_PROMPT_v3.md`, `PLAN_BOOK_TO_VIDEO.md`,
 `MEDIA_MODULE_SPEC.md`, `LOAD_FEATURES.md`, `LOAD_MARKETING.md`.
 
 ### Pending
 - **Load AI Tier 14 / 18-fallback add-ons** — see X-AI-14 (the core X-AI-CORE is **shipped** in v17dq–v17dy; only the Glam-parity layer remains).
-- **Browser mask editor** — see X-AI-MASK.
-- **Character Consistency module** — see X-CC.
 - **Piper TTS Stage 1 unblock + Stage 2 rollout** — see X-PIPER. Stage 1 shipped but not playing; blocked on the play() error text from the user. Resilience panel (Part 9) shipped in v17er gives an in-app diagnostic + recovery path.
-- **LOAD-ECO acceptance test pass** (Build Plan Part 13). Every part now has a tool surface, but the user-validation pass is still needed: open each tool, confirm PASS/FAIL/WARN labels render, run a sample export, save a receipt, check it appears in the Receipts library. Parts 1, 2, 3, 14-17 shipped in v17eq. Parts 4, 7, 9 + Book-to-Video wiring shipped in v17er. Parts 5, 6, 8, 10 shipped in v17es. Parts 11-13 are housekeeping/acceptance and are met by the existing tool surfaces.
+- **LOAD-ECO acceptance test pass** (Build Plan Part 13 + Load_Main_Claude_Handoff_Report Section 18). The 11 priority items from the handoff report are shipped in v17fx–v17g6 with `LOAD_MAIN_HANDOFF_FINAL_REPORT.md` listing what's auto-verified vs what still needs user verification on iPad. Parts 1, 2, 3, 14-17 of the earlier Load Main Next Build Plan shipped in v17eq. Parts 4, 7, 9 + Book-to-Video wiring shipped in v17er. Parts 5, 6, 8, 10 shipped in v17es.
+
+### Pending — closed this session
+- **Browser mask editor (X-AI-MASK)** — shipped v17ew as `load/tools/mask-editor.html`.
+- **Character Consistency module (X-CC)** — shipped v17ex as `load/tools/character-bible.html` wrapping `load/book-video/character-bible.js`.
+
+### Recently done (this session, 2026-05-06 — Handoff Report final verification)
+- **v17g7 &mdash; Sections 18 + 19 final report**:
+  - New file `LOAD_MAIN_HANDOFF_FINAL_REPORT.md` at the repo root: closing artifact for the eleven priority items (v17fx-v17g6). Each Section 18 acceptance row marked **VERIFIED**, **READY FOR USER VERIFICATION**, or **NOT DONE** per the report&apos;s rule against false-positive completion claims. Section 19&apos;s 15 confirmation items answered with the smoke-test commands and observed output that prove each.
+  - `MASTER_BACKLOG.md` Pending block cleaned up: items 2 (X-AI-MASK) and 3 (X-CC) moved to a new &quot;Pending — closed this session&quot; sub-block citing the v17ew / v17ex versions where they shipped; LOAD-ECO row updated to point at the new final-verification report.
+  - Cache `load-v17g6` -&gt; `load-v17g7`. Version badge bumped.
 
 ### Recently done (this session, 2026-05-06 — Handoff Report Part K: Sample test projects)
 - **v17g6 &mdash; Part K samples tightened to spec**:
