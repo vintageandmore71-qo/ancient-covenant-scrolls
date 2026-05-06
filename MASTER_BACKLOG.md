@@ -40,7 +40,7 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 
 ## Load main (`/load/`)
 
-**Cache:** `load-v17fs`. **Tip status spec:** `PLAN_LOAD_AI.md`,
+**Cache:** `load-v17ft`. **Tip status spec:** `PLAN_LOAD_AI.md`,
 `PLAN_IMAGE_PROMPT_v3.md`, `PLAN_BOOK_TO_VIDEO.md`,
 `MEDIA_MODULE_SPEC.md`, `LOAD_FEATURES.md`, `LOAD_MARKETING.md`.
 
@@ -50,6 +50,15 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 - **Character Consistency module** — see X-CC.
 - **Piper TTS Stage 1 unblock + Stage 2 rollout** — see X-PIPER. Stage 1 shipped but not playing; blocked on the play() error text from the user. Resilience panel (Part 9) shipped in v17er gives an in-app diagnostic + recovery path.
 - **LOAD-ECO acceptance test pass** (Build Plan Part 13). Every part now has a tool surface, but the user-validation pass is still needed: open each tool, confirm PASS/FAIL/WARN labels render, run a sample export, save a receipt, check it appears in the Receipts library. Parts 1, 2, 3, 14-17 shipped in v17eq. Parts 4, 7, 9 + Book-to-Video wiring shipped in v17er. Parts 5, 6, 8, 10 shipped in v17es. Parts 11-13 are housekeeping/acceptance and are met by the existing tool surfaces.
+
+### Recently done (this session, 2026-05-06 — Audio Normalize + Lorem Ipsum)
+- **v17ft &mdash; Audio Normalize + Lorem Ipsum**:
+  - **Audio Normalize:** new tool at `load/tools/audio-normalize.html`. Drop audio (any browser-decoded format). Tool measures peak and RMS in dBFS and shows a waveform. Pick **Peak normalize** (loudest sample to target) or **RMS normalize** (perceived loudness to target), set target dBFS (default -1). Optional soft-clip ceiling at 0 dBFS prevents clipping when over-driving. Exports a 16-bit PCM WAV; shows after-waveform plus actual gain applied, new peak, new RMS.
+  - **Lorem Ipsum:** new tool at `load/tools/lorem-ipsum.html`. Generate placeholder text in five flavors (Latin classic, English, Hipster, Pirate, Verse-style cadence). Pick output unit (Paragraphs / Sentences / Words) and count. Optional classic Latin opener. Each tap reshuffles. Copy or download `.txt`.
+  - cat-media.html and cat-build.html each gained one tile.
+  - Workspace tile description bumped to 57 tools.
+  - Help page updated with new TOC entries + per-tool cards.
+  - Cache `load-v17fs` -&gt; `load-v17ft`. Version badge bumped.
 
 ### Recently done (this session, 2026-05-06 — PWA Icon Set + Front Matter Builder)
 - **v17fs &mdash; PWA Icon Set + Front Matter Builder**:

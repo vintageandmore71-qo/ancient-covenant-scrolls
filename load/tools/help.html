@@ -126,6 +126,8 @@ code,kbd{background:#1a1a26;padding:2px 6px;border-radius:4px;font-family:ui-mon
   <a href="#outline">Outline Writer</a>
   <a href="#pwaicons">PWA Icon Set</a>
   <a href="#frontmatter">Front Matter Builder</a>
+  <a href="#audnorm">Audio Normalize</a>
+  <a href="#lorem">Lorem Ipsum</a>
   <a href="#acceptance">Acceptance Criteria</a>
 </nav>
 
@@ -878,6 +880,31 @@ code,kbd{background:#1a1a26;padding:2px 6px;border-radius:4px;font-family:ui-mon
   <li>Tap <strong>Download front-matter.md</strong> to save a Markdown file ready to prepend to your manuscript, or <strong>Copy Markdown</strong> to paste it into Manuscript-to-Book or EPUB Builder.</li>
 </ol>
 <a class="open" href="./front-matter.html">Open Front Matter Builder</a>
+</div>
+
+<div class="tool" id="audnorm">
+<h3>Audio Normalize</h3>
+<ol>
+  <li>Open <strong>Workspace Tools &rarr; Media &rarr; Audio Normalize</strong>.</li>
+  <li>Drop an audio file. Tool measures peak and RMS levels and shows a waveform.</li>
+  <li>Pick mode: <strong>Peak normalize</strong> (scales the loudest sample to your target) or <strong>RMS normalize</strong> (scales perceived loudness to your target).</li>
+  <li>Set a target dBFS (default -1 for safe digital headroom).</li>
+  <li>Toggle <strong>Soft-clip ceiling at 0 dBFS</strong> to round off any peaks that try to exceed the digital ceiling instead of hard clipping.</li>
+  <li>Tap <strong>Normalize &amp; export WAV</strong>. Tool downloads the new file and shows the after-waveform plus actual gain applied, new peak, new RMS.</li>
+</ol>
+<a class="open" href="./audio-normalize.html">Open Audio Normalize</a>
+</div>
+
+<div class="tool" id="lorem">
+<h3>Lorem Ipsum</h3>
+<ol>
+  <li>Open <strong>Workspace Tools &rarr; Build &amp; validate &rarr; Lorem Ipsum</strong>.</li>
+  <li>Pick a flavor: Latin (classic), English, Hipster, Pirate, or Verse-style cadence.</li>
+  <li>Pick the output unit (Paragraphs / Sentences / Words) and how many.</li>
+  <li>Toggle <strong>Start with the classic opener</strong> for the famous &quot;Lorem ipsum dolor sit amet&hellip;&quot; opener (Latin only).</li>
+  <li>Tap <strong>Generate</strong>. Each tap reshuffles the text. Tap <strong>Copy</strong> or <strong>Download .txt</strong>.</li>
+</ol>
+<a class="open" href="./lorem-ipsum.html">Open Lorem Ipsum</a>
 </div>
 
 <div class="tool" id="acceptance">

@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Load &mdash; Lorem Ipsum</title>
+<style>
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 0; background: #0a0a0f; color: #e8e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased; }
+header.top { display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px; border-bottom: 1px solid #1f1f2f; position: sticky; top: 0;
+  background: rgba(10,10,15,0.95); backdrop-filter: blur(8px); z-index: 5; }
+header.top a { color: #9ca3af; text-decoration: none; font-size: 13px;
+  padding: 6px 10px; border-radius: 6px; border: 1px solid #2a2a42; }
+header.top a:hover { color: #fff; border-color: #7c5cff; background: #1a1a2e; }
+header.top h1 { margin: 0; font-size: 18px; flex: 1; font-weight: 700; }
+main { max-width: 1100px; margin: 22px auto; padding: 0 20px 60px; }
+.intro { color: #9ca3af; font-size: 14px; line-height: 1.6; margin: 0 0 18px; }
+.card { background: #15152a; border: 1px solid #2a2a42; border-radius: 12px;
+  padding: 16px; margin-bottom: 16px; }
+.card h2 { margin: 0 0 12px; font-size: 14px; color: #9ca3af;
+  text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+.options { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+label.field { display: flex; flex-direction: column; gap: 4px;
+  font-size: 12px; color: #9ca3af; }
+label.toggle { display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; color: #9ca3af; }
+input[type=number], select { background: #0e0e1a; border: 1px solid #2a2a42;
+  color: #e8e8f0; padding: 8px 10px; border-radius: 6px; font: inherit;
+  font-size: 13px; }
+textarea { width: 100%; min-height: 320px; padding: 14px; background: #0e0e1a;
+  border: 1px solid #2a2a42; border-radius: 8px; color: #e8e8f0;
+  font-family: "Atkinson Hyperlegible", system-ui, sans-serif; font-size: 14px;
+  line-height: 1.6; resize: vertical; }
+button { font: inherit; padding: 9px 14px; border-radius: 8px; cursor: pointer;
+  border: 1px solid #2a2a42; background: #1a1a2e; color: #e8e8f0; font-size: 13px; }
+button:hover { border-color: #7c5cff; }
+button.primary { background: #7c5cff; border-color: #7c5cff; color: #fff;
+  font-weight: 700; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px;
+  align-items: center; }
+.summary { color: #9ca3af; font-size: 12px; margin-top: 12px; }
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+  background: #15152a; border: 1px solid #2a2a42; padding: 10px 16px;
+  border-radius: 8px; color: #e8e8f0; font-size: 13px; opacity: 0;
+  transition: opacity 0.2s; pointer-events: none; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<header class="top">
+<a href="./cat-build.html">&larr; Build &amp; validate</a>
+<h1>Lorem Ipsum</h1>
+<a href="./help.html#lorem">How it works</a>
+</header>
+<main>
+<p class="intro">Generate placeholder text in five flavors. Pick how many words, sentences, or paragraphs you need. Useful for layout testing, mock screens, and stress-testing the workspace tools before real content arrives.</p>
+<div class="card">
+<h2>Settings</h2>
+<div class="options">
+<label class="field">Flavor <select id="flavor">
+<option value="latin" selected>Latin (classic Lorem)</option>
+<option value="english">English (plain placeholder)</option>
+<option value="hipster">Hipster</option>
+<option value="pirate">Pirate</option>
+<option value="verse">Verse-style cadence</option>
+</select></label>
+<label class="field">Output unit <select id="unit">
+<option value="paragraphs" selected>Paragraphs</option>
+<option value="sentences">Sentences</option>
+<option value="words">Words</option>
+</select></label>
+<label class="field">Count <input id="count" type="number" min="1" max="500" value="3"></label>
+<label class="field">&nbsp;<label class="toggle"><input id="startClassic" type="checkbox" checked> Start with the classic opener (Latin only)</label></label>
+</div>
+<div class="toolbar">
+<button class="primary" id="generate">Generate</button>
+<button id="copy">Copy</button>
+<button id="download">Download .txt</button>
+</div>
+<div class="summary" id="summary">Tap Generate to make placeholder text.</div>
+</div>
+<div class="card">
+<h2>Output</h2>
+<textarea id="out" readonly></textarea>
+</div>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+'use strict';
+var $ = function(id){ return document.getElementById(id); };
+function toast(m){ var t = $('toast'); t.textContent = m; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 1800); }
+
+var WORDS = {
+  latin: ('lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure in reprehenderit voluptate velit esse cillum eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt culpa qui officia deserunt mollit anim id est laborum vivamus suspendisse curabitur aliquam etiam fusce porta tincidunt cras semper malesuada nibh euismod posuere fermentum').split(/\s+/),
+  english: ('idea word truth shadow river house hand light hour reason silence note plan circle wave path memory voice dream story flame stone garden window thought reason measure method season center matter movement question answer corner pattern weight gathering balance promise meaning origin form spirit moment journey witness boundary').split(/\s+/),
+  hipster: ('artisan loft pour-over fixie kale chambray brunch denim heirloom mason poutine slow-loop forage moustache flannel typewriter whittle craft small-batch farm-to-table single-origin pickle vinyl cardigan sustainable mixtape bespoke quinoa indie locavore cold-press').split(/\s+/),
+  pirate: ('plunder ahoy doubloon sail keelhaul mainsail rigging bilge bounty cutlass deckhand horizon longshore mate parrot scallywag scurvy treasure topsail wench yardarm grog brig bowsprit harpoon hook gunpowder schooner sextant tide tankard rum').split(/\s+/),
+  verse: ('night gold hush wandering covenant whisper river cinder shore sorrow grace promise stone alone burning silver shadow dawn lily fire root sigh gather long winter rest mercy quiet morning bend lantern hidden return calling water small candle').split(/\s+/)
+};
+var ENDERS = ['.', '.', '.', '.', '?', '!'];
+
+function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+function makeSentence(flavor, classic, isFirst){
+  var words = WORDS[flavor];
+  var len = 6 + Math.floor(Math.random() * 14);
+  var out = [];
+  if (isFirst && classic && flavor === 'latin') {
+    out = ['Lorem','ipsum','dolor','sit','amet,','consectetur','adipiscing','elit'];
+    return out.join(' ') + '.';
+  }
+  for (var i = 0; i < len; i++) out.push(pick(words));
+  var sentence = cap(out.join(' '));
+  if (sentence.length > 30 && Math.random() < 0.4) {
+    var commaAt = Math.floor(out.length / 2);
+    out[commaAt] = out[commaAt] + ',';
+    sentence = cap(out.join(' '));
+  }
+  return sentence + ENDERS[Math.floor(Math.random() * ENDERS.length)];
+}
+function makeParagraph(flavor, classic, isFirst){
+  var n = 3 + Math.floor(Math.random() * 5);
+  var sents = [];
+  for (var i = 0; i < n; i++) sents.push(makeSentence(flavor, classic, isFirst && i === 0));
+  return sents.join(' ');
+}
+function generate(){
+  var flavor = $('flavor').value;
+  var unit = $('unit').value;
+  var count = Math.max(1, parseInt($('count').value, 10) || 1);
+  var classic = $('startClassic').checked;
+  var out;
+  if (unit === 'words') {
+    var words = WORDS[flavor];
+    var arr = [];
+    for (var i = 0; i < count; i++) arr.push(pick(words));
+    if (classic && flavor === 'latin') arr[0] = 'Lorem';
+    out = cap(arr.join(' ')) + '.';
+  } else if (unit === 'sentences') {
+    var sents = [];
+    for (var j = 0; j < count; j++) sents.push(makeSentence(flavor, classic, j === 0));
+    out = sents.join(' ');
+  } else {
+    var paras = [];
+    for (var k = 0; k < count; k++) paras.push(makeParagraph(flavor, classic, k === 0));
+    out = paras.join('\n\n');
+  }
+  $('out').value = out;
+  var wc = (out.match(/\S+/g) || []).length;
+  $('summary').textContent = wc + ' words, ' + new Blob([out]).size + ' bytes.';
+}
+$('generate').addEventListener('click', generate);
+$('copy').addEventListener('click', function(){
+  if (!$('out').value) { toast('Nothing to copy'); return; }
+  if (navigator.clipboard) navigator.clipboard.writeText($('out').value).then(function(){ toast('Copied'); });
+  else { $('out').select(); document.execCommand('copy'); toast('Copied'); }
+});
+$('download').addEventListener('click', function(){
+  if (!$('out').value) { toast('Nothing to save'); return; }
+  var blob = new Blob([$('out').value], { type: 'text/plain' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'lorem.txt'; a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 200);
+  toast('Downloaded');
+});
+generate();
+})();
+</script>
+</body>
+</html>

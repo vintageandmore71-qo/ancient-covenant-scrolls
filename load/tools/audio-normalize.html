@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Load &mdash; Audio Normalize</title>
+<style>
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 0; background: #0a0a0f; color: #e8e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased; }
+header.top { display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px; border-bottom: 1px solid #1f1f2f; position: sticky; top: 0;
+  background: rgba(10,10,15,0.95); backdrop-filter: blur(8px); z-index: 5; }
+header.top a { color: #9ca3af; text-decoration: none; font-size: 13px;
+  padding: 6px 10px; border-radius: 6px; border: 1px solid #2a2a42; }
+header.top a:hover { color: #fff; border-color: #7c5cff; background: #1a1a2e; }
+header.top h1 { margin: 0; font-size: 18px; flex: 1; font-weight: 700; }
+main { max-width: 1100px; margin: 22px auto; padding: 0 20px 60px; }
+.intro { color: #9ca3af; font-size: 14px; line-height: 1.6; margin: 0 0 18px; }
+.card { background: #15152a; border: 1px solid #2a2a42; border-radius: 12px;
+  padding: 16px; margin-bottom: 16px; }
+.card h2 { margin: 0 0 12px; font-size: 14px; color: #9ca3af;
+  text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+.drop { display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 30px 16px; border: 2px dashed #2a2a42;
+  border-radius: 10px; cursor: pointer; gap: 6px; color: #9ca3af; }
+.drop:hover, .drop.over { border-color: #7c5cff; color: #fff; background: #1a1a2e; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px; margin-top: 12px; }
+.stat { background: #0e0e1a; border: 1px solid #2a2a42; border-radius: 8px;
+  padding: 10px 12px; }
+.stat .lbl { font-size: 11px; color: #9ca3af; text-transform: uppercase;
+  letter-spacing: 0.05em; }
+.stat .val { font-size: 18px; font-weight: 800; color: #fff;
+  font-variant-numeric: tabular-nums; }
+canvas.wave { width: 100%; height: 80px; background: #0e0e1a;
+  border: 1px solid #2a2a42; border-radius: 8px; margin-top: 8px;
+  display: block; }
+.wave-row { margin-top: 14px; }
+.wave-row .lbl { font-size: 12px; color: #9ca3af; margin-bottom: 4px; }
+.options { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+label.field { display: flex; flex-direction: column; gap: 4px;
+  font-size: 12px; color: #9ca3af; }
+label.toggle { display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; color: #9ca3af; }
+input[type=range] { width: 100%; }
+input[type=number] { background: #0e0e1a; border: 1px solid #2a2a42;
+  color: #e8e8f0; padding: 7px 10px; border-radius: 6px; font: inherit;
+  font-size: 13px; width: 100px; }
+select { background: #0e0e1a; border: 1px solid #2a2a42; color: #e8e8f0;
+  padding: 7px 10px; border-radius: 6px; font: inherit; font-size: 13px; }
+button { font: inherit; padding: 9px 14px; border-radius: 8px; cursor: pointer;
+  border: 1px solid #2a2a42; background: #1a1a2e; color: #e8e8f0; font-size: 13px; }
+button:hover { border-color: #7c5cff; }
+button.primary { background: #7c5cff; border-color: #7c5cff; color: #fff;
+  font-weight: 700; }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px;
+  align-items: center; }
+audio { width: 100%; margin-top: 14px; }
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+  background: #15152a; border: 1px solid #2a2a42; padding: 10px 16px;
+  border-radius: 8px; color: #e8e8f0; font-size: 13px; opacity: 0;
+  transition: opacity 0.2s; pointer-events: none; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<header class="top">
+<a href="./cat-media.html">&larr; Media</a>
+<h1>Audio Normalize</h1>
+<a href="./help.html#audnorm">How it works</a>
+</header>
+<main>
+<p class="intro">Drop an audio file. Tool measures peak and RMS, then scales to a target so quiet narration becomes loud enough and loud music can be tamed. Optional soft-clip ceiling so nothing distorts. Export 16-bit PCM WAV.</p>
+<div class="card">
+<h2>1. Source</h2>
+<div class="drop" id="drop">
+<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+<span>Drop an audio file</span>
+<span style="font-size:11px;">WAV, MP3, M4A, OGG, WEBM</span>
+<input id="file" type="file" accept="audio/*" style="display:none">
+</div>
+<div class="stats" id="stats" style="display:none;"></div>
+<div class="wave-row" id="waveBefore" style="display:none;">
+<div class="lbl">Before</div>
+<canvas class="wave" id="wbefore"></canvas>
+</div>
+</div>
+<div class="card">
+<h2>2. Target</h2>
+<div class="options">
+<label class="field">Mode <select id="mode">
+<option value="peak" selected>Peak normalize</option>
+<option value="rms">RMS normalize (perceived loudness)</option>
+</select></label>
+<label class="field">Target level (dBFS) <input id="target" type="number" min="-30" max="0" step="0.5" value="-1"></label>
+<label class="field">&nbsp;<label class="toggle"><input id="softClip" type="checkbox" checked> Soft-clip ceiling at 0 dBFS (no hard distortion)</label></label>
+</div>
+<div class="toolbar">
+<button class="primary" id="run" disabled>Normalize &amp; export WAV</button>
+<button id="clear" disabled>Clear</button>
+</div>
+<div class="wave-row" id="waveAfter" style="display:none;">
+<div class="lbl">After</div>
+<canvas class="wave" id="wafter"></canvas>
+</div>
+<div class="stats" id="afterStats" style="display:none;margin-top:12px;"></div>
+<audio id="player" controls style="display:none;"></audio>
+</div>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+'use strict';
+var $ = function(id){ return document.getElementById(id); };
+var ctx = null;
+var audio = null;
+var fileName = '';
+function toast(m){ var t = $('toast'); t.textContent = m; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2000); }
+function ensureCtx(){
+  if (!ctx) {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    ctx = new AC();
+  }
+  return ctx;
+}
+function db(v){ return v <= 0 ? -Infinity : 20 * Math.log10(v); }
+function fromDb(d){ return Math.pow(10, d / 20); }
+function fmt(secs){ var m = Math.floor(secs/60); var s = Math.floor(secs % 60);
+  return m + ':' + (s < 10 ? '0' + s : s); }
+function analyze(buf){
+  var ch = buf.numberOfChannels;
+  var len = buf.length;
+  var peak = 0; var sumSq = 0; var n = 0;
+  for (var c = 0; c < ch; c++) {
+    var data = buf.getChannelData(c);
+    for (var i = 0; i < len; i++) {
+      var v = Math.abs(data[i]);
+      if (v > peak) peak = v;
+      sumSq += data[i] * data[i];
+      n++;
+    }
+  }
+  var rms = Math.sqrt(sumSq / n);
+  return { peak: peak, rms: rms };
+}
+function drawWave(canvas, buf){
+  var ctxw = canvas.getContext('2d');
+  var w = canvas.clientWidth, h = canvas.clientHeight;
+  var dpr = window.devicePixelRatio || 1;
+  canvas.width = w * dpr; canvas.height = h * dpr; ctxw.scale(dpr, dpr);
+  ctxw.fillStyle = '#0e0e1a'; ctxw.fillRect(0, 0, w, h);
+  var data = buf.getChannelData(0);
+  var step = Math.max(1, Math.floor(data.length / w));
+  ctxw.strokeStyle = '#7c5cff'; ctxw.lineWidth = 1; ctxw.beginPath();
+  ctxw.moveTo(0, h/2);
+  for (var x = 0; x < w; x++) {
+    var min = 1, max = -1;
+    for (var i = 0; i < step; i++) {
+      var v = data[x * step + i];
+      if (v === undefined) break;
+      if (v < min) min = v;
+      if (v > max) max = v;
+    }
+    ctxw.moveTo(x, h/2 - max * h/2);
+    ctxw.lineTo(x, h/2 - min * h/2);
+  }
+  ctxw.stroke();
+  ctxw.strokeStyle = '#2a2a42'; ctxw.lineWidth = 1;
+  ctxw.beginPath(); ctxw.moveTo(0, h/2); ctxw.lineTo(w, h/2); ctxw.stroke();
+}
+function loadFile(f){
+  ensureCtx();
+  fileName = f.name;
+  toast('Reading ' + f.name + '&hellip;');
+  f.arrayBuffer().then(function(ab){
+    return ctx.decodeAudioData(ab.slice(0));
+  }).then(function(buf){
+    audio = buf;
+    var a = analyze(buf);
+    showStats(a, buf);
+    drawWave($('wbefore'), buf);
+    $('waveBefore').style.display = 'block';
+    $('run').disabled = false;
+    $('clear').disabled = false;
+    $('waveAfter').style.display = 'none';
+    $('afterStats').style.display = 'none';
+    $('player').style.display = 'none';
+  }).catch(function(e){
+    toast('Decode failed: ' + e.message);
+  });
+}
+function showStats(a, buf){
+  var s = $('stats');
+  s.style.display = 'grid';
+  s.innerHTML =
+    '<div class="stat"><div class="lbl">File</div><div class="val">' + fileName + '</div></div>' +
+    '<div class="stat"><div class="lbl">Length</div><div class="val">' + fmt(buf.duration) + '</div></div>' +
+    '<div class="stat"><div class="lbl">Sample rate</div><div class="val">' + buf.sampleRate.toLocaleString() + ' Hz</div></div>' +
+    '<div class="stat"><div class="lbl">Channels</div><div class="val">' + buf.numberOfChannels + '</div></div>' +
+    '<div class="stat"><div class="lbl">Peak</div><div class="val">' + db(a.peak).toFixed(1) + ' dBFS</div></div>' +
+    '<div class="stat"><div class="lbl">RMS</div><div class="val">' + db(a.rms).toFixed(1) + ' dBFS</div></div>';
+}
+function softClip(s){
+  if (s > 1) return 1 - Math.exp(-(s - 1) * 0.5) * 0.5 + 0.5;
+  if (s < -1) return -(1 - Math.exp(-(-s - 1) * 0.5) * 0.5 + 0.5);
+  return s;
+}
+function normalize(){
+  if (!audio) return;
+  var a = analyze(audio);
+  var mode = $('mode').value;
+  var target = parseFloat($('target').value);
+  var current = mode === 'peak' ? a.peak : a.rms;
+  if (current <= 0) { toast('Silent audio'); return; }
+  var gain = fromDb(target) / current;
+  var ch = audio.numberOfChannels;
+  var len = audio.length;
+  var out = ctx.createBuffer(ch, len, audio.sampleRate);
+  for (var c = 0; c < ch; c++) {
+    var src = audio.getChannelData(c);
+    var dst = out.getChannelData(c);
+    if ($('softClip').checked) {
+      for (var i = 0; i < len; i++) dst[i] = softClip(src[i] * gain);
+    } else {
+      for (var i2 = 0; i2 < len; i2++) {
+        var v = src[i2] * gain;
+        if (v > 1) v = 1; else if (v < -1) v = -1;
+        dst[i2] = v;
+      }
+    }
+  }
+  drawWave($('wafter'), out);
+  $('waveAfter').style.display = 'block';
+  var aAfter = analyze(out);
+  $('afterStats').style.display = 'grid';
+  $('afterStats').innerHTML =
+    '<div class="stat"><div class="lbl">Gain applied</div><div class="val">' + (gain >= 1 ? '+' : '') + db(gain).toFixed(1) + ' dB</div></div>' +
+    '<div class="stat"><div class="lbl">New peak</div><div class="val">' + db(aAfter.peak).toFixed(1) + ' dBFS</div></div>' +
+    '<div class="stat"><div class="lbl">New RMS</div><div class="val">' + db(aAfter.rms).toFixed(1) + ' dBFS</div></div>';
+  exportWav(out);
+}
+function exportWav(buf){
+  var len = buf.length, ch = buf.numberOfChannels, rate = buf.sampleRate;
+  var interleaved = new Float32Array(len * ch);
+  for (var c = 0; c < ch; c++) {
+    var data = buf.getChannelData(c);
+    for (var i = 0; i < len; i++) interleaved[i * ch + c] = data[i];
+  }
+  var bytesPerSample = 2;
+  var dataSize = interleaved.length * bytesPerSample;
+  var ab = new ArrayBuffer(44 + dataSize);
+  var v = new DataView(ab);
+  function ws(off, s){ for (var i = 0; i < s.length; i++) v.setUint8(off + i, s.charCodeAt(i)); }
+  ws(0, 'RIFF'); v.setUint32(4, 36 + dataSize, true); ws(8, 'WAVE');
+  ws(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true);
+  v.setUint16(22, ch, true); v.setUint32(24, rate, true);
+  v.setUint32(28, rate * ch * bytesPerSample, true);
+  v.setUint16(32, ch * bytesPerSample, true);
+  v.setUint16(34, bytesPerSample * 8, true);
+  ws(36, 'data'); v.setUint32(40, dataSize, true);
+  var off = 44;
+  for (var i2 = 0; i2 < interleaved.length; i2++, off += 2) {
+    var s = Math.max(-1, Math.min(1, interleaved[i2]));
+    v.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+  }
+  var blob = new Blob([ab], { type: 'audio/wav' });
+  var url = URL.createObjectURL(blob);
+  $('player').src = url; $('player').style.display = 'block';
+  var a = document.createElement('a'); a.href = url;
+  a.download = fileName.replace(/\.[^.]+$/, '') + '-normalized.wav';
+  a.click();
+  toast('WAV downloaded');
+}
+$('drop').addEventListener('click', function(){ $('file').click(); });
+['dragenter','dragover'].forEach(function(ev){
+  $('drop').addEventListener(ev, function(e){ e.preventDefault(); $('drop').classList.add('over'); });
+});
+['dragleave','drop'].forEach(function(ev){
+  $('drop').addEventListener(ev, function(e){ e.preventDefault(); $('drop').classList.remove('over'); });
+});
+$('drop').addEventListener('drop', function(e){
+  var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) loadFile(f);
+});
+$('file').addEventListener('change', function(e){
+  var f = e.target.files && e.target.files[0]; if (f) loadFile(f);
+});
+$('run').addEventListener('click', normalize);
+$('clear').addEventListener('click', function(){
+  audio = null; fileName = '';
+  $('stats').style.display = 'none'; $('waveBefore').style.display = 'none';
+  $('waveAfter').style.display = 'none'; $('afterStats').style.display = 'none';
+  $('player').style.display = 'none';
+  $('run').disabled = true; $('clear').disabled = true;
+});
+})();
+</script>
+</body>
+</html>
