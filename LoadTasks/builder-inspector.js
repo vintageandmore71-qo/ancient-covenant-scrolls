@@ -537,3 +537,175 @@
 
   window.LoadTasksBuilderReadiness = { renderReadiness };
 })();
+
+
+/* v5.14 PWA Builder Metadata Draft Plan */
+(function(){
+  const KEY = 'loadTasksMetadataDraftPlanV514';
+
+  function $(selector) { return document.querySelector(selector); }
+
+  function val(selector) {
+    const el = $(selector);
+    return el ? String(el.value || '').trim() : '';
+  }
+
+  function setVal(selector, value) {
+    const el = $(selector);
+    if (el) el.value = value || '';
+  }
+
+  function text(selector, value) {
+    const el = $(selector);
+    if (el) el.textContent = String(value || '');
+  }
+
+  function badge(textValue, level) {
+    const el = $('#builderMetadataDraftStatus');
+    if (el) {
+      el.textContent = textValue;
+      el.className = 'badge ' + (level || 'gray');
+    }
+  }
+
+  function currentMetadataText(selector) {
+    const el = $(selector);
+    return el ? String(el.textContent || '').trim() : '';
+  }
+
+  function buildDraft() {
+    return {
+      appName: val('#draftAppName'),
+      shortName: val('#draftShortName'),
+      description: val('#draftDescription'),
+      themeColor: val('#draftThemeColor'),
+      backgroundColor: val('#draftBackgroundColor'),
+      startUrl: val('#draftStartUrl'),
+      displayMode: val('#draftDisplayMode'),
+      createdAt: new Date().toISOString(),
+      source: {
+        appName: currentMetadataText('#metaAppName'),
+        shortName: currentMetadataText('#metaShortName'),
+        description: currentMetadataText('#metaDescription'),
+        themeColor: currentMetadataText('#metaThemeColor'),
+        backgroundColor: currentMetadataText('#metaBackgroundColor'),
+        startUrl: currentMetadataText('#metaStartUrl'),
+        displayMode: currentMetadataText('#metaDisplayMode')
+      }
+    };
+  }
+
+  function draftHasChanges(draft) {
+    return ['appName','shortName','description','themeColor','backgroundColor','startUrl','displayMode'].some(key => draft[key]);
+  }
+
+  function draftReport(draft) {
+    const rows = [
+      ['App name', draft.source.appName, draft.appName],
+      ['Short name', draft.source.shortName, draft.shortName],
+      ['Description', draft.source.description, draft.description],
+      ['Theme color', draft.source.themeColor, draft.themeColor],
+      ['Background color', draft.source.backgroundColor, draft.backgroundColor],
+      ['Start URL', draft.source.startUrl, draft.startUrl],
+      ['Display mode', draft.source.displayMode, draft.displayMode]
+    ];
+
+    const changed = rows.filter(row => row[2]);
+    const lines = [
+      'PWA Metadata Draft Change Plan',
+      '',
+      'Status: Draft only. No ZIP files changed.',
+      'Created: ' + draft.createdAt,
+      '',
+      'Proposed changes:'
+    ];
+
+    if (!changed.length) {
+      lines.push('No draft changes entered yet.');
+    } else {
+      changed.forEach(row => {
+        lines.push('- ' + row[0] + ':');
+        lines.push('  Current: ' + (row[1] || 'Not read'));
+        lines.push('  Draft: ' + row[2]);
+      });
+    }
+
+    lines.push('', 'Next safe step: review this plan before adding any edit/apply function.');
+    return lines.join('\n');
+  }
+
+  function renderDraft(draft) {
+    const box = $('#metadataDraftPreview');
+    if (box) box.textContent = draftReport(draft);
+    badge(draftHasChanges(draft) ? 'Draft saved' : 'Draft only', draftHasChanges(draft) ? 'blue' : 'gray');
+  }
+
+  function saveDraft() {
+    const draft = buildDraft();
+    localStorage.setItem(KEY, JSON.stringify(draft));
+    renderDraft(draft);
+  }
+
+  function loadDraft() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return;
+      const draft = JSON.parse(raw);
+      setVal('#draftAppName', draft.appName);
+      setVal('#draftShortName', draft.shortName);
+      setVal('#draftDescription', draft.description);
+      setVal('#draftThemeColor', draft.themeColor);
+      setVal('#draftBackgroundColor', draft.backgroundColor);
+      setVal('#draftStartUrl', draft.startUrl);
+      setVal('#draftDisplayMode', draft.displayMode);
+      renderDraft(draft);
+    } catch (error) {
+      localStorage.removeItem(KEY);
+    }
+  }
+
+  function clearDraft() {
+    ['#draftAppName','#draftShortName','#draftDescription','#draftThemeColor','#draftBackgroundColor','#draftStartUrl','#draftDisplayMode'].forEach(selector => setVal(selector, ''));
+    localStorage.removeItem(KEY);
+    text('#metadataDraftPreview', 'No draft plan saved yet.');
+    badge('Draft only', 'gray');
+  }
+
+  function downloadDraft() {
+    const draft = buildDraft();
+    const content = draftReport(draft);
+    const blob = new Blob([content], { type: 'text/markdown' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'Load_Tasks_Metadata_Draft_Change_Plan.md';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 300);
+  }
+
+  document.addEventListener('click', function(event) {
+    if (event.target.closest('#saveMetadataDraftBtn')) {
+      event.preventDefault();
+      saveDraft();
+      return;
+    }
+    if (event.target.closest('#clearMetadataDraftBtn')) {
+      event.preventDefault();
+      clearDraft();
+      return;
+    }
+    if (event.target.closest('#downloadMetadataDraftBtn')) {
+      event.preventDefault();
+      downloadDraft();
+      return;
+    }
+  }, true);
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadDraft);
+  } else {
+    loadDraft();
+  }
+
+  window.LoadTasksMetadataDraft = { saveDraft, clearDraft, downloadDraft, buildDraft };
+})();

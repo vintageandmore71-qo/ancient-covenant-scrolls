@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-loadtasks-version="5.13-builder-readiness-summary">
+<html lang="en" data-loadtasks-version="5.14-metadata-draft">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -14,7 +14,7 @@
   <link rel="icon" href="favicon.ico">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=5.13">
+  <link rel="stylesheet" href="styles.css?v=5.14">
 </head>
 <body>
   <a href="#main" class="skip-link">Skip to dashboard</a>
@@ -857,6 +857,39 @@
 
 
 
+
+          <div class="panel" id="builderMetadataDraftPanel">
+            <div class="panel-title">
+              <h2>Metadata draft plan</h2>
+              <span class="badge gray" id="builderMetadataDraftStatus">Draft only</span>
+            </div>
+            <p class="muted">Plan safe metadata changes before editing the ZIP. This does not change files.</p>
+            <div class="metadata-draft-grid">
+              <label>Draft app name<input id="draftAppName" placeholder="App name"></label>
+              <label>Draft short name<input id="draftShortName" placeholder="Short name"></label>
+              <label class="wide">Draft description<textarea id="draftDescription" placeholder="App description"></textarea></label>
+              <label>Draft theme color<input id="draftThemeColor" placeholder="#ffd400"></label>
+              <label>Draft background color<input id="draftBackgroundColor" placeholder="#050816"></label>
+              <label>Draft start URL<input id="draftStartUrl" placeholder="./"></label>
+              <label>Draft display mode
+                <select id="draftDisplayMode">
+                  <option value="">No change</option>
+                  <option value="standalone">standalone</option>
+                  <option value="fullscreen">fullscreen</option>
+                  <option value="minimal-ui">minimal-ui</option>
+                  <option value="browser">browser</option>
+                </select>
+              </label>
+            </div>
+            <div class="button-row">
+              <button class="primary-action" id="saveMetadataDraftBtn" type="button">Save Draft Plan</button>
+              <button class="secondary-action" id="clearMetadataDraftBtn" type="button">Clear Draft</button>
+              <button class="secondary-action" id="downloadMetadataDraftBtn" type="button">Download Draft Change Plan</button>
+            </div>
+            <div id="metadataDraftPreview" class="report-box">No draft plan saved yet.</div>
+          </div>
+
+
           <div class="panel" id="builderReadinessPanel">
             <div class="panel-title">
               <h2>PWA readiness summary</h2>
@@ -1037,6 +1070,6 @@
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
   </div>
   <script src="app.js?v=5.11"></script>
-  <script src="builder-inspector.js?v=5.13" defer></script>
+  <script src="builder-inspector.js?v=5.14" defer></script>
 </body>
 </html>

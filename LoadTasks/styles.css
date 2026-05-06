@@ -1139,3 +1139,39 @@ body.simple-mode .notes-row {
 .builder-issue-row.issue-red { border-left-color: rgba(255,92,92,.78); }
 .builder-issue-row.issue-blue { border-left-color: rgba(115,183,255,.75); }
 .builder-issue-row.issue-gray { border-left-color: rgba(183,187,204,.55); }
+
+
+/* v5.14 PWA Builder Metadata Draft Plan */
+.metadata-draft-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin: 16px 0;
+}
+.metadata-draft-grid label {
+  display: grid;
+  gap: 8px;
+}
+.metadata-draft-grid .wide {
+  grid-column: 1 / -1;
+}
+.metadata-draft-grid input,
+.metadata-draft-grid textarea,
+.metadata-draft-grid select {
+  width: 100%;
+  border: 1px solid var(--line-soft);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  border-radius: 16px;
+  padding: 14px;
+  font: inherit;
+}
+.metadata-draft-grid textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+@media (max-width: 900px) {
+  .metadata-draft-grid {
+    grid-template-columns: 1fr;
+  }
+}
