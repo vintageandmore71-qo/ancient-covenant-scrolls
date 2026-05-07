@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Asset Rights Inspector — Load</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<script src="../lib-load-db.js"></script>
+<script src="../lib-load-rights-inspector.js"></script>
+<script src="../../branding.js" data-brand-skip></script>
+<style>
+:root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--info:#60a5fa;--border:#2a2a40}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;font-size:14px}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#150a28 0,#0a0514 100%);border-bottom:1px solid var(--border)}
+header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)}
+header h1{margin:0;font-size:16px;font-weight:800;flex:1}
+.wrap{max-width:1200px;margin:0 auto;padding:24px 18px 80px}
+.build-marker{background:#facc15;color:#0a0a14;font-weight:900;font-size:13px;letter-spacing:.04em;padding:10px 14px;border-radius:10px;margin:0 0 14px;font-family:ui-monospace,Menlo,monospace;text-align:center}
+.intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin:0 0 14px;font-size:12.5px;color:var(--mute);line-height:1.55}
+.intro strong{color:var(--fg)}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0}
+button{font:inherit;padding:9px 14px;border-radius:8px;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-weight:700;font-size:13px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:14px 0}
+.s-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.s-card .v{font-size:24px;font-weight:900;line-height:1;color:#fff}
+.s-card .l{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mute);margin-top:4px;font-family:ui-monospace,Menlo,monospace}
+.s-card.ok .v{color:var(--ok)}
+.s-card.warn .v{color:var(--warn)}
+.s-card.err .v{color:var(--err)}
+.publish-card{padding:14px 16px;border-radius:14px;margin:14px 0;font-weight:700}
+.publish-card.ok{background:rgba(74,222,128,.10);border:1px solid rgba(74,222,128,.5);color:#a7f3c5}
+.publish-card.block{background:rgba(255,110,110,.10);border:1px solid rgba(255,110,110,.5);color:#ff9a9a}
+.scenes{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.scene{padding:14px 16px;border-bottom:1px solid var(--border)}
+.scene:last-child{border-bottom:none}
+.scene .head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-weight:700;margin-bottom:6px}
+.scene .id{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--mute);font-weight:400}
+.row{display:grid;grid-template-columns:1.5fr 90px 130px 1fr 120px;gap:8px;padding:6px 10px;border-bottom:1px dashed #1f2030;align-items:center;font-size:12.5px}
+.row:last-child{border-bottom:none}
+.row.head{background:transparent;font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);border-bottom:1px solid var(--border)}
+.cell{font-size:11px;font-weight:800;text-align:center;padding:5px 8px;border-radius:6px;background:#0a0e18;color:var(--mute);border:1px solid var(--border);font-family:ui-monospace,Menlo,monospace}
+.cell.user-owned,.cell.public-domain,.cell.licensed,.cell.platform-original,.cell.user-generated,.cell.user-recorded,.cell.third-party-licensed{background:rgba(74,222,128,.18);color:var(--ok);border-color:rgba(74,222,128,.4)}
+.cell.unknown,.cell.needs-review{background:rgba(255,110,110,.18);color:var(--err);border-color:rgba(255,110,110,.4)}
+.empty{padding:20px;text-align:center;color:var(--mute);font-style:italic}
+.report{background:#0a0e18;border:1px solid var(--border);border-radius:8px;padding:12px;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--fg);white-space:pre-wrap;word-break:break-word;max-height:380px;overflow:auto;margin-top:12px;display:none}
+@media(max-width:760px){.row{grid-template-columns:1fr;gap:4px}.row.head{display:none}.cell{display:inline-block;margin-right:6px}}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="./handoff-tools.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Handoff Tools
+  </a>
+  <h1>Asset Rights Inspector</h1>
+</header>
+<div class="wrap">
+<div class="build-marker">BUILD MARKER: RIGHTS-INSPECTOR-v1-2026-05-07-v17g45</div>
+<div class="intro">
+  <strong>Reliability addendum #9.</strong> Walks every scene in <code>LoadDB.scenes</code>, looks up its <code>rights-{sceneId}</code> envelope and <code>asset-decl-{sceneId}</code> entries from <code>kv</code>, and classifies every asset against the 9-value spec status enum. <strong>Status <code>unknown</code> or <code>needs-review</code> blocks LoadPlay publish-prep.</strong>
+</div>
+
+<div class="controls">
+  <button class="primary" id="run">Run rights inspection</button>
+  <button id="copy-report">Copy report</button>
+  <button id="download-report">Download report</button>
+  <span id="status" style="font-size:12px;color:var(--mute)"></span>
+</div>
+
+<div class="summary" id="summary"></div>
+<div id="publish-card"></div>
+<div class="scenes" id="scenes"></div>
+
+<pre class="report" id="report"></pre>
+</div>
+
+<script>
+'use strict';
+var $ = function (id) { return document.getElementById(id); };
+function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+if (!window.LoadRightsInspector || !window.LoadDB) {
+  $('scenes').innerHTML = '<p style="color:var(--err);padding:20px">Required libs missing.</p>';
+} else {
+
+var I = window.LoadRightsInspector;
+var LAST_REPORT = null;
+
+function paint(report) {
+  LAST_REPORT = report;
+  // Summary
+  var html = '';
+  html += '<div class="s-card"><div class="v">' + report.scenes.length + '</div><div class="l">Scenes</div></div>';
+  html += '<div class="s-card"><div class="v">' + report.total + '</div><div class="l">Assets</div></div>';
+  var blockedCount = report.blockers.length;
+  html += '<div class="s-card ' + (blockedCount === 0 ? 'ok' : 'err') + '"><div class="v">' + blockedCount + '</div><div class="l">Blockers</div></div>';
+  I.STATUSES.forEach(function (s) {
+    var n = report.byStatus[s] || 0;
+    var cls = (s === 'unknown' || s === 'needs-review') ? 'err' : (n > 0 ? 'ok' : '');
+    html += '<div class="s-card ' + cls + '"><div class="v">' + n + '</div><div class="l">' + esc(s) + '</div></div>';
+  });
+  $('summary').innerHTML = html;
+
+  var blocks = I.blocksPublish(report);
+  $('publish-card').innerHTML = '<div class="publish-card ' + (blocks ? 'block' : 'ok') + '">' +
+    (blocks ? 'BLOCKED — LoadPlay publish-prep blocked by ' + blockedCount + ' asset(s) with status unknown / needs-review.' : 'CLEAR — LoadPlay publish-prep is not blocked by rights at this time.') +
+    '</div>';
+
+  if (!report.scenes.length) {
+    $('scenes').innerHTML = '<div class="empty">No scenes in Project Memory yet. Attach a scene from AI Chat Studio first.</div>';
+    return;
+  }
+  var sh = '';
+  report.scenes.forEach(function (s) {
+    sh += '<div class="scene"><div class="head">' + esc(s.sceneId) + ' <span class="id">thread=' + esc(s.threadId || '-') + '</span>' +
+      ' <span class="cell ' + (s.sceneBlocksPublish ? 'unknown' : 'platform-original') + '">' + (s.sceneBlocksPublish ? 'blocks' : 'clear') + '</span></div>';
+    sh += '<div class="row head"><div>Asset</div><div class="cell">Kind</div><div class="cell">Status</div><div>Evidence</div><div class="cell">Publish</div></div>';
+    if (!s.assets.length) {
+      sh += '<div class="empty" style="padding:8px">No declarations found for this scene.</div>';
+    } else {
+      s.assets.forEach(function (a) {
+        sh += '<div class="row">' +
+          '<div style="font-family:ui-monospace,Menlo,monospace;font-size:11px;word-break:break-all">' + esc((a.asset || '').slice(0, 200)) + '</div>' +
+          '<div class="cell">' + esc(a.kind || '-') + '</div>' +
+          '<div class="cell ' + esc(a.status) + '">' + esc(a.status) + '</div>' +
+          '<div style="font-size:11.5px;color:var(--mute)">' + esc(a.evidence || '') + (a.source ? '<br>source: ' + esc(a.source) : '') + '</div>' +
+          '<div class="cell ' + (a.blocksPublish ? 'unknown' : 'platform-original') + '">' + (a.blocksPublish ? 'BLOCK' : 'OK') + '</div>' +
+        '</div>';
+      });
+    }
+    sh += '</div>';
+  });
+  $('scenes').innerHTML = sh;
+}
+
+function run() {
+  $('status').textContent = 'inspecting...';
+  return I.inspectAll().then(function (report) {
+    paint(report);
+    $('status').textContent = 'done. ' + new Date().toLocaleTimeString() + ' · ' + report.total + ' asset(s) inspected, ' + report.blockers.length + ' blocker(s)';
+  }).catch(function (e) { $('status').textContent = 'error: ' + ((e && e.message) || e); });
+}
+
+function buildReport() {
+  if (!LAST_REPORT) return Promise.resolve('Run an inspection first.');
+  var lines = ['LOAD ASSET RIGHTS INSPECTOR REPORT', 'Build: RIGHTS-INSPECTOR-v1-2026-05-07-v17g45', 'Generated: ' + new Date().toString(), ''];
+  lines.push('Scenes: ' + LAST_REPORT.scenes.length + ', Assets: ' + LAST_REPORT.total + ', Blockers: ' + LAST_REPORT.blockers.length);
+  lines.push('Publish-prep: ' + (I.blocksPublish(LAST_REPORT) ? 'BLOCKED' : 'CLEAR'));
+  lines.push('');
+  lines.push('By status:');
+  I.STATUSES.forEach(function (s) { lines.push('  ' + s + ': ' + (LAST_REPORT.byStatus[s] || 0)); });
+  lines.push('');
+  LAST_REPORT.scenes.forEach(function (s) {
+    lines.push('## ' + s.sceneId + ' (thread=' + (s.threadId || '-') + ', blocksPublish=' + s.sceneBlocksPublish + ')');
+    s.assets.forEach(function (a) {
+      lines.push('  ' + (a.kind || '-') + ' ' + a.status + (a.blocksPublish ? ' [BLOCK]' : '') + ' — ' + (a.asset || '').slice(0, 200) + ' — ' + a.evidence);
+    });
+    lines.push('');
+  });
+  return Promise.resolve(lines.join('\n'));
+}
+
+function copyText(t) {
+  if (navigator.clipboard) return navigator.clipboard.writeText(t).then(function () { return true; }).catch(function () { return false; });
+  try { var ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); return Promise.resolve(true); } catch (_) { return Promise.resolve(false); }
+}
+
+$('run').addEventListener('click', run);
+$('copy-report').addEventListener('click', function () { buildReport().then(function (t) { var pre = $('report'); pre.style.display = 'block'; pre.textContent = t; copyText(t).then(function (ok) { alert(ok ? 'Rights report copied.' : 'Copy failed.'); }); }); });
+$('download-report').addEventListener('click', function () { buildReport().then(function (t) { var pre = $('report'); pre.style.display = 'block'; pre.textContent = t; var blob = new Blob([t], { type: 'text/plain' }); var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'load-rights-' + Date.now() + '.txt'; a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 1500); }); });
+
+run();
+
+}
+</script>
+</body>
+</html>
