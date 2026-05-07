@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Continuity Lock — Load</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<script src="../lib-load-db.js"></script>
+<script src="../lib-load-prompt-compiler.js"></script>
+<script src="../lib-load-continuity.js"></script>
+<script src="../../branding.js" data-brand-skip></script>
+<style>
+:root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--info:#60a5fa;--border:#2a2a40}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;font-size:14px}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#150a28 0,#0a0514 100%);border-bottom:1px solid var(--border)}
+header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)}
+header h1{margin:0;font-size:16px;font-weight:800;flex:1}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 18px 80px}
+.build-marker{background:#facc15;color:#0a0a14;font-weight:900;font-size:13px;letter-spacing:.04em;padding:10px 14px;border-radius:10px;margin:0 0 14px;font-family:ui-monospace,Menlo,monospace;text-align:center}
+.intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin:0 0 14px;font-size:12.5px;color:var(--mute);line-height:1.55}
+.intro strong{color:var(--fg)}
+.section{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px;margin:0 0 14px}
+.section h3{margin:0 0 10px;font-size:13px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.05em}
+button{font:inherit;padding:9px 14px;border-radius:8px;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-weight:700;font-size:13px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.danger{background:rgba(255,110,110,.18);color:var(--err);border-color:rgba(255,110,110,.4)}
+button.small{font-size:11.5px;padding:5px 10px}
+input[type=text],select{background:#0a0e18;border:1px solid var(--border);border-radius:8px;color:var(--fg);font:inherit;font-size:14px;padding:8px 10px;width:100%}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.locks{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:760px){.locks{grid-template-columns:1fr}}
+.lock{background:#0a0e18;border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.lock .lbl{font-size:10.5px;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;font-weight:800;margin-bottom:6px;font-family:ui-monospace,Menlo,monospace}
+.lock .target{font-size:10.5px;color:var(--mute);font-family:ui-monospace,Menlo,monospace;margin-top:4px}
+.row{display:grid;grid-template-columns:130px 110px 1fr 1fr 80px;gap:8px;padding:8px 10px;border-bottom:1px solid var(--border);align-items:center;font-size:12.5px}
+.row.head{background:#1a1a2e;font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
+.row:last-child{border-bottom:none}
+.cell{font-size:11px;font-weight:800;text-align:center;padding:5px 8px;border-radius:6px;background:#0a0e18;color:var(--mute);border:1px solid var(--border)}
+.cell.match{background:rgba(74,222,128,.18);color:var(--ok);border-color:rgba(74,222,128,.4)}
+.cell.miss{background:rgba(250,204,21,.18);color:var(--warn);border-color:rgba(250,204,21,.4)}
+.cell.fail{background:rgba(255,110,110,.18);color:var(--err);border-color:rgba(255,110,110,.4)}
+.empty{padding:14px;text-align:center;color:var(--mute);font-style:italic;font-size:12.5px}
+.proof{background:#0a0e18;border:1px solid var(--border);border-radius:8px;padding:10px;font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:var(--fg);white-space:pre-wrap;word-break:break-word;max-height:380px;overflow:auto;margin-top:10px}
+.summary{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--mute);margin:0 0 10px}
+.summary strong{color:var(--fg)}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="./handoff-tools.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Handoff Tools
+  </a>
+  <h1>Continuity Lock</h1>
+</header>
+<div class="wrap">
+<div class="build-marker">BUILD MARKER: CONTINUITY-LOCK-v1-2026-05-07-v17g52</div>
+<div class="intro">
+  <strong>Reliability addendum #16.</strong> Per-thread locks for <em>character, wardrobe, era, style, location, tone, voice direction, lighting direction</em>. Locks persist in <code>LoadDB.kv['continuity-locks-{threadId}']</code>. <code>applyToPrompt()</code> appends each non-empty lock to the matching compiled-prompt layers (idempotent), and <code>diff()</code> compares thread locks to every scene's continuity record so drift is visible.
+</div>
+
+<div class="section">
+  <h3>1. Pick a thread</h3>
+  <div class="controls">
+    <select id="thread-pick" style="flex:1"><option value="">Loading…</option></select>
+    <button id="reload">Reload</button>
+    <span class="status" id="thread-status" style="font-size:12px;color:var(--mute)"></span>
+  </div>
+</div>
+
+<div class="section">
+  <h3>2. Lock fields</h3>
+  <div class="locks" id="locks"></div>
+  <div class="controls" style="margin-top:12px">
+    <button class="primary" id="save">Save locks</button>
+    <button class="danger" id="clear">Clear all</button>
+    <span class="status" id="save-status" style="font-size:12px;color:var(--mute)"></span>
+  </div>
+</div>
+
+<div class="section">
+  <h3>3. Drift report</h3>
+  <p style="font-size:12.5px;color:var(--mute);margin:0 0 10px">Compares the saved locks against every scene's <code>kv['continuity-{sceneId}']</code> record for this thread. <em>Mismatch</em> = scene contradicts the lock. <em>Missing</em> = scene has no value for that lock key.</p>
+  <div class="summary" id="drift-summary"></div>
+  <div id="drift"></div>
+</div>
+
+<div class="section">
+  <h3>4. Live apply preview</h3>
+  <p style="font-size:12.5px;color:var(--mute);margin:0 0 10px">Type a sample request and see the locked compiled prompt that would actually go to the provider.</p>
+  <div class="controls">
+    <input type="text" id="preview-text" placeholder="e.g. Bring this image to life with mocking laughter">
+    <button id="preview">Compile + apply locks</button>
+  </div>
+  <pre class="proof" id="preview-out" style="display:none"></pre>
+</div>
+
+</div>
+
+<script>
+'use strict';
+var $ = function (id) { return document.getElementById(id); };
+function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+if (!window.LoadDB || !window.LoadContinuity || !window.LoadPromptCompiler) {
+  $('locks').innerHTML = '<p style="color:var(--err);padding:20px">Required libs missing.</p>';
+} else {
+
+var DB = window.LoadDB;
+var C = window.LoadContinuity;
+var PC = window.LoadPromptCompiler;
+var CURRENT = '';
+var LOCKS = {};
+
+function paintLocks() {
+  var html = '';
+  C.LOCK_KEYS.forEach(function (k) {
+    var v = LOCKS[k] || '';
+    var targets = (C.PROMPT_TARGETS[k] || []).join(', ');
+    html += '<div class="lock"><div class="lbl">' + esc(k) + '</div>' +
+      '<input type="text" data-lock="' + esc(k) + '" value="' + esc(v) + '" placeholder="(empty = no lock)">' +
+      '<div class="target">applies to: ' + esc(targets || '-') + '</div></div>';
+  });
+  $('locks').innerHTML = html;
+  Array.prototype.slice.call(document.querySelectorAll('[data-lock]')).forEach(function (el) {
+    el.addEventListener('input', function () { LOCKS[el.getAttribute('data-lock')] = el.value; });
+  });
+}
+
+function loadThreads() {
+  return Promise.all([DB.getAll('scenes', 500), DB.getAll('kv', 2000)]).then(function (rows) {
+    var threads = {};
+    rows[0].map(function (r) { return r.value; }).filter(function (v) { return v && v.threadId; }).forEach(function (s) { threads[s.threadId] = (threads[s.threadId] || 0) + 1; });
+    rows[1].forEach(function (r) {
+      if (typeof r.key === 'string' && r.key.indexOf('queue-') === 0 && r.value && r.value.threadId) {
+        threads[r.value.threadId] = threads[r.value.threadId] || 0;
+      }
+    });
+    var sel = $('thread-pick'); sel.innerHTML = '';
+    var ids = Object.keys(threads).sort();
+    if (!ids.length) { sel.appendChild(new Option('No threads found — attach a scene in Chat Studio first', '')); return; }
+    sel.appendChild(new Option('— pick a thread —', ''));
+    ids.forEach(function (id) { sel.appendChild(new Option(id + ' (' + threads[id] + ' scene' + (threads[id] === 1 ? '' : 's') + ')', id)); });
+  });
+}
+loadThreads();
+
+function reloadLocks() {
+  if (!CURRENT) { LOCKS = {}; paintLocks(); $('drift').innerHTML = ''; $('drift-summary').innerHTML = ''; return; }
+  $('thread-status').textContent = 'reading locks…';
+  C.getLocks(CURRENT).then(function (locks) {
+    LOCKS = locks;
+    paintLocks();
+    $('thread-status').textContent = 'thread ' + CURRENT;
+    return C.diff(CURRENT);
+  }).then(paintDrift);
+}
+
+function paintDrift(report) {
+  var checked = report.scenesChecked.length;
+  var conflicts = report.conflicts.length;
+  $('drift-summary').innerHTML = '<span><strong>' + checked + '</strong> scene(s) checked</span><span><strong>' + conflicts + '</strong> drift conflict(s)</span>';
+  if (!checked) {
+    $('drift').innerHTML = '<div class="empty">No scenes attached to this thread yet.</div>';
+    return;
+  }
+  if (!conflicts) {
+    $('drift').innerHTML = '<div class="empty" style="color:var(--ok)">All scenes match the saved locks (or no locks set).</div>';
+    return;
+  }
+  var html = '<div class="row head"><div>Scene</div><div>Lock key</div><div>Locked</div><div>Actual</div><div class="cell">Kind</div></div>';
+  report.conflicts.forEach(function (c) {
+    html += '<div class="row">' +
+      '<div style="font-family:ui-monospace,Menlo,monospace;font-size:11px">' + esc(c.sceneId) + '</div>' +
+      '<div>' + esc(c.key) + '</div>' +
+      '<div style="font-size:11.5px;color:var(--mute)">' + esc(c.locked) + '</div>' +
+      '<div style="font-size:11.5px;color:var(--mute)">' + esc(c.actual || '(none)') + '</div>' +
+      '<div class="cell ' + (c.kind === 'mismatch' ? 'fail' : 'miss') + '">' + esc(c.kind) + '</div>' +
+      '</div>';
+  });
+  $('drift').innerHTML = html;
+}
+
+$('thread-pick').addEventListener('change', function () { CURRENT = this.value; reloadLocks(); });
+$('reload').addEventListener('click', reloadLocks);
+
+$('save').addEventListener('click', function () {
+  if (!CURRENT) { $('save-status').textContent = 'pick a thread'; return; }
+  var jobs = C.LOCK_KEYS.map(function (k) { return C.setLock(CURRENT, k, LOCKS[k] || ''); });
+  Promise.all(jobs).then(function () {
+    $('save-status').textContent = 'saved at ' + new Date().toLocaleTimeString();
+    return C.diff(CURRENT);
+  }).then(paintDrift);
+});
+$('clear').addEventListener('click', function () {
+  if (!CURRENT) return;
+  if (!confirm('Clear all 8 locks on this thread?')) return;
+  C.clearAll(CURRENT).then(reloadLocks);
+});
+
+$('preview').addEventListener('click', function () {
+  if (!CURRENT) { $('preview-out').style.display = 'block'; $('preview-out').textContent = 'pick a thread first'; return; }
+  var compiled = PC.compile($('preview-text').value || '(no text)');
+  C.applyToPrompt(CURRENT, compiled).then(function (locked) {
+    $('preview-out').style.display = 'block';
+    $('preview-out').textContent = 'BEFORE LOCKS\n------------\n' + JSON.stringify(compiled, null, 2) + '\n\nAFTER LOCKS\n-----------\n' + JSON.stringify(locked, null, 2);
+  });
+});
+
+}
+</script>
+</body>
+</html>
