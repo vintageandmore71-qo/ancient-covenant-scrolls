@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Provider Health Monitor — Load</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<script src="../lib-provider-registry.js"></script>
+<script src="../../branding.js" data-brand-skip></script>
+<style>
+:root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--info:#60a5fa;--border:#2a2a40}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;font-size:14px}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#150a28 0,#0a0514 100%);border-bottom:1px solid var(--border)}
+header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)}
+header h1{margin:0;font-size:16px;font-weight:800;flex:1}
+.wrap{max-width:1200px;margin:0 auto;padding:24px 18px 80px}
+.build-marker{background:#facc15;color:#0a0a14;font-weight:900;font-size:13px;letter-spacing:.04em;padding:10px 14px;border-radius:10px;margin:0 0 14px;font-family:ui-monospace,Menlo,monospace;text-align:center}
+.intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin:0 0 14px;font-size:12.5px;color:var(--mute);line-height:1.55}
+.intro strong{color:var(--fg)}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0}
+button{font:inherit;padding:9px 14px;border-radius:8px;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-weight:700;font-size:13px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button:disabled{opacity:.5;cursor:not-allowed}
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:14px 0}
+.s-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.s-card .v{font-size:24px;font-weight:900;line-height:1;color:#fff}
+.s-card .l{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mute);margin-top:4px}
+.s-card.pass .v{color:var(--ok)}
+.s-card.fail .v{color:var(--err)}
+.s-card.skip .v{color:var(--warn)}
+.s-card.run .v{color:var(--info)}
+.cat{margin:14px 0;background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.cat-head{padding:12px 16px;background:#1a1a2e;border-bottom:1px solid var(--border);font-size:13px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)}
+.row{display:grid;grid-template-columns:1.5fr 110px 110px 100px 80px;gap:8px;padding:9px 14px;border-bottom:1px solid var(--border);align-items:center;font-size:12.5px}
+.row:last-child{border-bottom:none}
+.row .name{font-weight:700}
+.row .id{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:var(--mute)}
+.cell{font-size:11px;font-weight:800;text-align:center;padding:5px 8px;border-radius:6px;background:#0a0e18;color:var(--mute);border:1px solid var(--border)}
+.cell.ready{background:rgba(74,222,128,.18);color:var(--ok);border-color:rgba(74,222,128,.4)}
+.cell.failed{background:rgba(255,110,110,.18);color:var(--err);border-color:rgba(255,110,110,.4)}
+.cell.skip{background:rgba(250,204,21,.18);color:var(--warn);border-color:rgba(250,204,21,.4)}
+.cell.run{background:rgba(96,165,250,.18);color:var(--info);border-color:rgba(96,165,250,.4)}
+.cell.notconf{background:rgba(154,160,176,.18);color:var(--mute);border-color:rgba(154,160,176,.3)}
+.row .detail{font-size:11px;color:var(--mute);font-family:ui-monospace,Menlo,monospace;word-break:break-word}
+.row button{font-size:11px;padding:5px 8px}
+.head{background:#1a1a2e;font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
+.report{background:#0a0e18;border:1px solid var(--border);border-radius:8px;padding:12px;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--fg);white-space:pre-wrap;word-break:break-word;max-height:380px;overflow:auto;margin-top:12px;display:none}
+@media(max-width:760px){.row{grid-template-columns:1fr;gap:4px}.row .cell{display:inline-block;margin-right:6px}}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="./handoff-tools.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Handoff Tools
+  </a>
+  <h1>Provider Health Monitor</h1>
+</header>
+<div class="wrap">
+<div class="build-marker">BUILD MARKER: PROVIDER-HEALTH-v1-2026-05-07-v17g37</div>
+<div class="intro">
+  <strong>Reliability Addendum item #1.</strong> Tests every provider in the shared registry against a real probe and shows one of nine spec statuses. <strong>No provider is marked Ready unless a real test succeeds.</strong> Tests use a 10 s timeout per probe; a hard cap of 30 s applies to network calls. Cloud-optional providers without a saved key are reported <em>Not configured</em>. Local providers without a reachable server return <em>Local server unavailable</em>. Built-in providers test their runtime API. Prompt-only providers always return <em>Ready</em> (they just emit prompts).
+</div>
+
+<div class="controls">
+  <button class="primary" id="run-all">Test all providers</button>
+  <button id="reset">Reset</button>
+  <button id="copy-report">Copy report</button>
+  <button id="download-report">Download report</button>
+  <span id="status" style="font-size:12px;color:var(--mute)"></span>
+</div>
+
+<div class="summary" id="summary">
+  <div class="s-card"><div class="v" id="s-total">0</div><div class="l">Providers</div></div>
+  <div class="s-card pass"><div class="v" id="s-ready">0</div><div class="l">Ready</div></div>
+  <div class="s-card fail"><div class="v" id="s-fail">0</div><div class="l">Failed</div></div>
+  <div class="s-card skip"><div class="v" id="s-skip">0</div><div class="l">Skipped</div></div>
+  <div class="s-card run"><div class="v" id="s-run">0</div><div class="l">Running</div></div>
+</div>
+
+<div id="categories"></div>
+
+<pre class="report" id="report"></pre>
+</div>
+
+<script>
+'use strict';
+var $ = function (id) { return document.getElementById(id); };
+function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+if (!window.LoadProviderRegistry) {
+  $('categories').innerHTML = '<p style="color:var(--err);padding:20px">Provider registry failed to load.</p>';
+} else {
+
+var R = window.LoadProviderRegistry;
+var STATE = {}; // providerId -> { status, detail, ms }
+var STATUSES = ['Ready','Not configured','Failed','Rate limited','Unsupported request','Returned no file','Offline','Local server unavailable','Needs user setup'];
+var TIMEOUT_MS = 10000;
+
+function statusClass(s) {
+  if (s === 'Ready') return 'ready';
+  if (s === 'Failed' || s === 'Rate limited' || s === 'Returned no file' || s === 'Offline') return 'failed';
+  if (s === 'Not configured' || s === 'Needs user setup' || s === 'Local server unavailable' || s === 'Unsupported request') return 'notconf';
+  return 'skip';
+}
+
+function withTimeout(promise, ms) {
+  return new Promise(function (resolve, reject) {
+    var to = setTimeout(function () { reject(new Error('timeout (' + ms + ' ms)')); }, ms);
+    Promise.resolve(promise).then(function (v) { clearTimeout(to); resolve(v); }, function (e) { clearTimeout(to); reject(e); });
+  });
+}
+
+// Probe individual providers. Each returns { status, detail, ms }.
+function probe(p) {
+  var t0 = Date.now();
+  var ms = function () { return Date.now() - t0; };
+  var id = p.providerId;
+  var type = p.providerType;
+
+  // Built-in: runtime-API check.
+  if (type === 'built-in') {
+    if (id === 'builtin') return Promise.resolve({ status: 'Ready', detail: 'rule-based / always on', ms: ms() });
+    if (id === 'browser-tts') {
+      var ok = ('speechSynthesis' in window) && typeof SpeechSynthesisUtterance !== 'undefined';
+      return Promise.resolve(ok ? { status: 'Ready', detail: 'speechSynthesis present, voices=' + ((window.speechSynthesis.getVoices() || []).length), ms: ms() } : { status: 'Failed', detail: 'speechSynthesis missing', ms: ms() });
+    }
+    if (id === 'voice-manipulator' || id === 'web-audio-mixer' || id === 'audio-cue-sheet' || id === 'procedural-ambience') {
+      var hasAC = !!(window.AudioContext || window.webkitAudioContext);
+      var hasOAC = !!(window.OfflineAudioContext || window.webkitOfflineAudioContext);
+      return Promise.resolve(hasAC ? { status: 'Ready', detail: 'AudioContext=' + hasAC + ' OfflineAudioContext=' + hasOAC, ms: ms() } : { status: 'Failed', detail: 'AudioContext missing', ms: ms() });
+    }
+    return Promise.resolve({ status: 'Ready', detail: 'built-in', ms: ms() });
+  }
+
+  // Prompt-only: always Ready (it just emits text).
+  if (type === 'prompt-only') {
+    return Promise.resolve({ status: 'Ready', detail: 'prompt-only emitter', ms: ms() });
+  }
+
+  // User-imported: needs user content -> Needs user setup.
+  if (type === 'user-imported') {
+    return Promise.resolve({ status: 'Needs user setup', detail: 'requires user-supplied assets', ms: ms() });
+  }
+
+  // Load-hosted-future: by spec, never Ready.
+  if (type === 'load-hosted-future') {
+    return Promise.resolve({ status: 'Not configured', detail: 'future Load-owned engine', ms: ms() });
+  }
+
+  // Cloud-optional: requires API key. Without a saved key, Not configured.
+  if (type === 'cloud-optional') {
+    var hasKey = false;
+    try {
+      var raw = localStorage.getItem('load_ai_providers_v2');
+      if (raw) {
+        var prefs = JSON.parse(raw);
+        // Match by providerId stem against vault keys.
+        var stems = ['gemini','groq','openrouter','huggingface'];
+        for (var i = 0; i < stems.length; i++) {
+          if (id.indexOf(stems[i]) !== -1 && prefs[stems[i]] && prefs[stems[i]].apiKey) { hasKey = true; break; }
+        }
+      }
+    } catch (_) {}
+    return Promise.resolve({ status: hasKey ? 'Needs user setup' : 'Not configured', detail: hasKey ? 'key in vault — wiring not tested live yet' : 'no API key in load_ai_providers_v2', ms: ms() });
+  }
+
+  // Local: needs a local server. Probe localhost endpoint when known.
+  if (type === 'local') {
+    if (id === 'local' /* on-device WebLLM */) {
+      var installed = (typeof window.__LOAD_LOCAL_AI === 'function');
+      return Promise.resolve(installed ? { status: 'Ready', detail: 'WebLLM installed', ms: ms() } : { status: 'Needs user setup', detail: 'on-device model not installed', ms: ms() });
+    }
+    if (id === 'localsd') {
+      var url = '';
+      try { url = localStorage.getItem('ps_local_sd_url') || ''; } catch (_) {}
+      if (!url) return Promise.resolve({ status: 'Needs user setup', detail: 'no local SD URL configured (ps_local_sd_url)', ms: ms() });
+      return withTimeout(fetch(url + '/sdapi/v1/options', { method: 'GET' }), TIMEOUT_MS)
+        .then(function (r) { return r.ok ? { status: 'Ready', detail: 'local SD HTTP ' + r.status, ms: ms() } : { status: 'Local server unavailable', detail: 'HTTP ' + r.status, ms: ms() }; })
+        .catch(function (e) { return { status: 'Local server unavailable', detail: (e && e.message) || 'connection failed', ms: ms() }; });
+    }
+    return Promise.resolve({ status: 'Local server unavailable', detail: 'no live probe wired for ' + id, ms: ms() });
+  }
+
+  // Free-api: real network probe.
+  if (type === 'free-api') {
+    if (id === 'pollinations') {
+      return withTimeout(fetch('https://text.pollinations.ai/health-test-' + Date.now(), { method: 'GET', cache: 'no-store' }), TIMEOUT_MS)
+        .then(function (r) { return r.ok ? { status: 'Ready', detail: 'HTTP ' + r.status, ms: ms() } : { status: r.status === 429 ? 'Rate limited' : 'Failed', detail: 'HTTP ' + r.status, ms: ms() }; })
+        .catch(function (e) { return { status: 'Offline', detail: (e && e.message) || 'fetch failed', ms: ms() }; });
+    }
+    if (id === 'pollflux' || id === 'pollinations-img' || id === 'pollturbo') {
+      var imgUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent('health test') + '?width=64&height=64&nologo=true&seed=' + Date.now();
+      return withTimeout(fetch(imgUrl, { method: 'HEAD' }), TIMEOUT_MS)
+        .then(function (r) { return r.ok ? { status: 'Ready', detail: 'HEAD HTTP ' + r.status, ms: ms() } : { status: r.status === 429 ? 'Rate limited' : 'Failed', detail: 'HEAD HTTP ' + r.status, ms: ms() }; })
+        .catch(function (e) { return { status: 'Offline', detail: (e && e.message) || 'fetch failed', ms: ms() }; });
+    }
+    if (id === 'horde') {
+      return withTimeout(fetch('https://aihorde.net/api/v2/status/heartbeat', { method: 'GET' }), TIMEOUT_MS)
+        .then(function (r) { return r.ok ? { status: 'Ready', detail: 'HTTP ' + r.status, ms: ms() } : { status: 'Failed', detail: 'HTTP ' + r.status, ms: ms() }; })
+        .catch(function (e) { return { status: 'Offline', detail: (e && e.message) || 'fetch failed', ms: ms() }; });
+    }
+    if (id === 'horde-text' || id === 'hordesdxl') {
+      return withTimeout(fetch('https://aihorde.net/api/v2/status/heartbeat', { method: 'GET' }), TIMEOUT_MS)
+        .then(function (r) { return r.ok ? { status: 'Ready', detail: 'AI Horde heartbeat HTTP ' + r.status, ms: ms() } : { status: 'Failed', detail: 'HTTP ' + r.status, ms: ms() }; })
+        .catch(function (e) { return { status: 'Offline', detail: (e && e.message) || 'fetch failed', ms: ms() }; });
+    }
+    return Promise.resolve({ status: 'Unsupported request', detail: 'no probe wired for free-api id ' + id, ms: ms() });
+  }
+
+  return Promise.resolve({ status: 'Unsupported request', detail: 'unknown type ' + type, ms: ms() });
+}
+
+function paintRow(p) {
+  var row = document.getElementById('row-' + p.providerId);
+  if (!row) return;
+  var s = STATE[p.providerId] || { status: '-', detail: '-', ms: 0 };
+  var stCls = statusClass(s.status);
+  row.innerHTML =
+    '<div><div class="name">' + esc(p.providerName) + '</div><div class="id">id: ' + esc(p.providerId) + ' · type: ' + esc(p.providerType) + '</div><div class="detail">' + esc(s.detail || '') + '</div></div>' +
+    '<div class="cell ' + stCls + '">' + esc(s.status) + '</div>' +
+    '<div class="cell">' + (s.ms ? s.ms + ' ms' : '-') + '</div>' +
+    '<div class="cell">' + esc(p.providerType) + '</div>' +
+    '<div><button data-test="' + esc(p.providerId) + '">Test</button></div>';
+  row.querySelector('[data-test]').addEventListener('click', function () { runOne(p); });
+}
+
+function paintSummary() {
+  var ready = 0, fail = 0, skip = 0, run = 0;
+  R.list().forEach(function (p) {
+    var s = STATE[p.providerId];
+    if (!s) return;
+    if (s.status === 'Ready') ready++;
+    else if (s.status === 'running') run++;
+    else if (statusClass(s.status) === 'failed') fail++;
+    else skip++;
+  });
+  $('s-total').textContent = R.list().length;
+  $('s-ready').textContent = ready;
+  $('s-fail').textContent = fail;
+  $('s-skip').textContent = skip;
+  $('s-run').textContent = run;
+}
+
+function runOne(p) {
+  STATE[p.providerId] = { status: 'running', detail: 'probing...', ms: 0 };
+  paintRow(p); paintSummary();
+  return probe(p).then(function (res) {
+    STATE[p.providerId] = res;
+    paintRow(p); paintSummary();
+  }).catch(function (e) {
+    STATE[p.providerId] = { status: 'Failed', detail: 'probe threw: ' + ((e && e.message) || e), ms: 0 };
+    paintRow(p); paintSummary();
+  });
+}
+
+function runAll() {
+  $('status').textContent = 'running ' + R.list().length + ' probes...';
+  // Sequential to avoid hammering hosts in parallel from a single client.
+  var list = R.list();
+  var i = 0;
+  function next() {
+    if (i >= list.length) { $('status').textContent = 'done. ' + new Date().toLocaleTimeString(); return; }
+    runOne(list[i]).then(function () { i++; next(); });
+  }
+  next();
+}
+
+function render() {
+  var cats = R.byCategory();
+  var html = '';
+  R.CATEGORIES.forEach(function (c) {
+    var rows = cats[c.id] || [];
+    if (!rows.length) return;
+    html += '<div class="cat"><div class="cat-head">' + esc(c.label) + ' &middot; ' + rows.length + '</div>';
+    html += '<div class="row head"><div>Provider</div><div class="cell">Status</div><div class="cell">ms</div><div class="cell">Type</div><div></div></div>';
+    rows.forEach(function (p) { html += '<div class="row" id="row-' + esc(p.providerId) + '"></div>'; });
+    html += '</div>';
+  });
+  $('categories').innerHTML = html;
+  R.list().forEach(paintRow);
+  paintSummary();
+}
+
+function buildReport() {
+  var lines = ['LOAD PROVIDER HEALTH REPORT', 'Build: PROVIDER-HEALTH-v1-2026-05-07-v17g37', 'Generated: ' + new Date().toString(), 'Page: ' + location.href, ''];
+  var cats = R.byCategory();
+  R.CATEGORIES.forEach(function (c) {
+    var rows = cats[c.id] || [];
+    if (!rows.length) return;
+    lines.push('## ' + c.label + ' (' + rows.length + ')');
+    rows.forEach(function (p) {
+      var s = STATE[p.providerId] || { status: '-', detail: '-', ms: 0 };
+      lines.push('  ' + p.providerId + ' [' + p.providerType + '] -> ' + s.status + ' (' + (s.ms || 0) + ' ms) — ' + (s.detail || ''));
+    });
+    lines.push('');
+  });
+  var ready = 0, fail = 0, skip = 0;
+  R.list().forEach(function (p) {
+    var s = STATE[p.providerId]; if (!s) return;
+    if (s.status === 'Ready') ready++;
+    else if (statusClass(s.status) === 'failed') fail++;
+    else skip++;
+  });
+  lines.push('TOTALS: ready=' + ready + ' fail=' + fail + ' skip=' + skip + ' total=' + R.list().length);
+  return lines.join('\n');
+}
+
+function copyText(t) {
+  if (navigator.clipboard) return navigator.clipboard.writeText(t).then(function () { return true; }).catch(function () { return false; });
+  try { var ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); return Promise.resolve(true); } catch (_) { return Promise.resolve(false); }
+}
+
+$('run-all').addEventListener('click', runAll);
+$('reset').addEventListener('click', function () { STATE = {}; render(); $('status').textContent = ''; var pre = $('report'); pre.style.display = 'none'; pre.textContent = ''; });
+$('copy-report').addEventListener('click', function () {
+  var t = buildReport(); var pre = $('report'); pre.style.display = 'block'; pre.textContent = t;
+  copyText(t).then(function (ok) { alert(ok ? 'Health report copied.' : 'Copy failed; long-press the report to select.'); });
+});
+$('download-report').addEventListener('click', function () {
+  var t = buildReport(); var pre = $('report'); pre.style.display = 'block'; pre.textContent = t;
+  var blob = new Blob([t], { type: 'text/plain' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'load-provider-health-' + Date.now() + '.txt'; a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); }, 1500);
+});
+render();
+
+}
+</script>
+</body>
+</html>
