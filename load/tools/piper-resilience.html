@@ -105,7 +105,10 @@ input[type=text]{width:100%;padding:9px 11px;background:#0a0e18;border:1px solid
   <div class="row">
     <button class="btn" type="button" id="export-report">Export Voice Diagnostic Report (JSON)</button>
     <button class="btn" type="button" id="copy-report">Copy report</button>
+    <button class="btn primary" type="button" id="copy-plain">Copy as plain text (paste-back)</button>
   </div>
+  <div id="plain-out" class="result" style="margin-top:10px;display:none;max-height:280px;overflow:auto"></div>
+  <p style="font-size:12px;color:var(--mute);margin:8px 0 0">Use <strong>Copy as plain text</strong> to grab a single short summary of what worked / what failed (tests 1-4 + the env line + the exact play() error message). Paste it back into Load tomorrow and the Piper Stage 1 fix can land.</p>
 </div>
 
 </div>
@@ -259,6 +262,43 @@ $('copy-report').addEventListener('click', function () {
   report.generatedAt = new Date().toISOString();
   var t = JSON.stringify(report, null, 2);
   if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { alert('Diagnostic report copied.'); });
+  else alert(t);
+});
+
+// Plain-text paste-back summary for tomorrow's Piper Stage 1 fix.
+$('copy-plain').addEventListener('click', function () {
+  report.generatedAt = new Date().toISOString();
+  function txt(id) { var el = document.getElementById(id); return el ? (el.textContent || '').trim() : '(missing)'; }
+  var lines = [
+    'LOAD PIPER PLAIN-TEXT DIAGNOSTIC',
+    'Build: PIPER-RESILIENCE-' + (report.generatedAt || ''),
+    'URL: ' + location.href,
+    '',
+    'ENVIRONMENT',
+    txt('env'),
+    '',
+    'TESTS',
+    '1. Raw audio:           ' + txt('r-raw'),
+    '2. Browser voice:       ' + txt('r-speech'),
+    '3. Piper generate:      ' + txt('r-gen'),
+    '4. Piper generate+play: ' + txt('r-play'),
+    '',
+    'RECOVERY ACTIONS',
+    txt('r-recover'),
+    '',
+    'NEXT STEPS',
+    'Tomorrow we patch Piper based on which step failed:',
+    '- Test 1 fail  -> iPad audio output / mute / silent-mode investigation',
+    '- Test 2 fail  -> speechSynthesis init + iOS unlock-on-tap fix',
+    '- Test 3 fail  -> lib-piper.js generate() — model load / WASM init',
+    '- Test 4 fail  -> playback path: HTMLAudioElement src + autoplay policy',
+    '',
+    'Paste this whole block back to Claude tomorrow.'
+  ];
+  var t = lines.join('\n');
+  $('plain-out').style.display = 'block';
+  $('plain-out').textContent = t;
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { alert('Plain-text summary copied. Paste back tomorrow.'); }, function () { alert('Copy failed — long-press to select the text below.'); });
   else alert(t);
 });
 </script>
