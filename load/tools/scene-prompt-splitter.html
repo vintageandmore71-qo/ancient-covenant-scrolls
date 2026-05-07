@@ -16,6 +16,7 @@ header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px
 header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)}
 header h1{margin:0;font-size:16px;font-weight:800;flex:1}
 .wrap{max-width:980px;margin:0 auto;padding:24px 18px 80px}
+.build-marker{background:#facc15;color:#0a0a14;font-weight:900;font-size:13px;letter-spacing:.04em;padding:10px 14px;border-radius:10px;margin:0 0 14px;font-family:ui-monospace,Menlo,monospace;text-align:center}
 .intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin:0 0 18px}
 .intro h2{margin:0 0 6px;font-size:18px;font-weight:800}
 .intro p{margin:0;color:var(--mute);font-size:13.5px;line-height:1.6}
@@ -39,6 +40,18 @@ button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .lbl-chip{font-size:10.5px;padding:2px 8px;border-radius:8px;border:1px solid var(--border);background:#0a0e18;color:var(--mute);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
 .lbl-chip.on{background:rgba(74,222,128,.18);color:var(--ok);border-color:rgba(74,222,128,.4)}
 .notice{background:rgba(250,204,21,.08);border:1px solid rgba(250,204,21,.3);color:#fbe788;font-size:12.5px;padding:10px 12px;border-radius:8px;margin-top:10px;line-height:1.6}
+.debug-panel{background:#101020;border:2px solid var(--info);border-radius:12px;padding:14px 16px;margin:0 0 16px;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--fg)}
+.debug-panel h3{margin:0 0 10px;font-size:13px;font-weight:800;color:var(--info);letter-spacing:.05em;text-transform:uppercase;font-family:'Inter',sans-serif}
+.debug-row{display:grid;grid-template-columns:220px 1fr;gap:8px;padding:3px 0;border-bottom:1px dashed #1f2030}
+.debug-row:last-child{border-bottom:none}
+.debug-row .k{color:var(--mute)}
+.debug-row .v{color:var(--fg);word-break:break-word}
+.debug-row .v.ok{color:var(--ok)}
+.debug-row .v.err{color:var(--err)}
+.debug-row .v.warn{color:var(--warn)}
+.selftest{background:#0a0e18;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:10px;font-family:ui-monospace,Menlo,monospace;font-size:12px;white-space:pre-wrap}
+.selftest .pass{color:var(--ok)}
+.selftest .fail{color:var(--err)}
 </style>
 </head>
 <body>
@@ -50,9 +63,25 @@ button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
   <h1>Scene Prompt Splitter</h1>
 </header>
 <div class="wrap">
+
+<div class="build-marker" id="build-marker">BUILD MARKER: PROMPT-DEBUG-v18-2026-05-07-v17g17</div>
+
+<div class="debug-panel" id="debug-panel">
+  <h3>Debug Status Panel</h3>
+  <div id="debug-rows"></div>
+  <div class="toolbar">
+    <button id="btn-copy-debug">Copy Debug Report</button>
+    <button id="btn-download-debug">Download Debug Report</button>
+    <button id="btn-self-test" class="primary">Run Self-Test</button>
+    <button id="btn-copy-selftest">Copy Self-Test Result</button>
+    <button id="btn-download-selftest">Download Self-Test Result</button>
+  </div>
+  <pre class="selftest" id="selftest-output" style="display:none"></pre>
+</div>
+
 <div class="intro">
   <h2>X-VIDEO-AI + X-AI-AUDIO Phase 1 — prompt-only</h2>
-  <p>Type a single creation request like <em>&ldquo;Bring this image to life, have noise and mocking laughter.&rdquo;</em> The splitter emits the five structured prompts the addendum requires &mdash; visual, motion, camera, sound, music, SFX, ambience &mdash; and the spec-shaped scene object with all 14 audio fields. <strong>Prompt-only by default.</strong> No generation provider is called; outputs are scene-ready JSON for later wiring to real engines (ComfyUI, AnimateDiff, FFmpeg.wasm, Load Local Engine).</p>
+  <p>Type a single creation request like <em>&ldquo;Bring this image to life, have noise and mocking laughter.&rdquo;</em> The splitter emits the structured prompts the addendum requires &mdash; visual, motion, camera, sound, music, SFX, ambience &mdash; and the spec-shaped scene object with all 14 audio fields. <strong>Prompt-only by default.</strong> No generation provider is called; outputs are scene-ready JSON for later wiring to real engines.</p>
   <p style="margin-top:8px"><strong>Output proof rule:</strong> this tool only produces prompts; nothing claims a real video or audio file. Generators wired in later phases must verify a real file/blob/URL before marking output ready.</p>
 </div>
 
@@ -63,7 +92,7 @@ button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
   <input type="text" id="scene-id" placeholder="scene_ark_001">
   <h3 style="margin-top:14px">3. User request</h3>
   <textarea id="user-prompt" placeholder="Bring this image to life, have noise and mocking laughter."></textarea>
-  <div class="examples">
+  <div class="examples" id="examples-row">
     <button data-ex="ark">Ark mockers (addendum example)</button>
     <button data-ex="market">Marketplace haggle</button>
     <button data-ex="storm">Storm at sea</button>
@@ -77,11 +106,13 @@ button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 </div>
 
 <div class="section" id="result-section">
-  <h3>Structured prompts <span id="status-line" style="font-weight:400;font-size:11px;color:var(--mute);margin-left:8px;text-transform:none;letter-spacing:0">waiting for input&hellip;</span></h3>
-  <div class="prompts" id="prompts-grid"></div>
+  <h3>Structured prompts</h3>
+  <div class="prompts" id="prompts-grid">
+    <div class="prompt-box"><div class="lbl">Placeholder</div><div class="val">Prompt results will appear here.</div></div>
+  </div>
   <h3 style="margin-top:18px">Spec-shaped scene object</h3>
   <p style="font-size:12.5px;color:var(--mute);margin-bottom:6px">14 fields per the addendum. Audio status defaults to <code>sound_prompt_saved</code> and audio rights to <code>needs-review</code> until a real generator wires up.</p>
-  <pre class="scene-json" id="scene-json"></pre>
+  <pre class="scene-json" id="scene-json">Prompt results will appear here.</pre>
   <div class="toolbar">
     <button id="copy-json">Copy JSON</button>
     <button id="download-json">Download scene.json</button>
@@ -102,8 +133,81 @@ button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 </div>
 <script>
 'use strict';
+var BUILD_MARKER = 'PROMPT-DEBUG-v18-2026-05-07-v17g17';
 var $ = function (id) { return document.getElementById(id); };
 function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+var DEBUG = {
+  buildMarker: BUILD_MARKER,
+  pageUrl: '',
+  filePath: '',
+  jsLoaded: 'no',
+  scriptFileLoaded: 'scene-prompt-splitter inline script',
+  inputFieldFound: 'no',
+  inputHandlerAttached: 'no',
+  presetButtonsFound: 0,
+  lastInputValue: '',
+  lastInputEventType: '',
+  lastInputEventTime: '',
+  activePreset: '',
+  promptRenderAttempted: 'no',
+  promptRenderCount: 0,
+  sceneJsonRenderAttempted: 'no',
+  sceneJsonRenderCount: 0,
+  resultContainerFound: 'no',
+  resultContainerVisible: 'no',
+  resultContainerChildCount: 0,
+  lastError: '',
+  lastSuccessfulRenderTime: ''
+};
+
+var DEBUG_ROW_ORDER = [
+  ['Build marker', 'buildMarker'],
+  ['Page URL', 'pageUrl'],
+  ['Current file path', 'filePath'],
+  ['JavaScript loaded', 'jsLoaded'],
+  ['Script file loaded', 'scriptFileLoaded'],
+  ['Input field found', 'inputFieldFound'],
+  ['Input handler attached', 'inputHandlerAttached'],
+  ['Preset buttons found', 'presetButtonsFound'],
+  ['Last input value', 'lastInputValue'],
+  ['Last input event type', 'lastInputEventType'],
+  ['Last input event time', 'lastInputEventTime'],
+  ['Active preset', 'activePreset'],
+  ['Prompt render attempted', 'promptRenderAttempted'],
+  ['Prompt render count', 'promptRenderCount'],
+  ['Scene JSON render attempted', 'sceneJsonRenderAttempted'],
+  ['Scene JSON render count', 'sceneJsonRenderCount'],
+  ['Result container found', 'resultContainerFound'],
+  ['Result container visible', 'resultContainerVisible'],
+  ['Result container child count', 'resultContainerChildCount'],
+  ['Last error', 'lastError'],
+  ['Last successful render time', 'lastSuccessfulRenderTime']
+];
+
+function paintDebug() {
+  var rows = $('debug-rows');
+  if (!rows) return;
+  var html = '';
+  for (var i = 0; i < DEBUG_ROW_ORDER.length; i++) {
+    var k = DEBUG_ROW_ORDER[i][0], key = DEBUG_ROW_ORDER[i][1];
+    var v = DEBUG[key];
+    var cls = '';
+    if (v === 'yes') cls = 'ok';
+    else if (v === 'no') cls = 'err';
+    else if (key === 'lastError' && v) cls = 'err';
+    html += '<div class="debug-row"><span class="k">' + esc(k) + ':</span><span class="v ' + cls + '">' + esc(String(v == null ? '' : v)) + '</span></div>';
+  }
+  rows.innerHTML = html;
+}
+
+function buildReport() {
+  var out = 'LOAD DEBUG REPORT\n';
+  for (var i = 0; i < DEBUG_ROW_ORDER.length; i++) {
+    out += DEBUG_ROW_ORDER[i][0] + ': ' + (DEBUG[DEBUG_ROW_ORDER[i][1]] == null ? '' : DEBUG[DEBUG_ROW_ORDER[i][1]]) + '\n';
+  }
+  return out;
+}
 
 var EXAMPLES = {
   ark:    'Bring this image to life, have noise and mocking laughter.',
@@ -209,7 +313,8 @@ var CARD_TYPES = [
 ];
 
 function paint(r) {
-  var sl = $('status-line'); if (sl) sl.textContent = 'rendered ' + new Date().toLocaleTimeString();
+  DEBUG.promptRenderAttempted = 'yes';
+  DEBUG.promptRenderCount = DEBUG.promptRenderCount + 1;
   var grid = $('prompts-grid');
   var fields = [
     ['Visual',       r.visualPrompt],
@@ -222,67 +327,212 @@ function paint(r) {
     ['Music',        r.musicPrompt],
     ['Ambience',     r.ambiencePrompt]
   ];
-  grid.innerHTML = fields.map(function (f) {
-    return '<div class="prompt-box"><div class="lbl">' + esc(f[0]) + '</div><div class="val">' + esc(f[1] || '(empty)') + '</div></div>';
-  }).join('');
-  $('scene-json').textContent = JSON.stringify(r.scene, null, 2);
-  $('audio-labels').innerHTML = AUDIO_LABELS.map(function (l) {
+  if (grid) {
+    grid.innerHTML = fields.map(function (f) {
+      return '<div class="prompt-box"><div class="lbl">' + esc(f[0]) + '</div><div class="val">' + esc(f[1] || '(empty)') + '</div></div>';
+    }).join('');
+  }
+  DEBUG.sceneJsonRenderAttempted = 'yes';
+  DEBUG.sceneJsonRenderCount = DEBUG.sceneJsonRenderCount + 1;
+  var sj = $('scene-json'); if (sj) sj.textContent = JSON.stringify(r.scene, null, 2);
+  var al = $('audio-labels'); if (al) al.innerHTML = AUDIO_LABELS.map(function (l) {
     var on = (l === 'Sound prompt saved' || l === 'Audio provider needed' || l === 'Silent video');
     return '<span class="lbl-chip' + (on ? ' on' : '') + '">' + esc(l) + '</span>';
   }).join('');
-  $('card-types').innerHTML = CARD_TYPES.map(function (l) {
+  var ct = $('card-types'); if (ct) ct.innerHTML = CARD_TYPES.map(function (l) {
     return '<span class="lbl-chip on">' + esc(l) + '</span>';
   }).join('');
+  DEBUG.lastSuccessfulRenderTime = new Date().toLocaleTimeString();
+  refreshDebugMeta();
 }
 
-function refresh() {
-  var sl = $('status-line');
+function refreshDebugMeta() {
   try {
-    var r = doSplit($('user-prompt').value, $('src-image').value, $('scene-id').value);
+    DEBUG.pageUrl = String(location.href);
+    DEBUG.filePath = String(location.pathname);
+    var rs = $('result-section');
+    DEBUG.resultContainerFound = rs ? 'yes' : 'no';
+    if (rs) {
+      var visible = rs.offsetParent !== null && !rs.hasAttribute('hidden');
+      DEBUG.resultContainerVisible = visible ? 'yes' : 'no';
+      var grid = $('prompts-grid');
+      DEBUG.resultContainerChildCount = grid ? grid.children.length : 0;
+    }
+    DEBUG.inputFieldFound = $('user-prompt') ? 'yes' : 'no';
+    DEBUG.presetButtonsFound = document.querySelectorAll('#examples-row button').length;
+  } catch (e) {
+    DEBUG.lastError = 'meta: ' + (e && e.message ? e.message : String(e));
+  }
+  paintDebug();
+}
+
+function refresh(eventType) {
+  try {
+    if (eventType) {
+      DEBUG.lastInputEventType = eventType;
+      DEBUG.lastInputEventTime = new Date().toLocaleTimeString();
+    }
+    var up = $('user-prompt');
+    if (up) DEBUG.lastInputValue = up.value.length > 80 ? up.value.slice(0,80) + '...' : up.value;
+    var r = doSplit(up ? up.value : '', $('src-image') ? $('src-image').value : '', $('scene-id') ? $('scene-id').value : '');
     if (r) {
       paint(r);
     } else {
-      if (sl) sl.textContent = 'enter a request above to see prompts';
       var grid = $('prompts-grid');
-      if (grid) grid.innerHTML = '<div class="prompt-box"><div class="lbl">Empty input</div><div class="val">Type a request in box 3 (User request) or tap a preset chip. Output renders here automatically.</div></div>';
-      var sj = $('scene-json'); if (sj) sj.textContent = '';
+      if (grid) grid.innerHTML = '<div class="prompt-box"><div class="lbl">Placeholder</div><div class="val">Prompt results will appear here. Type a request in box 3 (User request) or tap a preset chip.</div></div>';
+      var sj = $('scene-json'); if (sj) sj.textContent = 'Prompt results will appear here.';
       var al = $('audio-labels'); if (al) al.innerHTML = '';
       var ct = $('card-types'); if (ct) ct.innerHTML = '';
     }
+    refreshDebugMeta();
   } catch (e) {
-    if (sl) sl.textContent = 'error: ' + (e && e.message ? e.message : String(e));
+    DEBUG.lastError = (e && e.message ? e.message : String(e));
+    paintDebug();
   }
 }
-$('split').addEventListener('click', refresh);
-['user-prompt','src-image','scene-id'].forEach(function (id) {
-  var el = $(id); if (el) el.addEventListener('input', refresh);
-});
-$('clear').addEventListener('click', function () {
-  $('user-prompt').value = ''; $('src-image').value = ''; $('scene-id').value = '';
-  refresh();
-});
-$('copy-json').addEventListener('click', function () {
-  var t = $('scene-json').textContent;
-  if (!t) return;
-  if (navigator.clipboard) navigator.clipboard.writeText(t).then(function () { alert('Scene JSON copied.'); });
-});
-$('download-json').addEventListener('click', function () {
-  var t = $('scene-json').textContent; if (!t) return;
-  var blob = new Blob([t], { type: 'application/json' });
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'scene-prompts-' + Date.now() + '.json';
-  a.click();
-  setTimeout(function () { URL.revokeObjectURL(a.href); }, 1500);
-});
-document.querySelectorAll('.examples button').forEach(function (b) {
-  b.addEventListener('click', function () {
-    $('user-prompt').value = EXAMPLES[b.getAttribute('data-ex')] || '';
-    refresh();
-  });
-});
-// Render immediately if URL or initial values are non-empty.
-refresh();
+
+function attachInputHandlers() {
+  try {
+    var ids = ['user-prompt','src-image','scene-id'];
+    ids.forEach(function (id) {
+      var el = $(id); if (!el) return;
+      ['input','change','keyup','paste'].forEach(function (ev) {
+        el.addEventListener(ev, function () { refresh(ev); });
+      });
+    });
+    var presets = document.querySelectorAll('#examples-row button');
+    presets.forEach(function (b) {
+      var fire = function () {
+        var ex = b.getAttribute('data-ex');
+        DEBUG.activePreset = ex || '';
+        $('user-prompt').value = EXAMPLES[ex] || '';
+        refresh('preset-' + ex);
+      };
+      b.addEventListener('click', fire);
+      b.addEventListener('touchend', function (e) { e.preventDefault(); fire(); });
+    });
+    DEBUG.inputHandlerAttached = 'yes';
+  } catch (e) {
+    DEBUG.lastError = 'attach: ' + (e && e.message ? e.message : String(e));
+    DEBUG.inputHandlerAttached = 'no';
+  }
+}
+
+function runSelfTest() {
+  var lines = ['LOAD SELF-TEST RESULT', 'Build marker: ' + BUILD_MARKER];
+  var pass = function (n, ok, detail) { lines.push(n + ': ' + (ok ? 'PASS' : 'FAIL') + (detail ? ' (' + detail + ')' : '')); };
+  try {
+    var up = $('user-prompt');
+    pass('Input test', !!up, up ? 'found #user-prompt' : 'missing #user-prompt');
+
+    if (up) {
+      up.value = 'Self test: bring this image to life, have noise and mocking laughter.';
+      var ev = null;
+      try {
+        ev = new Event('input', { bubbles: true });
+      } catch (_) {
+        ev = document.createEvent('Event'); ev.initEvent('input', true, true);
+      }
+      up.dispatchEvent(ev);
+      var keyup = null;
+      try { keyup = new Event('keyup', { bubbles: true }); } catch(_) { keyup = document.createEvent('Event'); keyup.initEvent('keyup', true, true); }
+      up.dispatchEvent(keyup);
+      pass('Event handler test', DEBUG.lastInputEventType === 'input' || DEBUG.lastInputEventType === 'keyup', 'lastEvent=' + DEBUG.lastInputEventType);
+    } else {
+      pass('Event handler test', false, 'no input to dispatch on');
+    }
+
+    refresh('selftest');
+    pass('Prompt render test', DEBUG.promptRenderAttempted === 'yes' && DEBUG.promptRenderCount > 0, 'count=' + DEBUG.promptRenderCount);
+    pass('Scene JSON render test', DEBUG.sceneJsonRenderAttempted === 'yes' && DEBUG.sceneJsonRenderCount > 0, 'count=' + DEBUG.sceneJsonRenderCount);
+
+    var grid = $('prompts-grid');
+    pass('DOM insertion test', !!(grid && grid.children.length > 0), grid ? 'children=' + grid.children.length : 'no grid');
+
+    var rs = $('result-section');
+    pass('Visibility test', !!(rs && rs.offsetParent !== null && !rs.hasAttribute('hidden')), rs ? 'offsetParent=' + (rs.offsetParent ? 'set' : 'null') : 'no result section');
+  } catch (e) {
+    lines.push('UNCAUGHT ERROR: ' + (e && e.message ? e.message : String(e)));
+  }
+  var out = lines.join('\n');
+  var pre = $('selftest-output'); if (pre) { pre.style.display = 'block'; pre.textContent = out; }
+  return out;
+}
+
+function copyText(t) {
+  if (navigator.clipboard) {
+    return navigator.clipboard.writeText(t).then(function () { return true; }).catch(function () { return false; });
+  }
+  try {
+    var ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    return Promise.resolve(true);
+  } catch (e) { return Promise.resolve(false); }
+}
+
+(function init() {
+  try {
+    DEBUG.jsLoaded = 'yes';
+    DEBUG.pageUrl = String(location.href);
+    DEBUG.filePath = String(location.pathname);
+    paintDebug();
+
+    attachInputHandlers();
+
+    $('split').addEventListener('click', function () { refresh('split-click'); });
+    $('clear').addEventListener('click', function () {
+      $('user-prompt').value = ''; $('src-image').value = ''; $('scene-id').value = '';
+      DEBUG.activePreset = '';
+      refresh('clear-click');
+    });
+    $('copy-json').addEventListener('click', function () {
+      var t = $('scene-json').textContent; if (!t) return;
+      copyText(t).then(function (ok) { if (ok) alert('Scene JSON copied.'); });
+    });
+    $('download-json').addEventListener('click', function () {
+      var t = $('scene-json').textContent; if (!t) return;
+      var blob = new Blob([t], { type: 'application/json' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'scene-prompts-' + Date.now() + '.json';
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 1500);
+    });
+    $('btn-copy-debug').addEventListener('click', function () {
+      refreshDebugMeta();
+      copyText(buildReport()).then(function (ok) { alert(ok ? 'Debug report copied. Paste it back as text.' : 'Copy failed; long-press the panel to select manually.'); });
+    });
+    $('btn-download-debug').addEventListener('click', function () {
+      refreshDebugMeta();
+      var blob = new Blob([buildReport()], { type: 'text/plain' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'load-debug-report-' + Date.now() + '.txt';
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 1500);
+    });
+    $('btn-self-test').addEventListener('click', function () { runSelfTest(); refreshDebugMeta(); });
+    $('btn-download-selftest').addEventListener('click', function () {
+      var pre = $('selftest-output');
+      if (!pre || !pre.textContent) { alert('Tap Run Self-Test first.'); return; }
+      var blob = new Blob([pre.textContent], { type: 'text/plain' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'load-selftest-' + Date.now() + '.txt';
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 1500);
+    });
+    $('btn-copy-selftest').addEventListener('click', function () {
+      var pre = $('selftest-output');
+      if (!pre || !pre.textContent) { alert('Tap Run Self-Test first.'); return; }
+      copyText(pre.textContent).then(function (ok) { alert(ok ? 'Self-test result copied.' : 'Copy failed; long-press the report to select.'); });
+    });
+
+    refresh('init');
+  } catch (e) {
+    DEBUG.lastError = 'init: ' + (e && e.message ? e.message : String(e));
+    paintDebug();
+  }
+})();
 </script>
 </body>
 </html>
