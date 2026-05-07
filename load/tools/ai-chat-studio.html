@@ -15,6 +15,7 @@
 <script src="../lib-load-resume.js"></script>
 <script src="../lib-load-timeouts.js"></script>
 <script src="../lib-load-local-only.js"></script>
+<script src="../lib-load-ai-pipeline.js"></script>
 <script src="../lib-jszip.min.js"></script>
 <style>
 :root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--info:#60a5fa;--border:#2a2a40}
@@ -74,7 +75,12 @@ button.small{font-size:11.5px;padding:5px 10px}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
     Back to Load
   </a>
+  <a class="back" id="back-to-image-editor" href="../image-prompt/index.html" style="display:none;background:rgba(124,58,237,.18);color:#fff;border:1px solid rgba(124,58,237,.5)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Back to Image Editor
+  </a>
   <h1>AI Chat Studio</h1>
+  <span id="role-chip" style="display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:rgba(124,58,237,.22);color:#c4a8ff;padding:3px 8px;border-radius:6px">Production AI Chat</span>
 </header>
 <div class="wrap">
 <div class="build-marker">BUILD MARKER: CHAT-STUDIO-v3.8-2026-05-08-v17g56</div>
@@ -579,7 +585,26 @@ function bufferToWav(buffer) {
 }
 
 function buildPrompt(user) {
-  var parts = [user.trim()];
+  // Route every prompt through the shared LoadAIPipeline so AI Chat
+  // Studio and AI Image Editor inherit the same quality clauses,
+  // negative-prompt floor, and headshot framing rules. Falls back
+  // to plain join if the pipeline lib failed to load.
+  if (window.LoadAIPipeline && typeof window.LoadAIPipeline.compileImagePrompt === 'function') {
+    try {
+      var compiled = window.LoadAIPipeline.compileImagePrompt(user || '', {
+        size: STATE.size,
+        style: STATE.style,
+        mode: STATE.mode,
+        referenceImage: STATE.ref || null,
+        uploadedImage: STATE.ref || null
+      });
+      // Stash so callers (logGeneration / queue / cards) can show
+      // the operationType honestly without re-deriving it.
+      STATE.lastCompiled = compiled;
+      return compiled.fullPrompt || (user || '').trim();
+    } catch (_) {}
+  }
+  var parts = [(user || '').trim()];
   if (STATE.style) parts.push(STATE.style);
   return parts.join(', ');
 }
@@ -855,13 +880,150 @@ function runImage(p) {
 }
 
 function runI2I(p) {
-  // Free i2i routes need a key (HF / SiliconFlow). Honest message.
-  var card = appendCard({ cls: 'assistant', who: 'Image-to-image', badge: { cls: 'prompt', text: 'prompt only' },
-    html: '<pre>' + esc('Image-to-image needs a Hugging Face or SiliconFlow key (free tier). Phase 2 wires this through Load Main Settings — see Provider Registry.\n\nPrompt prepared:\n  ' + buildPrompt(p) + (STATE.ref ? '\n  reference: ' + STATE.ref.name + ' (' + STATE.ref.size + ' B)' : '')) + '</pre>' +
-           '<div class="actions"><a class="small" style="text-decoration:none;background:var(--bg3);padding:5px 10px;border-radius:8px;color:var(--fg);border:1px solid var(--border)" href="../image-prompt/index.html">Open Image Prompt tool</a></div>'
+  var full = buildPrompt(p);
+  // Real edit needs an image-input-capable provider. Free MVP path:
+  // AI Horde anonymous async with the reference image fed in via
+  // source_image. If no ref image, honest prompt-only message. If
+  // route fails: do NOT silently fall back to text-to-image (would
+  // regenerate the scene — not an edit).
+  if (!STATE.ref || !STATE.ref.dataUrl) {
+    var card = appendCard({ cls: 'assistant', who: 'Image-to-image', badge: { cls: 'prompt', text: 'no reference image' },
+      html: '<pre>' + esc('Image-to-image requires a reference image. Upload one (Reference image input above) or open this tab from the AI Image Editor handoff button.\n\nPrompt prepared:\n  ' + full) + '</pre>' });
+    logGeneration({ kind: 'image-to-image', provider: 'prompt-only', success: false, prompt: full, promptOnly: true,
+      opType: 'image-edit', resultLabel: 'no source image — prompt-only fallback' });
+    return Promise.resolve(card);
+  }
+  if (window.LoadLocalOnly && window.LoadLocalOnly.isOn()) {
+    appendCard({ cls: 'assistant', who: 'Image-to-image', badge: { cls: 'prompt', text: 'local-only blocked' },
+      html: '<pre>' + esc('Local-only mode is ON — cloud i2i providers blocked.\n\nPrompt prepared:\n  ' + full) + '</pre>' });
+    logGeneration({ kind: 'image-to-image', provider: 'local-only-blocked', success: false, prompt: full, promptOnly: true });
+    return Promise.resolve();
+  }
+  var card = appendCard({ cls: 'assistant', who: 'Image-to-image (AI Horde img2img)', badge: { cls: 'run', text: 'submitting' },
+    html: '<div class="meta">prompt: ' + esc(full) + ' (' + STATE.size + ') · op: image-edit / image-to-image</div>' +
+          '<img class="ref" src="' + esc(STATE.ref.dataUrl) + '" alt="ref">' +
+          '<div><span class="spinner"></span> submitting AI Horde async i2i job (anonymous, free)...</div>' });
+  var hordeMs = (window.LoadTimeouts ? window.LoadTimeouts.byIntent('horde-image') : 120000);
+  var stopChip = startDeadlineCountdown(card, hordeMs, 'horde timeout');
+  var t0 = Date.now();
+  return hordeImg2Img(full, STATE.ref.dataUrl, STATE.size, function (j2) {
+    var lastDiv = card.querySelectorAll('div')[card.querySelectorAll('div').length - 1];
+    if (lastDiv) lastDiv.innerHTML = '<span class="spinner"></span> AI Horde queued — wait_time=' + (j2.wait_time || '?') + 's queue=' + (j2.queue_position == null ? '?' : j2.queue_position);
+  }).then(function (out) {
+    stopChip();
+    return loadImageWithTimeout(out.url, 30000, 'i2i image render').then(function (img2) {
+      var ms = Date.now() - t0;
+      card.querySelector('.who').innerHTML = 'Image-to-image (AI Horde) <span class="badge ok">real edit</span>';
+      var imgEl = document.createElement('img'); imgEl.src = out.url; imgEl.alt = full;
+      card.appendChild(imgEl);
+      var meta = document.createElement('div'); meta.className = 'meta';
+      meta.textContent = 'provider: horde-img2img · op: image-edit / image-to-image · worker=' + (out.worker || 'anon') + ' · model=' + (out.model || 'sd') + ' · ' + ms + ' ms · ' + img2.w + 'x' + img2.h + ' · output proof: real image (Blob render verified)';
+      card.appendChild(meta);
+      var actions = document.createElement('div'); actions.className = 'actions';
+      var btnSave = document.createElement('button'); btnSave.className = 'small'; btnSave.textContent = 'Save image';
+      btnSave.addEventListener('click', function () { var a = document.createElement('a'); a.href = out.url; a.download = 'load-edit-' + Date.now() + '.webp'; a.target = '_blank'; a.click(); });
+      actions.appendChild(btnSave);
+      var btnAttach = document.createElement('button'); btnAttach.className = 'small primary'; btnAttach.textContent = 'Attach to scene';
+      btnAttach.addEventListener('click', function () { attachToScene({ image: out.url, visualPrompt: full, sizes: STATE.size }); });
+      actions.appendChild(btnAttach);
+      card.appendChild(actions);
+      logGeneration({ kind: 'image-to-image', provider: 'horde-img2img', success: true, ms: ms, prompt: full, size: STATE.size,
+        outputProof: { kind: 'image-url', url: out.url, w: img2.w, h: img2.h, worker: out.worker, model: out.model },
+        opType: 'image-edit', resultLabel: 'real edit (image-to-image)' });
+      if (window.LoadQueue && STATE.currentJob) {
+        window.LoadQueue.update(STATE.currentJob.jobId, { status: 'Complete', provider: 'horde-img2img', startedAt: t0, endedAt: Date.now() }).catch(function () {});
+      }
+    });
+  }).catch(function (err) {
+    stopChip();
+    var msg = String((err && err.message) || err);
+    var timedOut = /timed out/i.test(msg);
+    card.classList.add('error');
+    card.querySelector('.who').innerHTML = 'Image-to-image <span class="badge fail">' + (timedOut ? 'timed out' : 'failed') + '</span>';
+    var lastDiv = card.querySelectorAll('div')[card.querySelectorAll('div').length - 1];
+    if (lastDiv) lastDiv.textContent = 'AI Horde i2i ' + (timedOut ? 'timed out' : 'failed') + ': ' + msg + '\n\nReturned no file. Reference image preserved. No brightness fallback — a local filter is not a real edit.';
+    var actions = buildFailureActions({
+      onRetry: function () { send(); },
+      onNext: function () { appendCard({ cls: 'assistant', who: 'Try next provider', badge: { cls: 'prompt', text: 'edit provider needed' },
+        html: '<pre>' + esc('Free i2i routes wired in MVP: AI Horde img2img (current). For higher-fidelity edits add a free Hugging Face or Gemini 2.5 Flash Image key in Image Prompt > Settings — those keys are shared with this tab via Load Main Settings.') + '</pre>' }); },
+      onSavePromptOnly: function () { appendCard({ cls: 'assistant', who: 'Prompt saved', badge: { cls: 'prompt', text: 'prompt-only fallback saved' },
+        html: '<pre>' + esc('Saved edit prompt for later — paste into another tool when network is back:\n\n' + full + '\n\nReference image: kept above (i2i source).') + '</pre>' });
+        logGeneration({ kind: 'image-to-image', provider: 'prompt-only', success: false, prompt: full, promptOnly: true,
+          opType: 'image-edit', resultLabel: 'prompt-only fallback saved' }); }
+    });
+    card.appendChild(actions);
+    logGeneration({ kind: 'image-to-image', provider: 'horde-img2img', success: false, error: msg, prompt: full,
+      opType: 'image-edit', resultLabel: 'failed-edit (provider returned no file)', timedOut: timedOut });
+    if (window.LoadQueue && STATE.currentJob) {
+      window.LoadQueue.update(STATE.currentJob.jobId, {
+        status: 'Failed', provider: 'horde-img2img',
+        startedAt: t0, endedAt: Date.now(), error: msg,
+        nextRecommended: timedOut ? 'wait + retry' : 'add HF/Gemini key for better edits'
+      }).catch(function () {});
+    }
   });
-  logGeneration({ kind: 'image-to-image', provider: 'prompt-only', success: false, prompt: buildPrompt(p), promptOnly: true });
-  return Promise.resolve(card);
+}
+
+// AI Horde anonymous img2img — free, no key. Same shape as
+// hordeImage() but body includes source_image (base64) + denoising
+// strength. Polls until done; resolves with a real image URL or
+// data: URL. Caller verifies render via loadImageWithTimeout.
+function hordeImg2Img(prompt, dataUrl, sizeStr, onProgress) {
+  if (window.LoadLocalOnly && window.LoadLocalOnly.isOn()) {
+    return Promise.reject(new Error('Local-only mode is on — AI Horde i2i blocked'));
+  }
+  var sz = (sizeStr || '512x512').split('x');
+  var W = parseInt(sz[0], 10) || 512, H = parseInt(sz[1], 10) || 512;
+  W = Math.max(64, Math.min(1024, Math.round(W / 64) * 64));
+  H = Math.max(64, Math.min(1024, Math.round(H / 64) * 64));
+  // Strip the "data:image/...;base64," prefix — Horde wants raw base64.
+  var src64 = String(dataUrl || '');
+  var commaIdx = src64.indexOf(',');
+  if (src64.indexOf('data:') === 0 && commaIdx !== -1) src64 = src64.slice(commaIdx + 1);
+  var t0 = Date.now();
+  var body = {
+    prompt: prompt,
+    params: { n: 1, width: W, height: H, steps: 25, sampler_name: 'k_euler', cfg_scale: 7.5, denoising_strength: 0.6 },
+    models: ['stable_diffusion'],
+    source_image: src64,
+    source_processing: 'img2img'
+  };
+  return fetch('https://aihorde.net/api/v2/generate/async', {
+    method: 'POST',
+    headers: { 'apikey': '0000000000', 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(body)
+  }).then(function (r) {
+    if (!r.ok) throw new Error('horde-i2i async HTTP ' + r.status);
+    return r.json();
+  }).then(function (j) {
+    var id = j && j.id;
+    if (!id) throw new Error('horde-i2i returned no job id');
+    var capMs = (window.LoadTimeouts ? window.LoadTimeouts.byIntent('horde-image') : 120000);
+    var deadline = Date.now() + capMs;
+    return new Promise(function (resolve, reject) {
+      function poll() {
+        if (Date.now() > deadline) { reject(new Error('horde-i2i timed out (>' + capMs + ' ms)')); return; }
+        fetch('https://aihorde.net/api/v2/generate/check/' + id).then(function (r) {
+          if (!r.ok) throw new Error('check HTTP ' + r.status);
+          return r.json();
+        }).then(function (j2) {
+          if (onProgress) try { onProgress(j2); } catch (_) {}
+          if (j2.faulted) { reject(new Error('horde-i2i faulted: ' + JSON.stringify(j2))); return; }
+          if (j2.done) {
+            fetch('https://aihorde.net/api/v2/generate/status/' + id).then(function (r) { return r.json(); }).then(function (j3) {
+              var g = j3.generations && j3.generations[0];
+              if (!g || !g.img) { reject(new Error('horde-i2i: status returned no img')); return; }
+              var url = (String(g.img).indexOf('http') === 0) ? g.img : ('data:image/webp;base64,' + g.img);
+              resolve({ url: url, ms: Date.now() - t0, worker: g.worker_name || '', model: g.model || '', w: W, h: H });
+            }).catch(reject);
+          } else {
+            setTimeout(poll, 4000);
+          }
+        }).catch(reject);
+      }
+      poll();
+    });
+  });
 }
 
 function runAnimate(p) {
@@ -1097,6 +1259,46 @@ $('btn-extend').addEventListener('click', function () {
   $('user-input').value = STATE.lastPrompt + ' — extend the previous output by another beat, preserving style and continuity.';
   send();
 });
+// Handoff receiver — accept a payload from the AI Image Editor
+// (Quick Image Tool). Sets STATE.ref to the imported image, fills
+// the user-input prompt, switches to image-to-image mode, and
+// surfaces an "Imported from AI Image Editor" banner. Reverse-nav
+// "Back to Image Editor" is shown only when source==='image-editor'.
+(function consumeHandoff() {
+  var raw = '';
+  try { raw = sessionStorage.getItem('load.handoff.ai-chat-studio') || ''; } catch (_) {}
+  if (!raw) return;
+  var payload = null;
+  try { payload = JSON.parse(raw); } catch (_) {}
+  if (!payload || typeof payload !== 'object') return;
+  // Single-consume — clear after read so a Refresh doesn't re-trigger.
+  try { sessionStorage.removeItem('load.handoff.ai-chat-studio'); } catch (_) {}
+  if (payload.source === 'image-editor') {
+    var back = $('back-to-image-editor'); if (back) back.style.display = 'inline-flex';
+    var src = payload.imageDataUrl || payload.imageRemoteUrl || '';
+    if (src) {
+      STATE.ref = { name: 'imported-from-image-editor', size: 0, type: 'image/auto', dataUrl: src };
+      var pre = $('ref-preview'); if (pre) { pre.src = src; pre.style.display = 'inline-block'; }
+      var clr = $('ref-clear'); if (clr) clr.style.display = 'inline-block';
+      // Switch to image-to-image so the user lands on the correct
+      // mode for refining the imported image.
+      STATE.mode = 'i2i';
+      Array.prototype.slice.call(document.querySelectorAll('[data-mode]')).forEach(function (x) {
+        x.classList.toggle('on', x.getAttribute('data-mode') === 'i2i');
+      });
+      renderRouteLine();
+    }
+    if (payload.prompt) { $('user-input').value = payload.prompt; }
+    appendCard({ cls: 'assistant', who: 'Imported from AI Image Editor', badge: { cls: 'ok', text: 'handoff received' },
+      html: '<pre>' + esc('Active reference image set from AI Image Editor (Quick Image Tool).\n  prompt:        ' + (payload.prompt || '(none)') + '\n  last provider: ' + (payload.providerLast || '(unknown)') + '\n  scene lock:    ' + (payload.sceneLocked ? 'on' : 'off') + '\n  op type:       ' + (payload.operationType || '(unknown)') + '\n  output proof:  ' + (payload.outputProof || '(unknown)') + '\n\nProvider keys are shared via Load Main Settings — no duplicate keys, no separate histories. You can refine, regenerate, edit, animate, add sound/SFX, attach to scene, or export project from here.') + '</pre>' });
+    // Logging for project memory + audit chain.
+    logChat('system', 'handoff', 'Imported from AI Image Editor', payload);
+    logGeneration({ kind: 'handoff', provider: 'image-editor->ai-chat-studio', success: true,
+      prompt: payload.prompt || '', source: 'image-editor', sentAt: payload.sentAt,
+      operationType: payload.operationType, outputProof: payload.outputProof });
+  }
+})();
+
 // Local-only mode: hides cloud-optional providers from the route line.
 $('local-only').addEventListener('change', function () {
   STATE.localOnly = this.checked;
