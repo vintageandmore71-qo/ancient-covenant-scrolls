@@ -21,6 +21,57 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 
 ---
 
+## Strategic clarification — Load-owned AI Operating System (locked 2026-05-07)
+
+The AI roadmap is **Load&apos;s own AI operating system layer**, not a thin
+wrapper around third-party providers. **Providers are replaceable
+engines.** Load owns the workflow, memory, prompt structure, rights
+layer, safety layer, output proof system, project files, package
+export, and user experience.
+
+The product is **Load AI Chat Studio** + **Load Creation Engine**.
+
+Build order (eight numbered layers):
+
+1. **Load AI Core** — shared model router, provider registry, local /
+   open-source connector system, prompt-only fallback, output proof,
+   diagnostics. Maps to backlog row **X-AI-CORE** + cross-cutting
+   **X-AI-PROVIDERS**.
+2. **Load Project Memory** — scenes, characters, styles, voices,
+   wardrobe, prompts, outputs, rights, continuity, chat history.
+   Maps into **X-AI-CORE** project-memory schema.
+3. **Load Prompt Engine** — visual prompts, negative prompts, motion
+   prompts, sound prompts, music prompts, voice prompts, scene
+   prompts. Powers the chat splitter behaviour required by
+   **X-AI-CHAT-STUDIO** and **X-AI-AUDIO**.
+4. **Load Output Manager** — saves generated files, attaches outputs
+   to scenes, writes output proof, `generation-report.json`,
+   `asset-declarations.json`. Spans **X-AI-CORE** (proof rules) +
+   **X-STUDIO-AI** (scene attachment).
+5. **Load Safety and Rights Layer** — rights metadata writer, safety
+   scanner, blocked publish states, commercial-use review flags.
+   Already partially shipped: `lib-security-scanner.js` (v17fz),
+   `lib-rights-validator.js` (v17g3).
+6. **Load Package Engine** — exports `.loadstudio.zip` and
+   `.cinepwa.zip`, validates package structure, keeps projects
+   editable and reopenable. Already partially shipped: PWA Builder
+   (v17g1) + LoadStudio Validator (v17g2).
+7. **Load Local Engine** *(future)* — local rendering, local image
+   generation, local image animation, local audio / SFX, local TTS,
+   FFmpeg / FFmpeg.wasm muxing, ComfyUI bridge, Stable Diffusion
+   workflow bridge. Captured under **X-AI-PROVIDERS** placeholders +
+   **X-AI-AUDIO** Stage 4.
+8. **Load-hosted Model Server** *(future)* — optional Load-owned
+   backend model endpoint using lawful open-source / open-weight
+   models where possible. Captured under **X-AI-PROVIDERS** as
+   `load-hosted-future`.
+
+Provider rows (current 17 image providers, plus future image-animation,
+SFX, voice, muxing categories) sit **inside** layer 1; they do not
+define the product. See **X-AI-PROVIDERS** row below.
+
+---
+
 ## Cross-suite features (touch multiple apps)
 
 | ID | Item | Source | Status | Notes |
@@ -37,6 +88,7 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 | X-KG | **Shared local knowledge graph (one IDB across apps)** | `SUGGESTIONS_PARKED.md` | Parked. | |
 | **X-VIDEO-AI** | **Advanced AI video generation** &mdash; full text/image/scene-to-video pipeline beyond the existing Verse-to-Video + Reel Composer (which are on-device WebM composers, not AI). Will need cloud provider chain (Runway / Kling / Pika / Luma / Wan / SVD / AnimateDiff), prompt builder integration with Character Bible + Style Library, image-to-video gate, output receipt + safety scan + rights metadata flow, no-false-positive verification of returned video files. | User direction 2026-05-06. **VERY IMPORTANT.** | **Not started.** Spec to capture. | Touches Load main (the Verse-to-Video tool), LoadStudio (scene rendering), and the `lib-export-receipt.js` flow. Needs API key UI, provider-status panel parity with the image side, and a video-specific Output Receipt schema. |
 | **X-AI-AUDIO** | **Sound &amp; Atmosphere Engine** &mdash; real audio for animated image/video scenes (SFX, ambience, music, crowd noise, laughter, weather, footsteps, environment, music cues, narration / voice). Three sound paths: (1) embedded video audio when provider supports it, (2) separate generated audio/SFX attached to scene, (3) sound-prompt fallback when no audio provider exists. **MVP = path 2.** Required user-facing audio status labels (Audio embedded, Separate audio generated, Sound prompt saved, Audio provider needed, Silent video, Audio failed, Audio ready for scene, Audio ready for export, Audio muxing available, Audio muxing not available). Output proof rules: never claim audio unless real playable file/blob/URL exists. New scene fields (audioPrompt, sfxPrompt, musicPrompt, ambiencePrompt, voicePrompt, audio, music, sfx[], audioStatus, audioProvider, audioOutputProof, audioEmbedded, audioMuxed, audioDuration, audioRightsStatus). Stage path: prompt extraction &rarr; separate audio/SFX gen &rarr; layered playback &rarr; FFmpeg.wasm muxing &rarr; embedded audio. | `inbox/Load Main AI Addendum.docx` (2026-05-07) — addendum to the Combined AI Cinema System ZIP. **VERY IMPORTANT.** | **Not started.** | Peer of X-VIDEO-AI; sound is a non-optional production feature. Populates `assets/audio/`, `assets/music/`, `assets/sfx/` in LoadStudio packages. Writes into `scenes.json`, `generation-report.json`, `asset-declarations.json`, `rights.json`, `continuity-report.json`, `prompt-log.json`, `chat-history.json`. Chat splits a single user request into visual / motion / sound / music / SFX prompts; runs animation + audio jobs in parallel; surfaces five card types (animation request, animation progress, audio generation, video result, audio result). |
+| **X-AI-PROVIDERS** | **Free/open/local-first provider strategy + shared registry** &mdash; cross-cutting rule that applies to **X-AI-CORE, X-AI-CHAT-STUDIO, X-STUDIO-AI, X-VIDEO-AI, X-AI-AUDIO**. **Master rule:** MVP only uses free / open-source / local-first providers; paid providers (ElevenLabs, Replicate, Stability AI, etc.) are future-optional, off by default, never hard-coded, never exported. **No duplicate key settings** &mdash; reuse the existing Load Main API-key UI; do not build a second key vault. **Audit-first** &mdash; before adding new modules, audit the existing 17 image providers in `load.js` (Local SD/A1111, Pollinations Flux/classic/Turbo, HF cascade SDXL/SD-1.5/FLUX/SDXL-Inpainting, Cloudflare FLUX-schnell, Together FLUX-schnell-Free, AI Horde anon, Google Imagen / Gemini 2.5 Flash Image, DeepAI, AI Horde SDXL anon, Cloudflare SDXL-Lightning, HF SDXL-Turbo, SiliconFlow FLUX.1 Kontext + schnell, Real-ESRGAN, GFPGAN, CodeFormer) and the existing built-in image generator UI, then **extend, don&apos;t replace**. **Shared provider registry** schema with capability flags (text, image, imageToImage, inpainting, upscale, faceRestore, styleTransfer, referenceImage, imageAnimation, video, motionPrompt, performanceAnimation, audio, sfx, ambience, music, voice, narration, local, free, requiresApiKey, requiresLocalServer, documentParsing, safety) and status values (Not configured / Ready / Failed / Rate limited / Unsupported request / Returned no file / Offline / Local server unavailable / Needs user setup). **New provider category placeholders to add:** (A) image animation / image-to-video &mdash; ComfyUI, ComfyUI AnimateDiff, ComfyUI video workflow, LTX-Video, Wan, prompt-only motion, Load Local Engine; (B) SFX / ambience &mdash; prompt-only sound design, user-imported SFX library, public-domain SFX library, HF open-source audio, Load Local Engine audio; (C) voice / narration &mdash; existing Browser TTS + Piper + Voice Manipulator + user recording, plus future Kokoro TTS, HF TTS, Load Local Engine voice; (D) muxing &mdash; Web Audio Scene Mixer, FFmpeg.wasm, backend FFmpeg, Load Local Engine muxing. **Twenty-eight-entry MVP provider priority order** is documented in the source addendum. **Thirty-five acceptance criteria** must pass before this item is complete. | `inbox/5.7 load_ai_complete_addendum_since_last_zip.zip` (2026-05-07). **VERY IMPORTANT.** | **Not started.** | Cross-cutting; gates the build order of every other AI roadmap item. Output-proof rules in this addendum supersede earlier looser language. Must respect: never claim image / animation / video / audio / voice / muxed-video / provider-READY unless a real file/blob/URL or test response exists. `assets/video/` may need to be added to the LoadStudio validator&apos;s recognized folders for AI-video packages. |
 | **X-DB** | **Full production database** &mdash; replace per-device IndexedDB-only state with a server-side production database (cross-device sync of Library, Notes, Bookmarks, Receipts, Rights, Character Bible, Subscription state). | User direction 2026-05-06. **VERY IMPORTANT.** | **Not started.** Scope to define. | Open questions: Postgres vs Firestore vs Supabase; user identity (Apple Sign-In, email magic link); data export / GDPR delete; offline reconciliation; per-app schema or shared schema. Needs auth, conflict resolution, server-side rights enforcement. |
 | **X-SUBS** | **Subscription system** &mdash; paid tiers across the Load suite (Load main, Attain, Attain Jr, Study, LoadStudio, LoadPlay). | User direction 2026-05-06. **VERY IMPORTANT.** | **Not started.** Tier structure to define. | Open questions: Stripe / RevenueCat / App Store; per-app or suite-wide bundle; gated features (AI provider quotas, cloud sync, advanced video gen); receipt verification; family sharing; trial flow. Depends on **X-DB** for entitlement storage. |
 
@@ -51,6 +103,7 @@ sessions read this file at start (CLAUDE.md `Session continuity`).
 ### Pending
 - **Advanced AI video generation** &mdash; see **X-VIDEO-AI**. Captured 2026-05-06 as VERY IMPORTANT. Cloud video provider chain, prompt-builder integration, no-false-positive output verification, video-specific export receipts. Current Verse-to-Video / Reel Composer tools are on-device WebM composers and do not satisfy this.
 - **Sound &amp; Atmosphere Engine** &mdash; see **X-AI-AUDIO**. Captured 2026-05-07 as VERY IMPORTANT (`inbox/Load Main AI Addendum.docx`). Peer of X-VIDEO-AI. Real audio for animated scenes &mdash; SFX / ambience / music / crowd / laughter / weather / footsteps / environment / music cues / narration. MVP path: silent video + separate generated audio + scene attachment. Adds 14 new scene fields, 10 audio status labels, 5 chat-card types, and stage-gated build (prompt extraction &rarr; separate gen &rarr; layered playback &rarr; FFmpeg.wasm muxing &rarr; embedded audio). Output proof rules: never claim audio unless real playable file/blob/URL exists.
+- **Free/open/local-first provider strategy + shared registry** &mdash; see **X-AI-PROVIDERS**. Captured 2026-05-07 as VERY IMPORTANT (`inbox/5.7 load_ai_complete_addendum_since_last_zip.zip`). Cross-cutting rule for the entire AI roadmap: MVP uses only free / open-source / local-first providers; paid providers are future-optional, off by default, never hard-coded. Audit the existing 17 image providers + the built-in image-generator UI before any new module. Reuse the existing Load Main API-key settings (no second key vault). Shared provider registry schema with 24 capability flags + 9 status values. New provider-category placeholders for image-animation (ComfyUI / AnimateDiff / LTX-Video / Wan / Local Engine), SFX / ambience (prompt-only / user-imported / public-domain / HF open-source / Local Engine), voice (Kokoro / HF TTS / Local Engine), and muxing (Web Audio mixer / FFmpeg.wasm / Load Local Engine). 35 acceptance criteria.
 - **Full production database** &mdash; see **X-DB**. Captured 2026-05-06 as VERY IMPORTANT. Cross-device sync replacing per-device IndexedDB-only state. Auth + conflict resolution + GDPR delete still to be designed.
 - **Subscription system** &mdash; see **X-SUBS**. Captured 2026-05-06 as VERY IMPORTANT. Paid tiers across the suite. Gated features list still to be agreed; depends on **X-DB** for entitlement storage.
 - **Load AI Tier 14 / 18-fallback add-ons** — see X-AI-14 (the core X-AI-CORE is **shipped** in v17dq–v17dy; only the Glam-parity layer remains).

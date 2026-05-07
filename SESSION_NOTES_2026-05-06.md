@@ -71,9 +71,30 @@ shortcut tiles to the home screen with direct links to:
 Bump cache when this lands. Don't ship without user OK — they
 previously rejected one consolidation pass.
 
-### Step 3 — start one of the four VERY IMPORTANT specs
+### Step 3 — start one of the five VERY IMPORTANT specs
 
-User direction: four new pending items are flagged
+**Strategic clarification (locked 2026-05-07):** the AI roadmap is
+**Load&apos;s own AI operating system layer**, not a thin wrapper
+around providers. Providers are replaceable engines. Build order
+(eight numbered layers): (1) Load AI Core, (2) Load Project Memory,
+(3) Load Prompt Engine, (4) Load Output Manager, (5) Load Safety
+&amp; Rights Layer, (6) Load Package Engine, (7) Load Local Engine
+*(future)*, (8) Load-hosted Model Server *(future)*. Layers 5 and
+6 are already partially shipped (`lib-security-scanner.js` v17fz,
+`lib-rights-validator.js` v17g3, PWA Builder v17g1, LoadStudio
+Validator v17g2). The product is **Load AI Chat Studio** +
+**Load Creation Engine**, not a provider list.
+
+**Master rule (locked 2026-05-07 by addendum):** every AI roadmap
+item MVP must use **free / open-source / local-first** providers
+only. Paid providers (ElevenLabs, Replicate, Stability AI, etc.)
+are future-optional, off by default, never hard-coded, never
+exported. Reuse the existing Load Main API-key UI; do not build a
+second key vault. Audit the existing 17 image providers + the
+built-in image-generator UI **before** adding any new module —
+extend, don&apos;t replace.
+
+User direction: five new pending items are flagged
 **VERY IMPORTANT**. Pick exactly one to scope first based on user
 preference:
 
@@ -111,10 +132,25 @@ preference:
   receipt verification, family sharing, trial flow. Don't start
   this before X-DB has a concrete plan — entitlements need
   somewhere to live.
+- **X-AI-PROVIDERS — Free/open/local-first provider strategy +
+  shared registry.** Captured 2026-05-07 via
+  `inbox/5.7 load_ai_complete_addendum_since_last_zip.zip`. This
+  is **cross-cutting** &mdash; it gates X-VIDEO-AI, X-AI-AUDIO,
+  X-AI-CORE, X-AI-CHAT-STUDIO, and X-STUDIO-AI. Three audits
+  required before any new code: (a) the 14-question audit of the
+  existing built-in Load AI Image function (per
+  `inbox/5.6 Load AI READ ME.docx`); (b) the keep/extend audit of
+  the 17 existing image providers in `load.js`; (c) the existing
+  Load Main API-key UI audit so we don&apos;t duplicate it. Then
+  build / extend the shared provider registry (capability flags +
+  status labels) used by every AI feature. Twenty-eight-entry MVP
+  provider priority order is documented in the source addendum.
+  Thirty-five acceptance criteria.
 
-Recommended order: capture the spec for **X-VIDEO-AI** and
-**X-AI-AUDIO** together first (they share the production pipeline
-and the addendum says video must not block waiting for embedded
+Recommended order: do **X-AI-PROVIDERS audits** first (they unblock
+every other AI item), then capture the spec for **X-VIDEO-AI** and
+**X-AI-AUDIO** together (they share the production pipeline and
+the addendum says video must not block waiting for embedded
 audio), then **X-DB**, then **X-SUBS**.
 
 ### Step 4 — clear the five remaining Load main pending rows
