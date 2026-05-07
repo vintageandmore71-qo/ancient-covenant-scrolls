@@ -1517,7 +1517,22 @@ async function pipeline(prompt, imgData, tid, rawPrompt) {
         showFallbackBanner(fallbackNote);
         reply = fallback.reply;
       } else {
-        throw e;
+        // Image-creation rescue: when the chat chain fails but the
+        // user's literal prompt looks like an image request (e.g.
+        // "Create an office chair"), do NOT bail out — the image
+        // provider chain (Pollinations / Horde / HF / Local SD) is
+        // independent of chat providers and may still succeed. Build
+        // a synthetic SD_PROMPT-style reply so the existing
+        // wantsImage branch picks it up with the user's literal ask.
+        const looksLikeImageRequest = (rawPrompt || prompt || '').match(/\b(create|generate|render|make|draw|paint|illustrate|design|stylize|imagine|show|visualise|visualize|picture|photo|portrait|headshot|of\s+a|of\s+an|of\s+the)\b/i);
+        if (looksLikeImageRequest) {
+          fallbackNote = `${providerName(providerToCall)} ${e.timedOut ? 'timed out' : 'unavailable'} — running image providers directly`;
+          showFallbackBanner(fallbackNote);
+          reply = 'SD_PROMPT: ' + (rawPrompt || prompt || '').slice(0, 800);
+          usedProvider = 'image-only';
+        } else {
+          throw e;
+        }
       }
     }
 
@@ -1738,16 +1753,55 @@ async function pipeline(prompt, imgData, tid, rawPrompt) {
 
   } catch(err) {
     removeTyping(tid);
-    // Show only providers that can actually handle the current task.
-    // When an image is attached, text-only providers (HF Mistral,
-    // OpenRouter, Cerebras) can't do anything — they must NOT appear
-    // in the displayed fallback order. Per user directive 2026-04-30.
-    const visibleChain = getProviderOrder().filter(p => {
-      if (!hasProviderAccess(p)) return false;
-      if (imgData && !CAPS[p]?.vision) return false;
-      return true;
-    });
-    addError((err.message || 'Something went wrong. Check Settings and try again.') + `\n\nActive provider: ${providerName(usedProvider)}\nSelected model: ${activeModelLabel(usedProvider)}\nFallback order: ${visibleChain.map(providerName).join(' > ') || '(none — add a free Gemini or Puter key)'}`);
+    // Image-creation rescue (final): when the chat path threw and
+    // the user's literal prompt looks like an image request, run
+    // the image provider chain directly so a Puter timeout doesn't
+    // block Pollinations / Horde / HF / Local SD.
+    const looksLikeImageRequest = (rawPrompt || prompt || '').match(/\b(create|generate|render|make|draw|paint|illustrate|design|stylize|imagine|show|visualise|visualize|picture|photo|portrait|headshot|of\s+a|of\s+an|of\s+the)\b/i);
+    if (looksLikeImageRequest) {
+      try {
+        const literal = (rawPrompt || prompt || '').slice(0, 800);
+        const compiled = (window.LoadAIPipeline && typeof window.LoadAIPipeline.compileImagePrompt === 'function')
+          ? window.LoadAIPipeline.compileImagePrompt(literal, { size: '768x768', mode: imgData ? 'i2i' : 'text-to-image', referenceImage: imgData || null }).fullPrompt
+          : literal;
+        const result = await withTimeout(
+          imageGenWithFallback(compiled, imgData, { taskType: imgData ? 'img2img' : 'generate' }),
+          120000,
+          'Image generation'
+        );
+        const providerBadge = 'image-only + ' + result.providerName;
+        addAIMsg(`Here's your image! Tap Save to keep it.`, result.url, providerBadge,
+          `${providerName(usedProvider)} ${err.timedOut ? 'timed out' : 'failed'} — used ${result.providerName} (free) instead`,
+          [],
+          { opType: imgData ? 'real-edit' : 'text-to-image', isRealEdit: !!imgData, hadSourceImage: !!imgData, providerId: result.providerId });
+        try { setCurrentImageFromUrl(result.url, 'Previous result — keep editing'); } catch (_) {}
+        return; // success — do not show the error card
+      } catch (rescueErr) {
+        // fall through to error card below
+        err = new Error((err && err.message ? err.message + ' · ' : '') + 'image-rescue: ' + ((rescueErr && rescueErr.message) || rescueErr));
+      }
+    }
+    // Show every fallback the user can ACTUALLY get a result from
+    // for this request — image providers when the prompt is image-
+    // creation, chat providers otherwise. Image providers are
+    // independent of chat keys (Pollinations / Horde need no key,
+    // HF / Local SD use their own key in Image Prompt > Settings).
+    let visibleChain;
+    if (looksLikeImageRequest) {
+      visibleChain = IMAGE_PROVIDERS
+        .filter(p => p.enabled && p.enabled())
+        .map(p => p.name);
+      if (!visibleChain.length) {
+        visibleChain = ['Pollinations Flux', 'Pollinations', 'AI Horde anonymous', 'Hugging Face (token)', 'Local SD (A1111-compat)', 'prompt-only fallback'];
+      }
+    } else {
+      visibleChain = getProviderOrder().filter(p => {
+        if (!hasProviderAccess(p)) return false;
+        if (imgData && !CAPS[p]?.vision) return false;
+        return true;
+      }).map(providerName);
+    }
+    addError((err.message || 'Something went wrong. Check Settings and try again.') + `\n\nActive provider: ${providerName(usedProvider)}\nSelected model: ${activeModelLabel(usedProvider)}\nFallback order (${looksLikeImageRequest ? 'image' : 'chat'}): ${visibleChain.join(' > ') || '(no free image provider configured — choose Pollinations, AI Horde, Local SD, or prompt-only fallback)'}`);
   } finally {
     generating=false;updSend();
   }
