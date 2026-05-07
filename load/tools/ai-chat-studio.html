@@ -11,6 +11,7 @@
 <script src="../lib-provider-registry.js"></script>
 <script src="../lib-load-ai-core.js"></script>
 <script src="../lib-load-db.js"></script>
+<script src="../lib-load-queue.js"></script>
 <script src="../lib-jszip.min.js"></script>
 <style>
 :root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--info:#60a5fa;--border:#2a2a40}
@@ -73,7 +74,7 @@ button.small{font-size:11.5px;padding:5px 10px}
   <h1>AI Chat Studio</h1>
 </header>
 <div class="wrap">
-<div class="build-marker">BUILD MARKER: CHAT-STUDIO-v3.3-2026-05-07-v17g38</div>
+<div class="build-marker">BUILD MARKER: CHAT-STUDIO-v3.4-2026-05-07-v17g40</div>
 <div class="intro">
   <strong>X-AI-CHAT-STUDIO Phase 3.</strong> Routed chat with inline real-output cards. Free providers + on-device synthesis only. <em>Chat</em>: Pollinations text. <em>Text-to-image</em>: Pollinations image (real PNG/JPG). <em>Animate</em> (with a reference image): canvas Ken-Burns + MediaRecorder produces a <strong>real WebM video Blob</strong>. <em>Audio</em>: OfflineAudioContext synthesises a <strong>real WAV Blob</strong> matched to prompt keywords. Output proof: only marked ready when a real playable Blob exists; otherwise the card stays prompt-only honestly.
 </div>
@@ -510,6 +511,20 @@ function buildPrompt(user) {
 }
 
 // ── Send action.
+function enqueueJob(p) {
+  if (typeof window.LoadQueue === 'undefined') return Promise.resolve(null);
+  var intentByMode = { chat: 'chat', image: 'image-gen', i2i: 'image-to-image', animate: 'image-anim', video: 'video', audio: 'sfx' };
+  return window.LoadQueue.enqueue({
+    kind: STATE.mode, intent: intentByMode[STATE.mode] || STATE.mode,
+    prompt: p, threadId: STATE.threadId,
+    meta: { style: STATE.styleName, size: STATE.size, hasRef: !!STATE.ref, localOnly: !!STATE.localOnly }
+  }).catch(function () { return null; });
+}
+function jobUpdate(job, patch) {
+  if (!job || !window.LoadQueue) return Promise.resolve();
+  return window.LoadQueue.update(job.jobId, patch).catch(function () {});
+}
+
 function send() {
   var p = $('user-input').value.trim();
   if (!p) return;
@@ -521,7 +536,25 @@ function send() {
   appendCard({ cls: 'user', text: p });
   logChat('user', STATE.mode, p, { style: STATE.styleName, size: STATE.size, hasRef: !!STATE.ref, localOnly: !!STATE.localOnly });
 
-  var done = function () { $('btn-send').disabled = false; $('status').textContent = 'last reply ' + new Date().toLocaleTimeString(); };
+  enqueueJob(p).then(function (job) {
+    STATE.currentJob = job;
+    if (job) jobUpdate(job, { status: 'Preparing' });
+  });
+
+  var done = function () {
+    $('btn-send').disabled = false;
+    $('status').textContent = 'last reply ' + new Date().toLocaleTimeString();
+    // The mode handlers are responsible for the final job status; this is a
+    // safety net that flips Generating to Complete only if no other status
+    // (Failed / Cancelled) has been written.
+    if (STATE.currentJob) {
+      window.LoadQueue && window.LoadQueue.get(STATE.currentJob.jobId).then(function (j) {
+        if (j && (j.status === 'Generating' || j.status === 'Preparing')) {
+          window.LoadQueue.update(j.jobId, { status: 'Complete', progress: 100 });
+        }
+      });
+    }
+  };
 
   switch (STATE.mode) {
     case 'chat':       return runChat(p).then(done);
