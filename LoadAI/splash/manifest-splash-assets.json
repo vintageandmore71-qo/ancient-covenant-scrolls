@@ -1,0 +1,67 @@
+[
+  {
+    "src": "assets/splash/splash-640x1136.jpg",
+    "sizes": "640x1136",
+    "type": "image/jpeg"
+  },
+  {
+    "src": "assets/splash/splash-750x1334.jpg",
+    "sizes": "750x1334",
+    "type": "image/jpeg"
+  },
+  {
+    "src": "assets/splash/splash-828x1792.jpg",
+    "sizes": "828x1792",
+    "type": "image/jpeg"
+  },
+  {
+    "src": "assets/splash/splash-1125x2436.jpg",
+    "sizes": "1125x2436",
+    "type": "image/jpeg"
+  },
+  {
+    "src": "assets/splash/splash-1170x2532.jpg",
+    "sizes": "1170x2532",
+    "type": "image/jpeg"
+  },
+  {
+    "src": "assets/splash/splash-1242x2208.jpg",
+    "sizes": "1242x2208",
+    "type": "image/jpeg"
+  },
+  {
+    "src": "assets/splash/splash-1242x2688.jpg",
+    "sizes": "1242x2688",
+    "type": "image/jpeg"
+  },
+  {
+    "src": "assets/splash/splash-1284x2778.jpg",
+    "sizes": "1284x2778",
+    "type": "image/jpeg"
+  },
+  {
+    "src": "assets/splash/splash-1536x2048.jpg",
+    "sizes": "1536x2048",
+    "type": "image/jpeg"
+  },
+  {
+    "src": "assets/splash/splash-1668x2388.jpg",
+    "sizes": "1668x2388",
+    "type": "image/jpeg"
+  },
+  {
+    "src": "assets/splash/splash-2048x2732.jpg",
+    "sizes": "2048x2732",
+    "type": "image/jpeg"
+  },
+  {
+    "src": "assets/splash/splash-1080x1920.jpg",
+    "sizes": "1080x1920",
+    "type": "image/jpeg"
+  },
+  {
+    "src": "assets/splash/splash-1920x1080-landscape.jpg",
+    "sizes": "1920x1080",
+    "type": "image/jpeg"
+  }
+]
