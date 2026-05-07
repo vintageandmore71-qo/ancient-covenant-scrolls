@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Version History — Load</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<script src="../lib-load-db.js"></script>
+<script src="../lib-load-versions.js"></script>
+<script src="../../branding.js" data-brand-skip></script>
+<style>
+:root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--info:#60a5fa;--border:#2a2a40}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;font-size:14px}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#150a28 0,#0a0514 100%);border-bottom:1px solid var(--border)}
+header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)}
+header h1{margin:0;font-size:16px;font-weight:800;flex:1}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 18px 80px}
+.build-marker{background:#facc15;color:#0a0a14;font-weight:900;font-size:13px;letter-spacing:.04em;padding:10px 14px;border-radius:10px;margin:0 0 14px;font-family:ui-monospace,Menlo,monospace;text-align:center}
+.intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin:0 0 14px;font-size:12.5px;color:var(--mute);line-height:1.55}
+.intro strong{color:var(--fg)}
+.section{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px;margin:0 0 14px}
+.section h3{margin:0 0 10px;font-size:13px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.05em}
+button{font:inherit;padding:9px 14px;border-radius:8px;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-weight:700;font-size:13px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.danger{background:rgba(255,110,110,.18);color:var(--err);border-color:rgba(255,110,110,.4)}
+button.small{font-size:11.5px;padding:5px 10px}
+input[type=text],select{background:#0a0e18;border:1px solid var(--border);border-radius:8px;color:var(--fg);font:inherit;font-size:14px;padding:8px 10px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.kind-block{margin:0 0 14px}
+.kind-head{font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin:6px 0;font-family:ui-monospace,Menlo,monospace}
+.row{display:grid;grid-template-columns:130px 90px 1fr auto;gap:8px;padding:9px 12px;border-bottom:1px solid var(--border);align-items:center;font-size:12.5px}
+.row:last-child{border-bottom:none}
+.row.head{background:#1a1a2e;font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
+.label{font-family:ui-monospace,Menlo,monospace;font-weight:800}
+.cell{font-size:11px;font-weight:800;text-align:center;padding:5px 8px;border-radius:6px;background:#0a0e18;color:var(--mute);border:1px solid var(--border)}
+.cell.draft{background:rgba(96,165,250,.18);color:var(--info);border-color:rgba(96,165,250,.4)}
+.cell.final{background:rgba(74,222,128,.18);color:var(--ok);border-color:rgba(74,222,128,.4)}
+.cell.failed{background:rgba(255,110,110,.18);color:var(--err);border-color:rgba(255,110,110,.4)}
+.actions{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.empty{padding:14px;text-align:center;color:var(--mute);font-style:italic;font-size:12.5px}
+.proof{background:#0a0e18;border:1px solid var(--border);border-radius:8px;padding:10px;font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:var(--fg);white-space:pre-wrap;word-break:break-word;max-height:380px;overflow:auto;margin-top:10px;display:none}
+@media(max-width:760px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="./handoff-tools.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Handoff Tools
+  </a>
+  <h1>Version History</h1>
+</header>
+<div class="wrap">
+<div class="build-marker">BUILD MARKER: VERSION-HISTORY-v1-2026-05-07-v17g53</div>
+<div class="intro">
+  <strong>Reliability addendum #17.</strong> Every generated output is versioned. Records persist in <code>LoadDB.kv['versions-{sceneId}-{kind}-{versionId}']</code>. The user-visible label follows the spec: <code>scene_001_image_v1</code>, <code>scene_001_image_v2</code>, etc. Restore writes the chosen version's payload back into the scene record. <em>Mark final / Mark failed</em> are real status transitions.
+</div>
+
+<div class="section">
+  <h3>1. Pick a scene</h3>
+  <div class="controls">
+    <select id="scene-pick" style="flex:1"><option value="">Loading…</option></select>
+    <button id="reload">Reload</button>
+    <button id="seed">Add demo version (image)</button>
+    <span class="status" id="status" style="font-size:12px;color:var(--mute)"></span>
+  </div>
+</div>
+
+<div class="section">
+  <h3>2. Versions</h3>
+  <div id="kinds"></div>
+  <pre class="proof" id="proof"></pre>
+</div>
+
+<div class="section">
+  <h3>3. Compare</h3>
+  <div class="controls">
+    <input type="text" id="ver-a" placeholder="versionId A">
+    <input type="text" id="ver-b" placeholder="versionId B">
+    <button id="cmp">Compare</button>
+  </div>
+  <pre class="proof" id="cmp-out"></pre>
+</div>
+
+</div>
+
+<script>
+'use strict';
+var $ = function (id) { return document.getElementById(id); };
+function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+if (!window.LoadDB || !window.LoadVersions) {
+  $('kinds').innerHTML = '<p style="color:var(--err);padding:20px">Required libs missing.</p>';
+} else {
+
+var DB = window.LoadDB;
+var V = window.LoadVersions;
+var SID = '';
+
+function populateScenes() {
+  return DB.getAll('scenes', 500).then(function (rows) {
+    var scenes = rows.map(function (r) { return r.value; }).filter(function (v) { return v && v.sceneId; });
+    var sel = $('scene-pick'); sel.innerHTML = '';
+    if (!scenes.length) { sel.appendChild(new Option('No scenes — attach one in Chat Studio first', '')); return; }
+    sel.appendChild(new Option('— pick a scene —', ''));
+    scenes.forEach(function (sc) { sel.appendChild(new Option(sc.sceneId + ' (thread=' + (sc.threadId || '-') + ')', sc.sceneId)); });
+  });
+}
+populateScenes();
+
+function paint(byKind) {
+  var html = '';
+  V.KINDS.forEach(function (k) {
+    var rows = byKind[k] || [];
+    html += '<div class="kind-block"><div class="kind-head">' + esc(k) + ' (' + rows.length + ')</div>';
+    if (!rows.length) {
+      html += '<div class="empty">No ' + esc(k) + ' versions yet.</div>';
+    } else {
+      html += '<div class="row head"><div>Label</div><div class="cell">Status</div><div>Created</div><div></div></div>';
+      rows.forEach(function (r, i) {
+        var lbl = V.label(r, i + 1);
+        html += '<div class="row">' +
+          '<div><div class="label">' + esc(lbl) + '</div><div style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:var(--mute)">' + esc(r.versionId) + '</div></div>' +
+          '<div class="cell ' + esc(r.status) + '">' + esc(r.status) + '</div>' +
+          '<div style="font-size:11px;color:var(--mute);font-family:ui-monospace,Menlo,monospace">' + esc(r.createdAt) + (r.error ? '<br>err: ' + esc(r.error) : '') + '</div>' +
+          '<div class="actions">' +
+            '<button class="small" data-view="' + esc(r.versionId) + '">View</button>' +
+            '<button class="small" data-final="' + esc(r.versionId) + '">Final</button>' +
+            '<button class="small" data-failed="' + esc(r.versionId) + '">Failed</button>' +
+            '<button class="small primary" data-restore="' + esc(r.versionId) + '|' + esc(r.kind) + '">Restore</button>' +
+            '<button class="small danger" data-rm="' + esc(r.versionId) + '">Delete</button>' +
+          '</div>' +
+        '</div>';
+      });
+      html += '<div style="margin-top:6px;text-align:right"><button class="small danger" data-prune="' + esc(k) + '">Delete all failed in ' + esc(k) + '</button></div>';
+    }
+    html += '</div>';
+  });
+  $('kinds').innerHTML = html;
+  Array.prototype.slice.call(document.querySelectorAll('[data-view]')).forEach(function (b) {
+    b.addEventListener('click', function () {
+      V.get(b.getAttribute('data-view')).then(function (r) { $('proof').style.display = 'block'; $('proof').textContent = JSON.stringify(r, null, 2); });
+    });
+  });
+  Array.prototype.slice.call(document.querySelectorAll('[data-final]')).forEach(function (b) { b.addEventListener('click', function () { V.markFinal(b.getAttribute('data-final')).then(refresh); }); });
+  Array.prototype.slice.call(document.querySelectorAll('[data-failed]')).forEach(function (b) { b.addEventListener('click', function () {
+    var why = prompt('Failure reason (optional)') || '';
+    V.markFailed(b.getAttribute('data-failed'), why).then(refresh);
+  }); });
+  Array.prototype.slice.call(document.querySelectorAll('[data-restore]')).forEach(function (b) { b.addEventListener('click', function () {
+    var p = b.getAttribute('data-restore').split('|');
+    V.restore(SID, p[1], p[0]).then(function (r) {
+      $('status').textContent = r.ok ? 'restored ' + r.label + ' — fields ' + (r.fields || []).join(', ') : 'restore failed: ' + r.reason;
+    });
+  }); });
+  Array.prototype.slice.call(document.querySelectorAll('[data-rm]')).forEach(function (b) { b.addEventListener('click', function () { if (!confirm('Delete this version permanently?')) return; V.remove(b.getAttribute('data-rm')).then(refresh); }); });
+  Array.prototype.slice.call(document.querySelectorAll('[data-prune]')).forEach(function (b) { b.addEventListener('click', function () {
+    if (!confirm('Delete every failed ' + b.getAttribute('data-prune') + ' version on this scene?')) return;
+    V.deleteFailed(SID, b.getAttribute('data-prune')).then(function (n) { $('status').textContent = 'pruned ' + n + ' failed'; refresh(); });
+  }); });
+}
+
+function refresh() {
+  if (!SID) { $('kinds').innerHTML = '<div class="empty">Pick a scene above.</div>'; return; }
+  $('status').textContent = 'reading versions…';
+  V.listAll(SID).then(function (byKind) {
+    paint(byKind);
+    var total = V.KINDS.reduce(function (n, k) { return n + (byKind[k] || []).length; }, 0);
+    $('status').textContent = total + ' version(s) for ' + SID;
+  });
+}
+
+$('scene-pick').addEventListener('change', function () { SID = this.value; refresh(); });
+$('reload').addEventListener('click', refresh);
+$('seed').addEventListener('click', function () {
+  if (!SID) { $('status').textContent = 'pick a scene first'; return; }
+  V.add(SID, 'image', { image: 'demo://seeded-' + Date.now(), proof: { kind: 'demo', verifiedAt: new Date().toISOString() } }).then(refresh);
+});
+$('cmp').addEventListener('click', function () {
+  V.compare($('ver-a').value.trim(), $('ver-b').value.trim()).then(function (r) {
+    $('cmp-out').style.display = 'block'; $('cmp-out').textContent = JSON.stringify(r, null, 2);
+  });
+});
+
+}
+</script>
+</body>
+</html>
