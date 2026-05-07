@@ -88,10 +88,14 @@ header h1{margin:0;font-size:16px;font-weight:800;flex:1}
 'use strict';
 var REQUIRED_FILES = [
   'index.html','manifest.json','service-worker.js','project.json','scenes.json',
-  'characters.json','rights.json','credits.json','styles.css','player.js','editor.js'
+  'characters.json','rights.json','credits.json','styles.css','player.js','editor.js',
+  // Per inbox/5.7 Claude READ ME.docx item 11 — generated-media bookkeeping files
+  'generation-report.json','asset-declarations.json','continuity-report.json',
+  'prompt-log.json','chat-history.json','model-routing.json'
 ];
 var REQUIRED_FOLDERS = [
-  'assets/images/','assets/audio/','assets/music/','assets/sfx/','assets/subtitles/','assets/icons/'
+  'assets/images/','assets/video/','assets/audio/','assets/music/','assets/sfx/',
+  'assets/subtitles/','assets/icons/'
 ];
 var FAIL_HARD = ['index.html','project.json','scenes.json','rights.json'];
 
@@ -292,7 +296,14 @@ $('act-repair').addEventListener('click', function () {
     'credits.json': JSON.stringify({ schemaVersion: 1, credits: [] }, null, 2),
     'styles.css': '/* LoadStudio Project styles */\nbody{margin:0;font-family:-apple-system,sans-serif}\n',
     'player.js': '// LoadStudio player stub.\n',
-    'editor.js': '// LoadStudio editor stub.\n'
+    'editor.js': '// LoadStudio editor stub.\n',
+    // 5.7 Claude READ ME bookkeeping stubs.
+    'generation-report.json': JSON.stringify({ schemaVersion: 1, generations: [], note: 'Each generation attempt: provider, ms, success, outputProof.' }, null, 2),
+    'asset-declarations.json': JSON.stringify({ schemaVersion: 1, declarations: [], note: 'Per-asset license + status entries. Mirror of rights.json assetDeclarations.' }, null, 2),
+    'continuity-report.json': JSON.stringify({ schemaVersion: 1, scenesChecked: [], conflicts: [], note: 'Character / wardrobe / prop / era continuity findings.' }, null, 2),
+    'prompt-log.json': JSON.stringify({ schemaVersion: 1, prompts: [], note: 'Every visual / motion / sound / music / SFX / ambience / voice prompt the project emits.' }, null, 2),
+    'chat-history.json': JSON.stringify({ schemaVersion: 1, threads: [], note: 'AI Chat Studio threads, each with messages and any inline output cards.' }, null, 2),
+    'model-routing.json': JSON.stringify({ schemaVersion: 1, decisions: [], note: 'Each routing decision Load AI Core made: intent, picked provider, alternates, reason.' }, null, 2)
   };
   lastReport.missingFiles.forEach(function (p) {
     if (STUBS[p] !== undefined) { lastZip.file(p, STUBS[p]); added.push(p); }
