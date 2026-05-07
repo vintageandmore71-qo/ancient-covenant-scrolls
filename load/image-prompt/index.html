@@ -857,6 +857,43 @@ const CAPS = {
 
 /* ── STATE ── */
 const LS = localStorage;
+
+/* ── X-AI-PROVIDERS Phase 2 (5.7 Claude README item #5 sub) ──
+   Pull API keys from Load Main's shared vault (load_ai_providers_v2)
+   into the per-tool slots before C is built, so this iframe never
+   needs a second key UI. Writes back via syncBackToLoadMain() on
+   save so changes here propagate to load.js next boot.            */
+(function () {
+  try {
+    var raw = LS.getItem('load_ai_providers_v2');
+    if (!raw) return;
+    var p = JSON.parse(raw);
+    if (p && typeof p === 'object') {
+      if (p.huggingface && typeof p.huggingface.apiKey === 'string' && p.huggingface.apiKey && !LS.getItem('ps_hfimg')) {
+        LS.setItem('ps_hfimg', p.huggingface.apiKey);
+      }
+      if (p.gemini && typeof p.gemini.apiKey === 'string' && p.gemini.apiKey && !LS.getItem('ps_k_gemini')) {
+        LS.setItem('ps_k_gemini', p.gemini.apiKey);
+      }
+      if (p.openrouter && typeof p.openrouter.apiKey === 'string' && p.openrouter.apiKey && !LS.getItem('ps_k_or')) {
+        LS.setItem('ps_k_or', p.openrouter.apiKey);
+      }
+    }
+  } catch (e) { /* malformed JSON — keep existing per-tool slots */ }
+})();
+
+function syncBackToLoadMain(name, key) {
+  try {
+    var raw = LS.getItem('load_ai_providers_v2');
+    var p = raw ? JSON.parse(raw) : {};
+    if (typeof p !== 'object' || !p) p = {};
+    if (!p[name]) p[name] = { enabled: false, apiKey: '' };
+    p[name].apiKey = key || '';
+    if (key) p[name].enabled = true;
+    LS.setItem('load_ai_providers_v2', JSON.stringify(p));
+  } catch (e) { /* ignore — Load Main rebuilds the structure on next boot */ }
+}
+
 let C = {
   provider:    LS.getItem('ps_prov')     || '',
   keys: {
@@ -1065,6 +1102,10 @@ function saveSettings(){
   LS.setItem('ps_k_ant',C.keys.anthropic); LS.setItem('ps_k_hfc',C.keys.hfchat);
   LS.setItem('ps_k_gfb',C.keys.geminiFB); LS.setItem('ps_k_afb',C.keys.anthropicFB);
   LS.setItem('ps_hfimg',C.hfImgKey); LS.setItem('ps_orm',C.orModel);
+  /* mirror keys back into Load Main's shared vault — single key UI */
+  syncBackToLoadMain('huggingface', C.hfImgKey);
+  syncBackToLoadMain('gemini',      C.keys.gemini);
+  syncBackToLoadMain('openrouter',  C.keys.openrouter);
   LS.setItem('ps_hfm',C.hfModel); LS.setItem('ps_mode',C.mode);
   LS.setItem('ps_cfac',C.cfAccount); LS.setItem('ps_cftk',C.cfToken);
   LS.setItem('ps_tgk',C.togetherKey);

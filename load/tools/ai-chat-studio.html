@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
 <script src="../lib-provider-registry.js"></script>
 <script src="../lib-load-ai-core.js"></script>
+<script src="../lib-load-db.js"></script>
 <style>
 :root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--info:#60a5fa;--border:#2a2a40}
 *{box-sizing:border-box}
@@ -19,72 +20,114 @@ header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-ite
 header h1{margin:0;font-size:16px;font-weight:800;flex:1}
 .wrap{max-width:1000px;margin:0 auto;padding:24px 18px 80px}
 .build-marker{background:#facc15;color:#0a0a14;font-weight:900;font-size:13px;letter-spacing:.04em;padding:10px 14px;border-radius:10px;margin:0 0 14px;font-family:ui-monospace,Menlo,monospace;text-align:center}
-.intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin:0 0 18px}
-.intro h2{margin:0 0 6px;font-size:18px;font-weight:800}
-.intro p{margin:0;color:var(--mute);font-size:13.5px;line-height:1.6}
-.section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin:0 0 14px}
-.section h3{margin:0 0 10px;font-size:14px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.05em}
-.route-row{display:flex;flex-wrap:wrap;gap:6px}
-.route-chip{font-size:11.5px;padding:3px 8px;border-radius:8px;border:1px solid var(--border);background:#0a0e18;color:var(--mute);font-family:ui-monospace,Menlo,monospace}
-.route-chip.first{background:rgba(74,222,128,.18);color:var(--ok);border-color:rgba(74,222,128,.4)}
-textarea,input[type=text]{width:100%;background:#0a0e18;border:1px solid var(--border);border-radius:8px;color:var(--fg);font:inherit;font-size:14px;padding:10px 12px}
-textarea{min-height:64px;resize:vertical}
+.intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin:0 0 14px;font-size:12.5px;color:var(--mute);line-height:1.55}
+.intro strong{color:var(--fg)}
+.modes{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.mode-btn{font:inherit;padding:6px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border);background:var(--bg2);color:var(--mute);font-weight:700;font-size:12.5px}
+.mode-btn.on{background:rgba(124,58,237,.22);color:#fff;border-color:var(--accent)}
+.section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin:0 0 12px}
+.section h3{margin:0 0 8px;font-size:13px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.05em}
+textarea,input[type=text],select{width:100%;background:#0a0e18;border:1px solid var(--border);border-radius:8px;color:var(--fg);font:inherit;font-size:14px;padding:10px 12px}
+textarea{min-height:60px;resize:vertical}
 button{font:inherit;padding:9px 14px;border-radius:8px;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-weight:700;font-size:13px}
 button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 button:disabled{opacity:.5;cursor:not-allowed}
-.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;align-items:center}
-.messages{display:flex;flex-direction:column;gap:10px;margin-top:12px}
-.msg{padding:10px 12px;border-radius:10px;font-size:13.5px;line-height:1.55}
-.msg.user{background:#1a1a2e;border:1px solid var(--border);align-self:flex-end;max-width:90%}
-.msg.assistant{background:#0a0e18;border:1px solid rgba(124,58,237,.4);align-self:flex-start;max-width:95%}
-.msg.assistant .who{font-size:10.5px;font-weight:800;color:#c4a8ff;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
-.msg.error{background:rgba(255,110,110,.08);border:1px solid rgba(255,110,110,.4);color:var(--err);align-self:stretch}
-.msg .meta{font-size:11px;color:var(--mute);font-family:ui-monospace,Menlo,monospace;margin-top:5px}
-.msg pre{margin:6px 0 0;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,Menlo,monospace;font-size:12.5px}
-.status{font-size:11.5px;color:var(--mute);font-family:ui-monospace,Menlo,monospace}
+button.small{font-size:11.5px;padding:5px 10px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:760px){.row{grid-template-columns:1fr}}
+.messages{display:flex;flex-direction:column;gap:12px;margin-top:10px}
+.card{padding:12px;border-radius:10px;border:1px solid var(--border);background:#0a0e18;font-size:13.5px;line-height:1.55}
+.card.user{background:#1a1a2e;align-self:flex-end;max-width:90%}
+.card.assistant{align-self:flex-start;max-width:95%;border-color:rgba(124,58,237,.4)}
+.card.error{border-color:rgba(255,110,110,.5);color:#ff9a9a}
+.card .who{font-size:10.5px;font-weight:800;color:#c4a8ff;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
+.card pre{margin:6px 0 0;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,Menlo,monospace;font-size:12.5px}
+.card .meta{font-size:11px;color:var(--mute);font-family:ui-monospace,Menlo,monospace;margin-top:6px}
+.card .actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.card .badge{font-size:10px;font-weight:800;letter-spacing:.04em;padding:2px 6px;border-radius:5px;text-transform:uppercase;margin-left:6px}
+.card .badge.ok{background:rgba(74,222,128,.18);color:var(--ok)}
+.card .badge.fail{background:rgba(255,110,110,.18);color:var(--err)}
+.card .badge.prompt{background:rgba(250,204,21,.18);color:var(--warn)}
+.card .badge.run{background:rgba(96,165,250,.18);color:var(--info)}
+.card img{max-width:100%;border-radius:8px;margin-top:8px;display:block}
+.card .ref{max-width:140px;border-radius:8px;margin-top:6px;display:block;border:1px solid var(--border)}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(96,165,250,.25);border-top-color:var(--info);border-radius:50%;animation:spin 1s linear infinite;margin-right:6px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.input-bar{position:sticky;bottom:0;background:linear-gradient(180deg,rgba(10,10,20,0) 0,var(--bg) 18%);padding-top:12px;margin-top:14px}
+.style-pill,.size-pill{font-size:11.5px;padding:4px 9px;border-radius:7px;border:1px solid var(--border);background:var(--bg2);color:var(--mute);cursor:pointer}
+.style-pill.on,.size-pill.on{background:rgba(124,58,237,.22);color:#c4a8ff;border-color:rgba(124,58,237,.4)}
+.row-pills{display:flex;flex-wrap:wrap;gap:5px}
+.refbox{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mute)}
+.refbox img{width:48px;height:48px;border-radius:6px;border:1px solid var(--border);object-fit:cover}
+.status-line{font-size:11.5px;color:var(--mute);font-family:ui-monospace,Menlo,monospace;margin-top:4px}
 </style>
 </head>
 <body>
 <header>
-  <a class="back" href="../">
+  <a class="back" href="./handoff-tools.html">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
     Back to Load
   </a>
   <h1>AI Chat Studio</h1>
 </header>
 <div class="wrap">
-<div class="build-marker">BUILD MARKER: CHAT-STUDIO-v1-2026-05-07-v17g19</div>
+<div class="build-marker">BUILD MARKER: CHAT-STUDIO-v2-2026-05-07-v17g26</div>
 <div class="intro">
-  <h2>X-AI-CHAT-STUDIO Phase 1 &mdash; routed chat</h2>
-  <p>Free chat. The route is picked by <strong>Load AI Core</strong> from the shared provider registry, local-first / free-first. Phase 1 calls only providers that need no API key (Pollinations). Cloud providers that need a paid key stay off until you wire your own key in Settings &mdash; this page never asks for one.</p>
-  <p style="margin-top:8px"><strong>Output proof:</strong> the assistant message shows the provider that produced it and the round-trip time. If a real network call fails, the failure is shown plainly &mdash; never faked as a success.</p>
+  <strong>X-AI-CHAT-STUDIO Phase 2.</strong> Routed chat with inline output cards. Free providers only. Pollinations <em>text</em> for chat, Pollinations <em>image</em> for text-to-image &mdash; no key required. Animation, video, and audio output cards stay <strong>prompt-only</strong> on this page until a real generator is wired (per the output-proof rule). Save, refine, and attach-to-scene actions are real and write into Project Memory (<code>scenes</code>, <code>generations</code>, <code>chat-history</code>).
 </div>
 
 <div class="section">
-  <h3>Route for &ldquo;chat&rdquo; intent (free / local only)</h3>
-  <div class="route-row" id="route-row"></div>
-  <div class="status" id="route-status" style="margin-top:6px"></div>
+  <h3>Mode</h3>
+  <div class="modes" id="modes">
+    <button class="mode-btn on" data-mode="chat">Chat</button>
+    <button class="mode-btn" data-mode="image">Text-to-image</button>
+    <button class="mode-btn" data-mode="i2i">Image-to-image</button>
+    <button class="mode-btn" data-mode="animate">Animate</button>
+    <button class="mode-btn" data-mode="video">Video (prompt only)</button>
+    <button class="mode-btn" data-mode="audio">Audio / SFX / music</button>
+  </div>
+  <div class="status-line" id="route-line">route: chat</div>
 </div>
 
-<div class="section">
-  <h3>Chat</h3>
-  <div class="messages" id="messages">
-    <div class="msg assistant"><div class="who">Hint</div>Ask anything. Replies come from the first <em>Ready</em> provider in the route above.</div>
+<div class="section" id="opts">
+  <h3>Options</h3>
+  <div class="row">
+    <div>
+      <span class="status-line" style="margin:0 0 4px;display:block">Style</span>
+      <div class="row-pills" id="style-pills"></div>
+    </div>
+    <div>
+      <span class="status-line" style="margin:0 0 4px;display:block">Size (image / animate)</span>
+      <div class="row-pills" id="size-pills">
+        <button class="size-pill on" data-size="512x512">512x512</button>
+        <button class="size-pill" data-size="768x768">768x768</button>
+        <button class="size-pill" data-size="1024x576">1024x576 (16:9)</button>
+        <button class="size-pill" data-size="576x1024">576x1024 (9:16)</button>
+      </div>
+    </div>
   </div>
-  <div style="margin-top:12px">
-    <textarea id="user-input" placeholder="Type a message"></textarea>
+  <div style="margin-top:10px" class="refbox">
+    <span class="status-line" style="margin:0">Reference image (image-to-image / context):</span>
+    <input type="file" id="ref-input" accept="image/*" style="font-size:12px;color:var(--mute);background:transparent;padding:0;border:none">
+    <img id="ref-preview" style="display:none" alt="">
+    <button class="small" id="ref-clear" style="display:none">Clear</button>
   </div>
+</div>
+
+<div class="messages" id="messages">
+  <div class="card assistant"><div class="who">Hint</div>Pick a mode above. Chat mode runs free Pollinations text. Text-to-image runs free Pollinations image. Other modes emit prompt-only output cards until you wire a real provider.</div>
+</div>
+
+<div class="input-bar">
+  <textarea id="user-input" placeholder="Ask anything, describe an image, or describe a scene to animate"></textarea>
   <div class="toolbar">
     <button class="primary" id="btn-send">Send</button>
-    <button id="btn-clear">Clear</button>
-    <span class="status" id="status"></span>
+    <button id="btn-clear">Clear thread</button>
+    <span class="status-line" id="status"></span>
   </div>
 </div>
 
-<div class="section">
-  <h3>Provider used (last reply)</h3>
-  <div class="status" id="last-provider">none yet</div>
-</div>
 </div>
 
 <script>
@@ -93,84 +136,329 @@ var $ = function (id) { return document.getElementById(id); };
 function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
 if (!window.LoadAICore || !window.LoadProviderRegistry) {
-  $('messages').innerHTML = '<div class="msg error">Load AI Core or Provider Registry failed to load. Check the network and reload.</div>';
+  $('messages').innerHTML = '<div class="card error">Load AI Core or Provider Registry failed to load. Reload to try again.</div>';
 } else {
-  var Core = window.LoadAICore;
 
-  function renderRoute() {
-    var rows = Core.explain('chat', { includePaid: false });
-    var html = rows.map(function (r, i) {
-      return '<span class="route-chip' + (i === 0 ? ' first' : '') + '">' + esc((i + 1) + '. ' + r.providerName + ' [' + r.providerType + ']') + '</span>';
-    }).join('');
-    $('route-row').innerHTML = html || '<span class="status">no providers found</span>';
-    $('route-status').textContent = 'free / local only · ' + rows.length + ' provider' + (rows.length === 1 ? '' : 's');
-  }
-  renderRoute();
+var Core = window.LoadAICore;
+var DB = window.LoadDB || null;
 
-  function pollinations(prompt) {
-    var url = 'https://text.pollinations.ai/' + encodeURIComponent(prompt);
-    var t0 = Date.now();
-    return fetch(url, { method: 'GET', cache: 'no-store' }).then(function (r) {
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.text().then(function (text) { return { text: text, ms: Date.now() - t0 }; });
+var STATE = {
+  mode: 'chat',
+  style: '',
+  styleName: '',
+  size: '512x512',
+  ref: null,
+  threadId: 'thread-' + Date.now().toString(36),
+  messages: []
+};
+
+// ── Curated style chips. Mirror of lib-style-library when present.
+var STYLES = (window.LoadStyleLibrary && window.LoadStyleLibrary.STYLES) || [
+  { id: 'photo', name: 'Cinematic photoreal', prompt: 'cinematic photoreal, 35mm film grain, shallow depth of field, soft natural light' },
+  { id: 'paint', name: 'Oil painting',         prompt: 'oil on canvas, visible brushwork, museum-grade composition' },
+  { id: 'story', name: 'Storybook',            prompt: 'children-book illustration, soft palette, hand-drawn line, gentle texture' },
+  { id: 'noir',  name: 'Black and white noir', prompt: 'high-contrast black and white, hard rim light, deep shadows' },
+  { id: 'fantasy', name: 'High fantasy concept', prompt: 'high fantasy concept art, painterly volumetric light, mythic scale' },
+  { id: 'cel',   name: 'Cel-shaded animation', prompt: 'cel-shaded, two-tone shadow, clean outline, vivid saturated palette' }
+];
+
+function renderStylePills() {
+  var html = '<button class="style-pill' + (STATE.style ? '' : ' on') + '" data-style-id="">none</button>';
+  // Limit to 8 chips so the row stays tight.
+  STYLES.slice(0, 8).forEach(function (s) {
+    html += '<button class="style-pill' + (STATE.style === s.prompt ? ' on' : '') + '" data-style-id="' + esc(s.id) + '">' + esc(s.name) + '</button>';
+  });
+  $('style-pills').innerHTML = html;
+  Array.prototype.slice.call(document.querySelectorAll('[data-style-id]')).forEach(function (b) {
+    b.addEventListener('click', function () {
+      var id = b.getAttribute('data-style-id');
+      if (!id) { STATE.style = ''; STATE.styleName = ''; }
+      else { var s = STYLES.find(function (x) { return x.id === id; }); STATE.style = s ? s.prompt : ''; STATE.styleName = s ? s.name : ''; }
+      renderStylePills();
     });
+  });
+}
+renderStylePills();
+
+// ── URL deep-link: /ai-chat-studio.html?style=...
+(function () {
+  try {
+    var u = new URL(location.href);
+    var st = u.searchParams.get('style');
+    if (st) { STATE.style = st; STATE.styleName = 'from URL'; renderStylePills(); }
+  } catch (_) {}
+})();
+
+// ── Mode buttons.
+Array.prototype.slice.call(document.querySelectorAll('[data-mode]')).forEach(function (b) {
+  b.addEventListener('click', function () {
+    STATE.mode = b.getAttribute('data-mode');
+    Array.prototype.slice.call(document.querySelectorAll('[data-mode]')).forEach(function (x) { x.classList.toggle('on', x === b); });
+    renderRouteLine();
+  });
+});
+function renderRouteLine() {
+  var intentByMode = { chat: 'chat', image: 'image-gen', i2i: 'image-to-image', animate: 'image-anim', video: 'video', audio: 'sfx' };
+  var iid = intentByMode[STATE.mode] || 'chat';
+  var rows = Core.explain(iid, { includePaid: false });
+  var first = rows[0];
+  var line = 'mode=' + STATE.mode + ' · intent=' + iid + ' · primary route: ' + (first ? first.providerName + ' [' + first.providerType + ']' : 'no free provider — output stays prompt-only');
+  $('route-line').textContent = line;
+}
+renderRouteLine();
+
+// ── Size buttons.
+Array.prototype.slice.call(document.querySelectorAll('[data-size]')).forEach(function (b) {
+  b.addEventListener('click', function () {
+    STATE.size = b.getAttribute('data-size');
+    Array.prototype.slice.call(document.querySelectorAll('[data-size]')).forEach(function (x) { x.classList.toggle('on', x === b); });
+  });
+});
+
+// ── Reference image upload.
+$('ref-input').addEventListener('change', function () {
+  var f = this.files && this.files[0]; if (!f) return;
+  var r = new FileReader();
+  r.onload = function () {
+    STATE.ref = { name: f.name, size: f.size, type: f.type, dataUrl: r.result };
+    $('ref-preview').src = r.result; $('ref-preview').style.display = 'inline-block';
+    $('ref-clear').style.display = 'inline-block';
+  };
+  r.readAsDataURL(f);
+});
+$('ref-clear').addEventListener('click', function () {
+  STATE.ref = null; $('ref-input').value = ''; $('ref-preview').style.display = 'none'; $('ref-clear').style.display = 'none';
+});
+
+// ── DB write helpers (no-ops if LoadDB unavailable).
+function dbPut(store, key, value) {
+  if (!DB) return Promise.resolve(false);
+  return DB.put(store, key, value).then(function () { return true; }).catch(function () { return false; });
+}
+function logChat(role, mode, content, extra) {
+  var rec = { threadId: STATE.threadId, role: role, mode: mode, content: content, at: new Date().toISOString(), extra: extra || null };
+  return dbPut('kv', 'chat-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,6), rec);
+}
+function logGeneration(rec) {
+  rec.threadId = STATE.threadId;
+  rec.at = new Date().toISOString();
+  return dbPut('generations', 'gen-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,6), rec);
+}
+
+// ── Message rendering.
+function appendCard(opts) {
+  var div = document.createElement('div');
+  div.className = 'card ' + (opts.cls || 'assistant');
+  if (opts.id) div.id = opts.id;
+  var html = '';
+  if (opts.who) html += '<div class="who">' + esc(opts.who) + (opts.badge ? '<span class="badge ' + opts.badge.cls + '">' + esc(opts.badge.text) + '</span>' : '') + '</div>';
+  if (opts.text) html += '<pre>' + esc(opts.text) + '</pre>';
+  if (opts.html) html += opts.html;
+  if (opts.meta) html += '<div class="meta">' + esc(opts.meta) + '</div>';
+  div.innerHTML = html;
+  $('messages').appendChild(div);
+  div.scrollIntoView({ block: 'end' });
+  return div;
+}
+
+// ── Builders / fetchers per mode.
+function pollinationsText(prompt) {
+  var url = 'https://text.pollinations.ai/' + encodeURIComponent(prompt);
+  var t0 = Date.now();
+  return fetch(url, { method: 'GET', cache: 'no-store' }).then(function (r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.text().then(function (t) { return { text: t, ms: Date.now() - t0 }; });
+  });
+}
+function pollinationsImageUrl(prompt, size) {
+  var sz = (size || '512x512').split('x');
+  var u = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=' + (sz[0] || 512) + '&height=' + (sz[1] || 512) + '&nologo=true&seed=' + (Math.floor(Math.random() * 100000));
+  return u;
+}
+
+function buildPrompt(user) {
+  var parts = [user.trim()];
+  if (STATE.style) parts.push(STATE.style);
+  return parts.join(', ');
+}
+
+// ── Send action.
+function send() {
+  var p = $('user-input').value.trim();
+  if (!p) return;
+  $('user-input').value = '';
+  $('btn-send').disabled = true;
+  $('status').textContent = '';
+
+  appendCard({ cls: 'user', text: p });
+  logChat('user', STATE.mode, p, { style: STATE.styleName, size: STATE.size, hasRef: !!STATE.ref });
+
+  var done = function () { $('btn-send').disabled = false; $('status').textContent = 'last reply ' + new Date().toLocaleTimeString(); };
+
+  switch (STATE.mode) {
+    case 'chat':       return runChat(p).then(done);
+    case 'image':      return runImage(p).then(done);
+    case 'i2i':        return runI2I(p).then(done);
+    case 'animate':    return runAnimate(p).then(done);
+    case 'video':      return runVideoPromptOnly(p).then(done);
+    case 'audio':      return runAudioPromptOnly(p).then(done);
+    default:           return done();
   }
+}
 
-  function builtin(prompt) {
-    var t0 = Date.now();
-    var p = (prompt || '').trim();
-    var reply;
-    if (!p) reply = 'Type a message.';
-    else if (/^\/help\b/.test(p)) reply = 'Slash commands: /help — this list. /route — show provider order.';
-    else if (/^\/route\b/.test(p)) reply = 'Current route: ' + Core.explain('chat', { includePaid: false }).map(function (r) { return r.providerName; }).join(' -> ');
-    else reply = 'Built-in fallback (no network). You said: "' + p.slice(0, 240) + '"';
-    return Promise.resolve({ text: reply, ms: Date.now() - t0 });
-  }
+function runChat(p) {
+  var card = appendCard({ cls: 'assistant', who: 'Pollinations.ai', badge: { cls: 'run', text: 'thinking' }, text: '' });
+  card.querySelector('pre').innerHTML = '<span class="spinner"></span> calling text.pollinations.ai...';
+  return pollinationsText(p).then(function (res) {
+    card.querySelector('.who').innerHTML = 'Pollinations.ai <span class="badge ok">ok</span>';
+    card.querySelector('pre').textContent = res.text;
+    var meta = 'provider: pollinations · ' + res.ms + ' ms · ' + new Date().toLocaleTimeString();
+    var metaDiv = document.createElement('div'); metaDiv.className = 'meta'; metaDiv.textContent = meta;
+    card.appendChild(metaDiv);
+    logChat('assistant', 'chat', res.text, { provider: 'pollinations', ms: res.ms });
+    logGeneration({ kind: 'text', provider: 'pollinations', success: true, ms: res.ms, prompt: p, outputProof: { kind: 'text', length: res.text.length } });
+  }).catch(function (err) {
+    card.classList.add('error');
+    card.querySelector('.who').innerHTML = 'Pollinations.ai <span class="badge fail">fail</span>';
+    card.querySelector('pre').textContent = 'Network call failed: ' + ((err && err.message) || err);
+    logGeneration({ kind: 'text', provider: 'pollinations', success: false, error: String(err && err.message || err), prompt: p });
+  });
+}
 
-  function appendMsg(role, who, text, meta) {
-    var div = document.createElement('div');
-    div.className = 'msg ' + role;
-    var html = '';
-    if (who) html += '<div class="who">' + esc(who) + '</div>';
-    html += '<pre>' + esc(text) + '</pre>';
-    if (meta) html += '<div class="meta">' + esc(meta) + '</div>';
-    div.innerHTML = html;
-    $('messages').appendChild(div);
-    div.scrollIntoView({ block: 'end' });
-  }
-
-  function send() {
-    var p = $('user-input').value.trim();
-    if (!p) return;
-    appendMsg('user', '', p, '');
-    $('user-input').value = '';
-    $('btn-send').disabled = true;
-    $('status').textContent = 'thinking...';
-
-    pollinations(p).then(function (res) {
-      appendMsg('assistant', 'Pollinations.ai', res.text, 'provider: pollinations · ' + res.ms + ' ms · ' + new Date().toLocaleTimeString());
-      $('last-provider').textContent = 'Pollinations.ai (free-api) · ' + res.ms + ' ms · ' + new Date().toLocaleTimeString();
-    }).catch(function (err) {
-      var msg = (err && err.message) ? err.message : String(err);
-      appendMsg('assistant', 'Pollinations.ai (failed)', 'Network call failed: ' + msg + '. Falling back to built-in.', 'provider: pollinations failed -> builtin fallback');
-      builtin(p).then(function (res) {
-        appendMsg('assistant', 'Built-in fallback', res.text, 'provider: builtin · ' + res.ms + ' ms · ' + new Date().toLocaleTimeString());
-        $('last-provider').textContent = 'Built-in (no network) · after pollinations failed';
+function runImage(p) {
+  var full = buildPrompt(p);
+  var url = pollinationsImageUrl(full, STATE.size);
+  var t0 = Date.now();
+  var refHtml = STATE.ref ? '<img class="ref" src="' + esc(STATE.ref.dataUrl) + '" alt="ref">' : '';
+  var card = appendCard({ cls: 'assistant', who: 'Pollinations image', badge: { cls: 'run', text: 'generating' },
+    html: '<div class="meta">' + esc('prompt: ' + full + ' (' + STATE.size + ')') + '</div>' + refHtml + '<div><span class="spinner"></span> waiting for image...</div>'
+  });
+  return new Promise(function (resolve) {
+    var img = new Image();
+    img.onload = function () {
+      var ms = Date.now() - t0;
+      var bw = img.naturalWidth, bh = img.naturalHeight;
+      card.querySelector('.who').innerHTML = 'Pollinations image <span class="badge ok">image ready</span>';
+      var imgEl = document.createElement('img'); imgEl.src = url; imgEl.alt = full;
+      card.querySelectorAll('div')[card.querySelectorAll('div').length - 1].remove();
+      card.appendChild(imgEl);
+      var meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = 'provider: pollinations · ' + ms + ' ms · ' + bw + 'x' + bh + ' · output proof: real image loaded';
+      card.appendChild(meta);
+      var actions = document.createElement('div'); actions.className = 'actions';
+      actions.innerHTML = '<button class="small" data-act="save">Save image</button>' +
+        '<button class="small" data-act="refine">Refine</button>' +
+        '<button class="small" data-act="animate">Animate this</button>' +
+        '<button class="small primary" data-act="attach">Attach to scene</button>';
+      card.appendChild(actions);
+      actions.querySelector('[data-act=save]').addEventListener('click', function () {
+        var a = document.createElement('a'); a.href = url; a.download = 'load-image-' + Date.now() + '.jpg'; a.target = '_blank'; a.click();
       });
-    }).then(function () {
-      $('btn-send').disabled = false;
-      $('status').textContent = '';
-    });
-  }
+      actions.querySelector('[data-act=refine]').addEventListener('click', function () {
+        $('user-input').value = full + ', '; $('user-input').focus();
+      });
+      actions.querySelector('[data-act=animate]').addEventListener('click', function () {
+        STATE.mode = 'animate';
+        Array.prototype.slice.call(document.querySelectorAll('[data-mode]')).forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-mode') === 'animate'); });
+        renderRouteLine();
+        $('user-input').value = full;
+      });
+      actions.querySelector('[data-act=attach]').addEventListener('click', function () {
+        attachToScene({ image: url, visualPrompt: full, sizes: STATE.size });
+      });
+      logGeneration({ kind: 'image', provider: 'pollinations', success: true, ms: ms, prompt: full, size: STATE.size, outputProof: { kind: 'image-url', url: url, w: bw, h: bh } });
+      resolve();
+    };
+    img.onerror = function () {
+      card.classList.add('error');
+      card.querySelector('.who').innerHTML = 'Pollinations image <span class="badge fail">image failed</span>';
+      card.querySelectorAll('div')[card.querySelectorAll('div').length - 1].textContent = 'Image did not load. Network blocked or provider unreachable.';
+      logGeneration({ kind: 'image', provider: 'pollinations', success: false, prompt: full });
+      resolve();
+    };
+    img.src = url;
+  });
+}
 
-  $('btn-send').addEventListener('click', send);
-  $('user-input').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(); }
+function runI2I(p) {
+  // Free i2i routes need a key (HF / SiliconFlow). Honest message.
+  var card = appendCard({ cls: 'assistant', who: 'Image-to-image', badge: { cls: 'prompt', text: 'prompt only' },
+    html: '<pre>' + esc('Image-to-image needs a Hugging Face or SiliconFlow key (free tier). Phase 2 wires this through Load Main Settings — see Provider Registry.\n\nPrompt prepared:\n  ' + buildPrompt(p) + (STATE.ref ? '\n  reference: ' + STATE.ref.name + ' (' + STATE.ref.size + ' B)' : '')) + '</pre>' +
+           '<div class="actions"><a class="small" style="text-decoration:none;background:var(--bg3);padding:5px 10px;border-radius:8px;color:var(--fg);border:1px solid var(--border)" href="../image-prompt/index.html">Open Image Prompt tool</a></div>'
   });
-  $('btn-clear').addEventListener('click', function () {
-    $('messages').innerHTML = '';
-    $('last-provider').textContent = 'none yet';
+  logGeneration({ kind: 'image-to-image', provider: 'prompt-only', success: false, prompt: buildPrompt(p), promptOnly: true });
+  return Promise.resolve(card);
+}
+
+function runAnimate(p) {
+  var full = buildPrompt(p);
+  var motion = 'gentle subject motion, slow cinematic camera movement';
+  var card = appendCard({ cls: 'assistant', who: 'Animation', badge: { cls: 'prompt', text: 'animation request' },
+    html: '<pre>' + esc('Animation prompt prepared (real generator not wired in Phase 2 — output stays prompt-only):\n\nVisual: ' + full + '\nMotion: ' + motion + '\nSize: ' + STATE.size + (STATE.ref ? '\nReference: ' + STATE.ref.name : '')) + '</pre>'
   });
+  // Progress card per addendum.
+  var prog = appendCard({ cls: 'assistant', who: 'Animation progress', badge: { cls: 'run', text: 'queued' },
+    html: '<pre>Status: animation request queued. No real generator wired in Phase 2; status will stay at \'animation request queued\' instead of fake progress.</pre>'
+  });
+  // Video result card (prompt-only).
+  appendCard({ cls: 'assistant', who: 'Video result', badge: { cls: 'prompt', text: 'silent video' },
+    html: '<pre>No real video produced. Output proof rule: a video card never claims success unless a real playable file/blob/URL is produced.</pre>' +
+          '<div class="actions"><a class="small" style="text-decoration:none;background:var(--bg3);padding:5px 10px;border-radius:8px;color:var(--fg);border:1px solid var(--border)" href="./external-video-fallback.html">Open external-video fallback</a><a class="small" style="text-decoration:none;background:var(--bg3);padding:5px 10px;border-radius:8px;color:var(--fg);border:1px solid var(--border)" href="./scene-prompt-splitter.html">Open Scene Prompt Splitter</a></div>'
+  });
+  logGeneration({ kind: 'animation', provider: 'prompt-only', success: false, promptOnly: true, prompt: full, motion: motion });
+  return Promise.resolve(card);
+}
+
+function runVideoPromptOnly(p) {
+  appendCard({ cls: 'assistant', who: 'Video result', badge: { cls: 'prompt', text: 'silent video' },
+    html: '<pre>' + esc('Video prompt prepared (real generator not wired):\n  ' + buildPrompt(p) + '\nSize: ' + STATE.size) + '</pre>' +
+          '<div class="actions"><a class="small" style="text-decoration:none;background:var(--bg3);padding:5px 10px;border-radius:8px;color:var(--fg);border:1px solid var(--border)" href="./external-video-fallback.html">Build external-video prompt</a></div>'
+  });
+  logGeneration({ kind: 'video', provider: 'prompt-only', success: false, promptOnly: true, prompt: buildPrompt(p) });
+  return Promise.resolve();
+}
+
+function runAudioPromptOnly(p) {
+  appendCard({ cls: 'assistant', who: 'Audio result', badge: { cls: 'prompt', text: 'sound prompt saved' },
+    html: '<pre>' + esc('Audio / SFX / music prompt prepared (real generator not wired):\n  ' + buildPrompt(p)) + '</pre>' +
+          '<div class="actions"><a class="small" style="text-decoration:none;background:var(--bg3);padding:5px 10px;border-radius:8px;color:var(--fg);border:1px solid var(--border)" href="./scene-prompt-splitter.html">Open Scene Prompt Splitter</a></div>'
+  });
+  logGeneration({ kind: 'audio', provider: 'prompt-only', success: false, promptOnly: true, prompt: buildPrompt(p) });
+  return Promise.resolve();
+}
+
+function attachToScene(scene) {
+  if (!DB) {
+    appendCard({ cls: 'error', who: 'Attach', text: 'LoadDB unavailable; cannot attach.' });
+    return;
+  }
+  var rec = {
+    sceneId: 'scene_' + Date.now().toString(36),
+    title: '',
+    image: scene.image || '',
+    video: '',
+    visualPrompt: scene.visualPrompt || '',
+    audioStatus: 'silent_video',
+    audioRightsStatus: 'needs-review',
+    threadId: STATE.threadId,
+    createdAt: new Date().toISOString()
+  };
+  DB.put('scenes', rec.sceneId, rec).then(function () {
+    appendCard({ cls: 'assistant', who: 'Attach to scene', badge: { cls: 'ok', text: 'saved' },
+      text: 'Scene saved to Project Memory: ' + rec.sceneId });
+  }).catch(function (e) {
+    appendCard({ cls: 'error', who: 'Attach', text: 'Save failed: ' + (e && e.message || e) });
+  });
+}
+
+$('btn-send').addEventListener('click', send);
+$('user-input').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(); }
+});
+$('btn-clear').addEventListener('click', function () {
+  $('messages').innerHTML = '<div class="card assistant"><div class="who">Hint</div>Thread cleared. Pick a mode and ask.</div>';
+  STATE.threadId = 'thread-' + Date.now().toString(36);
+});
+
 }
 </script>
 </body>
