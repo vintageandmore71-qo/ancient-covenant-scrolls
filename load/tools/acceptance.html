@@ -120,7 +120,7 @@ header h1{margin:0;font-size:16px;font-weight:800;flex:1}
       hint:'Build a book project in PWA Builder. Unzip the result. Open index.html — must show a header, sidebar with chapters, and rendered text (not source code).' },
     { id:'14', label:'Export receipt appears after export.', kind:'manual',
       hint:'After PWA Builder finishes, the Export receipt panel renders inline. Open Export Receipts tool and confirm a saved receipt is present.' },
-    { id:'15', label:'Load Studio package validator exists.', kind:'auto',
+    { id:'15', label:'Load Studio™ package validator exists.', kind:'auto',
       run: function(){ return fetch('./loadstudio-validator.html', { method:'HEAD' }).then(function(r){ return r.ok ? { status:'PASS', detail:'/load/tools/loadstudio-validator.html reachable.' } : { status:'FAIL', detail:'HTTP '+r.status }; }).catch(function(e){ return { status:'FAIL', detail:e.message }; }); } },
     { id:'16', label:'.loadstudio.zip / .cinepwa.zip can be inspected.', kind:'manual',
       hint:'Open LoadStudio Validator. Drop a .loadstudio.zip. Confirm required-files / folders / rights checks render.' },

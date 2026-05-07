@@ -9,11 +9,11 @@
     "mood": "premium cinematic",
     "duration": 8,
     "status": "draft",
-    "narration": "Created with Load Studio.",
+    "narration": "Created with Load Studio™.",
     "dialogue": "",
     "imagePrompt": "premium cinematic studio title card, violet glow, dark film studio",
     "negativePrompt": "blurred text, distorted logo, clutter, low quality",
-    "subtitle": "Created with Load Studio.",
+    "subtitle": "Created with Load Studio™.",
     "transition": "fade",
     "camera": "Ken Burns"
   }
