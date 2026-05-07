@@ -78,6 +78,7 @@ var REGISTRY = [
   p('groq',    'Groq Llama 3.3',    'cloud-optional', 'chat-text', ['text','requiresApiKey'], 'Not configured', 'Free tier. User-supplied key.'),
   p('openrouter', 'OpenRouter (free models)', 'cloud-optional', 'chat-text', ['text','requiresApiKey','free'], 'Not configured', 'Only :free models used.'),
   p('huggingface-chat', 'Hugging Face Inference (chat)', 'cloud-optional', 'chat-text', ['text','requiresApiKey','free'], 'Not configured', 'User token; same UI as image HF.'),
+  p('horde-text',       'AI Horde anonymous text',       'free-api', 'chat-text', ['text','free'], 'Ready', 'Anonymous public LLM pool. No key. Best-effort fallback after Pollinations.'),
 
   // ── Category 2: image generation + repair (the existing 17) ──
   p('localsd',     'Local SD (A1111-compatible via localSdUrl)', 'local', 'image-gen', ['image','imageToImage','inpainting','styleTransfer','referenceImage','local','free','requiresLocalServer'], 'Needs user setup', 'GPU on local machine. img2img + mask painter integration.'),

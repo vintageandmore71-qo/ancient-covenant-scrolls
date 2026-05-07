@@ -72,7 +72,7 @@ button.small{font-size:11.5px;padding:5px 10px}
   <h1>AI Chat Studio</h1>
 </header>
 <div class="wrap">
-<div class="build-marker">BUILD MARKER: CHAT-STUDIO-v3-2026-05-07-v17g33</div>
+<div class="build-marker">BUILD MARKER: CHAT-STUDIO-v3.1-2026-05-07-v17g34</div>
 <div class="intro">
   <strong>X-AI-CHAT-STUDIO Phase 3.</strong> Routed chat with inline real-output cards. Free providers + on-device synthesis only. <em>Chat</em>: Pollinations text. <em>Text-to-image</em>: Pollinations image (real PNG/JPG). <em>Animate</em> (with a reference image): canvas Ken-Burns + MediaRecorder produces a <strong>real WebM video Blob</strong>. <em>Audio</em>: OfflineAudioContext synthesises a <strong>real WAV Blob</strong> matched to prompt keywords. Output proof: only marked ready when a real playable Blob exists; otherwise the card stays prompt-only honestly.
 </div>
@@ -270,6 +270,49 @@ function pollinationsText(prompt) {
     return r.text().then(function (t) { return { text: t, ms: Date.now() - t0 }; });
   });
 }
+// AI Horde anonymous text fallback (free, no key). Best-effort: 60s sync.
+function hordeText(prompt) {
+  var t0 = Date.now();
+  return fetch('https://aihorde.net/api/v2/generate/text/sync', {
+    method: 'POST',
+    headers: { 'apikey': '0000000000', 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({ prompt: prompt, params: { max_length: 200, max_context_length: 1024 } })
+  }).then(function (r) {
+    if (!r.ok) throw new Error('horde HTTP ' + r.status);
+    return r.json();
+  }).then(function (j) {
+    var gens = j && j.generations;
+    var text = gens && gens.length ? (gens[0].text || '').trim() : '';
+    if (!text) throw new Error('horde returned empty');
+    return { text: text, ms: Date.now() - t0, worker: gens[0].worker_name || '' };
+  });
+}
+
+// Browser TTS playback for voice prompts. Real audible output.
+// Output proof: speechSynthesis onstart fired AND onend fired.
+function speakViaBrowserTts(text) {
+  return new Promise(function (resolve, reject) {
+    if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') {
+      reject(new Error('speechSynthesis not supported'));
+      return;
+    }
+    var t0 = Date.now();
+    var u = new SpeechSynthesisUtterance(text);
+    u.rate = 1; u.pitch = 1; u.volume = 1;
+    var voices = window.speechSynthesis.getVoices() || [];
+    if (voices.length) u.voice = voices.find(function (v) { return v.default; }) || voices[0];
+    var started = false;
+    u.onstart = function () { started = true; };
+    u.onerror = function (e) { reject(new Error('speechSynthesis error: ' + (e && e.error || 'unknown'))); };
+    u.onend = function () {
+      if (!started) reject(new Error('speechSynthesis ended without starting'));
+      else resolve({ ms: Date.now() - t0, voice: u.voice ? u.voice.name : 'default' });
+    };
+    try { window.speechSynthesis.speak(u); }
+    catch (e) { reject(e); }
+  });
+}
+
 function pollinationsImageUrl(prompt, size) {
   var sz = (size || '512x512').split('x');
   var u = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=' + (sz[0] || 512) + '&height=' + (sz[1] || 512) + '&nologo=true&seed=' + (Math.floor(Math.random() * 100000));
@@ -440,16 +483,30 @@ function runChat(p) {
   return pollinationsText(p).then(function (res) {
     card.querySelector('.who').innerHTML = 'Pollinations.ai <span class="badge ok">ok</span>';
     card.querySelector('pre').textContent = res.text;
-    var meta = 'provider: pollinations · ' + res.ms + ' ms · ' + new Date().toLocaleTimeString();
-    var metaDiv = document.createElement('div'); metaDiv.className = 'meta'; metaDiv.textContent = meta;
+    var metaDiv = document.createElement('div'); metaDiv.className = 'meta';
+    metaDiv.textContent = 'provider: pollinations · ' + res.ms + ' ms · ' + new Date().toLocaleTimeString();
     card.appendChild(metaDiv);
     logChat('assistant', 'chat', res.text, { provider: 'pollinations', ms: res.ms });
     logGeneration({ kind: 'text', provider: 'pollinations', success: true, ms: res.ms, prompt: p, outputProof: { kind: 'text', length: res.text.length } });
   }).catch(function (err) {
-    card.classList.add('error');
-    card.querySelector('.who').innerHTML = 'Pollinations.ai <span class="badge fail">fail</span>';
-    card.querySelector('pre').textContent = 'Network call failed: ' + ((err && err.message) || err);
-    logGeneration({ kind: 'text', provider: 'pollinations', success: false, error: String(err && err.message || err), prompt: p });
+    // Fallback to AI Horde anonymous (free, no key).
+    card.querySelector('.who').innerHTML = 'Pollinations.ai <span class="badge fail">fail</span> &rarr; trying AI Horde';
+    card.querySelector('pre').innerHTML = 'Pollinations failed: ' + esc((err && err.message) || String(err)) + '<br><span class="spinner"></span> calling aihorde.net...';
+    return hordeText(p).then(function (res) {
+      card.classList.remove('error');
+      card.querySelector('.who').innerHTML = 'AI Horde <span class="badge ok">ok</span>';
+      card.querySelector('pre').textContent = res.text;
+      var metaDiv = document.createElement('div'); metaDiv.className = 'meta';
+      metaDiv.textContent = 'provider: horde-text · worker=' + (res.worker || 'anon') + ' · ' + res.ms + ' ms · ' + new Date().toLocaleTimeString();
+      card.appendChild(metaDiv);
+      logChat('assistant', 'chat', res.text, { provider: 'horde-text', ms: res.ms, worker: res.worker });
+      logGeneration({ kind: 'text', provider: 'horde-text', success: true, ms: res.ms, prompt: p, outputProof: { kind: 'text', length: res.text.length, worker: res.worker } });
+    }).catch(function (err2) {
+      card.classList.add('error');
+      card.querySelector('.who').innerHTML = 'Chat <span class="badge fail">all free providers failed</span>';
+      card.querySelector('pre').textContent = 'Pollinations: ' + ((err && err.message) || err) + '\nAI Horde: ' + ((err2 && err2.message) || err2);
+      logGeneration({ kind: 'text', provider: 'pollinations->horde', success: false, error: 'pollinations: ' + String(err && err.message || err) + ' | horde: ' + String(err2 && err2.message || err2), prompt: p });
+    });
   });
 }
 
@@ -582,8 +639,28 @@ function runVideoPromptOnly(p) {
 
 function runAudioPromptOnly(p) {
   var full = buildPrompt(p);
+  // Voice / narration prompts -> Browser TTS (real audible output, free, no key).
+  if (/\b(voice|narrate|narration|speak|speech|dialogue|whisper|read aloud|announces?|tells)\b/i.test(full)) {
+    appendCard({ cls: 'assistant', who: 'Audio generation', badge: { cls: 'run', text: 'audio generation' },
+      html: '<pre><span class="spinner"></span> speaking via browser speechSynthesis (free, no key):\n  ' + esc(full) + '</pre>' });
+    var t0v = Date.now();
+    return speakViaBrowserTts(full).then(function (out) {
+      var ms = Date.now() - t0v;
+      appendCard({ cls: 'assistant', who: 'Audio result', badge: { cls: 'ok', text: 'audio ready for scene' },
+        html: '<pre>Spoken aloud via browser TTS.\n  voice: ' + esc(out.voice) + '\n  ms: ' + ms + '\n  output proof: speechSynthesis onstart + onend fired (real audible output, no Blob).</pre>' });
+      logGeneration({ kind: 'audio', provider: 'browser-tts', success: true, ms: ms, prompt: full, outputProof: { kind: 'speech-synthesis', voice: out.voice, ms: ms } });
+    }).catch(function (err) {
+      // Fall through to OfflineAudioContext synthesis.
+      return runOfflineAudio(p, 'browser-tts failed: ' + ((err && err.message) || err));
+    });
+  }
+  return runOfflineAudio(p, '');
+}
+
+function runOfflineAudio(p, fallbackNote) {
+  var full = buildPrompt(p);
   appendCard({ cls: 'assistant', who: 'Audio generation', badge: { cls: 'run', text: 'audio generation' },
-    html: '<pre><span class="spinner"></span> rendering on-device WAV via OfflineAudioContext for prompt:\n  ' + esc(full) + '</pre>' });
+    html: '<pre>' + (fallbackNote ? esc(fallbackNote) + '\n' : '') + '<span class="spinner"></span> rendering on-device WAV via OfflineAudioContext for prompt:\n  ' + esc(full) + '</pre>' });
   var t0 = Date.now();
   return synthesizeAudio(full, 5).then(function (out) {
     var ms = Date.now() - t0;
