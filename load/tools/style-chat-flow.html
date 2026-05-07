@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Style Chat Flow — Load</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<style>
+:root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--info:#60a5fa;--border:#2a2a40}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;font-size:14px}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#150a28 0,#0a0514 100%);border-bottom:1px solid var(--border)}
+header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)}
+header h1{margin:0;font-size:16px;font-weight:800;flex:1}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 18px 80px}
+.build-marker{background:#facc15;color:#0a0a14;font-weight:900;font-size:13px;letter-spacing:.04em;padding:10px 14px;border-radius:10px;margin:0 0 14px;font-family:ui-monospace,Menlo,monospace;text-align:center}
+.intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin:0 0 18px}
+.intro h2{margin:0 0 6px;font-size:18px;font-weight:800}
+.intro p{margin:0;color:var(--mute);font-size:13.5px;line-height:1.6}
+.flow{display:grid;grid-template-columns:1fr;gap:10px;margin:14px 0}
+.layer{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:grid;grid-template-columns:50px 1fr 110px;gap:14px;align-items:center}
+.layer .num{font-size:24px;font-weight:900;color:#fff;text-align:center;background:rgba(124,58,237,.22);border:1px solid rgba(124,58,237,.5);border-radius:10px;padding:8px 0}
+.layer h3{margin:0 0 4px;font-size:14.5px;font-weight:800}
+.layer p{margin:0;font-size:12.5px;color:var(--mute);line-height:1.55}
+.layer .right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.badge{font-size:10.5px;font-weight:800;letter-spacing:.04em;padding:2px 8px;border-radius:6px;text-transform:uppercase}
+.badge.shipped{background:rgba(74,222,128,.18);color:var(--ok);border:1px solid rgba(74,222,128,.4)}
+.badge.partial{background:rgba(96,165,250,.18);color:var(--info);border:1px solid rgba(96,165,250,.4)}
+.badge.notbuilt{background:rgba(154,160,176,.18);color:var(--mute);border:1px solid rgba(154,160,176,.3)}
+.layer a{font-size:11.5px;color:var(--info);text-decoration:none;font-family:ui-monospace,Menlo,monospace}
+.layer a:hover{text-decoration:underline}
+.arrow{text-align:center;color:var(--mute);font-size:18px;line-height:1}
+@media(max-width:760px){.layer{grid-template-columns:42px 1fr;gap:10px}.layer .right{grid-column:1/-1;flex-direction:row;justify-content:flex-start;align-items:center;gap:8px}}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="./handoff-tools.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Handoff Tools
+  </a>
+  <h1>AI Style Chat — 7-layer flow</h1>
+</header>
+<div class="wrap">
+<div class="build-marker">BUILD MARKER: STYLE-CHAT-FLOW-v1-2026-05-07-v17g24</div>
+<div class="intro">
+  <h2>X-AI-14 sub-item &mdash; 7-layer chat flow visualisation</h2>
+  <p>The Glam-doc plan describes a seven-layer pipeline that any creation request flows through inside Load AI Chat Studio. Below: each layer, what it owns, and the live tool on this build that satisfies it (where one exists). Layers without a live tool are honestly marked <em>not built</em>.</p>
+</div>
+
+<div class="flow">
+
+<div class="layer">
+  <div class="num">1</div>
+  <div>
+    <h3>Chat input</h3>
+    <p>Free-text user request. Receives the original prose, optional reference image, optional source scene id.</p>
+  </div>
+  <div class="right"><span class="badge shipped">shipped</span><a href="./ai-chat-studio.html">ai-chat-studio.html</a></div>
+</div>
+<div class="arrow">&darr;</div>
+
+<div class="layer">
+  <div class="num">2</div>
+  <div>
+    <h3>Classifier</h3>
+    <p>Decides what the user actually wants: chat, image, image-to-image, animation, audio, voice, mux. Routes by intent id from Load AI Core.</p>
+  </div>
+  <div class="right"><span class="badge partial">partial</span><a href="./load-ai-core.html">load-ai-core.html</a></div>
+</div>
+<div class="arrow">&darr;</div>
+
+<div class="layer">
+  <div class="num">3</div>
+  <div>
+    <h3>Prompt builder</h3>
+    <p>Splits the request into structured prompts (visual / motion / camera / character / environment / sound / music / SFX / ambience). Optionally appends a curated style.</p>
+  </div>
+  <div class="right"><span class="badge shipped">shipped</span><a href="./scene-prompt-splitter.html">scene-prompt-splitter.html</a><a href="./style-library.html">style-library.html</a></div>
+</div>
+<div class="arrow">&darr;</div>
+
+<div class="layer">
+  <div class="num">4</div>
+  <div>
+    <h3>Mask editor</h3>
+    <p>Browser canvas mask editor for inpaint / ADD_OBJECT precision. Feeds a base image + mask into the router.</p>
+  </div>
+  <div class="right"><span class="badge shipped">shipped</span><a href="./mask-editor.html">mask-editor.html</a></div>
+</div>
+<div class="arrow">&darr;</div>
+
+<div class="layer">
+  <div class="num">5</div>
+  <div>
+    <h3>Provider router</h3>
+    <p>Picks the actual provider for the chosen intent from the registry. Local-first / free-first; cloud-optional only when the user has supplied a key. Falls back through the chain on failure.</p>
+  </div>
+  <div class="right"><span class="badge shipped">shipped</span><a href="./provider-registry.html">provider-registry.html</a><a href="./load-ai-core.html">load-ai-core.html</a></div>
+</div>
+<div class="arrow">&darr;</div>
+
+<div class="layer">
+  <div class="num">6</div>
+  <div>
+    <h3>Output verifier</h3>
+    <p>Output proof rule. The result is only marked ready if a real playable file/blob/URL is produced. Otherwise the spec scene field stays labelled <em>Sound prompt saved</em> / <em>Silent video</em>.</p>
+  </div>
+  <div class="right"><span class="badge partial">partial</span><a href="./loadstudio-validator.html">loadstudio-validator.html</a></div>
+</div>
+<div class="arrow">&darr;</div>
+
+<div class="layer">
+  <div class="num">7</div>
+  <div>
+    <h3>Image-to-video / animator</h3>
+    <p>Final layer that turns a verified still + motion prompt into a short clip. Routes through ComfyUI / AnimateDiff / LTX-Video / Wan locally, or emits a fallback prompt when nothing is available.</p>
+  </div>
+  <div class="right"><span class="badge partial">partial</span><a href="./external-video-fallback.html">external-video-fallback.html</a></div>
+</div>
+
+</div>
+
+<div style="background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.3);color:#9ec5ff;font-size:12.5px;padding:10px 12px;border-radius:8px;margin-top:18px;line-height:1.55">
+  <strong>Honest status:</strong> layers 1, 3, 4, 5 each have a live tool on this build. Layers 2, 6, 7 are partial &mdash; the routing / verification / image-to-video logic exists in the libraries and one or more visible audit pages, but full end-to-end wiring inside one chat thread is still ahead.
+</div>
+</div>
+</body>
+</html>
