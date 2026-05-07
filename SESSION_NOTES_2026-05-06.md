@@ -71,9 +71,9 @@ shortcut tiles to the home screen with direct links to:
 Bump cache when this lands. Don't ship without user OK — they
 previously rejected one consolidation pass.
 
-### Step 3 — start one of the three VERY IMPORTANT specs
+### Step 3 — start one of the four VERY IMPORTANT specs
 
-User direction tonight: three new pending items are flagged
+User direction: four new pending items are flagged
 **VERY IMPORTANT**. Pick exactly one to scope first based on user
 preference:
 
@@ -84,19 +84,38 @@ preference:
   verification of returned video files. Touches Load main
   (Verse-to-Video tool), LoadStudio (scene rendering), and
   `lib-export-receipt.js`.
+- **X-AI-AUDIO — Sound & Atmosphere Engine.** Captured 2026-05-07
+  via `inbox/Load Main AI Addendum.docx`. Peer of X-VIDEO-AI; sound
+  is non-optional for movie/content creation. MVP path: silent
+  video + separate generated audio attached to scene. Three sound
+  paths (embedded / separate / prompt-fallback). Five chat card
+  types (animation request, animation progress, audio generation,
+  video result, audio result). Ten audio status labels (Audio
+  embedded, Separate audio generated, Sound prompt saved, Audio
+  provider needed, Silent video, Audio failed, Audio ready for
+  scene, Audio ready for export, Audio muxing available, Audio
+  muxing not available). Fourteen new scene fields including
+  audioPrompt / sfxPrompt / musicPrompt / ambiencePrompt /
+  voicePrompt / audio / music / sfx[] / audioStatus /
+  audioProvider / audioOutputProof / audioEmbedded / audioMuxed /
+  audioRightsStatus. Stage path: prompt extraction → separate gen
+  → layered playback → FFmpeg.wasm muxing → embedded audio.
+  Output proof: never claim audio unless real playable
+  file/blob/URL exists.
 - **X-DB — Full production database.** Open scope: vendor
   (Postgres / Firestore / Supabase), auth (Apple Sign-In / email
   magic link), conflict resolution, GDPR delete, per-app vs shared
-  schema. This is the biggest of the three; it gates X-SUBS.
+  schema. Gates X-SUBS.
 - **X-SUBS — Subscription system.** Open scope: Stripe /
   RevenueCat / App Store, per-app vs suite bundle, gated features,
   receipt verification, family sharing, trial flow. Don't start
   this before X-DB has a concrete plan — entitlements need
   somewhere to live.
 
-Recommended order: capture the spec doc for X-VIDEO-AI first
-(smallest blast radius, builds on existing image-AI infra), then
-X-DB, then X-SUBS.
+Recommended order: capture the spec for **X-VIDEO-AI** and
+**X-AI-AUDIO** together first (they share the production pipeline
+and the addendum says video must not block waiting for embedded
+audio), then **X-DB**, then **X-SUBS**.
 
 ### Step 4 — clear the five remaining Load main pending rows
 
