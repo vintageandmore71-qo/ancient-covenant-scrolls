@@ -133,7 +133,31 @@ var REGISTRY = [
   p('load-engine-mux',   'Load Local Engine muxing connector',    'load-hosted-future', 'muxing', ['video','audio','local','free'], 'Not configured', 'Future Load-owned muxing.'),
 
   // ── Category 7: Load-hosted future ──
-  p('load-hosted-llm',   'Load-hosted Model Server (future)',     'load-hosted-future', 'load-hosted', ['text','image','imageToImage','imageAnimation','video','audio','sfx','voice','narration','free'], 'Not configured', 'Lawful open-source / open-weight backend.')
+  p('load-hosted-llm',   'Load-hosted Model Server (future)',     'load-hosted-future', 'load-hosted', ['text','image','imageToImage','imageAnimation','video','audio','sfx','voice','narration','free'], 'Not configured', 'Lawful open-source / open-weight backend.'),
+
+  // ── 5.7 AI Providers Verification — additional free / local-first slots
+  // Media import lanes (license + source metadata recorded per asset; CC is
+  // not auto-commercial-safe; user verifies use case-by-case):
+  p('freesound',         'Freesound import connector',            'cloud-optional', 'sfx', ['sfx','ambience','requiresApiKey','free'], 'Not configured', 'Near-term. User-supplied free Freesound API key. License + source URL captured per import.'),
+  p('pixabay-audio',     'Pixabay royalty-free audio import',     'cloud-optional', 'sfx', ['sfx','ambience','music','requiresApiKey','free'], 'Not configured', 'Near-term. User-supplied free Pixabay API key. Pixabay license recorded; user verifies commercial use.'),
+  p('opengameart',       'OpenGameArt audio import (future)',     'free-api',       'sfx', ['sfx','ambience','music','free'], 'Not configured', 'Future. CC0 / CC-BY / CC-BY-SA mix. Per-asset license must be captured.'),
+  p('internet-archive',  'Internet Archive audio/media import (future)', 'free-api','sfx', ['sfx','ambience','music','free'], 'Not configured', 'Future. License varies per item; never assume PD without verifying.'),
+  p('wikimedia-commons', 'Wikimedia Commons media import (future)','free-api',      'sfx', ['sfx','ambience','music','free'], 'Not configured', 'Future. CC / PD with attribution recorded per asset.'),
+  p('openverse',         'Openverse PD/CC search & import (future)','free-api',     'sfx', ['sfx','ambience','music','free'], 'Not configured', 'Future. Aggregator across CC sources; always verify commercial-safe license.'),
+
+  // Local browser audio tools:
+  p('audio-cue-sheet',   'Audio Cue Sheet / Timeline SFX',         'built-in', 'muxing', ['sfx','ambience','music','voice','local','free'], 'Ready', 'Per-scene cue list with timecodes for layered playback.'),
+  p('procedural-ambience','Procedural ambience generator',         'built-in', 'sfx',    ['sfx','ambience','local','free'], 'Ready', 'On-device synthesis: rain, wind, fire, room tone, crowd bed via OfflineAudioContext.'),
+
+  // Additional ComfyUI workflow connectors (specific to Wan / LTX flavours):
+  p('comfy-wan',         'ComfyUI Wan workflow connector',         'local',    'image-anim', ['video','imageAnimation','motionPrompt','performanceAnimation','local','requiresLocalServer','free'], 'Needs user setup', 'Future. Specific Wan workflow inside ComfyUI.'),
+  p('comfy-ltx',         'ComfyUI LTX workflow connector',         'local',    'image-anim', ['video','imageAnimation','motionPrompt','local','requiresLocalServer','free'], 'Needs user setup', 'Future. Specific LTX-Video workflow inside ComfyUI.'),
+
+  // Local / open voice options (license review where indicated):
+  p('openvoice',         'OpenVoice future connector',             'local',    'voice', ['voice','narration','local','requiresLocalServer','free'], 'Not configured', 'Future. Open voice cloning / TTS.'),
+  p('coqui-xtts',        'Coqui XTTS-style local TTS',             'local',    'voice', ['voice','narration','local','requiresLocalServer','free'], 'Not configured', 'Future. License review required (some XTTS variants are non-commercial).'),
+  p('indextts',          'IndexTTS future connector',              'local',    'voice', ['voice','narration','local','requiresLocalServer','free'], 'Not configured', 'Future.'),
+  p('vibevoice',         'VibeVoice multi-speaker connector',      'local',    'voice', ['voice','narration','local','requiresLocalServer','free'], 'Not configured', 'Future. Long-form / multi-speaker audio.')
 ];
 
 function list() { return REGISTRY.slice(); }
