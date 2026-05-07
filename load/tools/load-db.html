@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Load Project Memory — DB audit</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<script src="../lib-load-db.js"></script>
+<style>
+:root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--info:#60a5fa;--border:#2a2a40}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;font-size:14px}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#150a28 0,#0a0514 100%);border-bottom:1px solid var(--border)}
+header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)}
+header h1{margin:0;font-size:16px;font-weight:800;flex:1}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 18px 80px}
+.build-marker{background:#facc15;color:#0a0a14;font-weight:900;font-size:13px;letter-spacing:.04em;padding:10px 14px;border-radius:10px;margin:0 0 14px;font-family:ui-monospace,Menlo,monospace;text-align:center}
+.intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin:0 0 18px}
+.intro h2{margin:0 0 6px;font-size:18px;font-weight:800}
+.intro p{margin:0;color:var(--mute);font-size:13.5px;line-height:1.6}
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+.s-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.s-card .v{font-size:24px;font-weight:900;line-height:1;color:#fff}
+.s-card .l{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mute);margin-top:4px;font-family:ui-monospace,Menlo,monospace}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 14px}
+button{font:inherit;padding:9px 14px;border-radius:8px;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-weight:700;font-size:13px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.danger{background:rgba(255,110,110,.18);color:var(--err);border-color:rgba(255,110,110,.4)}
+.stores{display:grid;grid-template-columns:1fr;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.store{background:var(--bg2);padding:14px 16px}
+.store-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:8px}
+.store-name{font-size:14px;font-weight:800;font-family:ui-monospace,Menlo,monospace}
+.store-count{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:2px 8px;border-radius:6px;background:rgba(124,58,237,.18);color:#c4a8ff}
+.store-count.empty{background:rgba(154,160,176,.12);color:var(--mute)}
+.store-count.err{background:rgba(255,110,110,.18);color:var(--err)}
+.store .desc{font-size:12px;color:var(--mute);margin-bottom:8px}
+.entries{background:#0a0e18;border:1px solid var(--border);border-radius:8px;padding:10px;font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:var(--fg);white-space:pre-wrap;word-break:break-word;max-height:260px;overflow:auto}
+.entries.empty{color:var(--mute);font-style:italic}
+.row-actions{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px}
+.row-actions button{font-size:11.5px;padding:5px 10px}
+.report{background:#0a0e18;border:1px solid var(--border);border-radius:8px;padding:12px;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--fg);white-space:pre-wrap;word-break:break-word;max-height:380px;overflow:auto;margin-top:12px;display:none}
+.notice{background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.3);color:#9ec5ff;font-size:12.5px;padding:10px 12px;border-radius:8px;margin:14px 0;line-height:1.6}
+.write-form{background:#0a0e18;border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:10px;display:grid;grid-template-columns:1fr 1fr 2fr auto;gap:8px;align-items:start}
+.write-form input,.write-form textarea{background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--fg);font:inherit;font-size:12px;padding:6px 8px}
+.write-form textarea{min-height:34px;resize:vertical;font-family:ui-monospace,Menlo,monospace}
+@media(max-width:760px){.write-form{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="../">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Back to Load
+  </a>
+  <h1>Load Project Memory (DB)</h1>
+</header>
+<div class="wrap">
+<div class="build-marker">BUILD MARKER: LOAD-DB-v1-2026-05-07-v17g20</div>
+<div class="intro">
+  <h2>X-DB Phase 1 &mdash; Project Memory audit</h2>
+  <p>Layer 2 of the Load AI OS. Single shared IndexedDB <code id="db-name">load-projects</code> for projects, scenes, prompts, generation attempts, audio / video / image assets, exports, debug reports, and key-value scratch space. Phase 1 surfaces the DB read-only with a write-test row so you can confirm storage end-to-end without breaking anything in <code>load-apps</code>.</p>
+  <p style="margin-top:8px"><strong>No false positives:</strong> counts come from real <code>store.count()</code> calls; entries are real cursor reads. An empty store reports 0 honestly.</p>
+</div>
+
+<div class="summary" id="summary">
+  <div class="s-card"><div class="v" id="s-name">load-projects</div><div class="l">DB name</div></div>
+  <div class="s-card"><div class="v" id="s-version">-</div><div class="l">Schema version</div></div>
+  <div class="s-card"><div class="v" id="s-stores">-</div><div class="l">Stores</div></div>
+  <div class="s-card"><div class="v" id="s-records">-</div><div class="l">Records total</div></div>
+</div>
+
+<div class="controls">
+  <button class="primary" id="btn-refresh">Refresh</button>
+  <button id="btn-write-test">Write a test record</button>
+  <button id="btn-copy">Copy snapshot</button>
+  <button id="btn-download">Download snapshot</button>
+  <span id="status" style="font-size:12px;color:var(--mute)"></span>
+</div>
+
+<div class="stores" id="stores"></div>
+
+<div class="notice">
+  <strong>How to use on iPad:</strong> tap <em>Refresh</em> to read the DB. Tap <em>Write a test record</em> to confirm the DB accepts a write &mdash; the record will appear in the <code>kv</code> store. Tap <em>Download snapshot</em> to save the full DB contents as JSON.
+</div>
+
+<pre class="report" id="report"></pre>
+</div>
+
+<script>
+'use strict';
+var $ = function (id) { return document.getElementById(id); };
+function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function safeStringify(v) {
+  try { return JSON.stringify(v, function (k, x) { if (x instanceof Blob) return '[Blob ' + x.size + ' bytes ' + x.type + ']'; if (x instanceof ArrayBuffer) return '[ArrayBuffer ' + x.byteLength + ' bytes]'; return x; }, 2); }
+  catch (e) { return String(v); }
+}
+
+if (!window.LoadDB) {
+  $('stores').innerHTML = '<p style="color:var(--err);padding:20px">lib-load-db.js failed to load.</p>';
+} else {
+  var DB = window.LoadDB;
+
+  var STORE_DESCRIPTIONS = {
+    'projects':      'Top-level project records.',
+    'scenes':        'Spec-shaped scene objects (14 audio fields per addendum).',
+    'prompts':       'Structured prompts emitted by the Prompt Engine.',
+    'generations':   'Generation attempts: provider, ms, success/failure, output proof.',
+    'audio_assets':  'Audio blobs and references (sfx / ambience / music / voice).',
+    'video_assets':  'Video blobs and references.',
+    'image_assets':  'Image blobs and references.',
+    'exports':       'Export receipts (.loadstudio.zip / .cinepwa packages).',
+    'debug_reports': 'Saved Site Debugger reports.',
+    'kv':            'Misc key-value scratch space (cached settings, last route, etc.).'
+  };
+
+  function refresh() {
+    $('status').textContent = 'reading DB...';
+    DB.summary().then(function (sum) {
+      $('s-name').textContent = sum.name;
+      $('s-version').textContent = sum.version;
+      $('s-stores').textContent = Object.keys(sum.stores).length;
+      var total = 0;
+      Object.keys(sum.stores).forEach(function (k) { var n = sum.stores[k]; if (n >= 0) total += n; });
+      $('s-records').textContent = total;
+      return Promise.all(DB.STORES.map(function (id) {
+        return DB.getAll(id, 5).then(function (rows) { return { id: id, count: sum.stores[id], rows: rows }; })
+          .catch(function (e) { return { id: id, count: -1, rows: [], error: e && e.message || String(e) }; });
+      }));
+    }).then(function (groups) {
+      var html = '';
+      groups.forEach(function (g) {
+        var cls = g.count === 0 ? 'empty' : (g.count < 0 ? 'err' : '');
+        html += '<div class="store"><div class="store-head"><div class="store-name">' + esc(g.id) + '</div>' +
+          '<div class="store-count ' + cls + '">' + (g.count < 0 ? 'err' : (g.count + ' record' + (g.count === 1 ? '' : 's'))) + '</div>';
+        if (g.id === 'kv') html += '<button class="primary" data-write="' + esc(g.id) + '">Write test row</button>';
+        if (g.count > 0) html += '<button class="danger" data-clear="' + esc(g.id) + '">Clear store</button>';
+        html += '</div>';
+        html += '<div class="desc">' + esc(STORE_DESCRIPTIONS[g.id] || '') + '</div>';
+        if (g.error) html += '<div class="entries">error: ' + esc(g.error) + '</div>';
+        else if (!g.rows.length) html += '<div class="entries empty">(empty)</div>';
+        else {
+          var preview = g.rows.map(function (r) {
+            return '[' + safeStringify(r.key) + ']\n' + safeStringify(r.value);
+          }).join('\n\n');
+          html += '<div class="entries">' + esc(preview) + '</div>';
+        }
+        html += '</div>';
+      });
+      $('stores').innerHTML = html;
+      $('status').textContent = 'rendered ' + new Date().toLocaleTimeString();
+      Array.prototype.slice.call(document.querySelectorAll('[data-write]')).forEach(function (b) {
+        b.addEventListener('click', function () { writeTest(b.getAttribute('data-write')); });
+      });
+      Array.prototype.slice.call(document.querySelectorAll('[data-clear]')).forEach(function (b) {
+        b.addEventListener('click', function () {
+          if (!confirm('Clear store "' + b.getAttribute('data-clear') + '"? This is permanent.')) return;
+          DB.clear(b.getAttribute('data-clear')).then(refresh);
+        });
+      });
+    }).catch(function (e) {
+      $('status').textContent = 'error: ' + (e && e.message || e);
+    });
+  }
+
+  function writeTest(store) {
+    var key = 'test-' + Date.now().toString(36);
+    var value = { kind: 'write-test', writtenAt: new Date().toISOString(), note: 'Wrote from Load DB audit page.' };
+    DB.put(store, key, value).then(function () {
+      $('status').textContent = 'wrote ' + store + '/' + key;
+      refresh();
+    }).catch(function (e) {
+      $('status').textContent = 'write failed: ' + (e && e.message || e);
+    });
+  }
+
+  $('btn-refresh').addEventListener('click', refresh);
+  $('btn-write-test').addEventListener('click', function () { writeTest('kv'); });
+  $('btn-copy').addEventListener('click', function () {
+    DB.exportAll(50).then(function (snap) {
+      var t = JSON.stringify(snap, function (k, x) {
+        if (x instanceof Blob) return '[Blob ' + x.size + ' bytes ' + x.type + ']';
+        if (x instanceof ArrayBuffer) return '[ArrayBuffer ' + x.byteLength + ' bytes]';
+        return x;
+      }, 2);
+      var pre = $('report'); pre.style.display = 'block'; pre.textContent = t;
+      if (navigator.clipboard) navigator.clipboard.writeText(t).then(function () { alert('Snapshot copied.'); }, function () { alert('Copy failed; long-press the report to select.'); });
+      else alert('Clipboard not available; long-press the report to select.');
+    });
+  });
+  $('btn-download').addEventListener('click', function () {
+    DB.exportAll(500).then(function (snap) {
+      var t = JSON.stringify(snap, function (k, x) {
+        if (x instanceof Blob) return '[Blob ' + x.size + ' bytes ' + x.type + ']';
+        if (x instanceof ArrayBuffer) return '[ArrayBuffer ' + x.byteLength + ' bytes]';
+        return x;
+      }, 2);
+      var blob = new Blob([t], { type: 'application/json' });
+      var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'load-db-snapshot-' + Date.now() + '.json'; a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 1500);
+    });
+  });
+  refresh();
+}
+</script>
+</body>
+</html>
