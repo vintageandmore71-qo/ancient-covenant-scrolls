@@ -72,9 +72,9 @@ button.small{font-size:11.5px;padding:5px 10px}
   <h1>AI Chat Studio</h1>
 </header>
 <div class="wrap">
-<div class="build-marker">BUILD MARKER: CHAT-STUDIO-v2-2026-05-07-v17g26</div>
+<div class="build-marker">BUILD MARKER: CHAT-STUDIO-v3-2026-05-07-v17g33</div>
 <div class="intro">
-  <strong>X-AI-CHAT-STUDIO Phase 2.</strong> Routed chat with inline output cards. Free providers only. Pollinations <em>text</em> for chat, Pollinations <em>image</em> for text-to-image &mdash; no key required. Animation, video, and audio output cards stay <strong>prompt-only</strong> on this page until a real generator is wired (per the output-proof rule). Save, refine, and attach-to-scene actions are real and write into Project Memory (<code>scenes</code>, <code>generations</code>, <code>chat-history</code>).
+  <strong>X-AI-CHAT-STUDIO Phase 3.</strong> Routed chat with inline real-output cards. Free providers + on-device synthesis only. <em>Chat</em>: Pollinations text. <em>Text-to-image</em>: Pollinations image (real PNG/JPG). <em>Animate</em> (with a reference image): canvas Ken-Burns + MediaRecorder produces a <strong>real WebM video Blob</strong>. <em>Audio</em>: OfflineAudioContext synthesises a <strong>real WAV Blob</strong> matched to prompt keywords. Output proof: only marked ready when a real playable Blob exists; otherwise the card stays prompt-only honestly.
 </div>
 
 <div class="section">
@@ -276,6 +276,134 @@ function pollinationsImageUrl(prompt, size) {
   return u;
 }
 
+// ── On-device Ken-Burns animation: zoom + pan a still image into a real
+// WebM video via canvas.captureStream() + MediaRecorder. Output proof:
+// the resolve only fires after a real Blob with size > 1 KB is produced.
+function captureKenBurns(imgUrl, durationSec, sizeStr) {
+  var dims = (sizeStr || '512x512').split('x'); var W = parseInt(dims[0],10) || 512; var H = parseInt(dims[1],10) || 512;
+  return new Promise(function (resolve, reject) {
+    if (typeof MediaRecorder === 'undefined') { reject(new Error('MediaRecorder not supported on this browser')); return; }
+    var canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
+    var ctx = canvas.getContext('2d');
+    var img = new Image(); img.crossOrigin = 'anonymous';
+    img.onload = function () {
+      var stream;
+      try { stream = canvas.captureStream(30); }
+      catch (e) { reject(new Error('captureStream failed: ' + e.message)); return; }
+      var mime = 'video/webm;codecs=vp9';
+      if (!MediaRecorder.isTypeSupported(mime)) mime = 'video/webm;codecs=vp8';
+      if (!MediaRecorder.isTypeSupported(mime)) mime = 'video/webm';
+      if (!MediaRecorder.isTypeSupported(mime)) mime = '';
+      var rec; try { rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined); } catch (e) { reject(new Error('MediaRecorder init failed: ' + e.message)); return; }
+      var chunks = [];
+      rec.ondataavailable = function (e) { if (e.data && e.data.size > 0) chunks.push(e.data); };
+      rec.onstop = function () {
+        var blob = new Blob(chunks, { type: rec.mimeType || 'video/webm' });
+        if (blob.size < 1024) { reject(new Error('captured blob too small (' + blob.size + ' B)')); return; }
+        resolve({ blob: blob, mime: blob.type, bytes: blob.size, w: W, h: H });
+      };
+      var t0 = performance.now();
+      rec.start(100);
+      function tick() {
+        var t = (performance.now() - t0) / 1000;
+        var p = Math.min(1, t / durationSec);
+        var iw = img.naturalWidth, ih = img.naturalHeight;
+        var scale = 1 + 0.15 * p;
+        var pan = 30 * p;
+        var ratio = iw / ih, cratio = W / H;
+        var dw, dh;
+        if (ratio > cratio) { dh = H * scale; dw = dh * ratio; }
+        else { dw = W * scale; dh = dw / ratio; }
+        var dx = (W - dw) / 2 - pan;
+        var dy = (H - dh) / 2;
+        ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+        ctx.drawImage(img, dx, dy, dw, dh);
+        if (p < 1) requestAnimationFrame(tick); else setTimeout(function () { try { rec.stop(); } catch (_) {} }, 100);
+      }
+      requestAnimationFrame(tick);
+    };
+    img.onerror = function () { reject(new Error('source image failed to load')); };
+    img.src = imgUrl;
+  });
+}
+
+// ── On-device Web Audio synthesis: produces a real WAV Blob. Output proof:
+// resolve only fires after the OfflineAudioContext renders and a >2 KB
+// WAV blob is built. Picks waveform by prompt keyword honestly — never
+// claims it is "AI-generated speech" or "AI-generated music".
+function synthesizeAudio(prompt, durationSec) {
+  var SR = 44100;
+  var Ctx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  if (!Ctx) return Promise.reject(new Error('OfflineAudioContext not supported'));
+  var ctx = new Ctx(2, Math.floor(SR * durationSec), SR);
+  var p = (prompt || '').toLowerCase();
+  var kind = 'tone';
+  if (/wind|breeze|whoosh|air/.test(p)) kind = 'wind';
+  else if (/rain|storm|water|hiss/.test(p)) kind = 'rain';
+  else if (/laugh|crowd|chatter|noise|jeer|mock/.test(p)) kind = 'crowd';
+  else if (/hammer|knock|clang|footstep|drum/.test(p)) kind = 'hammer';
+  else if (/music|melody|tune|chord|score/.test(p)) kind = 'music';
+  if (kind === 'wind' || kind === 'rain' || kind === 'crowd') {
+    var src = ctx.createBufferSource();
+    var buf = ctx.createBuffer(1, ctx.length, SR);
+    var data = buf.getChannelData(0);
+    for (var i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.25;
+    src.buffer = buf;
+    var f = ctx.createBiquadFilter();
+    f.type = (kind === 'rain') ? 'highpass' : 'bandpass';
+    f.frequency.value = (kind === 'wind') ? 400 : (kind === 'rain') ? 2200 : 900;
+    f.Q.value = 0.7;
+    src.connect(f).connect(ctx.destination);
+    src.start(0);
+  } else if (kind === 'music') {
+    [261.63, 329.63, 392, 523.25].forEach(function (freq) {
+      var o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = freq;
+      var g = ctx.createGain(); g.gain.value = 0.08;
+      o.connect(g).connect(ctx.destination);
+      o.start(0); o.stop(durationSec);
+    });
+  } else {
+    var o = ctx.createOscillator(); o.type = (kind === 'hammer') ? 'square' : 'sine';
+    o.frequency.value = (kind === 'hammer') ? 80 : 440;
+    var g = ctx.createGain(); g.gain.value = 0.2;
+    if (kind === 'hammer') {
+      g.gain.setValueAtTime(0.0, 0);
+      for (var t = 0; t < durationSec; t += 0.5) {
+        g.gain.setValueAtTime(0.4, t);
+        g.gain.exponentialRampToValueAtTime(0.001, Math.min(t + 0.12, durationSec));
+      }
+    }
+    o.connect(g).connect(ctx.destination);
+    o.start(0); o.stop(durationSec);
+  }
+  return ctx.startRendering().then(function (rendered) {
+    var blob = bufferToWav(rendered);
+    if (blob.size < 2048) throw new Error('rendered audio too small (' + blob.size + ' B)');
+    return { blob: blob, mime: 'audio/wav', bytes: blob.size, kind: kind, durationSec: durationSec };
+  });
+}
+
+function bufferToWav(buffer) {
+  var n = buffer.numberOfChannels, sr = buffer.sampleRate, len = buffer.length;
+  var bps = 2; var dataLen = len * n * bps;
+  var ab = new ArrayBuffer(44 + dataLen); var v = new DataView(ab);
+  function s(off, str) { for (var i = 0; i < str.length; i++) v.setUint8(off + i, str.charCodeAt(i)); }
+  s(0,'RIFF'); v.setUint32(4, 36 + dataLen, true);
+  s(8,'WAVE'); s(12,'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, n, true);
+  v.setUint32(24, sr, true); v.setUint32(28, sr * n * bps, true);
+  v.setUint16(32, n * bps, true); v.setUint16(34, 16, true);
+  s(36,'data'); v.setUint32(40, dataLen, true);
+  var off = 44;
+  for (var i2 = 0; i2 < len; i2++) {
+    for (var c = 0; c < n; c++) {
+      var smp = Math.max(-1, Math.min(1, buffer.getChannelData(c)[i2]));
+      v.setInt16(off, smp < 0 ? smp * 0x8000 : smp * 0x7FFF, true);
+      off += 2;
+    }
+  }
+  return new Blob([ab], { type: 'audio/wav' });
+}
+
 function buildPrompt(user) {
   var parts = [user.trim()];
   if (STATE.style) parts.push(STATE.style);
@@ -392,20 +520,55 @@ function runI2I(p) {
 function runAnimate(p) {
   var full = buildPrompt(p);
   var motion = 'gentle subject motion, slow cinematic camera movement';
-  var card = appendCard({ cls: 'assistant', who: 'Animation', badge: { cls: 'prompt', text: 'animation request' },
-    html: '<pre>' + esc('Animation prompt prepared (real generator not wired in Phase 2 — output stays prompt-only):\n\nVisual: ' + full + '\nMotion: ' + motion + '\nSize: ' + STATE.size + (STATE.ref ? '\nReference: ' + STATE.ref.name : '')) + '</pre>'
+  var src = STATE.ref ? STATE.ref.dataUrl : null;
+  // No reference image -> stay prompt-only and show animation request +
+  // progress + silent-video-result cards (output-proof rule).
+  if (!src) {
+    appendCard({ cls: 'assistant', who: 'Animation request', badge: { cls: 'prompt', text: 'animation request' },
+      html: '<pre>' + esc('Animation prompt prepared (no reference image yet — upload one to capture a real on-device animation):\n\nVisual: ' + full + '\nMotion: ' + motion + '\nSize: ' + STATE.size) + '</pre>' });
+    appendCard({ cls: 'assistant', who: 'Animation progress', badge: { cls: 'run', text: 'queued' },
+      html: '<pre>Status: animation request queued. No real generator can run without a reference image.</pre>' });
+    appendCard({ cls: 'assistant', who: 'Video result', badge: { cls: 'prompt', text: 'silent video' },
+      html: '<pre>No real video produced. Output proof rule: a video card never claims success unless a real playable file/blob/URL is produced.</pre>' +
+            '<div class="actions"><a class="small" style="text-decoration:none;background:var(--bg3);padding:5px 10px;border-radius:8px;color:var(--fg);border:1px solid var(--border)" href="./external-video-fallback.html">Build external prompt</a></div>' });
+    logGeneration({ kind: 'animation', provider: 'prompt-only', success: false, promptOnly: true, prompt: full, motion: motion });
+    return Promise.resolve();
+  }
+  // Real on-device animation path: Ken-Burns canvas + MediaRecorder.
+  appendCard({ cls: 'assistant', who: 'Animation request', badge: { cls: 'ok', text: 'animation request' },
+    html: '<pre>' + esc('On-device Ken-Burns animation:\n  Visual: ' + full + '\n  Motion: ' + motion + '\n  Size: ' + STATE.size + '\n  Source: reference image (' + STATE.ref.name + ', ' + STATE.ref.size + ' B)') + '</pre>' });
+  var prog = appendCard({ cls: 'assistant', who: 'Animation progress', badge: { cls: 'run', text: 'recording' },
+    html: '<pre><span class="spinner"></span> capturing 5 s WebM via canvas.captureStream() + MediaRecorder...</pre>' });
+  var t0 = Date.now();
+  return captureKenBurns(src, 5, STATE.size).then(function (out) {
+    var ms = Date.now() - t0;
+    prog.querySelector('.who').innerHTML = 'Animation progress <span class="badge ok">complete</span>';
+    prog.querySelector('pre').textContent = 'Captured ' + out.bytes + ' B WebM (' + out.mime + ') in ' + ms + ' ms.';
+    var url = URL.createObjectURL(out.blob);
+    var card = appendCard({ cls: 'assistant', who: 'Video result', badge: { cls: 'ok', text: 'video ready' },
+      html: '<video src="' + url + '" controls playsinline style="max-width:100%;border-radius:8px;margin-top:8px"></video>' +
+            '<div class="meta">on-device Ken-Burns · ' + out.bytes + ' B · ' + out.mime + ' · ' + ms + ' ms · output proof: real WebM Blob</div>' +
+            '<div class="actions"></div>' });
+    var actions = card.querySelector('.actions');
+    var btnSave = document.createElement('button'); btnSave.className = 'small'; btnSave.textContent = 'Save video';
+    btnSave.addEventListener('click', function () { var a = document.createElement('a'); a.href = url; a.download = 'load-animation-' + Date.now() + '.webm'; a.click(); });
+    actions.appendChild(btnSave);
+    var btnAttach = document.createElement('button'); btnAttach.className = 'small primary'; btnAttach.textContent = 'Attach to scene';
+    btnAttach.addEventListener('click', function () {
+      attachToScene({ image: src, video: url, visualPrompt: full, motionPrompt: motion, sizes: STATE.size,
+        videoBlob: out.blob,
+        videoOutputProof: { kind: 'webm-blob', bytes: out.bytes, mime: out.mime, w: out.w, h: out.h, source: 'on-device Ken-Burns canvas + MediaRecorder' } });
+    });
+    actions.appendChild(btnAttach);
+    logGeneration({ kind: 'animation', provider: 'on-device-kenburns', success: true, ms: ms, prompt: full, motion: motion, outputProof: { kind: 'webm-blob', bytes: out.bytes, mime: out.mime, w: out.w, h: out.h } });
+  }).catch(function (err) {
+    prog.classList.add('error');
+    prog.querySelector('.who').innerHTML = 'Animation progress <span class="badge fail">failed</span>';
+    prog.querySelector('pre').textContent = 'On-device capture failed: ' + ((err && err.message) || err);
+    appendCard({ cls: 'assistant', who: 'Video result', badge: { cls: 'prompt', text: 'silent video' },
+      html: '<pre>No video produced (capture path failed). Output proof rule keeps this prompt-only.</pre>' });
+    logGeneration({ kind: 'animation', provider: 'on-device-kenburns', success: false, error: String((err && err.message) || err), prompt: full });
   });
-  // Progress card per addendum.
-  var prog = appendCard({ cls: 'assistant', who: 'Animation progress', badge: { cls: 'run', text: 'queued' },
-    html: '<pre>Status: animation request queued. No real generator wired in Phase 2; status will stay at \'animation request queued\' instead of fake progress.</pre>'
-  });
-  // Video result card (prompt-only).
-  appendCard({ cls: 'assistant', who: 'Video result', badge: { cls: 'prompt', text: 'silent video' },
-    html: '<pre>No real video produced. Output proof rule: a video card never claims success unless a real playable file/blob/URL is produced.</pre>' +
-          '<div class="actions"><a class="small" style="text-decoration:none;background:var(--bg3);padding:5px 10px;border-radius:8px;color:var(--fg);border:1px solid var(--border)" href="./external-video-fallback.html">Open external-video fallback</a><a class="small" style="text-decoration:none;background:var(--bg3);padding:5px 10px;border-radius:8px;color:var(--fg);border:1px solid var(--border)" href="./scene-prompt-splitter.html">Open Scene Prompt Splitter</a></div>'
-  });
-  logGeneration({ kind: 'animation', provider: 'prompt-only', success: false, promptOnly: true, prompt: full, motion: motion });
-  return Promise.resolve(card);
 }
 
 function runVideoPromptOnly(p) {
@@ -418,12 +581,35 @@ function runVideoPromptOnly(p) {
 }
 
 function runAudioPromptOnly(p) {
-  appendCard({ cls: 'assistant', who: 'Audio result', badge: { cls: 'prompt', text: 'sound prompt saved' },
-    html: '<pre>' + esc('Audio / SFX / music prompt prepared (real generator not wired):\n  ' + buildPrompt(p)) + '</pre>' +
-          '<div class="actions"><a class="small" style="text-decoration:none;background:var(--bg3);padding:5px 10px;border-radius:8px;color:var(--fg);border:1px solid var(--border)" href="./scene-prompt-splitter.html">Open Scene Prompt Splitter</a></div>'
+  var full = buildPrompt(p);
+  appendCard({ cls: 'assistant', who: 'Audio generation', badge: { cls: 'run', text: 'audio generation' },
+    html: '<pre><span class="spinner"></span> rendering on-device WAV via OfflineAudioContext for prompt:\n  ' + esc(full) + '</pre>' });
+  var t0 = Date.now();
+  return synthesizeAudio(full, 5).then(function (out) {
+    var ms = Date.now() - t0;
+    var url = URL.createObjectURL(out.blob);
+    var card = appendCard({ cls: 'assistant', who: 'Audio result', badge: { cls: 'ok', text: 'separate audio generated' },
+      html: '<audio src="' + url + '" controls playsinline style="width:100%;margin-top:8px"></audio>' +
+            '<div class="meta">on-device synthesis · kind=' + esc(out.kind) + ' · ' + out.bytes + ' B WAV · ' + ms + ' ms · output proof: real audio Blob</div>' +
+            '<div class="actions"></div>' });
+    var actions = card.querySelector('.actions');
+    var btnSave = document.createElement('button'); btnSave.className = 'small'; btnSave.textContent = 'Save audio';
+    btnSave.addEventListener('click', function () { var a = document.createElement('a'); a.href = url; a.download = 'load-audio-' + Date.now() + '.wav'; a.click(); });
+    actions.appendChild(btnSave);
+    var btnAttach = document.createElement('button'); btnAttach.className = 'small primary'; btnAttach.textContent = 'Attach to scene';
+    btnAttach.addEventListener('click', function () {
+      attachToScene({ visualPrompt: '', audio: url, audioPrompt: full, audioBlob: out.blob,
+        audioOutputProof: { kind: 'wav-blob', bytes: out.bytes, mime: out.mime, durationSec: out.durationSec, synthesisKind: out.kind, source: 'on-device OfflineAudioContext synthesis' },
+        audioStatus: 'separate_audio_generated' });
+    });
+    actions.appendChild(btnAttach);
+    logGeneration({ kind: 'audio', provider: 'on-device-webaudio', success: true, ms: ms, prompt: full, outputProof: { kind: 'wav-blob', bytes: out.bytes, mime: out.mime, durationSec: out.durationSec, synthesisKind: out.kind } });
+  }).catch(function (err) {
+    appendCard({ cls: 'assistant', who: 'Audio result', badge: { cls: 'prompt', text: 'sound prompt saved' },
+      html: '<pre>On-device audio synthesis failed (' + esc(String((err && err.message) || err)) + '). Falling back to prompt-only.\n\nPrompt:\n  ' + esc(full) + '</pre>' +
+            '<div class="actions"><a class="small" style="text-decoration:none;background:var(--bg3);padding:5px 10px;border-radius:8px;color:var(--fg);border:1px solid var(--border)" href="./scene-prompt-splitter.html">Open Scene Prompt Splitter</a></div>' });
+    logGeneration({ kind: 'audio', provider: 'on-device-webaudio', success: false, error: String((err && err.message) || err), prompt: full });
   });
-  logGeneration({ kind: 'audio', provider: 'prompt-only', success: false, promptOnly: true, prompt: buildPrompt(p) });
-  return Promise.resolve();
 }
 
 function attachToScene(scene) {
@@ -431,20 +617,35 @@ function attachToScene(scene) {
     appendCard({ cls: 'error', who: 'Attach', text: 'LoadDB unavailable; cannot attach.' });
     return;
   }
+  var sceneId = 'scene_' + Date.now().toString(36);
   var rec = {
-    sceneId: 'scene_' + Date.now().toString(36),
+    sceneId: sceneId,
     title: '',
     image: scene.image || '',
-    video: '',
+    video: scene.video || '',
     visualPrompt: scene.visualPrompt || '',
-    audioStatus: 'silent_video',
+    motionPrompt: scene.motionPrompt || '',
+    audioPrompt: scene.audioPrompt || '',
+    audio: scene.audio || '',
+    audioOutputProof: scene.audioOutputProof || null,
+    videoOutputProof: scene.videoOutputProof || null,
+    audioEmbedded: false,
+    audioMuxed: false,
+    audioStatus: scene.audioStatus || (scene.video ? 'silent_video' : 'silent_video'),
     audioRightsStatus: 'needs-review',
     threadId: STATE.threadId,
     createdAt: new Date().toISOString()
   };
-  DB.put('scenes', rec.sceneId, rec).then(function () {
-    appendCard({ cls: 'assistant', who: 'Attach to scene', badge: { cls: 'ok', text: 'saved' },
-      text: 'Scene saved to Project Memory: ' + rec.sceneId });
+  // Persist real Blob assets when present.
+  var saves = [];
+  if (scene.audioBlob) saves.push(DB.put('audio_assets', sceneId + '_audio', { sceneId: sceneId, blob: scene.audioBlob, proof: scene.audioOutputProof }));
+  if (scene.videoBlob) saves.push(DB.put('video_assets', sceneId + '_video', { sceneId: sceneId, blob: scene.videoBlob, proof: scene.videoOutputProof }));
+  saves.push(DB.put('scenes', sceneId, rec));
+  Promise.all(saves).then(function () {
+    var detail = 'Scene saved to Project Memory: ' + sceneId;
+    if (scene.audioBlob) detail += ' (+ audio blob in audio_assets)';
+    if (scene.videoBlob) detail += ' (+ video blob in video_assets)';
+    appendCard({ cls: 'assistant', who: 'Attach to scene', badge: { cls: 'ok', text: 'saved' }, text: detail });
   }).catch(function (e) {
     appendCard({ cls: 'error', who: 'Attach', text: 'Save failed: ' + (e && e.message || e) });
   });
