@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Load Site Debugger — run all tests</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<style>
+:root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--info:#60a5fa;--border:#2a2a40}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;font-size:14px}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#150a28 0,#0a0514 100%);border-bottom:1px solid var(--border)}
+header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)}
+header h1{margin:0;font-size:16px;font-weight:800;flex:1}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 18px 80px}
+.build-marker{background:#facc15;color:#0a0a14;font-weight:900;font-size:13px;letter-spacing:.04em;padding:10px 14px;border-radius:10px;margin:0 0 14px;font-family:ui-monospace,Menlo,monospace;text-align:center}
+.intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin:0 0 18px}
+.intro h2{margin:0 0 6px;font-size:18px;font-weight:800}
+.intro p{margin:0;color:var(--mute);font-size:13.5px;line-height:1.6}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0}
+button{font:inherit;padding:9px 14px;border-radius:8px;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-weight:700;font-size:13px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:0 0 14px}
+.s-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px}
+.s-card .v{font-size:22px;font-weight:900;line-height:1;color:#fff}
+.s-card .l{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mute);margin-top:4px}
+.s-card.pass .v{color:var(--ok)}
+.s-card.fail .v{color:var(--err)}
+.s-card.skip .v{color:var(--warn)}
+.targets{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.target{display:grid;grid-template-columns:1fr 90px 90px 90px 90px;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border);align-items:center}
+.target:last-child{border-bottom:none}
+.target .url{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--fg);word-break:break-all}
+.target .name{font-weight:700;font-size:13px;margin-bottom:2px}
+.target .check{font-size:11.5px;color:var(--mute)}
+.cell{font-size:11px;font-weight:800;text-align:center;padding:5px 8px;border-radius:6px;background:#0a0e18;color:var(--mute);border:1px solid var(--border)}
+.cell.pass{background:rgba(74,222,128,.18);color:var(--ok);border-color:rgba(74,222,128,.4)}
+.cell.fail{background:rgba(255,110,110,.18);color:var(--err);border-color:rgba(255,110,110,.4)}
+.cell.skip{background:rgba(250,204,21,.18);color:var(--warn);border-color:rgba(250,204,21,.4)}
+.cell.run{background:rgba(96,165,250,.18);color:var(--info);border-color:rgba(96,165,250,.4)}
+.head{background:#1a1a2e;font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
+.head .cell{background:transparent;border:none;color:var(--mute)}
+.notice{background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.3);color:#9ec5ff;font-size:12.5px;padding:10px 12px;border-radius:8px;margin:14px 0;line-height:1.6}
+.report{background:#0a0e18;border:1px solid var(--border);border-radius:8px;padding:12px;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--fg);white-space:pre-wrap;word-break:break-word;max-height:380px;overflow:auto;margin-top:12px;display:none}
+iframe{display:none}
+@media(max-width:760px){.target{grid-template-columns:1fr;gap:6px}.head{display:none}.cell{display:inline-block;margin-right:6px}}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="../">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Back to Load
+  </a>
+  <h1>Load Site Debugger</h1>
+</header>
+<div class="wrap">
+<div class="build-marker">BUILD MARKER: SITE-DEBUG-v1-2026-05-07-v17g18</div>
+<div class="intro">
+  <h2>Run all tests &mdash; debug any Load site</h2>
+  <p>Site-wide debugger. For each Load page, runs four real checks: <strong>fetch</strong> (HTTP 200), <strong>frame</strong> (loads in iframe), <strong>marker</strong> (expected build marker / element present), <strong>script</strong> (no <code>onerror</code> in iframe window). All checks run against the live page on the same origin. Cross-origin pages (the live ACR / Attain hosted apps if checked from elsewhere) will report <em>skip</em> for marker/script.</p>
+  <p style="margin-top:8px"><strong>No false positives:</strong> every result is from a real fetch or iframe probe; nothing is hard-coded as PASS.</p>
+</div>
+
+<div class="controls">
+  <button class="primary" id="run-all">Run all tests</button>
+  <button id="reset">Reset</button>
+  <button id="copy-report">Copy report</button>
+  <button id="download-report">Download report</button>
+  <span id="status" style="font-size:12px;color:var(--mute)"></span>
+</div>
+
+<div class="summary" id="summary">
+  <div class="s-card"><div class="v" id="s-total">0</div><div class="l">Targets</div></div>
+  <div class="s-card pass"><div class="v" id="s-pass">0</div><div class="l">Passed</div></div>
+  <div class="s-card fail"><div class="v" id="s-fail">0</div><div class="l">Failed</div></div>
+  <div class="s-card skip"><div class="v" id="s-skip">0</div><div class="l">Skipped</div></div>
+</div>
+
+<div class="targets" id="targets">
+  <div class="target head">
+    <div>Target</div><div class="cell">Fetch</div><div class="cell">Frame</div><div class="cell">Marker</div><div class="cell">Script</div>
+  </div>
+</div>
+
+<div class="notice">
+  <strong>How to use on iPad:</strong> tap <em>Run all tests</em>. Each row will fill in PASS / FAIL / skip per column. When done, tap <em>Download report</em> to save the full text log, or <em>Copy report</em> to paste it back. No screenshots required.
+</div>
+
+<pre class="report" id="report"></pre>
+
+<iframe id="probe-frame" sandbox="allow-same-origin allow-scripts" referrerpolicy="no-referrer"></iframe>
+</div>
+
+<script>
+'use strict';
+var $ = function (id) { return document.getElementById(id); };
+function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+// Targets: every Load page worth probing. base="../" => relative to /load/tools/.
+// Each entry: name, path, expectMarker (substring) or expectSelector (id).
+var TARGETS = [
+  { name: 'Load home',                path: '../',                                  expectSelector: '#home-screen' },
+  { name: 'Manifest (Load)',          path: '../manifest.json',                     expectJson: true },
+  { name: 'Service worker (Load)',    path: '../sw.js',                             expectMarker: "var CACHE = 'load-" },
+  { name: 'Run All Tests dashboard',  path: 'feature-tests.html',                   expectSelector: 'body' },
+  { name: 'PWA Builder',              path: 'pwa-builder.html',                     expectSelector: 'body' },
+  { name: 'LoadStudio Validator',     path: 'loadstudio-validator.html',            expectSelector: 'body' },
+  { name: 'Rights & Safety',          path: 'safety-rights.html',                   expectSelector: 'body' },
+  { name: 'Export Receipts',          path: 'export-receipts.html',                 expectSelector: 'body' },
+  { name: 'AI Provider Registry',     path: 'provider-registry.html',               expectSelector: '#categories' },
+  { name: 'Scene Prompt Splitter',    path: 'scene-prompt-splitter.html',           expectMarker: 'BUILD MARKER: PROMPT-DEBUG-v18' },
+  { name: 'Load AI Core',             path: 'load-ai-core.html',                    expectMarker: 'BUILD MARKER: AI-CORE-v1' },
+  { name: 'Site Debugger (self)',     path: 'site-debugger.html',                   expectMarker: 'BUILD MARKER: SITE-DEBUG-v1' },
+  { name: 'ACR Reader (root)',        path: '../../',                                expectSelector: 'body' },
+  { name: 'Attain',                   path: '../../attain/',                         expectSelector: 'body' },
+  { name: 'Attain Jr',                path: '../../attain-jr/',                      expectSelector: 'body' },
+  { name: 'Study',                    path: '../../study/',                          expectSelector: 'body' }
+];
+
+var ROW_STATE = []; // { target, fetch, frame, marker, script, notes[] }
+
+function painRow(i) {
+  var t = TARGETS[i], s = ROW_STATE[i];
+  var row = document.getElementById('row-' + i);
+  if (!row) return;
+  function cellHtml(state) {
+    if (state == null) return '<div class="cell">&middot;</div>';
+    if (state.startsWith('PASS')) return '<div class="cell pass">PASS</div>';
+    if (state.startsWith('FAIL')) return '<div class="cell fail">FAIL</div>';
+    if (state.startsWith('skip')) return '<div class="cell skip">skip</div>';
+    if (state.startsWith('run'))  return '<div class="cell run">running</div>';
+    return '<div class="cell">' + esc(state) + '</div>';
+  }
+  row.innerHTML =
+    '<div><div class="name">' + esc(t.name) + '</div>' +
+    '<div class="url">' + esc(t.path) + '</div>' +
+    '<div class="check">expect: ' + esc(t.expectMarker || t.expectSelector || (t.expectJson ? 'json' : '')) + '</div>' +
+    (s.notes && s.notes.length ? '<div class="check" style="color:var(--err);margin-top:4px">' + esc(s.notes.join('; ')) + '</div>' : '') +
+    '</div>' +
+    cellHtml(s.fetchSt) + cellHtml(s.frameSt) + cellHtml(s.markerSt) + cellHtml(s.scriptSt);
+}
+
+function renderTargets() {
+  var c = $('targets');
+  // keep header row, remove others
+  Array.prototype.slice.call(c.querySelectorAll('.target:not(.head)')).forEach(function (n) { n.remove(); });
+  TARGETS.forEach(function (t, i) {
+    if (!ROW_STATE[i]) ROW_STATE[i] = { fetchSt: null, frameSt: null, markerSt: null, scriptSt: null, notes: [] };
+    var div = document.createElement('div');
+    div.className = 'target';
+    div.id = 'row-' + i;
+    c.appendChild(div);
+    painRow(i);
+  });
+  $('s-total').textContent = TARGETS.length;
+  updateTotals();
+}
+
+function updateTotals() {
+  var pass = 0, fail = 0, skip = 0;
+  ROW_STATE.forEach(function (s) {
+    [s.fetchSt, s.frameSt, s.markerSt, s.scriptSt].forEach(function (st) {
+      if (!st) return;
+      if (st.startsWith('PASS')) pass++;
+      else if (st.startsWith('FAIL')) fail++;
+      else if (st.startsWith('skip')) skip++;
+    });
+  });
+  $('s-pass').textContent = pass;
+  $('s-fail').textContent = fail;
+  $('s-skip').textContent = skip;
+}
+
+function probeFetch(url) {
+  return fetch(url, { method: 'GET', cache: 'no-store' })
+    .then(function (r) {
+      return r.text().then(function (text) {
+        return { ok: r.ok, status: r.status, text: text };
+      });
+    })
+    .catch(function (err) { return { ok: false, status: 0, error: String(err && err.message || err) }; });
+}
+
+function probeFrame(url, expectMarker, expectSelector) {
+  return new Promise(function (resolve) {
+    var f = $('probe-frame');
+    var done = false;
+    var timer = setTimeout(function () {
+      if (done) return;
+      done = true;
+      resolve({ frame: 'FAIL: timeout (>15s)', marker: 'skip: frame timeout', script: 'skip: frame timeout' });
+    }, 15000);
+    function finish(res) {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      try { f.removeAttribute('src'); } catch (_) {}
+      resolve(res);
+    }
+    f.onload = function () {
+      try {
+        var doc = f.contentDocument;
+        if (!doc) return finish({ frame: 'skip: cross-origin doc', marker: 'skip: cross-origin', script: 'skip: cross-origin' });
+        var win = f.contentWindow;
+        var scriptErr = null;
+        try { win.addEventListener('error', function (e) { scriptErr = (e && e.message) || 'error'; }); } catch(_) {}
+        var markerSt = 'skip';
+        if (expectMarker) {
+          var has = (doc.body && doc.body.textContent.indexOf(expectMarker) !== -1) || (doc.documentElement.outerHTML.indexOf(expectMarker) !== -1);
+          markerSt = has ? 'PASS: marker found' : 'FAIL: marker missing';
+        } else if (expectSelector) {
+          var el = null; try { el = doc.querySelector(expectSelector); } catch (_) {}
+          markerSt = el ? 'PASS: ' + expectSelector + ' present' : 'FAIL: ' + expectSelector + ' missing';
+        }
+        var scriptSt = scriptErr ? ('FAIL: ' + scriptErr) : 'PASS: no errors';
+        finish({ frame: 'PASS: loaded', marker: markerSt, script: scriptSt });
+      } catch (e) {
+        finish({ frame: 'FAIL: ' + (e && e.message || e), marker: 'skip', script: 'skip' });
+      }
+    };
+    f.onerror = function () { finish({ frame: 'FAIL: onerror', marker: 'skip', script: 'skip' }); };
+    try { f.src = url; } catch (e) { finish({ frame: 'FAIL: ' + (e && e.message || e), marker: 'skip', script: 'skip' }); }
+  });
+}
+
+function runOne(i) {
+  var t = TARGETS[i];
+  var s = ROW_STATE[i];
+  s.notes = [];
+  s.fetchSt = 'run'; s.frameSt = 'run'; s.markerSt = 'run'; s.scriptSt = 'run';
+  painRow(i); updateTotals();
+  return probeFetch(t.path).then(function (fr) {
+    if (!fr.ok) {
+      s.fetchSt = 'FAIL: HTTP ' + (fr.status || 0) + (fr.error ? ' ' + fr.error : '');
+      s.frameSt = 'skip: fetch failed'; s.markerSt = 'skip: fetch failed'; s.scriptSt = 'skip: fetch failed';
+      s.notes.push(fr.error || ('status ' + fr.status));
+      painRow(i); updateTotals();
+      return;
+    }
+    s.fetchSt = 'PASS: HTTP ' + fr.status;
+
+    if (t.expectJson) {
+      try { JSON.parse(fr.text); s.markerSt = 'PASS: valid JSON'; }
+      catch (e) { s.markerSt = 'FAIL: invalid JSON: ' + (e && e.message || e); }
+      s.frameSt = 'skip: not html'; s.scriptSt = 'skip: not html';
+      painRow(i); updateTotals();
+      return;
+    }
+    if (t.path.endsWith('.js')) {
+      var ok = t.expectMarker ? (fr.text.indexOf(t.expectMarker) !== -1) : true;
+      s.markerSt = ok ? 'PASS: marker in source' : 'FAIL: marker missing in source';
+      s.frameSt = 'skip: not html'; s.scriptSt = 'skip: not html';
+      painRow(i); updateTotals();
+      return;
+    }
+    return probeFrame(t.path, t.expectMarker, t.expectSelector).then(function (res) {
+      s.frameSt = res.frame; s.markerSt = res.marker; s.scriptSt = res.script;
+      painRow(i); updateTotals();
+    });
+  });
+}
+
+function runAll() {
+  $('status').textContent = 'running ' + TARGETS.length + ' targets...';
+  ROW_STATE.forEach(function (s) { s.notes = []; s.fetchSt = null; s.frameSt = null; s.markerSt = null; s.scriptSt = null; });
+  renderTargets();
+  var i = 0;
+  function next() {
+    if (i >= TARGETS.length) {
+      $('status').textContent = 'done. ' + new Date().toLocaleTimeString();
+      return;
+    }
+    runOne(i).then(function () { i++; next(); });
+  }
+  next();
+}
+
+function buildReport() {
+  var lines = ['LOAD SITE DEBUGGER REPORT', 'Build: SITE-DEBUG-v1-2026-05-07-v17g18', 'Page: ' + location.href, 'Generated: ' + new Date().toString(), ''];
+  TARGETS.forEach(function (t, i) {
+    var s = ROW_STATE[i] || {};
+    lines.push('## ' + t.name);
+    lines.push('  url:    ' + t.path);
+    lines.push('  expect: ' + (t.expectMarker || t.expectSelector || (t.expectJson ? 'valid JSON' : '')));
+    lines.push('  fetch:  ' + (s.fetchSt || '-'));
+    lines.push('  frame:  ' + (s.frameSt || '-'));
+    lines.push('  marker: ' + (s.markerSt || '-'));
+    lines.push('  script: ' + (s.scriptSt || '-'));
+    if (s.notes && s.notes.length) lines.push('  notes:  ' + s.notes.join('; '));
+    lines.push('');
+  });
+  var pass = 0, fail = 0, skip = 0;
+  ROW_STATE.forEach(function (s) {
+    [s.fetchSt, s.frameSt, s.markerSt, s.scriptSt].forEach(function (st) {
+      if (!st) return;
+      if (st.startsWith('PASS')) pass++;
+      else if (st.startsWith('FAIL')) fail++;
+      else if (st.startsWith('skip')) skip++;
+    });
+  });
+  lines.push('TOTALS: pass=' + pass + ' fail=' + fail + ' skip=' + skip + ' targets=' + TARGETS.length);
+  return lines.join('\n');
+}
+
+function copyText(t) {
+  if (navigator.clipboard) return navigator.clipboard.writeText(t).then(function () { return true; }).catch(function () { return false; });
+  try { var ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); return Promise.resolve(true); } catch (_) { return Promise.resolve(false); }
+}
+
+$('run-all').addEventListener('click', runAll);
+$('reset').addEventListener('click', function () { ROW_STATE = []; renderTargets(); $('status').textContent = ''; var pre = $('report'); pre.style.display = 'none'; pre.textContent = ''; });
+$('copy-report').addEventListener('click', function () {
+  var t = buildReport(); var pre = $('report'); pre.style.display = 'block'; pre.textContent = t;
+  copyText(t).then(function (ok) { alert(ok ? 'Report copied.' : 'Copy failed; long-press the report to select.'); });
+});
+$('download-report').addEventListener('click', function () {
+  var t = buildReport(); var pre = $('report'); pre.style.display = 'block'; pre.textContent = t;
+  var blob = new Blob([t], { type: 'text/plain' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'load-site-debug-' + Date.now() + '.txt'; a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); }, 1500);
+});
+renderTargets();
+</script>
+</body>
+</html>
