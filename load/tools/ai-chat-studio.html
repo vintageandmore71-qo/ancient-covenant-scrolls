@@ -73,7 +73,7 @@ button.small{font-size:11.5px;padding:5px 10px}
   <h1>AI Chat Studio</h1>
 </header>
 <div class="wrap">
-<div class="build-marker">BUILD MARKER: CHAT-STUDIO-v3.2-2026-05-07-v17g36</div>
+<div class="build-marker">BUILD MARKER: CHAT-STUDIO-v3.3-2026-05-07-v17g38</div>
 <div class="intro">
   <strong>X-AI-CHAT-STUDIO Phase 3.</strong> Routed chat with inline real-output cards. Free providers + on-device synthesis only. <em>Chat</em>: Pollinations text. <em>Text-to-image</em>: Pollinations image (real PNG/JPG). <em>Animate</em> (with a reference image): canvas Ken-Burns + MediaRecorder produces a <strong>real WebM video Blob</strong>. <em>Audio</em>: OfflineAudioContext synthesises a <strong>real WAV Blob</strong> matched to prompt keywords. Output proof: only marked ready when a real playable Blob exists; otherwise the card stays prompt-only honestly.
 </div>
@@ -327,6 +327,54 @@ function pollinationsImageUrl(prompt, size) {
   return u;
 }
 
+// AI Horde anonymous image (free, no key) — async submit + polling.
+// Output proof: only resolves when the polled status returns a real
+// image URL or base64 string. Caller still verifies <img> onload.
+function hordeImage(prompt, sizeStr, onProgress) {
+  var sz = (sizeStr || '512x512').split('x');
+  var W = parseInt(sz[0],10) || 512, H = parseInt(sz[1],10) || 512;
+  // AI Horde requires width/height multiples of 64 and within a sane range.
+  W = Math.max(64, Math.min(1024, Math.round(W / 64) * 64));
+  H = Math.max(64, Math.min(1024, Math.round(H / 64) * 64));
+  var t0 = Date.now();
+  var body = { prompt: prompt, params: { n: 1, width: W, height: H, steps: 20, sampler_name: 'k_euler', cfg_scale: 7.5 }, models: ['stable_diffusion'] };
+  return fetch('https://aihorde.net/api/v2/generate/async', {
+    method: 'POST',
+    headers: { 'apikey': '0000000000', 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(body)
+  }).then(function (r) {
+    if (!r.ok) throw new Error('horde-image async HTTP ' + r.status);
+    return r.json();
+  }).then(function (j) {
+    var id = j && j.id;
+    if (!id) throw new Error('horde-image returned no job id');
+    var deadline = Date.now() + 120000; // 120 s cap
+    return new Promise(function (resolve, reject) {
+      function poll() {
+        if (Date.now() > deadline) { reject(new Error('horde-image timeout (>120 s)')); return; }
+        fetch('https://aihorde.net/api/v2/generate/check/' + id).then(function (r) {
+          if (!r.ok) throw new Error('check HTTP ' + r.status);
+          return r.json();
+        }).then(function (j2) {
+          if (onProgress) try { onProgress(j2); } catch (_) {}
+          if (j2.faulted) { reject(new Error('horde-image faulted: ' + JSON.stringify(j2))); return; }
+          if (j2.done) {
+            fetch('https://aihorde.net/api/v2/generate/status/' + id).then(function (r) { return r.json(); }).then(function (j3) {
+              var g = j3.generations && j3.generations[0];
+              if (!g || !g.img) { reject(new Error('horde-image: status returned no img')); return; }
+              var url = (String(g.img).indexOf('http') === 0) ? g.img : ('data:image/webp;base64,' + g.img);
+              resolve({ url: url, ms: Date.now() - t0, worker: g.worker_name || '', model: g.model || '', w: W, h: H });
+            }).catch(reject);
+          } else {
+            setTimeout(poll, 4000);
+          }
+        }).catch(reject);
+      }
+      poll();
+    });
+  });
+}
+
 // ── On-device Ken-Burns animation: zoom + pan a still image into a real
 // WebM video via canvas.captureStream() + MediaRecorder. Output proof:
 // the resolve only fires after a real Blob with size > 1 KB is produced.
@@ -563,11 +611,63 @@ function runImage(p) {
       resolve();
     };
     img.onerror = function () {
-      card.classList.add('error');
-      card.querySelector('.who').innerHTML = 'Pollinations image <span class="badge fail">image failed</span>';
-      card.querySelectorAll('div')[card.querySelectorAll('div').length - 1].textContent = 'Image did not load. Network blocked or provider unreachable.';
+      // Pollinations failed — fall back to AI Horde anonymous image (free, no key).
+      card.querySelector('.who').innerHTML = 'Pollinations image <span class="badge fail">fail</span> &rarr; trying AI Horde';
+      var lastDiv = card.querySelectorAll('div')[card.querySelectorAll('div').length - 1];
+      lastDiv.innerHTML = '<span class="spinner"></span> Pollinations failed. Submitting AI Horde async job (anonymous, free)...';
       logGeneration({ kind: 'image', provider: 'pollinations', success: false, prompt: full });
-      resolve();
+      var hordeT0 = Date.now();
+      hordeImage(full, STATE.size, function (j2) {
+        if (lastDiv) lastDiv.innerHTML = '<span class="spinner"></span> AI Horde queued — wait_time=' + (j2.wait_time || '?') + 's queue=' + (j2.queue_position == null ? '?' : j2.queue_position) + ' processing=' + (j2.processing || 0);
+      }).then(function (out) {
+        // Verify the returned URL/data renders before claiming Ready.
+        var img2 = new Image();
+        img2.onload = function () {
+          var ms2 = Date.now() - hordeT0;
+          card.classList.remove('error');
+          card.querySelector('.who').innerHTML = 'AI Horde image <span class="badge ok">image ready</span>';
+          if (lastDiv) lastDiv.remove();
+          var imgEl = document.createElement('img'); imgEl.src = out.url; imgEl.alt = full;
+          card.appendChild(imgEl);
+          var meta = document.createElement('div'); meta.className = 'meta';
+          meta.textContent = 'provider: pollinations -> horde-image · worker=' + (out.worker || 'anon') + ' · model=' + (out.model || 'sd') + ' · ' + ms2 + ' ms · ' + img2.naturalWidth + 'x' + img2.naturalHeight + ' · output proof: real image loaded';
+          card.appendChild(meta);
+          var actions = document.createElement('div'); actions.className = 'actions';
+          actions.innerHTML = '<button class="small" data-act="save">Save image</button>' +
+            '<button class="small" data-act="refine">Refine</button>' +
+            '<button class="small" data-act="animate">Animate this</button>' +
+            '<button class="small primary" data-act="attach">Attach to scene</button>';
+          card.appendChild(actions);
+          actions.querySelector('[data-act=save]').addEventListener('click', function () { var a = document.createElement('a'); a.href = out.url; a.download = 'load-image-horde-' + Date.now() + '.webp'; a.target = '_blank'; a.click(); });
+          actions.querySelector('[data-act=refine]').addEventListener('click', function () { $('user-input').value = full + ', '; $('user-input').focus(); });
+          actions.querySelector('[data-act=animate]').addEventListener('click', function () {
+            STATE.mode = 'animate';
+            Array.prototype.slice.call(document.querySelectorAll('[data-mode]')).forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-mode') === 'animate'); });
+            renderRouteLine();
+            $('user-input').value = full;
+          });
+          actions.querySelector('[data-act=attach]').addEventListener('click', function () {
+            attachToScene({ image: out.url, visualPrompt: full, sizes: STATE.size });
+          });
+          logGeneration({ kind: 'image', provider: 'horde-image', success: true, ms: ms2, prompt: full, size: STATE.size, outputProof: { kind: 'image-url', url: out.url, w: img2.naturalWidth, h: img2.naturalHeight, worker: out.worker, model: out.model } });
+          resolve();
+        };
+        img2.onerror = function () {
+          // Horde returned a URL but it failed to render — final prompt-only fallback.
+          card.classList.add('error');
+          card.querySelector('.who').innerHTML = 'AI Horde image <span class="badge fail">render fail</span>';
+          if (lastDiv) lastDiv.textContent = 'AI Horde returned an image URL but it failed to render. Output stays prompt-only.';
+          logGeneration({ kind: 'image', provider: 'pollinations->horde-image', success: false, prompt: full, error: 'horde img.onerror' });
+          resolve();
+        };
+        img2.src = out.url;
+      }).catch(function (err2) {
+        card.classList.add('error');
+        card.querySelector('.who').innerHTML = 'Image <span class="badge fail">all free providers failed</span>';
+        if (lastDiv) lastDiv.textContent = 'Pollinations failed; AI Horde failed: ' + ((err2 && err2.message) || err2) + '. Output stays prompt-only.';
+        logGeneration({ kind: 'image', provider: 'pollinations->horde-image', success: false, prompt: full, error: 'horde: ' + String((err2 && err2.message) || err2) });
+        resolve();
+      });
     };
     img.src = url;
   });
