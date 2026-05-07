@@ -77,7 +77,7 @@ button.small{font-size:11.5px;padding:5px 10px}
   <h1>AI Chat Studio</h1>
 </header>
 <div class="wrap">
-<div class="build-marker">BUILD MARKER: CHAT-STUDIO-v3.7-2026-05-07-v17g43</div>
+<div class="build-marker">BUILD MARKER: CHAT-STUDIO-v3.8-2026-05-08-v17g56</div>
 <div class="intro">
   <strong>X-AI-CHAT-STUDIO Phase 3.</strong> Routed chat with inline real-output cards. Free providers + on-device synthesis only. <em>Chat</em>: Pollinations text. <em>Text-to-image</em>: Pollinations image (real PNG/JPG). <em>Animate</em> (with a reference image): canvas Ken-Burns + MediaRecorder produces a <strong>real WebM video Blob</strong>. <em>Audio</em>: OfflineAudioContext synthesises a <strong>real WAV Blob</strong> matched to prompt keywords. Output proof: only marked ready when a real playable Blob exists; otherwise the card stays prompt-only honestly.
 </div>
@@ -341,6 +341,63 @@ function pollinationsImageUrl(prompt, size) {
   return u;
 }
 
+// Stash any URL/dataUrl as the animation source so a follow-up Animate
+// turn doesn't fall into the prompt-only branch. Bug fix 2026-05-08.
+function stashAsAnimateSource(url, name) {
+  STATE.ref = { name: (name || 'previous-result').slice(0, 40), size: 0, type: 'image/auto', dataUrl: url };
+  var p = $('ref-preview'); if (p) { p.src = url; p.style.display = 'inline-block'; }
+  var c = $('ref-clear'); if (c) c.style.display = 'inline-block';
+}
+
+// Render a small countdown chip into a card. Returns a stop function.
+function startDeadlineCountdown(card, ms, label) {
+  var deadline = Date.now() + ms;
+  var chip = document.createElement('span');
+  chip.style.cssText = 'display:inline-block;font-size:10.5px;font-weight:700;background:rgba(96,165,250,.18);color:var(--info);padding:2px 7px;border-radius:5px;margin-left:6px;font-family:ui-monospace,Menlo,monospace';
+  chip.textContent = (label || 'timeout') + ' in ' + Math.ceil(ms / 1000) + 's';
+  var who = card.querySelector('.who'); if (who) who.appendChild(chip);
+  var iv = setInterval(function () {
+    var left = Math.max(0, deadline - Date.now());
+    chip.textContent = (label || 'timeout') + ' in ' + Math.ceil(left / 1000) + 's';
+    if (left <= 0) { try { clearInterval(iv); } catch (_) {} try { chip.remove(); } catch (_) {} }
+  }, 1000);
+  return function () { try { clearInterval(iv); } catch (_) {} try { chip.remove(); } catch (_) {} };
+}
+
+// Build a standard 3-button failure action row used everywhere.
+// Buttons: Retry · Try next provider · Save prompt-only.
+function buildFailureActions(opts) {
+  opts = opts || {};
+  var wrap = document.createElement('div'); wrap.className = 'actions';
+  if (opts.onRetry) {
+    var b = document.createElement('button'); b.className = 'small'; b.textContent = 'Retry';
+    b.addEventListener('click', opts.onRetry); wrap.appendChild(b);
+  }
+  if (opts.onNext) {
+    var n = document.createElement('button'); n.className = 'small'; n.textContent = 'Try next provider';
+    n.addEventListener('click', opts.onNext); wrap.appendChild(n);
+  }
+  if (opts.onSavePromptOnly) {
+    var s = document.createElement('button'); s.className = 'small primary'; s.textContent = 'Save prompt-only';
+    s.addEventListener('click', opts.onSavePromptOnly); wrap.appendChild(s);
+  }
+  return wrap;
+}
+
+// Wrap any image URL load in a timeout so the UI is never stuck on a
+// silent-network spinner. Resolves with naturalWidth/Height or rejects
+// with a clear "<label> timed out" message.
+function loadImageWithTimeout(url, ms, label) {
+  return new Promise(function (resolve, reject) {
+    var done = false;
+    var to = setTimeout(function () { if (done) return; done = true; reject(new Error((label || 'image') + ' timed out (' + ms + ' ms)')); }, ms);
+    var img = new Image();
+    img.onload = function () { if (done) return; done = true; clearTimeout(to); resolve({ img: img, w: img.naturalWidth, h: img.naturalHeight }); };
+    img.onerror = function () { if (done) return; done = true; clearTimeout(to); reject(new Error((label || 'image') + ' failed to load')); };
+    img.src = url;
+  });
+}
+
 // AI Horde anonymous image (free, no key) — async submit + polling.
 // Output proof: only resolves when the polled status returns a real
 // image URL or base64 string. Caller still verifies <img> onload.
@@ -588,7 +645,11 @@ function send() {
 function runChat(p) {
   var card = appendCard({ cls: 'assistant', who: 'Pollinations.ai', badge: { cls: 'run', text: 'thinking' }, text: '' });
   card.querySelector('pre').innerHTML = '<span class="spinner"></span> calling text.pollinations.ai...';
+  var pollMs = (window.LoadTimeouts ? window.LoadTimeouts.byIntent('pollinations-text') : 30000);
+  var stopChip = startDeadlineCountdown(card, pollMs, 'timeout');
+  var startedAt = Date.now();
   return pollinationsText(p).then(function (res) {
+    stopChip();
     card.querySelector('.who').innerHTML = 'Pollinations.ai <span class="badge ok">ok</span>';
     card.querySelector('pre').textContent = res.text;
     var metaDiv = document.createElement('div'); metaDiv.className = 'meta';
@@ -597,23 +658,63 @@ function runChat(p) {
     logChat('assistant', 'chat', res.text, { provider: 'pollinations', ms: res.ms });
     logGeneration({ kind: 'text', provider: 'pollinations', success: true, ms: res.ms, prompt: p, outputProof: { kind: 'text', length: res.text.length } });
   }).catch(function (err) {
+    stopChip();
+    var pollEnd = Date.now();
+    var pollMsg = String((err && err.message) || err);
+    var timedOut = /timed out/i.test(pollMsg);
+    if (window.LoadQueue && STATE.currentJob) {
+      window.LoadQueue.update(STATE.currentJob.jobId, {
+        status: 'Failed',
+        provider: 'pollinations',
+        startedAt: startedAt, endedAt: pollEnd,
+        error: 'pollinations ' + (timedOut ? 'timed out' : 'failed') + ': ' + pollMsg
+      }).catch(function () {});
+    }
     // Fallback to AI Horde anonymous (free, no key).
-    card.querySelector('.who').innerHTML = 'Pollinations.ai <span class="badge fail">fail</span> &rarr; trying AI Horde';
-    card.querySelector('pre').innerHTML = 'Pollinations failed: ' + esc((err && err.message) || String(err)) + '<br><span class="spinner"></span> calling aihorde.net...';
+    card.querySelector('.who').innerHTML = 'Pollinations.ai <span class="badge fail">' + (timedOut ? 'timed out' : 'fail') + '</span> &rarr; trying AI Horde';
+    card.querySelector('pre').innerHTML = 'Pollinations: ' + esc(pollMsg) + '<br><span class="spinner"></span> calling aihorde.net...';
+    var hordeMs = (window.LoadTimeouts ? window.LoadTimeouts.byIntent('horde-text') : 60000);
+    var stopChip2 = startDeadlineCountdown(card, hordeMs, 'timeout');
+    var hordeStarted = Date.now();
     return hordeText(p).then(function (res) {
+      stopChip2();
       card.classList.remove('error');
       card.querySelector('.who').innerHTML = 'AI Horde <span class="badge ok">ok</span>';
       card.querySelector('pre').textContent = res.text;
       var metaDiv = document.createElement('div'); metaDiv.className = 'meta';
-      metaDiv.textContent = 'provider: horde-text · worker=' + (res.worker || 'anon') + ' · ' + res.ms + ' ms · ' + new Date().toLocaleTimeString();
+      metaDiv.textContent = 'provider: pollinations(' + (timedOut ? 'timed out' : 'failed') + ') -> horde-text · worker=' + (res.worker || 'anon') + ' · ' + res.ms + ' ms · ' + new Date().toLocaleTimeString();
       card.appendChild(metaDiv);
       logChat('assistant', 'chat', res.text, { provider: 'horde-text', ms: res.ms, worker: res.worker });
       logGeneration({ kind: 'text', provider: 'horde-text', success: true, ms: res.ms, prompt: p, outputProof: { kind: 'text', length: res.text.length, worker: res.worker } });
     }).catch(function (err2) {
+      stopChip2();
+      var hordeEnd = Date.now();
+      var hordeMsg = String((err2 && err2.message) || err2);
+      var timedOut2 = /timed out/i.test(hordeMsg);
       card.classList.add('error');
-      card.querySelector('.who').innerHTML = 'Chat <span class="badge fail">all free providers failed</span>';
-      card.querySelector('pre').textContent = 'Pollinations: ' + ((err && err.message) || err) + '\nAI Horde: ' + ((err2 && err2.message) || err2);
-      logGeneration({ kind: 'text', provider: 'pollinations->horde', success: false, error: 'pollinations: ' + String(err && err.message || err) + ' | horde: ' + String(err2 && err2.message || err2), prompt: p });
+      card.querySelector('.who').innerHTML = 'Chat <span class="badge fail">all free providers ' + (timedOut2 || timedOut ? 'timed out' : 'failed') + '</span>';
+      card.querySelector('pre').textContent = 'Pollinations: ' + pollMsg + '\nAI Horde: ' + hordeMsg + '\n\nThe Send button is re-enabled; tap Retry or Save prompt-only.';
+      var actions = buildFailureActions({
+        onRetry: function () { $('user-input').value = p; send(); },
+        onSavePromptOnly: function () {
+          appendCard({ cls: 'assistant', who: 'Prompt saved', badge: { cls: 'prompt', text: 'prompt-only' },
+            html: '<pre>' + esc('Saved prompt for later — paste into another tool when network is back:\n\n' + p) + '</pre>' });
+          logGeneration({ kind: 'text', provider: 'prompt-only', success: false, prompt: p, promptOnly: true });
+        }
+      });
+      card.appendChild(actions);
+      logGeneration({ kind: 'text', provider: 'pollinations->horde', success: false,
+        error: 'pollinations: ' + pollMsg + ' | horde: ' + hordeMsg, prompt: p,
+        startedAt: startedAt, endedAtPoll: pollEnd, endedAtHorde: hordeEnd,
+        timedOut: timedOut || timedOut2 });
+      if (window.LoadQueue && STATE.currentJob) {
+        window.LoadQueue.update(STATE.currentJob.jobId, {
+          status: 'Failed', provider: 'pollinations->horde',
+          startedAt: startedAt, endedAt: hordeEnd,
+          error: 'pollinations: ' + pollMsg + ' | horde: ' + hordeMsg,
+          nextRecommended: timedOut || timedOut2 ? 'wait + retry' : 'save prompt-only'
+        }).catch(function () {});
+      }
     });
   });
 }
@@ -631,103 +732,125 @@ function runImage(p) {
   var t0 = Date.now();
   var refHtml = STATE.ref ? '<img class="ref" src="' + esc(STATE.ref.dataUrl) + '" alt="ref">' : '';
   var card = appendCard({ cls: 'assistant', who: 'Pollinations image', badge: { cls: 'run', text: 'generating' },
-    html: '<div class="meta">' + esc('prompt: ' + full + ' (' + STATE.size + ')') + '</div>' + refHtml + '<div><span class="spinner"></span> waiting for image...</div>'
+    html: '<div class="meta">' + esc('prompt: ' + full + ' (' + STATE.size + ') · op: text-to-image') + '</div>' + refHtml + '<div><span class="spinner"></span> waiting for image...</div>'
   });
-  return new Promise(function (resolve) {
-    var img = new Image();
-    img.onload = function () {
-      var ms = Date.now() - t0;
-      var bw = img.naturalWidth, bh = img.naturalHeight;
-      card.querySelector('.who').innerHTML = 'Pollinations image <span class="badge ok">image ready</span>';
-      var imgEl = document.createElement('img'); imgEl.src = url; imgEl.alt = full;
-      card.querySelectorAll('div')[card.querySelectorAll('div').length - 1].remove();
-      card.appendChild(imgEl);
-      var meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = 'provider: pollinations · ' + ms + ' ms · ' + bw + 'x' + bh + ' · output proof: real image loaded';
-      card.appendChild(meta);
-      var actions = document.createElement('div'); actions.className = 'actions';
-      actions.innerHTML = '<button class="small" data-act="save">Save image</button>' +
-        '<button class="small" data-act="refine">Refine</button>' +
-        '<button class="small" data-act="animate">Animate this</button>' +
-        '<button class="small primary" data-act="attach">Attach to scene</button>';
+  var pollImgMs = (window.LoadTimeouts ? window.LoadTimeouts.byIntent('pollinations-image') : 45000);
+  var stopChip = startDeadlineCountdown(card, pollImgMs, 'timeout');
+  return loadImageWithTimeout(url, pollImgMs, 'pollinations image').then(function (out) {
+    stopChip();
+    var ms = Date.now() - t0;
+    var bw = out.w, bh = out.h;
+    card.querySelector('.who').innerHTML = 'Pollinations image <span class="badge ok">image ready</span>';
+    var imgEl = document.createElement('img'); imgEl.src = url; imgEl.alt = full;
+    card.querySelectorAll('div')[card.querySelectorAll('div').length - 1].remove();
+    card.appendChild(imgEl);
+    var meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = 'provider: pollinations · op: text-to-image · ' + ms + ' ms · ' + bw + 'x' + bh + ' · output proof: real image loaded';
+    card.appendChild(meta);
+    var actions = document.createElement('div'); actions.className = 'actions';
+    actions.innerHTML = '<button class="small" data-act="save">Save image</button>' +
+      '<button class="small" data-act="refine">Refine</button>' +
+      '<button class="small" data-act="animate">Animate this</button>' +
+      '<button class="small primary" data-act="attach">Attach to scene</button>';
+    card.appendChild(actions);
+    actions.querySelector('[data-act=save]').addEventListener('click', function () {
+      var a = document.createElement('a'); a.href = url; a.download = 'load-image-' + Date.now() + '.jpg'; a.target = '_blank'; a.click();
+    });
+    actions.querySelector('[data-act=refine]').addEventListener('click', function () {
+      $('user-input').value = full + ', '; $('user-input').focus();
+    });
+    actions.querySelector('[data-act=animate]').addEventListener('click', function () {
+      stashAsAnimateSource(url, full);
+      STATE.mode = 'animate';
+      Array.prototype.slice.call(document.querySelectorAll('[data-mode]')).forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-mode') === 'animate'); });
+      renderRouteLine();
+      $('user-input').value = full;
+    });
+    actions.querySelector('[data-act=attach]').addEventListener('click', function () {
+      attachToScene({ image: url, visualPrompt: full, sizes: STATE.size });
+    });
+    logGeneration({ kind: 'image', provider: 'pollinations', success: true, ms: ms, prompt: full, size: STATE.size,
+      outputProof: { kind: 'image-url', url: url, w: bw, h: bh },
+      opType: 'text-to-image', resultLabel: 'real image (text-to-image)' });
+    if (window.LoadQueue && STATE.currentJob) {
+      window.LoadQueue.update(STATE.currentJob.jobId, { status: 'Complete', provider: 'pollinations', startedAt: t0, endedAt: Date.now() }).catch(function () {});
+    }
+  }).catch(function (errPoll) {
+    stopChip();
+    var pollMsg = String((errPoll && errPoll.message) || errPoll);
+    var timedOut = /timed out/i.test(pollMsg);
+    card.querySelector('.who').innerHTML = 'Pollinations image <span class="badge fail">' + (timedOut ? 'timed out' : 'fail') + '</span> &rarr; trying AI Horde';
+    var lastDiv = card.querySelectorAll('div')[card.querySelectorAll('div').length - 1];
+    lastDiv.innerHTML = '<span class="spinner"></span> Pollinations ' + (timedOut ? 'timed out' : 'failed') + ': ' + esc(pollMsg) + '<br>Submitting AI Horde async job (anonymous, free)...';
+    logGeneration({ kind: 'image', provider: 'pollinations', success: false, prompt: full, error: pollMsg, timedOut: timedOut });
+    var hordeMs = (window.LoadTimeouts ? window.LoadTimeouts.byIntent('horde-image') : 120000);
+    var stopChip2 = startDeadlineCountdown(card, hordeMs, 'horde timeout');
+    var hordeT0 = Date.now();
+    hordeImage(full, STATE.size, function (j2) {
+      if (lastDiv) lastDiv.innerHTML = '<span class="spinner"></span> AI Horde queued — wait_time=' + (j2.wait_time || '?') + 's queue=' + (j2.queue_position == null ? '?' : j2.queue_position) + ' processing=' + (j2.processing || 0);
+    }).then(function (out) {
+      stopChip2();
+      return loadImageWithTimeout(out.url, 30000, 'horde image render').then(function (img2) {
+        var ms2 = Date.now() - hordeT0;
+        card.classList.remove('error');
+        card.querySelector('.who').innerHTML = 'AI Horde image <span class="badge ok">image ready</span>';
+        if (lastDiv) lastDiv.remove();
+        var imgEl = document.createElement('img'); imgEl.src = out.url; imgEl.alt = full;
+        card.appendChild(imgEl);
+        var meta = document.createElement('div'); meta.className = 'meta';
+        meta.textContent = 'provider: pollinations(' + (timedOut ? 'timed out' : 'failed') + ') -> horde-image · op: text-to-image · worker=' + (out.worker || 'anon') + ' · model=' + (out.model || 'sd') + ' · ' + ms2 + ' ms · ' + img2.w + 'x' + img2.h + ' · output proof: real image loaded';
+        card.appendChild(meta);
+        var actions = document.createElement('div'); actions.className = 'actions';
+        actions.innerHTML = '<button class="small" data-act="save">Save image</button>' +
+          '<button class="small" data-act="refine">Refine</button>' +
+          '<button class="small" data-act="animate">Animate this</button>' +
+          '<button class="small primary" data-act="attach">Attach to scene</button>';
+        card.appendChild(actions);
+        actions.querySelector('[data-act=save]').addEventListener('click', function () { var a = document.createElement('a'); a.href = out.url; a.download = 'load-image-horde-' + Date.now() + '.webp'; a.target = '_blank'; a.click(); });
+        actions.querySelector('[data-act=refine]').addEventListener('click', function () { $('user-input').value = full + ', '; $('user-input').focus(); });
+        actions.querySelector('[data-act=animate]').addEventListener('click', function () {
+          stashAsAnimateSource(out.url, full);
+          STATE.mode = 'animate';
+          Array.prototype.slice.call(document.querySelectorAll('[data-mode]')).forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-mode') === 'animate'); });
+          renderRouteLine();
+          $('user-input').value = full;
+        });
+        actions.querySelector('[data-act=attach]').addEventListener('click', function () {
+          attachToScene({ image: out.url, visualPrompt: full, sizes: STATE.size });
+        });
+        logGeneration({ kind: 'image', provider: 'horde-image', success: true, ms: ms2, prompt: full, size: STATE.size,
+          outputProof: { kind: 'image-url', url: out.url, w: img2.w, h: img2.h, worker: out.worker, model: out.model },
+          opType: 'text-to-image', resultLabel: 'real image (text-to-image, horde fallback)' });
+        if (window.LoadQueue && STATE.currentJob) {
+          window.LoadQueue.update(STATE.currentJob.jobId, { status: 'Complete', provider: 'pollinations->horde-image', startedAt: t0, endedAt: Date.now() }).catch(function () {});
+        }
+      });
+    }).catch(function (err2) {
+      stopChip2();
+      var hordeMsg = String((err2 && err2.message) || err2);
+      var timedOut2 = /timed out/i.test(hordeMsg);
+      card.classList.add('error');
+      card.querySelector('.who').innerHTML = 'Image <span class="badge fail">all free providers ' + (timedOut || timedOut2 ? 'timed out' : 'failed') + '</span>';
+      if (lastDiv) lastDiv.textContent = 'Pollinations: ' + pollMsg + '\nAI Horde: ' + hordeMsg + '\n\nReturned no file. Send is re-enabled — tap Retry, Try next provider, or Save prompt-only.';
+      var actions = buildFailureActions({
+        onRetry: function () { $('user-input').value = p; send(); },
+        onNext: function () { appendCard({ cls: 'assistant', who: 'Try next provider', badge: { cls: 'prompt', text: 'no more free routes' },
+          html: '<pre>' + esc('Pollinations and AI Horde are the two free image routes wired in MVP. Add a Hugging Face token in Image Prompt > Settings to enable HF SDXL as a third route.') + '</pre>' }); },
+        onSavePromptOnly: function () { appendCard({ cls: 'assistant', who: 'Prompt saved', badge: { cls: 'prompt', text: 'prompt-only' },
+          html: '<pre>' + esc('Saved prompt for later — paste into another tool when network is back:\n\n' + full) + '</pre>' });
+          logGeneration({ kind: 'image', provider: 'prompt-only', success: false, prompt: full, promptOnly: true }); }
+      });
       card.appendChild(actions);
-      actions.querySelector('[data-act=save]').addEventListener('click', function () {
-        var a = document.createElement('a'); a.href = url; a.download = 'load-image-' + Date.now() + '.jpg'; a.target = '_blank'; a.click();
-      });
-      actions.querySelector('[data-act=refine]').addEventListener('click', function () {
-        $('user-input').value = full + ', '; $('user-input').focus();
-      });
-      actions.querySelector('[data-act=animate]').addEventListener('click', function () {
-        STATE.mode = 'animate';
-        Array.prototype.slice.call(document.querySelectorAll('[data-mode]')).forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-mode') === 'animate'); });
-        renderRouteLine();
-        $('user-input').value = full;
-      });
-      actions.querySelector('[data-act=attach]').addEventListener('click', function () {
-        attachToScene({ image: url, visualPrompt: full, sizes: STATE.size });
-      });
-      logGeneration({ kind: 'image', provider: 'pollinations', success: true, ms: ms, prompt: full, size: STATE.size, outputProof: { kind: 'image-url', url: url, w: bw, h: bh } });
-      resolve();
-    };
-    img.onerror = function () {
-      // Pollinations failed — fall back to AI Horde anonymous image (free, no key).
-      card.querySelector('.who').innerHTML = 'Pollinations image <span class="badge fail">fail</span> &rarr; trying AI Horde';
-      var lastDiv = card.querySelectorAll('div')[card.querySelectorAll('div').length - 1];
-      lastDiv.innerHTML = '<span class="spinner"></span> Pollinations failed. Submitting AI Horde async job (anonymous, free)...';
-      logGeneration({ kind: 'image', provider: 'pollinations', success: false, prompt: full });
-      var hordeT0 = Date.now();
-      hordeImage(full, STATE.size, function (j2) {
-        if (lastDiv) lastDiv.innerHTML = '<span class="spinner"></span> AI Horde queued — wait_time=' + (j2.wait_time || '?') + 's queue=' + (j2.queue_position == null ? '?' : j2.queue_position) + ' processing=' + (j2.processing || 0);
-      }).then(function (out) {
-        // Verify the returned URL/data renders before claiming Ready.
-        var img2 = new Image();
-        img2.onload = function () {
-          var ms2 = Date.now() - hordeT0;
-          card.classList.remove('error');
-          card.querySelector('.who').innerHTML = 'AI Horde image <span class="badge ok">image ready</span>';
-          if (lastDiv) lastDiv.remove();
-          var imgEl = document.createElement('img'); imgEl.src = out.url; imgEl.alt = full;
-          card.appendChild(imgEl);
-          var meta = document.createElement('div'); meta.className = 'meta';
-          meta.textContent = 'provider: pollinations -> horde-image · worker=' + (out.worker || 'anon') + ' · model=' + (out.model || 'sd') + ' · ' + ms2 + ' ms · ' + img2.naturalWidth + 'x' + img2.naturalHeight + ' · output proof: real image loaded';
-          card.appendChild(meta);
-          var actions = document.createElement('div'); actions.className = 'actions';
-          actions.innerHTML = '<button class="small" data-act="save">Save image</button>' +
-            '<button class="small" data-act="refine">Refine</button>' +
-            '<button class="small" data-act="animate">Animate this</button>' +
-            '<button class="small primary" data-act="attach">Attach to scene</button>';
-          card.appendChild(actions);
-          actions.querySelector('[data-act=save]').addEventListener('click', function () { var a = document.createElement('a'); a.href = out.url; a.download = 'load-image-horde-' + Date.now() + '.webp'; a.target = '_blank'; a.click(); });
-          actions.querySelector('[data-act=refine]').addEventListener('click', function () { $('user-input').value = full + ', '; $('user-input').focus(); });
-          actions.querySelector('[data-act=animate]').addEventListener('click', function () {
-            STATE.mode = 'animate';
-            Array.prototype.slice.call(document.querySelectorAll('[data-mode]')).forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-mode') === 'animate'); });
-            renderRouteLine();
-            $('user-input').value = full;
-          });
-          actions.querySelector('[data-act=attach]').addEventListener('click', function () {
-            attachToScene({ image: out.url, visualPrompt: full, sizes: STATE.size });
-          });
-          logGeneration({ kind: 'image', provider: 'horde-image', success: true, ms: ms2, prompt: full, size: STATE.size, outputProof: { kind: 'image-url', url: out.url, w: img2.naturalWidth, h: img2.naturalHeight, worker: out.worker, model: out.model } });
-          resolve();
-        };
-        img2.onerror = function () {
-          // Horde returned a URL but it failed to render — final prompt-only fallback.
-          card.classList.add('error');
-          card.querySelector('.who').innerHTML = 'AI Horde image <span class="badge fail">render fail</span>';
-          if (lastDiv) lastDiv.textContent = 'AI Horde returned an image URL but it failed to render. Output stays prompt-only.';
-          logGeneration({ kind: 'image', provider: 'pollinations->horde-image', success: false, prompt: full, error: 'horde img.onerror' });
-          resolve();
-        };
-        img2.src = out.url;
-      }).catch(function (err2) {
-        card.classList.add('error');
-        card.querySelector('.who').innerHTML = 'Image <span class="badge fail">all free providers failed</span>';
-        if (lastDiv) lastDiv.textContent = 'Pollinations failed; AI Horde failed: ' + ((err2 && err2.message) || err2) + '. Output stays prompt-only.';
-        logGeneration({ kind: 'image', provider: 'pollinations->horde-image', success: false, prompt: full, error: 'horde: ' + String((err2 && err2.message) || err2) });
-        resolve();
-      });
-    };
-    img.src = url;
+      logGeneration({ kind: 'image', provider: 'pollinations->horde-image', success: false, prompt: full,
+        error: 'pollinations: ' + pollMsg + ' | horde: ' + hordeMsg, timedOut: timedOut || timedOut2 });
+      if (window.LoadQueue && STATE.currentJob) {
+        window.LoadQueue.update(STATE.currentJob.jobId, {
+          status: 'Failed', provider: 'pollinations->horde-image',
+          startedAt: t0, endedAt: Date.now(),
+          error: 'pollinations: ' + pollMsg + ' | horde: ' + hordeMsg,
+          nextRecommended: timedOut || timedOut2 ? 'wait + retry' : 'save prompt-only'
+        }).catch(function () {});
+      }
+    });
   });
 }
 
@@ -745,33 +868,40 @@ function runAnimate(p) {
   var full = buildPrompt(p);
   var motion = 'gentle subject motion, slow cinematic camera movement';
   var src = STATE.ref ? STATE.ref.dataUrl : null;
+  var srcLabel = STATE.ref ? (STATE.ref.name === 'previous-result' || /^thread-/.test(STATE.ref.name || '') ? 'animate generated image' : 'animate uploaded image') : 'no source';
   // No reference image -> stay prompt-only and show animation request +
   // progress + silent-video-result cards (output-proof rule).
   if (!src) {
     appendCard({ cls: 'assistant', who: 'Animation request', badge: { cls: 'prompt', text: 'animation request' },
-      html: '<pre>' + esc('Animation prompt prepared (no reference image yet — upload one to capture a real on-device animation):\n\nVisual: ' + full + '\nMotion: ' + motion + '\nSize: ' + STATE.size) + '</pre>' });
-    appendCard({ cls: 'assistant', who: 'Animation progress', badge: { cls: 'run', text: 'queued' },
-      html: '<pre>Status: animation request queued. No real generator can run without a reference image.</pre>' });
-    appendCard({ cls: 'assistant', who: 'Video result', badge: { cls: 'prompt', text: 'silent video' },
-      html: '<pre>No real video produced. Output proof rule: a video card never claims success unless a real playable file/blob/URL is produced.</pre>' +
+      html: '<pre>' + esc('Animation prompt prepared. No reference image yet — upload one (Reference image input above) or tap "Animate this" on a previous result.\n\nVisual: ' + full + '\nMotion: ' + motion + '\nSize: ' + STATE.size + '\nOp: prompt-only motion fallback') + '</pre>' });
+    appendCard({ cls: 'assistant', who: 'Video result', badge: { cls: 'prompt', text: 'prompt-only motion fallback' },
+      html: '<pre>No real video produced (no source image). Output proof rule: a video card never claims success unless a real playable file/blob/URL is produced.\n\nOp type: prompt-only motion fallback</pre>' +
             '<div class="actions"><a class="small" style="text-decoration:none;background:var(--bg3);padding:5px 10px;border-radius:8px;color:var(--fg);border:1px solid var(--border)" href="./external-video-fallback.html">Build external prompt</a></div>' });
-    logGeneration({ kind: 'animation', provider: 'prompt-only', success: false, promptOnly: true, prompt: full, motion: motion });
+    logGeneration({ kind: 'animation', provider: 'prompt-only', success: false, promptOnly: true, prompt: full, motion: motion,
+      opType: 'prompt-only-motion-fallback', resultLabel: 'prompt-only fallback (no source image)' });
     return Promise.resolve();
   }
   // Real on-device animation path: Ken-Burns canvas + MediaRecorder.
+  // Op type label distinguishes "animate uploaded image" vs "animate generated image"
+  // so the result card is honest about which source the animation used.
   appendCard({ cls: 'assistant', who: 'Animation request', badge: { cls: 'ok', text: 'animation request' },
-    html: '<pre>' + esc('On-device Ken-Burns animation:\n  Visual: ' + full + '\n  Motion: ' + motion + '\n  Size: ' + STATE.size + '\n  Source: reference image (' + STATE.ref.name + ', ' + STATE.ref.size + ' B)') + '</pre>' });
+    html: '<pre>' + esc('On-device Ken-Burns animation\n  Op:     ' + srcLabel + '\n  Visual: ' + full + '\n  Motion: ' + motion + '\n  Size:   ' + STATE.size + '\n  Source: reference image (' + STATE.ref.name + ', ' + STATE.ref.size + ' B)') + '</pre>' });
   var prog = appendCard({ cls: 'assistant', who: 'Animation progress', badge: { cls: 'run', text: 'recording' },
     html: '<pre><span class="spinner"></span> capturing 5 s WebM via canvas.captureStream() + MediaRecorder...</pre>' });
+  var animMs = (window.LoadTimeouts ? window.LoadTimeouts.byIntent('kenburns-record') : 30000);
+  var stopChip = startDeadlineCountdown(prog, animMs, 'timeout');
   var t0 = Date.now();
-  return captureKenBurns(src, 5, STATE.size).then(function (out) {
+  var capturePromise = captureKenBurns(src, 5, STATE.size);
+  if (window.LoadTimeouts) capturePromise = window.LoadTimeouts.withTimeout(capturePromise, animMs, 'on-device animation');
+  return capturePromise.then(function (out) {
+    stopChip();
     var ms = Date.now() - t0;
     prog.querySelector('.who').innerHTML = 'Animation progress <span class="badge ok">complete</span>';
     prog.querySelector('pre').textContent = 'Captured ' + out.bytes + ' B WebM (' + out.mime + ') in ' + ms + ' ms.';
     var url = URL.createObjectURL(out.blob);
-    var card = appendCard({ cls: 'assistant', who: 'Video result', badge: { cls: 'ok', text: 'video ready' },
+    var card = appendCard({ cls: 'assistant', who: 'Video result', badge: { cls: 'ok', text: 'real playable video' },
       html: '<video src="' + url + '" controls playsinline style="max-width:100%;border-radius:8px;margin-top:8px"></video>' +
-            '<div class="meta">on-device Ken-Burns · ' + out.bytes + ' B · ' + out.mime + ' · ' + ms + ' ms · output proof: real WebM Blob</div>' +
+            '<div class="meta">provider: on-device Ken-Burns · op: ' + esc(srcLabel) + ' · ' + out.bytes + ' B · ' + out.mime + ' · ' + ms + ' ms · output proof: real WebM Blob (size ' + out.bytes + ' B)</div>' +
             '<div class="actions"></div>' });
     var actions = card.querySelector('.actions');
     var btnSave = document.createElement('button'); btnSave.className = 'small'; btnSave.textContent = 'Save video';
@@ -781,17 +911,45 @@ function runAnimate(p) {
     btnAttach.addEventListener('click', function () {
       attachToScene({ image: src, video: url, visualPrompt: full, motionPrompt: motion, sizes: STATE.size,
         videoBlob: out.blob,
-        videoOutputProof: { kind: 'webm-blob', bytes: out.bytes, mime: out.mime, w: out.w, h: out.h, source: 'on-device Ken-Burns canvas + MediaRecorder' } });
+        videoOutputProof: { kind: 'webm-blob', bytes: out.bytes, mime: out.mime, w: out.w, h: out.h, source: 'on-device Ken-Burns canvas + MediaRecorder', opType: srcLabel } });
     });
     actions.appendChild(btnAttach);
-    logGeneration({ kind: 'animation', provider: 'on-device-kenburns', success: true, ms: ms, prompt: full, motion: motion, outputProof: { kind: 'webm-blob', bytes: out.bytes, mime: out.mime, w: out.w, h: out.h } });
+    logGeneration({ kind: 'animation', provider: 'on-device-kenburns', success: true, ms: ms, prompt: full, motion: motion,
+      outputProof: { kind: 'webm-blob', bytes: out.bytes, mime: out.mime, w: out.w, h: out.h },
+      opType: srcLabel, resultLabel: 'real playable video (' + srcLabel + ')' });
+    if (window.LoadQueue && STATE.currentJob) {
+      window.LoadQueue.update(STATE.currentJob.jobId, { status: 'Complete', provider: 'on-device-kenburns', startedAt: t0, endedAt: Date.now() }).catch(function () {});
+    }
   }).catch(function (err) {
+    stopChip();
+    var msg = String((err && err.message) || err);
+    var timedOut = /timed out/i.test(msg);
     prog.classList.add('error');
-    prog.querySelector('.who').innerHTML = 'Animation progress <span class="badge fail">failed</span>';
-    prog.querySelector('pre').textContent = 'On-device capture failed: ' + ((err && err.message) || err);
-    appendCard({ cls: 'assistant', who: 'Video result', badge: { cls: 'prompt', text: 'silent video' },
-      html: '<pre>No video produced (capture path failed). Output proof rule keeps this prompt-only.</pre>' });
-    logGeneration({ kind: 'animation', provider: 'on-device-kenburns', success: false, error: String((err && err.message) || err), prompt: full });
+    prog.querySelector('.who').innerHTML = 'Animation progress <span class="badge fail">' + (timedOut ? 'timed out' : 'failed') + '</span>';
+    prog.querySelector('pre').textContent = 'On-device capture ' + (timedOut ? 'timed out' : 'failed') + ': ' + msg + '\n\nThe uploaded image is preserved (Reference image input still set above). The Send button is re-enabled. Use the buttons below to retry, fall back to a prompt-only result, or open the external prompt builder.';
+    var fail = appendCard({ cls: 'assistant', who: 'Video result', badge: { cls: 'fail', text: 'no playable video' },
+      html: '<pre>' + esc('Animation route failed.\n  Op:       ' + srcLabel + '\n  Provider: on-device Ken-Burns (canvas.captureStream + MediaRecorder)\n  Error:    ' + msg + '\n  Status:   no playable video produced; uploaded image kept.') + '</pre>' });
+    var failActions = buildFailureActions({
+      onRetry: function () { send(); },
+      onNext: function () { appendCard({ cls: 'assistant', who: 'Try next provider', badge: { cls: 'prompt', text: 'no other free animate route' },
+        html: '<pre>' + esc('On-device Ken-Burns is the only free animation route in MVP. iPad Safari sometimes blocks MediaRecorder until a user-gesture unlocks audio output. Tap the screen once and Retry. If still blocked, use Save prompt-only to capture the prompt for an external animator.') + '</pre>' }); },
+      onSavePromptOnly: function () { appendCard({ cls: 'assistant', who: 'Prompt saved', badge: { cls: 'prompt', text: 'prompt-only motion fallback' },
+        html: '<pre>' + esc('Prompt saved for later — paste into another tool:\n\nVisual: ' + full + '\nMotion: ' + motion + '\nOp:     ' + srcLabel) + '</pre>' });
+        logGeneration({ kind: 'animation', provider: 'prompt-only', success: false, prompt: full, motion: motion, promptOnly: true,
+          opType: 'prompt-only-motion-fallback' }); }
+    });
+    var extLink = document.createElement('a'); extLink.className = 'small'; extLink.style.cssText = 'text-decoration:none;background:var(--bg3);padding:5px 10px;border-radius:8px;color:var(--fg);border:1px solid var(--border)'; extLink.href = './external-video-fallback.html'; extLink.textContent = 'Open external prompt builder';
+    failActions.appendChild(extLink);
+    fail.appendChild(failActions);
+    logGeneration({ kind: 'animation', provider: 'on-device-kenburns', success: false, error: msg, prompt: full, motion: motion,
+      opType: srcLabel, resultLabel: 'failed animation route', timedOut: timedOut });
+    if (window.LoadQueue && STATE.currentJob) {
+      window.LoadQueue.update(STATE.currentJob.jobId, {
+        status: 'Failed', provider: 'on-device-kenburns',
+        startedAt: t0, endedAt: Date.now(), error: msg,
+        nextRecommended: timedOut ? 'tap screen + retry' : 'save prompt-only'
+      }).catch(function () {});
+    }
   });
 }
 

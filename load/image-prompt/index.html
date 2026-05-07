@@ -1396,13 +1396,27 @@ function send(){
       cta: 'Got it'
     });
   }
-  pipeline(augmentedPrompt, snap, tid);
+  pipeline(augmentedPrompt, snap, tid, p);
+}
+
+/* Semantic-edit detector — when the user's RAW prompt asks for a real
+   pixel-level change (add / remove / replace / change object, etc.),
+   we must NOT silently apply a local Jimp filter and call it an
+   "edit." Local filters (rotate / blur / brightness / grayscale) are
+   not edits. Bug fix 2026-05-08: previous build matched LOCAL_OPS
+   against the augmented Scene-Lock template and could trigger the
+   brightness path off the word "lighter" / "brighter" inside a
+   preserved scene description. */
+const SEMANTIC_EDIT_VERBS = /\b(add|adds|adding|put|puts|putting|place|places|placing|insert|inserts|inserting|include|includes|including|remove|removes|removing|delete|deletes|deleting|erase|erases|erasing|replace|replaces|replacing|swap|swaps|swapping|change|changes|changing|transform|transforms|transforming|edit|edits|editing|modify|modifies|modifying|retouch|fix(?!ed)|generate|generates|generating|render|renders|rendering|draw|draws|drawing|paint|paints|painting|illustrate|illustrates|design|stylize|convert|create|creates|creating)\b/i;
+function hasSemanticEditIntent(rawPrompt) {
+  if (!rawPrompt) return false;
+  return SEMANTIC_EDIT_VERBS.test(rawPrompt);
 }
 
 /* ────────────────────────────────────────
    PIPELINE WITH FULL AUTO-FALLBACK
 ──────────────────────────────────────── */
-async function pipeline(prompt, imgData, tid) {
+async function pipeline(prompt, imgData, tid, rawPrompt) {
   let usedProvider = C.provider;
   let fallbackNote = null;
   let reply = '';
@@ -1458,14 +1472,22 @@ async function pipeline(prompt, imgData, tid) {
        gen for chitchat / questions / thanks. */
     let resultUrl = null;
     let imageProvUsed = null;
+    let resultOpType = null;          // 'real-edit' | 'local-filter' | 'text-to-image'
+    let resultIsRealEdit = false;
     let exportPromptText = null;
-    // Local-first router — try Jimp for trivial edits before any AI
-    // call. If matched + succeeded, skip the AI image path entirely.
-    if (imgData && prompt) {
-      const local = await tryLocalOp(prompt, imgData);
+    // Local-first router — try Jimp for trivial filter ops only.
+    // Match against the user's RAW prompt (not the augmented Scene-Lock
+    // template) so words like "lighter" / "brighter" inside a
+    // preserved scene description never trigger a brightness filter.
+    // Block entirely when the prompt has a semantic edit verb (add /
+    // remove / change / replace ...) — those need a real i2i provider.
+    if (imgData && rawPrompt && !hasSemanticEditIntent(rawPrompt)) {
+      const local = await tryLocalOp(rawPrompt, imgData);
       if (local) {
         resultUrl = local.url;
-        imageProvUsed = 'Local (' + local.op + ')';
+        imageProvUsed = 'Local filter (' + local.op + ')';
+        resultOpType = 'local-filter';
+        resultIsRealEdit = false;
       }
     }
     // Coerce reply to string defensively — some Puter responses return
@@ -1518,13 +1540,21 @@ async function pipeline(prompt, imgData, tid) {
         );
         resultUrl = result.url;
         imageProvUsed = result.providerName;
+        // Real edit only counts when the provider actually supports
+        // image input (img2img / inpainting). Text-to-image fallbacks
+        // are tagged differently so the result card never claims a
+        // "real edit" happened when the chain regenerated the scene.
+        const usedProvDef = IMAGE_PROVIDERS.find(p=>p.id===result.providerId) || {};
+        const usedI2I = usedProvDef.supportsImg2Img === true || usedProvDef.supportsInpainting === true;
+        resultIsRealEdit = !!imgData && usedI2I;
+        resultOpType = resultIsRealEdit ? 'real-edit' : 'text-to-image';
         if (result.skipped && result.skipped.length) {
           fallbackNote = (fallbackNote ? fallbackNote + ' • ' : '') + result.skipped.join(' • ');
         }
         // Debug line per build plan: taskType | provider | canEditImage | timedOut | outputChanged
         console.log('[Image] task=' + (result.task||'?') +
           ' | provider=' + result.providerName +
-          ' | canEditImage=' + ((IMAGE_PROVIDERS.find(p=>p.id===result.providerId)||{}).supportsImg2Img===true) +
+          ' | canEditImage=' + usedI2I +
           ' | timedOut=false | outputChanged=true');
         // Audit receipt
         recordReceipt({
@@ -1538,6 +1568,16 @@ async function pipeline(prompt, imgData, tid) {
           timedOut: false
         });
       } catch (e) {
+        // Bug fix 2026-05-08: when the user asked for a real semantic
+        // edit (e.g. "Add a toy ball") and every real i2i provider
+        // failed, never silently keep a Local-filter result and call
+        // it the answer. Clear out any brightness/filter result, drop
+        // the next-turn promotion, and surface an honest failure.
+        if (resultIsRealEdit === false && resultOpType === 'local-filter' && hasSemanticEditIntent(rawPrompt)) {
+          resultUrl = null;
+          imageProvUsed = null;
+          resultOpType = 'failed-edit';
+        }
         if (e && e.message === 'NO_EDIT_PROVIDER') {
           exportPromptText = buildSDExportPrompt(cleanPrompt, lastSDPrompt);
         } else if (e && e.message === 'MANUAL_MASK_NEEDED') {
@@ -1583,7 +1623,12 @@ async function pipeline(prompt, imgData, tid) {
     const chips = chipsMatch
       ? chipsMatch[1].split('|').map(s => s.trim().replace(/^["'`]|["'`]$/g,'')).filter(Boolean).slice(0,3)
       : [];
-    addAIMsg(finalText, resultUrl, providerBadge, fallbackNote, chips);
+    addAIMsg(finalText, resultUrl, providerBadge, fallbackNote, chips, {
+      opType: resultOpType || (resultUrl ? 'text-to-image' : (exportPromptText ? 'failed-edit' : 'chat')),
+      isRealEdit: resultIsRealEdit,
+      hadSourceImage: !!imgData,
+      providerId: usedProvider
+    });
     history.push({role:'assistant',content:finalText});
     // Phase 2: result becomes the next-turn input image automatically.
     // Also stash the SD_PROMPT used so the next turn can reference it
@@ -1591,7 +1636,14 @@ async function pipeline(prompt, imgData, tid) {
     if (resultUrl) {
       if (sdMatch) lastSDPrompt = sdMatch[1].trim();
       else if (prompt) lastSDPrompt = prompt;
-      setCurrentImageFromUrl(resultUrl, 'Previous result — keep editing');
+      // Local filters (rotate / blur / brightness / grayscale) are
+      // legitimate for filter-only intents (e.g. "rotate 90"). They
+      // become the next-turn input image so the user can keep
+      // editing. Real semantic edits ("Add a toy ball") are blocked
+      // earlier from local-op routing entirely, so this branch is
+      // safe — the bad case ("local filter as semantic edit") never
+      // reaches here.
+      setCurrentImageFromUrl(resultUrl, resultOpType === 'local-filter' ? 'Filtered (' + (imageProvUsed||'local') + ') — keep editing' : 'Previous result — keep editing');
       // Celebrate first true-edit (Gemini Image used with image attached)
       if (imageProvUsed === 'Gemini Image' && imgData) {
         showFirstUseHint('fu_gemini_edit_v1', {
@@ -2956,12 +3008,36 @@ function addUserMsg(text,imgData){
   a.appendChild(el);scrollBot();
 }
 
-function addAIMsg(text, imgUrl, provider, fallbackNote, chips) {
+function addAIMsg(text, imgUrl, provider, fallbackNote, chips, meta) {
   const a=document.getElementById('chat-area');
   const el=document.createElement('div');el.className='msg ai';
   const names={puter:'Puter.js',gemini:'Google Gemini',openrouter:'OpenRouter',cerebras:'Cerebras',anthropic:'Claude',hfchat:'HF Mistral'};
   const noteHtml = fallbackNote
     ? `<div class="fallback-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:-2px"><polygon points="13 2 4 14 12 14 11 22 20 10 12 10"/></svg> ${esc(fallbackNote)}</div>` : '';
+  // Honest op-type label per build plan 2026-05-08:
+  // every result card surfaces operation type + output proof status
+  // so a local filter is never mistaken for a real semantic edit.
+  const opType = (meta && meta.opType) || (imgUrl ? 'text-to-image' : 'chat');
+  const opLabels = {
+    'real-edit':       { label: 'real edit (image-to-image)',   tone: 'ok'   },
+    'text-to-image':   { label: 'text-to-image (new render)',   tone: 'info' },
+    'local-filter':    { label: 'local filter (NOT a real edit)', tone: 'warn' },
+    'failed-edit':     { label: 'edit failed — previous image kept', tone: 'err'  },
+    'chat':            { label: 'chat reply',                   tone: 'mute' }
+  };
+  const opCfg = opLabels[opType] || opLabels.chat;
+  const opBadgeHtml = `<div class="op-badge op-${opType}" data-op="${opType}" style="display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.04em;padding:3px 8px;border-radius:6px;text-transform:uppercase;margin-right:6px;margin-top:6px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1)">${esc(opCfg.label)}</div>`;
+  // Output proof line — verifiable facts only, no claims of success
+  // beyond what we can demonstrate.
+  let proofLine = '';
+  if (imgUrl) {
+    const blobLike = typeof imgUrl === 'string' && imgUrl.indexOf('blob:') === 0;
+    const dataLike = typeof imgUrl === 'string' && imgUrl.indexOf('data:') === 0;
+    proofLine = `output proof: ${blobLike ? 'real Blob URL' : (dataLike ? 'data URL' : 'remote URL')} · render verified on <img> load`;
+  } else if (opType === 'failed-edit') {
+    proofLine = 'output proof: no image produced; previous image preserved';
+  }
+  const proofHtml = proofLine ? `<div class="proof-line" style="font-size:10.5px;color:var(--ink-mid);margin-top:4px;font-family:ui-monospace,Menlo,monospace">${esc(proofLine)}</div>` : '';
   // Strip CHIPS: line from the displayed text — chips render as buttons below
   const cleanText = text.replace(/CHIPS:[\s\S]*$/i, '').trim();
   // Action buttons row — Save to Library (Load) + ⬇ Download
@@ -2980,7 +3056,9 @@ function addAIMsg(text, imgUrl, provider, fallbackNote, chips) {
     <div class="bubble">${imgUrl?`<img class="bubble-img" src="${imgUrl}" alt="result">`:''} ${esc(cleanText)}</div>
     ${actionsHtml}
     ${chipsHtml}
+    ${opBadgeHtml}
     <div class="model-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;vertical-align:-1px"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/></svg> ${esc(names[provider]||provider)}</div>
+    ${proofHtml}
   </div>`;
   a.appendChild(el);scrollBot();
   // Wire chip clicks: fill prompt input + focus
