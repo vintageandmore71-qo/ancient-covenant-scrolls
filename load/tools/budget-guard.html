@@ -88,8 +88,11 @@ button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
   <div class="test-result" id="test-result" style="margin-top:10px">tap Run guard test</div>
 </div>
 
-<h3 style="font-size:13px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 10px">Paid providers in registry</h3>
+<h3 style="font-size:13px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 10px">Paid providers (real money risk — off by default)</h3>
 <div class="list" id="paid-list"></div>
+
+<h3 style="font-size:13px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 10px">License-review-required (free tier — verify each asset's licence before commercial use)</h3>
+<div class="list" id="lrr-list"></div>
 
 <h3 style="font-size:13px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 10px">Recent paid-use log</h3>
 <div class="use" id="use-log"></div>
@@ -121,18 +124,33 @@ function paintPolicy() {
 function paintPaidList() {
   var rows = B.listPaid();
   if (!rows.length) {
-    $('paid-list').innerHTML = '<div class="empty">No paid providers in the registry — great.</div>';
-    return;
+    $('paid-list').innerHTML = '<div class="empty">No paid providers in the registry.</div>';
+  } else {
+    var html = '<div class="row head"><div>Provider</div><div>Notes</div><div class="cell">Class</div></div>';
+    rows.forEach(function (p) {
+      html += '<div class="row">' +
+        '<div><div style="font-weight:700">' + esc(p.providerName) + '</div><div style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:var(--mute)">' + esc(p.providerId) + '</div></div>' +
+        '<div style="font-size:12px;color:var(--mute)">' + esc(p.notes || '-') + '</div>' +
+        '<div class="cell paid">PAID</div>' +
+      '</div>';
+    });
+    $('paid-list').innerHTML = html;
   }
-  var html = '<div class="row head"><div>Provider</div><div>Notes</div><div class="cell">Type</div></div>';
-  rows.forEach(function (p) {
-    html += '<div class="row">' +
-      '<div><div style="font-weight:700">' + esc(p.providerName) + '</div><div style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:var(--mute)">' + esc(p.providerId) + '</div></div>' +
-      '<div style="font-size:12px;color:var(--mute)">' + esc(p.notes || '-') + '</div>' +
-      '<div class="cell paid">PAID</div>' +
-    '</div>';
-  });
-  $('paid-list').innerHTML = html;
+  // License-review-required list (free tier with key)
+  var lrr = (B.listLicenseReviewRequired ? B.listLicenseReviewRequired() : []);
+  if (!lrr.length) {
+    $('lrr-list').innerHTML = '<div class="empty">No license-review-required providers in the registry.</div>';
+  } else {
+    var html2 = '<div class="row head"><div>Provider</div><div>Notes</div><div class="cell">Class</div></div>';
+    lrr.forEach(function (p) {
+      html2 += '<div class="row">' +
+        '<div><div style="font-weight:700">' + esc(p.providerName) + '</div><div style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:var(--mute)">' + esc(p.providerId) + '</div></div>' +
+        '<div style="font-size:12px;color:var(--mute)">' + esc(p.notes || '-') + '</div>' +
+        '<div class="cell" style="background:rgba(96,165,250,.18);color:var(--info);border-color:rgba(96,165,250,.4)">LICENCE REVIEW</div>' +
+      '</div>';
+    });
+    $('lrr-list').innerHTML = html2;
+  }
 }
 
 function paintUseLog() {
@@ -169,7 +187,21 @@ function refresh() { paintPolicy(); paintPaidList(); paintSummary(); paintUseLog
 B.init().then(refresh);
 B.subscribe(function () { paintPolicy(); paintSummary(); });
 
-$('allow-paid').addEventListener('change', function () { B.setAllowPaid(this.checked).then(refresh); });
+$('allow-paid').addEventListener('change', function () {
+  // Per 5.7 feedback: user-facing warning before allowPaid can be turned on,
+  // and a monthly cap must be set first.
+  if (this.checked) {
+    var cap = +$('cap').value || B.getState().monthlyCapUsd;
+    if (cap <= 0) {
+      alert('Set a monthly USD cap before enabling paid providers. Cap is required to prevent runaway charges.');
+      this.checked = false;
+      return;
+    }
+    var ok = window.confirm('Allow paid providers?\n\nThis enables cloud-optional providers that may charge money (Imagen, DeepAI, SiliconFlow). Calls are still blocked when adding the estimated cost would push this month past the cap.\n\nFree-tier providers (Pollinations, Hugging Face, AI Horde, Cloudflare, Together, Gemini, Groq, OpenRouter free models, Freesound, Pixabay) are NOT affected by this toggle and stay on.\n\nProceed?');
+    if (!ok) { this.checked = false; return; }
+  }
+  B.setAllowPaid(this.checked).then(refresh);
+});
 $('save-cap').addEventListener('click', function () { B.setMonthlyCapUsd($('cap').value).then(refresh); });
 
 $('run-test').addEventListener('click', function () {

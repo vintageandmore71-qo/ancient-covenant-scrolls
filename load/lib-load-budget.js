@@ -47,6 +47,27 @@ function listPaid() {
   return R.list().filter(function (p) { return p.providerType === 'cloud-optional' && !p.capabilities.free; });
 }
 
+// Three-bucket classification (per 5.7 user feedback):
+//   'free'                       — built-in / free-api / local / prompt-only / user-imported,
+//                                  OR cloud-optional with free flag and no requiresApiKey
+//   'license-review-required'    — cloud-optional with free flag AND requiresApiKey
+//                                  (free tier, but the user must verify the licence on each
+//                                  imported / generated asset before commercial use)
+//   'paid'                       — cloud-optional WITHOUT free flag (real money risk)
+function classification(providerId) {
+  var R = getRegistry(); if (!R) return 'unknown';
+  var p = R.byId(providerId); if (!p) return 'unknown';
+  if (p.providerType !== 'cloud-optional') return 'free';
+  if (!p.capabilities.free) return 'paid';
+  if (p.capabilities.requiresApiKey) return 'license-review-required';
+  return 'free';
+}
+
+function listLicenseReviewRequired() {
+  var R = getRegistry(); if (!R) return [];
+  return R.list().filter(function (p) { return classification(p.providerId) === 'license-review-required'; });
+}
+
 function notify() {
   var snap = { allowPaid: STATE.allowPaid, monthlyCapUsd: STATE.monthlyCapUsd };
   SUBS.forEach(function (fn) { try { fn(snap); } catch (_) {} });
@@ -127,8 +148,9 @@ function checkPaidUse(providerId, costUsd) {
     return Promise.resolve({ allowed: false, reason: 'allowPaid is off (default) — paid providers blocked' });
   }
   var est = Math.max(0, +costUsd || 0);
+  // Per 5.7 feedback #6: a monthly cap is required before any paid provider can run.
   if (STATE.monthlyCapUsd <= 0) {
-    return Promise.resolve({ allowed: true, reason: 'no monthly cap set', currentTotal: 0, projectedTotal: est });
+    return Promise.resolve({ allowed: false, reason: 'monthly cap required — set a monthly USD cap before any paid provider can run' });
   }
   return getMonthlyTotalUsd().then(function (total) {
     var projected = total + est;
@@ -152,6 +174,8 @@ if (typeof window !== 'undefined') {
     init: init,
     isPaid: isPaid,
     listPaid: listPaid,
+    listLicenseReviewRequired: listLicenseReviewRequired,
+    classification: classification,
     setAllowPaid: setAllowPaid,
     setMonthlyCapUsd: setMonthlyCapUsd,
     recordUse: recordUse,
