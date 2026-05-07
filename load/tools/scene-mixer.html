@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Web Audio Scene Mixer — Load</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<script src="../lib-load-db.js"></script>
+<script src="../lib-load-mixer.js"></script>
+<script src="../../branding.js" data-brand-skip></script>
+<style>
+:root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--info:#60a5fa;--border:#2a2a40}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;font-size:14px}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#150a28 0,#0a0514 100%);border-bottom:1px solid var(--border)}
+header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)}
+header h1{margin:0;font-size:16px;font-weight:800;flex:1}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 18px 80px}
+.build-marker{background:#facc15;color:#0a0a14;font-weight:900;font-size:13px;letter-spacing:.04em;padding:10px 14px;border-radius:10px;margin:0 0 14px;font-family:ui-monospace,Menlo,monospace;text-align:center}
+.intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin:0 0 14px;font-size:12.5px;color:var(--mute);line-height:1.55}
+.intro strong{color:var(--fg)}
+.section{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px;margin:0 0 14px}
+.section h3{margin:0 0 10px;font-size:13px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.05em}
+button{font:inherit;padding:9px 14px;border-radius:8px;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-weight:700;font-size:13px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.danger{background:rgba(255,110,110,.18);color:var(--err);border-color:rgba(255,110,110,.4)}
+button.small{font-size:11.5px;padding:5px 10px}
+select,input[type=text]{background:#0a0e18;border:1px solid var(--border);border-radius:8px;color:var(--fg);font:inherit;font-size:14px;padding:8px 10px}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.lanes{display:grid;grid-template-columns:1fr;gap:8px}
+.lane{display:grid;grid-template-columns:90px 1fr 80px 90px 80px;gap:10px;padding:10px 12px;background:#0a0e18;border:1px solid var(--border);border-radius:10px;align-items:center;font-size:12.5px}
+.lane .lane-name{font-family:ui-monospace,Menlo,monospace;font-weight:800;color:var(--accent);text-transform:uppercase;font-size:11px;letter-spacing:.05em}
+.lane .layer-name{font-size:13px;font-weight:700}
+.lane .layer-meta{font-size:11px;color:var(--mute);font-family:ui-monospace,Menlo,monospace}
+.lane input[type=range]{width:100%}
+.cell{font-size:11px;font-weight:800;text-align:center;padding:5px 8px;border-radius:6px;background:#0a0e18;color:var(--mute);border:1px solid var(--border)}
+.cell.ok{background:rgba(74,222,128,.18);color:var(--ok);border-color:rgba(74,222,128,.4)}
+.cell.fail{background:rgba(255,110,110,.18);color:var(--err);border-color:rgba(255,110,110,.4)}
+.transport{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.video-host video{max-width:100%;border-radius:8px;background:#000}
+.empty{padding:14px;text-align:center;color:var(--mute);font-style:italic;font-size:12.5px}
+.status{font-size:12px;color:var(--mute);font-family:ui-monospace,Menlo,monospace;margin-left:8px}
+.proof{background:#0a0e18;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:var(--fg);white-space:pre-wrap;margin-top:8px;display:none}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="./handoff-tools.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Handoff Tools
+  </a>
+  <h1>Web Audio Scene Mixer</h1>
+</header>
+<div class="wrap">
+<div class="build-marker">BUILD MARKER: SCENE-MIXER-v1-2026-05-07-v17g47</div>
+<div class="intro">
+  <strong>Reliability addendum #11.</strong> Layered scene preview before muxing. Loads the scene's video Blob (silent) plus its audio Blob from <code>LoadDB.audio_assets</code>, plus any extra layers you add. Six spec lanes: <em>video, narration, ambience, SFX, music, voice</em>. Real Web Audio graph (AudioContext → BufferSource → Gain → destination). <strong>"Started" is only claimed after every loaded layer's BufferSource fires <code>start()</code> without throwing</strong> — count is shown in the proof block.
+</div>
+
+<div class="section">
+  <h3>1. Pick a scene</h3>
+  <div class="controls">
+    <select id="scene-pick" style="flex:1"><option value="">Loading scenes…</option></select>
+    <button id="load-scene">Load layers</button>
+  </div>
+  <div class="status" id="load-status"></div>
+</div>
+
+<div class="section">
+  <h3>2. Add a layer manually (optional)</h3>
+  <div class="controls">
+    <input type="file" id="file-input" accept="audio/*" style="font-size:12px;color:var(--mute);background:transparent">
+    <select id="lane-pick">
+      <option value="SFX">SFX</option>
+      <option value="ambience">ambience</option>
+      <option value="music">music</option>
+      <option value="voice">voice</option>
+      <option value="narration">narration</option>
+    </select>
+    <button id="add-file">Add file</button>
+  </div>
+</div>
+
+<div class="section">
+  <h3>3. Mixer</h3>
+  <div class="lanes" id="lanes"></div>
+  <div class="transport" style="margin-top:14px">
+    <button class="primary" id="play">Play all</button>
+    <button class="danger" id="stop">Stop</button>
+    <span id="elapsed" class="status">0.0 s</span>
+    <span id="proof-status" class="status"></span>
+  </div>
+  <pre class="proof" id="proof"></pre>
+</div>
+
+<div class="section video-host">
+  <h3>Video preview (silent — audio plays via mixer)</h3>
+  <div id="video-host"><div class="empty">Pick a scene with a video to preview here.</div></div>
+</div>
+</div>
+
+<script>
+'use strict';
+var $ = function (id) { return document.getElementById(id); };
+function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+if (!window.LoadMixer || !window.LoadDB) {
+  $('lanes').innerHTML = '<p style="color:var(--err);padding:20px">Required libs missing.</p>';
+} else {
+
+var DB = window.LoadDB;
+var mixer = window.LoadMixer.create();
+var elapsedTimer = null;
+var lastPlayProof = null;
+
+function populateScenes() {
+  return DB.getAll('scenes', 500).then(function (rows) {
+    var scenes = rows.map(function (r) { return r.value; }).filter(function (v) { return v && v.sceneId; });
+    var sel = $('scene-pick'); sel.innerHTML = '';
+    if (!scenes.length) { sel.innerHTML = '<option>No scenes found in Project Memory</option>'; return; }
+    sel.appendChild(new Option('— pick a scene —', ''));
+    scenes.forEach(function (sc) { sel.appendChild(new Option(sc.sceneId + ' (thread=' + (sc.threadId || '-') + ')', sc.sceneId)); });
+  }).catch(function (e) { $('scene-pick').innerHTML = '<option>error: ' + esc(e.message) + '</option>'; });
+}
+populateScenes();
+
+function paintLanes() {
+  var rows = mixer.getLayers();
+  if (!rows.length) {
+    $('lanes').innerHTML = '<div class="empty">No layers yet. Pick a scene and tap <em>Load layers</em>, or add a file.</div>';
+    return;
+  }
+  var html = '';
+  rows.forEach(function (l) {
+    html += '<div class="lane">' +
+      '<div class="lane-name">' + esc(l.lane) + '</div>' +
+      '<div><div class="layer-name">' + esc(l.name) + '</div>' +
+        '<div class="layer-meta">id=' + esc(l.id) + (l.hasBuffer ? ' · ' + l.durationSec.toFixed(2) + ' s' : ' · NO BUFFER') + (l.error ? ' · err: ' + esc(l.error) : '') + '</div></div>' +
+      '<div><input type="range" min="0" max="1" step="0.01" value="' + l.volume + '" data-vol="' + esc(l.id) + '"></div>' +
+      '<div><label style="font-size:11px;display:flex;align-items:center;gap:4px"><input type="checkbox" data-mute="' + esc(l.id) + '" ' + (l.muted ? 'checked' : '') + '> mute</label></div>' +
+      '<div class="cell ' + (l.hasBuffer ? 'ok' : 'fail') + '">' + (l.hasBuffer ? 'ready' : (l.error ? 'fail' : 'loading')) + '</div>' +
+    '</div>';
+  });
+  $('lanes').innerHTML = html;
+  Array.prototype.slice.call(document.querySelectorAll('[data-vol]')).forEach(function (el) { el.addEventListener('input', function () { mixer.setVolume(el.getAttribute('data-vol'), +el.value); }); });
+  Array.prototype.slice.call(document.querySelectorAll('[data-mute]')).forEach(function (el) { el.addEventListener('change', function () { mixer.setMuted(el.getAttribute('data-mute'), el.checked); }); });
+}
+
+$('load-scene').addEventListener('click', function () {
+  var sid = $('scene-pick').value; if (!sid) return;
+  $('load-status').textContent = 'loading…';
+  // Tear down any prior video
+  $('video-host').innerHTML = '<div class="empty">loading…</div>';
+  // Reset mixer
+  mixer.stop(); mixer.getLayers().forEach(function (l) { mixer.removeLayer(l.id); });
+  // Pull scene + assets
+  Promise.all([DB.get('scenes', sid), DB.get('audio_assets', sid + '_audio'), DB.get('video_assets', sid + '_video')]).then(function (rows) {
+    var scene = rows[0]; var audio = rows[1]; var video = rows[2];
+    if (audio && audio.blob) {
+      mixer.addLayer({ name: scene && scene.audioPrompt ? scene.audioPrompt.slice(0, 60) : 'scene audio', lane: 'SFX', blob: audio.blob });
+    }
+    if (video && video.blob) {
+      var url = URL.createObjectURL(video.blob);
+      $('video-host').innerHTML = '<video id="scene-video" src="' + esc(url) + '" controls playsinline muted style="width:100%"></video><div class="status" style="margin-top:6px">Video plays muted — audio comes from the mixer below.</div>';
+    } else {
+      $('video-host').innerHTML = '<div class="empty">No video Blob attached to this scene.</div>';
+    }
+    return mixer.loadAll();
+  }).then(function () {
+    paintLanes();
+    $('load-status').textContent = 'loaded.';
+  }).catch(function (e) { $('load-status').textContent = 'error: ' + ((e && e.message) || e); });
+});
+
+$('add-file').addEventListener('click', function () {
+  var f = $('file-input').files && $('file-input').files[0]; if (!f) return;
+  mixer.addLayer({ name: f.name, lane: $('lane-pick').value, blob: f });
+  mixer.loadAll().then(paintLanes);
+});
+
+$('play').addEventListener('click', function () {
+  // Output proof: only claim Started when at least one BufferSource actually started.
+  var proof = mixer.play();
+  lastPlayProof = proof;
+  $('proof').style.display = 'block';
+  $('proof').textContent = JSON.stringify(proof, null, 2);
+  if (proof.lanesStarted > 0) {
+    $('proof-status').textContent = 'started ' + proof.lanesStarted + ' lane(s) · ' + new Date().toLocaleTimeString();
+  } else {
+    $('proof-status').textContent = 'NO lanes started — add and load a layer first';
+  }
+  // Try to start the silent video preview in lockstep.
+  var v = document.getElementById('scene-video');
+  if (v) try { v.currentTime = 0; v.play(); } catch (_) {}
+  if (elapsedTimer) clearInterval(elapsedTimer);
+  elapsedTimer = setInterval(function () { $('elapsed').textContent = mixer.elapsed().toFixed(1) + ' s'; }, 200);
+});
+$('stop').addEventListener('click', function () {
+  mixer.stop();
+  if (elapsedTimer) { clearInterval(elapsedTimer); elapsedTimer = null; }
+  $('elapsed').textContent = '0.0 s';
+  $('proof-status').textContent = 'stopped';
+  var v = document.getElementById('scene-video'); if (v) try { v.pause(); } catch (_) {}
+});
+
+}
+</script>
+</body>
+</html>
