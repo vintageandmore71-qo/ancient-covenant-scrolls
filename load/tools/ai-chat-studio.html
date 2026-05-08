@@ -139,7 +139,7 @@ button.small{font-size:11.5px;padding:5px 10px}
   <summary style="cursor:pointer;padding:10px 14px;font-weight:800;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)">Advanced Details / Developer Diagnostics</summary>
   <div style="padding:0 14px 14px">
 
-    <div class="build-marker" style="margin-top:10px">BUILD MARKER: CHAT-STUDIO-v4.7-2026-05-08-v17g73 (text-to-image-fallback-button)</div>
+    <div class="build-marker" style="margin-top:10px">BUILD MARKER: CHAT-STUDIO-v4.8-2026-05-08-v17g74 (configure-edit-provider + animal-quality-gate)</div>
     <div class="intro">
       <strong>X-AI-CHAT-STUDIO Phase 3.</strong> Routed chat with inline real-output cards. Free / open-source / local-first only. <em>Chat</em>: Pollinations text → AI Horde fallback. <em>Text-to-image &amp; Image-to-image</em>: shared 17-provider chain via lib-load-image-providers.js (Local SD · Pollinations Flux · Pollinations · Pollinations Turbo · AI Horde · AI Horde SDXL · Hugging Face · Cloudflare AI · Cloudflare SDXL-Lightning · HF SDXL-Turbo · Together · Gemini Image · DeepAI · SiliconFlow · Real-ESRGAN · GFPGAN · CodeFormer). <em>Animate</em>: canvas Ken-Burns + MediaRecorder real WebM Blob. <em>Audio</em>: OfflineAudioContext WAV + Browser TTS + import / record / public-audio connectors / procedural ambience. Output proof: only marked ready when a real playable Blob exists; otherwise the card stays prompt-only honestly.
     </div>
@@ -1286,6 +1286,56 @@ function runEditWithPreservation(p) {
         html: '<pre>' + esc('Edit prompt saved (source image preserved):\n\n' + raw) + '</pre>' });
         logGeneration({ kind: 'image-to-image', provider: 'prompt-only', success: false, prompt: raw, promptOnly: true, opType: 'image-edit' }); }
     });
+    // ── Inline edit-provider configuration (the real fix) ──
+    // The user can wire a real source-preserving edit provider
+    // without leaving the chat: free HF token (SDXL img2img +
+    // inpaint) OR a Local SD / A1111 URL. Saves to the same
+    // ps_* localStorage namespace Image Prompt uses, so the next
+    // Send picks it up immediately. No new key vault.
+    var configBtn = document.createElement('button'); configBtn.className = 'small primary'; configBtn.textContent = 'Configure edit provider';
+    configBtn.addEventListener('click', function () {
+      var hfNow = ''; var localNow = '';
+      try { hfNow = localStorage.getItem('ps_hfimg') || ''; } catch (_) {}
+      try { localNow = localStorage.getItem('ps_local_sd_url') || ''; } catch (_) {}
+      var cfg = appendCard({ cls: 'assistant', who: 'Configure edit provider', badge: { cls: 'prompt', text: 'free / open-source / local' },
+        html: '<pre>' + esc('Wire a real source-preserving edit provider. Both options stay free; both fields save to the SAME key store Image Prompt uses (ps_hfimg / ps_local_sd_url) — no duplicate vault, no key in any export.\n\n1. Hugging Face token (free)\n   Sign in at huggingface.co > Settings > Access Tokens, paste the token below. Unlocks SDXL img2img + SDXL inpainting for hands/fingers and object-add edits.\n\n2. Local SD / A1111 / ComfyUI / Fooocus URL\n   If you run any of those locally on a Mac/PC, paste the API URL (e.g. http://192.168.0.10:7860). Unlocks pixel-perfect img2img + inpaint on your own GPU. Truly free, no quota.') + '</pre>' +
+              '<div style="display:grid;grid-template-columns:1fr;gap:6px;margin-top:6px;font-size:12.5px">' +
+                '<label>Hugging Face token <input type="password" data-fld="hf" placeholder="hf_..." value="' + esc(hfNow) + '" style="width:100%"></label>' +
+                '<label>Local SD URL <input type="text" data-fld="lsd" placeholder="http://localhost:7860" value="' + esc(localNow) + '" style="width:100%"></label>' +
+              '</div>' +
+              '<div class="actions"></div>' });
+      var ca = cfg.querySelector('.actions');
+      var bSave = document.createElement('button'); bSave.className = 'small primary'; bSave.textContent = 'Save + Retry edit';
+      bSave.addEventListener('click', function () {
+        var hf = cfg.querySelector('[data-fld=hf]').value.trim();
+        var lsd = cfg.querySelector('[data-fld=lsd]').value.trim().replace(/\/$/, '');
+        try {
+          if (hf) localStorage.setItem('ps_hfimg', hf); else localStorage.removeItem('ps_hfimg');
+          if (lsd) localStorage.setItem('ps_local_sd_url', lsd); else localStorage.removeItem('ps_local_sd_url');
+        } catch (_) {}
+        appendCard({ cls: 'assistant', who: 'Edit provider saved', badge: { cls: 'ok', text: hf || lsd ? 'configured' : 'cleared' },
+          html: '<pre>' + esc((hf ? 'Hugging Face token saved to ps_hfimg.\n' : '') + (lsd ? 'Local SD URL saved to ps_local_sd_url: ' + lsd + '\n' : '') + (hf || lsd ? '\nRetrying the edit through the shared 17-provider chain — img2img + inpaint routes are now in the chain.' : 'Both fields cleared. Edit Provider remains needed.')) + '</pre>' });
+        if (hf || lsd) {
+          $('user-input').value = raw;
+          send();
+        }
+      });
+      ca.appendChild(bSave);
+      var bTest = document.createElement('button'); bTest.className = 'small'; bTest.textContent = 'Test Local SD connection';
+      bTest.addEventListener('click', function () {
+        var lsd = cfg.querySelector('[data-fld=lsd]').value.trim().replace(/\/$/, '');
+        if (!lsd) { appendCard({ cls: 'assistant', who: 'Local SD test', badge: { cls: 'fail', text: 'no URL' }, text: 'Paste a Local SD URL first.' }); return; }
+        var t0 = Date.now();
+        fetch(lsd + '/sdapi/v1/sd-models', { method: 'GET', cache: 'no-store' })
+          .then(function (r) { return r.text().then(function (t) { return { ok: r.ok, status: r.status, body: t.slice(0, 200) }; }); })
+          .then(function (out) { appendCard({ cls: 'assistant', who: 'Local SD test', badge: { cls: out.ok ? 'ok' : 'fail', text: out.ok ? 'reachable' : ('HTTP ' + out.status) },
+            html: '<pre>' + esc('GET ' + lsd + '/sdapi/v1/sd-models\n  status: ' + out.status + '\n  ms:     ' + (Date.now() - t0) + '\n  head:   ' + out.body) + '</pre>' }); })
+          .catch(function (e) { appendCard({ cls: 'assistant', who: 'Local SD test', badge: { cls: 'fail', text: 'unreachable' },
+            html: '<pre>' + esc('Could not reach ' + lsd + ': ' + (e && e.message || e) + '\n\nCheck that your Local SD server is running and that --api + --listen are enabled.') + '</pre>' }); });
+      });
+      ca.appendChild(bTest);
+    });
+    actions.appendChild(configBtn);
     // Non-anatomy fallback: when no img2img provider succeeded but
     // the request is NOT anatomy-sensitive (e.g. "add a shih tzu
     // dog beside it" / "add a tree" / "add a lamp"), offer an
@@ -1295,7 +1345,7 @@ function runEditWithPreservation(p) {
     // through the shared chain. No silent fallback — the button
     // makes the trade-off visible.
     if (!anatomySensitive && manual) {
-      var t2i = document.createElement('button'); t2i.className = 'small primary'; t2i.textContent = 'Generate as new scene (text-to-image)';
+      var t2i = document.createElement('button'); t2i.className = 'small'; t2i.textContent = 'Generate as new scene (text-to-image, not pixel-edit)';
       t2i.addEventListener('click', function () {
         // Build a fresh prompt that re-states the previous scene
         // (best-effort preservation in words) plus the user's
@@ -1424,6 +1474,33 @@ function runImageViaSharedChain(p, full) {
       // Mirror to the always-visible live panel (no-op when the
       // panel was removed in chat-timeline mode).
       setLiveResult('ready', { provider: result.providerName, imgUrl: result.url, w: img2.w, h: img2.h });
+      // Animal / person quality gate (parity with the edit-path
+      // anatomy gate). Text-to-image paths regenerate the whole
+      // scene — animal anatomy is statistically poor on free
+      // SDXL routes. Always surface a Quality issue card so the
+      // user can Retry / Refine / Save anyway / Open Advanced
+      // Details. The Refine button auto-injects the locked
+      // animal/person anatomy clauses.
+      var animalLikeRx = /\b(dog|dogs|puppy|puppies|cat|cats|kitten|kittens|animal|animals|pet|pets|bird|birds|horse|horses|cow|sheep|pig|rabbit|fox|wolf|bear|tiger|lion|monkey|squirrel|shih\s*tzu|labrador|retriever|poodle|bulldog|chihuahua|husky|collie|terrier|spaniel|beagle|hand|hands|finger|fingers|face|faces|person|people|woman|man|child|girl|boy|portrait|headshot)\b/i;
+      if (animalLikeRx.test(full) || animalLikeRx.test(p || '')) {
+        var qg2 = appendCard({ cls: 'assistant', who: 'Quality issue detected', badge: { cls: 'warn', text: 'animal / anatomy check' },
+          html: '<pre>' + esc('Free text-to-image routes (Pollinations / Horde) regenerate the whole scene and frequently produce distorted animals, hands, or faces. Inspect the result above:\n  - dogs: correct legs / paws / muzzle / eyes\n  - people: realistic anatomy, no extra limbs, no warped face\n  - scale: subject sized naturally beside neighbors\n\nIf anything looks off, Refine (auto-injects anatomy clauses) or Retry. Save anyway only if the image is acceptable.\n\nFor pixel-preserving edits with believable animals/people, configure Hugging Face SDXL inpainting or Local SD via the Configure edit provider button on the previous card.') + '</pre>' +
+                '<div class="actions"></div>' });
+        var qa2 = qg2.querySelector('.actions');
+        var qbR = document.createElement('button'); qbR.className = 'small'; qbR.textContent = 'Retry'; qbR.addEventListener('click', function () { $('user-input').value = (p || full); send(); });
+        var qbF = document.createElement('button'); qbF.className = 'small'; qbF.textContent = 'Refine';
+        qbF.addEventListener('click', function () {
+          var animalQ = (window.LoadAIPipeline && window.LoadAIPipeline.ANIMAL_QUALITY) || 'realistic animal anatomy, correct legs, correct paws, natural face, correct eyes, correct muzzle, natural fur, no extra limbs, no melted body, no warped paws, no distorted head';
+          var portraitQ = (window.LoadAIPipeline && window.LoadAIPipeline.PORTRAIT_QUALITY) || 'realistic anatomy, natural face, clear eyes, correct hands, no distorted limbs, no extra fingers, no warped facial features';
+          $('user-input').value = (p || full) + ', ' + animalQ + ', ' + portraitQ;
+          $('user-input').focus();
+        });
+        var qbS = document.createElement('button'); qbS.className = 'small primary'; qbS.textContent = 'Save anyway';
+        qbS.addEventListener('click', function () { var a = document.createElement('a'); a.href = result.url; a.download = 'load-image-' + Date.now() + '.png'; a.click(); });
+        var qbA = document.createElement('button'); qbA.className = 'small'; qbA.textContent = 'Advanced Details';
+        qbA.addEventListener('click', function () { var d = document.querySelector('details.advanced-details'); if (d) { d.open = true; d.scrollIntoView({ block: 'center', behavior: 'smooth' }); } });
+        qa2.appendChild(qbR); qa2.appendChild(qbF); qa2.appendChild(qbS); qa2.appendChild(qbA);
+      }
       // Follow-up assistant bubble — chat-timeline style.
       appendCard({ cls: 'assistant', who: 'Production AI Chat',
         text: 'Here is your image. Would you like to make adjustments, animate it, add sound, or start a new creation?' });
