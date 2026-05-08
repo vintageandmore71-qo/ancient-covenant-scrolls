@@ -129,7 +129,7 @@ button.small{font-size:11.5px;padding:5px 10px}
   </div>
   <div style="max-width:1000px;margin:6px auto 0;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--mute)">
     <span id="active-mode-chip" style="display:inline-block;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:rgba(124,58,237,.18);color:#c4a8ff;padding:2px 8px;border-radius:5px">Create image</span>
-    <span id="ref-preview-chip" style="display:none;align-items:center;gap:6px"><img id="ref-preview" style="width:28px;height:28px;border-radius:5px;border:1px solid var(--border);object-fit:cover" alt=""><button class="small" id="ref-clear">Clear</button></span>
+    <span id="ref-preview-chip" style="display:none;align-items:center;gap:6px"><img id="ref-preview" style="width:28px;height:28px;border-radius:5px;border:1px solid var(--border);object-fit:cover" alt=""><button class="small" id="btn-paint-mask">Paint mask</button><button class="small" id="ref-clear">Clear</button></span>
     <span class="status-line" id="status" style="margin-left:auto"></span>
   </div>
 </div>
@@ -139,7 +139,7 @@ button.small{font-size:11.5px;padding:5px 10px}
   <summary style="cursor:pointer;padding:10px 14px;font-weight:800;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)">Advanced Details / Developer Diagnostics</summary>
   <div style="padding:0 14px 14px">
 
-    <div class="build-marker" style="margin-top:10px">BUILD MARKER: CHAT-STUDIO-v4.8-2026-05-08-v17g74 (configure-edit-provider + animal-quality-gate)</div>
+    <div class="build-marker" style="margin-top:10px">BUILD MARKER: CHAT-STUDIO-v4.9-2026-05-08-v17g75 (mask-painter + HF SDXL inpaint)</div>
     <div class="intro">
       <strong>X-AI-CHAT-STUDIO Phase 3.</strong> Routed chat with inline real-output cards. Free / open-source / local-first only. <em>Chat</em>: Pollinations text → AI Horde fallback. <em>Text-to-image &amp; Image-to-image</em>: shared 17-provider chain via lib-load-image-providers.js (Local SD · Pollinations Flux · Pollinations · Pollinations Turbo · AI Horde · AI Horde SDXL · Hugging Face · Cloudflare AI · Cloudflare SDXL-Lightning · HF SDXL-Turbo · Together · Gemini Image · DeepAI · SiliconFlow · Real-ESRGAN · GFPGAN · CodeFormer). <em>Animate</em>: canvas Ken-Burns + MediaRecorder real WebM Blob. <em>Audio</em>: OfflineAudioContext WAV + Browser TTS + import / record / public-audio connectors / procedural ambience. Output proof: only marked ready when a real playable Blob exists; otherwise the card stays prompt-only honestly.
     </div>
@@ -235,8 +235,115 @@ var STATE = {
   threadId: 'thread-' + Date.now().toString(36),
   messages: [],
   audioSubMode: null,
-  voiceStyle: 'narrator'
+  voiceStyle: 'narrator',
+  // Painted mask for the next inpaint Send. {base64, mime} when set.
+  // Cleared after a successful inpaint run so masks don't leak
+  // across turns. Set by openMaskPainter().
+  editMask: null
 };
+
+// ── Inline mask painter (true source-preserving inpaint MVP) ────
+// Opens a modal over the page, paints a binary mask on top of
+// STATE.ref.dataUrl, returns {base64, mime} on Apply. Designed
+// to run on iPad Safari — pointer events + touch.
+function openMaskPainter(dataUrl, onApply) {
+  if (!dataUrl) return;
+  var prev = document.getElementById('mask-painter-modal');
+  if (prev) prev.remove();
+  var modal = document.createElement('div');
+  modal.id = 'mask-painter-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:80;background:rgba(5,5,12,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px';
+  modal.innerHTML =
+    '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:12px;max-width:96vw;max-height:92vh;display:flex;flex-direction:column;gap:8px">' +
+      '<div style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:800;color:var(--fg)">Paint mask · region to change<button id="mp-cancel" style="margin-left:auto;background:transparent;border:1px solid var(--border);color:var(--fg);border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer">Cancel</button></div>' +
+      '<div style="position:relative;max-width:88vw;max-height:60vh;overflow:auto;border:1px solid var(--border);border-radius:8px;background:#000">' +
+        '<canvas id="mp-source" style="display:block;max-width:88vw;max-height:60vh"></canvas>' +
+        '<canvas id="mp-mask" style="position:absolute;left:0;top:0;max-width:88vw;max-height:60vh;cursor:crosshair;touch-action:none;mix-blend-mode:screen"></canvas>' +
+      '</div>' +
+      '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:12.5px;color:var(--mute)">' +
+        '<label>Brush <input id="mp-size" type="range" min="6" max="120" value="40" style="vertical-align:middle"></label>' +
+        '<button id="mp-clear" style="background:var(--bg3);border:1px solid var(--border);color:var(--fg);border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer">Clear</button>' +
+        '<span style="flex:1"></span>' +
+        '<button id="mp-apply" style="background:var(--accent);border:none;color:#fff;border-radius:8px;padding:8px 16px;font-weight:800;cursor:pointer">Apply mask</button>' +
+      '</div>' +
+      '<div style="font-size:11.5px;color:var(--mute);max-width:60ch">Paint over the area where the change should happen. Areas you paint will be regenerated by the inpaint model. Untouched areas stay pixel-identical to the source.</div>' +
+    '</div>';
+  document.body.appendChild(modal);
+  var img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = function () {
+    var maxDim = 1024;
+    var W = img.naturalWidth, H = img.naturalHeight;
+    if (W > maxDim || H > maxDim) {
+      var s = Math.min(maxDim / W, maxDim / H);
+      W = Math.round(W * s); H = Math.round(H * s);
+    }
+    var src = modal.querySelector('#mp-source');
+    var mask = modal.querySelector('#mp-mask');
+    src.width = W; src.height = H; mask.width = W; mask.height = H;
+    src.getContext('2d').drawImage(img, 0, 0, W, H);
+    var mctx = mask.getContext('2d');
+    mctx.lineCap = 'round'; mctx.lineJoin = 'round';
+    mctx.strokeStyle = 'rgba(124,58,237,.7)';
+    var brushEl = modal.querySelector('#mp-size');
+    function brush() { return parseInt(brushEl.value, 10) || 40; }
+    var painting = false;
+    function pos(e) {
+      var r = mask.getBoundingClientRect();
+      var x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+      var y = (e.touches ? e.touches[0].clientY : e.clientY) - r.top;
+      return { x: x * (mask.width / r.width), y: y * (mask.height / r.height) };
+    }
+    function down(e) { e.preventDefault(); painting = true; var p = pos(e); mctx.lineWidth = brush(); mctx.beginPath(); mctx.moveTo(p.x, p.y); mctx.lineTo(p.x + 0.1, p.y + 0.1); mctx.stroke(); }
+    function move(e) { if (!painting) return; e.preventDefault(); var p = pos(e); mctx.lineTo(p.x, p.y); mctx.stroke(); }
+    function up()   { painting = false; }
+    mask.addEventListener('mousedown', down); mask.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
+    mask.addEventListener('touchstart', down, { passive: false });
+    mask.addEventListener('touchmove', move, { passive: false });
+    window.addEventListener('touchend', up);
+    modal.querySelector('#mp-clear').addEventListener('click', function () { mctx.clearRect(0, 0, W, H); });
+    modal.querySelector('#mp-cancel').addEventListener('click', function () { modal.remove(); });
+    modal.querySelector('#mp-apply').addEventListener('click', function () {
+      // Build a black/white binary mask. White = paint, black = keep.
+      var out = document.createElement('canvas'); out.width = W; out.height = H;
+      var octx = out.getContext('2d');
+      octx.fillStyle = '#000'; octx.fillRect(0, 0, W, H);
+      var pix = mctx.getImageData(0, 0, W, H).data;
+      var od  = octx.getImageData(0, 0, W, H);
+      var op  = od.data;
+      for (var i = 0; i < pix.length; i += 4) {
+        if (pix[i + 3] > 50) { op[i] = 255; op[i + 1] = 255; op[i + 2] = 255; op[i + 3] = 255; }
+      }
+      octx.putImageData(od, 0, 0);
+      out.toBlob(function (blob) {
+        if (!blob || blob.size < 64) {
+          appendCard({ cls: 'assistant', who: 'Paint mask', badge: { cls: 'fail', text: 'no mask' },
+            html: '<pre>No painted area detected. Open Paint mask again and paint over the region you want to change.</pre>' });
+          modal.remove(); return;
+        }
+        var fr = new FileReader();
+        fr.onload = function () {
+          var s = String(fr.result || '');
+          var c = s.indexOf(',');
+          STATE.editMask = {
+            base64:  c !== -1 ? s.slice(c + 1) : s,
+            mime:    'image/png',
+            dataUrl: s,
+            w: W, h: H
+          };
+          modal.remove();
+          appendCard({ cls: 'assistant', who: 'Mask painted', badge: { cls: 'ok', text: 'inpaint ready' },
+            html: '<img src="' + esc(s) + '" alt="mask" style="max-width:160px;border-radius:6px;border:1px solid var(--border);background:#000">' +
+                  '<div class="meta">' + W + 'x' + H + ' binary mask · stored for the next Send · op: inpaint · source preserved: yes</div>' });
+          if (typeof onApply === 'function') onApply(STATE.editMask);
+        };
+        fr.readAsDataURL(blob);
+      }, 'image/png');
+    });
+  };
+  img.onerror = function () { modal.remove(); };
+  img.src = dataUrl;
+}
 
 // ── Shared 17-provider image chain via LoadImageProviders.build ─
 // Reads keys from the same localStorage namespace ("ps_*") that
@@ -387,6 +494,14 @@ syncActiveModeChip();
 // + button on the bottom bar opens the (now hidden) file input.
 (function () {
   var plus = $('btn-attach-input'); if (plus) plus.addEventListener('click', function () { var f = $('ref-input'); if (f) f.click(); });
+  var pm = $('btn-paint-mask'); if (pm) pm.addEventListener('click', function () {
+    if (!STATE.ref || !STATE.ref.dataUrl) {
+      appendCard({ cls: 'assistant', who: 'Paint mask', badge: { cls: 'fail', text: 'no source image' },
+        html: '<pre>Upload or generate a source image first, then paint a mask over the area you want to change.</pre>' });
+      return;
+    }
+    openMaskPainter(STATE.ref.dataUrl);
+  });
 })();
 
 // Mode-specific plain-language guide. Shown above the messages
@@ -1192,10 +1307,21 @@ function runEditWithPreservation(p) {
   // Also bound the whole edit run with a hard deadline timeout
   // so a stalled provider can't leave the user staring at a
   // spinner forever.
+  // True inpaint when a painted mask is in STATE.editMask. The
+  // shared chain's huggingface provider routes mask + img2img to
+  // SDXL inpainting (diffusers/stable-diffusion-xl-1.0-inpainting-0.1).
+  // localsd does the same via /sdapi/v1/img2img + body.mask.
+  var hasMask = !!(STATE.editMask && STATE.editMask.base64);
+  var __opts = hasMask
+    ? { taskType: 'inpaint', hardImg2Img: true, seed: STATE.editSeed,
+        mask: { base64: STATE.editMask.base64, mime: 'image/png', dataUrl: STATE.editMask.dataUrl } }
+    : { taskType: 'img2img', hardImg2Img: true, seed: STATE.editSeed };
+  // Surface the route into the loading card so the user can see
+  // mask-used: yes / no before the provider runs.
+  var routeLine = card.querySelector('[data-fld=route]');
+  if (routeLine) routeLine.textContent = 'Op: ' + (hasMask ? 'inpaint' : 'image-edit') + ' · Source preserved: yes · Mask used: ' + (hasMask ? 'yes' : 'no') + ' · Anatomy-sensitive: ' + (anatomySensitive ? 'yes' : 'no');
   var __editPromise = Promise.resolve().then(function () {
-    return SHARED_IMG.imageGenWithFallback(full, imgData, {
-      taskType: 'img2img', hardImg2Img: true, seed: STATE.editSeed
-    });
+    return SHARED_IMG.imageGenWithFallback(full, imgData, __opts);
   });
   if (window.LoadTimeouts && typeof window.LoadTimeouts.withTimeout === 'function') {
     __editPromise = window.LoadTimeouts.withTimeout(__editPromise, capMs, 'image-edit');
@@ -1210,7 +1336,7 @@ function runEditWithPreservation(p) {
       var imgEl = document.createElement('img'); imgEl.src = result.url; imgEl.alt = raw; imgEl.style.cssText = 'max-width:100%;border-radius:8px;margin-top:8px;display:block';
       card.appendChild(imgEl);
       var meta = document.createElement('div'); meta.className = 'meta';
-      meta.textContent = 'Status: Image Created · op: image-edit · source preserved: yes · provider: ' + result.providerName + ' · ' + ms + ' ms · ' + img2.w + 'x' + img2.h + ' · output proof: real image rendered';
+      meta.textContent = 'Status: Image Created · op: ' + (hasMask ? 'inpaint' : 'image-edit') + ' · source preserved: yes · mask used: ' + (hasMask ? 'yes' : 'no') + ' · provider: ' + result.providerName + ' · ' + ms + ' ms · ' + img2.w + 'x' + img2.h + ' · output proof: real image rendered';
       card.appendChild(meta);
       var actions = document.createElement('div'); actions.className = 'actions';
       actions.innerHTML = '<button class="small" data-act="save">Save</button>' +
@@ -1240,6 +1366,9 @@ function runEditWithPreservation(p) {
       // Promote this edit as the new edit source so chained
       // follow-ups keep stacking deltas on top.
       stashAsAnimateSource(result.url, raw);
+      // One-shot mask: clear after a successful inpaint so the
+      // user paints a fresh region on the next turn.
+      if (hasMask) STATE.editMask = null;
       // ── Anatomy / face quality hint (row 5) ──
       // No client-side anatomy detector ships in MVP. When the
       // edit prompt mentions hands / face / body parts, surface
