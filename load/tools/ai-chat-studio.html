@@ -139,7 +139,7 @@ button.small{font-size:11.5px;padding:5px 10px}
   <summary style="cursor:pointer;padding:10px 14px;font-weight:800;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)">Advanced Details / Developer Diagnostics</summary>
   <div style="padding:0 14px 14px">
 
-    <div class="build-marker" style="margin-top:10px">BUILD MARKER: CHAT-STUDIO-v4.5-2026-05-08-v17g71 (anatomy-safe-refusal)</div>
+    <div class="build-marker" style="margin-top:10px">BUILD MARKER: CHAT-STUDIO-v4.6-2026-05-08-v17g72 (no-hang-edit-path)</div>
     <div class="intro">
       <strong>X-AI-CHAT-STUDIO Phase 3.</strong> Routed chat with inline real-output cards. Free / open-source / local-first only. <em>Chat</em>: Pollinations text → AI Horde fallback. <em>Text-to-image &amp; Image-to-image</em>: shared 17-provider chain via lib-load-image-providers.js (Local SD · Pollinations Flux · Pollinations · Pollinations Turbo · AI Horde · AI Horde SDXL · Hugging Face · Cloudflare AI · Cloudflare SDXL-Lightning · HF SDXL-Turbo · Together · Gemini Image · DeepAI · SiliconFlow · Real-ESRGAN · GFPGAN · CodeFormer). <em>Animate</em>: canvas Ken-Burns + MediaRecorder real WebM Blob. <em>Audio</em>: OfflineAudioContext WAV + Browser TTS + import / record / public-audio connectors / procedural ambience. Output proof: only marked ready when a real playable Blob exists; otherwise the card stays prompt-only honestly.
     </div>
@@ -1162,8 +1162,21 @@ function runEditWithPreservation(p) {
           '<div class="result-placeholder" style="margin-top:10px;border:2px dashed var(--accent);border-radius:10px;background:rgba(124,58,237,.06);padding:24px 16px;text-align:center;min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">' +
             '<div style="font-size:14px;font-weight:700;color:var(--fg)"><span class="spinner"></span> Editing previous image…</div>' +
             '<div style="font-size:12.5px;color:var(--mute)">Provider: <strong>' + esc(firstProv) + '</strong></div>' +
-            '<div style="font-size:12.5px;color:var(--mute)">Edit will apply on top of the source above. Result appears here.</div>' +
+            '<div style="font-size:12.5px;color:var(--mute)" data-fld="route">Op: image-edit · Source preserved: yes · Anatomy-sensitive: no</div>' +
+            '<div style="font-size:12.5px;color:var(--mute)" data-fld="deadline">Timeout in 60s. Result will appear here.</div>' +
           '</div>' });
+  // Visible deadline countdown so the edit path can never appear
+  // to hang silently. Per LoadTimeouts spec image-to-image cap.
+  var capMs = (window.LoadTimeouts ? window.LoadTimeouts.byIntent('image-to-image') : 60000);
+  var dl = card.querySelector('[data-fld=deadline]');
+  var dlEnd = Date.now() + capMs;
+  var dlIv = setInterval(function () {
+    var left = Math.max(0, dlEnd - Date.now());
+    if (dl) dl.textContent = 'Timeout in ' + Math.ceil(left / 1000) + 's. Result will appear here.';
+    if (left <= 0) { try { clearInterval(dlIv); } catch (_) {} }
+  }, 1000);
+  var stopChip = startDeadlineCountdown(card, capMs, 'edit timeout');
+  function stopAllChips() { try { clearInterval(dlIv); } catch (_) {} stopChip(); }
   // Build imgData from the source.
   var s = String(STATE.ref.dataUrl);
   var c = s.indexOf(',');
@@ -1172,9 +1185,23 @@ function runEditWithPreservation(p) {
     mime:  (s.indexOf('data:') === 0 && c !== -1) ? s.slice(5, s.indexOf(';')) : 'image/png',
     dataUrl: s
   };
-  return SHARED_IMG.imageGenWithFallback(full, imgData, {
-    taskType: 'img2img', hardImg2Img: true, seed: STATE.editSeed
-  }).then(function (result) {
+  // Wrap imageGenWithFallback in Promise.resolve so any
+  // SYNCHRONOUS throw inside the lib (e.g. MANUAL_MASK_NEEDED
+  // when filtered.length is 0 + hardImg2Img: true) becomes a
+  // rejection that hits .catch — no more hung Send button.
+  // Also bound the whole edit run with a hard deadline timeout
+  // so a stalled provider can't leave the user staring at a
+  // spinner forever.
+  var __editPromise = Promise.resolve().then(function () {
+    return SHARED_IMG.imageGenWithFallback(full, imgData, {
+      taskType: 'img2img', hardImg2Img: true, seed: STATE.editSeed
+    });
+  });
+  if (window.LoadTimeouts && typeof window.LoadTimeouts.withTimeout === 'function') {
+    __editPromise = window.LoadTimeouts.withTimeout(__editPromise, capMs, 'image-edit');
+  }
+  return __editPromise.then(function (result) {
+    stopAllChips();
     return loadImageWithTimeout(result.url, 30000, result.providerName + ' edit render').then(function (img2) {
       var ms = Date.now() - t0;
       card.classList.remove('error');
@@ -1237,10 +1264,12 @@ function runEditWithPreservation(p) {
       }
     });
   }).catch(function (err) {
+    stopAllChips();
     var msg = String((err && err.message) || err);
     var manual = /MANUAL_MASK_NEEDED/i.test(msg) || /no img2img/i.test(msg) || /All image providers failed/i.test(msg);
+    var timedOut = /timed out/i.test(msg);
     card.classList.add('error');
-    var label = manual ? 'Edit Provider Needed' : 'Provider Failed';
+    var label = timedOut ? 'Edit Provider Timed Out' : (manual ? 'Edit Provider Needed' : 'Provider Failed');
     card.querySelector('.who').innerHTML = 'Edit image <span class="badge fail">' + esc(label) + '</span>';
     var ph = card.querySelector('.result-placeholder');
     if (ph) {
