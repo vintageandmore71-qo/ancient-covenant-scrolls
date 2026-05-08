@@ -139,7 +139,7 @@ button.small{font-size:11.5px;padding:5px 10px}
   <summary style="cursor:pointer;padding:10px 14px;font-weight:800;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)">Advanced Details / Developer Diagnostics</summary>
   <div style="padding:0 14px 14px">
 
-    <div class="build-marker" style="margin-top:10px">BUILD MARKER: CHAT-STUDIO-v4.2-2026-05-08-v17g68 (voice-line + preserve-edit)</div>
+    <div class="build-marker" style="margin-top:10px">BUILD MARKER: CHAT-STUDIO-v4.3-2026-05-08-v17g69 (anatomy-hint + audio-gate + camera-motion-honest)</div>
     <div class="intro">
       <strong>X-AI-CHAT-STUDIO Phase 3.</strong> Routed chat with inline real-output cards. Free / open-source / local-first only. <em>Chat</em>: Pollinations text → AI Horde fallback. <em>Text-to-image &amp; Image-to-image</em>: shared 17-provider chain via lib-load-image-providers.js (Local SD · Pollinations Flux · Pollinations · Pollinations Turbo · AI Horde · AI Horde SDXL · Hugging Face · Cloudflare AI · Cloudflare SDXL-Lightning · HF SDXL-Turbo · Together · Gemini Image · DeepAI · SiliconFlow · Real-ESRGAN · GFPGAN · CodeFormer). <em>Animate</em>: canvas Ken-Burns + MediaRecorder real WebM Blob. <em>Audio</em>: OfflineAudioContext WAV + Browser TTS + import / record / public-audio connectors / procedural ambience. Output proof: only marked ready when a real playable Blob exists; otherwise the card stays prompt-only honestly.
     </div>
@@ -1156,6 +1156,15 @@ function runEditWithPreservation(p) {
       // Promote this edit as the new edit source so chained
       // follow-ups keep stacking deltas on top.
       stashAsAnimateSource(result.url, raw);
+      // ── Anatomy / face quality hint (row 5) ──
+      // No client-side anatomy detector ships in MVP. When the
+      // edit prompt mentions hands / face / body parts, surface
+      // an honest hint instead of pretending we auto-validated
+      // the anatomy. User decides whether to Refine.
+      if (/\b(hand|hands|finger|fingers|face|faces|eye|eyes|mouth|teeth|smile|arm|arms|leg|legs|foot|feet|body|portrait|headshot|person|people|woman|man|child|girl|boy)\b/i.test(raw)) {
+        appendCard({ cls: 'assistant', who: 'Inspect anatomy', badge: { cls: 'warn', text: 'anatomy check' },
+          html: '<pre>' + esc('No client-side anatomy detector ships in MVP. Inspect the result for malformed hands / faces / extra fingers / warped features. If anatomy looks off, tap Refine and re-run — the safety negative prompt and stable seed are already applied.') + '</pre>' });
+      }
       logGeneration({ kind: 'image-to-image', provider: result.providerId, success: true, ms: ms, prompt: raw, fullPrompt: full, size: STATE.size,
         outputProof: { kind: 'image-url', url: result.url, w: img2.w, h: img2.h, providerName: result.providerName },
         opType: 'image-edit', sourcePreserved: true, resultLabel: 'Image Created (edit · ' + result.providerName + ')' });
@@ -1677,9 +1686,10 @@ function runAnimate(p) {
     prog.querySelector('.who').innerHTML = 'Animation progress <span class="badge ok">complete</span>';
     prog.querySelector('pre').textContent = 'Captured ' + out.bytes + ' B WebM (' + out.mime + ') in ' + ms + ' ms.';
     var url = URL.createObjectURL(out.blob);
-    var card = appendCard({ cls: 'assistant', who: 'Video result', badge: { cls: 'ok', text: 'real playable video' },
+    var card = appendCard({ cls: 'assistant', who: 'Camera-motion preview', badge: { cls: 'warn', text: 'camera-motion preview' },
       html: '<video src="' + url + '" controls playsinline style="max-width:100%;border-radius:8px;margin-top:8px"></video>' +
-            '<div class="meta">provider: on-device Ken-Burns · op: ' + esc(srcLabel) + ' · ' + out.bytes + ' B · ' + out.mime + ' · ' + ms + ' ms · output proof: real WebM Blob (size ' + out.bytes + ' B)</div>' +
+            '<div class="meta">provider: on-device Ken-Burns · op: ' + esc(srcLabel) + ' · type: <strong>camera-motion preview (zoom + pan)</strong> · ' + out.bytes + ' B · ' + out.mime + ' · ' + ms + ' ms · output proof: real WebM Blob (size ' + out.bytes + ' B)</div>' +
+            '<div style="margin-top:8px;padding:8px 10px;border-left:3px solid var(--warn);background:rgba(250,204,21,.06);font-size:12px;color:var(--mute)">This is a <strong>camera-motion preview</strong> (zoom + pan over a still image). True subject animation needs a video provider that is not wired in MVP — status: <strong>Animation provider needed for true subject motion</strong>.</div>' +
             '<div class="actions"></div>' });
     var actions = card.querySelector('.actions');
     var btnSave = document.createElement('button'); btnSave.className = 'small'; btnSave.textContent = 'Save video';
@@ -1689,12 +1699,12 @@ function runAnimate(p) {
     btnAttach.addEventListener('click', function () {
       attachToScene({ image: src, video: url, visualPrompt: full, motionPrompt: motion, sizes: STATE.size,
         videoBlob: out.blob,
-        videoOutputProof: { kind: 'webm-blob', bytes: out.bytes, mime: out.mime, w: out.w, h: out.h, source: 'on-device Ken-Burns canvas + MediaRecorder', opType: srcLabel } });
+        videoOutputProof: { kind: 'webm-blob', bytes: out.bytes, mime: out.mime, w: out.w, h: out.h, source: 'on-device Ken-Burns canvas + MediaRecorder · camera-motion preview', opType: srcLabel } });
     });
     actions.appendChild(btnAttach);
     logGeneration({ kind: 'animation', provider: 'on-device-kenburns', success: true, ms: ms, prompt: full, motion: motion,
-      outputProof: { kind: 'webm-blob', bytes: out.bytes, mime: out.mime, w: out.w, h: out.h },
-      opType: srcLabel, resultLabel: 'real playable video (' + srcLabel + ')' });
+      outputProof: { kind: 'webm-blob', bytes: out.bytes, mime: out.mime, w: out.w, h: out.h, motionType: 'camera-motion-preview' },
+      opType: srcLabel, resultLabel: 'Camera-motion preview · Animation provider needed for true subject motion' });
     if (window.LoadQueue && STATE.currentJob) {
       window.LoadQueue.update(STATE.currentJob.jobId, { status: 'Complete', provider: 'on-device-kenburns', startedAt: t0, endedAt: Date.now() }).catch(function () {});
     }
@@ -1860,6 +1870,22 @@ function runVoiceLine(rawText) {
 
 function runOfflineAudio(p, fallbackNote) {
   var full = buildPrompt(p);
+  // ── Audio quality gate (row 11) ──
+  // The OfflineAudioContext synth maps prompt keywords to filtered
+  // noise / sine tones. That is honest for "wind", "rain",
+  // "drumbeat", but it CANNOT produce real laughter / speech /
+  // dialogue / song. Rather than label colored noise as success,
+  // surface "Audio Provider Needed" for those request types and
+  // save the prompt.
+  var voiceLikeRx = /\b(laugh|laughter|chuckl|giggle|cry|crying|scream|shout|sing|singing|song|lyric|speech|speak|speaking|voice|word|words|dialog|dialogue|narrat|talk|whisper|shout|yell|moan|gasp|sob|sigh)\b/i;
+  if (voiceLikeRx.test(full)) {
+    appendCard({ cls: 'assistant', who: 'Sound effect', badge: { cls: 'fail', text: 'Audio Provider Needed' },
+      html: '<pre>' + esc('On-device WebAudio synthesis maps prompt keywords to filtered noise / sine tones. It cannot produce realistic laughter / speech / singing — labeling colored noise as success would be a fake result.\n\nSound prompt saved (status: sound_prompt_saved · audio_provider_needed):\n  "' + full + '"\n\nFor laughter, speech, or singing: switch the audio sub-mode to "Voice / narration" and type the line, OR record your own voice via Advanced Details > Audio tools > Record narration.') + '</pre>' });
+    logGeneration({ kind: 'audio', provider: 'on-device-webaudio', success: false, prompt: full,
+      promptOnly: true, audioStatus: 'audio_provider_needed',
+      resultLabel: 'Audio Provider Needed (voice-like request) · Sound Prompt Saved' });
+    return Promise.resolve();
+  }
   appendCard({ cls: 'assistant', who: 'Audio generation', badge: { cls: 'run', text: 'audio generation' },
     html: '<pre>' + (fallbackNote ? esc(fallbackNote) + '\n' : '') + '<span class="spinner"></span> rendering on-device WAV via OfflineAudioContext for prompt:\n  ' + esc(full) + '</pre>' });
   var t0 = Date.now();
@@ -1869,6 +1895,7 @@ function runOfflineAudio(p, fallbackNote) {
     var card = appendCard({ cls: 'assistant', who: 'Audio result', badge: { cls: 'ok', text: 'separate audio generated' },
       html: '<audio src="' + url + '" controls playsinline style="width:100%;margin-top:8px"></audio>' +
             '<div class="meta">provider: on-device-webaudio · op: separate audio generated · kind=' + esc(out.kind) + ' · ' + out.bytes + ' B WAV · ' + ms + ' ms · status: audio ready for scene · output proof: real WAV Blob (RIFF/WAVE)</div>' +
+            '<div style="margin-top:8px;padding:8px 10px;border-left:3px solid var(--warn);background:rgba(250,204,21,.06);font-size:12px;color:var(--mute)">This is a <strong>keyword-mapped filter synthesis</strong>, not a high-fidelity recording. Suitable for ambience / placeholder SFX. For voice / dialogue use the Voice / narration sub-mode.</div>' +
             '<div class="actions"></div>' });
     var actions = card.querySelector('.actions');
     var btnSave = document.createElement('button'); btnSave.className = 'small'; btnSave.textContent = 'Save audio';
@@ -1877,7 +1904,7 @@ function runOfflineAudio(p, fallbackNote) {
     var btnAttach = document.createElement('button'); btnAttach.className = 'small primary'; btnAttach.textContent = 'Attach to scene';
     btnAttach.addEventListener('click', function () {
       attachToScene({ visualPrompt: '', audio: url, audioPrompt: full, audioBlob: out.blob,
-        audioOutputProof: { kind: 'wav-blob', bytes: out.bytes, mime: out.mime, durationSec: out.durationSec, synthesisKind: out.kind, source: 'on-device OfflineAudioContext synthesis' },
+        audioOutputProof: { kind: 'wav-blob', bytes: out.bytes, mime: out.mime, durationSec: out.durationSec, synthesisKind: out.kind, source: 'on-device OfflineAudioContext synthesis · keyword-mapped filter synth' },
         audioStatus: 'separate_audio_generated' });
       appendCard({ cls: 'assistant', who: 'Audio attached', badge: { cls: 'ok', text: 'audio ready for export' },
         html: '<pre>Audio attached to scene.\n  status: audio ready for export\n  proof:  real WAV Blob in audio_assets store</pre>' });
@@ -1885,7 +1912,7 @@ function runOfflineAudio(p, fallbackNote) {
     actions.appendChild(btnAttach);
     logGeneration({ kind: 'audio', provider: 'on-device-webaudio', success: true, ms: ms, prompt: full,
       outputProof: { kind: 'wav-blob', bytes: out.bytes, mime: out.mime, durationSec: out.durationSec, synthesisKind: out.kind },
-      audioStatus: 'separate_audio_generated', resultLabel: 'Separate audio generated' });
+      audioStatus: 'separate_audio_generated', resultLabel: 'Separate audio generated (keyword-mapped synth)' });
   }).catch(function (err) {
     var msg = String((err && err.message) || err);
     var failCard = appendCard({ cls: 'assistant', who: 'Audio result', badge: { cls: 'fail', text: 'audio failed' },
