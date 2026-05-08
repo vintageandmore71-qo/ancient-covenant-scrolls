@@ -105,6 +105,20 @@ button.small{font-size:11.5px;padding:5px 10px}
   </div>
 </div>
 
+<!-- Mode-specific guide rail. Shown above the messages area; the
+     active block is toggled by setMode(). Keeps the next step
+     obvious in plain language. -->
+<div id="mode-guide" class="mode-guide" style="margin:0 0 12px;border:1px solid var(--border);border-radius:10px;padding:10px 14px;background:var(--bg2);font-size:13px;color:var(--mute);display:none">
+  <div style="font-weight:800;font-size:12.5px;color:var(--fg);margin-bottom:4px" data-fld="title"></div>
+  <div data-fld="steps"></div>
+</div>
+
+<!-- Empty result placeholder — visible before the first generation
+     so the user can clearly see where the result will appear. -->
+<div id="empty-result" class="empty-result" style="margin:0 0 12px;border:2px dashed var(--border);border-radius:10px;padding:32px 16px;text-align:center;color:var(--mute);font-size:14px">
+  Your result will appear here.
+</div>
+
 <div class="messages" id="messages">
   <div class="card assistant"><div class="who">Welcome</div>Tap an action above, describe what you want, then tap Send. Result cards show the file, status, and follow-up actions like Save / Refine / Animate / Add sound / Attach to scene / Export.</div>
 </div>
@@ -124,7 +138,7 @@ button.small{font-size:11.5px;padding:5px 10px}
   <summary style="cursor:pointer;padding:10px 14px;font-weight:800;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)">Advanced Details / Developer Diagnostics</summary>
   <div style="padding:0 14px 14px">
 
-    <div class="build-marker" style="margin-top:10px">BUILD MARKER: CHAT-STUDIO-v3.9-2026-05-08-v17g62</div>
+    <div class="build-marker" style="margin-top:10px">BUILD MARKER: CHAT-STUDIO-v3.10-2026-05-08-v17g63</div>
     <div class="intro">
       <strong>X-AI-CHAT-STUDIO Phase 3.</strong> Routed chat with inline real-output cards. Free / open-source / local-first only. <em>Chat</em>: Pollinations text → AI Horde fallback. <em>Text-to-image &amp; Image-to-image</em>: shared 17-provider chain via lib-load-image-providers.js (Local SD · Pollinations Flux · Pollinations · Pollinations Turbo · AI Horde · AI Horde SDXL · Hugging Face · Cloudflare AI · Cloudflare SDXL-Lightning · HF SDXL-Turbo · Together · Gemini Image · DeepAI · SiliconFlow · Real-ESRGAN · GFPGAN · CodeFormer). <em>Animate</em>: canvas Ken-Burns + MediaRecorder real WebM Blob. <em>Audio</em>: OfflineAudioContext WAV + Browser TTS + import / record / public-audio connectors / procedural ambience. Output proof: only marked ready when a real playable Blob exists; otherwise the card stays prompt-only honestly.
     </div>
@@ -332,10 +346,45 @@ renderStylePills();
 Array.prototype.slice.call(document.querySelectorAll('[data-mode]')).forEach(function (b) {
   b.addEventListener('click', function () {
     STATE.mode = b.getAttribute('data-mode');
-    Array.prototype.slice.call(document.querySelectorAll('[data-mode]')).forEach(function (x) { x.classList.toggle('on', x === b); });
+    Array.prototype.slice.call(document.querySelectorAll('[data-mode]')).forEach(function (x) {
+      x.classList.toggle('on', x.getAttribute('data-mode') === STATE.mode);
+    });
     renderRouteLine();
+    renderModeGuide();
   });
 });
+
+// Mode-specific plain-language guide. Shown above the messages
+// area; refreshed whenever the user picks a Simple Creator View
+// action button so the next step is always obvious.
+function renderModeGuide() {
+  var g = document.getElementById('mode-guide'); if (!g) return;
+  var t = g.querySelector('[data-fld=title]'); var s = g.querySelector('[data-fld=steps]');
+  var titles = {
+    image:   'Create image',
+    i2i:     'Edit image',
+    animate: 'Animate',
+    audio:   'Add sound',
+    chat:    'Write prompt',
+    video:   'Video prompt'
+  };
+  var steps = {
+    image:   'Step 1: Describe image  ·  Step 2: Tap Send  ·  Step 3: Image appears below',
+    i2i:     'Step 1: Upload reference (Advanced > Options)  ·  Step 2: Describe edit  ·  Step 3: Tap Send',
+    animate: 'Step 1: Upload or generate an image  ·  Step 2: Describe the motion  ·  Step 3: Tap Send · video appears below',
+    audio:   'Step 1: Describe sound, OR open Advanced > Audio tools  ·  Step 2: Tap Send  ·  Step 3: Audio appears below',
+    chat:    'Step 1: Type your question or prompt  ·  Step 2: Tap Send  ·  Step 3: Reply appears below',
+    video:   'Video generators are not wired in MVP. Type your scene; you can copy the prompt to an external animator.'
+  };
+  if (titles[STATE.mode]) {
+    t.textContent = titles[STATE.mode];
+    s.textContent = steps[STATE.mode];
+    g.style.display = 'block';
+  } else {
+    g.style.display = 'none';
+  }
+}
+renderModeGuide();
 function renderRouteLine() {
   var intentByMode = { chat: 'chat', image: 'image-gen', i2i: 'image-to-image', animate: 'image-anim', video: 'video', audio: 'sfx' };
   var iid = intentByMode[STATE.mode] || 'chat';
@@ -748,7 +797,14 @@ function jobUpdate(job, patch) {
   return window.LoadQueue.update(job.jobId, patch).catch(function () {});
 }
 
+// Hide the empty-result placeholder once the user starts a turn —
+// the loading card itself takes its place visually.
+function hideEmptyResultPlaceholder() {
+  var er = document.getElementById('empty-result'); if (er) er.style.display = 'none';
+}
+
 function send() {
+  hideEmptyResultPlaceholder();
   var p = $('user-input').value.trim();
   if (!p) return;
   $('user-input').value = '';
@@ -877,10 +933,40 @@ function runImageViaSharedChain(p, full) {
   var t0 = Date.now();
   var refHtml = STATE.ref ? '<img class="ref" src="' + esc(STATE.ref.dataUrl) + '" alt="ref">' : '';
   var op = STATE.ref ? 'image-to-image' : 'text-to-image';
-  var card = appendCard({ cls: 'assistant', who: 'Image (shared 17-provider chain)', badge: { cls: 'run', text: 'generating' },
-    html: '<div class="meta">' + esc('prompt: ' + full + ' (' + STATE.size + ') · op: ' + op) + '</div>' + refHtml + '<div><span class="spinner"></span> trying shared provider chain...</div>' });
+  // Provider hint — pick the first enabled provider from the shared
+  // chain so the loading card names the route the user is actually
+  // hitting first instead of a generic "thinking" chip.
+  var firstProv = 'shared free chain';
+  try {
+    if (SHARED_IMG && SHARED_IMG.providers) {
+      var first = SHARED_IMG.providers.find(function (pp) { return pp.enabled && pp.enabled() && SHARED_IMG.isHealthy(pp.id); });
+      if (first) firstProv = first.name;
+    }
+  } catch (_) {}
+  // Big visible loading card with prominent placeholder area so the
+  // user can clearly see WHERE the image will land. Replaces the
+  // small "POLLINATIONS.AI — THINKING" chip pattern.
   var capMs = (window.LoadTimeouts ? window.LoadTimeouts.byIntent(STATE.ref ? 'image-to-image' : 'image') : 60000);
+  var card = appendCard({ cls: 'assistant', who: 'Creating image…', badge: { cls: 'run', text: 'generating' },
+    html: '<div class="meta">' + esc('Provider: ' + firstProv + ' · Op: ' + op + ' · Prompt: ' + full + ' (' + STATE.size + ')') + '</div>' +
+          refHtml +
+          '<div class="result-placeholder" style="margin-top:10px;border:2px dashed var(--border);border-radius:10px;background:#0a0e18;padding:24px 16px;text-align:center;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">' +
+            '<div style="font-size:14px;font-weight:700;color:var(--fg)"><span class="spinner"></span> Creating image…</div>' +
+            '<div style="font-size:12.5px;color:var(--mute)">Provider: <strong>' + esc(firstProv) + '</strong></div>' +
+            '<div style="font-size:12.5px;color:var(--mute)" data-fld="deadline">Timeout in ' + Math.ceil(capMs / 1000) + 's. Result will appear here.</div>' +
+            '<div style="font-size:11.5px;color:var(--mute);max-width:420px;line-height:1.5">If the first provider fails, the system automatically tries the next free route from the shared 17-provider chain. The Send button will re-enable when finished.</div>' +
+          '</div>' });
+  // Wire the deadline chip to the placeholder line so the countdown
+  // is readable at a glance, not just on the small badge row.
+  var dl = card.querySelector('[data-fld=deadline]');
+  var dlEnd = Date.now() + capMs;
+  var dlIv = setInterval(function () {
+    var left = Math.max(0, dlEnd - Date.now());
+    if (dl) dl.textContent = 'Timeout in ' + Math.ceil(left / 1000) + 's. Result will appear here.';
+    if (left <= 0) { try { clearInterval(dlIv); } catch (_) {} }
+  }, 1000);
   var stopChip = startDeadlineCountdown(card, capMs, 'timeout');
+  function stopAllChips() { try { clearInterval(dlIv); } catch (_) {} stopChip(); }
   // Build imgData if a reference is set.
   var imgData = null;
   var prep = STATE.ref && STATE.ref.dataUrl
@@ -895,21 +981,26 @@ function runImageViaSharedChain(p, full) {
   return prep.then(function () {
     return SHARED_IMG.imageGenWithFallback(full, imgData, { taskType: STATE.ref ? 'img2img' : 'generate' });
   }).then(function (result) {
-    stopChip();
+    stopAllChips();
     return loadImageWithTimeout(result.url, 30000, result.providerName + ' render').then(function (img2) {
       var ms = Date.now() - t0;
-      card.querySelector('.who').innerHTML = 'Image <span class="badge ok">' + esc(result.providerName) + '</span>';
-      var imgEl = document.createElement('img'); imgEl.src = result.url; imgEl.alt = full;
-      card.querySelectorAll('div')[card.querySelectorAll('div').length - 1].remove();
+      // Replace the loading card content in-place: same DOM node so
+      // the user's eye stays anchored where the placeholder was.
+      card.classList.remove('error');
+      card.querySelector('.who').innerHTML = 'Image Created <span class="badge ok">' + esc(result.providerName) + '</span>';
+      var ph = card.querySelector('.result-placeholder'); if (ph) ph.remove();
+      var imgEl = document.createElement('img'); imgEl.src = result.url; imgEl.alt = full; imgEl.style.cssText = 'max-width:100%;border-radius:8px;margin-top:8px;display:block';
       card.appendChild(imgEl);
       var meta = document.createElement('div'); meta.className = 'meta';
-      meta.textContent = 'provider: ' + result.providerName + ' · op: ' + op + ' · ' + ms + ' ms · ' + img2.w + 'x' + img2.h + ' · output proof: real image rendered';
+      meta.textContent = 'Status: Image Created · provider: ' + result.providerName + ' · op: ' + op + ' · ' + ms + ' ms · ' + img2.w + 'x' + img2.h + ' · output proof: real image rendered';
       card.appendChild(meta);
       var actions = document.createElement('div'); actions.className = 'actions';
-      actions.innerHTML = '<button class="small" data-act="save">Save image</button>' +
+      actions.innerHTML = '<button class="small" data-act="save">Save</button>' +
         '<button class="small" data-act="refine">Refine</button>' +
-        '<button class="small" data-act="animate">Animate this</button>' +
-        '<button class="small primary" data-act="attach">Attach to scene</button>';
+        '<button class="small" data-act="animate">Animate</button>' +
+        '<button class="small" data-act="add-sound">Add sound</button>' +
+        '<button class="small primary" data-act="attach">Attach to scene</button>' +
+        '<button class="small" data-act="export">Export</button>';
       card.appendChild(actions);
       actions.querySelector('[data-act=save]').addEventListener('click', function () { var a = document.createElement('a'); a.href = result.url; a.download = 'load-image-' + Date.now() + '.png'; a.target = '_blank'; a.click(); });
       actions.querySelector('[data-act=refine]').addEventListener('click', function () { $('user-input').value = full + ', '; $('user-input').focus(); });
@@ -919,9 +1010,15 @@ function runImageViaSharedChain(p, full) {
         Array.prototype.slice.call(document.querySelectorAll('[data-mode]')).forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-mode') === 'animate'); });
         renderRouteLine(); $('user-input').value = full;
       });
+      actions.querySelector('[data-act=add-sound]').addEventListener('click', function () {
+        STATE.mode = 'audio';
+        Array.prototype.slice.call(document.querySelectorAll('[data-mode]')).forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-mode') === 'audio'); });
+        renderRouteLine(); $('user-input').focus();
+      });
       actions.querySelector('[data-act=attach]').addEventListener('click', function () {
         attachToScene({ image: result.url, visualPrompt: full, sizes: STATE.size });
       });
+      actions.querySelector('[data-act=export]').addEventListener('click', function () { exportProject('loadstudio'); });
       logGeneration({ kind: STATE.ref ? 'image-to-image' : 'image', provider: result.providerId, success: true, ms: ms, prompt: full, size: STATE.size,
         outputProof: { kind: 'image-url', url: result.url, w: img2.w, h: img2.h, providerName: result.providerName },
         opType: op, resultLabel: 'Image Created (' + result.providerName + ')' });
@@ -930,13 +1027,23 @@ function runImageViaSharedChain(p, full) {
       }
     });
   }).catch(function (err) {
-    stopChip();
+    stopAllChips();
     var msg = String((err && err.message) || err);
     var timedOut = /timed out/i.test(msg);
     card.classList.add('error');
-    card.querySelector('.who').innerHTML = 'Image <span class="badge fail">' + (timedOut ? 'Provider Timed Out' : 'Returned No File') + '</span>';
-    var lastDiv = card.querySelectorAll('div')[card.querySelectorAll('div').length - 1];
-    if (lastDiv) lastDiv.textContent = 'All free providers in the shared chain failed: ' + msg + '\n\nReference image preserved. The Send button is re-enabled.';
+    var statusLabel = timedOut ? 'Provider Timed Out' : 'Provider Failed';
+    card.querySelector('.who').innerHTML = 'Image <span class="badge fail">' + esc(statusLabel) + '</span>';
+    // Replace the placeholder with a clear failure block instead of
+    // hiding it. The user keeps eye-tracking the same area.
+    var ph = card.querySelector('.result-placeholder');
+    if (ph) {
+      ph.style.borderColor = 'var(--err)';
+      ph.style.background = 'rgba(255,110,110,.05)';
+      ph.innerHTML = '<div style="font-size:14px;font-weight:700;color:var(--err)">' + esc(statusLabel) + '</div>' +
+        '<div style="font-size:12.5px;color:var(--mute)">Provider attempted: <strong>' + esc(firstProv) + '</strong></div>' +
+        '<div style="font-size:12px;color:var(--mute);max-width:480px;line-height:1.5">' + esc(msg) + '</div>' +
+        '<div style="font-size:11.5px;color:var(--mute)">Reference image preserved. Send is re-enabled. Open Advanced Details for the full fallback chain + diagnostics.</div>';
+    }
     var actions = buildFailureActions({
       onRetry: function () { send(); },
       onNext: function () { appendCard({ cls: 'assistant', who: 'Try next provider', badge: { cls: 'prompt', text: 'no more free routes' },
@@ -945,6 +1052,9 @@ function runImageViaSharedChain(p, full) {
         html: '<pre>' + esc('Saved prompt for later — paste into another tool when network is back:\n\n' + full) + '</pre>' });
         logGeneration({ kind: 'image', provider: 'prompt-only', success: false, prompt: full, promptOnly: true, opType: op, resultLabel: 'Prompt Saved' }); }
     });
+    var advBtn = document.createElement('button'); advBtn.className = 'small'; advBtn.textContent = 'Open Advanced Details';
+    advBtn.addEventListener('click', function () { var d = document.querySelector('details.advanced-details'); if (d) { d.open = true; d.scrollIntoView({ block: 'center', behavior: 'smooth' }); } });
+    actions.appendChild(advBtn);
     card.appendChild(actions);
     logGeneration({ kind: STATE.ref ? 'image-to-image' : 'image', provider: 'shared-chain', success: false, error: msg, prompt: full, opType: op, timedOut: timedOut, resultLabel: timedOut ? 'Provider Timed Out' : 'Returned No File' });
     if (window.LoadQueue && STATE.currentJob) {
