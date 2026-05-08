@@ -138,7 +138,7 @@ button.small{font-size:11.5px;padding:5px 10px}
   <summary style="cursor:pointer;padding:10px 14px;font-weight:800;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)">Advanced Details / Developer Diagnostics</summary>
   <div style="padding:0 14px 14px">
 
-    <div class="build-marker" style="margin-top:10px">BUILD MARKER: CHAT-STUDIO-v3.10-2026-05-08-v17g63</div>
+    <div class="build-marker" style="margin-top:10px">BUILD MARKER: CHAT-STUDIO-v3.11-2026-05-08-v17g64</div>
     <div class="intro">
       <strong>X-AI-CHAT-STUDIO Phase 3.</strong> Routed chat with inline real-output cards. Free / open-source / local-first only. <em>Chat</em>: Pollinations text → AI Horde fallback. <em>Text-to-image &amp; Image-to-image</em>: shared 17-provider chain via lib-load-image-providers.js (Local SD · Pollinations Flux · Pollinations · Pollinations Turbo · AI Horde · AI Horde SDXL · Hugging Face · Cloudflare AI · Cloudflare SDXL-Lightning · HF SDXL-Turbo · Together · Gemini Image · DeepAI · SiliconFlow · Real-ESRGAN · GFPGAN · CodeFormer). <em>Animate</em>: canvas Ken-Burns + MediaRecorder real WebM Blob. <em>Audio</em>: OfflineAudioContext WAV + Browser TTS + import / record / public-audio connectors / procedural ambience. Output proof: only marked ready when a real playable Blob exists; otherwise the card stays prompt-only honestly.
     </div>
@@ -226,7 +226,10 @@ var Core = window.LoadAICore;
 var DB = window.LoadDB || null;
 
 var STATE = {
-  mode: 'chat',
+  // 5.8 AI Studio Fix · Simple Creator View defaults to "Create
+  // image" — matches the .on button in the markup so the user's
+  // first Send always lands on the image route, not chat.
+  mode: 'image',
   style: '',
   styleName: '',
   size: '512x512',
