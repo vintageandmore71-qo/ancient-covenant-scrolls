@@ -138,6 +138,10 @@ button.small{font-size:11.5px;padding:5px 10px}
     <button id="btn-extend">Extend</button>
     <button id="btn-export">Export project (.loadstudio.zip)</button>
     <button id="btn-export-cinepwa">Export project (.cinepwa.zip)</button>
+    <input type="file" id="audio-import-input" accept="audio/*" multiple style="display:none">
+    <button id="btn-import-audio">Import audio / SFX / music</button>
+    <button id="btn-record-audio">Record narration</button>
+    <button id="btn-voice-fx">Voice manipulator</button>
     <label class="status-line" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="local-only"> Local-only mode</label>
     <button id="btn-clear">Clear thread</button>
     <span class="status-line" id="status"></span>
@@ -1198,6 +1202,7 @@ function attachToScene(scene) {
   }
   var sceneId = 'scene_' + Date.now().toString(36);
   var nowIso = new Date().toISOString();
+  // 13 spec scene audio fields (audio MVP 2026-05-08).
   var rec = {
     sceneId: sceneId,
     title: '',
@@ -1205,14 +1210,23 @@ function attachToScene(scene) {
     video: scene.video || '',
     visualPrompt: scene.visualPrompt || '',
     motionPrompt: scene.motionPrompt || '',
-    audioPrompt: scene.audioPrompt || '',
-    audio: scene.audio || '',
-    audioOutputProof: scene.audioOutputProof || null,
-    videoOutputProof: scene.videoOutputProof || null,
-    audioEmbedded: false,
-    audioMuxed: false,
-    audioStatus: scene.audioStatus || (scene.video ? 'silent_video' : 'silent_video'),
-    audioRightsStatus: 'needs-review',
+    audioPrompt:    scene.audioPrompt    || '',
+    sfxPrompt:      scene.sfxPrompt      || '',
+    musicPrompt:    scene.musicPrompt    || '',
+    ambiencePrompt: scene.ambiencePrompt || '',
+    voicePrompt:    scene.voicePrompt    || '',
+    audio:          scene.audio          || '',
+    music:          scene.music          || '',
+    sfx:            scene.sfx            || '',
+    audioStatus:    scene.audioStatus    || (scene.video ? 'silent_video' : 'silent_video'),
+    audioProvider:  scene.audioProvider  || '',
+    audioEmbedded:  scene.audioEmbedded === true,
+    audioMuxed:     scene.audioMuxed === true,
+    audioRightsStatus: scene.audioRightsStatus || 'needs-review',
+    audioOutputProof:  scene.audioOutputProof  || null,
+    musicOutputProof:  scene.musicOutputProof  || null,
+    sfxOutputProof:    scene.sfxOutputProof    || null,
+    videoOutputProof:  scene.videoOutputProof  || null,
     threadId: STATE.threadId,
     createdAt: nowIso
   };
@@ -1222,19 +1236,28 @@ function attachToScene(scene) {
   var promptLog = {
     sceneId: sceneId, threadId: STATE.threadId, at: nowIso,
     visualPrompt: scene.visualPrompt || '', motionPrompt: scene.motionPrompt || '',
-    audioPrompt: scene.audioPrompt || '', sourcePrompt: ($('user-input') ? '' : ''),
+    audioPrompt:    rec.audioPrompt,
+    sfxPrompt:      rec.sfxPrompt,
+    musicPrompt:    rec.musicPrompt,
+    ambiencePrompt: rec.ambiencePrompt,
+    voicePrompt:    rec.voicePrompt,
+    sourcePrompt: '',
     style: STATE.styleName || ''
   };
   var assetDecl = { sceneId: sceneId, declarations: [] };
   if (scene.image) assetDecl.declarations.push({ asset: scene.image, kind: 'image', status: scene.image.indexOf('blob:') === 0 || scene.image.indexOf('data:') === 0 ? 'platform-original' : 'third-party-licensed', source: scene.image });
-  if (scene.audioBlob) assetDecl.declarations.push({ asset: sceneId + '_audio.wav', kind: 'audio', status: 'platform-original', source: 'on-device OfflineAudioContext synthesis', proof: scene.audioOutputProof });
+  if (scene.audioBlob) assetDecl.declarations.push({ asset: sceneId + '_audio' + audioExt(scene.audioMime, scene.audioOutputProof), kind: 'audio', subKind: 'audio', status: scene.audioRightsStatus === 'platform-original' || scene.audioProvider === 'on-device-webaudio' || scene.audioProvider === 'browser-tts' ? 'platform-original' : (scene.audioRightsStatus || 'needs-review'), source: scene.audioSource || scene.audioProvider || 'unknown', license: scene.audioLicense || 'unknown', proof: scene.audioOutputProof });
+  if (scene.musicBlob) assetDecl.declarations.push({ asset: sceneId + '_music' + audioExt(scene.musicMime, scene.musicOutputProof), kind: 'music', subKind: 'music', status: scene.musicRightsStatus || 'needs-review', source: scene.musicSource || 'imported', license: scene.musicLicense || 'unknown', proof: scene.musicOutputProof });
+  if (scene.sfxBlob) assetDecl.declarations.push({ asset: sceneId + '_sfx' + audioExt(scene.sfxMime, scene.sfxOutputProof), kind: 'sfx', subKind: 'sfx', status: scene.sfxRightsStatus || 'needs-review', source: scene.sfxSource || 'imported', license: scene.sfxLicense || 'unknown', proof: scene.sfxOutputProof });
   if (scene.videoBlob) assetDecl.declarations.push({ asset: sceneId + '_video.webm', kind: 'video', status: 'platform-original', source: 'on-device Ken-Burns canvas + MediaRecorder', proof: scene.videoOutputProof });
   var rights = { sceneId: sceneId, owner: '', license: 'unknown', sourceMaterial: '', assetDeclarations: assetDecl.declarations.slice(), notes: 'Attached from AI Chat Studio. Review before LoadPlay publish-prep.' };
   var continuity = { sceneId: sceneId, threadId: STATE.threadId, character: '', wardrobe: '', era: '', style: STATE.styleName || '', conflicts: [] };
-  var routing = { sceneId: sceneId, intent: scene.video ? 'image-anim' : (scene.audioBlob ? 'sfx' : 'image-gen'), pickedProvider: scene.videoBlob ? 'on-device-kenburns' : (scene.audioBlob ? 'on-device-webaudio' : 'pollinations'), at: nowIso };
+  var routing = { sceneId: sceneId, intent: scene.video ? 'image-anim' : ((scene.audioBlob || scene.musicBlob || scene.sfxBlob) ? 'audio' : 'image-gen'), pickedProvider: scene.videoBlob ? 'on-device-kenburns' : (scene.audioProvider || (scene.audioBlob ? 'on-device-webaudio' : 'pollinations')), at: nowIso };
 
   var saves = [];
-  if (scene.audioBlob) saves.push(DB.put('audio_assets', sceneId + '_audio', { sceneId: sceneId, blob: scene.audioBlob, proof: scene.audioOutputProof, mime: (scene.audioOutputProof && scene.audioOutputProof.mime) || 'audio/wav' }));
+  if (scene.audioBlob) saves.push(DB.put('audio_assets', sceneId + '_audio', { sceneId: sceneId, blob: scene.audioBlob, proof: scene.audioOutputProof, mime: scene.audioMime || (scene.audioOutputProof && scene.audioOutputProof.mime) || 'audio/wav', kind: 'audio', source: scene.audioSource || scene.audioProvider || '', license: scene.audioLicense || 'unknown' }));
+  if (scene.musicBlob) saves.push(DB.put('audio_assets', sceneId + '_music', { sceneId: sceneId, blob: scene.musicBlob, proof: scene.musicOutputProof, mime: scene.musicMime || (scene.musicOutputProof && scene.musicOutputProof.mime) || 'audio/mpeg', kind: 'music', source: scene.musicSource || '', license: scene.musicLicense || 'unknown' }));
+  if (scene.sfxBlob)   saves.push(DB.put('audio_assets', sceneId + '_sfx',   { sceneId: sceneId, blob: scene.sfxBlob,   proof: scene.sfxOutputProof,   mime: scene.sfxMime   || (scene.sfxOutputProof   && scene.sfxOutputProof.mime)   || 'audio/wav',  kind: 'sfx',   source: scene.sfxSource   || '', license: scene.sfxLicense   || 'unknown' }));
   if (scene.videoBlob) saves.push(DB.put('video_assets', sceneId + '_video', { sceneId: sceneId, blob: scene.videoBlob, proof: scene.videoOutputProof, mime: (scene.videoOutputProof && scene.videoOutputProof.mime) || 'video/webm' }));
   saves.push(DB.put('scenes', sceneId, rec));
   saves.push(DB.put('kv', 'prompt-log-' + sceneId, promptLog));
@@ -1245,10 +1268,132 @@ function attachToScene(scene) {
   Promise.all(saves).then(function () {
     var detail = 'Scene saved to Project Memory: ' + sceneId + ' (+ prompt-log, asset-decl, rights, continuity, routing entries)';
     if (scene.audioBlob) detail += ' (+ audio blob in audio_assets)';
+    if (scene.musicBlob) detail += ' (+ music blob in audio_assets)';
+    if (scene.sfxBlob)   detail += ' (+ sfx blob in audio_assets)';
     if (scene.videoBlob) detail += ' (+ video blob in video_assets)';
     appendCard({ cls: 'assistant', who: 'Attach to scene', badge: { cls: 'ok', text: 'saved' }, text: detail });
   }).catch(function (e) {
     appendCard({ cls: 'error', who: 'Attach', text: 'Save failed: ' + (e && e.message || e) });
+  });
+}
+
+// Audio MVP helpers (2026-05-08).
+// audioExt — pick a sane file extension from a Blob mime / output-
+// proof descriptor. Default .wav so the validator's required-folder
+// rules accept it.
+function audioExt(mime, proof) {
+  var m = String((mime || (proof && proof.mime) || 'audio/wav')).toLowerCase();
+  if (m.indexOf('mpeg') !== -1 || m.indexOf('mp3') !== -1) return '.mp3';
+  if (m.indexOf('ogg') !== -1) return '.ogg';
+  if (m.indexOf('mp4') !== -1 || m.indexOf('m4a') !== -1 || m.indexOf('aac') !== -1) return '.m4a';
+  if (m.indexOf('wav') !== -1 || m.indexOf('wave') !== -1 || m.indexOf('riff') !== -1) return '.wav';
+  if (m.indexOf('webm') !== -1) return '.webm';
+  return '.wav';
+}
+
+// Output proof for imported audio — magic-byte check on the first
+// 12 bytes + size sanity. Resolves to a proof descriptor or rejects.
+// Verifiers: WAV (RIFF/WAVE), OGG (OggS), MP3 (ID3 or 0xFFFB sync),
+// M4A (ftyp at offset 4), WebM (EBML 0x1A45DFA3).
+function verifyAudioBlob(blob) {
+  return new Promise(function (resolve, reject) {
+    if (!blob || typeof blob.size !== 'number') { reject(new Error('not a blob')); return; }
+    if (blob.size < 64) { reject(new Error('audio blob too small (' + blob.size + ' B)')); return; }
+    var head = blob.slice(0, 12);
+    head.arrayBuffer().then(function (ab) {
+      var b = new Uint8Array(ab);
+      // RIFF / WAVE
+      if (b[0]===0x52 && b[1]===0x49 && b[2]===0x46 && b[3]===0x46 && b[8]===0x57 && b[9]===0x41 && b[10]===0x56 && b[11]===0x45)
+        return resolve({ kind: 'audio-blob', subKind: 'wav', mime: 'audio/wav', bytes: blob.size, magic: 'RIFF/WAVE' });
+      // OGG
+      if (b[0]===0x4F && b[1]===0x67 && b[2]===0x67 && b[3]===0x53)
+        return resolve({ kind: 'audio-blob', subKind: 'ogg', mime: 'audio/ogg', bytes: blob.size, magic: 'OggS' });
+      // ID3 (MP3 with tag)
+      if (b[0]===0x49 && b[1]===0x44 && b[2]===0x33)
+        return resolve({ kind: 'audio-blob', subKind: 'mp3', mime: 'audio/mpeg', bytes: blob.size, magic: 'ID3' });
+      // MP3 frame sync 0xFFFB / 0xFFF3 / 0xFFF2
+      if (b[0]===0xFF && (b[1]===0xFB || b[1]===0xF3 || b[1]===0xF2))
+        return resolve({ kind: 'audio-blob', subKind: 'mp3', mime: 'audio/mpeg', bytes: blob.size, magic: 'MPEG-frame' });
+      // ISO ftyp (M4A/MP4)
+      if (b[4]===0x66 && b[5]===0x74 && b[6]===0x79 && b[7]===0x70)
+        return resolve({ kind: 'audio-blob', subKind: 'm4a', mime: 'audio/mp4', bytes: blob.size, magic: 'ftyp' });
+      // WebM EBML
+      if (b[0]===0x1A && b[1]===0x45 && b[2]===0xDF && b[3]===0xA3)
+        return resolve({ kind: 'audio-blob', subKind: 'webm', mime: 'audio/webm', bytes: blob.size, magic: 'EBML' });
+      reject(new Error('audio magic bytes not recognised (got ' + Array.prototype.slice.call(b).map(function (x) { return x.toString(16).padStart(2,'0'); }).join(' ') + ')'));
+    }).catch(reject);
+  });
+}
+
+// Detect audio kind from filename + user pick. User pick wins.
+function detectAudioKind(fileName, userPick) {
+  if (userPick) return userPick;
+  var n = String(fileName || '').toLowerCase();
+  if (/(music|song|track|score|theme|melody|bgm)/.test(n)) return 'music';
+  if (/(sfx|effect|hit|crash|impact|whoosh|click|footstep|fx)/.test(n)) return 'sfx';
+  if (/(narration|voice|vo|dialogue|monolog|speech|voiceover)/.test(n)) return 'audio';
+  if (/(ambien|atmos|room|wind|rain|crowd|background)/.test(n)) return 'sfx';
+  return 'audio';
+}
+
+// Open the audio import modal — prompts for kind + license + source.
+// Returns a Promise that resolves to the scene-friendly attach
+// payload (audioBlob / musicBlob / sfxBlob etc.).
+function importAudioFile(file, opts) {
+  opts = opts || {};
+  return verifyAudioBlob(file).then(function (proof) {
+    var kindGuess = detectAudioKind(file.name, opts.kind);
+    var url = URL.createObjectURL(file);
+    var card = appendCard({ cls: 'assistant', who: 'Audio import', badge: { cls: 'ok', text: 'audio imported' },
+      html: '<pre>' + esc('Imported: ' + file.name + '\n  size:    ' + proof.bytes + ' B\n  mime:    ' + proof.mime + '\n  magic:   ' + proof.magic + '\n  kind:    ' + kindGuess + '\n  status:  audio imported · separate audio available') + '</pre>' +
+            '<audio src="' + url + '" controls playsinline style="width:100%;margin-top:8px"></audio>' +
+            '<div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px">' +
+              '<label>Kind <select data-fld="kind"><option value="audio"' + (kindGuess==='audio'?' selected':'') + '>audio (narration / dialogue)</option><option value="music"' + (kindGuess==='music'?' selected':'') + '>music</option><option value="sfx"' + (kindGuess==='sfx'?' selected':'') + '>sfx (effect / ambience)</option></select></label>' +
+              '<label>License <select data-fld="license"><option value="user-owned">user-owned</option><option value="cc0">CC0 / public domain</option><option value="cc-by">CC BY</option><option value="cc-by-sa">CC BY-SA</option><option value="other-licensed">other (licensed)</option><option value="unknown">unknown</option></select></label>' +
+              '<label style="grid-column:1/3">Source <input type="text" data-fld="source" placeholder="e.g. self-recorded / Freesound CC0 #12345 / Pixabay / OpenGameArt" style="width:100%"></label>' +
+            '</div>' +
+            '<div class="actions"></div>' });
+    var actions = card.querySelector('.actions');
+    var btnAttach = document.createElement('button'); btnAttach.className = 'small primary'; btnAttach.textContent = 'Attach to scene';
+    btnAttach.addEventListener('click', function () {
+      var k = card.querySelector('[data-fld=kind]').value;
+      var lic = card.querySelector('[data-fld=license]').value;
+      var src = card.querySelector('[data-fld=source]').value || 'imported';
+      var statusByKind = { audio: 'audio_ready_for_scene', music: 'separate_audio_available', sfx: 'sfx_attached' };
+      var payload = { audioStatus: statusByKind[k] || 'audio_ready_for_scene', audioRightsStatus: lic === 'user-owned' || lic === 'cc0' ? lic : 'needs-review', audioProvider: 'user-import' };
+      if (k === 'music') {
+        payload.musicBlob = file; payload.music = url; payload.musicOutputProof = proof; payload.musicMime = proof.mime; payload.musicSource = src; payload.musicLicense = lic; payload.musicRightsStatus = lic === 'user-owned' || lic === 'cc0' ? lic : 'needs-review';
+      } else if (k === 'sfx') {
+        payload.sfxBlob = file; payload.sfx = url; payload.sfxOutputProof = proof; payload.sfxMime = proof.mime; payload.sfxSource = src; payload.sfxLicense = lic; payload.sfxRightsStatus = lic === 'user-owned' || lic === 'cc0' ? lic : 'needs-review';
+      } else {
+        payload.audioBlob = file; payload.audio = url; payload.audioOutputProof = proof; payload.audioMime = proof.mime; payload.audioSource = src; payload.audioLicense = lic;
+      }
+      attachToScene(payload);
+      appendCard({ cls: 'assistant', who: 'Audio attached', badge: { cls: 'ok', text: 'audio ready for export' },
+        html: '<pre>' + esc('Audio attached.\n  kind:    ' + k + '\n  license: ' + lic + '\n  source:  ' + src + '\n  status:  audio ready for export') + '</pre>' });
+    });
+    actions.appendChild(btnAttach);
+    var btnPreview = document.createElement('button'); btnPreview.className = 'small'; btnPreview.textContent = 'Add to scene preview (mixer)';
+    btnPreview.addEventListener('click', function () {
+      if (!window.LoadMixer) { appendCard({ cls: 'assistant', who: 'Mixer', badge: { cls: 'fail', text: 'mixer unavailable' }, text: 'LoadMixer module not loaded.' }); return; }
+      try {
+        var lane = (card.querySelector('[data-fld=kind]').value === 'music') ? 'music' : (card.querySelector('[data-fld=kind]').value === 'sfx' ? 'SFX' : 'narration');
+        if (!STATE.mixer) STATE.mixer = window.LoadMixer.create();
+        STATE.mixer.addLayer({ id: 'imp-' + Date.now().toString(36), lane: lane, blob: file, name: file.name });
+        appendCard({ cls: 'assistant', who: 'Scene mixer', badge: { cls: 'ok', text: 'lane added' },
+          html: '<pre>' + esc('Added to mixer lane: ' + lane + ' (' + file.name + ')') + '</pre>' });
+      } catch (e) { appendCard({ cls: 'error', who: 'Mixer', text: 'addLayer failed: ' + (e && e.message || e) }); }
+    });
+    actions.appendChild(btnPreview);
+    logGeneration({ kind: 'audio-import', provider: 'user-import', success: true, prompt: '', size: 0,
+      outputProof: proof, audioStatus: 'audio_imported', resultLabel: 'Audio imported · Separate audio available',
+      file: file.name });
+    return proof;
+  }).catch(function (err) {
+    appendCard({ cls: 'assistant', who: 'Audio import', badge: { cls: 'fail', text: 'audio failed' },
+      html: '<pre>' + esc('Could not verify audio file.\n  file:  ' + (file && file.name) + '\n  size:  ' + (file && file.size) + ' B\n  error: ' + (err && err.message || err) + '\n  status: audio failed — output proof rejected') + '</pre>' });
+    logGeneration({ kind: 'audio-import', provider: 'user-import', success: false, error: String(err && err.message || err), file: file && file.name });
+    throw err;
   });
 }
 
@@ -1363,6 +1508,40 @@ if (window.LoadResume) {
 $('btn-export').addEventListener('click', function () { exportProject('loadstudio'); });
 $('btn-export-cinepwa').addEventListener('click', function () { exportProject('cinepwa'); });
 
+// Audio MVP — wire toolbar buttons.
+$('btn-import-audio').addEventListener('click', function () { $('audio-import-input').click(); });
+$('audio-import-input').addEventListener('change', function () {
+  var files = Array.prototype.slice.call(this.files || []);
+  var t = this;
+  Promise.all(files.map(function (f) { return importAudioFile(f).catch(function () { return null; }); }))
+    .then(function () { try { t.value = ''; } catch (_) {} });
+});
+$('btn-record-audio').addEventListener('click', function () {
+  // Use the existing voice-recorder tool when present in the suite.
+  // Output stays on its own page; the user pastes the resulting
+  // file back through Import audio. No duplicate recorder built.
+  if (window.LoadVoiceRecorder && typeof window.LoadVoiceRecorder.open === 'function') {
+    window.LoadVoiceRecorder.open({ onSave: function (blob, name) {
+      try { return importAudioFile(new File([blob], name || 'narration.webm', { type: blob.type || 'audio/webm' })); }
+      catch (_) { return null; }
+    } });
+    return;
+  }
+  // Fallback: open the existing voice-recorder.html in a new tab so
+  // the user records there, then re-imports via the Import button.
+  window.open('./voice-recorder.html', '_blank', 'noopener');
+});
+$('btn-voice-fx').addEventListener('click', function () {
+  if (window.VoiceManipulator && typeof window.VoiceManipulator.open === 'function') {
+    window.VoiceManipulator.open();
+  } else if (window.CharacterVoiceStudio && typeof window.CharacterVoiceStudio.openManipulator === 'function') {
+    window.CharacterVoiceStudio.openManipulator();
+  } else {
+    appendCard({ cls: 'assistant', who: 'Voice manipulator', badge: { cls: 'prompt', text: 'audio provider needed' },
+      html: '<pre>' + esc('Voice manipulator module not loaded in this surface.\n\nWorkaround: record narration via "Record narration" then import via "Import audio". Status: audio provider needed.') + '</pre>' });
+  }
+});
+
 function exportProject(format) {
   format = format === 'cinepwa' ? 'cinepwa' : 'loadstudio';
   var ext = format === 'cinepwa' ? '.cinepwa.zip' : '.loadstudio.zip';
@@ -1434,7 +1613,17 @@ function exportProject(format) {
     z.folder('assets/music'); z.folder('assets/sfx'); z.folder('assets/subtitles'); z.folder('assets/icons');
     z.file('assets/music/.keep', ''); z.file('assets/sfx/.keep', ''); z.file('assets/subtitles/.keep', ''); z.file('assets/icons/.keep', '');
     imgs.forEach(function (a) { if (a.blob) z.file('assets/images/' + a.sceneId + '.bin', a.blob); });
-    auds.forEach(function (a) { if (a.blob) z.file('assets/audio/' + a.sceneId + '.wav', a.blob); });
+    // Route audio assets by kind so music lands in assets/music/,
+    // sfx in assets/sfx/, and narration / voice-overs / generic
+    // audio in assets/audio/. Extension picked from the stored
+    // mime type so .mp3 / .ogg / .m4a survive round-trip.
+    auds.forEach(function (a) {
+      if (!a.blob) return;
+      var folder = a.kind === 'music' ? 'assets/music/' : (a.kind === 'sfx' ? 'assets/sfx/' : 'assets/audio/');
+      var ext = audioExt(a.mime, a.proof);
+      var base = a.sceneId + (a.kind === 'music' || a.kind === 'sfx' ? ('_' + a.kind) : '');
+      z.file(folder + base + ext, a.blob);
+    });
     vids.forEach(function (a) { if (a.blob) z.file('assets/video/' + a.sceneId + '.webm', a.blob); });
 
     return z.generateAsync({ type: 'blob' }).then(function (blob) {
