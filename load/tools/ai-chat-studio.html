@@ -16,6 +16,7 @@
 <script src="../lib-load-timeouts.js"></script>
 <script src="../lib-load-local-only.js"></script>
 <script src="../lib-load-ai-pipeline.js"></script>
+<script src="../lib-public-audio-connectors.js"></script>
 <script src="../lib-jszip.min.js"></script>
 <style>
 :root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--info:#60a5fa;--border:#2a2a40}
@@ -142,6 +143,8 @@ button.small{font-size:11.5px;padding:5px 10px}
     <button id="btn-import-audio">Import audio / SFX / music</button>
     <button id="btn-record-audio">Record narration</button>
     <button id="btn-voice-fx">Voice manipulator</button>
+    <button id="btn-public-audio">Public audio sources</button>
+    <button id="btn-procedural-ambience">Procedural ambience</button>
     <label class="status-line" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="local-only"> Local-only mode</label>
     <button id="btn-clear">Clear thread</button>
     <span class="status-line" id="status"></span>
@@ -1540,6 +1543,92 @@ $('btn-voice-fx').addEventListener('click', function () {
     appendCard({ cls: 'assistant', who: 'Voice manipulator', badge: { cls: 'prompt', text: 'audio provider needed' },
       html: '<pre>' + esc('Voice manipulator module not loaded in this surface.\n\nWorkaround: record narration via "Record narration" then import via "Import audio". Status: audio provider needed.') + '</pre>' });
   }
+});
+
+// Public audio sources panel — URL-paste connectors for free /
+// public-domain / Creative-Commons audio. License + source meta
+// required per asset before attach. No API keys involved.
+$('btn-public-audio').addEventListener('click', function () {
+  if (!window.LoadPublicAudio) {
+    appendCard({ cls: 'assistant', who: 'Public audio sources', badge: { cls: 'fail', text: 'audio provider needed' },
+      html: '<pre>LoadPublicAudio module failed to load.</pre>' });
+    return;
+  }
+  var connectors = window.LoadPublicAudio.list();
+  var optHtml = connectors.map(function (c) { return '<option value="' + esc(c.id) + '" data-default="' + esc(c.defaultLicense) + '" data-hint="' + esc(c.hint) + '">' + esc(c.name) + ' (' + esc(c.host) + ')</option>'; }).join('');
+  var card = appendCard({ cls: 'assistant', who: 'Public audio sources', badge: { cls: 'prompt', text: 'paste URL + license' },
+    html: '<pre>' + esc('Paste a direct media URL from one of the free sources below. Confirm the license per asset — Creative-Commons does not automatically mean commercial-cleared.') + '</pre>' +
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;margin-top:6px">' +
+            '<label style="grid-column:1/3">Source <select data-fld="connector">' + optHtml + '</select></label>' +
+            '<label style="grid-column:1/3">Direct media URL <input type="text" data-fld="url" placeholder="https://..." style="width:100%"></label>' +
+            '<label>License <select data-fld="license"><option value="cc0">CC0 / public domain</option><option value="cc-by">CC BY</option><option value="cc-by-sa">CC BY-SA</option><option value="public-domain">public domain</option><option value="pixabay-content-license">Pixabay license</option><option value="oga-by">OGA-BY</option><option value="other-licensed">other (licensed)</option><option value="unknown">unknown</option></select></label>' +
+            '<label>Kind <select data-fld="kind"><option value="audio">audio (narration / dialogue)</option><option value="music">music</option><option value="sfx" selected>sfx (effect / ambience)</option></select></label>' +
+            '<label style="grid-column:1/3">Source note <input type="text" data-fld="note" placeholder="creator / clip-id / page URL" style="width:100%"></label>' +
+            '<div style="grid-column:1/3" data-fld="hint" class="status-line"></div>' +
+          '</div>' +
+          '<div class="actions"></div>' });
+  function updHint() {
+    var sel = card.querySelector('[data-fld=connector]');
+    var opt = sel.options[sel.selectedIndex];
+    if (opt) {
+      card.querySelector('[data-fld=hint]').textContent = opt.getAttribute('data-hint');
+      card.querySelector('[data-fld=license]').value = opt.getAttribute('data-default') || 'cc-by';
+    }
+  }
+  card.querySelector('[data-fld=connector]').addEventListener('change', updHint);
+  updHint();
+  var actions = card.querySelector('.actions');
+  var btnFetch = document.createElement('button'); btnFetch.className = 'small primary'; btnFetch.textContent = 'Fetch + verify + attach';
+  btnFetch.addEventListener('click', function () {
+    var connectorId = card.querySelector('[data-fld=connector]').value;
+    var url = card.querySelector('[data-fld=url]').value.trim();
+    var license = card.querySelector('[data-fld=license]').value;
+    var kind = card.querySelector('[data-fld=kind]').value;
+    var note = card.querySelector('[data-fld=note]').value.trim();
+    btnFetch.disabled = true; btnFetch.textContent = 'fetching...';
+    window.LoadPublicAudio.fromUrl(connectorId, url, { license: license, source: note ? (note + ' · ' + url) : url }).then(function (out) {
+      var fname = 'public-audio-' + Date.now().toString(36) + '.' + (out.proof.subKind || 'wav');
+      var file = new File([out.blob], fname, { type: out.proof.mime });
+      btnFetch.textContent = 'fetched';
+      // Hand off to importAudioFile so the existing kind/license/
+      // attach UI shows up — pre-set kind via opts.
+      return importAudioFile(file, { kind: kind, license: license, source: out.source, connector: out.name });
+    }).catch(function (err) {
+      btnFetch.disabled = false; btnFetch.textContent = 'Fetch + verify + attach';
+      appendCard({ cls: 'assistant', who: 'Public audio sources', badge: { cls: 'fail', text: 'audio failed' },
+        html: '<pre>' + esc('Fetch failed: ' + (err && err.message || err)) + '</pre>' });
+    });
+  });
+  actions.appendChild(btnFetch);
+});
+
+// Procedural ambience generator — on-device WAV render, no
+// network. Five locked-plan presets: rain / wind / fire /
+// room-tone / crowd-bed. Produces real WAV blobs that pass the
+// magic-byte verifier and route into the same attach pipeline.
+$('btn-procedural-ambience').addEventListener('click', function () {
+  if (!window.LoadPublicAudio) return;
+  var card = appendCard({ cls: 'assistant', who: 'Procedural ambience', badge: { cls: 'prompt', text: 'pick a preset' },
+    html: '<pre>' + esc('On-device ambience renderer (no network, no provider). Outputs a real WAV Blob; routes to assets/sfx/ on attach.') + '</pre>' +
+          '<div class="actions"></div>' });
+  var actions = card.querySelector('.actions');
+  ['rain', 'wind', 'fire', 'room-tone', 'crowd-bed'].forEach(function (kind) {
+    var b = document.createElement('button'); b.className = 'small'; b.textContent = kind;
+    b.addEventListener('click', function () {
+      b.disabled = true; b.textContent = kind + ' …';
+      window.LoadPublicAudio.proceduralAmbience(kind, 6).then(function (out) {
+        var file = new File([out.blob], 'ambience-' + kind + '-' + Date.now().toString(36) + '.wav', { type: 'audio/wav' });
+        return importAudioFile(file, { kind: 'sfx', license: 'cc0', source: 'procedural ambience (on-device WebAudio)' });
+      }).then(function () { b.textContent = kind + ' ✓'; })
+        .catch(function (err) { b.disabled = false; b.textContent = kind + ' (retry)'; appendCard({ cls: 'error', who: 'Procedural ambience', text: 'render failed: ' + (err && err.message || err) }); });
+    });
+    actions.appendChild(b);
+  });
+  // Future-feature footnote so the user knows what is and isn't wired.
+  var note = document.createElement('div'); note.className = 'meta';
+  note.style.marginTop = '8px';
+  note.textContent = 'Future audio routes (not wired): HF audio (audio provider needed) · Local audio model server (audio provider needed) · FFmpeg.wasm muxing (audio muxing future).';
+  card.appendChild(note);
 });
 
 function exportProject(format) {
