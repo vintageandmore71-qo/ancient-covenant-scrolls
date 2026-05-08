@@ -139,7 +139,7 @@ button.small{font-size:11.5px;padding:5px 10px}
   <summary style="cursor:pointer;padding:10px 14px;font-weight:800;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)">Advanced Details / Developer Diagnostics</summary>
   <div style="padding:0 14px 14px">
 
-    <div class="build-marker" style="margin-top:10px">BUILD MARKER: CHAT-STUDIO-v4.6-2026-05-08-v17g72 (no-hang-edit-path)</div>
+    <div class="build-marker" style="margin-top:10px">BUILD MARKER: CHAT-STUDIO-v4.7-2026-05-08-v17g73 (text-to-image-fallback-button)</div>
     <div class="intro">
       <strong>X-AI-CHAT-STUDIO Phase 3.</strong> Routed chat with inline real-output cards. Free / open-source / local-first only. <em>Chat</em>: Pollinations text → AI Horde fallback. <em>Text-to-image &amp; Image-to-image</em>: shared 17-provider chain via lib-load-image-providers.js (Local SD · Pollinations Flux · Pollinations · Pollinations Turbo · AI Horde · AI Horde SDXL · Hugging Face · Cloudflare AI · Cloudflare SDXL-Lightning · HF SDXL-Turbo · Together · Gemini Image · DeepAI · SiliconFlow · Real-ESRGAN · GFPGAN · CodeFormer). <em>Animate</em>: canvas Ken-Burns + MediaRecorder real WebM Blob. <em>Audio</em>: OfflineAudioContext WAV + Browser TTS + import / record / public-audio connectors / procedural ambience. Output proof: only marked ready when a real playable Blob exists; otherwise the card stays prompt-only honestly.
     </div>
@@ -1286,6 +1286,32 @@ function runEditWithPreservation(p) {
         html: '<pre>' + esc('Edit prompt saved (source image preserved):\n\n' + raw) + '</pre>' });
         logGeneration({ kind: 'image-to-image', provider: 'prompt-only', success: false, prompt: raw, promptOnly: true, opType: 'image-edit' }); }
     });
+    // Non-anatomy fallback: when no img2img provider succeeded but
+    // the request is NOT anatomy-sensitive (e.g. "add a shih tzu
+    // dog beside it" / "add a tree" / "add a lamp"), offer an
+    // explicit "Generate as new scene (text-to-image)" button. The
+    // user opts in knowingly: source pixels are NOT preserved, but
+    // the request completes via a strong scene-preservation prompt
+    // through the shared chain. No silent fallback — the button
+    // makes the trade-off visible.
+    if (!anatomySensitive && manual) {
+      var t2i = document.createElement('button'); t2i.className = 'small primary'; t2i.textContent = 'Generate as new scene (text-to-image)';
+      t2i.addEventListener('click', function () {
+        // Build a fresh prompt that re-states the previous scene
+        // (best-effort preservation in words) plus the user's
+        // edit. This is text-to-image, not pixel-edit.
+        var prevDesc = (STATE.lastCompiled && STATE.lastCompiled.fullPrompt) || '';
+        var combined = (prevDesc ? prevDesc + ', ' : '') + raw + ', preserve the previous scene description above; only add what was requested';
+        appendCard({ cls: 'assistant', who: 'Generating as new scene…', badge: { cls: 'warn', text: 'text-to-image (not pixel-edit)' },
+          html: '<pre>' + esc('Switching to text-to-image. Source pixels are NOT preserved — the system regenerates the scene from the combined prompt and adds the requested change. To get true pixel-preserving edits, configure a free HF inpainting / Gemini Image / Local SD provider.') + '</pre>' });
+        // Temporarily clear STATE.ref so runImageViaSharedChain
+        // takes the text-to-image path (taskType: 'generate'), not
+        // img2img. Restore after the run starts.
+        var savedRef = STATE.ref; STATE.ref = null;
+        runImageViaSharedChain(raw, combined).then(function () { STATE.ref = savedRef; });
+      });
+      actions.appendChild(t2i);
+    }
     var advBtn = document.createElement('button'); advBtn.className = 'small'; advBtn.textContent = 'Open Advanced Details';
     advBtn.addEventListener('click', function () { var d = document.querySelector('details.advanced-details'); if (d) { d.open = true; d.scrollIntoView({ block: 'center', behavior: 'smooth' }); } });
     actions.appendChild(advBtn);
