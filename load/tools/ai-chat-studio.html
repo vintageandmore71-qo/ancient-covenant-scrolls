@@ -114,9 +114,13 @@ button.small{font-size:11.5px;padding:5px 10px}
 </div>
 
 <!-- Empty result placeholder — visible before the first generation
-     so the user can clearly see where the result will appear. -->
-<div id="empty-result" class="empty-result" style="margin:0 0 12px;border:2px dashed var(--border);border-radius:10px;padding:32px 16px;text-align:center;color:var(--mute);font-size:14px">
-  Your result will appear here.
+     so the user can clearly see where the result will appear. The
+     same DOM node is reused as the LIVE result panel during/after
+     generation (see setLiveResult in script). Always rendered;
+     never hidden. -->
+<div id="empty-result" class="empty-result" style="margin:0 0 12px;border:2px dashed var(--border);border-radius:12px;padding:24px 16px;text-align:center;color:var(--mute);font-size:14px;background:#0a0e18;min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px">
+  <div style="font-size:14px;font-weight:700;color:var(--fg)">Your result will appear here.</div>
+  <div style="font-size:12px;color:var(--mute);max-width:480px;line-height:1.5">Tap a Simple Creator View action above (Create image / Edit image / Animate / Add sound / Write prompt), describe what you want, then tap Send.</div>
 </div>
 
 <div class="messages" id="messages">
@@ -138,7 +142,7 @@ button.small{font-size:11.5px;padding:5px 10px}
   <summary style="cursor:pointer;padding:10px 14px;font-weight:800;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)">Advanced Details / Developer Diagnostics</summary>
   <div style="padding:0 14px 14px">
 
-    <div class="build-marker" style="margin-top:10px">BUILD MARKER: CHAT-STUDIO-v3.11-2026-05-08-v17g64</div>
+    <div class="build-marker" style="margin-top:10px">BUILD MARKER: CHAT-STUDIO-v3.12-2026-05-08-v17g65</div>
     <div class="intro">
       <strong>X-AI-CHAT-STUDIO Phase 3.</strong> Routed chat with inline real-output cards. Free / open-source / local-first only. <em>Chat</em>: Pollinations text → AI Horde fallback. <em>Text-to-image &amp; Image-to-image</em>: shared 17-provider chain via lib-load-image-providers.js (Local SD · Pollinations Flux · Pollinations · Pollinations Turbo · AI Horde · AI Horde SDXL · Hugging Face · Cloudflare AI · Cloudflare SDXL-Lightning · HF SDXL-Turbo · Together · Gemini Image · DeepAI · SiliconFlow · Real-ESRGAN · GFPGAN · CodeFormer). <em>Animate</em>: canvas Ken-Burns + MediaRecorder real WebM Blob. <em>Audio</em>: OfflineAudioContext WAV + Browser TTS + import / record / public-audio connectors / procedural ambience. Output proof: only marked ready when a real playable Blob exists; otherwise the card stays prompt-only honestly.
     </div>
@@ -800,14 +804,78 @@ function jobUpdate(job, patch) {
   return window.LoadQueue.update(job.jobId, patch).catch(function () {});
 }
 
-// Hide the empty-result placeholder once the user starts a turn —
-// the loading card itself takes its place visually.
-function hideEmptyResultPlaceholder() {
-  var er = document.getElementById('empty-result'); if (er) er.style.display = 'none';
+// Live result panel — the always-visible big block above #messages.
+// Painted by setLiveResult so the user can never miss where the
+// image lands. We keep it visible at all times; its content swaps
+// through three states: idle / creating / ready / failed.
+function setLiveResult(state, opts) {
+  var er = document.getElementById('empty-result'); if (!er) return;
+  er.style.display = 'flex';
+  opts = opts || {};
+  if (state === 'idle') {
+    er.style.borderColor = 'var(--border)';
+    er.style.background = '#0a0e18';
+    er.innerHTML =
+      '<div style="font-size:14px;font-weight:700;color:var(--fg)">Your result will appear here.</div>' +
+      '<div style="font-size:12px;color:var(--mute);max-width:480px;line-height:1.5">Tap a Simple Creator View action above, describe what you want, then tap Send.</div>';
+    return;
+  }
+  if (state === 'creating') {
+    er.style.borderColor = 'var(--accent)';
+    er.style.background = 'rgba(124,58,237,.06)';
+    var capMs = opts.capMs || 45000;
+    er.innerHTML =
+      '<div style="font-size:15px;font-weight:800;color:var(--fg)"><span class="spinner"></span> Creating image…</div>' +
+      '<div style="font-size:12.5px;color:var(--mute)">Provider: <strong>' + esc(opts.provider || '') + '</strong></div>' +
+      '<div style="font-size:12.5px;color:var(--mute)" data-fld="deadline">Timeout in ' + Math.ceil(capMs / 1000) + 's. Result will appear here.</div>' +
+      '<div style="font-size:11.5px;color:var(--mute);max-width:480px;line-height:1.5">Op: text-to-image · Prompt: ' + esc((opts.prompt || '').slice(0, 200)) + '</div>';
+    if (er.__deadlineIv) try { clearInterval(er.__deadlineIv); } catch (_) {}
+    var dlEnd = Date.now() + capMs;
+    er.__deadlineIv = setInterval(function () {
+      var left = Math.max(0, dlEnd - Date.now());
+      var dl = er.querySelector('[data-fld=deadline]');
+      if (dl) dl.textContent = 'Timeout in ' + Math.ceil(left / 1000) + 's. Result will appear here.';
+      if (left <= 0) { try { clearInterval(er.__deadlineIv); er.__deadlineIv = null; } catch (_) {} }
+    }, 1000);
+    try { er.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (_) {}
+    return;
+  }
+  if (state === 'ready') {
+    if (er.__deadlineIv) { try { clearInterval(er.__deadlineIv); er.__deadlineIv = null; } catch (_) {} }
+    er.style.borderColor = 'var(--ok)';
+    er.style.background = 'rgba(74,222,128,.05)';
+    er.innerHTML =
+      '<div style="font-size:15px;font-weight:800;color:var(--ok)">Image Created</div>' +
+      (opts.imgUrl ? '<img src="' + esc(opts.imgUrl) + '" alt="" style="max-width:100%;max-height:320px;border-radius:8px">' : '') +
+      '<div style="font-size:12px;color:var(--mute)">Provider: <strong>' + esc(opts.provider || '') + '</strong> · op: text-to-image · output proof: real image rendered (' + (opts.bytes || '?') + ' B, ' + (opts.w || '?') + 'x' + (opts.h || '?') + ')</div>' +
+      '<div style="font-size:11.5px;color:var(--mute)">Full action row (Save / Refine / Animate / Add sound / Attach to scene / Export) is on the matching card in the chat below.</div>';
+    return;
+  }
+  if (state === 'failed') {
+    if (er.__deadlineIv) { try { clearInterval(er.__deadlineIv); er.__deadlineIv = null; } catch (_) {} }
+    er.style.borderColor = 'var(--err)';
+    er.style.background = 'rgba(255,110,110,.05)';
+    er.innerHTML =
+      '<div style="font-size:15px;font-weight:800;color:var(--err)">' + esc(opts.statusLabel || 'Provider Failed') + '</div>' +
+      '<div style="font-size:12.5px;color:var(--mute)">Provider attempted: <strong>' + esc(opts.provider || '') + '</strong></div>' +
+      '<div style="font-size:12px;color:var(--mute);max-width:520px;line-height:1.5">' + esc(opts.error || '') + '</div>' +
+      '<div style="font-size:11.5px;color:var(--mute)">Retry / Try next provider / Save prompt-only / Open Advanced Details — buttons live on the matching card in the chat below.</div>';
+    return;
+  }
 }
+
+// Backwards-compat alias used by send(); now flips the live panel
+// into the "creating" state so the placeholder stays visible.
+function hideEmptyResultPlaceholder() { /* live panel stays visible; setLiveResult drives its state */ }
 
 function send() {
   hideEmptyResultPlaceholder();
+  // Defensive: re-sync STATE.mode from whichever button currently
+  // carries the .on class. Stale STATE.mode was the v17g63 bug —
+  // a chat reply appeared instead of an image when the user hadn't
+  // tapped the action buttons before Send.
+  var activeBtn = document.querySelector('[data-mode].on');
+  if (activeBtn) STATE.mode = activeBtn.getAttribute('data-mode') || STATE.mode;
   var p = $('user-input').value.trim();
   if (!p) return;
   $('user-input').value = '';
@@ -950,6 +1018,10 @@ function runImageViaSharedChain(p, full) {
   // user can clearly see WHERE the image will land. Replaces the
   // small "POLLINATIONS.AI — THINKING" chip pattern.
   var capMs = (window.LoadTimeouts ? window.LoadTimeouts.byIntent(STATE.ref ? 'image-to-image' : 'image') : 60000);
+  // Paint the always-visible LIVE result panel above #messages so
+  // the user sees the loading state immediately on Send. This is
+  // the visible card iPad reports were missing.
+  setLiveResult('creating', { provider: firstProv, prompt: full, capMs: capMs });
   var card = appendCard({ cls: 'assistant', who: 'Creating image…', badge: { cls: 'run', text: 'generating' },
     html: '<div class="meta">' + esc('Provider: ' + firstProv + ' · Op: ' + op + ' · Prompt: ' + full + ' (' + STATE.size + ')') + '</div>' +
           refHtml +
@@ -1025,6 +1097,8 @@ function runImageViaSharedChain(p, full) {
       logGeneration({ kind: STATE.ref ? 'image-to-image' : 'image', provider: result.providerId, success: true, ms: ms, prompt: full, size: STATE.size,
         outputProof: { kind: 'image-url', url: result.url, w: img2.w, h: img2.h, providerName: result.providerName },
         opType: op, resultLabel: 'Image Created (' + result.providerName + ')' });
+      // Mirror to the always-visible live panel.
+      setLiveResult('ready', { provider: result.providerName, imgUrl: result.url, w: img2.w, h: img2.h });
       if (window.LoadQueue && STATE.currentJob) {
         window.LoadQueue.update(STATE.currentJob.jobId, { status: 'Complete', provider: result.providerId, startedAt: t0, endedAt: Date.now() }).catch(function () {});
       }
@@ -1059,6 +1133,8 @@ function runImageViaSharedChain(p, full) {
     advBtn.addEventListener('click', function () { var d = document.querySelector('details.advanced-details'); if (d) { d.open = true; d.scrollIntoView({ block: 'center', behavior: 'smooth' }); } });
     actions.appendChild(advBtn);
     card.appendChild(actions);
+    // Mirror to the always-visible live panel.
+    setLiveResult('failed', { provider: firstProv, statusLabel: statusLabel, error: msg });
     logGeneration({ kind: STATE.ref ? 'image-to-image' : 'image', provider: 'shared-chain', success: false, error: msg, prompt: full, opType: op, timedOut: timedOut, resultLabel: timedOut ? 'Provider Timed Out' : 'Returned No File' });
     if (window.LoadQueue && STATE.currentJob) {
       window.LoadQueue.update(STATE.currentJob.jobId, { status: 'Failed', provider: 'shared-chain', startedAt: t0, endedAt: Date.now(), error: msg }).catch(function () {});
