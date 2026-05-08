@@ -139,7 +139,7 @@ button.small{font-size:11.5px;padding:5px 10px}
   <summary style="cursor:pointer;padding:10px 14px;font-weight:800;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)">Advanced Details / Developer Diagnostics</summary>
   <div style="padding:0 14px 14px">
 
-    <div class="build-marker" style="margin-top:10px">BUILD MARKER: CHAT-STUDIO-v4.3-2026-05-08-v17g69 (anatomy-hint + audio-gate + camera-motion-honest)</div>
+    <div class="build-marker" style="margin-top:10px">BUILD MARKER: CHAT-STUDIO-v4.4-2026-05-08-v17g70 (edit-routing + voice-sfx-guard + quality-gate)</div>
     <div class="intro">
       <strong>X-AI-CHAT-STUDIO Phase 3.</strong> Routed chat with inline real-output cards. Free / open-source / local-first only. <em>Chat</em>: Pollinations text → AI Horde fallback. <em>Text-to-image &amp; Image-to-image</em>: shared 17-provider chain via lib-load-image-providers.js (Local SD · Pollinations Flux · Pollinations · Pollinations Turbo · AI Horde · AI Horde SDXL · Hugging Face · Cloudflare AI · Cloudflare SDXL-Lightning · HF SDXL-Turbo · Together · Gemini Image · DeepAI · SiliconFlow · Real-ESRGAN · GFPGAN · CodeFormer). <em>Animate</em>: canvas Ken-Burns + MediaRecorder real WebM Blob. <em>Audio</em>: OfflineAudioContext WAV + Browser TTS + import / record / public-audio connectors / procedural ambience. Output proof: only marked ready when a real playable Blob exists; otherwise the card stays prompt-only honestly.
     </div>
@@ -1051,7 +1051,7 @@ function runChat(p) {
 // Attach actions.
 // Semantic-edit verbs that, when seen with a previous image,
 // must route to image-edit / img2img — never to text-to-image.
-var SEMANTIC_EDIT_VERBS_RX = /\b(add|adds|adding|put|puts|putting|place|places|placing|insert|inserts|inserting|include|includes|including|remove|removes|removing|delete|deletes|deleting|erase|erases|erasing|replace|replaces|replacing|swap|swaps|swapping|change|changes|changing|transform|transforms|transforming|edit|edits|editing|modify|modifies|modifying|retouch|fix(?!ed)|paint|paints|painting|illustrate|illustrates|stylize|now\s+(add|put|make|change|remove|edit))\b/i;
+var SEMANTIC_EDIT_VERBS_RX = /\b(add|adds|adding|put|puts|putting|place|places|placing|insert|inserts|inserting|include|includes|including|remove|removes|removing|delete|deletes|deleting|erase|erases|erasing|replace|replaces|replacing|swap|swaps|swapping|change|changes|changing|transform|transforms|transforming|edit|edits|editing|modify|modifies|modifying|retouch|fix(?!ed)|adjust|adjusts|adjusting|refine|refines|refining|improve|improves|improving|attach|attaches|attaching|hold|holds|holding|touch|touches|touching|paint|paints|painting|illustrate|illustrates|stylize|now\s+(add|put|make|change|remove|edit|attach|fix|hold|touch|refine|improve))\b/i;
 function hasSemanticEditVerb(s) { return !!s && SEMANTIC_EDIT_VERBS_RX.test(s); }
 
 // Image-edit runner — uses the shared 17-provider chain with
@@ -1161,9 +1161,16 @@ function runEditWithPreservation(p) {
       // edit prompt mentions hands / face / body parts, surface
       // an honest hint instead of pretending we auto-validated
       // the anatomy. User decides whether to Refine.
-      if (/\b(hand|hands|finger|fingers|face|faces|eye|eyes|mouth|teeth|smile|arm|arms|leg|legs|foot|feet|body|portrait|headshot|person|people|woman|man|child|girl|boy)\b/i.test(raw)) {
-        appendCard({ cls: 'assistant', who: 'Inspect anatomy', badge: { cls: 'warn', text: 'anatomy check' },
-          html: '<pre>' + esc('No client-side anatomy detector ships in MVP. Inspect the result for malformed hands / faces / extra fingers / warped features. If anatomy looks off, tap Refine and re-run — the safety negative prompt and stable seed are already applied.') + '</pre>' });
+      if (/\b(hand|hands|finger|fingers|face|faces|eye|eyes|mouth|teeth|smile|arm|arms|leg|legs|foot|feet|body|portrait|headshot|person|people|woman|man|child|girl|boy|sitting|standing|holding|touching)\b/i.test(raw)) {
+        var qg = appendCard({ cls: 'assistant', who: 'Quality issue detected', badge: { cls: 'warn', text: 'anatomy check' },
+          html: '<pre>' + esc('Image edits involving hands / fingers / faces / limbs need a manual look — no on-device anatomy detector ships in MVP. Verify above:\n  - five natural fingers, no fused / extra fingers\n  - correct number of arms, legs, eyes\n  - no warped face / melted hands / distorted palms\n  - natural skin texture, sharp focus\n\nIf the result looks clean, tap Save anyway. If something is off, Retry (same seed) or Refine (extra preservation).') + '</pre>' +
+                '<div class="actions"></div>' });
+      var qa = qg.querySelector('.actions');
+      var bRetry = document.createElement('button'); bRetry.className = 'small'; bRetry.textContent = 'Retry'; bRetry.addEventListener('click', function () { $('user-input').value = raw; send(); });
+      var bRefine = document.createElement('button'); bRefine.className = 'small'; bRefine.textContent = 'Refine'; bRefine.addEventListener('click', function () { $('user-input').value = raw + ', preserve original anatomy, natural hands with five fingers, no warped face, sharp focus'; $('user-input').focus(); });
+      var bSave = document.createElement('button'); bSave.className = 'small primary'; bSave.textContent = 'Save anyway'; bSave.addEventListener('click', function () { var a = document.createElement('a'); a.href = result.url; a.download = 'load-edit-' + Date.now() + '.png'; a.click(); });
+      var bAdv = document.createElement('button'); bAdv.className = 'small'; bAdv.textContent = 'Advanced Details'; bAdv.addEventListener('click', function () { var d = document.querySelector('details.advanced-details'); if (d) { d.open = true; d.scrollIntoView({ block: 'center', behavior: 'smooth' }); } });
+      qa.appendChild(bRetry); qa.appendChild(bRefine); qa.appendChild(bSave); qa.appendChild(bAdv);
       }
       logGeneration({ kind: 'image-to-image', provider: result.providerId, success: true, ms: ms, prompt: raw, fullPrompt: full, size: STATE.size,
         outputProof: { kind: 'image-url', url: result.url, w: img2.w, h: img2.h, providerName: result.providerName },
@@ -1801,9 +1808,28 @@ function runAudioPromptOnly(p) {
 // synthesis call. Falls back to "Voice prompt saved" on iOS Safari
 // when speechSynthesis is unavailable.
 function runVoiceLine(rawText) {
+  // Voice routing guard — only TTS when the user clearly intended a
+  // spoken line. SFX / ambience / scene descriptions ("people
+  // laughing in the background", "crowd noise", "wind through the
+  // trees") must NOT be read aloud.
+  var sayPrefixRx = /^\s*(say|narrate|narrator|voice|speak|read\s+aloud|tells?|recite|deliver(?:s|ed)?)\s*[:,-]/i;
+  var quotedRx = /["“][^"”]{2,}["”]/;
+  var sfxLikeRx = /\b(laugh|laughter|chuckl|giggle|cry|crying|scream|sing|singing|song|cheer|applause|crowd|background|ambien|ambient|atmos|wind|rain|thunder|storm|bird|birds|traffic|footstep|knock|crash|hum|murmur|chatter|noise|sound\s*of|sounds?|sfx|effect)\b/i;
+  var hasSayPrefix = sayPrefixRx.test(rawText);
+  var hasQuoted = quotedRx.test(rawText);
+  var looksLikeSfx = sfxLikeRx.test(rawText) && !hasSayPrefix && !hasQuoted;
+  if (looksLikeSfx) {
+    appendCard({ cls: 'assistant', who: 'Voice / narration', badge: { cls: 'fail', text: 'Voice prompt saved' },
+      html: '<pre>' + esc('That looks like a sound-effect or ambience request, not a spoken dialogue line. Voice / narration mode will NOT read it aloud.\n\nVoice prompt saved (status: voice_prompt_saved).\n\nTo speak a real line, prefix with "Say:" — example:\n  Say: I told you this would happen.\n\nTo render the sound itself, switch sub-mode to Sound effect or Ambience.') + '</pre>' });
+    logGeneration({ kind: 'audio', provider: 'browser-tts-guard', success: false, prompt: rawText,
+      promptOnly: true, audioStatus: 'voice_prompt_saved', resultLabel: 'Voice prompt saved (SFX-like input)' });
+    return Promise.resolve();
+  }
   // Strip a leading "Say:" / "Narrate:" prefix so the model does
   // not literally read it.
-  var spoken = rawText.replace(/^\s*(say|narrate|narrator|voice|speak|read|tells?)\s*[:,-]\s*/i, '').trim();
+  var spoken = rawText.replace(/^\s*(say|narrate|narrator|voice|speak|read\s+aloud|tells?|recite|deliver(?:s|ed)?)\s*[:,-]\s*/i, '').trim();
+  // Also strip outer quotes if present.
+  spoken = spoken.replace(/^["“]|["”]$/g, '').trim();
   if (!spoken) {
     appendCard({ cls: 'assistant', who: 'Voice / narration', badge: { cls: 'prompt', text: 'voice prompt saved' },
       html: '<pre>' + esc('No spoken text detected. Type the exact line you want voiced. Example: "Say: I am sitting in this red chair."') + '</pre>' });
