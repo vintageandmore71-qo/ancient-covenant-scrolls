@@ -139,7 +139,7 @@ button.small{font-size:11.5px;padding:5px 10px}
   <summary style="cursor:pointer;padding:10px 14px;font-weight:800;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)">Advanced Details / Developer Diagnostics</summary>
   <div style="padding:0 14px 14px">
 
-    <div class="build-marker" style="margin-top:10px">BUILD MARKER: CHAT-STUDIO-v4.0-2026-05-08-v17g66 (chat-timeline)</div>
+    <div class="build-marker" style="margin-top:10px">BUILD MARKER: CHAT-STUDIO-v4.1-2026-05-08-v17g67 (preserve-edit)</div>
     <div class="intro">
       <strong>X-AI-CHAT-STUDIO Phase 3.</strong> Routed chat with inline real-output cards. Free / open-source / local-first only. <em>Chat</em>: Pollinations text → AI Horde fallback. <em>Text-to-image &amp; Image-to-image</em>: shared 17-provider chain via lib-load-image-providers.js (Local SD · Pollinations Flux · Pollinations · Pollinations Turbo · AI Horde · AI Horde SDXL · Hugging Face · Cloudflare AI · Cloudflare SDXL-Lightning · HF SDXL-Turbo · Together · Gemini Image · DeepAI · SiliconFlow · Real-ESRGAN · GFPGAN · CodeFormer). <em>Animate</em>: canvas Ken-Burns + MediaRecorder real WebM Blob. <em>Audio</em>: OfflineAudioContext WAV + Browser TTS + import / record / public-audio connectors / procedural ambience. Output proof: only marked ready when a real playable Blob exists; otherwise the card stays prompt-only honestly.
     </div>
@@ -943,10 +943,21 @@ function send() {
     }
   };
 
+  // Auto-upgrade to image-edit when a previous image is in the
+  // thread AND the user's prompt has a semantic edit verb. Stops
+  // a follow-up like "Now add a white ball" from being routed as
+  // a brand-new text-to-image generation that loses the chair.
+  if (STATE.mode === 'image' && STATE.ref && STATE.ref.dataUrl && hasSemanticEditVerb(p)) {
+    STATE.mode = 'i2i';
+    Array.prototype.slice.call(document.querySelectorAll('[data-mode]')).forEach(function (x) {
+      x.classList.toggle('on', x.getAttribute('data-mode') === 'i2i');
+    });
+    syncActiveModeChip();
+  }
   switch (STATE.mode) {
     case 'chat':       return runChat(p).then(done);
     case 'image':      return runImage(p).then(done);
-    case 'i2i':        return runI2I(p).then(done);
+    case 'i2i':        return runEditWithPreservation(p).then(done);
     case 'animate':    return runAnimate(p).then(done);
     case 'video':      return runVideoPromptOnly(p).then(done);
     case 'audio':      return runAudioPromptOnly(p).then(done);
@@ -1036,6 +1047,153 @@ function runChat(p) {
 // LoadImageProviders is available. Honest result card with
 // provider, op, output proof, and Save / Refine / Animate /
 // Attach actions.
+// Semantic-edit verbs that, when seen with a previous image,
+// must route to image-edit / img2img — never to text-to-image.
+var SEMANTIC_EDIT_VERBS_RX = /\b(add|adds|adding|put|puts|putting|place|places|placing|insert|inserts|inserting|include|includes|including|remove|removes|removing|delete|deletes|deleting|erase|erases|erasing|replace|replaces|replacing|swap|swaps|swapping|change|changes|changing|transform|transforms|transforming|edit|edits|editing|modify|modifies|modifying|retouch|fix(?!ed)|paint|paints|painting|illustrate|illustrates|stylize|now\s+(add|put|make|change|remove|edit))\b/i;
+function hasSemanticEditVerb(s) { return !!s && SEMANTIC_EDIT_VERBS_RX.test(s); }
+
+// Image-edit runner — uses the shared 17-provider chain with
+// hardImg2Img: true so we NEVER soft-fall-back to text-to-image
+// when an edit was requested. If no img2img-capable provider is
+// configured, surfaces an honest "Edit Provider Needed" card and
+// keeps the previous image visible.
+function runEditWithPreservation(p) {
+  var raw = (p || '').trim();
+  // Strong scene-preservation prompt so the chosen img2img model
+  // applies ONLY the user's delta on top of the existing image.
+  var preservePrefix = 'Preserve the previous image\'s subject, background, composition, lighting, and framing exactly. Apply ONLY this change: ';
+  var negative = (window.LoadAIPipeline && window.LoadAIPipeline.BASE_NEGATIVE) || 'no text, no watermarks, no morphing limbs, no extra fingers, no warping faces, no broken anatomy';
+  var full = preservePrefix + raw + '. Do not regenerate the scene. ' + negative;
+  if (!STATE.ref || !STATE.ref.dataUrl) {
+    appendCard({ cls: 'assistant', who: 'Edit image', badge: { cls: 'prompt', text: 'no source image' },
+      html: '<pre>' + esc('Image-edit needs a source image. Upload one with the + button or generate one first, then ask for the edit.\n\nPrompt prepared:\n  ' + raw) + '</pre>' });
+    logGeneration({ kind: 'image-to-image', provider: 'prompt-only', success: false, prompt: raw, promptOnly: true,
+      opType: 'image-edit', resultLabel: 'no source image' });
+    return Promise.resolve();
+  }
+  if (window.LoadLocalOnly && window.LoadLocalOnly.isOn()) {
+    appendCard({ cls: 'assistant', who: 'Edit image', badge: { cls: 'prompt', text: 'local-only blocked' },
+      html: '<pre>' + esc('Local-only mode is ON — cloud i2i providers blocked.\n\nPrompt prepared:\n  ' + raw) + '</pre>' });
+    return Promise.resolve();
+  }
+  if (!SHARED_IMG || typeof SHARED_IMG.imageGenWithFallback !== 'function') {
+    appendCard({ cls: 'assistant', who: 'Edit image', badge: { cls: 'fail', text: 'Edit Provider Needed' },
+      html: '<pre>' + esc('Shared image-provider chain not loaded. Open Advanced Details to inspect.') + '</pre>' });
+    return Promise.resolve();
+  }
+  var t0 = Date.now();
+  // Stable seed across the thread keeps the subject visually
+  // consistent on providers that respect a seed (Local SD,
+  // Gemini Image, SiliconFlow, AI Horde).
+  STATE.editSeed = STATE.editSeed || (Math.floor(Math.random() * 999999) + 1);
+  var firstProv = 'shared free chain';
+  try {
+    if (SHARED_IMG.providers) {
+      var first = SHARED_IMG.providers.find(function (pp) {
+        return pp.enabled && pp.enabled() && SHARED_IMG.isHealthy(pp.id) &&
+               (pp.supportsImg2Img === true || pp.supportsInpainting === true);
+      });
+      if (first) firstProv = first.name;
+      else firstProv = 'no img2img provider configured';
+    }
+  } catch (_) {}
+  var card = appendCard({ cls: 'assistant', who: 'Editing previous image…', badge: { cls: 'run', text: 'image-edit' },
+    html: '<div class="meta">' + esc('Op: image-edit · Source preserved: yes · Provider: ' + firstProv + ' · Edit: ' + raw) + '</div>' +
+          '<img class="ref" src="' + esc(STATE.ref.dataUrl) + '" alt="source" style="max-width:140px;border-radius:6px;border:1px solid var(--border);margin-top:6px">' +
+          '<div class="result-placeholder" style="margin-top:10px;border:2px dashed var(--accent);border-radius:10px;background:rgba(124,58,237,.06);padding:24px 16px;text-align:center;min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">' +
+            '<div style="font-size:14px;font-weight:700;color:var(--fg)"><span class="spinner"></span> Editing previous image…</div>' +
+            '<div style="font-size:12.5px;color:var(--mute)">Provider: <strong>' + esc(firstProv) + '</strong></div>' +
+            '<div style="font-size:12.5px;color:var(--mute)">Edit will apply on top of the source above. Result appears here.</div>' +
+          '</div>' });
+  // Build imgData from the source.
+  var s = String(STATE.ref.dataUrl);
+  var c = s.indexOf(',');
+  var imgData = {
+    base64: c !== -1 ? s.slice(c + 1) : s,
+    mime:  (s.indexOf('data:') === 0 && c !== -1) ? s.slice(5, s.indexOf(';')) : 'image/png',
+    dataUrl: s
+  };
+  return SHARED_IMG.imageGenWithFallback(full, imgData, {
+    taskType: 'img2img', hardImg2Img: true, seed: STATE.editSeed
+  }).then(function (result) {
+    return loadImageWithTimeout(result.url, 30000, result.providerName + ' edit render').then(function (img2) {
+      var ms = Date.now() - t0;
+      card.classList.remove('error');
+      card.querySelector('.who').innerHTML = 'Image Created <span class="badge ok">' + esc(result.providerName) + '</span>';
+      var ph = card.querySelector('.result-placeholder'); if (ph) ph.remove();
+      var imgEl = document.createElement('img'); imgEl.src = result.url; imgEl.alt = raw; imgEl.style.cssText = 'max-width:100%;border-radius:8px;margin-top:8px;display:block';
+      card.appendChild(imgEl);
+      var meta = document.createElement('div'); meta.className = 'meta';
+      meta.textContent = 'Status: Image Created · op: image-edit · source preserved: yes · provider: ' + result.providerName + ' · ' + ms + ' ms · ' + img2.w + 'x' + img2.h + ' · output proof: real image rendered';
+      card.appendChild(meta);
+      var actions = document.createElement('div'); actions.className = 'actions';
+      actions.innerHTML = '<button class="small" data-act="save">Save</button>' +
+        '<button class="small" data-act="refine">Refine</button>' +
+        '<button class="small" data-act="animate">Animate</button>' +
+        '<button class="small" data-act="add-sound">Add sound</button>' +
+        '<button class="small primary" data-act="attach">Attach to scene</button>' +
+        '<button class="small" data-act="export">Export</button>';
+      card.appendChild(actions);
+      actions.querySelector('[data-act=save]').addEventListener('click', function () { var a = document.createElement('a'); a.href = result.url; a.download = 'load-edit-' + Date.now() + '.png'; a.target = '_blank'; a.click(); });
+      actions.querySelector('[data-act=refine]').addEventListener('click', function () { $('user-input').value = raw + ', '; $('user-input').focus(); });
+      actions.querySelector('[data-act=animate]').addEventListener('click', function () {
+        stashAsAnimateSource(result.url, raw);
+        STATE.mode = 'animate';
+        Array.prototype.slice.call(document.querySelectorAll('[data-mode]')).forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-mode') === 'animate'); });
+        renderRouteLine(); $('user-input').value = raw;
+      });
+      actions.querySelector('[data-act=add-sound]').addEventListener('click', function () {
+        STATE.mode = 'audio';
+        Array.prototype.slice.call(document.querySelectorAll('[data-mode]')).forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-mode') === 'audio'); });
+        renderRouteLine();
+      });
+      actions.querySelector('[data-act=attach]').addEventListener('click', function () {
+        attachToScene({ image: result.url, visualPrompt: raw, sizes: STATE.size });
+      });
+      actions.querySelector('[data-act=export]').addEventListener('click', function () { exportProject('loadstudio'); });
+      // Promote this edit as the new edit source so chained
+      // follow-ups keep stacking deltas on top.
+      stashAsAnimateSource(result.url, raw);
+      logGeneration({ kind: 'image-to-image', provider: result.providerId, success: true, ms: ms, prompt: raw, fullPrompt: full, size: STATE.size,
+        outputProof: { kind: 'image-url', url: result.url, w: img2.w, h: img2.h, providerName: result.providerName },
+        opType: 'image-edit', sourcePreserved: true, resultLabel: 'Image Created (edit · ' + result.providerName + ')' });
+      if (window.LoadQueue && STATE.currentJob) {
+        window.LoadQueue.update(STATE.currentJob.jobId, { status: 'Complete', provider: result.providerId, startedAt: t0, endedAt: Date.now() }).catch(function () {});
+      }
+    });
+  }).catch(function (err) {
+    var msg = String((err && err.message) || err);
+    var manual = /MANUAL_MASK_NEEDED/i.test(msg) || /no img2img/i.test(msg) || /All image providers failed/i.test(msg);
+    card.classList.add('error');
+    var label = manual ? 'Edit Provider Needed' : 'Provider Failed';
+    card.querySelector('.who').innerHTML = 'Edit image <span class="badge fail">' + esc(label) + '</span>';
+    var ph = card.querySelector('.result-placeholder');
+    if (ph) {
+      ph.style.borderColor = 'var(--err)';
+      ph.style.background = 'rgba(255,110,110,.05)';
+      ph.innerHTML = '<div style="font-size:14px;font-weight:700;color:var(--err)">' + esc(label) + '</div>' +
+        '<div style="font-size:12.5px;color:var(--mute)">No img2img-capable free provider succeeded. Source image kept above.</div>' +
+        '<div style="font-size:12px;color:var(--mute);max-width:520px;line-height:1.5">' + esc(msg) + '</div>' +
+        '<div style="font-size:11.5px;color:var(--mute)">Add a free Hugging Face / Cloudflare / Gemini Image key in Image Prompt > Settings, OR run a Local SD / A1111 server and set its URL — both surfaces share the same key store.</div>';
+    }
+    var actions = buildFailureActions({
+      onRetry: function () { $('user-input').value = raw; send(); },
+      onSavePromptOnly: function () { appendCard({ cls: 'assistant', who: 'Prompt saved', badge: { cls: 'prompt', text: 'Prompt Saved' },
+        html: '<pre>' + esc('Edit prompt saved (source image preserved):\n\n' + raw) + '</pre>' });
+        logGeneration({ kind: 'image-to-image', provider: 'prompt-only', success: false, prompt: raw, promptOnly: true, opType: 'image-edit' }); }
+    });
+    var advBtn = document.createElement('button'); advBtn.className = 'small'; advBtn.textContent = 'Open Advanced Details';
+    advBtn.addEventListener('click', function () { var d = document.querySelector('details.advanced-details'); if (d) { d.open = true; d.scrollIntoView({ block: 'center', behavior: 'smooth' }); } });
+    actions.appendChild(advBtn);
+    card.appendChild(actions);
+    logGeneration({ kind: 'image-to-image', provider: 'shared-chain', success: false, error: msg, prompt: raw, fullPrompt: full,
+      opType: 'image-edit', sourcePreserved: true, resultLabel: label });
+    if (window.LoadQueue && STATE.currentJob) {
+      window.LoadQueue.update(STATE.currentJob.jobId, { status: 'Failed', provider: 'shared-chain-edit', error: msg }).catch(function () {});
+    }
+  });
+}
+
 function runImageViaSharedChain(p, full) {
   var t0 = Date.now();
   var refHtml = STATE.ref ? '<img class="ref" src="' + esc(STATE.ref.dataUrl) + '" alt="ref">' : '';
@@ -1139,6 +1297,12 @@ function runImageViaSharedChain(p, full) {
       // Follow-up assistant bubble — chat-timeline style.
       appendCard({ cls: 'assistant', who: 'Production AI Chat',
         text: 'Here is your image. Would you like to make adjustments, animate it, add sound, or start a new creation?' });
+      // Auto-stash the result as the next-turn edit source. Any
+      // follow-up prompt with a semantic edit verb ("add", "remove",
+      // "change", "put") will now route to image-to-image with the
+      // current image preserved, instead of generating a fresh
+      // unrelated render.
+      stashAsAnimateSource(result.url, full);
       if (window.LoadQueue && STATE.currentJob) {
         window.LoadQueue.update(STATE.currentJob.jobId, { status: 'Complete', provider: result.providerId, startedAt: t0, endedAt: Date.now() }).catch(function () {});
       }
