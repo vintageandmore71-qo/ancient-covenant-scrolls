@@ -72,7 +72,7 @@ button.small{font-size:11.5px;padding:5px 10px}
 </style>
 <script src="../../branding.js" data-brand-skip></script></head>
 <body>
-<header>
+<header style="position:sticky;top:0;z-index:30">
   <a class="back" href="./handoff-tools.html">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
     Back to Load
@@ -83,57 +83,54 @@ button.small{font-size:11.5px;padding:5px 10px}
   </a>
   <h1>AI Chat Studio</h1>
   <span id="role-chip" style="display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:rgba(124,58,237,.22);color:#c4a8ff;padding:3px 8px;border-radius:6px">Production AI Chat</span>
+  <button id="btn-tools" style="margin-left:auto;background:rgba(255,255,255,.06);color:var(--fg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-weight:700;font-size:13px;cursor:pointer">Tools ▾</button>
 </header>
-<div class="wrap">
 
-<!-- 5.8 AI Studio Fix · Simple Creator View ──────────────────────
-     Default page is plain-language. All technical knobs (mode
-     internals, route line, build marker, intro, public-audio
-     connectors, procedural ambience) are collapsed inside the
-     <details> below. The creator only sees: title role chip,
-     reference image preview, big plain-language action buttons,
-     prompt input, and Send. -->
+<!-- 5.8 AI Studio Not Working · chat-timeline layout. Mode buttons,
+     status panels, and technical knobs all live inside Advanced
+     Details below or the Tools popover. Default view is a chat
+     thread with a sticky bottom input bar. -->
 
-<div class="creator-pad" style="display:flex;flex-direction:column;gap:14px;margin:0 0 14px">
-  <div style="font-size:18px;font-weight:800;letter-spacing:.02em">What would you like to do next?</div>
-  <div class="big-actions" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px">
-    <button class="mode-btn big on"   data-mode="image"   data-simple="Create image"  style="padding:14px 16px;font-size:15px">Create image</button>
-    <button class="mode-btn big"      data-mode="i2i"     data-simple="Edit image"    style="padding:14px 16px;font-size:15px">Edit image</button>
-    <button class="mode-btn big"      data-mode="animate" data-simple="Animate"       style="padding:14px 16px;font-size:15px">Animate</button>
-    <button class="mode-btn big"      data-mode="audio"   data-simple="Add sound"     style="padding:14px 16px;font-size:15px">Add sound</button>
-    <button class="mode-btn big"      data-mode="chat"    data-simple="Write prompt"  style="padding:14px 16px;font-size:15px">Write prompt</button>
+<div class="chat-shell" style="max-width:1000px;margin:0 auto;padding:14px 16px 130px;min-height:calc(100vh - 60px)">
+
+<div class="messages" id="messages" style="display:flex;flex-direction:column;gap:12px">
+  <div class="card assistant" id="welcome-bubble">
+    <div class="who">Production AI Chat</div>
+    <div>Hi — describe what you want to create. The first turn defaults to <strong>Create image</strong>. Tap <strong>Tools</strong> in the header to switch to Edit image · Animate · Add sound · Write prompt. Result cards appear inline with action buttons (Save · Refine · Animate · Add sound · Attach to scene · Export).</div>
   </div>
 </div>
 
-<!-- Mode-specific guide rail. Shown above the messages area; the
-     active block is toggled by setMode(). Keeps the next step
-     obvious in plain language. -->
-<div id="mode-guide" class="mode-guide" style="margin:0 0 12px;border:1px solid var(--border);border-radius:10px;padding:10px 14px;background:var(--bg2);font-size:13px;color:var(--mute);display:none">
-  <div style="font-weight:800;font-size:12.5px;color:var(--fg);margin-bottom:4px" data-fld="title"></div>
-  <div data-fld="steps"></div>
+<!-- Tools popover — small floating menu opened by the header button.
+     Replaces the prominent mode-button grid with a chat-app-style
+     compact selector. -->
+<div id="tools-popover" style="display:none;position:fixed;top:60px;right:16px;z-index:40;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:8px;min-width:200px;box-shadow:0 8px 24px rgba(0,0,0,.4)">
+  <div style="font-size:11px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.05em;padding:4px 8px">Mode</div>
+  <button class="mode-btn big on" data-mode="image"   style="display:block;width:100%;text-align:left;padding:10px;margin-bottom:4px">Create image</button>
+  <button class="mode-btn big"    data-mode="i2i"     style="display:block;width:100%;text-align:left;padding:10px;margin-bottom:4px">Edit image</button>
+  <button class="mode-btn big"    data-mode="animate" style="display:block;width:100%;text-align:left;padding:10px;margin-bottom:4px">Animate</button>
+  <button class="mode-btn big"    data-mode="audio"   style="display:block;width:100%;text-align:left;padding:10px;margin-bottom:4px">Add sound</button>
+  <button class="mode-btn big"    data-mode="chat"    style="display:block;width:100%;text-align:left;padding:10px;margin-bottom:4px">Write prompt</button>
+  <div style="border-top:1px solid var(--border);margin:6px 0;padding-top:6px">
+    <button id="btn-regen" style="display:block;width:100%;text-align:left;padding:8px;margin-bottom:4px;font-size:12.5px">Regenerate last</button>
+    <button id="btn-export" style="display:block;width:100%;text-align:left;padding:8px;margin-bottom:4px;font-size:12.5px">Attach / Export project</button>
+  </div>
 </div>
 
-<!-- Empty result placeholder — visible before the first generation
-     so the user can clearly see where the result will appear. The
-     same DOM node is reused as the LIVE result panel during/after
-     generation (see setLiveResult in script). Always rendered;
-     never hidden. -->
-<div id="empty-result" class="empty-result" style="margin:0 0 12px;border:2px dashed var(--border);border-radius:12px;padding:24px 16px;text-align:center;color:var(--mute);font-size:14px;background:#0a0e18;min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px">
-  <div style="font-size:14px;font-weight:700;color:var(--fg)">Your result will appear here.</div>
-  <div style="font-size:12px;color:var(--mute);max-width:480px;line-height:1.5">Tap a Simple Creator View action above (Create image / Edit image / Animate / Add sound / Write prompt), describe what you want, then tap Send.</div>
 </div>
 
-<div class="messages" id="messages">
-  <div class="card assistant"><div class="who">Welcome</div>Tap an action above, describe what you want, then tap Send. Result cards show the file, status, and follow-up actions like Save / Refine / Animate / Add sound / Attach to scene / Export.</div>
-</div>
-
-<div class="input-bar">
-  <textarea id="user-input" placeholder="Describe what you want..." style="font-size:15px"></textarea>
-  <div class="toolbar primary-actions" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
-    <button class="primary" id="btn-send" style="font-size:15px;padding:11px 20px">Send</button>
-    <button id="btn-regen">Regenerate</button>
-    <button id="btn-export">Attach / Export project</button>
-    <span class="status-line" id="status"></span>
+<!-- Sticky bottom chat input bar -->
+<div class="chat-input-bar" style="position:fixed;left:0;right:0;bottom:0;background:linear-gradient(180deg,rgba(10,10,20,0) 0,var(--bg) 22%);padding:14px 16px 16px;z-index:25">
+  <div style="max-width:1000px;margin:0 auto;display:flex;align-items:flex-end;gap:8px;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:8px 8px 8px 12px">
+    <button id="btn-attach-input" title="Upload reference image" aria-label="Upload reference image" style="background:transparent;border:none;color:var(--mute);font-size:20px;font-weight:700;padding:6px 8px;cursor:pointer">+</button>
+    <input type="file" id="ref-input" accept="image/*" style="display:none">
+    <textarea id="user-input" rows="1" placeholder="Describe your idea or ask" style="flex:1;background:transparent;border:none;outline:none;resize:none;color:var(--fg);font:inherit;font-size:15px;padding:8px 4px;line-height:1.4;max-height:160px"></textarea>
+    <button id="btn-tools-inline" title="Tools" aria-label="Tools" style="background:transparent;border:none;color:var(--mute);font-size:13px;font-weight:700;padding:6px 8px;cursor:pointer">Tools</button>
+    <button class="primary" id="btn-send" title="Send" aria-label="Send" style="background:var(--accent);border:none;color:#fff;border-radius:10px;padding:9px 14px;font-size:16px;font-weight:800;cursor:pointer">↑</button>
+  </div>
+  <div style="max-width:1000px;margin:6px auto 0;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--mute)">
+    <span id="active-mode-chip" style="display:inline-block;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:rgba(124,58,237,.18);color:#c4a8ff;padding:2px 8px;border-radius:5px">Create image</span>
+    <span id="ref-preview-chip" style="display:none;align-items:center;gap:6px"><img id="ref-preview" style="width:28px;height:28px;border-radius:5px;border:1px solid var(--border);object-fit:cover" alt=""><button class="small" id="ref-clear">Clear</button></span>
+    <span class="status-line" id="status" style="margin-left:auto"></span>
   </div>
 </div>
 
@@ -142,7 +139,7 @@ button.small{font-size:11.5px;padding:5px 10px}
   <summary style="cursor:pointer;padding:10px 14px;font-weight:800;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)">Advanced Details / Developer Diagnostics</summary>
   <div style="padding:0 14px 14px">
 
-    <div class="build-marker" style="margin-top:10px">BUILD MARKER: CHAT-STUDIO-v3.12-2026-05-08-v17g65</div>
+    <div class="build-marker" style="margin-top:10px">BUILD MARKER: CHAT-STUDIO-v4.0-2026-05-08-v17g66 (chat-timeline)</div>
     <div class="intro">
       <strong>X-AI-CHAT-STUDIO Phase 3.</strong> Routed chat with inline real-output cards. Free / open-source / local-first only. <em>Chat</em>: Pollinations text → AI Horde fallback. <em>Text-to-image &amp; Image-to-image</em>: shared 17-provider chain via lib-load-image-providers.js (Local SD · Pollinations Flux · Pollinations · Pollinations Turbo · AI Horde · AI Horde SDXL · Hugging Face · Cloudflare AI · Cloudflare SDXL-Lightning · HF SDXL-Turbo · Together · Gemini Image · DeepAI · SiliconFlow · Real-ESRGAN · GFPGAN · CodeFormer). <em>Animate</em>: canvas Ken-Burns + MediaRecorder real WebM Blob. <em>Audio</em>: OfflineAudioContext WAV + Browser TTS + import / record / public-audio connectors / procedural ambience. Output proof: only marked ready when a real playable Blob exists; otherwise the card stays prompt-only honestly.
     </div>
@@ -178,10 +175,7 @@ button.small{font-size:11.5px;padding:5px 10px}
         </div>
       </div>
       <div style="margin-top:10px" class="refbox">
-        <span class="status-line" style="margin:0">Reference image (image-to-image / context):</span>
-        <input type="file" id="ref-input" accept="image/*" style="font-size:12px;color:var(--mute);background:transparent;padding:0;border:none">
-        <img id="ref-preview" style="display:none" alt="">
-        <button class="small" id="ref-clear" style="display:none">Clear</button>
+        <span class="status-line" style="margin:0">Reference image controls live in the bottom input bar (+ button). Drag-drop also supported there.</span>
       </div>
     </div>
 
@@ -358,8 +352,40 @@ Array.prototype.slice.call(document.querySelectorAll('[data-mode]')).forEach(fun
     });
     renderRouteLine();
     renderModeGuide();
+    syncActiveModeChip();
+    closeToolsPopover();
   });
 });
+
+// 5.8 chat-timeline · Tools popover wiring.
+function toggleToolsPopover() {
+  var p = $('tools-popover'); if (!p) return;
+  p.style.display = (p.style.display === 'none' || !p.style.display) ? 'block' : 'none';
+}
+function closeToolsPopover() {
+  var p = $('tools-popover'); if (p) p.style.display = 'none';
+}
+(function () {
+  var t1 = $('btn-tools'); if (t1) t1.addEventListener('click', toggleToolsPopover);
+  var t2 = $('btn-tools-inline'); if (t2) t2.addEventListener('click', toggleToolsPopover);
+  document.addEventListener('click', function (e) {
+    var p = $('tools-popover'); if (!p || p.style.display !== 'block') return;
+    if (e.target.closest && (e.target.closest('#tools-popover') || e.target.closest('#btn-tools') || e.target.closest('#btn-tools-inline'))) return;
+    closeToolsPopover();
+  });
+})();
+
+function syncActiveModeChip() {
+  var c = $('active-mode-chip'); if (!c) return;
+  var labels = { image: 'Create image', i2i: 'Edit image', animate: 'Animate', audio: 'Add sound', chat: 'Write prompt', video: 'Video prompt' };
+  c.textContent = labels[STATE.mode] || STATE.mode;
+}
+syncActiveModeChip();
+
+// + button on the bottom bar opens the (now hidden) file input.
+(function () {
+  var plus = $('btn-attach-input'); if (plus) plus.addEventListener('click', function () { var f = $('ref-input'); if (f) f.click(); });
+})();
 
 // Mode-specific plain-language guide. Shown above the messages
 // area; refreshed whenever the user picks a Simple Creator View
@@ -419,13 +445,15 @@ $('ref-input').addEventListener('change', function () {
   var r = new FileReader();
   r.onload = function () {
     STATE.ref = { name: f.name, size: f.size, type: f.type, dataUrl: r.result };
-    $('ref-preview').src = r.result; $('ref-preview').style.display = 'inline-block';
-    $('ref-clear').style.display = 'inline-block';
+    var p = $('ref-preview'); if (p) p.src = r.result;
+    var chip = $('ref-preview-chip'); if (chip) chip.style.display = 'inline-flex';
   };
   r.readAsDataURL(f);
 });
 $('ref-clear').addEventListener('click', function () {
-  STATE.ref = null; $('ref-input').value = ''; $('ref-preview').style.display = 'none'; $('ref-clear').style.display = 'none';
+  STATE.ref = null;
+  var i = $('ref-input'); if (i) i.value = '';
+  var chip = $('ref-preview-chip'); if (chip) chip.style.display = 'none';
 });
 
 // ── DB write helpers (no-ops if LoadDB unavailable).
@@ -454,8 +482,16 @@ function appendCard(opts) {
   if (opts.html) html += opts.html;
   if (opts.meta) html += '<div class="meta">' + esc(opts.meta) + '</div>';
   div.innerHTML = html;
+  // Scroll-margin so scrollIntoView lifts the card above the
+  // sticky bottom input bar (~130 px tall on iPad).
+  div.style.scrollMarginBottom = '160px';
   $('messages').appendChild(div);
-  div.scrollIntoView({ block: 'end' });
+  // Two-phase scroll to dodge iPad-Safari quirks: page-level first,
+  // then element-level on the next frame so the layout has settled.
+  try { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); } catch (_) {}
+  requestAnimationFrame(function () {
+    try { div.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (_) {}
+  });
   return div;
 }
 
@@ -531,8 +567,8 @@ function pollinationsImageUrl(prompt, size) {
 // turn doesn't fall into the prompt-only branch. Bug fix 2026-05-08.
 function stashAsAnimateSource(url, name) {
   STATE.ref = { name: (name || 'previous-result').slice(0, 40), size: 0, type: 'image/auto', dataUrl: url };
-  var p = $('ref-preview'); if (p) { p.src = url; p.style.display = 'inline-block'; }
-  var c = $('ref-clear'); if (c) c.style.display = 'inline-block';
+  var p = $('ref-preview'); if (p) p.src = url;
+  var chip = $('ref-preview-chip'); if (chip) chip.style.display = 'inline-flex';
 }
 
 // Render a small countdown chip into a card. Returns a stop function.
@@ -1097,8 +1133,12 @@ function runImageViaSharedChain(p, full) {
       logGeneration({ kind: STATE.ref ? 'image-to-image' : 'image', provider: result.providerId, success: true, ms: ms, prompt: full, size: STATE.size,
         outputProof: { kind: 'image-url', url: result.url, w: img2.w, h: img2.h, providerName: result.providerName },
         opType: op, resultLabel: 'Image Created (' + result.providerName + ')' });
-      // Mirror to the always-visible live panel.
+      // Mirror to the always-visible live panel (no-op when the
+      // panel was removed in chat-timeline mode).
       setLiveResult('ready', { provider: result.providerName, imgUrl: result.url, w: img2.w, h: img2.h });
+      // Follow-up assistant bubble — chat-timeline style.
+      appendCard({ cls: 'assistant', who: 'Production AI Chat',
+        text: 'Here is your image. Would you like to make adjustments, animate it, add sound, or start a new creation?' });
       if (window.LoadQueue && STATE.currentJob) {
         window.LoadQueue.update(STATE.currentJob.jobId, { status: 'Complete', provider: result.providerId, startedAt: t0, endedAt: Date.now() }).catch(function () {});
       }
