@@ -1148,15 +1148,33 @@ function prepTTS(txt) {
 
 function speakText(text) {
   if (!window.speechSynthesis) return;
-  try { window.speechSynthesis.resume(); } catch (e) {}
-  // No cancel() here — Web Speech cancel() is async and racing it
-  // with speak() in the same tick silently drops the speak across
-  // iPad Safari, desktop Safari, and Chrome.
-  var u = new SpeechSynthesisUtterance(prepTTS(text));
-  u.rate = 1; u.lang = 'en-US'; u.volume = 1;
-  var voice = getBestVoice();
-  if (voice) u.voice = voice;
-  window.speechSynthesis.speak(u);
+  var ss = window.speechSynthesis;
+  // iPad Safari wake-up: after a long silence the engine drops
+  // into a paused / stuck state where speak() returns without
+  // sound. Resume + cancel flushes its queue. We do NOT race
+  // cancel() with speak() in the same tick — schedule speak in
+  // the next microtask so the cancel commits first.
+  try { ss.resume(); } catch (_) {}
+  try { if (ss.speaking || ss.pending) ss.cancel(); } catch (_) {}
+  function fire() {
+    var u = new SpeechSynthesisUtterance(prepTTS(text));
+    u.rate = 1; u.lang = 'en-US'; u.volume = 1;
+    var voice = getBestVoice();
+    if (voice) u.voice = voice;
+    try { ss.speak(u); } catch (_) {}
+  }
+  // If voices haven't loaded yet (iPad voiceschanged race), wait
+  // up to ~1.5s before firing. Beyond that, speak with the
+  // default voice — better than silent failure.
+  if (!ttsVoices.length) {
+    var waited = 0;
+    var iv = setInterval(function () {
+      waited += 100;
+      if (ttsVoices.length || waited >= 1500) { clearInterval(iv); setTimeout(fire, 0); }
+    }, 100);
+  } else {
+    setTimeout(fire, 0);
+  }
 }
 
 // ---- Smart Algorithmic Question Generator ----
@@ -2020,10 +2038,12 @@ function showListenLearn(fid) {
 
   function playVerse() {
     if (!window.speechSynthesis) return;
-    try { window.speechSynthesis.resume(); } catch (e) {}
-    // No cancel() here — Web Speech cancel() is async and racing it
-    // with speak() in the same tick silently drops the speak. Stop
-    // paths elsewhere call cancel when interruption is intended.
+    var ss = window.speechSynthesis;
+    // iPad Safari wake-up — same pattern as speakText. Resume +
+    // cancel + microtask-deferred speak prevents silent drops
+    // after the engine sits idle.
+    try { ss.resume(); } catch (_) {}
+    try { if (ss.speaking || ss.pending) ss.cancel(); } catch (_) {}
     var card = document.getElementById('ll-card');
     if (card) card.classList.add('ll-speaking');
     var btn = document.getElementById('b-ll-play');
@@ -2069,7 +2089,7 @@ function showListenLearn(fid) {
       if (card) card.classList.remove('ll-speaking');
       if (btn) btn.textContent = '\u25B6 Play';
     };
-    window.speechSynthesis.speak(utterance);
+    setTimeout(function () { try { ss.speak(utterance); } catch (_) {} }, 0);
   }
 
   function stopSpeech() {
