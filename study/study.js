@@ -1217,6 +1217,19 @@ function smartBlank(verse) {
   return { ref: '', prompt: prompt, answer: pick.word, source_quote: verse, difficulty: pick.score >= 8 ? 'hard' : pick.score >= 5 ? 'medium' : 'easy' };
 }
 
+// Learning Quality gate — drops MC candidates that fail the
+// shared POS / case / length / number / tense / blind-solve
+// audit. Same engine Attain uses (lib-attain-quality.js). When
+// the lib isn't loaded the gate passes everything.
+function passesQualityGate(q) {
+  if (typeof window === 'undefined' || !window.LoadAttainQuality) return true;
+  if (typeof window.LoadAttainQuality.auditQuestion !== 'function') return true;
+  try {
+    var a = window.LoadAttainQuality.auditQuestion(q);
+    return !!(a && a.ok);
+  } catch (_) { return true; }
+}
+
 function generateSmartQuestions(fid, count) {
   var verses = getVerses(fid);
   if (!verses.length) return [];
@@ -1255,7 +1268,8 @@ function generateSmartMC(fid, count) {
       }
       var opts = [name].concat(shuffle(allNames).slice(0, 3));
       opts = shuffle(opts);
-      questions.push({ ref: '', question: 'Who is mentioned in: "' + snippet + '"?', options: opts, correct: opts.indexOf(name), source_quote: usable[i], difficulty: 'medium' });
+      var nameQ = { ref: '', question: 'Who is mentioned in: "' + snippet + '"?', options: opts, correct: opts.indexOf(name), source_quote: usable[i], difficulty: 'medium' };
+      if (passesQualityGate(nameQ)) questions.push(nameQ);
     } else if (placeMatches && placeMatches.length > 0) {
       var place = placeMatches[0];
       var snippet = words.slice(0, Math.min(10, words.length)).join(' ');
@@ -1267,7 +1281,8 @@ function generateSmartMC(fid, count) {
       }
       var opts = [place].concat(shuffle(allPlaces).slice(0, 3));
       opts = shuffle(opts);
-      questions.push({ ref: '', question: 'Which place appears in: "' + snippet + '"?', options: opts, correct: opts.indexOf(place), source_quote: usable[i], difficulty: 'medium' });
+      var placeQ = { ref: '', question: 'Which place appears in: "' + snippet + '"?', options: opts, correct: opts.indexOf(place), source_quote: usable[i], difficulty: 'medium' };
+      if (passesQualityGate(placeQ)) questions.push(placeQ);
     }
   }
   return questions;
@@ -2182,11 +2197,72 @@ function showProgress(fid) {
   h += '<div id="prog-io-msg" role="status" aria-live="polite" style="margin-top:8px;font-size:13px;color:var(--text-muted);font-weight:700"></div>';
   h += '</div>';
 
+  h += '<div class="prog-card" style="border-left:4px solid #7c3aed;margin-top:16px">';
+  h += '<h3 style="color:#7c3aed">Learning Quality Audit</h3>';
+  h += '<p style="margin:6px 0;font-size:13px">Run the question-quality engine over this section. Reports POS / capitalisation / length / number / tense / blind-solve giveaways.</p>';
+  h += '<button class="study-btn" id="b-prog-quality" style="background:#7c3aed">Run Learning Quality Audit</button>';
+  h += '<div id="prog-quality-out" style="margin-top:10px;font-size:13px"></div>';
+  h += '</div>';
+
   h += '<button class="study-btn" id="b-prog-back" style="margin-top:16px">Back to activities</button>';
   h += '</div>';
 
   document.getElementById('content').innerHTML = h;
   document.getElementById('b-prog-back').addEventListener('click', function () { go(fid); });
+
+  // Learning Quality Audit — runs the validator over MC questions
+  // generated for this section. Reports total / pass / fail / avg
+  // score / elimination resistance % / blind-solve count.
+  var qBtn = document.getElementById('b-prog-quality');
+  if (qBtn) qBtn.addEventListener('click', function () {
+    var out = document.getElementById('prog-quality-out');
+    if (!out) return;
+    out.innerHTML = '<em>Running…</em>';
+    if (!window.LoadAttainQuality || typeof window.LoadAttainQuality.auditQuestionSet !== 'function') {
+      out.innerHTML = '<span style="color:#dc2626">Quality engine not loaded.</span>'; return;
+    }
+    setTimeout(function () {
+      try {
+        var pool = [];
+        if (typeof generateSmartQuestions === 'function') {
+          var smart = generateSmartQuestions(fid, 50) || [];
+          for (var i = 0; i < smart.length; i++) pool.push(smart[i]);
+        }
+        var data = (typeof CHAPTER_CACHE !== 'undefined') ? CHAPTER_CACHE[fid] : null;
+        if (data && data.multiple_choice) for (var j = 0; j < data.multiple_choice.length; j++) {
+          var q = data.multiple_choice[j];
+          pool.push({ question: q.question, options: q.options.slice(), correct: q.correct, source: q.source_quote || '' });
+        }
+        if (data && data.fill_blank && pool.length < 100) for (var k = 0; k < data.fill_blank.length && pool.length < 100; k++) {
+          var fbq = data.fill_blank[k];
+          var opts = [fbq.answer];
+          for (var l = 0; l < data.fill_blank.length && opts.length < 4; l++) if (l !== k) opts.push(data.fill_blank[l].answer);
+          pool.push({ question: fbq.prompt.replace('______', '___'), options: opts, correct: opts.indexOf(fbq.answer), source: fbq.source_quote || '' });
+        }
+        var report = window.LoadAttainQuality.auditQuestionSet(pool);
+        var html = '';
+        html += '<div style="font-weight:700;margin-bottom:6px">Total: ' + report.total + ' · Pass: ' + report.pass + ' · Fail: ' + report.fail + '</div>';
+        html += '<div>Avg score: <strong>' + report.score + '</strong> / 100</div>';
+        html += '<div>Elimination resistance: <strong>' + report.eliminationResistance + '%</strong></div>';
+        html += '<div>Blind-solve flags: <strong>' + report.blindSolveCount + '</strong></div>';
+        var rcKeys = Object.keys(report.reasonCounts || {});
+        if (rcKeys.length) {
+          html += '<div style="margin-top:8px;font-weight:700">Reason frequency</div><ul style="margin:4px 0 0 16px;padding:0">';
+          rcKeys.sort(function (a, b) { return report.reasonCounts[b] - report.reasonCounts[a]; })
+                .forEach(function (r) { html += '<li>' + report.reasonCounts[r] + ' &times; ' + r + '</li>'; });
+          html += '</ul>';
+        } else {
+          html += '<div style="margin-top:8px;color:#059669">No quality issues detected.</div>';
+        }
+        var badge = (report.score >= 90 && report.eliminationResistance >= 90) ? 'PASS' : (report.score >= 70 ? 'PARTIAL' : 'FAIL');
+        var badgeColor = badge === 'PASS' ? '#059669' : (badge === 'PARTIAL' ? '#d97706' : '#dc2626');
+        html = '<div style="display:inline-block;background:' + badgeColor + ';color:#fff;padding:3px 10px;border-radius:5px;font-weight:800;margin-bottom:8px">' + badge + '</div>' + html;
+        out.innerHTML = html;
+      } catch (e) {
+        out.innerHTML = '<span style="color:#dc2626">Audit error: ' + (e && e.message ? e.message : e) + '</span>';
+      }
+    }, 0);
+  });
 
   document.getElementById('b-prog-export').addEventListener('click', function () {
     var exportData = {
@@ -2533,12 +2609,14 @@ function showChallenge(fid) {
           others = shuffle(others).slice(0, 3);
           for (var i = 0; i < others.length; i++) opts.push(others[i].answer);
           opts = shuffle(opts);
-          allQ.push({ question: q.prompt.replace('______', '___'), options: opts, correct: opts.indexOf(q.answer), source: q.source_quote || '' });
+          var fbQ = { question: q.prompt.replace('______', '___'), options: opts, correct: opts.indexOf(q.answer), source: q.source_quote || '' };
+          if (passesQualityGate(fbQ)) allQ.push(fbQ);
         });
       }
       if (data && data.multiple_choice) {
         data.multiple_choice.forEach(function (q) {
-          allQ.push({ question: q.question, options: q.options.slice(), correct: q.correct, source: q.source_quote || '' });
+          var mcQ = { question: q.question, options: q.options.slice(), correct: q.correct, source: q.source_quote || '' };
+          if (passesQualityGate(mcQ)) allQ.push(mcQ);
         });
       }
       if (allQ.length < 5) {
@@ -2561,7 +2639,8 @@ function showChallenge(fid) {
           var dWords = shuffle(words.filter(function (w) { return w.replace(/[.,;:!?]/g, '') !== ans && w.length > 3; })).slice(0, 3);
           for (var di = 0; di < dWords.length; di++) dOpts.push(dWords[di].replace(/[.,;:!?]/g, ''));
           dOpts = shuffle(dOpts);
-          allQ.push({ question: prompt, options: dOpts, correct: dOpts.indexOf(ans), source: usable[vi] });
+          var rgQ = { question: prompt, options: dOpts, correct: dOpts.indexOf(ans), source: usable[vi] };
+          if (passesQualityGate(rgQ)) allQ.push(rgQ);
         }
       }
       if (allQ.length < 2) { showStubForMode(fid, 'challenge'); return; }
