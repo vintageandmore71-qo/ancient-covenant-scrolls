@@ -24,8 +24,19 @@ These have been re-locked on 2026-05-04 after repeated violations.
 4. **NO EXTERNAL PRODUCT NAMES** in user-facing labels (no "VN", "Glam
    AI", "CapCut", "Runway", "Tubi" used as descriptors, etc.).
 5. **CACHE STRINGS GO FORWARD ONLY** — never decrement.
-6. **PUSH TO BOTH** the feature branch AND `main` on every shipping
-   commit. Pages serves from `main`.
+6. **SHIPPING PUSH FLOW.** Pages serves from `main`, but direct push
+   to `main` is blocked by branch protection (HTTP 403). On every
+   shipping commit:
+   a. Push to the feature branch (`git push -u origin <branch>`).
+   b. Open or update a PR from the feature branch into `main` using
+      the GitHub MCP tools (`mcp__github__list_pull_requests` to
+      check for an open one, `mcp__github__create_pull_request` if
+      none exists).
+   c. Enable PR auto-merge via `mcp__github__enable_pr_auto_merge`
+      (squash) so it lands as soon as required checks pass.
+   d. Tell the user the PR number + URL in the end-of-build summary
+      so they can one-click merge if auto-merge is unavailable.
+   Never attempt `git push origin <branch>:main` — it will 403.
 7. **DO NOT TOUCH ACR READER** (the root `/` app — files at repo
    root: `index.html`, `acr.css`, `sw.js`, etc., and the
    `content/` folder). Locked 2026-05-04 by user. Only edit if the
