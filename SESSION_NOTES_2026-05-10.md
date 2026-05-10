@@ -123,7 +123,6 @@ Test everything below on iPad before building anything new.
 - Inbox fix plan is in 5.8 AI Studio Fix.docx and 5.8 READ AI Studio Not working.docx — read those before building.
 
 Confirm cache is live first: open `https://dssorit.github.io/ancient-covenant-scrolls/load/sw.js` and verify `CACHE = 'load-v17g76'`.
-
 ## Outstanding / blocking
 
 - AI Chat Studio and Image Prompt not working — user to verify on iPad after fix is built.
@@ -147,6 +146,10 @@ Confirm cache is live first: open `https://dssorit.github.io/ancient-covenant-sc
 
 ## Today's commit log
 
+<<<<<<< HEAD
 - `c1c0900` — Load v17g76: audio routing fix (sfxLikeRx + engine SFX + honest tone labeling)
 - `a9d05a6` — Merge origin/main (CLAUDE.md shipping flow update) into feature branch
 - PR #6 squash-merged to main — SHA `d842909`
+=======
+No new commits this session. All session activity was diagnostic / planning.
+>>>>>>> origin/main

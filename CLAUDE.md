@@ -25,8 +25,8 @@ These have been re-locked on 2026-05-04 after repeated violations.
    AI", "CapCut", "Runway", "Tubi" used as descriptors, etc.).
 5. **CACHE STRINGS GO FORWARD ONLY** — never decrement.
 6. **SHIPPING PUSH FLOW.** Pages serves from `main`, but direct push
-   to `main` is blocked by branch protection (HTTP 403). On every
-   shipping commit:
+   to `main` is blocked (non-fast-forward after squash merges, and
+   may also be blocked by Rulesets). On every shipping commit:
    a. Push to the feature branch (`git push -u origin <branch>`).
    b. Open or update a PR from the feature branch into `main` using
       the GitHub MCP tools (`mcp__github__list_pull_requests` to
@@ -36,8 +36,17 @@ These have been re-locked on 2026-05-04 after repeated violations.
       (squash) so it lands as soon as required checks pass.
    d. Tell the user the PR number + URL in the end-of-build summary
       so they can one-click merge if auto-merge is unavailable.
-   Never attempt `git push origin <branch>:main` — it will 403.
-7. **DO NOT TOUCH ACR READER** (the root `/` app — files at repo
+   Never attempt `git push origin <branch>:main` — it will fail.
+   NEVER force push to `main`.
+7. **SYNC FROM `origin/main` BEFORE EVERY PUSH.** Squash merges
+   rewrite main's history, so any long-running feature branch goes
+   stale within one merged PR. Before pushing the feature branch
+   (and again before opening any PR), run:
+   `git fetch origin main && git merge origin/main --no-edit`
+   This is also the first thing to do at session start. If a direct
+   push to `main` fails, fall back to the PR workflow in rule 6.
+   Do not ship from a stale branch. Do not force push.
+8. **DO NOT TOUCH ACR READER** (the root `/` app — files at repo
    root: `index.html`, `acr.css`, `sw.js`, etc., and the
    `content/` folder). Locked 2026-05-04 by user. Only edit if the
    user explicitly says "edit ACR reader" / "fix the reader" /
@@ -46,6 +55,24 @@ These have been re-locked on 2026-05-04 after repeated violations.
 These are LOCKED. They take precedence over politeness, helpfulness,
 acknowledgements, "thinking out loud", or any pattern from earlier in
 training. Treat them as hard constraints, not preferences.
+
+## Preferred shipping workflow
+
+This is the default shipping flow. Follow it unless the user explicitly
+overrides it for a specific build.
+
+- At the start of every session, fetch and sync from `origin/main`
+  (`git fetch origin main && git merge origin/main --no-edit`).
+- Before every PR, fetch and sync from `origin/main` again.
+- Do not ship from stale branches.
+- After a PR is squash-merged, treat that feature branch as finished.
+- For each new logical shipping unit, prefer a fresh branch from the
+  latest `origin/main` (e.g. `claude/study-v81`, not a long-running
+  catch-all branch).
+- Never force push to `main`.
+- If direct push to `main` fails, use the PR workflow in locked rule 6.
+- Do not claim live completion until GitHub Pages confirms the new
+  version / cache marker on iPad.
 
 ## Session continuity (mandatory)
 
