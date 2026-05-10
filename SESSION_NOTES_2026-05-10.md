@@ -104,6 +104,25 @@ These were flagged as broken in inbox files 5.8 AI Studio Fix.docx and 5.8 READ 
 - 6. Provider Timeout Rules (image 45s, image-to-image 60s, video 3–8min, audio 60–120s).
 - Status: NOT YET ACTIONED.
 
+## REMINDER FOR 2026-05-11 — START HERE
+
+Test everything below on iPad before building anything new.
+
+**Load v17g76 audio routing — verify these 6 cases:**
+1. "People laughing in the background" — must route to SFX WAV, NOT be read aloud
+2. "Engine roar" — must play a low sawtooth rumble WAV, not a 440Hz tone
+3. "Wind blowing" — must play filtered noise WAV
+4. "Say hello world" — must use TTS (no WAV card)
+5. Any unmatched SFX prompt — must show red "Placeholder tone" badge (not green OK)
+6. Engine prompt badge — must show "Engine placeholder" label
+
+**AI Chat Studio and Image Prompt — still broken, not yet verified:**
+- Can it generate an image? Does a result card appear?
+- Does Send do anything visible in AI Chat Studio?
+- Does editing a result stay grounded in the original image?
+- Inbox fix plan is in 5.8 AI Studio Fix.docx and 5.8 READ AI Studio Not working.docx — read those before building.
+
+Confirm cache is live first: open `https://dssorit.github.io/ancient-covenant-scrolls/load/sw.js` and verify `CACHE = 'load-v17g76'`.
 ## Outstanding / blocking
 
 - AI Chat Studio and Image Prompt not working — user to verify on iPad after fix is built.
@@ -127,4 +146,10 @@ These were flagged as broken in inbox files 5.8 AI Studio Fix.docx and 5.8 READ 
 
 ## Today's commit log
 
+<<<<<<< HEAD
+- `c1c0900` — Load v17g76: audio routing fix (sfxLikeRx + engine SFX + honest tone labeling)
+- `a9d05a6` — Merge origin/main (CLAUDE.md shipping flow update) into feature branch
+- PR #6 squash-merged to main — SHA `d842909`
+=======
 No new commits this session. All session activity was diagnostic / planning.
+>>>>>>> origin/main

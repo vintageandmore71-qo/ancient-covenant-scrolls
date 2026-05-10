@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Load AI Status Report — 2026-05-10</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 860px; margin: 0 auto; padding: 24px 20px 60px; background: #0e0e16; color: #d4d4e0; font-size: 15px; line-height: 1.6; }
+  h1 { font-size: 20px; font-weight: 700; color: #fff; border-bottom: 1px solid #2a2a3a; padding-bottom: 12px; margin-bottom: 4px; }
+  .meta { font-size: 12px; color: #666; margin-bottom: 32px; }
+  h2 { font-size: 15px; font-weight: 700; color: #a0a0c0; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 40px; margin-bottom: 12px; border-bottom: 1px solid #1e1e2e; padding-bottom: 6px; }
+  h3 { font-size: 13px; font-weight: 600; color: #7a7aaa; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 28px; margin-bottom: 8px; }
+  p { margin: 0 0 12px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 24px; font-size: 13px; }
+  th { background: #16162a; color: #8888aa; font-weight: 600; text-align: left; padding: 8px 10px; border-bottom: 2px solid #2a2a3a; }
+  td { padding: 7px 10px; border-bottom: 1px solid #1a1a2a; vertical-align: top; }
+  tr:hover td { background: #13132a; }
+  .WORKING { background: #0a2a0a; color: #4caf50; font-weight: 600; font-size: 11px; padding: 2px 6px; border-radius: 3px; white-space: nowrap; }
+  .PARTIAL { background: #2a2000; color: #ffc107; font-weight: 600; font-size: 11px; padding: 2px 6px; border-radius: 3px; white-space: nowrap; }
+  .PROVIDER { background: #1a1a2a; color: #7c9aff; font-weight: 600; font-size: 11px; padding: 2px 6px; border-radius: 3px; white-space: nowrap; }
+  .PLACEHOLDER { background: #2a1a00; color: #ff9800; font-weight: 600; font-size: 11px; padding: 2px 6px; border-radius: 3px; white-space: nowrap; }
+  .NOTDONE { background: #1a1a1a; color: #666; font-weight: 600; font-size: 11px; padding: 2px 6px; border-radius: 3px; white-space: nowrap; }
+  .READY { background: #0a1a2a; color: #29b6f6; font-weight: 600; font-size: 11px; padding: 2px 6px; border-radius: 3px; white-space: nowrap; }
+  .FAIL { background: #2a0a0a; color: #f44336; font-weight: 600; font-size: 11px; padding: 2px 6px; border-radius: 3px; white-space: nowrap; }
+  .dl-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #16162a; border-top: 1px solid #2a2a3a; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+  .dl-btn { background: #3a3af0; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .dl-btn:active { background: #2a2ad0; }
+  .dl-note { font-size: 12px; color: #666; }
+  .section-label { font-size: 11px; font-weight: 700; color: #444; background: #111; padding: 2px 8px; border-radius: 3px; margin-right: 8px; }
+  ul { margin: 0 0 12px; padding-left: 20px; }
+  li { margin-bottom: 4px; }
+  .gap { margin-top: 20px; background: #13132a; border-left: 3px solid #3a3af0; padding: 12px 16px; border-radius: 0 6px 6px 0; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<h1>Load AI / Load Main — Current Status Report</h1>
+<div class="meta">Version: v17g76 &nbsp;|&nbsp; Cache: load-v17g76 &nbsp;|&nbsp; Date: 2026-05-10</div>
+
+<!-- ─────────────────────────────────────────── -->
+<h2>1. Executive Summary</h2>
+
+<p>Load Main is live at <code>https://dssorit.github.io/ancient-covenant-scrolls/load/</code>. Version badge shows v17g76. Service worker cache is load-v17g76.</p>
+
+<p>The Load AI layer has real infrastructure underneath it — a 17-provider image chain with health tracking, auto-fallback, and output-proof gating — but the two surfaces the user actually touches (Image Prompt and AI Chat Studio) are both confirmed not working on device as of 2026-05-10. The providers work in code. Something in the deployed UI is failing silently. That is the single most important thing to fix before any other AI build.</p>
+
+<p>Text-to-image via free providers (Pollinations, AI Horde) requires no API key and should work. The fact that it does not means the failure is in the UI layer, not the provider layer.</p>
+
+<p>Audio routing was fixed in v17g76. Conjugated SFX terms now route correctly. Honest badges now fire on all audio outputs.</p>
+
+<p>True source-preserving image editing (inpainting) is wired end to end but requires a Hugging Face key or local SD server. Without a key it cannot produce a real inpaint result.</p>
+
+<p>Hands, fingers, face, and anatomy-sensitive edits are blocked by a refusal gate when no strong inpaint provider is configured. The gate works. Real output requires a key.</p>
+
+<p>True subject animation does not exist. Ken-Burns camera-motion (zoom and pan on a still image) produces a real WebM file and is honestly labeled in the UI as camera-motion preview only.</p>
+
+<p>Realistic audio (laughter, crowd, singing, music as a real track) does not exist. The on-device synthesizer produces procedural placeholder audio only. Video generation does not exist.</p>
+
+<!-- ─────────────────────────────────────────── -->
+<h2>2. Capability Truth Table</h2>
+
+<h3>Image</h3>
+<table>
+<tr><th>Feature</th><th>Status</th><th>Notes</th></tr>
+<tr><td>Text-to-image — Image Prompt PWA</td><td><span class="FAIL">FAIL</span></td><td>User confirmed not working on device 2026-05-10. Free providers (Pollinations, AI Horde) need no key. Failure is in the UI layer.</td></tr>
+<tr><td>Text-to-image — AI Chat Studio</td><td><span class="FAIL">FAIL</span></td><td>Same confirmation. Real 17-provider chain is wired. UI is not surfacing results.</td></tr>
+<tr><td>Image-to-image edit (no mask)</td><td><span class="PARTIAL">PARTIAL</span></td><td>Code routes to img2img-capable providers. Anatomy gate fires for sensitive prompts. Cannot confirm working on device because AI Chat Studio is FAIL.</td></tr>
+<tr><td>Source-preserving inpaint</td><td><span class="PROVIDER">PROVIDER NEEDED</span></td><td>Mask painter wired. HF SDXL inpainting route wired. Requires ps_hfimg or local SD URL.</td></tr>
+<tr><td>Anatomy-safe refusal gate</td><td><span class="WORKING">WORKING REAL OUTPUT</span></td><td>Gate fires correctly. Refuses rather than generate broken anatomy when no strong inpaint provider is configured.</td></tr>
+<tr><td>Hands / fingers / face edits</td><td><span class="PROVIDER">PROVIDER NEEDED</span></td><td>Gate works. Real output requires ps_hfimg or local SD.</td></tr>
+<tr><td>Face restoration — GFPGAN</td><td><span class="PROVIDER">PROVIDER NEEDED</span></td><td>Real HF endpoint wired (TencentARC/GFPGAN). Requires ps_hfimg.</td></tr>
+<tr><td>Face restoration — CodeFormer</td><td><span class="PROVIDER">PROVIDER NEEDED</span></td><td>Real HF endpoint wired (sczhou/CodeFormer). Requires ps_hfimg.</td></tr>
+<tr><td>Upscale — Real-ESRGAN</td><td><span class="PROVIDER">PROVIDER NEEDED</span></td><td>Real HF endpoint wired (ai-forever/Real-ESRGAN). Requires ps_hfimg.</td></tr>
+<tr><td>Mask painter UI</td><td><span class="READY">READY FOR USER VERIFICATION</span></td><td>Binary canvas mask, brush painting, touch support wired. Inpaint route hooked up.</td></tr>
+<tr><td>Provider health board</td><td><span class="WORKING">WORKING REAL OUTPUT</span></td><td>Circuit breaker per provider. 3 fails in 5 min = skip. Resets after 5 min.</td></tr>
+<tr><td>Auto-fallback chain</td><td><span class="WORKING">WORKING REAL OUTPUT</span></td><td>Ordered fallback, task-aware filter (inpaint for inpaint tasks, upscale for upscale tasks).</td></tr>
+<tr><td>Output proof gate</td><td><span class="WORKING">WORKING REAL OUTPUT</span></td><td>No success badge without a real blob or data URL. Every card includes provider ID, skipped chain, operation type.</td></tr>
+</table>
+
+<h3>Animation</h3>
+<table>
+<tr><th>Feature</th><th>Status</th><th>Notes</th></tr>
+<tr><td>Ken-Burns camera-motion preview</td><td><span class="WORKING">WORKING REAL OUTPUT</span></td><td>1.15x zoom, 30 px pan over 5 seconds via canvas captureStream and MediaRecorder. Real WebM blob, blob size and magic bytes verified before card shows. Labeled in UI as camera-motion preview, not true animation.</td></tr>
+<tr><td>True subject animation</td><td><span class="NOTDONE">NOT DONE</span></td><td>No implementation. System saves the prompt and notes animation provider needed.</td></tr>
+<tr><td>Motion prompt applied</td><td><span class="NOTDONE">NOT DONE</span></td><td>Prompt text is saved. No motion applied from it. Animation provider required.</td></tr>
+</table>
+
+<h3>Audio</h3>
+<table>
+<tr><th>Feature</th><th>Status</th><th>Notes</th></tr>
+<tr><td>Voice / narration (browser TTS)</td><td><span class="READY">READY FOR USER VERIFICATION</span></td><td>7 voice styles with pitch and rate. Guard blocks SFX-like input in voice mode. Real playback. Not tested post v17g76.</td></tr>
+<tr><td>SFX — wind / rain / storm</td><td><span class="PLACEHOLDER">PLACEHOLDER ONLY</span></td><td>OfflineAudioContext filtered noise. Real WAV blob. Honestly labeled Procedural placeholder.</td></tr>
+<tr><td>SFX — engine / roar / rumble</td><td><span class="PLACEHOLDER">PLACEHOLDER ONLY</span></td><td>Sawtooth 55 Hz + 120 Hz bandpass noise. Real WAV blob. Labeled Engine placeholder. Fixed in v17g76.</td></tr>
+<tr><td>SFX — crowd / chatter / hammer</td><td><span class="PLACEHOLDER">PLACEHOLDER ONLY</span></td><td>Bandpass noise or square-wave oscillator. Real WAV blob. Honestly labeled.</td></tr>
+<tr><td>SFX — unmatched prompt</td><td><span class="PLACEHOLDER">PLACEHOLDER ONLY</span></td><td>Falls through to 440 Hz sine tone. Red badge: Placeholder tone.</td></tr>
+<tr><td>Laughter / singing / speech in SFX mode</td><td><span class="NOTDONE">NOT DONE</span></td><td>voiceLikeRx guard fires. Prompt saved. Audio Provider Needed card shown. No fake audio produced.</td></tr>
+<tr><td>Ambience mode</td><td><span class="PLACEHOLDER">PLACEHOLDER ONLY</span></td><td>Same OfflineAudioContext synth as SFX. Same honest badge.</td></tr>
+<tr><td>Music mode</td><td><span class="PLACEHOLDER">PLACEHOLDER ONLY</span></td><td>Four sine waves at C major chord frequencies. Real WAV blob. Not a real music track.</td></tr>
+<tr><td>Realistic SFX (any)</td><td><span class="PROVIDER">PROVIDER NEEDED</span></td><td>HF AudioCraft or similar required. OfflineAudioContext cannot produce realistic audio.</td></tr>
+<tr><td>Realistic music</td><td><span class="PROVIDER">PROVIDER NEEDED</span></td><td>HF MusicGen or similar required.</td></tr>
+<tr><td>Audio routing guards</td><td><span class="WORKING">WORKING REAL OUTPUT</span></td><td>sfxLikeRx and voiceLikeRx correct. Conjugated forms (laughing, screaming, singing) fixed in v17g76.</td></tr>
+<tr><td>Audio honest badges</td><td><span class="WORKING">WORKING REAL OUTPUT</span></td><td>kind=tone shows red Placeholder tone. Engine shows Engine placeholder. No false green OK.</td></tr>
+</table>
+
+<h3>Video</h3>
+<table>
+<tr><th>Feature</th><th>Status</th><th>Notes</th></tr>
+<tr><td>Video generation</td><td><span class="NOTDONE">NOT DONE</span></td><td>Prompt saved. Links to external-video-fallback.html. No provider wired. No clip produced.</td></tr>
+<tr><td>Audio + image muxed to video</td><td><span class="NOTDONE">NOT DONE</span></td><td>No FFmpeg.wasm or mux path exists.</td></tr>
+</table>
+
+<h3>Provider Registry (17 providers)</h3>
+<table>
+<tr><th>Provider</th><th>No Key</th><th>Inpaint</th><th>img2img</th><th>Upscale</th><th>Face</th></tr>
+<tr><td>Pollinations Flux</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+<tr><td>Pollinations</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+<tr><td>Pollinations Turbo</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+<tr><td>AI Horde (anonymous)</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+<tr><td>AI Horde SDXL</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+<tr><td>Hugging Face</td><td>Key: ps_hfimg</td><td>Yes</td><td>Yes</td><td>No</td><td>No</td></tr>
+<tr><td>HF SDXL-Turbo</td><td>Key: ps_hfimg</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+<tr><td>Real-ESRGAN via HF</td><td>Key: ps_hfimg</td><td>No</td><td>No</td><td>Yes</td><td>No</td></tr>
+<tr><td>GFPGAN via HF</td><td>Key: ps_hfimg</td><td>No</td><td>No</td><td>No</td><td>Yes</td></tr>
+<tr><td>CodeFormer via HF</td><td>Key: ps_hfimg</td><td>No</td><td>No</td><td>No</td><td>Yes</td></tr>
+<tr><td>Gemini Image</td><td>Key: ps_k_gemini</td><td>No</td><td>Yes</td><td>No</td><td>No</td></tr>
+<tr><td>Cloudflare Flux</td><td>Key: ps_cftk + ps_cfac</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+<tr><td>Cloudflare SDXL-Lightning</td><td>Key: ps_cftk + ps_cfac</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+<tr><td>Together AI</td><td>Key: ps_tgk</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+<tr><td>DeepAI</td><td>Key: ps_daik</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+<tr><td>SiliconFlow</td><td>Key: ps_sfk</td><td>No</td><td>Yes</td><td>No</td><td>No</td></tr>
+<tr><td>Local Stable Diffusion</td><td>Key: ps_local_sd_url</td><td>Yes</td><td>Yes</td><td>No</td><td>No</td></tr>
+</table>
+
+<!-- ─────────────────────────────────────────── -->
+<h2>3. Do Not Test Today List</h2>
+<ul>
+<li>Image Prompt PWA — known FAIL, needs a diagnostic build first</li>
+<li>AI Chat Studio — known FAIL, same reason</li>
+<li>Audio routing v17g76 — just shipped, defer to a future session</li>
+<li>Inpainting / mask painter — requires ps_hfimg to produce real output</li>
+<li>Face restoration (GFPGAN, CodeFormer) — requires ps_hfimg</li>
+<li>Upscale (Real-ESRGAN) — requires ps_hfimg</li>
+<li>Ken-Burns animation — code works, no device test needed today</li>
+<li>Voice TTS — code works, low priority today</li>
+<li>SFX / ambience / music — all are placeholder, nothing to verify</li>
+<li>Video — does not exist</li>
+</ul>
+
+<!-- ─────────────────────────────────────────── -->
+<h2>4. Next Build Order</h2>
+<table>
+<tr><th>#</th><th>Build</th><th>Testing required after</th></tr>
+<tr><td>1</td><td>Diagnose and fix why Image Prompt and AI Chat Studio fail on device. Free providers need no key. Failure is in the UI layer. Read 5.8 AI Studio Fix.docx and 5.8 READ AI Studio Not working.docx before building.</td><td>Minimal — one tap to confirm an image appears</td></tr>
+<tr><td>2</td><td>Bundled CC0 SFX library — real audio files for engine, wind, crowd, footsteps, replacing OfflineAudioContext synth</td><td>One listen per sound type</td></tr>
+<tr><td>3</td><td>Load Main Part 1 — fix contradictory AI/privacy copy in load.js. Text-only change.</td><td>None</td></tr>
+<tr><td>4</td><td>Provider capability flags audit — extend lib-load-image-providers.js with 24-flag schema per 5.7 AI Providers Verification.docx</td><td>None, code only</td></tr>
+<tr><td>5</td><td>Feature Verification Dashboard — 43 auto-tests, Run All Tests button</td><td>Tap the button, read the pass/fail table</td></tr>
+<tr><td>6</td><td>True audio provider (HF AudioCraft or MusicGen)</td><td>One listen to confirm real audio plays</td></tr>
+<tr><td>7</td><td>Structured animation intent parser — saves prompt with Animation Provider Needed card, clears false expectations</td><td>None, card either appears or it does not</td></tr>
+<tr><td>8</td><td>Load Main Parts 2–13 — full ecosystem hub build</td><td>Staged testing per part</td></tr>
+</table>
+
+<!-- ─────────────────────────────────────────── -->
+<h2>5. Provider Needed Checklist</h2>
+<table>
+<tr><th>What you want</th><th>Key to add</th><th>Where to get it</th></tr>
+<tr><td>Inpainting (source-preserving edit)</td><td>ps_hfimg</td><td>huggingface.co → Settings → Access Tokens (free)</td></tr>
+<tr><td>Face restoration (GFPGAN, CodeFormer)</td><td>ps_hfimg</td><td>Same HF token</td></tr>
+<tr><td>Upscale (Real-ESRGAN)</td><td>ps_hfimg</td><td>Same HF token</td></tr>
+<tr><td>Best img2img edit</td><td>ps_k_gemini</td><td>aistudio.google.com (free API key)</td></tr>
+<tr><td>Cloudflare image generation</td><td>ps_cftk + ps_cfac</td><td>dash.cloudflare.com → Workers AI (free tier)</td></tr>
+<tr><td>Together AI (FLUX free tier)</td><td>ps_tgk</td><td>api.together.xyz (free credits on signup)</td></tr>
+<tr><td>DeepAI</td><td>ps_daik</td><td>deepai.org (free tier)</td></tr>
+<tr><td>SiliconFlow</td><td>ps_sfk</td><td>siliconflow.cn (free credits)</td></tr>
+<tr><td>Local SD (full inpaint, no rate limits)</td><td>ps_local_sd_url</td><td>Run AUTOMATIC1111 or Forge locally, paste server URL</td></tr>
+<tr><td>5 providers with no key at all</td><td>—</td><td>Pollinations Flux, Pollinations, Pollinations Turbo, AI Horde, AI Horde SDXL</td></tr>
+</table>
+
+<!-- ─────────────────────────────────────────── -->
+<h2>6. Load AI Product Promise</h2>
+
+<p><strong>What Load promises:</strong> Generate images from a text prompt. Edit an existing image with a follow-up prompt, preserving the original. Animate a scene. Add sound and atmosphere. Export a finished scene as a package.</p>
+
+<p><strong>Text-to-image:</strong> Infrastructure is real. 17 providers, 5 need no key. Auto-fallback and health tracking work. The UI surfaces (Image Prompt and AI Chat Studio) are confirmed broken on device. Users cannot reach the working provider chain through the UI.</p>
+
+<p><strong>Image editing:</strong> The edit routing, anatomy gate, and img2img path are wired. Real inpainting requires a key. Without a key it uses standard img2img which changes the whole image, not just the masked region. The mask painter UI is built.</p>
+
+<p><strong>Animation:</strong> Ken-Burns camera-motion preview is real and produces a real file. It is not character animation. True subject motion is not implemented.</p>
+
+<p><strong>Sound:</strong> Browser TTS voice is real. Procedural synthesis produces placeholder blobs for SFX and ambience — real files, not realistic sounds. Music is a chord arpeggio, not a real track. Laughter, singing, and speech in SFX mode are blocked with an honest Provider Needed card.</p>
+
+<p><strong>Export:</strong> Output proof is in place on every card. No scene package muxing or full export exists.</p>
+
+<div class="gap">The provider infrastructure is sound, the UI layer is broken on device, and the realistic audio and true animation layers do not exist yet.</div>
+
+<!-- ─────────────────────────────────────────── -->
+<h2>7. Final Handoff Summary</h2>
+
+<p><strong>Current build:</strong> v17g76 &nbsp;|&nbsp; <strong>Cache:</strong> load-v17g76 &nbsp;|&nbsp; <strong>Last PR:</strong> #6 (squash, SHA d842909) &nbsp;|&nbsp; <strong>Branch:</strong> claude/fix-session-sending-TVMbW-i4JHc</p>
+
+<p><strong>Genuinely working (code verified):</strong></p>
+<ul>
+<li>17-provider image chain with health board and auto-fallback</li>
+<li>Output proof gate — no success badge without a real blob</li>
+<li>Anatomy refusal gate — refuses broken edits when no inpaint provider is set</li>
+<li>Ken-Burns animation — real WebM, honestly labeled</li>
+<li>Audio routing guards — sfxLikeRx and voiceLikeRx correct as of v17g76</li>
+<li>Audio honest badges — no false green OK on any output</li>
+</ul>
+
+<p><strong>Confirmed broken on device:</strong></p>
+<ul>
+<li>Image Prompt PWA — user confirmed 2026-05-10</li>
+<li>AI Chat Studio — user confirmed 2026-05-10</li>
+<li>Root cause: UI layer, not provider layer. Free providers need no key.</li>
+</ul>
+
+<p><strong>Not built:</strong></p>
+<ul>
+<li>True subject animation</li>
+<li>Realistic SFX, laughter, crowd, singing</li>
+<li>Real music generation</li>
+<li>Video generation or muxing</li>
+<li>Full scene package export</li>
+</ul>
+
+<p><strong>Built but needs a provider key:</strong></p>
+<ul>
+<li>Inpainting / mask painter (ps_hfimg or local SD)</li>
+<li>Face restoration GFPGAN / CodeFormer (ps_hfimg)</li>
+<li>Upscale Real-ESRGAN (ps_hfimg)</li>
+</ul>
+
+<p><strong>First task next session:</strong> Read 5.8 AI Studio Fix.docx and 5.8 READ AI Studio Not working.docx. Diagnose the UI failure in Image Prompt and AI Chat Studio. Fix the UI layer so the real provider chain is reachable from the device. This is the single highest-priority item.</p>
+
+<p><strong>Key files:</strong></p>
+<ul>
+<li><code>load/tools/ai-chat-studio.html</code> — AI Chat Studio surface</li>
+<li><code>load/image-prompt/index.html</code> — Image Prompt PWA</li>
+<li><code>load/lib-load-image-providers.js</code> — shared 17-provider chain</li>
+<li><code>load/load.js</code> — Load Main app shell</li>
+<li><code>load/sw.js</code> — service worker (CACHE = load-v17g76)</li>
+<li><code>LOAD_STATUS_2026-05-10.md</code> — markdown version of this file</li>
+<li><code>SESSION_NOTES_2026-05-10.md</code> — session log with test reminders</li>
+<li><code>MASTER_BACKLOG.md</code> — full feature backlog across all apps</li>
+<li><code>HANDOFF.md</code> — cross-session architectural state</li>
+<li><code>inbox/</code> — unread spec files (5.7, 5.8, Load Main Next Build Plan, PWA One Click, Reliability Addendum)</li>
+</ul>
+
+<div class="dl-bar">
+  <button class="dl-btn" onclick="dl()">Save as HTML</button>
+  <span class="dl-note">Or use Share &rarr; Print &rarr; Save as PDF in Safari</span>
+</div>
+
+<script>
+function dl() {
+  var a = document.createElement('a');
+  var blob = new Blob([document.documentElement.outerHTML], {type: 'text/html'});
+  a.href = URL.createObjectURL(blob);
+  a.download = 'Load-Status-Report-2026-05-10.html';
+  a.click();
+}
+</script>
+</body>
+</html>
