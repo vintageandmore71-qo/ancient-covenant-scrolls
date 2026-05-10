@@ -139,7 +139,7 @@ button.small{font-size:11.5px;padding:5px 10px}
   <summary style="cursor:pointer;padding:10px 14px;font-weight:800;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)">Advanced Details / Developer Diagnostics</summary>
   <div style="padding:0 14px 14px">
 
-    <div class="build-marker" style="margin-top:10px">BUILD MARKER: CHAT-STUDIO-v4.9-2026-05-08-v17g75 (mask-painter + HF SDXL inpaint)</div>
+    <div class="build-marker" style="margin-top:10px">BUILD MARKER: CHAT-STUDIO-v5.0-2026-05-10-v17g76 (audio routing fix: sfxLikeRx conjugated forms + engine SFX + honest tone labeling)</div>
     <div class="intro">
       <strong>X-AI-CHAT-STUDIO Phase 3.</strong> Routed chat with inline real-output cards. Free / open-source / local-first only. <em>Chat</em>: Pollinations text → AI Horde fallback. <em>Text-to-image &amp; Image-to-image</em>: shared 17-provider chain via lib-load-image-providers.js (Local SD · Pollinations Flux · Pollinations · Pollinations Turbo · AI Horde · AI Horde SDXL · Hugging Face · Cloudflare AI · Cloudflare SDXL-Lightning · HF SDXL-Turbo · Together · Gemini Image · DeepAI · SiliconFlow · Real-ESRGAN · GFPGAN · CodeFormer). <em>Animate</em>: canvas Ken-Burns + MediaRecorder real WebM Blob. <em>Audio</em>: OfflineAudioContext WAV + Browser TTS + import / record / public-audio connectors / procedural ambience. Output proof: only marked ready when a real playable Blob exists; otherwise the card stays prompt-only honestly.
     </div>
@@ -854,6 +854,7 @@ function synthesizeAudio(prompt, durationSec) {
   if (/wind|breeze|whoosh|air/.test(p)) kind = 'wind';
   else if (/rain|storm|water|hiss/.test(p)) kind = 'rain';
   else if (/laugh|crowd|chatter|noise|jeer|mock/.test(p)) kind = 'crowd';
+  else if (/engine|motor|roar|rumble|rev|truck|car\s*engine/.test(p)) kind = 'engine';
   else if (/hammer|knock|clang|footstep|drum/.test(p)) kind = 'hammer';
   else if (/music|melody|tune|chord|score/.test(p)) kind = 'music';
   if (kind === 'wind' || kind === 'rain' || kind === 'crowd') {
@@ -875,6 +876,23 @@ function synthesizeAudio(prompt, durationSec) {
       o.connect(g).connect(ctx.destination);
       o.start(0); o.stop(durationSec);
     });
+  } else if (kind === 'engine') {
+    // Low sawtooth + filtered rumble approximates engine/motor.
+    // Still a placeholder — label is 'engine (placeholder)'.
+    var oe = ctx.createOscillator(); oe.type = 'sawtooth'; oe.frequency.value = 55;
+    var ge = ctx.createGain(); ge.gain.value = 0.18;
+    var fe = ctx.createBiquadFilter(); fe.type = 'lowpass'; fe.frequency.value = 300;
+    oe.connect(ge).connect(fe).connect(ctx.destination);
+    oe.start(0); oe.stop(durationSec);
+    // Noise layer for texture
+    var srce = ctx.createBufferSource();
+    var bufe = ctx.createBuffer(1, ctx.length, SR);
+    var de = bufe.getChannelData(0);
+    for (var ie = 0; ie < de.length; ie++) de[ie] = (Math.random() * 2 - 1) * 0.06;
+    srce.buffer = bufe;
+    var fe2 = ctx.createBiquadFilter(); fe2.type = 'bandpass'; fe2.frequency.value = 120; fe2.Q.value = 0.5;
+    srce.connect(fe2).connect(ctx.destination);
+    srce.start(0);
   } else {
     var o = ctx.createOscillator(); o.type = (kind === 'hammer') ? 'square' : 'sine';
     o.frequency.value = (kind === 'hammer') ? 80 : 440;
@@ -2132,7 +2150,9 @@ function runVoiceLine(rawText) {
   // trees") must NOT be read aloud.
   var sayPrefixRx = /^\s*(say|narrate|narrator|voice|speak|read\s+aloud|tells?|recite|deliver(?:s|ed)?)\s*[:,-]/i;
   var quotedRx = /["“][^"”]{2,}["”]/;
-  var sfxLikeRx = /\b(laugh|laughter|chuckl|giggle|cry|crying|scream|sing|singing|song|cheer|applause|crowd|background|ambien|ambient|atmos|wind|rain|thunder|storm|bird|birds|traffic|footstep|knock|crash|hum|murmur|chatter|noise|sound\s*of|sounds?|sfx|effect)\b/i;
+  // No strict word-boundary end required — catches conjugated forms
+  // (laughing, screaming, singing, etc.) that \b(laugh)\b misses.
+  var sfxLikeRx = /(?:laugh|giggl|chuckl|crowd|background|ambien|ambient|atmos|wind|rain|thunder|storm|birds?|traffic|footstep|knock|crash|hum(?:ming)?|murmur|chatter|noise|sound\s*of|sounds?|sfx|effect|engine|roar|rumbl|scream|singing?|cheer|applause)/i;
   var hasSayPrefix = sayPrefixRx.test(rawText);
   var hasQuoted = quotedRx.test(rawText);
   var looksLikeSfx = sfxLikeRx.test(rawText) && !hasSayPrefix && !hasQuoted;
@@ -2221,7 +2241,9 @@ function runOfflineAudio(p, fallbackNote) {
   // dialogue / song. Rather than label colored noise as success,
   // surface "Audio Provider Needed" for those request types and
   // save the prompt.
-  var voiceLikeRx = /\b(laugh|laughter|chuckl|giggle|cry|crying|scream|shout|sing|singing|song|lyric|speech|speak|speaking|voice|word|words|dialog|dialogue|narrat|talk|whisper|shout|yell|moan|gasp|sob|sigh)\b/i;
+  // No strict word-boundary end — catches conjugated forms
+  // (laughing, screaming, singing, talking, etc.).
+  var voiceLikeRx = /(?:laugh|giggl|chuckl|scream|shout|sing(?:ing)?|song|lyric|speech|speak(?:ing)?|dialog(?:ue)?|narrat|talk(?:ing)?|whisper|yell(?:ing)?|moan|gasp|sob|sigh)/i;
   if (voiceLikeRx.test(full)) {
     appendCard({ cls: 'assistant', who: 'Sound effect', badge: { cls: 'fail', text: 'Audio Provider Needed' },
       html: '<pre>' + esc('On-device WebAudio synthesis maps prompt keywords to filtered noise / sine tones. It cannot produce realistic laughter / speech / singing — labeling colored noise as success would be a fake result.\n\nSound prompt saved (status: sound_prompt_saved · audio_provider_needed):\n  "' + full + '"\n\nFor laughter, speech, or singing: switch the audio sub-mode to "Voice / narration" and type the line, OR record your own voice via Advanced Details > Audio tools > Record narration.') + '</pre>' });
@@ -2236,10 +2258,18 @@ function runOfflineAudio(p, fallbackNote) {
   return synthesizeAudio(full, 5).then(function (out) {
     var ms = Date.now() - t0;
     var url = URL.createObjectURL(out.blob);
-    var card = appendCard({ cls: 'assistant', who: 'Audio result', badge: { cls: 'ok', text: 'separate audio generated' },
+    // kind='tone' means no keyword matched — the result is a plain
+    // sine wave unrelated to the request. Show warn, not ok.
+    var isTonePlaceholder = out.kind === 'tone';
+    var audioLabel = isTonePlaceholder ? 'Placeholder tone' : (out.kind === 'engine' ? 'Engine placeholder' : 'Procedural placeholder');
+    var audioBadgeCls = isTonePlaceholder ? 'fail' : 'prompt';
+    var audioStatusLabel = isTonePlaceholder
+      ? 'Placeholder tone — not realistic audio for this request. Status: audio_provider_needed · sound_prompt_saved.'
+      : ('Procedural placeholder (' + out.kind + ') — not a high-fidelity recording. Suitable for rough placement only.');
+    var card = appendCard({ cls: 'assistant', who: 'Audio result', badge: { cls: audioBadgeCls, text: audioLabel },
       html: '<audio src="' + url + '" controls playsinline style="width:100%;margin-top:8px"></audio>' +
-            '<div class="meta">provider: on-device-webaudio · op: separate audio generated · kind=' + esc(out.kind) + ' · ' + out.bytes + ' B WAV · ' + ms + ' ms · status: audio ready for scene · output proof: real WAV Blob (RIFF/WAVE)</div>' +
-            '<div style="margin-top:8px;padding:8px 10px;border-left:3px solid var(--warn);background:rgba(250,204,21,.06);font-size:12px;color:var(--mute)">This is a <strong>keyword-mapped filter synthesis</strong>, not a high-fidelity recording. Suitable for ambience / placeholder SFX. For voice / dialogue use the Voice / narration sub-mode.</div>' +
+            '<div class="meta">provider: on-device-webaudio · op: ' + esc(audioLabel) + ' · kind=' + esc(out.kind) + ' · ' + out.bytes + ' B WAV · ' + ms + ' ms · output proof: real WAV Blob (RIFF/WAVE)</div>' +
+            '<div style="margin-top:8px;padding:8px 10px;border-left:3px solid var(--' + (isTonePlaceholder ? 'err' : 'warn') + ');background:rgba(' + (isTonePlaceholder ? '255,110,110' : '250,204,21') + ',.06);font-size:12px;color:var(--mute)">' + esc(audioStatusLabel) + ' Use Import audio / Public audio sources / Record narration (Advanced Details) for real SFX.</div>' +
             '<div class="actions"></div>' });
     var actions = card.querySelector('.actions');
     var btnSave = document.createElement('button'); btnSave.className = 'small'; btnSave.textContent = 'Save audio';
