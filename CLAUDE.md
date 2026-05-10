@@ -33,13 +33,12 @@ These have been re-locked on 2026-05-04 after repeated violations.
       check for an open one, `mcp__github__create_pull_request` if
       none exists).
    c. Enable PR auto-merge via `mcp__github__enable_pr_auto_merge`
-      (squash) so it lands as soon as required checks pass. If the
-      repo has no required checks, auto-merge will be rejected with
-      "PR is already in clean status." In that case, immediately
-      call `mcp__github__merge_pull_request` (squash) to land it.
-      Either way, the PR must not sit waiting for a manual click.
-   d. Tell the user the PR number + URL in the end-of-build summary
-      so they can one-click merge if auto-merge is unavailable.
+      (squash) so it lands as soon as required checks pass.
+   d. Tell the user the PR number + URL, the list of files changed,
+      the risk level, and whether the change touches live code.
+      Wait for the user to merge. **Do not call
+      `mcp__github__merge_pull_request` unless rule 9 explicitly
+      authorizes it for that PR.**
    Never attempt `git push origin <branch>:main` — it will fail.
    NEVER force push to `main`.
 7. **SYNC FROM `origin/main` BEFORE EVERY PUSH.** Squash merges
@@ -55,6 +54,22 @@ These have been re-locked on 2026-05-04 after repeated violations.
    `content/` folder). Locked 2026-05-04 by user. Only edit if the
    user explicitly says "edit ACR reader" / "fix the reader" /
    names a root-app file. Otherwise leave the root untouched.
+9. **NEVER DIRECTLY MERGE A PR WITHOUT EXPLICIT PER-PR APPROVAL.**
+   Locked 2026-05-10 by user after a self-merge incident.
+   "Zero clicks for the user" is NOT more important than safety.
+   - For PRs that touch live site code, service worker, AI tools,
+     provider routing, export, security, package validation, or
+     deployment logic: **no direct merge ever.** Required-check
+     gating is preferred. Report changed files, explain risk
+     level, and wait for the user to merge.
+   - For PRs that only touch low-risk documentation / status
+     pages: still no default direct merge. State the files
+     changed, the risk level, whether it affects live code, and
+     ask before considering a direct merge. Only proceed if the
+     user replies with explicit approval for that specific PR.
+   - The real fix for unattended landing is a required CI check
+     so auto-merge has a gate to wait on. Direct self-merge by
+     Claude is not a substitute and is not the long-term fix.
 
 These are LOCKED. They take precedence over politeness, helpfulness,
 acknowledgements, "thinking out loud", or any pattern from earlier in
