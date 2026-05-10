@@ -1,0 +1,60 @@
+name: Load Site Safety Check
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  safety:
+    name: Load Site Safety Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Service-worker JS syntax check
+        shell: bash
+        run: |
+          set -e
+          fail=0
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            if ! node --check "$f" 2>err.log; then
+              echo "ERROR $f failed node --check:"
+              cat err.log
+              fail=1
+            fi
+          done < <(find . -name 'sw.js' -not -path './node_modules/*' -not -path './.git/*')
+          exit $fail
+
+      - name: ACR Reader root-app lock
+        shell: bash
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -e
+          touched=$(git diff --name-only "$BASE_SHA" -- 'index.html' 'acr.css' 'sw.js' 'content/' 2>/dev/null || true)
+          if [ -z "$touched" ]; then
+            echo "No root-app files touched."
+            exit 0
+          fi
+          echo "Root-app files touched:"
+          echo "$touched"
+          if printf '%s\n%s\n' "$PR_TITLE" "$PR_BODY" \
+              | grep -qiE 'edit acr reader|fix the reader|root-app override'; then
+            echo "ACR Reader edit acknowledged in PR title or body. OK."
+          else
+            echo "ERROR: root-app files changed without an explicit unlock phrase"
+            echo "       in the PR title or body."
+            echo "       Required phrase (any one): edit acr reader / fix the reader / root-app override"
+            exit 1
+          fi
+
+      - name: Done
+        run: echo "Load Site Safety Check passed."
