@@ -7,13 +7,14 @@
 // Attain Universal — Service Worker
 // Network-first for everything so updates always take effect
 
-var CACHE = 'attain-v71';
+var CACHE = 'attain-v72';
 
 var SHELL = [
   './',
   'index.html',
   'attain.css',
   'lib-hebrew-pron.js',
+  'lib-attain-quality.js',
   'attain-core.js',
   'attain-parser.js',
   'attain-study.js',

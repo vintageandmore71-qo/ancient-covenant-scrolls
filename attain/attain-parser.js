@@ -1004,6 +1004,14 @@ function validateGenerated(kind, q) {
     var correctVal = (typeof q.correct === 'number' && Array.isArray(q.options))
       ? q.options[q.correct] : q.correct;
     if (!checkDistractorsPlausible(q.options, correctVal)) return false;
+    // Learning Quality Engine — POS / case / length / number /
+    // tense parity + blind-solve. Reject any MC question a user
+    // could narrow down without knowing the material.
+    if (typeof window !== 'undefined' && window.LoadAttainQuality &&
+        typeof window.LoadAttainQuality.auditQuestion === 'function') {
+      var lq = window.LoadAttainQuality.auditQuestion(q);
+      if (!lq.ok) return false;
+    }
     return true;
   }
   if (kind === 'true_false') {

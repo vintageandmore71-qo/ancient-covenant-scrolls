@@ -446,6 +446,14 @@ function showSettings() {
   h += '</select>';
   h += '</div>';
 
+  // Learning Quality Audit (developer / power user)
+  h += '<div class="prog-card" style="border-left:4px solid #7c3aed">';
+  h += '<h3 class="prog-h3" style="color:#7c3aed">Learning Quality Audit</h3>';
+  h += '<p style="margin:6px 0;font-size:13px;color:#555">Run the question-quality engine over the active book. Reports parts-of-speech parity, capitalisation tells, length tells, tense / number agreement, and blind-solve guessability.</p>';
+  h += '<button class="study-btn" id="b-set-quality" style="background:#7c3aed" aria-label="Run learning quality audit">Run Learning Quality Audit</button>';
+  h += '<div id="quality-audit-out" style="margin-top:10px;font-size:13px;color:#222"></div>';
+  h += '</div>';
+
   // Danger zone
   h += '<div class="prog-card" style="border-left:4px solid #dc2626">';
   h += '<h3 class="prog-h3" style="color:#dc2626">Danger Zone</h3>';
@@ -506,6 +514,61 @@ function showSettings() {
   });
 
   document.getElementById('b-set-back').addEventListener('click', function () { showLibrary(); });
+
+  // Learning Quality Audit — run the validator over freshly
+  // generated questions for the active book. Honest counts:
+  // total / pass / fail / score / elimination-resistance %.
+  var qBtn = document.getElementById('b-set-quality');
+  if (qBtn) qBtn.addEventListener('click', function () {
+    var out = document.getElementById('quality-audit-out');
+    if (!out) return;
+    out.innerHTML = '<em>Running…</em>';
+    if (!window.LoadAttainQuality || typeof window.LoadAttainQuality.auditQuestionSet !== 'function') {
+      out.innerHTML = '<span style="color:#dc2626">Quality engine not loaded.</span>'; return;
+    }
+    if (typeof activeChapters === 'undefined' || !activeChapters || !activeChapters.length) {
+      out.innerHTML = '<span style="color:#dc2626">Open a book in the library first, then re-run the audit.</span>'; return;
+    }
+    setTimeout(function () {
+      try {
+        var paragraphs = [];
+        for (var ci = 0; ci < activeChapters.length; ci++) {
+          var ps = activeChapters[ci].paragraphs || [];
+          for (var pi = 0; pi < ps.length; pi++) paragraphs.push(ps[pi]);
+        }
+        var keyTerms = (typeof extractKeyTerms === 'function') ? extractKeyTerms(paragraphs) : [];
+        // Generate up to 100 candidates by calling generateMCQuestions
+        // multiple times with different sample slices (the generator
+        // already rejects internally — we audit what survives).
+        var pool = [];
+        if (typeof generateMCQuestions === 'function') {
+          var batch = generateMCQuestions(paragraphs, keyTerms, 100);
+          if (batch && batch.length) pool = pool.concat(batch);
+        }
+        var report = window.LoadAttainQuality.auditQuestionSet(pool);
+        var html = '';
+        html += '<div style="font-weight:700;margin-bottom:6px">Total: ' + report.total + ' · Pass: ' + report.pass + ' · Fail: ' + report.fail + '</div>';
+        html += '<div>Avg quality score: <strong>' + report.score + '</strong> / 100</div>';
+        html += '<div>Elimination resistance: <strong>' + report.eliminationResistance + '%</strong></div>';
+        html += '<div>Blind-solve flags: <strong>' + report.blindSolveCount + '</strong></div>';
+        var rcKeys = Object.keys(report.reasonCounts || {});
+        if (rcKeys.length) {
+          html += '<div style="margin-top:8px;font-weight:700">Reason frequency</div><ul style="margin:4px 0 0 16px;padding:0">';
+          rcKeys.sort(function (a, b) { return report.reasonCounts[b] - report.reasonCounts[a]; })
+                .forEach(function (r) { html += '<li>' + report.reasonCounts[r] + ' &times; ' + r + '</li>'; });
+          html += '</ul>';
+        } else {
+          html += '<div style="margin-top:8px;color:#059669">No quality issues detected.</div>';
+        }
+        var badge = (report.score >= 90 && report.eliminationResistance >= 90) ? 'PASS' : (report.score >= 70 ? 'PARTIAL' : 'FAIL');
+        var badgeColor = badge === 'PASS' ? '#059669' : (badge === 'PARTIAL' ? '#d97706' : '#dc2626');
+        html = '<div style="display:inline-block;background:' + badgeColor + ';color:#fff;padding:3px 10px;border-radius:5px;font-weight:800;margin-bottom:8px">' + badge + '</div>' + html;
+        out.innerHTML = html;
+      } catch (e) {
+        out.innerHTML = '<span style="color:#dc2626">Audit error: ' + (e && e.message ? e.message : e) + '</span>';
+      }
+    }, 0);
+  });
 }
 
 // ---- Upload Flow — drop zone, file picker, paste area, parsing progress ----

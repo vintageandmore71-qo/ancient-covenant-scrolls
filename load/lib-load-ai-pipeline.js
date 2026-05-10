@@ -55,6 +55,20 @@ var HEADSHOT_FRAMING = 'shoulders-up portrait, head and shoulders framing, subje
 // Generic high-quality clauses for non-portrait images.
 var BASE_QUALITY = 'high detail, sharp focus, balanced exposure, coherent composition';
 
+// Animal anatomy quality — auto-injected when the prompt mentions
+// a dog / cat / animal / pet etc. Mirrors the portrait clause set
+// so a text-to-image generation of "shih tzu beside a red car"
+// inherits the locked anatomy controls.
+var ANIMAL_QUALITY = [
+  'realistic animal anatomy', 'correct legs', 'correct paws',
+  'natural face', 'correct eyes', 'correct muzzle', 'natural fur',
+  'no extra limbs', 'no melted body', 'no warped paws',
+  'no distorted head', 'realistic scale beside the surrounding objects',
+  'photorealistic detail'
+].join(', ');
+
+var ANIMAL_RX = /\b(dog|dogs|puppy|puppies|cat|cats|kitten|kittens|animal|animals|pet|pets|bird|birds|horse|horses|cow|cows|sheep|pig|pigs|rabbit|rabbits|hamster|fox|wolf|bear|tiger|lion|elephant|giraffe|monkey|deer|squirrel|shih\s*tzu|labrador|retriever|poodle|bulldog|chihuahua|husky|collie|terrier|spaniel|beagle)\b/i;
+
 // Aspect-ratio map for spec sizes.
 var SIZE_TO_RATIO = {
   '512x512': '1:1',
@@ -90,6 +104,7 @@ function detectIntent(rawPrompt, opts) {
 
 function isPortrait(prompt) { return PORTRAIT_RX.test(prompt) || (PERSON_RX.test(prompt) && /\b(photo|picture|image|portrait|headshot)\b/i.test(prompt)); }
 function isHeadshot(prompt) { return HEADSHOT_RX.test(prompt); }
+function isAnimal(prompt)   { return ANIMAL_RX.test(prompt); }
 
 function compileImagePrompt(userPrompt, opts) {
   opts = opts || {};
@@ -99,6 +114,7 @@ function compileImagePrompt(userPrompt, opts) {
   var intent = detectIntent(userPrompt, opts);
   var portrait = isPortrait(userPrompt);
   var headshot = isHeadshot(userPrompt);
+  var animal   = isAnimal(userPrompt);
   // Visual prompt — user's literal ask, plus framing for headshots.
   var visualBits = [userPrompt];
   if (headshot) visualBits.push(HEADSHOT_FRAMING);
@@ -106,7 +122,14 @@ function compileImagePrompt(userPrompt, opts) {
   // Quality prompt — portrait clauses if person/portrait/headshot,
   // generic otherwise. Always non-empty so every route inherits a
   // minimum quality floor.
-  var qualityPrompt = portrait ? PORTRAIT_QUALITY : BASE_QUALITY;
+  // Stack quality clauses: portrait + animal both, when present.
+  // Portrait is anchored at the front (subject identity), animal
+  // appended (creature anatomy guardrails).
+  var qualityPrompt;
+  if (portrait && animal) qualityPrompt = PORTRAIT_QUALITY + ', ' + ANIMAL_QUALITY;
+  else if (portrait)      qualityPrompt = PORTRAIT_QUALITY;
+  else if (animal)        qualityPrompt = ANIMAL_QUALITY;
+  else                    qualityPrompt = BASE_QUALITY;
   // Negative prompt — base safety floor, never empty.
   var negativePrompt = BASE_NEGATIVE;
   // Final compiled prompt for providers that take a single string.
@@ -150,6 +173,7 @@ function compileImagePrompt(userPrompt, opts) {
     aspectRatio: SIZE_TO_RATIO[size] || size,
     isHeadshot: headshot,
     isPortrait: portrait,
+    isAnimal: animal,
     fullPrompt: fullPrompt
   };
 }
@@ -222,7 +246,9 @@ if (typeof window !== 'undefined') {
     BASE_NEGATIVE: BASE_NEGATIVE,
     PORTRAIT_QUALITY: PORTRAIT_QUALITY,
     HEADSHOT_FRAMING: HEADSHOT_FRAMING,
-    BASE_QUALITY: BASE_QUALITY
+    BASE_QUALITY: BASE_QUALITY,
+    ANIMAL_QUALITY: ANIMAL_QUALITY,
+    isAnimal: isAnimal
   };
 }
 if (typeof module !== 'undefined' && module.exports) {
