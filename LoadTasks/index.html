@@ -149,6 +149,21 @@
         <button data-view="testcoverage" data-route>Test Coverage</button>
         <button data-view="apiendpoints" data-route>API Endpoints</button>
         <button data-view="envcheck" data-route>Env Check</button>
+        <button data-view="mergelog" data-route>Merge Log</button>
+        <button data-view="bugtriage" data-route>Bug Triage</button>
+        <button data-view="sessiongoals" data-route>Session Goals</button>
+        <button data-view="shippedlog" data-route>Shipped Log</button>
+        <button data-view="testresults" data-route>Test Results</button>
+        <button data-view="rollbackplan" data-route>Rollback Plan</button>
+        <button data-view="riskregister" data-route>Risk Register</button>
+        <button data-view="branchlog" data-route>Branch Log</button>
+        <button data-view="standup" data-route>Stand-Up</button>
+        <button data-view="prprep" data-route>PR Prep</button>
+        <button data-view="clippad" data-route>Clip Pad</button>
+        <button data-view="urlstore" data-route>URL Store</button>
+        <button data-view="commitmsg2" data-route>Commit Tmpl</button>
+        <button data-view="pasteannotate" data-route>Paste &amp; Annotate</button>
+        <button data-view="worklog" data-route>Work Log</button>
       </nav>
       <button class="icon-button" id="hardRefresh" aria-label="Hard refresh app state">
         <span class="icon-mini" data-icon="refresh"></span>
@@ -261,6 +276,21 @@
         <button data-view="testcoverage" data-route><span class="rail-icon" data-icon="shield"></span><span>Test Coverage</span></button>
         <button data-view="apiendpoints" data-route><span class="rail-icon" data-icon="library"></span><span>API Endpoints</span></button>
         <button data-view="envcheck" data-route><span class="rail-icon" data-icon="shield"></span><span>Env Check</span></button>
+        <button data-view="mergelog" data-route><span class="rail-icon" data-icon="version"></span><span>Merge Log</span></button>
+        <button data-view="bugtriage" data-route><span class="rail-icon" data-icon="wrench"></span><span>Bug Triage</span></button>
+        <button data-view="sessiongoals" data-route><span class="rail-icon" data-icon="focus"></span><span>Session Goals</span></button>
+        <button data-view="shippedlog" data-route><span class="rail-icon" data-icon="vault"></span><span>Shipped Log</span></button>
+        <button data-view="testresults" data-route><span class="rail-icon" data-icon="shield"></span><span>Test Results</span></button>
+        <button data-view="rollbackplan" data-route><span class="rail-icon" data-icon="wrench"></span><span>Rollback Plan</span></button>
+        <button data-view="riskregister" data-route><span class="rail-icon" data-icon="notes"></span><span>Risk Register</span></button>
+        <button data-view="branchlog" data-route><span class="rail-icon" data-icon="library"></span><span>Branch Log</span></button>
+        <button data-view="standup" data-route><span class="rail-icon" data-icon="dashboard"></span><span>Stand-Up</span></button>
+        <button data-view="prprep" data-route><span class="rail-icon" data-icon="shield"></span><span>PR Prep</span></button>
+        <button data-view="clippad" data-route><span class="rail-icon" data-icon="notes"></span><span>Clip Pad</span></button>
+        <button data-view="urlstore" data-route><span class="rail-icon" data-icon="library"></span><span>URL Store</span></button>
+        <button data-view="commitmsg2" data-route><span class="rail-icon" data-icon="version"></span><span>Commit Tmpl</span></button>
+        <button data-view="pasteannotate" data-route><span class="rail-icon" data-icon="notes"></span><span>Paste &amp; Annotate</span></button>
+        <button data-view="worklog" data-route><span class="rail-icon" data-icon="focus"></span><span>Work Log</span></button>
       </aside>
 
       <section class="workspace">
@@ -734,6 +764,81 @@
               <span class="card-icon" data-icon="shield"></span>
               <strong>Environment Checker</strong>
               <span>Confirm your dev environment is set up correctly before building.</span>
+            </button>
+            <button class="command-card" data-view="mergelog" data-route>
+              <span class="card-icon" data-icon="version"></span>
+              <strong>Merge Log</strong>
+              <span>Log every merge with PR number, SHA, branch, date, and risk level.</span>
+            </button>
+            <button class="command-card" data-view="bugtriage" data-route>
+              <span class="card-icon" data-icon="wrench"></span>
+              <strong>Bug Triage</strong>
+              <span>Triage bugs with severity, site, status, and assignee.</span>
+            </button>
+            <button class="command-card" data-view="sessiongoals" data-route>
+              <span class="card-icon" data-icon="focus"></span>
+              <strong>Session Goals</strong>
+              <span>Set goals for this session and tick them off as you go.</span>
+            </button>
+            <button class="command-card" data-view="shippedlog" data-route>
+              <span class="card-icon" data-icon="vault"></span>
+              <strong>Shipped Features Log</strong>
+              <span>Permanent record of shipped features with date, PR, and SHA.</span>
+            </button>
+            <button class="command-card" data-view="testresults" data-route>
+              <span class="card-icon" data-icon="shield"></span>
+              <strong>Test Results Log</strong>
+              <span>Log manual test runs with pass/fail, device, and notes.</span>
+            </button>
+            <button class="command-card" data-view="rollbackplan" data-route>
+              <span class="card-icon" data-icon="wrench"></span>
+              <strong>Rollback Plan Builder</strong>
+              <span>Document rollback steps per PR before merging. Export as .txt.</span>
+            </button>
+            <button class="command-card" data-view="riskregister" data-route>
+              <span class="card-icon" data-icon="notes"></span>
+              <strong>Risk Register</strong>
+              <span>Log risks with probability, impact, mitigation, and status.</span>
+            </button>
+            <button class="command-card" data-view="branchlog" data-route>
+              <span class="card-icon" data-icon="library"></span>
+              <strong>Branch Log</strong>
+              <span>Log branches created in a sprint with purpose and merge status.</span>
+            </button>
+            <button class="command-card" data-view="standup" data-route>
+              <span class="card-icon" data-icon="dashboard"></span>
+              <strong>Daily Stand-Up Generator</strong>
+              <span>Generate a stand-up message from Today's Work and Blockers.</span>
+            </button>
+            <button class="command-card" data-view="prprep" data-route>
+              <span class="card-icon" data-icon="shield"></span>
+              <strong>PR Prep Checklist</strong>
+              <span>Run through required checks before opening any pull request.</span>
+            </button>
+            <button class="command-card" data-view="clippad" data-route>
+              <span class="card-icon" data-icon="notes"></span>
+              <strong>Clip Pad</strong>
+              <span>Store multiple text clips in-session. Copy any item with one tap.</span>
+            </button>
+            <button class="command-card" data-view="urlstore" data-route>
+              <span class="card-icon" data-icon="library"></span>
+              <strong>URL Store</strong>
+              <span>Save named internal URLs for quick access during builds.</span>
+            </button>
+            <button class="command-card" data-view="commitmsg2" data-route>
+              <span class="card-icon" data-icon="version"></span>
+              <strong>Commit Templates</strong>
+              <span>Library of commit message templates. Fill in and copy.</span>
+            </button>
+            <button class="command-card" data-view="pasteannotate" data-route>
+              <span class="card-icon" data-icon="notes"></span>
+              <strong>Paste &amp; Annotate</strong>
+              <span>Paste code or diff text and attach notes and tags. Save for later.</span>
+            </button>
+            <button class="command-card" data-view="worklog" data-route>
+              <span class="card-icon" data-icon="focus"></span>
+              <strong>Work Log</strong>
+              <span>Log time spent on tasks with duration and notes per session.</span>
             </button>
           </div>
 
@@ -6532,6 +6637,693 @@
           }());</script>
         </section>
 
+        <section class="view" id="view-mergelog" data-view-panel="mergelog">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Merge Log</h1><p>Log every merge: PR number, SHA, branch, risk level, and date.</p></div>
+          <article class="panel form-panel">
+            <label>PR number<input id="mgl-pr" placeholder="e.g. 24" type="number"></label>
+            <label>Merge SHA<input id="mgl-sha" placeholder="e.g. fbeb7e1b"></label>
+            <label>Branch<input id="mgl-branch" placeholder="e.g. claude/loadtasks-devbot-batch12-2026-05-11"></label>
+            <label>Risk<select id="mgl-risk"><option>Low</option><option>Medium</option><option>High</option></select></label>
+            <label>Site(s) affected<input id="mgl-sites" placeholder="e.g. LoadTasks, Load"></label>
+            <label>Notes<input id="mgl-notes" placeholder="Optional summary"></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="mgl-save">Log Merge</button>
+              <button class="secondary-action" id="mgl-export">Export .txt</button>
+              <button class="secondary-action" id="mgl-clear-all">Clear All</button>
+            </div>
+          </article>
+          <div id="mgl-list" style="margin-top:16px;"></div>
+          <script>(function(){
+            var MGL_RISK={Low:'#2ecc71',Medium:'#e67e22',High:'#e74c3c'};
+            function mglAll(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_mg_')===0&&k!=='lt_mg_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return b.ts-a.ts;});return a;}
+            function mglRender(){
+              var el=document.getElementById('mgl-list');if(!el)return;
+              var items=mglAll();if(!items.length){el.innerHTML='<p class="empty-state">No merges logged yet.</p>';return;}
+              el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'
+                +'<span style="background:'+MGL_RISK[it.risk]+';color:#fff;border-radius:4px;padding:2px 7px;font-size:11px;white-space:nowrap;">'+it.risk+'</span>'
+                +(it.pr?'<strong style="font-size:13px;">PR #'+it.pr+'</strong>':'')
+                +'<code style="font-size:11px;color:#9aa0b0;">'+it.sha+'</code>'
+                +'<span style="font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+it.branch+'</span>'
+                +(it.sites?'<span style="font-size:11px;color:#9aa0b0;">'+it.sites+'</span>':'')
+                +'<button class="small-btn mgl-del" data-id="'+it.id+'">X</button></div>';}).join('');
+              el.querySelectorAll('.mgl-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Remove?'))return;localStorage.removeItem('lt_mg_'+b.dataset.id);mglRender();});});
+            }
+            document.getElementById('mgl-save').addEventListener('click',function(){
+              var sha=document.getElementById('mgl-sha').value.trim();if(!sha)return;
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              localStorage.setItem('lt_mg_'+id,JSON.stringify({id:id,pr:document.getElementById('mgl-pr').value.trim(),sha:sha,branch:document.getElementById('mgl-branch').value.trim(),risk:document.getElementById('mgl-risk').value,sites:document.getElementById('mgl-sites').value.trim(),notes:document.getElementById('mgl-notes').value.trim(),ts:Date.now()}));
+              document.getElementById('mgl-sha').value='';document.getElementById('mgl-pr').value='';document.getElementById('mgl-branch').value='';document.getElementById('mgl-notes').value='';mglRender();
+              var toast=document.getElementById('toast');if(toast){toast.textContent='Merge logged';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}
+            });
+            document.getElementById('mgl-export').addEventListener('click',function(){
+              var txt='MERGE LOG\nExported: '+new Date().toLocaleString()+'\n\n'+mglAll().map(function(it){return'PR #'+(it.pr||'--')+' | '+it.sha+' | '+it.risk+'\nBranch: '+it.branch+(it.sites?'\nSites: '+it.sites:'')+(it.notes?'\nNotes: '+it.notes:'');}).join('\n\n');
+              var b=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='merge-log.txt';a.click();
+            });
+            document.getElementById('mgl-clear-all').addEventListener('click',function(){if(!confirm('Clear all merges?'))return;mglAll().forEach(function(it){localStorage.removeItem('lt_mg_'+it.id);});mglRender();});
+            var sec=document.getElementById('view-mergelog');if(sec)sec.addEventListener('lt-view-enter',mglRender);
+          }());</script>
+        </section>
+
+        <section class="view" id="view-bugtriage" data-view-panel="bugtriage">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Bug Triage</h1><p>Log and triage bugs with severity, site, status, and notes.</p></div>
+          <article class="panel form-panel">
+            <label>Bug title<input id="bgt-title" placeholder="Short description of the bug"></label>
+            <label>Site<input id="bgt-site" placeholder="Load, LoadStudio, Attain..."></label>
+            <label>Severity<select id="bgt-sev"><option>Critical</option><option>High</option><option>Normal</option><option>Low</option></select></label>
+            <label>Status<select id="bgt-status"><option>Open</option><option>In Progress</option><option>Fixed</option><option>Wont Fix</option><option>Duplicate</option></select></label>
+            <label>Steps to reproduce<textarea id="bgt-steps" rows="2" placeholder="How to trigger the bug..."></textarea></label>
+            <label>Notes<textarea id="bgt-notes" rows="2" placeholder="Additional context, workaround..."></textarea></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="bgt-save">Log Bug</button>
+              <button class="secondary-action" id="bgt-export">Export .txt</button>
+              <button class="secondary-action" id="bgt-clear-all">Clear All</button>
+            </div>
+          </article>
+          <div id="bgt-list" style="margin-top:16px;"></div>
+          <script>(function(){
+            var BGT_SEV={Critical:'#e74c3c',High:'#e67e22',Normal:'#3498db',Low:'#2ecc71'};
+            var BGT_STA={Open:'#e74c3c','In Progress':'#e67e22',Fixed:'#2ecc71','Wont Fix':'#9aa0b0',Duplicate:'#9aa0b0'};
+            function bgtAll(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_bgt_')===0&&k!=='lt_bgt_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return b.ts-a.ts;});return a;}
+            function bgtRender(){
+              var el=document.getElementById('bgt-list');if(!el)return;
+              var items=bgtAll();if(!items.length){el.innerHTML='<p class="empty-state">No bugs logged.</p>';return;}
+              el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;margin-bottom:6px;">'
+                +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">'
+                +'<span style="background:'+BGT_SEV[it.sev]+';color:#fff;border-radius:4px;padding:2px 6px;font-size:10px;">'+it.sev+'</span>'
+                +'<span style="background:'+BGT_STA[it.status]+';color:#fff;border-radius:4px;padding:2px 6px;font-size:10px;">'+it.status+'</span>'
+                +(it.site?'<span style="font-size:11px;color:#9aa0b0;">'+it.site+'</span>':'')
+                +'<button class="small-btn bgt-del" data-id="'+it.id+'" style="margin-left:auto;">X</button></div>'
+                +'<div style="font-size:13px;">'+it.title+'</div>'
+                +(it.notes?'<div style="font-size:11px;color:#9aa0b0;margin-top:4px;">'+it.notes+'</div>':'')
+                +'</div>';}).join('');
+              el.querySelectorAll('.bgt-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Remove?'))return;localStorage.removeItem('lt_bgt_'+b.dataset.id);bgtRender();});});
+            }
+            document.getElementById('bgt-save').addEventListener('click',function(){
+              var title=document.getElementById('bgt-title').value.trim();if(!title)return;
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              localStorage.setItem('lt_bgt_'+id,JSON.stringify({id:id,title:title,site:document.getElementById('bgt-site').value.trim(),sev:document.getElementById('bgt-sev').value,status:document.getElementById('bgt-status').value,steps:document.getElementById('bgt-steps').value.trim(),notes:document.getElementById('bgt-notes').value.trim(),ts:Date.now()}));
+              document.getElementById('bgt-title').value='';document.getElementById('bgt-steps').value='';document.getElementById('bgt-notes').value='';bgtRender();
+              var toast=document.getElementById('toast');if(toast){toast.textContent='Bug logged';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}
+            });
+            document.getElementById('bgt-export').addEventListener('click',function(){
+              var txt='BUG TRIAGE\nExported: '+new Date().toLocaleString()+'\n\n'+bgtAll().map(function(it){return'['+it.sev+'] ['+it.status+'] '+it.title+(it.site?'\nSite: '+it.site:'')+(it.steps?'\nSteps: '+it.steps:'')+(it.notes?'\nNotes: '+it.notes:'');}).join('\n\n');
+              var b=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='bug-triage.txt';a.click();
+            });
+            document.getElementById('bgt-clear-all').addEventListener('click',function(){if(!confirm('Clear all bugs?'))return;bgtAll().forEach(function(it){localStorage.removeItem('lt_bgt_'+it.id);});bgtRender();});
+            var sec=document.getElementById('view-bugtriage');if(sec)sec.addEventListener('lt-view-enter',bgtRender);
+          }());</script>
+        </section>
+
+        <section class="view" id="view-sessiongoals" data-view-panel="sessiongoals">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Session Goals</h1><p>Set goals for this session. Tick them off as you complete each one.</p></div>
+          <article class="panel form-panel">
+            <label>Goal<input id="sgl-goal" placeholder="What do you want to complete this session?"></label>
+            <label>Priority<select id="sgl-pri"><option>Must do</option><option>Should do</option><option>Nice to have</option></select></label>
+            <button class="primary-action" id="sgl-add" style="margin-bottom:4px;">Add Goal</button>
+          </article>
+          <div id="sgl-list" style="margin-top:12px;"></div>
+          <div id="sgl-actions" style="display:none;flex-wrap:wrap;gap:10px;margin-top:12px;">
+            <button class="secondary-action" id="sgl-export">Export .txt</button>
+            <button class="secondary-action" id="sgl-clear">Clear All</button>
+          </div>
+          <script>(function(){
+            var SGL_PRI={'Must do':'#e74c3c','Should do':'#e67e22','Nice to have':'#3498db'};
+            function sglLoad(){try{return JSON.parse(localStorage.getItem('lt_sgl_current')||'[]');}catch(e){return[];}}
+            function sglSave(items){localStorage.setItem('lt_sgl_current',JSON.stringify(items));}
+            function sglRender(){
+              var items=sglLoad();
+              var el=document.getElementById('sgl-list');if(!el)return;
+              var act=document.getElementById('sgl-actions');
+              if(!items.length){el.innerHTML='<p class="empty-state">No goals set.</p>';if(act)act.style.display='none';return;}
+              if(act)act.style.display='flex';
+              var done=items.filter(function(s){return s.done;}).length;
+              el.innerHTML='<div style="font-size:13px;color:#9aa0b0;margin-bottom:8px;">'+done+' / '+items.length+' complete</div>'
+                +items.map(function(g,idx){return'<label style="display:flex;align-items:center;gap:12px;padding:10px 14px;margin-bottom:6px;background:rgba(255,255,255,0.05);border-radius:8px;cursor:pointer;">'
+                  +'<input type="checkbox" data-idx="'+idx+'"'+(g.done?' checked':'')+' style="width:18px;height:18px;accent-color:#ffd400;flex-shrink:0;">'
+                  +'<span style="flex:1;'+(g.done?'text-decoration:line-through;color:#9aa0b0;')+'">'+g.goal+'</span>'
+                  +'<span style="background:'+SGL_PRI[g.pri]+';color:#fff;border-radius:4px;padding:2px 6px;font-size:10px;white-space:nowrap;">'+g.pri+'</span>'
+                  +'<button class="small-btn sgl-del" data-idx="'+idx+'">X</button></label>';}).join('');
+              el.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.addEventListener('change',function(){var items=sglLoad();items[parseInt(cb.dataset.idx)].done=cb.checked;sglSave(items);sglRender();});});
+              el.querySelectorAll('.sgl-del').forEach(function(b){b.addEventListener('click',function(e){e.preventDefault();var items=sglLoad();items.splice(parseInt(b.dataset.idx),1);sglSave(items);sglRender();});});
+            }
+            document.getElementById('sgl-add').addEventListener('click',function(){
+              var goal=document.getElementById('sgl-goal').value.trim();if(!goal)return;
+              var items=sglLoad();items.push({goal:goal,pri:document.getElementById('sgl-pri').value,done:false});sglSave(items);
+              document.getElementById('sgl-goal').value='';sglRender();
+            });
+            document.getElementById('sgl-export').addEventListener('click',function(){
+              var items=sglLoad();
+              var txt='SESSION GOALS\n'+new Date().toLocaleString()+'\n\n'+items.map(function(g){return(g.done?'[x] ':'[ ] ')+'['+g.pri+'] '+g.goal;}).join('\n');
+              var b=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='session-goals.txt';a.click();
+            });
+            document.getElementById('sgl-clear').addEventListener('click',function(){if(!confirm('Clear all goals?'))return;localStorage.removeItem('lt_sgl_current');sglRender();});
+            var sec=document.getElementById('view-sessiongoals');if(sec)sec.addEventListener('lt-view-enter',sglRender);sglRender();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-shippedlog" data-view-panel="shippedlog">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Shipped Features Log</h1><p>Permanent record of every shipped feature: date, PR, SHA, and site.</p></div>
+          <article class="panel form-panel">
+            <label>Feature name<input id="shp-name" placeholder="What was shipped?"></label>
+            <label>Site<input id="shp-site" placeholder="Load, LoadStudio, Attain..."></label>
+            <label>PR number<input id="shp-pr" placeholder="e.g. 24" type="number"></label>
+            <label>Merge SHA<input id="shp-sha" placeholder="e.g. fbeb7e1b"></label>
+            <label>Date shipped<input id="shp-date" placeholder="e.g. 2026-05-11" type="date"></label>
+            <label>Notes<input id="shp-notes" placeholder="One-line summary of what changed"></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="shp-save">Log Feature</button>
+              <button class="secondary-action" id="shp-export">Export .txt</button>
+              <button class="secondary-action" id="shp-clear-all">Clear All</button>
+            </div>
+          </article>
+          <div id="shp-list" style="margin-top:16px;"></div>
+          <script>(function(){
+            function shpAll(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_shp_')===0&&k!=='lt_shp_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return b.ts-a.ts;});return a;}
+            function shpRender(){
+              var el=document.getElementById('shp-list');if(!el)return;
+              var items=shpAll();if(!items.length){el.innerHTML='<p class="empty-state">No shipped features logged.</p>';return;}
+              el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'
+                +(it.date?'<span style="font-size:11px;color:#9aa0b0;white-space:nowrap;">'+it.date+'</span>':'')
+                +'<strong style="font-size:13px;flex:1;">'+it.name+'</strong>'
+                +(it.site?'<span style="font-size:11px;color:#9aa0b0;">'+it.site+'</span>':'')
+                +(it.pr?'<code style="font-size:11px;">PR #'+it.pr+'</code>':'')
+                +(it.sha?'<code style="font-size:11px;color:#9aa0b0;">'+it.sha+'</code>':'')
+                +'<button class="small-btn shp-del" data-id="'+it.id+'">X</button></div>';}).join('');
+              el.querySelectorAll('.shp-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Remove?'))return;localStorage.removeItem('lt_shp_'+b.dataset.id);shpRender();});});
+            }
+            document.getElementById('shp-save').addEventListener('click',function(){
+              var name=document.getElementById('shp-name').value.trim();if(!name)return;
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              localStorage.setItem('lt_shp_'+id,JSON.stringify({id:id,name:name,site:document.getElementById('shp-site').value.trim(),pr:document.getElementById('shp-pr').value.trim(),sha:document.getElementById('shp-sha').value.trim(),date:document.getElementById('shp-date').value,notes:document.getElementById('shp-notes').value.trim(),ts:Date.now()}));
+              document.getElementById('shp-name').value='';document.getElementById('shp-pr').value='';document.getElementById('shp-sha').value='';document.getElementById('shp-notes').value='';shpRender();
+              var toast=document.getElementById('toast');if(toast){toast.textContent='Feature logged';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}
+            });
+            document.getElementById('shp-export').addEventListener('click',function(){
+              var txt='SHIPPED FEATURES LOG\nExported: '+new Date().toLocaleString()+'\n\n'+shpAll().map(function(it){return(it.date||'--')+' | '+(it.site||'--')+' | PR #'+(it.pr||'--')+' | '+it.sha+'\n'+it.name+(it.notes?'\n'+it.notes:'');}).join('\n\n');
+              var b=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='shipped-log.txt';a.click();
+            });
+            document.getElementById('shp-clear-all').addEventListener('click',function(){if(!confirm('Clear all entries?'))return;shpAll().forEach(function(it){localStorage.removeItem('lt_shp_'+it.id);});shpRender();});
+            var sec=document.getElementById('view-shippedlog');if(sec)sec.addEventListener('lt-view-enter',shpRender);
+          }());</script>
+        </section>
+
+        <section class="view" id="view-testresults" data-view-panel="testresults">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Test Results Log</h1><p>Log manual test runs with pass/fail, device, feature, and notes.</p></div>
+          <article class="panel form-panel">
+            <label>Feature tested<input id="tr2-feature" placeholder="What feature or flow was tested?"></label>
+            <label>Site<input id="tr2-site" placeholder="Load, LoadStudio, Attain..."></label>
+            <label>Device<input id="tr2-device" placeholder="e.g. iPad Safari, Chrome desktop"></label>
+            <label>Result<select id="tr2-result"><option>Pass</option><option>Fail</option><option>Partial</option><option>Blocked</option></select></label>
+            <label>Notes<textarea id="tr2-notes" rows="2" placeholder="What was tested, what broke, what was skipped..."></textarea></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="tr2-save">Log Result</button>
+              <button class="secondary-action" id="tr2-export">Export .txt</button>
+              <button class="secondary-action" id="tr2-clear-all">Clear All</button>
+            </div>
+          </article>
+          <div id="tr2-list" style="margin-top:16px;"></div>
+          <script>(function(){
+            var TR2_RES={Pass:'#2ecc71',Fail:'#e74c3c',Partial:'#e67e22',Blocked:'#9aa0b0'};
+            function tr2All(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_tr_')===0&&k!=='lt_tr_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return b.ts-a.ts;});return a;}
+            function tr2Render(){
+              var el=document.getElementById('tr2-list');if(!el)return;
+              var items=tr2All();if(!items.length){el.innerHTML='<p class="empty-state">No test results logged.</p>';return;}
+              el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'
+                +'<span style="background:'+TR2_RES[it.result]+';color:#fff;border-radius:4px;padding:2px 7px;font-size:11px;white-space:nowrap;">'+it.result+'</span>'
+                +'<span style="font-size:13px;flex:1;">'+it.feature+'</span>'
+                +(it.site?'<span style="font-size:11px;color:#9aa0b0;">'+it.site+'</span>':'')
+                +(it.device?'<span style="font-size:11px;color:#9aa0b0;">'+it.device+'</span>':'')
+                +'<button class="small-btn tr2-del" data-id="'+it.id+'">X</button></div>';}).join('');
+              el.querySelectorAll('.tr2-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Remove?'))return;localStorage.removeItem('lt_tr_'+b.dataset.id);tr2Render();});});
+            }
+            document.getElementById('tr2-save').addEventListener('click',function(){
+              var feature=document.getElementById('tr2-feature').value.trim();if(!feature)return;
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              localStorage.setItem('lt_tr_'+id,JSON.stringify({id:id,feature:feature,site:document.getElementById('tr2-site').value.trim(),device:document.getElementById('tr2-device').value.trim(),result:document.getElementById('tr2-result').value,notes:document.getElementById('tr2-notes').value.trim(),ts:Date.now()}));
+              document.getElementById('tr2-feature').value='';document.getElementById('tr2-notes').value='';tr2Render();
+              var toast=document.getElementById('toast');if(toast){toast.textContent='Result logged';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}
+            });
+            document.getElementById('tr2-export').addEventListener('click',function(){
+              var txt='TEST RESULTS\nExported: '+new Date().toLocaleString()+'\n\n'+tr2All().map(function(it){return'['+it.result+'] '+it.feature+(it.site?'\nSite: '+it.site:'')+(it.device?'\nDevice: '+it.device:'')+(it.notes?'\nNotes: '+it.notes:'');}).join('\n\n');
+              var b=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='test-results.txt';a.click();
+            });
+            document.getElementById('tr2-clear-all').addEventListener('click',function(){if(!confirm('Clear all results?'))return;tr2All().forEach(function(it){localStorage.removeItem('lt_tr_'+it.id);});tr2Render();});
+            var sec=document.getElementById('view-testresults');if(sec)sec.addEventListener('lt-view-enter',tr2Render);
+          }());</script>
+        </section>
+
+        <section class="view" id="view-rollbackplan" data-view-panel="rollbackplan">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Rollback Plan Builder</h1><p>Document the rollback plan for a PR before merging. Export to share.</p></div>
+          <article class="panel form-panel">
+            <label>PR / batch title<input id="rbp-title" placeholder="e.g. LoadTasks Batch 13"></label>
+            <label>PR number<input id="rbp-pr" placeholder="e.g. 25" type="number"></label>
+            <label>Merge SHA (fill after merge)<input id="rbp-sha" placeholder="8 chars, e.g. fbeb7e1b"></label>
+            <label>Files changed<textarea id="rbp-files" rows="2" placeholder="List files affected (one per line)"></textarea></label>
+            <label>Rollback command<input id="rbp-cmd" placeholder="e.g. git revert fbeb7e1b"></label>
+            <label>Risk if not rolled back<select id="rbp-risk"><option>Low — no user impact</option><option>Medium — degraded experience</option><option>High — breakage or data loss</option></select></label>
+            <label>Verification after rollback<textarea id="rbp-verify" rows="2" placeholder="Steps to confirm rollback succeeded..."></textarea></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="rbp-save">Save Plan</button>
+              <button class="secondary-action" id="rbp-export">Export .txt</button>
+              <button class="secondary-action" id="rbp-clear-form">Clear Form</button>
+            </div>
+          </article>
+          <div id="rbp-list" style="margin-top:16px;"></div>
+          <script>(function(){
+            var RBP_FIDS=['rbp-title','rbp-pr','rbp-sha','rbp-files','rbp-cmd','rbp-verify'];
+            function rbpText(){return'ROLLBACK PLAN\nGenerated: '+new Date().toLocaleString()+'\nPR: '+(document.getElementById('rbp-pr').value||'--')+' — '+document.getElementById('rbp-title').value+'\nSHA: '+document.getElementById('rbp-sha').value+'\nRisk: '+document.getElementById('rbp-risk').value+'\n\nFILES CHANGED:\n'+document.getElementById('rbp-files').value+'\n\nROLLBACK COMMAND:\n'+document.getElementById('rbp-cmd').value+'\n\nVERIFICATION:\n'+document.getElementById('rbp-verify').value;}
+            function rbpAll(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_rbp_')===0&&k!=='lt_rbp_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return b.ts-a.ts;});return a;}
+            function rbpRender(){
+              var el=document.getElementById('rbp-list');if(!el)return;
+              var items=rbpAll();if(!items.length){el.innerHTML='<p class="empty-state">No rollback plans saved.</p>';return;}
+              el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px;">'
+                +'<div style="flex:1;"><strong>'+it.title+'</strong>'+(it.pr?' (PR #'+it.pr+')':'')+' <code style="font-size:11px;color:#9aa0b0;">'+it.sha+'</code>'
+                +'<div style="font-size:11px;color:#9aa0b0;margin-top:2px;font-family:monospace;">'+it.cmd+'</div></div>'
+                +'<button class="small-btn rbp-load" data-id="'+it.id+'">Load</button>'
+                +'<button class="small-btn rbp-del" data-id="'+it.id+'">X</button></div>';}).join('');
+              el.querySelectorAll('.rbp-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Delete?'))return;localStorage.removeItem('lt_rbp_'+b.dataset.id);rbpRender();});});
+              el.querySelectorAll('.rbp-load').forEach(function(b){b.addEventListener('click',function(){var d=JSON.parse(localStorage.getItem('lt_rbp_'+b.dataset.id));document.getElementById('rbp-title').value=d.title||'';document.getElementById('rbp-pr').value=d.pr||'';document.getElementById('rbp-sha').value=d.sha||'';document.getElementById('rbp-files').value=d.files||'';document.getElementById('rbp-cmd').value=d.cmd||'';document.getElementById('rbp-verify').value=d.verify||'';});});
+            }
+            document.getElementById('rbp-save').addEventListener('click',function(){
+              var title=document.getElementById('rbp-title').value.trim();if(!title)return;
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              localStorage.setItem('lt_rbp_'+id,JSON.stringify({id:id,title:title,pr:document.getElementById('rbp-pr').value.trim(),sha:document.getElementById('rbp-sha').value.trim(),files:document.getElementById('rbp-files').value.trim(),cmd:document.getElementById('rbp-cmd').value.trim(),risk:document.getElementById('rbp-risk').value,verify:document.getElementById('rbp-verify').value.trim(),ts:Date.now()}));
+              rbpRender();var toast=document.getElementById('toast');if(toast){toast.textContent='Plan saved';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}
+            });
+            document.getElementById('rbp-export').addEventListener('click',function(){var b=new Blob([rbpText()],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='rollback-plan.txt';a.click();});
+            document.getElementById('rbp-clear-form').addEventListener('click',function(){RBP_FIDS.forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});});
+            var sec=document.getElementById('view-rollbackplan');if(sec)sec.addEventListener('lt-view-enter',rbpRender);
+          }());</script>
+        </section>
+
+        <section class="view" id="view-riskregister" data-view-panel="riskregister">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Risk Register</h1><p>Log risks with probability, impact, mitigation plan, and status.</p></div>
+          <article class="panel form-panel">
+            <label>Risk description<textarea id="rr3-desc" rows="2" placeholder="What could go wrong?"></textarea></label>
+            <label>Site / area<input id="rr3-site" placeholder="Load, Attain, all sites..."></label>
+            <label>Probability<select id="rr3-prob"><option>High</option><option>Medium</option><option>Low</option></select></label>
+            <label>Impact<select id="rr3-impact"><option>High</option><option>Medium</option><option>Low</option></select></label>
+            <label>Mitigation<textarea id="rr3-mitigation" rows="2" placeholder="How to reduce or eliminate this risk..."></textarea></label>
+            <label>Status<select id="rr3-status"><option>Open</option><option>Mitigated</option><option>Accepted</option><option>Closed</option></select></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="rr3-save">Log Risk</button>
+              <button class="secondary-action" id="rr3-export">Export .txt</button>
+              <button class="secondary-action" id="rr3-clear-all">Clear All</button>
+            </div>
+          </article>
+          <div id="rr3-list" style="margin-top:16px;"></div>
+          <script>(function(){
+            var RR3_LVL={High:'#e74c3c',Medium:'#e67e22',Low:'#2ecc71'};
+            var RR3_STA={Open:'#e74c3c',Mitigated:'#e67e22',Accepted:'#3498db',Closed:'#2ecc71'};
+            function rr3All(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_rg_')===0&&k!=='lt_rg_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return b.ts-a.ts;});return a;}
+            function rr3Render(){
+              var el=document.getElementById('rr3-list');if(!el)return;
+              var items=rr3All();if(!items.length){el.innerHTML='<p class="empty-state">No risks logged.</p>';return;}
+              el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;margin-bottom:6px;">'
+                +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+                +'<span style="font-size:10px;background:'+RR3_LVL[it.prob]+';color:#fff;border-radius:4px;padding:2px 5px;">P:'+it.prob+'</span>'
+                +'<span style="font-size:10px;background:'+RR3_LVL[it.impact]+';color:#fff;border-radius:4px;padding:2px 5px;">I:'+it.impact+'</span>'
+                +'<span style="font-size:10px;background:'+RR3_STA[it.status]+';color:#fff;border-radius:4px;padding:2px 5px;">'+it.status+'</span>'
+                +(it.site?'<span style="font-size:11px;color:#9aa0b0;">'+it.site+'</span>':'')
+                +'<button class="small-btn rr3-del" data-id="'+it.id+'" style="margin-left:auto;">X</button></div>'
+                +'<div style="font-size:13px;margin-bottom:4px;">'+it.desc+'</div>'
+                +(it.mitigation?'<div style="font-size:11px;color:#9aa0b0;">Mitigation: '+it.mitigation+'</div>':'')
+                +'</div>';}).join('');
+              el.querySelectorAll('.rr3-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Remove?'))return;localStorage.removeItem('lt_rg_'+b.dataset.id);rr3Render();});});
+            }
+            document.getElementById('rr3-save').addEventListener('click',function(){
+              var desc=document.getElementById('rr3-desc').value.trim();if(!desc)return;
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              localStorage.setItem('lt_rg_'+id,JSON.stringify({id:id,desc:desc,site:document.getElementById('rr3-site').value.trim(),prob:document.getElementById('rr3-prob').value,impact:document.getElementById('rr3-impact').value,mitigation:document.getElementById('rr3-mitigation').value.trim(),status:document.getElementById('rr3-status').value,ts:Date.now()}));
+              document.getElementById('rr3-desc').value='';document.getElementById('rr3-mitigation').value='';rr3Render();
+              var toast=document.getElementById('toast');if(toast){toast.textContent='Risk logged';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}
+            });
+            document.getElementById('rr3-export').addEventListener('click',function(){
+              var txt='RISK REGISTER\nExported: '+new Date().toLocaleString()+'\n\n'+rr3All().map(function(it){return'[P:'+it.prob+' I:'+it.impact+'] ['+it.status+'] '+it.desc+(it.site?'\nArea: '+it.site:'')+(it.mitigation?'\nMitigation: '+it.mitigation:'');}).join('\n\n');
+              var b=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='risk-register.txt';a.click();
+            });
+            document.getElementById('rr3-clear-all').addEventListener('click',function(){if(!confirm('Clear all risks?'))return;rr3All().forEach(function(it){localStorage.removeItem('lt_rg_'+it.id);});rr3Render();});
+            var sec=document.getElementById('view-riskregister');if(sec)sec.addEventListener('lt-view-enter',rr3Render);
+          }());</script>
+        </section>
+
+        <section class="view" id="view-branchlog" data-view-panel="branchlog">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Branch Log</h1><p>Log every branch created in this sprint: purpose, status, and outcome.</p></div>
+          <article class="panel form-panel">
+            <label>Branch name<input id="brl-name" placeholder="e.g. claude/loadtasks-devbot-batch13-2026-05-11"></label>
+            <label>Purpose<input id="brl-purpose" placeholder="What this branch is for"></label>
+            <label>Based on<input id="brl-base" placeholder="e.g. main @ fbeb7e1b"></label>
+            <label>Status<select id="brl-status"><option>Active</option><option>Merged</option><option>Abandoned</option><option>Pending review</option></select></label>
+            <label>PR number (if merged)<input id="brl-pr" placeholder="e.g. 25" type="number"></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="brl-save">Log Branch</button>
+              <button class="secondary-action" id="brl-export">Export .txt</button>
+              <button class="secondary-action" id="brl-clear-all">Clear All</button>
+            </div>
+          </article>
+          <div id="brl-list" style="margin-top:16px;"></div>
+          <script>(function(){
+            var BRL_STA={Active:'#3498db',Merged:'#2ecc71',Abandoned:'#9aa0b0','Pending review':'#e67e22'};
+            function brlAll(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_brl_')===0&&k!=='lt_brl_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return b.ts-a.ts;});return a;}
+            function brlRender(){
+              var el=document.getElementById('brl-list');if(!el)return;
+              var items=brlAll();if(!items.length){el.innerHTML='<p class="empty-state">No branches logged.</p>';return;}
+              el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;margin-bottom:6px;">'
+                +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">'
+                +'<span style="background:'+BRL_STA[it.status]+';color:#fff;border-radius:4px;padding:2px 6px;font-size:10px;">'+it.status+'</span>'
+                +(it.pr?'<span style="font-size:11px;color:#9aa0b0;">PR #'+it.pr+'</span>':'')
+                +'<button class="small-btn brl-del" data-id="'+it.id+'" style="margin-left:auto;">X</button></div>'
+                +'<code style="font-size:12px;">'+it.name+'</code>'
+                +(it.purpose?'<div style="font-size:12px;color:#9aa0b0;margin-top:4px;">'+it.purpose+'</div>':'')
+                +'</div>';}).join('');
+              el.querySelectorAll('.brl-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Remove?'))return;localStorage.removeItem('lt_brl_'+b.dataset.id);brlRender();});});
+            }
+            document.getElementById('brl-save').addEventListener('click',function(){
+              var name=document.getElementById('brl-name').value.trim();if(!name)return;
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              localStorage.setItem('lt_brl_'+id,JSON.stringify({id:id,name:name,purpose:document.getElementById('brl-purpose').value.trim(),base:document.getElementById('brl-base').value.trim(),status:document.getElementById('brl-status').value,pr:document.getElementById('brl-pr').value.trim(),ts:Date.now()}));
+              document.getElementById('brl-name').value='';document.getElementById('brl-purpose').value='';brlRender();
+              var toast=document.getElementById('toast');if(toast){toast.textContent='Branch logged';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}
+            });
+            document.getElementById('brl-export').addEventListener('click',function(){
+              var txt='BRANCH LOG\nExported: '+new Date().toLocaleString()+'\n\n'+brlAll().map(function(it){return'['+it.status+'] '+it.name+(it.pr?' (PR #'+it.pr+')':'')+(it.purpose?'\n'+it.purpose:'')+(it.base?'\nBase: '+it.base:'');}).join('\n\n');
+              var b=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='branch-log.txt';a.click();
+            });
+            document.getElementById('brl-clear-all').addEventListener('click',function(){if(!confirm('Clear all branches?'))return;brlAll().forEach(function(it){localStorage.removeItem('lt_brl_'+it.id);});brlRender();});
+            var sec=document.getElementById('view-branchlog');if(sec)sec.addEventListener('lt-view-enter',brlRender);
+          }());</script>
+        </section>
+
+        <section class="view" id="view-standup" data-view-panel="standup">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Daily Stand-Up Generator</h1><p>Reads your Today's Work and Blockers to generate a stand-up message. Edit and copy.</p></div>
+          <article class="panel">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+              <button class="primary-action" id="su-generate">Generate Stand-Up</button>
+              <button class="secondary-action" id="su-copy" style="display:none;">Copy</button>
+              <button class="secondary-action" id="su-export" style="display:none;">Export .txt</button>
+            </div>
+            <textarea id="su-text" rows="12" style="width:100%;background:rgba(0,0,0,0.2);color:#e0e4f0;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:12px;font-size:13px;line-height:1.6;resize:vertical;display:none;" placeholder="Generated stand-up will appear here. You can edit before copying."></textarea>
+          </article>
+          <script>(function(){
+            var suText='';
+            document.getElementById('su-generate').addEventListener('click',function(){
+              var tw=localStorage.getItem('lt_tw_draft')||'';
+              var blockers=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_bk_')===0&&k!=='lt_bk_draft'){try{var b=JSON.parse(localStorage.getItem(k));if(b&&b.status==='Open')blockers.push(b);}catch(e){}}}
+              var today=new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+              var lines=['DAILY STAND-UP — '+today,''];
+              lines.push('YESTERDAY / LAST SESSION:');
+              if(tw){var twLines=tw.split('\n').filter(function(l){return l.trim();});twLines.forEach(function(l){lines.push('  - '+l.trim());});}
+              else{lines.push('  (no notes in Today\'s Work)');}
+              lines.push('');
+              lines.push('TODAY:');
+              lines.push('  - ');
+              lines.push('');
+              lines.push('BLOCKERS:');
+              if(blockers.length){blockers.forEach(function(b){lines.push('  - '+b.desc);});}
+              else{lines.push('  None');}
+              suText=lines.join('\n');
+              var el=document.getElementById('su-text');el.value=suText;el.style.display='';
+              document.getElementById('su-copy').style.display='';document.getElementById('su-export').style.display='';
+            });
+            document.getElementById('su-copy').addEventListener('click',function(){
+              var text=document.getElementById('su-text').value;
+              navigator.clipboard&&navigator.clipboard.writeText(text).then(function(){var t=document.getElementById('toast');if(t){t.textContent='Stand-up copied';t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2000);}});
+            });
+            document.getElementById('su-export').addEventListener('click',function(){
+              var text=document.getElementById('su-text').value;
+              var b=new Blob([text],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='standup.txt';a.click();
+            });
+            var sec=document.getElementById('view-standup');if(sec)sec.addEventListener('lt-view-enter',function(){document.getElementById('su-text').style.display='none';document.getElementById('su-copy').style.display='none';document.getElementById('su-export').style.display='none';});
+          }());</script>
+        </section>
+
+        <section class="view" id="view-prprep" data-view-panel="prprep">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>PR Prep Checklist</h1><p>Run every check before opening a pull request. Reset between PRs.</p></div>
+          <article class="panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+              <span id="pp-progress" style="font-size:14px;color:#9aa0b0;">0 / 16 checked</span>
+              <div style="display:flex;gap:10px;">
+                <button class="secondary-action" id="pp-reset">Reset</button>
+                <button class="primary-action" id="pp-copy">Copy Summary</button>
+              </div>
+            </div>
+            <div id="pp-items"></div>
+          </article>
+          <script>(function(){
+            var PP_ITEMS=[
+              'git fetch origin main and merge — branch is up to date',
+              'On the correct feature branch (not main)',
+              'git diff shows ONLY expected files changed',
+              'No accidental changes to root app files (index.html, acr.css, sw.js)',
+              'Cache version bumped in sw.js if JS/HTML/CSS changed',
+              'Cache version bumped in load.js badge if Load changed',
+              'No credentials, API keys, or tokens in the diff',
+              'No console.log statements left in shipped code',
+              'Feature works on iPad Safari (primary device)',
+              'No regressions in other views verified',
+              'PR title is clear and under 70 characters',
+              'PR body includes: files changed, risk level, rollback command',
+              'Rollback command is tested or verified correct',
+              'No unrelated files included in this PR',
+              'Service worker NOT touched (unless explicitly approved)',
+              'Load AI / provider routing NOT touched (unless explicitly approved)'
+            ];
+            var ppState=PP_ITEMS.map(function(){return false;});
+            function ppRender(){
+              var el=document.getElementById('pp-items');if(!el)return;
+              el.innerHTML=PP_ITEMS.map(function(label,idx){return'<label style="display:flex;align-items:flex-start;gap:12px;padding:10px 14px;margin-bottom:6px;background:rgba(255,255,255,0.05);border-radius:8px;cursor:pointer;">'
+                +'<input type="checkbox" data-idx="'+idx+'"'+(ppState[idx]?' checked':'')+' style="width:18px;height:18px;accent-color:#ffd400;flex-shrink:0;margin-top:2px;">'
+                +'<span style="font-size:13px;'+(ppState[idx]?'text-decoration:line-through;color:#9aa0b0;':'')+'">'+label+'</span>'
+                +'</label>';}).join('');
+              el.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.addEventListener('change',function(){ppState[parseInt(cb.dataset.idx)]=cb.checked;ppRender();});});
+              var checked=ppState.filter(Boolean).length;
+              document.getElementById('pp-progress').textContent=checked+' / '+PP_ITEMS.length+' checked';
+              document.getElementById('pp-progress').style.color=checked===PP_ITEMS.length?'#2ecc71':'#9aa0b0';
+            }
+            document.getElementById('pp-reset').addEventListener('click',function(){ppState=PP_ITEMS.map(function(){return false;});ppRender();});
+            document.getElementById('pp-copy').addEventListener('click',function(){
+              var checked=ppState.filter(Boolean).length;
+              var txt='PR PREP CHECKLIST ('+checked+'/'+PP_ITEMS.length+')\n\n'+PP_ITEMS.map(function(l,i){return(ppState[i]?'[x] ':'[ ] ')+l;}).join('\n');
+              navigator.clipboard&&navigator.clipboard.writeText(txt).then(function(){var t=document.getElementById('toast');if(t){t.textContent='Checklist copied';t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2000);}});
+            });
+            var sec=document.getElementById('view-prprep');if(sec)sec.addEventListener('lt-view-enter',ppRender);ppRender();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-clippad" data-view-panel="clippad">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Clip Pad</h1><p>Store multiple text clips for this session. Copy any item with one tap.</p></div>
+          <article class="panel form-panel">
+            <label>Label<input id="cp2-label" placeholder="Short name for this clip"></label>
+            <label>Content<textarea id="cp2-content" rows="4" placeholder="Paste text, command, or snippet..."></textarea></label>
+            <button class="primary-action" id="cp2-add">Add Clip</button>
+          </article>
+          <div id="cp2-list" style="margin-top:16px;"></div>
+          <script>(function(){
+            var cpClips=[];
+            function cp2Render(){
+              var el=document.getElementById('cp2-list');if(!el)return;
+              if(!cpClips.length){el.innerHTML='<p class="empty-state">No clips yet. Add one above.</p>';return;}
+              el.innerHTML=cpClips.map(function(c,idx){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;margin-bottom:8px;">'
+                +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+                +'<strong style="font-size:13px;flex:1;">'+c.label+'</strong>'
+                +'<button class="small-btn cp2-copy" data-idx="'+idx+'">Copy</button>'
+                +'<button class="small-btn cp2-del" data-idx="'+idx+'">X</button></div>'
+                +'<pre style="margin:0;font-size:12px;color:#9aa0b0;white-space:pre-wrap;word-break:break-all;max-height:100px;overflow-y:auto;">'+c.content+'</pre>'
+                +'</div>';}).join('');
+              el.querySelectorAll('.cp2-copy').forEach(function(b){b.addEventListener('click',function(){
+                var text=cpClips[parseInt(b.dataset.idx)].content;
+                navigator.clipboard&&navigator.clipboard.writeText(text).then(function(){var t=document.getElementById('toast');if(t){t.textContent='Copied';t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2000);}});
+              });});
+              el.querySelectorAll('.cp2-del').forEach(function(b){b.addEventListener('click',function(){cpClips.splice(parseInt(b.dataset.idx),1);cp2Render();});});
+            }
+            document.getElementById('cp2-add').addEventListener('click',function(){
+              var content=document.getElementById('cp2-content').value;if(!content.trim())return;
+              cpClips.unshift({label:document.getElementById('cp2-label').value.trim()||'Clip '+(cpClips.length+1),content:content});
+              document.getElementById('cp2-label').value='';document.getElementById('cp2-content').value='';cp2Render();
+            });
+            var sec=document.getElementById('view-clippad');if(sec)sec.addEventListener('lt-view-enter',cp2Render);
+          }());</script>
+        </section>
+
+        <section class="view" id="view-urlstore" data-view-panel="urlstore">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>URL Store</h1><p>Save named internal URLs for quick access during builds. Tap to copy or open.</p></div>
+          <article class="panel form-panel">
+            <label>Label<input id="us2-label" placeholder="e.g. Main SW file, Pages deploy, PR #24"></label>
+            <label>URL<input id="us2-url" type="url" placeholder="https://..."></label>
+            <label>Category<input id="us2-cat" placeholder="e.g. Deploy, GitHub, Docs"></label>
+            <button class="primary-action" id="us2-save">Save URL</button>
+          </article>
+          <div id="us2-list" style="margin-top:16px;"></div>
+          <script>(function(){
+            function us2All(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_us_')===0&&k!=='lt_us_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return(a.cat+a.label).localeCompare(b.cat+b.label);});return a;}
+            function us2Render(){
+              var el=document.getElementById('us2-list');if(!el)return;
+              var items=us2All();if(!items.length){el.innerHTML='<p class="empty-state">No URLs saved.</p>';return;}
+              el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'
+                +(it.cat?'<span style="font-size:10px;background:rgba(255,255,255,0.08);border-radius:4px;padding:2px 6px;color:#9aa0b0;">'+it.cat+'</span>':'')
+                +'<span style="font-size:13px;flex:1;">'+it.label+'</span>'
+                +'<button class="small-btn us2-copy" data-url="'+it.url+'">Copy</button>'
+                +'<button class="small-btn us2-del" data-id="'+it.id+'">X</button></div>';}).join('');
+              el.querySelectorAll('.us2-copy').forEach(function(b){b.addEventListener('click',function(){navigator.clipboard&&navigator.clipboard.writeText(b.dataset.url).then(function(){var t=document.getElementById('toast');if(t){t.textContent='URL copied';t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2000);}});});});
+              el.querySelectorAll('.us2-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Remove?'))return;localStorage.removeItem('lt_us_'+b.dataset.id);us2Render();});});
+            }
+            document.getElementById('us2-save').addEventListener('click',function(){
+              var label=document.getElementById('us2-label').value.trim();var url=document.getElementById('us2-url').value.trim();if(!label||!url)return;
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              localStorage.setItem('lt_us_'+id,JSON.stringify({id:id,label:label,url:url,cat:document.getElementById('us2-cat').value.trim(),ts:Date.now()}));
+              document.getElementById('us2-label').value='';document.getElementById('us2-url').value='';us2Render();
+              var toast=document.getElementById('toast');if(toast){toast.textContent='URL saved';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}
+            });
+            var sec=document.getElementById('view-urlstore');if(sec)sec.addEventListener('lt-view-enter',us2Render);
+          }());</script>
+        </section>
+
+        <section class="view" id="view-commitmsg2" data-view-panel="commitmsg2">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Commit Templates</h1><p>Fill in a template and copy a ready-to-use commit message.</p></div>
+          <article class="panel">
+            <div style="margin-bottom:12px;">
+              <label style="display:block;margin-bottom:6px;font-size:13px;">Template<select id="cm2-tmpl" style="display:block;width:100%;margin-top:4px;">
+                <option value="batch">LoadTasks batch — with tool list</option>
+                <option value="fix">Bug fix — with symptom and cause</option>
+                <option value="feat">New feature — with site and description</option>
+                <option value="revert">Revert — with commit SHA and reason</option>
+                <option value="docs">Docs / session notes — with date</option>
+                <option value="cache">Cache bump only</option>
+              </select></label>
+            </div>
+            <div id="cm2-fields" style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px;"></div>
+            <button class="primary-action" id="cm2-build" style="margin-bottom:10px;">Build Message</button>
+            <div id="cm2-out" style="display:none;">
+              <pre id="cm2-text" style="background:rgba(0,0,0,0.25);border-radius:8px;padding:14px;font-size:12px;white-space:pre-wrap;word-break:break-all;margin-bottom:10px;color:#e0e4f0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;"></pre>
+              <button class="small-btn" id="cm2-copy">Copy</button>
+            </div>
+          </article>
+          <script>(function(){
+            var CM2_TMPLS={
+              batch:{fields:[{id:'site',label:'Site (e.g. LoadTasks)',ph:'LoadTasks'},{id:'ver',label:'Version (e.g. v5.30)',ph:'v5.30'},{id:'tools',label:'Tool list (comma separated)',ph:'Merge Log, Bug Triage, Session Goals'}],build:function(f){return f.site+' '+f.ver+': Developer Bot Batch — '+f.tools+'\n\nhttps://claude.ai/code/session_01RUGxi8voy4ogVQsCKyVup6';}},
+              fix:{fields:[{id:'symptom',label:'Symptom (what broke)',ph:'Dashboard counters show wrong count'},{id:'cause',label:'Root cause',ph:'Duplicate lt_fc_ key in items array'},{id:'files',label:'File changed',ph:'LoadTasks/index.html'}],build:function(f){return'Fix: '+f.symptom+'\n\nCause: '+f.cause+'\nFile: '+f.files+'\n\nhttps://claude.ai/code/session_01RUGxi8voy4ogVQsCKyVup6';}},
+              feat:{fields:[{id:'site',label:'Site',ph:'Load'},{id:'name',label:'Feature name',ph:'Dark mode toggle'},{id:'desc',label:'One-line description',ph:'Adds user-controlled dark/light toggle to settings'}],build:function(f){return'Add '+f.name+' to '+f.site+'\n\n'+f.desc+'\n\nhttps://claude.ai/code/session_01RUGxi8voy4ogVQsCKyVup6';}},
+              revert:{fields:[{id:'sha',label:'Commit SHA being reverted',ph:'fbeb7e1b'},{id:'reason',label:'Reason for revert',ph:'Dashboard regression introduced'}],build:function(f){return'Revert '+f.sha+'\n\n'+f.reason+'\n\nhttps://claude.ai/code/session_01RUGxi8voy4ogVQsCKyVup6';}},
+              docs:{fields:[{id:'date',label:'Date',ph:'2026-05-11'},{id:'desc',label:'What was documented',ph:'Session notes for Batch 13 build'}],build:function(f){return'Docs: '+f.desc+' — '+f.date+'\n\nhttps://claude.ai/code/session_01RUGxi8voy4ogVQsCKyVup6';}},
+              cache:{fields:[{id:'site',label:'Site',ph:'Load'},{id:'from',label:'Old cache version',ph:'load-v5a'},{id:'to',label:'New cache version',ph:'load-v5b'}],build:function(f){return'Bump '+f.site+' cache '+f.from+' to '+f.to+'\n\nhttps://claude.ai/code/session_01RUGxi8voy4ogVQsCKyVup6';}}
+            };
+            function cm2RenderFields(){
+              var key=document.getElementById('cm2-tmpl').value;var tmpl=CM2_TMPLS[key];
+              var el=document.getElementById('cm2-fields');if(!el)return;
+              el.innerHTML=tmpl.fields.map(function(f){return'<label style="display:flex;flex-direction:column;gap:4px;font-size:13px;">'+f.label+'<input id="cm2-f-'+f.id+'" placeholder="'+f.ph+'" style="margin-top:2px;"></label>';}).join('');
+              document.getElementById('cm2-out').style.display='none';
+            }
+            document.getElementById('cm2-tmpl').addEventListener('change',cm2RenderFields);
+            document.getElementById('cm2-build').addEventListener('click',function(){
+              var key=document.getElementById('cm2-tmpl').value;var tmpl=CM2_TMPLS[key];
+              var f={};tmpl.fields.forEach(function(field){var el=document.getElementById('cm2-f-'+field.id);f[field.id]=el?el.value.trim():'';});
+              var msg=tmpl.build(f);
+              document.getElementById('cm2-text').textContent=msg;document.getElementById('cm2-out').style.display='';
+              document.getElementById('cm2-copy').dataset.msg=msg;
+            });
+            document.getElementById('cm2-copy').addEventListener('click',function(){
+              var msg=this.dataset.msg;if(!msg)return;
+              navigator.clipboard&&navigator.clipboard.writeText(msg).then(function(){var t=document.getElementById('toast');if(t){t.textContent='Message copied';t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2000);}});
+            });
+            var sec=document.getElementById('view-commitmsg2');if(sec)sec.addEventListener('lt-view-enter',cm2RenderFields);cm2RenderFields();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-pasteannotate" data-view-panel="pasteannotate">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Paste and Annotate</h1><p>Paste code or diff text and attach notes and a tag. Save for later reference.</p></div>
+          <article class="panel form-panel">
+            <label>Title<input id="pan-title" placeholder="Short name for this paste"></label>
+            <label>Tag<select id="pan-tag"><option>Code</option><option>Diff</option><option>Error</option><option>Command</option><option>Output</option><option>Other</option></select></label>
+            <label>Content<textarea id="pan-content" rows="6" placeholder="Paste code, diff, error output, command..."></textarea></label>
+            <label>Note<textarea id="pan-note" rows="2" placeholder="What this is, why it matters, context..."></textarea></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="pan-save">Save</button>
+              <button class="secondary-action" id="pan-export">Export .txt</button>
+              <button class="secondary-action" id="pan-clear-all">Clear All</button>
+            </div>
+          </article>
+          <div id="pan-list" style="margin-top:16px;"></div>
+          <script>(function(){
+            var PAN_TAG={Code:'#3498db',Diff:'#9b59b6',Error:'#e74c3c',Command:'#e67e22',Output:'#2ecc71',Other:'#9aa0b0'};
+            function panAll(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_pa_')===0&&k!=='lt_pa_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return b.ts-a.ts;});return a;}
+            function panRender(){
+              var el=document.getElementById('pan-list');if(!el)return;
+              var items=panAll();if(!items.length){el.innerHTML='<p class="empty-state">No pastes saved.</p>';return;}
+              el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;margin-bottom:8px;">'
+                +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+                +'<span style="background:'+PAN_TAG[it.tag]+';color:#fff;border-radius:4px;padding:2px 6px;font-size:10px;">'+it.tag+'</span>'
+                +'<strong style="font-size:13px;flex:1;">'+it.title+'</strong>'
+                +'<button class="small-btn pan-copy" data-id="'+it.id+'">Copy</button>'
+                +'<button class="small-btn pan-del" data-id="'+it.id+'">X</button></div>'
+                +(it.note?'<div style="font-size:12px;color:#9aa0b0;margin-bottom:6px;">'+it.note+'</div>':'')
+                +'<pre style="margin:0;font-size:11px;color:#c0c8e0;white-space:pre-wrap;word-break:break-all;max-height:120px;overflow-y:auto;background:rgba(0,0,0,0.2);border-radius:6px;padding:8px;">'+it.content+'</pre>'
+                +'</div>';}).join('');
+              el.querySelectorAll('.pan-copy').forEach(function(b){b.addEventListener('click',function(){
+                var d=JSON.parse(localStorage.getItem('lt_pa_'+b.dataset.id));
+                navigator.clipboard&&navigator.clipboard.writeText(d.content).then(function(){var t=document.getElementById('toast');if(t){t.textContent='Content copied';t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2000);}});
+              });});
+              el.querySelectorAll('.pan-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Remove?'))return;localStorage.removeItem('lt_pa_'+b.dataset.id);panRender();});});
+            }
+            document.getElementById('pan-save').addEventListener('click',function(){
+              var title=document.getElementById('pan-title').value.trim();var content=document.getElementById('pan-content').value;if(!title||!content.trim())return;
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              localStorage.setItem('lt_pa_'+id,JSON.stringify({id:id,title:title,tag:document.getElementById('pan-tag').value,content:content,note:document.getElementById('pan-note').value.trim(),ts:Date.now()}));
+              document.getElementById('pan-title').value='';document.getElementById('pan-content').value='';document.getElementById('pan-note').value='';panRender();
+              var toast=document.getElementById('toast');if(toast){toast.textContent='Saved';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}
+            });
+            document.getElementById('pan-export').addEventListener('click',function(){
+              var txt='PASTE AND ANNOTATE\nExported: '+new Date().toLocaleString()+'\n\n'+panAll().map(function(it){return'['+it.tag+'] '+it.title+(it.note?'\n'+it.note:'')+'\n\n'+it.content;}).join('\n\n---\n\n');
+              var b=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='paste-annotate.txt';a.click();
+            });
+            document.getElementById('pan-clear-all').addEventListener('click',function(){if(!confirm('Clear all pastes?'))return;panAll().forEach(function(it){localStorage.removeItem('lt_pa_'+it.id);});panRender();});
+            var sec=document.getElementById('view-pasteannotate');if(sec)sec.addEventListener('lt-view-enter',panRender);
+          }());</script>
+        </section>
+
+        <section class="view" id="view-worklog" data-view-panel="worklog">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Work Log</h1><p>Log time spent on tasks. Record duration, task, and site per entry.</p></div>
+          <article class="panel form-panel">
+            <label>Task<input id="wl2-task" placeholder="What did you work on?"></label>
+            <label>Site<input id="wl2-site" placeholder="Load, LoadStudio, Attain..."></label>
+            <label>Duration<input id="wl2-dur" placeholder="e.g. 45 min, 2 hrs"></label>
+            <label>Date<input id="wl2-date" type="date"></label>
+            <label>Notes<input id="wl2-notes" placeholder="Outcome, blockers, context..."></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="wl2-save">Log Work</button>
+              <button class="secondary-action" id="wl2-export">Export .txt</button>
+              <button class="secondary-action" id="wl2-clear-all">Clear All</button>
+            </div>
+          </article>
+          <div id="wl2-list" style="margin-top:16px;"></div>
+          <script>(function(){
+            function wl2All(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_wl_')===0&&k!=='lt_wl_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return b.ts-a.ts;});return a;}
+            function wl2Render(){
+              var el=document.getElementById('wl2-list');if(!el)return;
+              var items=wl2All();if(!items.length){el.innerHTML='<p class="empty-state">No work logged.</p>';return;}
+              el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'
+                +(it.date?'<span style="font-size:11px;color:#9aa0b0;white-space:nowrap;">'+it.date+'</span>':'')
+                +(it.dur?'<span style="font-size:12px;font-weight:600;white-space:nowrap;color:#ffd400;">'+it.dur+'</span>':'')
+                +'<span style="font-size:13px;flex:1;">'+it.task+'</span>'
+                +(it.site?'<span style="font-size:11px;color:#9aa0b0;">'+it.site+'</span>':'')
+                +'<button class="small-btn wl2-del" data-id="'+it.id+'">X</button></div>';}).join('');
+              el.querySelectorAll('.wl2-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Remove?'))return;localStorage.removeItem('lt_wl_'+b.dataset.id);wl2Render();});});
+            }
+            document.getElementById('wl2-save').addEventListener('click',function(){
+              var task=document.getElementById('wl2-task').value.trim();if(!task)return;
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              localStorage.setItem('lt_wl_'+id,JSON.stringify({id:id,task:task,site:document.getElementById('wl2-site').value.trim(),dur:document.getElementById('wl2-dur').value.trim(),date:document.getElementById('wl2-date').value,notes:document.getElementById('wl2-notes').value.trim(),ts:Date.now()}));
+              document.getElementById('wl2-task').value='';document.getElementById('wl2-dur').value='';document.getElementById('wl2-notes').value='';wl2Render();
+              var toast=document.getElementById('toast');if(toast){toast.textContent='Work logged';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}
+            });
+            document.getElementById('wl2-export').addEventListener('click',function(){
+              var txt='WORK LOG\nExported: '+new Date().toLocaleString()+'\n\n'+wl2All().map(function(it){return(it.date||'--')+' | '+(it.dur||'--')+' | '+(it.site||'--')+'\n'+it.task+(it.notes?'\n'+it.notes:'');}).join('\n\n');
+              var b=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='work-log.txt';a.click();
+            });
+            document.getElementById('wl2-clear-all').addEventListener('click',function(){if(!confirm('Clear all work log entries?'))return;wl2All().forEach(function(it){localStorage.removeItem('lt_wl_'+it.id);});wl2Render();});
+            var sec=document.getElementById('view-worklog');if(sec)sec.addEventListener('lt-view-enter',wl2Render);
+          }());</script>
+        </section>
+
         <!-- ═══ DASHBOARD COUNTERS SCRIPT ═══ -->
         <script>
         (function(){
@@ -6579,7 +7371,17 @@
               {label:'Quick Ref',n:ltCountPrefix('lt_qr_',['lt_qr_draft'])},
               {label:'Code Review Notes',n:ltCountPrefix('lt_crn_',['lt_crn_draft'])},
               {label:'Test Coverage',n:ltCountPrefix('lt_tc_',['lt_tc_draft'])},
-              {label:'API Endpoints',n:ltCountPrefix('lt_ae_',['lt_ae_draft'])}
+              {label:'API Endpoints',n:ltCountPrefix('lt_ae_',['lt_ae_draft'])},
+              {label:'Merge Log',n:ltCountPrefix('lt_mg_',['lt_mg_draft'])},
+              {label:'Bug Triage',n:ltCountPrefix('lt_bgt_',['lt_bgt_draft'])},
+              {label:'Shipped Log',n:ltCountPrefix('lt_shp_',['lt_shp_draft'])},
+              {label:'Test Results',n:ltCountPrefix('lt_tr_',['lt_tr_draft'])},
+              {label:'Rollback Plans',n:ltCountPrefix('lt_rbp_',['lt_rbp_draft'])},
+              {label:'Risk Register',n:ltCountPrefix('lt_rg_',['lt_rg_draft'])},
+              {label:'Branch Log',n:ltCountPrefix('lt_brl_',['lt_brl_draft'])},
+              {label:'URL Store',n:ltCountPrefix('lt_us_',['lt_us_draft'])},
+              {label:'Pastes',n:ltCountPrefix('lt_pa_',['lt_pa_draft'])},
+              {label:'Work Log',n:ltCountPrefix('lt_wl_',['lt_wl_draft'])}
             ];
             el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px;text-align:center;"><div style="font-size:28px;font-weight:700;line-height:1;">'+(it.n)+'</div><div style="font-size:12px;color:#9aa0b0;margin-top:4px;">'+it.label+'</div></div>';}).join('');
           }
