@@ -43,6 +43,7 @@ jobs:
                   report += '  - ' + b + '\n'
               report += '\nNo PR was created. No files were modified.\n'
               report += '=== END ===\n'
+              print(report)
               with open(report_file, 'w') as fh:
                   fh.write(report)
               github_env = os.environ.get('GITHUB_ENV', '')
@@ -191,6 +192,8 @@ jobs:
               )
 
           if pr_result.returncode != 0:
+              print('gh pr create stdout: ' + pr_result.stdout.strip())
+              print('gh pr create stderr: ' + pr_result.stderr.strip())
               write_report_and_exit(job_id, ['gh pr create failed: ' + pr_result.stderr.strip()], report_file)
 
           pr_url = pr_result.stdout.strip()
