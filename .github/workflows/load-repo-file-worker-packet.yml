@@ -1,0 +1,234 @@
+name: Repo File Worker - Packet Generator
+
+on:
+  workflow_dispatch:
+    inputs:
+      job_file:
+        description: 'Path to job file'
+        required: false
+        default: 'loadtasks-inbox/repo-file-job.json'
+
+permissions:
+  contents: read
+
+jobs:
+  generate-packet:
+    name: Generate Repo File Worker Packet
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate packet
+        id: packet
+        run: |
+          python3 << 'PYEOF'
+          import json, os, sys, subprocess, zipfile
+
+          JOB_FILE = os.environ.get('JOB_FILE', 'loadtasks-inbox/repo-file-job.json')
+
+          if not os.path.isfile(JOB_FILE):
+              print('ERROR: Job file not found: ' + JOB_FILE)
+              sys.exit(1)
+
+          with open(JOB_FILE) as fh:
+              try:
+                  job = json.load(fh)
+              except json.JSONDecodeError as e:
+                  print('ERROR: Invalid JSON: ' + str(e))
+                  sys.exit(1)
+
+          REQUIRED = [
+              'targetSite', 'targetFiles', 'fileAction', 'riskLevel',
+              'rollbackPlan', 'proposedChangeSummary', 'acceptanceCriteria',
+              ]
+          missing = [f for f in REQUIRED if not str(job.get(f, '')).strip()]
+          if missing:
+              print('VALIDATION FAIL - Missing: ' + ', '.join(missing))
+              sys.exit(1)
+
+          job_id = str(job.get('jobId', job.get('id', 'UNKNOWN')))
+
+          HIGH_PATTERNS = [
+              'sw.js', 'service-worker', 'ai-chat-studio', 'image-prompt',
+              'lib-load-image-providers', 'provider', 'audio', 'animation',
+              'export-pack', 'deploy', 'security', 'token', 'secret',
+              'credential', 'cloudflare', '.github/workflows', 'acr.css',
+              'content/', 'load/sw',
+              ]
+          MED_PATTERNS = [
+              'load.js', 'load/load', 'loadstudio', 'loadplay', 'attain',
+              'study', 'acr', 'index.html', 'lib-',
+              ]
+
+          target_files_raw = str(job.get('targetFiles', ''))
+          pl = target_files_raw.lower()
+
+          if any(p.lower() in pl for p in HIGH_PATTERNS):
+              auto_risk = 'HIGH'
+          elif any(p.lower() in pl for p in MED_PATTERNS):
+              auto_risk = 'MEDIUM'
+          else:
+              auto_risk = 'LOW'
+
+          raw = target_files_raw.replace(',', '\n')
+          file_paths = [f.strip() for f in raw.splitlines() if f.strip()]
+
+          file_snapshots = {}
+          file_check_lines = []
+          for fp in file_paths:
+              r = subprocess.run(
+                  ['git', 'show', 'HEAD:' + fp],
+                  capture_output=True, text=True
+              )
+              if r.returncode == 0:
+                  file_snapshots[fp] = r.stdout
+                  line_count = len(r.stdout.splitlines())
+                  file_check_lines.append('  - ' + fp + ' -> EXISTS (' + str(line_count) + ' lines)')
+              else:
+                  file_snapshots[fp] = None
+                  file_check_lines.append('  - ' + fp + ' -> NOT FOUND IN REPO')
+
+          head_r = subprocess.run(['git', 'rev-parse', 'HEAD'], capture_output=True, text=True)
+          head_sha = head_r.stdout.strip()
+
+          out_dir = 'rfwpacket-' + job_id
+          os.makedirs(out_dir, exist_ok=True)
+
+          patch_plan = ''
+          patch_plan += 'PATCH PLAN\n'
+          patch_plan += '==========\n'
+          patch_plan += 'Job ID:           ' + job_id + '\n'
+          patch_plan += 'Target Site:      ' + str(job.get('targetSite', 'UNKNOWN')) + '\n'
+          patch_plan += 'File Action:      ' + str(job.get('fileAction', 'UNKNOWN')) + '\n'
+          patch_plan += 'Risk (declared):  ' + str(job.get('riskLevel', 'UNKNOWN')) + '\n'
+          patch_plan += 'Risk (auto):      ' + auto_risk + '\n'
+          patch_plan += 'HEAD SHA:         ' + head_sha + '\n'
+          patch_plan += '\n'
+          patch_plan += 'Target Files:\n'
+          for line in file_check_lines:
+              patch_plan += line + '\n'
+          patch_plan += '\n'
+          patch_plan += 'Proposed Change Summary:\n'
+          patch_plan += str(job.get('proposedChangeSummary', '(none)')) + '\n'
+          patch_plan += '\n'
+          patch_plan += 'Acceptance Criteria:\n'
+          patch_plan += str(job.get('acceptanceCriteria', '(none)')) + '\n'
+          patch_plan += '\n'
+          patch_plan += 'Reason for Change:\n'
+          patch_plan += str(job.get('reasonForChange', '(none)')) + '\n'
+
+          with open(os.path.join(out_dir, 'patch-plan.txt'), 'w') as fh:
+              fh.write(patch_plan)
+
+          pr_draft = ''
+          pr_draft += str(job.get('prTitleSuggestion', 'Repo File Worker: ' + str(job.get('fileAction', 'edit')) + ' ' + target_files_raw)) + '\n'
+          pr_draft += '\n'
+          pr_draft += str(job.get('prBodyDraft', '')) + '\n'
+          if not job.get('prBodyDraft'):
+              pr_draft += '## Summary\n'
+              pr_draft += str(job.get('proposedChangeSummary', '(none)')) + '\n'
+              pr_draft += '\n'
+              pr_draft += '## Risk\n'
+              pr_draft += str(job.get('riskLevel', 'UNKNOWN')) + ' - ' + auto_risk + ' (auto)\n'
+              pr_draft += '\n'
+              pr_draft += '## Files Changed\n'
+              for fp in file_paths:
+                  pr_draft += '- ' + fp + '\n'
+              pr_draft += '\n'
+              pr_draft += '## Acceptance Criteria\n'
+              pr_draft += str(job.get('acceptanceCriteria', '(none)')) + '\n'
+              pr_draft += '\n'
+              pr_draft += '## Rollback\n'
+              pr_draft += str(job.get('rollbackPlan', '(none)')) + '\n'
+
+          with open(os.path.join(out_dir, 'pr-draft.txt'), 'w') as fh:
+              fh.write(pr_draft)
+
+          rollback = ''
+          rollback += 'ROLLBACK PLAN\n'
+          rollback += '=============\n'
+          rollback += 'Job ID:   ' + job_id + '\n'
+          rollback += 'HEAD SHA: ' + head_sha + '\n'
+          rollback += '\n'
+          rollback += 'Rollback Command (from job):\n'
+          rollback += str(job.get('rollbackPlan', '(none)')) + '\n'
+          rollback += '\n'
+          rollback += 'Manual rollback per file:\n'
+          for fp in file_paths:
+              rollback += '  git checkout ' + head_sha + ' -- ' + fp + '\n'
+          rollback += '\n'
+          rollback += 'Pre-patch file snapshots are included in this packet.\n'
+          rollback += 'To restore a file manually, copy from snapshot/<path>.\n'
+
+          with open(os.path.join(out_dir, 'rollback-plan.txt'), 'w') as fh:
+              fh.write(rollback)
+
+          impact = ''
+          impact += 'FILE IMPACT REPORT\n'
+          impact += '==================\n'
+          impact += 'Job ID:       ' + job_id + '\n'
+          impact += 'Generated at: ' + head_sha + '\n'
+          impact += '\n'
+          impact += 'Impact Flags:\n'
+          impact += '  Live site impact:       ' + str(job.get('liveSiteImpact', 'Unknown')) + '\n'
+          impact += '  Service worker impact:  ' + str(job.get('serviceWorkerImpact', 'Unknown')) + '\n'
+          impact += '  AI provider impact:     ' + str(job.get('aiProviderImpact', 'Unknown')) + '\n'
+          impact += '  Export package impact:  ' + str(job.get('exportPackageImpact', 'Unknown')) + '\n'
+          impact += '  Security impact:        ' + str(job.get('securityImpact', 'Unknown')) + '\n'
+          impact += '\n'
+          impact += 'Risk Classification:\n'
+          impact += '  Declared: ' + str(job.get('riskLevel', 'UNKNOWN')) + '\n'
+          impact += '  Auto:     ' + auto_risk + '\n'
+          if auto_risk != str(job.get('riskLevel', 'UNKNOWN')):
+              impact += '  WARNING: Risk mismatch - review before proceeding\n'
+          impact += '\n'
+          impact += 'Target Files:\n'
+          for line in file_check_lines:
+              impact += line + '\n'
+
+          with open(os.path.join(out_dir, 'file-impact-report.txt'), 'w') as fh:
+              fh.write(impact)
+
+          snap_dir = os.path.join(out_dir, 'snapshots')
+          os.makedirs(snap_dir, exist_ok=True)
+          for fp, content in file_snapshots.items():
+              if content is not None:
+                  safe_name = fp.replace('/', '__').replace('\\', '__')
+                  with open(os.path.join(snap_dir, safe_name), 'w') as fh:
+                      fh.write(content)
+
+          zip_name = 'repo-file-worker-packet-' + job_id + '.zip'
+          with zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED) as zf:
+              for root, dirs, files in os.walk(out_dir):
+                  for fname in files:
+                      full = os.path.join(root, fname)
+                      arcname = os.path.relpath(full, out_dir)
+                      zf.write(full, arcname)
+
+          print('Packet generated: ' + zip_name)
+          print('Contents:')
+          with zipfile.ZipFile(zip_name) as zf:
+              for name in zf.namelist():
+                  print('  ' + name)
+
+          github_env = os.environ.get('GITHUB_ENV', '')
+          if github_env:
+              with open(github_env, 'a') as fh:
+                  fh.write('PACKET_FILE=' + zip_name + '\n')
+                  fh.write('JOB_ID=' + job_id + '\n')
+          PYEOF
+        env:
+          JOB_FILE: ${{ inputs.job_file || 'loadtasks-inbox/repo-file-job.json' }}
+
+      - name: Upload packet artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: repo-file-worker-packet-${{ env.JOB_ID || 'unknown' }}
+          path: ${{ env.PACKET_FILE || 'repo-file-worker-packet-*.zip' }}
+          retention-days: 30
+          if-no-files-found: warn
