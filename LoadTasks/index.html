@@ -96,6 +96,18 @@
         <button data-view="buildhealth" data-route>Health</button>
         <button data-view="jobdetail" data-route>Job Detail</button>
         <button data-view="linked" data-route>Linked</button>
+        <button data-view="commandcenter" data-route>Command Center</button>
+        <button data-view="todaywork" data-route>Today</button>
+        <button data-view="priorityqueue" data-route>Priority Queue</button>
+        <button data-view="blockers" data-route>Blockers</button>
+        <button data-view="nextaction" data-route>Next Action</button>
+        <button data-view="savedprompts" data-route>Saved Prompts</button>
+        <button data-view="recoveryreport" data-route>Recovery Report</button>
+        <button data-view="branchinventory" data-route>Branches</button>
+        <button data-view="prreview" data-route>PR Review</button>
+        <button data-view="mergedecision" data-route>Merge Check</button>
+        <button data-view="rollbackdecision" data-route>Rollback Check</button>
+        <button data-view="dailyexport" data-route>Daily Export</button>
       </nav>
       <button class="icon-button" id="hardRefresh" aria-label="Hard refresh app state">
         <span class="icon-mini" data-icon="refresh"></span>
@@ -155,6 +167,18 @@
         <button data-view="buildhealth" data-route><span class="rail-icon" data-icon="shield"></span><span>Health</span></button>
         <button data-view="jobdetail" data-route><span class="rail-icon" data-icon="wrench"></span><span>Job Detail</span></button>
         <button data-view="linked" data-route><span class="rail-icon" data-icon="version"></span><span>Linked</span></button>
+        <button data-view="commandcenter" data-route><span class="rail-icon" data-icon="dashboard"></span><span>Command Center</span></button>
+        <button data-view="todaywork" data-route><span class="rail-icon" data-icon="notes"></span><span>Today</span></button>
+        <button data-view="priorityqueue" data-route><span class="rail-icon" data-icon="focus"></span><span>Priority</span></button>
+        <button data-view="blockers" data-route><span class="rail-icon" data-icon="wrench"></span><span>Blockers</span></button>
+        <button data-view="nextaction" data-route><span class="rail-icon" data-icon="shield"></span><span>Next Action</span></button>
+        <button data-view="savedprompts" data-route><span class="rail-icon" data-icon="library"></span><span>Saved Prompts</span></button>
+        <button data-view="recoveryreport" data-route><span class="rail-icon" data-icon="wrench"></span><span>Recovery</span></button>
+        <button data-view="branchinventory" data-route><span class="rail-icon" data-icon="version"></span><span>Branches</span></button>
+        <button data-view="prreview" data-route><span class="rail-icon" data-icon="shield"></span><span>PR Review</span></button>
+        <button data-view="mergedecision" data-route><span class="rail-icon" data-icon="certificate"></span><span>Merge Check</span></button>
+        <button data-view="rollbackdecision" data-route><span class="rail-icon" data-icon="wrench"></span><span>Rollback</span></button>
+        <button data-view="dailyexport" data-route><span class="rail-icon" data-icon="upload"></span><span>Daily Export</span></button>
       </aside>
 
       <section class="workspace">
@@ -363,6 +387,66 @@
               <span class="card-icon" data-icon="version"></span>
               <strong>Linked Records</strong>
               <span>Enter any record ID and find everything that references it.</span>
+            </button>
+            <button class="command-card" data-view="commandcenter" data-route>
+              <span class="card-icon" data-icon="dashboard"></span>
+              <strong>Command Center</strong>
+              <span>All tools at a glance with live record counts and direct links.</span>
+            </button>
+            <button class="command-card" data-view="todaywork" data-route>
+              <span class="card-icon" data-icon="notes"></span>
+              <strong>Today's Work</strong>
+              <span>Log what you built, what broke, and what is next. Auto-saves.</span>
+            </button>
+            <button class="command-card" data-view="priorityqueue" data-route>
+              <span class="card-icon" data-icon="focus"></span>
+              <strong>Priority Queue</strong>
+              <span>Add tasks by urgency. Mark done. Export the list.</span>
+            </button>
+            <button class="command-card" data-view="blockers" data-route>
+              <span class="card-icon" data-icon="wrench"></span>
+              <strong>Blockers</strong>
+              <span>Log anything blocking progress. Resolve or reopen with one tap.</span>
+            </button>
+            <button class="command-card" data-view="nextaction" data-route>
+              <span class="card-icon" data-icon="shield"></span>
+              <strong>Next Action</strong>
+              <span>Scans open issues, backlog, and repair jobs. Shows where to focus.</span>
+            </button>
+            <button class="command-card" data-view="savedprompts" data-route>
+              <span class="card-icon" data-icon="library"></span>
+              <strong>Saved Prompts</strong>
+              <span>Store reusable Claude prompts. Copy with one tap.</span>
+            </button>
+            <button class="command-card" data-view="recoveryreport" data-route>
+              <span class="card-icon" data-icon="wrench"></span>
+              <strong>Recovery Report</strong>
+              <span>Document what broke, recovery steps, and rollback command.</span>
+            </button>
+            <button class="command-card" data-view="branchinventory" data-route>
+              <span class="card-icon" data-icon="version"></span>
+              <strong>Branch Inventory</strong>
+              <span>Track every feature branch — purpose, status, and linked PR.</span>
+            </button>
+            <button class="command-card" data-view="prreview" data-route>
+              <span class="card-icon" data-icon="shield"></span>
+              <strong>PR Review Checklist</strong>
+              <span>12-point checklist. Check items, copy summary, reset.</span>
+            </button>
+            <button class="command-card" data-view="mergedecision" data-route>
+              <span class="card-icon" data-icon="certificate"></span>
+              <strong>Merge Decision</strong>
+              <span>Fill in context. Get a clear GO or NO-GO statement to copy.</span>
+            </button>
+            <button class="command-card" data-view="rollbackdecision" data-route>
+              <span class="card-icon" data-icon="wrench"></span>
+              <strong>Rollback Decision</strong>
+              <span>Document what broke. Generate a plain-language rollback plan.</span>
+            </button>
+            <button class="command-card" data-view="dailyexport" data-route>
+              <span class="card-icon" data-icon="upload"></span>
+              <strong>Export Daily Work Packet</strong>
+              <span>Bundle today's work, note pad, session notes, and open issues into .txt.</span>
             </button>
           </div>
 
@@ -3677,6 +3761,562 @@
           </script>
         </section>
 
+        <!-- ═══ BATCH 9: DAILY OPERATIONS TOOLS ═══ -->
+        <section class="view" id="view-commandcenter" data-view-panel="commandcenter">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Command Center</h1><p>All recording and review tools with live record counts.</p></div>
+          <div id="cc-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;"></div>
+          <script>(function(){
+            var tools=[
+              {view:'repairjob',label:'Repair Job Writer',prefix:'lt_rjw_',excl:['lt_rjw_draft','lt_repairjob_draft']},
+              {view:'buildvault',label:'Stable Build Vault',prefix:'lt_bv_',excl:['lt_bv_draft']},
+              {view:'sitehealth',label:'Site Health Report',prefix:'lt_sh_',excl:['lt_sh_draft']},
+              {view:'repairpack',label:'Repair Pack Summary',prefix:'lt_rp_',excl:['lt_rp_draft']},
+              {view:'criteria',label:'Acceptance Criteria',prefix:'lt_ac_',excl:['lt_ac_draft']},
+              {view:'smokecheck',label:'Smoke Check',prefix:'lt_sc_',excl:['lt_sc_draft']},
+              {view:'baseline',label:'Build Baseline',prefix:'lt_bl_',excl:['lt_bl_draft']},
+              {view:'riskreport',label:'Risk Report',prefix:'lt_rr_',excl:['lt_rr_draft']},
+              {view:'sessionnotes',label:'Session Notes',prefix:'lt_sn_',excl:['lt_sn_draft']},
+              {view:'changelog',label:'Changelog',prefix:'lt_cl_',excl:['lt_cl_draft']},
+              {view:'backlog',label:'Feature Backlog',prefix:'lt_fb_',excl:['lt_fb_draft']},
+              {view:'testplan',label:'Test Plans',prefix:'lt_tp_',excl:['lt_tp_draft']},
+              {view:'issues',label:'Issues',prefix:'lt_is_',excl:['lt_is_draft']},
+              {view:'priorityqueue',label:'Priority Queue',prefix:'lt_pq_',excl:['lt_pq_draft']},
+              {view:'blockers',label:'Blockers',prefix:'lt_bk_',excl:['lt_bk_draft']},
+              {view:'savedprompts',label:'Saved Prompts',prefix:'lt_sp_',excl:['lt_sp_draft']},
+              {view:'recoveryreport',label:'Recovery Reports',prefix:'lt_rv_',excl:['lt_rv_draft']},
+              {view:'branchinventory',label:'Branch Inventory',prefix:'lt_bi_',excl:['lt_bi_draft']}
+            ];
+            function count(prefix,excl){var n=0;for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(prefix)===0){var skip=false;excl.forEach(function(e){if(k===e)skip=true;});if(!skip)n++;}}return n;}
+            function render(){
+              var g=document.getElementById('cc-grid');if(!g)return;
+              g.innerHTML=tools.map(function(t){
+                var n=count(t.prefix,t.excl);
+                return '<button class="command-card" data-view="'+t.view+'" data-route style="text-align:left;"><strong>'+t.label+'</strong><span style="font-size:22px;font-weight:700;display:block;margin-top:6px;">'+n+'</span><span style="font-size:11px;color:#9aa0b0;">records saved</span></button>';
+              }).join('');
+            }
+            var sec=document.getElementById('view-commandcenter');
+            if(sec){sec.addEventListener('lt-view-enter',render);setTimeout(function(){if(sec.classList.contains('active'))render();},150);}
+          }());</script>
+        </section>
+
+        <section class="view" id="view-todaywork" data-view-panel="todaywork">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Today's Work</h1><p>Record what you built, what broke, and what is next. Auto-saves as you type.</p></div>
+          <article class="panel form-panel">
+            <label>Date<input id="tw-date" type="date"></label>
+            <label>Site<input id="tw-site" placeholder="e.g. Load, LoadStudio, Attain"></label>
+            <label>What did you build<textarea id="tw-built" rows="3" placeholder="Features shipped, fixes applied..."></textarea></label>
+            <label>What broke<textarea id="tw-broke" rows="3" placeholder="Bugs found, regressions, failures..."></textarea></label>
+            <label>What is next<textarea id="tw-next" rows="3" placeholder="Next planned action..."></textarea></label>
+            <label>Blockers<textarea id="tw-blockers" rows="2" placeholder="Anything blocking progress..."></textarea></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="tw-copy">Copy as Text Block</button>
+              <button class="secondary-action" id="tw-export">Export .txt</button>
+              <button class="secondary-action" id="tw-clear">Clear</button>
+            </div>
+          </article>
+          <script>(function(){
+            var FIDS=['tw-date','tw-site','tw-built','tw-broke','tw-next','tw-blockers'];
+            var KEY='lt_tw_draft';var timer;
+            function save(){var d={};FIDS.forEach(function(id){d[id]=document.getElementById(id)?document.getElementById(id).value:'';});localStorage.setItem(KEY,JSON.stringify(d));}
+            function load(){var raw=localStorage.getItem(KEY);if(!raw)return;try{var d=JSON.parse(raw);FIDS.forEach(function(id){var el=document.getElementById(id);if(el&&d[id]!=null)el.value=d[id];});}catch(e){}}
+            function getText(){return'TODAY\'S WORK\nDate: '+(document.getElementById('tw-date').value||'--')+'\nSite: '+(document.getElementById('tw-site').value||'--')+'\n\nBUILT:\n'+(document.getElementById('tw-built').value||'--')+'\n\nBROKE:\n'+(document.getElementById('tw-broke').value||'--')+'\n\nNEXT:\n'+(document.getElementById('tw-next').value||'--')+'\n\nBLOCKERS:\n'+(document.getElementById('tw-blockers').value||'--');}
+            FIDS.forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',function(){clearTimeout(timer);timer=setTimeout(save,600);});});
+            document.getElementById('tw-copy').addEventListener('click',function(){navigator.clipboard&&navigator.clipboard.writeText(getText()).then(function(){var t=document.getElementById('toast');if(t){t.textContent='Copied';t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2000);}});});
+            document.getElementById('tw-export').addEventListener('click',function(){var b=new Blob([getText()],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='todays-work-'+(document.getElementById('tw-date').value||'today')+'.txt';a.click();});
+            document.getElementById('tw-clear').addEventListener('click',function(){if(!confirm('Clear today\'s work note?'))return;FIDS.forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});localStorage.removeItem(KEY);});
+            var sec=document.getElementById('view-todaywork');
+            if(sec){sec.addEventListener('lt-view-enter',function(){load();var d=document.getElementById('tw-date');if(d&&!d.value){var n=new Date();d.value=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');}});setTimeout(function(){if(sec.classList.contains('active')){load();}},150);}
+          }());</script>
+        </section>
+
+        <section class="view" id="view-priorityqueue" data-view-panel="priorityqueue">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Priority Queue</h1><p>Add tasks in order of urgency. Mark done. Export the list.</p></div>
+          <article class="panel form-panel">
+            <label>Task<input id="pq-task" placeholder="Describe the task"></label>
+            <label>Site<input id="pq-site" placeholder="Load, LoadStudio, Attain..."></label>
+            <label>Priority<select id="pq-priority"><option>Critical</option><option>High</option><option selected>Normal</option><option>Low</option></select></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="pq-save">Add to Queue</button>
+              <button class="secondary-action" id="pq-export">Export .txt</button>
+            </div>
+          </article>
+          <div id="pq-list" style="margin-top:16px;"></div>
+          <script>(function(){
+            var PRI_ORDER={Critical:0,High:1,Normal:2,Low:3};
+            var PRI_COLOR={Critical:'#e74c3c',High:'#e67e22',Normal:'#3498db',Low:'#9aa0b0'};
+            function getAll(){var items=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_pq_')===0&&k!=='lt_pq_draft'){try{items.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}items.sort(function(a,b){return(PRI_ORDER[a.priority]||2)-(PRI_ORDER[b.priority]||2);});return items;}
+            function render(){
+              var el=document.getElementById('pq-list');if(!el)return;
+              var items=getAll();
+              if(!items.length){el.innerHTML='<p class="empty-state">No tasks in queue.</p>';return;}
+              el.innerHTML=items.map(function(it){
+                var done=it.done?'opacity:0.45;text-decoration:line-through;':'';
+                return '<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;'+done+'">'
+                  +'<span style="background:'+PRI_COLOR[it.priority]+';color:#fff;border-radius:4px;padding:2px 8px;font-size:11px;white-space:nowrap;">'+it.priority+'</span>'
+                  +'<span style="flex:1;">'+it.task+(it.site?' <span style="color:#9aa0b0;font-size:12px;">('+it.site+')</span>':'')+'</span>'
+                  +'<button class="small-btn pq-toggle" data-id="'+it.id+'">'+(it.done?'Undo':'Done')+'</button>'
+                  +'<button class="small-btn pq-del" data-id="'+it.id+'">X</button>'
+                  +'</div>';
+              }).join('');
+              el.querySelectorAll('.pq-toggle').forEach(function(b){b.addEventListener('click',function(){var k='lt_pq_'+b.dataset.id;var raw=localStorage.getItem(k);if(!raw)return;var d=JSON.parse(raw);d.done=!d.done;localStorage.setItem(k,JSON.stringify(d));render();});});
+              el.querySelectorAll('.pq-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Remove this task?'))return;localStorage.removeItem('lt_pq_'+b.dataset.id);render();});});
+            }
+            document.getElementById('pq-save').addEventListener('click',function(){
+              var task=document.getElementById('pq-task').value.trim();if(!task)return;
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              var rec={id:id,task:task,site:document.getElementById('pq-site').value.trim(),priority:document.getElementById('pq-priority').value,done:false,ts:Date.now()};
+              localStorage.setItem('lt_pq_'+id,JSON.stringify(rec));
+              document.getElementById('pq-task').value='';document.getElementById('pq-site').value='';
+              render();
+            });
+            document.getElementById('pq-export').addEventListener('click',function(){
+              var items=getAll();
+              var txt='PRIORITY QUEUE\n\n'+items.map(function(it){return'['+it.priority+'] '+(it.done?'[DONE] ':'')+it.task+(it.site?' ('+it.site+')':'');}).join('\n');
+              var b=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='priority-queue.txt';a.click();
+            });
+            var sec=document.getElementById('view-priorityqueue');if(sec)sec.addEventListener('lt-view-enter',render);
+          }());</script>
+        </section>
+
+        <section class="view" id="view-blockers" data-view-panel="blockers">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Blockers</h1><p>Log anything blocking progress. Mark resolved when cleared.</p></div>
+          <article class="panel form-panel">
+            <label>Description<input id="bk-desc" placeholder="What is blocked?"></label>
+            <label>Site<input id="bk-site" placeholder="Load, LoadStudio, Attain..."></label>
+            <label>Type<select id="bk-type"><option>Technical</option><option>Waiting</option><option>Decision</option><option>Other</option></select></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="bk-save">Log Blocker</button>
+              <button class="secondary-action" id="bk-export">Export .txt</button>
+              <button class="secondary-action" id="bk-showall">Show All</button>
+            </div>
+          </article>
+          <div id="bk-list" style="margin-top:16px;"></div>
+          <script>(function(){
+            var bkShowResolved=false;
+            function bkGetAll(){var items=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_bk_')===0&&k!=='lt_bk_draft'){try{items.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}items.sort(function(a,b){return b.ts-a.ts;});return items;}
+            function bkRender(){
+              var el=document.getElementById('bk-list');if(!el)return;
+              var items=bkGetAll().filter(function(it){return bkShowResolved||it.status!=='Resolved';});
+              if(!items.length){el.innerHTML='<p class="empty-state">'+(bkShowResolved?'No blockers logged.':'No active blockers.')+'</p>';return;}
+              var COLOR={Technical:'#e74c3c',Waiting:'#e67e22',Decision:'#9b59b6',Other:'#9aa0b0'};
+              el.innerHTML=items.map(function(it){
+                var resolved=it.status==='Resolved';
+                return '<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px;margin-bottom:8px;'+(resolved?'opacity:0.5;':'')+'display:flex;align-items:flex-start;gap:12px;">'
+                  +'<span style="background:'+(COLOR[it.type]||'#9aa0b0')+';color:#fff;border-radius:4px;padding:2px 8px;font-size:11px;white-space:nowrap;margin-top:2px;">'+it.type+'</span>'
+                  +'<div style="flex:1;"><div>'+it.desc+(it.site?' <span style="color:#9aa0b0;font-size:12px;">('+it.site+')</span>':'')+'</div>'
+                  +'<div style="font-size:12px;color:#9aa0b0;margin-top:3px;">Status: '+it.status+'</div></div>'
+                  +'<button class="small-btn bk-toggle" data-id="'+it.id+'">'+(resolved?'Reopen':'Resolve')+'</button>'
+                  +'<button class="small-btn bk-del" data-id="'+it.id+'">X</button>'
+                  +'</div>';
+              }).join('');
+              el.querySelectorAll('.bk-toggle').forEach(function(b){b.addEventListener('click',function(){var k='lt_bk_'+b.dataset.id;var raw=localStorage.getItem(k);if(!raw)return;var d=JSON.parse(raw);d.status=d.status==='Resolved'?'Active':'Resolved';localStorage.setItem(k,JSON.stringify(d));bkRender();});});
+              el.querySelectorAll('.bk-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Delete this blocker?'))return;localStorage.removeItem('lt_bk_'+b.dataset.id);bkRender();});});
+            }
+            document.getElementById('bk-save').addEventListener('click',function(){
+              var desc=document.getElementById('bk-desc').value.trim();if(!desc)return;
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              var rec={id:id,desc:desc,site:document.getElementById('bk-site').value.trim(),type:document.getElementById('bk-type').value,status:'Active',ts:Date.now()};
+              localStorage.setItem('lt_bk_'+id,JSON.stringify(rec));
+              document.getElementById('bk-desc').value='';document.getElementById('bk-site').value='';
+              bkRender();
+            });
+            document.getElementById('bk-export').addEventListener('click',function(){
+              var items=bkGetAll();
+              var txt='BLOCKERS\n\n'+items.map(function(it){return'['+it.status+'] ['+it.type+'] '+it.desc+(it.site?' ('+it.site+')':'');}).join('\n');
+              var b=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='blockers.txt';a.click();
+            });
+            document.getElementById('bk-showall').addEventListener('click',function(){bkShowResolved=!bkShowResolved;document.getElementById('bk-showall').textContent=bkShowResolved?'Hide Resolved':'Show All';bkRender();});
+            var sec=document.getElementById('view-blockers');if(sec)sec.addEventListener('lt-view-enter',bkRender);
+          }());</script>
+        </section>
+
+        <section class="view" id="view-nextaction" data-view-panel="nextaction">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Next Action</h1><p>Scans open Issues, Backlog items, Repair Jobs, and Blockers. Suggests where to focus.</p></div>
+          <article class="panel">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+              <button class="primary-action" id="na-scan">Scan Records</button>
+              <button class="secondary-action" id="na-copy" style="display:none;">Copy</button>
+            </div>
+            <div id="na-output" class="empty-state">Tap Scan Records to analyse open work.</div>
+          </article>
+          <script>(function(){
+            function naSevOrder(s){return{Critical:0,High:1,Normal:2,Low:3}[s]||2;}
+            function naStatOrder(s){return{FAIL:0,PARTIAL:1,'WORKING REAL OUTPUT':2}[s]||3;}
+            function naScan(){
+              var suggestions=[];
+              for(var i=0;i<localStorage.length;i++){
+                var k=localStorage.key(i);if(!k)continue;
+                if(k.indexOf('lt_is_')===0&&k!=='lt_is_draft'){try{var d=JSON.parse(localStorage.getItem(k));if(d.status!=='Resolved')suggestions.push({type:'Issue',label:'[Issue] '+d.title+(d.site?' ('+d.site+')':''),sort:naSevOrder(d.severity)});}catch(e){}}
+                if(k.indexOf('lt_fb_')===0&&k!=='lt_fb_draft'){try{var d2=JSON.parse(localStorage.getItem(k));if(d2.status!=='Done')suggestions.push({type:'Backlog',label:'[Backlog] '+d2.feature+(d2.site?' ('+d2.site+')':''),sort:naSevOrder(d2.priority)+0.5});}catch(e){}}
+                if(k.indexOf('lt_rjw_')===0&&k!=='lt_rjw_draft'&&k!=='lt_repairjob_draft'){try{var d3=JSON.parse(localStorage.getItem(k));if(d3.status==='FAIL'||d3.status==='PARTIAL')suggestions.push({type:'Repair',label:'[Repair] '+d3.site+' — '+d3.status,sort:naStatOrder(d3.status)});}catch(e){}}
+                if(k.indexOf('lt_bk_')===0&&k!=='lt_bk_draft'){try{var d4=JSON.parse(localStorage.getItem(k));if(d4.status==='Active')suggestions.push({type:'Blocker',label:'[Blocker] '+d4.desc+(d4.site?' ('+d4.site+')':''),sort:1});}catch(e){}}
+              }
+              suggestions.sort(function(a,b){return a.sort-b.sort;});
+              return suggestions.slice(0,10);
+            }
+            var NA_COLOR={Issue:'#e74c3c',Backlog:'#3498db',Repair:'#e67e22',Blocker:'#9b59b6'};
+            document.getElementById('na-scan').addEventListener('click',function(){
+              var items=naScan();
+              var out=document.getElementById('na-output');
+              var copy=document.getElementById('na-copy');
+              if(!items.length){out.innerHTML='<p class="empty-state">No open issues, backlog items, or failing repair jobs found.</p>';copy.style.display='none';return;}
+              out.innerHTML='<div style="margin-bottom:10px;font-size:13px;color:#9aa0b0;">Top '+items.length+' open items — highest priority first</div>'
+                +items.map(function(it,idx){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;">'
+                  +'<span style="background:#1e2130;color:#9aa0b0;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">'+(idx+1)+'</span>'
+                  +'<span style="background:'+(NA_COLOR[it.type]||'#9aa0b0')+';color:#fff;border-radius:4px;padding:2px 7px;font-size:11px;white-space:nowrap;">'+it.type+'</span>'
+                  +'<span style="flex:1;">'+it.label+'</span>'
+                  +'</div>';}).join('');
+              copy.style.display='';
+              copy.dataset.text=items.map(function(it,idx){return(idx+1)+'. '+it.label;}).join('\n');
+            });
+            document.getElementById('na-copy').addEventListener('click',function(){var t=this.dataset.text;navigator.clipboard&&navigator.clipboard.writeText(t).then(function(){var toast=document.getElementById('toast');if(toast){toast.textContent='Copied';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}});});
+          }());</script>
+        </section>
+
+        <section class="view" id="view-savedprompts" data-view-panel="savedprompts">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Saved Prompts</h1><p>Store reusable Claude prompts. Copy with one tap.</p></div>
+          <article class="panel form-panel">
+            <label>Name<input id="sp-name" placeholder="Short label for this prompt"></label>
+            <label>Prompt Text<textarea id="sp-text" rows="5" placeholder="Paste the full prompt here..."></textarea></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="sp-save">Save Prompt</button>
+              <button class="secondary-action" id="sp-exportall">Export All .txt</button>
+            </div>
+          </article>
+          <div id="sp-list" style="margin-top:16px;"></div>
+          <script>(function(){
+            function spGetAll(){var items=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_sp_')===0&&k!=='lt_sp_draft'){try{items.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}items.sort(function(a,b){return b.ts-a.ts;});return items;}
+            function spRender(){
+              var el=document.getElementById('sp-list');if(!el)return;
+              var items=spGetAll();
+              if(!items.length){el.innerHTML='<p class="empty-state">No prompts saved yet.</p>';return;}
+              el.innerHTML=items.map(function(it){
+                return '<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:14px;margin-bottom:10px;">'
+                  +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
+                  +'<strong>'+it.name+'</strong>'
+                  +'<div style="display:flex;gap:8px;">'
+                  +'<button class="small-btn sp-copy" data-id="'+it.id+'">Copy</button>'
+                  +'<button class="small-btn sp-del" data-id="'+it.id+'">X</button>'
+                  +'</div></div>'
+                  +'<div style="font-size:13px;color:#9aa0b0;white-space:pre-wrap;max-height:80px;overflow:hidden;">'+it.text.substring(0,200)+(it.text.length>200?'...':'')+'</div>'
+                  +'</div>';
+              }).join('');
+              el.querySelectorAll('.sp-copy').forEach(function(b){b.addEventListener('click',function(){var raw=localStorage.getItem('lt_sp_'+b.dataset.id);if(!raw)return;var d=JSON.parse(raw);navigator.clipboard&&navigator.clipboard.writeText(d.text).then(function(){var toast=document.getElementById('toast');if(toast){toast.textContent='Prompt copied';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}});});});
+              el.querySelectorAll('.sp-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Delete this prompt?'))return;localStorage.removeItem('lt_sp_'+b.dataset.id);spRender();});});
+            }
+            document.getElementById('sp-save').addEventListener('click',function(){
+              var name=document.getElementById('sp-name').value.trim();var text=document.getElementById('sp-text').value.trim();if(!name||!text)return;
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              localStorage.setItem('lt_sp_'+id,JSON.stringify({id:id,name:name,text:text,ts:Date.now()}));
+              document.getElementById('sp-name').value='';document.getElementById('sp-text').value='';spRender();
+            });
+            document.getElementById('sp-exportall').addEventListener('click',function(){
+              var items=spGetAll();
+              var txt='SAVED PROMPTS\n\n'+items.map(function(it){return'=== '+it.name+' ===\n'+it.text;}).join('\n\n');
+              var b=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='saved-prompts.txt';a.click();
+            });
+            var sec=document.getElementById('view-savedprompts');if(sec)sec.addEventListener('lt-view-enter',spRender);
+          }());</script>
+        </section>
+
+        <section class="view" id="view-recoveryreport" data-view-panel="recoveryreport">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Recovery Report</h1><p>Document what broke, how to recover, and the rollback plan.</p></div>
+          <article class="panel form-panel">
+            <label>Title<input id="rv-title" placeholder="Short name for this recovery event"></label>
+            <label>Site<input id="rv-site" placeholder="Load, LoadStudio, Attain..."></label>
+            <label>What broke<textarea id="rv-broke" rows="3" placeholder="Describe what failed and when it was noticed..."></textarea></label>
+            <label>Last known good SHA or branch<input id="rv-sha" placeholder="e.g. abc123 or backup/2026-05-11-v5.24"></label>
+            <label>Files affected<textarea id="rv-files" rows="2" placeholder="List affected files..."></textarea></label>
+            <label>Recovery steps<textarea id="rv-steps" rows="4" placeholder="Step-by-step instructions to recover..."></textarea></label>
+            <label>Rollback command<input id="rv-cmd" placeholder="e.g. git checkout abc123 -- load/sw.js"></label>
+            <label>Notes<textarea id="rv-notes" rows="2" placeholder="Additional context..."></textarea></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="rv-save">Save Report</button>
+              <button class="secondary-action" id="rv-export">Export .txt</button>
+              <button class="secondary-action" id="rv-clear">Clear Form</button>
+            </div>
+          </article>
+          <div id="rv-list" style="margin-top:16px;"></div>
+          <script>(function(){
+            var RV_FIDS=['rv-title','rv-site','rv-broke','rv-sha','rv-files','rv-steps','rv-cmd','rv-notes'];
+            function rvText(){return'RECOVERY REPORT\nTitle: '+(document.getElementById('rv-title').value||'--')+'\nSite: '+(document.getElementById('rv-site').value||'--')+'\n\nWHAT BROKE:\n'+(document.getElementById('rv-broke').value||'--')+'\n\nLAST GOOD: '+(document.getElementById('rv-sha').value||'--')+'\n\nFILES AFFECTED:\n'+(document.getElementById('rv-files').value||'--')+'\n\nRECOVERY STEPS:\n'+(document.getElementById('rv-steps').value||'--')+'\n\nROLLBACK COMMAND:\n'+(document.getElementById('rv-cmd').value||'--')+'\n\nNOTES:\n'+(document.getElementById('rv-notes').value||'--');}
+            function rvRender(){
+              var el=document.getElementById('rv-list');if(!el)return;
+              var items=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_rv_')===0&&k!=='lt_rv_draft'){try{items.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}
+              items.sort(function(a,b){return b.ts-a.ts;});
+              if(!items.length){el.innerHTML='<p class="empty-state">No recovery reports saved.</p>';return;}
+              el.innerHTML=items.map(function(it){
+                return '<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;">'
+                  +'<div style="flex:1;"><strong>'+it.title+'</strong>'+(it.site?' <span style="color:#9aa0b0;font-size:12px;">('+it.site+')</span>':'')+'<div style="font-size:12px;color:#9aa0b0;margin-top:3px;">Last good: '+it.sha+'</div></div>'
+                  +'<button class="small-btn rv-load" data-id="'+it.id+'">Load</button>'
+                  +'<button class="small-btn rv-del" data-id="'+it.id+'">X</button>'
+                  +'</div>';
+              }).join('');
+              el.querySelectorAll('.rv-load').forEach(function(b){b.addEventListener('click',function(){var raw=localStorage.getItem('lt_rv_'+b.dataset.id);if(!raw)return;var d=JSON.parse(raw);document.getElementById('rv-title').value=d.title||'';document.getElementById('rv-site').value=d.site||'';document.getElementById('rv-broke').value=d.broke||'';document.getElementById('rv-sha').value=d.sha||'';document.getElementById('rv-files').value=d.files||'';document.getElementById('rv-steps').value=d.steps||'';document.getElementById('rv-cmd').value=d.cmd||'';document.getElementById('rv-notes').value=d.notes||'';});});
+              el.querySelectorAll('.rv-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Delete this report?'))return;localStorage.removeItem('lt_rv_'+b.dataset.id);rvRender();});});
+            }
+            document.getElementById('rv-save').addEventListener('click',function(){
+              var title=document.getElementById('rv-title').value.trim();if(!title)return;
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              var rec={id:id,title:title,site:document.getElementById('rv-site').value.trim(),broke:document.getElementById('rv-broke').value.trim(),sha:document.getElementById('rv-sha').value.trim(),files:document.getElementById('rv-files').value.trim(),steps:document.getElementById('rv-steps').value.trim(),cmd:document.getElementById('rv-cmd').value.trim(),notes:document.getElementById('rv-notes').value.trim(),ts:Date.now()};
+              localStorage.setItem('lt_rv_'+id,JSON.stringify(rec));rvRender();
+              var toast=document.getElementById('toast');if(toast){toast.textContent='Recovery report saved';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}
+            });
+            document.getElementById('rv-export').addEventListener('click',function(){var b=new Blob([rvText()],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='recovery-report.txt';a.click();});
+            document.getElementById('rv-clear').addEventListener('click',function(){if(!confirm('Clear form?'))return;RV_FIDS.forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});});
+            var sec=document.getElementById('view-recoveryreport');if(sec)sec.addEventListener('lt-view-enter',rvRender);
+          }());</script>
+        </section>
+
+        <section class="view" id="view-branchinventory" data-view-panel="branchinventory">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Branch Inventory</h1><p>Track every feature branch — purpose, status, and linked PR.</p></div>
+          <article class="panel form-panel">
+            <label>Branch Name<input id="bi-name" placeholder="e.g. claude/loadtasks-devbot-batch9-2026-05-11"></label>
+            <label>Purpose<input id="bi-purpose" placeholder="What this branch does"></label>
+            <label>Status<select id="bi-status"><option>Active</option><option>Stale</option><option>Merged</option><option>Deleted</option></select></label>
+            <label>Linked PR<input id="bi-pr" placeholder="e.g. #20"></label>
+            <label>Notes<input id="bi-notes" placeholder="Any extra context"></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="bi-save">Add Branch</button>
+              <button class="secondary-action" id="bi-export">Export .txt</button>
+            </div>
+          </article>
+          <div id="bi-list" style="margin-top:16px;"></div>
+          <script>(function(){
+            var BI_COLOR={Active:'#2ecc71',Stale:'#e67e22',Merged:'#9aa0b0',Deleted:'#e74c3c'};
+            function biGetAll(){var items=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_bi_')===0&&k!=='lt_bi_draft'){try{items.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}items.sort(function(a,b){return b.ts-a.ts;});return items;}
+            function biRender(){
+              var el=document.getElementById('bi-list');if(!el)return;
+              var items=biGetAll();
+              if(!items.length){el.innerHTML='<p class="empty-state">No branches logged.</p>';return;}
+              el.innerHTML=items.map(function(it){
+                return '<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;">'
+                  +'<span style="background:'+(BI_COLOR[it.status]||'#9aa0b0')+';color:#fff;border-radius:4px;padding:2px 8px;font-size:11px;white-space:nowrap;">'+it.status+'</span>'
+                  +'<div style="flex:1;"><code style="font-size:12px;">'+it.name+'</code><div style="font-size:12px;color:#9aa0b0;margin-top:2px;">'+it.purpose+(it.pr?' · PR '+it.pr:'')+'</div></div>'
+                  +'<select class="small-btn bi-sel" data-id="'+it.id+'" style="padding:4px 6px;font-size:12px;background:#1e2130;border:1px solid rgba(255,255,255,.15);color:#e0e4f0;border-radius:4px;">'
+                  +['Active','Stale','Merged','Deleted'].map(function(s){return'<option'+(s===it.status?' selected':'')+'>'+s+'</option>';}).join('')+'</select>'
+                  +'<button class="small-btn bi-del" data-id="'+it.id+'">X</button>'
+                  +'</div>';
+              }).join('');
+              el.querySelectorAll('.bi-sel').forEach(function(sel){sel.addEventListener('change',function(){var k='lt_bi_'+sel.dataset.id;var raw=localStorage.getItem(k);if(!raw)return;var d=JSON.parse(raw);d.status=sel.value;localStorage.setItem(k,JSON.stringify(d));biRender();});});
+              el.querySelectorAll('.bi-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Remove this branch record?'))return;localStorage.removeItem('lt_bi_'+b.dataset.id);biRender();});});
+            }
+            document.getElementById('bi-save').addEventListener('click',function(){
+              var name=document.getElementById('bi-name').value.trim();if(!name)return;
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              var rec={id:id,name:name,purpose:document.getElementById('bi-purpose').value.trim(),status:document.getElementById('bi-status').value,pr:document.getElementById('bi-pr').value.trim(),notes:document.getElementById('bi-notes').value.trim(),ts:Date.now()};
+              localStorage.setItem('lt_bi_'+id,JSON.stringify(rec));
+              document.getElementById('bi-name').value='';document.getElementById('bi-purpose').value='';document.getElementById('bi-pr').value='';document.getElementById('bi-notes').value='';
+              biRender();
+            });
+            document.getElementById('bi-export').addEventListener('click',function(){
+              var items=biGetAll();
+              var txt='BRANCH INVENTORY\n\n'+items.map(function(it){return'['+it.status+'] '+it.name+'\nPurpose: '+it.purpose+(it.pr?'\nPR: '+it.pr:'')+(it.notes?'\nNotes: '+it.notes:'');}).join('\n\n');
+              var b=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='branch-inventory.txt';a.click();
+            });
+            var sec=document.getElementById('view-branchinventory');if(sec)sec.addEventListener('lt-view-enter',biRender);
+          }());</script>
+        </section>
+
+        <section class="view" id="view-prreview" data-view-panel="prreview">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>PR Review Checklist</h1><p>Check each item before approving. Copy summary when done.</p></div>
+          <article class="panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+              <span id="pr-progress" style="font-size:14px;color:#9aa0b0;">0 / 12 checked</span>
+              <div style="display:flex;gap:10px;">
+                <button class="secondary-action" id="pr-reset">Reset</button>
+                <button class="primary-action" id="pr-copy">Copy Summary</button>
+              </div>
+            </div>
+            <div id="pr-items"></div>
+          </article>
+          <script>(function(){
+            var PR_ITEMS=[
+              'PR targets the correct base branch',
+              'Only intended files are changed',
+              'No service worker edits unless approved',
+              'No credentials, tokens, or secrets in diff',
+              'No Load AI or provider routing changes',
+              'Cache version bumped if JS/HTML/CSS changed',
+              'Risk level is stated in PR description',
+              'Rollback plan is stated in PR description',
+              'Tests or smoke check results noted',
+              'Verified on device (iPad or target platform)',
+              'No unrelated changes bundled in',
+              'Commit messages are clear and descriptive'
+            ];
+            var prState=PR_ITEMS.map(function(){return false;});
+            function prRender(){
+              var el=document.getElementById('pr-items');if(!el)return;
+              el.innerHTML=PR_ITEMS.map(function(label,idx){
+                return '<label style="display:flex;align-items:center;gap:12px;padding:10px 14px;margin-bottom:6px;background:rgba(255,255,255,0.05);border-radius:8px;cursor:pointer;">'
+                  +'<input type="checkbox" data-idx="'+idx+'"'+(prState[idx]?' checked':'')+' style="width:18px;height:18px;accent-color:#ffd400;flex-shrink:0;">'
+                  +'<span style="'+(prState[idx]?'text-decoration:line-through;color:#9aa0b0;':'')+'">'+label+'</span>'
+                  +'</label>';
+              }).join('');
+              el.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.addEventListener('change',function(){prState[parseInt(cb.dataset.idx)]=cb.checked;prRender();});});
+              var checked=prState.filter(Boolean).length;
+              document.getElementById('pr-progress').textContent=checked+' / '+PR_ITEMS.length+' checked';
+            }
+            document.getElementById('pr-reset').addEventListener('click',function(){prState=PR_ITEMS.map(function(){return false;});prRender();});
+            document.getElementById('pr-copy').addEventListener('click',function(){
+              var checked=prState.filter(Boolean).length;
+              var txt='PR REVIEW CHECKLIST ('+checked+'/'+PR_ITEMS.length+' passed)\n\n'+PR_ITEMS.map(function(label,idx){return(prState[idx]?'[x] ':'[ ] ')+label;}).join('\n');
+              navigator.clipboard&&navigator.clipboard.writeText(txt).then(function(){var toast=document.getElementById('toast');if(toast){toast.textContent='Checklist copied';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}});
+            });
+            var sec=document.getElementById('view-prreview');if(sec)sec.addEventListener('lt-view-enter',prRender);
+            prRender();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-mergedecision" data-view-panel="mergedecision">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Merge Decision</h1><p>Fill in the context. Get a clear GO or NO-GO statement to copy.</p></div>
+          <article class="panel form-panel">
+            <label>PR Number<input id="md-pr" placeholder="e.g. #21"></label>
+            <label>What changed<textarea id="md-what" rows="3" placeholder="Summarise the changes in this PR..."></textarea></label>
+            <label>Tests passed<select id="md-tests"><option>Yes — all passed</option><option>Partial — some passed</option><option>No tests run</option><option>Tests failed</option></select></label>
+            <label>Risk level<select id="md-risk"><option>Low</option><option>Medium</option><option>High</option></select></label>
+            <label>Service worker or cache touched<select id="md-sw"><option>No</option><option>Yes</option></select></label>
+            <label>Verified on device<select id="md-device"><option>Yes</option><option>No</option><option>Not yet</option></select></label>
+            <label>Rollback plan<textarea id="md-rollback" rows="2" placeholder="How to roll back if this breaks something..."></textarea></label>
+            <button class="primary-action" id="md-generate">Generate Decision</button>
+          </article>
+          <div id="md-output" style="margin-top:16px;display:none;">
+            <article class="panel">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <h2 id="md-verdict" style="margin:0;font-size:20px;"></h2>
+                <button class="small-btn" id="md-copy">Copy</button>
+              </div>
+              <pre id="md-text" style="white-space:pre-wrap;font-size:13px;color:#e0e4f0;margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;"></pre>
+            </article>
+          </div>
+          <script>(function(){
+            document.getElementById('md-generate').addEventListener('click',function(){
+              var pr=document.getElementById('md-pr').value.trim();
+              var what=document.getElementById('md-what').value.trim();
+              var tests=document.getElementById('md-tests').value;
+              var risk=document.getElementById('md-risk').value;
+              var sw=document.getElementById('md-sw').value;
+              var device=document.getElementById('md-device').value;
+              var rollback=document.getElementById('md-rollback').value.trim();
+              var issues=[];
+              if(tests==='Tests failed')issues.push('Tests failed');
+              if(tests==='Partial — some passed')issues.push('Not all tests passed');
+              if(risk==='High')issues.push('High risk change');
+              if(device==='No'||device==='Not yet')issues.push('Not verified on device');
+              if(!rollback)issues.push('No rollback plan stated');
+              if(sw==='Yes'&&risk==='High')issues.push('Service worker touched at high risk');
+              var go=issues.length===0;
+              var verdict=go?'GO — Merge approved':'NO-GO — Do not merge yet';
+              var txt='MERGE DECISION\nPR: '+(pr||'--')+'\n\nVERDICT: '+verdict+'\n\nCHANGES:\n'+(what||'--')+'\n\nTESTS: '+tests+'\nRISK: '+risk+'\nSW TOUCHED: '+sw+'\nDEVICE VERIFIED: '+device+'\n\nROLLBACK PLAN:\n'+(rollback||'--')+(issues.length?'\n\nBLOCKERS:\n'+issues.map(function(i){return'- '+i;}).join('\n'):'');
+              document.getElementById('md-verdict').textContent=verdict;
+              document.getElementById('md-verdict').style.color=go?'#2ecc71':'#e74c3c';
+              document.getElementById('md-text').textContent=txt;
+              document.getElementById('md-output').style.display='';
+              document.getElementById('md-copy').dataset.text=txt;
+            });
+            document.getElementById('md-copy').addEventListener('click',function(){var t=this.dataset.text;if(!t)return;navigator.clipboard&&navigator.clipboard.writeText(t).then(function(){var toast=document.getElementById('toast');if(toast){toast.textContent='Decision copied';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}});});
+          }());</script>
+        </section>
+
+        <section class="view" id="view-rollbackdecision" data-view-panel="rollbackdecision">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Rollback Decision</h1><p>Document what broke and generate a clear rollback plan.</p></div>
+          <article class="panel form-panel">
+            <label>What broke<textarea id="rb-broke" rows="3" placeholder="Describe the failure in plain language..."></textarea></label>
+            <label>Site<input id="rb-site" placeholder="Load, LoadStudio, Attain..."></label>
+            <label>When did it break<input id="rb-when" placeholder="e.g. after PR #21 merged, after deploy at 14:30"></label>
+            <label>Last known good SHA or branch<input id="rb-sha" placeholder="e.g. abc123 or backup/2026-05-11-v5.24"></label>
+            <label>Files affected<textarea id="rb-files" rows="2" placeholder="List the files that changed in the breaking commit..."></textarea></label>
+            <label>Collateral risk of rolling back<textarea id="rb-collateral" rows="2" placeholder="What other features might be undone by the rollback?"></textarea></label>
+            <button class="primary-action" id="rb-generate">Generate Rollback Plan</button>
+          </article>
+          <div id="rb-output" style="margin-top:16px;display:none;">
+            <article class="panel">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <h2 style="margin:0;font-size:16px;color:#ffd400;">Rollback Plan</h2>
+                <div style="display:flex;gap:8px;">
+                  <button class="small-btn" id="rb-copy">Copy</button>
+                  <button class="small-btn" id="rb-export-btn">Export .txt</button>
+                </div>
+              </div>
+              <pre id="rb-text" style="white-space:pre-wrap;font-size:13px;color:#e0e4f0;margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;"></pre>
+            </article>
+          </div>
+          <script>(function(){
+            document.getElementById('rb-generate').addEventListener('click',function(){
+              var broke=document.getElementById('rb-broke').value.trim();
+              var site=document.getElementById('rb-site').value.trim();
+              var when=document.getElementById('rb-when').value.trim();
+              var sha=document.getElementById('rb-sha').value.trim();
+              var files=document.getElementById('rb-files').value.trim();
+              var collateral=document.getElementById('rb-collateral').value.trim();
+              var txt='ROLLBACK PLAN\nGenerated: '+new Date().toLocaleString()+'\n\nSITE: '+(site||'--')+'\n\nWHAT BROKE:\n'+(broke||'--')+'\n\nBROKE WHEN: '+(when||'--')+'\n\nLAST KNOWN GOOD: '+(sha||'--')+'\n\nFILES TO ROLL BACK:\n'+(files||'--')+'\n\nROLLBACK COMMANDS:\n'+(sha?'git fetch origin main\ngit checkout '+sha+' -- <affected files>\ngit add <affected files>\ngit commit -m "Rollback: restore from '+sha+'"\ngit push -u origin <branch>':'[Provide last known good SHA or branch to generate commands]')+'\n\nCOLLATERAL RISK:\n'+(collateral||'None stated');
+              document.getElementById('rb-text').textContent=txt;
+              document.getElementById('rb-output').style.display='';
+            });
+            document.getElementById('rb-copy').addEventListener('click',function(){var t=document.getElementById('rb-text').textContent;navigator.clipboard&&navigator.clipboard.writeText(t).then(function(){var toast=document.getElementById('toast');if(toast){toast.textContent='Plan copied';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}});});
+            document.getElementById('rb-export-btn').addEventListener('click',function(){var t=document.getElementById('rb-text').textContent;var b=new Blob([t],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='rollback-plan.txt';a.click();});
+          }());</script>
+        </section>
+
+        <section class="view" id="view-dailyexport" data-view-panel="dailyexport">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Export Daily Work Packet</h1><p>Bundles today's work note, note pad, latest session notes, recent changelog, and open issues into one .txt file.</p></div>
+          <article class="panel">
+            <div style="margin-bottom:16px;">
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:16px;" id="de-summary"></div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button class="primary-action" id="de-build">Build Packet</button>
+                <button class="secondary-action" id="de-export" style="display:none;">Download .txt</button>
+                <button class="secondary-action" id="de-copy" style="display:none;">Copy All</button>
+              </div>
+            </div>
+            <pre id="de-preview" style="display:none;white-space:pre-wrap;font-size:12px;color:#9aa0b0;max-height:400px;overflow-y:auto;border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:14px;margin-top:16px;"></pre>
+          </article>
+          <script>(function(){
+            var dePacket='';
+            function dePfxCount(prefix,excl){var n=0;for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(prefix)===0){var skip=false;(excl||[]).forEach(function(e){if(k===e)skip=true;});if(!skip)n++;}}return n;}
+            function deRenderSummary(){
+              var el=document.getElementById('de-summary');if(!el)return;
+              var openIs=0;for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_is_')===0&&k!=='lt_is_draft'){try{var d=JSON.parse(localStorage.getItem(k));if(d.status!=='Resolved')openIs++;}catch(e){}}}
+              var actBk=0;for(var j=0;j<localStorage.length;j++){var k2=localStorage.key(j);if(k2&&k2.indexOf('lt_bk_')===0&&k2!=='lt_bk_draft'){try{var d2=JSON.parse(localStorage.getItem(k2));if(d2.status==='Active')actBk++;}catch(e){}}}
+              var items=[
+                {label:"Today's Work",n:localStorage.getItem('lt_tw_draft')?1:0},
+                {label:'Note Pad',n:localStorage.getItem('lt_np_draft')?1:0},
+                {label:'Session Notes',n:dePfxCount('lt_sn_',['lt_sn_draft'])},
+                {label:'Changelog',n:dePfxCount('lt_cl_',['lt_cl_draft'])},
+                {label:'Open Issues',n:openIs},
+                {label:'Active Blockers',n:actBk}
+              ];
+              el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px;text-align:center;"><div style="font-size:22px;font-weight:700;">'+it.n+'</div><div style="font-size:12px;color:#9aa0b0;">'+it.label+'</div></div>';}).join('');
+            }
+            document.getElementById('de-build').addEventListener('click',function(){
+              var parts=[];
+              var today=new Date();var ds=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+              parts.push('DAILY WORK PACKET — '+ds+'\n'+'='.repeat(40));
+              var tw=localStorage.getItem('lt_tw_draft');
+              if(tw){try{var d=JSON.parse(tw);parts.push('\nTODAY\'S WORK\n'+'-'.repeat(20)+'\nDate: '+(d['tw-date']||ds)+'\nSite: '+(d['tw-site']||'--')+'\n\nBuilt:\n'+(d['tw-built']||'--')+'\n\nBroke:\n'+(d['tw-broke']||'--')+'\n\nNext:\n'+(d['tw-next']||'--')+'\n\nBlockers:\n'+(d['tw-blockers']||'--'));}catch(e){}}
+              var np=localStorage.getItem('lt_np_draft');if(np)parts.push('\nNOTE PAD\n'+'-'.repeat(20)+'\n'+np);
+              var snArr=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_sn_')===0&&k!=='lt_sn_draft'){try{snArr.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}
+              snArr.sort(function(a,b){return b.ts-a.ts;});
+              if(snArr.length){var sn=snArr[0];parts.push('\nLATEST SESSION NOTES ('+sn.id+')\n'+'-'.repeat(20)+'\nDate: '+(sn.date||'--')+'\nSite: '+(sn.site||'--')+'\nBuilt:\n'+(sn.built||'--')+'\nBroke:\n'+(sn.broke||'--')+'\nNext:\n'+(sn.next||'--'));}
+              var clArr=[];for(var j=0;j<localStorage.length;j++){var k2=localStorage.key(j);if(k2&&k2.indexOf('lt_cl_')===0&&k2!=='lt_cl_draft'){try{clArr.push(JSON.parse(localStorage.getItem(k2)));}catch(e){}}}
+              clArr.sort(function(a,b){return b.ts-a.ts;});var rCl=clArr.slice(0,5);
+              if(rCl.length){parts.push('\nRECENT CHANGELOG (last '+rCl.length+')\n'+'-'.repeat(20)+'\n'+rCl.map(function(e){return(e.date||'--')+' | '+(e.pr||'--')+' | '+(e.site||'--')+' | '+(e.summary||'--');}).join('\n'));}
+              var isArr=[];for(var m=0;m<localStorage.length;m++){var k3=localStorage.key(m);if(k3&&k3.indexOf('lt_is_')===0&&k3!=='lt_is_draft'){try{var d3=JSON.parse(localStorage.getItem(k3));if(d3.status!=='Resolved')isArr.push(d3);}catch(e){}}}
+              isArr.sort(function(a,b){return({Critical:0,High:1,Normal:2,Low:3}[a.severity]||2)-({Critical:0,High:1,Normal:2,Low:3}[b.severity]||2);});
+              if(isArr.length){parts.push('\nOPEN ISSUES ('+isArr.length+')\n'+'-'.repeat(20)+'\n'+isArr.map(function(it){return'['+it.severity+'] '+it.title+(it.site?' ('+it.site+')':'');}).join('\n'));}
+              var bkArr=[];for(var n=0;n<localStorage.length;n++){var k4=localStorage.key(n);if(k4&&k4.indexOf('lt_bk_')===0&&k4!=='lt_bk_draft'){try{var d4=JSON.parse(localStorage.getItem(k4));if(d4.status==='Active')bkArr.push(d4);}catch(e){}}}
+              if(bkArr.length){parts.push('\nACTIVE BLOCKERS ('+bkArr.length+')\n'+'-'.repeat(20)+'\n'+bkArr.map(function(b){return'['+b.type+'] '+b.desc+(b.site?' ('+b.site+')':'');}).join('\n'));}
+              dePacket=parts.join('\n\n');
+              document.getElementById('de-preview').textContent=dePacket;document.getElementById('de-preview').style.display='';
+              document.getElementById('de-export').style.display='';document.getElementById('de-copy').style.display='';
+            });
+            document.getElementById('de-export').addEventListener('click',function(){var b=new Blob([dePacket],{type:'text/plain'});var a=document.createElement('a');var t=new Date();a.href=URL.createObjectURL(b);a.download='daily-work-packet-'+t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0')+'.txt';a.click();});
+            document.getElementById('de-copy').addEventListener('click',function(){navigator.clipboard&&navigator.clipboard.writeText(dePacket).then(function(){var toast=document.getElementById('toast');if(toast){toast.textContent='Packet copied';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}});});
+            var sec=document.getElementById('view-dailyexport');if(sec)sec.addEventListener('lt-view-enter',deRenderSummary);
+          }());</script>
+        </section>
+
         <!-- ═══ DASHBOARD COUNTERS SCRIPT ═══ -->
         <script>
         (function(){
@@ -3698,7 +4338,12 @@
               {label:'Test Plans',n:ltCountPrefix('lt_tp_',['lt_tp_draft'])},
               {label:'Issues',n:ltCountPrefix('lt_is_',['lt_is_draft'])},
               {label:'Session Notes',n:ltCountPrefix('lt_sn_',['lt_sn_draft'])},
-              {label:'Changelog',n:ltCountPrefix('lt_cl_',['lt_cl_draft'])}
+              {label:'Changelog',n:ltCountPrefix('lt_cl_',['lt_cl_draft'])},
+              {label:'Priority Queue',n:ltCountPrefix('lt_pq_',['lt_pq_draft'])},
+              {label:'Blockers',n:ltCountPrefix('lt_bk_',['lt_bk_draft'])},
+              {label:'Saved Prompts',n:ltCountPrefix('lt_sp_',['lt_sp_draft'])},
+              {label:'Recovery Reports',n:ltCountPrefix('lt_rv_',['lt_rv_draft'])},
+              {label:'Branch Inventory',n:ltCountPrefix('lt_bi_',['lt_bi_draft'])}
             ];
             el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px;text-align:center;"><div style="font-size:28px;font-weight:700;line-height:1;">'+(it.n)+'</div><div style="font-size:12px;color:#9aa0b0;margin-top:4px;">'+it.label+'</div></div>';}).join('');
           }
