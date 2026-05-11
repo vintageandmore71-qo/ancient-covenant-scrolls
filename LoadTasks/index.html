@@ -83,6 +83,10 @@
         <button data-view="handoffdoc" data-route>Handoff Doc</button>
         <button data-view="changelog" data-route>Changelog</button>
         <button data-view="versiontracker" data-route>Version Tracker</button>
+        <button data-view="backlog" data-route>Backlog</button>
+        <button data-view="testplan" data-route>Test Plan</button>
+        <button data-view="issues" data-route>Issues</button>
+        <button data-view="runchecklist" data-route>Checklist</button>
       </nav>
       <button class="icon-button" id="hardRefresh" aria-label="Hard refresh app state">
         <span class="icon-mini" data-icon="refresh"></span>
@@ -129,6 +133,10 @@
         <button data-view="handoffdoc" data-route><span class="rail-icon" data-icon="handoff"></span><span>Handoff Doc</span></button>
         <button data-view="changelog" data-route><span class="rail-icon" data-icon="version"></span><span>Changelog</span></button>
         <button data-view="versiontracker" data-route><span class="rail-icon" data-icon="library"></span><span>Version Tracker</span></button>
+        <button data-view="backlog" data-route><span class="rail-icon" data-icon="library"></span><span>Backlog</span></button>
+        <button data-view="testplan" data-route><span class="rail-icon" data-icon="shield"></span><span>Test Plan</span></button>
+        <button data-view="issues" data-route><span class="rail-icon" data-icon="wrench"></span><span>Issues</span></button>
+        <button data-view="runchecklist" data-route><span class="rail-icon" data-icon="shield"></span><span>Checklist</span></button>
       </aside>
 
       <section class="workspace">
@@ -272,6 +280,26 @@
               <span class="card-icon" data-icon="library"></span>
               <strong>Version Tracker</strong>
               <span>Track current version and cache marker for every site in one place.</span>
+            </button>
+            <button class="command-card" data-view="backlog" data-route>
+              <span class="card-icon" data-icon="library"></span>
+              <strong>Feature Backlog</strong>
+              <span>Track features by site, priority, and status. Export as .txt or .json.</span>
+            </button>
+            <button class="command-card" data-view="testplan" data-route>
+              <span class="card-icon" data-icon="shield"></span>
+              <strong>Test Plan Builder</strong>
+              <span>Create a structured test plan with steps and pass/fail per item.</span>
+            </button>
+            <button class="command-card" data-view="issues" data-route>
+              <span class="card-icon" data-icon="wrench"></span>
+              <strong>Issue Tracker</strong>
+              <span>Log bugs and issues by site and severity. Update status. Export.</span>
+            </button>
+            <button class="command-card" data-view="runchecklist" data-route>
+              <span class="card-icon" data-icon="shield"></span>
+              <strong>Build Checklist Runner</strong>
+              <span>Run pre-built checklists for common workflows. Check off items and reset.</span>
             </button>
           </div>
 
@@ -1868,7 +1896,7 @@
             document.getElementById('lr-refresh').addEventListener('click', function(){ lrRender(); lrToast('Records refreshed.'); });
 
             document.getElementById('lr-export-all').addEventListener('click', function(){
-              var bundle = { exportedAt: new Date().toISOString(), repairJobs: [], buildVaultEntries: [], siteHealthReports: [], repairPackSummaries: [], criteriaChecklists: [], smokeChecks: [], buildSnapshots: [], riskReports: [], sessionNotes: [], changelogEntries: [], versionSnapshots: [] };
+              var bundle = { exportedAt: new Date().toISOString(), repairJobs: [], buildVaultEntries: [], siteHealthReports: [], repairPackSummaries: [], criteriaChecklists: [], smokeChecks: [], buildSnapshots: [], riskReports: [], sessionNotes: [], changelogEntries: [], versionSnapshots: [], featureBacklog: [], testPlans: [], issues: [] };
               for (var i = 0; i < localStorage.length; i++) {
                 var k = localStorage.key(i);
                 try {
@@ -1884,6 +1912,9 @@
                   else if (k && k.indexOf('lt_sn_') === 0 && k !== 'lt_sn_draft') bundle.sessionNotes.push(d);
                   else if (k && k.indexOf('lt_cl_') === 0 && k !== 'lt_cl_draft') bundle.changelogEntries.push(d);
                   else if (k && k.indexOf('lt_vt_') === 0 && k !== 'lt_vt_draft') bundle.versionSnapshots.push(d);
+                  else if (k && k.indexOf('lt_fb_') === 0 && k !== 'lt_fb_draft') bundle.featureBacklog.push(d);
+                  else if (k && k.indexOf('lt_tp_') === 0 && k !== 'lt_tp_draft') bundle.testPlans.push(d);
+                  else if (k && k.indexOf('lt_is_') === 0 && k !== 'lt_is_draft') bundle.issues.push(d);
                 } catch(e){}
               }
               var b = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' });
@@ -2120,8 +2151,8 @@
           (function(){
             function irToast(m){var t=document.getElementById('toast');if(t){t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2400);}}
             function irImportBundle(bundle){
-              var counts={repairJobs:0,buildVaultEntries:0,siteHealthReports:0,repairPackSummaries:0,criteriaChecklists:0};
-              var skipped={repairJobs:0,buildVaultEntries:0,siteHealthReports:0,repairPackSummaries:0,criteriaChecklists:0};
+              var counts={repairJobs:0,buildVaultEntries:0,siteHealthReports:0,repairPackSummaries:0,criteriaChecklists:0,smokeChecks:0,buildSnapshots:0,riskReports:0,sessionNotes:0,changelogEntries:0,featureBacklog:0,testPlans:0,issues:0};
+              var skipped={repairJobs:0,buildVaultEntries:0,siteHealthReports:0,repairPackSummaries:0,criteriaChecklists:0,smokeChecks:0,buildSnapshots:0,riskReports:0,sessionNotes:0,changelogEntries:0,featureBacklog:0,testPlans:0,issues:0};
               function doImport(arr,prefix,idField,countKey){
                 if(!Array.isArray(arr))return;
                 arr.forEach(function(item){var id=item&&item[idField];if(!id)return;var key=prefix+id;if(localStorage.getItem(key)){skipped[countKey]++;return;}try{localStorage.setItem(key,JSON.stringify(item));counts[countKey]++;}catch(e){}});
@@ -2131,6 +2162,14 @@
               doImport(bundle.siteHealthReports,'lt_sh_','reportId','siteHealthReports');
               doImport(bundle.repairPackSummaries,'lt_rp_','summaryId','repairPackSummaries');
               doImport(bundle.criteriaChecklists,'lt_ac_','criteriaId','criteriaChecklists');
+              doImport(bundle.smokeChecks,'lt_sc_','checkId','smokeChecks');
+              doImport(bundle.buildSnapshots,'lt_bl_','snapshotId','buildSnapshots');
+              doImport(bundle.riskReports,'lt_rr_','reportId','riskReports');
+              doImport(bundle.sessionNotes,'lt_sn_','notesId','sessionNotes');
+              doImport(bundle.changelogEntries,'lt_cl_','entryId','changelogEntries');
+              doImport(bundle.featureBacklog,'lt_fb_','featureId','featureBacklog');
+              doImport(bundle.testPlans,'lt_tp_','planId','testPlans');
+              doImport(bundle.issues,'lt_is_','issueId','issues');
               var result=document.getElementById('ir-result');
               if(result){
                 var lines=['Import complete. Exported at: '+(bundle.exportedAt||'unknown'),''];
@@ -2139,6 +2178,14 @@
                 lines.push('Site Health Reports: '+counts.siteHealthReports+' imported, '+skipped.siteHealthReports+' skipped');
                 lines.push('Repair Pack Summaries: '+counts.repairPackSummaries+' imported, '+skipped.repairPackSummaries+' skipped');
                 lines.push('Acceptance Criteria: '+counts.criteriaChecklists+' imported, '+skipped.criteriaChecklists+' skipped');
+                lines.push('Smoke Checks: '+counts.smokeChecks+' imported, '+skipped.smokeChecks+' skipped');
+                lines.push('Build Snapshots: '+counts.buildSnapshots+' imported, '+skipped.buildSnapshots+' skipped');
+                lines.push('Risk Reports: '+counts.riskReports+' imported, '+skipped.riskReports+' skipped');
+                lines.push('Session Notes: '+counts.sessionNotes+' imported, '+skipped.sessionNotes+' skipped');
+                lines.push('Changelog Entries: '+counts.changelogEntries+' imported, '+skipped.changelogEntries+' skipped');
+                lines.push('Feature Backlog: '+counts.featureBacklog+' imported, '+skipped.featureBacklog+' skipped');
+                lines.push('Test Plans: '+counts.testPlans+' imported, '+skipped.testPlans+' skipped');
+                lines.push('Issues: '+counts.issues+' imported, '+skipped.issues+' skipped');
                 result.textContent=lines.join('\n');result.style.display='';
               }
               irToast('Import complete.');
@@ -2647,6 +2694,330 @@
           </script>
         </section>
 
+        <!-- ═══ FEATURE BACKLOG ═══ -->
+        <section class="view" id="view-backlog" data-view-panel="backlog">
+          <div class="section-head">
+            <p class="eyebrow">Feature Backlog</p>
+            <h1>Track features by site and priority.</h1>
+            <p>Add features with priority and status. Update as work progresses. Export as .txt or .json. Local only.</p>
+          </div>
+          <div class="panel" style="margin-bottom:16px;">
+            <h2 style="margin-bottom:12px;font-size:15px;">Add Feature</h2>
+            <div style="display:grid;gap:12px;">
+              <label>Feature Name<input id="fb-name" type="text" placeholder="Example: Fix Image Prompt FAIL"></label>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                <label>Site<select id="fb-site"><option value="">Select...</option><option>Load Main</option><option>Load AI / AI Chat Studio</option><option>Image Prompt PWA</option><option>Load Studio</option><option>Load Play</option><option>Load Tasks</option><option>Study</option><option>Attain</option><option>Attain Jr</option><option>Other</option></select></label>
+                <label>Priority<select id="fb-priority"><option value="">Select...</option><option>Critical</option><option>High</option><option>Normal</option><option>Low</option></select></label>
+                <label>Status<select id="fb-status"><option value="Backlogged">Backlogged</option><option value="In Progress">In Progress</option><option value="Blocked">Blocked</option><option value="Done">Done</option></select></label>
+              </div>
+              <label>Notes<textarea id="fb-notes" rows="2" placeholder="Any context for this feature."></textarea></label>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+              <button class="primary-action" type="button" id="fb-add">Add to Backlog</button>
+              <button class="secondary-action" type="button" id="fb-export-txt">Export .txt</button>
+              <button class="secondary-action" type="button" id="fb-export-json">Export .json</button>
+            </div>
+          </div>
+          <div class="panel">
+            <h2 style="margin-bottom:12px;font-size:15px;">Backlog</h2>
+            <div id="fb-list" style="display:grid;gap:8px;"></div>
+          </div>
+          <script>
+          (function(){
+            function fbToast(m){var t=document.getElementById('toast');if(t){t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2400);}}
+            function fbGet(id){return document.getElementById(id);}
+            function fbVal(id){var e=fbGet(id);return e?e.value.trim():'';}
+            function fbSet(id,v){var e=fbGet(id);if(e)e.value=v;}
+            function fbGenId(){return'FB-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,5).toUpperCase();}
+            var STATUS_COLORS={'Backlogged':'#9e9e9e','In Progress':'#ff9800','Blocked':'#f44336','Done':'#4caf50'};
+            function fbGetAll(){
+              var items=[];
+              for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_fb_')===0&&k!=='lt_fb_draft'){try{items.push({key:k,data:JSON.parse(localStorage.getItem(k))});}catch(e){}}}
+              var order={Critical:0,High:1,Normal:2,Low:3};
+              items.sort(function(a,b){return(order[a.data.priority]||99)-(order[b.data.priority]||99);});
+              return items;
+            }
+            function fbRender(){
+              var list=fbGet('fb-list');if(!list)return;
+              var items=fbGetAll();
+              if(items.length===0){list.innerHTML='<p style="font-size:13px;color:#9aa0b0;">No features yet. Add the first one above.</p>';return;}
+              list.innerHTML='';
+              items.forEach(function(item){
+                var d=item.data;var color=STATUS_COLORS[d.status]||'#9aa0b0';
+                var row=document.createElement('div');
+                row.style.cssText='padding:10px 12px;background:rgba(255,255,255,0.04);border-radius:6px;display:grid;gap:6px;';
+                var top=document.createElement('div');top.style.cssText='display:flex;align-items:center;gap:8px;';
+                var nameSpan=document.createElement('span');nameSpan.style.cssText='flex:1;font-size:13px;font-weight:600;';nameSpan.textContent=d.featureName||'—';
+                var siteBadge=document.createElement('span');siteBadge.style.cssText='font-size:11px;color:#9aa0b0;';siteBadge.textContent=d.site||'';
+                var priSpan=document.createElement('span');priSpan.style.cssText='font-size:11px;color:#ffd400;';priSpan.textContent=d.priority||'';
+                var sel=document.createElement('select');sel.className='sb-status-select';
+                sel.style.cssText='background:rgba(255,255,255,0.06);border:1px solid '+color+';border-radius:4px;padding:2px 6px;color:'+color+';font-size:11px;font-weight:600;';
+                ['Backlogged','In Progress','Blocked','Done'].forEach(function(s){var o=document.createElement('option');o.value=s;o.textContent=s;if(d.status===s)o.selected=true;sel.appendChild(o);});
+                sel.addEventListener('change',function(key){return function(){var raw=localStorage.getItem(key);if(!raw)return;var jb=JSON.parse(raw);jb.status=this.value;localStorage.setItem(key,JSON.stringify(jb));var c=STATUS_COLORS[this.value]||'#9aa0b0';this.style.borderColor=c;this.style.color=c;fbToast('Status updated.');};}(item.key));
+                var del=document.createElement('button');del.type='button';del.textContent='Delete';del.className='secondary-action';del.style.cssText='padding:2px 8px;font-size:11px;color:#f44336;border-color:#f44336;';
+                del.addEventListener('click',function(key){return function(){localStorage.removeItem(key);fbRender();fbToast('Deleted.');};}(item.key));
+                top.appendChild(nameSpan);top.appendChild(siteBadge);top.appendChild(priSpan);top.appendChild(sel);top.appendChild(del);
+                row.appendChild(top);
+                if(d.notes){var notes=document.createElement('div');notes.style.cssText='font-size:12px;color:#9aa0b0;';notes.textContent=d.notes;row.appendChild(notes);}
+                list.appendChild(row);
+              });
+            }
+            fbGet('fb-add').addEventListener('click',function(){
+              var name=fbVal('fb-name');if(!name){fbToast('Enter a feature name.');return;}
+              var item={featureId:fbGenId(),savedAt:new Date().toISOString(),featureName:name,site:fbVal('fb-site'),priority:fbVal('fb-priority')||'Normal',status:fbVal('fb-status')||'Backlogged',notes:fbVal('fb-notes')};
+              try{localStorage.setItem('lt_fb_'+item.featureId,JSON.stringify(item));fbSet('fb-name','');fbSet('fb-notes','');fbToast('Feature added.');fbRender();}catch(ex){fbToast('Save failed.');}
+            });
+            fbGet('fb-export-txt').addEventListener('click',function(){
+              var items=fbGetAll();if(items.length===0){fbToast('No backlog items to export.');return;}
+              var lines=['FEATURE BACKLOG','Exported: '+new Date().toISOString(),''];
+              items.forEach(function(it){var d=it.data;lines.push('['+d.status+'] '+d.featureName+' — '+(d.site||'—')+' — '+(d.priority||'—'));if(d.notes)lines.push('  '+d.notes);lines.push('');});
+              var b=new Blob([lines.join('\n')],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='backlog-'+Date.now()+'.txt';a.click();URL.revokeObjectURL(a.href);fbToast('.txt exported.');
+            });
+            fbGet('fb-export-json').addEventListener('click',function(){
+              var items=fbGetAll().map(function(it){return it.data;});if(items.length===0){fbToast('No backlog items to export.');return;}
+              var b=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),featureBacklog:items},null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='backlog-'+Date.now()+'.json';a.click();URL.revokeObjectURL(a.href);fbToast('.json exported.');
+            });
+            var panel=document.getElementById('view-backlog');
+            if(panel){panel.addEventListener('lt-view-enter',fbRender);setTimeout(function(){if(panel.classList.contains('active'))fbRender();},100);}
+          }());
+          </script>
+        </section>
+
+        <!-- ═══ TEST PLAN BUILDER ═══ -->
+        <section class="view" id="view-testplan" data-view-panel="testplan">
+          <div class="section-head">
+            <p class="eyebrow">Test Plan Builder</p>
+            <h1>Create a structured test plan.</h1>
+            <p>Add test steps with expected results. Mark each pass or fail. Export as .txt. Local only.</p>
+          </div>
+          <div class="panel">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+              <button class="primary-action" type="button" id="tp-new">New Test Plan</button>
+              <button class="secondary-action" type="button" id="tp-save">Save Locally</button>
+              <button class="secondary-action" type="button" id="tp-load">Reload Saved</button>
+              <button class="secondary-action" type="button" id="tp-export">Export .txt</button>
+              <button class="secondary-action" type="button" id="tp-copy">Copy</button>
+            </div>
+            <div style="display:grid;gap:12px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <label>Plan ID (auto)<input id="tp-id" type="text" readonly style="background:rgba(255,255,255,0.04);"></label>
+                <label>Date<input id="tp-date" type="text" placeholder="Example: 2026-05-11"></label>
+              </div>
+              <label>Plan Title<input id="tp-title" type="text" placeholder="Example: Image Prompt UI smoke test"></label>
+              <label>Linked Repair Job ID<input id="tp-jobId" type="text" placeholder="Paste RJ-xxx (optional)"></label>
+              <div>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                  <strong style="flex:1;font-size:14px;">Test Steps</strong>
+                  <button class="secondary-action" type="button" id="tp-add-step" style="padding:4px 12px;font-size:13px;">Add Step</button>
+                </div>
+                <div id="tp-steps-list" style="display:grid;gap:8px;min-height:48px;"></div>
+              </div>
+              <div id="tp-progress" style="font-size:13px;color:#9aa0b0;"></div>
+            </div>
+          </div>
+          <script>
+          (function(){
+            function tpGet(id){return document.getElementById(id);}
+            function tpVal(id){var e=tpGet(id);return e?e.value.trim():'';}
+            function tpSet(id,v){var e=tpGet(id);if(e)e.value=v;}
+            function tpToast(m){var t=document.getElementById('toast');if(t){t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2400);}}
+            function tpGenId(){return'TP-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,5).toUpperCase();}
+            function tpGetSteps(){
+              var rows=tpGet('tp-steps-list').querySelectorAll('.tp-step-row');var steps=[];
+              rows.forEach(function(row){
+                var desc=row.querySelector('[data-field="desc"]');var exp=row.querySelector('[data-field="expected"]');var res=row.querySelector('[data-field="result"]');
+                if(desc&&desc.value.trim())steps.push({description:desc.value.trim(),expected:exp?exp.value.trim():'',result:res?res.value:'pending'});
+              });
+              return steps;
+            }
+            function tpUpdateProgress(){
+              var steps=tpGetSteps();var pass=steps.filter(function(s){return s.result==='pass';}).length;var fail=steps.filter(function(s){return s.result==='fail';}).length;
+              var prog=tpGet('tp-progress');if(prog)prog.textContent=steps.length>0?(pass+' pass, '+fail+' fail, '+(steps.length-pass-fail)+' pending of '+steps.length+' steps'):'No steps yet.';
+            }
+            function tpAddStep(desc,expected,result){
+              var list=tpGet('tp-steps-list');
+              var row=document.createElement('div');row.className='tp-step-row';
+              row.style.cssText='padding:8px 10px;background:rgba(255,255,255,0.04);border-radius:6px;display:grid;gap:6px;';
+              var topRow=document.createElement('div');topRow.style.cssText='display:flex;gap:8px;align-items:flex-start;';
+              var descInp=document.createElement('input');descInp.setAttribute('data-field','desc');descInp.type='text';descInp.value=desc||'';descInp.placeholder='Test step description...';
+              descInp.style.cssText='flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:5px 8px;color:inherit;font-size:13px;';
+              descInp.addEventListener('input',tpUpdateProgress);
+              var resSel=document.createElement('select');resSel.setAttribute('data-field','result');
+              var resColors={pending:'#9aa0b0',pass:'#4caf50',fail:'#f44336'};
+              ['pending','pass','fail'].forEach(function(r){var o=document.createElement('option');o.value=r;o.textContent=r.toUpperCase();if((result||'pending')===r)o.selected=true;resSel.appendChild(o);});
+              resSel.style.cssText='background:rgba(255,255,255,0.06);border:1px solid '+(resColors[result||'pending'])+';border-radius:4px;padding:4px 6px;color:'+(resColors[result||'pending'])+';font-size:12px;font-weight:600;';
+              resSel.addEventListener('change',function(){this.style.borderColor=resColors[this.value]||'#9aa0b0';this.style.color=resColors[this.value]||'#9aa0b0';tpUpdateProgress();});
+              var del=document.createElement('button');del.type='button';del.textContent='Remove';del.className='secondary-action';del.style.cssText='padding:3px 8px;font-size:11px;color:#f44336;border-color:#f44336;flex-shrink:0;';
+              del.addEventListener('click',function(){row.remove();tpUpdateProgress();});
+              topRow.appendChild(descInp);topRow.appendChild(resSel);topRow.appendChild(del);
+              var expInp=document.createElement('input');expInp.setAttribute('data-field','expected');expInp.type='text';expInp.value=expected||'';expInp.placeholder='Expected result...';
+              expInp.style.cssText='width:100%;box-sizing:border-box;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:4px;padding:4px 8px;color:#9aa0b0;font-size:12px;';
+              row.appendChild(topRow);row.appendChild(expInp);list.appendChild(row);tpUpdateProgress();
+            }
+            function tpBuild(){return{planId:tpVal('tp-id'),date:tpVal('tp-date'),title:tpVal('tp-title'),linkedJobId:tpVal('tp-jobId'),steps:tpGetSteps()};}
+            function tpFill(d){tpSet('tp-id',d.planId||'');tpSet('tp-date',d.date||'');tpSet('tp-title',d.title||'');tpSet('tp-jobId',d.linkedJobId||'');var list=tpGet('tp-steps-list');list.innerHTML='';if(Array.isArray(d.steps))d.steps.forEach(function(s){tpAddStep(s.description,s.expected,s.result);});tpUpdateProgress();}
+            function tpText(d){
+              var steps=d.steps||[];var pass=steps.filter(function(s){return s.result==='pass';}).length;var fail=steps.filter(function(s){return s.result==='fail';}).length;
+              var lines=['TEST PLAN — '+(d.title||'Untitled'),'Plan ID: '+(d.planId||''),'Date: '+(d.date||''),'Linked Job: '+(d.linkedJobId||'—'),''];
+              steps.forEach(function(s,i){var mark=s.result==='pass'?'[PASS]':s.result==='fail'?'[FAIL]':'[    ]';lines.push(mark+' Step '+(i+1)+': '+s.description);if(s.expected)lines.push('       Expected: '+s.expected);});
+              lines.push('');lines.push(pass+' pass, '+fail+' fail, '+(steps.length-pass-fail)+' pending of '+steps.length+' steps.');
+              return lines.join('\n');
+            }
+            tpGet('tp-new').addEventListener('click',function(){tpFill({});tpSet('tp-id',tpGenId());tpSet('tp-date',new Date().toISOString().slice(0,10));tpToast('New test plan started.');});
+            tpGet('tp-add-step').addEventListener('click',function(){tpAddStep('','','pending');var last=tpGet('tp-steps-list').lastChild;if(last)last.querySelector('[data-field="desc"]').focus();});
+            tpGet('tp-save').addEventListener('click',function(){try{var d=tpBuild();if(!d.planId){tpToast('Start a new plan first.');return;}localStorage.setItem('lt_tp_'+d.planId,JSON.stringify(d));localStorage.setItem('lt_tp_draft',JSON.stringify(d));tpToast('Test plan saved.');}catch(ex){tpToast('Save failed.');}});
+            tpGet('tp-load').addEventListener('click',function(){try{var r=localStorage.getItem('lt_tp_draft');if(!r){tpToast('No saved plan found.');return;}tpFill(JSON.parse(r));tpToast('Plan loaded.');}catch(ex){tpToast('Load failed.');}});
+            tpGet('tp-export').addEventListener('click',function(){var d=tpBuild();if(!d.planId){tpToast('Start a new plan first.');return;}var b=new Blob([tpText(d)],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(d.planId||'test-plan')+'.txt';a.click();URL.revokeObjectURL(a.href);tpToast('.txt exported.');});
+            tpGet('tp-copy').addEventListener('click',function(){var d=tpBuild();if(!d.planId){tpToast('Start a new plan first.');return;}navigator.clipboard.writeText(tpText(d)).then(function(){tpToast('Copied.');}).catch(function(){tpToast('Copy failed.');});});
+          }());
+          </script>
+        </section>
+
+        <!-- ═══ ISSUE TRACKER ═══ -->
+        <section class="view" id="view-issues" data-view-panel="issues">
+          <div class="section-head">
+            <p class="eyebrow">Issue Tracker</p>
+            <h1>Log bugs and issues.</h1>
+            <p>Add issues by site and severity. Update status as they are resolved. Export as .json. Local only.</p>
+          </div>
+          <div class="panel" style="margin-bottom:16px;">
+            <h2 style="margin-bottom:12px;font-size:15px;">Log Issue</h2>
+            <div style="display:grid;gap:12px;">
+              <label>Title<input id="is-title" type="text" placeholder="Example: Image Prompt — no result card on device"></label>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                <label>Site<select id="is-site"><option value="">Select...</option><option>Load Main</option><option>Load AI / AI Chat Studio</option><option>Image Prompt PWA</option><option>Load Studio</option><option>Load Play</option><option>Load Tasks</option><option>Study</option><option>Attain</option><option>Attain Jr</option><option>Other</option></select></label>
+                <label>Severity<select id="is-severity"><option value="">Select...</option><option>Critical</option><option>High</option><option>Normal</option><option>Low</option></select></label>
+                <label>Status<select id="is-status"><option value="Open">Open</option><option value="In Progress">In Progress</option><option value="Resolved">Resolved</option></select></label>
+              </div>
+              <label>Notes<textarea id="is-notes" rows="2" placeholder="What did you observe? What confirms this issue?"></textarea></label>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+              <button class="primary-action" type="button" id="is-add">Log Issue</button>
+              <button class="secondary-action" type="button" id="is-export">Export .json</button>
+            </div>
+          </div>
+          <div class="panel">
+            <h2 style="margin-bottom:12px;font-size:15px;">Open Issues</h2>
+            <div id="is-list" style="display:grid;gap:8px;"></div>
+          </div>
+          <script>
+          (function(){
+            function isToast(m){var t=document.getElementById('toast');if(t){t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2400);}}
+            function isGet(id){return document.getElementById(id);}
+            function isVal(id){var e=isGet(id);return e?e.value.trim():'';}
+            function isSet(id,v){var e=isGet(id);if(e)e.value=v;}
+            function isGenId(){return'IS-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,5).toUpperCase();}
+            var SEV_COLORS={Critical:'#f44336',High:'#ff9800',Normal:'#ffd400',Low:'#9aa0b0'};
+            var STAT_COLORS={Open:'#f44336','In Progress':'#ff9800',Resolved:'#4caf50'};
+            function isGetAll(){
+              var items=[];
+              for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_is_')===0&&k!=='lt_is_draft'){try{items.push({key:k,data:JSON.parse(localStorage.getItem(k))});}catch(e){}}}
+              var order={Critical:0,High:1,Normal:2,Low:3};
+              items.sort(function(a,b){return(order[a.data.severity]||99)-(order[b.data.severity]||99);});
+              return items;
+            }
+            function isRender(){
+              var list=isGet('is-list');if(!list)return;
+              var items=isGetAll();
+              if(items.length===0){list.innerHTML='<p style="font-size:13px;color:#9aa0b0;">No issues logged.</p>';return;}
+              list.innerHTML='';
+              items.forEach(function(item){
+                var d=item.data;
+                var row=document.createElement('div');row.style.cssText='padding:10px 12px;background:rgba(255,255,255,0.04);border-radius:6px;display:grid;gap:5px;';
+                var top=document.createElement('div');top.style.cssText='display:flex;align-items:center;gap:8px;';
+                var title=document.createElement('span');title.style.cssText='flex:1;font-size:13px;font-weight:600;';title.textContent=d.title||'—';
+                var sev=document.createElement('span');sev.style.cssText='font-size:11px;color:'+(SEV_COLORS[d.severity]||'#9aa0b0')+';font-weight:600;';sev.textContent=d.severity||'';
+                var siteBadge=document.createElement('span');siteBadge.style.cssText='font-size:11px;color:#9aa0b0;';siteBadge.textContent=d.site||'';
+                var sel=document.createElement('select');
+                sel.style.cssText='background:rgba(255,255,255,0.06);border:1px solid '+(STAT_COLORS[d.status]||'#9aa0b0')+';border-radius:4px;padding:2px 6px;color:'+(STAT_COLORS[d.status]||'#9aa0b0')+';font-size:11px;font-weight:600;';
+                ['Open','In Progress','Resolved'].forEach(function(s){var o=document.createElement('option');o.value=s;o.textContent=s;if(d.status===s)o.selected=true;sel.appendChild(o);});
+                sel.addEventListener('change',function(key){return function(){var raw=localStorage.getItem(key);if(!raw)return;var iss=JSON.parse(raw);iss.status=this.value;localStorage.setItem(key,JSON.stringify(iss));var c=STAT_COLORS[this.value]||'#9aa0b0';this.style.borderColor=c;this.style.color=c;isToast('Status updated.');};}(item.key));
+                var del=document.createElement('button');del.type='button';del.textContent='Delete';del.className='secondary-action';del.style.cssText='padding:2px 8px;font-size:11px;color:#f44336;border-color:#f44336;';
+                del.addEventListener('click',function(key){return function(){localStorage.removeItem(key);isRender();isToast('Deleted.');};}(item.key));
+                top.appendChild(title);top.appendChild(sev);top.appendChild(siteBadge);top.appendChild(sel);top.appendChild(del);
+                row.appendChild(top);
+                if(d.notes){var notes=document.createElement('div');notes.style.cssText='font-size:12px;color:#9aa0b0;';notes.textContent=d.notes;row.appendChild(notes);}
+                list.appendChild(row);
+              });
+            }
+            isGet('is-add').addEventListener('click',function(){
+              var title=isVal('is-title');if(!title){isToast('Enter an issue title.');return;}
+              var item={issueId:isGenId(),loggedAt:new Date().toISOString(),title:title,site:isVal('is-site'),severity:isVal('is-severity')||'Normal',status:isVal('is-status')||'Open',notes:isVal('is-notes')};
+              try{localStorage.setItem('lt_is_'+item.issueId,JSON.stringify(item));isSet('is-title','');isSet('is-notes','');isToast('Issue logged.');isRender();}catch(ex){isToast('Save failed.');}
+            });
+            isGet('is-export').addEventListener('click',function(){
+              var items=isGetAll().map(function(it){return it.data;});if(items.length===0){isToast('No issues to export.');return;}
+              var b=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),issues:items},null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='issues-'+Date.now()+'.json';a.click();URL.revokeObjectURL(a.href);isToast('.json exported.');
+            });
+            var panel=document.getElementById('view-issues');
+            if(panel){panel.addEventListener('lt-view-enter',isRender);setTimeout(function(){if(panel.classList.contains('active'))isRender();},100);}
+          }());
+          </script>
+        </section>
+
+        <!-- ═══ BUILD CHECKLIST RUNNER ═══ -->
+        <section class="view" id="view-runchecklist" data-view-panel="runchecklist">
+          <div class="section-head">
+            <p class="eyebrow">Build Checklist Runner</p>
+            <h1>Run a pre-built workflow checklist.</h1>
+            <p>Pick a checklist, check items off as you go, then reset and reuse. Nothing is saved to local storage.</p>
+          </div>
+          <div style="margin-bottom:16px;">
+            <label style="font-size:14px;font-weight:600;">Checklist<select id="ck-select" style="display:block;margin-top:6px;width:100%;max-width:360px;"></select></label>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+            <button class="primary-action" type="button" id="ck-reset">Reset Checklist</button>
+            <button class="secondary-action" type="button" id="ck-copy-result">Copy Result</button>
+          </div>
+          <div class="panel">
+            <div id="ck-list" style="display:grid;gap:8px;"></div>
+          </div>
+          <div id="ck-progress" style="margin-top:12px;font-size:13px;color:#9aa0b0;"></div>
+          <script>
+          (function(){
+            function ckToast(m){var t=document.getElementById('toast');if(t){t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2400);}}
+            var CHECKLISTS=[
+              {name:'Before Push',items:['Confirm branch is a feature branch (not main)','Confirm service worker / cache string is NOT touched (unless this is a cache bump build)','Confirm no Load AI / provider routing / audio / animation files are changed (unless approved)','Confirm no GitHub or Cloudflare tokens are hardcoded','Run git diff and check every changed file','Confirm risk level (LOW / MEDIUM / HIGH)','Write rollback plan before pushing']},
+              {name:'After Merge',items:['Confirm PR was merged with squash','Create backup branch: git push origin main:refs/heads/backup/YYYY-MM-DD-vXXX','Update Version Tracker with new commit hash and build marker','Add a Changelog entry for this PR','If user verified on device — update Build Vault / Stable Build Snapshot','Update SESSION_NOTES with what was shipped today']},
+              {name:'Low-Testing Day',items:['Confirm this is a low-testing day (no device testing requested)','Only build tasks that are LOW risk and require no device verification','Do not start any Load AI, provider, audio, animation, or export builds today','Do not ask user to test anything on iPad','If a task requires device testing — park it, do not build it','End session with updated Session Notes']},
+              {name:'New Session Start',items:['Read SESSION_NOTES_*.md (most recent date)','Read HANDOFF.md','Run git fetch origin main','Check git log --oneline -10 for recent commits','Confirm current branch','Check for any uncommitted changes','Confirm what was last shipped and what is confirmed broken','Identify the single highest-priority task']},
+              {name:'Full Smoke Check',items:['Open live site URL on device','Confirm page loads (no blank screen, no raw code visible)','Confirm main navigation is visible','Confirm version badge shows expected version','Open sw.js URL and confirm CACHE string matches expected version','Tap at least one primary action and confirm it responds','Report any blank screen, error, or missing UI to session notes']}
+            ];
+            var currentList=0;
+            function ckRender(){
+              var list=document.getElementById('ck-list');if(!list)return;
+              var checklist=CHECKLISTS[currentList];if(!checklist)return;
+              list.innerHTML='';
+              checklist.items.forEach(function(item,i){
+                var row=document.createElement('div');row.style.cssText='display:flex;align-items:flex-start;gap:10px;padding:8px 10px;background:rgba(255,255,255,0.04);border-radius:6px;cursor:pointer;';
+                var cb=document.createElement('input');cb.type='checkbox';cb.id='ck-item-'+i;cb.style.cssText='width:18px;height:18px;flex-shrink:0;margin-top:1px;cursor:pointer;';
+                cb.addEventListener('change',ckUpdateProgress);
+                var lbl=document.createElement('label');lbl.htmlFor='ck-item-'+i;lbl.style.cssText='font-size:13px;cursor:pointer;line-height:1.5;';lbl.textContent=item;
+                row.appendChild(cb);row.appendChild(lbl);list.appendChild(row);
+              });
+              ckUpdateProgress();
+            }
+            function ckUpdateProgress(){
+              var items=document.getElementById('ck-list').querySelectorAll('input[type="checkbox"]');
+              var done=0;items.forEach(function(cb){if(cb.checked)done++;});
+              var prog=document.getElementById('ck-progress');if(prog)prog.textContent=done+' of '+items.length+' items checked.';
+            }
+            var sel=document.getElementById('ck-select');
+            CHECKLISTS.forEach(function(cl,i){var o=document.createElement('option');o.value=i;o.textContent=cl.name;sel.appendChild(o);});
+            sel.addEventListener('change',function(){currentList=parseInt(this.value)||0;ckRender();});
+            document.getElementById('ck-reset').addEventListener('click',function(){ckRender();ckToast('Checklist reset.');});
+            document.getElementById('ck-copy-result').addEventListener('click',function(){
+              var checklist=CHECKLISTS[currentList];if(!checklist)return;
+              var items=document.getElementById('ck-list').querySelectorAll('input[type="checkbox"]');
+              var lines=[checklist.name+' — '+new Date().toISOString().slice(0,10),''];
+              items.forEach(function(cb,i){lines.push((cb.checked?'[DONE] ':'[    ] ')+(checklist.items[i]||''));});
+              navigator.clipboard.writeText(lines.join('\n')).then(function(){ckToast('Result copied.');}).catch(function(){ckToast('Copy failed.');});
+            });
+            ckRender();
+          }());
+          </script>
+        </section>
+
         <!-- ═══ DASHBOARD COUNTERS SCRIPT ═══ -->
         <script>
         (function(){
@@ -2663,7 +3034,12 @@
               {label:'Health Reports',n:ltCountPrefix('lt_sh_',['lt_sh_draft'])},
               {label:'Build Snapshots',n:ltCountPrefix('lt_bl_',['lt_bl_draft'])},
               {label:'Risk Reports',n:ltCountPrefix('lt_rr_',['lt_rr_draft'])},
-              {label:'Smoke Checks',n:ltCountPrefix('lt_sc_',['lt_sc_draft'])}
+              {label:'Smoke Checks',n:ltCountPrefix('lt_sc_',['lt_sc_draft'])},
+              {label:'Backlog Items',n:ltCountPrefix('lt_fb_',['lt_fb_draft'])},
+              {label:'Test Plans',n:ltCountPrefix('lt_tp_',['lt_tp_draft'])},
+              {label:'Issues',n:ltCountPrefix('lt_is_',['lt_is_draft'])},
+              {label:'Session Notes',n:ltCountPrefix('lt_sn_',['lt_sn_draft'])},
+              {label:'Changelog',n:ltCountPrefix('lt_cl_',['lt_cl_draft'])}
             ];
             el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px;text-align:center;"><div style="font-size:28px;font-weight:700;line-height:1;">'+(it.n)+'</div><div style="font-size:12px;color:#9aa0b0;margin-top:4px;">'+it.label+'</div></div>';}).join('');
           }
