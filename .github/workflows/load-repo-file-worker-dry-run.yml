@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'loadtasks-inbox/repo-file-job.json'
+      - '.github/workflows/load-repo-file-worker-dry-run.yml'
   workflow_dispatch:
     inputs:
       job_file:
@@ -110,46 +111,44 @@ jobs:
 
           job_id = str(job.get('jobId', job.get('id', 'UNKNOWN')))
 
-          lines = [
-              '=== DRY RUN REPORT ===',
-              'Job ID:           ' + job_id,
-              'Target Site:      ' + str(job.get('targetSite', 'UNKNOWN')),
-              'File Action:      ' + str(job.get('fileAction', 'UNKNOWN')),
-              'Risk (declared):  ' + declared_risk,
-              'Risk (auto):      ' + auto_risk,
-              'Risk check:       ' + risk_note,
-              '',
-              'Target Files:',
-          ] + file_results + [
-              '',
-              'Field Validation: PASS',
-              '',
-              'Patch Plan Summary:',
-              str(job.get('proposedChangeSummary', '(none)')),
-              '',
-              'Acceptance Criteria:',
-              str(job.get('acceptanceCriteria', '(none)')),
-              '',
-              'PR Draft Title:',
-              str(job.get('prTitleSuggestion', '(not specified)')),
-              '',
-              'Branch Suggestion:',
-              str(job.get('branchNameSuggestion', '(not specified)')),
-              '',
-              'Rollback Plan:',
-              str(job.get('rollbackPlan', '(not specified)')),
-              '',
-              'Impact Flags:',
-              '  Live site impact:       ' + str(job.get('liveSiteImpact', 'Unknown')),
-              '  Service worker impact:  ' + str(job.get('serviceWorkerImpact', 'Unknown')),
-              '  AI provider impact:     ' + str(job.get('aiProviderImpact', 'Unknown')),
-              '  Security impact:        ' + str(job.get('securityImpact', 'Unknown')),
-              '',
-              'Verdict: ' + verdict,
-              '',
-              '=== DRY RUN COMPLETE - NO FILES WERE MODIFIED ===',
-          ]
-          report = '\n'.join(lines) + '\n'
+          report = '=== DRY RUN REPORT ===\n'
+          report += 'Job ID:           ' + job_id + '\n'
+          report += 'Target Site:      ' + str(job.get('targetSite', 'UNKNOWN')) + '\n'
+          report += 'File Action:      ' + str(job.get('fileAction', 'UNKNOWN')) + '\n'
+          report += 'Risk (declared):  ' + declared_risk + '\n'
+          report += 'Risk (auto):      ' + auto_risk + '\n'
+          report += 'Risk check:       ' + risk_note + '\n'
+          report += '\n'
+          report += 'Target Files:\n'
+          for fr in file_results:
+              report += fr + '\n'
+          report += '\n'
+          report += 'Field Validation: PASS\n'
+          report += '\n'
+          report += 'Patch Plan Summary:\n'
+          report += str(job.get('proposedChangeSummary', '(none)')) + '\n'
+          report += '\n'
+          report += 'Acceptance Criteria:\n'
+          report += str(job.get('acceptanceCriteria', '(none)')) + '\n'
+          report += '\n'
+          report += 'PR Draft Title:\n'
+          report += str(job.get('prTitleSuggestion', '(not specified)')) + '\n'
+          report += '\n'
+          report += 'Branch Suggestion:\n'
+          report += str(job.get('branchNameSuggestion', '(not specified)')) + '\n'
+          report += '\n'
+          report += 'Rollback Plan:\n'
+          report += str(job.get('rollbackPlan', '(not specified)')) + '\n'
+          report += '\n'
+          report += 'Impact Flags:\n'
+          report += '  Live site impact:       ' + str(job.get('liveSiteImpact', 'Unknown')) + '\n'
+          report += '  Service worker impact:  ' + str(job.get('serviceWorkerImpact', 'Unknown')) + '\n'
+          report += '  AI provider impact:     ' + str(job.get('aiProviderImpact', 'Unknown')) + '\n'
+          report += '  Security impact:        ' + str(job.get('securityImpact', 'Unknown')) + '\n'
+          report += '\n'
+          report += 'Verdict: ' + verdict + '\n'
+          report += '\n'
+          report += '=== DRY RUN COMPLETE - NO FILES WERE MODIFIED ===\n'
 
           report_filename = 'dry-run-report-' + job_id + '.txt'
           with open(report_filename, 'w') as fh:
