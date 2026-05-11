@@ -66,6 +66,7 @@
         <button data-view="github" data-route>GitHub</button>
         <button data-view="help" data-route>Help</button>
 <button data-view="settings" data-route>Settings</button>
+        <button data-view="repairjob" data-route>Repair Job</button>
       </nav>
       <button class="icon-button" id="hardRefresh" aria-label="Hard refresh app state">
         <span class="icon-mini" data-icon="refresh"></span>
@@ -95,6 +96,7 @@
         <button data-view="focus" data-route><span class="rail-icon" data-icon="focus"></span><span>Focus Mode</span></button>
         <button data-view="handoff" data-route><span class="rail-icon" data-icon="handoff"></span><span>Handoff</span></button>
         <button data-view="github" data-route><span class="rail-icon" data-icon="github"></span><span>GitHub Export</span></button>
+        <button data-view="repairjob" data-route><span class="rail-icon" data-icon="wrench"></span><span>Repair Job</span></button>
       </aside>
 
       <section class="workspace">
@@ -153,6 +155,11 @@
               <span class="card-icon" data-icon="help"></span>
               <strong>Open Help Center</strong>
               <span>Ask the Load AI Helper and follow step-by-step instructions.</span>
+            </button>
+            <button class="command-card" data-view="repairjob" data-route>
+              <span class="card-icon" data-icon="wrench"></span>
+              <strong>Repair Job Writer</strong>
+              <span>Create, export, and save structured repair jobs for Load sites.</span>
             </button>
           </div>
 
@@ -1077,6 +1084,301 @@
             </article>
           </div>
         </section>
+        <section class="view" id="view-repairjob" data-view-panel="repairjob">
+          <div class="section-head">
+            <p class="eyebrow">Repair Job Writer</p>
+            <h1>Create structured repair jobs for Load sites.</h1>
+            <p>Write, export, copy, save, and reload repair-job.json files. Generate plain-language repair reports for developer review.</p>
+            <div class="panel" style="margin-top:12px;background:rgba(255,200,0,0.07);border:1px solid rgba(255,200,0,0.2);padding:14px 16px;border-radius:8px;font-size:13px;line-height:1.6;">
+              <strong>Safety notice</strong><br>
+              This tool creates repair job records only. It does not push code. It does not merge pull requests. It does not deploy to any site. It does not store GitHub, Cloudflare, or provider tokens. It does not modify live sites. All data stays in this browser unless you export it.
+            </div>
+          </div>
+
+          <div class="panel" style="margin-bottom:16px;">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;">
+              <button class="primary-action" type="button" id="rjw-new">New Repair Job</button>
+              <button class="secondary-action" type="button" id="rjw-save">Save Locally</button>
+              <button class="secondary-action" type="button" id="rjw-load">Reload Saved</button>
+              <button class="secondary-action" type="button" id="rjw-export">Export repair-job.json</button>
+              <button class="secondary-action" type="button" id="rjw-copy">Copy JSON</button>
+              <button class="secondary-action" type="button" id="rjw-report">Generate Report</button>
+            </div>
+
+            <div style="display:grid;gap:12px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <label>Job ID (auto-generated)<input id="rjw-jobId" type="text" readonly style="background:rgba(255,255,255,0.04);"></label>
+                <label>Created At (auto-generated)<input id="rjw-createdAt" type="text" readonly style="background:rgba(255,255,255,0.04);"></label>
+              </div>
+              <label>Site
+                <select id="rjw-site">
+                  <option value="">Select site...</option>
+                  <option>Load Main</option>
+                  <option>Load AI / AI Chat Studio</option>
+                  <option>Image Prompt PWA</option>
+                  <option>Load Studio</option>
+                  <option>Load Play</option>
+                  <option>Load Tasks</option>
+                  <option>Study</option>
+                  <option>Attain</option>
+                  <option>Attain Jr</option>
+                  <option>Other</option>
+                </select>
+              </label>
+              <label>Affected Area<input id="rjw-affectedArea" type="text" placeholder="Example: AI Chat Studio image generation UI"></label>
+              <label>Problem Summary<textarea id="rjw-problemSummary" rows="3" placeholder="Describe the problem clearly and factually."></textarea></label>
+              <label>Evidence<textarea id="rjw-evidence" rows="3" placeholder="What did you observe? What confirms the problem exists?"></textarea></label>
+              <label>Suspected Cause<textarea id="rjw-suspectedCause" rows="2" placeholder="What is the likely root cause? Label as suspected, not confirmed."></textarea></label>
+              <label>Affected Files<textarea id="rjw-affectedFiles" rows="2" placeholder="Example: load/tools/ai-chat-studio.html, load/lib-load-image-providers.js"></textarea></label>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <label>Risk Level
+                  <select id="rjw-riskLevel">
+                    <option value="">Select...</option>
+                    <option>LOW</option>
+                    <option>MEDIUM</option>
+                    <option>HIGH</option>
+                  </select>
+                </label>
+                <label>Status
+                  <select id="rjw-status">
+                    <option value="">Select...</option>
+                    <option>WORKING REAL OUTPUT</option>
+                    <option>PARTIAL</option>
+                    <option>PROVIDER NEEDED</option>
+                    <option>PLACEHOLDER ONLY</option>
+                    <option>NOT DONE</option>
+                    <option>READY FOR USER VERIFICATION</option>
+                    <option>FAIL</option>
+                  </select>
+                </label>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                <label>Live Site Impact
+                  <select id="rjw-liveSiteImpact">
+                    <option value="">Select...</option>
+                    <option>YES</option>
+                    <option>NO</option>
+                  </select>
+                </label>
+                <label>Service Worker Impact
+                  <select id="rjw-serviceWorkerImpact">
+                    <option value="">Select...</option>
+                    <option>YES</option>
+                    <option>NO</option>
+                  </select>
+                </label>
+                <label>Provider Impact
+                  <select id="rjw-providerImpact">
+                    <option value="">Select...</option>
+                    <option>YES</option>
+                    <option>NO</option>
+                  </select>
+                </label>
+                <label>Export/Package Impact
+                  <select id="rjw-exportPackageImpact">
+                    <option value="">Select...</option>
+                    <option>YES</option>
+                    <option>NO</option>
+                  </select>
+                </label>
+                <label>Security Impact
+                  <select id="rjw-securityImpact">
+                    <option value="">Select...</option>
+                    <option>YES</option>
+                    <option>NO</option>
+                  </select>
+                </label>
+                <label>User Testing Required
+                  <select id="rjw-userTestingRequired">
+                    <option value="">Select...</option>
+                    <option>YES</option>
+                    <option>NO</option>
+                  </select>
+                </label>
+              </div>
+
+              <label>Acceptance Criteria<textarea id="rjw-acceptanceCriteria" rows="3" placeholder="What must be true for this repair to be considered complete?"></textarea></label>
+              <label>Rollback Plan<textarea id="rjw-rollbackPlan" rows="2" placeholder="How do we undo this change if it breaks something?"></textarea></label>
+              <label>Next Recommended Action<textarea id="rjw-nextAction" rows="2" placeholder="What is the single next step?"></textarea></label>
+            </div>
+          </div>
+
+          <div class="panel" id="rjw-report-panel" style="display:none;">
+            <h2>Plain-language repair report</h2>
+            <pre id="rjw-report-text" style="white-space:pre-wrap;font-size:13px;line-height:1.7;background:rgba(0,0,0,0.2);padding:14px;border-radius:6px;overflow-x:auto;"></pre>
+            <div style="margin-top:10px;display:flex;gap:10px;">
+              <button class="secondary-action" type="button" id="rjw-copy-report">Copy Report</button>
+            </div>
+          </div>
+
+          <script>
+          (function () {
+            function rjwGet(id) { return document.getElementById(id); }
+            function rjwVal(id) { var el = rjwGet(id); return el ? el.value.trim() : ''; }
+            function rjwSet(id, v) { var el = rjwGet(id); if (el) el.value = v; }
+            function rjwToast(msg) {
+              var t = document.getElementById('toast');
+              if (t) { t.textContent = msg; t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); }, 2400); }
+            }
+
+            function rjwBuild() {
+              return {
+                jobId: rjwVal('rjw-jobId'),
+                createdAt: rjwVal('rjw-createdAt'),
+                site: rjwVal('rjw-site'),
+                affectedArea: rjwVal('rjw-affectedArea'),
+                problemSummary: rjwVal('rjw-problemSummary'),
+                evidence: rjwVal('rjw-evidence'),
+                suspectedCause: rjwVal('rjw-suspectedCause'),
+                affectedFiles: rjwVal('rjw-affectedFiles').split('\n').map(function(s){ return s.trim(); }).filter(Boolean),
+                riskLevel: rjwVal('rjw-riskLevel'),
+                liveSiteImpact: rjwVal('rjw-liveSiteImpact'),
+                serviceWorkerImpact: rjwVal('rjw-serviceWorkerImpact'),
+                providerImpact: rjwVal('rjw-providerImpact'),
+                exportPackageImpact: rjwVal('rjw-exportPackageImpact'),
+                securityImpact: rjwVal('rjw-securityImpact'),
+                userTestingRequired: rjwVal('rjw-userTestingRequired'),
+                acceptanceCriteria: rjwVal('rjw-acceptanceCriteria'),
+                rollbackPlan: rjwVal('rjw-rollbackPlan'),
+                status: rjwVal('rjw-status'),
+                nextRecommendedAction: rjwVal('rjw-nextAction')
+              };
+            }
+
+            function rjwFill(job) {
+              rjwSet('rjw-jobId', job.jobId || '');
+              rjwSet('rjw-createdAt', job.createdAt || '');
+              rjwSet('rjw-site', job.site || '');
+              rjwSet('rjw-affectedArea', job.affectedArea || '');
+              rjwSet('rjw-problemSummary', job.problemSummary || '');
+              rjwSet('rjw-evidence', job.evidence || '');
+              rjwSet('rjw-suspectedCause', job.suspectedCause || '');
+              rjwSet('rjw-affectedFiles', Array.isArray(job.affectedFiles) ? job.affectedFiles.join('\n') : (job.affectedFiles || ''));
+              rjwSet('rjw-riskLevel', job.riskLevel || '');
+              rjwSet('rjw-liveSiteImpact', job.liveSiteImpact || '');
+              rjwSet('rjw-serviceWorkerImpact', job.serviceWorkerImpact || '');
+              rjwSet('rjw-providerImpact', job.providerImpact || '');
+              rjwSet('rjw-exportPackageImpact', job.exportPackageImpact || '');
+              rjwSet('rjw-securityImpact', job.securityImpact || '');
+              rjwSet('rjw-userTestingRequired', job.userTestingRequired || '');
+              rjwSet('rjw-acceptanceCriteria', job.acceptanceCriteria || '');
+              rjwSet('rjw-rollbackPlan', job.rollbackPlan || '');
+              rjwSet('rjw-status', job.status || '');
+              rjwSet('rjw-nextAction', job.nextRecommendedAction || '');
+            }
+
+            function rjwGenId() {
+              return 'RJ-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
+            }
+
+            rjwGet('rjw-new').addEventListener('click', function () {
+              rjwFill({});
+              rjwSet('rjw-jobId', rjwGenId());
+              rjwSet('rjw-createdAt', new Date().toISOString());
+              rjwGet('rjw-report-panel').style.display = 'none';
+              rjwToast('New repair job started.');
+            });
+
+            rjwGet('rjw-save').addEventListener('click', function () {
+              try {
+                localStorage.setItem('lt_repairjob_draft', JSON.stringify(rjwBuild()));
+                rjwToast('Repair job saved locally.');
+              } catch(e) { rjwToast('Save failed: ' + e.message); }
+            });
+
+            rjwGet('rjw-load').addEventListener('click', function () {
+              try {
+                var raw = localStorage.getItem('lt_repairjob_draft');
+                if (!raw) { rjwToast('No saved repair job found.'); return; }
+                rjwFill(JSON.parse(raw));
+                rjwToast('Saved repair job loaded.');
+              } catch(e) { rjwToast('Load failed: ' + e.message); }
+            });
+
+            rjwGet('rjw-export').addEventListener('click', function () {
+              var job = rjwBuild();
+              if (!job.jobId) { rjwToast('Start a new repair job first.'); return; }
+              var blob = new Blob([JSON.stringify(job, null, 2)], { type: 'application/json' });
+              var a = document.createElement('a');
+              a.href = URL.createObjectURL(blob);
+              a.download = (job.jobId || 'repair-job') + '.json';
+              a.click();
+              URL.revokeObjectURL(a.href);
+              rjwToast('repair-job.json exported.');
+            });
+
+            rjwGet('rjw-copy').addEventListener('click', function () {
+              var job = rjwBuild();
+              if (!job.jobId) { rjwToast('Start a new repair job first.'); return; }
+              navigator.clipboard.writeText(JSON.stringify(job, null, 2)).then(function(){
+                rjwToast('JSON copied to clipboard.');
+              }).catch(function(){ rjwToast('Copy failed. Try exporting instead.'); });
+            });
+
+            rjwGet('rjw-report').addEventListener('click', function () {
+              var j = rjwBuild();
+              if (!j.jobId) { rjwToast('Start a new repair job first.'); return; }
+              var files = Array.isArray(j.affectedFiles) ? j.affectedFiles.join(', ') : j.affectedFiles;
+              var lines = [
+                'REPAIR JOB REPORT',
+                '=================',
+                'Job ID: ' + j.jobId,
+                'Created: ' + j.createdAt,
+                'Site: ' + (j.site || 'Not specified'),
+                'Affected Area: ' + (j.affectedArea || 'Not specified'),
+                '',
+                'PROBLEM',
+                j.problemSummary || 'Not described.',
+                '',
+                'EVIDENCE',
+                j.evidence || 'Not provided.',
+                '',
+                'SUSPECTED CAUSE',
+                j.suspectedCause || 'Not identified.',
+                '',
+                'AFFECTED FILES',
+                files || 'Not listed.',
+                '',
+                'RISK: ' + (j.riskLevel || 'Not set') + '  |  STATUS: ' + (j.status || 'Not set'),
+                'Live site impact: ' + (j.liveSiteImpact || 'Unknown'),
+                'Service worker impact: ' + (j.serviceWorkerImpact || 'Unknown'),
+                'Provider impact: ' + (j.providerImpact || 'Unknown'),
+                'Export/package impact: ' + (j.exportPackageImpact || 'Unknown'),
+                'Security impact: ' + (j.securityImpact || 'Unknown'),
+                'User testing required: ' + (j.userTestingRequired || 'Unknown'),
+                '',
+                'ACCEPTANCE CRITERIA',
+                j.acceptanceCriteria || 'Not defined.',
+                '',
+                'ROLLBACK PLAN',
+                j.rollbackPlan || 'Not defined.',
+                '',
+                'NEXT RECOMMENDED ACTION',
+                j.nextRecommendedAction || 'Not specified.',
+                '',
+                'SAFETY NOTICE',
+                'This repair job was created using Load Tasks Repair Job Writer.',
+                'It does not push code. It does not merge pull requests.',
+                'It does not deploy to any site. It does not store tokens.',
+                'It does not modify live sites.'
+              ];
+              rjwGet('rjw-report-text').textContent = lines.join('\n');
+              rjwGet('rjw-report-panel').style.display = '';
+              rjwToast('Report generated.');
+            });
+
+            rjwGet('rjw-copy-report').addEventListener('click', function () {
+              var text = rjwGet('rjw-report-text').textContent;
+              navigator.clipboard.writeText(text).then(function(){
+                rjwToast('Report copied to clipboard.');
+              }).catch(function(){ rjwToast('Copy failed.'); });
+            });
+          }());
+          </script>
+        </section>
+
       </section>
     </main>
 
