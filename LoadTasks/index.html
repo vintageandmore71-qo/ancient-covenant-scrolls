@@ -67,6 +67,10 @@
         <button data-view="help" data-route>Help</button>
 <button data-view="settings" data-route>Settings</button>
         <button data-view="repairjob" data-route>Repair Job</button>
+        <button data-view="buildvault" data-route>Build Vault</button>
+        <button data-view="sitehealth" data-route>Site Health</button>
+        <button data-view="repairpack" data-route>Repair Pack</button>
+        <button data-view="localrecords" data-route>Local Records</button>
       </nav>
       <button class="icon-button" id="hardRefresh" aria-label="Hard refresh app state">
         <span class="icon-mini" data-icon="refresh"></span>
@@ -97,6 +101,10 @@
         <button data-view="handoff" data-route><span class="rail-icon" data-icon="handoff"></span><span>Handoff</span></button>
         <button data-view="github" data-route><span class="rail-icon" data-icon="github"></span><span>GitHub Export</span></button>
         <button data-view="repairjob" data-route><span class="rail-icon" data-icon="wrench"></span><span>Repair Job</span></button>
+        <button data-view="buildvault" data-route><span class="rail-icon" data-icon="vault"></span><span>Build Vault</span></button>
+        <button data-view="sitehealth" data-route><span class="rail-icon" data-icon="shield"></span><span>Site Health</span></button>
+        <button data-view="repairpack" data-route><span class="rail-icon" data-icon="wrench"></span><span>Repair Pack</span></button>
+        <button data-view="localrecords" data-route><span class="rail-icon" data-icon="library"></span><span>Local Records</span></button>
       </aside>
 
       <section class="workspace">
@@ -160,6 +168,26 @@
               <span class="card-icon" data-icon="wrench"></span>
               <strong>Repair Job Writer</strong>
               <span>Create, export, and save structured repair jobs for Load sites.</span>
+            </button>
+            <button class="command-card" data-view="buildvault" data-route>
+              <span class="card-icon" data-icon="vault"></span>
+              <strong>Stable Build Vault</strong>
+              <span>Record verified builds with commit hash, features, and rollback point.</span>
+            </button>
+            <button class="command-card" data-view="sitehealth" data-route>
+              <span class="card-icon" data-icon="shield"></span>
+              <strong>Site Health Report</strong>
+              <span>Record whether a site loads, what is broken, and what is missing.</span>
+            </button>
+            <button class="command-card" data-view="repairpack" data-route>
+              <span class="card-icon" data-icon="wrench"></span>
+              <strong>Repair Pack Summary</strong>
+              <span>Summarise a repair pack with risk level, rollback plan, and status.</span>
+            </button>
+            <button class="command-card" data-view="localrecords" data-route>
+              <span class="card-icon" data-icon="library"></span>
+              <strong>Local Records</strong>
+              <span>View, reload, delete, and export all locally saved records.</span>
             </button>
           </div>
 
@@ -1526,6 +1554,254 @@
                 rjwToast('Report copied to clipboard.');
               }).catch(function(){ rjwToast('Copy failed.'); });
             });
+          }());
+          </script>
+        </section>
+
+        <!-- ═══ STABLE BUILD VAULT ENTRY CREATOR ═══ -->
+        <section class="view" id="view-buildvault" data-view-panel="buildvault">
+          <div class="section-head">
+            <p class="eyebrow">Stable Build Vault</p>
+            <h1>Record a verified stable build.</h1>
+            <p>Create build-vault-entry.json for every confirmed working version. Local only — no deployment.</p>
+          </div>
+          <div class="panel">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+              <button class="primary-action" type="button" id="bv-new">New Entry</button>
+              <button class="secondary-action" type="button" id="bv-save">Save Locally</button>
+              <button class="secondary-action" type="button" id="bv-load">Reload Saved</button>
+              <button class="secondary-action" type="button" id="bv-export">Export build-vault-entry.json</button>
+              <button class="secondary-action" type="button" id="bv-copy">Copy JSON</button>
+            </div>
+            <div style="display:grid;gap:12px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <label>Entry ID (auto)<input id="bv-id" type="text" readonly style="background:rgba(255,255,255,0.04);"></label>
+                <label>Date (auto)<input id="bv-date" type="text" readonly style="background:rgba(255,255,255,0.04);"></label>
+              </div>
+              <label>Site<select id="bv-site"><option value="">Select...</option><option>Load Main</option><option>Load AI / AI Chat Studio</option><option>Image Prompt PWA</option><option>Load Studio</option><option>Load Play</option><option>Load Tasks</option><option>Study</option><option>Attain</option><option>Attain Jr</option><option>Other</option></select></label>
+              <label>Build Marker<input id="bv-buildMarker" type="text" placeholder="Example: v17g76 / load-v17g76"></label>
+              <label>Commit Hash<input id="bv-commitHash" type="text" placeholder="Example: d842909"></label>
+              <label>Rollback Point<input id="bv-rollbackPoint" type="text" placeholder="Example: backup/2026-05-10-v17g76 or commit SHA"></label>
+              <label>Verification Status<select id="bv-verificationStatus"><option value="">Select...</option><option>WORKING REAL OUTPUT</option><option>PARTIAL</option><option>READY FOR USER VERIFICATION</option><option>PROVIDER NEEDED</option><option>FAIL</option></select></label>
+              <label>Verified Features<textarea id="bv-verifiedFeatures" rows="3" placeholder="List features confirmed working on device."></textarea></label>
+              <label>Known Issues<textarea id="bv-knownIssues" rows="3" placeholder="List known issues or provider-needed items."></textarea></label>
+              <label>Notes<textarea id="bv-notes" rows="2" placeholder="Any extra context for this build."></textarea></label>
+            </div>
+          </div>
+          <script>
+          (function(){
+            function bvGet(id){return document.getElementById(id);}
+            function bvVal(id){var e=bvGet(id);return e?e.value.trim():'';}
+            function bvSet(id,v){var e=bvGet(id);if(e)e.value=v;}
+            function bvToast(m){var t=document.getElementById('toast');if(t){t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2400);}}
+            function bvBuild(){return{entryId:bvVal('bv-id'),date:bvVal('bv-date'),site:bvVal('bv-site'),buildMarker:bvVal('bv-buildMarker'),commitHash:bvVal('bv-commitHash'),rollbackPoint:bvVal('bv-rollbackPoint'),verificationStatus:bvVal('bv-verificationStatus'),verifiedFeatures:bvVal('bv-verifiedFeatures'),knownIssues:bvVal('bv-knownIssues'),notes:bvVal('bv-notes')};}
+            function bvFill(e){bvSet('bv-id',e.entryId||'');bvSet('bv-date',e.date||'');bvSet('bv-site',e.site||'');bvSet('bv-buildMarker',e.buildMarker||'');bvSet('bv-commitHash',e.commitHash||'');bvSet('bv-rollbackPoint',e.rollbackPoint||'');bvSet('bv-verificationStatus',e.verificationStatus||'');bvSet('bv-verifiedFeatures',e.verifiedFeatures||'');bvSet('bv-knownIssues',e.knownIssues||'');bvSet('bv-notes',e.notes||'');}
+            function bvGenId(){return'BV-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,5).toUpperCase();}
+            bvGet('bv-new').addEventListener('click',function(){bvFill({});bvSet('bv-id',bvGenId());bvSet('bv-date',new Date().toISOString());bvToast('New vault entry started.');});
+            bvGet('bv-save').addEventListener('click',function(){try{var e=bvBuild();if(!e.entryId){bvToast('Start a new entry first.');return;}localStorage.setItem('lt_bv_'+e.entryId,JSON.stringify(e));localStorage.setItem('lt_bv_draft',JSON.stringify(e));bvToast('Entry saved locally.');}catch(ex){bvToast('Save failed.');}});
+            bvGet('bv-load').addEventListener('click',function(){try{var r=localStorage.getItem('lt_bv_draft');if(!r){bvToast('No saved entry found.');return;}bvFill(JSON.parse(r));bvToast('Entry loaded.');}catch(ex){bvToast('Load failed.');}});
+            bvGet('bv-export').addEventListener('click',function(){var e=bvBuild();if(!e.entryId){bvToast('Start a new entry first.');return;}var b=new Blob([JSON.stringify(e,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(e.entryId||'build-vault-entry')+'.json';a.click();URL.revokeObjectURL(a.href);bvToast('Exported.');});
+            bvGet('bv-copy').addEventListener('click',function(){var e=bvBuild();if(!e.entryId){bvToast('Start a new entry first.');return;}navigator.clipboard.writeText(JSON.stringify(e,null,2)).then(function(){bvToast('Copied.');}).catch(function(){bvToast('Copy failed.');});});
+          }());
+          </script>
+        </section>
+
+        <!-- ═══ SITE HEALTH REPORT TEMPLATE ═══ -->
+        <section class="view" id="view-sitehealth" data-view-panel="sitehealth">
+          <div class="section-head">
+            <p class="eyebrow">Site Health Report</p>
+            <h1>Record a site health check.</h1>
+            <p>Create site-health-report.json to document what loaded, what was broken, and what was missing. Local only.</p>
+          </div>
+          <div class="panel">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+              <button class="primary-action" type="button" id="sh-new">New Report</button>
+              <button class="secondary-action" type="button" id="sh-save">Save Locally</button>
+              <button class="secondary-action" type="button" id="sh-load">Reload Saved</button>
+              <button class="secondary-action" type="button" id="sh-export">Export site-health-report.json</button>
+              <button class="secondary-action" type="button" id="sh-copy">Copy JSON</button>
+            </div>
+            <div style="display:grid;gap:12px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <label>Report ID (auto)<input id="sh-id" type="text" readonly style="background:rgba(255,255,255,0.04);"></label>
+                <label>Checked At (auto)<input id="sh-checkedAt" type="text" readonly style="background:rgba(255,255,255,0.04);"></label>
+              </div>
+              <label>Site<select id="sh-site"><option value="">Select...</option><option>Load Main</option><option>Load AI / AI Chat Studio</option><option>Image Prompt PWA</option><option>Load Studio</option><option>Load Play</option><option>Load Tasks</option><option>Study</option><option>Attain</option><option>Attain Jr</option><option>Other</option></select></label>
+              <label>Live URL<input id="sh-liveUrl" type="text" placeholder="Example: https://dssorit.github.io/ancient-covenant-scrolls/load/"></label>
+              <label>Build Marker<input id="sh-buildMarker" type="text" placeholder="Example: v17g76"></label>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                <label>Page Loads<select id="sh-pageLoads"><option value="">Select...</option><option>YES</option><option>NO</option></select></label>
+                <label>Blank Screen<select id="sh-blankScreen"><option value="">Select...</option><option>YES</option><option>NO</option></select></label>
+                <label>Raw Code Visible<select id="sh-rawCodeVisible"><option value="">Select...</option><option>YES</option><option>NO</option></select></label>
+                <label>Manifest Present<select id="sh-manifestPresent"><option value="">Select...</option><option>YES</option><option>NO</option></select></label>
+                <label>Service Worker Present<select id="sh-swPresent"><option value="">Select...</option><option>YES</option><option>NO</option></select></label>
+              </div>
+              <label>Broken Links / Buttons<textarea id="sh-brokenLinks" rows="2" placeholder="List any broken links or buttons observed."></textarea></label>
+              <label>Notes<textarea id="sh-notes" rows="3" placeholder="Any other observations."></textarea></label>
+            </div>
+          </div>
+          <script>
+          (function(){
+            function shGet(id){return document.getElementById(id);}
+            function shVal(id){var e=shGet(id);return e?e.value.trim():'';}
+            function shSet(id,v){var e=shGet(id);if(e)e.value=v;}
+            function shToast(m){var t=document.getElementById('toast');if(t){t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2400);}}
+            function shBuild(){return{reportId:shVal('sh-id'),checkedAt:shVal('sh-checkedAt'),site:shVal('sh-site'),liveUrl:shVal('sh-liveUrl'),buildMarker:shVal('sh-buildMarker'),pageLoads:shVal('sh-pageLoads'),blankScreen:shVal('sh-blankScreen'),rawCodeVisible:shVal('sh-rawCodeVisible'),manifestPresent:shVal('sh-manifestPresent'),serviceWorkerPresent:shVal('sh-swPresent'),brokenLinks:shVal('sh-brokenLinks'),notes:shVal('sh-notes')};}
+            function shFill(r){shSet('sh-id',r.reportId||'');shSet('sh-checkedAt',r.checkedAt||'');shSet('sh-site',r.site||'');shSet('sh-liveUrl',r.liveUrl||'');shSet('sh-buildMarker',r.buildMarker||'');shSet('sh-pageLoads',r.pageLoads||'');shSet('sh-blankScreen',r.blankScreen||'');shSet('sh-rawCodeVisible',r.rawCodeVisible||'');shSet('sh-manifestPresent',r.manifestPresent||'');shSet('sh-swPresent',r.serviceWorkerPresent||'');shSet('sh-brokenLinks',r.brokenLinks||'');shSet('sh-notes',r.notes||'');}
+            function shGenId(){return'SH-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,5).toUpperCase();}
+            shGet('sh-new').addEventListener('click',function(){shFill({});shSet('sh-id',shGenId());shSet('sh-checkedAt',new Date().toISOString());shToast('New health report started.');});
+            shGet('sh-save').addEventListener('click',function(){try{var r=shBuild();if(!r.reportId){shToast('Start a new report first.');return;}localStorage.setItem('lt_sh_'+r.reportId,JSON.stringify(r));localStorage.setItem('lt_sh_draft',JSON.stringify(r));shToast('Report saved locally.');}catch(ex){shToast('Save failed.');}});
+            shGet('sh-load').addEventListener('click',function(){try{var r=localStorage.getItem('lt_sh_draft');if(!r){shToast('No saved report found.');return;}shFill(JSON.parse(r));shToast('Report loaded.');}catch(ex){shToast('Load failed.');}});
+            shGet('sh-export').addEventListener('click',function(){var r=shBuild();if(!r.reportId){shToast('Start a new report first.');return;}var b=new Blob([JSON.stringify(r,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(r.reportId||'site-health-report')+'.json';a.click();URL.revokeObjectURL(a.href);shToast('Exported.');});
+            shGet('sh-copy').addEventListener('click',function(){var r=shBuild();if(!r.reportId){shToast('Start a new report first.');return;}navigator.clipboard.writeText(JSON.stringify(r,null,2)).then(function(){shToast('Copied.');}).catch(function(){shToast('Copy failed.');});});
+          }());
+          </script>
+        </section>
+
+        <!-- ═══ REPAIR PACK SUMMARY ═══ -->
+        <section class="view" id="view-repairpack" data-view-panel="repairpack">
+          <div class="section-head">
+            <p class="eyebrow">Repair Pack Summary</p>
+            <h1>Summarise a repair pack.</h1>
+            <p>Create repair-pack-summary.json linking a repair job to its files, risk, rollback plan, and status. Local only.</p>
+          </div>
+          <div class="panel">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+              <button class="primary-action" type="button" id="rp-new">New Summary</button>
+              <button class="secondary-action" type="button" id="rp-save">Save Locally</button>
+              <button class="secondary-action" type="button" id="rp-load">Reload Saved</button>
+              <button class="secondary-action" type="button" id="rp-export">Export repair-pack-summary.json</button>
+              <button class="secondary-action" type="button" id="rp-copy">Copy JSON</button>
+            </div>
+            <div style="display:grid;gap:12px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <label>Summary ID (auto)<input id="rp-id" type="text" readonly style="background:rgba(255,255,255,0.04);"></label>
+                <label>Created At (auto)<input id="rp-date" type="text" readonly style="background:rgba(255,255,255,0.04);"></label>
+              </div>
+              <label>Repair Job ID<input id="rp-repairJobId" type="text" placeholder="Paste the Job ID from Repair Job Writer."></label>
+              <label>Files Affected<textarea id="rp-filesAffected" rows="2" placeholder="List files included in this repair pack."></textarea></label>
+              <label>Risk Level<select id="rp-riskLevel"><option value="">Select...</option><option>LOW</option><option>MEDIUM</option><option>HIGH</option></select></label>
+              <label>Status<select id="rp-status"><option value="">Select...</option><option>WORKING REAL OUTPUT</option><option>PARTIAL</option><option>PROVIDER NEEDED</option><option>PLACEHOLDER ONLY</option><option>NOT DONE</option><option>READY FOR USER VERIFICATION</option><option>FAIL</option></select></label>
+              <label>Rollback Plan<textarea id="rp-rollbackPlan" rows="2" placeholder="How to undo this repair pack."></textarea></label>
+              <label>Acceptance Criteria<textarea id="rp-acceptanceCriteria" rows="2" placeholder="What must be true for this pack to pass."></textarea></label>
+            </div>
+          </div>
+          <script>
+          (function(){
+            function rpGet(id){return document.getElementById(id);}
+            function rpVal(id){var e=rpGet(id);return e?e.value.trim():'';}
+            function rpSet(id,v){var e=rpGet(id);if(e)e.value=v;}
+            function rpToast(m){var t=document.getElementById('toast');if(t){t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2400);}}
+            function rpBuild(){return{summaryId:rpVal('rp-id'),createdAt:rpVal('rp-date'),repairJobId:rpVal('rp-repairJobId'),filesAffected:rpVal('rp-filesAffected').split('\n').map(function(s){return s.trim();}).filter(Boolean),riskLevel:rpVal('rp-riskLevel'),status:rpVal('rp-status'),rollbackPlan:rpVal('rp-rollbackPlan'),acceptanceCriteria:rpVal('rp-acceptanceCriteria')};}
+            function rpFill(s){rpSet('rp-id',s.summaryId||'');rpSet('rp-date',s.createdAt||'');rpSet('rp-repairJobId',s.repairJobId||'');rpSet('rp-filesAffected',Array.isArray(s.filesAffected)?s.filesAffected.join('\n'):(s.filesAffected||''));rpSet('rp-riskLevel',s.riskLevel||'');rpSet('rp-status',s.status||'');rpSet('rp-rollbackPlan',s.rollbackPlan||'');rpSet('rp-acceptanceCriteria',s.acceptanceCriteria||'');}
+            function rpGenId(){return'RP-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,5).toUpperCase();}
+            rpGet('rp-new').addEventListener('click',function(){rpFill({});rpSet('rp-id',rpGenId());rpSet('rp-date',new Date().toISOString());rpToast('New repair pack summary started.');});
+            rpGet('rp-save').addEventListener('click',function(){try{var s=rpBuild();if(!s.summaryId){rpToast('Start a new summary first.');return;}localStorage.setItem('lt_rp_'+s.summaryId,JSON.stringify(s));localStorage.setItem('lt_rp_draft',JSON.stringify(s));rpToast('Summary saved locally.');}catch(ex){rpToast('Save failed.');}});
+            rpGet('rp-load').addEventListener('click',function(){try{var r=localStorage.getItem('lt_rp_draft');if(!r){rpToast('No saved summary found.');return;}rpFill(JSON.parse(r));rpToast('Summary loaded.');}catch(ex){rpToast('Load failed.');}});
+            rpGet('rp-export').addEventListener('click',function(){var s=rpBuild();if(!s.summaryId){rpToast('Start a new summary first.');return;}var b=new Blob([JSON.stringify(s,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(s.summaryId||'repair-pack-summary')+'.json';a.click();URL.revokeObjectURL(a.href);rpToast('Exported.');});
+            rpGet('rp-copy').addEventListener('click',function(){var s=rpBuild();if(!s.summaryId){rpToast('Start a new summary first.');return;}navigator.clipboard.writeText(JSON.stringify(s,null,2)).then(function(){rpToast('Copied.');}).catch(function(){rpToast('Copy failed.');});});
+          }());
+          </script>
+        </section>
+
+        <!-- ═══ LOCAL RECORDS DASHBOARD + EXPORT ALL ═══ -->
+        <section class="view" id="view-localrecords" data-view-panel="localrecords">
+          <div class="section-head">
+            <p class="eyebrow">Local Records</p>
+            <h1>All locally saved records.</h1>
+            <p>View, reload, delete, and export records saved in this browser. Nothing is sent anywhere.</p>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+            <button class="primary-action" type="button" id="lr-refresh">Refresh</button>
+            <button class="secondary-action" type="button" id="lr-export-all">Export All Records</button>
+          </div>
+
+          <div class="panel" style="margin-bottom:16px;">
+            <h2>Repair Jobs</h2>
+            <div id="lr-rjw-list" style="display:grid;gap:8px;"></div>
+          </div>
+          <div class="panel" style="margin-bottom:16px;">
+            <h2>Build Vault Entries</h2>
+            <div id="lr-bv-list" style="display:grid;gap:8px;"></div>
+          </div>
+          <div class="panel" style="margin-bottom:16px;">
+            <h2>Site Health Reports</h2>
+            <div id="lr-sh-list" style="display:grid;gap:8px;"></div>
+          </div>
+          <div class="panel">
+            <h2>Repair Pack Summaries</h2>
+            <div id="lr-rp-list" style="display:grid;gap:8px;"></div>
+          </div>
+
+          <script>
+          (function(){
+            function lrToast(m){var t=document.getElementById('toast');if(t){t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2400);}}
+
+            function lrRenderGroup(prefix, listId, labelFn) {
+              var list = document.getElementById(listId);
+              if (!list) return [];
+              var items = [];
+              for (var i = 0; i < localStorage.length; i++) {
+                var k = localStorage.key(i);
+                if (k && k.indexOf(prefix) === 0 && k !== prefix + 'draft') {
+                  try { items.push({ key: k, data: JSON.parse(localStorage.getItem(k)) }); } catch(e) {}
+                }
+              }
+              if (items.length === 0) { list.innerHTML = '<p style="font-size:13px;color:#9aa0b0;">None saved.</p>'; return items; }
+              list.innerHTML = '';
+              items.sort(function(a,b){ return a.key < b.key ? 1 : -1; }).forEach(function(item) {
+                var row = document.createElement('div');
+                row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 10px;background:rgba(255,255,255,0.04);border-radius:6px;font-size:13px;';
+                var label = document.createElement('span');
+                label.style.cssText = 'flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+                label.textContent = labelFn(item.data);
+                var delBtn = document.createElement('button');
+                delBtn.className = 'secondary-action';
+                delBtn.textContent = 'Delete';
+                delBtn.style.cssText = 'padding:4px 10px;font-size:12px;color:#f44336;border-color:#f44336;';
+                delBtn.addEventListener('click', function(key){ return function(){ localStorage.removeItem(key); lrRender(); lrToast('Deleted from local storage.'); }; }(item.key));
+                row.appendChild(label);
+                row.appendChild(delBtn);
+                list.appendChild(row);
+              });
+              return items;
+            }
+
+            function lrRender() {
+              lrRenderGroup('lt_rjw_', 'lr-rjw-list', function(d){ return (d.jobId||'?') + ' — ' + (d.site||'') + ' — ' + (d.status||''); });
+              lrRenderGroup('lt_bv_',  'lr-bv-list',  function(d){ return (d.entryId||'?') + ' — ' + (d.site||'') + ' — ' + (d.buildMarker||''); });
+              lrRenderGroup('lt_sh_',  'lr-sh-list',  function(d){ return (d.reportId||'?') + ' — ' + (d.site||'') + ' — ' + (d.pageLoads ? 'Loads:'+d.pageLoads : ''); });
+              lrRenderGroup('lt_rp_',  'lr-rp-list',  function(d){ return (d.summaryId||'?') + ' — ' + (d.repairJobId||'') + ' — ' + (d.status||''); });
+            }
+
+            document.getElementById('lr-refresh').addEventListener('click', function(){ lrRender(); lrToast('Records refreshed.'); });
+
+            document.getElementById('lr-export-all').addEventListener('click', function(){
+              var bundle = { exportedAt: new Date().toISOString(), repairJobs: [], buildVaultEntries: [], siteHealthReports: [], repairPackSummaries: [] };
+              for (var i = 0; i < localStorage.length; i++) {
+                var k = localStorage.key(i);
+                try {
+                  var d = JSON.parse(localStorage.getItem(k));
+                  if (k && k.indexOf('lt_rjw_') === 0 && k !== 'lt_rjw_draft') bundle.repairJobs.push(d);
+                  else if (k && k.indexOf('lt_bv_') === 0 && k !== 'lt_bv_draft') bundle.buildVaultEntries.push(d);
+                  else if (k && k.indexOf('lt_sh_') === 0 && k !== 'lt_sh_draft') bundle.siteHealthReports.push(d);
+                  else if (k && k.indexOf('lt_rp_') === 0 && k !== 'lt_rp_draft') bundle.repairPackSummaries.push(d);
+                } catch(e){}
+              }
+              var b = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' });
+              var a = document.createElement('a');
+              a.href = URL.createObjectURL(b);
+              a.download = 'load-tasks-records-' + Date.now() + '.json';
+              a.click();
+              URL.revokeObjectURL(a.href);
+              lrToast('All records exported.');
+            });
+
+            var panel = document.getElementById('view-localrecords');
+            if (panel) {
+              panel.addEventListener('lt-view-enter', lrRender);
+              setTimeout(function(){ if (panel.classList.contains('active')) lrRender(); }, 100);
+            }
           }());
           </script>
         </section>
