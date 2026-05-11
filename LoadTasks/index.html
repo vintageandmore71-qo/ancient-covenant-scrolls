@@ -75,6 +75,10 @@
         <button data-view="criteria" data-route>Criteria</button>
         <button data-view="statusboard" data-route>Status Board</button>
         <button data-view="importrecords" data-route>Import</button>
+        <button data-view="smokecheck" data-route>Smoke Check</button>
+        <button data-view="baseline" data-route>Baseline</button>
+        <button data-view="riskreport" data-route>Risk Report</button>
+        <button data-view="promptbuilder" data-route>Prompt Builder</button>
       </nav>
       <button class="icon-button" id="hardRefresh" aria-label="Hard refresh app state">
         <span class="icon-mini" data-icon="refresh"></span>
@@ -113,6 +117,10 @@
         <button data-view="criteria" data-route><span class="rail-icon" data-icon="shield"></span><span>Criteria</span></button>
         <button data-view="statusboard" data-route><span class="rail-icon" data-icon="version"></span><span>Status Board</span></button>
         <button data-view="importrecords" data-route><span class="rail-icon" data-icon="upload"></span><span>Import</span></button>
+        <button data-view="smokecheck" data-route><span class="rail-icon" data-icon="shield"></span><span>Smoke Check</span></button>
+        <button data-view="baseline" data-route><span class="rail-icon" data-icon="vault"></span><span>Baseline</span></button>
+        <button data-view="riskreport" data-route><span class="rail-icon" data-icon="wrench"></span><span>Risk Report</span></button>
+        <button data-view="promptbuilder" data-route><span class="rail-icon" data-icon="notes"></span><span>Prompt Builder</span></button>
       </aside>
 
       <section class="workspace">
@@ -217,7 +225,29 @@
               <strong>Import Records</strong>
               <span>Paste or upload an exported records bundle to restore local data.</span>
             </button>
+            <button class="command-card" data-view="smokecheck" data-route>
+              <span class="card-icon" data-icon="shield"></span>
+              <strong>Site Smoke Check</strong>
+              <span>Record whether a site opens, blank screen, raw code, navigation visible.</span>
+            </button>
+            <button class="command-card" data-view="baseline" data-route>
+              <span class="card-icon" data-icon="vault"></span>
+              <strong>Friday Baseline</strong>
+              <span>Save a stable build snapshot with commit hash, cache marker, and rollback point.</span>
+            </button>
+            <button class="command-card" data-view="riskreport" data-route>
+              <span class="card-icon" data-icon="wrench"></span>
+              <strong>Risk Report</strong>
+              <span>Generate a pre-change risk report before any build or push.</span>
+            </button>
+            <button class="command-card" data-view="promptbuilder" data-route>
+              <span class="card-icon" data-icon="notes"></span>
+              <strong>Prompt Builder</strong>
+              <span>Generate safe developer instructions for common Claude Code scenarios.</span>
+            </button>
           </div>
+
+          <div id="lt-counters" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:24px;"></div>
 
           <div class="two-col">
             <article class="panel">
@@ -2095,6 +2125,246 @@
           }());
           </script>
         </section>
+
+        <!-- ═══ SITE SMOKE CHECK BUILDER ═══ -->
+        <section class="view" id="view-smokecheck" data-view-panel="smokecheck">
+          <div class="section-head">
+            <p class="eyebrow">Site Smoke Check</p>
+            <h1>Record a basic site smoke check.</h1>
+            <p>Quick pass/fail record for whether a site is functioning on device. Local only.</p>
+          </div>
+          <div class="panel">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+              <button class="primary-action" type="button" id="sc-new">New Smoke Check</button>
+              <button class="secondary-action" type="button" id="sc-save">Save Locally</button>
+              <button class="secondary-action" type="button" id="sc-load">Reload Saved</button>
+              <button class="secondary-action" type="button" id="sc-export">Export smoke-check.json</button>
+              <button class="secondary-action" type="button" id="sc-copy">Copy JSON</button>
+            </div>
+            <div style="display:grid;gap:12px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <label>Check ID (auto)<input id="sc-id" type="text" readonly style="background:rgba(255,255,255,0.04);"></label>
+                <label>Checked At (auto)<input id="sc-checkedAt" type="text" readonly style="background:rgba(255,255,255,0.04);"></label>
+              </div>
+              <label>Site Name<input id="sc-site" type="text" placeholder="Example: Load Main"></label>
+              <label>Live URL<input id="sc-url" type="text" placeholder="Example: https://dssorit.github.io/ancient-covenant-scrolls/load/"></label>
+              <label>Build Marker<input id="sc-buildMarker" type="text" placeholder="Example: v17g76"></label>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <label>Page Opens<select id="sc-pageOpens"><option value="">Select...</option><option>YES</option><option>NO</option></select></label>
+                <label>Blank Screen<select id="sc-blankScreen"><option value="">Select...</option><option>YES</option><option>NO</option></select></label>
+                <label>Raw Code Visible<select id="sc-rawCode"><option value="">Select...</option><option>YES</option><option>NO</option></select></label>
+                <label>Main Nav Visible<select id="sc-navVisible"><option value="">Select...</option><option>YES</option><option>NO</option></select></label>
+              </div>
+              <label>Notes<textarea id="sc-notes" rows="3" placeholder="Any observations from this check."></textarea></label>
+            </div>
+          </div>
+          <script>
+          (function(){
+            function scGet(id){return document.getElementById(id);}
+            function scVal(id){var e=scGet(id);return e?e.value.trim():'';}
+            function scSet(id,v){var e=scGet(id);if(e)e.value=v;}
+            function scToast(m){var t=document.getElementById('toast');if(t){t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2400);}}
+            function scGenId(){return'SC-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,5).toUpperCase();}
+            function scBuild(){return{checkId:scVal('sc-id'),checkedAt:scVal('sc-checkedAt'),site:scVal('sc-site'),liveUrl:scVal('sc-url'),buildMarker:scVal('sc-buildMarker'),pageOpens:scVal('sc-pageOpens'),blankScreen:scVal('sc-blankScreen'),rawCodeVisible:scVal('sc-rawCode'),mainNavVisible:scVal('sc-navVisible'),notes:scVal('sc-notes')};}
+            function scFill(d){scSet('sc-id',d.checkId||'');scSet('sc-checkedAt',d.checkedAt||'');scSet('sc-site',d.site||'');scSet('sc-url',d.liveUrl||'');scSet('sc-buildMarker',d.buildMarker||'');scSet('sc-pageOpens',d.pageOpens||'');scSet('sc-blankScreen',d.blankScreen||'');scSet('sc-rawCode',d.rawCodeVisible||'');scSet('sc-navVisible',d.mainNavVisible||'');scSet('sc-notes',d.notes||'');}
+            scGet('sc-new').addEventListener('click',function(){scFill({});scSet('sc-id',scGenId());scSet('sc-checkedAt',new Date().toISOString());scToast('New smoke check started.');});
+            scGet('sc-save').addEventListener('click',function(){try{var d=scBuild();if(!d.checkId){scToast('Start a new smoke check first.');return;}localStorage.setItem('lt_sc_'+d.checkId,JSON.stringify(d));localStorage.setItem('lt_sc_draft',JSON.stringify(d));scToast('Smoke check saved locally.');}catch(ex){scToast('Save failed.');}});
+            scGet('sc-load').addEventListener('click',function(){try{var r=localStorage.getItem('lt_sc_draft');if(!r){scToast('No saved smoke check found.');return;}scFill(JSON.parse(r));scToast('Smoke check loaded.');}catch(ex){scToast('Load failed.');}});
+            scGet('sc-export').addEventListener('click',function(){var d=scBuild();if(!d.checkId){scToast('Start a new smoke check first.');return;}var b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(d.checkId||'smoke-check')+'.json';a.click();URL.revokeObjectURL(a.href);scToast('Exported.');});
+            scGet('sc-copy').addEventListener('click',function(){var d=scBuild();if(!d.checkId){scToast('Start a new smoke check first.');return;}navigator.clipboard.writeText(JSON.stringify(d,null,2)).then(function(){scToast('Copied.');}).catch(function(){scToast('Copy failed.');});});
+          }());
+          </script>
+        </section>
+
+        <!-- ═══ FRIDAY BASELINE / STABLE BUILD SNAPSHOT ═══ -->
+        <section class="view" id="view-baseline" data-view-panel="baseline">
+          <div class="section-head">
+            <p class="eyebrow">Friday Baseline</p>
+            <h1>Save a stable build snapshot.</h1>
+            <p>Record the exact state of a confirmed working build so you can recover it later. Local only.</p>
+          </div>
+          <div class="panel">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+              <button class="primary-action" type="button" id="bl-new">New Snapshot</button>
+              <button class="secondary-action" type="button" id="bl-save">Save Snapshot</button>
+              <button class="secondary-action" type="button" id="bl-load">Reload Saved</button>
+              <button class="secondary-action" type="button" id="bl-export">Export stable-build-snapshot.json</button>
+              <button class="secondary-action" type="button" id="bl-copy">Copy JSON</button>
+            </div>
+            <div style="display:grid;gap:12px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <label>Snapshot ID (auto)<input id="bl-id" type="text" readonly style="background:rgba(255,255,255,0.04);"></label>
+                <label>Saved At (auto)<input id="bl-savedAt" type="text" readonly style="background:rgba(255,255,255,0.04);"></label>
+              </div>
+              <label>Site<select id="bl-site"><option value="">Select...</option><option>Load Main</option><option>Load AI / AI Chat Studio</option><option>Image Prompt PWA</option><option>Load Studio</option><option>Load Play</option><option>Load Tasks</option><option>Study</option><option>Attain</option><option>Attain Jr</option><option>Other</option></select></label>
+              <label>Commit Hash<input id="bl-commitHash" type="text" placeholder="Example: ffc8bb93"></label>
+              <label>Build Marker<input id="bl-buildMarker" type="text" placeholder="Example: v17g76 / lt-v5.20"></label>
+              <label>Cache Marker<input id="bl-cacheMarker" type="text" placeholder="Example: load-v17g76"></label>
+              <label>Rollback Point<input id="bl-rollbackPoint" type="text" placeholder="Example: backup/2026-05-11-lt-v5.20 or commit SHA"></label>
+              <label>Verified Features<textarea id="bl-verifiedFeatures" rows="3" placeholder="List features confirmed working on device at this point."></textarea></label>
+              <label>Known Issues<textarea id="bl-knownIssues" rows="2" placeholder="List known issues that existed at this point."></textarea></label>
+              <label>Do Not Touch Notes<textarea id="bl-doNotTouch" rows="2" placeholder="List files or areas that must not be changed to keep this build stable."></textarea></label>
+            </div>
+          </div>
+          <script>
+          (function(){
+            function blGet(id){return document.getElementById(id);}
+            function blVal(id){var e=blGet(id);return e?e.value.trim():'';}
+            function blSet(id,v){var e=blGet(id);if(e)e.value=v;}
+            function blToast(m){var t=document.getElementById('toast');if(t){t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2400);}}
+            function blGenId(){return'BL-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,5).toUpperCase();}
+            function blBuild(){return{snapshotId:blVal('bl-id'),savedAt:blVal('bl-savedAt'),site:blVal('bl-site'),commitHash:blVal('bl-commitHash'),buildMarker:blVal('bl-buildMarker'),cacheMarker:blVal('bl-cacheMarker'),rollbackPoint:blVal('bl-rollbackPoint'),verifiedFeatures:blVal('bl-verifiedFeatures'),knownIssues:blVal('bl-knownIssues'),doNotTouchNotes:blVal('bl-doNotTouch')};}
+            function blFill(d){blSet('bl-id',d.snapshotId||'');blSet('bl-savedAt',d.savedAt||'');blSet('bl-site',d.site||'');blSet('bl-commitHash',d.commitHash||'');blSet('bl-buildMarker',d.buildMarker||'');blSet('bl-cacheMarker',d.cacheMarker||'');blSet('bl-rollbackPoint',d.rollbackPoint||'');blSet('bl-verifiedFeatures',d.verifiedFeatures||'');blSet('bl-knownIssues',d.knownIssues||'');blSet('bl-doNotTouch',d.doNotTouchNotes||'');}
+            blGet('bl-new').addEventListener('click',function(){blFill({});blSet('bl-id',blGenId());blSet('bl-savedAt',new Date().toISOString());blToast('New snapshot started.');});
+            blGet('bl-save').addEventListener('click',function(){try{var d=blBuild();if(!d.snapshotId){blToast('Start a new snapshot first.');return;}localStorage.setItem('lt_bl_'+d.snapshotId,JSON.stringify(d));localStorage.setItem('lt_bl_draft',JSON.stringify(d));blToast('Snapshot saved locally.');}catch(ex){blToast('Save failed.');}});
+            blGet('bl-load').addEventListener('click',function(){try{var r=localStorage.getItem('lt_bl_draft');if(!r){blToast('No saved snapshot found.');return;}blFill(JSON.parse(r));blToast('Snapshot loaded.');}catch(ex){blToast('Load failed.');}});
+            blGet('bl-export').addEventListener('click',function(){var d=blBuild();if(!d.snapshotId){blToast('Start a new snapshot first.');return;}var b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(d.snapshotId||'stable-build-snapshot')+'.json';a.click();URL.revokeObjectURL(a.href);blToast('Exported.');});
+            blGet('bl-copy').addEventListener('click',function(){var d=blBuild();if(!d.snapshotId){blToast('Start a new snapshot first.');return;}navigator.clipboard.writeText(JSON.stringify(d,null,2)).then(function(){blToast('Copied.');}).catch(function(){blToast('Copy failed.');});});
+          }());
+          </script>
+        </section>
+
+        <!-- ═══ RISK REPORT GENERATOR ═══ -->
+        <section class="view" id="view-riskreport" data-view-panel="riskreport">
+          <div class="section-head">
+            <p class="eyebrow">Risk Report</p>
+            <h1>Generate a pre-change risk report.</h1>
+            <p>Fill in the proposed change and impact flags. Export or copy the plain-language report before starting any build or push.</p>
+          </div>
+          <div class="panel">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+              <button class="primary-action" type="button" id="rr-generate">Generate Risk Report</button>
+              <button class="secondary-action" type="button" id="rr-export">Export risk-report.txt</button>
+              <button class="secondary-action" type="button" id="rr-copy">Copy Report</button>
+              <button class="secondary-action" type="button" id="rr-save">Save Locally</button>
+              <button class="secondary-action" type="button" id="rr-load">Reload Saved</button>
+            </div>
+            <div style="display:grid;gap:12px;">
+              <label>Proposed Change<textarea id="rr-proposedChange" rows="3" placeholder="Describe the change you are about to make."></textarea></label>
+              <label>Files Likely to Change<textarea id="rr-files" rows="2" placeholder="List files that will be edited."></textarea></label>
+              <label>Risk Level<select id="rr-riskLevel"><option value="">Select...</option><option>LOW</option><option>MEDIUM</option><option>HIGH</option></select></label>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                <label>Live Site Impact<select id="rr-liveSite"><option value="">Select...</option><option>YES</option><option>NO</option></select></label>
+                <label>Service Worker Impact<select id="rr-sw"><option value="">Select...</option><option>YES</option><option>NO</option></select></label>
+                <label>AI / Provider Impact<select id="rr-ai"><option value="">Select...</option><option>YES</option><option>NO</option></select></label>
+                <label>Audio Impact<select id="rr-audio"><option value="">Select...</option><option>YES</option><option>NO</option></select></label>
+                <label>Animation Impact<select id="rr-animation"><option value="">Select...</option><option>YES</option><option>NO</option></select></label>
+                <label>Export / Package Impact<select id="rr-export-pkg"><option value="">Select...</option><option>YES</option><option>NO</option></select></label>
+                <label>Security Impact<select id="rr-security"><option value="">Select...</option><option>YES</option><option>NO</option></select></label>
+                <label>Approval Needed<select id="rr-approval"><option value="">Select...</option><option>YES</option><option>NO</option></select></label>
+              </div>
+              <label>Rollback Plan<textarea id="rr-rollback" rows="2" placeholder="How to undo this change if it breaks something."></textarea></label>
+            </div>
+            <div id="rr-output" style="display:none;margin-top:16px;padding:14px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:13px;white-space:pre-wrap;font-family:monospace;"></div>
+          </div>
+          <script>
+          (function(){
+            function rrGet(id){return document.getElementById(id);}
+            function rrVal(id){var e=rrGet(id);return e?e.value.trim():'';}
+            function rrSet(id,v){var e=rrGet(id);if(e)e.value=v;}
+            function rrToast(m){var t=document.getElementById('toast');if(t){t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2400);}}
+            function rrBuildData(){return{proposedChange:rrVal('rr-proposedChange'),files:rrVal('rr-files'),riskLevel:rrVal('rr-riskLevel'),liveSiteImpact:rrVal('rr-liveSite'),serviceWorkerImpact:rrVal('rr-sw'),aiProviderImpact:rrVal('rr-ai'),audioImpact:rrVal('rr-audio'),animationImpact:rrVal('rr-animation'),exportPackageImpact:rrVal('rr-export-pkg'),securityImpact:rrVal('rr-security'),approvalNeeded:rrVal('rr-approval'),rollbackPlan:rrVal('rr-rollback')};}
+            function rrFill(d){rrSet('rr-proposedChange',d.proposedChange||'');rrSet('rr-files',d.files||'');rrSet('rr-riskLevel',d.riskLevel||'');rrSet('rr-liveSite',d.liveSiteImpact||'');rrSet('rr-sw',d.serviceWorkerImpact||'');rrSet('rr-ai',d.aiProviderImpact||'');rrSet('rr-audio',d.audioImpact||'');rrSet('rr-animation',d.animationImpact||'');rrSet('rr-export-pkg',d.exportPackageImpact||'');rrSet('rr-security',d.securityImpact||'');rrSet('rr-approval',d.approvalNeeded||'');rrSet('rr-rollback',d.rollbackPlan||'');}
+            function rrBuildText(d){
+              var lines=['PRE-CHANGE RISK REPORT','Generated: '+new Date().toISOString(),''];
+              lines.push('PROPOSED CHANGE');lines.push(d.proposedChange||'(not specified)');lines.push('');
+              lines.push('FILES LIKELY TO CHANGE');lines.push(d.files||'(not specified)');lines.push('');
+              lines.push('RISK LEVEL: '+(d.riskLevel||'(not set)'));lines.push('');
+              lines.push('IMPACT FLAGS');
+              lines.push('Live site impact:        '+(d.liveSiteImpact||'—'));
+              lines.push('Service worker impact:   '+(d.serviceWorkerImpact||'—'));
+              lines.push('AI / provider impact:    '+(d.aiProviderImpact||'—'));
+              lines.push('Audio impact:            '+(d.audioImpact||'—'));
+              lines.push('Animation impact:        '+(d.animationImpact||'—'));
+              lines.push('Export / package impact: '+(d.exportPackageImpact||'—'));
+              lines.push('Security impact:         '+(d.securityImpact||'—'));
+              lines.push('Approval needed:         '+(d.approvalNeeded||'—'));
+              lines.push('');
+              lines.push('ROLLBACK PLAN');lines.push(d.rollbackPlan||'(not specified)');
+              return lines.join('\n');
+            }
+            rrGet('rr-generate').addEventListener('click',function(){var d=rrBuildData();var text=rrBuildText(d);var out=rrGet('rr-output');out.textContent=text;out.style.display='';rrToast('Report generated.');});
+            rrGet('rr-export').addEventListener('click',function(){var d=rrBuildData();var text=rrBuildText(d);var b=new Blob([text],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='risk-report-'+Date.now()+'.txt';a.click();URL.revokeObjectURL(a.href);rrToast('.txt exported.');});
+            rrGet('rr-copy').addEventListener('click',function(){var d=rrBuildData();var text=rrBuildText(d);navigator.clipboard.writeText(text).then(function(){rrToast('Report copied.');}).catch(function(){rrToast('Copy failed.');});});
+            rrGet('rr-save').addEventListener('click',function(){try{var d=rrBuildData();var id='RR-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,5).toUpperCase();d.reportId=id;d.savedAt=new Date().toISOString();localStorage.setItem('lt_rr_'+id,JSON.stringify(d));localStorage.setItem('lt_rr_draft',JSON.stringify(d));rrToast('Risk report saved locally.');}catch(ex){rrToast('Save failed.');}});
+            rrGet('rr-load').addEventListener('click',function(){try{var r=localStorage.getItem('lt_rr_draft');if(!r){rrToast('No saved report found.');return;}rrFill(JSON.parse(r));rrToast('Report loaded.');}catch(ex){rrToast('Load failed.');}});
+          }());
+          </script>
+        </section>
+
+        <!-- ═══ CLAUDE PROMPT BUILDER ═══ -->
+        <section class="view" id="view-promptbuilder" data-view-panel="promptbuilder">
+          <div class="section-head">
+            <p class="eyebrow">Prompt Builder</p>
+            <h1>Generate safe developer instructions.</h1>
+            <p>Pick a prompt type. Fill in the context. Copy the plain-language instruction to use with Claude Code.</p>
+          </div>
+          <div class="panel">
+            <div style="display:grid;gap:12px;margin-bottom:16px;">
+              <label>Prompt Type<select id="pb-type">
+                <option value="readonly">Read-only inspect</option>
+                <option value="featurebranch">Build on feature branch</option>
+                <option value="prreview">Low-risk PR review</option>
+                <option value="recovery">Recovery report</option>
+                <option value="notesting">No-testing day</option>
+                <option value="merge">Merge approval</option>
+              </select></label>
+              <label>Context (optional)<textarea id="pb-context" rows="3" placeholder="Add specific details: file name, PR number, feature name, etc."></textarea></label>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+              <button class="primary-action" type="button" id="pb-generate">Generate Prompt</button>
+              <button class="secondary-action" type="button" id="pb-copy">Copy Prompt</button>
+              <button class="secondary-action" type="button" id="pb-export">Export prompt.txt</button>
+            </div>
+            <div id="pb-output" style="display:none;padding:14px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:13px;white-space:pre-wrap;line-height:1.6;"></div>
+          </div>
+          <script>
+          (function(){
+            function pbGet(id){return document.getElementById(id);}
+            function pbToast(m){var t=document.getElementById('toast');if(t){t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2400);}}
+            var PROMPTS={
+              readonly:function(ctx){return'Claude, this is a read-only session.\n\nDo not make any file edits, commits, pushes, pulls, merges, branch updates, or repo state changes of any kind.\n\nYour only job is to inspect and report.\n\n'+(ctx?'Context: '+ctx+'\n\n':'')+'Report your findings in plain language. Do not take any action without asking first.';},
+              featurebranch:function(ctx){return'Claude, build the following on a feature branch only.\n\nDo not push to main. Do not merge. Do not touch the service worker, cache string, Load AI, provider routing, audio, animation, export packages, GitHub tokens, or Cloudflare tokens.\n\n'+(ctx?'Build task: '+ctx+'\n\n':'')+'When done: open one PR, report the PR number, files changed, risk level, and rollback plan. Wait for my explicit approval before merging.';},
+              prreview:function(ctx){return'Claude, review the following PR for safety before I merge it.\n\n'+(ctx?'PR: '+ctx+'\n\n':'')+'Check:\n- Files changed (list them)\n- Risk level (LOW / MEDIUM / HIGH)\n- Service worker or cache string touched (yes/no)\n- Load AI, provider routing, audio, animation, export, or deployment touched (yes/no)\n- Any security concern\n- Rollback plan\n\nDo not merge. Report only.';},
+              recovery:function(ctx){return'Claude, I need a recovery report.\n\n'+(ctx?'Situation: '+ctx+'\n\n':'')+'Do not make any changes. Read the current state of the repo and report:\n- Current branch and latest commit\n- What was last shipped to main\n- Any uncommitted changes\n- The safest rollback option\n- What files were touched in the last 3 commits\n\nReport only. Ask before taking any action.';},
+              notesting:function(ctx){return'Claude, today is a low-testing day.\n\nDo not start any builds that require device testing to verify. Do not ask me to test anything on iPad.\n\nSafe tasks only:\n- Read-only inspection\n- Documentation updates\n- Low-risk text changes\n- Session notes\n- Status reports\n\n'+(ctx?'Focus: '+ctx+'\n\n':'')+'If a task requires device testing, park it and tell me. Do not build it today.';},
+              merge:function(ctx){return'Claude, merge PR #'+(ctx||'[NUMBER]')+' now.\n\n(Use this exact wording when you are ready to approve a specific PR. Replace [NUMBER] with the PR number.)'}
+            };
+            function pbGenerate(){
+              var type=pbGet('pb-type').value;var ctx=(pbGet('pb-context').value||'').trim();
+              var fn=PROMPTS[type];if(!fn)return'';return fn(ctx);
+            }
+            pbGet('pb-generate').addEventListener('click',function(){var text=pbGenerate();var out=pbGet('pb-output');out.textContent=text;out.style.display='';pbToast('Prompt generated.');});
+            pbGet('pb-copy').addEventListener('click',function(){var text=pbGenerate();if(!text){pbToast('Generate a prompt first.');return;}navigator.clipboard.writeText(text).then(function(){pbToast('Prompt copied.');}).catch(function(){pbToast('Copy failed.');});});
+            pbGet('pb-export').addEventListener('click',function(){var text=pbGenerate();if(!text){pbToast('Generate a prompt first.');return;}var b=new Blob([text],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='prompt-'+Date.now()+'.txt';a.click();URL.revokeObjectURL(a.href);pbToast('.txt exported.');});
+          }());
+          </script>
+        </section>
+
+        <!-- ═══ DASHBOARD COUNTERS SCRIPT ═══ -->
+        <script>
+        (function(){
+          function ltCountPrefix(prefix,exclude){
+            var n=0;
+            for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(prefix)===0){var skip=false;if(exclude)exclude.forEach(function(ex){if(k===ex)skip=true;});if(!skip)n++;}}
+            return n;
+          }
+          function ltRenderCounters(){
+            var el=document.getElementById('lt-counters');if(!el)return;
+            var items=[
+              {label:'Repair Jobs',n:ltCountPrefix('lt_rjw_',['lt_rjw_draft','lt_repairjob_draft'])},
+              {label:'Criteria Lists',n:ltCountPrefix('lt_ac_',['lt_ac_draft'])},
+              {label:'Health Reports',n:ltCountPrefix('lt_sh_',['lt_sh_draft'])},
+              {label:'Build Snapshots',n:ltCountPrefix('lt_bl_',['lt_bl_draft'])},
+              {label:'Risk Reports',n:ltCountPrefix('lt_rr_',['lt_rr_draft'])},
+              {label:'Smoke Checks',n:ltCountPrefix('lt_sc_',['lt_sc_draft'])}
+            ];
+            el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px;text-align:center;"><div style="font-size:28px;font-weight:700;line-height:1;">'+(it.n)+'</div><div style="font-size:12px;color:#9aa0b0;margin-top:4px;">'+it.label+'</div></div>';}).join('');
+          }
+          var dash=document.getElementById('view-dashboard');
+          if(dash){dash.addEventListener('lt-view-enter',ltRenderCounters);setTimeout(function(){if(dash.classList.contains('active'))ltRenderCounters();},150);}
+        }());
+        </script>
 
       </section>
     </main>
