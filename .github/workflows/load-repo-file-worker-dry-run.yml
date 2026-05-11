@@ -31,30 +31,27 @@ jobs:
 
           JOB_FILE = os.environ.get('JOB_FILE', 'loadtasks-inbox/repo-file-job.json')
 
-          # Read job file
           if not os.path.isfile(JOB_FILE):
-              print(f'ERROR: Job file not found: {JOB_FILE}')
+              print('ERROR: Job file not found: ' + JOB_FILE)
               sys.exit(1)
 
-          with open(JOB_FILE) as f:
+          with open(JOB_FILE) as fh:
               try:
-                  job = json.load(f)
+                  job = json.load(fh)
               except json.JSONDecodeError as e:
-                  print(f'ERROR: Invalid JSON in {JOB_FILE}: {e}')
+                  print('ERROR: Invalid JSON: ' + str(e))
                   sys.exit(1)
 
-          # Validate required fields
           REQUIRED = [
               'targetSite', 'targetFiles', 'fileAction', 'riskLevel',
               'rollbackPlan', 'proposedChangeSummary', 'acceptanceCriteria'
           ]
           missing = [f for f in REQUIRED if not str(job.get(f, '')).strip()]
           if missing:
-              print(f'VALIDATION FAIL - Missing fields: {", ".join(missing)}')
+              print('VALIDATION FAIL - Missing: ' + ', '.join(missing))
               sys.exit(1)
-          print('VALIDATION PASS - all required fields present')
+          print('VALIDATION PASS')
 
-          # Risk classification from file paths
           HIGH_PATTERNS = [
               'sw.js', 'service-worker', 'ai-chat-studio', 'image-prompt',
               'lib-load-image-providers', 'provider', 'audio', 'animation',
@@ -66,50 +63,46 @@ jobs:
               'load.js', 'load/load', 'loadstudio', 'loadplay', 'attain',
               'study', 'acr', 'index.html', 'lib-'
           ]
-          LOW_PATTERNS = [
-              'loadtasks/index.html', 'session_notes', 'handoff',
-              'claude.md', 'master_backlog'
-          ]
 
           target_files_raw = str(job.get('targetFiles', ''))
-          paths_lower = target_files_raw.lower()
+          pl = target_files_raw.lower()
 
-          if any(p.lower() in paths_lower for p in HIGH_PATTERNS):
+          if any(p.lower() in pl for p in HIGH_PATTERNS):
               auto_risk = 'HIGH'
-          elif any(p.lower() in paths_lower for p in MED_PATTERNS):
+          elif any(p.lower() in pl for p in MED_PATTERNS):
               auto_risk = 'MEDIUM'
           else:
               auto_risk = 'LOW'
 
           declared_risk = str(job.get('riskLevel', 'UNKNOWN'))
-          risk_note = 'MATCH' if auto_risk == declared_risk else f'MISMATCH (declared={declared_risk}, auto={auto_risk})'
+          if auto_risk == declared_risk:
+              risk_note = 'MATCH'
+          else:
+              risk_note = 'MISMATCH (declared=' + declared_risk + ', auto=' + auto_risk + ')'
 
-          # Parse file list
           raw = target_files_raw.replace(',', '\n')
           file_paths = [f.strip() for f in raw.splitlines() if f.strip()]
 
-          # Check file existence in repo
           file_results = []
           all_found = True
           for fp in file_paths:
-              result = subprocess.run(
+              r = subprocess.run(
                   ['git', 'ls-files', '--error-unmatch', fp],
                   capture_output=True, text=True
               )
-              if result.returncode == 0:
-                  file_results.append(f'  - {fp} -> EXISTS')
+              if r.returncode == 0:
+                  file_results.append('  - ' + fp + ' -> EXISTS')
               else:
-                  file_results.append(f'  - {fp} -> NOT FOUND IN REPO')
+                  file_results.append('  - ' + fp + ' -> NOT FOUND IN REPO')
                   all_found = False
 
           if not file_paths:
               file_results = ['  (no file paths parsed)']
 
-          # Verdict
           if auto_risk == 'HIGH':
               verdict = 'NEEDS REVIEW - HIGH risk file(s) detected'
           elif not all_found:
-              verdict = 'NEEDS REVIEW - one or more target files not found in repo'
+              verdict = 'NEEDS REVIEW - one or more target files not found'
           elif auto_risk == 'MEDIUM':
               verdict = 'NEEDS REVIEW - MEDIUM risk, verify before proceeding'
           else:
@@ -117,64 +110,59 @@ jobs:
 
           job_id = str(job.get('jobId', job.get('id', 'UNKNOWN')))
 
-          # Build report
-          file_block = '\n'.join(file_results)
-          report = f"""=== DRY RUN REPORT ===
-Job ID:           {job_id}
-Target Site:      {job.get('targetSite', 'UNKNOWN')}
-File Action:      {job.get('fileAction', 'UNKNOWN')}
-Risk (declared):  {declared_risk}
-Risk (auto):      {auto_risk}
-Risk check:       {risk_note}
+          lines = [
+              '=== DRY RUN REPORT ===',
+              'Job ID:           ' + job_id,
+              'Target Site:      ' + str(job.get('targetSite', 'UNKNOWN')),
+              'File Action:      ' + str(job.get('fileAction', 'UNKNOWN')),
+              'Risk (declared):  ' + declared_risk,
+              'Risk (auto):      ' + auto_risk,
+              'Risk check:       ' + risk_note,
+              '',
+              'Target Files:',
+          ] + file_results + [
+              '',
+              'Field Validation: PASS',
+              '',
+              'Patch Plan Summary:',
+              str(job.get('proposedChangeSummary', '(none)')),
+              '',
+              'Acceptance Criteria:',
+              str(job.get('acceptanceCriteria', '(none)')),
+              '',
+              'PR Draft Title:',
+              str(job.get('prTitleSuggestion', '(not specified)')),
+              '',
+              'Branch Suggestion:',
+              str(job.get('branchNameSuggestion', '(not specified)')),
+              '',
+              'Rollback Plan:',
+              str(job.get('rollbackPlan', '(not specified)')),
+              '',
+              'Impact Flags:',
+              '  Live site impact:       ' + str(job.get('liveSiteImpact', 'Unknown')),
+              '  Service worker impact:  ' + str(job.get('serviceWorkerImpact', 'Unknown')),
+              '  AI provider impact:     ' + str(job.get('aiProviderImpact', 'Unknown')),
+              '  Security impact:        ' + str(job.get('securityImpact', 'Unknown')),
+              '',
+              'Verdict: ' + verdict,
+              '',
+              '=== DRY RUN COMPLETE - NO FILES WERE MODIFIED ===',
+          ]
+          report = '\n'.join(lines) + '\n'
 
-Target Files:
-{file_block}
-
-Field Validation: PASS
-
-Patch Plan Summary:
-{job.get('proposedChangeSummary', '(none)')}
-
-Acceptance Criteria:
-{job.get('acceptanceCriteria', '(none)')}
-
-PR Draft Title:
-{job.get('prTitleSuggestion', '(not specified)')}
-
-Branch Suggestion:
-{job.get('branchNameSuggestion', '(not specified)')}
-
-Rollback Plan:
-{job.get('rollbackPlan', '(not specified)')}
-
-Impact Flags:
-  Live site impact:       {job.get('liveSiteImpact', 'Unknown')}
-  Service worker impact:  {job.get('serviceWorkerImpact', 'Unknown')}
-  AI provider impact:     {job.get('aiProviderImpact', 'Unknown')}
-  Security impact:        {job.get('securityImpact', 'Unknown')}
-
-Verdict: {verdict}
-
-=== DRY RUN COMPLETE - NO FILES WERE MODIFIED ===
-"""
-
-          report_filename = f'dry-run-report-{job_id}.txt'
-          with open(report_filename, 'w') as f:
-              f.write(report)
+          report_filename = 'dry-run-report-' + job_id + '.txt'
+          with open(report_filename, 'w') as fh:
+              fh.write(report)
 
           print(report)
-          print(f'Report written: {report_filename}')
+          print('Report written: ' + report_filename)
 
-          # Export for artifact upload step
-          env_file = os.environ.get('GITHUB_ENV', '')
-          if env_file:
-              with open(env_file, 'a') as f:
-                  f.write(f'REPORT_FILE={report_filename}\n')
-                  f.write(f'JOB_ID={job_id}\n')
-
-          # Exit 1 only on hard block (never on needs-review - still upload artifact)
-          if 'SAFE TO PROCEED' not in verdict and 'NEEDS REVIEW' not in verdict:
-              sys.exit(1)
+          github_env = os.environ.get('GITHUB_ENV', '')
+          if github_env:
+              with open(github_env, 'a') as fh:
+                  fh.write('REPORT_FILE=' + report_filename + '\n')
+                  fh.write('JOB_ID=' + job_id + '\n')
           PYEOF
         env:
           JOB_FILE: ${{ inputs.job_file || 'loadtasks-inbox/repo-file-job.json' }}
