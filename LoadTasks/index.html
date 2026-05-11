@@ -186,6 +186,18 @@
         <button data-view="safenextstep" data-route>Safe Next Step</button>
         <button data-view="siteprotection" data-route>Site Protection</button>
         <button data-view="vaultreminder" data-route>Vault Reminder</button>
+        <button data-view="starthere" data-route>Start Here</button>
+        <button data-view="simpledash" data-route>Simple Dash</button>
+        <button data-view="pinnedcmd" data-route>Pinned</button>
+        <button data-view="dailywizard" data-route>Daily Wizard</button>
+        <button data-view="recoverywizard" data-route>Recovery Wizard</button>
+        <button data-view="releasewizard" data-route>Release Wizard</button>
+        <button data-view="lowtestwizard" data-route>Low-Test Wizard</button>
+        <button data-view="buildsession" data-route>Build Wizard</button>
+        <button data-view="exportdaily" data-route>Daily Packet</button>
+        <button data-view="exportrecovery" data-route>Recovery Packet</button>
+        <button data-view="exportrelease" data-route>Release Packet</button>
+        <button data-view="compactmode" data-route>Compact Mode</button>
       </nav>
       <button class="icon-button" id="hardRefresh" aria-label="Hard refresh app state">
         <span class="icon-mini" data-icon="refresh"></span>
@@ -335,6 +347,18 @@
         <button data-view="safenextstep" data-route><span class="rail-icon" data-icon="shield"></span><span>Safe Next Step</span></button>
         <button data-view="siteprotection" data-route><span class="rail-icon" data-icon="shield"></span><span>Site Protection</span></button>
         <button data-view="vaultreminder" data-route><span class="rail-icon" data-icon="vault"></span><span>Vault Reminder</span></button>
+        <button data-view="starthere" data-route><span class="rail-icon" data-icon="focus"></span><span>Start Here</span></button>
+        <button data-view="simpledash" data-route><span class="rail-icon" data-icon="dashboard"></span><span>Simple Dash</span></button>
+        <button data-view="pinnedcmd" data-route><span class="rail-icon" data-icon="focus"></span><span>Pinned</span></button>
+        <button data-view="dailywizard" data-route><span class="rail-icon" data-icon="notes"></span><span>Daily Wizard</span></button>
+        <button data-view="recoverywizard" data-route><span class="rail-icon" data-icon="wrench"></span><span>Recovery Wizard</span></button>
+        <button data-view="releasewizard" data-route><span class="rail-icon" data-icon="version"></span><span>Release Wizard</span></button>
+        <button data-view="lowtestwizard" data-route><span class="rail-icon" data-icon="shield"></span><span>Low-Test Wizard</span></button>
+        <button data-view="buildsession" data-route><span class="rail-icon" data-icon="library"></span><span>Build Wizard</span></button>
+        <button data-view="exportdaily" data-route><span class="rail-icon" data-icon="vault"></span><span>Daily Packet</span></button>
+        <button data-view="exportrecovery" data-route><span class="rail-icon" data-icon="vault"></span><span>Recovery Packet</span></button>
+        <button data-view="exportrelease" data-route><span class="rail-icon" data-icon="vault"></span><span>Release Packet</span></button>
+        <button data-view="compactmode" data-route><span class="rail-icon" data-icon="shield"></span><span>Compact Mode</span></button>
       </aside>
 
       <section class="workspace">
@@ -993,6 +1017,66 @@
               <span class="card-icon" data-icon="vault"></span>
               <strong>Build Vault Reminder</strong>
               <span>Track when you last vaulted a build and get reminded to vault again.</span>
+            </button>
+            <button class="command-card" data-view="starthere" data-route>
+              <span class="card-icon" data-icon="focus"></span>
+              <strong>Start Here</strong>
+              <span>New session orientation: review state, set goals, pick a workflow.</span>
+            </button>
+            <button class="command-card" data-view="simpledash" data-route>
+              <span class="card-icon" data-icon="dashboard"></span>
+              <strong>Simplified Dashboard</strong>
+              <span>Clean status view: open work, goals, recent activity, no scroll.</span>
+            </button>
+            <button class="command-card" data-view="pinnedcmd" data-route>
+              <span class="card-icon" data-icon="focus"></span>
+              <strong>Pinned Command Area</strong>
+              <span>Pin frequently used commands and tools to a persistent launch panel.</span>
+            </button>
+            <button class="command-card" data-view="dailywizard" data-route>
+              <span class="card-icon" data-icon="notes"></span>
+              <strong>Daily Workflow Wizard</strong>
+              <span>Step-by-step guide for a standard developer day.</span>
+            </button>
+            <button class="command-card" data-view="recoverywizard" data-route>
+              <span class="card-icon" data-icon="wrench"></span>
+              <strong>Recovery Workflow Wizard</strong>
+              <span>Step-by-step guide for recovering from a broken deploy or incident.</span>
+            </button>
+            <button class="command-card" data-view="releasewizard" data-route>
+              <span class="card-icon" data-icon="version"></span>
+              <strong>Release Workflow Wizard</strong>
+              <span>Step-by-step guide for shipping a release from branch to live.</span>
+            </button>
+            <button class="command-card" data-view="lowtestwizard" data-route>
+              <span class="card-icon" data-icon="shield"></span>
+              <strong>Low-Testing Day Wizard</strong>
+              <span>Step-by-step guide for low-risk builds when device testing is limited.</span>
+            </button>
+            <button class="command-card" data-view="buildsession" data-route>
+              <span class="card-icon" data-icon="library"></span>
+              <strong>Build Session Wizard</strong>
+              <span>Step-by-step guide for running a focused multi-batch build session.</span>
+            </button>
+            <button class="command-card" data-view="exportdaily" data-route>
+              <span class="card-icon" data-icon="vault"></span>
+              <strong>One-Click Daily Packet</strong>
+              <span>Export today's work, goals, blockers, and stand-up in one tap.</span>
+            </button>
+            <button class="command-card" data-view="exportrecovery" data-route>
+              <span class="card-icon" data-icon="vault"></span>
+              <strong>One-Click Recovery Packet</strong>
+              <span>Export all incident, regression, risk, and rollback records.</span>
+            </button>
+            <button class="command-card" data-view="exportrelease" data-route>
+              <span class="card-icon" data-icon="vault"></span>
+              <strong>One-Click Release Packet</strong>
+              <span>Export deploy receipts, shipped log, release notes, and merge log.</span>
+            </button>
+            <button class="command-card" data-view="compactmode" data-route>
+              <span class="card-icon" data-icon="shield"></span>
+              <strong>Compact Mode</strong>
+              <span>Toggle tool categories on or off to reduce nav clutter.</span>
             </button>
           </div>
 
@@ -8514,6 +8598,446 @@
           }());</script>
         </section>
 
+        <section class="view" id="view-starthere" data-view-panel="starthere">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Start Here</h1><p>New session orientation. Review state, set your goals, then pick a workflow.</p></div>
+          <div id="sh2-body"></div>
+          <script>(function(){
+            function sh2Get(prefix,excl){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(prefix)===0){var skip=false;(excl||[]).forEach(function(e){if(k===e)skip=true;});if(!skip){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}}return a;}
+            function sh2Render(){
+              var el=document.getElementById('sh2-body');if(!el)return;
+              var openBlockers=sh2Get('lt_bk_',['lt_bk_draft']).filter(function(b){return b.status==='Open';}).length;
+              var critBugs=sh2Get('lt_bgt_',['lt_bgt_draft']).filter(function(b){return(b.sev==='Critical'||b.sev==='High')&&b.status==='Open';}).length;
+              var goals=[];try{goals=JSON.parse(localStorage.getItem('lt_sgl_current')||'[]');}catch(e){}
+              var tw=localStorage.getItem('lt_tw_draft')||'';
+              var lastBackup=parseInt(localStorage.getItem('lt_last_backup_ts')||'0',10);
+              var backupDue=!lastBackup||(Date.now()-lastBackup>86400000);
+              var steps=[
+                {done:!backupDue,label:'Data backed up recently',action:'Backup Check',view:'backupreminder',urgent:backupDue},
+                {done:critBugs===0,label:'No critical/high bugs open'+(critBugs?': '+critBugs+' need attention':''),action:'Bug Triage',view:'bugtriage',urgent:critBugs>0},
+                {done:openBlockers===0,label:'No open blockers'+(openBlockers?' — '+openBlockers+' unresolved':''),action:'Blockers',view:'blockers',urgent:openBlockers>0},
+                {done:tw.trim().length>0,label:"Today's Work note written",action:"Today's Work",view:'todaywork',urgent:false},
+                {done:goals.filter(function(g){return!g.done;}).length>0||goals.length>0,label:'Session goals set'+(goals.length?' ('+goals.filter(function(g){return!g.done;}).length+' remaining)':''),action:'Session Goals',view:'sessiongoals',urgent:false}
+              ];
+              var WIZARDS=[
+                {label:'Standard Day',view:'dailywizard'},{label:'Recovery Session',view:'recoverywizard'},{label:'Release Day',view:'releasewizard'},{label:'Low-Test Day',view:'lowtestwizard'},{label:'Build Session',view:'buildsession'}
+              ];
+              var done=steps.filter(function(s){return s.done;}).length;
+              el.innerHTML='<article class="panel" style="margin-bottom:16px;">'
+                +'<h2 style="font-size:14px;margin-bottom:12px;">Session Readiness ('+done+' / '+steps.length+')</h2>'
+                +steps.map(function(s){return'<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">'
+                  +'<span style="font-size:16px;">'+(s.done?'✓':'○')+'</span>'
+                  +'<span style="flex:1;font-size:13px;'+(s.urgent?'color:#ffd400;font-weight:600;':'')+'">'+s.label+'</span>'
+                  +(s.done?'':'<button class="small-btn sh2-go" data-view="'+s.view+'">'+s.action+'</button>')
+                  +'</div>';}).join('')
+                +'</article>'
+                +'<article class="panel"><h2 style="font-size:14px;margin-bottom:12px;">Pick a Workflow</h2>'
+                +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;">'
+                +WIZARDS.map(function(w){return'<button class="primary-action sh2-go" data-view="'+w.view+'" style="font-size:13px;padding:10px 14px;">'+w.label+'</button>';}).join('')
+                +'</div></article>';
+              el.querySelectorAll('.sh2-go').forEach(function(b){b.addEventListener('click',function(){var t=document.querySelector('[data-view="'+b.dataset.view+'"][data-route]');if(t)t.click();});});
+            }
+            var sec=document.getElementById('view-starthere');if(sec)sec.addEventListener('lt-view-enter',sh2Render);sh2Render();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-simpledash" data-view-panel="simpledash">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Simplified Dashboard</h1><p>Clean status view with only open items and recent activity.</p></div>
+          <div id="sd2-body" style="margin-top:8px;"></div>
+          <script>(function(){
+            function sd2Get(prefix,excl){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(prefix)===0){var skip=false;(excl||[]).forEach(function(e){if(k===e)skip=true;});if(!skip){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}}return a;}
+            function sd2Render(){
+              var el=document.getElementById('sd2-body');if(!el)return;
+              var tw=localStorage.getItem('lt_tw_draft')||'';
+              var goals=[];try{goals=JSON.parse(localStorage.getItem('lt_sgl_current')||'[]');}catch(e){}
+              var openGoals=goals.filter(function(g){return!g.done;});
+              var doneGoals=goals.filter(function(g){return g.done;});
+              var blockers=sd2Get('lt_bk_',['lt_bk_draft']).filter(function(b){return b.status==='Open';});
+              var bugs=sd2Get('lt_bgt_',['lt_bgt_draft']).filter(function(b){return b.status==='Open'||b.status==='In Progress';});
+              var shp=sd2Get('lt_shp_',['lt_shp_draft']).slice(0,5);
+              var merges=sd2Get('lt_mg_',['lt_mg_draft']).slice(0,5);
+              var pins=[];try{pins=JSON.parse(localStorage.getItem('lt_pins')||'[]');}catch(e){}
+              var ql=[];try{ql=JSON.parse(localStorage.getItem('lt_ql_config')||'[]');}catch(e){}
+              var html='';
+              if(pins.length||ql.length){
+                var combined=ql.length?ql:pins.slice(0,8);
+                html+='<article class="panel" style="margin-bottom:12px;"><h2 style="font-size:13px;color:#9aa0b0;margin-bottom:8px;">QUICK ACCESS</h2>'
+                  +'<div style="display:flex;flex-wrap:wrap;gap:6px;">'
+                  +combined.map(function(p){return'<button class="small-btn sd2-go" data-view="'+p.view+'" style="font-size:12px;">'+p.label+'</button>';}).join('')+'</div></article>';
+              }
+              html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">';
+              html+='<article class="panel"><h2 style="font-size:12px;color:#9aa0b0;margin-bottom:8px;">SESSION GOALS ('+doneGoals.length+'/'+goals.length+')</h2>';
+              if(!goals.length)html+='<p style="font-size:12px;color:#9aa0b0;">None set.</p>';
+              else html+=goals.slice(0,5).map(function(g){return'<div style="font-size:13px;padding:3px 0;'+(g.done?'text-decoration:line-through;color:#9aa0b0;':'')+'">'+g.goal+'</div>';}).join('');
+              html+='</article>';
+              html+='<article class="panel"><h2 style="font-size:12px;color:#9aa0b0;margin-bottom:8px;">OPEN BLOCKERS ('+blockers.length+')</h2>';
+              if(!blockers.length)html+='<p style="font-size:12px;color:#2ecc71;">None</p>';
+              else html+=blockers.slice(0,4).map(function(b){return'<div style="font-size:13px;padding:3px 0;color:#ffd400;">'+b.desc+'</div>';}).join('');
+              html+='</article>';
+              html+='<article class="panel"><h2 style="font-size:12px;color:#9aa0b0;margin-bottom:8px;">OPEN BUGS ('+bugs.length+')</h2>';
+              if(!bugs.length)html+='<p style="font-size:12px;color:#2ecc71;">None</p>';
+              else html+=bugs.slice(0,4).map(function(b){return'<div style="font-size:13px;padding:3px 0;">['+b.sev+'] '+b.title+'</div>';}).join('');
+              html+='</article>';
+              html+='<article class="panel"><h2 style="font-size:12px;color:#9aa0b0;margin-bottom:8px;">SHIPPED (last 5)</h2>';
+              if(!shp.length)html+='<p style="font-size:12px;color:#9aa0b0;">None</p>';
+              else html+=shp.map(function(s){return'<div style="font-size:12px;padding:3px 0;">'+s.name+'</div>';}).join('');
+              html+='</article>';
+              html+='</div>';
+              if(tw.trim()){html+='<article class="panel" style="margin-top:12px;"><h2 style="font-size:12px;color:#9aa0b0;margin-bottom:6px;">TODAY\'S WORK</h2><div style="font-size:13px;color:#e0e4f0;white-space:pre-wrap;max-height:100px;overflow-y:auto;">'+tw.trim()+'</div></article>';}
+              el.innerHTML=html;
+              el.querySelectorAll('.sd2-go').forEach(function(b){b.addEventListener('click',function(){var t=document.querySelector('[data-view="'+b.dataset.view+'"][data-route]');if(t)t.click();});});
+            }
+            var sec=document.getElementById('view-simpledash');if(sec)sec.addEventListener('lt-view-enter',sd2Render);sd2Render();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-pinnedcmd" data-view-panel="pinnedcmd">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Pinned Command Area</h1><p>Pin shell commands, git commands, and tool shortcuts to a persistent panel.</p></div>
+          <article class="panel form-panel" style="margin-bottom:12px;">
+            <label>Label<input id="pc2-label" placeholder="e.g. Sync from main"></label>
+            <label>Command or note<textarea id="pc2-cmd" rows="2" placeholder="e.g. git fetch origin main &amp;&amp; git merge origin/main --no-edit"></textarea></label>
+            <label>Category<input id="pc2-cat" placeholder="e.g. Git, Deploy, Daily"></label>
+            <button class="primary-action" id="pc2-save">Pin It</button>
+          </article>
+          <div id="pc2-list"></div>
+          <script>(function(){
+            function pc2All(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_pcmd_')===0&&k!=='lt_pcmd_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return(a.cat+a.label).localeCompare(b.cat+b.label);});return a;}
+            function pc2Render(){
+              var el=document.getElementById('pc2-list');if(!el)return;
+              var items=pc2All();if(!items.length){el.innerHTML='<p class="empty-state">No pinned commands. Add one above.</p>';return;}
+              var cats=[...new Set(items.map(function(it){return it.cat||'Other';}))];
+              el.innerHTML=cats.map(function(cat){
+                var group=items.filter(function(it){return(it.cat||'Other')===cat;});
+                return'<div style="margin-bottom:14px;"><div style="font-size:11px;font-weight:700;color:#9aa0b0;margin-bottom:6px;">'+cat.toUpperCase()+'</div>'
+                  +group.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 12px;margin-bottom:6px;">'
+                    +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">'
+                    +'<strong style="flex:1;font-size:13px;">'+it.label+'</strong>'
+                    +'<button class="small-btn pc2-copy" data-id="'+it.id+'">Copy</button>'
+                    +'<button class="small-btn pc2-del" data-id="'+it.id+'">X</button></div>'
+                    +'<pre style="margin:0;font-size:11px;color:#9aa0b0;white-space:pre-wrap;word-break:break-all;">'+it.cmd+'</pre></div>';}).join('')
+                  +'</div>';}).join('');
+              el.querySelectorAll('.pc2-copy').forEach(function(b){b.addEventListener('click',function(){var d=JSON.parse(localStorage.getItem('lt_pcmd_'+b.dataset.id));navigator.clipboard&&navigator.clipboard.writeText(d.cmd).then(function(){var t=document.getElementById('toast');if(t){t.textContent='Copied';t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2000);}});});});
+              el.querySelectorAll('.pc2-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Remove?'))return;localStorage.removeItem('lt_pcmd_'+b.dataset.id);pc2Render();});});
+            }
+            document.getElementById('pc2-save').addEventListener('click',function(){
+              var label=document.getElementById('pc2-label').value.trim();var cmd=document.getElementById('pc2-cmd').value.trim();if(!label||!cmd)return;
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              localStorage.setItem('lt_pcmd_'+id,JSON.stringify({id:id,label:label,cmd:cmd,cat:document.getElementById('pc2-cat').value.trim()||'Other',ts:Date.now()}));
+              document.getElementById('pc2-label').value='';document.getElementById('pc2-cmd').value='';pc2Render();
+              var toast=document.getElementById('toast');if(toast){toast.textContent='Pinned';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}
+            });
+            var sec=document.getElementById('view-pinnedcmd');if(sec)sec.addEventListener('lt-view-enter',pc2Render);pc2Render();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-dailywizard" data-view-panel="dailywizard">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Daily Workflow Wizard</h1><p>Step-by-step guide for a standard developer day. Tick steps as you go.</p></div>
+          <article class="panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><span id="dw-prog" style="font-size:13px;color:#9aa0b0;"></span><button class="secondary-action" id="dw-reset" style="font-size:12px;padding:6px 12px;">Reset</button></div>
+            <div id="dw-steps"></div>
+          </article>
+          <script>(function(){
+            var DW=[
+              {step:'Review session notes from last session (SESSION_NOTES_*.md)',view:'sessionnotes'},
+              {step:'Check open blockers from previous session',view:'blockers'},
+              {step:'Run git fetch origin main — confirm branch is up to date',view:null},
+              {step:'Open Backup Check — confirm data is backed up',view:'backupreminder'},
+              {step:'Set session goals for today',view:'sessiongoals'},
+              {step:'Write in Today\'s Work what you plan to do',view:'todaywork'},
+              {step:'Open Command Center Overview — scan for critical items',view:'cmdoverview'},
+              {step:'Pick your first task from Priority Queue',view:'priorityqueue'},
+              {step:'Run Env Check before building',view:'envcheck'},
+              {step:'Build on the correct feature branch (not main)',view:null},
+              {step:'Run PR Prep Checklist before opening any PR',view:'prprep'},
+              {step:'Log the merge in Merge Log after it lands',view:'mergelog'},
+              {step:'Log shipped feature in Shipped Log',view:'shippedlog'},
+              {step:'Update Blockers — mark any cleared ones Resolved',view:'blockers'},
+              {step:'Generate Session Summary at end of day',view:'sessionsummary'}
+            ];
+            var dwState=DW.map(function(){return false;});
+            function dwRender(){
+              var el=document.getElementById('dw-steps');if(!el)return;
+              var done=dwState.filter(Boolean).length;
+              document.getElementById('dw-prog').textContent=done+' / '+DW.length+' steps done';
+              el.innerHTML=DW.map(function(s,i){return'<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">'
+                +'<label style="display:flex;align-items:flex-start;gap:10px;flex:1;cursor:pointer;">'
+                +'<input type="checkbox" data-idx="'+i+'"'+(dwState[i]?' checked':'')+' style="width:18px;height:18px;accent-color:#ffd400;flex-shrink:0;margin-top:2px;">'
+                +'<span style="font-size:13px;'+(dwState[i]?'text-decoration:line-through;color:#9aa0b0;':'')+'">'+(i+1)+'. '+s.step+'</span></label>'
+                +(s.view?'<button class="small-btn dw-go" data-view="'+s.view+'">Go</button>':'')+'</div>';}).join('');
+              el.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.addEventListener('change',function(){dwState[parseInt(cb.dataset.idx)]=cb.checked;dwRender();});});
+              el.querySelectorAll('.dw-go').forEach(function(b){b.addEventListener('click',function(){var t=document.querySelector('[data-view="'+b.dataset.view+'"][data-route]');if(t)t.click();});});
+            }
+            document.getElementById('dw-reset').addEventListener('click',function(){dwState=DW.map(function(){return false;});dwRender();});
+            var sec=document.getElementById('view-dailywizard');if(sec)sec.addEventListener('lt-view-enter',dwRender);dwRender();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-recoverywizard" data-view-panel="recoverywizard">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Recovery Workflow Wizard</h1><p>Step-by-step guide for recovering from a broken deploy or production incident.</p></div>
+          <article class="panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><span id="rw-prog" style="font-size:13px;color:#9aa0b0;"></span><button class="secondary-action" id="rw-reset" style="font-size:12px;padding:6px 12px;">Reset</button></div>
+            <div id="rw-steps"></div>
+          </article>
+          <script>(function(){
+            var RW=[
+              {step:'STOP — do not ship anything new until incident is resolved',view:null},
+              {step:'Open Incident Report — document what broke, when, and who is affected',view:'incidentreport'},
+              {step:'Identify the breaking commit using git log',view:null},
+              {step:'Check Rollback Plan — was a rollback plan filed before the merge?',view:'rollbackplan'},
+              {step:'Execute rollback: git revert <SHA> or git checkout <good-sha> -- <file>',view:null},
+              {step:'Verify the rollback: smoke check, reload on device',view:'smokecheck'},
+              {step:'Log the Rollback Receipt',view:'rollbackreceipt'},
+              {step:'Open Regression Log — log what regressed',view:'regressionlog'},
+              {step:'Update Open Risks Summary — assess new risk surface',view:'openrisks'},
+              {step:'Update Bug Triage — log the root-cause bug',view:'bugtriage'},
+              {step:'Write Post-Mortem once service is restored',view:'postmortem'},
+              {step:'Update Session Notes with what happened and how it was fixed',view:'sessionnotes'},
+              {step:'Run Safe Next Step before resuming normal work',view:'safenextstep'}
+            ];
+            var rwState=RW.map(function(){return false;});
+            function rwRender(){
+              var el=document.getElementById('rw-steps');if(!el)return;
+              var done=rwState.filter(Boolean).length;
+              document.getElementById('rw-prog').textContent=done+' / '+RW.length+' steps done';
+              el.innerHTML=RW.map(function(s,i){return'<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">'
+                +'<label style="display:flex;align-items:flex-start;gap:10px;flex:1;cursor:pointer;">'
+                +'<input type="checkbox" data-idx="'+i+'"'+(rwState[i]?' checked':'')+' style="width:18px;height:18px;accent-color:#ffd400;flex-shrink:0;margin-top:2px;">'
+                +'<span style="font-size:13px;'+(rwState[i]?'text-decoration:line-through;color:#9aa0b0;':(i===0?'color:#e74c3c;font-weight:700;':''))+'">'+s.step+'</span></label>'
+                +(s.view?'<button class="small-btn rw-go" data-view="'+s.view+'">Go</button>':'')+'</div>';}).join('');
+              el.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.addEventListener('change',function(){rwState[parseInt(cb.dataset.idx)]=cb.checked;rwRender();});});
+              el.querySelectorAll('.rw-go').forEach(function(b){b.addEventListener('click',function(){var t=document.querySelector('[data-view="'+b.dataset.view+'"][data-route]');if(t)t.click();});});
+            }
+            document.getElementById('rw-reset').addEventListener('click',function(){rwState=RW.map(function(){return false;});rwRender();});
+            var sec=document.getElementById('view-recoverywizard');if(sec)sec.addEventListener('lt-view-enter',rwRender);rwRender();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-releasewizard" data-view-panel="releasewizard">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Release Workflow Wizard</h1><p>Step-by-step guide for shipping a release from branch to live.</p></div>
+          <article class="panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><span id="rlw-prog" style="font-size:13px;color:#9aa0b0;"></span><button class="secondary-action" id="rlw-reset" style="font-size:12px;padding:6px 12px;">Reset</button></div>
+            <div id="rlw-steps"></div>
+          </article>
+          <script>(function(){
+            var RLW=[
+              {step:'Run Safe Next Step — confirm no blockers before releasing',view:'safenextstep'},
+              {step:'Confirm feature branch is up to date with origin/main',view:null},
+              {step:'Run Smoke Check on staging or dev build',view:'smokecheck'},
+              {step:'Run PR Prep Checklist — all 16 items checked',view:'prprep'},
+              {step:'File Rollback Plan before opening PR',view:'rollbackplan'},
+              {step:'Open PR and confirm title, body, and risk level are correct',view:null},
+              {step:'Enable auto-merge (squash) or get approval',view:null},
+              {step:'Log merge in Merge Log after PR lands',view:'mergelog'},
+              {step:'Log shipped features in Shipped Log',view:'shippedlog'},
+              {step:'Log Deploy Receipt',view:'deployreceipt'},
+              {step:'Write Release Notes',view:'releasenotes'},
+              {step:'Verify on iPad Safari — primary device test',view:null},
+              {step:'Log Build Vault event if this is a stable release',view:'vaultreminder'},
+              {step:'Update Backup Check — mark backup done after vault',view:'backupreminder'},
+              {step:'Export Release Packet for the record',view:'exportrelease'}
+            ];
+            var rlwState=RLW.map(function(){return false;});
+            function rlwRender(){
+              var el=document.getElementById('rlw-steps');if(!el)return;
+              var done=rlwState.filter(Boolean).length;
+              document.getElementById('rlw-prog').textContent=done+' / '+RLW.length+' steps done';
+              el.innerHTML=RLW.map(function(s,i){return'<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">'
+                +'<label style="display:flex;align-items:flex-start;gap:10px;flex:1;cursor:pointer;">'
+                +'<input type="checkbox" data-idx="'+i+'"'+(rlwState[i]?' checked':'')+' style="width:18px;height:18px;accent-color:#ffd400;flex-shrink:0;margin-top:2px;">'
+                +'<span style="font-size:13px;'+(rlwState[i]?'text-decoration:line-through;color:#9aa0b0;':'')+'">'+s.step+'</span></label>'
+                +(s.view?'<button class="small-btn rlw-go" data-view="'+s.view+'">Go</button>':'')+'</div>';}).join('');
+              el.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.addEventListener('change',function(){rlwState[parseInt(cb.dataset.idx)]=cb.checked;rlwRender();});});
+              el.querySelectorAll('.rlw-go').forEach(function(b){b.addEventListener('click',function(){var t=document.querySelector('[data-view="'+b.dataset.view+'"][data-route]');if(t)t.click();});});
+            }
+            document.getElementById('rlw-reset').addEventListener('click',function(){rlwState=RLW.map(function(){return false;});rlwRender();});
+            var sec=document.getElementById('view-releasewizard');if(sec)sec.addEventListener('lt-view-enter',rlwRender);rlwRender();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-lowtestwizard" data-view-panel="lowtestwizard">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Low-Test Day Wizard</h1><p>Checklist for builds when iPad testing is limited. Tighten other controls.</p></div>
+          <article class="panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><span id="ltw-prog" style="font-size:13px;color:#9aa0b0;"></span><button class="secondary-action" id="ltw-reset" style="font-size:12px;padding:6px 12px;">Reset</button></div>
+            <div id="ltw-steps"></div>
+          </article>
+          <script>(function(){
+            var LTW=[
+              {step:'ONLY ship changes rated Low risk — no Medium or High on a low-test day',view:null},
+              {step:'ONLY touch LoadTasks/index.html or similarly isolated files',view:null},
+              {step:'NEVER touch sw.js, service worker, or cache keys',view:null},
+              {step:'NEVER touch AI provider routing, audio, or export logic',view:null},
+              {step:'File Rollback Plan before every single merge',view:'rollbackplan'},
+              {step:'Run PR Prep Checklist — every item must pass',view:'prprep'},
+              {step:'Confirm diff contains ONLY expected files',view:null},
+              {step:'Run Smoke Check against the change description',view:'smokecheck'},
+              {step:'Log Test Results with Blocked if device not available',view:'testresults'},
+              {step:'Double-check rollback command is correct and tested in mind',view:'rollbackplan'},
+              {step:'Log Merge and Deploy Receipt immediately after landing',view:'mergelog'},
+              {step:'Export Daily Packet at session end for full audit trail',view:'exportdaily'}
+            ];
+            var ltwState=LTW.map(function(){return false;});
+            function ltwRender(){
+              var el=document.getElementById('ltw-steps');if(!el)return;
+              var done=ltwState.filter(Boolean).length;
+              document.getElementById('ltw-prog').textContent=done+' / '+LTW.length+' steps done';
+              el.innerHTML=LTW.map(function(s,i){return'<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">'
+                +'<label style="display:flex;align-items:flex-start;gap:10px;flex:1;cursor:pointer;">'
+                +'<input type="checkbox" data-idx="'+i+'"'+(ltwState[i]?' checked':'')+' style="width:18px;height:18px;accent-color:#ffd400;flex-shrink:0;margin-top:2px;">'
+                +'<span style="font-size:13px;'+(ltwState[i]?'text-decoration:line-through;color:#9aa0b0;':(i<4?'color:#ffd400;font-weight:600;':''))+'">'+s.step+'</span></label>'
+                +(s.view?'<button class="small-btn ltw-go" data-view="'+s.view+'">Go</button>':'')+'</div>';}).join('');
+              el.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.addEventListener('change',function(){ltwState[parseInt(cb.dataset.idx)]=cb.checked;ltwRender();});});
+              el.querySelectorAll('.ltw-go').forEach(function(b){b.addEventListener('click',function(){var t=document.querySelector('[data-view="'+b.dataset.view+'"][data-route]');if(t)t.click();});});
+            }
+            document.getElementById('ltw-reset').addEventListener('click',function(){ltwState=LTW.map(function(){return false;});ltwRender();});
+            var sec=document.getElementById('view-lowtestwizard');if(sec)sec.addEventListener('lt-view-enter',ltwRender);ltwRender();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-buildsession" data-view-panel="buildsession">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Build Session Wizard</h1><p>Step-by-step guide for a focused multi-batch build session.</p></div>
+          <article class="panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><span id="bsw-prog" style="font-size:13px;color:#9aa0b0;"></span><button class="secondary-action" id="bsw-reset" style="font-size:12px;padding:6px 12px;">Reset</button></div>
+            <div id="bsw-steps"></div>
+          </article>
+          <script>(function(){
+            var BSW=[
+              {step:'Run Env Check — confirm all 12 environment items pass',view:'envcheck'},
+              {step:'Run git fetch origin main and merge — confirm up to date',view:null},
+              {step:'Create a fresh feature branch from latest main',view:null},
+              {step:'Log the new branch in Branch Log',view:'branchlog'},
+              {step:'Set Session Goals — what must ship this session?',view:'sessiongoals'},
+              {step:'Open Build Sequence Planner — list every operation in order',view:'buildsequence'},
+              {step:'Build: only change LoadTasks/index.html (or approved scope)',view:null},
+              {step:'Run PR Prep Checklist before opening PR',view:'prprep'},
+              {step:'File Rollback Plan before merging',view:'rollbackplan'},
+              {step:'Open PR — confirm title, body, risk, and rollback are correct',view:null},
+              {step:'Log Merge in Merge Log immediately after merge',view:'mergelog'},
+              {step:'Log shipped tools in Shipped Log',view:'shippedlog'},
+              {step:'Export Handoff Packet at end of session',view:'exporthandoff'},
+              {step:'Run Backup Check — export data if due',view:'backupreminder'},
+              {step:'Generate Session Summary',view:'sessionsummary'}
+            ];
+            var bswState=BSW.map(function(){return false;});
+            function bswRender(){
+              var el=document.getElementById('bsw-steps');if(!el)return;
+              var done=bswState.filter(Boolean).length;
+              document.getElementById('bsw-prog').textContent=done+' / '+BSW.length+' steps done';
+              el.innerHTML=BSW.map(function(s,i){return'<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">'
+                +'<label style="display:flex;align-items:flex-start;gap:10px;flex:1;cursor:pointer;">'
+                +'<input type="checkbox" data-idx="'+i+'"'+(bswState[i]?' checked':'')+' style="width:18px;height:18px;accent-color:#ffd400;flex-shrink:0;margin-top:2px;">'
+                +'<span style="font-size:13px;'+(bswState[i]?'text-decoration:line-through;color:#9aa0b0;':'')+'">'+s.step+'</span></label>'
+                +(s.view?'<button class="small-btn bsw-go" data-view="'+s.view+'">Go</button>':'')+'</div>';}).join('');
+              el.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.addEventListener('change',function(){bswState[parseInt(cb.dataset.idx)]=cb.checked;bswRender();});});
+              el.querySelectorAll('.bsw-go').forEach(function(b){b.addEventListener('click',function(){var t=document.querySelector('[data-view="'+b.dataset.view+'"][data-route]');if(t)t.click();});});
+            }
+            document.getElementById('bsw-reset').addEventListener('click',function(){bswState=BSW.map(function(){return false;});bswRender();});
+            var sec=document.getElementById('view-buildsession');if(sec)sec.addEventListener('lt-view-enter',bswRender);bswRender();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-exportdaily" data-view-panel="exportdaily">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Daily Packet</h1><p>One tap exports today's work, goals, blockers, bugs, and stand-up text.</p></div>
+          <article class="panel">
+            <button class="primary-action" id="epd-export" style="margin-bottom:12px;">Export Daily Packet</button>
+            <div id="epd-preview" style="font-size:12px;color:#9aa0b0;"></div>
+          </article>
+          <script>(function(){
+            function epdGet(prefix,excl){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(prefix)===0){var skip=false;(excl||[]).forEach(function(e){if(k===e)skip=true;});if(!skip){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}}return a;}
+            document.getElementById('epd-export').addEventListener('click',function(){
+              var lines=['DAILY PACKET — '+new Date().toLocaleString(),'='.repeat(50),''];
+              var tw=localStorage.getItem('lt_tw_draft');if(tw&&tw.trim()){lines.push("TODAY'S WORK:");lines.push(tw.trim());lines.push('');}
+              var goals=[];try{goals=JSON.parse(localStorage.getItem('lt_sgl_current')||'[]');}catch(e){}
+              if(goals.length){lines.push('SESSION GOALS:');goals.forEach(function(g){lines.push((g.done?'[x] ':'[ ] ')+g.goal);});lines.push('');}
+              var blockers=epdGet('lt_bk_',['lt_bk_draft']).filter(function(b){return b.status==='Open';});
+              if(blockers.length){lines.push('OPEN BLOCKERS:');blockers.forEach(function(b){lines.push('- '+b.desc);});lines.push('');}
+              var bugs=epdGet('lt_bgt_',['lt_bgt_draft']).filter(function(b){return b.status==='Open';});
+              if(bugs.length){lines.push('OPEN BUGS:');bugs.forEach(function(b){lines.push('['+b.sev+'] '+b.title);});lines.push('');}
+              var pq=epdGet('lt_pq_',['lt_pq_draft']);if(pq.length){lines.push('PRIORITY QUEUE:');pq.slice(0,6).forEach(function(p){lines.push('['+p.priority+'] '+p.task);});lines.push('');}
+              var shp=epdGet('lt_shp_',['lt_shp_draft']);if(shp.length){lines.push('SHIPPED TODAY (recent):');shp.slice(0,5).forEach(function(s){lines.push('- '+s.name+(s.pr?' PR#'+s.pr:''));});lines.push('');}
+              var notes=localStorage.getItem('lt_np_draft');if(notes&&notes.trim()){lines.push('NOTE PAD:');lines.push(notes.trim().substring(0,300));lines.push('');}
+              var txt=lines.join('\n');
+              document.getElementById('epd-preview').textContent=txt.length+' chars — '+lines.length+' lines';
+              var b=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='daily-packet-'+new Date().toISOString().slice(0,10)+'.txt';a.click();
+            });
+          }());</script>
+        </section>
+
+        <section class="view" id="view-exportrecovery" data-view-panel="exportrecovery">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Recovery Packet</h1><p>One tap exports all incident, regression, risk, rollback, and bug records.</p></div>
+          <article class="panel">
+            <button class="primary-action" id="epr-export" style="margin-bottom:12px;">Export Recovery Packet</button>
+            <div id="epr-preview" style="font-size:12px;color:#9aa0b0;"></div>
+          </article>
+          <script>(function(){
+            function eprGet(prefix,excl){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(prefix)===0){var skip=false;(excl||[]).forEach(function(e){if(k===e)skip=true;});if(!skip){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}}return a;}
+            document.getElementById('epr-export').addEventListener('click',function(){
+              var lines=['RECOVERY PACKET — '+new Date().toLocaleString(),'='.repeat(50),''];
+              var incidents=eprGet('lt_ir_',['lt_ir_draft']);if(incidents.length){lines.push('INCIDENTS ('+incidents.length+'):');incidents.forEach(function(it){lines.push('['+it.sev+'] '+it.title+(it.site?' ('+it.site+')':'')+(it.resolved?'\nResolved: '+it.resolved:''));});lines.push('');}
+              var regressions=eprGet('lt_rl_',['lt_rl_draft']);if(regressions.length){lines.push('REGRESSIONS ('+regressions.length+'):');regressions.forEach(function(r){lines.push('['+r.status+'] '+(r.what||r.title||'--'));});lines.push('');}
+              var bugs=eprGet('lt_bgt_',['lt_bgt_draft']).filter(function(b){return b.status!=='Fixed';});if(bugs.length){lines.push('OPEN BUGS ('+bugs.length+'):');bugs.forEach(function(b){lines.push('['+b.sev+'] ['+b.status+'] '+b.title);});lines.push('');}
+              var risks=eprGet('lt_rg_',['lt_rg_draft']).filter(function(r){return r.status==='Open';});if(risks.length){lines.push('OPEN RISKS ('+risks.length+'):');risks.forEach(function(r){lines.push('[P:'+r.prob+' I:'+r.impact+'] '+r.desc);});lines.push('');}
+              var rbs=eprGet('lt_rr2_',['lt_rr2_draft']);if(rbs.length){lines.push('ROLLBACK RECEIPTS ('+rbs.length+'):');rbs.forEach(function(r){lines.push((r.site||'--')+' — '+(r.reason||'--'));});lines.push('');}
+              var rbp=eprGet('lt_rbp_',['lt_rbp_draft']);if(rbp.length){lines.push('ROLLBACK PLANS ON FILE ('+rbp.length+'):');rbp.forEach(function(r){lines.push(r.title+(r.cmd?'\nCmd: '+r.cmd:''));});lines.push('');}
+              var txt=lines.join('\n');
+              document.getElementById('epr-preview').textContent=txt.length+' chars';
+              var b=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='recovery-packet-'+new Date().toISOString().slice(0,10)+'.txt';a.click();
+            });
+          }());</script>
+        </section>
+
+        <section class="view" id="view-exportrelease" data-view-panel="exportrelease">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Release Packet</h1><p>One tap exports deploy receipts, shipped log, release notes, and merge log.</p></div>
+          <article class="panel">
+            <button class="primary-action" id="eprl-export" style="margin-bottom:12px;">Export Release Packet</button>
+            <div id="eprl-preview" style="font-size:12px;color:#9aa0b0;"></div>
+          </article>
+          <script>(function(){
+            function eprlGet(prefix,excl){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(prefix)===0){var skip=false;(excl||[]).forEach(function(e){if(k===e)skip=true;});if(!skip){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}}return a;}
+            document.getElementById('eprl-export').addEventListener('click',function(){
+              var lines=['RELEASE PACKET — '+new Date().toLocaleString(),'='.repeat(50),''];
+              var merges=eprlGet('lt_mg_',['lt_mg_draft']);if(merges.length){lines.push('MERGES ('+merges.length+'):');merges.forEach(function(m){lines.push('PR #'+(m.pr||'--')+' | '+m.sha+' | '+m.risk+(m.branch?'\n'+m.branch:''));});lines.push('');}
+              var shp=eprlGet('lt_shp_',['lt_shp_draft']);if(shp.length){lines.push('SHIPPED FEATURES ('+shp.length+'):');shp.forEach(function(s){lines.push('- '+s.name+(s.date?' ('+s.date+')':'')+(s.pr?' PR#'+s.pr:'')+(s.sha?' '+s.sha:''));});lines.push('');}
+              var dr=eprlGet('lt_dr_',['lt_dr_draft']);if(dr.length){lines.push('DEPLOY RECEIPTS ('+dr.length+'):');dr.forEach(function(d){lines.push((d.site||'--')+' — '+(d.version||'--')+(d.ts?'\n'+new Date(d.ts).toLocaleString():''));});lines.push('');}
+              var vault=eprlGet('lt_bvr_',['lt_bvr_draft']);if(vault.length){lines.push('VAULT EVENTS ('+vault.length+'):');vault.forEach(function(v){lines.push(v.site+' '+v.sha+(v.branch?' branch: '+v.branch:''));});lines.push('');}
+              var txt=lines.join('\n');
+              document.getElementById('eprl-preview').textContent=txt.length+' chars';
+              var b=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='release-packet-'+new Date().toISOString().slice(0,10)+'.txt';a.click();
+            });
+          }());</script>
+        </section>
+
+        <section class="view" id="view-compactmode" data-view-panel="compactmode">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Compact Mode</h1><p>Toggle tool categories on or off. Hidden categories collapse in the dashboard grid.</p></div>
+          <article class="panel">
+            <p style="font-size:13px;color:#9aa0b0;margin-bottom:16px;">Turn off categories you do not use regularly. This preference is saved and used to filter the dashboard cards.</p>
+            <div id="cm3-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;"></div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="cm3-save">Save Visibility</button>
+              <button class="secondary-action" id="cm3-reset">Show All</button>
+            </div>
+            <div id="cm3-status" style="font-size:12px;color:#9aa0b0;margin-top:10px;"></div>
+          </article>
+          <script>(function(){
+            var CM3_CATS=['Daily Operations','Planning and Tracking','Build and Deploy','Records and Logs','Documentation','Tools and Utilities','Generators and Builders','Batch 8-11 Tools','Batch 12-13 Tools','Batch 14-15 Tools','Batch 16 Wizards'];
+            function cm3Load(){try{var v=JSON.parse(localStorage.getItem('lt_vis_config')||'{}');return v;}catch(e){return{};}}
+            function cm3Render(){
+              var vis=cm3Load();var el=document.getElementById('cm3-list');if(!el)return;
+              el.innerHTML=CM3_CATS.map(function(cat){var hidden=vis[cat]===false;return'<label style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(255,255,255,0.05);border-radius:8px;cursor:pointer;">'
+                +'<input type="checkbox" data-cat="'+cat+'"'+(hidden?'':' checked')+' style="width:18px;height:18px;accent-color:#ffd400;flex-shrink:0;">'
+                +'<span style="font-size:13px;">'+cat+'</span>'
+                +'<span style="font-size:11px;color:#9aa0b0;margin-left:auto;">'+(hidden?'hidden':'visible')+'</span></label>';}).join('');
+            }
+            document.getElementById('cm3-save').addEventListener('click',function(){
+              var vis={};document.querySelectorAll('#cm3-list input[type=checkbox]').forEach(function(cb){vis[cb.dataset.cat]=cb.checked;});
+              localStorage.setItem('lt_vis_config',JSON.stringify(vis));
+              var hiddenCount=Object.keys(vis).filter(function(k){return vis[k]===false;}).length;
+              document.getElementById('cm3-status').textContent='Saved. '+hiddenCount+' categor'+(hiddenCount===1?'y':'ies')+' hidden.';
+              cm3Render();
+            });
+            document.getElementById('cm3-reset').addEventListener('click',function(){localStorage.removeItem('lt_vis_config');cm3Render();document.getElementById('cm3-status').textContent='All categories visible.';});
+            var sec=document.getElementById('view-compactmode');if(sec)sec.addEventListener('lt-view-enter',cm3Render);cm3Render();
+          }());</script>
+        </section>
+
         <!-- ═══ DASHBOARD COUNTERS SCRIPT ═══ -->
         <script>
         (function(){
@@ -8574,7 +9098,8 @@
               {label:'Work Log',n:ltCountPrefix('lt_wl_',['lt_wl_draft'])},
               {label:'Handoff Packets',n:ltCountPrefix('lt_hpkt_',['lt_hpkt_draft'])},
               {label:'Site Protections',n:ltCountPrefix('lt_sps_',['lt_sps_draft'])},
-              {label:'Vault Events',n:ltCountPrefix('lt_bvr_',['lt_bvr_draft'])}
+              {label:'Vault Events',n:ltCountPrefix('lt_bvr_',['lt_bvr_draft'])},
+              {label:'Pinned Commands',n:ltCountPrefix('lt_pcmd_',['lt_pcmd_draft'])}
             ];
             el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px;text-align:center;"><div style="font-size:28px;font-weight:700;line-height:1;">'+(it.n)+'</div><div style="font-size:12px;color:#9aa0b0;margin-top:4px;">'+it.label+'</div></div>';}).join('');
           }
