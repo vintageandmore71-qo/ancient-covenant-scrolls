@@ -79,6 +79,10 @@
         <button data-view="baseline" data-route>Baseline</button>
         <button data-view="riskreport" data-route>Risk Report</button>
         <button data-view="promptbuilder" data-route>Prompt Builder</button>
+        <button data-view="sessionnotes" data-route>Session Notes</button>
+        <button data-view="handoffdoc" data-route>Handoff Doc</button>
+        <button data-view="changelog" data-route>Changelog</button>
+        <button data-view="versiontracker" data-route>Version Tracker</button>
       </nav>
       <button class="icon-button" id="hardRefresh" aria-label="Hard refresh app state">
         <span class="icon-mini" data-icon="refresh"></span>
@@ -121,6 +125,10 @@
         <button data-view="baseline" data-route><span class="rail-icon" data-icon="vault"></span><span>Baseline</span></button>
         <button data-view="riskreport" data-route><span class="rail-icon" data-icon="wrench"></span><span>Risk Report</span></button>
         <button data-view="promptbuilder" data-route><span class="rail-icon" data-icon="notes"></span><span>Prompt Builder</span></button>
+        <button data-view="sessionnotes" data-route><span class="rail-icon" data-icon="notes"></span><span>Session Notes</span></button>
+        <button data-view="handoffdoc" data-route><span class="rail-icon" data-icon="handoff"></span><span>Handoff Doc</span></button>
+        <button data-view="changelog" data-route><span class="rail-icon" data-icon="version"></span><span>Changelog</span></button>
+        <button data-view="versiontracker" data-route><span class="rail-icon" data-icon="library"></span><span>Version Tracker</span></button>
       </aside>
 
       <section class="workspace">
@@ -244,6 +252,26 @@
               <span class="card-icon" data-icon="notes"></span>
               <strong>Prompt Builder</strong>
               <span>Generate safe developer instructions for common Claude Code scenarios.</span>
+            </button>
+            <button class="command-card" data-view="sessionnotes" data-route>
+              <span class="card-icon" data-icon="notes"></span>
+              <strong>Session Notes</strong>
+              <span>Write and export a structured session log with built, broken, and next steps.</span>
+            </button>
+            <button class="command-card" data-view="handoffdoc" data-route>
+              <span class="card-icon" data-icon="handoff"></span>
+              <strong>Handoff Doc</strong>
+              <span>Generate a plain-language handoff block to start the next Claude session.</span>
+            </button>
+            <button class="command-card" data-view="changelog" data-route>
+              <span class="card-icon" data-icon="version"></span>
+              <strong>Changelog</strong>
+              <span>Record one entry per PR or merge. Export a full changelog as .txt.</span>
+            </button>
+            <button class="command-card" data-view="versiontracker" data-route>
+              <span class="card-icon" data-icon="library"></span>
+              <strong>Version Tracker</strong>
+              <span>Track current version and cache marker for every site in one place.</span>
             </button>
           </div>
 
@@ -1840,7 +1868,7 @@
             document.getElementById('lr-refresh').addEventListener('click', function(){ lrRender(); lrToast('Records refreshed.'); });
 
             document.getElementById('lr-export-all').addEventListener('click', function(){
-              var bundle = { exportedAt: new Date().toISOString(), repairJobs: [], buildVaultEntries: [], siteHealthReports: [], repairPackSummaries: [], criteriaChecklists: [] };
+              var bundle = { exportedAt: new Date().toISOString(), repairJobs: [], buildVaultEntries: [], siteHealthReports: [], repairPackSummaries: [], criteriaChecklists: [], smokeChecks: [], buildSnapshots: [], riskReports: [], sessionNotes: [], changelogEntries: [], versionSnapshots: [] };
               for (var i = 0; i < localStorage.length; i++) {
                 var k = localStorage.key(i);
                 try {
@@ -1850,6 +1878,12 @@
                   else if (k && k.indexOf('lt_sh_') === 0 && k !== 'lt_sh_draft') bundle.siteHealthReports.push(d);
                   else if (k && k.indexOf('lt_rp_') === 0 && k !== 'lt_rp_draft') bundle.repairPackSummaries.push(d);
                   else if (k && k.indexOf('lt_ac_') === 0 && k !== 'lt_ac_draft') bundle.criteriaChecklists.push(d);
+                  else if (k && k.indexOf('lt_sc_') === 0 && k !== 'lt_sc_draft') bundle.smokeChecks.push(d);
+                  else if (k && k.indexOf('lt_bl_') === 0 && k !== 'lt_bl_draft') bundle.buildSnapshots.push(d);
+                  else if (k && k.indexOf('lt_rr_') === 0 && k !== 'lt_rr_draft') bundle.riskReports.push(d);
+                  else if (k && k.indexOf('lt_sn_') === 0 && k !== 'lt_sn_draft') bundle.sessionNotes.push(d);
+                  else if (k && k.indexOf('lt_cl_') === 0 && k !== 'lt_cl_draft') bundle.changelogEntries.push(d);
+                  else if (k && k.indexOf('lt_vt_') === 0 && k !== 'lt_vt_draft') bundle.versionSnapshots.push(d);
                 } catch(e){}
               }
               var b = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' });
@@ -2337,6 +2371,278 @@
             pbGet('pb-generate').addEventListener('click',function(){var text=pbGenerate();var out=pbGet('pb-output');out.textContent=text;out.style.display='';pbToast('Prompt generated.');});
             pbGet('pb-copy').addEventListener('click',function(){var text=pbGenerate();if(!text){pbToast('Generate a prompt first.');return;}navigator.clipboard.writeText(text).then(function(){pbToast('Prompt copied.');}).catch(function(){pbToast('Copy failed.');});});
             pbGet('pb-export').addEventListener('click',function(){var text=pbGenerate();if(!text){pbToast('Generate a prompt first.');return;}var b=new Blob([text],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='prompt-'+Date.now()+'.txt';a.click();URL.revokeObjectURL(a.href);pbToast('.txt exported.');});
+          }());
+          </script>
+        </section>
+
+        <!-- ═══ SESSION NOTES BUILDER ═══ -->
+        <section class="view" id="view-sessionnotes" data-view-panel="sessionnotes">
+          <div class="section-head">
+            <p class="eyebrow">Session Notes</p>
+            <h1>Write a structured session log.</h1>
+            <p>Record what was built, what is broken, and what comes next. Export as .txt or .md. Local only.</p>
+          </div>
+          <div class="panel">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+              <button class="primary-action" type="button" id="sn-new">New Session Notes</button>
+              <button class="secondary-action" type="button" id="sn-save">Save Locally</button>
+              <button class="secondary-action" type="button" id="sn-load">Reload Saved</button>
+              <button class="secondary-action" type="button" id="sn-export-txt">Export .txt</button>
+              <button class="secondary-action" type="button" id="sn-export-md">Export .md</button>
+              <button class="secondary-action" type="button" id="sn-copy">Copy</button>
+            </div>
+            <div style="display:grid;gap:12px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <label>Notes ID (auto)<input id="sn-id" type="text" readonly style="background:rgba(255,255,255,0.04);"></label>
+                <label>Date<input id="sn-date" type="text" placeholder="Example: 2026-05-11"></label>
+              </div>
+              <label>Branch<input id="sn-branch" type="text" placeholder="Example: claude/loadtasks-devbot-batch5-2026-05-11"></label>
+              <label>Latest Commit Hash<input id="sn-commit" type="text" placeholder="Example: 811fb710"></label>
+              <label>Built Today<textarea id="sn-built" rows="4" placeholder="List features or fixes shipped this session, one per line."></textarea></label>
+              <label>Broken / Blocking<textarea id="sn-broken" rows="3" placeholder="List what is confirmed broken or blocking, one per line."></textarea></label>
+              <label>Next Steps<textarea id="sn-next" rows="3" placeholder="What should happen at the start of the next session?"></textarea></label>
+              <label>Pending / Parked<textarea id="sn-parked" rows="3" placeholder="Features deferred and why."></textarea></label>
+              <label>Notes<textarea id="sn-notes" rows="2" placeholder="Any other context for the next session."></textarea></label>
+            </div>
+          </div>
+          <script>
+          (function(){
+            function snGet(id){return document.getElementById(id);}
+            function snVal(id){var e=snGet(id);return e?e.value.trim():'';}
+            function snSet(id,v){var e=snGet(id);if(e)e.value=v;}
+            function snToast(m){var t=document.getElementById('toast');if(t){t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2400);}}
+            function snGenId(){return'SN-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,5).toUpperCase();}
+            function snBuild(){return{notesId:snVal('sn-id'),date:snVal('sn-date'),branch:snVal('sn-branch'),commitHash:snVal('sn-commit'),builtToday:snVal('sn-built'),brokenBlocking:snVal('sn-broken'),nextSteps:snVal('sn-next'),pendingParked:snVal('sn-parked'),notes:snVal('sn-notes')};}
+            function snFill(d){snSet('sn-id',d.notesId||'');snSet('sn-date',d.date||'');snSet('sn-branch',d.branch||'');snSet('sn-commit',d.commitHash||'');snSet('sn-built',d.builtToday||'');snSet('sn-broken',d.brokenBlocking||'');snSet('sn-next',d.nextSteps||'');snSet('sn-parked',d.pendingParked||'');snSet('sn-notes',d.notes||'');}
+            function snText(d,md){
+              var h=md?'# ':'',h2=md?'## ':'--- ',sep=md?'\n':'\n';
+              var lines=[h+'Session Notes — '+(d.date||'(no date)'),''];
+              lines.push(h2+'Current State');lines.push('Branch: '+(d.branch||'—'));lines.push('Commit: '+(d.commitHash||'—'));lines.push('');
+              lines.push(h2+'Built Today');lines.push(d.builtToday||'(none)');lines.push('');
+              lines.push(h2+'Broken / Blocking');lines.push(d.brokenBlocking||'(none)');lines.push('');
+              lines.push(h2+'Next Steps');lines.push(d.nextSteps||'(none)');lines.push('');
+              lines.push(h2+'Pending / Parked');lines.push(d.pendingParked||'(none)');lines.push('');
+              if(d.notes){lines.push(h2+'Notes');lines.push(d.notes);lines.push('');}
+              return lines.join('\n');
+            }
+            snGet('sn-new').addEventListener('click',function(){snFill({});snSet('sn-id',snGenId());snSet('sn-date',new Date().toISOString().slice(0,10));snToast('New session notes started.');});
+            snGet('sn-save').addEventListener('click',function(){try{var d=snBuild();if(!d.notesId){snToast('Start new notes first.');return;}localStorage.setItem('lt_sn_'+d.notesId,JSON.stringify(d));localStorage.setItem('lt_sn_draft',JSON.stringify(d));snToast('Notes saved locally.');}catch(ex){snToast('Save failed.');}});
+            snGet('sn-load').addEventListener('click',function(){try{var r=localStorage.getItem('lt_sn_draft');if(!r){snToast('No saved notes found.');return;}snFill(JSON.parse(r));snToast('Notes loaded.');}catch(ex){snToast('Load failed.');}});
+            snGet('sn-export-txt').addEventListener('click',function(){var d=snBuild();if(!d.notesId){snToast('Start new notes first.');return;}var b=new Blob([snText(d,false)],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='session-notes-'+(d.date||Date.now())+'.txt';a.click();URL.revokeObjectURL(a.href);snToast('.txt exported.');});
+            snGet('sn-export-md').addEventListener('click',function(){var d=snBuild();if(!d.notesId){snToast('Start new notes first.');return;}var b=new Blob([snText(d,true)],{type:'text/markdown'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='session-notes-'+(d.date||Date.now())+'.md';a.click();URL.revokeObjectURL(a.href);snToast('.md exported.');});
+            snGet('sn-copy').addEventListener('click',function(){var d=snBuild();if(!d.notesId){snToast('Start new notes first.');return;}navigator.clipboard.writeText(snText(d,false)).then(function(){snToast('Copied.');}).catch(function(){snToast('Copy failed.');});});
+          }());
+          </script>
+        </section>
+
+        <!-- ═══ HANDOFF DOCUMENT GENERATOR ═══ -->
+        <section class="view" id="view-handoffdoc" data-view-panel="handoffdoc">
+          <div class="section-head">
+            <p class="eyebrow">Handoff Doc</p>
+            <h1>Generate a handoff block for the next session.</h1>
+            <p>Fill in the current state. Copy the output and paste it into a new Claude Code session to resume without re-explaining context.</p>
+          </div>
+          <div class="panel">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+              <button class="primary-action" type="button" id="hd-generate">Generate Handoff</button>
+              <button class="secondary-action" type="button" id="hd-copy">Copy Handoff</button>
+              <button class="secondary-action" type="button" id="hd-export">Export handoff.txt</button>
+              <button class="secondary-action" type="button" id="hd-save">Save Locally</button>
+              <button class="secondary-action" type="button" id="hd-load">Reload Saved</button>
+            </div>
+            <div style="display:grid;gap:12px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <label>Current Branch<input id="hd-branch" type="text" placeholder="Example: claude/loadtasks-devbot-batch5-2026-05-11"></label>
+                <label>Last Commit Hash<input id="hd-commit" type="text" placeholder="Example: 811fb710"></label>
+              </div>
+              <label>Last PR Merged<input id="hd-pr" type="text" placeholder="Example: PR #16 — LoadTasks v5.21"></label>
+              <label>Currently Working On<textarea id="hd-workingOn" rows="2" placeholder="What task is in progress right now?"></textarea></label>
+              <label>Confirmed Working Features<textarea id="hd-working" rows="3" placeholder="List features confirmed working on device."></textarea></label>
+              <label>Confirmed Broken Features<textarea id="hd-broken" rows="3" placeholder="List features confirmed broken on device."></textarea></label>
+              <label>First Task Next Session<textarea id="hd-firstTask" rows="2" placeholder="What is the single first action for the next session?"></textarea></label>
+              <label>Key Files to Know<textarea id="hd-files" rows="2" placeholder="List the most important files for the current work."></textarea></label>
+              <label>Do Not Touch<textarea id="hd-doNotTouch" rows="2" placeholder="List files or areas that must not be changed."></textarea></label>
+              <label>Extra Context<textarea id="hd-context" rows="2" placeholder="Any other context the next session will need."></textarea></label>
+            </div>
+            <div id="hd-output" style="display:none;margin-top:16px;padding:14px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:13px;white-space:pre-wrap;line-height:1.6;"></div>
+          </div>
+          <script>
+          (function(){
+            function hdGet(id){return document.getElementById(id);}
+            function hdVal(id){var e=hdGet(id);return e?e.value.trim():'';}
+            function hdSet(id,v){var e=hdGet(id);if(e)e.value=v;}
+            function hdToast(m){var t=document.getElementById('toast');if(t){t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2400);}}
+            function hdBuildData(){return{branch:hdVal('hd-branch'),commitHash:hdVal('hd-commit'),lastPR:hdVal('hd-pr'),currentlyWorkingOn:hdVal('hd-workingOn'),confirmedWorking:hdVal('hd-working'),confirmedBroken:hdVal('hd-broken'),firstTaskNextSession:hdVal('hd-firstTask'),keyFiles:hdVal('hd-files'),doNotTouch:hdVal('hd-doNotTouch'),extraContext:hdVal('hd-context')};}
+            function hdFill(d){hdSet('hd-branch',d.branch||'');hdSet('hd-commit',d.commitHash||'');hdSet('hd-pr',d.lastPR||'');hdSet('hd-workingOn',d.currentlyWorkingOn||'');hdSet('hd-working',d.confirmedWorking||'');hdSet('hd-broken',d.confirmedBroken||'');hdSet('hd-firstTask',d.firstTaskNextSession||'');hdSet('hd-files',d.keyFiles||'');hdSet('hd-doNotTouch',d.doNotTouch||'');hdSet('hd-context',d.extraContext||'');}
+            function hdBuildText(d){
+              var lines=['LOAD PROJECT HANDOFF — '+new Date().toISOString().slice(0,10),''];
+              lines.push('CURRENT STATE');
+              lines.push('Branch: '+(d.branch||'—'));
+              lines.push('Last commit: '+(d.commitHash||'—'));
+              lines.push('Last PR merged: '+(d.lastPR||'—'));
+              lines.push('');
+              if(d.currentlyWorkingOn){lines.push('CURRENTLY WORKING ON');lines.push(d.currentlyWorkingOn);lines.push('');}
+              lines.push('CONFIRMED WORKING ON DEVICE');lines.push(d.confirmedWorking||'(none listed)');lines.push('');
+              lines.push('CONFIRMED BROKEN ON DEVICE');lines.push(d.confirmedBroken||'(none listed)');lines.push('');
+              lines.push('FIRST TASK NEXT SESSION');lines.push(d.firstTaskNextSession||'(not specified)');lines.push('');
+              if(d.keyFiles){lines.push('KEY FILES');lines.push(d.keyFiles);lines.push('');}
+              if(d.doNotTouch){lines.push('DO NOT TOUCH');lines.push(d.doNotTouch);lines.push('');}
+              if(d.extraContext){lines.push('EXTRA CONTEXT');lines.push(d.extraContext);lines.push('');}
+              lines.push('---');
+              lines.push('Claude, resume from this handoff. Read SESSION_NOTES_*.md and HANDOFF.md for full context before doing anything.');
+              return lines.join('\n');
+            }
+            hdGet('hd-generate').addEventListener('click',function(){var d=hdBuildData();var text=hdBuildText(d);hdGet('hd-output').textContent=text;hdGet('hd-output').style.display='';hdToast('Handoff generated.');});
+            hdGet('hd-copy').addEventListener('click',function(){var d=hdBuildData();navigator.clipboard.writeText(hdBuildText(d)).then(function(){hdToast('Handoff copied.');}).catch(function(){hdToast('Copy failed.');});});
+            hdGet('hd-export').addEventListener('click',function(){var d=hdBuildData();var b=new Blob([hdBuildText(d)],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='handoff-'+new Date().toISOString().slice(0,10)+'.txt';a.click();URL.revokeObjectURL(a.href);hdToast('Exported.');});
+            hdGet('hd-save').addEventListener('click',function(){try{var d=hdBuildData();d.hdId='HD-'+Date.now().toString(36).toUpperCase();d.savedAt=new Date().toISOString();localStorage.setItem('lt_hd_draft',JSON.stringify(d));hdToast('Handoff saved locally.');}catch(ex){hdToast('Save failed.');}});
+            hdGet('hd-load').addEventListener('click',function(){try{var r=localStorage.getItem('lt_hd_draft');if(!r){hdToast('No saved handoff found.');return;}hdFill(JSON.parse(r));hdToast('Handoff loaded.');}catch(ex){hdToast('Load failed.');}});
+          }());
+          </script>
+        </section>
+
+        <!-- ═══ CHANGELOG ENTRY BUILDER ═══ -->
+        <section class="view" id="view-changelog" data-view-panel="changelog">
+          <div class="section-head">
+            <p class="eyebrow">Changelog</p>
+            <h1>Record one entry per PR or merge.</h1>
+            <p>Build a running changelog for the project. Export all entries as a single .txt file. Local only.</p>
+          </div>
+          <div class="panel" style="margin-bottom:16px;">
+            <h2 style="margin-bottom:12px;font-size:15px;">New Entry</h2>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+              <button class="primary-action" type="button" id="cl-add">Add Entry</button>
+              <button class="secondary-action" type="button" id="cl-clear-form">Clear Form</button>
+            </div>
+            <div style="display:grid;gap:12px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                <label>Version<input id="cl-version" type="text" placeholder="Example: v5.21"></label>
+                <label>Date<input id="cl-date" type="text" placeholder="Example: 2026-05-11"></label>
+                <label>PR Number<input id="cl-pr" type="text" placeholder="Example: 16"></label>
+              </div>
+              <label>What Changed<textarea id="cl-what" rows="3" placeholder="Describe what was added or fixed in plain language."></textarea></label>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <label>Risk Level<select id="cl-risk"><option value="">Select...</option><option>LOW</option><option>MEDIUM</option><option>HIGH</option></select></label>
+                <label>Verified on Device<select id="cl-verified"><option value="">Select...</option><option>YES</option><option>NO</option><option>SMOKE CHECK ONLY</option></select></label>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+            <button class="secondary-action" type="button" id="cl-export-all">Export Full Changelog .txt</button>
+          </div>
+          <div class="panel">
+            <h2 style="margin-bottom:12px;font-size:15px;">Saved Entries</h2>
+            <div id="cl-list" style="display:grid;gap:8px;"></div>
+          </div>
+          <script>
+          (function(){
+            function clToast(m){var t=document.getElementById('toast');if(t){t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2400);}}
+            function clGet(id){return document.getElementById(id);}
+            function clVal(id){var e=clGet(id);return e?e.value.trim():'';}
+            function clSet(id,v){var e=clGet(id);if(e)e.value=v;}
+            function clGenId(){return'CL-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,5).toUpperCase();}
+            function clGetAll(){
+              var items=[];
+              for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_cl_')===0&&k!=='lt_cl_draft'){try{items.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}
+              items.sort(function(a,b){return(b.savedAt||'')>(a.savedAt||'')?1:-1;});
+              return items;
+            }
+            function clRender(){
+              var list=clGet('cl-list');if(!list)return;
+              var items=clGetAll();
+              if(items.length===0){list.innerHTML='<p style="font-size:13px;color:#9aa0b0;">No entries yet. Add the first entry above.</p>';return;}
+              list.innerHTML='';
+              items.forEach(function(item){
+                var row=document.createElement('div');
+                row.style.cssText='padding:10px 12px;background:rgba(255,255,255,0.04);border-radius:6px;font-size:13px;display:flex;gap:10px;align-items:flex-start;';
+                var info=document.createElement('div');info.style.flex='1';
+                info.innerHTML='<strong>'+(item.version||'—')+'</strong> &nbsp;'+( item.date||'')+(item.pr?' &nbsp; PR #'+item.pr:'')+' &nbsp; <span style="color:#9aa0b0;">'+(item.riskLevel||'')+'</span>'+(item.verifiedOnDevice?' &nbsp; Verified: '+item.verifiedOnDevice:'')+'<br><span style="color:#ccc;">'+(item.whatChanged||'')+'</span>';
+                var del=document.createElement('button');del.type='button';del.textContent='Delete';del.className='secondary-action';del.style.cssText='padding:3px 10px;font-size:12px;color:#f44336;border-color:#f44336;flex-shrink:0;';
+                del.addEventListener('click',function(key){return function(){localStorage.removeItem(key);clRender();clToast('Entry deleted.');};}('lt_cl_'+item.entryId));
+                row.appendChild(info);row.appendChild(del);list.appendChild(row);
+              });
+            }
+            clGet('cl-add').addEventListener('click',function(){
+              var entry={entryId:clGenId(),savedAt:new Date().toISOString(),version:clVal('cl-version'),date:clVal('cl-date'),pr:clVal('cl-pr'),whatChanged:clVal('cl-what'),riskLevel:clVal('cl-risk'),verifiedOnDevice:clVal('cl-verified')};
+              if(!entry.whatChanged){clToast('Add a description of what changed.');return;}
+              try{localStorage.setItem('lt_cl_'+entry.entryId,JSON.stringify(entry));clToast('Entry added.');clSet('cl-version','');clSet('cl-date','');clSet('cl-pr','');clSet('cl-what','');clSet('cl-risk','');clSet('cl-verified','');clRender();}catch(ex){clToast('Save failed.');}
+            });
+            clGet('cl-clear-form').addEventListener('click',function(){clSet('cl-version','');clSet('cl-date','');clSet('cl-pr','');clSet('cl-what','');clSet('cl-risk','');clSet('cl-verified','');clToast('Form cleared.');});
+            clGet('cl-export-all').addEventListener('click',function(){
+              var items=clGetAll();if(items.length===0){clToast('No entries to export.');return;}
+              var lines=['CHANGELOG','Exported: '+new Date().toISOString(),''];
+              items.forEach(function(item){
+                lines.push((item.version||'—')+' — '+(item.date||'')+(item.pr?' — PR #'+item.pr:''));
+                lines.push('Risk: '+(item.riskLevel||'—')+' | Verified: '+(item.verifiedOnDevice||'—'));
+                lines.push(item.whatChanged||'');lines.push('');
+              });
+              var b=new Blob([lines.join('\n')],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='changelog-'+Date.now()+'.txt';a.click();URL.revokeObjectURL(a.href);clToast('Changelog exported.');
+            });
+            var panel=document.getElementById('view-changelog');
+            if(panel){panel.addEventListener('lt-view-enter',clRender);setTimeout(function(){if(panel.classList.contains('active'))clRender();},100);}
+          }());
+          </script>
+        </section>
+
+        <!-- ═══ VERSION TRACKER ═══ -->
+        <section class="view" id="view-versiontracker" data-view-panel="versiontracker">
+          <div class="section-head">
+            <p class="eyebrow">Version Tracker</p>
+            <h1>Track all site versions in one place.</h1>
+            <p>One row per site. Save the current version, cache marker, and last verified date. Export as JSON. Local only.</p>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+            <button class="primary-action" type="button" id="vt-save-all">Save All</button>
+            <button class="secondary-action" type="button" id="vt-load">Reload Saved</button>
+            <button class="secondary-action" type="button" id="vt-export">Export version-snapshot.json</button>
+            <button class="secondary-action" type="button" id="vt-copy">Copy JSON</button>
+          </div>
+          <div class="panel">
+            <div id="vt-table" style="display:grid;gap:12px;"></div>
+          </div>
+          <script>
+          (function(){
+            function vtToast(m){var t=document.getElementById('toast');if(t){t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2400);}}
+            var SITES=['Load Main','Load AI / AI Chat Studio','Image Prompt PWA','Load Studio','Load Play','Load Tasks','Study','Attain','Attain Jr'];
+            var STORAGE_KEY='lt_vt_current';
+            function vtBuild(){
+              var rows=document.getElementById('vt-table').querySelectorAll('.vt-row');
+              var data={savedAt:new Date().toISOString(),sites:[]};
+              rows.forEach(function(row){
+                var site=row.getAttribute('data-site');
+                data.sites.push({site:site,currentVersion:row.querySelector('[data-field="version"]').value.trim(),cacheMarker:row.querySelector('[data-field="cache"]').value.trim(),lastCommit:row.querySelector('[data-field="commit"]').value.trim(),lastVerifiedDate:row.querySelector('[data-field="verified"]').value.trim(),notes:row.querySelector('[data-field="notes"]').value.trim()});
+              });
+              return data;
+            }
+            function vtFill(data){
+              var table=document.getElementById('vt-table');if(!table)return;
+              var siteMap={};
+              if(data&&Array.isArray(data.sites))data.sites.forEach(function(s){siteMap[s.site]=s;});
+              table.innerHTML='';
+              SITES.forEach(function(site){
+                var saved=siteMap[site]||{};
+                var row=document.createElement('div');row.className='vt-row';row.setAttribute('data-site',site);
+                row.style.cssText='padding:12px;background:rgba(255,255,255,0.04);border-radius:8px;display:grid;gap:8px;';
+                row.innerHTML='<strong style="font-size:14px;">'+site+'</strong>'
+                  +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;">'
+                  +'<label style="font-size:12px;">Version<input data-field="version" type="text" value="'+(saved.currentVersion||'')+'" placeholder="e.g. v17g76" style="display:block;margin-top:3px;width:100%;box-sizing:border-box;"></label>'
+                  +'<label style="font-size:12px;">Cache Marker<input data-field="cache" type="text" value="'+(saved.cacheMarker||'')+'" placeholder="e.g. load-v17g76" style="display:block;margin-top:3px;width:100%;box-sizing:border-box;"></label>'
+                  +'<label style="font-size:12px;">Last Commit<input data-field="commit" type="text" value="'+(saved.lastCommit||'')+'" placeholder="e.g. 811fb710" style="display:block;margin-top:3px;width:100%;box-sizing:border-box;"></label>'
+                  +'<label style="font-size:12px;">Last Verified<input data-field="verified" type="text" value="'+(saved.lastVerifiedDate||'')+'" placeholder="e.g. 2026-05-11" style="display:block;margin-top:3px;width:100%;box-sizing:border-box;"></label>'
+                  +'</div>'
+                  +'<label style="font-size:12px;">Notes<input data-field="notes" type="text" value="'+(saved.notes||'')+'" placeholder="Any extra context for this site." style="display:block;margin-top:3px;width:100%;box-sizing:border-box;"></label>';
+                table.appendChild(row);
+              });
+            }
+            document.getElementById('vt-save-all').addEventListener('click',function(){try{var d=vtBuild();localStorage.setItem(STORAGE_KEY,JSON.stringify(d));vtToast('Version snapshot saved.');}catch(ex){vtToast('Save failed.');}});
+            document.getElementById('vt-load').addEventListener('click',function(){try{var r=localStorage.getItem(STORAGE_KEY);if(!r){vtToast('No saved snapshot found.');return;}vtFill(JSON.parse(r));vtToast('Snapshot loaded.');}catch(ex){vtToast('Load failed.');}});
+            document.getElementById('vt-export').addEventListener('click',function(){var d=vtBuild();var b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='version-snapshot-'+Date.now()+'.json';a.click();URL.revokeObjectURL(a.href);vtToast('Exported.');});
+            document.getElementById('vt-copy').addEventListener('click',function(){var d=vtBuild();navigator.clipboard.writeText(JSON.stringify(d,null,2)).then(function(){vtToast('Copied.');}).catch(function(){vtToast('Copy failed.');});});
+            var panel=document.getElementById('view-versiontracker');
+            if(panel){
+              panel.addEventListener('lt-view-enter',function(){var r=localStorage.getItem(STORAGE_KEY);vtFill(r?JSON.parse(r):null);});
+              setTimeout(function(){if(panel.classList.contains('active')){var r=localStorage.getItem(STORAGE_KEY);vtFill(r?JSON.parse(r):null);}},100);
+            } else {vtFill(null);}
           }());
           </script>
         </section>
