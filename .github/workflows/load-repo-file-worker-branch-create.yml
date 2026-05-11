@@ -128,6 +128,22 @@ jobs:
               print('BLOCKED:')
               for b in blocks:
                   print('  - ' + b)
+              blocked_report = '=== RFW BRANCH CREATE BLOCKED ===\n'
+              blocked_report += 'Job ID:  ' + job_id + '\n'
+              blocked_report += 'VERDICT: BLOCKED\n\n'
+              blocked_report += 'Reasons:\n'
+              for b in blocks:
+                  blocked_report += '  - ' + b + '\n'
+              blocked_report += '\nNo branch was created. No files were modified.\n'
+              blocked_report += '=== END ===\n'
+              blocked_file = 'branch-creation-report-' + job_id + '.txt'
+              with open(blocked_file, 'w') as fh:
+                  fh.write(blocked_report)
+              github_env = os.environ.get('GITHUB_ENV', '')
+              if github_env:
+                  with open(github_env, 'a') as fh:
+                      fh.write('REPORT_FILE=' + blocked_file + '\n')
+                      fh.write('JOB_ID=' + job_id + '\n')
               sys.exit(1)
 
           exist_r = subprocess.run(
