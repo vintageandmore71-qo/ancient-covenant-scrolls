@@ -108,6 +108,18 @@
         <button data-view="mergedecision" data-route>Merge Check</button>
         <button data-view="rollbackdecision" data-route>Rollback Check</button>
         <button data-view="dailyexport" data-route>Daily Export</button>
+        <button data-view="diffviewer" data-route>Diff Viewer</button>
+        <button data-view="commitmsg" data-route>Commit Msg</button>
+        <button data-view="errorlog" data-route>Error Log</button>
+        <button data-view="deploychecklist" data-route>Deploy Check</button>
+        <button data-view="snippets" data-route>Snippets</button>
+        <button data-view="prdraft" data-route>PR Draft</button>
+        <button data-view="sessiongen" data-route>Session Gen</button>
+        <button data-view="worktimer" data-route>Work Timer</button>
+        <button data-view="buildnotes" data-route>Build Notes</button>
+        <button data-view="sitemap" data-route>Site Map</button>
+        <button data-view="comparebuilds" data-route>Compare Builds</button>
+        <button data-view="labelmaker" data-route>Label Maker</button>
       </nav>
       <button class="icon-button" id="hardRefresh" aria-label="Hard refresh app state">
         <span class="icon-mini" data-icon="refresh"></span>
@@ -179,6 +191,18 @@
         <button data-view="mergedecision" data-route><span class="rail-icon" data-icon="certificate"></span><span>Merge Check</span></button>
         <button data-view="rollbackdecision" data-route><span class="rail-icon" data-icon="wrench"></span><span>Rollback</span></button>
         <button data-view="dailyexport" data-route><span class="rail-icon" data-icon="upload"></span><span>Daily Export</span></button>
+        <button data-view="diffviewer" data-route><span class="rail-icon" data-icon="focus"></span><span>Diff Viewer</span></button>
+        <button data-view="commitmsg" data-route><span class="rail-icon" data-icon="notes"></span><span>Commit Msg</span></button>
+        <button data-view="errorlog" data-route><span class="rail-icon" data-icon="wrench"></span><span>Error Log</span></button>
+        <button data-view="deploychecklist" data-route><span class="rail-icon" data-icon="shield"></span><span>Deploy Check</span></button>
+        <button data-view="snippets" data-route><span class="rail-icon" data-icon="library"></span><span>Snippets</span></button>
+        <button data-view="prdraft" data-route><span class="rail-icon" data-icon="version"></span><span>PR Draft</span></button>
+        <button data-view="sessiongen" data-route><span class="rail-icon" data-icon="notes"></span><span>Session Gen</span></button>
+        <button data-view="worktimer" data-route><span class="rail-icon" data-icon="focus"></span><span>Work Timer</span></button>
+        <button data-view="buildnotes" data-route><span class="rail-icon" data-icon="notes"></span><span>Build Notes</span></button>
+        <button data-view="sitemap" data-route><span class="rail-icon" data-icon="library"></span><span>Site Map</span></button>
+        <button data-view="comparebuilds" data-route><span class="rail-icon" data-icon="vault"></span><span>Compare</span></button>
+        <button data-view="labelmaker" data-route><span class="rail-icon" data-icon="certificate"></span><span>Label Maker</span></button>
       </aside>
 
       <section class="workspace">
@@ -447,6 +471,66 @@
               <span class="card-icon" data-icon="upload"></span>
               <strong>Export Daily Work Packet</strong>
               <span>Bundle today's work, note pad, session notes, and open issues into .txt.</span>
+            </button>
+            <button class="command-card" data-view="diffviewer" data-route>
+              <span class="card-icon" data-icon="focus"></span>
+              <strong>Diff Viewer</strong>
+              <span>Paste two text blocks and see exactly what changed line by line.</span>
+            </button>
+            <button class="command-card" data-view="commitmsg" data-route>
+              <span class="card-icon" data-icon="notes"></span>
+              <strong>Commit Message Generator</strong>
+              <span>Fill in site, type, and changes. Get a clean conventional commit message.</span>
+            </button>
+            <button class="command-card" data-view="errorlog" data-route>
+              <span class="card-icon" data-icon="wrench"></span>
+              <strong>Error Log</strong>
+              <span>Record errors with site, message, and status. Export full log.</span>
+            </button>
+            <button class="command-card" data-view="deploychecklist" data-route>
+              <span class="card-icon" data-icon="shield"></span>
+              <strong>Deploy Checklist</strong>
+              <span>Pre-deploy safety checklist. Check items off. Copy summary.</span>
+            </button>
+            <button class="command-card" data-view="snippets" data-route>
+              <span class="card-icon" data-icon="library"></span>
+              <strong>Snippet Library</strong>
+              <span>Save code or text snippets with labels. Copy with one tap.</span>
+            </button>
+            <button class="command-card" data-view="prdraft" data-route>
+              <span class="card-icon" data-icon="version"></span>
+              <strong>PR Draft Maker</strong>
+              <span>Fill fields and generate a ready-to-paste PR description block.</span>
+            </button>
+            <button class="command-card" data-view="sessiongen" data-route>
+              <span class="card-icon" data-icon="notes"></span>
+              <strong>Session Summary Generator</strong>
+              <span>Combine today's work, issues, and next steps into a formatted summary.</span>
+            </button>
+            <button class="command-card" data-view="worktimer" data-route>
+              <span class="card-icon" data-icon="focus"></span>
+              <strong>Work Timer</strong>
+              <span>Start, stop, and log time spent per task. Export the time log.</span>
+            </button>
+            <button class="command-card" data-view="buildnotes" data-route>
+              <span class="card-icon" data-icon="notes"></span>
+              <strong>Build Notes</strong>
+              <span>Quick inline notes per build. Save with site and version label.</span>
+            </button>
+            <button class="command-card" data-view="sitemap" data-route>
+              <span class="card-icon" data-icon="library"></span>
+              <strong>Site Map</strong>
+              <span>Track pages and routes per site. Record status per route.</span>
+            </button>
+            <button class="command-card" data-view="comparebuilds" data-route>
+              <span class="card-icon" data-icon="vault"></span>
+              <strong>Compare Builds</strong>
+              <span>Compare two saved baselines side by side. Spot what changed.</span>
+            </button>
+            <button class="command-card" data-view="labelmaker" data-route>
+              <span class="card-icon" data-icon="certificate"></span>
+              <strong>Label Maker</strong>
+              <span>Generate consistent status labels and badge text for records and PRs.</span>
             </button>
           </div>
 
@@ -4317,6 +4401,595 @@
           }());</script>
         </section>
 
+        <!-- ═══ BATCH 10: BUILD TOOLS ═══ -->
+        <section class="view" id="view-diffviewer" data-view-panel="diffviewer">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Diff Viewer</h1><p>Paste two text blocks. See what was added, removed, or unchanged line by line.</p></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <article class="panel form-panel">
+              <label>Before<textarea id="dv-before" rows="10" placeholder="Paste the original text here..."></textarea></label>
+            </article>
+            <article class="panel form-panel">
+              <label>After<textarea id="dv-after" rows="10" placeholder="Paste the new text here..."></textarea></label>
+            </article>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0;">
+            <button class="primary-action" id="dv-run">Compare</button>
+            <button class="secondary-action" id="dv-clear">Clear</button>
+            <button class="secondary-action" id="dv-copy" style="display:none;">Copy Diff</button>
+          </div>
+          <div id="dv-output"></div>
+          <script>(function(){
+            function dvDiff(a,b){
+              var aLines=a.split('\n');var bLines=b.split('\n');var out=[];
+              var aMax=aLines.length;var bMax=bLines.length;var i=0;var j=0;
+              while(i<aMax||j<bMax){
+                var al=i<aMax?aLines[i]:null;var bl=j<bMax?bLines[j]:null;
+                if(al===bl){out.push({type:'same',text:al});i++;j++;}
+                else if(bl===null||(al!==null&&bLines.indexOf(al,j)<0)){out.push({type:'removed',text:al});i++;}
+                else{out.push({type:'added',text:bl});j++;}
+              }
+              return out;
+            }
+            var dvResult=[];
+            document.getElementById('dv-run').addEventListener('click',function(){
+              var a=document.getElementById('dv-before').value;var b=document.getElementById('dv-after').value;
+              dvResult=dvDiff(a,b);
+              var added=dvResult.filter(function(l){return l.type==='added';}).length;
+              var removed=dvResult.filter(function(l){return l.type==='removed';}).length;
+              var el=document.getElementById('dv-output');
+              el.innerHTML='<div style="margin-bottom:10px;font-size:13px;color:#9aa0b0;">+'+added+' added &nbsp; -'+removed+' removed</div>'
+                +'<div style="font-family:monospace;font-size:12px;border:1px solid rgba(255,255,255,.08);border-radius:8px;overflow:hidden;">'
+                +dvResult.map(function(l){
+                  var bg=l.type==='added'?'rgba(46,204,113,0.15)':l.type==='removed'?'rgba(231,76,60,0.15)':'transparent';
+                  var prefix=l.type==='added'?'+ ':l.type==='removed'?'- ':'  ';
+                  var color=l.type==='added'?'#2ecc71':l.type==='removed'?'#e74c3c':'#9aa0b0';
+                  return'<div style="padding:2px 10px;background:'+bg+';color:'+color+';">'+prefix+l.text.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</div>';
+                }).join('')+'</div>';
+              document.getElementById('dv-copy').style.display='';
+            });
+            document.getElementById('dv-clear').addEventListener('click',function(){document.getElementById('dv-before').value='';document.getElementById('dv-after').value='';document.getElementById('dv-output').innerHTML='';document.getElementById('dv-copy').style.display='none';});
+            document.getElementById('dv-copy').addEventListener('click',function(){var txt=dvResult.map(function(l){return(l.type==='added'?'+ ':l.type==='removed'?'- ':'  ')+l.text;}).join('\n');navigator.clipboard&&navigator.clipboard.writeText(txt).then(function(){var toast=document.getElementById('toast');if(toast){toast.textContent='Diff copied';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}});});
+          }());</script>
+        </section>
+
+        <section class="view" id="view-commitmsg" data-view-panel="commitmsg">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Commit Message Generator</h1><p>Fill in the details. Get a clean conventional commit message to copy.</p></div>
+          <article class="panel form-panel">
+            <label>Type<select id="cm-type"><option>feat</option><option>fix</option><option>refactor</option><option>docs</option><option>chore</option><option>test</option><option>style</option><option>perf</option></select></label>
+            <label>Site / scope<input id="cm-scope" placeholder="e.g. LoadTasks, load/sw.js, attain"></label>
+            <label>What changed (imperative, no period)<input id="cm-what" placeholder="e.g. add Priority Queue view to Developer Bot"></label>
+            <label>Body — why (optional)<textarea id="cm-body" rows="3" placeholder="Extra context if needed..."></textarea></label>
+            <label>Breaking change (optional)<input id="cm-breaking" placeholder="Leave blank if none"></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="cm-generate">Generate</button>
+              <button class="secondary-action" id="cm-clear">Clear</button>
+            </div>
+          </article>
+          <div id="cm-output" style="margin-top:16px;display:none;">
+            <article class="panel">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                <h2 style="margin:0;font-size:14px;color:#9aa0b0;">Generated message</h2>
+                <button class="small-btn" id="cm-copy">Copy</button>
+              </div>
+              <pre id="cm-text" style="white-space:pre-wrap;font-family:monospace;font-size:13px;color:#ffd400;margin:0;"></pre>
+            </article>
+          </div>
+          <script>(function(){
+            document.getElementById('cm-generate').addEventListener('click',function(){
+              var type=document.getElementById('cm-type').value;
+              var scope=document.getElementById('cm-scope').value.trim();
+              var what=document.getElementById('cm-what').value.trim();
+              if(!what)return;
+              var header=type+(scope?'('+scope+')':'')+': '+what;
+              var body=document.getElementById('cm-body').value.trim();
+              var breaking=document.getElementById('cm-breaking').value.trim();
+              var msg=header+(body?'\n\n'+body:'')+(breaking?'\n\nBREAKING CHANGE: '+breaking:'');
+              document.getElementById('cm-text').textContent=msg;
+              document.getElementById('cm-output').style.display='';
+              document.getElementById('cm-copy').dataset.text=msg;
+            });
+            document.getElementById('cm-copy').addEventListener('click',function(){var t=this.dataset.text;if(!t)return;navigator.clipboard&&navigator.clipboard.writeText(t).then(function(){var toast=document.getElementById('toast');if(toast){toast.textContent='Message copied';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}});});
+            document.getElementById('cm-clear').addEventListener('click',function(){['cm-scope','cm-what','cm-body','cm-breaking'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});document.getElementById('cm-output').style.display='none';});
+          }());</script>
+        </section>
+
+        <section class="view" id="view-errorlog" data-view-panel="errorlog">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Error Log</h1><p>Record errors with site, message, and status. Export the full log.</p></div>
+          <article class="panel form-panel">
+            <label>Error message<textarea id="el-msg" rows="3" placeholder="Paste the error message or describe what happened..."></textarea></label>
+            <label>Site<input id="el-site" placeholder="Load, LoadStudio, Attain..."></label>
+            <label>Context<input id="el-ctx" placeholder="Where it happened (e.g. sw.js line 42, Safari console)"></label>
+            <label>Severity<select id="el-sev"><option>Critical</option><option>High</option><option selected>Normal</option><option>Low</option></select></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="el-save">Log Error</button>
+              <button class="secondary-action" id="el-export">Export .txt</button>
+              <button class="secondary-action" id="el-showall">Show Resolved</button>
+            </div>
+          </article>
+          <div id="el-list" style="margin-top:16px;"></div>
+          <script>(function(){
+            var elShowRes=false;
+            var EL_SEV={Critical:'#e74c3c',High:'#e67e22',Normal:'#3498db',Low:'#9aa0b0'};
+            function elGetAll(){var items=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_el_')===0&&k!=='lt_el_draft'){try{items.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}items.sort(function(a,b){return b.ts-a.ts;});return items;}
+            function elRender(){
+              var el=document.getElementById('el-list');if(!el)return;
+              var items=elGetAll().filter(function(it){return elShowRes||it.status!=='Resolved';});
+              if(!items.length){el.innerHTML='<p class="empty-state">'+(elShowRes?'No errors logged.':'No open errors.')+'</p>';return;}
+              el.innerHTML=items.map(function(it){
+                var res=it.status==='Resolved';
+                return '<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px;margin-bottom:8px;'+(res?'opacity:0.5;':'')+'display:flex;align-items:flex-start;gap:12px;">'
+                  +'<span style="background:'+(EL_SEV[it.sev]||'#9aa0b0')+';color:#fff;border-radius:4px;padding:2px 8px;font-size:11px;white-space:nowrap;margin-top:2px;">'+it.sev+'</span>'
+                  +'<div style="flex:1;"><div style="font-size:13px;word-break:break-word;">'+it.msg.substring(0,120)+(it.msg.length>120?'...':'')+'</div>'
+                  +'<div style="font-size:12px;color:#9aa0b0;margin-top:3px;">'+(it.site||'')+(it.ctx?' · '+it.ctx:'')+' · '+it.status+'</div></div>'
+                  +'<button class="small-btn el-toggle" data-id="'+it.id+'">'+(res?'Reopen':'Resolve')+'</button>'
+                  +'<button class="small-btn el-del" data-id="'+it.id+'">X</button>'
+                  +'</div>';
+              }).join('');
+              el.querySelectorAll('.el-toggle').forEach(function(b){b.addEventListener('click',function(){var k='lt_el_'+b.dataset.id;var raw=localStorage.getItem(k);if(!raw)return;var d=JSON.parse(raw);d.status=d.status==='Resolved'?'Open':'Resolved';localStorage.setItem(k,JSON.stringify(d));elRender();});});
+              el.querySelectorAll('.el-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Delete this error entry?'))return;localStorage.removeItem('lt_el_'+b.dataset.id);elRender();});});
+            }
+            document.getElementById('el-save').addEventListener('click',function(){
+              var msg=document.getElementById('el-msg').value.trim();if(!msg)return;
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              var rec={id:id,msg:msg,site:document.getElementById('el-site').value.trim(),ctx:document.getElementById('el-ctx').value.trim(),sev:document.getElementById('el-sev').value,status:'Open',ts:Date.now()};
+              localStorage.setItem('lt_el_'+id,JSON.stringify(rec));
+              document.getElementById('el-msg').value='';document.getElementById('el-site').value='';document.getElementById('el-ctx').value='';elRender();
+            });
+            document.getElementById('el-export').addEventListener('click',function(){
+              var items=elGetAll();
+              var txt='ERROR LOG\n\n'+items.map(function(it){return new Date(it.ts).toLocaleString()+'\n['+it.sev+'] ['+it.status+'] '+(it.site||'')+(it.ctx?' - '+it.ctx:'')+'\n'+it.msg;}).join('\n\n---\n\n');
+              var b=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='error-log.txt';a.click();
+            });
+            document.getElementById('el-showall').addEventListener('click',function(){elShowRes=!elShowRes;this.textContent=elShowRes?'Hide Resolved':'Show Resolved';elRender();});
+            var sec=document.getElementById('view-errorlog');if(sec)sec.addEventListener('lt-view-enter',elRender);
+          }());</script>
+        </section>
+
+        <section class="view" id="view-deploychecklist" data-view-panel="deploychecklist">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Deploy Checklist</h1><p>Pre-deploy safety checklist. Check items off before every push to main.</p></div>
+          <article class="panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+              <span id="dc-progress" style="font-size:14px;color:#9aa0b0;">0 / 14 checked</span>
+              <div style="display:flex;gap:10px;">
+                <button class="secondary-action" id="dc-reset">Reset</button>
+                <button class="primary-action" id="dc-copy">Copy Summary</button>
+              </div>
+            </div>
+            <div id="dc-items"></div>
+          </article>
+          <script>(function(){
+            var DC_ITEMS=[
+              'Branch is up to date with origin/main (git fetch + merge)',
+              'Only intended files changed (git diff --stat checked)',
+              'Cache version bumped in sw.js if JS/HTML/CSS changed',
+              'Cache version bumped in app badge if JS/HTML/CSS changed',
+              'No credentials, tokens, or secrets in the diff',
+              'No service worker changes without approval',
+              'No Load AI or provider routing changes',
+              'PR description states files changed and risk level',
+              'PR description states rollback plan',
+              'Smoke check passed on device before push',
+              'No console errors on target pages',
+              'Offline mode tested if SW was changed',
+              'PR targets correct base branch (main)',
+              'Commit message follows conventional format'
+            ];
+            var dcState=DC_ITEMS.map(function(){return false;});
+            function dcRender(){
+              var el=document.getElementById('dc-items');if(!el)return;
+              el.innerHTML=DC_ITEMS.map(function(label,idx){
+                return '<label style="display:flex;align-items:center;gap:12px;padding:10px 14px;margin-bottom:6px;background:rgba(255,255,255,0.05);border-radius:8px;cursor:pointer;">'
+                  +'<input type="checkbox" data-idx="'+idx+'"'+(dcState[idx]?' checked':'')+' style="width:18px;height:18px;accent-color:#ffd400;flex-shrink:0;">'
+                  +'<span style="'+(dcState[idx]?'text-decoration:line-through;color:#9aa0b0;':'')+'">'+label+'</span>'
+                  +'</label>';
+              }).join('');
+              el.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.addEventListener('change',function(){dcState[parseInt(cb.dataset.idx)]=cb.checked;dcRender();});});
+              var checked=dcState.filter(Boolean).length;
+              document.getElementById('dc-progress').textContent=checked+' / '+DC_ITEMS.length+' checked';
+              document.getElementById('dc-progress').style.color=checked===DC_ITEMS.length?'#2ecc71':'#9aa0b0';
+            }
+            document.getElementById('dc-reset').addEventListener('click',function(){dcState=DC_ITEMS.map(function(){return false;});dcRender();});
+            document.getElementById('dc-copy').addEventListener('click',function(){
+              var checked=dcState.filter(Boolean).length;
+              var txt='DEPLOY CHECKLIST ('+checked+'/'+DC_ITEMS.length+' passed)\n\n'+DC_ITEMS.map(function(label,idx){return(dcState[idx]?'[x] ':'[ ] ')+label;}).join('\n');
+              navigator.clipboard&&navigator.clipboard.writeText(txt).then(function(){var toast=document.getElementById('toast');if(toast){toast.textContent='Checklist copied';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}});
+            });
+            var sec=document.getElementById('view-deploychecklist');if(sec)sec.addEventListener('lt-view-enter',dcRender);
+            dcRender();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-snippets" data-view-panel="snippets">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Snippet Library</h1><p>Save code or text snippets with labels. Copy with one tap.</p></div>
+          <article class="panel form-panel">
+            <label>Label<input id="sn2-label" placeholder="Short name for this snippet"></label>
+            <label>Language / type<input id="sn2-lang" placeholder="e.g. git, js, css, bash, plain text"></label>
+            <label>Snippet<textarea id="sn2-text" rows="6" placeholder="Paste code or text here..."></textarea></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="sn2-save">Save Snippet</button>
+              <button class="secondary-action" id="sn2-exportall">Export All .txt</button>
+            </div>
+          </article>
+          <div id="sn2-list" style="margin-top:16px;"></div>
+          <script>(function(){
+            function sn2GetAll(){var items=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_snp_')===0&&k!=='lt_snp_draft'){try{items.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}items.sort(function(a,b){return b.ts-a.ts;});return items;}
+            function sn2Render(){
+              var el=document.getElementById('sn2-list');if(!el)return;
+              var items=sn2GetAll();
+              if(!items.length){el.innerHTML='<p class="empty-state">No snippets saved yet.</p>';return;}
+              el.innerHTML=items.map(function(it){
+                return '<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:14px;margin-bottom:10px;">'
+                  +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
+                  +'<div><strong>'+it.label+'</strong>'+(it.lang?' <span style="background:#1e2130;color:#9aa0b0;border-radius:4px;padding:2px 7px;font-size:11px;">'+it.lang+'</span>':'')+'</div>'
+                  +'<div style="display:flex;gap:8px;"><button class="small-btn sn2-copy" data-id="'+it.id+'">Copy</button><button class="small-btn sn2-del" data-id="'+it.id+'">X</button></div>'
+                  +'</div>'
+                  +'<pre style="font-size:12px;color:#9aa0b0;margin:0;white-space:pre-wrap;max-height:80px;overflow:hidden;">'+it.text.substring(0,300).replace(/&/g,'&amp;').replace(/</g,'&lt;')+(it.text.length>300?'\n...':'')+'</pre>'
+                  +'</div>';
+              }).join('');
+              el.querySelectorAll('.sn2-copy').forEach(function(b){b.addEventListener('click',function(){var raw=localStorage.getItem('lt_snp_'+b.dataset.id);if(!raw)return;var d=JSON.parse(raw);navigator.clipboard&&navigator.clipboard.writeText(d.text).then(function(){var toast=document.getElementById('toast');if(toast){toast.textContent='Snippet copied';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}});});});
+              el.querySelectorAll('.sn2-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Delete this snippet?'))return;localStorage.removeItem('lt_snp_'+b.dataset.id);sn2Render();});});
+            }
+            document.getElementById('sn2-save').addEventListener('click',function(){
+              var label=document.getElementById('sn2-label').value.trim();var text=document.getElementById('sn2-text').value.trim();if(!label||!text)return;
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              localStorage.setItem('lt_snp_'+id,JSON.stringify({id:id,label:label,lang:document.getElementById('sn2-lang').value.trim(),text:text,ts:Date.now()}));
+              document.getElementById('sn2-label').value='';document.getElementById('sn2-lang').value='';document.getElementById('sn2-text').value='';sn2Render();
+            });
+            document.getElementById('sn2-exportall').addEventListener('click',function(){
+              var items=sn2GetAll();
+              var txt='SNIPPET LIBRARY\n\n'+items.map(function(it){return'=== '+it.label+(it.lang?' ['+it.lang+']':'')+' ===\n'+it.text;}).join('\n\n');
+              var b=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='snippets.txt';a.click();
+            });
+            var sec=document.getElementById('view-snippets');if(sec)sec.addEventListener('lt-view-enter',sn2Render);
+          }());</script>
+        </section>
+
+        <section class="view" id="view-prdraft" data-view-panel="prdraft">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>PR Draft Maker</h1><p>Fill in the fields. Generate a ready-to-paste PR title and body.</p></div>
+          <article class="panel form-panel">
+            <label>PR Title<input id="pd-title" placeholder="Short description (under 70 chars)"></label>
+            <label>What changed<textarea id="pd-what" rows="3" placeholder="Bullet points of changes..."></textarea></label>
+            <label>Files changed<input id="pd-files" placeholder="e.g. LoadTasks/index.html"></label>
+            <label>Risk level<select id="pd-risk"><option>Low</option><option>Medium</option><option>High</option></select></label>
+            <label>Service worker or cache touched<select id="pd-sw"><option>No</option><option>Yes</option></select></label>
+            <label>Load AI or providers touched<select id="pd-ai"><option>No</option><option>Yes</option></select></label>
+            <label>Rollback plan<textarea id="pd-rollback" rows="2" placeholder="How to revert if this breaks something..."></textarea></label>
+            <label>Test notes<textarea id="pd-tests" rows="2" placeholder="Smoke check results, device tested, etc..."></textarea></label>
+            <button class="primary-action" id="pd-generate">Generate PR Body</button>
+          </article>
+          <div id="pd-output" style="margin-top:16px;display:none;">
+            <article class="panel">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                <h2 style="margin:0;font-size:14px;color:#9aa0b0;">PR Description</h2>
+                <button class="small-btn" id="pd-copy">Copy</button>
+              </div>
+              <pre id="pd-text" style="white-space:pre-wrap;font-size:13px;color:#e0e4f0;margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;"></pre>
+            </article>
+          </div>
+          <script>(function(){
+            document.getElementById('pd-generate').addEventListener('click',function(){
+              var title=document.getElementById('pd-title').value.trim();
+              var what=document.getElementById('pd-what').value.trim();
+              var files=document.getElementById('pd-files').value.trim();
+              var risk=document.getElementById('pd-risk').value;
+              var sw=document.getElementById('pd-sw').value;
+              var ai=document.getElementById('pd-ai').value;
+              var rollback=document.getElementById('pd-rollback').value.trim();
+              var tests=document.getElementById('pd-tests').value.trim();
+              var body='## Summary\n'+(what?what.split('\n').map(function(l){return l.trim()?'- '+l.trim():'';}).filter(Boolean).join('\n'):'- No summary provided')
+                +'\n\n## Files changed\n'+(files||'Not specified')
+                +'\n\n## Risk level\n'+risk
+                +'\n\n## Service worker / cache touched\n'+sw
+                +'\n\n## Load AI / providers touched\n'+ai
+                +'\n\n## Rollback plan\n'+(rollback||'Not specified')
+                +'\n\n## Test notes\n'+(tests||'Not specified');
+              var full=(title?'TITLE: '+title+'\n\n':'')+body;
+              document.getElementById('pd-text').textContent=full;
+              document.getElementById('pd-output').style.display='';
+              document.getElementById('pd-copy').dataset.text=full;
+            });
+            document.getElementById('pd-copy').addEventListener('click',function(){var t=this.dataset.text;if(!t)return;navigator.clipboard&&navigator.clipboard.writeText(t).then(function(){var toast=document.getElementById('toast');if(toast){toast.textContent='PR body copied';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}});});
+          }());</script>
+        </section>
+
+        <section class="view" id="view-sessiongen" data-view-panel="sessiongen">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Session Summary Generator</h1><p>Reads your saved records and generates a formatted session summary to copy or export.</p></div>
+          <article class="panel">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+              <button class="primary-action" id="sg-build">Build Summary</button>
+              <button class="secondary-action" id="sg-copy" style="display:none;">Copy</button>
+              <button class="secondary-action" id="sg-export" style="display:none;">Export .txt</button>
+            </div>
+            <pre id="sg-output" style="display:none;white-space:pre-wrap;font-size:13px;color:#e0e4f0;border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:14px;max-height:500px;overflow-y:auto;font-family:-apple-system,BlinkMacSystemFont,sans-serif;"></pre>
+          </article>
+          <script>(function(){
+            var sgText='';
+            document.getElementById('sg-build').addEventListener('click',function(){
+              var parts=[];
+              var today=new Date();var ds=today.toLocaleDateString();
+              parts.push('SESSION SUMMARY — '+ds+'\n'+'='.repeat(40));
+              var tw=localStorage.getItem('lt_tw_draft');
+              if(tw){try{var d=JSON.parse(tw);if(d['tw-built']||d['tw-site']){parts.push('\nBUILT TODAY'+(d['tw-site']?' ('+d['tw-site']+')':'')+'\n'+'-'.repeat(20)+'\n'+(d['tw-built']||'Nothing recorded'));}}catch(e){}}
+              var snArr=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_sn_')===0&&k!=='lt_sn_draft'){try{snArr.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}
+              snArr.sort(function(a,b){return b.ts-a.ts;});
+              if(snArr.length){var sn=snArr[0];if(sn.built)parts.push('\nFROM LATEST SESSION NOTES\n'+'-'.repeat(20)+'\n'+(sn.built||'--'));}
+              var isArr=[];for(var j=0;j<localStorage.length;j++){var k2=localStorage.key(j);if(k2&&k2.indexOf('lt_is_')===0&&k2!=='lt_is_draft'){try{var d2=JSON.parse(localStorage.getItem(k2));if(d2.status!=='Resolved')isArr.push(d2);}catch(e){}}}
+              isArr.sort(function(a,b){return({Critical:0,High:1,Normal:2,Low:3}[a.severity]||2)-({Critical:0,High:1,Normal:2,Low:3}[b.severity]||2);});
+              if(isArr.length){parts.push('\nOPEN ISSUES ('+isArr.length+')\n'+'-'.repeat(20)+'\n'+isArr.map(function(it){return'['+it.severity+'] '+it.title+(it.site?' ('+it.site+')':'');}).join('\n'));}
+              var bkArr=[];for(var m=0;m<localStorage.length;m++){var k3=localStorage.key(m);if(k3&&k3.indexOf('lt_bk_')===0&&k3!=='lt_bk_draft'){try{var d3=JSON.parse(localStorage.getItem(k3));if(d3.status==='Active')bkArr.push(d3);}catch(e){}}}
+              if(bkArr.length){parts.push('\nACTIVE BLOCKERS\n'+'-'.repeat(20)+'\n'+bkArr.map(function(b){return'['+b.type+'] '+b.desc+(b.site?' ('+b.site+')':'');}).join('\n'));}
+              var pqArr=[];for(var n=0;n<localStorage.length;n++){var k4=localStorage.key(n);if(k4&&k4.indexOf('lt_pq_')===0&&k4!=='lt_pq_draft'){try{var d4=JSON.parse(localStorage.getItem(k4));if(!d4.done)pqArr.push(d4);}catch(e){}}}
+              pqArr.sort(function(a,b){return({Critical:0,High:1,Normal:2,Low:3}[a.priority]||2)-({Critical:0,High:1,Normal:2,Low:3}[b.priority]||2);});
+              if(pqArr.length){parts.push('\nPRIORITY QUEUE ('+pqArr.length+' pending)\n'+'-'.repeat(20)+'\n'+pqArr.slice(0,5).map(function(it){return'['+it.priority+'] '+it.task+(it.site?' ('+it.site+')':'');}).join('\n'));}
+              var tw2=localStorage.getItem('lt_tw_draft');
+              if(tw2){try{var d5=JSON.parse(tw2);if(d5['tw-next'])parts.push('\nNEXT STEPS\n'+'-'.repeat(20)+'\n'+d5['tw-next']);}catch(e){}}
+              var np=localStorage.getItem('lt_np_draft');if(np)parts.push('\nNOTES\n'+'-'.repeat(20)+'\n'+np);
+              sgText=parts.join('\n\n');
+              document.getElementById('sg-output').textContent=sgText;document.getElementById('sg-output').style.display='';
+              document.getElementById('sg-copy').style.display='';document.getElementById('sg-export').style.display='';
+            });
+            document.getElementById('sg-copy').addEventListener('click',function(){navigator.clipboard&&navigator.clipboard.writeText(sgText).then(function(){var toast=document.getElementById('toast');if(toast){toast.textContent='Summary copied';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}});});
+            document.getElementById('sg-export').addEventListener('click',function(){var b=new Blob([sgText],{type:'text/plain'});var a=document.createElement('a');var t=new Date();a.href=URL.createObjectURL(b);a.download='session-summary-'+t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0')+'.txt';a.click();});
+          }());</script>
+        </section>
+
+        <section class="view" id="view-worktimer" data-view-panel="worktimer">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Work Timer</h1><p>Start, stop, and log time spent per task. Export the time log.</p></div>
+          <article class="panel form-panel">
+            <label>Task label<input id="wt-label" placeholder="What are you working on?"></label>
+            <label>Site<input id="wt-site" placeholder="Load, LoadStudio..."></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:8px;">
+              <button class="primary-action" id="wt-start">Start</button>
+              <button class="secondary-action" id="wt-stop" disabled>Stop + Log</button>
+              <span id="wt-display" style="font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;color:#ffd400;min-width:80px;">0:00</span>
+            </div>
+          </article>
+          <div id="wt-log-wrap" style="margin-top:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+              <h2 style="margin:0;font-size:15px;">Time Log</h2>
+              <button class="small-btn" id="wt-export">Export .txt</button>
+            </div>
+            <div id="wt-log"></div>
+          </div>
+          <script>(function(){
+            var wtStart=null;var wtInterval=null;
+            function wtGetAll(){var items=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_wt_')===0&&k!=='lt_wt_draft'){try{items.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}items.sort(function(a,b){return b.ts-a.ts;});return items;}
+            function wtFmt(ms){var s=Math.floor(ms/1000);var m=Math.floor(s/60);var h=Math.floor(m/60);return(h?h+'h ':'')+String(m%60).padStart(2,'0')+'m '+String(s%60).padStart(2,'0')+'s';}
+            function wtRender(){
+              var el=document.getElementById('wt-log');if(!el)return;
+              var items=wtGetAll();
+              if(!items.length){el.innerHTML='<p class="empty-state">No time entries yet.</p>';return;}
+              el.innerHTML=items.map(function(it){
+                return '<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;margin-bottom:6px;display:flex;align-items:center;gap:12px;">'
+                  +'<span style="font-size:18px;font-weight:700;color:#ffd400;white-space:nowrap;min-width:70px;">'+wtFmt(it.dur)+'</span>'
+                  +'<div style="flex:1;"><div>'+it.label+'</div><div style="font-size:12px;color:#9aa0b0;">'+(it.site||'')+(it.site?' · ':'')+new Date(it.ts).toLocaleString()+'</div></div>'
+                  +'<button class="small-btn wt-del" data-id="'+it.id+'">X</button>'
+                  +'</div>';
+              }).join('');
+              el.querySelectorAll('.wt-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Remove this entry?'))return;localStorage.removeItem('lt_wt_'+b.dataset.id);wtRender();});});
+            }
+            document.getElementById('wt-start').addEventListener('click',function(){
+              if(wtInterval)return;
+              wtStart=Date.now();
+              var startBtn=document.getElementById('wt-start');var stopBtn=document.getElementById('wt-stop');
+              startBtn.disabled=true;stopBtn.disabled=false;
+              wtInterval=setInterval(function(){var el=document.getElementById('wt-display');if(el)el.textContent=wtFmt(Date.now()-wtStart).replace('s','').replace('m ','m:').split(':').map(function(p,i){return i>0?p.padStart(2,'0'):p;}).join(':');},1000);
+            });
+            document.getElementById('wt-stop').addEventListener('click',function(){
+              if(!wtInterval||!wtStart)return;
+              clearInterval(wtInterval);wtInterval=null;
+              var dur=Date.now()-wtStart;wtStart=null;
+              var label=document.getElementById('wt-label').value.trim()||'Untimed task';
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              localStorage.setItem('lt_wt_'+id,JSON.stringify({id:id,label:label,site:document.getElementById('wt-site').value.trim(),dur:dur,ts:Date.now()}));
+              document.getElementById('wt-start').disabled=false;this.disabled=true;
+              document.getElementById('wt-display').textContent='0:00';
+              wtRender();
+            });
+            document.getElementById('wt-export').addEventListener('click',function(){
+              var items=wtGetAll();
+              var txt='WORK TIMER LOG\n\n'+items.map(function(it){return new Date(it.ts).toLocaleString()+' | '+wtFmt(it.dur)+' | '+it.label+(it.site?' ('+it.site+')':'');}).join('\n');
+              var b=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='work-timer-log.txt';a.click();
+            });
+            var sec=document.getElementById('view-worktimer');if(sec)sec.addEventListener('lt-view-enter',wtRender);
+          }());</script>
+        </section>
+
+        <section class="view" id="view-buildnotes" data-view-panel="buildnotes">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Build Notes</h1><p>Quick notes per build. Save with site and version label. Export any time.</p></div>
+          <article class="panel form-panel">
+            <label>Site<input id="bn-site" placeholder="Load, LoadStudio, Attain..."></label>
+            <label>Version<input id="bn-ver" placeholder="e.g. v5.26, v17g80"></label>
+            <label>Notes<textarea id="bn-text" rows="5" placeholder="What you observed, fixed, or noted about this build..."></textarea></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="bn-save">Save Note</button>
+              <button class="secondary-action" id="bn-export">Export All .txt</button>
+            </div>
+          </article>
+          <div id="bn-list" style="margin-top:16px;"></div>
+          <script>(function(){
+            function bnGetAll(){var items=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_bn_')===0&&k!=='lt_bn_draft'){try{items.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}items.sort(function(a,b){return b.ts-a.ts;});return items;}
+            function bnRender(){
+              var el=document.getElementById('bn-list');if(!el)return;
+              var items=bnGetAll();
+              if(!items.length){el.innerHTML='<p class="empty-state">No build notes saved.</p>';return;}
+              el.innerHTML=items.map(function(it){
+                return '<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:14px;margin-bottom:10px;">'
+                  +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
+                  +'<div><strong>'+(it.site||'—')+'</strong>'+(it.ver?' <span style="background:#1e2130;color:#ffd400;border-radius:4px;padding:2px 7px;font-size:11px;">'+it.ver+'</span>':'')+'<span style="font-size:12px;color:#9aa0b0;margin-left:8px;">'+new Date(it.ts).toLocaleDateString()+'</span></div>'
+                  +'<button class="small-btn bn-del" data-id="'+it.id+'">X</button>'
+                  +'</div>'
+                  +'<div style="font-size:13px;color:#9aa0b0;white-space:pre-wrap;">'+it.text.substring(0,200)+(it.text.length>200?'...':'')+'</div>'
+                  +'</div>';
+              }).join('');
+              el.querySelectorAll('.bn-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Delete this note?'))return;localStorage.removeItem('lt_bn_'+b.dataset.id);bnRender();});});
+            }
+            document.getElementById('bn-save').addEventListener('click',function(){
+              var text=document.getElementById('bn-text').value.trim();if(!text)return;
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              localStorage.setItem('lt_bn_'+id,JSON.stringify({id:id,site:document.getElementById('bn-site').value.trim(),ver:document.getElementById('bn-ver').value.trim(),text:text,ts:Date.now()}));
+              document.getElementById('bn-text').value='';bnRender();
+            });
+            document.getElementById('bn-export').addEventListener('click',function(){
+              var items=bnGetAll();
+              var txt='BUILD NOTES\n\n'+items.map(function(it){return new Date(it.ts).toLocaleString()+'\n'+(it.site||'—')+(it.ver?' '+it.ver:'')+'\n\n'+it.text;}).join('\n\n---\n\n');
+              var b=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='build-notes.txt';a.click();
+            });
+            var sec=document.getElementById('view-buildnotes');if(sec)sec.addEventListener('lt-view-enter',bnRender);
+          }());</script>
+        </section>
+
+        <section class="view" id="view-sitemap" data-view-panel="sitemap">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Site Map</h1><p>Track pages and routes per site. Record status per route.</p></div>
+          <article class="panel form-panel">
+            <label>Site<input id="sm-site" placeholder="Load, LoadStudio, Attain..."></label>
+            <label>Route / page<input id="sm-route" placeholder="e.g. /load/, /load/#dashboard, /attain/"></label>
+            <label>Status<select id="sm-status"><option>Working</option><option>Broken</option><option>Partial</option><option>Not tested</option><option>Redirect</option></select></label>
+            <label>Notes<input id="sm-notes" placeholder="What works, what is broken, what is missing..."></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="sm-save">Add Route</button>
+              <button class="secondary-action" id="sm-export">Export .txt</button>
+            </div>
+          </article>
+          <div id="sm-list" style="margin-top:16px;"></div>
+          <script>(function(){
+            var SM_COLOR={Working:'#2ecc71',Broken:'#e74c3c',Partial:'#e67e22','Not tested':'#9aa0b0',Redirect:'#9b59b6'};
+            function smGetAll(){var items=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_sm_')===0&&k!=='lt_sm_draft'){try{items.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}items.sort(function(a,b){return(a.site+a.route).localeCompare(b.site+b.route);});return items;}
+            function smRender(){
+              var el=document.getElementById('sm-list');if(!el)return;
+              var items=smGetAll();
+              if(!items.length){el.innerHTML='<p class="empty-state">No routes tracked yet.</p>';return;}
+              var bySite={};items.forEach(function(it){(bySite[it.site]=bySite[it.site]||[]).push(it);});
+              el.innerHTML=Object.keys(bySite).map(function(site){
+                return '<div style="margin-bottom:16px;"><h3 style="font-size:14px;color:#ffd400;margin:0 0 8px;">'+site+'</h3>'
+                  +bySite[site].map(function(it){
+                    return '<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;margin-bottom:6px;display:flex;align-items:center;gap:12px;">'
+                      +'<span style="background:'+(SM_COLOR[it.status]||'#9aa0b0')+';color:#fff;border-radius:4px;padding:2px 8px;font-size:11px;white-space:nowrap;">'+it.status+'</span>'
+                      +'<code style="flex:1;font-size:12px;">'+it.route+'</code>'
+                      +(it.notes?'<span style="font-size:12px;color:#9aa0b0;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+it.notes+'</span>':'')
+                      +'<select class="small-btn sm-sel" data-id="'+it.id+'" style="padding:4px 6px;font-size:12px;background:#1e2130;border:1px solid rgba(255,255,255,.15);color:#e0e4f0;border-radius:4px;">'
+                      +['Working','Broken','Partial','Not tested','Redirect'].map(function(s){return'<option'+(s===it.status?' selected':'')+'>'+s+'</option>';}).join('')+'</select>'
+                      +'<button class="small-btn sm-del" data-id="'+it.id+'">X</button>'
+                      +'</div>';
+                  }).join('')+'</div>';
+              }).join('');
+              el.querySelectorAll('.sm-sel').forEach(function(sel){sel.addEventListener('change',function(){var k='lt_sm_'+sel.dataset.id;var raw=localStorage.getItem(k);if(!raw)return;var d=JSON.parse(raw);d.status=sel.value;localStorage.setItem(k,JSON.stringify(d));smRender();});});
+              el.querySelectorAll('.sm-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Remove this route?'))return;localStorage.removeItem('lt_sm_'+b.dataset.id);smRender();});});
+            }
+            document.getElementById('sm-save').addEventListener('click',function(){
+              var site=document.getElementById('sm-site').value.trim();var route=document.getElementById('sm-route').value.trim();if(!site||!route)return;
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              localStorage.setItem('lt_sm_'+id,JSON.stringify({id:id,site:site,route:route,status:document.getElementById('sm-status').value,notes:document.getElementById('sm-notes').value.trim(),ts:Date.now()}));
+              document.getElementById('sm-route').value='';document.getElementById('sm-notes').value='';smRender();
+            });
+            document.getElementById('sm-export').addEventListener('click',function(){
+              var items=smGetAll();
+              var txt='SITE MAP\n\n'+items.map(function(it){return'['+it.status+'] '+it.site+' '+it.route+(it.notes?' — '+it.notes:'');}).join('\n');
+              var b=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='site-map.txt';a.click();
+            });
+            var sec=document.getElementById('view-sitemap');if(sec)sec.addEventListener('lt-view-enter',smRender);
+          }());</script>
+        </section>
+
+        <section class="view" id="view-comparebuilds" data-view-panel="comparebuilds">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Compare Builds</h1><p>Pick two saved baselines and see them side by side.</p></div>
+          <article class="panel">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+              <label>Baseline A<select id="cb-a" style="width:100%;padding:8px;background:#1e2130;border:1px solid rgba(255,255,255,.15);color:#e0e4f0;border-radius:6px;"><option value="">-- pick baseline --</option></select></label>
+              <label>Baseline B<select id="cb-b" style="width:100%;padding:8px;background:#1e2130;border:1px solid rgba(255,255,255,.15);color:#e0e4f0;border-radius:6px;"><option value="">-- pick baseline --</option></select></label>
+            </div>
+            <button class="primary-action" id="cb-compare">Compare</button>
+          </article>
+          <div id="cb-output" style="margin-top:16px;"></div>
+          <script>(function(){
+            function cbLoad(){
+              var items=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_bl_')===0&&k!=='lt_bl_draft'){try{items.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}
+              items.sort(function(a,b){return b.ts-a.ts;});
+              ['cb-a','cb-b'].forEach(function(id){var sel=document.getElementById(id);if(!sel)return;sel.innerHTML='<option value="">-- pick baseline --</option>'+items.map(function(it){return'<option value="'+it.id+'">'+(it.site||'--')+' — '+(it.version||it.commitHash||'').substring(0,20)+'</option>';}).join('');});
+            }
+            function cbField(label,a,b){
+              var changed=a!==b;
+              return '<div style="margin-bottom:8px;background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;border-left:3px solid '+(changed?'#e67e22':'rgba(255,255,255,.1)')+';">'
+                +'<div style="font-size:11px;color:#9aa0b0;margin-bottom:4px;">'+label+'</div>'
+                +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
+                +'<div style="font-size:13px;color:'+(changed?'#e74c3c':'#e0e4f0')+';">'+((a||'—').substring(0,100))+'</div>'
+                +'<div style="font-size:13px;color:'+(changed?'#2ecc71':'#e0e4f0')+';">'+((b||'—').substring(0,100))+'</div>'
+                +'</div></div>';
+            }
+            document.getElementById('cb-compare').addEventListener('click',function(){
+              var aId=document.getElementById('cb-a').value;var bId=document.getElementById('cb-b').value;
+              if(!aId||!bId){document.getElementById('cb-output').innerHTML='<p class="empty-state">Pick two baselines to compare.</p>';return;}
+              var aRaw=localStorage.getItem('lt_bl_'+aId);var bRaw=localStorage.getItem('lt_bl_'+bId);
+              if(!aRaw||!bRaw)return;
+              var a=JSON.parse(aRaw);var b=JSON.parse(bRaw);
+              var out='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;"><div style="font-size:13px;color:#9aa0b0;text-align:center;">Baseline A</div><div style="font-size:13px;color:#9aa0b0;text-align:center;">Baseline B</div></div>';
+              out+=cbField('Site',a.site,b.site);
+              out+=cbField('Version',a.version,b.version);
+              out+=cbField('Commit Hash',a.commitHash,b.commitHash);
+              out+=cbField('Cache Marker',a.cacheMarker,b.cacheMarker);
+              out+=cbField('Status',a.status,b.status);
+              out+=cbField('Notes',a.notes,b.notes);
+              out+=cbField('Date',new Date(a.ts).toLocaleDateString(),new Date(b.ts).toLocaleDateString());
+              document.getElementById('cb-output').innerHTML=out;
+            });
+            var sec=document.getElementById('view-comparebuilds');if(sec)sec.addEventListener('lt-view-enter',cbLoad);
+          }());</script>
+        </section>
+
+        <section class="view" id="view-labelmaker" data-view-panel="labelmaker">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Label Maker</h1><p>Generate consistent status labels and badge text for records, PRs, and commits.</p></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">
+            <article class="panel">
+              <h2 style="font-size:14px;margin:0 0 12px;">Build Status</h2>
+              <div id="lm-build" style="display:flex;flex-direction:column;gap:6px;"></div>
+            </article>
+            <article class="panel">
+              <h2 style="font-size:14px;margin:0 0 12px;">Risk Level</h2>
+              <div id="lm-risk" style="display:flex;flex-direction:column;gap:6px;"></div>
+            </article>
+            <article class="panel">
+              <h2 style="font-size:14px;margin:0 0 12px;">PR Decision</h2>
+              <div id="lm-pr" style="display:flex;flex-direction:column;gap:6px;"></div>
+            </article>
+            <article class="panel">
+              <h2 style="font-size:14px;margin:0 0 12px;">Issue Severity</h2>
+              <div id="lm-sev" style="display:flex;flex-direction:column;gap:6px;"></div>
+            </article>
+            <article class="panel">
+              <h2 style="font-size:14px;margin:0 0 12px;">Branch Status</h2>
+              <div id="lm-branch" style="display:flex;flex-direction:column;gap:6px;"></div>
+            </article>
+            <article class="panel">
+              <h2 style="font-size:14px;margin:0 0 12px;">Blocker Type</h2>
+              <div id="lm-blocker" style="display:flex;flex-direction:column;gap:6px;"></div>
+            </article>
+          </div>
+          <script>(function(){
+            var LABELS={
+              'lm-build':[{text:'WORKING REAL OUTPUT',color:'#2ecc71'},{text:'PARTIAL',color:'#e67e22'},{text:'PROVIDER NEEDED',color:'#9b59b6'},{text:'PLACEHOLDER ONLY',color:'#9aa0b0'},{text:'FAIL',color:'#e74c3c'},{text:'NOT DONE',color:'#7f8c8d'}],
+              'lm-risk':[{text:'Low',color:'#2ecc71'},{text:'Medium',color:'#e67e22'},{text:'High',color:'#e74c3c'}],
+              'lm-pr':[{text:'GO — Merge approved',color:'#2ecc71'},{text:'NO-GO — Do not merge yet',color:'#e74c3c'},{text:'HOLD — Needs review',color:'#e67e22'}],
+              'lm-sev':[{text:'Critical',color:'#e74c3c'},{text:'High',color:'#e67e22'},{text:'Normal',color:'#3498db'},{text:'Low',color:'#9aa0b0'}],
+              'lm-branch':[{text:'Active',color:'#2ecc71'},{text:'Stale',color:'#e67e22'},{text:'Merged',color:'#9aa0b0'},{text:'Deleted',color:'#e74c3c'}],
+              'lm-blocker':[{text:'Technical',color:'#e74c3c'},{text:'Waiting',color:'#e67e22'},{text:'Decision',color:'#9b59b6'},{text:'Other',color:'#9aa0b0'}]
+            };
+            function lmRender(){
+              Object.keys(LABELS).forEach(function(id){
+                var el=document.getElementById(id);if(!el)return;
+                el.innerHTML=LABELS[id].map(function(l){
+                  return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'
+                    +'<span style="background:'+l.color+';color:#fff;border-radius:4px;padding:3px 10px;font-size:12px;font-weight:600;">'+l.text+'</span>'
+                    +'<button class="small-btn lm-copy" data-text="'+l.text+'">Copy</button>'
+                    +'</div>';
+                }).join('');
+              });
+              document.querySelectorAll('.lm-copy').forEach(function(b){b.addEventListener('click',function(){navigator.clipboard&&navigator.clipboard.writeText(b.dataset.text).then(function(){var toast=document.getElementById('toast');if(toast){toast.textContent='"'+b.dataset.text+'" copied';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}});});});
+            }
+            var sec=document.getElementById('view-labelmaker');if(sec)sec.addEventListener('lt-view-enter',lmRender);
+            lmRender();
+          }());</script>
+        </section>
+
         <!-- ═══ DASHBOARD COUNTERS SCRIPT ═══ -->
         <script>
         (function(){
@@ -4343,7 +5016,12 @@
               {label:'Blockers',n:ltCountPrefix('lt_bk_',['lt_bk_draft'])},
               {label:'Saved Prompts',n:ltCountPrefix('lt_sp_',['lt_sp_draft'])},
               {label:'Recovery Reports',n:ltCountPrefix('lt_rv_',['lt_rv_draft'])},
-              {label:'Branch Inventory',n:ltCountPrefix('lt_bi_',['lt_bi_draft'])}
+              {label:'Branch Inventory',n:ltCountPrefix('lt_bi_',['lt_bi_draft'])},
+              {label:'Error Log',n:ltCountPrefix('lt_el_',['lt_el_draft'])},
+              {label:'Snippets',n:ltCountPrefix('lt_snp_',['lt_snp_draft'])},
+              {label:'Work Timer',n:ltCountPrefix('lt_wt_',['lt_wt_draft'])},
+              {label:'Build Notes',n:ltCountPrefix('lt_bn_',['lt_bn_draft'])},
+              {label:'Site Map',n:ltCountPrefix('lt_sm_',['lt_sm_draft'])}
             ];
             el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px;text-align:center;"><div style="font-size:28px;font-weight:700;line-height:1;">'+(it.n)+'</div><div style="font-size:12px;color:#9aa0b0;margin-top:4px;">'+it.label+'</div></div>';}).join('');
           }
