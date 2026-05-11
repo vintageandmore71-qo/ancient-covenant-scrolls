@@ -215,6 +215,16 @@
         <button data-view="rfjhandoff" data-route>Job Handoff</button>
         <button data-view="rfjpacket" data-route>Job Packet</button>
         <button data-view="phase2readiness" data-route>Phase 2 Ready</button>
+        <button data-view="rfjdashboard" data-route>Job Dashboard</button>
+        <button data-view="rfjstatusboard" data-route>Status Board</button>
+        <button data-view="rfjsearch" data-route>Job Search</button>
+        <button data-view="rfjtimeline" data-route>Job Timeline</button>
+        <button data-view="rfjdupes" data-route>Dupe Finder</button>
+        <button data-view="rfjpriority" data-route>Priority Queue</button>
+        <button data-view="rfjblockers" data-route>Job Blockers</button>
+        <button data-view="rfjreviewq" data-route>Review Queue</button>
+        <button data-view="rfjexportall" data-route>Export All</button>
+        <button data-view="rfjimport" data-route>Import Jobs</button>
       </nav>
       <button class="icon-button" id="hardRefresh" aria-label="Hard refresh app state">
         <span class="icon-mini" data-icon="refresh"></span>
@@ -393,6 +403,16 @@
         <button data-view="rfjhandoff" data-route><span class="rail-icon" data-icon="branch"></span><span>Job Handoff</span></button>
         <button data-view="rfjpacket" data-route><span class="rail-icon" data-icon="vault"></span><span>Job Packet</span></button>
         <button data-view="phase2readiness" data-route><span class="rail-icon" data-icon="verified"></span><span>Phase 2 Ready</span></button>
+        <button data-view="rfjdashboard" data-route><span class="rail-icon" data-icon="dashboard"></span><span>Job Dashboard</span></button>
+        <button data-view="rfjstatusboard" data-route><span class="rail-icon" data-icon="status"></span><span>Status Board</span></button>
+        <button data-view="rfjsearch" data-route><span class="rail-icon" data-icon="search"></span><span>Job Search</span></button>
+        <button data-view="rfjtimeline" data-route><span class="rail-icon" data-icon="version"></span><span>Job Timeline</span></button>
+        <button data-view="rfjdupes" data-route><span class="rail-icon" data-icon="scope"></span><span>Dupe Finder</span></button>
+        <button data-view="rfjpriority" data-route><span class="rail-icon" data-icon="risk"></span><span>Priority Queue</span></button>
+        <button data-view="rfjblockers" data-route><span class="rail-icon" data-icon="shield"></span><span>Job Blockers</span></button>
+        <button data-view="rfjreviewq" data-route><span class="rail-icon" data-icon="verified"></span><span>Review Queue</span></button>
+        <button data-view="rfjexportall" data-route><span class="rail-icon" data-icon="vault"></span><span>Export All</span></button>
+        <button data-view="rfjimport" data-route><span class="rail-icon" data-icon="branch"></span><span>Import Jobs</span></button>
       </aside>
 
       <section class="workspace">
@@ -1196,6 +1216,56 @@
               <span class="card-icon" data-icon="verified"></span>
               <strong>Phase 2 Executor Readiness</strong>
               <span>Checklist to confirm all conditions are met before enabling Phase 2.</span>
+            </button>
+            <button class="command-card" data-view="rfjdashboard" data-route>
+              <span class="card-icon" data-icon="dashboard"></span>
+              <strong>Repo Job Dashboard</strong>
+              <span>Overview of all saved jobs by status, risk, and site.</span>
+            </button>
+            <button class="command-card" data-view="rfjstatusboard" data-route>
+              <span class="card-icon" data-icon="status"></span>
+              <strong>Repo Job Status Board</strong>
+              <span>Kanban-style view: Draft, Ready, In Progress, Done, Blocked.</span>
+            </button>
+            <button class="command-card" data-view="rfjsearch" data-route>
+              <span class="card-icon" data-icon="search"></span>
+              <strong>Repo Job Search</strong>
+              <span>Search and filter saved jobs by file, site, risk, or status.</span>
+            </button>
+            <button class="command-card" data-view="rfjtimeline" data-route>
+              <span class="card-icon" data-icon="version"></span>
+              <strong>Repo Job Timeline</strong>
+              <span>Jobs sorted by creation date. Track activity over time.</span>
+            </button>
+            <button class="command-card" data-view="rfjdupes" data-route>
+              <span class="card-icon" data-icon="scope"></span>
+              <strong>Repo Job Duplicate Finder</strong>
+              <span>Find jobs targeting the same file to avoid conflicts.</span>
+            </button>
+            <button class="command-card" data-view="rfjpriority" data-route>
+              <span class="card-icon" data-icon="risk"></span>
+              <strong>Repo Job Priority Queue</strong>
+              <span>Rank and order jobs by priority. Mark what to do next.</span>
+            </button>
+            <button class="command-card" data-view="rfjblockers" data-route>
+              <span class="card-icon" data-icon="shield"></span>
+              <strong>Repo Job Blockers</strong>
+              <span>Track what is blocking each job from moving forward.</span>
+            </button>
+            <button class="command-card" data-view="rfjreviewq" data-route>
+              <span class="card-icon" data-icon="verified"></span>
+              <strong>Repo Job Review Queue</strong>
+              <span>Jobs awaiting review before they can proceed to PR.</span>
+            </button>
+            <button class="command-card" data-view="rfjexportall" data-route>
+              <span class="card-icon" data-icon="vault"></span>
+              <strong>Repo Job Export All</strong>
+              <span>Export every saved job as a single JSON backup file.</span>
+            </button>
+            <button class="command-card" data-view="rfjimport" data-route>
+              <span class="card-icon" data-icon="branch"></span>
+              <strong>Repo Job Import</strong>
+              <span>Import jobs from a previously exported JSON backup.</span>
             </button>
           </div>
 
@@ -10021,6 +10091,430 @@
           }());</script>
         </section>
 
+        <!-- VIEW: rfjdashboard -->
+        <section class="view" id="view-rfjdashboard" data-view-panel="rfjdashboard">
+          <div class="section-head"><p class="eyebrow">Repo File Worker</p><h1>Repo Job Dashboard</h1><p>Overview of all saved jobs grouped by status, risk, and target site.</p></div>
+          <div class="panel-wrap">
+          <article class="panel">
+            <div class="panel-title"><h2>Summary</h2><button id="rjd-refresh" class="small-btn">Refresh</button></div>
+            <div id="rjd-summary" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:20px;"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-title"><h2>All Jobs</h2></div>
+            <div id="rjd-list" style="display:grid;gap:8px;"></div>
+          </article>
+          </div>
+          <script>(function(){
+            function rjdAll(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_rfj_')===0&&k!=='lt_rfj_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return b.ts-a.ts;});return a;}
+            var STATUS_COLORS={draft:'#9aa0b0',ready:'#2563eb',inprogress:'#f59e0b',done:'#22c55e',blocked:'#ef4444'};
+            var RISK_COLORS={LOW:'#22c55e',MEDIUM:'#f59e0b',HIGH:'#ef4444'};
+            function rjdRender(){
+              var jobs=rjdAll();
+              var sum=document.getElementById('rjd-summary');var lst=document.getElementById('rjd-list');
+              if(!sum||!lst)return;
+              var total=jobs.length;
+              var byStatus={};var byRisk={LOW:0,MEDIUM:0,HIGH:0};
+              jobs.forEach(function(j){
+                var s=j.status||'draft';byStatus[s]=(byStatus[s]||0)+1;
+                if(j.riskLevel)byRisk[j.riskLevel]=(byRisk[j.riskLevel]||0)+1;
+              });
+              var tiles=[{label:'Total',n:total,c:'#9aa0b0'}];
+              Object.keys(byStatus).forEach(function(s){tiles.push({label:s.charAt(0).toUpperCase()+s.slice(1),n:byStatus[s],c:STATUS_COLORS[s]||'#9aa0b0'});});
+              ['LOW','MEDIUM','HIGH'].forEach(function(r){if(byRisk[r])tiles.push({label:r,n:byRisk[r],c:RISK_COLORS[r]});});
+              sum.innerHTML=tiles.map(function(t){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px;text-align:center;"><div style="font-size:26px;font-weight:700;color:'+t.c+';">'+t.n+'</div><div style="font-size:12px;color:#9aa0b0;margin-top:3px;">'+t.label+'</div></div>';}).join('');
+              if(!jobs.length){lst.innerHTML='<p style="color:#9aa0b0;">No jobs saved yet.</p>';return;}
+              lst.innerHTML=jobs.map(function(j){
+                var sc=STATUS_COLORS[j.status||'draft']||'#9aa0b0';var rc=RISK_COLORS[j.riskLevel]||'#9aa0b0';
+                return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">'+
+                  '<div><strong style="font-size:13px;">'+j.jobId+'</strong><br><span style="font-size:12px;color:#9aa0b0;">'+j.targetFiles+'</span></div>'+
+                  '<div style="display:flex;gap:8px;align-items:center;">'+
+                  '<span style="font-size:12px;font-weight:700;color:'+rc+';">'+j.riskLevel+'</span>'+
+                  '<span style="font-size:12px;font-weight:700;color:'+sc+';">'+(j.status||'draft').toUpperCase()+'</span></div></div>';
+              }).join('');
+            }
+            document.getElementById('rjd-refresh').addEventListener('click',rjdRender);
+            var sec=document.getElementById('view-rfjdashboard');
+            if(sec){sec.addEventListener('lt-view-enter',rjdRender);setTimeout(function(){if(sec.classList.contains('active'))rjdRender();},150);}
+          }());</script>
+        </section>
+
+        <!-- VIEW: rfjstatusboard -->
+        <section class="view" id="view-rfjstatusboard" data-view-panel="rfjstatusboard">
+          <div class="section-head"><p class="eyebrow">Repo File Worker</p><h1>Repo Job Status Board</h1><p>Jobs grouped into columns by status. Click a job to update its status.</p></div>
+          <div class="panel-wrap">
+          <div id="rjsb-board" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;"></div>
+          </div>
+          <script>(function(){
+            var STATUSES=['draft','ready','inprogress','done','blocked'];
+            var STATUS_LABELS={draft:'Draft',ready:'Ready',inprogress:'In Progress',done:'Done',blocked:'Blocked'};
+            var STATUS_COLORS={draft:'#9aa0b0',ready:'#2563eb',inprogress:'#f59e0b',done:'#22c55e',blocked:'#ef4444'};
+            function rjsbAll(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_rfj_')===0&&k!=='lt_rfj_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}return a;}
+            function rjsbRender(){
+              var jobs=rjsbAll();
+              var board=document.getElementById('rjsb-board');if(!board)return;
+              board.innerHTML=STATUSES.map(function(s){
+                var col=jobs.filter(function(j){return(j.status||'draft')===s;});
+                var c=STATUS_COLORS[s];
+                return '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;">'+
+                  '<div style="font-weight:700;color:'+c+';margin-bottom:10px;font-size:13px;">'+STATUS_LABELS[s]+' ('+col.length+')</div>'+
+                  (col.length?col.map(function(j){
+                    return '<div style="background:rgba(255,255,255,0.05);border-radius:6px;padding:8px 10px;margin-bottom:8px;">'+
+                      '<div style="font-size:12px;font-weight:700;">'+j.jobId+'</div>'+
+                      '<div style="font-size:11px;color:#9aa0b0;margin-bottom:6px;">'+j.targetFiles+'</div>'+
+                      '<select data-rjsb-id="'+j.id+'" style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);border-radius:4px;padding:4px 6px;color:#e8eaf0;font-size:11px;">'+
+                      STATUSES.map(function(st){return'<option value="'+st+'"'+(j.status===st?' selected':st==='draft'&&!j.status?' selected':'')+'>'+STATUS_LABELS[st]+'</option>';}).join('')+
+                      '</select></div>';
+                  }).join(''):'<div style="font-size:12px;color:#9aa0b0;padding:6px;">No jobs</div>')+
+                  '</div>';
+              }).join('');
+              board.querySelectorAll('[data-rjsb-id]').forEach(function(sel){
+                sel.addEventListener('change',function(){
+                  var j=JSON.parse(localStorage.getItem('lt_rfj_'+sel.dataset.rjsbId));
+                  if(!j)return;j.status=sel.value;localStorage.setItem('lt_rfj_'+sel.dataset.rjsbId,JSON.stringify(j));
+                  rjsbRender();
+                });
+              });
+            }
+            var sec=document.getElementById('view-rfjstatusboard');
+            if(sec){sec.addEventListener('lt-view-enter',rjsbRender);setTimeout(function(){if(sec.classList.contains('active'))rjsbRender();},150);}
+          }());</script>
+        </section>
+
+        <!-- VIEW: rfjsearch -->
+        <section class="view" id="view-rfjsearch" data-view-panel="rfjsearch">
+          <div class="section-head"><p class="eyebrow">Repo File Worker</p><h1>Repo Job Search</h1><p>Search and filter saved jobs by file path, site, risk, or status.</p></div>
+          <div class="panel-wrap">
+          <article class="panel">
+            <div class="panel-title"><h2>Filters</h2></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+              <input id="rjs-q" type="text" placeholder="Search file, site, summary..." style="grid-column:span 2;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:8px 12px;color:#e8eaf0;font-size:14px;" />
+              <select id="rjs-risk" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:8px 10px;color:#e8eaf0;font-size:13px;">
+                <option value="">All risks</option>
+                <option value="LOW">LOW</option>
+                <option value="MEDIUM">MEDIUM</option>
+                <option value="HIGH">HIGH</option>
+              </select>
+              <select id="rjs-status" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:8px 10px;color:#e8eaf0;font-size:13px;">
+                <option value="">All statuses</option>
+                <option value="draft">Draft</option>
+                <option value="ready">Ready</option>
+                <option value="inprogress">In Progress</option>
+                <option value="done">Done</option>
+                <option value="blocked">Blocked</option>
+              </select>
+            </div>
+            <div id="rjs-results" style="display:grid;gap:8px;"></div>
+          </article>
+          </div>
+          <script>(function(){
+            function rjsAll(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_rfj_')===0&&k!=='lt_rfj_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return b.ts-a.ts;});return a;}
+            var RISK_COLORS={LOW:'#22c55e',MEDIUM:'#f59e0b',HIGH:'#ef4444'};
+            function rjsRender(){
+              var q=(document.getElementById('rjs-q').value||'').toLowerCase();
+              var risk=document.getElementById('rjs-risk').value;
+              var status=document.getElementById('rjs-status').value;
+              var jobs=rjsAll().filter(function(j){
+                if(risk&&j.riskLevel!==risk)return false;
+                if(status&&(j.status||'draft')!==status)return false;
+                if(q){var hay=(j.targetFiles+' '+(j.targetSite||'')+' '+(j.proposedChangeSummary||'')+' '+j.jobId).toLowerCase();if(hay.indexOf(q)<0)return false;}
+                return true;
+              });
+              var el=document.getElementById('rjs-results');if(!el)return;
+              if(!jobs.length){el.innerHTML='<p style="color:#9aa0b0;">No matching jobs.</p>';return;}
+              var rc=RISK_COLORS;
+              el.innerHTML=jobs.map(function(j){
+                return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px 14px;">'+
+                  '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'+
+                  '<strong style="font-size:13px;">'+j.jobId+'</strong>'+
+                  '<span style="font-size:12px;font-weight:700;color:'+(rc[j.riskLevel]||'#9aa0b0')+';">'+j.riskLevel+'</span></div>'+
+                  '<div style="font-size:12px;color:#9aa0b0;">'+j.targetFiles+'</div>'+
+                  '<div style="font-size:12px;color:#c0c4d0;margin-top:4px;">'+((j.proposedChangeSummary||'').slice(0,100))+'</div></div>';
+              }).join('');
+            }
+            ['rjs-q','rjs-risk','rjs-status'].forEach(function(id){
+              var el=document.getElementById(id);if(el)el.addEventListener('input',rjsRender);
+            });
+            var sec=document.getElementById('view-rfjsearch');
+            if(sec){sec.addEventListener('lt-view-enter',rjsRender);setTimeout(function(){if(sec.classList.contains('active'))rjsRender();},150);}
+          }());</script>
+        </section>
+
+        <!-- VIEW: rfjtimeline -->
+        <section class="view" id="view-rfjtimeline" data-view-panel="rfjtimeline">
+          <div class="section-head"><p class="eyebrow">Repo File Worker</p><h1>Repo Job Timeline</h1><p>All jobs sorted by creation date, newest first.</p></div>
+          <div class="panel-wrap">
+          <article class="panel">
+            <div class="panel-title"><h2>Timeline</h2><button id="rjtl-refresh" class="small-btn">Refresh</button></div>
+            <div id="rjtl-list" style="display:grid;gap:0;"></div>
+          </article>
+          </div>
+          <script>(function(){
+            var RISK_COLORS={LOW:'#22c55e',MEDIUM:'#f59e0b',HIGH:'#ef4444'};
+            function rjtlAll(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_rfj_')===0&&k!=='lt_rfj_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return b.ts-a.ts;});return a;}
+            function rjtlRender(){
+              var jobs=rjtlAll();var el=document.getElementById('rjtl-list');if(!el)return;
+              if(!jobs.length){el.innerHTML='<p style="color:#9aa0b0;">No jobs saved yet.</p>';return;}
+              var lastDate='';
+              el.innerHTML=jobs.map(function(j){
+                var d=new Date(j.ts);var dateStr=d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+                var header='';if(dateStr!==lastDate){header='<div style="font-size:11px;font-weight:700;color:#9aa0b0;padding:12px 0 6px;text-transform:uppercase;letter-spacing:.05em;">'+dateStr+'</div>';lastDate=dateStr;}
+                return header+'<div style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);">'+
+                  '<div style="width:4px;border-radius:2px;background:'+(RISK_COLORS[j.riskLevel]||'#9aa0b0')+';align-self:stretch;flex-shrink:0;min-height:40px;"></div>'+
+                  '<div><strong style="font-size:13px;">'+j.jobId+'</strong>'+
+                  '<div style="font-size:12px;color:#9aa0b0;">'+j.targetFiles+'</div>'+
+                  '<div style="font-size:11px;color:#9aa0b0;margin-top:2px;">'+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+' &mdash; '+(j.status||'draft').toUpperCase()+'</div></div></div>';
+              }).join('');
+            }
+            document.getElementById('rjtl-refresh').addEventListener('click',rjtlRender);
+            var sec=document.getElementById('view-rfjtimeline');
+            if(sec){sec.addEventListener('lt-view-enter',rjtlRender);setTimeout(function(){if(sec.classList.contains('active'))rjtlRender();},150);}
+          }());</script>
+        </section>
+
+        <!-- VIEW: rfjdupes -->
+        <section class="view" id="view-rfjdupes" data-view-panel="rfjdupes">
+          <div class="section-head"><p class="eyebrow">Repo File Worker</p><h1>Repo Job Duplicate Finder</h1><p>Jobs targeting the same file. Review before submitting to avoid conflicts.</p></div>
+          <div class="panel-wrap">
+          <article class="panel">
+            <div class="panel-title"><h2>Duplicate Targets</h2><button id="rjdf-refresh" class="small-btn">Refresh</button></div>
+            <div id="rjdf-list" style="display:grid;gap:10px;"></div>
+          </article>
+          </div>
+          <script>(function(){
+            function rjdfAll(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_rfj_')===0&&k!=='lt_rfj_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return b.ts-a.ts;});return a;}
+            function rjdfRender(){
+              var jobs=rjdfAll();var el=document.getElementById('rjdf-list');if(!el)return;
+              var byFile={};
+              jobs.forEach(function(j){var f=(j.targetFiles||'').trim().toLowerCase();if(!byFile[f])byFile[f]=[];byFile[f].push(j);});
+              var dupes=Object.keys(byFile).filter(function(f){return byFile[f].length>1;});
+              if(!dupes.length){el.innerHTML='<p style="color:#22c55e;">No duplicate file targets found.</p>';return;}
+              el.innerHTML=dupes.map(function(f){
+                return '<div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:8px;padding:14px 16px;">'+
+                  '<div style="font-weight:700;color:#f59e0b;margin-bottom:8px;">'+f+' ('+byFile[f].length+' jobs)</div>'+
+                  byFile[f].map(function(j){
+                    return '<div style="font-size:13px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);">'+
+                      '<strong>'+j.jobId+'</strong> &mdash; '+(j.status||'draft').toUpperCase()+' &mdash; '+j.riskLevel+'</div>';
+                  }).join('')+'</div>';
+              }).join('');
+            }
+            document.getElementById('rjdf-refresh').addEventListener('click',rjdfRender);
+            var sec=document.getElementById('view-rfjdupes');
+            if(sec){sec.addEventListener('lt-view-enter',rjdfRender);setTimeout(function(){if(sec.classList.contains('active'))rjdfRender();},150);}
+          }());</script>
+        </section>
+
+        <!-- VIEW: rfjpriority -->
+        <section class="view" id="view-rfjpriority" data-view-panel="rfjpriority">
+          <div class="section-head"><p class="eyebrow">Repo File Worker</p><h1>Repo Job Priority Queue</h1><p>Set priority on jobs and sort to see what to do next.</p></div>
+          <div class="panel-wrap">
+          <article class="panel">
+            <div class="panel-title"><h2>Priority Order</h2><button id="rjpq-refresh" class="small-btn">Refresh</button></div>
+            <div id="rjpq-list" style="display:grid;gap:8px;"></div>
+          </article>
+          </div>
+          <script>(function(){
+            var PRI_LABELS={1:'Critical',2:'High',3:'Normal',4:'Low',5:'Parked'};
+            var PRI_COLORS={1:'#ef4444',2:'#f59e0b',3:'#2563eb',4:'#9aa0b0',5:'#6b7280'};
+            function rjpqAll(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_rfj_')===0&&k!=='lt_rfj_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}
+              a.sort(function(a,b){return(parseInt(a.priority)||3)-(parseInt(b.priority)||3);});return a;}
+            function rjpqRender(){
+              var jobs=rjpqAll();var el=document.getElementById('rjpq-list');if(!el)return;
+              if(!jobs.length){el.innerHTML='<p style="color:#9aa0b0;">No jobs saved yet.</p>';return;}
+              el.innerHTML=jobs.map(function(j){
+                var p=parseInt(j.priority)||3;var pc=PRI_COLORS[p]||'#9aa0b0';
+                return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">'+
+                  '<div><strong style="font-size:13px;">'+j.jobId+'</strong><br><span style="font-size:12px;color:#9aa0b0;">'+j.targetFiles+'</span></div>'+
+                  '<select data-rjpq-id="'+j.id+'" style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);border-radius:5px;padding:5px 8px;color:'+pc+';font-weight:700;font-size:13px;">'+
+                  [1,2,3,4,5].map(function(v){return'<option value="'+v+'"'+(p===v?' selected':'')+'>'+PRI_LABELS[v]+'</option>';}).join('')+
+                  '</select></div>';
+              }).join('');
+              el.querySelectorAll('[data-rjpq-id]').forEach(function(sel){
+                sel.addEventListener('change',function(){
+                  var j=JSON.parse(localStorage.getItem('lt_rfj_'+sel.dataset.rjpqId));
+                  if(!j)return;j.priority=parseInt(sel.value);localStorage.setItem('lt_rfj_'+sel.dataset.rjpqId,JSON.stringify(j));
+                  rjpqRender();
+                });
+              });
+            }
+            document.getElementById('rjpq-refresh').addEventListener('click',rjpqRender);
+            var sec=document.getElementById('view-rfjpriority');
+            if(sec){sec.addEventListener('lt-view-enter',rjpqRender);setTimeout(function(){if(sec.classList.contains('active'))rjpqRender();},150);}
+          }());</script>
+        </section>
+
+        <!-- VIEW: rfjblockers -->
+        <section class="view" id="view-rfjblockers" data-view-panel="rfjblockers">
+          <div class="section-head"><p class="eyebrow">Repo File Worker</p><h1>Repo Job Blockers</h1><p>Log what is blocking each job. Clear blockers to move a job to ready.</p></div>
+          <div class="panel-wrap">
+          <article class="panel">
+            <div class="panel-title"><h2>Add Blocker</h2></div>
+            <div style="display:grid;gap:10px;margin-bottom:14px;">
+              <select id="rjbl-sel" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:8px 12px;color:#e8eaf0;font-size:14px;">
+                <option value="">-- Select job --</option>
+              </select>
+              <input id="rjbl-blocker" type="text" placeholder="Describe the blocker" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:8px 12px;color:#e8eaf0;font-size:14px;" />
+              <button id="rjbl-add" style="background:#2563eb;color:#fff;border:none;border-radius:6px;padding:9px 18px;font-size:14px;cursor:pointer;">Add Blocker</button>
+            </div>
+          </article>
+          <article class="panel">
+            <div class="panel-title"><h2>Active Blockers</h2><button id="rjbl-refresh" class="small-btn">Refresh</button></div>
+            <div id="rjbl-list" style="display:grid;gap:8px;"></div>
+          </article>
+          </div>
+          <script>(function(){
+            function rjblAll(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_rfj_')===0&&k!=='lt_rfj_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return b.ts-a.ts;});return a;}
+            function rjblBkAll(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_rjbl_')===0){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return b.ts-a.ts;});return a;}
+            function rjblLoadSel(){
+              var sel=document.getElementById('rjbl-sel');if(!sel)return;
+              var jobs=rjblAll();
+              sel.innerHTML='<option value="">-- Select job --</option>'+jobs.map(function(j){return'<option value="'+j.id+'">'+j.jobId+'</option>';}).join('');
+            }
+            function rjblRender(){
+              var bks=rjblBkAll();var el=document.getElementById('rjbl-list');if(!el)return;
+              if(!bks.length){el.innerHTML='<p style="color:#22c55e;">No active blockers.</p>';return;}
+              el.innerHTML=bks.map(function(b){
+                return '<div style="background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:12px 14px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">'+
+                  '<div><div style="font-size:12px;color:#9aa0b0;margin-bottom:2px;">'+b.jobId+'</div><div style="font-size:13px;color:#e8eaf0;">'+b.blocker+'</div></div>'+
+                  '<button class="rjbl-del" data-id="'+b.id+'" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:5px;padding:4px 10px;color:#ef4444;font-size:12px;cursor:pointer;flex-shrink:0;">Clear</button></div>';
+              }).join('');
+              el.querySelectorAll('.rjbl-del').forEach(function(b){
+                b.addEventListener('click',function(){localStorage.removeItem('lt_rjbl_'+b.dataset.id);rjblRender();});
+              });
+            }
+            document.getElementById('rjbl-add').addEventListener('click',function(){
+              var jobId=document.getElementById('rjbl-sel').value;var blocker=document.getElementById('rjbl-blocker').value.trim();
+              if(!jobId||!blocker)return;
+              var j=JSON.parse(localStorage.getItem('lt_rfj_'+jobId));if(!j)return;
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              localStorage.setItem('lt_rjbl_'+id,JSON.stringify({id:id,jobId:j.jobId,jobRef:jobId,blocker:blocker,ts:Date.now()}));
+              document.getElementById('rjbl-blocker').value='';
+              rjblRender();
+            });
+            document.getElementById('rjbl-refresh').addEventListener('click',rjblRender);
+            var sec=document.getElementById('view-rfjblockers');
+            if(sec){sec.addEventListener('lt-view-enter',function(){rjblLoadSel();rjblRender();});setTimeout(function(){if(sec.classList.contains('active')){rjblLoadSel();rjblRender();}},150);}
+          }());</script>
+        </section>
+
+        <!-- VIEW: rfjreviewq -->
+        <section class="view" id="view-rfjreviewq" data-view-panel="rfjreviewq">
+          <div class="section-head"><p class="eyebrow">Repo File Worker</p><h1>Repo Job Review Queue</h1><p>Jobs with status "ready" awaiting review before proceeding to PR.</p></div>
+          <div class="panel-wrap">
+          <article class="panel">
+            <div class="panel-title"><h2>Awaiting Review</h2><button id="rjrq-refresh" class="small-btn">Refresh</button></div>
+            <div id="rjrq-list" style="display:grid;gap:8px;"></div>
+          </article>
+          </div>
+          <script>(function(){
+            var RISK_COLORS={LOW:'#22c55e',MEDIUM:'#f59e0b',HIGH:'#ef4444'};
+            function rjrqAll(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_rfj_')===0&&k!=='lt_rfj_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}
+              return a.filter(function(j){return(j.status||'draft')==='ready';}).sort(function(a,b){return(parseInt(a.priority)||3)-(parseInt(b.priority)||3);});}
+            function rjrqRender(){
+              var jobs=rjrqAll();var el=document.getElementById('rjrq-list');if(!el)return;
+              if(!jobs.length){el.innerHTML='<p style="color:#9aa0b0;">No jobs in review queue. Set a job status to "Ready" to add it here.</p>';return;}
+              el.innerHTML=jobs.map(function(j){
+                var rc=RISK_COLORS[j.riskLevel]||'#9aa0b0';
+                return '<div style="background:rgba(37,99,235,0.07);border:1px solid rgba(37,99,235,0.2);border-radius:8px;padding:14px 16px;">'+
+                  '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">'+
+                  '<strong style="font-size:13px;">'+j.jobId+'</strong>'+
+                  '<span style="font-size:12px;font-weight:700;color:'+rc+';">'+j.riskLevel+'</span></div>'+
+                  '<div style="font-size:12px;color:#9aa0b0;margin-bottom:4px;">'+j.targetFiles+'</div>'+
+                  '<div style="font-size:12px;color:#c0c4d0;margin-bottom:10px;">'+((j.proposedChangeSummary||'').slice(0,120))+'</div>'+
+                  '<div style="display:flex;gap:8px;flex-wrap:wrap;">'+
+                  '<button class="rjrq-approve" data-id="'+j.id+'" style="background:#22c55e;color:#fff;border:none;border-radius:5px;padding:5px 12px;font-size:12px;cursor:pointer;">Approve — move to In Progress</button>'+
+                  '<button class="rjrq-block" data-id="'+j.id+'" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:5px;padding:5px 12px;color:#ef4444;font-size:12px;cursor:pointer;">Block</button>'+
+                  '</div></div>';
+              }).join('');
+              el.querySelectorAll('.rjrq-approve').forEach(function(b){
+                b.addEventListener('click',function(){
+                  var j=JSON.parse(localStorage.getItem('lt_rfj_'+b.dataset.id));if(!j)return;
+                  j.status='inprogress';localStorage.setItem('lt_rfj_'+b.dataset.id,JSON.stringify(j));rjrqRender();
+                });
+              });
+              el.querySelectorAll('.rjrq-block').forEach(function(b){
+                b.addEventListener('click',function(){
+                  var j=JSON.parse(localStorage.getItem('lt_rfj_'+b.dataset.id));if(!j)return;
+                  j.status='blocked';localStorage.setItem('lt_rfj_'+b.dataset.id,JSON.stringify(j));rjrqRender();
+                });
+              });
+            }
+            document.getElementById('rjrq-refresh').addEventListener('click',rjrqRender);
+            var sec=document.getElementById('view-rfjreviewq');
+            if(sec){sec.addEventListener('lt-view-enter',rjrqRender);setTimeout(function(){if(sec.classList.contains('active'))rjrqRender();},150);}
+          }());</script>
+        </section>
+
+        <!-- VIEW: rfjexportall -->
+        <section class="view" id="view-rfjexportall" data-view-panel="rfjexportall">
+          <div class="section-head"><p class="eyebrow">Repo File Worker</p><h1>Repo Job Export All</h1><p>Export every saved job as a single JSON backup file.</p></div>
+          <div class="panel-wrap">
+          <article class="panel">
+            <div class="panel-title"><h2>Export</h2></div>
+            <div id="rjea-summary" style="margin-bottom:14px;font-size:14px;color:#c0c4d0;"></div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button id="rjea-export" style="background:#2563eb;color:#fff;border:none;border-radius:6px;padding:9px 18px;font-size:14px;cursor:pointer;">Download All Jobs (JSON)</button>
+              <button id="rjea-copy" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:9px 18px;color:#e8eaf0;font-size:14px;cursor:pointer;">Copy to Clipboard</button>
+            </div>
+          </article>
+          </div>
+          <script>(function(){
+            function rjeaAll(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_rfj_')===0&&k!=='lt_rfj_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return b.ts-a.ts;});return a;}
+            function rjeaLoad(){
+              var jobs=rjeaAll();var s=document.getElementById('rjea-summary');if(s)s.textContent=jobs.length+' job'+(jobs.length!==1?'s':'')+' saved.';
+            }
+            function rjeaJSON(){return JSON.stringify({exportedAt:new Date().toISOString(),count:rjeaAll().length,jobs:rjeaAll()},null,2);}
+            document.getElementById('rjea-export').addEventListener('click',function(){
+              var bl=new Blob([rjeaJSON()],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download='repo-file-jobs-'+Date.now()+'.json';a.click();
+            });
+            document.getElementById('rjea-copy').addEventListener('click',function(){
+              navigator.clipboard&&navigator.clipboard.writeText(rjeaJSON()).then(function(){var t=document.getElementById('toast');if(t){t.textContent='All jobs copied to clipboard';t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}});
+            });
+            var sec=document.getElementById('view-rfjexportall');
+            if(sec){sec.addEventListener('lt-view-enter',rjeaLoad);setTimeout(function(){if(sec.classList.contains('active'))rjeaLoad();},150);}
+          }());</script>
+        </section>
+
+        <!-- VIEW: rfjimport -->
+        <section class="view" id="view-rfjimport" data-view-panel="rfjimport">
+          <div class="section-head"><p class="eyebrow">Repo File Worker</p><h1>Repo Job Import</h1><p>Import jobs from a previously exported JSON backup. Duplicate IDs are skipped.</p></div>
+          <div class="panel-wrap">
+          <article class="panel">
+            <div class="panel-title"><h2>Paste or Upload JSON</h2></div>
+            <textarea id="rji-json" rows="8" placeholder='Paste exported JSON here, or use the file picker below...' style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:10px 12px;color:#e8eaf0;font-size:13px;font-family:monospace;resize:vertical;margin-bottom:10px;box-sizing:border-box;"></textarea>
+            <input id="rji-file" type="file" accept=".json" style="display:none;" />
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+              <button id="rji-pick" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:8px 16px;color:#e8eaf0;font-size:14px;cursor:pointer;">Choose File</button>
+              <button id="rji-import" style="background:#2563eb;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:14px;cursor:pointer;">Import Jobs</button>
+            </div>
+            <div id="rji-result" style="font-size:13px;color:#c0c4d0;"></div>
+          </article>
+          </div>
+          <script>(function(){
+            document.getElementById('rji-pick').addEventListener('click',function(){document.getElementById('rji-file').click();});
+            document.getElementById('rji-file').addEventListener('change',function(e){
+              var f=e.target.files[0];if(!f)return;
+              var r=new FileReader();r.onload=function(ev){document.getElementById('rji-json').value=ev.target.result;};r.readAsText(f);
+            });
+            document.getElementById('rji-import').addEventListener('click',function(){
+              var raw=document.getElementById('rji-json').value.trim();
+              var res=document.getElementById('rji-result');
+              if(!raw){res.textContent='Nothing to import.';return;}
+              var data;try{data=JSON.parse(raw);}catch(e){res.textContent='Invalid JSON: '+e.message;return;}
+              var jobs=Array.isArray(data)?data:(Array.isArray(data.jobs)?data.jobs:null);
+              if(!jobs){res.textContent='No jobs array found in JSON.';return;}
+              var added=0;var skipped=0;
+              jobs.forEach(function(j){
+                if(!j||!j.id){skipped++;return;}
+                var key='lt_rfj_'+j.id;
+                if(localStorage.getItem(key)){skipped++;return;}
+                try{localStorage.setItem(key,JSON.stringify(j));added++;}catch(e){skipped++;}
+              });
+              res.innerHTML='<span style="color:#22c55e;">Imported: '+added+'</span> &nbsp; <span style="color:#9aa0b0;">Skipped (already exist or invalid): '+skipped+'</span>';
+              if(added>0){var t=document.getElementById('toast');if(t){t.textContent=added+' job'+(added!==1?'s':'')+' imported';t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}}
+            });
+          }());</script>
+        </section>
+
         <!-- ═══ DASHBOARD COUNTERS SCRIPT ═══ -->
         <script>
         (function(){
@@ -10084,7 +10578,8 @@
               {label:'Vault Events',n:ltCountPrefix('lt_bvr_',['lt_bvr_draft'])},
               {label:'Pinned Commands',n:ltCountPrefix('lt_pcmd_',['lt_pcmd_draft'])},
               {label:'Repo File Jobs',n:ltCountPrefix('lt_rfj_',['lt_rfj_draft'])},
-              {label:'Patch Scopes',n:ltCountPrefix('lt_ps2_',[])}
+              {label:'Patch Scopes',n:ltCountPrefix('lt_ps2_',[])},
+              {label:'Job Blockers',n:ltCountPrefix('lt_rjbl_',[])}
             ];
             el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px;text-align:center;"><div style="font-size:28px;font-weight:700;line-height:1;">'+(it.n)+'</div><div style="font-size:12px;color:#9aa0b0;margin-top:4px;">'+it.label+'</div></div>';}).join('');
           }
