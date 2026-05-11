@@ -15,7 +15,7 @@
   "proposedChangeSummary": "Branch creation test only. No file edits.",
   "acceptanceCriteria": "Feature branch created from main. No files changed in branch.",
   "rollbackPlan": "Delete the created branch: git push origin --delete rfw-test-branch-create",
-  "branchNameSuggestion": "rfw-test-branch-create",
+  "branchNameSuggestion": "rfw-test-pr-create",
   "prTitleSuggestion": "RFW Test: Branch creation test",
   "prBodyDraft": "## Summary\n- Branch creation test only\n- No file edits\n\n## Risk\nLOW\n\n## Rollback\ngit push origin --delete rfw-test-branch-create",
   "userApprovalRequired": "Yes",
