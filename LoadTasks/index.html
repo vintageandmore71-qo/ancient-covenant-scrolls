@@ -91,6 +91,11 @@
         <button data-view="timeline" data-route>Timeline</button>
         <button data-view="quickactions" data-route>Quick Actions</button>
         <button data-view="stats" data-route>Stats</button>
+        <button data-view="notepad" data-route>Note Pad</button>
+        <button data-view="bysite" data-route>By Site</button>
+        <button data-view="buildhealth" data-route>Health</button>
+        <button data-view="jobdetail" data-route>Job Detail</button>
+        <button data-view="linked" data-route>Linked</button>
       </nav>
       <button class="icon-button" id="hardRefresh" aria-label="Hard refresh app state">
         <span class="icon-mini" data-icon="refresh"></span>
@@ -145,6 +150,11 @@
         <button data-view="timeline" data-route><span class="rail-icon" data-icon="version"></span><span>Timeline</span></button>
         <button data-view="quickactions" data-route><span class="rail-icon" data-icon="dashboard"></span><span>Quick Actions</span></button>
         <button data-view="stats" data-route><span class="rail-icon" data-icon="certificate"></span><span>Stats</span></button>
+        <button data-view="notepad" data-route><span class="rail-icon" data-icon="notes"></span><span>Note Pad</span></button>
+        <button data-view="bysite" data-route><span class="rail-icon" data-icon="library"></span><span>By Site</span></button>
+        <button data-view="buildhealth" data-route><span class="rail-icon" data-icon="shield"></span><span>Health</span></button>
+        <button data-view="jobdetail" data-route><span class="rail-icon" data-icon="wrench"></span><span>Job Detail</span></button>
+        <button data-view="linked" data-route><span class="rail-icon" data-icon="version"></span><span>Linked</span></button>
       </aside>
 
       <section class="workspace">
@@ -328,6 +338,31 @@
               <span class="card-icon" data-icon="certificate"></span>
               <strong>Stats Summary</strong>
               <span>Total counts, last activity per type, and localStorage usage.</span>
+            </button>
+            <button class="command-card" data-view="notepad" data-route>
+              <span class="card-icon" data-icon="notes"></span>
+              <strong>Quick Note Pad</strong>
+              <span>Scratch pad that auto-saves as you type. Export .txt anytime.</span>
+            </button>
+            <button class="command-card" data-view="bysite" data-route>
+              <span class="card-icon" data-icon="library"></span>
+              <strong>Per-Site View</strong>
+              <span>Pick a site and see all records for it grouped by type.</span>
+            </button>
+            <button class="command-card" data-view="buildhealth" data-route>
+              <span class="card-icon" data-icon="shield"></span>
+              <strong>Build Health</strong>
+              <span>Open issues by severity, repair jobs by status, backlog by priority.</span>
+            </button>
+            <button class="command-card" data-view="jobdetail" data-route>
+              <span class="card-icon" data-icon="wrench"></span>
+              <strong>Repair Job Detail</strong>
+              <span>View all fields for a repair job as a formatted report. Copy or export.</span>
+            </button>
+            <button class="command-card" data-view="linked" data-route>
+              <span class="card-icon" data-icon="version"></span>
+              <strong>Linked Records</strong>
+              <span>Enter any record ID and find everything that references it.</span>
             </button>
           </div>
 
@@ -3352,6 +3387,292 @@
             document.getElementById('st-refresh').addEventListener('click',stRender);
             var panel=document.getElementById('view-stats');
             if(panel){panel.addEventListener('lt-view-enter',stRender);setTimeout(function(){if(panel.classList.contains('active'))stRender();},100);}
+          }());
+          </script>
+        </section>
+
+        <!-- ═══ QUICK NOTE PAD ═══ -->
+        <section class="view" id="view-notepad" data-view-panel="notepad">
+          <div class="section-head">
+            <p class="eyebrow">Quick Note Pad</p>
+            <h1>Capture thoughts mid-session.</h1>
+            <p>Auto-saves as you type. One active note at a time. Export .txt anytime.</p>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+            <button class="secondary-action" type="button" id="np-export">Export .txt</button>
+            <button class="secondary-action" type="button" id="np-copy">Copy</button>
+            <button class="secondary-action" type="button" id="np-clear">Clear</button>
+          </div>
+          <div id="np-saved-indicator" style="font-size:12px;color:#9aa0b0;margin-bottom:8px;"></div>
+          <textarea id="np-text" rows="18" placeholder="Type notes here. Saved automatically." style="width:100%;box-sizing:border-box;font-size:14px;line-height:1.6;"></textarea>
+          <script>
+          (function(){
+            var KEY='lt_np_draft';var timer=null;
+            function npToast(m){var t=document.getElementById('toast');if(t){t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2000);}}
+            function npSave(){var text=document.getElementById('np-text').value;localStorage.setItem(KEY,text);var ind=document.getElementById('np-saved-indicator');if(ind)ind.textContent='Saved at '+new Date().toLocaleTimeString();}
+            function npLoad(){var r=localStorage.getItem(KEY)||'';document.getElementById('np-text').value=r;}
+            document.getElementById('np-text').addEventListener('input',function(){clearTimeout(timer);timer=setTimeout(npSave,600);});
+            document.getElementById('np-export').addEventListener('click',function(){var text=document.getElementById('np-text').value;if(!text.trim()){npToast('Nothing to export.');return;}var b=new Blob([text],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='note-'+Date.now()+'.txt';a.click();URL.revokeObjectURL(a.href);npToast('Exported.');});
+            document.getElementById('np-copy').addEventListener('click',function(){var text=document.getElementById('np-text').value;if(!text.trim()){npToast('Nothing to copy.');return;}navigator.clipboard.writeText(text).then(function(){npToast('Copied.');}).catch(function(){npToast('Copy failed.');});});
+            document.getElementById('np-clear').addEventListener('click',function(){if(!confirm('Clear the note pad?'))return;document.getElementById('np-text').value='';localStorage.removeItem(KEY);var ind=document.getElementById('np-saved-indicator');if(ind)ind.textContent='';npToast('Cleared.');});
+            var panel=document.getElementById('view-notepad');
+            if(panel){panel.addEventListener('lt-view-enter',npLoad);setTimeout(function(){if(panel.classList.contains('active'))npLoad();},100);}
+          }());
+          </script>
+        </section>
+
+        <!-- ═══ PER-SITE VIEW ═══ -->
+        <section class="view" id="view-bysite" data-view-panel="bysite">
+          <div class="section-head">
+            <p class="eyebrow">Per-Site View</p>
+            <h1>All records for one site.</h1>
+            <p>Pick a site and see every saved record related to it, grouped by type.</p>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;">
+            <select id="ps-site" style="flex:1;max-width:320px;"><option value="">Select a site...</option><option>Load Main</option><option>Load AI / AI Chat Studio</option><option>Image Prompt PWA</option><option>Load Studio</option><option>Load Play</option><option>Load Tasks</option><option>Study</option><option>Attain</option><option>Attain Jr</option><option>Other</option></select>
+            <button class="primary-action" type="button" id="ps-show">Show Records</button>
+          </div>
+          <div id="ps-count" style="font-size:13px;color:#9aa0b0;margin-bottom:12px;"></div>
+          <div id="ps-results" style="display:grid;gap:16px;"></div>
+          <script>
+          (function(){
+            var PS_SPECS=[
+              {prefix:'lt_rjw_',drafts:['lt_rjw_draft','lt_repairjob_draft'],type:'Repair Jobs',siteField:'site',label:function(d){return(d.jobId||'?')+' — '+(d.affectedArea||d.problemSummary||'')+ ' — '+(d.status||'');}},
+              {prefix:'lt_sh_',drafts:['lt_sh_draft'],type:'Site Health Reports',siteField:'site',label:function(d){return(d.reportId||'?')+' — Opens:'+(d.pageLoads||'—')+' — '+(d.buildMarker||'');}},
+              {prefix:'lt_sc_',drafts:['lt_sc_draft'],type:'Smoke Checks',siteField:'site',label:function(d){return(d.checkId||'?')+' — Opens:'+(d.pageOpens||'—')+' — '+(d.buildMarker||'');}},
+              {prefix:'lt_bl_',drafts:['lt_bl_draft'],type:'Build Snapshots',siteField:'site',label:function(d){return(d.snapshotId||'?')+' — '+(d.buildMarker||'')+' — '+(d.commitHash||'');}},
+              {prefix:'lt_bv_',drafts:['lt_bv_draft'],type:'Build Vault Entries',siteField:'site',label:function(d){return(d.entryId||'?')+' — '+(d.buildMarker||'')+' — '+(d.verificationStatus||'');}},
+              {prefix:'lt_fb_',drafts:['lt_fb_draft'],type:'Backlog Items',siteField:'site',label:function(d){return(d.featureId||'?')+' — '+(d.featureName||'—')+' — '+(d.status||'');}},
+              {prefix:'lt_is_',drafts:['lt_is_draft'],type:'Issues',siteField:'site',label:function(d){return(d.issueId||'?')+' — '+(d.title||'—')+' — '+(d.status||'');}}
+            ];
+            function psRender(){
+              var site=document.getElementById('ps-site').value;
+              var results=document.getElementById('ps-results');var count=document.getElementById('ps-count');
+              if(!site){results.innerHTML='';count.textContent='';return;}
+              var totalHits=0;var html='';
+              PS_SPECS.forEach(function(spec){
+                var hits=[];
+                for(var i=0;i<localStorage.length;i++){
+                  var k=localStorage.key(i);if(!k||k.indexOf(spec.prefix)!==0)continue;
+                  var isDraft=false;spec.drafts.forEach(function(dr){if(k===dr)isDraft=true;});if(isDraft)continue;
+                  try{var d=JSON.parse(localStorage.getItem(k));if((d[spec.siteField]||'')===site)hits.push(d);}catch(e){}
+                }
+                if(hits.length===0)return;
+                totalHits+=hits.length;
+                html+='<div class="panel"><h2 style="font-size:14px;margin-bottom:10px;">'+spec.type+' ('+hits.length+')</h2><div style="display:grid;gap:6px;">';
+                hits.forEach(function(d){html+='<div style="padding:6px 10px;background:rgba(255,255,255,0.04);border-radius:6px;font-size:13px;">'+spec.label(d)+'</div>';});
+                html+='</div></div>';
+              });
+              count.textContent=totalHits+' record'+(totalHits!==1?'s':'')+' found for "'+site+'"';
+              results.innerHTML=totalHits===0?'<p style="font-size:13px;color:#9aa0b0;">No records saved for this site.</p>':html;
+            }
+            document.getElementById('ps-show').addEventListener('click',psRender);
+            document.getElementById('ps-site').addEventListener('change',psRender);
+          }());
+          </script>
+        </section>
+
+        <!-- ═══ BUILD HEALTH DASHBOARD ═══ -->
+        <section class="view" id="view-buildhealth" data-view-panel="buildhealth">
+          <div class="section-head">
+            <p class="eyebrow">Build Health</p>
+            <h1>Current project health at a glance.</h1>
+            <p>Open issues by severity, repair jobs by status, backlog by priority. Read-only.</p>
+          </div>
+          <div style="margin-bottom:16px;">
+            <button class="primary-action" type="button" id="bh-refresh">Refresh</button>
+          </div>
+          <div id="bh-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;"></div>
+          <script>
+          (function(){
+            function bhCount(prefix,drafts,filterFn){
+              var n=0;
+              for(var i=0;i<localStorage.length;i++){
+                var k=localStorage.key(i);if(!k||k.indexOf(prefix)!==0)continue;
+                var isDraft=false;drafts.forEach(function(dr){if(k===dr)isDraft=true;});if(isDraft)continue;
+                try{var d=JSON.parse(localStorage.getItem(k));if(!filterFn||filterFn(d))n++;}catch(e){}
+              }
+              return n;
+            }
+            function bhCard(title,rows,accentColor){
+              var html='<div class="panel" style="border-top:3px solid '+(accentColor||'#ffd400')+';">';
+              html+='<h2 style="font-size:14px;margin-bottom:12px;">'+title+'</h2>';
+              html+='<div style="display:grid;gap:6px;">';
+              rows.forEach(function(row){
+                html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.06);">'
+                  +'<span style="font-size:13px;color:'+(row.color||'inherit')+';">'+row.label+'</span>'
+                  +'<span style="font-size:20px;font-weight:700;color:'+(row.color||'#ffd400')+';">'+row.count+'</span>'
+                  +'</div>';
+              });
+              html+='</div></div>';
+              return html;
+            }
+            function bhRender(){
+              var grid=document.getElementById('bh-grid');if(!grid)return;
+              var html='';
+              html+=bhCard('Issues by Severity',[
+                {label:'Critical',color:'#f44336',count:bhCount('lt_is_',['lt_is_draft'],function(d){return d.severity==='Critical'&&d.status!=='Resolved';})},
+                {label:'High',color:'#ff9800',count:bhCount('lt_is_',['lt_is_draft'],function(d){return d.severity==='High'&&d.status!=='Resolved';})},
+                {label:'Normal',color:'#ffd400',count:bhCount('lt_is_',['lt_is_draft'],function(d){return d.severity==='Normal'&&d.status!=='Resolved';})},
+                {label:'Resolved',color:'#4caf50',count:bhCount('lt_is_',['lt_is_draft'],function(d){return d.status==='Resolved';})}
+              ],'#f44336');
+              html+=bhCard('Repair Jobs by Status',[
+                {label:'FAIL',color:'#f44336',count:bhCount('lt_rjw_',['lt_rjw_draft','lt_repairjob_draft'],function(d){return d.status==='FAIL';})},
+                {label:'In Progress',color:'#ff9800',count:bhCount('lt_rjw_',['lt_rjw_draft','lt_repairjob_draft'],function(d){return d.status==='PARTIAL';})},
+                {label:'Working',color:'#4caf50',count:bhCount('lt_rjw_',['lt_rjw_draft','lt_repairjob_draft'],function(d){return d.status==='WORKING REAL OUTPUT';})},
+                {label:'Total',color:'#9aa0b0',count:bhCount('lt_rjw_',['lt_rjw_draft','lt_repairjob_draft'])}
+              ],'#ff9800');
+              html+=bhCard('Backlog by Priority',[
+                {label:'Critical',color:'#f44336',count:bhCount('lt_fb_',['lt_fb_draft'],function(d){return d.priority==='Critical';})},
+                {label:'High',color:'#ff9800',count:bhCount('lt_fb_',['lt_fb_draft'],function(d){return d.priority==='High';})},
+                {label:'In Progress',color:'#2196f3',count:bhCount('lt_fb_',['lt_fb_draft'],function(d){return d.status==='In Progress';})},
+                {label:'Done',color:'#4caf50',count:bhCount('lt_fb_',['lt_fb_draft'],function(d){return d.status==='Done';})}
+              ],'#2196f3');
+              html+=bhCard('Verification Status',[
+                {label:'Smoke checks saved',color:'#9aa0b0',count:bhCount('lt_sc_',['lt_sc_draft'])},
+                {label:'Baselines saved',color:'#4caf50',count:bhCount('lt_bl_',['lt_bl_draft'])},
+                {label:'Build vault entries',color:'#4caf50',count:bhCount('lt_bv_',['lt_bv_draft'])},
+                {label:'Risk reports saved',color:'#ff9800',count:bhCount('lt_rr_',['lt_rr_draft'])}
+              ],'#4caf50');
+              grid.innerHTML=html;
+            }
+            document.getElementById('bh-refresh').addEventListener('click',bhRender);
+            var panel=document.getElementById('view-buildhealth');
+            if(panel){panel.addEventListener('lt-view-enter',bhRender);setTimeout(function(){if(panel.classList.contains('active'))bhRender();},100);}
+          }());
+          </script>
+        </section>
+
+        <!-- ═══ REPAIR JOB DETAIL ═══ -->
+        <section class="view" id="view-jobdetail" data-view-panel="jobdetail">
+          <div class="section-head">
+            <p class="eyebrow">Repair Job Detail</p>
+            <h1>View all fields for a repair job.</h1>
+            <p>Enter a job ID or pick from the list. Formatted as a plain-language report.</p>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;">
+            <select id="jd-picker" style="flex:1;max-width:360px;"><option value="">Select a saved repair job...</option></select>
+            <button class="primary-action" type="button" id="jd-load">Load</button>
+            <button class="secondary-action" type="button" id="jd-copy">Copy Report</button>
+            <button class="secondary-action" type="button" id="jd-export">Export .txt</button>
+          </div>
+          <div id="jd-output" style="display:none;padding:16px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:13px;white-space:pre-wrap;line-height:1.7;font-family:monospace;"></div>
+          <script>
+          (function(){
+            function jdToast(m){var t=document.getElementById('toast');if(t){t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2400);}}
+            function jdGetJobs(){
+              var jobs=[];
+              for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_rjw_')===0&&k!=='lt_rjw_draft'&&k!=='lt_repairjob_draft'){try{jobs.push({key:k,data:JSON.parse(localStorage.getItem(k))});}catch(e){}}}
+              jobs.sort(function(a,b){return a.key<b.key?1:-1;});
+              return jobs;
+            }
+            function jdPopulatePicker(){
+              var sel=document.getElementById('jd-picker');
+              var current=sel.value;
+              while(sel.options.length>1)sel.remove(1);
+              jdGetJobs().forEach(function(item){var o=document.createElement('option');o.value=item.key;o.textContent=(item.data.jobId||'?')+' — '+(item.data.site||'—')+' — '+(item.data.status||'');sel.appendChild(o);});
+              if(current)sel.value=current;
+            }
+            function jdBuildText(d){
+              var lines=['REPAIR JOB DETAIL REPORT',''];
+              lines.push('Job ID:          '+(d.jobId||'—'));
+              lines.push('Created:         '+(d.createdAt||'—'));
+              lines.push('Site:            '+(d.site||'—'));
+              lines.push('Affected Area:   '+(d.affectedArea||'—'));
+              lines.push('Status:          '+(d.status||'—'));
+              lines.push('Risk Level:      '+(d.riskLevel||'—'));
+              lines.push('');
+              lines.push('PROBLEM SUMMARY');lines.push(d.problemSummary||'(none)');lines.push('');
+              lines.push('EVIDENCE');lines.push(d.evidence||'(none)');lines.push('');
+              lines.push('SUSPECTED CAUSE');lines.push(d.suspectedCause||'(none)');lines.push('');
+              lines.push('AFFECTED FILES');lines.push(Array.isArray(d.affectedFiles)?d.affectedFiles.join('\n'):(d.affectedFiles||'(none)'));lines.push('');
+              lines.push('IMPACT FLAGS');
+              lines.push('Live site:       '+(d.liveSiteImpact||'—'));
+              lines.push('Service worker:  '+(d.serviceWorkerImpact||'—'));
+              lines.push('Provider:        '+(d.providerImpact||'—'));
+              lines.push('Export package:  '+(d.exportPackageImpact||'—'));
+              lines.push('Security:        '+(d.securityImpact||'—'));
+              lines.push('User testing:    '+(d.userTestingRequired||'—'));
+              lines.push('');
+              lines.push('ACCEPTANCE CRITERIA');lines.push(d.acceptanceCriteria||'(none)');lines.push('');
+              lines.push('ROLLBACK PLAN');lines.push(d.rollbackPlan||'(none)');lines.push('');
+              lines.push('NEXT RECOMMENDED ACTION');lines.push(d.nextRecommendedAction||'(none)');
+              return lines.join('\n');
+            }
+            document.getElementById('jd-load').addEventListener('click',function(){
+              var key=document.getElementById('jd-picker').value;if(!key){jdToast('Select a job first.');return;}
+              try{var d=JSON.parse(localStorage.getItem(key));var text=jdBuildText(d);var out=document.getElementById('jd-output');out.textContent=text;out.style.display='';}catch(e){jdToast('Could not load job.');}
+            });
+            document.getElementById('jd-copy').addEventListener('click',function(){var out=document.getElementById('jd-output');if(!out.textContent){jdToast('Load a job first.');return;}navigator.clipboard.writeText(out.textContent).then(function(){jdToast('Copied.');}).catch(function(){jdToast('Copy failed.');});});
+            document.getElementById('jd-export').addEventListener('click',function(){var out=document.getElementById('jd-output');if(!out.textContent){jdToast('Load a job first.');return;}var b=new Blob([out.textContent],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='repair-job-detail-'+Date.now()+'.txt';a.click();URL.revokeObjectURL(a.href);jdToast('Exported.');});
+            var panel=document.getElementById('view-jobdetail');
+            if(panel){panel.addEventListener('lt-view-enter',jdPopulatePicker);setTimeout(function(){if(panel.classList.contains('active'))jdPopulatePicker();},100);}
+          }());
+          </script>
+        </section>
+
+        <!-- ═══ LINKED RECORDS FINDER ═══ -->
+        <section class="view" id="view-linked" data-view-panel="linked">
+          <div class="section-head">
+            <p class="eyebrow">Linked Records</p>
+            <h1>Find everything that references an ID.</h1>
+            <p>Enter any record ID. Shows all other records that reference it in any field.</p>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+            <input id="lr2-query" type="text" placeholder="Paste a record ID (RJ-xxx, RP-xxx, AC-xxx...)" style="flex:1;min-width:200px;">
+            <button class="primary-action" type="button" id="lr2-search">Find Links</button>
+            <button class="secondary-action" type="button" id="lr2-clear">Clear</button>
+          </div>
+          <div id="lr2-count" style="font-size:13px;color:#9aa0b0;margin-bottom:12px;"></div>
+          <div id="lr2-results" style="display:grid;gap:8px;"></div>
+          <script>
+          (function(){
+            var LR_SPECS=[
+              {prefix:'lt_rjw_',drafts:['lt_rjw_draft','lt_repairjob_draft'],type:'Repair Job',idField:'jobId',refFields:function(d){return[d.jobId];}},
+              {prefix:'lt_rp_',drafts:['lt_rp_draft'],type:'Repair Pack',idField:'summaryId',refFields:function(d){return[d.summaryId,d.repairJobId];}},
+              {prefix:'lt_ac_',drafts:['lt_ac_draft'],type:'Criteria',idField:'criteriaId',refFields:function(d){return[d.criteriaId,d.repairPackId];}},
+              {prefix:'lt_tp_',drafts:['lt_tp_draft'],type:'Test Plan',idField:'planId',refFields:function(d){return[d.planId,d.linkedJobId];}},
+              {prefix:'lt_is_',drafts:['lt_is_draft'],type:'Issue',idField:'issueId',refFields:function(d){return[d.issueId];}},
+              {prefix:'lt_bv_',drafts:['lt_bv_draft'],type:'Build Vault',idField:'entryId',refFields:function(d){return[d.entryId,d.commitHash];}},
+              {prefix:'lt_bl_',drafts:['lt_bl_draft'],type:'Baseline',idField:'snapshotId',refFields:function(d){return[d.snapshotId,d.commitHash,d.rollbackPoint];}},
+              {prefix:'lt_sc_',drafts:['lt_sc_draft'],type:'Smoke Check',idField:'checkId',refFields:function(d){return[d.checkId,d.buildMarker];}},
+              {prefix:'lt_rr_',drafts:['lt_rr_draft'],type:'Risk Report',idField:'reportId',refFields:function(d){return[d.reportId];}},
+              {prefix:'lt_sh_',drafts:['lt_sh_draft'],type:'Site Health',idField:'reportId',refFields:function(d){return[d.reportId,d.buildMarker];}},
+              {prefix:'lt_fb_',drafts:['lt_fb_draft'],type:'Backlog',idField:'featureId',refFields:function(d){return[d.featureId];}},
+              {prefix:'lt_sn_',drafts:['lt_sn_draft'],type:'Session Notes',idField:'notesId',refFields:function(d){return[d.notesId,d.branch,d.commitHash];}},
+              {prefix:'lt_cl_',drafts:['lt_cl_draft'],type:'Changelog',idField:'entryId',refFields:function(d){return[d.entryId,d.pr?(('PR #'+d.pr)||''):null];}},
+            ];
+            function lr2Search(){
+              var q=(document.getElementById('lr2-query').value||'').trim();
+              var results=document.getElementById('lr2-results');var count=document.getElementById('lr2-count');
+              if(!q){results.innerHTML='';count.textContent='';return;}
+              var hits=[];
+              LR_SPECS.forEach(function(spec){
+                for(var i=0;i<localStorage.length;i++){
+                  var k=localStorage.key(i);if(!k||k.indexOf(spec.prefix)!==0)continue;
+                  var isDraft=false;spec.drafts.forEach(function(dr){if(k===dr)isDraft=true;});if(isDraft)continue;
+                  try{
+                    var d=JSON.parse(localStorage.getItem(k));
+                    var refs=spec.refFields(d).filter(Boolean);
+                    var matched=refs.some(function(r){return r&&r.toString()===q;});
+                    if(matched)hits.push({type:spec.type,id:(d[spec.idField]||'?'),refs:refs});
+                  }catch(e){}
+                }
+              });
+              count.textContent=hits.length+' record'+(hits.length!==1?'s':'')+' reference "'+q+'"';
+              if(hits.length===0){results.innerHTML='<p style="font-size:13px;color:#9aa0b0;">No records reference this ID.</p>';return;}
+              results.innerHTML='';
+              hits.forEach(function(hit){
+                var row=document.createElement('div');
+                row.style.cssText='padding:8px 12px;background:rgba(255,255,255,0.04);border-radius:6px;font-size:13px;display:flex;gap:10px;align-items:center;';
+                var badge=document.createElement('span');badge.style.cssText='font-size:11px;font-weight:600;color:#ffd400;flex-shrink:0;min-width:90px;';badge.textContent=hit.type;
+                var lbl=document.createElement('span');lbl.style.cssText='flex:1;';lbl.textContent=hit.id+' — references: '+hit.refs.filter(Boolean).join(', ');
+                row.appendChild(badge);row.appendChild(lbl);results.appendChild(row);
+              });
+            }
+            document.getElementById('lr2-search').addEventListener('click',lr2Search);
+            document.getElementById('lr2-query').addEventListener('keydown',function(e){if(e.key==='Enter')lr2Search();});
+            document.getElementById('lr2-clear').addEventListener('click',function(){document.getElementById('lr2-query').value='';document.getElementById('lr2-results').innerHTML='';document.getElementById('lr2-count').textContent='';});
           }());
           </script>
         </section>
