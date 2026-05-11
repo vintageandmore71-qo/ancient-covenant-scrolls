@@ -198,6 +198,13 @@
         <button data-view="exportrecovery" data-route>Recovery Packet</button>
         <button data-view="exportrelease" data-route>Release Packet</button>
         <button data-view="compactmode" data-route>Compact Mode</button>
+        <button data-view="repofilejob" data-route>Repo File Job</button>
+        <button data-view="filepathhelper" data-route>File Paths</button>
+        <button data-view="riskclassifier" data-route>Risk Classifier</button>
+        <button data-view="patchplan" data-route>Patch Plan</button>
+        <button data-view="prdraftbuilder" data-route>PR Draft</button>
+        <button data-view="exportrfj" data-route>Export Job</button>
+        <button data-view="actionspec" data-route>Action Spec</button>
       </nav>
       <button class="icon-button" id="hardRefresh" aria-label="Hard refresh app state">
         <span class="icon-mini" data-icon="refresh"></span>
@@ -359,6 +366,13 @@
         <button data-view="exportrecovery" data-route><span class="rail-icon" data-icon="vault"></span><span>Recovery Packet</span></button>
         <button data-view="exportrelease" data-route><span class="rail-icon" data-icon="vault"></span><span>Release Packet</span></button>
         <button data-view="compactmode" data-route><span class="rail-icon" data-icon="shield"></span><span>Compact Mode</span></button>
+        <button data-view="repofilejob" data-route><span class="rail-icon" data-icon="version"></span><span>Repo File Job</span></button>
+        <button data-view="filepathhelper" data-route><span class="rail-icon" data-icon="library"></span><span>File Paths</span></button>
+        <button data-view="riskclassifier" data-route><span class="rail-icon" data-icon="shield"></span><span>Risk Classifier</span></button>
+        <button data-view="patchplan" data-route><span class="rail-icon" data-icon="notes"></span><span>Patch Plan</span></button>
+        <button data-view="prdraftbuilder" data-route><span class="rail-icon" data-icon="version"></span><span>PR Draft</span></button>
+        <button data-view="exportrfj" data-route><span class="rail-icon" data-icon="vault"></span><span>Export Job</span></button>
+        <button data-view="actionspec" data-route><span class="rail-icon" data-icon="shield"></span><span>Action Spec</span></button>
       </aside>
 
       <section class="workspace">
@@ -1077,6 +1091,41 @@
               <span class="card-icon" data-icon="shield"></span>
               <strong>Compact Mode</strong>
               <span>Toggle tool categories on or off to reduce nav clutter.</span>
+            </button>
+            <button class="command-card" data-view="repofilejob" data-route>
+              <span class="card-icon" data-icon="version"></span>
+              <strong>Repo File Work Request</strong>
+              <span>Create a structured job spec for a repo file change. No browser token. No direct write.</span>
+            </button>
+            <button class="command-card" data-view="filepathhelper" data-route>
+              <span class="card-icon" data-icon="library"></span>
+              <strong>File Path Helper</strong>
+              <span>Preset file paths for every Load area. Copy any path with one tap.</span>
+            </button>
+            <button class="command-card" data-view="riskclassifier" data-route>
+              <span class="card-icon" data-icon="shield"></span>
+              <strong>Risk Classifier</strong>
+              <span>Paste file paths and get an automatic LOW / MEDIUM / HIGH risk level.</span>
+            </button>
+            <button class="command-card" data-view="patchplan" data-route>
+              <span class="card-icon" data-icon="notes"></span>
+              <strong>Patch Plan Builder</strong>
+              <span>Generate a patch-plan.txt from a saved repo file job.</span>
+            </button>
+            <button class="command-card" data-view="prdraftbuilder" data-route>
+              <span class="card-icon" data-icon="version"></span>
+              <strong>PR Draft Builder</strong>
+              <span>Generate a PR title and PR body from a saved repo file job.</span>
+            </button>
+            <button class="command-card" data-view="exportrfj" data-route>
+              <span class="card-icon" data-icon="vault"></span>
+              <strong>Export Repo File Job</strong>
+              <span>Copy JSON, export patch plan, export PR draft from any saved job.</span>
+            </button>
+            <button class="command-card" data-view="actionspec" data-route>
+              <span class="card-icon" data-icon="shield"></span>
+              <strong>GitHub Action Spec</strong>
+              <span>Placeholder spec for the future secure executor. Phase 2 reference.</span>
             </button>
           </div>
 
@@ -9038,6 +9087,354 @@
           }());</script>
         </section>
 
+        <section class="view" id="view-repofilejob" data-view-panel="repofilejob">
+          <div class="section-head"><p class="eyebrow">Repo File Worker — Phase 1</p><h1>Repo File Work Request</h1><p>Create a structured job spec. No browser token. No direct file write. Output is JSON for later secure execution.</p></div>
+          <article class="panel form-panel">
+            <label>Target site<select id="rfj-site"><option>LoadTasks</option><option>Load</option><option>LoadStudio</option><option>LoadPlay</option><option>Attain</option><option>Attain Jr</option><option>Study</option><option>ACR Reader</option><option>Multiple</option></select></label>
+            <label>Target files (one per line)<textarea id="rfj-files" rows="4" placeholder="LoadTasks/index.html&#10;load/load.js"></textarea></label>
+            <label>File action<select id="rfj-action"><option>modify</option><option>add</option><option>review-only</option></select></label>
+            <label>Reason for change<textarea id="rfj-reason" rows="3" placeholder="Why this file needs to change. What problem it solves."></textarea></label>
+            <label>Proposed change summary<textarea id="rfj-change" rows="4" placeholder="Describe exactly what lines or sections will change and how."></textarea></label>
+            <label>Acceptance criteria<textarea id="rfj-criteria" rows="3" placeholder="How will we know the change is correct? What to verify."></textarea></label>
+            <label>Rollback plan<input id="rfj-rollback" placeholder="e.g. git revert &lt;SHA&gt;"></label>
+            <label>Branch name suggestion<input id="rfj-branch" placeholder="e.g. fix/loadtasks-counter-duplicate-key"></label>
+            <label>PR title suggestion<input id="rfj-prtitle" placeholder="e.g. Fix duplicate lt_fc_ key in dashboard counters"></label>
+            <label>PR body draft<textarea id="rfj-prbody" rows="4" placeholder="Files changed, risk level, rollback, verification steps..."></textarea></label>
+            <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:12px;margin-bottom:8px;">
+              <div style="font-size:12px;font-weight:700;color:#9aa0b0;margin-bottom:8px;">IMPACT ASSESSMENT</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <label style="font-size:12px;">Risk level (auto or override)<select id="rfj-risk" style="display:block;width:100%;margin-top:4px;font-size:12px;"><option>LOW</option><option>MEDIUM</option><option>HIGH</option></select></label>
+                <label style="font-size:12px;">Live site impact<input id="rfj-liveimpact" placeholder="Describe" style="margin-top:4px;font-size:12px;"></label>
+                <label style="font-size:12px;">Service worker impact?<select id="rfj-swimpact" style="display:block;width:100%;margin-top:4px;font-size:12px;"><option>No</option><option>Yes</option><option>Unknown</option></select></label>
+                <label style="font-size:12px;">AI / provider impact?<select id="rfj-aiimpact" style="display:block;width:100%;margin-top:4px;font-size:12px;"><option>No</option><option>Yes</option><option>Unknown</option></select></label>
+                <label style="font-size:12px;">Export / package impact?<select id="rfj-exportimpact" style="display:block;width:100%;margin-top:4px;font-size:12px;"><option>No</option><option>Yes</option><option>Unknown</option></select></label>
+                <label style="font-size:12px;">Security impact?<select id="rfj-secimpact" style="display:block;width:100%;margin-top:4px;font-size:12px;"><option>No</option><option>Yes</option><option>Unknown</option></select></label>
+              </div>
+            </div>
+            <label>Status<select id="rfj-status"><option>Draft</option><option>Ready for Review</option><option>Approved</option><option>Rejected</option></select></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="rfj-save">Save Job</button>
+              <button class="secondary-action" id="rfj-classify">Auto-Classify Risk</button>
+              <button class="secondary-action" id="rfj-clear">Clear Form</button>
+            </div>
+            <div id="rfj-msg" style="font-size:12px;margin-top:8px;color:#9aa0b0;"></div>
+          </article>
+          <script>(function(){
+            var RFJ_HIGH_PATTERNS=['sw.js','service-worker','ai-chat-studio','image-prompt','lib-load-image','provider','audio','animation','export-pack','deploy','security','cloudflare','token','secret','credential','password','hash','_sw','worktimer'];
+            var RFJ_MED_PATTERNS=['load.js','load/load','loadstudio','loadplay','attain','study','acr','index.html','lib-'];
+            function rfjClassify(){
+              var files=document.getElementById('rfj-files').value.toLowerCase();
+              for(var i=0;i<RFJ_HIGH_PATTERNS.length;i++){if(files.indexOf(RFJ_HIGH_PATTERNS[i])>=0){document.getElementById('rfj-risk').value='HIGH';document.getElementById('rfj-msg').textContent='Auto-classified HIGH — matched: '+RFJ_HIGH_PATTERNS[i];return;}}
+              for(var j=0;j<RFJ_MED_PATTERNS.length;j++){if(files.indexOf(RFJ_MED_PATTERNS[j])>=0){document.getElementById('rfj-risk').value='MEDIUM';document.getElementById('rfj-msg').textContent='Auto-classified MEDIUM — matched: '+RFJ_MED_PATTERNS[j];return;}}
+              if(files.indexOf('loadtasks/index.html')>=0||files.indexOf('loadtasks\\index.html')>=0){document.getElementById('rfj-risk').value='LOW';document.getElementById('rfj-msg').textContent='Auto-classified LOW — LoadTasks only, no live code impact';return;}
+              document.getElementById('rfj-risk').value='MEDIUM';document.getElementById('rfj-msg').textContent='Auto-classified MEDIUM — could not determine from file paths alone';
+            }
+            document.getElementById('rfj-classify').addEventListener('click',rfjClassify);
+            document.getElementById('rfj-files').addEventListener('blur',rfjClassify);
+            function rfjAll(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_rfj_')===0&&k!=='lt_rfj_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return b.ts-a.ts;});return a;}
+            document.getElementById('rfj-save').addEventListener('click',function(){
+              var files=document.getElementById('rfj-files').value.trim();var reason=document.getElementById('rfj-reason').value.trim();if(!files||!reason){document.getElementById('rfj-msg').textContent='Target files and reason are required.';return;}
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              var job={id:id,jobId:'RFJ-'+id,createdAt:new Date().toISOString(),targetSite:document.getElementById('rfj-site').value,targetFiles:files,fileAction:document.getElementById('rfj-action').value,reasonForChange:reason,riskLevel:document.getElementById('rfj-risk').value,liveSiteImpact:document.getElementById('rfj-liveimpact').value.trim(),serviceWorkerImpact:document.getElementById('rfj-swimpact').value,aiProviderImpact:document.getElementById('rfj-aiimpact').value,exportPackageImpact:document.getElementById('rfj-exportimpact').value,securityImpact:document.getElementById('rfj-secimpact').value,proposedChangeSummary:document.getElementById('rfj-change').value.trim(),acceptanceCriteria:document.getElementById('rfj-criteria').value.trim(),rollbackPlan:document.getElementById('rfj-rollback').value.trim(),branchNameSuggestion:document.getElementById('rfj-branch').value.trim(),prTitleSuggestion:document.getElementById('rfj-prtitle').value.trim(),prBodyDraft:document.getElementById('rfj-prbody').value.trim(),userApprovalRequired:'Yes',status:document.getElementById('rfj-status').value,ts:Date.now()};
+              localStorage.setItem('lt_rfj_'+id,JSON.stringify(job));
+              document.getElementById('rfj-msg').textContent='Job '+job.jobId+' saved. Open Export Job to generate files.';
+              var toast=document.getElementById('toast');if(toast){toast.textContent='Job saved';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}
+            });
+            document.getElementById('rfj-clear').addEventListener('click',function(){['rfj-files','rfj-reason','rfj-change','rfj-criteria','rfj-rollback','rfj-branch','rfj-prtitle','rfj-prbody','rfj-liveimpact'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});document.getElementById('rfj-msg').textContent='';});
+          }());</script>
+        </section>
+
+        <section class="view" id="view-filepathhelper" data-view-panel="filepathhelper">
+          <div class="section-head"><p class="eyebrow">Repo File Worker — Phase 1</p><h1>File Path Helper</h1><p>Preset paths for every Load area. Tap Copy to add to clipboard.</p></div>
+          <article class="panel">
+            <div id="fph-list"></div>
+          </article>
+          <script>(function(){
+            var FPH=[
+              {cat:'LoadTasks',risk:'LOW',paths:['LoadTasks/index.html','LoadTasks/app.js','LoadTasks/styles.css']},
+              {cat:'Load Core',risk:'MEDIUM',paths:['load/load.js','load/index.html','load/styles.css','load/app.js']},
+              {cat:'Load Service Worker',risk:'HIGH',paths:['load/sw.js']},
+              {cat:'Load AI Chat Studio',risk:'HIGH',paths:['load/tools/ai-chat-studio.html','load/lib-load-ai.js']},
+              {cat:'Load Image Prompt',risk:'HIGH',paths:['load/image-prompt/index.html','load/image-prompt/app.js']},
+              {cat:'Load Image Providers',risk:'HIGH',paths:['load/lib-load-image-providers.js']},
+              {cat:'LoadStudio',risk:'MEDIUM',paths:['loadstudio/index.html','loadstudio/app.js','loadstudio/sw.js']},
+              {cat:'LoadPlay',risk:'MEDIUM',paths:['loadplay/index.html','loadplay/app.js','loadplay/sw.js']},
+              {cat:'Attain',risk:'MEDIUM',paths:['attain/index.html','attain/app.js','attain/sw.js']},
+              {cat:'Attain Jr',risk:'MEDIUM',paths:['attain-jr/index.html','attain-jr/app.js','attain-jr/sw.js']},
+              {cat:'Study',risk:'MEDIUM',paths:['study/index.html','study/app.js','study/sw.js']},
+              {cat:'ACR Reader (LOCKED)',risk:'HIGH',paths:['index.html','acr.css','sw.js','content/']},
+              {cat:'Root / Config',risk:'HIGH',paths:['.github/workflows/','package.json','CLAUDE.md','HANDOFF.md']}
+            ];
+            var RISK_COLOR={LOW:'#2ecc71',MEDIUM:'#e67e22',HIGH:'#e74c3c'};
+            function fphRender(){
+              var el=document.getElementById('fph-list');if(!el)return;
+              el.innerHTML=FPH.map(function(g){return'<div style="margin-bottom:14px;">'
+                +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+                +'<span style="font-size:12px;font-weight:700;">'+g.cat+'</span>'
+                +'<span style="font-size:10px;background:'+RISK_COLOR[g.risk]+';color:#fff;border-radius:4px;padding:2px 6px;">'+g.risk+'</span></div>'
+                +g.paths.map(function(p){return'<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;margin-bottom:4px;background:rgba(255,255,255,0.04);border-radius:6px;">'
+                  +'<code style="flex:1;font-size:12px;">'+p+'</code>'
+                  +'<button class="small-btn fph-copy" data-path="'+p+'">Copy</button></div>';}).join('')
+                +'</div>';}).join('');
+              el.querySelectorAll('.fph-copy').forEach(function(b){b.addEventListener('click',function(){navigator.clipboard&&navigator.clipboard.writeText(b.dataset.path).then(function(){var t=document.getElementById('toast');if(t){t.textContent='Copied: '+b.dataset.path;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2000);}});});});
+            }
+            var sec=document.getElementById('view-filepathhelper');if(sec)sec.addEventListener('lt-view-enter',fphRender);fphRender();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-riskclassifier" data-view-panel="riskclassifier">
+          <div class="section-head"><p class="eyebrow">Repo File Worker — Phase 1</p><h1>Risk Classifier</h1><p>Paste file paths and get an automatic risk level with reasoning.</p></div>
+          <article class="panel">
+            <label>File paths (one per line)<textarea id="rc2-files" rows="5" placeholder="load/sw.js&#10;LoadTasks/index.html&#10;load/load.js"></textarea></label>
+            <button class="primary-action" id="rc2-classify" style="margin-bottom:12px;">Classify Risk</button>
+            <div id="rc2-result"></div>
+          </article>
+          <article class="panel" style="margin-top:12px;">
+            <h2 style="font-size:13px;margin-bottom:10px;">Classification Rules</h2>
+            <div style="font-size:12px;line-height:1.8;color:#9aa0b0;">
+              <div><span style="color:#e74c3c;font-weight:700;">HIGH</span> — sw.js, service-worker, ai-chat-studio, image-prompt, lib-load-image-providers, provider routing, audio, animation, export/package logic, deploy, security, tokens, credentials, file deletion</div>
+              <div style="margin-top:6px;"><span style="color:#e67e22;font-weight:700;">MEDIUM</span> — load.js, load/index.html, loadstudio, loadplay, attain, study, ACR (LOCKED), static HTML in live apps, UI copy changes</div>
+              <div style="margin-top:6px;"><span style="color:#2ecc71;font-weight:700;">LOW</span> — LoadTasks/index.html, local-only tools, docs, handoff notes, session notes, status pages, non-live content</div>
+            </div>
+          </article>
+          <script>(function(){
+            var RC2_RULES=[
+              {pattern:'sw.js',risk:'HIGH',reason:'Service worker — stale cache risk'},
+              {pattern:'service-worker',risk:'HIGH',reason:'Service worker'},
+              {pattern:'ai-chat-studio',risk:'HIGH',reason:'Load AI tool'},
+              {pattern:'image-prompt',risk:'HIGH',reason:'Image Prompt tool'},
+              {pattern:'lib-load-image-providers',risk:'HIGH',reason:'Provider routing'},
+              {pattern:'lib-load-image',risk:'HIGH',reason:'Image library'},
+              {pattern:'provider',risk:'HIGH',reason:'Provider routing'},
+              {pattern:'audio',risk:'HIGH',reason:'Audio logic'},
+              {pattern:'animation',risk:'HIGH',reason:'Animation logic'},
+              {pattern:'export-pack',risk:'HIGH',reason:'Export package logic'},
+              {pattern:'deploy',risk:'HIGH',reason:'Deployment logic'},
+              {pattern:'security',risk:'HIGH',reason:'Security logic'},
+              {pattern:'token',risk:'HIGH',reason:'Contains token reference'},
+              {pattern:'secret',risk:'HIGH',reason:'Contains secret reference'},
+              {pattern:'credential',risk:'HIGH',reason:'Contains credential reference'},
+              {pattern:'cloudflare',risk:'HIGH',reason:'Cloudflare config'},
+              {pattern:'.github/workflows',risk:'HIGH',reason:'CI/CD workflow'},
+              {pattern:'acr.css',risk:'HIGH',reason:'ACR Reader — locked file'},
+              {pattern:'content/',risk:'HIGH',reason:'ACR Reader content — locked'},
+              {pattern:'index.html',risk:'HIGH',reason:'Root index.html — ACR Reader locked file (if at root)'},
+              {pattern:'load/sw',risk:'HIGH',reason:'Load service worker'},
+              {pattern:'loadstudio',risk:'MEDIUM',reason:'LoadStudio live app'},
+              {pattern:'loadplay',risk:'MEDIUM',reason:'LoadPlay live app'},
+              {pattern:'attain',risk:'MEDIUM',reason:'Attain live app'},
+              {pattern:'study',risk:'MEDIUM',reason:'Study live app'},
+              {pattern:'load/load.js',risk:'MEDIUM',reason:'Load core JS'},
+              {pattern:'load/index',risk:'MEDIUM',reason:'Load main page'},
+              {pattern:'load/',risk:'MEDIUM',reason:'Load app file'},
+              {pattern:'loadtasks/index.html',risk:'LOW',reason:'LoadTasks tool only — no live code impact'},
+              {pattern:'session_notes',risk:'LOW',reason:'Documentation only'},
+              {pattern:'handoff',risk:'LOW',reason:'Documentation only'},
+              {pattern:'claude.md',risk:'LOW',reason:'Project instructions — not live code'},
+              {pattern:'master_backlog',risk:'LOW',reason:'Documentation only'}
+            ];
+            document.getElementById('rc2-classify').addEventListener('click',function(){
+              var raw=document.getElementById('rc2-files').value.trim().toLowerCase();
+              var lines=raw.split(/[\n,]+/).map(function(l){return l.trim();}).filter(Boolean);
+              if(!lines.length){document.getElementById('rc2-result').innerHTML='<p class="empty-state">Enter at least one file path.</p>';return;}
+              var results=lines.map(function(line){
+                for(var i=0;i<RC2_RULES.length;i++){
+                  if(line.indexOf(RC2_RULES[i].pattern.toLowerCase())>=0){
+                    if(RC2_RULES[i].pattern==='index.html'&&line.indexOf('loadtasks')>=0){return{file:line,risk:'LOW',reason:'LoadTasks only'};}
+                    return{file:line,risk:RC2_RULES[i].risk,reason:RC2_RULES[i].reason};
+                  }
+                }
+                return{file:line,risk:'MEDIUM',reason:'Unknown — assume medium until confirmed'};
+              });
+              var RISK_ORDER={HIGH:0,MEDIUM:1,LOW:2};var RISK_COLOR={HIGH:'#e74c3c',MEDIUM:'#e67e22',LOW:'#2ecc71'};
+              results.sort(function(a,b){return RISK_ORDER[a.risk]-RISK_ORDER[b.risk];});
+              var overall=results[0].risk;
+              document.getElementById('rc2-result').innerHTML='<div style="font-size:14px;font-weight:700;color:'+RISK_COLOR[overall]+';margin-bottom:12px;">Overall Risk: '+overall+'</div>'
+                +results.map(function(r){return'<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;margin-bottom:4px;background:rgba(255,255,255,0.04);border-radius:6px;">'
+                  +'<span style="font-size:10px;background:'+RISK_COLOR[r.risk]+';color:#fff;border-radius:4px;padding:2px 5px;white-space:nowrap;">'+r.risk+'</span>'
+                  +'<code style="flex:1;font-size:11px;">'+r.file+'</code>'
+                  +'<span style="font-size:11px;color:#9aa0b0;">'+r.reason+'</span></div>';}).join('');
+            });
+            var sec=document.getElementById('view-riskclassifier');if(sec)sec.addEventListener('lt-view-enter',function(){document.getElementById('rc2-result').innerHTML='';});
+          }());</script>
+        </section>
+
+        <section class="view" id="view-patchplan" data-view-panel="patchplan">
+          <div class="section-head"><p class="eyebrow">Repo File Worker — Phase 1</p><h1>Patch Plan Builder</h1><p>Select a saved job and generate a patch-plan.txt.</p></div>
+          <article class="panel" style="margin-bottom:12px;">
+            <label>Select job<select id="pp2-select" style="display:block;width:100%;margin-top:4px;"><option value="">-- select a saved job --</option></select></label>
+            <button class="primary-action" id="pp2-generate" style="margin-top:8px;">Generate Patch Plan</button>
+          </article>
+          <div id="pp2-output" style="display:none;">
+            <article class="panel">
+              <div style="display:flex;gap:8px;margin-bottom:10px;">
+                <button class="small-btn" id="pp2-copy">Copy</button>
+                <button class="small-btn" id="pp2-export">Export patch-plan.txt</button>
+              </div>
+              <pre id="pp2-text" style="white-space:pre-wrap;font-size:12px;color:#e0e4f0;margin:0;line-height:1.7;font-family:-apple-system,BlinkMacSystemFont,sans-serif;max-height:500px;overflow-y:auto;"></pre>
+            </article>
+          </div>
+          <script>(function(){
+            function pp2All(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_rfj_')===0&&k!=='lt_rfj_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return b.ts-a.ts;});return a;}
+            function pp2Populate(){
+              var sel=document.getElementById('pp2-select');if(!sel)return;
+              var jobs=pp2All();var curr=sel.value;
+              sel.innerHTML='<option value="">-- select a saved job --</option>'+jobs.map(function(j){return'<option value="'+j.id+'">'+(j.jobId||j.id)+' — '+j.targetSite+' ['+j.riskLevel+'] '+j.status+'</option>';}).join('');
+              if(curr)sel.value=curr;
+            }
+            function pp2Build(job){
+              return'PATCH PLAN\nJob ID: '+job.jobId+'\nCreated: '+job.createdAt+'\nStatus: '+job.status+'\n'+'='.repeat(50)+'\n\nPROBLEM\n'+'-'.repeat(30)+'\n'+job.reasonForChange+'\n\nTARGET SITE: '+job.targetSite+'\nFILE ACTION: '+job.fileAction+'\n\nTARGET FILES\n'+'-'.repeat(30)+'\n'+job.targetFiles+'\n\nPROPOSED CHANGES\n'+'-'.repeat(30)+'\n'+(job.proposedChangeSummary||'(not specified)')+'\n\nRISK ASSESSMENT\n'+'-'.repeat(30)+'\nRisk Level: '+job.riskLevel+'\nLive Site Impact: '+(job.liveSiteImpact||'None stated')+'\nService Worker: '+job.serviceWorkerImpact+'\nAI / Provider: '+job.aiProviderImpact+'\nExport / Package: '+job.exportPackageImpact+'\nSecurity: '+job.securityImpact+'\nUser Approval Required: '+job.userApprovalRequired+'\n\nACCEPTANCE CRITERIA\n'+'-'.repeat(30)+'\n'+(job.acceptanceCriteria||'(not specified)')+'\n\nROLLBACK PLAN\n'+'-'.repeat(30)+'\n'+(job.rollbackPlan||'(not specified)')+'\n\nBRANCH SUGGESTION: '+(job.branchNameSuggestion||'(not specified)')+'\nPR TITLE SUGGESTION: '+(job.prTitleSuggestion||'(not specified)');
+            }
+            document.getElementById('pp2-generate').addEventListener('click',function(){
+              var id=document.getElementById('pp2-select').value;if(!id)return;
+              var job=JSON.parse(localStorage.getItem('lt_rfj_'+id));if(!job)return;
+              var text=pp2Build(job);
+              document.getElementById('pp2-text').textContent=text;
+              document.getElementById('pp2-output').style.display='';
+              document.getElementById('pp2-copy').dataset.text=text;
+              document.getElementById('pp2-export').dataset.text=text;
+              document.getElementById('pp2-export').dataset.fn='patch-plan-'+job.jobId+'.txt';
+            });
+            document.getElementById('pp2-copy').addEventListener('click',function(){var t=this.dataset.text;if(!t)return;navigator.clipboard&&navigator.clipboard.writeText(t).then(function(){var toast=document.getElementById('toast');if(toast){toast.textContent='Copied';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}});});
+            document.getElementById('pp2-export').addEventListener('click',function(){var t=this.dataset.text;if(!t)return;var b=new Blob([t],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=this.dataset.fn||'patch-plan.txt';a.click();});
+            var sec=document.getElementById('view-patchplan');if(sec)sec.addEventListener('lt-view-enter',function(){pp2Populate();document.getElementById('pp2-output').style.display='none';});pp2Populate();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-prdraftbuilder" data-view-panel="prdraftbuilder">
+          <div class="section-head"><p class="eyebrow">Repo File Worker — Phase 1</p><h1>PR Draft Builder</h1><p>Select a saved job and generate a PR title and PR body.</p></div>
+          <article class="panel" style="margin-bottom:12px;">
+            <label>Select job<select id="prd2-select" style="display:block;width:100%;margin-top:4px;"><option value="">-- select a saved job --</option></select></label>
+            <button class="primary-action" id="prd2-generate" style="margin-top:8px;">Generate PR Draft</button>
+          </article>
+          <div id="prd2-output" style="display:none;">
+            <article class="panel" style="margin-bottom:12px;">
+              <h2 style="font-size:13px;color:#9aa0b0;margin-bottom:6px;">PR TITLE</h2>
+              <div id="prd2-title" style="font-size:14px;font-weight:700;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;"></div>
+              <button class="small-btn" id="prd2-copy-title" style="margin-top:8px;">Copy Title</button>
+            </article>
+            <article class="panel">
+              <div style="display:flex;gap:8px;margin-bottom:10px;">
+                <h2 style="font-size:13px;color:#9aa0b0;flex:1;margin:0;">PR BODY</h2>
+                <button class="small-btn" id="prd2-copy-body">Copy Body</button>
+                <button class="small-btn" id="prd2-export">Export .txt</button>
+              </div>
+              <pre id="prd2-body" style="white-space:pre-wrap;font-size:12px;color:#e0e4f0;margin:0;line-height:1.7;font-family:-apple-system,BlinkMacSystemFont,sans-serif;max-height:500px;overflow-y:auto;"></pre>
+            </article>
+          </div>
+          <script>(function(){
+            function prd2All(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_rfj_')===0&&k!=='lt_rfj_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return b.ts-a.ts;});return a;}
+            function prd2Populate(){
+              var sel=document.getElementById('prd2-select');if(!sel)return;
+              var jobs=prd2All();var curr=sel.value;
+              sel.innerHTML='<option value="">-- select a saved job --</option>'+jobs.map(function(j){return'<option value="'+j.id+'">'+(j.jobId||j.id)+' — '+j.targetSite+' ['+j.riskLevel+']</option>';}).join('');
+              if(curr)sel.value=curr;
+            }
+            function prd2Body(job){
+              var RISK_NOTE={LOW:'Low — LoadTasks/local tools only, no live code impact',MEDIUM:'Medium — live app HTML/JS, no service worker or AI provider',HIGH:'High — service worker, AI provider, or deployment logic involved'};
+              return'## Summary\n'+job.reasonForChange+'\n\n## Files expected to change\n'+job.targetFiles.split('\n').map(function(f){return'- `'+f.trim()+'`';}).filter(Boolean).join('\n')+'\n\n## Risk level\n'+(RISK_NOTE[job.riskLevel]||job.riskLevel)+'\n\n## Live site impact\n'+(job.liveSiteImpact||'None stated')+'\n\n## Impact flags\n- Service worker: '+job.serviceWorkerImpact+'\n- AI / provider: '+job.aiProviderImpact+'\n- Export / package: '+job.exportPackageImpact+'\n- Security: '+job.securityImpact+'\n\n## Proposed change\n'+job.proposedChangeSummary+'\n\n## Acceptance criteria\n'+(job.acceptanceCriteria||'(not specified)')+'\n\n## Tests / checks required\n- [ ] Smoke check on staging\n- [ ] Verify on iPad Safari\n- [ ] Confirm rollback command works\n\n## Rollback plan\n`'+(job.rollbackPlan||'git revert <SHA>')+'`\n\n## User verification needed\n'+job.userApprovalRequired+' — do not merge without explicit user approval.\n\nJob ID: '+job.jobId+'\nStatus: '+job.status;
+            }
+            document.getElementById('prd2-generate').addEventListener('click',function(){
+              var id=document.getElementById('prd2-select').value;if(!id)return;
+              var job=JSON.parse(localStorage.getItem('lt_rfj_'+id));if(!job)return;
+              var title=job.prTitleSuggestion||('['+job.riskLevel+'] '+job.targetSite+': '+job.reasonForChange.substring(0,60));
+              var body=prd2Body(job);
+              document.getElementById('prd2-title').textContent=title;
+              document.getElementById('prd2-body').textContent=body;
+              document.getElementById('prd2-output').style.display='';
+              document.getElementById('prd2-copy-title').dataset.text=title;
+              document.getElementById('prd2-copy-body').dataset.text=body;
+              document.getElementById('prd2-export').dataset.text='PR TITLE:\n'+title+'\n\nPR BODY:\n'+body;
+              document.getElementById('prd2-export').dataset.fn='pr-draft-'+job.jobId+'.txt';
+            });
+            ['prd2-copy-title','prd2-copy-body'].forEach(function(id){document.getElementById(id).addEventListener('click',function(){var t=this.dataset.text;if(!t)return;navigator.clipboard&&navigator.clipboard.writeText(t).then(function(){var toast=document.getElementById('toast');if(toast){toast.textContent='Copied';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}});});});
+            document.getElementById('prd2-export').addEventListener('click',function(){var t=this.dataset.text;if(!t)return;var b=new Blob([t],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=this.dataset.fn||'pr-draft.txt';a.click();});
+            var sec=document.getElementById('view-prdraftbuilder');if(sec)sec.addEventListener('lt-view-enter',function(){prd2Populate();document.getElementById('prd2-output').style.display='none';});prd2Populate();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-exportrfj" data-view-panel="exportrfj">
+          <div class="section-head"><p class="eyebrow">Repo File Worker — Phase 1</p><h1>Export Repo File Job</h1><p>Browse all saved jobs. Copy JSON, export patch plan, or export PR draft.</p></div>
+          <div id="erfj-list" style="margin-top:8px;"></div>
+          <script>(function(){
+            var RISK_COLOR={LOW:'#2ecc71',MEDIUM:'#e67e22',HIGH:'#e74c3c'};
+            var STA_COLOR={Draft:'#9aa0b0','Ready for Review':'#3498db',Approved:'#2ecc71',Rejected:'#e74c3c',Executed:'#9b59b6'};
+            function erfjAll(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_rfj_')===0&&k!=='lt_rfj_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return b.ts-a.ts;});return a;}
+            function ppText(j){return'PATCH PLAN\nJob ID: '+j.jobId+'\nCreated: '+j.createdAt+'\nStatus: '+j.status+'\n'+'='.repeat(50)+'\n\nPROBLEM\n'+j.reasonForChange+'\n\nTARGET SITE: '+j.targetSite+'\nFILE ACTION: '+j.fileAction+'\n\nTARGET FILES\n'+j.targetFiles+'\n\nPROPOSED CHANGES\n'+(j.proposedChangeSummary||'N/A')+'\n\nRISK: '+j.riskLevel+'\nSW: '+j.serviceWorkerImpact+' | AI: '+j.aiProviderImpact+' | Export: '+j.exportPackageImpact+' | Security: '+j.securityImpact+'\n\nACCEPTANCE CRITERIA\n'+(j.acceptanceCriteria||'N/A')+'\n\nROLLBACK: '+(j.rollbackPlan||'N/A');}
+            function prdText(j){return'PR TITLE:\n'+(j.prTitleSuggestion||('['+j.riskLevel+'] '+j.targetSite))+'\n\nPR BODY:\n## Summary\n'+j.reasonForChange+'\n\n## Files\n'+j.targetFiles.split('\n').map(function(f){return'- `'+f.trim()+'`';}).join('\n')+'\n\n## Risk: '+j.riskLevel+'\n## SW: '+j.serviceWorkerImpact+' | AI: '+j.aiProviderImpact+'\n\n## Rollback\n`'+(j.rollbackPlan||'git revert <SHA>')+'`\n\nJob ID: '+j.jobId;}
+            function erfjRender(){
+              var el=document.getElementById('erfj-list');if(!el)return;
+              var jobs=erfjAll();
+              if(!jobs.length){el.innerHTML='<p class="empty-state">No jobs saved. Create one in Repo File Work Request.</p>';return;}
+              el.innerHTML=jobs.map(function(j){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px;margin-bottom:10px;">'
+                +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">'
+                +'<code style="font-size:11px;color:#ffd400;">'+j.jobId+'</code>'
+                +'<span style="font-size:10px;background:'+(RISK_COLOR[j.riskLevel]||'#9aa0b0')+';color:#fff;border-radius:4px;padding:2px 5px;">'+j.riskLevel+'</span>'
+                +'<span style="font-size:10px;background:'+(STA_COLOR[j.status]||'#9aa0b0')+';color:#fff;border-radius:4px;padding:2px 5px;">'+j.status+'</span>'
+                +'<span style="font-size:12px;flex:1;">'+j.targetSite+'</span>'
+                +'<span style="font-size:10px;color:#9aa0b0;">'+new Date(j.ts).toLocaleDateString()+'</span></div>'
+                +'<div style="font-size:12px;color:#9aa0b0;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+j.reasonForChange+'</div>'
+                +'<div style="font-size:11px;color:#9aa0b0;margin-bottom:10px;font-family:monospace;">'+j.targetFiles.split('\n').slice(0,3).join(', ')+'</div>'
+                +'<div style="display:flex;gap:6px;flex-wrap:wrap;">'
+                +'<button class="small-btn erfj-json" data-id="'+j.id+'">Copy JSON</button>'
+                +'<button class="small-btn erfj-patch" data-id="'+j.id+'">Export Patch Plan</button>'
+                +'<button class="small-btn erfj-pr" data-id="'+j.id+'">Export PR Draft</button>'
+                +'<select class="small-btn erfj-status-sel" data-id="'+j.id+'" style="font-size:11px;"><option>Draft</option><option>Ready for Review</option><option>Approved</option><option>Rejected</option><option>Executed</option></select>'
+                +'<button class="small-btn erfj-del" data-id="'+j.id+'" style="background:rgba(231,76,60,0.2);color:#e74c3c;">Delete</button></div>'
+                +'</div>';}).join('');
+              jobs.forEach(function(j){var sel=el.querySelector('.erfj-status-sel[data-id="'+j.id+'"]');if(sel)sel.value=j.status;});
+              el.querySelectorAll('.erfj-json').forEach(function(b){b.addEventListener('click',function(){var d=localStorage.getItem('lt_rfj_'+b.dataset.id);navigator.clipboard&&navigator.clipboard.writeText(JSON.stringify(JSON.parse(d),null,2)).then(function(){var t=document.getElementById('toast');if(t){t.textContent='JSON copied';t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2000);}});});});
+              el.querySelectorAll('.erfj-patch').forEach(function(b){b.addEventListener('click',function(){var j=JSON.parse(localStorage.getItem('lt_rfj_'+b.dataset.id));var bl=new Blob([ppText(j)],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download='patch-plan-'+j.jobId+'.txt';a.click();});});
+              el.querySelectorAll('.erfj-pr').forEach(function(b){b.addEventListener('click',function(){var j=JSON.parse(localStorage.getItem('lt_rfj_'+b.dataset.id));var bl=new Blob([prdText(j)],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download='pr-draft-'+j.jobId+'.txt';a.click();});});
+              el.querySelectorAll('.erfj-status-sel').forEach(function(sel){sel.addEventListener('change',function(){var j=JSON.parse(localStorage.getItem('lt_rfj_'+sel.dataset.id));j.status=sel.value;localStorage.setItem('lt_rfj_'+sel.dataset.id,JSON.stringify(j));});});
+              el.querySelectorAll('.erfj-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Delete job '+b.dataset.id+'?'))return;localStorage.removeItem('lt_rfj_'+b.dataset.id);erfjRender();});});
+            }
+            var sec=document.getElementById('view-exportrfj');if(sec)sec.addEventListener('lt-view-enter',erfjRender);erfjRender();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-actionspec" data-view-panel="actionspec">
+          <div class="section-head"><p class="eyebrow">Repo File Worker — Phase 2 Preview</p><h1>GitHub Action Spec</h1><p>How the secure executor will work in Phase 2. No browser token. No direct write. No merge.</p></div>
+          <article class="panel" style="margin-bottom:12px;">
+            <h2 style="font-size:14px;color:#ffd400;margin-bottom:12px;">Architecture: What Each Layer Does</h2>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;border-left:3px solid #3498db;"><strong style="font-size:13px;">Load Tasks (this app)</strong><div style="font-size:12px;color:#9aa0b0;margin-top:4px;">Creates structured repo-file-job.json. Classifies risk. Drafts PR. No tokens. No direct writes. Output is a JSON file the user exports.</div></div>
+              <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;border-left:3px solid #ffd400;"><strong style="font-size:13px;">User</strong><div style="font-size:12px;color:#9aa0b0;margin-top:4px;">Reviews the repo-file-job.json. Approves or rejects. If approved, uploads JSON to trigger the GitHub Action. All merges require explicit user approval. User is the release gatekeeper.</div></div>
+              <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;border-left:3px solid #2ecc71;"><strong style="font-size:13px;">GitHub Actions (Phase 2 — not yet built)</strong><div style="font-size:12px;color:#9aa0b0;margin-top:4px;">Reads the approved repo-file-job.json securely (no browser exposure). Creates a new feature branch from latest main. Applies the approved file changes. Opens a PR. Does NOT merge. Does NOT deploy.</div></div>
+              <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;border-left:3px solid #9b59b6;"><strong style="font-size:13px;">GitHub Repo</strong><div style="font-size:12px;color:#9aa0b0;margin-top:4px;">Source of truth for all files. PR target. Pages host. Protected main branch. All changes land via PR — never direct push.</div></div>
+            </div>
+          </article>
+          <article class="panel" style="margin-bottom:12px;">
+            <h2 style="font-size:14px;color:#ffd400;margin-bottom:12px;">Phase 2 GitHub Action: Planned Behaviour</h2>
+            <div style="font-size:13px;line-height:1.8;color:#e0e4f0;">
+              <div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);">1. Trigger: dispatch event with repo-file-job.json payload</div>
+              <div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);">2. Validate: check riskLevel, serviceWorkerImpact, userApprovalRequired fields</div>
+              <div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);">3. Reject HIGH-risk jobs unless explicit override flag is present in the JSON</div>
+              <div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);">4. git fetch origin main</div>
+              <div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);">5. git checkout -b &lt;branchNameSuggestion&gt;</div>
+              <div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);">6. Apply file changes as defined in the job (patch or full replacement)</div>
+              <div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);">7. git commit -m "&lt;prTitleSuggestion&gt;"</div>
+              <div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);">8. git push -u origin &lt;branch&gt;</div>
+              <div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);">9. Open PR with prTitleSuggestion and prBodyDraft — NOT auto-merged</div>
+              <div style="padding:4px 0;">10. Report PR URL back to user. Wait for user to review and merge.</div>
+            </div>
+          </article>
+          <article class="panel">
+            <h2 style="font-size:14px;color:#e74c3c;margin-bottom:12px;">Hard Rules — Never Implemented in Phase 2</h2>
+            <div style="font-size:13px;line-height:1.8;color:#9aa0b0;">
+              <div>— No GitHub token stored in the browser</div>
+              <div>— No Cloudflare token anywhere</div>
+              <div>— No direct push to main</div>
+              <div>— No auto-merge without explicit user approval</div>
+              <div>— No file deletion without explicit per-file approval in the job</div>
+              <div>— No branch deletion</div>
+              <div>— No production deployment trigger</div>
+              <div>— No service worker / cache changes without HIGH-risk approval flag</div>
+              <div>— No AI provider routing changes without HIGH-risk approval flag</div>
+            </div>
+          </article>
+        </section>
+
         <!-- ═══ DASHBOARD COUNTERS SCRIPT ═══ -->
         <script>
         (function(){
@@ -9099,7 +9496,8 @@
               {label:'Handoff Packets',n:ltCountPrefix('lt_hpkt_',['lt_hpkt_draft'])},
               {label:'Site Protections',n:ltCountPrefix('lt_sps_',['lt_sps_draft'])},
               {label:'Vault Events',n:ltCountPrefix('lt_bvr_',['lt_bvr_draft'])},
-              {label:'Pinned Commands',n:ltCountPrefix('lt_pcmd_',['lt_pcmd_draft'])}
+              {label:'Pinned Commands',n:ltCountPrefix('lt_pcmd_',['lt_pcmd_draft'])},
+              {label:'Repo File Jobs',n:ltCountPrefix('lt_rfj_',['lt_rfj_draft'])}
             ];
             el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px;text-align:center;"><div style="font-size:28px;font-weight:700;line-height:1;">'+(it.n)+'</div><div style="font-size:12px;color:#9aa0b0;margin-top:4px;">'+it.label+'</div></div>';}).join('');
           }
