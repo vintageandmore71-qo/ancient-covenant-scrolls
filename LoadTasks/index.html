@@ -174,6 +174,18 @@
         <button data-view="sessionsummary" data-route>Session Summary</button>
         <button data-view="toolcategories" data-route>Tool Categories</button>
         <button data-view="toolhelp" data-route>Tool Help</button>
+        <button data-view="cmdoverview" data-route>CMD Overview</button>
+        <button data-view="toolsearch2" data-route>Tool Search</button>
+        <button data-view="depmap" data-route>Dep Map</button>
+        <button data-view="activework" data-route>Active Work</button>
+        <button data-view="openrisks" data-route>Open Risks</button>
+        <button data-view="pendingreviews" data-route>Pending Reviews</button>
+        <button data-view="backupreminder" data-route>Backup Check</button>
+        <button data-view="exporthandoff" data-route>Export Handoff</button>
+        <button data-view="importhandoff" data-route>Import Handoff</button>
+        <button data-view="safenextstep" data-route>Safe Next Step</button>
+        <button data-view="siteprotection" data-route>Site Protection</button>
+        <button data-view="vaultreminder" data-route>Vault Reminder</button>
       </nav>
       <button class="icon-button" id="hardRefresh" aria-label="Hard refresh app state">
         <span class="icon-mini" data-icon="refresh"></span>
@@ -311,6 +323,18 @@
         <button data-view="sessionsummary" data-route><span class="rail-icon" data-icon="notes"></span><span>Session Summary</span></button>
         <button data-view="toolcategories" data-route><span class="rail-icon" data-icon="library"></span><span>Tool Categories</span></button>
         <button data-view="toolhelp" data-route><span class="rail-icon" data-icon="notes"></span><span>Tool Help</span></button>
+        <button data-view="cmdoverview" data-route><span class="rail-icon" data-icon="dashboard"></span><span>CMD Overview</span></button>
+        <button data-view="toolsearch2" data-route><span class="rail-icon" data-icon="library"></span><span>Tool Search</span></button>
+        <button data-view="depmap" data-route><span class="rail-icon" data-icon="version"></span><span>Dep Map</span></button>
+        <button data-view="activework" data-route><span class="rail-icon" data-icon="focus"></span><span>Active Work</span></button>
+        <button data-view="openrisks" data-route><span class="rail-icon" data-icon="shield"></span><span>Open Risks</span></button>
+        <button data-view="pendingreviews" data-route><span class="rail-icon" data-icon="version"></span><span>Pending Reviews</span></button>
+        <button data-view="backupreminder" data-route><span class="rail-icon" data-icon="vault"></span><span>Backup Check</span></button>
+        <button data-view="exporthandoff" data-route><span class="rail-icon" data-icon="vault"></span><span>Export Handoff</span></button>
+        <button data-view="importhandoff" data-route><span class="rail-icon" data-icon="vault"></span><span>Import Handoff</span></button>
+        <button data-view="safenextstep" data-route><span class="rail-icon" data-icon="shield"></span><span>Safe Next Step</span></button>
+        <button data-view="siteprotection" data-route><span class="rail-icon" data-icon="shield"></span><span>Site Protection</span></button>
+        <button data-view="vaultreminder" data-route><span class="rail-icon" data-icon="vault"></span><span>Vault Reminder</span></button>
       </aside>
 
       <section class="workspace">
@@ -909,6 +933,66 @@
               <span class="card-icon" data-icon="notes"></span>
               <strong>Tool Help</strong>
               <span>Help text and usage tips for every tool in the Developer Bot.</span>
+            </button>
+            <button class="command-card" data-view="cmdoverview" data-route>
+              <span class="card-icon" data-icon="dashboard"></span>
+              <strong>Command Center Overview</strong>
+              <span>One-screen status of all open work, risks, and pending actions.</span>
+            </button>
+            <button class="command-card" data-view="toolsearch2" data-route>
+              <span class="card-icon" data-icon="library"></span>
+              <strong>Tool Search</strong>
+              <span>Search all tools with filters by category, type, and storage use.</span>
+            </button>
+            <button class="command-card" data-view="depmap" data-route>
+              <span class="card-icon" data-icon="version"></span>
+              <strong>Tool Dependency Map</strong>
+              <span>See which tools read from other tools and how data flows.</span>
+            </button>
+            <button class="command-card" data-view="activework" data-route>
+              <span class="card-icon" data-icon="focus"></span>
+              <strong>Active Work Summary</strong>
+              <span>All in-progress items across every tool in one view.</span>
+            </button>
+            <button class="command-card" data-view="openrisks" data-route>
+              <span class="card-icon" data-icon="shield"></span>
+              <strong>Open Risks Summary</strong>
+              <span>All open risks from Bug Triage, Risk Register, and Hot Fix.</span>
+            </button>
+            <button class="command-card" data-view="pendingreviews" data-route>
+              <span class="card-icon" data-icon="version"></span>
+              <strong>Pending Reviews Summary</strong>
+              <span>Items awaiting review across PR Review, Feature Accept, and Merge Check.</span>
+            </button>
+            <button class="command-card" data-view="backupreminder" data-route>
+              <span class="card-icon" data-icon="vault"></span>
+              <strong>Backup Check</strong>
+              <span>Check when you last exported data and get a reminder to backup.</span>
+            </button>
+            <button class="command-card" data-view="exporthandoff" data-route>
+              <span class="card-icon" data-icon="vault"></span>
+              <strong>Export Handoff Packet</strong>
+              <span>Bundle all open work into a structured handoff for the next session.</span>
+            </button>
+            <button class="command-card" data-view="importhandoff" data-route>
+              <span class="card-icon" data-icon="vault"></span>
+              <strong>Import Handoff Packet</strong>
+              <span>Restore open items from a handoff packet at the start of a session.</span>
+            </button>
+            <button class="command-card" data-view="safenextstep" data-route>
+              <span class="card-icon" data-icon="shield"></span>
+              <strong>Safe Next Step</strong>
+              <span>Recommends the lowest-risk next action given your current records.</span>
+            </button>
+            <button class="command-card" data-view="siteprotection" data-route>
+              <span class="card-icon" data-icon="shield"></span>
+              <strong>Site Protection Status</strong>
+              <span>Log and review protection settings and locked files per site.</span>
+            </button>
+            <button class="command-card" data-view="vaultreminder" data-route>
+              <span class="card-icon" data-icon="vault"></span>
+              <strong>Build Vault Reminder</strong>
+              <span>Track when you last vaulted a build and get reminded to vault again.</span>
             </button>
           </div>
 
@@ -7947,6 +8031,489 @@
           });
         }());</script>
 
+        <section class="view" id="view-cmdoverview" data-view-panel="cmdoverview">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Command Center Overview</h1><p>One-screen status of all open work, risks, and pending actions.</p></div>
+          <div id="cco-body" style="margin-top:8px;"></div>
+          <script>(function(){
+            function ccoGet(prefix,excl){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(prefix)===0){var skip=false;(excl||[]).forEach(function(e){if(k===e)skip=true;});if(!skip){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}}return a;}
+            function ccoRender(){
+              var el=document.getElementById('cco-body');if(!el)return;
+              var sections=[];
+              var blockers=ccoGet('lt_bk_',['lt_bk_draft']).filter(function(b){return b.status==='Open';});
+              if(blockers.length)sections.push({label:'BLOCKERS',color:'#e74c3c',items:blockers.map(function(b){return b.desc;})});
+              var critbugs=ccoGet('lt_bgt_',['lt_bgt_draft']).filter(function(b){return(b.sev==='Critical'||b.sev==='High')&&b.status==='Open';});
+              if(critbugs.length)sections.push({label:'OPEN BUGS (Critical/High)',color:'#e74c3c',items:critbugs.map(function(b){return'['+b.sev+'] '+b.title;})});
+              var hotfixes=ccoGet('lt_hf_',['lt_hf_draft']).filter(function(h){return h.status==='Open'||h.status==='In Progress';});
+              if(hotfixes.length)sections.push({label:'HOT FIXES',color:'#e67e22',items:hotfixes.map(function(h){return h.desc||h.title||'--';})});
+              var incidents=ccoGet('lt_ir_',['lt_ir_draft']).filter(function(it){return!it.resolved||it.resolved==='Still open';});
+              if(incidents.length)sections.push({label:'OPEN INCIDENTS',color:'#e74c3c',items:incidents.map(function(it){return it.title;})});
+              var regressions=ccoGet('lt_rl_',['lt_rl_draft']).filter(function(r){return r.status==='Open';});
+              if(regressions.length)sections.push({label:'REGRESSIONS',color:'#e67e22',items:regressions.map(function(r){return r.what||r.title||'--';})});
+              var pq=ccoGet('lt_pq_',['lt_pq_draft']).filter(function(p){return p.priority==='P0'||p.priority==='P1';});
+              if(pq.length)sections.push({label:'P0/P1 PRIORITY QUEUE',color:'#ffd400',items:pq.map(function(p){return'['+p.priority+'] '+p.task;})});
+              var risks=ccoGet('lt_rg_',['lt_rg_draft']).filter(function(r){return r.status==='Open'&&r.prob==='High';});
+              if(risks.length)sections.push({label:'HIGH-PROBABILITY RISKS',color:'#e67e22',items:risks.map(function(r){return r.desc;})});
+              var goals=[];try{goals=JSON.parse(localStorage.getItem('lt_sgl_current')||'[]');}catch(e){}
+              var openGoals=goals.filter(function(g){return!g.done;});
+              if(openGoals.length)sections.push({label:'SESSION GOALS REMAINING',color:'#3498db',items:openGoals.map(function(g){return g.goal;})});
+              if(!sections.length){el.innerHTML='<div style="text-align:center;padding:32px;color:#9aa0b0;font-size:14px;">All clear — no open items found.</div>';return;}
+              el.innerHTML=sections.map(function(s){return'<div style="margin-bottom:16px;">'
+                +'<div style="font-size:11px;font-weight:700;color:'+s.color+';letter-spacing:0.05em;margin-bottom:8px;">'+s.label+' ('+s.items.length+')</div>'
+                +'<div style="background:rgba(255,255,255,0.04);border-left:3px solid '+s.color+';border-radius:0 8px 8px 0;padding:10px 14px;">'
+                +s.items.slice(0,5).map(function(t){return'<div style="font-size:13px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04);">'+t+'</div>';}).join('')
+                +(s.items.length>5?'<div style="font-size:11px;color:#9aa0b0;margin-top:4px;">...and '+(s.items.length-5)+' more</div>':'')
+                +'</div></div>';}).join('');
+            }
+            var sec=document.getElementById('view-cmdoverview');if(sec)sec.addEventListener('lt-view-enter',ccoRender);ccoRender();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-toolsearch2" data-view-panel="toolsearch2">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Tool Search</h1><p>Search and filter all tools by name, category, or storage type.</p></div>
+          <article class="panel">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+              <input id="ts2-q" placeholder="Search by name or keyword..." style="flex:1;min-width:160px;">
+              <select id="ts2-cat" style="min-width:140px;"><option value="">All categories</option><option>Daily Operations</option><option>Planning and Tracking</option><option>Build and Deploy</option><option>Records and Logs</option><option>Documentation</option><option>Tools and Utilities</option><option>Generators and Builders</option></select>
+              <select id="ts2-stor" style="min-width:130px;"><option value="">Any storage</option><option value="persisted">Saves records</option><option value="session">Session only</option></select>
+            </div>
+            <div id="ts2-results"></div>
+          </article>
+          <script>(function(){
+            var TS2_TOOLS=[
+              {view:'commandcenter',label:'Command Center',cat:'Daily Operations',stor:'persisted',desc:'Central hub for daily developer operations'},
+              {view:'todaywork',label:"Today's Work",cat:'Daily Operations',stor:'session',desc:"Log what you're working on today"},
+              {view:'priorityqueue',label:'Priority Queue',cat:'Daily Operations',stor:'persisted',desc:'Ordered list of high-priority tasks'},
+              {view:'blockers',label:'Blockers',cat:'Daily Operations',stor:'persisted',desc:'Track what is blocking your work'},
+              {view:'sessiongoals',label:'Session Goals',cat:'Daily Operations',stor:'session',desc:'Set goals for this session'},
+              {view:'notepad',label:'Note Pad',cat:'Daily Operations',stor:'session',desc:'Free-form scratch pad'},
+              {view:'worktimer',label:'Work Timer',cat:'Daily Operations',stor:'session',desc:'Session timer for a single task'},
+              {view:'worklog',label:'Work Log',cat:'Daily Operations',stor:'persisted',desc:'Log time spent on tasks'},
+              {view:'standup',label:'Daily Stand-Up',cat:'Daily Operations',stor:'session',desc:'Generate a stand-up message'},
+              {view:'whatsnext2',label:"What's Next?",cat:'Daily Operations',stor:'session',desc:'Get a suggested next action'},
+              {view:'sessionsummary',label:'Session Summary',cat:'Daily Operations',stor:'session',desc:'Auto-generate end-of-session report'},
+              {view:'backlog',label:'Backlog',cat:'Planning and Tracking',stor:'persisted',desc:'Feature backlog'},
+              {view:'issues',label:'Issues',cat:'Planning and Tracking',stor:'persisted',desc:'Log and manage issues'},
+              {view:'bugtriage',label:'Bug Triage',cat:'Planning and Tracking',stor:'persisted',desc:'Triage bugs by severity'},
+              {view:'riskregister',label:'Risk Register',cat:'Planning and Tracking',stor:'persisted',desc:'Log risks with probability and impact'},
+              {view:'hotfix',label:'Hot Fix',cat:'Planning and Tracking',stor:'persisted',desc:'Track urgent hot fixes'},
+              {view:'regressionlog',label:'Regression Log',cat:'Planning and Tracking',stor:'persisted',desc:'Log regressions found during testing'},
+              {view:'decisionlog',label:'Decision Log',cat:'Planning and Tracking',stor:'persisted',desc:'Record architectural decisions'},
+              {view:'scopecreep',label:'Scope Creep',cat:'Planning and Tracking',stor:'persisted',desc:'Document scope changes'},
+              {view:'featuretoggles',label:'Feature Toggles',cat:'Planning and Tracking',stor:'persisted',desc:'Track feature flag states'},
+              {view:'sprintlog',label:'Sprint Log',cat:'Planning and Tracking',stor:'persisted',desc:'Log sprint goals and outcomes'},
+              {view:'smokecheck',label:'Smoke Check',cat:'Build and Deploy',stor:'persisted',desc:'Run a smoke test checklist'},
+              {view:'baseline',label:'Baseline',cat:'Build and Deploy',stor:'persisted',desc:'Record a baseline state'},
+              {view:'prprep',label:'PR Prep',cat:'Build and Deploy',stor:'session',desc:'Checklist before opening a PR'},
+              {view:'mergedecision',label:'Merge Check',cat:'Build and Deploy',stor:'session',desc:'Checklist before merging'},
+              {view:'deployreceipt',label:'Deploy Receipt',cat:'Build and Deploy',stor:'persisted',desc:'Record a completed deployment'},
+              {view:'rollbackplan',label:'Rollback Plan',cat:'Build and Deploy',stor:'persisted',desc:'Document rollback steps'},
+              {view:'rollbackreceipt',label:'Rollback Receipt',cat:'Build and Deploy',stor:'persisted',desc:'Document a rollback'},
+              {view:'branchinventory',label:'Branch Inventory',cat:'Build and Deploy',stor:'persisted',desc:'Track active branches'},
+              {view:'branchlog',label:'Branch Log',cat:'Build and Deploy',stor:'persisted',desc:'Log branches created in a sprint'},
+              {view:'branchsafety',label:'Branch Safety',cat:'Build and Deploy',stor:'session',desc:'Check a branch is safe to merge'},
+              {view:'envcheck',label:'Env Check',cat:'Build and Deploy',stor:'session',desc:'Confirm dev environment'},
+              {view:'buildsequence',label:'Build Sequence',cat:'Build and Deploy',stor:'session',desc:'Plan build operation order'},
+              {view:'stagingplan',label:'Staging Plan',cat:'Build and Deploy',stor:'persisted',desc:'Plan a staging deploy'},
+              {view:'mergelog',label:'Merge Log',cat:'Records and Logs',stor:'persisted',desc:'Log every merge'},
+              {view:'shippedlog',label:'Shipped Log',cat:'Records and Logs',stor:'persisted',desc:'Log shipped features'},
+              {view:'testresults',label:'Test Results',cat:'Records and Logs',stor:'persisted',desc:'Log test run results'},
+              {view:'testcoverage',label:'Test Coverage',cat:'Records and Logs',stor:'persisted',desc:'Track test coverage'},
+              {view:'incidentreport',label:'Incident Report',cat:'Records and Logs',stor:'persisted',desc:'Document incidents'},
+              {view:'postmortem',label:'Post-Mortem',cat:'Records and Logs',stor:'session',desc:'Structured post-mortem template'},
+              {view:'knownissues',label:'Known Issues',cat:'Records and Logs',stor:'persisted',desc:'Register of known issues'},
+              {view:'filechanges',label:'File Changes',cat:'Records and Logs',stor:'persisted',desc:'Log which files changed'},
+              {view:'changelog',label:'Changelog',cat:'Records and Logs',stor:'persisted',desc:'Record session changes'},
+              {view:'versiontracker',label:'Version Tracker',cat:'Records and Logs',stor:'persisted',desc:'Track version numbers'},
+              {view:'sessionnotes',label:'Session Notes',cat:'Documentation',stor:'persisted',desc:'Write session notes'},
+              {view:'handoffdoc',label:'Handoff Doc',cat:'Documentation',stor:'persisted',desc:'Generate a handoff document'},
+              {view:'buildnotes',label:'Build Notes',cat:'Documentation',stor:'persisted',desc:'Document build decisions'},
+              {view:'releasenotes',label:'Release Notes',cat:'Documentation',stor:'persisted',desc:'Write release notes'},
+              {view:'quickref',label:'Quick Ref',cat:'Documentation',stor:'persisted',desc:'Store quick-reference entries'},
+              {view:'sitemap',label:'Site Map',cat:'Documentation',stor:'persisted',desc:'Document site structure'},
+              {view:'depnotes',label:'Dep Notes',cat:'Documentation',stor:'persisted',desc:'Document dependencies'},
+              {view:'apiendpoints',label:'API Endpoints',cat:'Documentation',stor:'persisted',desc:'Document API endpoints'},
+              {view:'codenotes',label:'Code Review Notes',cat:'Documentation',stor:'persisted',desc:'Notes during code review'},
+              {view:'pasteannotate',label:'Paste and Annotate',cat:'Documentation',stor:'persisted',desc:'Paste text with notes'},
+              {view:'toolindex',label:'Tool Index',cat:'Tools and Utilities',stor:'session',desc:'Search all tools'},
+              {view:'favorites',label:'Favorites',cat:'Tools and Utilities',stor:'persisted',desc:'Pin your most-used tools'},
+              {view:'recenttools',label:'Recently Used',cat:'Tools and Utilities',stor:'persisted',desc:'See recently visited tools'},
+              {view:'exportpacket',label:'Export All Reports',cat:'Tools and Utilities',stor:'session',desc:'Bundle all records into one export'},
+              {view:'settingsio',label:'Settings Backup',cat:'Tools and Utilities',stor:'session',desc:'Export/import all data as JSON'},
+              {view:'quicklaunch',label:'Quick Launch',cat:'Tools and Utilities',stor:'persisted',desc:'Configurable tool shortcuts'},
+              {view:'toolcategories',label:'Tool Categories',cat:'Tools and Utilities',stor:'session',desc:'Browse tools by category'},
+              {view:'toolhelp',label:'Tool Help',cat:'Tools and Utilities',stor:'session',desc:'Help text for every tool'},
+              {view:'promptbuilder',label:'Prompt Builder',cat:'Generators and Builders',stor:'persisted',desc:'Build AI prompts'},
+              {view:'savedprompts',label:'Saved Prompts',cat:'Generators and Builders',stor:'persisted',desc:'Store and reuse prompts'},
+              {view:'commitmsg2',label:'Commit Templates',cat:'Generators and Builders',stor:'session',desc:'Commit message templates'},
+              {view:'prcomments',label:'PR Comment Builder',cat:'Generators and Builders',stor:'session',desc:'Generate PR review comments'},
+              {view:'snippets',label:'Snippets',cat:'Generators and Builders',stor:'persisted',desc:'Save code snippets'},
+              {view:'clippad',label:'Clip Pad',cat:'Generators and Builders',stor:'session',desc:'Multi-clipboard for session'},
+              {view:'urlstore',label:'URL Store',cat:'Generators and Builders',stor:'persisted',desc:'Save named URLs'}
+            ];
+            function ts2Render(){
+              var q=(document.getElementById('ts2-q').value||'').toLowerCase();
+              var cat=document.getElementById('ts2-cat').value;
+              var stor=document.getElementById('ts2-stor').value;
+              var results=TS2_TOOLS.filter(function(t){
+                if(cat&&t.cat!==cat)return false;
+                if(stor&&t.stor!==stor)return false;
+                if(q&&t.label.toLowerCase().indexOf(q)<0&&t.desc.toLowerCase().indexOf(q)<0)return false;
+                return true;
+              });
+              var el=document.getElementById('ts2-results');if(!el)return;
+              if(!results.length){el.innerHTML='<p class="empty-state">No tools match.</p>';return;}
+              el.innerHTML='<div style="font-size:12px;color:#9aa0b0;margin-bottom:8px;">'+results.length+' result'+(results.length===1?'':'s')+'</div>'
+                +results.map(function(t){return'<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;margin-bottom:4px;background:rgba(255,255,255,0.04);border-radius:8px;">'
+                  +'<div style="flex:1;"><div style="font-size:13px;font-weight:600;">'+t.label+'</div>'
+                  +'<div style="font-size:11px;color:#9aa0b0;">'+t.cat+' &middot; '+(t.stor==='persisted'?'saves records':'session only')+'</div></div>'
+                  +'<button class="small-btn ts2-go" data-view="'+t.view+'">Go</button></div>';}).join('');
+              el.querySelectorAll('.ts2-go').forEach(function(b){b.addEventListener('click',function(){var t=document.querySelector('[data-view="'+b.dataset.view+'"][data-route]');if(t)t.click();});});
+            }
+            ['ts2-q','ts2-cat','ts2-stor'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',ts2Render);if(el&&el.tagName==='SELECT')el.addEventListener('change',ts2Render);});
+            var sec=document.getElementById('view-toolsearch2');if(sec)sec.addEventListener('lt-view-enter',ts2Render);ts2Render();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-depmap" data-view-panel="depmap">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Tool Dependency Map</h1><p>Which tools read data from other tools, and what data flows where.</p></div>
+          <article class="panel">
+            <div id="dm-list"></div>
+          </article>
+          <script>(function(){
+            var DM_DEPS=[
+              {tool:'Daily Stand-Up',reads:["Today's Work (lt_tw_draft)","Blockers (lt_bk_)"],writes:[]},
+              {tool:'Session Summary',reads:["Today's Work (lt_tw_draft)","Session Goals (lt_sgl_current)","Shipped Log (lt_shp_)","Merge Log (lt_mg_)","Blockers (lt_bk_)","Note Pad (lt_np_draft)","Bug Triage (lt_bgt_)"],writes:[]},
+              {tool:"What's Next?",reads:['Bug Triage (lt_bgt_)','Blockers (lt_bk_)','Hot Fix (lt_hf_)','Priority Queue (lt_pq_)','Incidents (lt_ir_)','Regressions (lt_rl_)','Backlog (lt_fb_)',"Today's Work (lt_tw_draft)"],writes:[]},
+              {tool:'Session Snapshot',reads:['Repair Jobs (lt_rjw_)','Issues (lt_is_)','Blockers (lt_bk_)','Priority Queue (lt_pq_)','Hot Fix (lt_hf_)','Regressions (lt_rl_)','Backlog (lt_fb_)',"Note Pad (lt_np_draft)"],writes:[]},
+              {tool:'Command Center Overview',reads:['Blockers (lt_bk_)','Bug Triage (lt_bgt_)','Hot Fix (lt_hf_)','Incidents (lt_ir_)','Regressions (lt_rl_)','Priority Queue (lt_pq_)','Risk Register (lt_rg_)','Session Goals (lt_sgl_current)'],writes:[]},
+              {tool:'Active Work Summary',reads:['Repair Jobs (lt_rjw_)','Issues (lt_is_)','Bug Triage (lt_bgt_)','Hot Fix (lt_hf_)','Blockers (lt_bk_)','Sprint Log (lt_sl_)'],writes:[]},
+              {tool:'Open Risks Summary',reads:['Bug Triage (lt_bgt_)','Risk Register (lt_rg_)','Hot Fix (lt_hf_)','Regressions (lt_rl_)','Known Issues (lt_ki_)'],writes:[]},
+              {tool:'Export All Reports',reads:['All lt_ prefixes'],writes:['File download']},
+              {tool:'Settings Backup',reads:['All lt_ keys'],writes:['All lt_ keys (on restore)']},
+              {tool:'Export Handoff',reads:["Today's Work","Blockers","Priority Queue","Session Goals","Shipped Log","Merge Log","Open Bugs"],writes:['lt_hpkt_ (handoff packet)']},
+              {tool:'Import Handoff',reads:['lt_hpkt_'],writes:['lt_bk_','lt_pq_','lt_sgl_current']}
+            ];
+            function dmRender(){
+              var el=document.getElementById('dm-list');if(!el)return;
+              el.innerHTML=DM_DEPS.map(function(d){return'<div style="margin-bottom:12px;padding:10px 14px;background:rgba(255,255,255,0.04);border-radius:8px;">'
+                +'<div style="font-size:13px;font-weight:700;margin-bottom:6px;">'+d.tool+'</div>'
+                +(d.reads.length?'<div style="font-size:11px;color:#9aa0b0;margin-bottom:4px;">Reads: '+d.reads.join(', ')+'</div>':'')
+                +(d.writes.length?'<div style="font-size:11px;color:#3498db;">Writes: '+d.writes.join(', ')+'</div>':'')
+                +'</div>';}).join('');
+            }
+            var sec=document.getElementById('view-depmap');if(sec)sec.addEventListener('lt-view-enter',dmRender);dmRender();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-activework" data-view-panel="activework">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Active Work Summary</h1><p>All in-progress items across every tool in one view.</p></div>
+          <div id="aw-body" style="margin-top:8px;"></div>
+          <script>(function(){
+            function awGet(prefix,excl){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(prefix)===0){var skip=false;(excl||[]).forEach(function(e){if(k===e)skip=true;});if(!skip){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}}return a;}
+            function awRender(){
+              var el=document.getElementById('aw-body');if(!el)return;
+              var sections=[];
+              var repairJobs=awGet('lt_rjw_',['lt_rjw_draft','lt_repairjob_draft']).filter(function(r){return r.status==='In Progress'||r.status==='Open';});
+              if(repairJobs.length)sections.push({label:'Repair Jobs',items:repairJobs.map(function(r){return(r.site||'--')+' — '+(r.desc||r.title||'--');})});
+              var issues=awGet('lt_is_',['lt_is_draft']).filter(function(i){return i.status==='Open'||i.status==='In Progress';});
+              if(issues.length)sections.push({label:'Issues',items:issues.map(function(i){return i.title||'--';})});
+              var bugs=awGet('lt_bgt_',['lt_bgt_draft']).filter(function(b){return b.status==='Open'||b.status==='In Progress';});
+              if(bugs.length)sections.push({label:'Bugs',items:bugs.map(function(b){return'['+b.sev+'] '+b.title;})});
+              var hotfixes=awGet('lt_hf_',['lt_hf_draft']).filter(function(h){return h.status==='Open'||h.status==='In Progress';});
+              if(hotfixes.length)sections.push({label:'Hot Fixes',items:hotfixes.map(function(h){return h.desc||h.title||'--';})});
+              var blockers=awGet('lt_bk_',['lt_bk_draft']).filter(function(b){return b.status==='Open';});
+              if(blockers.length)sections.push({label:'Blockers',items:blockers.map(function(b){return b.desc||'--';})});
+              var sprints=awGet('lt_sl_',['lt_sl_draft']).filter(function(s){return s.status==='Active'||s.status==='In Progress';});
+              if(sprints.length)sections.push({label:'Active Sprints',items:sprints.map(function(s){return s.name||s.goal||'--';})});
+              var goals=[];try{goals=JSON.parse(localStorage.getItem('lt_sgl_current')||'[]');}catch(e){}
+              var openGoals=goals.filter(function(g){return!g.done;});
+              if(openGoals.length)sections.push({label:'Session Goals Remaining',items:openGoals.map(function(g){return g.goal;})});
+              if(!sections.length){el.innerHTML='<div style="text-align:center;padding:32px;color:#9aa0b0;font-size:14px;">No active work items found.</div>';return;}
+              var total=sections.reduce(function(sum,s){return sum+s.items.length;},0);
+              el.innerHTML='<div style="font-size:13px;color:#9aa0b0;margin-bottom:16px;">'+total+' active item'+(total===1?'':'s')+' across '+sections.length+' categor'+(sections.length===1?'y':'ies')+'</div>'
+                +sections.map(function(s){return'<div style="margin-bottom:14px;">'
+                  +'<div style="font-size:11px;font-weight:700;color:#ffd400;letter-spacing:0.05em;margin-bottom:8px;">'+s.label.toUpperCase()+' ('+s.items.length+')</div>'
+                  +'<div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:8px 12px;">'
+                  +s.items.slice(0,6).map(function(t){return'<div style="font-size:13px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);">'+t+'</div>';}).join('')
+                  +(s.items.length>6?'<div style="font-size:11px;color:#9aa0b0;padding-top:4px;">...and '+(s.items.length-6)+' more</div>':'')
+                  +'</div></div>';}).join('');
+            }
+            var sec=document.getElementById('view-activework');if(sec)sec.addEventListener('lt-view-enter',awRender);awRender();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-openrisks" data-view-panel="openrisks">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Open Risks Summary</h1><p>All open risks from Bug Triage, Risk Register, Hot Fix, Regressions, and Known Issues.</p></div>
+          <div id="or-body" style="margin-top:8px;"></div>
+          <script>(function(){
+            function orGet(prefix,excl){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(prefix)===0){var skip=false;(excl||[]).forEach(function(e){if(k===e)skip=true;});if(!skip){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}}return a;}
+            function orRender(){
+              var el=document.getElementById('or-body');if(!el)return;
+              var rows=[];
+              orGet('lt_bgt_',['lt_bgt_draft']).filter(function(b){return b.status==='Open'||b.status==='In Progress';}).forEach(function(b){rows.push({type:'Bug',sev:b.sev,label:b.title,source:'Bug Triage'});});
+              orGet('lt_rg_',['lt_rg_draft']).filter(function(r){return r.status==='Open';}).forEach(function(r){rows.push({type:'Risk',sev:r.prob+'/'+r.impact,label:r.desc,source:'Risk Register'});});
+              orGet('lt_hf_',['lt_hf_draft']).filter(function(h){return h.status==='Open'||h.status==='In Progress';}).forEach(function(h){rows.push({type:'Hot Fix',sev:h.urgency||'High',label:h.desc||h.title||'--',source:'Hot Fix'});});
+              orGet('lt_rl_',['lt_rl_draft']).filter(function(r){return r.status==='Open';}).forEach(function(r){rows.push({type:'Regression',sev:'High',label:r.what||r.title||'--',source:'Regression Log'});});
+              orGet('lt_ki_',['lt_ki_draft']).filter(function(k){return k.status==='Open';}).forEach(function(k){rows.push({type:'Known Issue',sev:k.sev||'Normal',label:k.title||'--',source:'Known Issues'});});
+              if(!rows.length){el.innerHTML='<div style="text-align:center;padding:32px;color:#9aa0b0;font-size:14px;">No open risks found.</div>';return;}
+              var SEV_ORDER={Critical:0,High:1,'High/High':1,Normal:2,Medium:2,Low:3};
+              rows.sort(function(a,b){return(SEV_ORDER[a.sev]||2)-(SEV_ORDER[b.sev]||2);});
+              var SEV_COLOR={Critical:'#e74c3c',High:'#e74c3c','High/High':'#e67e22',Normal:'#e67e22',Medium:'#e67e22',Low:'#2ecc71'};
+              el.innerHTML='<div style="font-size:13px;color:#9aa0b0;margin-bottom:12px;">'+rows.length+' open risk'+(rows.length===1?'':'s')+'</div>'
+                +rows.map(function(r){return'<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;margin-bottom:4px;background:rgba(255,255,255,0.04);border-radius:8px;">'
+                  +'<span style="font-size:10px;background:'+(SEV_COLOR[r.sev]||'#9aa0b0')+';color:#fff;border-radius:4px;padding:2px 5px;white-space:nowrap;">'+r.sev+'</span>'
+                  +'<span style="font-size:10px;background:rgba(255,255,255,0.08);color:#9aa0b0;border-radius:4px;padding:2px 5px;white-space:nowrap;">'+r.type+'</span>'
+                  +'<span style="font-size:13px;flex:1;">'+r.label+'</span>'
+                  +'<span style="font-size:10px;color:#9aa0b0;">'+r.source+'</span></div>';}).join('');
+            }
+            var sec=document.getElementById('view-openrisks');if(sec)sec.addEventListener('lt-view-enter',orRender);orRender();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-pendingreviews" data-view-panel="pendingreviews">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Pending Reviews Summary</h1><p>Items awaiting review or approval across all tools.</p></div>
+          <div id="pr2-body" style="margin-top:8px;"></div>
+          <script>(function(){
+            function pr2Get(prefix,excl){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(prefix)===0){var skip=false;(excl||[]).forEach(function(e){if(k===e)skip=true;});if(!skip){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}}return a;}
+            function pr2Render(){
+              var el=document.getElementById('pr2-body');if(!el)return;
+              var rows=[];
+              pr2Get('lt_bi_',['lt_bi_draft']).filter(function(b){return b.status==='Pending review'||b.status==='Open for review';}).forEach(function(b){rows.push({label:b.name||b.branch||'--',type:'Branch',source:'Branch Inventory'});});
+              pr2Get('lt_brl_',['lt_brl_draft']).filter(function(b){return b.status==='Pending review';}).forEach(function(b){rows.push({label:b.name||'--',type:'Branch',source:'Branch Log'});});
+              pr2Get('lt_sl_',['lt_sl_draft']).filter(function(s){return s.status==='Needs review';}).forEach(function(s){rows.push({label:s.name||s.goal||'--',type:'Sprint',source:'Sprint Log'});});
+              pr2Get('lt_fb_',['lt_fb_draft']).filter(function(f){return f.status==='In Review';}).forEach(function(f){rows.push({label:f.feature||'--',type:'Feature',source:'Backlog'});});
+              pr2Get('lt_ki_',['lt_ki_draft']).filter(function(k){return k.status==='Needs review';}).forEach(function(k){rows.push({label:k.title||'--',type:'Issue',source:'Known Issues'});});
+              if(!rows.length){el.innerHTML='<div style="text-align:center;padding:32px;color:#9aa0b0;font-size:14px;">No pending reviews found in saved records.</div>';return;}
+              el.innerHTML='<div style="font-size:13px;color:#9aa0b0;margin-bottom:12px;">'+rows.length+' pending review'+(rows.length===1?'':'s')+'</div>'
+                +rows.map(function(r){return'<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;margin-bottom:4px;background:rgba(255,255,255,0.04);border-radius:8px;">'
+                  +'<span style="font-size:10px;background:rgba(52,152,219,0.3);color:#3498db;border-radius:4px;padding:2px 6px;">'+r.type+'</span>'
+                  +'<span style="font-size:13px;flex:1;">'+r.label+'</span>'
+                  +'<span style="font-size:10px;color:#9aa0b0;">'+r.source+'</span></div>';}).join('');
+            }
+            var sec=document.getElementById('view-pendingreviews');if(sec)sec.addEventListener('lt-view-enter',pr2Render);pr2Render();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-backupreminder" data-view-panel="backupreminder">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Backup Check</h1><p>Track when you last exported data and see how many records are unsaved to a backup.</p></div>
+          <article class="panel">
+            <div id="br-status" style="margin-bottom:16px;"></div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="br-mark">Mark Backup Done Now</button>
+              <button class="secondary-action" id="br-export">Go to Settings Backup</button>
+            </div>
+          </article>
+          <script>(function(){
+            function brRender(){
+              var el=document.getElementById('br-status');if(!el)return;
+              var lastTs=parseInt(localStorage.getItem('lt_last_backup_ts')||'0',10);
+              var count=0;for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_')===0)count++;}
+              var ageMs=lastTs?Date.now()-lastTs:null;
+              var ageStr=ageMs===null?'Never':(ageMs<60000?'Just now':ageMs<3600000?Math.round(ageMs/60000)+' min ago':ageMs<86400000?Math.round(ageMs/3600000)+' hr ago':Math.round(ageMs/86400000)+' day'+(Math.round(ageMs/86400000)>1?'s':'')+' ago');
+              var urgent=ageMs===null||ageMs>86400000;
+              el.innerHTML='<div style="background:rgba(255,255,255,0.04);border-left:3px solid '+(urgent?'#e74c3c':'#2ecc71')+';border-radius:0 8px 8px 0;padding:12px 16px;">'
+                +'<div style="font-size:14px;font-weight:700;margin-bottom:4px;">'+(urgent?'Backup recommended':'Backup recent')+'</div>'
+                +'<div style="font-size:13px;color:#9aa0b0;">Last backup: <strong style="color:#e0e4f0;">'+ageStr+'</strong></div>'
+                +'<div style="font-size:13px;color:#9aa0b0;margin-top:4px;">Total lt_ keys in localStorage: <strong style="color:#e0e4f0;">'+count+'</strong></div>'
+                +'</div>';
+            }
+            document.getElementById('br-mark').addEventListener('click',function(){localStorage.setItem('lt_last_backup_ts',Date.now().toString());brRender();var toast=document.getElementById('toast');if(toast){toast.textContent='Backup timestamp recorded';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}});
+            document.getElementById('br-export').addEventListener('click',function(){var t=document.querySelector('[data-view="settingsio"][data-route]');if(t)t.click();});
+            var sec=document.getElementById('view-backupreminder');if(sec)sec.addEventListener('lt-view-enter',brRender);brRender();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-exporthandoff" data-view-panel="exporthandoff">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Export Handoff Packet</h1><p>Bundle all open work into a structured handoff. Save as .txt or store for Import Handoff.</p></div>
+          <article class="panel">
+            <label>Session label<input id="ehp-label" placeholder="e.g. End of Batch 15 session — 2026-05-11"></label>
+            <label>Notes for next session<textarea id="ehp-notes" rows="3" placeholder="What the next session needs to know..."></textarea></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="ehp-generate">Generate Handoff</button>
+              <button class="secondary-action" id="ehp-export" style="display:none;">Export .txt</button>
+              <button class="secondary-action" id="ehp-save" style="display:none;">Save to Import Handoff</button>
+            </div>
+            <textarea id="ehp-text" rows="16" style="width:100%;background:rgba(0,0,0,0.2);color:#e0e4f0;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:12px;font-size:12px;line-height:1.6;resize:vertical;display:none;margin-top:12px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;"></textarea>
+          </article>
+          <script>(function(){
+            var ehpText='';
+            function ehpGet(prefix,excl){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(prefix)===0){var skip=false;(excl||[]).forEach(function(e){if(k===e)skip=true;});if(!skip){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}}return a;}
+            document.getElementById('ehp-generate').addEventListener('click',function(){
+              var label=document.getElementById('ehp-label').value.trim()||'Session handoff '+new Date().toLocaleString();
+              var notes=document.getElementById('ehp-notes').value.trim();
+              var lines=['HANDOFF PACKET: '+label,'Generated: '+new Date().toLocaleString(),'='.repeat(50),''];
+              if(notes){lines.push('NOTES FOR NEXT SESSION:');lines.push(notes);lines.push('');}
+              var tw=localStorage.getItem('lt_tw_draft');if(tw&&tw.trim()){lines.push("TODAY'S WORK:");lines.push(tw.trim());lines.push('');}
+              var goals=[];try{goals=JSON.parse(localStorage.getItem('lt_sgl_current')||'[]');}catch(e){}
+              var openGoals=goals.filter(function(g){return!g.done;});
+              if(openGoals.length){lines.push('INCOMPLETE SESSION GOALS:');openGoals.forEach(function(g){lines.push('[ ] '+g.goal);});lines.push('');}
+              var blockers=ehpGet('lt_bk_',['lt_bk_draft']).filter(function(b){return b.status==='Open';});
+              if(blockers.length){lines.push('OPEN BLOCKERS:');blockers.forEach(function(b){lines.push('- '+b.desc);});lines.push('');}
+              var pq=ehpGet('lt_pq_',['lt_pq_draft']);if(pq.length){lines.push('PRIORITY QUEUE:');pq.slice(0,8).forEach(function(p){lines.push('['+p.priority+'] '+p.task);});lines.push('');}
+              var bugs=ehpGet('lt_bgt_',['lt_bgt_draft']).filter(function(b){return b.status==='Open'||b.status==='In Progress';});
+              if(bugs.length){lines.push('OPEN BUGS:');bugs.forEach(function(b){lines.push('['+b.sev+'] '+b.title);});lines.push('');}
+              var shp=ehpGet('lt_shp_',['lt_shp_draft']);if(shp.length){lines.push('SHIPPED (recent 5):');shp.slice(0,5).forEach(function(s){lines.push('- '+s.name+(s.pr?' PR #'+s.pr:'')+(s.sha?' '+s.sha:''));});lines.push('');}
+              ehpText=lines.join('\n');
+              var el=document.getElementById('ehp-text');el.value=ehpText;el.style.display='';
+              document.getElementById('ehp-export').style.display='';document.getElementById('ehp-save').style.display='';
+            });
+            document.getElementById('ehp-export').addEventListener('click',function(){var b=new Blob([ehpText],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='handoff-packet.txt';a.click();});
+            document.getElementById('ehp-save').addEventListener('click',function(){
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              localStorage.setItem('lt_hpkt_'+id,JSON.stringify({id:id,label:document.getElementById('ehp-label').value.trim(),text:ehpText,ts:Date.now()}));
+              var toast=document.getElementById('toast');if(toast){toast.textContent='Handoff saved — open Import Handoff to restore';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}
+            });
+            var sec=document.getElementById('view-exporthandoff');if(sec)sec.addEventListener('lt-view-enter',function(){document.getElementById('ehp-text').style.display='none';document.getElementById('ehp-export').style.display='none';document.getElementById('ehp-save').style.display='none';});
+          }());</script>
+        </section>
+
+        <section class="view" id="view-importhandoff" data-view-panel="importhandoff">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Import Handoff Packet</h1><p>Restore open items from a saved handoff packet at the start of a new session.</p></div>
+          <div id="ihp-list" style="margin-top:8px;"></div>
+          <script>(function(){
+            function ihpAll(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_hpkt_')===0){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return b.ts-a.ts;});return a;}
+            function ihpRender(){
+              var el=document.getElementById('ihp-list');if(!el)return;
+              var items=ihpAll();if(!items.length){el.innerHTML='<p class="empty-state">No saved handoff packets. Export one using Export Handoff.</p>';return;}
+              el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px;margin-bottom:10px;">'
+                +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+                +'<strong style="flex:1;font-size:13px;">'+it.label+'</strong>'
+                +'<span style="font-size:11px;color:#9aa0b0;">'+new Date(it.ts).toLocaleDateString()+'</span>'
+                +'<button class="small-btn ihp-del" data-id="'+it.id+'">X</button></div>'
+                +'<pre style="margin:0 0 10px;font-size:11px;color:#9aa0b0;white-space:pre-wrap;max-height:120px;overflow-y:auto;background:rgba(0,0,0,0.2);border-radius:6px;padding:8px;">'+it.text.substring(0,400)+(it.text.length>400?'\n...':'')+'</pre>'
+                +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+                +'<button class="small-btn ihp-copy" data-id="'+it.id+'">Copy Text</button>'
+                +'<button class="small-btn ihp-export" data-id="'+it.id+'">Export .txt</button>'
+                +'</div></div>';}).join('');
+              el.querySelectorAll('.ihp-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Delete this handoff packet?'))return;localStorage.removeItem('lt_hpkt_'+b.dataset.id);ihpRender();});});
+              el.querySelectorAll('.ihp-copy').forEach(function(b){b.addEventListener('click',function(){var d=JSON.parse(localStorage.getItem('lt_hpkt_'+b.dataset.id));navigator.clipboard&&navigator.clipboard.writeText(d.text).then(function(){var t=document.getElementById('toast');if(t){t.textContent='Handoff copied';t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2000);}});});});
+              el.querySelectorAll('.ihp-export').forEach(function(b){b.addEventListener('click',function(){var d=JSON.parse(localStorage.getItem('lt_hpkt_'+b.dataset.id));var bl=new Blob([d.text],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download='handoff-'+d.id+'.txt';a.click();});});
+            }
+            var sec=document.getElementById('view-importhandoff');if(sec)sec.addEventListener('lt-view-enter',ihpRender);ihpRender();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-safenextstep" data-view-panel="safenextstep">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Safe Next Step</h1><p>Recommends the lowest-risk next action based on your current records and open items.</p></div>
+          <article class="panel">
+            <button class="primary-action" id="sns-analyze" style="margin-bottom:16px;">Recommend Safe Next Step</button>
+            <div id="sns-output"></div>
+          </article>
+          <script>(function(){
+            document.getElementById('sns-analyze').addEventListener('click',function(){
+              var el=document.getElementById('sns-output');if(!el)return;
+              function snsGet(prefix,excl){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(prefix)===0){var skip=false;(excl||[]).forEach(function(e){if(k===e)skip=true;});if(!skip){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}}return a;}
+              var steps=[];
+              var openIncidents=snsGet('lt_ir_',['lt_ir_draft']).filter(function(it){return!it.resolved||it.resolved==='Still open';});
+              if(openIncidents.length){steps.push({risk:'High',label:'Resolve open incidents first',detail:'There are '+openIncidents.length+' unresolved incident'+(openIncidents.length>1?'s':'')+'. Do not ship anything new until incidents are closed.',action:'Go to Incident Report',view:'incidentreport'});return;}
+              var critBugs=snsGet('lt_bgt_',['lt_bgt_draft']).filter(function(b){return b.sev==='Critical'&&b.status==='Open';});
+              if(critBugs.length){steps.push({risk:'High',label:'Fix critical bugs before continuing',detail:critBugs.length+' critical bug'+(critBugs.length>1?'s')+' are open. Any build on top of a critical bug adds risk.',action:'Go to Bug Triage',view:'bugtriage'});}
+              var staleBackup=!localStorage.getItem('lt_last_backup_ts')||(Date.now()-parseInt(localStorage.getItem('lt_last_backup_ts')||'0',10))>86400000;
+              if(staleBackup){steps.push({risk:'Medium',label:'Back up your data before the next build',detail:'No backup recorded in the last 24 hours. Export settings before making more changes.',action:'Go to Settings Backup',view:'settingsio'});}
+              var blockers=snsGet('lt_bk_',['lt_bk_draft']).filter(function(b){return b.status==='Open';});
+              if(blockers.length){steps.push({risk:'Medium',label:'Clear blockers before starting new work',detail:blockers.length+' open blocker'+(blockers.length>1?'s that are':' that is')+' likely to interrupt mid-build.',action:'Go to Blockers',view:'blockers'});}
+              var noGoals=!localStorage.getItem('lt_sgl_current')||(function(){try{var g=JSON.parse(localStorage.getItem('lt_sgl_current')||'[]');return!g.length;}catch(e){return true;}})();
+              if(noGoals){steps.push({risk:'Low',label:'Set session goals before building',detail:'No goals are set for this session. Defined goals reduce scope creep.',action:'Go to Session Goals',view:'sessiongoals'});}
+              var tw=localStorage.getItem('lt_tw_draft');
+              if(!tw||!tw.trim()){steps.push({risk:'Low',label:'Log what you\'re about to work on',detail:"Today's Work is empty. Writing it now gives you a record if the session is interrupted.",action:"Go to Today's Work",view:'todaywork'});}
+              if(!steps.length){el.innerHTML='<div style="background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);border-radius:8px;padding:16px;text-align:center;"><div style="font-size:14px;font-weight:700;color:#2ecc71;margin-bottom:6px;">All clear — safe to proceed</div><div style="font-size:13px;color:#9aa0b0;">No blockers, no incidents, no critical bugs. You are good to build.</div></div>';return;}
+              var RISK_COLOR={High:'#e74c3c',Medium:'#e67e22',Low:'#3498db'};
+              el.innerHTML=steps.map(function(s,i){return'<div style="background:'+(i===0?'rgba(255,212,0,0.06)':'rgba(255,255,255,0.04)')+';border-left:3px solid '+RISK_COLOR[s.risk]+';border-radius:0 8px 8px 0;padding:12px 14px;margin-bottom:10px;">'
+                +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">'
+                +'<span style="font-size:10px;background:'+RISK_COLOR[s.risk]+';color:#fff;border-radius:4px;padding:2px 6px;">'+s.risk+'</span>'
+                +'<strong style="font-size:13px;">'+(i===0?'Recommended: ':'')+s.label+'</strong></div>'
+                +'<div style="font-size:12px;color:#9aa0b0;margin-bottom:8px;">'+s.detail+'</div>'
+                +'<button class="small-btn sns-go" data-view="'+s.view+'">'+s.action+'</button></div>';}).join('');
+              el.querySelectorAll('.sns-go').forEach(function(b){b.addEventListener('click',function(){var t=document.querySelector('[data-view="'+b.dataset.view+'"][data-route]');if(t)t.click();});});
+            });
+            var sec=document.getElementById('view-safenextstep');if(sec)sec.addEventListener('lt-view-enter',function(){document.getElementById('sns-output').innerHTML='';});
+          }());</script>
+        </section>
+
+        <section class="view" id="view-siteprotection" data-view-panel="siteprotection">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Site Protection Status</h1><p>Log and review protection settings, locked files, and deploy restrictions per site.</p></div>
+          <article class="panel form-panel">
+            <label>Site<input id="sps-site" placeholder="Load, LoadStudio, Attain, ACR..."></label>
+            <label>Protection type<select id="sps-type"><option>Branch protection (main locked)</option><option>File locked (do not edit)</option><option>Deploy gated (approval required)</option><option>SW locked (no SW changes)</option><option>Backup current (known good SHA)</option><option>Custom</option></select></label>
+            <label>Detail<input id="sps-detail" placeholder="e.g. main requires PR + squash merge, ACR reader locked 2026-05-04"></label>
+            <label>Status<select id="sps-status"><option>Active</option><option>Bypassed</option><option>Removed</option></select></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="primary-action" id="sps-save">Log Protection</button>
+              <button class="secondary-action" id="sps-export">Export .txt</button>
+              <button class="secondary-action" id="sps-clear-all">Clear All</button>
+            </div>
+          </article>
+          <div id="sps-list" style="margin-top:16px;"></div>
+          <script>(function(){
+            var SPS_STA={Active:'#2ecc71',Bypassed:'#e74c3c',Removed:'#9aa0b0'};
+            function spsAll(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_sps_')===0&&k!=='lt_sps_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return(a.site+a.type).localeCompare(b.site+b.type);});return a;}
+            function spsRender(){
+              var el=document.getElementById('sps-list');if(!el)return;
+              var items=spsAll();if(!items.length){el.innerHTML='<p class="empty-state">No protections logged.</p>';return;}
+              el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px;margin-bottom:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'
+                +'<span style="background:'+SPS_STA[it.status]+';color:#fff;border-radius:4px;padding:2px 6px;font-size:10px;">'+it.status+'</span>'
+                +(it.site?'<strong style="font-size:12px;">'+it.site+'</strong>':'')
+                +'<span style="font-size:12px;flex:1;color:#9aa0b0;">'+it.type+'</span>'
+                +(it.detail?'<span style="font-size:11px;color:#9aa0b0;flex-basis:100%;">'+it.detail+'</span>':'')
+                +'<button class="small-btn sps-del" data-id="'+it.id+'">X</button></div>';}).join('');
+              el.querySelectorAll('.sps-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Remove?'))return;localStorage.removeItem('lt_sps_'+b.dataset.id);spsRender();});});
+            }
+            document.getElementById('sps-save').addEventListener('click',function(){
+              var site=document.getElementById('sps-site').value.trim();if(!site)return;
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              localStorage.setItem('lt_sps_'+id,JSON.stringify({id:id,site:site,type:document.getElementById('sps-type').value,detail:document.getElementById('sps-detail').value.trim(),status:document.getElementById('sps-status').value,ts:Date.now()}));
+              document.getElementById('sps-site').value='';document.getElementById('sps-detail').value='';spsRender();
+              var toast=document.getElementById('toast');if(toast){toast.textContent='Protection logged';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}
+            });
+            document.getElementById('sps-export').addEventListener('click',function(){
+              var txt='SITE PROTECTION STATUS\nExported: '+new Date().toLocaleString()+'\n\n'+spsAll().map(function(it){return'['+it.status+'] '+it.site+' — '+it.type+(it.detail?'\n'+it.detail:'');}).join('\n\n');
+              var b=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='site-protection.txt';a.click();
+            });
+            document.getElementById('sps-clear-all').addEventListener('click',function(){if(!confirm('Clear all?'))return;spsAll().forEach(function(it){localStorage.removeItem('lt_sps_'+it.id);});spsRender();});
+            var sec=document.getElementById('view-siteprotection');if(sec)sec.addEventListener('lt-view-enter',spsRender);
+          }());</script>
+        </section>
+
+        <section class="view" id="view-vaultreminder" data-view-panel="vaultreminder">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Build Vault Reminder</h1><p>Track when you last vaulted a build. Log vault events and get reminded when due.</p></div>
+          <article class="panel form-panel" style="margin-bottom:16px;">
+            <label>Site<input id="bvr-site" placeholder="Load, Attain, ACR..."></label>
+            <label>SHA / version vaulted<input id="bvr-sha" placeholder="e.g. 58899a63 / v5.31"></label>
+            <label>Branch / tag<input id="bvr-branch" placeholder="e.g. backup/2026-05-11-v531"></label>
+            <label>Notes<input id="bvr-notes" placeholder="Why this build was vaulted"></label>
+            <button class="primary-action" id="bvr-save">Log Vault Event</button>
+          </article>
+          <div id="bvr-list" style="margin-top:8px;"></div>
+          <script>(function(){
+            function bvrAll(){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_bvr_')===0&&k!=='lt_bvr_draft'){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}a.sort(function(a,b){return b.ts-a.ts;});return a;}
+            function bvrRender(){
+              var el=document.getElementById('bvr-list');if(!el)return;
+              var items=bvrAll();
+              if(!items.length){el.innerHTML='<p class="empty-state">No vault events logged. Log one every time you create a backup/2026-* branch.</p>';return;}
+              var latest=items[0];var ageMs=Date.now()-latest.ts;var due=ageMs>86400000*3;
+              el.innerHTML='<div style="background:rgba(255,255,255,0.04);border-left:3px solid '+(due?'#e67e22':'#2ecc71')+';border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:16px;">'
+                +'<div style="font-size:13px;font-weight:700;">'+(due?'Vault may be due':'Recent vault on record')+'</div>'
+                +'<div style="font-size:12px;color:#9aa0b0;margin-top:2px;">Last vault: '+latest.site+' '+latest.sha+' ('+new Date(latest.ts).toLocaleDateString()+')</div>'
+                +'</div>'
+                +items.map(function(it){return'<div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:8px 12px;margin-bottom:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'
+                  +'<strong style="font-size:12px;">'+it.site+'</strong>'
+                  +'<code style="font-size:11px;color:#9aa0b0;">'+it.sha+'</code>'
+                  +(it.branch?'<code style="font-size:11px;color:#9aa0b0;">'+it.branch+'</code>':'')
+                  +'<span style="font-size:11px;color:#9aa0b0;margin-left:auto;">'+new Date(it.ts).toLocaleDateString()+'</span>'
+                  +'<button class="small-btn bvr-del" data-id="'+it.id+'">X</button></div>';}).join('');
+              el.querySelectorAll('.bvr-del').forEach(function(b){b.addEventListener('click',function(){if(!confirm('Remove?'))return;localStorage.removeItem('lt_bvr_'+b.dataset.id);bvrRender();});});
+            }
+            document.getElementById('bvr-save').addEventListener('click',function(){
+              var site=document.getElementById('bvr-site').value.trim();var sha=document.getElementById('bvr-sha').value.trim();if(!site||!sha)return;
+              var id=Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+              localStorage.setItem('lt_bvr_'+id,JSON.stringify({id:id,site:site,sha:sha,branch:document.getElementById('bvr-branch').value.trim(),notes:document.getElementById('bvr-notes').value.trim(),ts:Date.now()}));
+              document.getElementById('bvr-site').value='';document.getElementById('bvr-sha').value='';document.getElementById('bvr-branch').value='';document.getElementById('bvr-notes').value='';bvrRender();
+              var toast=document.getElementById('toast');if(toast){toast.textContent='Vault event logged';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}
+            });
+            var sec=document.getElementById('view-vaultreminder');if(sec)sec.addEventListener('lt-view-enter',bvrRender);bvrRender();
+          }());</script>
+        </section>
+
         <!-- ═══ DASHBOARD COUNTERS SCRIPT ═══ -->
         <script>
         (function(){
@@ -8004,7 +8571,10 @@
               {label:'Branch Log',n:ltCountPrefix('lt_brl_',['lt_brl_draft'])},
               {label:'URL Store',n:ltCountPrefix('lt_us_',['lt_us_draft'])},
               {label:'Pastes',n:ltCountPrefix('lt_pa_',['lt_pa_draft'])},
-              {label:'Work Log',n:ltCountPrefix('lt_wl_',['lt_wl_draft'])}
+              {label:'Work Log',n:ltCountPrefix('lt_wl_',['lt_wl_draft'])},
+              {label:'Handoff Packets',n:ltCountPrefix('lt_hpkt_',['lt_hpkt_draft'])},
+              {label:'Site Protections',n:ltCountPrefix('lt_sps_',['lt_sps_draft'])},
+              {label:'Vault Events',n:ltCountPrefix('lt_bvr_',['lt_bvr_draft'])}
             ];
             el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px;text-align:center;"><div style="font-size:28px;font-weight:700;line-height:1;">'+(it.n)+'</div><div style="font-size:12px;color:#9aa0b0;margin-top:4px;">'+it.label+'</div></div>';}).join('');
           }
