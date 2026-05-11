@@ -15,6 +15,23 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="stylesheet" href="styles.css?v=5.16">
+<style>
+.rail-grp{border:none;background:transparent;margin:0;padding:0;width:100%;}
+.rail-grp>summary{list-style:none;padding:5px 14px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9aa0b0;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between;border-radius:6px;margin:6px 0 2px;}
+.rail-grp>summary::-webkit-details-marker{display:none;}
+.rail-grp>summary::after{content:'▾';font-size:10px;}
+.rail-grp:not([open])>summary::after{content:'▸';}
+.rail-grp>summary:hover{background:rgba(255,255,255,0.05);color:#e8eaf0;}
+.nav-group-sep{display:inline-flex;align-items:center;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6b7280;padding:0 10px;white-space:nowrap;flex-shrink:0;border-left:1px solid rgba(255,255,255,0.1);margin:0 4px;}
+#nav-search{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:4px 10px;color:#e8eaf0;font-size:12px;width:110px;flex-shrink:0;min-width:80px;outline:none;}
+#nav-search::placeholder{color:#9aa0b0;}
+.lt-dash-ql{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:20px;}
+.lt-dash-ql button{background:rgba(37,99,235,0.12);border:1px solid rgba(37,99,235,0.25);border-radius:8px;padding:10px 12px;color:#c0c4d0;font-size:12px;font-weight:600;cursor:pointer;text-align:center;}
+.lt-dash-ql button:hover{background:rgba(37,99,235,0.22);color:#e8eaf0;}
+.lt-recent-added{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:20px;}
+.lt-recent-added button{background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:10px 12px;color:#c0c4d0;font-size:12px;font-weight:600;cursor:pointer;text-align:center;}
+.lt-recent-added button:hover{background:rgba(34,197,94,0.15);color:#e8eaf0;}
+</style>
 <script src="../branding.js" data-brand-skip></script></head>
 <body>
   <a href="#main" class="skip-link">Skip to dashboard</a>
@@ -43,6 +60,7 @@
         </div>
       </div>
       <nav class="topnav" aria-label="Primary navigation">
+        <input id="nav-search" type="search" placeholder="Find tool..." autocomplete="off" aria-label="Filter navigation">
         <button data-view="dashboard" data-route>Dashboard</button>
         <button data-view="agentlab" data-route>Agent Lab</button>
         <button data-view="notescenter" data-route>Notes</button>
@@ -66,6 +84,7 @@
         <button data-view="github" data-route>GitHub</button>
         <button data-view="help" data-route>Help</button>
 <button data-view="settings" data-route>Settings</button>
+        <span class="nav-group-sep">Build Tools</span>
         <button data-view="repairjob" data-route>Repair Job</button>
         <button data-view="buildvault" data-route>Build Vault</button>
         <button data-view="sitehealth" data-route>Site Health</button>
@@ -149,6 +168,7 @@
         <button data-view="testcoverage" data-route>Test Coverage</button>
         <button data-view="apiendpoints" data-route>API Endpoints</button>
         <button data-view="envcheck" data-route>Env Check</button>
+        <span class="nav-group-sep">Daily Work</span>
         <button data-view="mergelog" data-route>Merge Log</button>
         <button data-view="bugtriage" data-route>Bug Triage</button>
         <button data-view="sessiongoals" data-route>Session Goals</button>
@@ -178,6 +198,7 @@
         <button data-view="toolsearch2" data-route>Tool Search</button>
         <button data-view="depmap" data-route>Dep Map</button>
         <button data-view="activework" data-route>Active Work</button>
+        <span class="nav-group-sep">Safety</span>
         <button data-view="openrisks" data-route>Open Risks</button>
         <button data-view="pendingreviews" data-route>Pending Reviews</button>
         <button data-view="backupreminder" data-route>Backup Check</button>
@@ -198,6 +219,7 @@
         <button data-view="exportrecovery" data-route>Recovery Packet</button>
         <button data-view="exportrelease" data-route>Release Packet</button>
         <button data-view="compactmode" data-route>Compact Mode</button>
+        <span class="nav-group-sep">Repo File Worker</span>
         <button data-view="repofilejob" data-route>Repo File Job</button>
         <button data-view="filepathhelper" data-route>File Paths</button>
         <button data-view="riskclassifier" data-route>Risk Classifier</button>
@@ -430,6 +452,34 @@
           </div>
 
           <div class="metric-grid" id="dashboardMetrics"></div>
+
+          <div style="margin-bottom:6px;"><p class="eyebrow" style="margin-bottom:8px;">Start Here</p>
+          <div class="lt-dash-ql" id="lt-dash-ql">
+            <button data-view="starthere" data-route>Start Here</button>
+            <button data-view="repofilejob" data-route>New Repo Job</button>
+            <button data-view="rfjdashboard" data-route>Job Dashboard</button>
+            <button data-view="toolsearch2" data-route>Tool Search</button>
+            <button data-view="whatsnext2" data-route>What's Next</button>
+            <button data-view="standup" data-route>Stand-Up</button>
+            <button data-view="prsafetychk" data-route>PR Safety</button>
+            <button data-view="safenextstep" data-route>Safe Next Step</button>
+          </div></div>
+
+          <div style="margin-bottom:6px;"><p class="eyebrow" style="margin-bottom:8px;">Recently Added</p>
+          <div class="lt-recent-added">
+            <button data-view="rfjimport" data-route>Import Jobs</button>
+            <button data-view="rfjexportall" data-route>Export All Jobs</button>
+            <button data-view="rfjreviewq" data-route>Review Queue</button>
+            <button data-view="rfjblockers" data-route>Job Blockers</button>
+            <button data-view="rfjpriority" data-route>Priority Queue</button>
+            <button data-view="rfjdupes" data-route>Dupe Finder</button>
+            <button data-view="rfjtimeline" data-route>Job Timeline</button>
+            <button data-view="rfjsearch" data-route>Job Search</button>
+            <button data-view="rfjstatusboard" data-route>Status Board</button>
+            <button data-view="phase2readiness" data-route>Phase 2 Ready</button>
+            <button data-view="rollbackbuilder" data-route>Rollback Builder</button>
+            <button data-view="highriskwarn" data-route>High-Risk Warn</button>
+          </div></div>
 
           <div class="action-grid">
             <button class="command-card" data-view="intake" data-route>
@@ -10595,5 +10645,73 @@
   </div>
   <script src="app.js?v=5.11"></script>
   <script src="builder-inspector.js?v=5.16" defer></script>
+  <script>(function(){
+    /* Rail grouping */
+    var PINNED=['dashboard','starthere','toolsearch2','favorites','recenttools','quicklaunch'];
+    var GROUPS=[
+      {label:'Repo File Worker',open:true,views:['repofilejob','filepathhelper','riskclassifier','patchplan','prdraftbuilder','exportrfj','actionspec','rfjtemplate','fileimpact','highriskwarn','approvephrase','rollbackbuilder','prsafetychk','patchscope','rfjhandoff','rfjpacket','phase2readiness','rfjdashboard','rfjstatusboard','rfjsearch','rfjtimeline','rfjdupes','rfjpriority','rfjblockers','rfjreviewq','rfjexportall','rfjimport']},
+      {label:'Daily Work',open:true,views:['standup','worklog','mergelog','bugtriage','shippedlog','testresults','branchlog','prprep','dailycommand','activework','whatsnext2','sessionsummary','simpledash','pinnedcmd','sessiongoals','sessionnotes']},
+      {label:'Safety',open:true,views:['validator','sitehealth','openrisks','pendingreviews','backupreminder','safenextstep','siteprotection','vaultreminder','branchsafety','prrisks','smokecheck','envcheck','rollbackplan','verifyscript']},
+      {label:'Reports',open:true,views:['exportpacket','settingsio','exportdaily','exportrecovery','exportrelease','exporthandoff','importhandoff','dailyexport','releasenotes','toolindex','toolhelp']}
+    ];
+    function groupRail(){
+      var rail=document.querySelector('.side-rail');if(!rail)return;
+      var btns={};
+      rail.querySelectorAll('button[data-view][data-route]').forEach(function(b){btns[b.getAttribute('data-view')]=b;});
+      while(rail.firstChild)rail.removeChild(rail.firstChild);
+      PINNED.forEach(function(v){if(btns[v])rail.appendChild(btns[v]);});
+      var allGrouped={};PINNED.forEach(function(v){allGrouped[v]=1;});
+      GROUPS.forEach(function(g){
+        var det=document.createElement('details');det.className='rail-grp';if(g.open)det.setAttribute('open','');
+        var sum=document.createElement('summary');sum.textContent=g.label;det.appendChild(sum);
+        g.views.forEach(function(v){allGrouped[v]=1;if(btns[v])det.appendChild(btns[v]);});
+        rail.appendChild(det);
+      });
+      var rest=Object.keys(btns).filter(function(v){return!allGrouped[v];});
+      if(rest.length){
+        var det=document.createElement('details');det.className='rail-grp';
+        var sum=document.createElement('summary');sum.textContent='All Other Tools ('+rest.length+')';det.appendChild(sum);
+        rest.forEach(function(v){if(btns[v])det.appendChild(btns[v]);});
+        rail.appendChild(det);
+      }
+    }
+    /* Nav search filter */
+    function initNavSearch(){
+      var inp=document.getElementById('nav-search');if(!inp)return;
+      inp.addEventListener('input',function(){
+        var q=inp.value.toLowerCase().trim();
+        var nav=inp.closest('nav');if(!nav)return;
+        nav.querySelectorAll('button[data-route]').forEach(function(b){
+          b.style.display=(!q||b.textContent.toLowerCase().indexOf(q)>=0)?'':'none';
+        });
+      });
+    }
+    /* Compact mode persistence on load */
+    function applyCompact(){
+      try{
+        var vis=JSON.parse(localStorage.getItem('lt_vis_config')||'{}');
+        var hidden=Object.keys(vis).filter(function(k){return vis[k]===false;});
+        if(!hidden.length)return;
+        var dash=document.getElementById('view-dashboard');if(!dash)return;
+        dash.querySelectorAll('[data-cat]').forEach(function(el){
+          el.style.display=(vis[el.getAttribute('data-cat')]===false)?'none':'';
+        });
+      }catch(e){}
+    }
+    /* Dashboard start-here buttons route via data-route */
+    function initDashQL(){
+      var ql=document.getElementById('lt-dash-ql');
+      if(ql)ql.querySelectorAll('button[data-view][data-route]').forEach(function(b){
+        b.addEventListener('click',function(){var ev=new CustomEvent('lt-route',{bubbles:true,detail:{view:b.getAttribute('data-view')}});b.dispatchEvent(ev);});
+      });
+      var ra=document.querySelector('.lt-recent-added');
+      if(ra)ra.querySelectorAll('button[data-view][data-route]').forEach(function(b){
+        b.addEventListener('click',function(){var ev=new CustomEvent('lt-route',{bubbles:true,detail:{view:b.getAttribute('data-view')}});b.dispatchEvent(ev);});
+      });
+    }
+    if(document.readyState==='loading'){
+      document.addEventListener('DOMContentLoaded',function(){groupRail();initNavSearch();applyCompact();initDashQL();});
+    }else{groupRail();initNavSearch();applyCompact();initDashQL();}
+  }());</script>
 <footer data-loadeco-nav style="padding:14px 18px;border-top:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.25);text-align:center;font-size:12.5px;color:#9aa0b0;font-family:-apple-system,BlinkMacSystemFont,sans-serif">Part of Load Eco™: <a href="../load/" style="color:inherit;text-decoration:none;margin:0 6px">Load</a> &middot; <a href="../loadstudio/" style="color:inherit;text-decoration:none;margin:0 6px">Load Studio™</a> &middot; <a href="../LoadPlay/" style="color:inherit;text-decoration:none;margin:0 6px">Load Play™</a> &middot; <a href="../LoadTasks/" style="color:inherit;text-decoration:none;margin:0 6px">Load Tasks™</a> &middot; <a href="../LoadAI/" style="color:inherit;text-decoration:none;margin:0 6px">Load AI™</a></footer></body>
 </html>
