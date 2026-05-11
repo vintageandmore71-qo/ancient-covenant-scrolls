@@ -6,7 +6,7 @@
   "targetFiles": "LoadTasks/index.html",
   "fileAction": "inspect-or-plan",
   "reasonForChange": "Branch creation test only. No file edits will be made.",
-  "riskLevel": "LOW",
+  "riskLevel": "MEDIUM",
   "liveSiteImpact": "No",
   "serviceWorkerImpact": "No",
   "aiProviderImpact": "No",
