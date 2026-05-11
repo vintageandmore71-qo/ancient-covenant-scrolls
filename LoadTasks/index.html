@@ -164,6 +164,16 @@
         <button data-view="commitmsg2" data-route>Commit Tmpl</button>
         <button data-view="pasteannotate" data-route>Paste &amp; Annotate</button>
         <button data-view="worklog" data-route>Work Log</button>
+        <button data-view="toolindex" data-route>Tool Index</button>
+        <button data-view="favorites" data-route>Favorites</button>
+        <button data-view="recenttools" data-route>Recent Tools</button>
+        <button data-view="exportpacket" data-route>Export Packet</button>
+        <button data-view="settingsio" data-route>Settings Backup</button>
+        <button data-view="quicklaunch" data-route>Quick Launch</button>
+        <button data-view="whatsnext2" data-route>What's Next</button>
+        <button data-view="sessionsummary" data-route>Session Summary</button>
+        <button data-view="toolcategories" data-route>Tool Categories</button>
+        <button data-view="toolhelp" data-route>Tool Help</button>
       </nav>
       <button class="icon-button" id="hardRefresh" aria-label="Hard refresh app state">
         <span class="icon-mini" data-icon="refresh"></span>
@@ -291,6 +301,16 @@
         <button data-view="commitmsg2" data-route><span class="rail-icon" data-icon="version"></span><span>Commit Tmpl</span></button>
         <button data-view="pasteannotate" data-route><span class="rail-icon" data-icon="notes"></span><span>Paste &amp; Annotate</span></button>
         <button data-view="worklog" data-route><span class="rail-icon" data-icon="focus"></span><span>Work Log</span></button>
+        <button data-view="toolindex" data-route><span class="rail-icon" data-icon="library"></span><span>Tool Index</span></button>
+        <button data-view="favorites" data-route><span class="rail-icon" data-icon="focus"></span><span>Favorites</span></button>
+        <button data-view="recenttools" data-route><span class="rail-icon" data-icon="version"></span><span>Recent</span></button>
+        <button data-view="exportpacket" data-route><span class="rail-icon" data-icon="vault"></span><span>Export All</span></button>
+        <button data-view="settingsio" data-route><span class="rail-icon" data-icon="shield"></span><span>Settings Backup</span></button>
+        <button data-view="quicklaunch" data-route><span class="rail-icon" data-icon="dashboard"></span><span>Quick Launch</span></button>
+        <button data-view="whatsnext2" data-route><span class="rail-icon" data-icon="focus"></span><span>What's Next</span></button>
+        <button data-view="sessionsummary" data-route><span class="rail-icon" data-icon="notes"></span><span>Session Summary</span></button>
+        <button data-view="toolcategories" data-route><span class="rail-icon" data-icon="library"></span><span>Tool Categories</span></button>
+        <button data-view="toolhelp" data-route><span class="rail-icon" data-icon="notes"></span><span>Tool Help</span></button>
       </aside>
 
       <section class="workspace">
@@ -839,6 +859,56 @@
               <span class="card-icon" data-icon="focus"></span>
               <strong>Work Log</strong>
               <span>Log time spent on tasks with duration and notes per session.</span>
+            </button>
+            <button class="command-card" data-view="toolindex" data-route>
+              <span class="card-icon" data-icon="library"></span>
+              <strong>Tool Index</strong>
+              <span>Search all tools by name or keyword. Go directly to any tool.</span>
+            </button>
+            <button class="command-card" data-view="favorites" data-route>
+              <span class="card-icon" data-icon="focus"></span>
+              <strong>Favorites</strong>
+              <span>Pin your most-used tools for one-tap access from a single panel.</span>
+            </button>
+            <button class="command-card" data-view="recenttools" data-route>
+              <span class="card-icon" data-icon="version"></span>
+              <strong>Recently Used Tools</strong>
+              <span>See which tools you used recently and jump back to any of them.</span>
+            </button>
+            <button class="command-card" data-view="exportpacket" data-route>
+              <span class="card-icon" data-icon="vault"></span>
+              <strong>Export All Reports</strong>
+              <span>Bundle every record from every tool into one .txt export file.</span>
+            </button>
+            <button class="command-card" data-view="settingsio" data-route>
+              <span class="card-icon" data-icon="shield"></span>
+              <strong>Settings Backup</strong>
+              <span>Export all LoadTasks data as JSON. Restore from a backup file.</span>
+            </button>
+            <button class="command-card" data-view="quicklaunch" data-route>
+              <span class="card-icon" data-icon="dashboard"></span>
+              <strong>Quick Launch</strong>
+              <span>Configure up to 8 one-tap shortcuts for your daily tools.</span>
+            </button>
+            <button class="command-card" data-view="whatsnext2" data-route>
+              <span class="card-icon" data-icon="focus"></span>
+              <strong>What Should I Do Next?</strong>
+              <span>Reads your records and suggests the highest-priority next action.</span>
+            </button>
+            <button class="command-card" data-view="sessionsummary" data-route>
+              <span class="card-icon" data-icon="notes"></span>
+              <strong>Session Summary</strong>
+              <span>Auto-generate an end-of-session report from all your records.</span>
+            </button>
+            <button class="command-card" data-view="toolcategories" data-route>
+              <span class="card-icon" data-icon="library"></span>
+              <strong>Tool Categories</strong>
+              <span>Browse all tools grouped by category: Daily, Build, Records, etc.</span>
+            </button>
+            <button class="command-card" data-view="toolhelp" data-route>
+              <span class="card-icon" data-icon="notes"></span>
+              <strong>Tool Help</strong>
+              <span>Help text and usage tips for every tool in the Developer Bot.</span>
             </button>
           </div>
 
@@ -7323,6 +7393,559 @@
             var sec=document.getElementById('view-worklog');if(sec)sec.addEventListener('lt-view-enter',wl2Render);
           }());</script>
         </section>
+
+        <section class="view" id="view-toolindex" data-view-panel="toolindex">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Tool Index</h1><p>Search all tools by name or keyword. Tap any result to open it.</p></div>
+          <article class="panel">
+            <input id="ti-search" placeholder="Search tools..." style="width:100%;margin-bottom:12px;">
+            <div id="ti-results"></div>
+          </article>
+          <script>(function(){
+            var TI_TOOLS=[
+              {view:'dashboard',label:'Dashboard',desc:'Overview of all records and quick-action cards'},
+              {view:'repairjob',label:'Repair Job',desc:'Create and track repair jobs across sites'},
+              {view:'buildvault',label:'Build Vault',desc:'Snapshot and store stable build states'},
+              {view:'sitehealth',label:'Site Health',desc:'Run a health check on a site'},
+              {view:'repairpack',label:'Repair Pack',desc:'Bundle repair jobs into a single export'},
+              {view:'localrecords',label:'Local Records',desc:'Browse and export all saved records'},
+              {view:'templates',label:'Templates',desc:'Manage reusable text templates'},
+              {view:'criteria',label:'Criteria',desc:'Manage acceptance criteria lists'},
+              {view:'statusboard',label:'Status Board',desc:'View the current status of all active work'},
+              {view:'importrecords',label:'Import Records',desc:'Import previously exported records'},
+              {view:'smokecheck',label:'Smoke Check',desc:'Run a smoke test checklist for a site'},
+              {view:'baseline',label:'Baseline',desc:'Record a baseline state for comparison'},
+              {view:'riskreport',label:'Risk Report',desc:'Generate a risk report for a build'},
+              {view:'promptbuilder',label:'Prompt Builder',desc:'Build AI prompts with structured fields'},
+              {view:'sessionnotes',label:'Session Notes',desc:'Write and export notes for a session'},
+              {view:'handoffdoc',label:'Handoff Doc',desc:'Generate a handoff document for the next session'},
+              {view:'changelog',label:'Changelog',desc:'Record changes made in this session'},
+              {view:'versiontracker',label:'Version Tracker',desc:'Track version numbers across all sites'},
+              {view:'backlog',label:'Backlog',desc:'Manage the feature backlog'},
+              {view:'testplan',label:'Test Plan',desc:'Write and track a test plan'},
+              {view:'issues',label:'Issues',desc:'Log and manage issues'},
+              {view:'runchecklist',label:'Checklist',desc:'Run a step-by-step checklist'},
+              {view:'searchrecords',label:'Search Records',desc:'Search across all saved records'},
+              {view:'timeline',label:'Timeline',desc:'View a timeline of events'},
+              {view:'quickactions',label:'Quick Actions',desc:'Run common operations with one tap'},
+              {view:'stats',label:'Stats',desc:'View usage statistics and counts'},
+              {view:'notepad',label:'Note Pad',desc:'Free-form scratch pad for the session'},
+              {view:'bysite',label:'By Site',desc:'View all records filtered by site'},
+              {view:'buildhealth',label:'Build Health',desc:'Health overview of a specific build'},
+              {view:'jobdetail',label:'Job Detail',desc:'Detailed view of a repair job'},
+              {view:'linked',label:'Linked Records',desc:'View records linked across tools'},
+              {view:'commandcenter',label:'Command Center',desc:'Central hub for daily developer operations'},
+              {view:'todaywork',label:'Today\'s Work',desc:'Log what you worked on today'},
+              {view:'priorityqueue',label:'Priority Queue',desc:'Ordered list of high-priority tasks'},
+              {view:'blockers',label:'Blockers',desc:'Track what is blocking your work'},
+              {view:'nextaction',label:'Next Action',desc:'Identify and commit to the next action'},
+              {view:'savedprompts',label:'Saved Prompts',desc:'Store and reuse AI prompts'},
+              {view:'recoveryreport',label:'Recovery Report',desc:'Document recovery from an incident'},
+              {view:'branchinventory',label:'Branch Inventory',desc:'Track all active branches'},
+              {view:'prreview',label:'PR Review',desc:'Document a pull request review'},
+              {view:'mergedecision',label:'Merge Check',desc:'Checklist before merging a PR'},
+              {view:'rollbackdecision',label:'Rollback Check',desc:'Decide whether to roll back a deploy'},
+              {view:'dailyexport',label:'Daily Export',desc:'Export a daily summary of all work'},
+              {view:'releasenotes',label:'Release Notes',desc:'Write release notes for a build'},
+              {view:'rollbackreceipt',label:'Rollback Receipt',desc:'Document a completed rollback'},
+              {view:'approvalphrase',label:'Approval Phrase',desc:'Look up required approval phrases'},
+              {view:'branchsafety',label:'Branch Safety',desc:'Check a branch is safe to merge'},
+              {view:'prrisks',label:'PR Risk Matrix',desc:'Score the risk of a pull request'},
+              {view:'deployreceipt',label:'Deploy Receipt',desc:'Record a completed deployment'},
+              {view:'stagingplan',label:'Staging Plan',desc:'Plan a staging deploy sequence'},
+              {view:'knownissues',label:'Known Issues',desc:'Register of known outstanding issues'},
+              {view:'verifyscript',label:'Verify Script',desc:'Generate a verification script for a deploy'},
+              {view:'featureaccept',label:'Feature Accept',desc:'Run a feature acceptance checklist'},
+              {view:'depnotes',label:'Dependency Notes',desc:'Document third-party dependencies'},
+              {view:'dailycommand',label:'Daily Command',desc:'Daily Command Center summary'},
+              {view:'hotfix',label:'Hot Fix Tracker',desc:'Track hot fixes with urgency and status'},
+              {view:'regressionlog',label:'Regression Log',desc:'Log regressions found during testing'},
+              {view:'decisionlog',label:'Decision Log',desc:'Record architectural and design decisions'},
+              {view:'scopecreep',label:'Scope Creep Register',desc:'Document scope changes and their impact'},
+              {view:'prcomments',label:'PR Comment Builder',desc:'Generate standardised review comments'},
+              {view:'filechanges',label:'File Change Tracker',desc:'Log which files changed and why'},
+              {view:'buildsequence',label:'Build Sequence Planner',desc:'Plan the exact order of build operations'},
+              {view:'incidentreport',label:'Incident Report',desc:'Document production incidents'},
+              {view:'postmortem',label:'Post-Mortem Template',desc:'Structured post-mortem after an incident'},
+              {view:'featuretoggles',label:'Feature Toggles',desc:'Track feature flag states per site'},
+              {view:'sprintlog',label:'Sprint Log',desc:'Log sprint goals and outcomes'},
+              {view:'quickref',label:'Quick Reference',desc:'Store quick-reference entries by category'},
+              {view:'sessionsnap',label:'Session State Snapshot',desc:'Capture all open records as a snapshot'},
+              {view:'codenotes',label:'Code Review Notes',desc:'Notes taken during a code review'},
+              {view:'testcoverage',label:'Test Coverage',desc:'Track test coverage per feature and site'},
+              {view:'apiendpoints',label:'API Endpoints',desc:'Document API endpoints per site'},
+              {view:'envcheck',label:'Environment Checker',desc:'Confirm dev environment before building'},
+              {view:'mergelog',label:'Merge Log',desc:'Log every merge with PR, SHA, and risk'},
+              {view:'bugtriage',label:'Bug Triage',desc:'Triage bugs with severity and status'},
+              {view:'sessiongoals',label:'Session Goals',desc:'Set and track goals for this session'},
+              {view:'shippedlog',label:'Shipped Features Log',desc:'Permanent record of all shipped features'},
+              {view:'testresults',label:'Test Results Log',desc:'Log manual test run results'},
+              {view:'rollbackplan',label:'Rollback Plan Builder',desc:'Document rollback steps before merging'},
+              {view:'riskregister',label:'Risk Register',desc:'Log risks with probability, impact, mitigation'},
+              {view:'branchlog',label:'Branch Log',desc:'Log all branches created in a sprint'},
+              {view:'standup',label:'Daily Stand-Up Generator',desc:'Generate a stand-up from your records'},
+              {view:'prprep',label:'PR Prep Checklist',desc:'Run checks before opening a pull request'},
+              {view:'clippad',label:'Clip Pad',desc:'Store multiple text clips for this session'},
+              {view:'urlstore',label:'URL Store',desc:'Save named internal URLs for quick access'},
+              {view:'commitmsg2',label:'Commit Templates',desc:'Fill-in commit message templates'},
+              {view:'pasteannotate',label:'Paste and Annotate',desc:'Paste code or diff with notes and tags'},
+              {view:'worklog',label:'Work Log',desc:'Log time spent on tasks per session'},
+              {view:'toolindex',label:'Tool Index',desc:'Search all tools by name or keyword'},
+              {view:'favorites',label:'Favorites',desc:'Pin your most-used tools'},
+              {view:'recenttools',label:'Recently Used',desc:'See recently visited tools'},
+              {view:'exportpacket',label:'Export All Reports',desc:'Bundle all records into one export'},
+              {view:'settingsio',label:'Settings Backup',desc:'Export and import all LoadTasks data'},
+              {view:'quicklaunch',label:'Quick Launch',desc:'Configurable one-tap tool shortcuts'},
+              {view:'whatsnext2',label:'What Should I Do Next?',desc:'Get a suggested next action from your records'},
+              {view:'sessionsummary',label:'Session Summary',desc:'Auto-generate an end-of-session report'},
+              {view:'toolcategories',label:'Tool Categories',desc:'Browse all tools grouped by category'},
+              {view:'toolhelp',label:'Tool Help',desc:'Help text and tips for every tool'}
+            ];
+            function tiFilter(q){
+              if(!q)return TI_TOOLS;
+              var lq=q.toLowerCase();
+              return TI_TOOLS.filter(function(t){return t.label.toLowerCase().indexOf(lq)>=0||t.desc.toLowerCase().indexOf(lq)>=0;});
+            }
+            function tiRender(q){
+              var el=document.getElementById('ti-results');if(!el)return;
+              var results=tiFilter(q||'');
+              if(!results.length){el.innerHTML='<p class="empty-state">No tools match your search.</p>';return;}
+              el.innerHTML='<div style="font-size:12px;color:#9aa0b0;margin-bottom:10px;">'+results.length+' tool'+(results.length===1?'':'s')+'</div>'
+                +results.map(function(t){return'<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;margin-bottom:4px;background:rgba(255,255,255,0.04);border-radius:8px;">'
+                  +'<div style="flex:1;"><div style="font-size:13px;font-weight:600;">'+t.label+'</div><div style="font-size:11px;color:#9aa0b0;margin-top:2px;">'+t.desc+'</div></div>'
+                  +'<button class="small-btn ti-go" data-view="'+t.view+'">Go</button></div>';}).join('');
+              el.querySelectorAll('.ti-go').forEach(function(b){b.addEventListener('click',function(){
+                var target=document.querySelector('[data-view="'+b.dataset.view+'"][data-route]');
+                if(target)target.click();
+              });});
+            }
+            document.getElementById('ti-search').addEventListener('input',function(){tiRender(this.value.trim());});
+            var sec=document.getElementById('view-toolindex');if(sec)sec.addEventListener('lt-view-enter',function(){tiRender(document.getElementById('ti-search').value.trim());});
+            tiRender('');
+          }());</script>
+        </section>
+
+        <section class="view" id="view-favorites" data-view-panel="favorites">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Favorites</h1><p>Pin your most-used tools here for one-tap access. Tap a tool name to open it.</p></div>
+          <article class="panel">
+            <div style="margin-bottom:12px;">
+              <input id="fav-search" placeholder="Search tools to pin..." style="width:100%;margin-bottom:8px;">
+              <div id="fav-suggest" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;max-height:200px;overflow-y:auto;"></div>
+            </div>
+          </article>
+          <h2 style="font-size:14px;color:#9aa0b0;margin:16px 0 8px;">Pinned Tools</h2>
+          <div id="fav-pins" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;"></div>
+          <script>(function(){
+            var FAV_ALL=[
+              {view:'commandcenter',label:'Command Center'},{view:'todaywork',label:'Today\'s Work'},{view:'priorityqueue',label:'Priority Queue'},{view:'blockers',label:'Blockers'},{view:'notepad',label:'Note Pad'},{view:'smokecheck',label:'Smoke Check'},{view:'repairjob',label:'Repair Job'},{view:'issues',label:'Issues'},{view:'backlog',label:'Backlog'},{view:'sessionnotes',label:'Session Notes'},{view:'handoffdoc',label:'Handoff Doc'},{view:'changelog',label:'Changelog'},{view:'hotfix',label:'Hot Fix'},{view:'regressionlog',label:'Regression Log'},{view:'decisionlog',label:'Decision Log'},{view:'prprep',label:'PR Prep'},{view:'mergelog',label:'Merge Log'},{view:'branchinventory',label:'Branch Inventory'},{view:'deployreceipt',label:'Deploy Receipt'},{view:'rollbackreceipt',label:'Rollback Receipt'},{view:'bugtriage',label:'Bug Triage'},{view:'sessiongoals',label:'Session Goals'},{view:'shippedlog',label:'Shipped Log'},{view:'testresults',label:'Test Results'},{view:'quickref',label:'Quick Ref'},{view:'snippets',label:'Snippets'},{view:'worktimer',label:'Work Timer'},{view:'buildnotes',label:'Build Notes'},{view:'riskreport',label:'Risk Report'},{view:'featuretoggles',label:'Feature Toggles'},{view:'riskregister',label:'Risk Register'},{view:'branchlog',label:'Branch Log'},{view:'standup',label:'Stand-Up'},{view:'clippad',label:'Clip Pad'},{view:'urlstore',label:'URL Store'},{view:'commitmsg2',label:'Commit Tmpl'},{view:'worklog',label:'Work Log'},{view:'quicklaunch',label:'Quick Launch'},{view:'whatsnext2',label:'What\'s Next'},{view:'sessionsummary',label:'Session Summary'}
+            ];
+            function favLoad(){try{return JSON.parse(localStorage.getItem('lt_pins')||'[]');}catch(e){return[];}}
+            function favSave(pins){localStorage.setItem('lt_pins',JSON.stringify(pins));}
+            function favRenderPins(){
+              var pins=favLoad();
+              var el=document.getElementById('fav-pins');if(!el)return;
+              if(!pins.length){el.innerHTML='<p class="empty-state" style="grid-column:1/-1;">No favorites yet. Search above to pin tools.</p>';return;}
+              el.innerHTML=pins.map(function(p,idx){return'<div style="background:rgba(255,212,0,0.08);border:1px solid rgba(255,212,0,0.2);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:8px;">'
+                +'<button style="flex:1;background:none;border:none;color:#e0e4f0;font-size:13px;font-weight:600;text-align:left;cursor:pointer;padding:0;" class="fav-go" data-view="'+p.view+'">'+p.label+'</button>'
+                +'<button class="small-btn fav-rm" data-idx="'+idx+'">X</button></div>';}).join('');
+              el.querySelectorAll('.fav-go').forEach(function(b){b.addEventListener('click',function(){var t=document.querySelector('[data-view="'+b.dataset.view+'"][data-route]');if(t)t.click();});});
+              el.querySelectorAll('.fav-rm').forEach(function(b){b.addEventListener('click',function(){var pins=favLoad();pins.splice(parseInt(b.dataset.idx),1);favSave(pins);favRenderPins();});});
+            }
+            function favRenderSuggest(q){
+              var el=document.getElementById('fav-suggest');if(!el)return;
+              var pins=favLoad();
+              var pinned=pins.map(function(p){return p.view;});
+              var lq=(q||'').toLowerCase();
+              var results=FAV_ALL.filter(function(t){return(!lq||t.label.toLowerCase().indexOf(lq)>=0)&&pinned.indexOf(t.view)<0;}).slice(0,20);
+              if(!q&&!results.length){el.innerHTML='';return;}
+              el.innerHTML=results.map(function(t){return'<button class="small-btn fav-pin" data-view="'+t.view+'" data-label="'+t.label+'" style="text-align:left;">+ '+t.label+'</button>';}).join('');
+              el.querySelectorAll('.fav-pin').forEach(function(b){b.addEventListener('click',function(){var pins=favLoad();pins.push({view:b.dataset.view,label:b.dataset.label});favSave(pins);favRenderPins();favRenderSuggest(document.getElementById('fav-search').value.trim());});});
+            }
+            document.getElementById('fav-search').addEventListener('input',function(){favRenderSuggest(this.value.trim());});
+            var sec=document.getElementById('view-favorites');if(sec)sec.addEventListener('lt-view-enter',function(){favRenderPins();favRenderSuggest('');});
+            favRenderPins();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-recenttools" data-view-panel="recenttools">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Recently Used Tools</h1><p>Tools you opened recently. Tap any to open it again.</p></div>
+          <div id="rt-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:16px;"></div>
+          <div style="margin-top:20px;"><button class="secondary-action" id="rt-clear">Clear History</button></div>
+          <script>(function(){
+            function rtLoad(){try{return JSON.parse(localStorage.getItem('lt_recent_views')||'[]');}catch(e){return[];}}
+            function rtRender(){
+              var el=document.getElementById('rt-list');if(!el)return;
+              var items=rtLoad();
+              if(!items.length){el.innerHTML='<p class="empty-state" style="grid-column:1/-1;">No recently used tools yet. Navigate to any tool to track it.</p>';return;}
+              el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:8px;">'
+                +'<button style="flex:1;background:none;border:none;color:#e0e4f0;font-size:13px;font-weight:600;text-align:left;cursor:pointer;padding:0;" class="rt-go" data-view="'+it.view+'">'+it.label+'</button>'
+                +(it.ts?'<span style="font-size:10px;color:#9aa0b0;">'+new Date(it.ts).toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'})+'</span>':'')
+                +'</div>';}).join('');
+              el.querySelectorAll('.rt-go').forEach(function(b){b.addEventListener('click',function(){var t=document.querySelector('[data-view="'+b.dataset.view+'"][data-route]');if(t)t.click();});});
+            }
+            document.getElementById('rt-clear').addEventListener('click',function(){if(!confirm('Clear recent history?'))return;localStorage.removeItem('lt_recent_views');rtRender();});
+            var sec=document.getElementById('view-recenttools');if(sec)sec.addEventListener('lt-view-enter',rtRender);
+            rtRender();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-exportpacket" data-view-panel="exportpacket">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Export All Reports</h1><p>Bundle every record from every tool into one .txt file. Nothing is excluded.</p></div>
+          <article class="panel">
+            <div style="margin-bottom:16px;">
+              <div id="ep-summary" style="font-size:13px;color:#9aa0b0;margin-bottom:16px;"></div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button class="primary-action" id="ep-export">Export All as .txt</button>
+                <button class="secondary-action" id="ep-preview">Preview Count</button>
+              </div>
+            </div>
+          </article>
+          <script>(function(){
+            var EP_TYPES=[
+              {prefix:'lt_rjw_',excl:['lt_rjw_draft','lt_repairjob_draft'],label:'Repair Jobs'},
+              {prefix:'lt_is_',excl:['lt_is_draft'],label:'Issues'},
+              {prefix:'lt_ac_',excl:['lt_ac_draft'],label:'Criteria Lists'},
+              {prefix:'lt_sh_',excl:['lt_sh_draft'],label:'Health Reports'},
+              {prefix:'lt_bl_',excl:['lt_bl_draft'],label:'Build Snapshots'},
+              {prefix:'lt_fb_',excl:['lt_fb_draft'],label:'Backlog'},
+              {prefix:'lt_bk_',excl:['lt_bk_draft'],label:'Blockers'},
+              {prefix:'lt_pq_',excl:['lt_pq_draft'],label:'Priority Queue'},
+              {prefix:'lt_sp_',excl:['lt_sp_draft'],label:'Saved Prompts'},
+              {prefix:'lt_rv_',excl:['lt_rv_draft'],label:'Recovery Reports'},
+              {prefix:'lt_bi_',excl:['lt_bi_draft'],label:'Branch Inventory'},
+              {prefix:'lt_el_',excl:['lt_el_draft'],label:'Error Log'},
+              {prefix:'lt_snp_',excl:['lt_snp_draft'],label:'Snippets'},
+              {prefix:'lt_bn_',excl:['lt_bn_draft'],label:'Build Notes'},
+              {prefix:'lt_sm_',excl:['lt_sm_draft'],label:'Site Map'},
+              {prefix:'lt_rr2_',excl:['lt_rr2_draft'],label:'Rollback Receipts'},
+              {prefix:'lt_dr_',excl:['lt_dr_draft'],label:'Deploy Receipts'},
+              {prefix:'lt_ki_',excl:['lt_ki_draft'],label:'Known Issues'},
+              {prefix:'lt_dn_',excl:['lt_dn_draft'],label:'Dependency Notes'},
+              {prefix:'lt_hf_',excl:['lt_hf_draft'],label:'Hot Fixes'},
+              {prefix:'lt_rl_',excl:['lt_rl_draft'],label:'Regressions'},
+              {prefix:'lt_dl_',excl:['lt_dl_draft'],label:'Decisions'},
+              {prefix:'lt_sc2_',excl:['lt_sc2_draft'],label:'Scope Creep'},
+              {prefix:'lt_fc_',excl:['lt_fc_draft'],label:'File Changes'},
+              {prefix:'lt_ir_',excl:['lt_ir_draft'],label:'Incident Reports'},
+              {prefix:'lt_ft2_',excl:['lt_ft2_draft'],label:'Feature Toggles'},
+              {prefix:'lt_sl_',excl:['lt_sl_draft'],label:'Sprint Logs'},
+              {prefix:'lt_qr_',excl:['lt_qr_draft'],label:'Quick Reference'},
+              {prefix:'lt_crn_',excl:['lt_crn_draft'],label:'Code Review Notes'},
+              {prefix:'lt_tc_',excl:['lt_tc_draft'],label:'Test Coverage'},
+              {prefix:'lt_ae_',excl:['lt_ae_draft'],label:'API Endpoints'},
+              {prefix:'lt_mg_',excl:['lt_mg_draft'],label:'Merge Log'},
+              {prefix:'lt_bgt_',excl:['lt_bgt_draft'],label:'Bug Triage'},
+              {prefix:'lt_shp_',excl:['lt_shp_draft'],label:'Shipped Log'},
+              {prefix:'lt_tr_',excl:['lt_tr_draft'],label:'Test Results'},
+              {prefix:'lt_rbp_',excl:['lt_rbp_draft'],label:'Rollback Plans'},
+              {prefix:'lt_rg_',excl:['lt_rg_draft'],label:'Risk Register'},
+              {prefix:'lt_brl_',excl:['lt_brl_draft'],label:'Branch Log'},
+              {prefix:'lt_us_',excl:['lt_us_draft'],label:'URL Store'},
+              {prefix:'lt_pa_',excl:['lt_pa_draft'],label:'Pastes'},
+              {prefix:'lt_wl_',excl:['lt_wl_draft'],label:'Work Log'},
+              {prefix:'lt_pins',excl:[],label:'Favorites (pins)'},
+              {prefix:'lt_ql_',excl:['lt_ql_config'],label:'Quick Launch config'}
+            ];
+            function epGetAll(){
+              var sections=[];var totalRecs=0;
+              EP_TYPES.forEach(function(t){
+                var items=[];
+                for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(t.prefix)===0){var skip=false;t.excl.forEach(function(e){if(k===e)skip=true;});if(!skip){try{items.push(JSON.parse(localStorage.getItem(k)));}catch(e){items.push(localStorage.getItem(k));}}}}
+                if(items.length){totalRecs+=items.length;sections.push({label:t.label,items:items});}
+              });
+              var specialKeys=['lt_tw_draft','lt_np_draft','lt_hd_draft'];
+              specialKeys.forEach(function(k){var v=localStorage.getItem(k);if(v)sections.push({label:k,items:[v]});});
+              return{sections:sections,total:totalRecs};
+            }
+            document.getElementById('ep-preview').addEventListener('click',function(){
+              var data=epGetAll();
+              document.getElementById('ep-summary').textContent=data.total+' records across '+data.sections.length+' categories. Click Export to download.';
+            });
+            document.getElementById('ep-export').addEventListener('click',function(){
+              var data=epGetAll();
+              var lines=['LOAD TASKS — FULL EXPORT','Generated: '+new Date().toLocaleString(),'Total records: '+data.total,'','='.repeat(50),''];
+              data.sections.forEach(function(s){
+                lines.push('');lines.push(s.label.toUpperCase()+' ('+s.items.length+')');lines.push('-'.repeat(40));
+                s.items.forEach(function(it){
+                  if(typeof it==='string'){lines.push(it);}
+                  else{lines.push(JSON.stringify(it,null,2));}
+                });
+              });
+              var b=new Blob([lines.join('\n')],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='loadtasks-export-'+new Date().toISOString().slice(0,10)+'.txt';a.click();
+            });
+          }());</script>
+        </section>
+
+        <section class="view" id="view-settingsio" data-view-panel="settingsio">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Settings Backup</h1><p>Export all LoadTasks data as a JSON file. Restore from a backup to recover data.</p></div>
+          <article class="panel" style="margin-bottom:16px;">
+            <h2 style="font-size:14px;margin-bottom:12px;">Export</h2>
+            <p style="font-size:13px;color:#9aa0b0;margin-bottom:12px;">Downloads every localStorage key that starts with <code>lt_</code> as a JSON file.</p>
+            <button class="primary-action" id="sio-export">Export Backup JSON</button>
+          </article>
+          <article class="panel">
+            <h2 style="font-size:14px;margin-bottom:12px;">Restore</h2>
+            <p style="font-size:13px;color:#9aa0b0;margin-bottom:12px;">Paste JSON from a previous export. Existing keys will be overwritten. Non-lt_ keys are ignored.</p>
+            <textarea id="sio-paste" rows="6" placeholder="Paste backup JSON here..." style="width:100%;background:rgba(0,0,0,0.2);color:#e0e4f0;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px;font-size:12px;resize:vertical;margin-bottom:10px;"></textarea>
+            <button class="primary-action" id="sio-restore">Restore from JSON</button>
+            <div id="sio-status" style="font-size:13px;margin-top:10px;"></div>
+          </article>
+          <script>(function(){
+            document.getElementById('sio-export').addEventListener('click',function(){
+              var data={};var count=0;
+              for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('lt_')===0){data[k]=localStorage.getItem(k);count++;}}
+              var json=JSON.stringify(data,null,2);
+              var b=new Blob([json],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='loadtasks-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();
+              var toast=document.getElementById('toast');if(toast){toast.textContent=count+' keys exported';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}
+            });
+            document.getElementById('sio-restore').addEventListener('click',function(){
+              var raw=document.getElementById('sio-paste').value.trim();if(!raw){document.getElementById('sio-status').textContent='Nothing to restore.';return;}
+              var data;try{data=JSON.parse(raw);}catch(e){document.getElementById('sio-status').textContent='Invalid JSON: '+e.message;return;}
+              var count=0;var skipped=0;
+              Object.keys(data).forEach(function(k){if(k.indexOf('lt_')===0){localStorage.setItem(k,data[k]);count++;}else{skipped++;}});
+              document.getElementById('sio-status').textContent=count+' keys restored'+(skipped?' ('+skipped+' non-lt_ keys skipped)':'');
+              document.getElementById('sio-paste').value='';
+            });
+          }());</script>
+        </section>
+
+        <section class="view" id="view-quicklaunch" data-view-panel="quicklaunch">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Quick Launch</h1><p>Configure up to 8 one-tap shortcuts for your daily tools.</p></div>
+          <article class="panel" style="margin-bottom:16px;">
+            <h2 style="font-size:14px;margin-bottom:12px;">Your Shortcuts</h2>
+            <div id="ql-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:12px;"></div>
+            <button class="secondary-action" id="ql-reset">Reset All</button>
+          </article>
+          <article class="panel">
+            <h2 style="font-size:14px;margin-bottom:10px;">Add a Shortcut</h2>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <input id="ql-search" placeholder="Search tools..." style="flex:1;min-width:160px;">
+              <button class="primary-action" id="ql-search-btn">Search</button>
+            </div>
+            <div id="ql-results" style="margin-top:10px;"></div>
+          </article>
+          <script>(function(){
+            var QL_ALL=[
+              {view:'commandcenter',label:'Command Center'},{view:'todaywork',label:'Today\'s Work'},{view:'priorityqueue',label:'Priority Queue'},{view:'blockers',label:'Blockers'},{view:'notepad',label:'Note Pad'},{view:'smokecheck',label:'Smoke Check'},{view:'repairjob',label:'Repair Job'},{view:'issues',label:'Issues'},{view:'backlog',label:'Backlog'},{view:'sessionnotes',label:'Session Notes'},{view:'hotfix',label:'Hot Fix'},{view:'regressionlog',label:'Regression Log'},{view:'decisionlog',label:'Decision Log'},{view:'prprep',label:'PR Prep'},{view:'mergelog',label:'Merge Log'},{view:'deployreceipt',label:'Deploy Receipt'},{view:'rollbackreceipt',label:'Rollback Receipt'},{view:'bugtriage',label:'Bug Triage'},{view:'sessiongoals',label:'Session Goals'},{view:'shippedlog',label:'Shipped Log'},{view:'testresults',label:'Test Results'},{view:'quickref',label:'Quick Ref'},{view:'snippets',label:'Snippets'},{view:'worktimer',label:'Work Timer'},{view:'buildnotes',label:'Build Notes'},{view:'riskreport',label:'Risk Report'},{view:'branchlog',label:'Branch Log'},{view:'standup',label:'Stand-Up'},{view:'clippad',label:'Clip Pad'},{view:'urlstore',label:'URL Store'},{view:'commitmsg2',label:'Commit Tmpl'},{view:'worklog',label:'Work Log'},{view:'whatsnext2',label:'What\'s Next'},{view:'sessionsummary',label:'Session Summary'},{view:'toolindex',label:'Tool Index'},{view:'favorites',label:'Favorites'},{view:'branchinventory',label:'Branch Inventory'},{view:'changelog',label:'Changelog'},{view:'versiontracker',label:'Version Tracker'}
+            ];
+            function qlLoad(){try{return JSON.parse(localStorage.getItem('lt_ql_config')||'[]');}catch(e){return[];}}
+            function qlSave(c){localStorage.setItem('lt_ql_config',JSON.stringify(c));}
+            function qlRenderGrid(){
+              var cfg=qlLoad();var el=document.getElementById('ql-grid');if(!el)return;
+              if(!cfg.length){el.innerHTML='<p class="empty-state" style="grid-column:1/-1;">No shortcuts yet. Search below to add up to 8.</p>';return;}
+              el.innerHTML=cfg.map(function(c,idx){return'<div style="background:rgba(255,255,255,0.06);border-radius:8px;padding:12px;display:flex;align-items:center;gap:8px;">'
+                +'<span style="font-size:13px;font-weight:700;color:#ffd400;margin-right:4px;">'+(idx+1)+'</span>'
+                +'<button style="flex:1;background:none;border:none;color:#e0e4f0;font-size:13px;font-weight:600;text-align:left;cursor:pointer;padding:0;" class="ql-go" data-view="'+c.view+'">'+c.label+'</button>'
+                +'<button class="small-btn ql-rm" data-idx="'+idx+'">X</button></div>';}).join('');
+              el.querySelectorAll('.ql-go').forEach(function(b){b.addEventListener('click',function(){var t=document.querySelector('[data-view="'+b.dataset.view+'"][data-route]');if(t)t.click();});});
+              el.querySelectorAll('.ql-rm').forEach(function(b){b.addEventListener('click',function(){var cfg=qlLoad();cfg.splice(parseInt(b.dataset.idx),1);qlSave(cfg);qlRenderGrid();});});
+            }
+            function qlRenderResults(q){
+              var el=document.getElementById('ql-results');if(!el)return;
+              var cfg=qlLoad();var pinned=cfg.map(function(c){return c.view;});
+              var lq=(q||'').toLowerCase();
+              var results=QL_ALL.filter(function(t){return(!lq||t.label.toLowerCase().indexOf(lq)>=0)&&pinned.indexOf(t.view)<0;}).slice(0,12);
+              if(!results.length){el.innerHTML='<p style="font-size:12px;color:#9aa0b0;">No results.</p>';return;}
+              el.innerHTML='<div style="display:flex;flex-wrap:wrap;gap:6px;">'+results.map(function(t){return'<button class="small-btn ql-add" data-view="'+t.view+'" data-label="'+t.label+'">+ '+t.label+'</button>';}).join('')+'</div>';
+              el.querySelectorAll('.ql-add').forEach(function(b){b.addEventListener('click',function(){var cfg=qlLoad();if(cfg.length>=8){var toast=document.getElementById('toast');if(toast){toast.textContent='Max 8 shortcuts';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}return;}cfg.push({view:b.dataset.view,label:b.dataset.label});qlSave(cfg);qlRenderGrid();qlRenderResults(document.getElementById('ql-search').value.trim());});});
+            }
+            document.getElementById('ql-search-btn').addEventListener('click',function(){qlRenderResults(document.getElementById('ql-search').value.trim());});
+            document.getElementById('ql-search').addEventListener('keydown',function(e){if(e.key==='Enter')qlRenderResults(this.value.trim());});
+            document.getElementById('ql-reset').addEventListener('click',function(){if(!confirm('Clear all shortcuts?'))return;qlSave([]);qlRenderGrid();});
+            var sec=document.getElementById('view-quicklaunch');if(sec)sec.addEventListener('lt-view-enter',function(){qlRenderGrid();qlRenderResults('');});
+            qlRenderGrid();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-whatsnext2" data-view-panel="whatsnext2">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>What Should I Do Next?</h1><p>Reads your open records to suggest the highest-priority action right now.</p></div>
+          <article class="panel">
+            <button class="primary-action" id="wn2-analyze" style="margin-bottom:16px;">Analyze Records</button>
+            <div id="wn2-output"></div>
+          </article>
+          <script>(function(){
+            document.getElementById('wn2-analyze').addEventListener('click',function(){
+              var el=document.getElementById('wn2-output');if(!el)return;
+              var suggestions=[];
+              function getItems(prefix,excl){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(prefix)===0){var skip=false;(excl||[]).forEach(function(e){if(k===e)skip=true;});if(!skip){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}}return a;}
+              var criticalBugs=getItems('lt_bgt_',['lt_bgt_draft']).filter(function(b){return b.sev==='Critical'&&b.status==='Open';});
+              if(criticalBugs.length){suggestions.push({priority:1,label:'CRITICAL — Fix open bugs first',detail:criticalBugs.length+' critical bug'+(criticalBugs.length>1?'s':'')+' open: '+criticalBugs.map(function(b){return b.title;}).slice(0,3).join(', '),view:'bugtriage',action:'Go to Bug Triage'});}
+              var blockers=getItems('lt_bk_',['lt_bk_draft']).filter(function(b){return b.status==='Open';});
+              if(blockers.length){suggestions.push({priority:2,label:'Unblocked? Resolve open blockers',detail:blockers.length+' open blocker'+(blockers.length>1?'s':'')+': '+blockers.map(function(b){return b.desc;}).slice(0,2).join('; '),view:'blockers',action:'Go to Blockers'});}
+              var hotfixes=getItems('lt_hf_',['lt_hf_draft']).filter(function(h){return h.status==='Open'||h.status==='In Progress';});
+              if(hotfixes.length){suggestions.push({priority:3,label:'Hot fixes need attention',detail:hotfixes.length+' open hot fix'+(hotfixes.length>1?'es':''),view:'hotfix',action:'Go to Hot Fix'});}
+              var pqItems=getItems('lt_pq_',['lt_pq_draft']).filter(function(p){return p.priority==='P0'||p.priority==='P1';});
+              if(pqItems.length){suggestions.push({priority:4,label:'High-priority queue items waiting',detail:pqItems.length+' P0/P1 item'+(pqItems.length>1?'s':''),view:'priorityqueue',action:'Go to Priority Queue'});}
+              var tw=localStorage.getItem('lt_tw_draft');
+              if(!tw||!tw.trim()){suggestions.push({priority:5,label:'Log what you\'re working on today',detail:'Today\'s Work is empty — capture your session goals first',view:'todaywork',action:'Go to Today\'s Work'});}
+              var incidents=getItems('lt_ir_',['lt_ir_draft']).filter(function(it){return it.resolved==='Still open'||!it.resolved;});
+              if(incidents.length){suggestions.push({priority:6,label:'Open incidents need resolution',detail:incidents.length+' unresolved incident'+(incidents.length>1?'s':''),view:'incidentreport',action:'Go to Incident Report'});}
+              var regressions=getItems('lt_rl_',['lt_rl_draft']).filter(function(r){return r.status==='Open';});
+              if(regressions.length){suggestions.push({priority:7,label:'Regressions to investigate',detail:regressions.length+' open regression'+(regressions.length>1?'s':''),view:'regressionlog',action:'Go to Regression Log'});}
+              var backlog=getItems('lt_fb_',['lt_fb_draft']).filter(function(f){return f.status==='Next Up';});
+              if(backlog.length){suggestions.push({priority:8,label:'Features marked Next Up in backlog',detail:backlog.length+' item'+(backlog.length>1?'s':'')+' ready to start',view:'backlog',action:'Go to Backlog'});}
+              if(!suggestions.length){el.innerHTML='<div style="text-align:center;padding:24px;color:#9aa0b0;font-size:14px;">All clear — no urgent items found in your records.</div>';return;}
+              suggestions.sort(function(a,b){return a.priority-b.priority;});
+              el.innerHTML=suggestions.map(function(s,i){return'<div style="background:'+(i===0?'rgba(255,212,0,0.08)':'rgba(255,255,255,0.05)')+';border:'+(i===0?'1px solid rgba(255,212,0,0.25)':'1px solid transparent')+';border-radius:8px;padding:12px 14px;margin-bottom:8px;">'
+                +'<div style="font-size:13px;font-weight:700;margin-bottom:4px;'+(i===0?'color:#ffd400;':'')+'">'+s.label+'</div>'
+                +'<div style="font-size:12px;color:#9aa0b0;margin-bottom:8px;">'+s.detail+'</div>'
+                +'<button class="small-btn wn2-go" data-view="'+s.view+'">'+s.action+'</button></div>';}).join('');
+              el.querySelectorAll('.wn2-go').forEach(function(b){b.addEventListener('click',function(){var t=document.querySelector('[data-view="'+b.dataset.view+'"][data-route]');if(t)t.click();});});
+            });
+            var sec=document.getElementById('view-whatsnext2');if(sec)sec.addEventListener('lt-view-enter',function(){document.getElementById('wn2-output').innerHTML='';});
+          }());</script>
+        </section>
+
+        <section class="view" id="view-sessionsummary" data-view-panel="sessionsummary">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Session Summary</h1><p>Auto-generate an end-of-session report from all your records.</p></div>
+          <article class="panel">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+              <button class="primary-action" id="ss2-generate">Generate Summary</button>
+              <button class="secondary-action" id="ss2-copy" style="display:none;">Copy</button>
+              <button class="secondary-action" id="ss2-export" style="display:none;">Export .txt</button>
+            </div>
+            <textarea id="ss2-text" rows="18" style="width:100%;background:rgba(0,0,0,0.2);color:#e0e4f0;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:12px;font-size:12px;line-height:1.6;resize:vertical;display:none;font-family:-apple-system,BlinkMacSystemFont,sans-serif;"></textarea>
+          </article>
+          <script>(function(){
+            var ss2Text='';
+            document.getElementById('ss2-generate').addEventListener('click',function(){
+              function getItems(prefix,excl){var a=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(prefix)===0){var skip=false;(excl||[]).forEach(function(e){if(k===e)skip=true;});if(!skip){try{a.push(JSON.parse(localStorage.getItem(k)));}catch(e){}}}}return a;}
+              var lines=['SESSION SUMMARY','Generated: '+new Date().toLocaleString(),'='.repeat(50),''];
+              var tw=localStorage.getItem('lt_tw_draft');if(tw&&tw.trim()){lines.push('TODAY\'S WORK');lines.push('-'.repeat(30));lines.push(tw.trim());lines.push('');}
+              var goals=[];try{goals=JSON.parse(localStorage.getItem('lt_sgl_current')||'[]');}catch(e){}
+              if(goals.length){lines.push('SESSION GOALS');lines.push('-'.repeat(30));var done=goals.filter(function(g){return g.done;}).length;lines.push(done+' / '+goals.length+' complete');goals.forEach(function(g){lines.push((g.done?'[x] ':'[ ] ')+g.goal);});lines.push('');}
+              var shp=getItems('lt_shp_',['lt_shp_draft']);if(shp.length){lines.push('SHIPPED TODAY (recent '+Math.min(5,shp.length)+')');lines.push('-'.repeat(30));shp.slice(0,5).forEach(function(it){lines.push('- '+it.name+(it.pr?' (PR #'+it.pr+')+':''));});lines.push('');}
+              var merges=getItems('lt_mg_',['lt_mg_draft']);if(merges.length){lines.push('MERGES LOGGED');lines.push('-'.repeat(30));merges.slice(0,5).forEach(function(it){lines.push('PR #'+(it.pr||'--')+' | '+it.sha+' | '+it.risk);});lines.push('');}
+              var blockers=getItems('lt_bk_',['lt_bk_draft']).filter(function(b){return b.status==='Open';});if(blockers.length){lines.push('OPEN BLOCKERS');lines.push('-'.repeat(30));blockers.forEach(function(b){lines.push('- '+b.desc);});lines.push('');}
+              var bugs=getItems('lt_bgt_',['lt_bgt_draft']).filter(function(b){return b.status==='Open'||b.status==='In Progress';});if(bugs.length){lines.push('OPEN BUGS ('+bugs.length+')');lines.push('-'.repeat(30));bugs.slice(0,5).forEach(function(b){lines.push('['+b.sev+'] '+b.title);});lines.push('');}
+              var notes=localStorage.getItem('lt_np_draft');if(notes&&notes.trim()){lines.push('NOTE PAD');lines.push('-'.repeat(30));lines.push(notes.trim().substring(0,400)+(notes.trim().length>400?'\n...':''));lines.push('');}
+              ss2Text=lines.join('\n');
+              var el=document.getElementById('ss2-text');el.value=ss2Text;el.style.display='';
+              document.getElementById('ss2-copy').style.display='';document.getElementById('ss2-export').style.display='';
+            });
+            document.getElementById('ss2-copy').addEventListener('click',function(){var t=document.getElementById('ss2-text').value;navigator.clipboard&&navigator.clipboard.writeText(t).then(function(){var toast=document.getElementById('toast');if(toast){toast.textContent='Summary copied';toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2000);}});});
+            document.getElementById('ss2-export').addEventListener('click',function(){var t=document.getElementById('ss2-text').value;var b=new Blob([t],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='session-summary.txt';a.click();});
+            var sec=document.getElementById('view-sessionsummary');if(sec)sec.addEventListener('lt-view-enter',function(){document.getElementById('ss2-text').style.display='none';document.getElementById('ss2-copy').style.display='none';document.getElementById('ss2-export').style.display='none';document.getElementById('ss2-text').value='';});
+          }());</script>
+        </section>
+
+        <section class="view" id="view-toolcategories" data-view-panel="toolcategories">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Tool Categories</h1><p>Browse all tools grouped by what they are for. Tap any tool to open it.</p></div>
+          <script>(function(){
+            var TC_CATS=[
+              {cat:'Daily Operations',tools:[{view:'commandcenter',label:'Command Center'},{view:'todaywork',label:'Today\'s Work'},{view:'priorityqueue',label:'Priority Queue'},{view:'blockers',label:'Blockers'},{view:'sessiongoals',label:'Session Goals'},{view:'notepad',label:'Note Pad'},{view:'worktimer',label:'Work Timer'},{view:'worklog',label:'Work Log'},{view:'standup',label:'Daily Stand-Up'},{view:'whatsnext2',label:'What\'s Next'},{view:'sessionsummary',label:'Session Summary'},{view:'dailyexport',label:'Daily Export'}]},
+              {cat:'Planning and Tracking',tools:[{view:'backlog',label:'Backlog'},{view:'issues',label:'Issues'},{view:'bugtriage',label:'Bug Triage'},{view:'riskregister',label:'Risk Register'},{view:'hotfix',label:'Hot Fix'},{view:'regressionlog',label:'Regression Log'},{view:'decisionlog',label:'Decision Log'},{view:'scopecreep',label:'Scope Creep'},{view:'featuretoggles',label:'Feature Toggles'},{view:'sprintlog',label:'Sprint Log'},{view:'timeline',label:'Timeline'},{view:'statusboard',label:'Status Board'}]},
+              {cat:'Build and Deploy',tools:[{view:'smokecheck',label:'Smoke Check'},{view:'baseline',label:'Baseline'},{view:'prprep',label:'PR Prep'},{view:'mergedecision',label:'Merge Check'},{view:'deployreceipt',label:'Deploy Receipt'},{view:'rollbackplan',label:'Rollback Plan'},{view:'rollbackreceipt',label:'Rollback Receipt'},{view:'rollbackdecision',label:'Rollback Check'},{view:'buildsequence',label:'Build Sequence'},{view:'branchinventory',label:'Branch Inventory'},{view:'branchlog',label:'Branch Log'},{view:'branchsafety',label:'Branch Safety'},{view:'envcheck',label:'Env Check'},{view:'stagingplan',label:'Staging Plan'}]},
+              {cat:'Records and Logs',tools:[{view:'mergelog',label:'Merge Log'},{view:'shippedlog',label:'Shipped Log'},{view:'testresults',label:'Test Results'},{view:'testcoverage',label:'Test Coverage'},{view:'incidentreport',label:'Incident Report'},{view:'postmortem',label:'Post-Mortem'},{view:'riskreport',label:'Risk Report'},{view:'knownissues',label:'Known Issues'},{view:'filechanges',label:'File Changes'},{view:'changelog',label:'Changelog'},{view:'versiontracker',label:'Version Tracker'},{view:'localrecords',label:'Local Records'}]},
+              {cat:'Documentation',tools:[{view:'sessionnotes',label:'Session Notes'},{view:'handoffdoc',label:'Handoff Doc'},{view:'buildnotes',label:'Build Notes'},{view:'releasenotes',label:'Release Notes'},{view:'quickref',label:'Quick Ref'},{view:'sitemap',label:'Site Map'},{view:'depnotes',label:'Dep Notes'},{view:'apiendpoints',label:'API Endpoints'},{view:'codenotes',label:'Code Review Notes'},{view:'pasteannotate',label:'Paste and Annotate'},{view:'dailycommand',label:'Daily Command'}]},
+              {cat:'Tools and Utilities',tools:[{view:'toolindex',label:'Tool Index'},{view:'favorites',label:'Favorites'},{view:'recenttools',label:'Recent Tools'},{view:'quicklaunch',label:'Quick Launch'},{view:'exportpacket',label:'Export All'},{view:'settingsio',label:'Settings Backup'},{view:'toolhelp',label:'Tool Help'},{view:'toolcategories',label:'Tool Categories'},{view:'sessionsnap',label:'Session Snapshot'},{view:'searchrecords',label:'Search Records'},{view:'importrecords',label:'Import Records'},{view:'stats',label:'Stats'}]},
+              {cat:'Generators and Builders',tools:[{view:'promptbuilder',label:'Prompt Builder'},{view:'savedprompts',label:'Saved Prompts'},{view:'commitmsg2',label:'Commit Templates'},{view:'prcomments',label:'PR Comment Builder'},{view:'verifyscript',label:'Verify Script'},{view:'approvalphrase',label:'Approval Phrase'},{view:'labelmaker',label:'Label Maker'},{view:'standup',label:'Stand-Up Generator'},{view:'snippets',label:'Snippets'},{view:'clippad',label:'Clip Pad'},{view:'urlstore',label:'URL Store'}]}
+            ];
+            function tcRender(){
+              var sec=document.getElementById('view-toolcategories');if(!sec)return;
+              var existing=sec.querySelector('#tc-content');
+              if(existing)return;
+              var el=document.createElement('div');el.id='tc-content';el.style.marginTop='8px';
+              TC_CATS.forEach(function(cat){
+                var section=document.createElement('div');section.style.marginBottom='20px';
+                section.innerHTML='<h2 style="font-size:14px;color:#9aa0b0;margin:0 0 10px;">'+cat.cat+'</h2>'
+                  +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px;">'
+                  +cat.tools.map(function(t){return'<button class="small-btn tc-go" data-view="'+t.view+'" style="text-align:left;padding:8px 12px;">'+t.label+'</button>';}).join('')+'</div>';
+                el.appendChild(section);
+              });
+              sec.appendChild(el);
+              sec.querySelectorAll('.tc-go').forEach(function(b){b.addEventListener('click',function(){var t=document.querySelector('[data-view="'+b.dataset.view+'"][data-route]');if(t)t.click();});});
+            }
+            var sec=document.getElementById('view-toolcategories');if(sec)sec.addEventListener('lt-view-enter',tcRender);tcRender();
+          }());</script>
+        </section>
+
+        <section class="view" id="view-toolhelp" data-view-panel="toolhelp">
+          <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Tool Help</h1><p>Usage tips and guidance for every tool in the Developer Bot.</p></div>
+          <article class="panel">
+            <input id="th-search" placeholder="Search help topics..." style="width:100%;margin-bottom:12px;">
+            <div id="th-list"></div>
+          </article>
+          <script>(function(){
+            var TH_HELP=[
+              {label:'Dashboard',tip:'The Dashboard shows counts for all record types. Use it as your home base. Check the counters to see what\'s been logged.'},
+              {label:'Today\'s Work (lt_tw_draft)',tip:'Free-form text area. Write what you worked on today. Used by Stand-Up Generator and Session Summary.'},
+              {label:'Priority Queue',tip:'Add items with P0-P3 priority. P0 is fire-drill urgent. Review this first each session.'},
+              {label:'Blockers',tip:'Log anything stopping progress. Set status to Resolved when cleared. Stand-Up and What\'s Next read from here.'},
+              {label:'Session Goals',tip:'Set 3-5 goals at the start of each session. Tick off as you go. Exported by Session Summary.'},
+              {label:'Note Pad',tip:'Single persistent scratch pad. Only one note — overwrites each session. Saved as lt_np_draft.'},
+              {label:'Work Timer',tip:'Simple timer for a single task. Does not save — session-only. Use Work Log to persist entries.'},
+              {label:'Work Log',tip:'Persist timed or estimated work entries. Include duration, site, date, and notes. Export as .txt.'},
+              {label:'Daily Stand-Up',tip:'Reads Today\'s Work and open Blockers. Edit the generated text before copying.'},
+              {label:'What\'s Next?',tip:'Reads Bug Triage, Blockers, Hot Fix, Priority Queue, and more to suggest the highest-priority action.'},
+              {label:'Session Summary',tip:'Reads Today\'s Work, Session Goals, Shipped Log, Merge Log, Blockers, Bug Triage, and Note Pad.'},
+              {label:'Bug Triage',tip:'Set severity Critical/High/Normal/Low and status Open/In Progress/Fixed. Critical+Open items surface in What\'s Next.'},
+              {label:'Hot Fix Tracker',tip:'For urgent fixes outside normal batch flow. Set status Open, In Progress, Merged, or Rolled Back.'},
+              {label:'Regression Log',tip:'Log regressions found during testing. Open status items surface in What\'s Next.'},
+              {label:'Risk Register',tip:'Score risks with Probability + Impact (both High = urgent). Add mitigation and update status.'},
+              {label:'Merge Log',tip:'Log every merge immediately after it happens. Include PR#, SHA, branch, risk, and sites.'},
+              {label:'Shipped Log',tip:'Permanent record of shipped features. Include PR#, SHA, and date so you can trace what shipped when.'},
+              {label:'Deploy Receipt',tip:'Fill in after every deploy. Used as an audit trail.'},
+              {label:'Rollback Plan',tip:'Fill in BEFORE merging. Document the rollback command and verification steps.'},
+              {label:'Rollback Receipt',tip:'Fill in AFTER rolling back. Documents what was done and why.'},
+              {label:'Branch Log',tip:'Log every branch as you create it. Update status to Merged or Abandoned when done.'},
+              {label:'PR Prep Checklist',tip:'Run through all 16 items before opening any PR. Reset between PRs.'},
+              {label:'PR Comment Builder',tip:'Template-based. Select a finding type, add a file/line reference, and copy the comment.'},
+              {label:'Env Check',tip:'Tick off 12 environment conditions before starting a build. Reset each session.'},
+              {label:'Test Results Log',tip:'Log manual test runs with Pass/Fail/Partial/Blocked, device, and notes.'},
+              {label:'Test Coverage',tip:'Track which features have test coverage and at what level.'},
+              {label:'Incident Report',tip:'For production incidents. Fill in symptom, timeline, root cause, and actions.'},
+              {label:'Post-Mortem Template',tip:'Structured doc after any incident. Generate → copy → paste into your notes.'},
+              {label:'Decision Log',tip:'Record every architectural decision. Include reason and alternatives considered.'},
+              {label:'Scope Creep Register',tip:'Log every time work grows beyond the original plan. Track impact and approval.'},
+              {label:'Feature Toggles',tip:'Track feature flags per site. Update state when toggling.'},
+              {label:'Tool Index',tip:'Search all tools by name or description keyword. Tap Go to open any tool directly.'},
+              {label:'Favorites',tip:'Pin up to any number of tools. Pinned tools are stored in lt_pins.'},
+              {label:'Quick Launch',tip:'Configure up to 8 numbered shortcuts. Tap a number to open its tool.'},
+              {label:'Export All Reports',tip:'Bundles every lt_ record as a .txt file. Use for end-of-session backup.'},
+              {label:'Settings Backup',tip:'Exports all lt_ keys as JSON. Import to restore. Safe to run any time.'},
+              {label:'Paste and Annotate',tip:'Paste code, diffs, or error output. Add a tag and note. Stored in lt_pa_.'},
+              {label:'Commit Templates',tip:'6 templates: batch, fix, feature, revert, docs, cache bump. Fill in and copy.'},
+              {label:'Quick Reference',tip:'Store any short reference entry with a category. Good for recurring commands.'},
+              {label:'Snippets',tip:'Save reusable code or text snippets. Tag and search.'},
+              {label:'Clip Pad',tip:'Session-only multi-clipboard. Items clear when you leave the view. For temp copies.'},
+              {label:'URL Store',tip:'Save named internal URLs. Stored in lt_us_. Copy any URL with one tap.'},
+              {label:'Session Snapshot',tip:'Reads all open records and generates a point-in-time summary. Copy or export.'},
+              {label:'Handoff Doc',tip:'Generates a document the next session (or next developer) can use to pick up where you left off.'},
+              {label:'Search Records',tip:'Full-text search across all lt_ records. Type a keyword to find matching entries.'},
+              {label:'Local Records',tip:'Browse all records by type. Includes Export All (JSON bundle).'},
+              {label:'Recently Used',tip:'Tracks the last 20 views you opened. Cleared when you click Reset.'}
+            ];
+            function thRender(q){
+              var el=document.getElementById('th-list');if(!el)return;
+              var lq=(q||'').toLowerCase();
+              var results=TH_HELP.filter(function(h){return!lq||h.label.toLowerCase().indexOf(lq)>=0||h.tip.toLowerCase().indexOf(lq)>=0;});
+              if(!results.length){el.innerHTML='<p class="empty-state">No help topics match your search.</p>';return;}
+              el.innerHTML=results.map(function(h){return'<div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);">'
+                +'<div style="font-size:13px;font-weight:600;margin-bottom:4px;">'+h.label+'</div>'
+                +'<div style="font-size:12px;color:#9aa0b0;line-height:1.6;">'+h.tip+'</div></div>';}).join('');
+            }
+            document.getElementById('th-search').addEventListener('input',function(){thRender(this.value.trim());});
+            var sec=document.getElementById('view-toolhelp');if(sec)sec.addEventListener('lt-view-enter',function(){thRender(document.getElementById('th-search').value.trim());});
+            thRender('');
+          }());</script>
+        </section>
+
+        <script>(function(){
+          function rtTrack(viewId,label){
+            var recent;try{recent=JSON.parse(localStorage.getItem('lt_recent_views')||'[]');}catch(e){recent=[];}
+            recent=recent.filter(function(r){return r.view!==viewId;});
+            recent.unshift({view:viewId,label:label||viewId,ts:Date.now()});
+            if(recent.length>20)recent=recent.slice(0,20);
+            localStorage.setItem('lt_recent_views',JSON.stringify(recent));
+          }
+          document.querySelectorAll('section.view[data-view-panel]').forEach(function(sec){
+            var viewId=sec.getAttribute('data-view-panel');
+            var label=(sec.querySelector('h1')||{}).textContent||viewId;
+            sec.addEventListener('lt-view-enter',function(){
+              if(viewId!=='recenttools')rtTrack(viewId,label);
+            });
+          });
+        }());</script>
 
         <!-- ═══ DASHBOARD COUNTERS SCRIPT ═══ -->
         <script>
