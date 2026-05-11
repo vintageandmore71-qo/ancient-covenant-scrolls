@@ -1098,11 +1098,25 @@
           <div class="panel" style="margin-bottom:16px;">
             <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;">
               <button class="primary-action" type="button" id="rjw-new">New Repair Job</button>
+              <button class="secondary-action" type="button" id="rjw-sample">Fill Sample Job</button>
+              <button class="secondary-action" type="button" id="rjw-validate">Validate Job</button>
               <button class="secondary-action" type="button" id="rjw-save">Save Locally</button>
               <button class="secondary-action" type="button" id="rjw-load">Reload Saved</button>
               <button class="secondary-action" type="button" id="rjw-export">Export repair-job.json</button>
+              <button class="secondary-action" type="button" id="rjw-export-report">Export Report (.txt)</button>
               <button class="secondary-action" type="button" id="rjw-copy">Copy JSON</button>
               <button class="secondary-action" type="button" id="rjw-report">Generate Report</button>
+              <button class="secondary-action" type="button" id="rjw-history-toggle">Job History</button>
+            </div>
+
+            <div id="rjw-validate-panel" style="display:none;margin-bottom:12px;padding:12px 14px;border-radius:6px;font-size:13px;line-height:1.7;"></div>
+
+            <div id="rjw-history-panel" style="display:none;margin-bottom:16px;">
+              <div class="panel">
+                <h2 style="margin:0 0 10px;">Saved job history</h2>
+                <p style="font-size:13px;color:#9aa0b0;margin:0 0 10px;">Jobs are stored locally in this browser only. Deleting here removes only local browser storage.</p>
+                <div id="rjw-history-list" style="display:grid;gap:8px;"></div>
+              </div>
             </div>
 
             <div style="display:grid;gap:12px;">
@@ -1223,6 +1237,9 @@
               if (t) { t.textContent = msg; t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); }, 2400); }
             }
 
+            var RJW_REQUIRED = ['jobId','createdAt','site','affectedArea','problemSummary','evidence','suspectedCause','riskLevel','status','acceptanceCriteria','rollbackPlan'];
+            var RJW_LABELS = { jobId:'Job ID', createdAt:'Created At', site:'Site', affectedArea:'Affected Area', problemSummary:'Problem Summary', evidence:'Evidence', suspectedCause:'Suspected Cause', riskLevel:'Risk Level', status:'Status', acceptanceCriteria:'Acceptance Criteria', rollbackPlan:'Rollback Plan' };
+
             function rjwBuild() {
               return {
                 jobId: rjwVal('rjw-jobId'),
@@ -1273,17 +1290,114 @@
               return 'RJ-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
             }
 
+            var SAMPLE_JOB = {
+              site: 'Load AI / AI Chat Studio',
+              affectedArea: 'Image generation UI — Image Prompt PWA and AI Chat Studio',
+              problemSummary: 'Image Prompt PWA and AI Chat Studio both fail to produce image results on device. No result card appears after submitting a prompt.',
+              evidence: 'User confirmed on 2026-05-10 that neither surface returns a visible result. Free providers (Pollinations, AI Horde) require no API key and should work, ruling out a missing-key cause.',
+              suspectedCause: 'UI layer failure. The 17-provider chain is wired in code and free providers need no key. Suspected: result card render path is broken or an unhandled JS error prevents the response from reaching the UI.',
+              affectedFiles: 'load/tools/ai-chat-studio.html\nload/image-prompt/index.html\nload/lib-load-image-providers.js',
+              riskLevel: 'HIGH',
+              liveSiteImpact: 'YES',
+              serviceWorkerImpact: 'NO',
+              providerImpact: 'YES',
+              exportPackageImpact: 'NO',
+              securityImpact: 'NO',
+              userTestingRequired: 'YES',
+              status: 'FAIL',
+              acceptanceCriteria: 'User submits a text prompt in Image Prompt or AI Chat Studio. A result card appears with a real image. Provider ID and output proof are shown. No silent failure.',
+              rollbackPlan: 'Revert affected HTML file to last known working commit. Use git checkout <good-sha> -- <file>.',
+              nextRecommendedAction: 'Read 5.8 AI Studio Fix.docx and 5.8 READ AI Studio Not working.docx. Inspect the result card render path in load/tools/ai-chat-studio.html for unhandled errors.'
+            };
+
+            function rjwRenderHistory() {
+              var list = rjwGet('rjw-history-list');
+              if (!list) return;
+              var keys = [];
+              for (var i = 0; i < localStorage.length; i++) {
+                var k = localStorage.key(i);
+                if (k && k.indexOf('lt_rjw_') === 0) keys.push(k);
+              }
+              if (keys.length === 0) {
+                list.innerHTML = '<p style="font-size:13px;color:#9aa0b0;">No saved jobs found.</p>';
+                return;
+              }
+              list.innerHTML = '';
+              keys.sort().reverse().forEach(function(k) {
+                try {
+                  var job = JSON.parse(localStorage.getItem(k));
+                  var row = document.createElement('div');
+                  row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 10px;background:rgba(255,255,255,0.04);border-radius:6px;font-size:13px;';
+                  row.innerHTML = '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (job.jobId || k) + ' — ' + (job.site || '') + ' — ' + (job.status || '') + '</span>';
+                  var loadBtn = document.createElement('button');
+                  loadBtn.className = 'secondary-action';
+                  loadBtn.textContent = 'Load';
+                  loadBtn.style.cssText = 'padding:4px 10px;font-size:12px;';
+                  loadBtn.addEventListener('click', function(jb){ return function(){ rjwFill(jb); rjwToast('Job loaded.'); rjwGet('rjw-history-panel').style.display='none'; }; }(job));
+                  var delBtn = document.createElement('button');
+                  delBtn.className = 'secondary-action';
+                  delBtn.textContent = 'Delete';
+                  delBtn.style.cssText = 'padding:4px 10px;font-size:12px;color:#f44336;border-color:#f44336;';
+                  delBtn.addEventListener('click', function(key){ return function(){ localStorage.removeItem(key); rjwRenderHistory(); rjwToast('Job deleted from local storage.'); }; }(k));
+                  row.appendChild(loadBtn);
+                  row.appendChild(delBtn);
+                  list.appendChild(row);
+                } catch(e) {}
+              });
+            }
+
             rjwGet('rjw-new').addEventListener('click', function () {
               rjwFill({});
               rjwSet('rjw-jobId', rjwGenId());
               rjwSet('rjw-createdAt', new Date().toISOString());
               rjwGet('rjw-report-panel').style.display = 'none';
+              rjwGet('rjw-validate-panel').style.display = 'none';
               rjwToast('New repair job started.');
+            });
+
+            rjwGet('rjw-sample').addEventListener('click', function () {
+              rjwFill(SAMPLE_JOB);
+              rjwSet('rjw-jobId', rjwGenId());
+              rjwSet('rjw-createdAt', new Date().toISOString());
+              rjwGet('rjw-report-panel').style.display = 'none';
+              rjwGet('rjw-validate-panel').style.display = 'none';
+              rjwToast('Sample job loaded.');
+            });
+
+            rjwGet('rjw-validate').addEventListener('click', function () {
+              var job = rjwBuild();
+              var missing = [];
+              RJW_REQUIRED.forEach(function(f) {
+                var v = Array.isArray(job[f]) ? job[f].join('') : (job[f] || '');
+                if (!v.trim()) missing.push(RJW_LABELS[f] || f);
+              });
+              var panel = rjwGet('rjw-validate-panel');
+              panel.style.display = '';
+              if (missing.length === 0) {
+                panel.style.background = 'rgba(76,175,80,0.12)';
+                panel.style.border = '1px solid rgba(76,175,80,0.3)';
+                panel.innerHTML = '<strong style="color:#4caf50;">PASS</strong> — All required fields are present.';
+              } else {
+                panel.style.background = 'rgba(244,67,54,0.10)';
+                panel.style.border = '1px solid rgba(244,67,54,0.3)';
+                panel.innerHTML = '<strong style="color:#f44336;">FAIL</strong> — Missing required fields:<br>' + missing.map(function(m){ return '&bull; ' + m; }).join('<br>');
+              }
+            });
+
+            rjwGet('rjw-history-toggle').addEventListener('click', function () {
+              var p = rjwGet('rjw-history-panel');
+              var showing = p.style.display !== 'none';
+              p.style.display = showing ? 'none' : '';
+              if (!showing) rjwRenderHistory();
             });
 
             rjwGet('rjw-save').addEventListener('click', function () {
               try {
-                localStorage.setItem('lt_repairjob_draft', JSON.stringify(rjwBuild()));
+                var job = rjwBuild();
+                if (!job.jobId) { rjwToast('Start a new repair job first.'); return; }
+                var key = 'lt_rjw_' + job.jobId;
+                localStorage.setItem(key, JSON.stringify(job));
+                localStorage.setItem('lt_repairjob_draft', JSON.stringify(job));
                 rjwToast('Repair job saved locally.');
               } catch(e) { rjwToast('Save failed: ' + e.message); }
             });
@@ -1307,6 +1421,43 @@
               a.click();
               URL.revokeObjectURL(a.href);
               rjwToast('repair-job.json exported.');
+            });
+
+            rjwGet('rjw-export-report').addEventListener('click', function () {
+              var j = rjwBuild();
+              if (!j.jobId) { rjwToast('Start a new repair job first.'); return; }
+              var files = Array.isArray(j.affectedFiles) ? j.affectedFiles.join(', ') : j.affectedFiles;
+              var lines = [
+                'REPAIR JOB REPORT', '=================',
+                'Job ID: ' + j.jobId, 'Created: ' + j.createdAt,
+                'Site: ' + (j.site || 'Not specified'), 'Affected Area: ' + (j.affectedArea || 'Not specified'),
+                '', 'PROBLEM', j.problemSummary || 'Not described.',
+                '', 'EVIDENCE', j.evidence || 'Not provided.',
+                '', 'SUSPECTED CAUSE', j.suspectedCause || 'Not identified.',
+                '', 'AFFECTED FILES', files || 'Not listed.',
+                '', 'RISK: ' + (j.riskLevel || 'Not set') + '  |  STATUS: ' + (j.status || 'Not set'),
+                'Live site impact: ' + (j.liveSiteImpact || 'Unknown'),
+                'Service worker impact: ' + (j.serviceWorkerImpact || 'Unknown'),
+                'Provider impact: ' + (j.providerImpact || 'Unknown'),
+                'Export/package impact: ' + (j.exportPackageImpact || 'Unknown'),
+                'Security impact: ' + (j.securityImpact || 'Unknown'),
+                'User testing required: ' + (j.userTestingRequired || 'Unknown'),
+                '', 'ACCEPTANCE CRITERIA', j.acceptanceCriteria || 'Not defined.',
+                '', 'ROLLBACK PLAN', j.rollbackPlan || 'Not defined.',
+                '', 'NEXT RECOMMENDED ACTION', j.nextRecommendedAction || 'Not specified.',
+                '', 'SAFETY NOTICE',
+                'This repair job was created using Load Tasks Repair Job Writer.',
+                'It does not push code. It does not merge pull requests.',
+                'It does not deploy to any site. It does not store tokens.',
+                'It does not modify live sites.'
+              ];
+              var blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+              var a = document.createElement('a');
+              a.href = URL.createObjectURL(blob);
+              a.download = (j.jobId || 'repair-report') + '.txt';
+              a.click();
+              URL.revokeObjectURL(a.href);
+              rjwToast('Report exported as .txt.');
             });
 
             rjwGet('rjw-copy').addEventListener('click', function () {
