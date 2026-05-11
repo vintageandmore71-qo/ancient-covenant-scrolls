@@ -87,6 +87,10 @@
         <button data-view="testplan" data-route>Test Plan</button>
         <button data-view="issues" data-route>Issues</button>
         <button data-view="runchecklist" data-route>Checklist</button>
+        <button data-view="searchrecords" data-route>Search</button>
+        <button data-view="timeline" data-route>Timeline</button>
+        <button data-view="quickactions" data-route>Quick Actions</button>
+        <button data-view="stats" data-route>Stats</button>
       </nav>
       <button class="icon-button" id="hardRefresh" aria-label="Hard refresh app state">
         <span class="icon-mini" data-icon="refresh"></span>
@@ -137,6 +141,10 @@
         <button data-view="testplan" data-route><span class="rail-icon" data-icon="shield"></span><span>Test Plan</span></button>
         <button data-view="issues" data-route><span class="rail-icon" data-icon="wrench"></span><span>Issues</span></button>
         <button data-view="runchecklist" data-route><span class="rail-icon" data-icon="shield"></span><span>Checklist</span></button>
+        <button data-view="searchrecords" data-route><span class="rail-icon" data-icon="focus"></span><span>Search</span></button>
+        <button data-view="timeline" data-route><span class="rail-icon" data-icon="version"></span><span>Timeline</span></button>
+        <button data-view="quickactions" data-route><span class="rail-icon" data-icon="dashboard"></span><span>Quick Actions</span></button>
+        <button data-view="stats" data-route><span class="rail-icon" data-icon="certificate"></span><span>Stats</span></button>
       </aside>
 
       <section class="workspace">
@@ -300,6 +308,26 @@
               <span class="card-icon" data-icon="shield"></span>
               <strong>Build Checklist Runner</strong>
               <span>Run pre-built checklists for common workflows. Check off items and reset.</span>
+            </button>
+            <button class="command-card" data-view="searchrecords" data-route>
+              <span class="card-icon" data-icon="focus"></span>
+              <strong>Search Records</strong>
+              <span>Search all saved records by keyword across every record type.</span>
+            </button>
+            <button class="command-card" data-view="timeline" data-route>
+              <span class="card-icon" data-icon="version"></span>
+              <strong>Build Timeline</strong>
+              <span>All records in date order. See everything that happened and when.</span>
+            </button>
+            <button class="command-card" data-view="quickactions" data-route>
+              <span class="card-icon" data-icon="dashboard"></span>
+              <strong>Quick Actions</strong>
+              <span>One-tap shortcuts to the most common starting points.</span>
+            </button>
+            <button class="command-card" data-view="stats" data-route>
+              <span class="card-icon" data-icon="certificate"></span>
+              <strong>Stats Summary</strong>
+              <span>Total counts, last activity per type, and localStorage usage.</span>
             </button>
           </div>
 
@@ -1846,9 +1874,41 @@
             <h2>Repair Pack Summaries</h2>
             <div id="lr-rp-list" style="display:grid;gap:8px;"></div>
           </div>
-          <div class="panel">
+          <div class="panel" style="margin-bottom:16px;">
             <h2>Acceptance Criteria Checklists</h2>
             <div id="lr-ac-list" style="display:grid;gap:8px;"></div>
+          </div>
+          <div class="panel" style="margin-bottom:16px;">
+            <h2>Smoke Checks</h2>
+            <div id="lr-sc-list" style="display:grid;gap:8px;"></div>
+          </div>
+          <div class="panel" style="margin-bottom:16px;">
+            <h2>Build Snapshots</h2>
+            <div id="lr-bl-list" style="display:grid;gap:8px;"></div>
+          </div>
+          <div class="panel" style="margin-bottom:16px;">
+            <h2>Risk Reports</h2>
+            <div id="lr-rr-list" style="display:grid;gap:8px;"></div>
+          </div>
+          <div class="panel" style="margin-bottom:16px;">
+            <h2>Session Notes</h2>
+            <div id="lr-sn-list" style="display:grid;gap:8px;"></div>
+          </div>
+          <div class="panel" style="margin-bottom:16px;">
+            <h2>Changelog Entries</h2>
+            <div id="lr-cl-list" style="display:grid;gap:8px;"></div>
+          </div>
+          <div class="panel" style="margin-bottom:16px;">
+            <h2>Feature Backlog</h2>
+            <div id="lr-fb-list" style="display:grid;gap:8px;"></div>
+          </div>
+          <div class="panel" style="margin-bottom:16px;">
+            <h2>Test Plans</h2>
+            <div id="lr-tp-list" style="display:grid;gap:8px;"></div>
+          </div>
+          <div class="panel">
+            <h2>Issues</h2>
+            <div id="lr-is-list" style="display:grid;gap:8px;"></div>
           </div>
 
           <script>
@@ -1891,6 +1951,14 @@
               lrRenderGroup('lt_sh_',  'lr-sh-list',  function(d){ return (d.reportId||'?') + ' — ' + (d.site||'') + ' — ' + (d.pageLoads ? 'Loads:'+d.pageLoads : ''); });
               lrRenderGroup('lt_rp_',  'lr-rp-list',  function(d){ return (d.summaryId||'?') + ' — ' + (d.repairJobId||'') + ' — ' + (d.status||''); });
               lrRenderGroup('lt_ac_',  'lr-ac-list',  function(d){ var done=(d.items||[]).filter(function(i){return i.checked;}).length; return (d.criteriaId||'?') + ' — ' + (d.title||'') + ' — ' + done+'/'+(d.items||[]).length+' passed'; });
+              lrRenderGroup('lt_sc_',  'lr-sc-list',  function(d){ return (d.checkId||'?') + ' — ' + (d.site||'') + ' — Opens:' + (d.pageOpens||'—'); });
+              lrRenderGroup('lt_bl_',  'lr-bl-list',  function(d){ return (d.snapshotId||'?') + ' — ' + (d.site||'') + ' — ' + (d.buildMarker||''); });
+              lrRenderGroup('lt_rr_',  'lr-rr-list',  function(d){ return (d.reportId||'?') + ' — ' + (d.riskLevel||'—') + ' — ' + ((d.proposedChange||'').slice(0,40)||'—'); });
+              lrRenderGroup('lt_sn_',  'lr-sn-list',  function(d){ return (d.notesId||'?') + ' — ' + (d.date||'') + ' — ' + (d.branch||''); });
+              lrRenderGroup('lt_cl_',  'lr-cl-list',  function(d){ return (d.entryId||'?') + ' — ' + (d.version||'—') + (d.pr?' PR#'+d.pr:'') + ' — ' + (d.date||''); });
+              lrRenderGroup('lt_fb_',  'lr-fb-list',  function(d){ return (d.featureId||'?') + ' — ' + (d.featureName||'—') + ' — ' + (d.status||''); });
+              lrRenderGroup('lt_tp_',  'lr-tp-list',  function(d){ return (d.planId||'?') + ' — ' + (d.title||'—') + ' — ' + (d.date||''); });
+              lrRenderGroup('lt_is_',  'lr-is-list',  function(d){ return (d.issueId||'?') + ' — ' + (d.title||'—') + ' — ' + (d.status||''); });
             }
 
             document.getElementById('lr-refresh').addEventListener('click', function(){ lrRender(); lrToast('Records refreshed.'); });
@@ -3014,6 +3082,276 @@
               navigator.clipboard.writeText(lines.join('\n')).then(function(){ckToast('Result copied.');}).catch(function(){ckToast('Copy failed.');});
             });
             ckRender();
+          }());
+          </script>
+        </section>
+
+        <!-- ═══ SEARCH RECORDS ═══ -->
+        <section class="view" id="view-searchrecords" data-view-panel="searchrecords">
+          <div class="section-head">
+            <p class="eyebrow">Search Records</p>
+            <h1>Find any saved record by keyword.</h1>
+            <p>Searches IDs, titles, site names, status, notes, and descriptions across all record types.</p>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+            <input id="sr-query" type="text" placeholder="Type a keyword and press Search..." style="flex:1;min-width:200px;">
+            <button class="primary-action" type="button" id="sr-search">Search</button>
+            <button class="secondary-action" type="button" id="sr-clear">Clear</button>
+          </div>
+          <div id="sr-count" style="font-size:13px;color:#9aa0b0;margin-bottom:12px;"></div>
+          <div id="sr-results" style="display:grid;gap:8px;"></div>
+          <script>
+          (function(){
+            function srToast(m){var t=document.getElementById('toast');if(t){t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2400);}}
+            var PREFIXES=[
+              {prefix:'lt_rjw_',drafts:['lt_rjw_draft','lt_repairjob_draft'],type:'Repair Job',label:function(d){return(d.jobId||'?')+' — '+(d.site||'')+ ' — '+(d.affectedArea||'');},fields:function(d){return[d.jobId,d.site,d.affectedArea,d.problemSummary,d.status,d.riskLevel,d.evidence,d.suspectedCause,d.rollbackPlan,d.nextRecommendedAction];}},
+              {prefix:'lt_bv_',drafts:['lt_bv_draft'],type:'Build Vault',label:function(d){return(d.entryId||'?')+' — '+(d.site||'')+' — '+(d.buildMarker||'');},fields:function(d){return[d.entryId,d.site,d.buildMarker,d.commitHash,d.verifiedFeatures,d.knownIssues,d.notes];}},
+              {prefix:'lt_sh_',drafts:['lt_sh_draft'],type:'Site Health',label:function(d){return(d.reportId||'?')+' — '+(d.site||'')+' — Opens:'+(d.pageLoads||'—');},fields:function(d){return[d.reportId,d.site,d.liveUrl,d.buildMarker,d.brokenLinks,d.notes];}},
+              {prefix:'lt_rp_',drafts:['lt_rp_draft'],type:'Repair Pack',label:function(d){return(d.summaryId||'?')+' — '+(d.repairJobId||'')+' — '+(d.status||'');},fields:function(d){return[d.summaryId,d.repairJobId,d.status,d.riskLevel,d.rollbackPlan,d.acceptanceCriteria];}},
+              {prefix:'lt_ac_',drafts:['lt_ac_draft'],type:'Criteria',label:function(d){return(d.criteriaId||'?')+' — '+(d.title||'')+' — '+(d.repairPackId||'');},fields:function(d){return[d.criteriaId,d.title,d.repairPackId];}},
+              {prefix:'lt_sc_',drafts:['lt_sc_draft'],type:'Smoke Check',label:function(d){return(d.checkId||'?')+' — '+(d.site||'')+' — Opens:'+(d.pageOpens||'—');},fields:function(d){return[d.checkId,d.site,d.liveUrl,d.buildMarker,d.notes];}},
+              {prefix:'lt_bl_',drafts:['lt_bl_draft'],type:'Baseline',label:function(d){return(d.snapshotId||'?')+' — '+(d.site||'')+' — '+(d.buildMarker||'');},fields:function(d){return[d.snapshotId,d.site,d.buildMarker,d.commitHash,d.verifiedFeatures,d.knownIssues,d.doNotTouchNotes];}},
+              {prefix:'lt_rr_',drafts:['lt_rr_draft'],type:'Risk Report',label:function(d){return(d.reportId||'?')+' — '+(d.riskLevel||'—')+' — '+((d.proposedChange||'').slice(0,50));},fields:function(d){return[d.reportId,d.riskLevel,d.proposedChange,d.files,d.rollbackPlan];}},
+              {prefix:'lt_sn_',drafts:['lt_sn_draft'],type:'Session Notes',label:function(d){return(d.notesId||'?')+' — '+(d.date||'')+' — '+(d.branch||'');},fields:function(d){return[d.notesId,d.date,d.branch,d.commitHash,d.builtToday,d.brokenBlocking,d.nextSteps];}},
+              {prefix:'lt_cl_',drafts:['lt_cl_draft'],type:'Changelog',label:function(d){return(d.entryId||'?')+' — '+(d.version||'—')+(d.pr?' PR#'+d.pr:'')+' — '+(d.date||'');},fields:function(d){return[d.entryId,d.version,d.date,d.pr,d.whatChanged];}},
+              {prefix:'lt_fb_',drafts:['lt_fb_draft'],type:'Backlog',label:function(d){return(d.featureId||'?')+' — '+(d.featureName||'—')+' — '+(d.status||'');},fields:function(d){return[d.featureId,d.featureName,d.site,d.priority,d.status,d.notes];}},
+              {prefix:'lt_tp_',drafts:['lt_tp_draft'],type:'Test Plan',label:function(d){return(d.planId||'?')+' — '+(d.title||'—')+' — '+(d.date||'');},fields:function(d){return[d.planId,d.title,d.date,d.linkedJobId];}},
+              {prefix:'lt_is_',drafts:['lt_is_draft'],type:'Issue',label:function(d){return(d.issueId||'?')+' — '+(d.title||'—')+' — '+(d.status||'');},fields:function(d){return[d.issueId,d.title,d.site,d.severity,d.status,d.notes];}}
+            ];
+            function srSearch(){
+              var q=(document.getElementById('sr-query').value||'').trim().toLowerCase();
+              var results=document.getElementById('sr-results');var count=document.getElementById('sr-count');
+              if(!q){results.innerHTML='';count.textContent='';return;}
+              var hits=[];
+              PREFIXES.forEach(function(spec){
+                for(var i=0;i<localStorage.length;i++){
+                  var k=localStorage.key(i);
+                  if(!k||k.indexOf(spec.prefix)!==0)continue;
+                  var isDraft=false;spec.drafts.forEach(function(dr){if(k===dr)isDraft=true;});if(isDraft)continue;
+                  try{
+                    var d=JSON.parse(localStorage.getItem(k));
+                    var haystack=spec.fields(d).filter(Boolean).join(' ').toLowerCase();
+                    if(haystack.indexOf(q)!==-1)hits.push({type:spec.type,label:spec.label(d),key:k});
+                  }catch(e){}
+                }
+              });
+              count.textContent=hits.length+' result'+(hits.length!==1?'s':'')+' for "'+q+'"';
+              if(hits.length===0){results.innerHTML='<p style="font-size:13px;color:#9aa0b0;">No records matched.</p>';return;}
+              results.innerHTML='';
+              hits.forEach(function(hit){
+                var row=document.createElement('div');
+                row.style.cssText='padding:8px 12px;background:rgba(255,255,255,0.04);border-radius:6px;font-size:13px;display:flex;gap:10px;align-items:center;';
+                var badge=document.createElement('span');badge.style.cssText='font-size:11px;font-weight:600;color:#ffd400;flex-shrink:0;min-width:80px;';badge.textContent=hit.type;
+                var lbl=document.createElement('span');lbl.style.cssText='flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';lbl.textContent=hit.label;
+                row.appendChild(badge);row.appendChild(lbl);results.appendChild(row);
+              });
+            }
+            document.getElementById('sr-search').addEventListener('click',srSearch);
+            document.getElementById('sr-query').addEventListener('keydown',function(e){if(e.key==='Enter')srSearch();});
+            document.getElementById('sr-clear').addEventListener('click',function(){document.getElementById('sr-query').value='';document.getElementById('sr-results').innerHTML='';document.getElementById('sr-count').textContent='';});
+          }());
+          </script>
+        </section>
+
+        <!-- ═══ BUILD TIMELINE ═══ -->
+        <section class="view" id="view-timeline" data-view-panel="timeline">
+          <div class="section-head">
+            <p class="eyebrow">Build Timeline</p>
+            <h1>All records in date order.</h1>
+            <p>See everything that was saved and when. Most recent first.</p>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+            <button class="primary-action" type="button" id="tl-refresh">Refresh</button>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;"><input type="checkbox" id="tl-today-only"> Today only</label>
+          </div>
+          <div id="tl-count" style="font-size:13px;color:#9aa0b0;margin-bottom:12px;"></div>
+          <div id="tl-list" style="display:grid;gap:8px;"></div>
+          <script>
+          (function(){
+            var ALL_PREFIXES=[
+              {prefix:'lt_rjw_',drafts:['lt_rjw_draft','lt_repairjob_draft'],type:'Repair Job',dateField:'createdAt',label:function(d){return(d.site||'—')+' — '+(d.affectedArea||d.problemSummary||'');}},
+              {prefix:'lt_bv_',drafts:['lt_bv_draft'],type:'Build Vault',dateField:'date',label:function(d){return(d.site||'—')+' — '+(d.buildMarker||'');}},
+              {prefix:'lt_sh_',drafts:['lt_sh_draft'],type:'Site Health',dateField:'checkedAt',label:function(d){return(d.site||'—')+' — Opens:'+(d.pageLoads||'—');}},
+              {prefix:'lt_rp_',drafts:['lt_rp_draft'],type:'Repair Pack',dateField:'createdAt',label:function(d){return(d.repairJobId||'—')+' — '+(d.status||'');}},
+              {prefix:'lt_ac_',drafts:['lt_ac_draft'],type:'Criteria',dateField:'createdAt',label:function(d){return(d.title||'—');}},
+              {prefix:'lt_sc_',drafts:['lt_sc_draft'],type:'Smoke Check',dateField:'checkedAt',label:function(d){return(d.site||'—')+' — Opens:'+(d.pageOpens||'—');}},
+              {prefix:'lt_bl_',drafts:['lt_bl_draft'],type:'Baseline',dateField:'savedAt',label:function(d){return(d.site||'—')+' — '+(d.buildMarker||'');}},
+              {prefix:'lt_rr_',drafts:['lt_rr_draft'],type:'Risk Report',dateField:'savedAt',label:function(d){return(d.riskLevel||'—')+' — '+((d.proposedChange||'').slice(0,60));}},
+              {prefix:'lt_sn_',drafts:['lt_sn_draft'],type:'Session Notes',dateField:'savedAt',label:function(d){return(d.date||'—')+' — '+(d.branch||'');}},
+              {prefix:'lt_cl_',drafts:['lt_cl_draft'],type:'Changelog',dateField:'savedAt',label:function(d){return(d.version||'—')+(d.pr?' PR#'+d.pr:'')+' — '+(d.whatChanged||'').slice(0,60);}},
+              {prefix:'lt_fb_',drafts:['lt_fb_draft'],type:'Backlog',dateField:'savedAt',label:function(d){return(d.featureName||'—')+' — '+(d.status||'');}},
+              {prefix:'lt_tp_',drafts:['lt_tp_draft'],type:'Test Plan',dateField:'savedAt',label:function(d){return(d.title||'—');}},
+              {prefix:'lt_is_',drafts:['lt_is_draft'],type:'Issue',dateField:'loggedAt',label:function(d){return(d.title||'—')+' — '+(d.status||'');}}
+            ];
+            var TYPE_COLORS={'Repair Job':'#f44336','Build Vault':'#4caf50','Site Health':'#2196f3','Repair Pack':'#ff9800','Criteria':'#9c27b0','Smoke Check':'#00bcd4','Baseline':'#4caf50','Risk Report':'#ff5722','Session Notes':'#607d8b','Changelog':'#ffd400','Backlog':'#9aa0b0','Test Plan':'#3f51b5','Issue':'#f44336'};
+            function tlRender(){
+              var todayOnly=document.getElementById('tl-today-only').checked;
+              var today=new Date().toISOString().slice(0,10);
+              var list=document.getElementById('tl-list');var count=document.getElementById('tl-count');
+              var items=[];
+              ALL_PREFIXES.forEach(function(spec){
+                for(var i=0;i<localStorage.length;i++){
+                  var k=localStorage.key(i);
+                  if(!k||k.indexOf(spec.prefix)!==0)continue;
+                  var isDraft=false;spec.drafts.forEach(function(dr){if(k===dr)isDraft=true;});if(isDraft)continue;
+                  try{
+                    var d=JSON.parse(localStorage.getItem(k));
+                    var date=d[spec.dateField]||'';
+                    if(todayOnly&&date.slice(0,10)!==today)continue;
+                    items.push({type:spec.type,date:date,label:spec.label(d)});
+                  }catch(e){}
+                }
+              });
+              items.sort(function(a,b){return(b.date||'')>(a.date||'')?1:-1;});
+              count.textContent=items.length+' record'+(items.length!==1?'s':'')+(todayOnly?' saved today':' total');
+              if(items.length===0){list.innerHTML='<p style="font-size:13px;color:#9aa0b0;">No records found.</p>';return;}
+              list.innerHTML='';
+              items.forEach(function(item){
+                var row=document.createElement('div');
+                row.style.cssText='padding:8px 12px;background:rgba(255,255,255,0.04);border-radius:6px;font-size:13px;display:flex;gap:10px;align-items:center;';
+                var badge=document.createElement('span');badge.style.cssText='font-size:11px;font-weight:600;color:'+(TYPE_COLORS[item.type]||'#9aa0b0')+';flex-shrink:0;min-width:90px;';badge.textContent=item.type;
+                var date=document.createElement('span');date.style.cssText='font-size:11px;color:#9aa0b0;flex-shrink:0;';date.textContent=(item.date||'').slice(0,16).replace('T',' ');
+                var lbl=document.createElement('span');lbl.style.cssText='flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';lbl.textContent=item.label;
+                row.appendChild(badge);row.appendChild(date);row.appendChild(lbl);list.appendChild(row);
+              });
+            }
+            document.getElementById('tl-refresh').addEventListener('click',tlRender);
+            document.getElementById('tl-today-only').addEventListener('change',tlRender);
+            var panel=document.getElementById('view-timeline');
+            if(panel){panel.addEventListener('lt-view-enter',tlRender);setTimeout(function(){if(panel.classList.contains('active'))tlRender();},100);}
+          }());
+          </script>
+        </section>
+
+        <!-- ═══ QUICK ACTIONS ═══ -->
+        <section class="view" id="view-quickactions" data-view-panel="quickactions">
+          <div class="section-head">
+            <p class="eyebrow">Quick Actions</p>
+            <h1>One tap to the most common starting points.</h1>
+            <p>Jump straight to a new record or a key view without navigating the full menu.</p>
+          </div>
+          <div class="action-grid">
+            <button class="command-card" data-view="repairjob" data-route>
+              <span class="card-icon" data-icon="wrench"></span>
+              <strong>New Repair Job</strong>
+              <span>Open Repair Job Writer ready to fill.</span>
+            </button>
+            <button class="command-card" data-view="smokecheck" data-route>
+              <span class="card-icon" data-icon="shield"></span>
+              <strong>New Smoke Check</strong>
+              <span>Open Site Smoke Check Builder.</span>
+            </button>
+            <button class="command-card" data-view="baseline" data-route>
+              <span class="card-icon" data-icon="vault"></span>
+              <strong>New Baseline</strong>
+              <span>Save a stable build snapshot.</span>
+            </button>
+            <button class="command-card" data-view="sessionnotes" data-route>
+              <span class="card-icon" data-icon="notes"></span>
+              <strong>New Session Notes</strong>
+              <span>Start a session log for today.</span>
+            </button>
+            <button class="command-card" data-view="issues" data-route>
+              <span class="card-icon" data-icon="wrench"></span>
+              <strong>Log Issue</strong>
+              <span>Open Issue Tracker to log a bug.</span>
+            </button>
+            <button class="command-card" data-view="riskreport" data-route>
+              <span class="card-icon" data-icon="shield"></span>
+              <strong>New Risk Report</strong>
+              <span>Generate a pre-change risk report.</span>
+            </button>
+            <button class="command-card" data-view="statusboard" data-route>
+              <span class="card-icon" data-icon="version"></span>
+              <strong>Open Status Board</strong>
+              <span>See all repair jobs by status.</span>
+            </button>
+            <button class="command-card" data-view="runchecklist" data-route>
+              <span class="card-icon" data-icon="shield"></span>
+              <strong>Run Checklist</strong>
+              <span>Open Build Checklist Runner.</span>
+            </button>
+            <button class="command-card" data-view="handoffdoc" data-route>
+              <span class="card-icon" data-icon="handoff"></span>
+              <strong>Generate Handoff</strong>
+              <span>Create a handoff block for the next session.</span>
+            </button>
+            <button class="command-card" data-view="promptbuilder" data-route>
+              <span class="card-icon" data-icon="notes"></span>
+              <strong>Build a Prompt</strong>
+              <span>Generate a safe developer instruction to copy.</span>
+            </button>
+            <button class="command-card" data-view="templates" data-route>
+              <span class="card-icon" data-icon="library"></span>
+              <strong>Use a Template</strong>
+              <span>Start a repair job from a pre-built scenario.</span>
+            </button>
+            <button class="command-card" data-view="timeline" data-route>
+              <span class="card-icon" data-icon="version"></span>
+              <strong>View Timeline</strong>
+              <span>See all records in date order.</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- ═══ STATS SUMMARY ═══ -->
+        <section class="view" id="view-stats" data-view-panel="stats">
+          <div class="section-head">
+            <p class="eyebrow">Stats Summary</p>
+            <h1>What is saved in this browser.</h1>
+            <p>Counts, last activity, and storage usage for every record type.</p>
+          </div>
+          <div style="display:flex;gap:10px;margin-bottom:16px;">
+            <button class="primary-action" type="button" id="st-refresh">Refresh</button>
+          </div>
+          <div id="st-table" style="display:grid;gap:8px;"></div>
+          <div id="st-storage" style="margin-top:16px;font-size:13px;color:#9aa0b0;"></div>
+          <script>
+          (function(){
+            var SPECS=[
+              {prefix:'lt_rjw_',drafts:['lt_rjw_draft','lt_repairjob_draft'],type:'Repair Jobs',dateField:'createdAt'},
+              {prefix:'lt_bv_',drafts:['lt_bv_draft'],type:'Build Vault Entries',dateField:'date'},
+              {prefix:'lt_sh_',drafts:['lt_sh_draft'],type:'Site Health Reports',dateField:'checkedAt'},
+              {prefix:'lt_rp_',drafts:['lt_rp_draft'],type:'Repair Pack Summaries',dateField:'createdAt'},
+              {prefix:'lt_ac_',drafts:['lt_ac_draft'],type:'Criteria Checklists',dateField:'createdAt'},
+              {prefix:'lt_sc_',drafts:['lt_sc_draft'],type:'Smoke Checks',dateField:'checkedAt'},
+              {prefix:'lt_bl_',drafts:['lt_bl_draft'],type:'Build Snapshots',dateField:'savedAt'},
+              {prefix:'lt_rr_',drafts:['lt_rr_draft'],type:'Risk Reports',dateField:'savedAt'},
+              {prefix:'lt_sn_',drafts:['lt_sn_draft'],type:'Session Notes',dateField:'savedAt'},
+              {prefix:'lt_cl_',drafts:['lt_cl_draft'],type:'Changelog Entries',dateField:'savedAt'},
+              {prefix:'lt_fb_',drafts:['lt_fb_draft'],type:'Backlog Items',dateField:'savedAt'},
+              {prefix:'lt_tp_',drafts:['lt_tp_draft'],type:'Test Plans',dateField:'savedAt'},
+              {prefix:'lt_is_',drafts:['lt_is_draft'],type:'Issues',dateField:'loggedAt'}
+            ];
+            function stRender(){
+              var table=document.getElementById('st-table');if(!table)return;
+              var rows=[];var totalRecords=0;
+              SPECS.forEach(function(spec){
+                var count=0;var latest='';
+                for(var i=0;i<localStorage.length;i++){
+                  var k=localStorage.key(i);if(!k||k.indexOf(spec.prefix)!==0)continue;
+                  var isDraft=false;spec.drafts.forEach(function(dr){if(k===dr)isDraft=true;});if(isDraft)continue;
+                  count++;totalRecords++;
+                  try{var d=JSON.parse(localStorage.getItem(k));var dt=d[spec.dateField]||'';if(dt>latest)latest=dt;}catch(e){}
+                }
+                rows.push({type:spec.type,count:count,latest:latest});
+              });
+              table.innerHTML='<div style="display:grid;grid-template-columns:1fr 60px 1fr;gap:0;background:rgba(255,255,255,0.04);border-radius:8px;overflow:hidden;">'
+                +'<div style="padding:8px 12px;font-size:11px;font-weight:600;color:#9aa0b0;border-bottom:1px solid rgba(255,255,255,0.06);">Record Type</div>'
+                +'<div style="padding:8px 12px;font-size:11px;font-weight:600;color:#9aa0b0;border-bottom:1px solid rgba(255,255,255,0.06);text-align:center;">Count</div>'
+                +'<div style="padding:8px 12px;font-size:11px;font-weight:600;color:#9aa0b0;border-bottom:1px solid rgba(255,255,255,0.06);">Last Saved</div>'
+                +rows.map(function(r,i){var border=i<rows.length-1?'border-bottom:1px solid rgba(255,255,255,0.04);':'';return'<div style="padding:8px 12px;font-size:13px;'+border+'">'+r.type+'</div>'+'<div style="padding:8px 12px;font-size:13px;font-weight:700;text-align:center;'+border+'">'+r.count+'</div>'+'<div style="padding:8px 12px;font-size:12px;color:#9aa0b0;'+border+'">'+(r.latest?r.latest.slice(0,16).replace('T',' '):'—')+'</div>';}).join('')
+                +'</div>';
+              var totalStr='Total: '+totalRecords+' records across all types.';
+              try{
+                var used=0;for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);used+=k.length+(localStorage.getItem(k)||'').length;}
+                var kb=Math.round(used/1024*10)/10;totalStr+=' Estimated localStorage usage: '+kb+' KB.';
+              }catch(e){}
+              document.getElementById('st-storage').textContent=totalStr;
+            }
+            document.getElementById('st-refresh').addEventListener('click',stRender);
+            var panel=document.getElementById('view-stats');
+            if(panel){panel.addEventListener('lt-view-enter',stRender);setTimeout(function(){if(panel.classList.contains('active'))stRender();},100);}
           }());
           </script>
         </section>
