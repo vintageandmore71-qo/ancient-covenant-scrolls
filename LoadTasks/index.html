@@ -463,871 +463,346 @@
 
           <div class="metric-grid" id="dashboardMetrics"></div>
 
-          <div style="margin-bottom:6px;"><p class="eyebrow" style="margin-bottom:8px;">Start Here</p>
-          <div class="lt-dash-ql" id="lt-dash-ql">
-            <button data-view="starthere" data-route>Start Here</button>
-            <button data-view="repofilejob" data-route>New Repo Job</button>
-            <button data-view="rfjdashboard" data-route>Job Dashboard</button>
-            <button data-view="toolsearch2" data-route>Tool Search</button>
-            <button data-view="whatsnext2" data-route>What's Next</button>
-            <button data-view="standup" data-route>Stand-Up</button>
-            <button data-view="prsafetychk" data-route>PR Safety</button>
-            <button data-view="safenextstep" data-route>Safe Next Step</button>
-          </div></div>
-
-          <div style="margin-bottom:6px;"><p class="eyebrow" style="margin-bottom:8px;">Recently Added</p>
-          <div class="lt-recent-added">
-            <button data-view="rfjimport" data-route>Import Jobs</button>
-            <button data-view="rfjexportall" data-route>Export All Jobs</button>
-            <button data-view="rfjreviewq" data-route>Review Queue</button>
-            <button data-view="rfjblockers" data-route>Job Blockers</button>
-            <button data-view="rfjpriority" data-route>Priority Queue</button>
-            <button data-view="rfjdupes" data-route>Dupe Finder</button>
-            <button data-view="rfjtimeline" data-route>Job Timeline</button>
-            <button data-view="rfjsearch" data-route>Job Search</button>
-            <button data-view="rfjstatusboard" data-route>Status Board</button>
-            <button data-view="phase2readiness" data-route>Phase 2 Ready</button>
-            <button data-view="rollbackbuilder" data-route>Rollback Builder</button>
-            <button data-view="highriskwarn" data-route>High-Risk Warn</button>
-          </div></div>
-
-          <div class="action-grid">
-            <button class="command-card" data-view="intake" data-route>
-              <span class="card-icon" data-icon="upload"></span>
-              <strong>Upload Build</strong>
-              <span>Upload ZIP, HTML, notes, reports, or manuals.</span>
-            </button>
-            <button class="command-card" data-view="notes" data-route>
-              <span class="card-icon" data-icon="notes"></span>
-              <strong>Paste Notes</strong>
-              <span>Extract tasks from ChatGPT, Claude, or developer instructions.</span>
-            </button>
-            <button class="command-card hot" data-view="validator" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>Run Validator</strong>
-              <span>Check PWA structure, assets, buttons, claims, and security.</span>
-            </button>
-            <button class="command-card" data-view="fix" data-route>
-              <span class="card-icon" data-icon="wrench"></span>
-              <strong>Fix and Repair</strong>
-              <span>Auto-fix safe issues or generate repair instructions.</span>
-            </button>
-            <button class="command-card" data-view="handoff" data-route>
-              <span class="card-icon" data-icon="handoff"></span>
-              <strong>Developer Handoff</strong>
-              <span>Export Claude prompts, QA checklists, and reports.</span>
-            </button>
-            <button class="command-card" data-view="vault" data-route>
-              <span class="card-icon" data-icon="vault"></span>
-              <strong>Open Project Vault</strong>
-              <span>Protect stable builds and remember what broke.</span>
-            </button>
-            <button class="command-card" data-view="focus" data-route>
-              <span class="card-icon" data-icon="focus"></span>
-              <strong>Show Next Step</strong>
-              <span>Use the readability-friendly guided workflow.</span>
-            </button>
-            <button class="command-card" data-view="help" data-route>
-              <span class="card-icon" data-icon="help"></span>
-              <strong>Open Help Center</strong>
-              <span>Ask the Load AI Helper and follow step-by-step instructions.</span>
-            </button>
-            <button class="command-card" data-view="repairjob" data-route>
-              <span class="card-icon" data-icon="wrench"></span>
-              <strong>Repair Job Writer</strong>
-              <span>Create, export, and save structured repair jobs for Load sites.</span>
-            </button>
-            <button class="command-card" data-view="buildvault" data-route>
-              <span class="card-icon" data-icon="vault"></span>
-              <strong>Stable Build Vault</strong>
-              <span>Record verified builds with commit hash, features, and rollback point.</span>
-            </button>
-            <button class="command-card" data-view="sitehealth" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>Site Health Report</strong>
-              <span>Record whether a site loads, what is broken, and what is missing.</span>
-            </button>
-            <button class="command-card" data-view="repairpack" data-route>
-              <span class="card-icon" data-icon="wrench"></span>
-              <strong>Repair Pack Summary</strong>
-              <span>Summarise a repair pack with risk level, rollback plan, and status.</span>
-            </button>
-            <button class="command-card" data-view="localrecords" data-route>
-              <span class="card-icon" data-icon="library"></span>
-              <strong>Local Records</strong>
-              <span>View, reload, delete, and export all locally saved records.</span>
-            </button>
-            <button class="command-card" data-view="templates" data-route>
-              <span class="card-icon" data-icon="library"></span>
-              <strong>Job Templates</strong>
-              <span>Fill a repair job from a pre-built scenario template.</span>
-            </button>
-            <button class="command-card" data-view="criteria" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>Acceptance Criteria</strong>
-              <span>Build a checklist linked to a repair pack and check items off.</span>
-            </button>
-            <button class="command-card" data-view="statusboard" data-route>
-              <span class="card-icon" data-icon="version"></span>
-              <strong>Repair Status Board</strong>
-              <span>See all repair jobs by status. Update status in one tap.</span>
-            </button>
-            <button class="command-card" data-view="importrecords" data-route>
-              <span class="card-icon" data-icon="upload"></span>
-              <strong>Import Records</strong>
-              <span>Paste or upload an exported records bundle to restore local data.</span>
-            </button>
-            <button class="command-card" data-view="smokecheck" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>Site Smoke Check</strong>
-              <span>Record whether a site opens, blank screen, raw code, navigation visible.</span>
-            </button>
-            <button class="command-card" data-view="baseline" data-route>
-              <span class="card-icon" data-icon="vault"></span>
-              <strong>Friday Baseline</strong>
-              <span>Save a stable build snapshot with commit hash, cache marker, and rollback point.</span>
-            </button>
-            <button class="command-card" data-view="riskreport" data-route>
-              <span class="card-icon" data-icon="wrench"></span>
-              <strong>Risk Report</strong>
-              <span>Generate a pre-change risk report before any build or push.</span>
-            </button>
-            <button class="command-card" data-view="promptbuilder" data-route>
-              <span class="card-icon" data-icon="notes"></span>
-              <strong>Prompt Builder</strong>
-              <span>Generate safe developer instructions for common Claude Code scenarios.</span>
-            </button>
-            <button class="command-card" data-view="sessionnotes" data-route>
-              <span class="card-icon" data-icon="notes"></span>
-              <strong>Session Notes</strong>
-              <span>Write and export a structured session log with built, broken, and next steps.</span>
-            </button>
-            <button class="command-card" data-view="handoffdoc" data-route>
-              <span class="card-icon" data-icon="handoff"></span>
-              <strong>Handoff Doc</strong>
-              <span>Generate a plain-language handoff block to start the next Claude session.</span>
-            </button>
-            <button class="command-card" data-view="changelog" data-route>
-              <span class="card-icon" data-icon="version"></span>
-              <strong>Changelog</strong>
-              <span>Record one entry per PR or merge. Export a full changelog as .txt.</span>
-            </button>
-            <button class="command-card" data-view="versiontracker" data-route>
-              <span class="card-icon" data-icon="library"></span>
-              <strong>Version Tracker</strong>
-              <span>Track current version and cache marker for every site in one place.</span>
-            </button>
-            <button class="command-card" data-view="backlog" data-route>
-              <span class="card-icon" data-icon="library"></span>
-              <strong>Feature Backlog</strong>
-              <span>Track features by site, priority, and status. Export as .txt or .json.</span>
-            </button>
-            <button class="command-card" data-view="testplan" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>Test Plan Builder</strong>
-              <span>Create a structured test plan with steps and pass/fail per item.</span>
-            </button>
-            <button class="command-card" data-view="issues" data-route>
-              <span class="card-icon" data-icon="wrench"></span>
-              <strong>Issue Tracker</strong>
-              <span>Log bugs and issues by site and severity. Update status. Export.</span>
-            </button>
-            <button class="command-card" data-view="runchecklist" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>Build Checklist Runner</strong>
-              <span>Run pre-built checklists for common workflows. Check off items and reset.</span>
-            </button>
-            <button class="command-card" data-view="searchrecords" data-route>
-              <span class="card-icon" data-icon="focus"></span>
-              <strong>Search Records</strong>
-              <span>Search all saved records by keyword across every record type.</span>
-            </button>
-            <button class="command-card" data-view="timeline" data-route>
-              <span class="card-icon" data-icon="version"></span>
-              <strong>Build Timeline</strong>
-              <span>All records in date order. See everything that happened and when.</span>
-            </button>
-            <button class="command-card" data-view="quickactions" data-route>
-              <span class="card-icon" data-icon="dashboard"></span>
-              <strong>Quick Actions</strong>
-              <span>One-tap shortcuts to the most common starting points.</span>
-            </button>
-            <button class="command-card" data-view="stats" data-route>
-              <span class="card-icon" data-icon="certificate"></span>
-              <strong>Stats Summary</strong>
-              <span>Total counts, last activity per type, and localStorage usage.</span>
-            </button>
-            <button class="command-card" data-view="notepad" data-route>
-              <span class="card-icon" data-icon="notes"></span>
-              <strong>Quick Note Pad</strong>
-              <span>Scratch pad that auto-saves as you type. Export .txt anytime.</span>
-            </button>
-            <button class="command-card" data-view="bysite" data-route>
-              <span class="card-icon" data-icon="library"></span>
-              <strong>Per-Site View</strong>
-              <span>Pick a site and see all records for it grouped by type.</span>
-            </button>
-            <button class="command-card" data-view="buildhealth" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>Build Health</strong>
-              <span>Open issues by severity, repair jobs by status, backlog by priority.</span>
-            </button>
-            <button class="command-card" data-view="jobdetail" data-route>
-              <span class="card-icon" data-icon="wrench"></span>
-              <strong>Repair Job Detail</strong>
-              <span>View all fields for a repair job as a formatted report. Copy or export.</span>
-            </button>
-            <button class="command-card" data-view="linked" data-route>
-              <span class="card-icon" data-icon="version"></span>
-              <strong>Linked Records</strong>
-              <span>Enter any record ID and find everything that references it.</span>
-            </button>
-            <button class="command-card" data-view="commandcenter" data-route>
-              <span class="card-icon" data-icon="dashboard"></span>
-              <strong>Command Center</strong>
-              <span>All tools at a glance with live record counts and direct links.</span>
-            </button>
-            <button class="command-card" data-view="todaywork" data-route>
-              <span class="card-icon" data-icon="notes"></span>
-              <strong>Today's Work</strong>
-              <span>Log what you built, what broke, and what is next. Auto-saves.</span>
-            </button>
-            <button class="command-card" data-view="priorityqueue" data-route>
-              <span class="card-icon" data-icon="focus"></span>
-              <strong>Priority Queue</strong>
-              <span>Add tasks by urgency. Mark done. Export the list.</span>
-            </button>
-            <button class="command-card" data-view="blockers" data-route>
-              <span class="card-icon" data-icon="wrench"></span>
-              <strong>Blockers</strong>
-              <span>Log anything blocking progress. Resolve or reopen with one tap.</span>
-            </button>
-            <button class="command-card" data-view="nextaction" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>Next Action</strong>
-              <span>Scans open issues, backlog, and repair jobs. Shows where to focus.</span>
-            </button>
-            <button class="command-card" data-view="savedprompts" data-route>
-              <span class="card-icon" data-icon="library"></span>
-              <strong>Saved Prompts</strong>
-              <span>Store reusable Claude prompts. Copy with one tap.</span>
-            </button>
-            <button class="command-card" data-view="recoveryreport" data-route>
-              <span class="card-icon" data-icon="wrench"></span>
-              <strong>Recovery Report</strong>
-              <span>Document what broke, recovery steps, and rollback command.</span>
-            </button>
-            <button class="command-card" data-view="branchinventory" data-route>
-              <span class="card-icon" data-icon="version"></span>
-              <strong>Branch Inventory</strong>
-              <span>Track every feature branch — purpose, status, and linked PR.</span>
-            </button>
-            <button class="command-card" data-view="prreview" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>PR Review Checklist</strong>
-              <span>12-point checklist. Check items, copy summary, reset.</span>
-            </button>
-            <button class="command-card" data-view="mergedecision" data-route>
-              <span class="card-icon" data-icon="certificate"></span>
-              <strong>Merge Decision</strong>
-              <span>Fill in context. Get a clear GO or NO-GO statement to copy.</span>
-            </button>
-            <button class="command-card" data-view="rollbackdecision" data-route>
-              <span class="card-icon" data-icon="wrench"></span>
-              <strong>Rollback Decision</strong>
-              <span>Document what broke. Generate a plain-language rollback plan.</span>
-            </button>
-            <button class="command-card" data-view="dailyexport" data-route>
-              <span class="card-icon" data-icon="upload"></span>
-              <strong>Export Daily Work Packet</strong>
-              <span>Bundle today's work, note pad, session notes, and open issues into .txt.</span>
-            </button>
-            <button class="command-card" data-view="diffviewer" data-route>
-              <span class="card-icon" data-icon="focus"></span>
-              <strong>Diff Viewer</strong>
-              <span>Paste two text blocks and see exactly what changed line by line.</span>
-            </button>
-            <button class="command-card" data-view="commitmsg" data-route>
-              <span class="card-icon" data-icon="notes"></span>
-              <strong>Commit Message Generator</strong>
-              <span>Fill in site, type, and changes. Get a clean conventional commit message.</span>
-            </button>
-            <button class="command-card" data-view="errorlog" data-route>
-              <span class="card-icon" data-icon="wrench"></span>
-              <strong>Error Log</strong>
-              <span>Record errors with site, message, and status. Export full log.</span>
-            </button>
-            <button class="command-card" data-view="deploychecklist" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>Deploy Checklist</strong>
-              <span>Pre-deploy safety checklist. Check items off. Copy summary.</span>
-            </button>
-            <button class="command-card" data-view="snippets" data-route>
-              <span class="card-icon" data-icon="library"></span>
-              <strong>Snippet Library</strong>
-              <span>Save code or text snippets with labels. Copy with one tap.</span>
-            </button>
-            <button class="command-card" data-view="prdraft" data-route>
-              <span class="card-icon" data-icon="version"></span>
-              <strong>PR Draft Maker</strong>
-              <span>Fill fields and generate a ready-to-paste PR description block.</span>
-            </button>
-            <button class="command-card" data-view="sessiongen" data-route>
-              <span class="card-icon" data-icon="notes"></span>
-              <strong>Session Summary Generator</strong>
-              <span>Combine today's work, issues, and next steps into a formatted summary.</span>
-            </button>
-            <button class="command-card" data-view="worktimer" data-route>
-              <span class="card-icon" data-icon="focus"></span>
-              <strong>Work Timer</strong>
-              <span>Start, stop, and log time spent per task. Export the time log.</span>
-            </button>
-            <button class="command-card" data-view="buildnotes" data-route>
-              <span class="card-icon" data-icon="notes"></span>
-              <strong>Build Notes</strong>
-              <span>Quick inline notes per build. Save with site and version label.</span>
-            </button>
-            <button class="command-card" data-view="sitemap" data-route>
-              <span class="card-icon" data-icon="library"></span>
-              <strong>Site Map</strong>
-              <span>Track pages and routes per site. Record status per route.</span>
-            </button>
-            <button class="command-card" data-view="comparebuilds" data-route>
-              <span class="card-icon" data-icon="vault"></span>
-              <strong>Compare Builds</strong>
-              <span>Compare two saved baselines side by side. Spot what changed.</span>
-            </button>
-            <button class="command-card" data-view="labelmaker" data-route>
-              <span class="card-icon" data-icon="certificate"></span>
-              <strong>Label Maker</strong>
-              <span>Generate consistent status labels and badge text for records and PRs.</span>
-            </button>
-            <button class="command-card" data-view="releasenotes" data-route>
-              <span class="card-icon" data-icon="version"></span>
-              <strong>Release Notes Builder</strong>
-              <span>Draft structured release notes from changelog entries and PR list.</span>
-            </button>
-            <button class="command-card" data-view="rollbackreceipt" data-route>
-              <span class="card-icon" data-icon="wrench"></span>
-              <strong>Rollback Receipt Builder</strong>
-              <span>Generate a formal rollback receipt to document a completed revert.</span>
-            </button>
-            <button class="command-card" data-view="approvalphrase" data-route>
-              <span class="card-icon" data-icon="certificate"></span>
-              <strong>Approval Phrase Generator</strong>
-              <span>Generate the exact approval phrases needed to trigger Claude actions.</span>
-            </button>
-            <button class="command-card" data-view="branchsafety" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>Branch Safety Checklist</strong>
-              <span>Confirm a branch is safe to push before any git push command.</span>
-            </button>
-            <button class="command-card" data-view="prrisks" data-route>
-              <span class="card-icon" data-icon="focus"></span>
-              <strong>PR Risk Matrix</strong>
-              <span>Score a PR across 8 risk dimensions. Get a composite risk rating.</span>
-            </button>
-            <button class="command-card" data-view="deployreceipt" data-route>
-              <span class="card-icon" data-icon="upload"></span>
-              <strong>Deployment Receipt Draft</strong>
-              <span>Document a completed deployment with SHA, files, and verification status.</span>
-            </button>
-            <button class="command-card" data-view="stagingplan" data-route>
-              <span class="card-icon" data-icon="notes"></span>
-              <strong>Staging Plan Builder</strong>
-              <span>Plan what to test before merging. Steps, expected results, pass/fail.</span>
-            </button>
-            <button class="command-card" data-view="knownissues" data-route>
-              <span class="card-icon" data-icon="wrench"></span>
-              <strong>Known Issues Register</strong>
-              <span>Permanent log of known issues per site. Separate from the Issue Tracker.</span>
-            </button>
-            <button class="command-card" data-view="verifyscript" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>Verification Script Builder</strong>
-              <span>Build a step-by-step manual verification script for any feature or fix.</span>
-            </button>
-            <button class="command-card" data-view="featureaccept" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>Feature Acceptance Checklist</strong>
-              <span>Define and check acceptance criteria before marking a feature done.</span>
-            </button>
-            <button class="command-card" data-view="depnotes" data-route>
-              <span class="card-icon" data-icon="library"></span>
-              <strong>Dependency Notes</strong>
-              <span>Log libraries, scripts, or external dependencies per site with version and status.</span>
-            </button>
-            <button class="command-card" data-view="dailycommand" data-route>
-              <span class="card-icon" data-icon="dashboard"></span>
-              <strong>Daily Command Center Summary</strong>
-              <span>One-tap view of today's key numbers: issues, blockers, queue, timer, notes.</span>
-            </button>
-            <button class="command-card" data-view="hotfix" data-route>
-              <span class="card-icon" data-icon="wrench"></span>
-              <strong>Hot Fix Tracker</strong>
-              <span>Track urgent fixes: site, severity, branch, status. Export open fixes.</span>
-            </button>
-            <button class="command-card" data-view="regressionlog" data-route>
-              <span class="card-icon" data-icon="wrench"></span>
-              <strong>Regression Log</strong>
-              <span>Record regressions found during testing. Link to fix. Mark resolved.</span>
-            </button>
-            <button class="command-card" data-view="decisionlog" data-route>
-              <span class="card-icon" data-icon="notes"></span>
-              <strong>Decision Log</strong>
-              <span>Record key decisions with context and rationale. Never lose the why.</span>
-            </button>
-            <button class="command-card" data-view="scopecreep" data-route>
-              <span class="card-icon" data-icon="focus"></span>
-              <strong>Scope Creep Logger</strong>
-              <span>Log when scope expands beyond what was approved. Track and export.</span>
-            </button>
-            <button class="command-card" data-view="prcomments" data-route>
-              <span class="card-icon" data-icon="version"></span>
-              <strong>PR Comment Builder</strong>
-              <span>Generate standardised review comments for common PR findings.</span>
-            </button>
-            <button class="command-card" data-view="filechanges" data-route>
-              <span class="card-icon" data-icon="library"></span>
-              <strong>File Change Tracker</strong>
-              <span>Log which files changed in a session, why, and what was the risk.</span>
-            </button>
-            <button class="command-card" data-view="buildsequence" data-route>
-              <span class="card-icon" data-icon="dashboard"></span>
-              <strong>Build Sequence Planner</strong>
-              <span>Plan the exact order of operations for a build. Step through and tick off.</span>
-            </button>
-            <button class="command-card" data-view="incidentreport" data-route>
-              <span class="card-icon" data-icon="wrench"></span>
-              <strong>Incident Report Builder</strong>
-              <span>Document production incidents: what broke, impact, timeline, resolution.</span>
-            </button>
-            <button class="command-card" data-view="postmortem" data-route>
-              <span class="card-icon" data-icon="notes"></span>
-              <strong>Post-Mortem Template</strong>
-              <span>Structured post-mortem after any incident or failed deploy.</span>
-            </button>
-            <button class="command-card" data-view="featuretoggles" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>Feature Toggle Notes</strong>
-              <span>Track feature flags and conditional blocks per site. Record current state.</span>
-            </button>
-            <button class="command-card" data-view="sprintlog" data-route>
-              <span class="card-icon" data-icon="version"></span>
-              <strong>Sprint Log</strong>
-              <span>Log session goals, what shipped, what did not, and what blocked you.</span>
-            </button>
-            <button class="command-card" data-view="quickref" data-route>
-              <span class="card-icon" data-icon="library"></span>
-              <strong>Quick Reference Card</strong>
-              <span>Build a personal cheatsheet of commands, keys, and shortcuts.</span>
-            </button>
-            <button class="command-card" data-view="sessionsnap" data-route>
-              <span class="card-icon" data-icon="vault"></span>
-              <strong>Session State Snapshot</strong>
-              <span>Capture all open records as a moment-in-time snapshot. Export or copy.</span>
-            </button>
-            <button class="command-card" data-view="codenotes" data-route>
-              <span class="card-icon" data-icon="notes"></span>
-              <strong>Code Review Notes</strong>
-              <span>Notes during code review with file, line, and finding type. Export.</span>
-            </button>
-            <button class="command-card" data-view="testcoverage" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>Test Coverage Notes</strong>
-              <span>Track what is tested vs untested per site and feature. Export gaps.</span>
-            </button>
-            <button class="command-card" data-view="apiendpoints" data-route>
-              <span class="card-icon" data-icon="library"></span>
-              <strong>API Endpoint Notes</strong>
-              <span>Document API endpoints per site with method, status, and auth type.</span>
-            </button>
-            <button class="command-card" data-view="envcheck" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>Environment Checker</strong>
-              <span>Confirm your dev environment is set up correctly before building.</span>
-            </button>
-            <button class="command-card" data-view="mergelog" data-route>
-              <span class="card-icon" data-icon="version"></span>
-              <strong>Merge Log</strong>
-              <span>Log every merge with PR number, SHA, branch, date, and risk level.</span>
-            </button>
-            <button class="command-card" data-view="bugtriage" data-route>
-              <span class="card-icon" data-icon="wrench"></span>
-              <strong>Bug Triage</strong>
-              <span>Triage bugs with severity, site, status, and assignee.</span>
-            </button>
-            <button class="command-card" data-view="sessiongoals" data-route>
-              <span class="card-icon" data-icon="focus"></span>
-              <strong>Session Goals</strong>
-              <span>Set goals for this session and tick them off as you go.</span>
-            </button>
-            <button class="command-card" data-view="shippedlog" data-route>
-              <span class="card-icon" data-icon="vault"></span>
-              <strong>Shipped Features Log</strong>
-              <span>Permanent record of shipped features with date, PR, and SHA.</span>
-            </button>
-            <button class="command-card" data-view="testresults" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>Test Results Log</strong>
-              <span>Log manual test runs with pass/fail, device, and notes.</span>
-            </button>
-            <button class="command-card" data-view="rollbackplan" data-route>
-              <span class="card-icon" data-icon="wrench"></span>
-              <strong>Rollback Plan Builder</strong>
-              <span>Document rollback steps per PR before merging. Export as .txt.</span>
-            </button>
-            <button class="command-card" data-view="riskregister" data-route>
-              <span class="card-icon" data-icon="notes"></span>
-              <strong>Risk Register</strong>
-              <span>Log risks with probability, impact, mitigation, and status.</span>
-            </button>
-            <button class="command-card" data-view="branchlog" data-route>
-              <span class="card-icon" data-icon="library"></span>
-              <strong>Branch Log</strong>
-              <span>Log branches created in a sprint with purpose and merge status.</span>
-            </button>
-            <button class="command-card" data-view="standup" data-route>
-              <span class="card-icon" data-icon="dashboard"></span>
-              <strong>Daily Stand-Up Generator</strong>
-              <span>Generate a stand-up message from Today's Work and Blockers.</span>
-            </button>
-            <button class="command-card" data-view="prprep" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>PR Prep Checklist</strong>
-              <span>Run through required checks before opening any pull request.</span>
-            </button>
-            <button class="command-card" data-view="clippad" data-route>
-              <span class="card-icon" data-icon="notes"></span>
-              <strong>Clip Pad</strong>
-              <span>Store multiple text clips in-session. Copy any item with one tap.</span>
-            </button>
-            <button class="command-card" data-view="urlstore" data-route>
-              <span class="card-icon" data-icon="library"></span>
-              <strong>URL Store</strong>
-              <span>Save named internal URLs for quick access during builds.</span>
-            </button>
-            <button class="command-card" data-view="commitmsg2" data-route>
-              <span class="card-icon" data-icon="version"></span>
-              <strong>Commit Templates</strong>
-              <span>Library of commit message templates. Fill in and copy.</span>
-            </button>
-            <button class="command-card" data-view="pasteannotate" data-route>
-              <span class="card-icon" data-icon="notes"></span>
-              <strong>Paste &amp; Annotate</strong>
-              <span>Paste code or diff text and attach notes and tags. Save for later.</span>
-            </button>
-            <button class="command-card" data-view="worklog" data-route>
-              <span class="card-icon" data-icon="focus"></span>
-              <strong>Work Log</strong>
-              <span>Log time spent on tasks with duration and notes per session.</span>
-            </button>
-            <button class="command-card" data-view="toolindex" data-route>
-              <span class="card-icon" data-icon="library"></span>
-              <strong>Tool Index</strong>
-              <span>Search all tools by name or keyword. Go directly to any tool.</span>
-            </button>
-            <button class="command-card" data-view="favorites" data-route>
-              <span class="card-icon" data-icon="focus"></span>
-              <strong>Favorites</strong>
-              <span>Pin your most-used tools for one-tap access from a single panel.</span>
-            </button>
-            <button class="command-card" data-view="recenttools" data-route>
-              <span class="card-icon" data-icon="version"></span>
-              <strong>Recently Used Tools</strong>
-              <span>See which tools you used recently and jump back to any of them.</span>
-            </button>
-            <button class="command-card" data-view="exportpacket" data-route>
-              <span class="card-icon" data-icon="vault"></span>
-              <strong>Export All Reports</strong>
-              <span>Bundle every record from every tool into one .txt export file.</span>
-            </button>
-            <button class="command-card" data-view="settingsio" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>Settings Backup</strong>
-              <span>Export all LoadTasks data as JSON. Restore from a backup file.</span>
-            </button>
-            <button class="command-card" data-view="quicklaunch" data-route>
-              <span class="card-icon" data-icon="dashboard"></span>
-              <strong>Quick Launch</strong>
-              <span>Configure up to 8 one-tap shortcuts for your daily tools.</span>
-            </button>
-            <button class="command-card" data-view="whatsnext2" data-route>
-              <span class="card-icon" data-icon="focus"></span>
-              <strong>What Should I Do Next?</strong>
-              <span>Reads your records and suggests the highest-priority next action.</span>
-            </button>
-            <button class="command-card" data-view="sessionsummary" data-route>
-              <span class="card-icon" data-icon="notes"></span>
-              <strong>Session Summary</strong>
-              <span>Auto-generate an end-of-session report from all your records.</span>
-            </button>
-            <button class="command-card" data-view="toolcategories" data-route>
-              <span class="card-icon" data-icon="library"></span>
-              <strong>Tool Categories</strong>
-              <span>Browse all tools grouped by category: Daily, Build, Records, etc.</span>
-            </button>
-            <button class="command-card" data-view="toolhelp" data-route>
-              <span class="card-icon" data-icon="notes"></span>
-              <strong>Tool Help</strong>
-              <span>Help text and usage tips for every tool in the Developer Bot.</span>
-            </button>
-            <button class="command-card" data-view="cmdoverview" data-route>
-              <span class="card-icon" data-icon="dashboard"></span>
-              <strong>Command Center Overview</strong>
-              <span>One-screen status of all open work, risks, and pending actions.</span>
-            </button>
-            <button class="command-card" data-view="toolsearch2" data-route>
-              <span class="card-icon" data-icon="library"></span>
-              <strong>Tool Search</strong>
-              <span>Search all tools with filters by category, type, and storage use.</span>
-            </button>
-            <button class="command-card" data-view="depmap" data-route>
-              <span class="card-icon" data-icon="version"></span>
-              <strong>Tool Dependency Map</strong>
-              <span>See which tools read from other tools and how data flows.</span>
-            </button>
-            <button class="command-card" data-view="activework" data-route>
-              <span class="card-icon" data-icon="focus"></span>
-              <strong>Active Work Summary</strong>
-              <span>All in-progress items across every tool in one view.</span>
-            </button>
-            <button class="command-card" data-view="openrisks" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>Open Risks Summary</strong>
-              <span>All open risks from Bug Triage, Risk Register, and Hot Fix.</span>
-            </button>
-            <button class="command-card" data-view="pendingreviews" data-route>
-              <span class="card-icon" data-icon="version"></span>
-              <strong>Pending Reviews Summary</strong>
-              <span>Items awaiting review across PR Review, Feature Accept, and Merge Check.</span>
-            </button>
-            <button class="command-card" data-view="backupreminder" data-route>
-              <span class="card-icon" data-icon="vault"></span>
-              <strong>Backup Check</strong>
-              <span>Check when you last exported data and get a reminder to backup.</span>
-            </button>
-            <button class="command-card" data-view="exporthandoff" data-route>
-              <span class="card-icon" data-icon="vault"></span>
-              <strong>Export Handoff Packet</strong>
-              <span>Bundle all open work into a structured handoff for the next session.</span>
-            </button>
-            <button class="command-card" data-view="importhandoff" data-route>
-              <span class="card-icon" data-icon="vault"></span>
-              <strong>Import Handoff Packet</strong>
-              <span>Restore open items from a handoff packet at the start of a session.</span>
-            </button>
-            <button class="command-card" data-view="safenextstep" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>Safe Next Step</strong>
-              <span>Recommends the lowest-risk next action given your current records.</span>
-            </button>
-            <button class="command-card" data-view="siteprotection" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>Site Protection Status</strong>
-              <span>Log and review protection settings and locked files per site.</span>
-            </button>
-            <button class="command-card" data-view="vaultreminder" data-route>
-              <span class="card-icon" data-icon="vault"></span>
-              <strong>Build Vault Reminder</strong>
-              <span>Track when you last vaulted a build and get reminded to vault again.</span>
-            </button>
-            <button class="command-card" data-view="starthere" data-route>
-              <span class="card-icon" data-icon="focus"></span>
-              <strong>Start Here</strong>
-              <span>New session orientation: review state, set goals, pick a workflow.</span>
-            </button>
-            <button class="command-card" data-view="simpledash" data-route>
-              <span class="card-icon" data-icon="dashboard"></span>
-              <strong>Simplified Dashboard</strong>
-              <span>Clean status view: open work, goals, recent activity, no scroll.</span>
-            </button>
-            <button class="command-card" data-view="pinnedcmd" data-route>
-              <span class="card-icon" data-icon="focus"></span>
-              <strong>Pinned Command Area</strong>
-              <span>Pin frequently used commands and tools to a persistent launch panel.</span>
-            </button>
-            <button class="command-card" data-view="dailywizard" data-route>
-              <span class="card-icon" data-icon="notes"></span>
-              <strong>Daily Workflow Guide</strong>
-              <span>Step-by-step guide for a standard developer day.</span>
-            </button>
-            <button class="command-card" data-view="recoverywizard" data-route>
-              <span class="card-icon" data-icon="wrench"></span>
-              <strong>Recovery Workflow Guide</strong>
-              <span>Step-by-step guide for recovering from a broken deploy or incident.</span>
-            </button>
-            <button class="command-card" data-view="releasewizard" data-route>
-              <span class="card-icon" data-icon="version"></span>
-              <strong>Release Guide</strong>
-              <span>Step-by-step guide for shipping a release from branch to live.</span>
-            </button>
-            <button class="command-card" data-view="lowtestwizard" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>Low-Test Day Guide</strong>
-              <span>Step-by-step guide for low-risk builds when device testing is limited.</span>
-            </button>
-            <button class="command-card" data-view="buildsession" data-route>
-              <span class="card-icon" data-icon="library"></span>
-              <strong>Build Session Guide</strong>
-              <span>Step-by-step guide for running a focused multi-batch build session.</span>
-            </button>
-            <button class="command-card" data-view="exportdaily" data-route>
-              <span class="card-icon" data-icon="vault"></span>
-              <strong>One-Click Daily Packet</strong>
-              <span>Export today's work, goals, blockers, and stand-up in one tap.</span>
-            </button>
-            <button class="command-card" data-view="exportrecovery" data-route>
-              <span class="card-icon" data-icon="vault"></span>
-              <strong>One-Click Recovery Packet</strong>
-              <span>Export all incident, regression, risk, and rollback records.</span>
-            </button>
-            <button class="command-card" data-view="exportrelease" data-route>
-              <span class="card-icon" data-icon="vault"></span>
-              <strong>One-Click Release Packet</strong>
-              <span>Export deploy receipts, shipped log, release notes, and merge log.</span>
-            </button>
-            <button class="command-card" data-view="compactmode" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>Compact Mode</strong>
-              <span>Toggle tool categories on or off to reduce nav clutter.</span>
-            </button>
-            <button class="command-card" data-view="repofilejob" data-route>
-              <span class="card-icon" data-icon="version"></span>
-              <strong>Repo File Work Request</strong>
-              <span>Create a structured job spec for a repo file change. No browser token. No direct write.</span>
-            </button>
-            <button class="command-card" data-view="filepathhelper" data-route>
-              <span class="card-icon" data-icon="library"></span>
-              <strong>File Path Helper</strong>
-              <span>Preset file paths for every Load area. Copy any path with one tap.</span>
-            </button>
-            <button class="command-card" data-view="riskclassifier" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>Risk Classifier</strong>
-              <span>Paste file paths and get an automatic LOW / MEDIUM / HIGH risk level.</span>
-            </button>
-            <button class="command-card" data-view="patchplan" data-route>
-              <span class="card-icon" data-icon="notes"></span>
-              <strong>Patch Plan Builder</strong>
-              <span>Generate a patch-plan.txt from a saved repo file job.</span>
-            </button>
-            <button class="command-card" data-view="prdraftbuilder" data-route>
-              <span class="card-icon" data-icon="version"></span>
-              <strong>PR Draft Builder</strong>
-              <span>Generate a PR title and PR body from a saved repo file job.</span>
-            </button>
-            <button class="command-card" data-view="exportrfj" data-route>
-              <span class="card-icon" data-icon="vault"></span>
-              <strong>Export Repo File Job</strong>
-              <span>Copy JSON, export patch plan, export PR draft from any saved job.</span>
-            </button>
-            <button class="command-card" data-view="actionspec" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>GitHub Action Spec</strong>
-              <span>Placeholder spec for the future secure executor. Phase 2 reference.</span>
-            </button>
-            <button class="command-card" data-view="rfjtemplate" data-route>
-              <span class="card-icon" data-icon="branch"></span>
-              <strong>Job Templates</strong>
-              <span>Pre-filled repo file job templates for common change types.</span>
-            </button>
-            <button class="command-card" data-view="fileimpact" data-route>
-              <span class="card-icon" data-icon="risk"></span>
-              <strong>File Impact Analyzer</strong>
-              <span>Analyze which systems a file change will affect before submitting.</span>
-            </button>
-            <button class="command-card" data-view="highriskwarn" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>High-Risk File Warning</strong>
-              <span>Review all HIGH-risk files and required approval conditions.</span>
-            </button>
-            <button class="command-card" data-view="approvephrase" data-route>
-              <span class="card-icon" data-icon="verified"></span>
-              <strong>Approval Phrase Builder</strong>
-              <span>Generate standard approval phrases for PR descriptions and reviews.</span>
-            </button>
-            <button class="command-card" data-view="rollbackbuilder" data-route>
-              <span class="card-icon" data-icon="version"></span>
-              <strong>Rollback Builder</strong>
-              <span>Build rollback commands from saved jobs or manual SHA input.</span>
-            </button>
-            <button class="command-card" data-view="prsafetychk" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>PR Safety Checklist</strong>
-              <span>Run through a pre-merge safety checklist before approving a PR.</span>
-            </button>
-            <button class="command-card" data-view="patchscope" data-route>
-              <span class="card-icon" data-icon="scope"></span>
-              <strong>Patch Scope Limiter</strong>
-              <span>Define and enforce scope limits on a patch before building.</span>
-            </button>
-            <button class="command-card" data-view="rfjhandoff" data-route>
-              <span class="card-icon" data-icon="branch"></span>
-              <strong>Repo Job Handoff Export</strong>
-              <span>Export a job handoff note for session continuity or handover.</span>
-            </button>
-            <button class="command-card" data-view="rfjpacket" data-route>
-              <span class="card-icon" data-icon="vault"></span>
-              <strong>Repo Job Packet Export</strong>
-              <span>Bundle job JSON, patch plan, and PR draft into one exportable packet.</span>
-            </button>
-            <button class="command-card" data-view="phase2readiness" data-route>
-              <span class="card-icon" data-icon="verified"></span>
-              <strong>Phase 2 Executor Readiness</strong>
-              <span>Checklist to confirm all conditions are met before enabling Phase 2.</span>
-            </button>
-            <button class="command-card" data-view="rfjdashboard" data-route>
-              <span class="card-icon" data-icon="dashboard"></span>
-              <strong>Repo Job Dashboard</strong>
-              <span>Overview of all saved jobs by status, risk, and site.</span>
-            </button>
-            <button class="command-card" data-view="rfjstatusboard" data-route>
-              <span class="card-icon" data-icon="status"></span>
-              <strong>Repo Job Status Board</strong>
-              <span>Kanban-style view: Draft, Ready, In Progress, Done, Blocked.</span>
-            </button>
-            <button class="command-card" data-view="rfjsearch" data-route>
-              <span class="card-icon" data-icon="search"></span>
-              <strong>Repo Job Search</strong>
-              <span>Search and filter saved jobs by file, site, risk, or status.</span>
-            </button>
-            <button class="command-card" data-view="rfjtimeline" data-route>
-              <span class="card-icon" data-icon="version"></span>
-              <strong>Repo Job Timeline</strong>
-              <span>Jobs sorted by creation date. Track activity over time.</span>
-            </button>
-            <button class="command-card" data-view="rfjdupes" data-route>
-              <span class="card-icon" data-icon="scope"></span>
-              <strong>Repo Job Duplicate Finder</strong>
-              <span>Find jobs targeting the same file to avoid conflicts.</span>
-            </button>
-            <button class="command-card" data-view="rfjpriority" data-route>
-              <span class="card-icon" data-icon="risk"></span>
-              <strong>Repo Job Priority Queue</strong>
-              <span>Rank and order jobs by priority. Mark what to do next.</span>
-            </button>
-            <button class="command-card" data-view="rfjblockers" data-route>
-              <span class="card-icon" data-icon="shield"></span>
-              <strong>Repo Job Blockers</strong>
-              <span>Track what is blocking each job from moving forward.</span>
-            </button>
-            <button class="command-card" data-view="rfjreviewq" data-route>
-              <span class="card-icon" data-icon="verified"></span>
-              <strong>Repo Job Review Queue</strong>
-              <span>Jobs awaiting review before they can proceed to PR.</span>
-            </button>
-            <button class="command-card" data-view="rfjexportall" data-route>
-              <span class="card-icon" data-icon="vault"></span>
-              <strong>Repo Job Export All</strong>
-              <span>Export every saved job as a single JSON backup file.</span>
-            </button>
-            <button class="command-card" data-view="rfjimport" data-route>
-              <span class="card-icon" data-icon="branch"></span>
-              <strong>Repo Job Import</strong>
-              <span>Import jobs from a previously exported JSON backup.</span>
-            </button>
+          <!-- Dashboard mode controls -->
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px;flex-wrap:wrap;">
+            <span class="eyebrow" style="margin:0;">View:</span>
+            <button id="dash-beg-btn" class="small-btn" onclick="setDashMode('beginner')" style="font-weight:700;">Step-by-Step</button>
+            <button id="dash-exp-btn" class="small-btn" onclick="setDashMode('expert')" style="opacity:0.55;">All Tools</button>
+            <button class="small-btn" onclick="dashExpandAll()" style="margin-left:auto;opacity:0.7;">Expand All Groups</button>
           </div>
+
+          <!-- GROUP 1: Start Here -->
+          <article class="panel dash-group" style="border-top:2px solid rgba(59,130,246,0.45);border-left:3px solid rgba(59,130,246,0.35);margin-bottom:14px;">
+            <div class="panel-title"><h2>Start Here</h2><span style="font-size:0.75rem;color:rgba(59,130,246,0.8);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">Orientation &amp; Navigation</span></div>
+            <p style="margin-bottom:12px;font-size:0.85rem;opacity:0.7;">New session? Orient yourself, set goals, find any tool, or get a safe suggested next step.</p>
+            <div class="action-grid">
+              <button class="command-card" data-view="starthere" data-route>
+                <span class="card-icon" data-icon="focus"></span>
+                <strong>Start Here</strong>
+                <span>New session orientation: review state, set goals, pick a workflow.</span>
+              </button>
+              <button class="command-card" data-view="whatsnext2" data-route>
+                <span class="card-icon" data-icon="focus"></span>
+                <strong>What Should I Do Next?</strong>
+                <span>Reads your records and suggests the highest-priority next action.</span>
+              </button>
+              <button class="command-card" data-view="safenextstep" data-route>
+                <span class="card-icon" data-icon="shield"></span>
+                <strong>Safe Next Step</strong>
+                <span>Recommends the lowest-risk next action given your current records.</span>
+              </button>
+              <button class="command-card" data-view="toolsearch2" data-route>
+                <span class="card-icon" data-icon="library"></span>
+                <strong>Tool Search</strong>
+                <span>Search all tools with filters by category, type, and storage use.</span>
+              </button>
+              <button class="command-card" data-view="quickactions" data-route>
+                <span class="card-icon" data-icon="dashboard"></span>
+                <strong>Quick Actions</strong>
+                <span>One-tap shortcuts to the most common starting points.</span>
+              </button>
+            </div>
+            <details class="dash-more-det">
+              <summary style="cursor:pointer;font-size:0.82rem;color:var(--accent,#8b99ff);padding:8px 0 4px;list-style:none;">More Start Here tools (22 more)</summary>
+              <div class="lt-recent-added" style="margin-top:6px;">
+                <button data-view="focus" data-route>Show Next Step</button>
+                <button data-view="help" data-route>Help Center</button>
+                <button data-view="dailycommand" data-route>Daily Command Summary</button>
+                <button data-view="commandcenter" data-route>Command Center</button>
+                <button data-view="todaywork" data-route>Today's Work</button>
+                <button data-view="priorityqueue" data-route>Priority Queue</button>
+                <button data-view="blockers" data-route>Blockers</button>
+                <button data-view="nextaction" data-route>Next Action</button>
+                <button data-view="sessiongoals" data-route>Session Goals</button>
+                <button data-view="standup" data-route>Stand-Up Generator</button>
+                <button data-view="quickref" data-route>Quick Reference Card</button>
+                <button data-view="toolindex" data-route>Tool Index</button>
+                <button data-view="toolcategories" data-route>Tool Categories</button>
+                <button data-view="toolhelp" data-route>Tool Help</button>
+                <button data-view="cmdoverview" data-route>Command Center Overview</button>
+                <button data-view="activework" data-route>Active Work Summary</button>
+                <button data-view="favorites" data-route>Favorites</button>
+                <button data-view="recenttools" data-route>Recently Used Tools</button>
+                <button data-view="quicklaunch" data-route>Quick Launch</button>
+                <button data-view="simpledash" data-route>Simplified Dashboard</button>
+                <button data-view="pinnedcmd" data-route>Pinned Command Area</button>
+                <button data-view="compactmode" data-route>Compact Mode</button>
+              </div>
+            </details>
+          </article>
+
+          <!-- GROUP 2: Developer Bot -->
+          <article class="panel dash-group" style="border-top:2px solid rgba(124,58,237,0.45);border-left:3px solid rgba(124,58,237,0.35);margin-bottom:14px;">
+            <div class="panel-title"><h2>Developer Bot</h2><span style="font-size:0.75rem;color:rgba(124,58,237,0.8);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">Safe Repo Change Pipeline</span></div>
+            <p style="margin-bottom:12px;font-size:0.85rem;opacity:0.7;">Create and track repo file jobs. Run the safe change pipeline. Review, validate, and roll back with confidence.</p>
+            <div class="action-grid">
+              <button class="command-card" data-view="devbothome" data-route>
+                <span class="card-icon" data-icon="dashboard"></span>
+                <strong>Developer Bot Home</strong>
+                <span>Central hub for all bot tools: pipeline map, guided flow, history.</span>
+              </button>
+              <button class="command-card" data-view="repofilejob" data-route>
+                <span class="card-icon" data-icon="version"></span>
+                <strong>Repo File Work Request</strong>
+                <span>Create a structured job spec for a repo file change. No browser token. No direct write.</span>
+              </button>
+              <button class="command-card" data-view="rfjdashboard" data-route>
+                <span class="card-icon" data-icon="dashboard"></span>
+                <strong>Repo Job Dashboard</strong>
+                <span>Overview of all saved jobs by status, risk, and site.</span>
+              </button>
+              <button class="command-card" data-view="riskclassifier" data-route>
+                <span class="card-icon" data-icon="shield"></span>
+                <strong>Risk Classifier</strong>
+                <span>Paste file paths and get an automatic LOW / MEDIUM / HIGH risk level.</span>
+              </button>
+              <button class="command-card" data-view="filepathhelper" data-route>
+                <span class="card-icon" data-icon="library"></span>
+                <strong>File Path Helper</strong>
+                <span>Preset file paths for every Load area. Copy any path with one tap.</span>
+              </button>
+            </div>
+            <details class="dash-more-det">
+              <summary style="cursor:pointer;font-size:0.82rem;color:var(--accent,#8b99ff);padding:8px 0 4px;list-style:none;">More Developer Bot tools (23 more)</summary>
+              <div class="lt-recent-added" style="margin-top:6px;">
+                <button data-view="highriskwarn" data-route>High-Risk File Warning</button>
+                <button data-view="patchplan" data-route>Patch Plan Builder</button>
+                <button data-view="prdraftbuilder" data-route>PR Draft Builder</button>
+                <button data-view="exportrfj" data-route>Export Repo File Job</button>
+                <button data-view="actionspec" data-route>GitHub Action Spec</button>
+                <button data-view="rfjtemplate" data-route>Job Templates</button>
+                <button data-view="fileimpact" data-route>File Impact Analyzer</button>
+                <button data-view="approvephrase" data-route>Approval Phrase Builder</button>
+                <button data-view="rollbackbuilder" data-route>Rollback Builder</button>
+                <button data-view="prsafetychk" data-route>PR Safety Checklist</button>
+                <button data-view="patchscope" data-route>Patch Scope Limiter</button>
+                <button data-view="rfjhandoff" data-route>Repo Job Handoff Export</button>
+                <button data-view="rfjpacket" data-route>Repo Job Packet Export</button>
+                <button data-view="phase2readiness" data-route>Phase 2 Readiness</button>
+                <button data-view="rfjstatusboard" data-route>Job Status Board</button>
+                <button data-view="rfjsearch" data-route>Job Search</button>
+                <button data-view="rfjtimeline" data-route>Job Timeline</button>
+                <button data-view="rfjdupes" data-route>Dupe Finder</button>
+                <button data-view="rfjpriority" data-route>Job Priority Queue</button>
+                <button data-view="rfjblockers" data-route>Job Blockers</button>
+                <button data-view="rfjreviewq" data-route>Job Review Queue</button>
+                <button data-view="rfjexportall" data-route>Export All Jobs</button>
+                <button data-view="rfjimport" data-route>Import Jobs</button>
+              </div>
+            </details>
+          </article>
+
+          <!-- GROUP 3: Build & Edit -->
+          <article class="panel dash-group" style="border-top:2px solid rgba(59,130,246,0.35);border-left:3px solid rgba(59,130,246,0.25);margin-bottom:14px;">
+            <div class="panel-title"><h2>Build &amp; Edit</h2><span style="font-size:0.75rem;color:rgba(59,130,246,0.65);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">Records, Tracking &amp; Notes</span></div>
+            <p style="margin-bottom:12px;font-size:0.85rem;opacity:0.7;">Upload builds, track records, write notes, manage repair jobs, and keep every session organized.</p>
+            <div class="action-grid">
+              <button class="command-card hot" data-view="validator" data-route>
+                <span class="card-icon" data-icon="shield"></span>
+                <strong>Run Validator</strong>
+                <span>Check PWA structure, assets, buttons, claims, and security.</span>
+              </button>
+              <button class="command-card" data-view="intake" data-route>
+                <span class="card-icon" data-icon="upload"></span>
+                <strong>Upload Build</strong>
+                <span>Upload ZIP, HTML, notes, reports, or manuals.</span>
+              </button>
+              <button class="command-card" data-view="notes" data-route>
+                <span class="card-icon" data-icon="notes"></span>
+                <strong>Paste Notes</strong>
+                <span>Extract tasks from ChatGPT, Claude, or developer instructions.</span>
+              </button>
+              <button class="command-card" data-view="repairjob" data-route>
+                <span class="card-icon" data-icon="wrench"></span>
+                <strong>Repair Job Writer</strong>
+                <span>Create, export, and save structured repair jobs for Load sites.</span>
+              </button>
+              <button class="command-card" data-view="fix" data-route>
+                <span class="card-icon" data-icon="wrench"></span>
+                <strong>Fix and Repair</strong>
+                <span>Auto-fix safe issues or generate repair instructions.</span>
+              </button>
+            </div>
+            <details class="dash-more-det">
+              <summary style="cursor:pointer;font-size:0.82rem;color:var(--accent,#8b99ff);padding:8px 0 4px;list-style:none;">More Build &amp; Edit tools (46 more)</summary>
+              <div class="lt-recent-added" style="margin-top:6px;">
+                <button data-view="handoff" data-route>Developer Handoff</button>
+                <button data-view="vault" data-route>Project Vault</button>
+                <button data-view="buildvault" data-route>Stable Build Vault</button>
+                <button data-view="sitehealth" data-route>Site Health Report</button>
+                <button data-view="repairpack" data-route>Repair Pack Summary</button>
+                <button data-view="localrecords" data-route>Local Records</button>
+                <button data-view="templates" data-route>Job Templates</button>
+                <button data-view="statusboard" data-route>Repair Status Board</button>
+                <button data-view="importrecords" data-route>Import Records</button>
+                <button data-view="baseline" data-route>Friday Baseline</button>
+                <button data-view="promptbuilder" data-route>Prompt Builder</button>
+                <button data-view="changelog" data-route>Changelog</button>
+                <button data-view="versiontracker" data-route>Version Tracker</button>
+                <button data-view="backlog" data-route>Feature Backlog</button>
+                <button data-view="issues" data-route>Issue Tracker</button>
+                <button data-view="searchrecords" data-route>Search Records</button>
+                <button data-view="timeline" data-route>Build Timeline</button>
+                <button data-view="stats" data-route>Stats Summary</button>
+                <button data-view="notepad" data-route>Quick Note Pad</button>
+                <button data-view="bysite" data-route>Per-Site View</button>
+                <button data-view="buildhealth" data-route>Build Health</button>
+                <button data-view="jobdetail" data-route>Repair Job Detail</button>
+                <button data-view="linked" data-route>Linked Records</button>
+                <button data-view="savedprompts" data-route>Saved Prompts</button>
+                <button data-view="branchinventory" data-route>Branch Inventory</button>
+                <button data-view="commitmsg" data-route>Commit Message Generator</button>
+                <button data-view="errorlog" data-route>Error Log</button>
+                <button data-view="snippets" data-route>Snippet Library</button>
+                <button data-view="worktimer" data-route>Work Timer</button>
+                <button data-view="buildnotes" data-route>Build Notes</button>
+                <button data-view="sitemap" data-route>Site Map</button>
+                <button data-view="comparebuilds" data-route>Compare Builds</button>
+                <button data-view="releasenotes" data-route>Release Notes Builder</button>
+                <button data-view="depnotes" data-route>Dependency Notes</button>
+                <button data-view="scopecreep" data-route>Scope Creep Logger</button>
+                <button data-view="buildsequence" data-route>Build Sequence Planner</button>
+                <button data-view="apiendpoints" data-route>API Endpoint Notes</button>
+                <button data-view="branchlog" data-route>Branch Log</button>
+                <button data-view="clippad" data-route>Clip Pad</button>
+                <button data-view="urlstore" data-route>URL Store</button>
+                <button data-view="commitmsg2" data-route>Commit Templates</button>
+                <button data-view="pasteannotate" data-route>Paste &amp; Annotate</button>
+                <button data-view="worklog" data-route>Work Log</button>
+                <button data-view="depmap" data-route>Tool Dependency Map</button>
+                <button data-view="dailywizard" data-route>Daily Workflow Guide</button>
+                <button data-view="buildsession" data-route>Build Session Guide</button>
+              </div>
+            </details>
+          </article>
+
+          <!-- GROUP 4: Review & Safety -->
+          <article class="panel dash-group" style="border-top:2px solid rgba(217,119,6,0.5);border-left:3px solid rgba(217,119,6,0.35);margin-bottom:14px;">
+            <div class="panel-title"><h2>Review &amp; Safety</h2><span style="font-size:0.75rem;color:rgba(217,119,6,0.85);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">PR Checks, Testing &amp; Risk</span></div>
+            <p style="margin-bottom:12px;font-size:0.85rem;opacity:0.7;">Run safety checks before merging. Review PRs, track risks, and confirm acceptance criteria.</p>
+            <div class="action-grid">
+              <button class="command-card" data-view="prreview" data-route>
+                <span class="card-icon" data-icon="shield"></span>
+                <strong>PR Review Checklist</strong>
+                <span>12-point checklist. Check items, copy summary, reset.</span>
+              </button>
+              <button class="command-card" data-view="mergedecision" data-route>
+                <span class="card-icon" data-icon="certificate"></span>
+                <strong>Merge Decision</strong>
+                <span>Fill in context. Get a clear GO or NO-GO statement to copy.</span>
+              </button>
+              <button class="command-card" data-view="diffviewer" data-route>
+                <span class="card-icon" data-icon="focus"></span>
+                <strong>Diff Viewer</strong>
+                <span>Paste two text blocks and see exactly what changed line by line.</span>
+              </button>
+              <button class="command-card" data-view="branchsafety" data-route>
+                <span class="card-icon" data-icon="shield"></span>
+                <strong>Branch Safety Checklist</strong>
+                <span>Confirm a branch is safe to push before any git push command.</span>
+              </button>
+              <button class="command-card" data-view="deploychecklist" data-route>
+                <span class="card-icon" data-icon="shield"></span>
+                <strong>Deploy Checklist</strong>
+                <span>Pre-deploy safety checklist. Check items off. Copy summary.</span>
+              </button>
+            </div>
+            <details class="dash-more-det">
+              <summary style="cursor:pointer;font-size:0.82rem;color:var(--accent,#8b99ff);padding:8px 0 4px;list-style:none;">More Review &amp; Safety tools (30 more)</summary>
+              <div class="lt-recent-added" style="margin-top:6px;">
+                <button data-view="rollbackdecision" data-route>Rollback Decision</button>
+                <button data-view="prrisks" data-route>PR Risk Matrix</button>
+                <button data-view="prprep" data-route>PR Prep Checklist</button>
+                <button data-view="deployreceipt" data-route>Deployment Receipt Draft</button>
+                <button data-view="stagingplan" data-route>Staging Plan Builder</button>
+                <button data-view="verifyscript" data-route>Verification Script Builder</button>
+                <button data-view="featureaccept" data-route>Feature Acceptance Checklist</button>
+                <button data-view="featuretoggles" data-route>Feature Toggle Notes</button>
+                <button data-view="criteria" data-route>Acceptance Criteria</button>
+                <button data-view="smokecheck" data-route>Site Smoke Check</button>
+                <button data-view="riskreport" data-route>Risk Report</button>
+                <button data-view="testplan" data-route>Test Plan Builder</button>
+                <button data-view="runchecklist" data-route>Build Checklist Runner</button>
+                <button data-view="testcoverage" data-route>Test Coverage Notes</button>
+                <button data-view="testresults" data-route>Test Results Log</button>
+                <button data-view="rollbackplan" data-route>Rollback Plan Builder</button>
+                <button data-view="riskregister" data-route>Risk Register</button>
+                <button data-view="prcomments" data-route>PR Comment Builder</button>
+                <button data-view="filechanges" data-route>File Change Tracker</button>
+                <button data-view="codenotes" data-route>Code Review Notes</button>
+                <button data-view="envcheck" data-route>Environment Checker</button>
+                <button data-view="mergelog" data-route>Merge Log</button>
+                <button data-view="openrisks" data-route>Open Risks Summary</button>
+                <button data-view="pendingreviews" data-route>Pending Reviews Summary</button>
+                <button data-view="siteprotection" data-route>Site Protection Status</button>
+                <button data-view="labelmaker" data-route>Label Maker</button>
+                <button data-view="prdraft" data-route>PR Draft Maker</button>
+                <button data-view="approvalphrase" data-route>Approval Phrase Generator</button>
+                <button data-view="releasewizard" data-route>Release Guide</button>
+                <button data-view="lowtestwizard" data-route>Low-Test Day Guide</button>
+              </div>
+            </details>
+          </article>
+
+          <!-- GROUP 5: Recovery & Reports -->
+          <article class="panel dash-group" style="border-top:2px solid rgba(34,197,94,0.45);border-left:3px solid rgba(34,197,94,0.35);margin-bottom:14px;">
+            <div class="panel-title"><h2>Recovery &amp; Reports</h2><span style="font-size:0.75rem;color:rgba(34,197,94,0.8);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">Incidents, Exports &amp; Session Wrap-Up</span></div>
+            <p style="margin-bottom:12px;font-size:0.85rem;opacity:0.7;">Recover from incidents, roll back safely, export data, and wrap up sessions with structured reports.</p>
+            <div class="action-grid">
+              <button class="command-card" data-view="recoveryreport" data-route>
+                <span class="card-icon" data-icon="wrench"></span>
+                <strong>Recovery Report</strong>
+                <span>Document what broke, recovery steps, and rollback command.</span>
+              </button>
+              <button class="command-card" data-view="rollbackreceipt" data-route>
+                <span class="card-icon" data-icon="wrench"></span>
+                <strong>Rollback Receipt Builder</strong>
+                <span>Generate a formal rollback receipt to document a completed revert.</span>
+              </button>
+              <button class="command-card" data-view="incidentreport" data-route>
+                <span class="card-icon" data-icon="wrench"></span>
+                <strong>Incident Report Builder</strong>
+                <span>Document production incidents: what broke, impact, timeline, resolution.</span>
+              </button>
+              <button class="command-card" data-view="dailyexport" data-route>
+                <span class="card-icon" data-icon="upload"></span>
+                <strong>Export Daily Work Packet</strong>
+                <span>Bundle today's work, note pad, session notes, and open issues into .txt.</span>
+              </button>
+              <button class="command-card" data-view="sessionsummary" data-route>
+                <span class="card-icon" data-icon="notes"></span>
+                <strong>Session Summary</strong>
+                <span>Auto-generate an end-of-session report from all your records.</span>
+              </button>
+            </div>
+            <details class="dash-more-det">
+              <summary style="cursor:pointer;font-size:0.82rem;color:var(--accent,#8b99ff);padding:8px 0 4px;list-style:none;">More Recovery &amp; Reports tools (22 more)</summary>
+              <div class="lt-recent-added" style="margin-top:6px;">
+                <button data-view="sessionnotes" data-route>Session Notes</button>
+                <button data-view="handoffdoc" data-route>Handoff Doc</button>
+                <button data-view="sessiongen" data-route>Session Summary Generator</button>
+                <button data-view="sessionsnap" data-route>Session State Snapshot</button>
+                <button data-view="knownissues" data-route>Known Issues Register</button>
+                <button data-view="hotfix" data-route>Hot Fix Tracker</button>
+                <button data-view="regressionlog" data-route>Regression Log</button>
+                <button data-view="decisionlog" data-route>Decision Log</button>
+                <button data-view="postmortem" data-route>Post-Mortem Template</button>
+                <button data-view="sprintlog" data-route>Sprint Log</button>
+                <button data-view="bugtriage" data-route>Bug Triage</button>
+                <button data-view="shippedlog" data-route>Shipped Features Log</button>
+                <button data-view="exportpacket" data-route>Export All Reports</button>
+                <button data-view="settingsio" data-route>Settings Backup</button>
+                <button data-view="backupreminder" data-route>Backup Check</button>
+                <button data-view="exporthandoff" data-route>Export Handoff Packet</button>
+                <button data-view="importhandoff" data-route>Import Handoff Packet</button>
+                <button data-view="vaultreminder" data-route>Build Vault Reminder</button>
+                <button data-view="exportdaily" data-route>One-Click Daily Packet</button>
+                <button data-view="exportrecovery" data-route>One-Click Recovery Packet</button>
+                <button data-view="exportrelease" data-route>One-Click Release Packet</button>
+                <button data-view="recoverywizard" data-route>Recovery Workflow Guide</button>
+              </div>
+            </details>
+          </article>
 
           <div id="lt-counters" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:24px;"></div>
 
@@ -12216,7 +11691,7 @@
             el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px;text-align:center;"><div style="font-size:28px;font-weight:700;line-height:1;">'+(it.n)+'</div><div style="font-size:12px;color:#9aa0b0;margin-top:4px;">'+it.label+'</div></div>';}).join('');
           }
           var dash=document.getElementById('view-dashboard');
-          if(dash){dash.addEventListener('lt-view-enter',ltRenderCounters);setTimeout(function(){if(dash.classList.contains('active'))ltRenderCounters();},150);}
+          if(dash){dash.addEventListener('lt-view-enter',function(){ltRenderCounters();if(typeof applyDashMode==='function')applyDashMode();});setTimeout(function(){if(dash.classList.contains('active')){ltRenderCounters();if(typeof applyDashMode==='function')applyDashMode();}},150);}
         }());
         </script>
 
@@ -12281,20 +11756,45 @@
         });
       }catch(e){}
     }
-    /* Dashboard start-here buttons route via data-route */
+    /* Dashboard group-more buttons route via data-route */
     function initDashQL(){
-      var ql=document.getElementById('lt-dash-ql');
-      if(ql)ql.querySelectorAll('button[data-view][data-route]').forEach(function(b){
-        b.addEventListener('click',function(){var ev=new CustomEvent('lt-route',{bubbles:true,detail:{view:b.getAttribute('data-view')}});b.dispatchEvent(ev);});
-      });
-      var ra=document.querySelector('.lt-recent-added');
-      if(ra)ra.querySelectorAll('button[data-view][data-route]').forEach(function(b){
-        b.addEventListener('click',function(){var ev=new CustomEvent('lt-route',{bubbles:true,detail:{view:b.getAttribute('data-view')}});b.dispatchEvent(ev);});
-      });
+      var ras=document.querySelectorAll('.lt-recent-added');
+      var i,j,btns;
+      for(i=0;i<ras.length;i++){
+        btns=ras[i].querySelectorAll('button[data-view][data-route]');
+        for(j=0;j<btns.length;j++){
+          (function(b){b.addEventListener('click',function(){var ev=new CustomEvent('lt-route',{bubbles:true,detail:{view:b.getAttribute('data-view')}});b.dispatchEvent(ev);});})(btns[j]);
+        }
+      }
     }
+    /* Dashboard tile mode toggle */
+    function setDashMode(mode){
+      localStorage.setItem('lt_dash_mode',mode);
+      applyDashMode();
+    }
+    function applyDashMode(){
+      var mode=localStorage.getItem('lt_dash_mode')||'beginner';
+      var dets=document.querySelectorAll('#view-dashboard .dash-more-det');
+      var i,begBtn=document.getElementById('dash-beg-btn'),expBtn=document.getElementById('dash-exp-btn');
+      if(mode==='expert'){
+        for(i=0;i<dets.length;i++){dets[i].open=true;}
+        if(begBtn){begBtn.style.fontWeight='';begBtn.style.opacity='0.55';}
+        if(expBtn){expBtn.style.fontWeight='700';expBtn.style.opacity='1';}
+      }else{
+        for(i=0;i<dets.length;i++){dets[i].open=false;}
+        if(begBtn){begBtn.style.fontWeight='700';begBtn.style.opacity='1';}
+        if(expBtn){expBtn.style.fontWeight='';expBtn.style.opacity='0.55';}
+      }
+    }
+    function dashExpandAll(){
+      var dets=document.querySelectorAll('#view-dashboard .dash-more-det');
+      for(var i=0;i<dets.length;i++){dets[i].open=true;}
+    }
+    window.setDashMode=setDashMode;
+    window.dashExpandAll=dashExpandAll;
     if(document.readyState==='loading'){
-      document.addEventListener('DOMContentLoaded',function(){groupRail();initNavSearch();applyCompact();initDashQL();});
-    }else{groupRail();initNavSearch();applyCompact();initDashQL();}
+      document.addEventListener('DOMContentLoaded',function(){groupRail();initNavSearch();applyCompact();initDashQL();applyDashMode();});
+    }else{groupRail();initNavSearch();applyCompact();initDashQL();applyDashMode();}
   }());</script>
 <footer data-loadeco-nav style="padding:14px 18px;border-top:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.25);text-align:center;font-size:12.5px;color:#9aa0b0;font-family:-apple-system,BlinkMacSystemFont,sans-serif">Part of Load Eco™: <a href="../load/" style="color:inherit;text-decoration:none;margin:0 6px">Load</a> &middot; <a href="../loadstudio/" style="color:inherit;text-decoration:none;margin:0 6px">Load Studio™</a> &middot; <a href="../LoadPlay/" style="color:inherit;text-decoration:none;margin:0 6px">Load Play™</a> &middot; <a href="../LoadTasks/" style="color:inherit;text-decoration:none;margin:0 6px">Load Tasks™</a> &middot; <a href="../LoadAI/" style="color:inherit;text-decoration:none;margin:0 6px">Load AI™</a></footer></body>
 </html>
