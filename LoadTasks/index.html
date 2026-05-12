@@ -10478,6 +10478,254 @@
           }());</script>
         </section>
 
+        <!-- VIEW: workhistory -->
+        <section class="view" id="view-workhistory" data-view-panel="workhistory">
+          <div class="section-head"><p class="eyebrow">Repo File Worker</p><h1>Bot Memory / Work History</h1><p>Local log of jobs, branches, PRs, and rollback commands. Stored on this device only — nothing is sent to GitHub or any server.</p></div>
+          <article class="panel" style="margin-bottom:12px;">
+            <div style="padding:10px 14px;border-radius:8px;background:rgba(99,102,241,0.07);border-left:3px solid #6366f1;margin-bottom:16px;">
+              <strong style="font-size:13px;color:#a5b4fc;">Local tracking only.</strong>
+              <p style="font-size:13px;color:#c0c4d0;margin:4px 0 0;">This history lives in your browser's localStorage. It is not synced to GitHub, not shared between devices, and not read by any workflow. Clear browser data and it is gone. Export regularly to keep a backup.</p>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+              <input id="wh-search" type="text" placeholder="Search job ID, branch, notes..." style="flex:1;min-width:160px;padding:8px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#e8eaf0;font-size:13px;box-sizing:border-box;">
+              <select id="wh-filter" style="padding:8px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:#1e2030;color:#e8eaf0;font-size:13px;">
+                <option value="">All statuses</option>
+                <option value="draft">Draft</option>
+                <option value="approved">Approved</option>
+                <option value="in-progress">In progress</option>
+                <option value="merged">Merged</option>
+                <option value="reverted">Reverted</option>
+                <option value="blocked">Blocked</option>
+              </select>
+              <button id="wh-add-btn" class="primary-action" style="white-space:nowrap;">+ Log a job</button>
+            </div>
+            <div style="display:flex;gap:10px;margin-bottom:4px;">
+              <button id="wh-export-txt" class="secondary-action" style="font-size:12px;padding:6px 12px;">Export as text</button>
+              <button id="wh-export-json" class="secondary-action" style="font-size:12px;padding:6px 12px;">Export as JSON</button>
+            </div>
+          </article>
+
+          <div id="wh-form-wrap" style="display:none;margin-bottom:12px;">
+            <article class="panel">
+              <div style="font-size:13px;font-weight:700;color:#a5b4fc;margin-bottom:14px;" id="wh-form-title">Log a new job</div>
+              <input type="hidden" id="wh-edit-id">
+              <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+                <label style="flex:1;min-width:140px;">
+                  <span style="font-size:12px;color:#9aa0b0;display:block;margin-bottom:3px;">Job ID <span style="color:#f87171;">*</span></span>
+                  <input id="wh-f-jobid" type="text" placeholder="RFJ-001" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#e8eaf0;font-size:13px;box-sizing:border-box;font-family:monospace;">
+                </label>
+                <label style="flex:1;min-width:140px;">
+                  <span style="font-size:12px;color:#9aa0b0;display:block;margin-bottom:3px;">Status</span>
+                  <select id="wh-f-status" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:#1e2030;color:#e8eaf0;font-size:13px;">
+                    <option value="draft">Draft</option>
+                    <option value="approved">Approved</option>
+                    <option value="in-progress">In progress</option>
+                    <option value="merged" selected>Merged</option>
+                    <option value="reverted">Reverted</option>
+                    <option value="blocked">Blocked</option>
+                  </select>
+                </label>
+              </div>
+              <label style="display:block;margin-bottom:10px;">
+                <span style="font-size:12px;color:#9aa0b0;display:block;margin-bottom:3px;">Branch name</span>
+                <input id="wh-f-branch" type="text" placeholder="claude/my-change-2026-05-12" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#e8eaf0;font-size:13px;box-sizing:border-box;font-family:monospace;">
+              </label>
+              <label style="display:block;margin-bottom:10px;">
+                <span style="font-size:12px;color:#9aa0b0;display:block;margin-bottom:3px;">PR link or number</span>
+                <input id="wh-f-pr" type="text" placeholder="#58 or full URL" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#e8eaf0;font-size:13px;box-sizing:border-box;font-family:monospace;">
+              </label>
+              <label style="display:block;margin-bottom:10px;">
+                <span style="font-size:12px;color:#9aa0b0;display:block;margin-bottom:3px;">Artifact name</span>
+                <input id="wh-f-artifact" type="text" placeholder="repo-file-worker-packet-RFJ-001.zip" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#e8eaf0;font-size:13px;box-sizing:border-box;font-family:monospace;">
+              </label>
+              <label style="display:block;margin-bottom:10px;">
+                <span style="font-size:12px;color:#9aa0b0;display:block;margin-bottom:3px;">Rollback command</span>
+                <input id="wh-f-rollback" type="text" placeholder="git revert a38318bb --no-edit" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#e8eaf0;font-size:13px;box-sizing:border-box;font-family:monospace;">
+              </label>
+              <label style="display:block;margin-bottom:14px;">
+                <span style="font-size:12px;color:#9aa0b0;display:block;margin-bottom:3px;">Status notes</span>
+                <textarea id="wh-f-notes" rows="2" placeholder="e.g. Merged and verified on iPad. No regressions." style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#e8eaf0;font-size:13px;box-sizing:border-box;resize:vertical;"></textarea>
+              </label>
+              <div style="display:flex;gap:10px;">
+                <button id="wh-save-btn" class="primary-action">Save entry</button>
+                <button id="wh-cancel-btn" class="secondary-action">Cancel</button>
+              </div>
+            </article>
+          </div>
+
+          <div id="wh-list"></div>
+          <script>(function(){
+            var STOR='lt_work_history';
+            function load(){try{return JSON.parse(localStorage.getItem(STOR)||'[]');}catch(e){return[];}}
+            function save(arr){localStorage.setItem(STOR,JSON.stringify(arr));}
+            function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+            var STATUS_COLOR={draft:'#9aa0b0','in-progress':'#fbbf24',approved:'#60a5fa',merged:'#4ade80',reverted:'#fb923c',blocked:'#f87171'};
+            var STATUS_BG={draft:'rgba(154,160,176,0.12)','in-progress':'rgba(251,191,36,0.12)',approved:'rgba(96,165,250,0.12)',merged:'rgba(74,222,128,0.12)',reverted:'rgba(251,146,60,0.12)',blocked:'rgba(239,68,68,0.12)'};
+            function badge(status){
+              var c=STATUS_COLOR[status]||'#9aa0b0';
+              var bg=STATUS_BG[status]||'rgba(154,160,176,0.12)';
+              return '<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:'+bg+';color:'+c+';">'+escHtml(status)+'</span>';
+            }
+            function formatDate(iso){
+              try{var d=new Date(iso);return d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});}catch(e){return iso||'';}
+            }
+            function copyBtn(text,label){
+              label=label||'Copy';
+              var safe=text.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+              return '<button onclick="(function(){navigator.clipboard&&navigator.clipboard.writeText(\''+safe+'\').then(function(){});})();" style="background:rgba(99,102,241,0.15);color:#a5b4fc;border:1px solid rgba(99,102,241,0.25);border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer;margin-left:6px;">'+label+'</button>';
+            }
+            function render(){
+              var arr=load();
+              var q=(document.getElementById('wh-search').value||'').toLowerCase();
+              var st=(document.getElementById('wh-filter').value||'').toLowerCase();
+              var filtered=arr.filter(function(e){
+                var matchQ=!q||(e.jobId||'').toLowerCase().indexOf(q)!==-1||(e.branch||'').toLowerCase().indexOf(q)!==-1||(e.statusNotes||'').toLowerCase().indexOf(q)!==-1||(e.prLink||'').toLowerCase().indexOf(q)!==-1;
+                var matchSt=!st||(e.status||'').toLowerCase()===st;
+                return matchQ&&matchSt;
+              });
+              var list=document.getElementById('wh-list');
+              if(!list) return;
+              if(!filtered.length){
+                list.innerHTML='<div style="padding:20px;text-align:center;color:#9aa0b0;font-size:13px;">'+(arr.length?'No entries match your search.':'No jobs logged yet. Use + Log a job to add one.')+'</div>';
+                return;
+              }
+              var h='';
+              filtered.forEach(function(e){
+                var id=escHtml(e.id||'');
+                h+='<article class="panel" style="margin-bottom:10px;">';
+                h+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px;">';
+                h+='<div><span style="font-size:14px;font-weight:700;color:#e8eaf0;">'+escHtml(e.jobId||'(no job ID)')+'</span> '+badge(e.status||'draft')+'</div>';
+                h+='<div style="font-size:11px;color:#9aa0b0;white-space:nowrap;">'+formatDate(e.dateAdded)+'</div>';
+                h+='</div>';
+                if(e.branch) h+='<div style="margin-bottom:6px;font-size:12px;color:#9aa0b0;">Branch: <code style="color:#c0c4d0;">'+escHtml(e.branch)+'</code>'+copyBtn(e.branch,'Copy branch')+'</div>';
+                if(e.prLink) h+='<div style="margin-bottom:6px;font-size:12px;color:#9aa0b0;">PR: <code style="color:#c0c4d0;">'+escHtml(e.prLink)+'</code></div>';
+                if(e.artifactName) h+='<div style="margin-bottom:6px;font-size:12px;color:#9aa0b0;">Artifact: <code style="color:#c0c4d0;">'+escHtml(e.artifactName)+'</code></div>';
+                if(e.rollbackCmd) h+='<div style="margin-bottom:6px;font-size:12px;color:#9aa0b0;">Rollback: <code style="color:#fca5a5;">'+escHtml(e.rollbackCmd)+'</code>'+copyBtn(e.rollbackCmd,'Copy rollback')+'</div>';
+                if(e.statusNotes) h+='<div style="margin-bottom:10px;font-size:13px;color:#c0c4d0;padding:8px 10px;border-radius:6px;background:rgba(255,255,255,0.03);">'+escHtml(e.statusNotes)+'</div>';
+                h+='<div style="display:flex;gap:8px;">';
+                h+='<button onclick="whEdit(\''+id+'\');" style="background:rgba(99,102,241,0.15);color:#a5b4fc;border:1px solid rgba(99,102,241,0.25);border-radius:4px;padding:4px 12px;font-size:12px;cursor:pointer;">Edit</button>';
+                h+='<button onclick="whDelete(\''+id+'\');" style="background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.2);border-radius:4px;padding:4px 12px;font-size:12px;cursor:pointer;">Delete</button>';
+                h+='</div>';
+                h+='</article>';
+              });
+              list.innerHTML=h;
+            }
+            window.whEdit=function(id){
+              var arr=load();
+              var e=null;
+              for(var i=0;i<arr.length;i++){if(arr[i].id===id){e=arr[i];break;}}
+              if(!e) return;
+              document.getElementById('wh-edit-id').value=id;
+              document.getElementById('wh-f-jobid').value=e.jobId||'';
+              document.getElementById('wh-f-status').value=e.status||'merged';
+              document.getElementById('wh-f-branch').value=e.branch||'';
+              document.getElementById('wh-f-pr').value=e.prLink||'';
+              document.getElementById('wh-f-artifact').value=e.artifactName||'';
+              document.getElementById('wh-f-rollback').value=e.rollbackCmd||'';
+              document.getElementById('wh-f-notes').value=e.statusNotes||'';
+              document.getElementById('wh-form-title').textContent='Edit entry';
+              document.getElementById('wh-form-wrap').style.display='block';
+              document.getElementById('wh-form-wrap').scrollIntoView({behavior:'smooth',block:'nearest'});
+            };
+            window.whDelete=function(id){
+              if(!confirm('Delete this entry? This cannot be undone.')) return;
+              var arr=load().filter(function(e){return e.id!==id;});
+              save(arr);render();
+            };
+            function clearForm(){
+              document.getElementById('wh-edit-id').value='';
+              document.getElementById('wh-f-jobid').value='';
+              document.getElementById('wh-f-status').value='merged';
+              document.getElementById('wh-f-branch').value='';
+              document.getElementById('wh-f-pr').value='';
+              document.getElementById('wh-f-artifact').value='';
+              document.getElementById('wh-f-rollback').value='';
+              document.getElementById('wh-f-notes').value='';
+              document.getElementById('wh-form-title').textContent='Log a new job';
+            }
+            document.getElementById('wh-add-btn').addEventListener('click',function(){
+              clearForm();
+              var fw=document.getElementById('wh-form-wrap');
+              fw.style.display=fw.style.display==='none'?'block':'none';
+            });
+            document.getElementById('wh-cancel-btn').addEventListener('click',function(){
+              document.getElementById('wh-form-wrap').style.display='none';
+              clearForm();
+            });
+            document.getElementById('wh-save-btn').addEventListener('click',function(){
+              var jobId=(document.getElementById('wh-f-jobid').value.trim())||'';
+              if(!jobId){alert('Job ID is required.');return;}
+              var arr=load();
+              var editId=document.getElementById('wh-edit-id').value.trim();
+              var entry={
+                id:editId||('wh-'+Date.now()),
+                jobId:jobId,
+                status:document.getElementById('wh-f-status').value,
+                branch:(document.getElementById('wh-f-branch').value.trim())||'',
+                prLink:(document.getElementById('wh-f-pr').value.trim())||'',
+                artifactName:(document.getElementById('wh-f-artifact').value.trim())||'',
+                rollbackCmd:(document.getElementById('wh-f-rollback').value.trim())||'',
+                statusNotes:(document.getElementById('wh-f-notes').value.trim())||'',
+                dateAdded:editId?(function(){for(var i=0;i<arr.length;i++){if(arr[i].id===editId)return arr[i].dateAdded;}return new Date().toISOString();}()):new Date().toISOString()
+              };
+              if(editId){
+                for(var i=0;i<arr.length;i++){if(arr[i].id===editId){arr[i]=entry;break;}}
+              } else {
+                arr.unshift(entry);
+              }
+              save(arr);
+              document.getElementById('wh-form-wrap').style.display='none';
+              clearForm();
+              render();
+            });
+            document.getElementById('wh-search').addEventListener('input',render);
+            document.getElementById('wh-filter').addEventListener('change',render);
+            function exportText(){
+              var arr=load();
+              if(!arr.length){alert('No entries to export.');return;}
+              var lines=['=== BOT MEMORY / WORK HISTORY ===','Exported: '+new Date().toISOString(),'Total entries: '+arr.length,''];
+              arr.forEach(function(e,i){
+                lines.push('--- Entry '+(i+1)+' ---');
+                lines.push('Job ID:    '+(e.jobId||''));
+                lines.push('Status:    '+(e.status||''));
+                lines.push('Date:      '+(e.dateAdded||''));
+                lines.push('Branch:    '+(e.branch||''));
+                lines.push('PR:        '+(e.prLink||''));
+                lines.push('Artifact:  '+(e.artifactName||''));
+                lines.push('Rollback:  '+(e.rollbackCmd||''));
+                lines.push('Notes:     '+(e.statusNotes||''));
+                lines.push('');
+              });
+              lines.push('=== END ===');
+              var blob=new Blob([lines.join('\n')],{type:'text/plain'});
+              var a=document.createElement('a');
+              a.href=URL.createObjectURL(blob);
+              a.download='lt-work-history-'+new Date().toISOString().slice(0,10)+'.txt';
+              a.click();
+            }
+            function exportJson(){
+              var arr=load();
+              if(!arr.length){alert('No entries to export.');return;}
+              var blob=new Blob([JSON.stringify(arr,null,2)],{type:'application/json'});
+              var a=document.createElement('a');
+              a.href=URL.createObjectURL(blob);
+              a.download='lt-work-history-'+new Date().toISOString().slice(0,10)+'.json';
+              a.click();
+            }
+            document.getElementById('wh-export-txt').addEventListener('click',exportText);
+            document.getElementById('wh-export-json').addEventListener('click',exportJson);
+            var sec=document.getElementById('view-workhistory');
+            if(sec){sec.addEventListener('lt-view-enter',function(){
+              document.getElementById('wh-search').value='';
+              document.getElementById('wh-filter').value='';
+              document.getElementById('wh-form-wrap').style.display='none';
+              clearForm();
+              render();
+            });}
+            render();
+          }());</script>
+        </section>
+
         <!-- VIEW: rfwwizard -->
         <section class="view" id="view-rfwwizard" data-view-panel="rfwwizard">
           <div class="section-head"><p class="eyebrow">Repo File Worker</p><h1>Guided Bot Flow</h1><p>Step-by-step guide to building a safe repo change request. No automatic merge or deploy.</p></div>
@@ -11744,7 +11992,7 @@
     /* Rail grouping */
     var PINNED=['dashboard','starthere','toolsearch2','favorites','recenttools','quicklaunch'];
     var GROUPS=[
-      {label:'Repo File Worker',open:true,views:['repofilejob','rfwwizard','rfwguide','rfwfilepick','safesim','prcoach','rbbuilder','filepathhelper','riskclassifier','patchplan','prdraftbuilder','exportrfj','actionspec','rfjtemplate','fileimpact','highriskwarn','approvephrase','rollbackbuilder','prsafetychk','patchscope','rfjhandoff','rfjpacket','phase2readiness','rfjdashboard','rfjstatusboard','rfjsearch','rfjtimeline','rfjdupes','rfjpriority','rfjblockers','rfjreviewq','rfjexportall','rfjimport']},
+      {label:'Repo File Worker',open:true,views:['repofilejob','rfwwizard','rfwguide','rfwfilepick','safesim','prcoach','rbbuilder','workhistory','filepathhelper','riskclassifier','patchplan','prdraftbuilder','exportrfj','actionspec','rfjtemplate','fileimpact','highriskwarn','approvephrase','rollbackbuilder','prsafetychk','patchscope','rfjhandoff','rfjpacket','phase2readiness','rfjdashboard','rfjstatusboard','rfjsearch','rfjtimeline','rfjdupes','rfjpriority','rfjblockers','rfjreviewq','rfjexportall','rfjimport']},
       {label:'Daily Work',open:true,views:['standup','worklog','mergelog','bugtriage','shippedlog','testresults','branchlog','prprep','dailycommand','activework','whatsnext2','sessionsummary','simpledash','pinnedcmd','sessiongoals','sessionnotes']},
       {label:'Safety',open:true,views:['validator','sitehealth','openrisks','pendingreviews','backupreminder','safenextstep','siteprotection','vaultreminder','branchsafety','prrisks','smokecheck','envcheck','rollbackplan','verifyscript']},
       {label:'Reports',open:true,views:['exportpacket','settingsio','exportdaily','exportrecovery','exportrelease','exporthandoff','importhandoff','dailyexport','releasenotes','toolindex','toolhelp']}
