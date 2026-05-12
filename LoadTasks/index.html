@@ -227,6 +227,7 @@
         <button data-view="repofilejob" data-route>Repo File Job</button>
         <button data-view="rfwwizard" data-route>Bot Wizard</button>
         <button data-view="rfwguide" data-route>How To Guide</button>
+        <button data-view="rfwfilepick" data-route>Safe File Picker</button>
         <button data-view="filepathhelper" data-route>File Paths</button>
         <button data-view="riskclassifier" data-route>Risk Classifier</button>
         <button data-view="patchplan" data-route>Patch Plan</button>
@@ -417,6 +418,7 @@
         <button data-view="repofilejob" data-route><span class="rail-icon" data-icon="version"></span><span>Repo File Job</span></button>
         <button data-view="rfwwizard" data-route><span class="rail-icon" data-icon="branch"></span><span>Bot Wizard</span></button>
         <button data-view="rfwguide" data-route><span class="rail-icon" data-icon="notes"></span><span>How To Guide</span></button>
+        <button data-view="rfwfilepick" data-route><span class="rail-icon" data-icon="shield"></span><span>Safe File Picker</span></button>
         <button data-view="filepathhelper" data-route><span class="rail-icon" data-icon="library"></span><span>File Paths</span></button>
         <button data-view="riskclassifier" data-route><span class="rail-icon" data-icon="shield"></span><span>Risk Classifier</span></button>
         <button data-view="patchplan" data-route><span class="rail-icon" data-icon="notes"></span><span>Patch Plan</span></button>
@@ -9880,6 +9882,145 @@
           </div>
         </section>
 
+        <!-- VIEW: rfwfilepick -->
+        <section class="view" id="view-rfwfilepick" data-view-panel="rfwfilepick">
+          <div class="section-head"><p class="eyebrow">Repo File Worker</p><h1>Safe File Picker</h1><p>Choose a file to edit. See its risk level and why before building a job.</p></div>
+          <div class="panel-wrap">
+
+          <article class="panel" style="margin-bottom:12px;">
+            <label style="display:block;margin-bottom:10px;">Search or type a file path<input id="sfp-search" type="text" placeholder="e.g. HANDOFF.md or load/load.js" style="display:block;width:100%;margin-top:4px;padding:8px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#e8eaf0;font-size:14px;box-sizing:border-box;"></label>
+            <div id="sfp-custom-risk" style="display:none;margin-bottom:10px;padding:10px 14px;border-radius:8px;font-size:13px;"></div>
+            <button id="sfp-use-custom" style="display:none;background:#2563eb;color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:13px;cursor:pointer;">Use this path in Bot Wizard</button>
+          </article>
+
+          <article class="panel" style="margin-bottom:12px;">
+            <div class="panel-title"><h2>LOW risk — safe to edit via pipeline</h2></div>
+            <div style="font-size:12px;color:#9aa0b0;margin-bottom:10px;">Docs and data files. Small blast radius. Easy to fix if something goes wrong. Standard pipeline flow — no override needed.</div>
+            <div id="sfp-low" style="display:grid;gap:6px;"></div>
+          </article>
+
+          <article class="panel" style="margin-bottom:12px;">
+            <div class="panel-title"><h2>MEDIUM risk — review diff carefully before merging</h2></div>
+            <div style="font-size:12px;color:#9aa0b0;margin-bottom:10px;">Live app pages. A mistake here affects real users. Review the draft PR diff line by line. Do not fast-lane.</div>
+            <div id="sfp-med" style="display:grid;gap:6px;"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-title"><h2>HIGH risk — blocked by default</h2></div>
+            <div style="font-size:12px;color:#fca5a5;margin-bottom:10px;">These files are protected. The pipeline blocks unless you add <code>highRiskOverride: true</code> to the job file. A draft PR is still required. Read the Do Not Touch panel before proceeding.</div>
+            <div id="sfp-high" style="display:grid;gap:6px;"></div>
+          </article>
+
+          <div id="sfp-detail" style="display:none;position:sticky;bottom:0;margin-top:12px;"></div>
+          </div>
+          <script>(function(){
+            var STOR='lt_rfwpick_selected';
+            var FILES=[
+              {path:'HANDOFF.md',risk:'LOW',why:'Documentation only. No runtime code. Small blast radius.',group:'Docs'},
+              {path:'MASTER_BACKLOG.md',risk:'LOW',why:'Documentation only. Backlog tracking file.',group:'Docs'},
+              {path:'SESSION_NOTES_YYYY-MM-DD.md',risk:'LOW',why:'Session log files. Docs only.',group:'Docs'},
+              {path:'VERIFIED_LOG.md',risk:'LOW',why:'Verification log. Docs only.',group:'Docs'},
+              {path:'SUGGESTIONS_PARKED.md',risk:'LOW',why:'Parked ideas list. Docs only.',group:'Docs'},
+              {path:'SITE_STATUS.md',risk:'LOW',why:'Status page. Docs only.',group:'Docs'},
+              {path:'README.md',risk:'LOW',why:'Repo readme. Docs only.',group:'Docs'},
+              {path:'loadtasks-inbox/repo-file-job.json',risk:'LOW',why:'Job file for the pipeline. Data only. No runtime code.',group:'Data'},
+              {path:'LoadTasks/index.html',risk:'MEDIUM',why:'Live app page. Matches index.html pattern. Changes are visible to users. Review diff carefully.',group:'LoadTasks'},
+              {path:'load/load.js',risk:'MEDIUM',why:'Core Load app JavaScript. Touches live functionality. Cache bump required after any change.',group:'Load'},
+              {path:'load/index.html',risk:'MEDIUM',why:'Load main page. Live app HTML.',group:'Load'},
+              {path:'attain/index.html',risk:'MEDIUM',why:'Attain live app page.',group:'Attain'},
+              {path:'attain-jr/attain-jr.js',risk:'MEDIUM',why:'Attain Jr core script. Live app.',group:'Attain Jr'},
+              {path:'study/index.html',risk:'MEDIUM',why:'Study live app page.',group:'Study'},
+              {path:'load/sw.js',risk:'HIGH',why:'Service worker. Controls caching for all Load users. A wrong change breaks the PWA for everyone. LOCKED unless explicit override.',group:'PROTECTED'},
+              {path:'sw.js',risk:'HIGH',why:'ACR Reader service worker. LOCKED by user rule. Do not touch without explicit instruction.',group:'PROTECTED'},
+              {path:'.github/workflows/',risk:'HIGH',why:'CI/CD pipeline files. Can trigger deployments and access repo secrets. SELF-PROTECTED — never edit via 2D pipeline.',group:'PROTECTED'},
+              {path:'load/lib-load-image-providers.js',risk:'HIGH',why:'AI provider routing. A mistake breaks all image generation.',group:'PROTECTED'},
+              {path:'load/tools/ai-chat-studio.html',risk:'HIGH',why:'AI Chat Studio. Touches provider tokens and conversation state.',group:'PROTECTED'},
+              {path:'load/image-prompt/index.html',risk:'HIGH',why:'Image Prompt tool. Direct access to AI provider credentials.',group:'PROTECTED'},
+              {path:'acr.css',risk:'HIGH',why:'ACR Reader styles. LOCKED by user rule.',group:'PROTECTED'},
+              {path:'index.html (root)',risk:'HIGH',why:'ACR Reader root. LOCKED by user rule. Do not touch.',group:'PROTECTED'},
+              {path:'content/',risk:'HIGH',why:'ACR Reader content folder. LOCKED by user rule.',group:'PROTECTED'}
+            ];
+
+            var RISK_COLOR={HIGH:'#ef4444',MEDIUM:'#e67e22',LOW:'#2ecc71'};
+            var RISK_BG={HIGH:'rgba(239,68,68,0.08)',MEDIUM:'rgba(230,126,34,0.08)',LOW:'rgba(46,204,113,0.08)'};
+            var RISK_BORDER={HIGH:'rgba(239,68,68,0.3)',MEDIUM:'rgba(230,126,34,0.3)',LOW:'rgba(46,204,113,0.3)'};
+
+            var HIGH_PAT=['sw.js','service-worker','ai-chat-studio','image-prompt','lib-load-image-providers','provider','audio','animation','export-pack','deploy','security','token','secret','credential','cloudflare','.github/workflows','acr.css','content/','load/sw'];
+            var MED_PAT=['load.js','load/load','loadstudio','loadplay','attain','study','acr','index.html','lib-'];
+
+            function classifyCustom(fp){
+              var p=fp.toLowerCase();
+              if(!fp)return null;
+              for(var i=0;i<HIGH_PAT.length;i++){if(p.indexOf(HIGH_PAT[i].toLowerCase())>=0)return'HIGH';}
+              if(p.indexOf('loadtasks/index.html')>=0||p.indexOf('loadtasks\\index.html')>=0)return'MEDIUM';
+              for(var j=0;j<MED_PAT.length;j++){if(p.indexOf(MED_PAT[j].toLowerCase())>=0)return'MEDIUM';}
+              return'LOW';
+            }
+
+            function useFile(path){
+              localStorage.setItem(STOR,path);
+              var wizBtn=document.querySelector('[data-view="rfwwizard"][data-route]');
+              if(wizBtn)wizBtn.click();
+            }
+
+            function makeRow(f){
+              var row=document.createElement('div');
+              row.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:'+RISK_BG[f.risk]+';border:1px solid '+RISK_BORDER[f.risk]+';cursor:pointer;';
+              row.innerHTML='<span style="font-size:10px;background:'+RISK_COLOR[f.risk]+';color:#fff;border-radius:4px;padding:2px 6px;white-space:nowrap;flex-shrink:0;">'+f.risk+'</span>'
+                +'<span style="flex:1;font-size:13px;color:#e8eaf0;font-family:monospace;">'+f.path+'</span>'
+                +'<span style="font-size:11px;color:#9aa0b0;flex-shrink:0;">'+f.group+'</span>';
+              row.addEventListener('click',function(){showDetail(f);});
+              return row;
+            }
+
+            function showDetail(f){
+              var det=document.getElementById('sfp-detail');
+              if(!det)return;
+              det.style.display='';
+              det.innerHTML='<article class="panel" style="background:rgba(0,0,0,0.4);border:1px solid '+RISK_BORDER[f.risk]+';border-radius:10px;padding:14px 16px;">'
+                +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+                +'<span style="background:'+RISK_COLOR[f.risk]+';color:#fff;border-radius:4px;padding:3px 8px;font-size:11px;font-weight:700;">'+f.risk+'</span>'
+                +'<code style="font-size:13px;color:#e8eaf0;">'+f.path+'</code></div>'
+                +'<div style="font-size:13px;color:#c0c4d0;margin-bottom:12px;">'+f.why+'</div>'
+                +(f.risk!=='HIGH'?'<button onclick="(function(){localStorage.setItem(\''+STOR+'\',\''+f.path+'\');var b=document.querySelector(\'[data-view=rfwwizard][data-route]\');if(b)b.click();})()" style="background:#2563eb;color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:13px;cursor:pointer;">Use this path in Bot Wizard</button>'
+                :'<div style="font-size:12px;color:#fca5a5;padding:8px 12px;background:rgba(239,68,68,0.1);border-radius:6px;">HIGH-risk target. Read the Do Not Touch panel and add <code>highRiskOverride:true</code> to the job file before proceeding.</div>')
+                +'</article>';
+            }
+
+            function render(){
+              var low=document.getElementById('sfp-low');
+              var med=document.getElementById('sfp-med');
+              var high=document.getElementById('sfp-high');
+              if(!low)return;
+              low.innerHTML='';med.innerHTML='';high.innerHTML='';
+              FILES.forEach(function(f){
+                var el={LOW:low,MEDIUM:med,HIGH:high}[f.risk];
+                if(el)el.appendChild(makeRow(f));
+              });
+            }
+
+            var search=document.getElementById('sfp-search');
+            if(search){
+              search.addEventListener('input',function(){
+                var val=this.value.trim();
+                var riskEl=document.getElementById('sfp-custom-risk');
+                var useBtn=document.getElementById('sfp-use-custom');
+                if(!val){riskEl.style.display='none';if(useBtn)useBtn.style.display='none';return;}
+                var r=classifyCustom(val);
+                riskEl.style.display='';
+                riskEl.style.background=RISK_BG[r];
+                riskEl.style.border='1px solid '+RISK_BORDER[r];
+                riskEl.innerHTML='<strong style="color:'+RISK_COLOR[r]+';">'+r+'</strong> — '+(r==='HIGH'?'HIGH-risk target. Read the Do Not Touch panel. Add highRiskOverride:true to job file before proceeding.':r==='MEDIUM'?'MEDIUM risk. Review draft PR diff carefully before merging.':'LOW risk. Standard pipeline flow applies.');
+                if(useBtn){useBtn.style.display=r==='HIGH'?'none':'';useBtn.onclick=function(){localStorage.setItem(STOR,val);var b=document.querySelector('[data-view=rfwwizard][data-route]');if(b)b.click();};}
+              });
+            }
+
+            var sec=document.getElementById('view-rfwfilepick');
+            if(sec){sec.addEventListener('lt-view-enter',function(){render();document.getElementById('sfp-detail').style.display='none';});}
+            render();
+          }());</script>
+        </section>
+
         <!-- VIEW: rfwwizard -->
         <section class="view" id="view-rfwwizard" data-view-panel="rfwwizard">
           <div class="section-head"><p class="eyebrow">Repo File Worker</p><h1>Guided Bot Wizard</h1><p>Step-by-step guide to building a safe repo change request. No automatic merge or deploy.</p></div>
@@ -10090,7 +10231,15 @@
             }
 
             var sec=document.getElementById('view-rfwwizard');
-            if(sec)sec.addEventListener('lt-view-enter',function(){applyMode();});
+            if(sec)sec.addEventListener('lt-view-enter',function(){
+              applyMode();
+              var picked=localStorage.getItem('lt_rfwpick_selected');
+              if(picked){
+                var fpEl=document.getElementById('wiz-filepath');
+                if(fpEl){fpEl.value=picked;fpEl.dispatchEvent(new Event('input'));}
+                localStorage.removeItem('lt_rfwpick_selected');
+              }
+            });
             applyMode();
           }());</script>
         </section>
@@ -11138,7 +11287,7 @@
     /* Rail grouping */
     var PINNED=['dashboard','starthere','toolsearch2','favorites','recenttools','quicklaunch'];
     var GROUPS=[
-      {label:'Repo File Worker',open:true,views:['repofilejob','rfwwizard','rfwguide','filepathhelper','riskclassifier','patchplan','prdraftbuilder','exportrfj','actionspec','rfjtemplate','fileimpact','highriskwarn','approvephrase','rollbackbuilder','prsafetychk','patchscope','rfjhandoff','rfjpacket','phase2readiness','rfjdashboard','rfjstatusboard','rfjsearch','rfjtimeline','rfjdupes','rfjpriority','rfjblockers','rfjreviewq','rfjexportall','rfjimport']},
+      {label:'Repo File Worker',open:true,views:['repofilejob','rfwwizard','rfwguide','rfwfilepick','filepathhelper','riskclassifier','patchplan','prdraftbuilder','exportrfj','actionspec','rfjtemplate','fileimpact','highriskwarn','approvephrase','rollbackbuilder','prsafetychk','patchscope','rfjhandoff','rfjpacket','phase2readiness','rfjdashboard','rfjstatusboard','rfjsearch','rfjtimeline','rfjdupes','rfjpriority','rfjblockers','rfjreviewq','rfjexportall','rfjimport']},
       {label:'Daily Work',open:true,views:['standup','worklog','mergelog','bugtriage','shippedlog','testresults','branchlog','prprep','dailycommand','activework','whatsnext2','sessionsummary','simpledash','pinnedcmd','sessiongoals','sessionnotes']},
       {label:'Safety',open:true,views:['validator','sitehealth','openrisks','pendingreviews','backupreminder','safenextstep','siteprotection','vaultreminder','branchsafety','prrisks','smokecheck','envcheck','rollbackplan','verifyscript']},
       {label:'Reports',open:true,views:['exportpacket','settingsio','exportdaily','exportrecovery','exportrelease','exporthandoff','importhandoff','dailyexport','releasenotes','toolindex','toolhelp']}
