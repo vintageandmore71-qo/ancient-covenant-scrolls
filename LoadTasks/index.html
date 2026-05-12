@@ -10730,95 +10730,239 @@
         <section class="view" id="view-devbothome" data-view-panel="devbothome">
           <div class="section-head"><p class="eyebrow">Developer Bot</p><h1>Developer Bot Home</h1><p>A step-by-step system for making safe, controlled changes to this repo. Nothing merges or deploys automatically.</p></div>
 
+          <!-- Mode toggle -->
           <article class="panel" style="margin-bottom:12px;">
-            <div style="padding:10px 14px;border-radius:8px;background:rgba(99,102,241,0.07);border-left:3px solid #6366f1;">
-              <strong style="font-size:13px;color:#a5b4fc;">Operating Manual</strong>
-              <p style="font-size:13px;color:#c0c4d0;margin:6px 0 0;">The full plain-language guide is in <code>DEVELOPER_BOT_MANUAL.md</code> at the root of this repo. It covers every phase, every field, troubleshooting, and rollback steps. Open it in GitHub to read it.</p>
-            </div>
-          </article>
-
-          <article class="panel" style="margin-bottom:12px;">
-            <div style="font-size:12px;font-weight:700;color:#6366f1;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;">Pipeline completion — all phases shipped</div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;">
-              <div style="padding:8px 10px;border-radius:6px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);font-size:12px;color:#4ade80;"><strong>2A</strong> Job File Template</div>
-              <div style="padding:8px 10px;border-radius:6px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);font-size:12px;color:#4ade80;"><strong>2B</strong> Packet Generator</div>
-              <div style="padding:8px 10px;border-radius:6px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);font-size:12px;color:#4ade80;"><strong>2C1</strong> PR Prep Validate</div>
-              <div style="padding:8px 10px;border-radius:6px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);font-size:12px;color:#4ade80;"><strong>2C2</strong> Branch Create</div>
-              <div style="padding:8px 10px;border-radius:6px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);font-size:12px;color:#4ade80;"><strong>2C3</strong> PR Create</div>
-              <div style="padding:8px 10px;border-radius:6px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);font-size:12px;color:#4ade80;"><strong>2D</strong> File Edit</div>
-              <div style="padding:8px 10px;border-radius:6px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);font-size:12px;color:#4ade80;"><strong>2E</strong> Approval Gate</div>
-              <div style="padding:8px 10px;border-radius:6px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);font-size:12px;color:#4ade80;"><strong>2G</strong> HIGH Override Gate</div>
-              <div style="padding:8px 10px;border-radius:6px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);font-size:12px;color:#4ade80;"><strong>2H</strong> Self-protection</div>
-              <div style="padding:8px 10px;border-radius:6px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);font-size:12px;color:#4ade80;"><strong>2I</strong> Safe File Picker</div>
-              <div style="padding:8px 10px;border-radius:6px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);font-size:12px;color:#4ade80;"><strong>2J</strong> Risk Explainer</div>
-              <div style="padding:8px 10px;border-radius:6px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);font-size:12px;color:#4ade80;"><strong>2K</strong> Guided Bot Flow</div>
-              <div style="padding:8px 10px;border-radius:6px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);font-size:12px;color:#4ade80;"><strong>2L</strong> Safe Change Simulator</div>
-              <div style="padding:8px 10px;border-radius:6px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);font-size:12px;color:#4ade80;"><strong>2N</strong> PR Review Coach</div>
-              <div style="padding:8px 10px;border-radius:6px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);font-size:12px;color:#4ade80;"><strong>2Q</strong> Rollback Builder</div>
-              <div style="padding:8px 10px;border-radius:6px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);font-size:12px;color:#4ade80;"><strong>2R</strong> Work History</div>
-              <div style="padding:8px 10px;border-radius:6px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);font-size:12px;color:#4ade80;"><strong>2T</strong> Do Not Touch Panel</div>
-              <div style="padding:8px 10px;border-radius:6px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);font-size:12px;color:#4ade80;"><strong>2U</strong> Beginner/Expert Mode</div>
-              <div style="padding:8px 10px;border-radius:6px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);font-size:12px;color:#4ade80;"><strong>2V</strong> How To Guide</div>
-              <div style="padding:8px 10px;border-radius:6px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);font-size:12px;color:#4ade80;"><strong>2W</strong> Operating Manual</div>
-              <div style="padding:8px 10px;border-radius:6px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);font-size:12px;color:#4ade80;"><strong>2X</strong> Final UI Connection</div>
-            </div>
-          </article>
-
-          <article class="panel" style="margin-bottom:12px;">
-            <div style="font-size:12px;font-weight:700;color:#6366f1;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:14px;">Choose a path</div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">
-
-              <div style="padding:16px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);">
-                <div style="font-size:11px;font-weight:700;color:#6ee7b7;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Start Here</div>
-                <div style="font-size:14px;font-weight:700;color:#e8eaf0;margin-bottom:6px;">How To Guide</div>
-                <div style="font-size:13px;color:#9aa0b0;margin-bottom:14px;">New to the bot? Read the 11-section plain-language guide. Covers every step from job file to live merge.</div>
-                <button class="primary-action" data-view="rfwguide" data-route style="font-size:13px;padding:8px 16px;">Open guide</button>
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+              <div>
+                <div style="font-size:12px;font-weight:700;color:#6366f1;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">Mode</div>
+                <div id="dbh-mode-desc" style="font-size:13px;color:#9aa0b0;"></div>
               </div>
+              <div style="display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.12);">
+                <button id="dbh-beg-btn" style="padding:8px 20px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:background 0.15s;">Beginner</button>
+                <button id="dbh-exp-btn" style="padding:8px 20px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:background 0.15s;">Expert</button>
+              </div>
+            </div>
+          </article>
 
-              <div style="padding:16px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);">
-                <div style="font-size:11px;font-weight:700;color:#a5b4fc;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Safe Repo Work</div>
-                <div style="font-size:14px;font-weight:700;color:#e8eaf0;margin-bottom:6px;">Guided Bot Flow</div>
-                <div style="font-size:13px;color:#9aa0b0;margin-bottom:10px;">Build a safe change request step by step. Generates the job file fields for you.</div>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                  <button class="primary-action" data-view="rfwwizard" data-route style="font-size:13px;padding:8px 14px;">Bot Flow</button>
-                  <button class="secondary-action" data-view="rfwfilepick" data-route style="font-size:13px;padding:8px 14px;">File Picker</button>
-                  <button class="secondary-action" data-view="safesim" data-route style="font-size:13px;padding:8px 14px;">Simulator</button>
+          <!-- Recommended Next Action -->
+          <article class="panel" id="dbh-next-panel" style="margin-bottom:12px;display:none;">
+            <div style="font-size:12px;font-weight:700;color:#6ee7b7;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">Recommended next action</div>
+            <div id="dbh-next-content"></div>
+          </article>
+
+          <!-- Visual Workflow Map -->
+          <article class="panel" style="margin-bottom:12px;">
+            <div style="font-size:12px;font-weight:700;color:#6366f1;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:14px;">Pipeline flow</div>
+            <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;">
+              <button data-view="repofilejob" data-route style="padding:8px 14px;border-radius:20px;border:1px solid rgba(99,102,241,0.4);background:rgba(99,102,241,0.1);color:#a5b4fc;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">1. Job File</button>
+              <span style="color:#9aa0b0;font-size:14px;">&#8594;</span>
+              <button data-view="safesim" data-route style="padding:8px 14px;border-radius:20px;border:1px solid rgba(99,102,241,0.3);background:rgba(99,102,241,0.07);color:#a5b4fc;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">2. Validate (2C1)</button>
+              <span style="color:#9aa0b0;font-size:14px;">&#8594;</span>
+              <button style="padding:8px 14px;border-radius:20px;border:1px solid rgba(99,102,241,0.3);background:rgba(99,102,241,0.07);color:#a5b4fc;font-size:12px;font-weight:600;cursor:default;white-space:nowrap;">3. Branch (2C2)</button>
+              <span style="color:#9aa0b0;font-size:14px;">&#8594;</span>
+              <button style="padding:8px 14px;border-radius:20px;border:1px solid rgba(99,102,241,0.3);background:rgba(99,102,241,0.07);color:#a5b4fc;font-size:12px;font-weight:600;cursor:default;white-space:nowrap;">4. Draft PR (2C3)</button>
+              <span style="color:#9aa0b0;font-size:14px;">&#8594;</span>
+              <button data-view="prcoach" data-route style="padding:8px 14px;border-radius:20px;border:1px solid rgba(251,191,36,0.4);background:rgba(251,191,36,0.07);color:#fbbf24;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">5. Review</button>
+              <span style="color:#9aa0b0;font-size:14px;">&#8594;</span>
+              <button style="padding:8px 14px;border-radius:20px;border:1px solid rgba(74,222,128,0.4);background:rgba(74,222,128,0.07);color:#4ade80;font-size:12px;font-weight:600;cursor:default;white-space:nowrap;">6. Merge</button>
+            </div>
+            <p style="font-size:12px;color:#9aa0b0;margin:10px 0 0;">Steps 3, 4, and 6 run in GitHub Actions or GitHub UI — not in this app. Clickable steps open the relevant tool here.</p>
+          </article>
+
+          <!-- Path 1: Start Here -->
+          <article class="panel" style="margin-bottom:12px;">
+            <div style="font-size:11px;font-weight:700;color:#6ee7b7;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Start Here</div>
+            <div style="font-size:15px;font-weight:700;color:#e8eaf0;margin-bottom:6px;">New to the bot?</div>
+            <p style="font-size:13px;color:#9aa0b0;margin:0 0 14px;">Read the plain-language guide first. Covers every step from job file to live merge.</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="primary-action" data-view="rfwguide" data-route style="font-size:13px;padding:9px 18px;">How To Guide</button>
+              <button class="secondary-action dbh-expert-only" data-view="rfwwizard" data-route style="font-size:13px;padding:9px 18px;">Guided Bot Flow</button>
+            </div>
+            <div class="dbh-expert-only" style="margin-top:12px;padding:10px 12px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);font-size:12px;color:#9aa0b0;">
+              Operating Manual: <code>DEVELOPER_BOT_MANUAL.md</code> at repo root — open in GitHub for full reference including troubleshooting.
+            </div>
+          </article>
+
+          <!-- Path 2: Build & Edit -->
+          <article class="panel" style="margin-bottom:12px;">
+            <div style="font-size:11px;font-weight:700;color:#a5b4fc;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Build &amp; Edit</div>
+            <div style="font-size:15px;font-weight:700;color:#e8eaf0;margin-bottom:6px;">Create a change request</div>
+            <p style="font-size:13px;color:#9aa0b0;margin:0 0 14px;">Pick a file, fill in the fields, generate your job file.</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+              <button class="primary-action" data-view="rfwfilepick" data-route style="font-size:13px;padding:9px 18px;">File Picker</button>
+              <button class="primary-action" data-view="rfwwizard" data-route style="font-size:13px;padding:9px 18px;">Bot Flow</button>
+              <button class="secondary-action" data-view="safesim" data-route style="font-size:13px;padding:9px 18px;">Simulator</button>
+            </div>
+            <details class="dbh-expert-only" style="margin-top:4px;">
+              <summary style="font-size:12px;color:#6366f1;cursor:pointer;padding:6px 0;">Advanced tools</summary>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;padding:10px 0 2px;">
+                <button class="secondary-action" data-view="repofilejob" data-route style="font-size:12px;padding:6px 12px;">Repo File Job</button>
+                <button class="secondary-action" data-view="riskclassifier" data-route style="font-size:12px;padding:6px 12px;">Risk Classifier</button>
+                <button class="secondary-action" data-view="patchplan" data-route style="font-size:12px;padding:6px 12px;">Patch Plan</button>
+                <button class="secondary-action" data-view="prdraftbuilder" data-route style="font-size:12px;padding:6px 12px;">PR Draft Builder</button>
+                <button class="secondary-action" data-view="actionspec" data-route style="font-size:12px;padding:6px 12px;">Action Spec</button>
+                <button class="secondary-action" data-view="rfjtemplate" data-route style="font-size:12px;padding:6px 12px;">RFJ Template</button>
+                <button class="secondary-action" data-view="exportrfj" data-route style="font-size:12px;padding:6px 12px;">Export RFJ</button>
+              </div>
+            </details>
+          </article>
+
+          <!-- Path 3: Review & Safety -->
+          <article class="panel" style="margin-bottom:12px;">
+            <div style="font-size:11px;font-weight:700;color:#fbbf24;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Review &amp; Safety</div>
+            <div style="font-size:15px;font-weight:700;color:#e8eaf0;margin-bottom:6px;">Before you merge</div>
+            <p style="font-size:13px;color:#9aa0b0;margin:0 0 14px;">Work through the checklist. Confirm every critical item before approving the PR.</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+              <button class="primary-action" data-view="prcoach" data-route style="font-size:13px;padding:9px 18px;">PR Review Coach</button>
+              <button class="secondary-action" data-view="highriskwarn" data-route style="font-size:13px;padding:9px 18px;">Do Not Touch Rules</button>
+            </div>
+            <details class="dbh-expert-only" style="margin-top:4px;">
+              <summary style="font-size:12px;color:#6366f1;cursor:pointer;padding:6px 0;">Advanced tools</summary>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;padding:10px 0 2px;">
+                <button class="secondary-action" data-view="prsafetychk" data-route style="font-size:12px;padding:6px 12px;">PR Safety Check</button>
+                <button class="secondary-action" data-view="fileimpact" data-route style="font-size:12px;padding:6px 12px;">File Impact</button>
+                <button class="secondary-action" data-view="approvephrase" data-route style="font-size:12px;padding:6px 12px;">Approve Phrase</button>
+                <button class="secondary-action" data-view="patchscope" data-route style="font-size:12px;padding:6px 12px;">Patch Scope</button>
+              </div>
+            </details>
+          </article>
+
+          <!-- Path 4: Recovery & Rollback -->
+          <article class="panel" style="margin-bottom:12px;">
+            <div style="font-size:11px;font-weight:700;color:#f87171;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Recovery &amp; Rollback</div>
+            <div style="font-size:15px;font-weight:700;color:#e8eaf0;margin-bottom:6px;">Something went wrong?</div>
+            <p style="font-size:13px;color:#9aa0b0;margin:0 0 14px;">Generate the exact commands to reverse a merged change safely.</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+              <button class="primary-action" data-view="rbbuilder" data-route style="font-size:13px;padding:9px 18px;">Rollback Builder</button>
+            </div>
+            <details class="dbh-expert-only" style="margin-top:4px;">
+              <summary style="font-size:12px;color:#6366f1;cursor:pointer;padding:6px 0;">Advanced tools</summary>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;padding:10px 0 2px;">
+                <button class="secondary-action" data-view="rollbackbuilder" data-route style="font-size:12px;padding:6px 12px;">Rollback Builder (legacy)</button>
+                <button class="secondary-action" data-view="rfjhandoff" data-route style="font-size:12px;padding:6px 12px;">RFJ Handoff</button>
+                <button class="secondary-action" data-view="rfjpacket" data-route style="font-size:12px;padding:6px 12px;">RFJ Packet</button>
+                <button class="secondary-action" data-view="phase2readiness" data-route style="font-size:12px;padding:6px 12px;">Phase 2 Readiness</button>
+              </div>
+            </details>
+          </article>
+
+          <!-- Path 5: History & Reports -->
+          <article class="panel" style="margin-bottom:12px;">
+            <div style="font-size:11px;font-weight:700;color:#c4b5fd;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">History &amp; Reports</div>
+            <div style="font-size:15px;font-weight:700;color:#e8eaf0;margin-bottom:6px;">Track your work</div>
+            <p style="font-size:13px;color:#9aa0b0;margin:0 0 14px;">Log jobs, search past changes, and export your work history.</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+              <button class="primary-action" data-view="workhistory" data-route style="font-size:13px;padding:9px 18px;">Work History</button>
+            </div>
+            <details class="dbh-expert-only" style="margin-top:4px;">
+              <summary style="font-size:12px;color:#6366f1;cursor:pointer;padding:6px 0;">Advanced reports</summary>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;padding:10px 0 2px;">
+                <button class="secondary-action" data-view="rfjdashboard" data-route style="font-size:12px;padding:6px 12px;">RFJ Dashboard</button>
+                <button class="secondary-action" data-view="rfjstatusboard" data-route style="font-size:12px;padding:6px 12px;">Status Board</button>
+                <button class="secondary-action" data-view="rfjsearch" data-route style="font-size:12px;padding:6px 12px;">RFJ Search</button>
+                <button class="secondary-action" data-view="rfjtimeline" data-route style="font-size:12px;padding:6px 12px;">Timeline</button>
+                <button class="secondary-action" data-view="rfjdupes" data-route style="font-size:12px;padding:6px 12px;">Duplicates</button>
+                <button class="secondary-action" data-view="rfjpriority" data-route style="font-size:12px;padding:6px 12px;">Priority</button>
+                <button class="secondary-action" data-view="rfjblockers" data-route style="font-size:12px;padding:6px 12px;">Blockers</button>
+                <button class="secondary-action" data-view="rfjreviewq" data-route style="font-size:12px;padding:6px 12px;">Review Queue</button>
+                <button class="secondary-action" data-view="rfjexportall" data-route style="font-size:12px;padding:6px 12px;">Export All</button>
+                <button class="secondary-action" data-view="rfjimport" data-route style="font-size:12px;padding:6px 12px;">Import</button>
+              </div>
+            </details>
+          </article>
+
+          <!-- Danger / Protected (expert, collapsed) -->
+          <div class="dbh-expert-only" style="margin-bottom:12px;">
+            <details>
+              <summary style="padding:12px 16px;border-radius:8px;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);font-size:13px;font-weight:700;color:#f87171;cursor:pointer;list-style:none;">Protected areas — HIGH risk (expand to review)</summary>
+              <article class="panel" style="margin-top:4px;border-top:2px solid rgba(239,68,68,0.25);">
+                <p style="font-size:13px;color:#fca5a5;margin:0 0 12px;">These files require <code>highRiskOverride:true</code> in the job file. The 2D workflow blocks all changes here by default.</p>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:14px;">
+                  <div style="padding:8px 10px;border-radius:6px;background:rgba(239,68,68,0.07);font-size:12px;color:#fca5a5;"><code>.github/workflows/</code> — pipeline files</div>
+                  <div style="padding:8px 10px;border-radius:6px;background:rgba(239,68,68,0.07);font-size:12px;color:#fca5a5;"><code>sw.js</code> / service worker</div>
+                  <div style="padding:8px 10px;border-radius:6px;background:rgba(239,68,68,0.07);font-size:12px;color:#fca5a5;"><code>content/</code> folder</div>
+                  <div style="padding:8px 10px;border-radius:6px;background:rgba(239,68,68,0.07);font-size:12px;color:#fca5a5;"><code>acr.css</code> root stylesheet</div>
+                  <div style="padding:8px 10px;border-radius:6px;background:rgba(239,68,68,0.07);font-size:12px;color:#fca5a5;">AI / provider files</div>
+                  <div style="padding:8px 10px;border-radius:6px;background:rgba(239,68,68,0.07);font-size:12px;color:#fca5a5;">Token / credential / deploy files</div>
                 </div>
-              </div>
+                <button class="secondary-action" data-view="highriskwarn" data-route style="font-size:12px;padding:6px 14px;">Full Do Not Touch rules</button>
+              </article>
+            </details>
+          </div>
 
-              <div style="padding:16px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);">
-                <div style="font-size:11px;font-weight:700;color:#fbbf24;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Review PR</div>
-                <div style="font-size:14px;font-weight:700;color:#e8eaf0;margin-bottom:6px;">PR Review Coach</div>
-                <div style="font-size:13px;color:#9aa0b0;margin-bottom:14px;">Interactive checklist for reviewing a pull request before you approve it. Covers files, risk, rollback, and merge safety.</div>
-                <button class="primary-action" data-view="prcoach" data-route style="font-size:13px;padding:8px 16px;">Open coach</button>
-              </div>
-
-              <div style="padding:16px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);">
-                <div style="font-size:11px;font-weight:700;color:#f87171;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Rollback Help</div>
-                <div style="font-size:14px;font-weight:700;color:#e8eaf0;margin-bottom:6px;">Rollback Command Builder</div>
-                <div style="font-size:13px;color:#9aa0b0;margin-bottom:14px;">Generate the exact commands to reverse a merged change. Enter a SHA, branch, or PR number and copy the output.</div>
-                <button class="primary-action" data-view="rbbuilder" data-route style="font-size:13px;padding:8px 16px;">Build rollback</button>
-              </div>
-
-              <div style="padding:16px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);">
-                <div style="font-size:11px;font-weight:700;color:#c4b5fd;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Work History</div>
-                <div style="font-size:14px;font-weight:700;color:#e8eaf0;margin-bottom:6px;">Bot Memory</div>
-                <div style="font-size:13px;color:#9aa0b0;margin-bottom:14px;">Log and search past jobs, branches, PRs, and rollback commands. Stored locally on this device. Export any time.</div>
-                <button class="primary-action" data-view="workhistory" data-route style="font-size:13px;padding:8px 16px;">View history</button>
-              </div>
-
-            </div>
-          </article>
-
+          <!-- Safety reminders (always visible) -->
           <article class="panel">
-            <div style="font-size:12px;font-weight:700;color:#6366f1;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">Safety reminder</div>
+            <div style="font-size:12px;font-weight:700;color:#6366f1;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">Always remember</div>
             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;">
-              <div style="padding:8px 12px;border-radius:6px;background:rgba(239,68,68,0.07);border-left:3px solid #ef4444;font-size:13px;color:#fca5a5;">Nothing merges automatically. You merge every PR.</div>
-              <div style="padding:8px 12px;border-radius:6px;background:rgba(239,68,68,0.07);border-left:3px solid #ef4444;font-size:13px;color:#fca5a5;">Auto-merge must never be enabled.</div>
-              <div style="padding:8px 12px;border-radius:6px;background:rgba(239,68,68,0.07);border-left:3px solid #ef4444;font-size:13px;color:#fca5a5;">Workflows must never be edited via the 2D pipeline.</div>
-              <div style="padding:8px 12px;border-radius:6px;background:rgba(239,68,68,0.07);border-left:3px solid #ef4444;font-size:13px;color:#fca5a5;">HIGH-risk files require highRiskOverride and careful review.</div>
+              <div style="padding:10px 12px;border-radius:6px;background:rgba(239,68,68,0.07);border-left:3px solid #ef4444;font-size:13px;color:#fca5a5;">Nothing merges automatically. You merge every PR.</div>
+              <div style="padding:10px 12px;border-radius:6px;background:rgba(239,68,68,0.07);border-left:3px solid #ef4444;font-size:13px;color:#fca5a5;">Auto-merge must never be enabled.</div>
+              <div style="padding:10px 12px;border-radius:6px;background:rgba(239,68,68,0.07);border-left:3px solid #ef4444;font-size:13px;color:#fca5a5;">Workflows must never be edited via 2D.</div>
+              <div style="padding:10px 12px;border-radius:6px;background:rgba(239,68,68,0.07);border-left:3px solid #ef4444;font-size:13px;color:#fca5a5;">HIGH-risk files require highRiskOverride.</div>
             </div>
           </article>
+
+          <script>(function(){
+            var STOR='lt_devbot_mode';
+            var begBtn=document.getElementById('dbh-beg-btn');
+            var expBtn=document.getElementById('dbh-exp-btn');
+            var modeDesc=document.getElementById('dbh-mode-desc');
+            var expertEls=document.querySelectorAll('#view-devbothome .dbh-expert-only');
+            function applyMode(mode){
+              var isBeg=mode!=='expert';
+              begBtn.style.background=isBeg?'rgba(99,102,241,0.3)':'rgba(255,255,255,0.05)';
+              begBtn.style.color=isBeg?'#a5b4fc':'#9aa0b0';
+              expBtn.style.background=isBeg?'rgba(255,255,255,0.05)':'rgba(99,102,241,0.3)';
+              expBtn.style.color=isBeg?'#9aa0b0':'#a5b4fc';
+              modeDesc.textContent=isBeg?'Beginner — essential tools only. Advanced sections hidden.':'Expert — all tools and advanced sections visible.';
+              for(var i=0;i<expertEls.length;i++){
+                expertEls[i].style.display=isBeg?'none':'';
+              }
+            }
+            function setMode(mode){
+              localStorage.setItem(STOR,mode);
+              applyMode(mode);
+            }
+            begBtn.addEventListener('click',function(){setMode('beginner');});
+            expBtn.addEventListener('click',function(){setMode('expert');});
+            function updateNextAction(){
+              var panel=document.getElementById('dbh-next-panel');
+              var content=document.getElementById('dbh-next-content');
+              if(!panel||!content) return;
+              var history=[];
+              try{history=JSON.parse(localStorage.getItem('lt_work_history')||'[]');}catch(e){}
+              var picked=localStorage.getItem('lt_rfwpick_selected')||'';
+              var h='';
+              if(picked){
+                h='<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">';
+                h+='<div style="font-size:13px;color:#c0c4d0;">File picked: <code style="color:#a5b4fc;">'+picked.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</code></div>';
+                h+='<button class="primary-action" data-view="rfwwizard" data-route style="font-size:13px;padding:7px 14px;">Continue in Bot Flow</button>';
+                h+='</div>';
+              } else if(history.length>0){
+                var last=history[0];
+                h='<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">';
+                h+='<div style="font-size:13px;color:#c0c4d0;">Last logged job: <strong style="color:#e8eaf0;">'+(last.jobId||'(no ID)')+'</strong> &mdash; '+(last.status||'unknown status')+'</div>';
+                h+='<button class="primary-action" data-view="workhistory" data-route style="font-size:13px;padding:7px 14px;">View history</button>';
+                h+='<button class="secondary-action" data-view="rfwfilepick" data-route style="font-size:13px;padding:7px 14px;">Start new job</button>';
+                h+='</div>';
+              } else {
+                h='<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">';
+                h+='<div style="font-size:13px;color:#c0c4d0;">First time here? Start with the How To Guide.</div>';
+                h+='<button class="primary-action" data-view="rfwguide" data-route style="font-size:13px;padding:7px 14px;">Open How To Guide</button>';
+                h+='</div>';
+              }
+              content.innerHTML=h;
+              panel.style.display='block';
+            }
+            var sec=document.getElementById('view-devbothome');
+            if(sec){sec.addEventListener('lt-view-enter',function(){
+              var mode=localStorage.getItem(STOR)||'beginner';
+              applyMode(mode);
+              updateNextAction();
+            });}
+            var mode=localStorage.getItem(STOR)||'beginner';
+            applyMode(mode);
+            updateNextAction();
+          }());</script>
         </section>
 
         <!-- VIEW: rfwwizard -->
