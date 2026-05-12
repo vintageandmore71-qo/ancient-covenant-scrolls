@@ -10770,8 +10770,8 @@
           </article>
 
           <!-- Path 1: Start Here -->
-          <article class="panel" style="margin-bottom:12px;">
-            <div style="font-size:11px;font-weight:700;color:#6ee7b7;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Start Here</div>
+          <article class="panel" style="margin-bottom:12px;border-top:2px solid rgba(59,130,246,0.45);border-left:3px solid rgba(59,130,246,0.35);">
+            <div style="font-size:11px;font-weight:700;color:#60a5fa;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Start Here</div>
             <div style="font-size:15px;font-weight:700;color:#e8eaf0;margin-bottom:6px;">New to the bot?</div>
             <p style="font-size:13px;color:#9aa0b0;margin:0 0 14px;">Read the plain-language guide first. Covers every step from job file to live merge.</p>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -10784,8 +10784,8 @@
           </article>
 
           <!-- Path 2: Build & Edit -->
-          <article class="panel" style="margin-bottom:12px;">
-            <div style="font-size:11px;font-weight:700;color:#a5b4fc;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Build &amp; Edit</div>
+          <article class="panel" style="margin-bottom:12px;border-top:2px solid rgba(59,130,246,0.45);border-left:3px solid rgba(59,130,246,0.35);">
+            <div style="font-size:11px;font-weight:700;color:#60a5fa;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Build &amp; Edit</div>
             <div style="font-size:15px;font-weight:700;color:#e8eaf0;margin-bottom:6px;">Create a change request</div>
             <p style="font-size:13px;color:#9aa0b0;margin:0 0 14px;">Pick a file, fill in the fields, generate your job file.</p>
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
@@ -10808,7 +10808,7 @@
           </article>
 
           <!-- Path 3: Review & Safety -->
-          <article class="panel" style="margin-bottom:12px;">
+          <article class="panel" style="margin-bottom:12px;border-top:2px solid rgba(217,119,6,0.5);border-left:3px solid rgba(217,119,6,0.4);">
             <div style="font-size:11px;font-weight:700;color:#fbbf24;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Review &amp; Safety</div>
             <div style="font-size:15px;font-weight:700;color:#e8eaf0;margin-bottom:6px;">Before you merge</div>
             <p style="font-size:13px;color:#9aa0b0;margin:0 0 14px;">Work through the checklist. Confirm every critical item before approving the PR.</p>
@@ -10828,8 +10828,8 @@
           </article>
 
           <!-- Path 4: Recovery & Rollback -->
-          <article class="panel" style="margin-bottom:12px;">
-            <div style="font-size:11px;font-weight:700;color:#f87171;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Recovery &amp; Rollback</div>
+          <article class="panel" style="margin-bottom:12px;border-top:2px solid rgba(34,197,94,0.45);border-left:3px solid rgba(34,197,94,0.35);">
+            <div style="font-size:11px;font-weight:700;color:#4ade80;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Recovery &amp; Rollback</div>
             <div style="font-size:15px;font-weight:700;color:#e8eaf0;margin-bottom:6px;">Something went wrong?</div>
             <p style="font-size:13px;color:#9aa0b0;margin:0 0 14px;">Generate the exact commands to reverse a merged change safely.</p>
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
@@ -10847,7 +10847,7 @@
           </article>
 
           <!-- Path 5: History & Reports -->
-          <article class="panel" style="margin-bottom:12px;">
+          <article class="panel" style="margin-bottom:12px;border-top:2px solid rgba(124,58,237,0.45);border-left:3px solid rgba(124,58,237,0.35);">
             <div style="font-size:11px;font-weight:700;color:#c4b5fd;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">History &amp; Reports</div>
             <div style="font-size:15px;font-weight:700;color:#e8eaf0;margin-bottom:6px;">Track your work</div>
             <p style="font-size:13px;color:#9aa0b0;margin:0 0 14px;">Log jobs, search past changes, and export your work history.</p>
@@ -10874,8 +10874,8 @@
           <!-- Danger / Protected (expert, collapsed) -->
           <div class="dbh-expert-only" style="margin-bottom:12px;">
             <details>
-              <summary style="padding:12px 16px;border-radius:8px;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);font-size:13px;font-weight:700;color:#f87171;cursor:pointer;list-style:none;">Protected areas — HIGH risk (expand to review)</summary>
-              <article class="panel" style="margin-top:4px;border-top:2px solid rgba(239,68,68,0.25);">
+              <summary style="padding:12px 16px;border-radius:8px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-left:3px solid rgba(239,68,68,0.5);font-size:13px;font-weight:700;color:#f87171;cursor:pointer;list-style:none;">Protected areas — HIGH risk (expand to review)</summary>
+              <article class="panel" style="margin-top:4px;border-top:2px solid rgba(239,68,68,0.4);border-left:3px solid rgba(239,68,68,0.3);">
                 <p style="font-size:13px;color:#fca5a5;margin:0 0 12px;">These files require <code>highRiskOverride:true</code> in the job file. The 2D workflow blocks all changes here by default.</p>
                 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:14px;">
                   <div style="padding:8px 10px;border-radius:6px;background:rgba(239,68,68,0.07);font-size:12px;color:#fca5a5;"><code>.github/workflows/</code> — pipeline files</div>
