@@ -226,6 +226,7 @@
         <span class="nav-group-sep">Repo File Worker</span>
         <button data-view="repofilejob" data-route>Repo File Job</button>
         <button data-view="rfwwizard" data-route>Bot Wizard</button>
+        <button data-view="rfwguide" data-route>How To Guide</button>
         <button data-view="filepathhelper" data-route>File Paths</button>
         <button data-view="riskclassifier" data-route>Risk Classifier</button>
         <button data-view="patchplan" data-route>Patch Plan</button>
@@ -415,6 +416,7 @@
         <button data-view="compactmode" data-route><span class="rail-icon" data-icon="shield"></span><span>Compact Mode</span></button>
         <button data-view="repofilejob" data-route><span class="rail-icon" data-icon="version"></span><span>Repo File Job</span></button>
         <button data-view="rfwwizard" data-route><span class="rail-icon" data-icon="branch"></span><span>Bot Wizard</span></button>
+        <button data-view="rfwguide" data-route><span class="rail-icon" data-icon="notes"></span><span>How To Guide</span></button>
         <button data-view="filepathhelper" data-route><span class="rail-icon" data-icon="library"></span><span>File Paths</span></button>
         <button data-view="riskclassifier" data-route><span class="rail-icon" data-icon="shield"></span><span>Risk Classifier</span></button>
         <button data-view="patchplan" data-route><span class="rail-icon" data-icon="notes"></span><span>Patch Plan</span></button>
@@ -9654,6 +9656,230 @@
           </article>
         </section>
 
+        <!-- VIEW: rfwguide -->
+        <section class="view" id="view-rfwguide" data-view-panel="rfwguide">
+          <div class="section-head"><p class="eyebrow">Repo File Worker</p><h1>How To Guide</h1><p>Plain-language, step-by-step guide to using the Developer Bot safely.</p></div>
+          <div class="panel-wrap">
+
+          <article class="panel">
+            <details open>
+              <summary style="font-weight:700;font-size:15px;cursor:pointer;padding:4px 0;">What does the Developer Bot do?</summary>
+              <div style="margin-top:12px;display:grid;gap:10px;font-size:13px;color:#c0c4d0;line-height:1.7;">
+                <p>The Developer Bot is a safe, controlled system for making changes to files in this repository. It does <strong>not</strong> run code, push to main, or deploy anything on its own. Every step requires you to approve before it moves forward.</p>
+                <p>The bot works in two parts: this app (Load Tasks) builds and validates a job file, and GitHub Actions applies the change on a separate branch. You review the result as a draft PR before deciding whether to merge.</p>
+                <div style="padding:10px 14px;border-radius:8px;background:rgba(46,204,113,0.06);border-left:3px solid #2ecc71;"><strong style="color:#6ee7b7;">You are always in control.</strong> The bot never merges, never deploys, and never touches protected files without an explicit override from you.</div>
+              </div>
+            </details>
+          </article>
+
+          <article class="panel">
+            <details>
+              <summary style="font-weight:700;font-size:15px;cursor:pointer;padding:4px 0;">What each workflow does</summary>
+              <div style="margin-top:12px;display:grid;gap:10px;">
+                <div style="padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.04);border-left:3px solid #6366f1;">
+                  <div style="font-weight:700;color:#a5b4fc;margin-bottom:4px;">2A — Dry Run Validator</div>
+                  <div style="font-size:13px;color:#c0c4d0;">Checks that the job file is valid and safe before anything else happens. No files are changed. No branch is created. Use this first to catch errors early.</div>
+                </div>
+                <div style="padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.04);border-left:3px solid #8b5cf6;">
+                  <div style="font-weight:700;color:#c4b5fd;margin-bottom:4px;">2B — Packet Generator</div>
+                  <div style="font-size:13px;color:#c0c4d0;">Reads the job file and produces a planning packet: a patch plan, PR draft, rollback plan, and file snapshots. Saves everything as a downloadable artifact. No files are changed.</div>
+                </div>
+                <div style="padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.04);border-left:3px solid #3b82f6;">
+                  <div style="font-weight:700;color:#93c5fd;margin-bottom:4px;">2C1 — PR Prep Validate</div>
+                  <div style="font-size:13px;color:#c0c4d0;">Validates the job file and previews the branch name and PR draft. Runs automatically when the job file is pushed. Produces a zip artifact with the validation report. No files are changed.</div>
+                </div>
+                <div style="padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.04);border-left:3px solid #0ea5e9;">
+                  <div style="font-weight:700;color:#7dd3fc;margin-bottom:4px;">2C2 — Branch Create</div>
+                  <div style="font-size:13px;color:#c0c4d0;">Creates a new feature branch from the latest main. No file changes on the branch yet. Run this after 2C1 passes. The branch name comes from the job file.</div>
+                </div>
+                <div style="padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.04);border-left:3px solid #06b6d4;">
+                  <div style="font-weight:700;color:#67e8f9;margin-bottom:4px;">2C3 — Draft PR Create</div>
+                  <div style="font-size:13px;color:#c0c4d0;">Opens a draft pull request from the feature branch into main. No files are changed yet. The PR is in draft so it cannot be merged by accident.</div>
+                </div>
+                <div style="padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.04);border-left:3px solid #2ecc71;">
+                  <div style="font-weight:700;color:#6ee7b7;margin-bottom:4px;">2D — Controlled File Edit</div>
+                  <div style="font-size:13px;color:#c0c4d0;">Applies the patch to the target file on the feature branch. Commits and pushes. Updates the draft PR. Produces a diff artifact so you can see exactly what changed. Does <strong>not</strong> merge.</div>
+                </div>
+                <div style="padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.04);border-left:3px solid #ffd400;">
+                  <div style="font-weight:700;color:#fde68a;margin-bottom:4px;">2E — Real Edit Flow</div>
+                  <div style="font-size:13px;color:#c0c4d0;">The full pipeline used on a real task. Runs 2C1 through 2D in sequence on an actual repo file. Confirmed working on HANDOFF.md (PR #50, 2026-05-12).</div>
+                </div>
+              </div>
+            </details>
+          </article>
+
+          <article class="panel">
+            <details>
+              <summary style="font-weight:700;font-size:15px;cursor:pointer;padding:4px 0;">What NOT to do</summary>
+              <div style="margin-top:12px;display:grid;gap:8px;font-size:13px;">
+                <div style="padding:10px 14px;border-radius:8px;background:rgba(239,68,68,0.06);border-left:3px solid #ef4444;color:#c0c4d0;"><strong style="color:#fca5a5;">Do not merge a draft PR without reading the diff.</strong> Open the PR, click Files Changed, and check every line before clicking merge.</div>
+                <div style="padding:10px 14px;border-radius:8px;background:rgba(239,68,68,0.06);border-left:3px solid #ef4444;color:#c0c4d0;"><strong style="color:#fca5a5;">Do not use the 2D pipeline to edit workflow files.</strong> Files in <code>.github/workflows/</code> are HIGH-risk and self-protected. Edit them only via a direct PR with human review.</div>
+                <div style="padding:10px 14px;border-radius:8px;background:rgba(239,68,68,0.06);border-left:3px solid #ef4444;color:#c0c4d0;"><strong style="color:#fca5a5;">Do not skip the validate step.</strong> Run 2C1 first. If it shows BLOCKED, fix the job file before moving forward.</div>
+                <div style="padding:10px 14px;border-radius:8px;background:rgba(239,68,68,0.06);border-left:3px solid #ef4444;color:#c0c4d0;"><strong style="color:#fca5a5;">Do not set a lower risk level than the classifier shows.</strong> The declared risk must match the auto-classification. A mismatch blocks every phase.</div>
+                <div style="padding:10px 14px;border-radius:8px;background:rgba(239,68,68,0.06);border-left:3px solid #ef4444;color:#c0c4d0;"><strong style="color:#fca5a5;">Do not approve a change to a HIGH-risk file without reading the Do Not Touch panel first.</strong></div>
+              </div>
+            </details>
+          </article>
+
+          <article class="panel">
+            <details>
+              <summary style="font-weight:700;font-size:15px;cursor:pointer;padding:4px 0;">HIGH-risk file warnings</summary>
+              <div style="margin-top:12px;font-size:13px;color:#c0c4d0;line-height:1.7;">
+                <p style="margin-bottom:10px;">These file types are always HIGH-risk. The pipeline blocks by default. To proceed you must add <code>highRiskOverride: true</code> to the job file — and you must still review the draft PR before merging.</p>
+                <div style="display:grid;gap:6px;">
+                  <div style="padding:8px 12px;border-radius:6px;background:rgba(239,68,68,0.06);font-size:12px;color:#fca5a5;"><code>sw.js</code>, <code>service-worker</code> — Service workers control caching. A wrong change can break the app for all users.</div>
+                  <div style="padding:8px 12px;border-radius:6px;background:rgba(239,68,68,0.06);font-size:12px;color:#fca5a5;"><code>.github/workflows/</code> — CI/CD pipelines. Can trigger deployments and access secrets.</div>
+                  <div style="padding:8px 12px;border-radius:6px;background:rgba(239,68,68,0.06);font-size:12px;color:#fca5a5;"><code>provider</code>, <code>lib-load-image-providers</code> — AI provider routing. A mistake breaks all image generation.</div>
+                  <div style="padding:8px 12px;border-radius:6px;background:rgba(239,68,68,0.06);font-size:12px;color:#fca5a5;"><code>token</code>, <code>secret</code>, <code>credential</code>, <code>security</code> — Never edit files with these names via automated pipelines.</div>
+                  <div style="padding:8px 12px;border-radius:6px;background:rgba(239,68,68,0.06);font-size:12px;color:#fca5a5;"><code>acr.css</code>, <code>content/</code>, root <code>index.html</code>, root <code>sw.js</code> — ACR Reader. Locked. Do not touch without explicit instruction.</div>
+                </div>
+              </div>
+            </details>
+          </article>
+
+          <article class="panel">
+            <details>
+              <summary style="font-weight:700;font-size:15px;cursor:pointer;padding:4px 0;">How to review a draft PR</summary>
+              <div style="margin-top:12px;font-size:13px;color:#c0c4d0;line-height:1.7;">
+                <ol style="margin:0 0 0 18px;padding:0;display:grid;gap:8px;">
+                  <li>Open GitHub. Go to the Pull Requests tab. Find the draft PR created by the workflow.</li>
+                  <li>Click <strong>Files Changed</strong>. Read every line. Green lines were added. Red lines were removed.</li>
+                  <li>Check: is this exactly what the job file said would change? Nothing more?</li>
+                  <li>Check: does the change look correct? No extra whitespace, no broken syntax?</li>
+                  <li>If something looks wrong, close the PR. Delete the branch. Fix the job file and run the pipeline again.</li>
+                  <li>If everything looks correct, click <strong>Ready for Review</strong> to take it out of draft. Then click <strong>Merge</strong>.</li>
+                </ol>
+              </div>
+            </details>
+          </article>
+
+          <article class="panel">
+            <details>
+              <summary style="font-weight:700;font-size:15px;cursor:pointer;padding:4px 0;">How to rollback safely</summary>
+              <div style="margin-top:12px;font-size:13px;color:#c0c4d0;line-height:1.7;">
+                <p style="margin-bottom:10px;"><strong>If the PR has not been merged yet:</strong></p>
+                <ol style="margin:0 0 12px 18px;padding:0;display:grid;gap:6px;">
+                  <li>Close the draft PR on GitHub.</li>
+                  <li>Delete the feature branch on GitHub (branch list under Code tab).</li>
+                  <li>No changes have landed on main. Nothing to undo.</li>
+                </ol>
+                <p style="margin-bottom:10px;"><strong>If the PR has already been merged:</strong></p>
+                <ol style="margin:0 0 0 18px;padding:0;display:grid;gap:6px;">
+                  <li>Find the merge commit SHA. It is shown in the PR on GitHub, or in the session notes.</li>
+                  <li>Run: <code>git revert &lt;SHA&gt;</code> — this creates a new commit that undoes the change. It does not delete history.</li>
+                  <li>Push to a new branch. Open a PR. Merge after review.</li>
+                  <li>Never force-push to main.</li>
+                </ol>
+              </div>
+            </details>
+          </article>
+
+          <article class="panel">
+            <details>
+              <summary style="font-weight:700;font-size:15px;cursor:pointer;padding:4px 0;">How to read a GitHub Actions run</summary>
+              <div style="margin-top:12px;font-size:13px;color:#c0c4d0;line-height:1.7;">
+                <ol style="margin:0 0 0 18px;padding:0;display:grid;gap:8px;">
+                  <li>Go to the GitHub repo. Click the <strong>Actions</strong> tab.</li>
+                  <li>Find the workflow run you triggered. A green check means it passed. A red X means it failed.</li>
+                  <li>Click the run to open it. Click the job name to see the log.</li>
+                  <li>Scroll down in the log to find the output. Look for <strong>VERDICT: BLOCKED</strong> or <strong>VERDICT: EDIT COMMITTED</strong>.</li>
+                  <li>If BLOCKED, the log shows the exact reason. Fix the job file and re-run.</li>
+                  <li>If it passed, scroll to the bottom to find the draft PR link or artifact download.</li>
+                </ol>
+              </div>
+            </details>
+          </article>
+
+          <article class="panel">
+            <details>
+              <summary style="font-weight:700;font-size:15px;cursor:pointer;padding:4px 0;">How to verify artifacts</summary>
+              <div style="margin-top:12px;font-size:13px;color:#c0c4d0;line-height:1.7;">
+                <ol style="margin:0 0 0 18px;padding:0;display:grid;gap:8px;">
+                  <li>After a workflow run completes, scroll to the bottom of the run page on GitHub.</li>
+                  <li>Look for the <strong>Artifacts</strong> section. Click the artifact name to download.</li>
+                  <li>Open the downloaded file. For 2C1 it is a zip. For 2D it is a .txt file with a diff preview.</li>
+                  <li>Check the diff preview. Confirm the change matches what you intended.</li>
+                  <li>If the artifact is missing, check the Actions log for an error. The workflow may have failed before the upload step.</li>
+                </ol>
+              </div>
+            </details>
+          </article>
+
+          <article class="panel">
+            <details>
+              <summary style="font-weight:700;font-size:15px;cursor:pointer;padding:4px 0;">Beginner Mode and Expert Mode explained</summary>
+              <div style="margin-top:12px;font-size:13px;color:#c0c4d0;line-height:1.7;display:grid;gap:10px;">
+                <div style="padding:10px 14px;border-radius:8px;background:rgba(37,99,235,0.06);border-left:3px solid #3b82f6;"><strong style="color:#93c5fd;">Beginner Mode</strong> — plain-language hints are visible. Advanced fields like patch mode, anchor, and patch content are hidden. Start here if you are new to the pipeline or want a reduced-clutter view.</div>
+                <div style="padding:10px 14px;border-radius:8px;background:rgba(124,58,237,0.06);border-left:3px solid #7c3aed;"><strong style="color:#c4b5fd;">Expert Mode</strong> — all fields are visible, including the 2D-specific patch fields. Workflow links and advanced controls are shown. Use this when you know the pipeline well and want full control.</div>
+                <p>Switch modes using the toggle at the top of the Bot Wizard view. Your choice is saved and stays between visits.</p>
+              </div>
+            </details>
+          </article>
+
+          <article class="panel">
+            <details>
+              <summary style="font-weight:700;font-size:15px;cursor:pointer;padding:4px 0;">Branch cleanup directions</summary>
+              <div style="margin-top:12px;font-size:13px;color:#c0c4d0;line-height:1.7;">
+                <p style="margin-bottom:10px;">After a PR is merged or closed, delete its feature branch to keep the repo tidy.</p>
+                <ol style="margin:0 0 12px 18px;padding:0;display:grid;gap:6px;">
+                  <li>Go to GitHub. Click the <strong>Code</strong> tab. Click <strong>Branches</strong>.</li>
+                  <li>Find branches starting with <code>rfw-</code> or <code>claude/rfw</code>.</li>
+                  <li>Click the trash icon next to each stale branch. Confirm deletion.</li>
+                </ol>
+                <div style="padding:8px 12px;border-radius:6px;background:rgba(255,255,255,0.04);font-size:12px;color:#9aa0b0;">Note: <code>git push origin --delete &lt;branch&gt;</code> may return 403 in some environments. Use the GitHub UI branch list instead.</div>
+                <p style="margin-top:10px;"><strong>Stale branches from this session that need cleanup:</strong></p>
+                <ul style="margin:6px 0 0 18px;padding:0;display:grid;gap:4px;font-size:12px;color:#9aa0b0;">
+                  <li><code>rfw-2d-edit-test</code></li>
+                  <li><code>rfw-test-branch-create</code></li>
+                  <li><code>rfw-test-pr-create</code></li>
+                  <li><code>rfw-handoff-task-c</code></li>
+                  <li><code>claude/rfw-test-job-2026-05-11</code></li>
+                  <li><code>claude/rfw-test-job-medium-2026-05-11</code></li>
+                  <li><code>claude/rfw-update-branch-suggestion-2026-05-11</code></li>
+                </ul>
+              </div>
+            </details>
+          </article>
+
+          <article class="panel">
+            <details>
+              <summary style="font-weight:700;font-size:15px;cursor:pointer;padding:4px 0;">Common failures and how to fix them</summary>
+              <div style="margin-top:12px;display:grid;gap:10px;font-size:13px;">
+                <div style="padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.04);">
+                  <div style="font-weight:700;color:#fde68a;margin-bottom:4px;">BLOCKED: status is "draft" — must be "approved"</div>
+                  <div style="color:#c0c4d0;">Open the job file. Change <code>"status": "draft"</code> to <code>"status": "approved"</code>. Save and re-run.</div>
+                </div>
+                <div style="padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.04);">
+                  <div style="font-weight:700;color:#fde68a;margin-bottom:4px;">BLOCKED: risk mismatch</div>
+                  <div style="color:#c0c4d0;">The riskLevel you set does not match the auto-classifier result. Run the Risk Classifier tool, find the correct level, and update the job file.</div>
+                </div>
+                <div style="padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.04);">
+                  <div style="font-weight:700;color:#fde68a;margin-bottom:4px;">BLOCKED: target file not found in repo</div>
+                  <div style="color:#c0c4d0;">The file path in the job file does not exist in the repo. Check the exact path including capitalisation. Use the File Paths tool to browse.</div>
+                </div>
+                <div style="padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.04);">
+                  <div style="font-weight:700;color:#fde68a;margin-bottom:4px;">BLOCKED: targetAnchor not found in file</div>
+                  <div style="color:#c0c4d0;">The anchor string you set does not appear in the target file. Open the file, find a unique phrase that exists in it, and use that as the anchor.</div>
+                </div>
+                <div style="padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.04);">
+                  <div style="font-weight:700;color:#fde68a;margin-bottom:4px;">gh pr create: not permitted</div>
+                  <div style="color:#c0c4d0;">Go to GitHub repo Settings → Actions → General → Workflow permissions. Enable <strong>Allow GitHub Actions to create and approve pull requests</strong>.</div>
+                </div>
+                <div style="padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.04);">
+                  <div style="font-weight:700;color:#fde68a;margin-bottom:4px;">No artifact appeared after the run</div>
+                  <div style="color:#c0c4d0;">The workflow may have failed before the upload step. Open the Actions log. Look for the BLOCKED reason printed to the log. Fix the job file and re-run.</div>
+                </div>
+                <div style="padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.04);">
+                  <div style="font-weight:700;color:#fde68a;margin-bottom:4px;">Branch already exists on origin</div>
+                  <div style="color:#c0c4d0;">A branch with the same name was created in a previous run. Delete the old branch on GitHub (Code → Branches), then re-run 2C2.</div>
+                </div>
+              </div>
+            </details>
+          </article>
+
+          </div>
+        </section>
+
         <!-- VIEW: rfwwizard -->
         <section class="view" id="view-rfwwizard" data-view-panel="rfwwizard">
           <div class="section-head"><p class="eyebrow">Repo File Worker</p><h1>Guided Bot Wizard</h1><p>Step-by-step guide to building a safe repo change request. No automatic merge or deploy.</p></div>
@@ -10912,7 +11138,7 @@
     /* Rail grouping */
     var PINNED=['dashboard','starthere','toolsearch2','favorites','recenttools','quicklaunch'];
     var GROUPS=[
-      {label:'Repo File Worker',open:true,views:['repofilejob','rfwwizard','filepathhelper','riskclassifier','patchplan','prdraftbuilder','exportrfj','actionspec','rfjtemplate','fileimpact','highriskwarn','approvephrase','rollbackbuilder','prsafetychk','patchscope','rfjhandoff','rfjpacket','phase2readiness','rfjdashboard','rfjstatusboard','rfjsearch','rfjtimeline','rfjdupes','rfjpriority','rfjblockers','rfjreviewq','rfjexportall','rfjimport']},
+      {label:'Repo File Worker',open:true,views:['repofilejob','rfwwizard','rfwguide','filepathhelper','riskclassifier','patchplan','prdraftbuilder','exportrfj','actionspec','rfjtemplate','fileimpact','highriskwarn','approvephrase','rollbackbuilder','prsafetychk','patchscope','rfjhandoff','rfjpacket','phase2readiness','rfjdashboard','rfjstatusboard','rfjsearch','rfjtimeline','rfjdupes','rfjpriority','rfjblockers','rfjreviewq','rfjexportall','rfjimport']},
       {label:'Daily Work',open:true,views:['standup','worklog','mergelog','bugtriage','shippedlog','testresults','branchlog','prprep','dailycommand','activework','whatsnext2','sessionsummary','simpledash','pinnedcmd','sessiongoals','sessionnotes']},
       {label:'Safety',open:true,views:['validator','sitehealth','openrisks','pendingreviews','backupreminder','safenextstep','siteprotection','vaultreminder','branchsafety','prrisks','smokecheck','envcheck','rollbackplan','verifyscript']},
       {label:'Reports',open:true,views:['exportpacket','settingsio','exportdaily','exportrecovery','exportrelease','exporthandoff','importhandoff','dailyexport','releasenotes','toolindex','toolhelp']}
