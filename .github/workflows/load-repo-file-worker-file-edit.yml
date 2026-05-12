@@ -1,0 +1,318 @@
+name: Repo File Worker - File Edit (2D)
+
+on:
+  workflow_dispatch:
+    inputs:
+      job_file:
+        description: 'Path to job file'
+        required: false
+        default: 'loadtasks-inbox/repo-file-job.json'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  file-edit:
+    name: Controlled File Edit on Feature Branch
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate, edit, and open draft PR
+        id: edit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_FILE: ${{ inputs.job_file || 'loadtasks-inbox/repo-file-job.json' }}
+        run: |
+          python3 << 'PYEOF'
+          import json, os, sys, subprocess, re, datetime, difflib
+
+          JOB_FILE = os.environ.get('JOB_FILE', 'loadtasks-inbox/repo-file-job.json')
+
+          def fail(job_id, reasons, report_file):
+              report = '=== RFW FILE EDIT BLOCKED ===\n'
+              report += 'Job ID:  ' + job_id + '\n'
+              report += 'VERDICT: BLOCKED\n\n'
+              report += 'Reasons:\n'
+              for r in reasons:
+                  report += '  - ' + r + '\n'
+              report += '\nNo files were modified. No branch created.\n'
+              report += '=== END ===\n'
+              print(report)
+              with open(report_file, 'w') as fh:
+                  fh.write(report)
+              github_env = os.environ.get('GITHUB_ENV', '')
+              if github_env:
+                  with open(github_env, 'a') as fh:
+                      fh.write('REPORT_FILE=' + report_file + '\n')
+                      fh.write('JOB_ID=' + job_id + '\n')
+              sys.exit(1)
+
+          if not os.path.isfile(JOB_FILE):
+              fail('UNKNOWN', ['Job file not found: ' + JOB_FILE], 'rfw-file-edit-report-UNKNOWN.txt')
+
+          with open(JOB_FILE) as fh:
+              try:
+                  job = json.load(fh)
+              except json.JSONDecodeError as e:
+                  fail('UNKNOWN', ['Invalid JSON: ' + str(e)], 'rfw-file-edit-report-UNKNOWN.txt')
+
+          job_id = str(job.get('jobId', job.get('id', 'UNKNOWN')))
+          report_file = 'rfw-file-edit-report-' + job_id + '.txt'
+
+          REQUIRED = [
+              'targetSite', 'targetFiles', 'fileAction', 'riskLevel',
+              'rollbackPlan', 'proposedChangeSummary', 'acceptanceCriteria',
+              'patchMode', 'targetAnchor', 'patchContent',
+              ]
+          missing = [f for f in REQUIRED if not str(job.get(f, '')).strip()]
+          if missing:
+              fail(job_id, ['Missing required fields: ' + ', '.join(missing)], report_file)
+
+          HIGH_BLOCKED = [
+              'sw.js', 'service-worker', 'ai-chat-studio', 'image-prompt',
+              'lib-load-image-providers', 'provider', 'audio', 'animation',
+              'export-pack', 'deploy', 'security', 'token', 'secret',
+              'credential', 'cloudflare', '.github/workflows', 'acr.css',
+              'content/', 'load/sw',
+              ]
+          MED_PATTERNS = [
+              'load.js', 'load/load', 'loadstudio', 'loadplay', 'attain',
+              'study', 'acr', 'index.html', 'lib-',
+              ]
+
+          target_files_raw = str(job.get('targetFiles', ''))
+          pl = target_files_raw.lower()
+          if any(p.lower() in pl for p in HIGH_BLOCKED):
+              auto_risk = 'HIGH'
+          elif any(p.lower() in pl for p in MED_PATTERNS):
+              auto_risk = 'MEDIUM'
+          else:
+              auto_risk = 'LOW'
+
+          declared_risk = str(job.get('riskLevel', 'UNKNOWN')).upper()
+
+          raw = target_files_raw.replace(',', '\n')
+          file_paths = [f.strip() for f in raw.splitlines() if f.strip()]
+
+          blocks = []
+
+          job_status = str(job.get('status', 'draft')).lower()
+          if job_status != 'approved':
+              blocks.append('status is "' + job_status + '" — must be "approved"')
+
+          user_approval = str(job.get('userApprovalRequired', ''))
+          if user_approval.lower() not in ('yes', 'true', '1'):
+              blocks.append('userApprovalRequired is "' + user_approval + '" — must be "Yes"')
+
+          if auto_risk == 'HIGH':
+              blocks.append('auto risk is HIGH — file-edit blocked for HIGH risk targets')
+
+          if auto_risk != declared_risk:
+              blocks.append('risk mismatch: declared=' + declared_risk + ' auto=' + auto_risk)
+
+          patch_mode = str(job.get('patchMode', '')).lower()
+          if patch_mode not in ('replace-block', 'append'):
+              blocks.append('patchMode must be "replace-block" or "append", got: "' + patch_mode + '"')
+
+          for fp in file_paths:
+              r = subprocess.run(
+                  ['git', 'ls-files', '--error-unmatch', fp],
+                  capture_output=True, text=True
+                  )
+              if r.returncode != 0:
+                  blocks.append('target file not found in repo: ' + fp)
+
+          if blocks:
+              fail(job_id, blocks, report_file)
+
+          branch_suggestion = str(job.get('branchNameSuggestion', ''))
+          today = datetime.date.today().isoformat()
+          if branch_suggestion:
+              branch_name = branch_suggestion.replace('YYYY-MM-DD', today)
+          else:
+              safe_id = re.sub(r'[^a-z0-9-]', '-', job_id.lower())
+              branch_name = 'rfw/' + safe_id + '-' + today
+
+          branch_name = re.sub(r'[^a-zA-Z0-9/_.-]', '-', branch_name)
+          branch_name = re.sub(r'-+', '-', branch_name).strip('-')
+
+          PROTECTED = ['main', 'master', 'develop', 'release',
+              ]
+          for p in PROTECTED:
+              if branch_name.lower() == p:
+                  fail(job_id, ['branch name "' + branch_name + '" is protected'], report_file)
+
+          head_r = subprocess.run(['git', 'rev-parse', 'origin/main'], capture_output=True, text=True)
+          head_sha = head_r.stdout.strip()
+
+          exist_r = subprocess.run(
+              ['git', 'ls-remote', '--exit-code', 'origin', branch_name],
+              capture_output=True, text=True
+              )
+          if exist_r.returncode == 0:
+              co_r = subprocess.run(
+                  ['git', 'checkout', branch_name],
+                  capture_output=True, text=True
+                  )
+              if co_r.returncode != 0:
+                  subprocess.run(['git', 'checkout', '-b', branch_name, 'origin/' + branch_name])
+          else:
+              subprocess.run(['git', 'checkout', '-b', branch_name, 'origin/main'])
+
+          target_anchor = str(job.get('targetAnchor', ''))
+          patch_content = str(job.get('patchContent', ''))
+
+          diffs = []
+          for fp in file_paths:
+              with open(fp, 'r') as fh:
+                  original = fh.read()
+              original_lines = original.splitlines(keepends=True)
+
+              if patch_mode == 'replace-block':
+                  modified_lines = []
+                  replaced = False
+                  for line in original_lines:
+                      if not replaced and target_anchor in line:
+                          modified_lines.append(patch_content if patch_content.endswith('\n') else patch_content + '\n')
+                          replaced = True
+                      else:
+                          modified_lines.append(line)
+                  if not replaced:
+                      fail(job_id, ['targetAnchor not found in ' + fp + ': "' + target_anchor + '"'], report_file)
+                  modified = ''.join(modified_lines)
+              else:
+                  modified_lines = list(original_lines)
+                  inserted = False
+                  for i, line in enumerate(original_lines):
+                      if target_anchor in line:
+                          insert_text = patch_content if patch_content.endswith('\n') else patch_content + '\n'
+                          modified_lines.insert(i + 1, insert_text)
+                          inserted = True
+                          break
+                  if not inserted:
+                      fail(job_id, ['targetAnchor not found in ' + fp + ': "' + target_anchor + '"'], report_file)
+                  modified = ''.join(modified_lines)
+
+              diff = ''.join(difflib.unified_diff(
+                  original_lines,
+                  modified.splitlines(keepends=True),
+                  fromfile='a/' + fp,
+                  tofile='b/' + fp,
+                  lineterm=''
+                  ))
+              diffs.append('--- ' + fp + ' ---\n' + diff)
+
+              with open(fp, 'w') as fh:
+                  fh.write(modified)
+
+          subprocess.run(['git', 'config', 'user.email', 'github-actions[bot]@users.noreply.github.com'])
+          subprocess.run(['git', 'config', 'user.name', 'github-actions[bot]'])
+
+          commit_msg = str(job.get('prTitleSuggestion', 'RFW: ' + job_id)) + '\n\nJob: ' + job_id
+          subprocess.run(['git', 'add'] + file_paths)
+          commit_r = subprocess.run(
+              ['git', 'commit', '-m', commit_msg],
+              capture_output=True, text=True
+              )
+          if commit_r.returncode != 0:
+              fail(job_id, ['git commit failed: ' + commit_r.stderr.strip()], report_file)
+
+          push_r = subprocess.run(
+              ['git', 'push', 'origin', branch_name],
+              capture_output=True, text=True
+              )
+          if push_r.returncode != 0:
+              fail(job_id, ['git push failed: ' + push_r.stderr.strip()], report_file)
+
+          after_sha_r = subprocess.run(['git', 'rev-parse', 'HEAD'], capture_output=True, text=True)
+          after_sha = after_sha_r.stdout.strip()
+
+          pr_title = str(job.get('prTitleSuggestion', 'RFW: ' + job_id))
+          pr_body = '## Job Details\n'
+          pr_body += '- **Job ID:** ' + job_id + '\n'
+          pr_body += '- **Risk:** ' + declared_risk + ' (auto: ' + auto_risk + ')\n'
+          pr_body += '- **Files:** ' + target_files_raw + '\n'
+          pr_body += '\n## Proposed Change\n'
+          pr_body += str(job.get('proposedChangeSummary', '')) + '\n'
+          pr_body += '\n## Rollback\n'
+          pr_body += str(job.get('rollbackPlan', '')) + '\n'
+          pr_body += '\n## Boundaries\n'
+          pr_body += '- SW/cache: No | AI/providers: No | Deployment: No | Auto-merge: No\n'
+          pr_body += '\n_Draft PR created by RFW 2D. Review diff before merging._\n'
+
+          check_pr = subprocess.run(
+              ['gh', 'pr', 'list', '--head', branch_name, '--state', 'open', '--json', 'number'],
+              capture_output=True, text=True
+              )
+          existing = []
+          try:
+              existing = json.loads(check_pr.stdout)
+          except Exception:
+              pass
+
+          if existing:
+              pr_num = str(existing[0].get('number', ''))
+              subprocess.run([
+                  'gh', 'pr', 'edit', pr_num,
+                  '--body', pr_body,
+                  ])
+              repo = os.environ.get('GITHUB_REPOSITORY', 'DssOrit/ancient-covenant-scrolls')
+              pr_url = 'https://github.com/' + repo + '/pull/' + pr_num
+              print('Updated existing draft PR: ' + pr_url)
+          else:
+              pr_r = subprocess.run(
+                  ['gh', 'pr', 'create',
+                   '--title', pr_title,
+                   '--body', pr_body,
+                   '--head', branch_name,
+                   '--base', 'main',
+                   '--draft',
+                   ],
+                  capture_output=True, text=True
+                  )
+              if pr_r.returncode != 0:
+                  print('gh pr create stderr: ' + pr_r.stderr.strip())
+                  fail(job_id, ['gh pr create failed: ' + pr_r.stderr.strip()], report_file)
+              pr_url = pr_r.stdout.strip()
+              print('Draft PR created: ' + pr_url)
+
+          diff_text = '\n'.join(diffs) if diffs else '(no diff)'
+
+          report = '=== RFW FILE EDIT REPORT ===\n'
+          report += 'Job ID:     ' + job_id + '\n'
+          report += 'Branch:     ' + branch_name + '\n'
+          report += 'Before SHA: ' + head_sha + '\n'
+          report += 'After SHA:  ' + after_sha + '\n'
+          report += 'PR URL:     ' + pr_url + '\n'
+          report += 'Patch mode: ' + patch_mode + '\n'
+          report += '\nDiff Preview:\n'
+          report += diff_text + '\n'
+          report += '\nVERDICT: EDIT COMMITTED TO BRANCH\n'
+          report += 'No merge. No auto-merge. User approval required.\n'
+          report += '=== END ===\n'
+          print(report)
+
+          with open(report_file, 'w') as fh:
+              fh.write(report)
+
+          github_env = os.environ.get('GITHUB_ENV', '')
+          if github_env:
+              with open(github_env, 'a') as fh:
+                  fh.write('REPORT_FILE=' + report_file + '\n')
+                  fh.write('JOB_ID=' + job_id + '\n')
+          PYEOF
+
+      - name: Upload file edit report artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rfw-file-edit-report-${{ env.JOB_ID || 'unknown' }}
+          path: ${{ env.REPORT_FILE || 'rfw-file-edit-report-*.txt' }}
+          retention-days: 30
+          if-no-files-found: warn
