@@ -9391,6 +9391,29 @@
               <div style="margin-top:6px;"><span style="color:#2ecc71;font-weight:700;">LOW</span> — LoadTasks/index.html, local-only tools, docs, handoff notes, session notes, status pages, non-live content</div>
             </div>
           </article>
+          <article class="panel" style="margin-top:12px;">
+            <div class="panel-title"><h2>What each risk level means — plain language</h2></div>
+            <div style="display:grid;gap:12px;">
+              <div style="border-left:3px solid #2ecc71;padding:10px 14px;background:rgba(46,204,113,0.06);border-radius:0 8px 8px 0;">
+                <div style="font-weight:700;color:#2ecc71;margin-bottom:4px;">LOW</div>
+                <div style="font-size:13px;color:#c0c4d0;margin-bottom:6px;">Docs, session notes, handoff files, LoadTasks-only pages. Small blast radius. Easy to fix if something goes wrong.</div>
+                <div style="font-size:12px;color:#9aa0b0;line-height:1.7;"><strong>What the pipeline does:</strong> validates job, creates branch, applies patch, opens draft PR. No special approval beyond the standard job file fields.</div>
+              </div>
+              <div style="border-left:3px solid #e67e22;padding:10px 14px;background:rgba(230,126,34,0.06);border-radius:0 8px 8px 0;">
+                <div style="font-weight:700;color:#e67e22;margin-bottom:4px;">MEDIUM</div>
+                <div style="font-size:13px;color:#c0c4d0;margin-bottom:6px;">Live app pages such as LoadTasks/index.html, Load core files, Attain, Study. A mistake here affects real users.</div>
+                <div style="font-size:12px;color:#9aa0b0;line-height:1.7;"><strong>What the pipeline does:</strong> same flow as LOW, but the draft PR needs careful review. Check the diff line by line. Do not fast-lane a MEDIUM change.</div>
+              </div>
+              <div style="border-left:3px solid #ef4444;padding:10px 14px;background:rgba(239,68,68,0.06);border-radius:0 8px 8px 0;">
+                <div style="font-weight:700;color:#ef4444;margin-bottom:4px;">HIGH</div>
+                <div style="font-size:13px;color:#c0c4d0;margin-bottom:6px;">Service workers, AI providers, security files, workflows, credentials, deployment logic. A mistake can break the whole app or expose sensitive data.</div>
+                <div style="font-size:12px;color:#9aa0b0;line-height:1.7;"><strong>What the pipeline does:</strong> blocks by default. To proceed, add <code>highRiskOverride: true</code> to the job file. A draft PR is still required. No auto-merge. You must approve every step.</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:12px 14px;font-size:12px;color:#9aa0b0;line-height:1.8;">
+                <strong style="color:#e8eaf0;">The one rule that never changes:</strong> the risk level you declare in the job file must match what the classifier calculates. If they do not match, every pipeline phase blocks until you correct it.
+              </div>
+            </div>
+          </article>
           <script>(function(){
             var RC2_RULES=[
               {pattern:'sw.js',risk:'HIGH',reason:'Service worker — stale cache risk'},
@@ -9733,6 +9756,25 @@
           <article class="panel">
             <div class="panel-title"><h2>HIGH-Risk Files</h2></div>
             <div style="display:grid;gap:10px;" id="hrw-list"></div>
+          </article>
+          <article class="panel" style="margin-top:12px;">
+            <div class="panel-title"><h2>Pipeline self-protection rules</h2></div>
+            <div style="display:grid;gap:10px;">
+              <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:8px;padding:14px 16px;">
+                <div style="font-weight:700;color:#ef4444;margin-bottom:6px;">Rule 1 — Workflows must never edit themselves</div>
+                <div style="font-size:13px;color:#c0c4d0;margin-bottom:6px;">The 2D File Edit workflow cannot be used to edit any file in <code>.github/workflows/</code>. That path is always HIGH-risk. Use a direct PR with human review instead.</div>
+                <div style="font-size:12px;color:#9aa0b0;">Each workflow file carries a SELF-PROTECTION comment at the top as a visible reminder.</div>
+              </div>
+              <div style="background:rgba(234,179,8,0.08);border:1px solid rgba(234,179,8,0.25);border-radius:8px;padding:14px 16px;">
+                <div style="font-weight:700;color:#eab308;margin-bottom:6px;">Rule 2 — HIGH-risk targets need an explicit override</div>
+                <div style="font-size:13px;color:#c0c4d0;margin-bottom:6px;">If a file is auto-classified as HIGH-risk, the pipeline blocks by default. To proceed, add <code>highRiskOverride: true</code> to the job file. This is a deliberate, logged choice — not a shortcut.</div>
+                <div style="font-size:12px;color:#9aa0b0;">Even with the override, the workflow creates a draft PR only. No auto-merge. You must review and approve before anything lands.</div>
+              </div>
+              <div style="background:rgba(37,99,235,0.08);border:1px solid rgba(37,99,235,0.25);border-radius:8px;padding:14px 16px;">
+                <div style="font-weight:700;color:#3b82f6;margin-bottom:6px;">Rule 3 — Declared risk must match auto-classification</div>
+                <div style="font-size:13px;color:#c0c4d0;">Set <code>riskLevel</code> in the job file to match what the Risk Classifier reports. A mismatch blocks all pipeline phases. This prevents accidental under-labelling of risky changes.</div>
+              </div>
+            </div>
           </article>
           </div>
           <script>(function(){
