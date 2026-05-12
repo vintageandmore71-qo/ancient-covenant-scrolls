@@ -1,4 +1,6 @@
 name: Repo File Worker - Packet Generator
+# SELF-PROTECTION: This workflow must never be edited via the 2D file-edit pipeline.
+# .github/workflows/ is a HIGH-risk target. Edit only via direct PR with human review.
 
 on:
   workflow_dispatch:
