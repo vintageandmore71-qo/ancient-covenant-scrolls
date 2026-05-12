@@ -411,3 +411,44 @@ User unpacks into a new private repo on a different GitHub account.
   don't delete — keeps the audit trail.
 - The `study/BUILD_PLAN.md` is the source of truth for the Study PWA's
   feature backlog. These two files don't overlap.
+
+---
+
+## TASK C — Repo File Worker Pipeline (confirmed 2026-05-12)
+
+Phases 2B–2D confirmed WORKING REAL OUTPUT as of 2026-05-12.
+
+### Workflow files (all in `.github/workflows/`)
+
+- `load-repo-file-worker-packet.yml` — 2B: validate job + generate packet artifact (plan, snapshots, rollback)
+- `load-repo-file-worker-pr-prep-validate.yml` — 2C1: validate job file + preview branch name + PR draft
+- `load-repo-file-worker-branch-create.yml` — 2C2: create feature branch from approved job (zero file changes)
+- `load-repo-file-worker-pr-create.yml` — 2C3: open draft PR from existing branch
+- `load-repo-file-worker-file-edit.yml` — 2D: apply patch to target file on branch, open or update draft PR
+
+### Job file
+
+`loadtasks-inbox/repo-file-job.json` — update before running any phase.
+
+Required fields: `targetSite`, `targetFiles`, `fileAction`, `riskLevel`, `rollbackPlan`,
+`proposedChangeSummary`, `acceptanceCriteria`, `status` (must be "approved"),
+`userApprovalRequired` (must be "Yes").
+
+2D adds: `patchMode` (replace-block or append), `targetAnchor` (unique substring to find),
+`patchContent` (replacement or inserted text).
+
+### Risk classification
+
+HIGH blocked in 2D (no override): sw.js, service-worker, .github/workflows, security,
+token, secret, credential, deploy, cloudflare, audio, animation, acr.css, content/.
+MEDIUM: index.html, load.js, attain, study, acr, lib-.
+LOW: docs, markdown, data files.
+Declared `riskLevel` must match auto-classification or all phases block.
+
+### Confirmed merge SHAs
+
+- 2B: `3d6227965b` PR #36
+- 2C1: `303057b1e5` PR #38
+- 2C2: `08fdfa0b` PR #39 (fixes: PR #40, #41, #42)
+- 2C3: `6b1f56e8` PR #43 (fixes: PR #44, #45)
+- 2D: `a77f9b1a` PR #47
