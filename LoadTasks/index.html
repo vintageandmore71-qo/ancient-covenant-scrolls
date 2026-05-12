@@ -225,6 +225,7 @@
         <button data-view="compactmode" data-route>Compact Mode</button>
         <span class="nav-group-sep">Repo File Worker</span>
         <button data-view="repofilejob" data-route>Repo File Job</button>
+        <button data-view="rfwwizard" data-route>Bot Wizard</button>
         <button data-view="filepathhelper" data-route>File Paths</button>
         <button data-view="riskclassifier" data-route>Risk Classifier</button>
         <button data-view="patchplan" data-route>Patch Plan</button>
@@ -413,6 +414,7 @@
         <button data-view="exportrelease" data-route><span class="rail-icon" data-icon="vault"></span><span>Release Packet</span></button>
         <button data-view="compactmode" data-route><span class="rail-icon" data-icon="shield"></span><span>Compact Mode</span></button>
         <button data-view="repofilejob" data-route><span class="rail-icon" data-icon="version"></span><span>Repo File Job</span></button>
+        <button data-view="rfwwizard" data-route><span class="rail-icon" data-icon="branch"></span><span>Bot Wizard</span></button>
         <button data-view="filepathhelper" data-route><span class="rail-icon" data-icon="library"></span><span>File Paths</span></button>
         <button data-view="riskclassifier" data-route><span class="rail-icon" data-icon="shield"></span><span>Risk Classifier</span></button>
         <button data-view="patchplan" data-route><span class="rail-icon" data-icon="notes"></span><span>Patch Plan</span></button>
@@ -9652,6 +9654,221 @@
           </article>
         </section>
 
+        <!-- VIEW: rfwwizard -->
+        <section class="view" id="view-rfwwizard" data-view-panel="rfwwizard">
+          <div class="section-head"><p class="eyebrow">Repo File Worker</p><h1>Guided Bot Wizard</h1><p>Step-by-step guide to building a safe repo change request. No automatic merge or deploy.</p></div>
+          <div class="panel-wrap">
+
+          <article class="panel" style="margin-bottom:12px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+              <div>
+                <div style="font-weight:700;font-size:14px;margin-bottom:2px;">Mode</div>
+                <div style="font-size:12px;color:#9aa0b0;" id="wiz-mode-label">Beginner: plain-language steps, reduced clutter.</div>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button id="wiz-btn-beginner" style="padding:7px 16px;border-radius:6px;border:2px solid #2563eb;background:#2563eb;color:#fff;font-size:13px;cursor:pointer;">Beginner</button>
+                <button id="wiz-btn-expert" style="padding:7px 16px;border-radius:6px;border:2px solid rgba(255,255,255,0.2);background:transparent;color:#9aa0b0;font-size:13px;cursor:pointer;">Expert</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-title"><h2>Step 1 — What kind of change?</h2></div>
+            <div class="wiz-beginner-hint" style="font-size:13px;color:#9aa0b0;margin-bottom:12px;">Choose the type of change you want to make. This helps set the right risk level and job fields automatically.</div>
+            <div style="display:grid;gap:8px;" id="wiz-task-list">
+              <button class="wiz-task-btn" data-task="docs" data-risk="LOW" style="text-align:left;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:#e8eaf0;cursor:pointer;font-size:13px;"><strong>Docs / notes edit</strong> <span style="color:#9aa0b0;font-size:12px;">— session notes, handoff files, README. Risk: LOW.</span></button>
+              <button class="wiz-task-btn" data-task="ui-text" data-risk="MEDIUM" style="text-align:left;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:#e8eaf0;cursor:pointer;font-size:13px;"><strong>UI text / label fix</strong> <span style="color:#9aa0b0;font-size:12px;">— change visible text or labels in a live app page. Risk: MEDIUM.</span></button>
+              <button class="wiz-task-btn" data-task="data" data-risk="LOW" style="text-align:left;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:#e8eaf0;cursor:pointer;font-size:13px;"><strong>Data / config file</strong> <span style="color:#9aa0b0;font-size:12px;">— JSON, config, or inbox file. Risk: usually LOW.</span></button>
+              <button class="wiz-task-btn" data-task="custom" data-risk="MEDIUM" style="text-align:left;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:#e8eaf0;cursor:pointer;font-size:13px;"><strong>Custom change</strong> <span style="color:#9aa0b0;font-size:12px;">— you will fill in all fields manually. Risk: you decide.</span></button>
+            </div>
+            <div id="wiz-task-chosen" style="display:none;margin-top:12px;padding:10px 14px;border-radius:8px;background:rgba(37,99,235,0.1);border:1px solid rgba(37,99,235,0.3);font-size:13px;color:#93c5fd;"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-title"><h2>Step 2 — Which file?</h2></div>
+            <div class="wiz-beginner-hint" style="font-size:13px;color:#9aa0b0;margin-bottom:12px;">Enter the file path relative to the repo root. Example: <code>LoadTasks/index.html</code> or <code>HANDOFF.md</code>. The risk level is calculated automatically.</div>
+            <label style="display:block;margin-bottom:8px;">File path<input id="wiz-filepath" type="text" placeholder="e.g. HANDOFF.md or LoadTasks/index.html" style="display:block;width:100%;margin-top:4px;padding:8px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#e8eaf0;font-size:14px;box-sizing:border-box;"></label>
+            <div id="wiz-risk-result" style="display:none;margin-top:10px;padding:10px 14px;border-radius:8px;font-size:13px;"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-title"><h2>Step 3 — Describe the change</h2></div>
+            <div class="wiz-beginner-hint" style="font-size:13px;color:#9aa0b0;margin-bottom:12px;">Write in plain language. Describe what changes, why it is safe, and how to undo it if something goes wrong.</div>
+            <div style="display:grid;gap:12px;">
+              <label>What will change? (one or two sentences)<textarea id="wiz-summary" rows="2" placeholder="Example: Add a TASK C section to HANDOFF.md documenting the confirmed RFW pipeline phases." style="display:block;width:100%;margin-top:4px;padding:8px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#e8eaf0;font-size:13px;box-sizing:border-box;resize:vertical;"></textarea></label>
+              <label>How will you know it worked? (acceptance criteria)<input id="wiz-criteria" type="text" placeholder="Example: Section visible in HANDOFF.md. Draft PR created. Main unchanged." style="display:block;width:100%;margin-top:4px;padding:8px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#e8eaf0;font-size:14px;box-sizing:border-box;"></label>
+              <label>Rollback plan (how to undo this change)<input id="wiz-rollback" type="text" placeholder="Example: git revert HEAD on the feature branch, or delete the branch." style="display:block;width:100%;margin-top:4px;padding:8px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#e8eaf0;font-size:14px;box-sizing:border-box;"></label>
+            </div>
+          </article>
+
+          <article class="panel wiz-expert-panel" style="display:none;">
+            <div class="panel-title"><h2>Step 4 — Patch details (Expert)</h2></div>
+            <div style="font-size:13px;color:#9aa0b0;margin-bottom:12px;">These fields control how the 2D workflow applies the change. Only needed when running the 2D File Edit pipeline.</div>
+            <div style="display:grid;gap:12px;">
+              <label>Patch mode
+                <select id="wiz-patchmode" style="display:block;width:100%;margin-top:4px;padding:8px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#e8eaf0;font-size:14px;">
+                  <option value="append">append — insert text after the anchor line</option>
+                  <option value="replace-block">replace-block — replace the anchor line with new content</option>
+                </select>
+              </label>
+              <label>Target anchor (a unique line or phrase in the file)<input id="wiz-anchor" type="text" placeholder="e.g. These two files don't overlap." style="display:block;width:100%;margin-top:4px;padding:8px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#e8eaf0;font-size:14px;box-sizing:border-box;"></label>
+              <label>Patch content (the text to insert or use as replacement)<textarea id="wiz-patchcontent" rows="4" placeholder="Enter the exact text to insert or replace." style="display:block;width:100%;margin-top:4px;padding:8px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#e8eaf0;font-size:13px;box-sizing:border-box;resize:vertical;font-family:monospace;"></textarea></label>
+              <div style="font-size:12px;color:#9aa0b0;padding:8px 12px;background:rgba(255,255,255,0.03);border-radius:6px;"><strong>HIGH-risk override:</strong> if the file auto-classifies as HIGH, the pipeline blocks. To proceed, the generated job file will include <code>highRiskOverride: true</code>. You must still review the draft PR before merging.</div>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-title"><h2>Generate job file</h2></div>
+            <div class="wiz-beginner-hint" style="font-size:13px;color:#9aa0b0;margin-bottom:12px;">Fill in steps 1–3 first. Click Generate to produce the repo-file-job.json. Then follow the next-steps guide below.</div>
+            <button id="wiz-generate" style="background:#2563eb;color:#fff;border:none;border-radius:6px;padding:9px 20px;font-size:14px;cursor:pointer;margin-bottom:12px;">Generate repo-file-job.json</button>
+            <div id="wiz-output" style="display:none;">
+              <pre id="wiz-json" style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:14px;font-size:12px;color:#e8eaf0;overflow-x:auto;white-space:pre-wrap;word-break:break-all;margin-bottom:10px;"></pre>
+              <button id="wiz-copy" style="background:rgba(255,255,255,0.08);color:#e8eaf0;border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:7px 16px;font-size:13px;cursor:pointer;">Copy JSON</button>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-title"><h2>Next steps after generating the job file</h2></div>
+            <div class="wiz-beginner-hint" style="font-size:13px;color:#9aa0b0;margin-bottom:12px;">Follow these steps in order. No step merges or deploys automatically. You approve each one.</div>
+            <div style="display:grid;gap:10px;counter-reset:wiz-steps;">
+              <div style="padding:10px 14px;border-radius:8px;border-left:3px solid #3b82f6;background:rgba(59,130,246,0.06);font-size:13px;color:#c0c4d0;"><strong style="color:#93c5fd;">1. Validate</strong> — Go to GitHub Actions. Run <em>Repo File Worker - PR Prep Validate (2C1)</em>. Check the artifact. If BLOCKED, fix the job file and re-run.</div>
+              <div style="padding:10px 14px;border-radius:8px;border-left:3px solid #8b5cf6;background:rgba(139,92,246,0.06);font-size:13px;color:#c0c4d0;"><strong style="color:#c4b5fd;">2. Create branch</strong> — Run <em>Repo File Worker - Branch Create (2C2)</em>. This creates a feature branch from main. No files are changed yet.</div>
+              <div style="padding:10px 14px;border-radius:8px;border-left:3px solid #6366f1;background:rgba(99,102,241,0.06);font-size:13px;color:#c0c4d0;"><strong style="color:#a5b4fc;">3. Open draft PR</strong> — Run <em>Repo File Worker - PR Create (2C3)</em>. This opens a draft PR. You can review the branch before any edits happen.</div>
+              <div style="padding:10px 14px;border-radius:8px;border-left:3px solid #2ecc71;background:rgba(46,204,113,0.06);font-size:13px;color:#c0c4d0;"><strong style="color:#6ee7b7;">4. Apply edit</strong> — Run <em>Repo File Worker - File Edit (2D)</em>. This applies the patch, commits to the branch, and updates the draft PR. A diff artifact is produced.</div>
+              <div style="padding:10px 14px;border-radius:8px;border-left:3px solid #ffd400;background:rgba(255,212,0,0.06);font-size:13px;color:#c0c4d0;"><strong style="color:#fde68a;">5. Review and merge</strong> — Open the draft PR. Check the diff. If the change is correct, mark it ready for review and merge. <strong>Never auto-merge.</strong> You are the gatekeeper.</div>
+            </div>
+            <div style="margin-top:12px;padding:10px 14px;border-radius:8px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);font-size:12px;color:#9aa0b0;line-height:1.7;">
+              <strong style="color:#fca5a5;">Never do this:</strong> do not edit workflow files via the 2D pipeline. Do not merge without reviewing the diff. Do not skip the validate step. Do not approve a HIGH-risk change without reading the Do Not Touch panel first.
+            </div>
+          </article>
+
+          </div>
+          <script>(function(){
+            var STOR='lt_rfwwiz_mode';
+            var HIGH_PAT=['sw.js','service-worker','ai-chat-studio','image-prompt','lib-load-image-providers','provider','audio','animation','export-pack','deploy','security','token','secret','credential','cloudflare','.github/workflows','acr.css','content/','load/sw'];
+            var MED_PAT=['load.js','load/load','loadstudio','loadplay','attain','study','acr','index.html','lib-'];
+
+            function getMode(){return localStorage.getItem(STOR)||'beginner';}
+            function setMode(m){localStorage.setItem(STOR,m);applyMode();}
+
+            function applyMode(){
+              var m=getMode();
+              var isBeginner=(m==='beginner');
+              var btn1=document.getElementById('wiz-btn-beginner');
+              var btn2=document.getElementById('wiz-btn-expert');
+              var lbl=document.getElementById('wiz-mode-label');
+              var hints=document.querySelectorAll('#view-rfwwizard .wiz-beginner-hint');
+              var expertPanels=document.querySelectorAll('#view-rfwwizard .wiz-expert-panel');
+              if(btn1){btn1.style.background=isBeginner?'#2563eb':'transparent';btn1.style.color=isBeginner?'#fff':'#9aa0b0';btn1.style.borderColor=isBeginner?'#2563eb':'rgba(255,255,255,0.2)';}
+              if(btn2){btn2.style.background=isBeginner?'transparent':'#7c3aed';btn2.style.color=isBeginner?'#9aa0b0':'#fff';btn2.style.borderColor=isBeginner?'rgba(255,255,255,0.2)':'#7c3aed';}
+              if(lbl){lbl.textContent=isBeginner?'Beginner: plain-language steps, reduced clutter.':'Expert: all fields visible including patch details.';}
+              for(var i=0;i<hints.length;i++){hints[i].style.display=isBeginner?'':'none';}
+              for(var j=0;j<expertPanels.length;j++){expertPanels[j].style.display=isBeginner?'none':'';}
+            }
+
+            function classifyRisk(fp){
+              var p=fp.toLowerCase();
+              if(fp==='')return null;
+              for(var i=0;i<HIGH_PAT.length;i++){if(p.indexOf(HIGH_PAT[i].toLowerCase())>=0)return'HIGH';}
+              if(p.indexOf('loadtasks/index.html')>=0||p.indexOf('loadtasks\\index.html')>=0)return'MEDIUM';
+              for(var j=0;j<MED_PAT.length;j++){if(p.indexOf(MED_PAT[j].toLowerCase())>=0)return'MEDIUM';}
+              return'LOW';
+            }
+
+            var RISK_COLOR={HIGH:'#ef4444',MEDIUM:'#e67e22',LOW:'#2ecc71'};
+            var RISK_BG={HIGH:'rgba(239,68,68,0.08)',MEDIUM:'rgba(230,126,34,0.08)',LOW:'rgba(46,204,113,0.08)'};
+            var RISK_BORDER={HIGH:'rgba(239,68,68,0.3)',MEDIUM:'rgba(230,126,34,0.3)',LOW:'rgba(46,204,113,0.3)'};
+            var RISK_NOTE={
+              HIGH:'HIGH risk. The pipeline will block unless you add highRiskOverride:true. Read the Do Not Touch panel before proceeding.',
+              MEDIUM:'MEDIUM risk. Review the draft PR diff carefully before merging. Do not fast-lane.',
+              LOW:'LOW risk. Standard pipeline flow applies. Still review the diff before merging.'
+            };
+
+            var chosenTask=null;var chosenRisk=null;
+
+            document.querySelectorAll('#view-rfwwizard .wiz-task-btn').forEach(function(btn){
+              btn.addEventListener('click',function(){
+                chosenTask=this.getAttribute('data-task');
+                chosenRisk=this.getAttribute('data-risk');
+                document.querySelectorAll('#view-rfwwizard .wiz-task-btn').forEach(function(b){b.style.borderColor='rgba(255,255,255,0.12)';b.style.background='rgba(255,255,255,0.04)';});
+                this.style.borderColor='#2563eb';this.style.background='rgba(37,99,235,0.12)';
+                var chEl=document.getElementById('wiz-task-chosen');
+                if(chEl){chEl.style.display='';chEl.textContent='Selected: '+this.querySelector('strong').textContent+' (starting risk: '+chosenRisk+')';}
+              });
+            });
+
+            var fpInput=document.getElementById('wiz-filepath');
+            if(fpInput){
+              fpInput.addEventListener('input',function(){
+                var fp=this.value.trim();
+                var rEl=document.getElementById('wiz-risk-result');
+                if(!rEl)return;
+                if(!fp){rEl.style.display='none';return;}
+                var r=classifyRisk(fp);
+                rEl.style.display='';
+                rEl.style.background=RISK_BG[r];
+                rEl.style.border='1px solid '+RISK_BORDER[r];
+                rEl.innerHTML='<strong style="color:'+RISK_COLOR[r]+';">'+r+'</strong> — '+RISK_NOTE[r];
+              });
+            }
+
+            var b1=document.getElementById('wiz-btn-beginner');
+            var b2=document.getElementById('wiz-btn-expert');
+            if(b1)b1.addEventListener('click',function(){setMode('beginner');});
+            if(b2)b2.addEventListener('click',function(){setMode('expert');});
+
+            var genBtn=document.getElementById('wiz-generate');
+            if(genBtn){
+              genBtn.addEventListener('click',function(){
+                var fp=(document.getElementById('wiz-filepath')||{}).value||'';
+                var summary=(document.getElementById('wiz-summary')||{}).value||'';
+                var criteria=(document.getElementById('wiz-criteria')||{}).value||'';
+                var rollback=(document.getElementById('wiz-rollback')||{}).value||'';
+                if(!fp||!summary){alert('Enter a file path and change summary first.');return;}
+                var autoRisk=classifyRisk(fp)||chosenRisk||'LOW';
+                var jobId='RFJ-'+Date.now();
+                var patchMode=(document.getElementById('wiz-patchmode')||{}).value||'append';
+                var anchor=(document.getElementById('wiz-anchor')||{}).value||'';
+                var patchContent=(document.getElementById('wiz-patchcontent')||{}).value||'';
+                var job={
+                  jobId:jobId,
+                  createdAt:new Date().toISOString(),
+                  targetSite:'repo',
+                  targetFiles:fp,
+                  fileAction:chosenTask||'edit',
+                  riskLevel:autoRisk,
+                  proposedChangeSummary:summary,
+                  acceptanceCriteria:criteria,
+                  rollbackPlan:rollback,
+                  userApprovalRequired:'Yes',
+                  status:'draft'
+                };
+                if(autoRisk==='HIGH')job.highRiskOverride=true;
+                if(getMode()==='expert'&&anchor){job.patchMode=patchMode;job.targetAnchor=anchor;}
+                if(getMode()==='expert'&&patchContent)job.patchContent=patchContent;
+                var out=document.getElementById('wiz-json');
+                var outWrap=document.getElementById('wiz-output');
+                if(out)out.textContent=JSON.stringify(job,null,2);
+                if(outWrap)outWrap.style.display='';
+              });
+            }
+
+            var copyBtn=document.getElementById('wiz-copy');
+            if(copyBtn){
+              copyBtn.addEventListener('click',function(){
+                var out=document.getElementById('wiz-json');
+                if(!out)return;
+                if(navigator.clipboard){navigator.clipboard.writeText(out.textContent).then(function(){copyBtn.textContent='Copied!';setTimeout(function(){copyBtn.textContent='Copy JSON';},1500);});}
+                else{var ta=document.createElement('textarea');ta.value=out.textContent;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);copyBtn.textContent='Copied!';setTimeout(function(){copyBtn.textContent='Copy JSON';},1500);}
+              });
+            }
+
+            var sec=document.getElementById('view-rfwwizard');
+            if(sec)sec.addEventListener('lt-view-enter',function(){applyMode();});
+            applyMode();
+          }());</script>
+        </section>
+
         <!-- VIEW: rfjtemplate -->
         <section class="view" id="view-rfjtemplate" data-view-panel="rfjtemplate">
           <div class="section-head"><p class="eyebrow">Repo File Worker</p><h1>Job Templates</h1><p>Pick a template to pre-fill a new Repo File Job.</p></div>
@@ -10695,7 +10912,7 @@
     /* Rail grouping */
     var PINNED=['dashboard','starthere','toolsearch2','favorites','recenttools','quicklaunch'];
     var GROUPS=[
-      {label:'Repo File Worker',open:true,views:['repofilejob','filepathhelper','riskclassifier','patchplan','prdraftbuilder','exportrfj','actionspec','rfjtemplate','fileimpact','highriskwarn','approvephrase','rollbackbuilder','prsafetychk','patchscope','rfjhandoff','rfjpacket','phase2readiness','rfjdashboard','rfjstatusboard','rfjsearch','rfjtimeline','rfjdupes','rfjpriority','rfjblockers','rfjreviewq','rfjexportall','rfjimport']},
+      {label:'Repo File Worker',open:true,views:['repofilejob','rfwwizard','filepathhelper','riskclassifier','patchplan','prdraftbuilder','exportrfj','actionspec','rfjtemplate','fileimpact','highriskwarn','approvephrase','rollbackbuilder','prsafetychk','patchscope','rfjhandoff','rfjpacket','phase2readiness','rfjdashboard','rfjstatusboard','rfjsearch','rfjtimeline','rfjdupes','rfjpriority','rfjblockers','rfjreviewq','rfjexportall','rfjimport']},
       {label:'Daily Work',open:true,views:['standup','worklog','mergelog','bugtriage','shippedlog','testresults','branchlog','prprep','dailycommand','activework','whatsnext2','sessionsummary','simpledash','pinnedcmd','sessiongoals','sessionnotes']},
       {label:'Safety',open:true,views:['validator','sitehealth','openrisks','pendingreviews','backupreminder','safenextstep','siteprotection','vaultreminder','branchsafety','prrisks','smokecheck','envcheck','rollbackplan','verifyscript']},
       {label:'Reports',open:true,views:['exportpacket','settingsio','exportdaily','exportrecovery','exportrelease','exporthandoff','importhandoff','dailyexport','releasenotes','toolindex','toolhelp']}
