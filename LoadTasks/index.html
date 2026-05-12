@@ -10021,6 +10021,152 @@
           }());</script>
         </section>
 
+        <!-- VIEW: safesim -->
+        <section class="view" id="view-safesim" data-view-panel="safesim">
+          <div class="section-head"><p class="eyebrow">Repo File Worker</p><h1>Safe Change Simulator</h1><p>Simulate the 2C1 pipeline validation checks before creating a real job file. No files are changed.</p></div>
+          <article class="panel">
+            <p style="font-size:13px;color:#9aa0b0;margin-bottom:16px;">Fill in the same fields you would put in <code>repo-file-job.json</code>. The simulator runs the same risk-classification and block checks as the live 2C1 workflow — without touching anything real.</p>
+            <label style="display:block;margin-bottom:12px;">
+              <span style="font-size:13px;color:#c0c4d0;display:block;margin-bottom:4px;">Target file path <span style="color:#f87171;">*</span></span>
+              <input id="sim-filepath" type="text" placeholder="e.g. LoadTasks/index.html" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#e8eaf0;font-size:14px;box-sizing:border-box;">
+            </label>
+            <div id="sim-autorisk-inline" style="display:none;margin-bottom:12px;padding:8px 12px;border-radius:6px;font-size:13px;font-weight:600;"></div>
+            <div style="display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap;">
+              <label style="flex:1;min-width:140px;">
+                <span style="font-size:13px;color:#c0c4d0;display:block;margin-bottom:4px;">Declared risk level</span>
+                <select id="sim-risk" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:#1e2030;color:#e8eaf0;font-size:14px;">
+                  <option value="LOW">LOW</option>
+                  <option value="MEDIUM" selected>MEDIUM</option>
+                  <option value="HIGH">HIGH</option>
+                </select>
+              </label>
+              <label style="flex:1;min-width:140px;">
+                <span style="font-size:13px;color:#c0c4d0;display:block;margin-bottom:4px;">File action</span>
+                <select id="sim-action" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:#1e2030;color:#e8eaf0;font-size:14px;">
+                  <option value="edit" selected>edit</option>
+                  <option value="add">add</option>
+                  <option value="delete">delete</option>
+                </select>
+              </label>
+            </div>
+            <label style="display:block;margin-bottom:12px;">
+              <span style="font-size:13px;color:#c0c4d0;display:block;margin-bottom:4px;">Job ID (optional — auto-generated if blank)</span>
+              <input id="sim-jobid" type="text" placeholder="e.g. RFJ-MYCHANGE-001" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#e8eaf0;font-size:14px;box-sizing:border-box;">
+            </label>
+            <label style="display:block;margin-bottom:12px;">
+              <span style="font-size:13px;color:#c0c4d0;display:block;margin-bottom:4px;">Branch name suggestion (optional)</span>
+              <input id="sim-branch" type="text" placeholder="e.g. rfw/my-change-YYYY-MM-DD" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#e8eaf0;font-size:14px;box-sizing:border-box;">
+            </label>
+            <label style="display:block;margin-bottom:12px;">
+              <span style="font-size:13px;color:#c0c4d0;display:block;margin-bottom:4px;">Proposed change summary (optional)</span>
+              <textarea id="sim-summary" rows="2" placeholder="What are you changing and why?" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#e8eaf0;font-size:14px;box-sizing:border-box;resize:vertical;"></textarea>
+            </label>
+            <div id="sim-override-row" style="display:none;margin-bottom:16px;padding:10px 14px;border-radius:8px;background:rgba(239,68,68,0.07);border-left:3px solid #ef4444;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                <input id="sim-override" type="checkbox" style="width:16px;height:16px;">
+                <span style="font-size:13px;color:#fca5a5;"><strong>highRiskOverride: true</strong> — I understand this is HIGH risk and have reviewed the Do Not Touch rules.</span>
+              </label>
+            </div>
+            <button id="sim-run" class="primary-action" style="margin-bottom:20px;">Simulate 2C1 Validation</button>
+            <div id="sim-output" style="display:none;"></div>
+          </article>
+          <script>(function(){
+            var HIGH_PATTERNS=['sw.js','service-worker','ai-chat-studio','image-prompt','lib-load-image-providers','provider','audio','animation','export-pack','deploy','security','token','secret','credential','cloudflare','.github/workflows','acr.css','content/','load/sw'];
+            var MED_PATTERNS=['load.js','load/load','loadstudio','loadplay','attain','study','acr','index.html','lib-'];
+            function classifyRisk(fp){
+              var pl=fp.toLowerCase();
+              if(HIGH_PATTERNS.some(function(p){return pl.indexOf(p.toLowerCase())!==-1;})) return 'HIGH';
+              if(MED_PATTERNS.some(function(p){return pl.indexOf(p.toLowerCase())!==-1;})) return 'MEDIUM';
+              return 'LOW';
+            }
+            function riskColor(r){return r==='HIGH'?'#f87171':r==='MEDIUM'?'#fbbf24':'#4ade80';}
+            function riskBg(r){return r==='HIGH'?'rgba(239,68,68,0.08)':r==='MEDIUM'?'rgba(251,191,36,0.08)':'rgba(74,222,128,0.08)';}
+            function riskBorder(r){return r==='HIGH'?'rgba(239,68,68,0.3)':r==='MEDIUM'?'rgba(251,191,36,0.3)':'rgba(74,222,128,0.3)';}
+            function sanitizeBranch(name){
+              var today=new Date().toISOString().slice(0,10);
+              name=name.replace('YYYY-MM-DD',today);
+              name=name.replace(/[^a-zA-Z0-9\/_.\\-]/g,'-');
+              name=name.replace(/-+/g,'-').replace(/^-|-$/g,'');
+              return name;
+            }
+            function genBranchName(jobId,suggestion){
+              var today=new Date().toISOString().slice(0,10);
+              if(suggestion&&suggestion.trim()) return sanitizeBranch(suggestion.trim());
+              var safe=jobId.toLowerCase().replace(/[^a-z0-9-]/g,'-');
+              return 'rfw/'+safe+'-'+today;
+            }
+            var fpEl=document.getElementById('sim-filepath');
+            var riskSel=document.getElementById('sim-risk');
+            var overrideRow=document.getElementById('sim-override-row');
+            var inlineRisk=document.getElementById('sim-autorisk-inline');
+            function updateInlineRisk(){
+              var fp=fpEl?fpEl.value:'';
+              if(!fp.trim()){inlineRisk.style.display='none';overrideRow.style.display='none';return;}
+              var ar=classifyRisk(fp);
+              inlineRisk.style.display='block';
+              inlineRisk.style.background=riskBg(ar);
+              inlineRisk.style.color=riskColor(ar);
+              inlineRisk.style.border='1px solid '+riskBorder(ar);
+              inlineRisk.textContent='Auto-classified risk: '+ar;
+              overrideRow.style.display=ar==='HIGH'?'block':'none';
+            }
+            if(fpEl) fpEl.addEventListener('input',updateInlineRisk);
+            document.getElementById('sim-run').addEventListener('click',function(){
+              var fp=fpEl?fpEl.value.trim():'';
+              var declared=riskSel?riskSel.value:'MEDIUM';
+              var action=document.getElementById('sim-action').value||'edit';
+              var jobId=(document.getElementById('sim-jobid').value.trim())||('SIM-'+Date.now());
+              var branchSug=(document.getElementById('sim-branch').value.trim())||'';
+              var summary=(document.getElementById('sim-summary').value.trim())||'';
+              var hasOverride=!!(document.getElementById('sim-override')&&document.getElementById('sim-override').checked);
+              var blocks=[];
+              if(!fp) blocks.push('targetFiles is empty — required field');
+              if(!summary) blocks.push('proposedChangeSummary is empty — required field');
+              var auto=fp?classifyRisk(fp):'UNKNOWN';
+              if(auto==='HIGH'&&!hasOverride) blocks.push('auto risk is HIGH — add highRiskOverride:true to job to proceed');
+              if(auto!=='UNKNOWN'&&auto!==declared) blocks.push('risk mismatch: declared='+declared+' auto='+auto);
+              var branchName=genBranchName(jobId,branchSug);
+              var PROTECTED=['main','master','develop','release'];
+              PROTECTED.forEach(function(p){if(branchName.toLowerCase()===p) blocks.push('branch name "'+branchName+'" is a protected name');});
+              if(!/^[a-zA-Z0-9][a-zA-Z0-9\/_.\\-]*$/.test(branchName)) blocks.push('branch name "'+branchName+'" contains invalid characters');
+              var ok=blocks.length===0;
+              var vc=ok?'#4ade80':'#f87171';
+              var vbg=ok?'rgba(74,222,128,0.08)':'rgba(239,68,68,0.08)';
+              var vbord=ok?'#4ade80':'#ef4444';
+              var h='<div style="font-family:monospace;font-size:13px;background:rgba(0,0,0,0.3);border-radius:8px;padding:16px;border:1px solid rgba(255,255,255,0.1);">';
+              h+='<div style="color:#9aa0b0;margin-bottom:12px;">=== RFW 2C1 SIMULATION ===</div>';
+              h+='<div style="margin-bottom:4px;"><span style="color:#9aa0b0;">Job ID:           </span><span style="color:#e8eaf0;">'+jobId+'</span></div>';
+              h+='<div style="margin-bottom:4px;"><span style="color:#9aa0b0;">File Action:      </span><span style="color:#e8eaf0;">'+action+'</span></div>';
+              h+='<div style="margin-bottom:4px;"><span style="color:#9aa0b0;">Target File:      </span><span style="color:#e8eaf0;">'+(fp||'(none)')+'</span></div>';
+              h+='<div style="margin-bottom:4px;"><span style="color:#9aa0b0;">Risk (declared):  </span><span style="color:'+riskColor(declared)+';">'+declared+'</span></div>';
+              h+='<div style="margin-bottom:4px;"><span style="color:#9aa0b0;">Risk (auto):      </span><span style="color:'+riskColor(auto)+';">'+auto+'</span></div>';
+              h+='<div style="margin-bottom:12px;"><span style="color:#9aa0b0;">Branch name:      </span><span style="color:#e8eaf0;">'+branchName+'</span></div>';
+              h+='<div style="color:#9aa0b0;margin-bottom:4px;">Approval fields (simulated as "approved" / "Yes"):</div>';
+              h+='<div style="margin-bottom:12px;font-size:12px;color:#6ee7b7;">  status: approved   userApprovalRequired: Yes</div>';
+              h+='<div style="margin-bottom:12px;padding:6px 10px;border-radius:4px;background:rgba(251,191,36,0.08);color:#fbbf24;font-size:12px;">File existence: cannot verify from browser — confirm the file exists in the repo before submitting the real job.</div>';
+              if(blocks.length){
+                h+='<div style="color:#f87171;margin-bottom:6px;">BLOCKS ('+blocks.length+'):</div>';
+                blocks.forEach(function(b){h+='<div style="margin-bottom:3px;color:#fca5a5;">  - '+b+'</div>';});
+                h+='<br>';
+              } else {
+                h+='<div style="color:#4ade80;margin-bottom:12px;">BLOCKS: none</div>';
+              }
+              h+='<div style="padding:10px 14px;border-radius:6px;background:'+vbg+';border-left:3px solid '+vbord+';font-size:14px;font-weight:700;color:'+vc+';">VERDICT: '+(ok?'SAFE TO PROCEED':'BLOCKED')+'</div>';
+              h+='<div style="margin-top:10px;font-size:12px;color:#9aa0b0;">'+(ok?'Next: run real 2C1 workflow with your job file, then 2C2 (branch create), then 2C3 (PR create).':'Fix the blocks above before submitting the real job file.')+'</div>';
+              h+='<div style="color:#9aa0b0;margin-top:10px;">=== NO FILES WERE MODIFIED ===</div>';
+              h+='</div>';
+              var out=document.getElementById('sim-output');
+              out.style.display='block';
+              out.innerHTML=h;
+            });
+            var sec=document.getElementById('view-safesim');
+            if(sec){sec.addEventListener('lt-view-enter',function(){
+              document.getElementById('sim-output').style.display='none';
+              updateInlineRisk();
+            });}
+          }());</script>
+        </section>
+
         <!-- VIEW: rfwwizard -->
         <section class="view" id="view-rfwwizard" data-view-panel="rfwwizard">
           <div class="section-head"><p class="eyebrow">Repo File Worker</p><h1>Guided Bot Flow</h1><p>Step-by-step guide to building a safe repo change request. No automatic merge or deploy.</p></div>
@@ -11287,7 +11433,7 @@
     /* Rail grouping */
     var PINNED=['dashboard','starthere','toolsearch2','favorites','recenttools','quicklaunch'];
     var GROUPS=[
-      {label:'Repo File Worker',open:true,views:['repofilejob','rfwwizard','rfwguide','rfwfilepick','filepathhelper','riskclassifier','patchplan','prdraftbuilder','exportrfj','actionspec','rfjtemplate','fileimpact','highriskwarn','approvephrase','rollbackbuilder','prsafetychk','patchscope','rfjhandoff','rfjpacket','phase2readiness','rfjdashboard','rfjstatusboard','rfjsearch','rfjtimeline','rfjdupes','rfjpriority','rfjblockers','rfjreviewq','rfjexportall','rfjimport']},
+      {label:'Repo File Worker',open:true,views:['repofilejob','rfwwizard','rfwguide','rfwfilepick','safesim','filepathhelper','riskclassifier','patchplan','prdraftbuilder','exportrfj','actionspec','rfjtemplate','fileimpact','highriskwarn','approvephrase','rollbackbuilder','prsafetychk','patchscope','rfjhandoff','rfjpacket','phase2readiness','rfjdashboard','rfjstatusboard','rfjsearch','rfjtimeline','rfjdupes','rfjpriority','rfjblockers','rfjreviewq','rfjexportall','rfjimport']},
       {label:'Daily Work',open:true,views:['standup','worklog','mergelog','bugtriage','shippedlog','testresults','branchlog','prprep','dailycommand','activework','whatsnext2','sessionsummary','simpledash','pinnedcmd','sessiongoals','sessionnotes']},
       {label:'Safety',open:true,views:['validator','sitehealth','openrisks','pendingreviews','backupreminder','safenextstep','siteprotection','vaultreminder','branchsafety','prrisks','smokecheck','envcheck','rollbackplan','verifyscript']},
       {label:'Reports',open:true,views:['exportpacket','settingsio','exportdaily','exportrecovery','exportrelease','exporthandoff','importhandoff','dailyexport','releasenotes','toolindex','toolhelp']}
