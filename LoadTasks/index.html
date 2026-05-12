@@ -11630,65 +11630,92 @@
             for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(prefix)===0){var skip=false;if(exclude)exclude.forEach(function(ex){if(k===ex)skip=true;});if(!skip)n++;}}
             return n;
           }
+          function ltTileHtml(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px;text-align:center;"><div style="font-size:28px;font-weight:700;line-height:1;">'+it.n+'</div><div style="font-size:12px;color:#9aa0b0;margin-top:4px;">'+it.label+'</div></div>';}
+          function ltShowAllTiles(){var gs=document.querySelectorAll('#view-dashboard .lt-stat-grp');for(var i=0;i<gs.length;i++){gs[i].open=true;}}
+          window.ltShowAllTiles=ltShowAllTiles;
           function ltRenderCounters(){
             var el=document.getElementById('lt-counters');if(!el)return;
-            var items=[
+            var mode=localStorage.getItem('lt_dash_mode')||'beginner';
+            var exp=(mode==='expert');
+            var oa=exp?' open':'';
+            var key=[
               {label:'Repair Jobs',n:ltCountPrefix('lt_rjw_',['lt_rjw_draft','lt_repairjob_draft'])},
-              {label:'Criteria Lists',n:ltCountPrefix('lt_ac_',['lt_ac_draft'])},
-              {label:'Health Reports',n:ltCountPrefix('lt_sh_',['lt_sh_draft'])},
-              {label:'Build Snapshots',n:ltCountPrefix('lt_bl_',['lt_bl_draft'])},
-              {label:'Risk Reports',n:ltCountPrefix('lt_rr_',['lt_rr_draft'])},
-              {label:'Smoke Checks',n:ltCountPrefix('lt_sc_',['lt_sc_draft'])},
-              {label:'Backlog Items',n:ltCountPrefix('lt_fb_',['lt_fb_draft'])},
-              {label:'Test Plans',n:ltCountPrefix('lt_tp_',['lt_tp_draft'])},
               {label:'Issues',n:ltCountPrefix('lt_is_',['lt_is_draft'])},
-              {label:'Session Notes',n:ltCountPrefix('lt_sn_',['lt_sn_draft'])},
-              {label:'Changelog',n:ltCountPrefix('lt_cl_',['lt_cl_draft'])},
-              {label:'Priority Queue',n:ltCountPrefix('lt_pq_',['lt_pq_draft'])},
-              {label:'Blockers',n:ltCountPrefix('lt_bk_',['lt_bk_draft'])},
-              {label:'Saved Prompts',n:ltCountPrefix('lt_sp_',['lt_sp_draft'])},
+              {label:'Risk Reports',n:ltCountPrefix('lt_rr_',['lt_rr_draft'])},
               {label:'Recovery Reports',n:ltCountPrefix('lt_rv_',['lt_rv_draft'])},
-              {label:'Branch Inventory',n:ltCountPrefix('lt_bi_',['lt_bi_draft'])},
-              {label:'Error Log',n:ltCountPrefix('lt_el_',['lt_el_draft'])},
-              {label:'Snippets',n:ltCountPrefix('lt_snp_',['lt_snp_draft'])},
-              {label:'Work Timer',n:ltCountPrefix('lt_wt_',['lt_wt_draft'])},
-              {label:'Build Notes',n:ltCountPrefix('lt_bn_',['lt_bn_draft'])},
-              {label:'Site Map',n:ltCountPrefix('lt_sm_',['lt_sm_draft'])},
-              {label:'Rollback Receipts',n:ltCountPrefix('lt_rr2_',['lt_rr2_draft'])},
-              {label:'Deploy Receipts',n:ltCountPrefix('lt_dr_',['lt_dr_draft'])},
-              {label:'Known Issues',n:ltCountPrefix('lt_ki_',['lt_ki_draft'])},
-              {label:'Dependencies',n:ltCountPrefix('lt_dn_',['lt_dn_draft'])},
-              {label:'Hot Fixes',n:ltCountPrefix('lt_hf_',['lt_hf_draft'])},
-              {label:'Regressions',n:ltCountPrefix('lt_rl_',['lt_rl_draft'])},
-              {label:'Decisions',n:ltCountPrefix('lt_dl_',['lt_dl_draft'])},
-              {label:'Scope Creep',n:ltCountPrefix('lt_sc2_',['lt_sc2_draft'])},
-              {label:'File Changes',n:ltCountPrefix('lt_fc_',['lt_fc_draft'])},
-              {label:'Incident Reports',n:ltCountPrefix('lt_ir_',['lt_ir_draft'])},
-              {label:'Feature Toggles',n:ltCountPrefix('lt_ft2_',['lt_ft2_draft'])},
-              {label:'Sprint Logs',n:ltCountPrefix('lt_sl_',['lt_sl_draft'])},
-              {label:'Quick Ref',n:ltCountPrefix('lt_qr_',['lt_qr_draft'])},
-              {label:'Code Review Notes',n:ltCountPrefix('lt_crn_',['lt_crn_draft'])},
-              {label:'Test Coverage',n:ltCountPrefix('lt_tc_',['lt_tc_draft'])},
-              {label:'API Endpoints',n:ltCountPrefix('lt_ae_',['lt_ae_draft'])},
-              {label:'Merge Log',n:ltCountPrefix('lt_mg_',['lt_mg_draft'])},
-              {label:'Bug Triage',n:ltCountPrefix('lt_bgt_',['lt_bgt_draft'])},
-              {label:'Shipped Log',n:ltCountPrefix('lt_shp_',['lt_shp_draft'])},
-              {label:'Test Results',n:ltCountPrefix('lt_tr_',['lt_tr_draft'])},
-              {label:'Rollback Plans',n:ltCountPrefix('lt_rbp_',['lt_rbp_draft'])},
-              {label:'Risk Register',n:ltCountPrefix('lt_rg_',['lt_rg_draft'])},
-              {label:'Branch Log',n:ltCountPrefix('lt_brl_',['lt_brl_draft'])},
-              {label:'URL Store',n:ltCountPrefix('lt_us_',['lt_us_draft'])},
-              {label:'Pastes',n:ltCountPrefix('lt_pa_',['lt_pa_draft'])},
-              {label:'Work Log',n:ltCountPrefix('lt_wl_',['lt_wl_draft'])},
-              {label:'Handoff Packets',n:ltCountPrefix('lt_hpkt_',['lt_hpkt_draft'])},
-              {label:'Site Protections',n:ltCountPrefix('lt_sps_',['lt_sps_draft'])},
-              {label:'Vault Events',n:ltCountPrefix('lt_bvr_',['lt_bvr_draft'])},
-              {label:'Pinned Commands',n:ltCountPrefix('lt_pcmd_',['lt_pcmd_draft'])},
-              {label:'Repo File Jobs',n:ltCountPrefix('lt_rfj_',['lt_rfj_draft'])},
-              {label:'Patch Scopes',n:ltCountPrefix('lt_ps2_',[])},
-              {label:'Job Blockers',n:ltCountPrefix('lt_rjbl_',[])}
+              {label:'Blockers',n:ltCountPrefix('lt_bk_',['lt_bk_draft'])},
+              {label:'Repo File Jobs',n:ltCountPrefix('lt_rfj_',['lt_rfj_draft'])}
             ];
-            el.innerHTML=items.map(function(it){return'<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px;text-align:center;"><div style="font-size:28px;font-weight:700;line-height:1;">'+(it.n)+'</div><div style="font-size:12px;color:#9aa0b0;margin-top:4px;">'+it.label+'</div></div>';}).join('');
+            var groups=[
+              {label:'Build Health',c:'rgba(59,130,246,0.4)',items:[
+                {label:'Health Reports',n:ltCountPrefix('lt_sh_',['lt_sh_draft'])},
+                {label:'Build Snapshots',n:ltCountPrefix('lt_bl_',['lt_bl_draft'])},
+                {label:'Smoke Checks',n:ltCountPrefix('lt_sc_',['lt_sc_draft'])},
+                {label:'Work Timer',n:ltCountPrefix('lt_wt_',['lt_wt_draft'])},
+                {label:'Build Notes',n:ltCountPrefix('lt_bn_',['lt_bn_draft'])},
+                {label:'Vault Events',n:ltCountPrefix('lt_bvr_',['lt_bvr_draft'])},
+                {label:'Pinned Commands',n:ltCountPrefix('lt_pcmd_',['lt_pcmd_draft'])}
+              ]},
+              {label:'Testing',c:'rgba(217,119,6,0.45)',items:[
+                {label:'Criteria Lists',n:ltCountPrefix('lt_ac_',['lt_ac_draft'])},
+                {label:'Test Plans',n:ltCountPrefix('lt_tp_',['lt_tp_draft'])},
+                {label:'Test Coverage',n:ltCountPrefix('lt_tc_',['lt_tc_draft'])},
+                {label:'Test Results',n:ltCountPrefix('lt_tr_',['lt_tr_draft'])}
+              ]},
+              {label:'Risk & Safety',c:'rgba(217,119,6,0.45)',items:[
+                {label:'Rollback Receipts',n:ltCountPrefix('lt_rr2_',['lt_rr2_draft'])},
+                {label:'Deploy Receipts',n:ltCountPrefix('lt_dr_',['lt_dr_draft'])},
+                {label:'Known Issues',n:ltCountPrefix('lt_ki_',['lt_ki_draft'])},
+                {label:'Scope Creep',n:ltCountPrefix('lt_sc2_',['lt_sc2_draft'])},
+                {label:'Feature Toggles',n:ltCountPrefix('lt_ft2_',['lt_ft2_draft'])},
+                {label:'Rollback Plans',n:ltCountPrefix('lt_rbp_',['lt_rbp_draft'])},
+                {label:'Risk Register',n:ltCountPrefix('lt_rg_',['lt_rg_draft'])}
+              ]},
+              {label:'Recovery',c:'rgba(34,197,94,0.45)',items:[
+                {label:'Hot Fixes',n:ltCountPrefix('lt_hf_',['lt_hf_draft'])},
+                {label:'Regressions',n:ltCountPrefix('lt_rl_',['lt_rl_draft'])},
+                {label:'Decisions',n:ltCountPrefix('lt_dl_',['lt_dl_draft'])},
+                {label:'Incident Reports',n:ltCountPrefix('lt_ir_',['lt_ir_draft'])}
+              ]},
+              {label:'Logs & History',c:'rgba(124,58,237,0.4)',items:[
+                {label:'Changelog',n:ltCountPrefix('lt_cl_',['lt_cl_draft'])},
+                {label:'Branch Inventory',n:ltCountPrefix('lt_bi_',['lt_bi_draft'])},
+                {label:'Error Log',n:ltCountPrefix('lt_el_',['lt_el_draft'])},
+                {label:'File Changes',n:ltCountPrefix('lt_fc_',['lt_fc_draft'])},
+                {label:'Sprint Logs',n:ltCountPrefix('lt_sl_',['lt_sl_draft'])},
+                {label:'Merge Log',n:ltCountPrefix('lt_mg_',['lt_mg_draft'])},
+                {label:'Bug Triage',n:ltCountPrefix('lt_bgt_',['lt_bgt_draft'])},
+                {label:'Shipped Log',n:ltCountPrefix('lt_shp_',['lt_shp_draft'])},
+                {label:'Branch Log',n:ltCountPrefix('lt_brl_',['lt_brl_draft'])}
+              ]},
+              {label:'Developer Records',c:'rgba(59,130,246,0.25)',items:[
+                {label:'Backlog Items',n:ltCountPrefix('lt_fb_',['lt_fb_draft'])},
+                {label:'Session Notes',n:ltCountPrefix('lt_sn_',['lt_sn_draft'])},
+                {label:'Priority Queue',n:ltCountPrefix('lt_pq_',['lt_pq_draft'])},
+                {label:'Saved Prompts',n:ltCountPrefix('lt_sp_',['lt_sp_draft'])},
+                {label:'Snippets',n:ltCountPrefix('lt_snp_',['lt_snp_draft'])},
+                {label:'Site Map',n:ltCountPrefix('lt_sm_',['lt_sm_draft'])},
+                {label:'Quick Ref',n:ltCountPrefix('lt_qr_',['lt_qr_draft'])},
+                {label:'Code Review Notes',n:ltCountPrefix('lt_crn_',['lt_crn_draft'])},
+                {label:'API Endpoints',n:ltCountPrefix('lt_ae_',['lt_ae_draft'])},
+                {label:'Dependencies',n:ltCountPrefix('lt_dn_',['lt_dn_draft'])},
+                {label:'URL Store',n:ltCountPrefix('lt_us_',['lt_us_draft'])},
+                {label:'Pastes',n:ltCountPrefix('lt_pa_',['lt_pa_draft'])},
+                {label:'Work Log',n:ltCountPrefix('lt_wl_',['lt_wl_draft'])},
+                {label:'Handoff Packets',n:ltCountPrefix('lt_hpkt_',['lt_hpkt_draft'])},
+                {label:'Site Protections',n:ltCountPrefix('lt_sps_',['lt_sps_draft'])},
+                {label:'Patch Scopes',n:ltCountPrefix('lt_ps2_',[])},
+                {label:'Job Blockers',n:ltCountPrefix('lt_rjbl_',[])}
+              ]}
+            ];
+            var html='<div style="grid-column:1/-1;display:flex;align-items:center;gap:10px;margin-bottom:4px;"><span class="eyebrow" style="margin:0;">Status Tiles</span><button class="small-btn" onclick="ltShowAllTiles()" style="margin-left:auto;opacity:0.7;">Show All Status Tiles</button></div>';
+            key.forEach(function(it){html+=ltTileHtml(it);});
+            groups.forEach(function(g,gi){
+              html+='<div style="grid-column:1/-1;margin-top:4px;"><details class="lt-stat-grp" id="lt-stat-grp-'+gi+'"'+oa+' style="background:rgba(255,255,255,0.02);border-radius:8px;border-left:3px solid '+g.c+';padding:6px 10px;"><summary style="cursor:pointer;font-size:0.78rem;color:var(--accent,#8b99ff);padding:4px 0;list-style:none;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;">'+g.label+' ('+g.items.length+')</summary><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:8px;">';
+              g.items.forEach(function(it){html+=ltTileHtml(it);});
+              html+='</div></details></div>';
+            });
+            el.innerHTML=html;
           }
           var dash=document.getElementById('view-dashboard');
           if(dash){dash.addEventListener('lt-view-enter',function(){ltRenderCounters();if(typeof applyDashMode==='function')applyDashMode();});setTimeout(function(){if(dash.classList.contains('active')){ltRenderCounters();if(typeof applyDashMode==='function')applyDashMode();}},150);}
@@ -11775,20 +11802,25 @@
     function applyDashMode(){
       var mode=localStorage.getItem('lt_dash_mode')||'beginner';
       var dets=document.querySelectorAll('#view-dashboard .dash-more-det');
+      var stats=document.querySelectorAll('#view-dashboard .lt-stat-grp');
       var i,begBtn=document.getElementById('dash-beg-btn'),expBtn=document.getElementById('dash-exp-btn');
       if(mode==='expert'){
         for(i=0;i<dets.length;i++){dets[i].open=true;}
+        for(i=0;i<stats.length;i++){stats[i].open=true;}
         if(begBtn){begBtn.style.fontWeight='';begBtn.style.opacity='0.55';}
         if(expBtn){expBtn.style.fontWeight='700';expBtn.style.opacity='1';}
       }else{
         for(i=0;i<dets.length;i++){dets[i].open=false;}
+        for(i=0;i<stats.length;i++){stats[i].open=false;}
         if(begBtn){begBtn.style.fontWeight='700';begBtn.style.opacity='1';}
         if(expBtn){expBtn.style.fontWeight='';expBtn.style.opacity='0.55';}
       }
     }
     function dashExpandAll(){
       var dets=document.querySelectorAll('#view-dashboard .dash-more-det');
+      var stats=document.querySelectorAll('#view-dashboard .lt-stat-grp');
       for(var i=0;i<dets.length;i++){dets[i].open=true;}
+      for(var j=0;j<stats.length;j++){stats[j].open=true;}
     }
     window.setDashMode=setDashMode;
     window.dashExpandAll=dashExpandAll;
