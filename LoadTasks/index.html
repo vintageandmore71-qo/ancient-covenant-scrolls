@@ -10167,6 +10167,187 @@
           }());</script>
         </section>
 
+        <!-- VIEW: prcoach -->
+        <section class="view" id="view-prcoach" data-view-panel="prcoach">
+          <div class="section-head"><p class="eyebrow">Repo File Worker</p><h1>PR Review Coach</h1><p>Step-by-step checklist for reviewing a pull request before you approve it. Plain-language guidance at every step.</p></div>
+          <article class="panel">
+            <p style="font-size:13px;color:#9aa0b0;margin-bottom:16px;">Work through each section. Every critical item must be checked before you merge. The coach does not read GitHub — you supply the answers.</p>
+            <div id="prc-score-bar" style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);">
+              <span style="font-size:13px;color:#9aa0b0;">Progress:</span>
+              <div style="flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,0.1);overflow:hidden;">
+                <div id="prc-bar-fill" style="height:100%;width:0%;border-radius:4px;background:#4ade80;transition:width 0.2s;"></div>
+              </div>
+              <span id="prc-score-label" style="font-size:13px;color:#9aa0b0;white-space:nowrap;">0 / 0</span>
+            </div>
+
+            <div style="margin-bottom:20px;">
+              <div style="font-size:12px;font-weight:700;color:#6366f1;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">1. Draft PR check</div>
+              <div style="font-size:12px;color:#9aa0b0;margin-bottom:10px;">A PR must be out of draft and fully described before you review it.</div>
+              <label class="prc-item" style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;cursor:pointer;">
+                <input type="checkbox" class="prc-check prc-critical" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;">
+                <span style="font-size:13px;color:#e8eaf0;">PR is marked ready for review — not a draft</span>
+              </label>
+              <label class="prc-item" style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;cursor:pointer;">
+                <input type="checkbox" class="prc-check" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;">
+                <span style="font-size:13px;color:#e8eaf0;">PR title clearly describes what is changing</span>
+              </label>
+              <label class="prc-item" style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
+                <input type="checkbox" class="prc-check" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;">
+                <span style="font-size:13px;color:#e8eaf0;">PR body includes: job ID, target files, proposed change summary, and rollback plan</span>
+              </label>
+            </div>
+
+            <div style="margin-bottom:20px;">
+              <div style="font-size:12px;font-weight:700;color:#6366f1;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">2. File change check</div>
+              <div style="font-size:12px;color:#9aa0b0;margin-bottom:10px;">Look at the Files tab in the PR. Only the files listed in the job should be changed.</div>
+              <label class="prc-item" style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;cursor:pointer;">
+                <input type="checkbox" class="prc-check prc-critical" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;">
+                <span style="font-size:13px;color:#e8eaf0;">Only the expected files are changed — no surprise additions</span>
+              </label>
+              <label class="prc-item" style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;cursor:pointer;">
+                <input type="checkbox" class="prc-check prc-critical" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;">
+                <span style="font-size:13px;color:#e8eaf0;">No <code>.github/workflows/</code> files changed</span>
+              </label>
+              <label class="prc-item" style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;cursor:pointer;">
+                <input type="checkbox" class="prc-check prc-critical" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;">
+                <span style="font-size:13px;color:#e8eaf0;">No <code>sw.js</code> or service worker files changed</span>
+              </label>
+              <label class="prc-item" style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
+                <input type="checkbox" class="prc-check prc-critical" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;">
+                <span style="font-size:13px;color:#e8eaf0;">No provider, AI, token, credential, or deploy files changed</span>
+              </label>
+            </div>
+
+            <div style="margin-bottom:20px;">
+              <div style="font-size:12px;font-weight:700;color:#6366f1;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">3. Risk check</div>
+              <div style="font-size:12px;color:#9aa0b0;margin-bottom:10px;">The declared risk in the PR must match the auto-classified risk from the 2C1 report. A mismatch is a hard block.</div>
+              <label class="prc-item" style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;cursor:pointer;">
+                <input type="checkbox" class="prc-check prc-critical" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;">
+                <span style="font-size:13px;color:#e8eaf0;">Declared risk level matches the auto-classified risk in the 2C1 validation report</span>
+              </label>
+              <label class="prc-item" style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;cursor:pointer;">
+                <input type="checkbox" class="prc-check" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;">
+                <span style="font-size:13px;color:#e8eaf0;">If HIGH risk: <code>highRiskOverride:true</code> is documented and justified in the PR</span>
+              </label>
+              <label class="prc-item" style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
+                <input type="checkbox" class="prc-check" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;">
+                <span style="font-size:13px;color:#e8eaf0;">The risk level is appropriate for the scope of the change</span>
+              </label>
+            </div>
+
+            <div style="margin-bottom:20px;">
+              <div style="font-size:12px;font-weight:700;color:#6366f1;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">4. Rollback check</div>
+              <div style="font-size:12px;color:#9aa0b0;margin-bottom:10px;">Every change must be reversible. Know your rollback command before you merge.</div>
+              <label class="prc-item" style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;cursor:pointer;">
+                <input type="checkbox" class="prc-check prc-critical" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;">
+                <span style="font-size:13px;color:#e8eaf0;">A rollback plan is documented in the PR body</span>
+              </label>
+              <label class="prc-item" style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;cursor:pointer;">
+                <input type="checkbox" class="prc-check" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;">
+                <span style="font-size:13px;color:#e8eaf0;">The rollback is a simple command (e.g. <code>git revert &lt;sha&gt;</code>)</span>
+              </label>
+              <label class="prc-item" style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
+                <input type="checkbox" class="prc-check" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;">
+                <span style="font-size:13px;color:#e8eaf0;">I know how to run the rollback if the live site breaks after merge</span>
+              </label>
+            </div>
+
+            <div style="margin-bottom:20px;padding:12px 14px;border-radius:8px;background:rgba(239,68,68,0.07);border-left:3px solid #ef4444;">
+              <div style="font-size:12px;font-weight:700;color:#f87171;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">5. Auto-merge warning</div>
+              <p style="font-size:13px;color:#fca5a5;margin:0 0 10px;">Auto-merge must never be enabled for this pipeline. If it is on, turn it off before merging.</p>
+              <p style="font-size:12px;color:#9aa0b0;margin:0 0 10px;">Why: auto-merge bypasses the human review step that is the whole point of this pipeline. A mistake that would be caught on review ships silently instead.</p>
+              <label class="prc-item" style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
+                <input type="checkbox" class="prc-check prc-critical" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;">
+                <span style="font-size:13px;color:#fca5a5;font-weight:600;">Auto-merge is NOT enabled on this PR</span>
+              </label>
+            </div>
+
+            <div style="margin-bottom:24px;">
+              <div style="font-size:12px;font-weight:700;color:#6366f1;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">6. Merge decision</div>
+              <div style="font-size:12px;color:#9aa0b0;margin-bottom:10px;">Only you can decide to merge. The pipeline cannot approve on your behalf.</div>
+              <label class="prc-item" style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;cursor:pointer;">
+                <input type="checkbox" class="prc-check" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;">
+                <span style="font-size:13px;color:#e8eaf0;">I have reviewed the diff and understand every line that is changing</span>
+              </label>
+              <label class="prc-item" style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;cursor:pointer;">
+                <input type="checkbox" class="prc-check" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;">
+                <span style="font-size:13px;color:#e8eaf0;">Required checks are passing (or I have confirmed none are required)</span>
+              </label>
+              <label class="prc-item" style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
+                <input type="checkbox" class="prc-check prc-critical" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;">
+                <span style="font-size:13px;color:#e8eaf0;">I am consciously choosing to merge — this is not automatic</span>
+              </label>
+            </div>
+
+            <div id="prc-verdict" style="display:none;padding:14px 16px;border-radius:8px;margin-bottom:16px;"></div>
+            <div style="display:flex;gap:10px;">
+              <button id="prc-check-btn" class="primary-action">Check verdict</button>
+              <button id="prc-reset-btn" class="secondary-action">Reset</button>
+            </div>
+          </article>
+          <script>(function(){
+            var checks=document.querySelectorAll('#view-prcoach .prc-check');
+            var critical=document.querySelectorAll('#view-prcoach .prc-check.prc-critical');
+            var fill=document.getElementById('prc-bar-fill');
+            var label=document.getElementById('prc-score-label');
+            var verdict=document.getElementById('prc-verdict');
+            var total=checks.length;
+            function updateBar(){
+              var done=0;
+              checks.forEach(function(c){if(c.checked)done++;});
+              var pct=total>0?Math.round(done/total*100):0;
+              fill.style.width=pct+'%';
+              fill.style.background=pct===100?'#4ade80':pct>=60?'#fbbf24':'#f87171';
+              label.textContent=done+' / '+total;
+            }
+            checks.forEach(function(c){c.addEventListener('change',function(){updateBar();verdict.style.display='none';});});
+            updateBar();
+            document.getElementById('prc-check-btn').addEventListener('click',function(){
+              var critFail=[];
+              critical.forEach(function(c){if(!c.checked){
+                var lbl=c.parentElement.querySelector('span');
+                critFail.push(lbl?lbl.textContent.trim():'(unknown)');
+              }});
+              var done=0;checks.forEach(function(c){if(c.checked)done++;});
+              var allCritOk=critFail.length===0;
+              var allOk=done===total;
+              var h='';
+              if(allCritOk&&allOk){
+                h='<div style="font-weight:700;font-size:15px;color:#4ade80;margin-bottom:8px;">READY TO MERGE</div>';
+                h+='<p style="font-size:13px;color:#c0c4d0;margin:0;">All checks passed. The decision is yours — merge when you are ready.</p>';
+                verdict.style.background='rgba(74,222,128,0.08)';
+                verdict.style.borderLeft='3px solid #4ade80';
+              } else if(allCritOk&&!allOk){
+                h='<div style="font-weight:700;font-size:15px;color:#fbbf24;margin-bottom:8px;">LIKELY SAFE — REVIEW REMAINING ITEMS</div>';
+                h+='<p style="font-size:13px;color:#c0c4d0;margin:0 0 6px;">All critical checks passed. '+(total-done)+' non-critical item(s) unchecked. Review them before merging.</p>';
+                verdict.style.background='rgba(251,191,36,0.08)';
+                verdict.style.borderLeft='3px solid #fbbf24';
+              } else {
+                h='<div style="font-weight:700;font-size:15px;color:#f87171;margin-bottom:8px;">DO NOT MERGE YET</div>';
+                h+='<p style="font-size:13px;color:#fca5a5;margin:0 0 8px;">'+critFail.length+' critical check(s) not confirmed:</p>';
+                h+='<ul style="margin:0;padding-left:18px;">';
+                critFail.forEach(function(b){h+='<li style="font-size:13px;color:#fca5a5;margin-bottom:4px;">'+b+'</li>';});
+                h+='</ul>';
+                verdict.style.background='rgba(239,68,68,0.08)';
+                verdict.style.borderLeft='3px solid #ef4444';
+              }
+              verdict.innerHTML=h;
+              verdict.style.display='block';
+            });
+            document.getElementById('prc-reset-btn').addEventListener('click',function(){
+              checks.forEach(function(c){c.checked=false;});
+              verdict.style.display='none';
+              updateBar();
+            });
+            var sec=document.getElementById('view-prcoach');
+            if(sec){sec.addEventListener('lt-view-enter',function(){
+              checks.forEach(function(c){c.checked=false;});
+              verdict.style.display='none';
+              updateBar();
+            });}
+          }());</script>
+        </section>
+
         <!-- VIEW: rfwwizard -->
         <section class="view" id="view-rfwwizard" data-view-panel="rfwwizard">
           <div class="section-head"><p class="eyebrow">Repo File Worker</p><h1>Guided Bot Flow</h1><p>Step-by-step guide to building a safe repo change request. No automatic merge or deploy.</p></div>
@@ -11433,7 +11614,7 @@
     /* Rail grouping */
     var PINNED=['dashboard','starthere','toolsearch2','favorites','recenttools','quicklaunch'];
     var GROUPS=[
-      {label:'Repo File Worker',open:true,views:['repofilejob','rfwwizard','rfwguide','rfwfilepick','safesim','filepathhelper','riskclassifier','patchplan','prdraftbuilder','exportrfj','actionspec','rfjtemplate','fileimpact','highriskwarn','approvephrase','rollbackbuilder','prsafetychk','patchscope','rfjhandoff','rfjpacket','phase2readiness','rfjdashboard','rfjstatusboard','rfjsearch','rfjtimeline','rfjdupes','rfjpriority','rfjblockers','rfjreviewq','rfjexportall','rfjimport']},
+      {label:'Repo File Worker',open:true,views:['repofilejob','rfwwizard','rfwguide','rfwfilepick','safesim','prcoach','filepathhelper','riskclassifier','patchplan','prdraftbuilder','exportrfj','actionspec','rfjtemplate','fileimpact','highriskwarn','approvephrase','rollbackbuilder','prsafetychk','patchscope','rfjhandoff','rfjpacket','phase2readiness','rfjdashboard','rfjstatusboard','rfjsearch','rfjtimeline','rfjdupes','rfjpriority','rfjblockers','rfjreviewq','rfjexportall','rfjimport']},
       {label:'Daily Work',open:true,views:['standup','worklog','mergelog','bugtriage','shippedlog','testresults','branchlog','prprep','dailycommand','activework','whatsnext2','sessionsummary','simpledash','pinnedcmd','sessiongoals','sessionnotes']},
       {label:'Safety',open:true,views:['validator','sitehealth','openrisks','pendingreviews','backupreminder','safenextstep','siteprotection','vaultreminder','branchsafety','prrisks','smokecheck','envcheck','rollbackplan','verifyscript']},
       {label:'Reports',open:true,views:['exportpacket','settingsio','exportdaily','exportrecovery','exportrelease','exporthandoff','importhandoff','dailyexport','releasenotes','toolindex','toolhelp']}
