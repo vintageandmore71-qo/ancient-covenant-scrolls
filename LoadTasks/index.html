@@ -10348,6 +10348,136 @@
           }());</script>
         </section>
 
+        <!-- VIEW: rbbuilder -->
+        <section class="view" id="view-rbbuilder" data-view-panel="rbbuilder">
+          <div class="section-head"><p class="eyebrow">Repo File Worker</p><h1>Rollback Command Builder</h1><p>Generate the exact commands needed to reverse a change. Commands are guidance only — they do not run automatically.</p></div>
+          <article class="panel">
+            <div style="padding:10px 14px;border-radius:8px;background:rgba(239,68,68,0.07);border-left:3px solid #ef4444;margin-bottom:20px;">
+              <strong style="font-size:13px;color:#f87171;">These commands are guidance only.</strong>
+              <p style="font-size:13px;color:#fca5a5;margin:6px 0 0;">Nothing runs automatically. Copy each command and run it yourself in your terminal. Read every command before running it.</p>
+            </div>
+
+            <div style="margin-bottom:20px;">
+              <div style="font-size:12px;font-weight:700;color:#6366f1;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">Inputs</div>
+              <label style="display:block;margin-bottom:10px;">
+                <span style="font-size:13px;color:#c0c4d0;display:block;margin-bottom:4px;">Merge SHA (from the squash-merge commit)</span>
+                <input id="rb-sha" type="text" placeholder="e.g. a38318bb or full 40-char SHA" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#e8eaf0;font-size:14px;box-sizing:border-box;font-family:monospace;">
+              </label>
+              <label style="display:block;margin-bottom:10px;">
+                <span style="font-size:13px;color:#c0c4d0;display:block;margin-bottom:4px;">Feature branch name</span>
+                <input id="rb-branch" type="text" placeholder="e.g. claude/my-change-2026-05-12" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#e8eaf0;font-size:14px;box-sizing:border-box;font-family:monospace;">
+              </label>
+              <label style="display:block;margin-bottom:14px;">
+                <span style="font-size:13px;color:#c0c4d0;display:block;margin-bottom:4px;">PR number (if applicable)</span>
+                <input id="rb-pr" type="text" placeholder="e.g. 58" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#e8eaf0;font-size:14px;box-sizing:border-box;font-family:monospace;">
+              </label>
+              <button id="rb-build" class="primary-action">Build rollback commands</button>
+            </div>
+
+            <div id="rb-output" style="display:none;"></div>
+          </article>
+          <script>(function(){
+            function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+            function cmdBlock(label,hint,cmds){
+              var id='rb-cmd-'+Math.random().toString(36).slice(2,8);
+              var lines=cmds.join('\n');
+              var h='<div style="margin-bottom:18px;">';
+              h+='<div style="font-size:12px;font-weight:700;color:#a5b4fc;margin-bottom:4px;">'+label+'</div>';
+              if(hint) h+='<div style="font-size:12px;color:#9aa0b0;margin-bottom:8px;">'+hint+'</div>';
+              h+='<div style="position:relative;">';
+              h+='<pre id="'+id+'" style="margin:0;padding:12px 14px;border-radius:6px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.1);color:#e8eaf0;font-size:13px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;">'+escHtml(lines)+'</pre>';
+              h+='<button onclick="(function(){var el=document.getElementById(\''+id+'\');if(!el)return;var t=el.textContent;navigator.clipboard&&navigator.clipboard.writeText(t).then(function(){var b=el.parentElement.querySelector(\'button\');if(b){var orig=b.textContent;b.textContent=\'Copied\';setTimeout(function(){b.textContent=orig;},1200);}});})();" style="position:absolute;top:8px;right:8px;background:rgba(99,102,241,0.2);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer;">Copy</button>';
+              h+='</div></div>';
+              return h;
+            }
+            function reminderBlock(title,body,color){
+              color=color||'#fbbf24';
+              var bg=color==='#f87171'?'rgba(239,68,68,0.07)':'rgba(251,191,36,0.07)';
+              var bord=color==='#f87171'?'#ef4444':'#d97706';
+              return '<div style="margin-bottom:14px;padding:10px 14px;border-radius:8px;background:'+bg+';border-left:3px solid '+bord+';">'
+                +'<strong style="font-size:13px;color:'+color+';">'+title+'</strong>'
+                +'<p style="font-size:13px;color:#c0c4d0;margin:6px 0 0;">'+body+'</p>'
+                +'</div>';
+            }
+            document.getElementById('rb-build').addEventListener('click',function(){
+              var sha=(document.getElementById('rb-sha').value.trim())||'';
+              var branch=(document.getElementById('rb-branch').value.trim())||'';
+              var pr=(document.getElementById('rb-pr').value.trim())||'';
+              var today=new Date().toISOString().slice(0,10);
+              var revertBranch=branch?('revert/'+branch.replace(/^[^\/]+\//,'').slice(0,40)+'-'+today):'revert/rollback-'+today;
+              revertBranch=revertBranch.replace(/[^a-zA-Z0-9\/_.\\-]/g,'-').replace(/-+/g,'-');
+              var h='';
+              h+='<div style="font-size:12px;font-weight:700;color:#6366f1;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:14px;">Generated rollback commands</div>';
+              if(sha){
+                h+=cmdBlock(
+                  'Revert by merge SHA',
+                  'Creates a new commit that reverses the squash-merge. Opens a new branch and PR — does not touch main directly.',
+                  [
+                    'git fetch origin main',
+                    'git checkout -b '+revertBranch+' origin/main',
+                    'git revert '+sha+' --no-edit',
+                    'git push -u origin '+revertBranch,
+                    '# Then open a PR from '+revertBranch+' into main'
+                  ]
+                );
+              } else {
+                h+=reminderBlock('No merge SHA entered','Enter the merge SHA above to generate the revert command. Find it on the merged PR page on GitHub or in git log.');
+              }
+              if(branch){
+                h+=cmdBlock(
+                  'Delete feature branch (after revert lands)',
+                  'Only run this after the revert PR has been merged into main.',
+                  ['git push origin --delete '+branch]
+                );
+                h+=cmdBlock(
+                  'Confirm branch is gone',
+                  'Should return nothing if the branch was deleted successfully.',
+                  ['git ls-remote --exit-code origin '+branch]
+                );
+              } else {
+                h+=reminderBlock('No branch name entered','Enter the feature branch name above to generate the delete command.');
+              }
+              h+='<div style="font-size:12px;font-weight:700;color:#6366f1;letter-spacing:0.08em;text-transform:uppercase;margin:18px 0 10px;">Reminders</div>';
+              if(pr){
+                h+=reminderBlock(
+                  'Close draft PR #'+escHtml(pr)+' first',
+                  'If PR #'+escHtml(pr)+' is still open on GitHub (draft or ready), close it before the revert lands. Go to the PR page and click Close pull request. Do not merge it.',
+                  '#f87171'
+                );
+              } else {
+                h+=reminderBlock(
+                  'Close any open draft PR first',
+                  'If the original change has an open PR on GitHub (draft or ready), close it before the revert lands. Do not merge it. Enter the PR number above to get a specific reminder.',
+                  '#f87171'
+                );
+              }
+              h+=reminderBlock(
+                'Delete the feature branch after revert',
+                'Once the revert is merged, delete the feature branch on GitHub. A stale branch with the broken change can cause confusion later. Delete via GitHub UI or the command above.',
+                '#fbbf24'
+              );
+              h+=reminderBlock(
+                'Bump cache version if SW or JS was changed',
+                'If the original change touched sw.js, load.js, or any cached asset, bump the cache version in the revert commit. A lower cache number can leave users with the broken version cached.',
+                '#fbbf24'
+              );
+              h+='<div style="margin-top:16px;padding:10px 14px;border-radius:8px;background:rgba(239,68,68,0.07);border-left:3px solid #ef4444;font-size:13px;color:#fca5a5;">'
+                +'<strong>These commands are guidance only.</strong> Nothing runs automatically. Read every command before running it in your terminal.'
+                +'</div>';
+              var out=document.getElementById('rb-output');
+              out.style.display='block';
+              out.innerHTML=h;
+            });
+            var sec=document.getElementById('view-rbbuilder');
+            if(sec){sec.addEventListener('lt-view-enter',function(){
+              document.getElementById('rb-sha').value='';
+              document.getElementById('rb-branch').value='';
+              document.getElementById('rb-pr').value='';
+              document.getElementById('rb-output').style.display='none';
+            });}
+          }());</script>
+        </section>
+
         <!-- VIEW: rfwwizard -->
         <section class="view" id="view-rfwwizard" data-view-panel="rfwwizard">
           <div class="section-head"><p class="eyebrow">Repo File Worker</p><h1>Guided Bot Flow</h1><p>Step-by-step guide to building a safe repo change request. No automatic merge or deploy.</p></div>
@@ -11614,7 +11744,7 @@
     /* Rail grouping */
     var PINNED=['dashboard','starthere','toolsearch2','favorites','recenttools','quicklaunch'];
     var GROUPS=[
-      {label:'Repo File Worker',open:true,views:['repofilejob','rfwwizard','rfwguide','rfwfilepick','safesim','prcoach','filepathhelper','riskclassifier','patchplan','prdraftbuilder','exportrfj','actionspec','rfjtemplate','fileimpact','highriskwarn','approvephrase','rollbackbuilder','prsafetychk','patchscope','rfjhandoff','rfjpacket','phase2readiness','rfjdashboard','rfjstatusboard','rfjsearch','rfjtimeline','rfjdupes','rfjpriority','rfjblockers','rfjreviewq','rfjexportall','rfjimport']},
+      {label:'Repo File Worker',open:true,views:['repofilejob','rfwwizard','rfwguide','rfwfilepick','safesim','prcoach','rbbuilder','filepathhelper','riskclassifier','patchplan','prdraftbuilder','exportrfj','actionspec','rfjtemplate','fileimpact','highriskwarn','approvephrase','rollbackbuilder','prsafetychk','patchscope','rfjhandoff','rfjpacket','phase2readiness','rfjdashboard','rfjstatusboard','rfjsearch','rfjtimeline','rfjdupes','rfjpriority','rfjblockers','rfjreviewq','rfjexportall','rfjimport']},
       {label:'Daily Work',open:true,views:['standup','worklog','mergelog','bugtriage','shippedlog','testresults','branchlog','prprep','dailycommand','activework','whatsnext2','sessionsummary','simpledash','pinnedcmd','sessiongoals','sessionnotes']},
       {label:'Safety',open:true,views:['validator','sitehealth','openrisks','pendingreviews','backupreminder','safenextstep','siteprotection','vaultreminder','branchsafety','prrisks','smokecheck','envcheck','rollbackplan','verifyscript']},
       {label:'Reports',open:true,views:['exportpacket','settingsio','exportdaily','exportrecovery','exportrelease','exporthandoff','importhandoff','dailyexport','releasenotes','toolindex','toolhelp']}
