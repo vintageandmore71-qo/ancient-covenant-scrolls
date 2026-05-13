@@ -1345,6 +1345,11 @@ body.ls-contrast-safe{filter:contrast(1.15)}
         <label>Asset Path or URL<input id="ls-pr-asset" type="text" placeholder="File path, blob URL, or asset URL"></label>
         <label>Fallback Used<select id="ls-pr-fallback"><option>No</option><option>Yes</option><option>Not Applicable</option></select></label>
         <label>Approved Take Status<select id="ls-pr-take-status"><option>pending</option><option>approved</option><option>rejected</option><option>not reviewed</option></select></label>
+        <label style="grid-column:1/-1">Prompt Sent<textarea id="ls-pr-prompt" rows="2" placeholder="The exact prompt that was sent to the provider."></textarea></label>
+        <label style="grid-column:1/-1">Error Details (if any)<textarea id="ls-pr-error" rows="2" placeholder="Full error message or failure description. Leave blank if no error."></textarea></label>
+      </div>
+      <div class="ls-panel" style="background:rgba(156,156,255,.06);border-color:rgba(156,156,255,.22);margin-top:10px">
+        <p style="margin:0;font:400 13.5px Inter,system-ui,sans-serif;color:#d8d2ec;line-height:1.6"><strong style="color:#9c9cff">Integration Required:</strong> Live provider calls require a connected API. Logging, export, and the No False Success rules work offline. No generation result is accepted without a real file, blob, or URL on record.</p>
       </div>
       <button id="ls-pr-add-btn" class="btn primary" type="button" style="margin-top:12px">Add Entry</button>
     </div>
@@ -1377,6 +1382,13 @@ body.ls-contrast-safe{filter:contrast(1.15)}
         <div class="field"><label>Marketplace Allowed</label><select id="ls-oc-marketplace"><option>No</option><option>Yes - Own Platform Only</option><option>Yes - All Platforms</option></select></div>
         <div class="field"><label>Attach to Scene ID</label><input type="text" id="ls-oc-scene-id" placeholder="scene-001 (optional)"></div>
         <div class="field"><label>Attach to Reference Pack ID</label><input type="text" id="ls-oc-refpack-id" placeholder="rp-001 (optional)"></div>
+        <div class="field"><label>Face Notes</label><textarea id="ls-oc-face-notes" rows="2" placeholder="Face structure and features to preserve."></textarea></div>
+        <div class="field"><label>Skin Tone Notes</label><input type="text" id="ls-oc-skin-notes" placeholder="e.g. warm olive, medium brown, fair with freckles"></div>
+        <div class="field"><label>Body Type Notes</label><input type="text" id="ls-oc-body-notes" placeholder="e.g. tall, slim, athletic build"></div>
+        <div class="field"><label>Hair Notes</label><input type="text" id="ls-oc-hair-notes" placeholder="e.g. long curly dark brown, short straight black"></div>
+        <div class="field" style="grid-column:span 2"><label>Wardrobe Notes</label><textarea id="ls-oc-wardrobe-notes" rows="2" placeholder="Clothing style, colors, and accessories to preserve."></textarea></div>
+        <div class="field"><label>Allowed Changes</label><textarea id="ls-oc-allowed-changes" rows="2" placeholder="What can change. e.g. expression, pose, background"></textarea></div>
+        <div class="field"><label>Forbidden Changes</label><textarea id="ls-oc-forbidden-changes" rows="2" placeholder="What must never change. e.g. eye color, scar location"></textarea></div>
         <div class="field" style="grid-column:span 2"><label style="display:flex;align-items:flex-start;gap:8px"><input type="checkbox" id="ls-oc-confirm" style="margin-top:3px;flex-shrink:0"><span>I confirm I own this image or have permission to use it. I accept responsibility for all rights and usage restrictions.</span></label></div>
       </div>
       <div id="ls-oc-preview" style="margin-top:12px"></div>
@@ -1401,6 +1413,9 @@ body.ls-contrast-safe{filter:contrast(1.15)}
     </div>
     <div class="ls-panel" style="background:rgba(251,210,74,.06);border-color:rgba(251,210,74,.22)">
       <p style="margin:0;font:400 13.5px Inter,system-ui,sans-serif;color:#d8d2ec;line-height:1.6"><strong style="color:#fbd24a">Rights Notice:</strong> Only clone or reuse images and likenesses you own or have permission to use. LoadStudio stores rights metadata with every character and asset.</p>
+    </div>
+    <div class="ls-panel" style="background:rgba(156,156,255,.06);border-color:rgba(156,156,255,.22)">
+      <p style="margin:0;font:400 13.5px Inter,system-ui,sans-serif;color:#d8d2ec;line-height:1.6"><strong style="color:#9c9cff">Integration Required:</strong> Creating character images from your reference requires a connected image generation provider. No image is generated without a real provider response. The profile and metadata save offline.</p>
     </div>
     <div id="ls-oc-saved-list" style="margin-top:14px"></div>
     <div class="ls-related"><div class="ls-related-h">Related</div><div class="ls-related-row">
@@ -1444,6 +1459,10 @@ body.ls-contrast-safe{filter:contrast(1.15)}
     </div>
     <div class="ls-panel">
       <h3 style="margin:0 0 10px;font:600 15px Inter,system-ui,sans-serif;color:#fff">Take Log</h3>
+      <div style="display:flex;align-items:center;gap:14px;margin:0 0 12px;padding:10px 14px;background:rgba(156,156,255,.06);border:1px solid rgba(156,156,255,.20);border-radius:10px;flex-wrap:wrap">
+        <div><p style="margin:0 0 2px;font:500 11px Inter,system-ui,sans-serif;color:#9c9cff;text-transform:uppercase;letter-spacing:.1em">Average Consistency Score</p><div id="ls-ce-avg-score" style="font:700 28px Inter,system-ui,sans-serif;color:#fff">--</div><p style="margin:2px 0 0;font:300 11px Inter,system-ui,sans-serif;color:#9c93b5">Target: 4 or above across all scores</p></div>
+        <button id="ls-ce-save-report-btn" style="margin-left:auto;padding:8px 16px;border-radius:9px;font:500 13px Inter,system-ui,sans-serif;border:1px solid rgba(156,156,255,.32);background:rgba(156,156,255,.10);color:#fff;cursor:pointer">Save Continuity Report</button>
+      </div>
       <div id="ls-ce-log"><p style="color:#9c93b5;font:300 13px Inter,system-ui,sans-serif">No takes logged yet.</p></div>
     </div>
     <div class="ls-panel" style="border-color:rgba(94,224,165,.28);background:rgba(94,224,165,.04)">
@@ -1525,6 +1544,9 @@ body.ls-contrast-safe{filter:contrast(1.15)}
       <h3 style="margin:0 0 10px;font:600 15px Inter,system-ui,sans-serif;color:#fff">Saved Packs</h3>
       <div id="ls-rp-list"><p style="color:#9c93b5;font:300 13px Inter,system-ui,sans-serif">No packs saved yet.</p></div>
     </div>
+    <div class="ls-panel" style="background:rgba(94,180,214,.06);border-color:rgba(94,180,214,.22)">
+      <p style="margin:0;font:400 13.5px Inter,system-ui,sans-serif;color:#d8d2ec;line-height:1.6"><strong style="color:#5eb4d6">Integration Required:</strong> Generating reference images for pack slots requires a connected image generation provider. Pack assembly, export, and metadata storage work offline.</p>
+    </div>
     <div class="ls-related"><div class="ls-related-h">Related</div><div class="ls-related-row">
       <button class="ls-related-tile" onclick="lsNav('own-image-clone')"><div class="ls-related-tile-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><span class="ls-related-tile-label">Clone Studio</span></button>
       <button class="ls-related-tile" onclick="lsNav('character-stability')"><div class="ls-related-tile-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><span class="ls-related-tile-label">Char Stability</span></button>
@@ -1546,6 +1568,10 @@ body.ls-contrast-safe{filter:contrast(1.15)}
         <div class="field"><label>Scene Mood</label><input type="text" id="ls-pl-mood" placeholder="e.g. tense, calm, mysterious"></div>
         <div class="field"><label>Extra Negative Prompt</label><textarea id="ls-pl-neg-extra" rows="2" placeholder="Additional things to avoid."></textarea></div>
         <div class="field"><label>Provider Format</label><select id="ls-pl-provider-format"><option value="generic">Generic (any provider)</option><option value="pollinations">Pollinations Flux</option><option value="comfyui">ComfyUI / AUTOMATIC1111</option><option value="openrouter">OpenRouter</option><option value="hf">Hugging Face</option></select></div>
+        <div class="field" style="grid-column:span 2"><label>Character DNA (identity string to lock)</label><textarea id="ls-pl-dna" rows="3" placeholder="Paste the character DNA — the exact identity description that must be preserved across every scene. Pull from Character Studio."></textarea></div>
+        <div class="field" style="grid-column:span 2"><label>Approved Reference Notes</label><textarea id="ls-pl-ref-notes" rows="2" placeholder="Key notes from approved takes to include in the prompt."></textarea></div>
+        <div class="field"><label>Wardrobe Notes</label><textarea id="ls-pl-wardrobe" rows="2" placeholder="Specific wardrobe to preserve in this scene."></textarea></div>
+        <div class="field"><label>Forbidden Changes</label><textarea id="ls-pl-forbidden" rows="2" placeholder="What must never change. Pull from rejected takes."></textarea></div>
       </div>
       <div style="margin:12px 0">
         <p style="margin:0 0 8px;font:500 12.5px Inter,system-ui,sans-serif;color:#c0b8d9">Always Include</p>
