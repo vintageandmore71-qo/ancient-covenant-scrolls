@@ -1,25 +1,35 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "profiles": [],
   "schema": {
     "id": "string",
-    "name": "string",
+    "characterId": "string",
+    "characterName": "string",
     "consistencyMode": "strict|moderate|loose",
     "faceNotes": "string",
-    "bodyType": "string",
-    "skinTone": "string",
-    "hair": "string",
-    "wardrobe": "string",
+    "bodyNotes": "string",
+    "skinToneNotes": "string",
+    "hairNotes": "string",
+    "wardrobeNotes": "string",
     "era": "string",
     "expressionRange": "string",
     "allowedVariations": "string",
     "forbiddenChanges": "string",
     "promptLockPhrases": "string",
     "negativePromptLockPhrases": "string",
-    "faceConsistencyScore": 0,
-    "wardrobeConsistencyScore": 0,
+    "scores": {
+      "face": 0,
+      "skinTone": 0,
+      "bodyType": 0,
+      "hair": 0,
+      "wardrobe": 0,
+      "era": 0,
+      "style": 0
+    },
+    "consistencyScore": 0,
     "referenceImages": [],
     "approvedTakes": [],
-    "rejectedTakes": []
+    "rejectedTakes": [],
+    "savedAt": "ISO8601"
   }
 }

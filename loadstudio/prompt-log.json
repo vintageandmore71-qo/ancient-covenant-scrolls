@@ -1,9 +1,12 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "prompts": [],
   "schema": {
     "type": "string",
     "prompt": "string",
+    "characterId": "string",
+    "sceneId": "string",
+    "providerFormat": "generic|pollinations|comfyui|openrouter|hf",
     "savedAt": "ISO8601"
   }
 }

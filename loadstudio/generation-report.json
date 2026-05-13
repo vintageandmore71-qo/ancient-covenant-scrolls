@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "report": [],
   "schema": {
     "provider": "string",
@@ -7,6 +7,8 @@
     "result": "Success|Failed|Partial|Skipped",
     "reason": "string",
     "asset": "string",
+    "fallbackUsed": "No|Yes|Not Applicable",
+    "approvedTakeStatus": "pending|approved|rejected|not reviewed",
     "time": "ISO8601"
   },
   "noFalseSuccessRule": "Never mark a result as Success unless a real file, blob, URL, or base64 data was returned."

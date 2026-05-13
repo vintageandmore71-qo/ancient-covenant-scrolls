@@ -1,1 +1,1 @@
-{"version":"1.0","referencePacks":[],"schema":{"id":"string","name":"string","characterId":"string","contents":[],"notes":"string","createdAt":"ISO8601"}}
+{"version":"1.1","referencePacks":[],"schema":{"id":"string","name":"string","characterId":"string","contents":[],"slots":{"frontPortrait":"string","sideProfile":"string","fullBody":"string","wardrobeReference":"string","expressionRefs":[],"styleReference":"string","sceneReference":"string"},"includesApprovedTakes":false,"includesRejectedNotes":false,"includesSourceImages":false,"notes":"string","createdAt":"ISO8601"}}
