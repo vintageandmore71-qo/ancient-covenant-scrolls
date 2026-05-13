@@ -1,5 +1,5 @@
 {
-  "sections_count": 55,
+  "sections_count": 60,
   "features_count": 661,
   "manual_package_items": [
     "index.html",
@@ -76,7 +76,12 @@
     "prompt-writer",
     "multilingual",
     "production-board",
-    "provider-report"
+    "provider-report",
+    "own-image-clone",
+    "continuity-engine",
+    "reference-pack",
+    "prompt-lock",
+    "scene-proof"
   ],
   "locked_rule": "No delivery unless all requests and build-plan functions are represented, verified, or marked Integration Required when external dependencies are required."
 }
