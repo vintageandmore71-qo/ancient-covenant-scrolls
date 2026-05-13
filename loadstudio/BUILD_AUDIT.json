@@ -1,5 +1,5 @@
 {
-  "sections_count": 40,
+  "sections_count": 55,
   "features_count": 661,
   "manual_package_items": [
     "index.html",
@@ -61,7 +61,22 @@
     "developer-lab",
     "api-keys",
     "connectivity",
-    "help-tour"
+    "help-tour",
+    "advertiser",
+    "inbox",
+    "display-focus-controls",
+    "director-ai",
+    "character-stability",
+    "text-to-video",
+    "image-to-video",
+    "video-stylizer",
+    "sfx-generator",
+    "voice-character-engine",
+    "video-outpainting",
+    "prompt-writer",
+    "multilingual",
+    "production-board",
+    "provider-report"
   ],
   "locked_rule": "No delivery unless all requests and build-plan functions are represented, verified, or marked Integration Required when external dependencies are required."
 }

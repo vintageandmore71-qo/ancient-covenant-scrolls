@@ -1,0 +1,12 @@
+{
+  "version": "1.0",
+  "assets": [],
+  "schema": {
+    "id": "string",
+    "filename": "string",
+    "type": "image|video|audio|document",
+    "source": "string",
+    "rightsStatus": "owned|licensed|public-domain|pending",
+    "addedAt": "ISO8601"
+  }
+}

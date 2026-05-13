@@ -1,0 +1,25 @@
+{
+  "version": "1.0",
+  "profiles": [],
+  "schema": {
+    "id": "string",
+    "name": "string",
+    "consistencyMode": "strict|moderate|loose",
+    "faceNotes": "string",
+    "bodyType": "string",
+    "skinTone": "string",
+    "hair": "string",
+    "wardrobe": "string",
+    "era": "string",
+    "expressionRange": "string",
+    "allowedVariations": "string",
+    "forbiddenChanges": "string",
+    "promptLockPhrases": "string",
+    "negativePromptLockPhrases": "string",
+    "faceConsistencyScore": 0,
+    "wardrobeConsistencyScore": 0,
+    "referenceImages": [],
+    "approvedTakes": [],
+    "rejectedTakes": []
+  }
+}

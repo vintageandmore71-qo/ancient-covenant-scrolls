@@ -136,4 +136,338 @@ function action(a,el){let secid=el.dataset.sectionId; if(a==='close-modal') retu
 document.addEventListener('click',e=>{let s=e.target.closest('[data-section]'); if(s) go(s.dataset.section); let f=e.target.closest('[data-feature]'); if(f) featureClick(f.dataset.feature); let a=e.target.closest('[data-action]'); if(a) action(a.dataset.action,a);});
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
 render();
+
+// Display & Focus Controls - restore persisted toggles on load
+(function(){
+  var toggles=[
+    {id:'ls-toggle-large-text',key:'ls_large_text',cls:'ls-large-text'},
+    {id:'ls-toggle-spacing',key:'ls_spacing',cls:'ls-comfortable-spacing'},
+    {id:'ls-toggle-clutter',key:'ls_clutter',cls:'ls-reduced-clutter'},
+    {id:'ls-toggle-focus',key:'ls_focus',cls:'ls-focus-mode'},
+    {id:'ls-toggle-stepbystep',key:'ls_stepbystep',cls:'ls-stepbystep'},
+    {id:'ls-toggle-plainlang',key:'ls_plain_lang',cls:'ls-plain-lang'},
+    {id:'ls-toggle-contrast',key:'ls_contrast',cls:'ls-contrast-safe'}
+  ];
+  function applyToggle(t){
+    var on=localStorage.getItem(t.key)==='1';
+    document.body.classList.toggle(t.cls,on);
+    var btn=document.getElementById(t.id);
+    if(btn){btn.style.background=on?'rgba(179,136,255,.28)':'';}
+  }
+  function bindToggle(t){
+    var btn=document.getElementById(t.id);
+    if(!btn)return;
+    applyToggle(t);
+    btn.addEventListener('click',function(){
+      var on=document.body.classList.toggle(t.cls);
+      localStorage.setItem(t.key,on?'1':'0');
+      btn.style.background=on?'rgba(179,136,255,.28)':'';
+    });
+  }
+  document.addEventListener('DOMContentLoaded',function(){
+    toggles.forEach(bindToggle);
+    var tourBtn=document.getElementById('ls-open-tour');
+    if(tourBtn){tourBtn.addEventListener('click',function(){if(typeof lsStartTour==='function')lsStartTour();});}
+  });
+})();
+
+// Director AI - Save Direction
+(function(){
+  document.addEventListener('DOMContentLoaded',function(){
+    var saveBtn=document.getElementById('ls-dir-save');
+    if(saveBtn){
+      saveBtn.addEventListener('click',function(){
+        var data={vision:val('ls-dir-vision'),style:val('ls-dir-style'),beats:val('ls-dir-beats'),pacing:val('ls-dir-pacing')};
+        localStorage.setItem('ls_director_ai',JSON.stringify(data));
+        var a=document.createElement('a');
+        a.href='data:application/json,'+encodeURIComponent(JSON.stringify(data,null,2));
+        a.download='director-ai.json';a.click();
+      });
+    }
+    var genBtn=document.getElementById('ls-dir-genshot');
+    if(genBtn){
+      genBtn.addEventListener('click',function(){
+        var desc=val('ls-dir-scene-desc'),shot=val('ls-dir-shot-type'),move=val('ls-dir-camera-move');
+        var out='Shot List
+
+Scene: '+desc+'
+Shot Type: '+shot+'
+Camera: '+move+'
+Lens: Standard
+Notes: Review with director before filming.';
+        var el=document.getElementById('ls-dir-shotlist-out');if(el)el.value=out;
+      });
+    }
+  });
+  function val(id){var el=document.getElementById(id);return el?el.value||el.textContent:'';}
+})();
+
+// Text to Video - Build Prompt
+(function(){
+  document.addEventListener('DOMContentLoaded',function(){
+    var btn=document.getElementById('ls-t2v-build');
+    if(btn){
+      btn.addEventListener('click',function(){
+        var idea=v('ls-t2v-idea'),style=v('ls-t2v-style'),dur=v('ls-t2v-duration'),ratio=v('ls-t2v-ratio'),cam=v('ls-t2v-camera'),light=v('ls-t2v-lighting');
+        var prompt='Cinematic video prompt
+Style: '+style+'
+Duration: '+dur+'
+Aspect ratio: '+ratio+'
+Scene: '+idea+'
+Camera: '+cam+'
+Lighting: '+light+'
+Provider: Not connected. Save this prompt and attach a result manually.';
+        var el=document.getElementById('ls-t2v-output');if(el)el.value=prompt;
+      });
+    }
+  });
+  function v(id){var el=document.getElementById(id);return el?(el.value||'(not set)'):'';}
+})();
+
+// Image to Video - Build Motion Prompt
+(function(){
+  document.addEventListener('DOMContentLoaded',function(){
+    var btn=document.getElementById('ls-i2v-build-btn');
+    if(btn){
+      btn.addEventListener('click',function(){
+        var motion=v('ls-i2v-motion'),notes=v('ls-i2v-notes');
+        var face=document.getElementById('ls-i2v-preserve-face'),war=document.getElementById('ls-i2v-preserve-wardrobe'),comp=document.getElementById('ls-i2v-preserve-comp');
+        var preserves=[];
+        if(face&&face.checked)preserves.push('face');
+        if(war&&war.checked)preserves.push('wardrobe');
+        if(comp&&comp.checked)preserves.push('composition');
+        var out='Motion prompt
+Motion type: '+motion+'
+Preserve: '+(preserves.join(', ')||'none specified')+'
+Notes: '+notes;
+        var el=document.getElementById('ls-i2v-output');if(el)el.value=out;
+      });
+    }
+    var up=document.getElementById('ls-i2v-upload');
+    if(up){up.addEventListener('change',function(){
+      var file=up.files[0];if(!file)return;
+      var reader=new FileReader();
+      reader.onload=function(e){var prev=document.getElementById('ls-i2v-preview');if(prev){prev.innerHTML='<img src="'+e.target.result+'" style="max-width:100%;border-radius:8px;margin-top:8px;">';}};
+      reader.readAsDataURL(file);
+    });}
+  });
+  function v(id){var el=document.getElementById(id);return el?(el.value||'(not set)'):'';}
+})();
+
+// Video Stylizer - Build Style Prompt
+(function(){
+  document.addEventListener('DOMContentLoaded',function(){
+    var btn=document.getElementById('ls-vs-build-btn');
+    if(btn){
+      btn.addEventListener('click',function(){
+        var style=v('ls-vs-style'),notes=v('ls-vs-notes');
+        var preserves=[];
+        ['ls-vs-face','ls-vs-skin','ls-vs-body','ls-vs-hair','ls-vs-wardrobe','ls-vs-era','ls-vs-comp'].forEach(function(id){
+          var el=document.getElementById(id);
+          if(el&&el.checked){
+            var lbl=el.closest('label');
+            if(lbl)preserves.push(lbl.textContent.trim());
+          }
+        });
+        var out='Style prompt
+Style: '+style+'
+Preserve: '+(preserves.join(', ')||'none')+'
+Notes: '+notes+'
+Warning: Stylization can break character identity. Review output carefully.';
+        var el=document.getElementById('ls-vs-output');if(el)el.value=out;
+      });
+    }
+  });
+  function v(id){var el=document.getElementById(id);return el?(el.value||'(not set)'):'';}
+})();
+
+// SFX Generator
+(function(){
+  document.addEventListener('DOMContentLoaded',function(){
+    document.querySelectorAll('.ls-sfx-type-btn').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        var tags=document.getElementById('ls-sfx-tags');
+        if(tags){tags.value=(tags.value?tags.value+', ':'')+btn.textContent.trim();}
+      });
+    });
+    var buildBtn=document.getElementById('ls-sfx-build-btn');
+    if(buildBtn){buildBtn.addEventListener('click',function(){
+      var scene=v('ls-sfx-scene'),tags=v('ls-sfx-tags'),sync=v('ls-sfx-sync');
+      var out='SFX Prompt
+Scene: '+scene+'
+Types: '+tags+'
+Sync moment: '+sync+'
+Provider: Not connected. Save this prompt for later use.';
+      var el=document.getElementById('ls-sfx-output');if(el)el.value=out;
+    });}
+    var expBtn=document.getElementById('ls-sfx-export-btn');
+    if(expBtn){expBtn.addEventListener('click',function(){
+      var cue='SFX Cue Sheet
+
+Scene: '+v('ls-sfx-scene')+'
+Types: '+v('ls-sfx-tags')+'
+Sync: '+v('ls-sfx-sync')+'
+Loop: '+(document.getElementById('ls-sfx-loop')&&document.getElementById('ls-sfx-loop').checked?'Yes':'No')+'
+Status: Pending provider connection';
+      var a=document.createElement('a');a.href='data:text/plain,'+encodeURIComponent(cue);a.download='sfx-cue-sheet.txt';a.click();
+    });}
+  });
+  function v(id){var el=document.getElementById(id);return el?(el.value||''):'';}
+})();
+
+// Voice Character Engine
+(function(){
+  document.addEventListener('DOMContentLoaded',function(){
+    var saveBtn=document.getElementById('ls-vce-save-btn');
+    if(saveBtn){saveBtn.addEventListener('click',function(){
+      var profile={character:v('ls-vce-char'),archetype:v('ls-vce-archetype'),tone:r('ls-vce-tone'),pitch:r('ls-vce-pitch'),speed:r('ls-vce-speed'),warmth:r('ls-vce-warmth'),breathiness:r('ls-vce-breathiness'),rasp:r('ls-vce-rasp'),clarity:r('ls-vce-clarity'),authority:r('ls-vce-authority'),notes:v('ls-vce-notes')};
+      var log=JSON.parse(localStorage.getItem('ls_voices')||'[]');
+      log.push(profile);localStorage.setItem('ls_voices',JSON.stringify(log));
+      var a=document.createElement('a');a.href='data:application/json,'+encodeURIComponent(JSON.stringify(profile,null,2));a.download='voice-profile.json';a.click();
+    });}
+    var qBtn=document.getElementById('ls-vce-queue-btn');
+    if(qBtn){qBtn.addEventListener('click',function(){
+      var q=document.getElementById('ls-vce-queue');
+      var char=v('ls-vce-char')||'Unnamed';
+      if(q){var item=document.createElement('div');item.style.cssText='padding:8px 12px;border:1px solid rgba(251,210,74,.28);border-radius:8px;margin-bottom:6px;font:400 13px Inter,system-ui,sans-serif;color:#fbd24a;';item.textContent=char+' - queued for voice synthesis';q.appendChild(item);}
+    });}
+  });
+  function v(id){var el=document.getElementById(id);return el?(el.value||''):'';}
+  function r(id){var el=document.getElementById(id);return el?parseInt(el.value||'50'):50;}
+})();
+
+// Outpainting - Build Prompt
+(function(){
+  document.addEventListener('DOMContentLoaded',function(){
+    var btn=document.getElementById('ls-out-build-btn');
+    if(btn){btn.addEventListener('click',function(){
+      var type=v('ls-out-type'),notes=v('ls-out-notes');
+      var subject=document.getElementById('ls-out-subject'),face=document.getElementById('ls-out-face');
+      var preserves=[];if(subject&&subject.checked)preserves.push('subject position');if(face&&face.checked)preserves.push('face and body');
+      var out='Outpainting Prompt
+Conversion: '+type+'
+Preserve: '+(preserves.join(', ')||'none')+'
+Notes: '+notes+'
+Provider: Not connected.';
+      var el=document.getElementById('ls-out-output');if(el)el.value=out;
+    });}
+    var expBtn=document.getElementById('ls-out-export-btn');
+    if(expBtn){expBtn.addEventListener('click',function(){
+      var txt=document.getElementById('ls-out-output');
+      var a=document.createElement('a');a.href='data:text/plain,'+encodeURIComponent(txt?txt.value:'');a.download='framing-prompt.txt';a.click();
+    });}
+  });
+  function v(id){var el=document.getElementById(id);return el?(el.value||''):'';}
+})();
+
+// Prompt Writer
+(function(){
+  document.addEventListener('DOMContentLoaded',function(){
+    var btn=document.getElementById('ls-pw-build');
+    if(btn){btn.addEventListener('click',function(){
+      var type=v('ls-pw-type'),idea=v('ls-pw-idea'),char=v('ls-pw-char'),loc=v('ls-pw-location'),cam=v('ls-pw-camera'),light=v('ls-pw-lighting'),details=v('ls-pw-details');
+      var out=type+' Prompt
+
+'+idea+'
+
+Character: '+char+'
+Location: '+loc+'
+Camera: '+cam+'
+Lighting: '+light+'
+Additional: '+details;
+      var el=document.getElementById('ls-pw-output');if(el)el.value=out;
+    });}
+    var saveBtn=document.getElementById('ls-pw-save-btn');
+    if(saveBtn){saveBtn.addEventListener('click',function(){
+      var log=JSON.parse(localStorage.getItem('ls_prompt_log')||'[]');
+      log.push({type:v('ls-pw-type'),prompt:v('ls-pw-output'),savedAt:new Date().toISOString()});
+      localStorage.setItem('ls_prompt_log',JSON.stringify(log));
+      var a=document.createElement('a');a.href='data:application/json,'+encodeURIComponent(JSON.stringify(log,null,2));a.download='prompt-log.json';a.click();
+    });}
+  });
+  function v(id){var el=document.getElementById(id);return el?(el.value||''):'';}
+})();
+
+// Multilingual - Export subtitle placeholder
+(function(){
+  document.addEventListener('DOMContentLoaded',function(){
+    var expBtn=document.getElementById('ls-ml-export-srt-btn');
+    if(expBtn){expBtn.addEventListener('click',function(){
+      var lang=v('ls-ml-subtitle')||'en';
+      var srt='1
+00:00:00,000 --> 00:00:04,000
+[Subtitle '+lang+' - add translation here]
+
+2
+00:00:04,000 --> 00:00:08,000
+[Subtitle '+lang+' - add translation here]
+';
+      var a=document.createElement('a');a.href='data:text/plain,'+encodeURIComponent(srt);a.download='subtitles-'+lang+'.srt';a.click();
+    });}
+    var saveBtn=document.getElementById('ls-ml-save-meta-btn');
+    if(saveBtn){saveBtn.addEventListener('click',function(){
+      var meta={projectLang:v('ls-ml-project'),sceneLang:v('ls-ml-scene'),subtitleLang:v('ls-ml-subtitle'),voiceLang:v('ls-ml-voice'),translationPrompt:v('ls-ml-trans'),localizationNotes:v('ls-ml-meta')};
+      localStorage.setItem('ls_multilingual',JSON.stringify(meta));
+    });}
+  });
+  function v(id){var el=document.getElementById(id);return el?(el.value||''):'';}
+})();
+
+// Production Board
+(function(){
+  document.addEventListener('DOMContentLoaded',function(){
+    var refreshBtn=document.getElementById('ls-pb-refresh-btn');
+    if(refreshBtn){refreshBtn.addEventListener('click',function(){renderPBScenes();});}
+    var exportBtn=document.getElementById('ls-pb-export-btn');
+    if(exportBtn){exportBtn.addEventListener('click',function(){
+      var data={scenes:JSON.parse(localStorage.getItem('ls_scenes')||'[]'),chars:JSON.parse(localStorage.getItem('ls_characters')||'[]'),voices:JSON.parse(localStorage.getItem('ls_voices')||'[]')};
+      var a=document.createElement('a');a.href='data:application/json,'+encodeURIComponent(JSON.stringify(data,null,2));a.download='production-board.json';a.click();
+    });}
+  });
+  function renderPBScenes(){
+    var list=document.getElementById('ls-pb-scene-list');if(!list)return;
+    var scenes=JSON.parse(localStorage.getItem('ls_scenes')||'[]');
+    if(!scenes.length){list.innerHTML='<p style="color:#9c93b5;font:300 13px Inter,system-ui,sans-serif">No scenes saved yet. Add scenes in Scene Builder.</p>';return;}
+    list.innerHTML=scenes.map(function(s,i){
+      return '<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(125,42,232,.18);border-radius:10px;margin-bottom:6px;">'+'<button onclick="lsPBMove('+i+',-1)" style="padding:4px 8px;border-radius:6px;border:1px solid rgba(179,136,255,.28);background:transparent;color:#c0b8d9;font-size:12px;cursor:pointer">Up</button>'+'<button onclick="lsPBMove('+i+',1)" style="padding:4px 8px;border-radius:6px;border:1px solid rgba(179,136,255,.28);background:transparent;color:#c0b8d9;font-size:12px;cursor:pointer">Down</button>'+'<span style="flex:1;font:500 14px Inter,system-ui,sans-serif;color:#fff">'+(s.title||s.id||'Scene '+i)+'</span>'+'<span style="font:400 12px Inter,system-ui,sans-serif;color:#9c9cff;padding:2px 8px;border-radius:5px;border:1px solid rgba(156,156,255,.28);background:rgba(156,156,255,.08)">'+(s.status||'draft')+'</span>'+'</div>';
+    }).join('');
+  }
+  window.lsPBMove=function(i,dir){
+    var scenes=JSON.parse(localStorage.getItem('ls_scenes')||'[]');
+    var j=i+dir;if(j<0||j>=scenes.length)return;
+    var tmp=scenes[i];scenes[i]=scenes[j];scenes[j]=tmp;
+    localStorage.setItem('ls_scenes',JSON.stringify(scenes));
+    renderPBScenes();
+  };
+})();
+
+// Provider Report
+(function(){
+  document.addEventListener('DOMContentLoaded',function(){
+    var addBtn=document.getElementById('ls-pr-add-btn');
+    if(addBtn){addBtn.addEventListener('click',function(){
+      var entry={provider:v('ls-pr-provider'),task:v('ls-pr-task'),result:v('ls-pr-result'),reason:v('ls-pr-reason'),asset:v('ls-pr-asset'),time:new Date().toISOString()};
+      var log=JSON.parse(localStorage.getItem('ls_provider_log')||'[]');
+      log.push(entry);localStorage.setItem('ls_provider_log',JSON.stringify(log));
+      renderPRLog();
+    });}
+    var clearBtn=document.getElementById('ls-pr-clear-btn');
+    if(clearBtn){clearBtn.addEventListener('click',function(){localStorage.removeItem('ls_provider_log');renderPRLog();});}
+    var expBtn=document.getElementById('ls-pr-export-btn');
+    if(expBtn){expBtn.addEventListener('click',function(){
+      var log=JSON.parse(localStorage.getItem('ls_provider_log')||'[]');
+      var a=document.createElement('a');a.href='data:application/json,'+encodeURIComponent(JSON.stringify({report:log},null,2));a.download='generation-report.json';a.click();
+    });}
+    renderPRLog();
+  });
+  function renderPRLog(){
+    var list=document.getElementById('ls-pr-log');if(!list)return;
+    var log=JSON.parse(localStorage.getItem('ls_provider_log')||'[]');
+    if(!log.length){list.innerHTML='<p style="color:#9c93b5;font:300 13px Inter,system-ui,sans-serif">No provider attempts logged yet.</p>';return;}
+    var colors={Success:'#5ee0a5',Failed:'#ff6e9c',Partial:'#fbd24a',Skipped:'#9c9cff'};
+    list.innerHTML=log.map(function(e){return '<div style="padding:10px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(125,42,232,.18);border-radius:10px;margin-bottom:6px;font:400 13px Inter,system-ui,sans-serif;color:#c0b8d9"><span style="color:'+(colors[e.result]||'#c0b8d9')+';font-weight:600">'+e.result+'</span> - '+e.provider+' / '+e.task+(e.reason?' - '+e.reason:'')+(e.asset?'<br><small style="color:#9c9cff">Asset: '+e.asset+'</small>':'')+'</div>';}).join('');
+  }
+  function v(id){var el=document.getElementById(id);return el?(el.value||''):'';}
+})();
+
 })();

@@ -1,0 +1,9 @@
+{
+  "version": "1.0",
+  "prompts": [],
+  "schema": {
+    "type": "string",
+    "prompt": "string",
+    "savedAt": "ISO8601"
+  }
+}

@@ -1,5 +1,5 @@
-const CACHE='loadstudio-complete-v43';
-const ASSETS=['./','index.html','styles.css','app.js','lseditor.js','manifest.json','project.json','scenes.json','characters.json','rights.json','credits.json','platform.json','data/feature-registry.json','data/initial-state.json','assets/brand/loadstudio-logo.png','assets/brand/loadstudio-splash.jpeg','icons/icon-72.png','icons/icon-96.png','icons/icon-128.png','icons/icon-144.png','icons/icon-152.png','icons/icon-180.png','icons/icon-192.png','icons/icon-384.png','icons/icon-512.png'];
+const CACHE='loadstudio-complete-v44';
+const ASSETS=['./','index.html','styles.css','app.js','lseditor.js','manifest.json','project.json','scenes.json','characters.json','rights.json','credits.json','platform.json','data/feature-registry.json','data/initial-state.json','director-ai.json','character-stability.json','prompt-log.json','generation-report.json','continuity-report.json','asset-declarations.json','voices.json','wardrobe.json','props.json','locations.json','looks.json','assets/brand/loadstudio-logo.png','assets/brand/loadstudio-splash.jpeg','icons/icon-72.png','icons/icon-96.png','icons/icon-128.png','icons/icon-144.png','icons/icon-152.png','icons/icon-180.png','icons/icon-192.png','icons/icon-384.png','icons/icon-512.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS).catch(()=>{})));self.skipWaiting();});
 // SCOPED cleanup — only delete loadstudio-* caches. Without this filter
 // the activate handler would wipe every other PWA's cache on this same
