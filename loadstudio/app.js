@@ -190,13 +190,7 @@ render();
     if(genBtn){
       genBtn.addEventListener('click',function(){
         var desc=val('ls-dir-scene-desc'),shot=val('ls-dir-shot-type'),move=val('ls-dir-camera-move');
-        var out='Shot List
-
-Scene: '+desc+'
-Shot Type: '+shot+'
-Camera: '+move+'
-Lens: Standard
-Notes: Review with director before filming.';
+        var out='Shot List\n\nScene: '+desc+'\nShot Type: '+shot+'\nCamera: '+move+'\nLens: Standard\nNotes: Review with director before filming.';
         var el=document.getElementById('ls-dir-shotlist-out');if(el)el.value=out;
       });
     }
@@ -211,14 +205,7 @@ Notes: Review with director before filming.';
     if(btn){
       btn.addEventListener('click',function(){
         var idea=v('ls-t2v-idea'),style=v('ls-t2v-style'),dur=v('ls-t2v-duration'),ratio=v('ls-t2v-ratio'),cam=v('ls-t2v-camera'),light=v('ls-t2v-lighting');
-        var prompt='Cinematic video prompt
-Style: '+style+'
-Duration: '+dur+'
-Aspect ratio: '+ratio+'
-Scene: '+idea+'
-Camera: '+cam+'
-Lighting: '+light+'
-Provider: Not connected. Save this prompt and attach a result manually.';
+        var prompt='Cinematic video prompt\nStyle: '+style+'\nDuration: '+dur+'\nAspect ratio: '+ratio+'\nScene: '+idea+'\nCamera: '+cam+'\nLighting: '+light+'\nProvider: Not connected. Save this prompt and attach a result manually.';
         var el=document.getElementById('ls-t2v-output');if(el)el.value=prompt;
       });
     }
@@ -238,10 +225,7 @@ Provider: Not connected. Save this prompt and attach a result manually.';
         if(face&&face.checked)preserves.push('face');
         if(war&&war.checked)preserves.push('wardrobe');
         if(comp&&comp.checked)preserves.push('composition');
-        var out='Motion prompt
-Motion type: '+motion+'
-Preserve: '+(preserves.join(', ')||'none specified')+'
-Notes: '+notes;
+        var out='Motion prompt\nMotion type: '+motion+'\nPreserve: '+(preserves.join(', ')||'none specified')+'\nNotes: '+notes;
         var el=document.getElementById('ls-i2v-output');if(el)el.value=out;
       });
     }
@@ -271,11 +255,7 @@ Notes: '+notes;
             if(lbl)preserves.push(lbl.textContent.trim());
           }
         });
-        var out='Style prompt
-Style: '+style+'
-Preserve: '+(preserves.join(', ')||'none')+'
-Notes: '+notes+'
-Warning: Stylization can break character identity. Review output carefully.';
+        var out='Style prompt\nStyle: '+style+'\nPreserve: '+(preserves.join(', ')||'none')+'\nNotes: '+notes+'\nWarning: Stylization can break character identity. Review output carefully.';
         var el=document.getElementById('ls-vs-output');if(el)el.value=out;
       });
     }
@@ -295,22 +275,12 @@ Warning: Stylization can break character identity. Review output carefully.';
     var buildBtn=document.getElementById('ls-sfx-build-btn');
     if(buildBtn){buildBtn.addEventListener('click',function(){
       var scene=v('ls-sfx-scene'),tags=v('ls-sfx-tags'),sync=v('ls-sfx-sync');
-      var out='SFX Prompt
-Scene: '+scene+'
-Types: '+tags+'
-Sync moment: '+sync+'
-Provider: Not connected. Save this prompt for later use.';
+      var out='SFX Prompt\nScene: '+scene+'\nTypes: '+tags+'\nSync moment: '+sync+'\nProvider: Not connected. Save this prompt for later use.';
       var el=document.getElementById('ls-sfx-output');if(el)el.value=out;
     });}
     var expBtn=document.getElementById('ls-sfx-export-btn');
     if(expBtn){expBtn.addEventListener('click',function(){
-      var cue='SFX Cue Sheet
-
-Scene: '+v('ls-sfx-scene')+'
-Types: '+v('ls-sfx-tags')+'
-Sync: '+v('ls-sfx-sync')+'
-Loop: '+(document.getElementById('ls-sfx-loop')&&document.getElementById('ls-sfx-loop').checked?'Yes':'No')+'
-Status: Pending provider connection';
+      var cue='SFX Cue Sheet\n\nScene: '+v('ls-sfx-scene')+'\nTypes: '+v('ls-sfx-tags')+'\nSync: '+v('ls-sfx-sync')+'\nLoop: '+(document.getElementById('ls-sfx-loop')&&document.getElementById('ls-sfx-loop').checked?'Yes':'No')+'\nStatus: Pending provider connection';
       var a=document.createElement('a');a.href='data:text/plain,'+encodeURIComponent(cue);a.download='sfx-cue-sheet.txt';a.click();
     });}
   });
@@ -346,11 +316,7 @@ Status: Pending provider connection';
       var type=v('ls-out-type'),notes=v('ls-out-notes');
       var subject=document.getElementById('ls-out-subject'),face=document.getElementById('ls-out-face');
       var preserves=[];if(subject&&subject.checked)preserves.push('subject position');if(face&&face.checked)preserves.push('face and body');
-      var out='Outpainting Prompt
-Conversion: '+type+'
-Preserve: '+(preserves.join(', ')||'none')+'
-Notes: '+notes+'
-Provider: Not connected.';
+      var out='Outpainting Prompt\nConversion: '+type+'\nPreserve: '+(preserves.join(', ')||'none')+'\nNotes: '+notes+'\nProvider: Not connected.';
       var el=document.getElementById('ls-out-output');if(el)el.value=out;
     });}
     var expBtn=document.getElementById('ls-out-export-btn');
@@ -368,15 +334,7 @@ Provider: Not connected.';
     var btn=document.getElementById('ls-pw-build');
     if(btn){btn.addEventListener('click',function(){
       var type=v('ls-pw-type'),idea=v('ls-pw-idea'),char=v('ls-pw-char'),loc=v('ls-pw-location'),cam=v('ls-pw-camera'),light=v('ls-pw-lighting'),details=v('ls-pw-details');
-      var out=type+' Prompt
-
-'+idea+'
-
-Character: '+char+'
-Location: '+loc+'
-Camera: '+cam+'
-Lighting: '+light+'
-Additional: '+details;
+      var out=type+' Prompt\n\n'+idea+'\n\nCharacter: '+char+'\nLocation: '+loc+'\nCamera: '+cam+'\nLighting: '+light+'\nAdditional: '+details;
       var el=document.getElementById('ls-pw-output');if(el)el.value=out;
     });}
     var saveBtn=document.getElementById('ls-pw-save-btn');
@@ -396,14 +354,7 @@ Additional: '+details;
     var expBtn=document.getElementById('ls-ml-export-srt-btn');
     if(expBtn){expBtn.addEventListener('click',function(){
       var lang=v('ls-ml-subtitle')||'en';
-      var srt='1
-00:00:00,000 --> 00:00:04,000
-[Subtitle '+lang+' - add translation here]
-
-2
-00:00:04,000 --> 00:00:08,000
-[Subtitle '+lang+' - add translation here]
-';
+      var srt='1\n00:00:00,000 --> 00:00:04,000\n[Subtitle '+lang+' - add translation here]\n\n2\n00:00:04,000 --> 00:00:08,000\n[Subtitle '+lang+' - add translation here]\n';
       var a=document.createElement('a');a.href='data:text/plain,'+encodeURIComponent(srt);a.download='subtitles-'+lang+'.srt';a.click();
     });}
     var saveBtn=document.getElementById('ls-ml-save-meta-btn');
