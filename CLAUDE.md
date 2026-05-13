@@ -70,25 +70,6 @@ These have been re-locked on 2026-05-04 after repeated violations.
    - The real fix for unattended landing is a required CI check
      so auto-merge has a gate to wait on. Direct self-merge by
      Claude is not a substitute and is not the long-term fix.
-   - **LOADSTUDIO PR MERGE EXCEPTION (2026-05-13).** Claude may
-     call `mcp__github__merge_pull_request` for a LoadStudio PR
-     only when ALL of the following are true simultaneously:
-     1. User said exactly "Approved to merge PR #N after checks
-        pass" with the matching PR number in this session.
-     2. All required GitHub checks are green (verified via
-        `get_check_runs` — no check in non-success state).
-     3. Changed files are `loadstudio/*` only — no Load, Load
-        Play, Load AI, ACR, Attain, Attain Jr, Study, or any
-        other app file.
-     4. `node --check loadstudio/app.js` passes if app.js
-        is in the changed files.
-     5. JSON files validate if any JSON file is in the changed
-        files.
-     6. `sw.js` cache string matches `loadstudio-*` only (scoped
-        cleanup intact).
-     7. Final merge report is compact (no walls of text).
-     If any condition is not met, do not merge — report which
-     condition failed and wait for the user to merge manually.
 
 These are LOCKED. They take precedence over politeness, helpfulness,
 acknowledgements, "thinking out loud", or any pattern from earlier in
