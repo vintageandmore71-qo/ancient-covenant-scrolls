@@ -42,7 +42,7 @@ function log(msg){state.logs=state.logs||[];state.logs.push(new Date().toLocaleT
 function modal(title,body){$('#modalTitle').textContent=title;$('#modalBody').innerHTML=body;$('#modal').classList.add('show')}
 function closeModal(){$('#modal').classList.remove('show')}
 function download(name,text,type='application/json'){const b=new Blob([text],{type});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-function go(id){lsApplyDeptClass(id);$$('.section').forEach(s=>s.classList.remove('active')); const el=$('#section-'+id); if(el){el.classList.add('active'); el.scrollIntoView({behavior:'smooth',block:'start'});} }
+function go(id){lsApplyDeptClass(id);$$('.section').forEach(s=>s.classList.remove('active')); const el=$('#section-'+id); if(el){el.classList.add('active'); requestAnimationFrame(()=>el.scrollIntoView({behavior:'smooth',block:'start'}));} }
 function sectionById(id){return featureData.sections.find(s=>s.id===id)}
 function statusText(section){if(section.type==='integration')return 'Integration Required: this tool needs API keys, backend, microphone permission, FFmpeg, cloud storage, Load Play endpoint, or live provider access.'; if(section.type==='mixed')return 'Local workflow is implemented. Live provider or backend actions are marked Integration Required where needed.'; return 'Local workflow implemented in this PWA.'}
 // Wrapped in a function so `${id}` resolves to the section id at
