@@ -420,15 +420,22 @@ render();
     container.innerHTML=html;
   }
   document.addEventListener('DOMContentLoaded',function(){
+    function autoSelectAndConfirm(scenes){
+      var sel=document.getElementById('ls-pb-scene-sel');
+      populateSceneSel();
+      if(sel&&scenes.length===1){sel.value='0';}
+      renderBoard();
+      var names=scenes.map(function(s){return s.title||s.id||'Scene';}).join(', ');
+      showConfirm(scenes.length+' scene'+(scenes.length!==1?'s':'')+' loaded: '+names+'.','#b388ff');
+    }
     var loadBtn=document.getElementById('ls-pb-load-btn');
     if(loadBtn){loadBtn.addEventListener('click',function(){
       var existing=getScenes();
-      if(existing.length){populateSceneSel();renderBoard();showConfirm(existing.length+' scene'+(existing.length!==1?'s':'')+' loaded.','#b388ff');return;}
+      if(existing.length){autoSelectAndConfirm(existing);return;}
       fetch('scenes.json').then(function(r){return r.json();}).then(function(data){
         if(Array.isArray(data)&&data.length){
           localStorage.setItem('ls_scenes',JSON.stringify(data));
-          populateSceneSel();renderBoard();
-          showConfirm(data.length+' scene'+(data.length!==1?'s':'')+' loaded.','#b388ff');
+          autoSelectAndConfirm(data);
         } else {showConfirm('No scenes found. Add a scene first.','#ff8080');}
       }).catch(function(){showConfirm('No scenes found. Add a scene first.','#ff8080');});
     });}
