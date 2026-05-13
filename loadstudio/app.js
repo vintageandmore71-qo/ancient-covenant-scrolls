@@ -652,82 +652,185 @@ window.lsCTP=function(id,ev){
   var cl='<button class="ls-ctp-close" type="button" onclick="document.getElementById(\'continuityToolsPanel\').style.display=\'none\'" aria-label="Close">&#x2715;</button>';
   var panels={
     'own-image-clone':cl+'<h2 class="ls-ctp-h">Owned Character Builder</h2><p class="ls-ctp-desc">Create a character you own or have permission to use. Fill in identity details, set what can and cannot change, then save.</p>'
-      +'<div class="ls-ctp-field"><label>Ownership / permission confirmation</label><label style="display:flex;align-items:center;gap:8px;margin-top:4px;font:400 14px Inter,system-ui,sans-serif;color:#f5f0ff"><input type="checkbox" style="width:auto;margin:0"> I confirm ownership or rights to use this character</label></div>'
-      +'<div class="ls-ctp-field"><label>Likeness type</label><select><option value="">Select...</option><option>Fully fictional</option><option>Creator-owned likeness</option><option>Licensed likeness</option></select></div>'
-      +'<div class="ls-ctp-field"><label>Character name</label><input type="text" placeholder="Full character name"></div>'
-      +'<div class="ls-ctp-field"><label>Face notes</label><input type="text" placeholder="Describe key face features"></div>'
-      +'<div class="ls-ctp-field"><label>Skin tone notes</label><input type="text" placeholder="e.g. warm medium brown, no filter"></div>'
-      +'<div class="ls-ctp-field"><label>Body type notes</label><input type="text" placeholder="e.g. lean athletic build, tall"></div>'
-      +'<div class="ls-ctp-field"><label>Hair notes</label><input type="text" placeholder="Color, length, texture, style"></div>'
-      +'<div class="ls-ctp-field"><label>Wardrobe notes</label><textarea placeholder="Describe the character\'s usual wardrobe"></textarea></div>'
-      +'<div class="ls-ctp-field"><label>Allowed changes</label><textarea placeholder="What can vary between scenes (e.g. outfit color)"></textarea></div>'
-      +'<div class="ls-ctp-field"><label>Forbidden changes</label><textarea placeholder="What must never change (e.g. face shape, eye color)"></textarea></div>'
-      +'<div class="ls-ctp-actions"><button class="ls-ctp-btn primary" type="button">Save character metadata</button></div>',
+      +'<div class="ls-ctp-field"><label>Ownership / permission confirmation</label><label style="display:flex;align-items:center;gap:8px;margin-top:4px;font:400 14px Inter,system-ui,sans-serif;color:#f5f0ff"><input id="ctp-oic-ownership" type="checkbox" style="width:auto;margin:0"> I confirm ownership or rights to use this character</label></div>'
+      +'<div class="ls-ctp-field"><label>Likeness type</label><select id="ctp-oic-likeness"><option value="">Select...</option><option>Fully fictional</option><option>Creator-owned likeness</option><option>Licensed likeness</option></select></div>'
+      +'<div class="ls-ctp-field"><label>Character name</label><input id="ctp-oic-name" type="text" placeholder="Full character name"></div>'
+      +'<div class="ls-ctp-field"><label>Face notes</label><input id="ctp-oic-face" type="text" placeholder="Describe key face features"></div>'
+      +'<div class="ls-ctp-field"><label>Skin tone notes</label><input id="ctp-oic-skin" type="text" placeholder="e.g. warm medium brown, no filter"></div>'
+      +'<div class="ls-ctp-field"><label>Body type notes</label><input id="ctp-oic-body" type="text" placeholder="e.g. lean athletic build, tall"></div>'
+      +'<div class="ls-ctp-field"><label>Hair notes</label><input id="ctp-oic-hair" type="text" placeholder="Color, length, texture, style"></div>'
+      +'<div class="ls-ctp-field"><label>Wardrobe notes</label><textarea id="ctp-oic-wardrobe" placeholder="Describe the character\'s usual wardrobe"></textarea></div>'
+      +'<div class="ls-ctp-field"><label>Allowed changes</label><textarea id="ctp-oic-allowed" placeholder="What can vary between scenes (e.g. outfit color)"></textarea></div>'
+      +'<div class="ls-ctp-field"><label>Forbidden changes</label><textarea id="ctp-oic-forbidden" placeholder="What must never change (e.g. face shape, eye color)"></textarea></div>'
+      +'<div class="ls-ctp-field"><label>Rights notes</label><textarea id="ctp-oic-rights" placeholder="License details, expiry, permitted uses"></textarea></div>'
+      +'<div class="ls-ctp-actions"><button class="ls-ctp-btn primary" type="button" onclick="window.lsSaveCTP_ownImageClone()">Save character metadata</button></div>',
     'reference-pack':cl+'<h2 class="ls-ctp-h">Reference Pack Builder</h2><p class="ls-ctp-desc">Upload reference images for consistent character looks. Each slot holds one image used to anchor that aspect of the character.</p>'
-      +'<div class="ls-ctp-field"><label>Front portrait</label><input type="file" accept="image/*"></div>'
-      +'<div class="ls-ctp-field"><label>Side profile</label><input type="file" accept="image/*"></div>'
-      +'<div class="ls-ctp-field"><label>Full body</label><input type="file" accept="image/*"></div>'
-      +'<div class="ls-ctp-field"><label>Wardrobe reference</label><input type="file" accept="image/*"></div>'
-      +'<div class="ls-ctp-field"><label>Expression reference</label><input type="file" accept="image/*"></div>'
-      +'<div class="ls-ctp-field"><label>Style reference</label><input type="file" accept="image/*"></div>'
-      +'<div class="ls-ctp-actions"><button class="ls-ctp-btn primary" type="button">Save reference pack</button><button class="ls-ctp-btn secondary" type="button">Export reference pack metadata</button></div>',
+      +'<div class="ls-ctp-field"><label>Character name</label><input id="ctp-rp-character" type="text" placeholder="Character this pack belongs to"></div>'
+      +'<div class="ls-ctp-field"><label>Scene ID</label><input id="ctp-rp-scene" type="text" placeholder="Scene this pack is for (optional)"></div>'
+      +'<div class="ls-ctp-field"><label>Front portrait</label><input id="ctp-rp-front" type="file" accept="image/*"></div>'
+      +'<div class="ls-ctp-field"><label>Side profile</label><input id="ctp-rp-side" type="file" accept="image/*"></div>'
+      +'<div class="ls-ctp-field"><label>Full body</label><input id="ctp-rp-body" type="file" accept="image/*"></div>'
+      +'<div class="ls-ctp-field"><label>Wardrobe reference</label><input id="ctp-rp-wardrobe" type="file" accept="image/*"></div>'
+      +'<div class="ls-ctp-field"><label>Expression reference</label><input id="ctp-rp-expression" type="file" accept="image/*"></div>'
+      +'<div class="ls-ctp-field"><label>Style reference</label><input id="ctp-rp-style" type="file" accept="image/*"></div>'
+      +'<div class="ls-ctp-actions"><button class="ls-ctp-btn primary" type="button" onclick="window.lsSaveCTP_referencePack()">Save reference pack</button><button class="ls-ctp-btn secondary" type="button" onclick="window.lsExportCTP_referencePack()">Export reference pack metadata</button></div>',
     'continuity-engine':cl+'<h2 class="ls-ctp-h">Continuity Engine</h2><p class="ls-ctp-desc">Log approved and rejected takes. Record what must not repeat. Score each attribute for consistency against the character reference.</p>'
-      +'<div class="ls-ctp-field"><label>Approved takes</label><textarea placeholder="Approved take IDs and filenames, one per line"></textarea></div>'
-      +'<div class="ls-ctp-field"><label>Rejected takes</label><textarea placeholder="Rejected take IDs and reason for rejection, one per line"></textarea></div>'
-      +'<div class="ls-ctp-field"><label>Do-not-repeat memory</label><textarea placeholder="Prompts or elements that produced bad results — never repeat these"></textarea></div>'
+      +'<div class="ls-ctp-field"><label>Approved takes</label><textarea id="ctp-ce-approved" placeholder="Approved take IDs and filenames, one per line"></textarea></div>'
+      +'<div class="ls-ctp-field"><label>Rejected takes</label><textarea id="ctp-ce-rejected" placeholder="Rejected take IDs and reason for rejection, one per line"></textarea></div>'
+      +'<div class="ls-ctp-field"><label>Do-not-repeat memory</label><textarea id="ctp-ce-dnr" placeholder="Prompts or elements that produced bad results — never repeat these"></textarea></div>'
       +'<p style="font:600 12px Inter,system-ui,sans-serif;color:#b0a8d0;letter-spacing:.04em;margin:4px 0 10px">Consistency scores (0–100)</p>'
       +'<div class="ls-ctp-score-grid">'
-      +'<div class="ls-ctp-field"><label>Face match score</label><input type="number" min="0" max="100" placeholder="0–100"></div>'
-      +'<div class="ls-ctp-field"><label>Skin tone match score</label><input type="number" min="0" max="100" placeholder="0–100"></div>'
-      +'<div class="ls-ctp-field"><label>Body type match score</label><input type="number" min="0" max="100" placeholder="0–100"></div>'
-      +'<div class="ls-ctp-field"><label>Hair match score</label><input type="number" min="0" max="100" placeholder="0–100"></div>'
-      +'<div class="ls-ctp-field"><label>Wardrobe match score</label><input type="number" min="0" max="100" placeholder="0–100"></div>'
-      +'<div class="ls-ctp-field"><label>Era match score</label><input type="number" min="0" max="100" placeholder="0–100"></div>'
-      +'<div class="ls-ctp-field"><label>Style match score</label><input type="number" min="0" max="100" placeholder="0–100"></div>'
-      +'<div class="ls-ctp-field"><label>Average consistency score</label><input type="number" min="0" max="100" placeholder="0–100"></div>'
+      +'<div class="ls-ctp-field"><label>Face match score</label><input id="ctp-ce-face" type="number" min="0" max="100" placeholder="0–100" oninput="window.lsCalcCTPAvg()"></div>'
+      +'<div class="ls-ctp-field"><label>Skin tone match score</label><input id="ctp-ce-skin" type="number" min="0" max="100" placeholder="0–100" oninput="window.lsCalcCTPAvg()"></div>'
+      +'<div class="ls-ctp-field"><label>Body type match score</label><input id="ctp-ce-body" type="number" min="0" max="100" placeholder="0–100" oninput="window.lsCalcCTPAvg()"></div>'
+      +'<div class="ls-ctp-field"><label>Hair match score</label><input id="ctp-ce-hair" type="number" min="0" max="100" placeholder="0–100" oninput="window.lsCalcCTPAvg()"></div>'
+      +'<div class="ls-ctp-field"><label>Wardrobe match score</label><input id="ctp-ce-wardrobe" type="number" min="0" max="100" placeholder="0–100" oninput="window.lsCalcCTPAvg()"></div>'
+      +'<div class="ls-ctp-field"><label>Era match score</label><input id="ctp-ce-era" type="number" min="0" max="100" placeholder="0–100" oninput="window.lsCalcCTPAvg()"></div>'
+      +'<div class="ls-ctp-field"><label>Style match score</label><input id="ctp-ce-style" type="number" min="0" max="100" placeholder="0–100" oninput="window.lsCalcCTPAvg()"></div>'
+      +'<div class="ls-ctp-field"><label>Average consistency score</label><input id="ctp-ce-avg" type="number" min="0" max="100" placeholder="auto-calculated" readonly></div>'
       +'</div>'
-      +'<div class="ls-ctp-actions"><button class="ls-ctp-btn primary" type="button">Save continuity report</button></div>',
+      +'<div class="ls-ctp-actions"><button class="ls-ctp-btn primary" type="button" onclick="window.lsSaveCTP_continuityEngine()">Save continuity report</button></div>',
     'prompt-lock':cl+'<h2 class="ls-ctp-h">Prompt Lock Compiler</h2><p class="ls-ctp-desc">Lock and compile approved prompts. Set character DNA, wardrobe, camera, lighting, and scene mood, then export in the format your provider needs.</p>'
-      +'<div class="ls-ctp-field"><label>Character DNA</label><textarea placeholder="Paste your locked character description from the Owned Character Builder"></textarea></div>'
-      +'<div class="ls-ctp-field"><label>Approved reference notes</label><textarea placeholder="Notes on which reference images to anchor against"></textarea></div>'
-      +'<div class="ls-ctp-field"><label>Forbidden changes</label><textarea placeholder="Elements that must never appear or change in any generated image"></textarea></div>'
-      +'<div class="ls-ctp-field"><label>Wardrobe notes</label><input type="text" placeholder="Exact wardrobe for this scene"></div>'
-      +'<div class="ls-ctp-field"><label>Camera setup</label><input type="text" placeholder="e.g. medium close-up, eye level, shallow depth of field"></div>'
-      +'<div class="ls-ctp-field"><label>Lighting setup</label><input type="text" placeholder="e.g. golden hour, soft diffuse, three-point"></div>'
-      +'<div class="ls-ctp-field"><label>Scene mood</label><input type="text" placeholder="e.g. tense, quiet, celebratory"></div>'
-      +'<div class="ls-ctp-field"><label>Negative prompt additions</label><textarea placeholder="Additional things to exclude from the generated image"></textarea></div>'
-      +'<div class="ls-ctp-field"><label>Provider format</label><select><option value="">Select provider format...</option><option>Generic text prompt</option><option>Structured JSON</option><option>Negative-prompt split</option></select></div>'
-      +'<div class="ls-ctp-actions"><button class="ls-ctp-btn primary" type="button">Compile prompt</button><button class="ls-ctp-btn secondary" type="button">Save to prompt log</button></div>',
+      +'<div class="ls-ctp-field"><label>Character DNA</label><textarea id="ctp-pl-dna" placeholder="Paste your locked character description from the Owned Character Builder"></textarea></div>'
+      +'<div class="ls-ctp-field"><label>Approved reference notes</label><textarea id="ctp-pl-refnotes" placeholder="Notes on which reference images to anchor against"></textarea></div>'
+      +'<div class="ls-ctp-field"><label>Forbidden changes</label><textarea id="ctp-pl-forbidden" placeholder="Elements that must never appear or change in any generated image"></textarea></div>'
+      +'<div class="ls-ctp-field"><label>Wardrobe notes</label><input id="ctp-pl-wardrobe" type="text" placeholder="Exact wardrobe for this scene"></div>'
+      +'<div class="ls-ctp-field"><label>Camera setup</label><input id="ctp-pl-camera" type="text" placeholder="e.g. medium close-up, eye level, shallow depth of field"></div>'
+      +'<div class="ls-ctp-field"><label>Lighting setup</label><input id="ctp-pl-lighting" type="text" placeholder="e.g. golden hour, soft diffuse, three-point"></div>'
+      +'<div class="ls-ctp-field"><label>Scene mood</label><input id="ctp-pl-mood" type="text" placeholder="e.g. tense, quiet, celebratory"></div>'
+      +'<div class="ls-ctp-field"><label>Negative prompt additions</label><textarea id="ctp-pl-negative" placeholder="Additional things to exclude from the generated image"></textarea></div>'
+      +'<div class="ls-ctp-field"><label>Provider format</label><select id="ctp-pl-format"><option value="">Select provider format...</option><option>Generic text prompt</option><option>Structured JSON</option><option>Negative-prompt split</option></select></div>'
+      +'<div class="ls-ctp-field"><label>Compiled prompt</label><textarea id="ctp-pl-compiled" placeholder="Compiled prompt appears here after clicking Compile"></textarea></div>'
+      +'<div class="ls-ctp-actions"><button class="ls-ctp-btn primary" type="button" onclick="window.lsCompileCTP_promptLock()">Compile prompt</button><button class="ls-ctp-btn secondary" type="button" onclick="window.lsSaveCTP_promptLock()">Save to prompt log</button></div>',
     'scene-proof':cl+'<h2 class="ls-ctp-h">Scene Proof</h2><p class="ls-ctp-desc">Save a proof record for an image before approving a take. Record where the asset came from, its rights status, and your approval decision.</p>'
-      +'<div class="ls-ctp-field"><label>Asset ID</label><input type="text" placeholder="Unique ID for this asset"></div>'
-      +'<div class="ls-ctp-field"><label>Asset type</label><select><option value="">Select...</option><option>Generated image</option><option>Uploaded image</option><option>Reference crop</option><option>Edited image</option></select></div>'
-      +'<div class="ls-ctp-field"><label>Provider</label><input type="text" placeholder="Which provider or tool created this"></div>'
-      +'<div class="ls-ctp-field"><label>Prompt used</label><textarea placeholder="The full prompt sent to the provider"></textarea></div>'
-      +'<div class="ls-ctp-field"><label>Source scene</label><input type="text" placeholder="Scene ID or scene name"></div>'
-      +'<div class="ls-ctp-field"><label>Source character</label><input type="text" placeholder="Character name this image is of"></div>'
-      +'<div class="ls-ctp-field"><label>File path</label><input type="text" placeholder="Local file path if saved"></div>'
-      +'<div class="ls-ctp-field"><label>Blob URL</label><input type="text" placeholder="blob:// URL if held in memory"></div>'
-      +'<div class="ls-ctp-field"><label>External URL</label><input type="text" placeholder="https:// URL if hosted externally"></div>'
-      +'<div class="ls-ctp-field"><label>Base64 preview</label><textarea placeholder="Paste base64 data URI for offline preview (optional)"></textarea></div>'
-      +'<div class="ls-ctp-field"><label>Rights status</label><select><option value="">Select...</option><option>Creator-owned</option><option>Licensed</option><option>Pending confirmation</option><option>Blocked</option></select></div>'
-      +'<div class="ls-ctp-field"><label>Approved status</label><select><option value="">Select...</option><option>Approved</option><option>Not approved</option><option>Under review</option></select></div>'
-      +'<div class="ls-ctp-field"><label>Consistency score (0–100)</label><input type="number" min="0" max="100" placeholder="0–100"></div>'
-      +'<div class="ls-ctp-actions"><button class="ls-ctp-btn primary" type="button">Save proof</button><button class="ls-ctp-btn secondary" type="button">Export proof report</button></div>',
+      +'<div class="ls-ctp-field"><label>Asset ID</label><input id="ctp-sp-assetid" type="text" placeholder="Unique ID for this asset"></div>'
+      +'<div class="ls-ctp-field"><label>Asset type</label><select id="ctp-sp-type"><option value="">Select...</option><option>Generated image</option><option>Uploaded image</option><option>Reference crop</option><option>Edited image</option></select></div>'
+      +'<div class="ls-ctp-field"><label>Provider</label><input id="ctp-sp-provider" type="text" placeholder="Which provider or tool created this"></div>'
+      +'<div class="ls-ctp-field"><label>Prompt used</label><textarea id="ctp-sp-prompt" placeholder="The full prompt sent to the provider"></textarea></div>'
+      +'<div class="ls-ctp-field"><label>Source scene</label><input id="ctp-sp-scene" type="text" placeholder="Scene ID or scene name"></div>'
+      +'<div class="ls-ctp-field"><label>Source character</label><input id="ctp-sp-char" type="text" placeholder="Character name this image is of"></div>'
+      +'<div class="ls-ctp-field"><label>File path</label><input id="ctp-sp-filepath" type="text" placeholder="Local file path if saved"></div>'
+      +'<div class="ls-ctp-field"><label>Blob URL</label><input id="ctp-sp-blob" type="text" placeholder="blob:// URL if held in memory"></div>'
+      +'<div class="ls-ctp-field"><label>External URL</label><input id="ctp-sp-url" type="text" placeholder="https:// URL if hosted externally"></div>'
+      +'<div class="ls-ctp-field"><label>Base64 preview</label><textarea id="ctp-sp-b64" placeholder="Paste base64 data URI for offline preview (optional)"></textarea></div>'
+      +'<div class="ls-ctp-field"><label>Rights status</label><select id="ctp-sp-rights"><option value="">Select...</option><option>Creator-owned</option><option>Licensed</option><option>Pending confirmation</option><option>Blocked</option></select></div>'
+      +'<div class="ls-ctp-field"><label>Approved status</label><select id="ctp-sp-approved"><option value="">Select...</option><option>Approved</option><option>Not approved</option><option>Under review</option></select></div>'
+      +'<div class="ls-ctp-field"><label>Consistency score (0–100)</label><input id="ctp-sp-score" type="number" min="0" max="100" placeholder="0–100"></div>'
+      +'<div class="ls-ctp-actions"><button class="ls-ctp-btn primary" type="button" onclick="window.lsSaveCTP_sceneProof()">Save proof</button><button class="ls-ctp-btn secondary" type="button" onclick="window.lsExportCTP_sceneProof()">Export proof report</button></div>',
     'provider-report':'<span class="ls-ctp-tag-req">Integration Required</span>'+cl+'<h2 class="ls-ctp-h">Provider Reports</h2><p class="ls-ctp-desc">Log what happened when you tried an image or voice provider. Record the task, the prompt, what came back, and whether it worked.</p>'
-      +'<div class="ls-ctp-field"><label>Provider tried</label><input type="text" placeholder="Provider name or endpoint"></div>'
-      +'<div class="ls-ctp-field"><label>Task type</label><select><option value="">Select...</option><option>Image generation</option><option>Image editing</option><option>Voice generation</option><option>Text generation</option></select></div>'
-      +'<div class="ls-ctp-field"><label>Prompt sent</label><textarea placeholder="The prompt or request sent to the provider"></textarea></div>'
-      +'<div class="ls-ctp-field"><label>Result status</label><select><option value="">Select...</option><option>Result received</option><option>Partial result returned</option><option>Error returned</option><option>No response</option></select></div>'
-      +'<div class="ls-ctp-field"><label>Error details</label><textarea placeholder="Paste error message or describe what went wrong"></textarea></div>'
-      +'<div class="ls-ctp-field"><label>Fallback used</label><input type="text" placeholder="Which fallback provider or method was used, if any"></div>'
-      +'<div class="ls-ctp-field"><label>Asset proof path</label><input type="text" placeholder="File path, blob URL, or external URL of the result asset"></div>'
-      +'<div class="ls-ctp-field"><label>Approved take status</label><select><option value="">Select...</option><option>Approved take</option><option>Rejected take</option><option>Under review</option></select></div>'
-      +'<div class="ls-ctp-actions"><button class="ls-ctp-btn primary" type="button">Save provider report</button></div>'
+      +'<div class="ls-ctp-field"><label>Provider tried</label><input id="ctp-pr-provider" type="text" placeholder="Provider name or endpoint"></div>'
+      +'<div class="ls-ctp-field"><label>Task type</label><select id="ctp-pr-task"><option value="">Select...</option><option>Image generation</option><option>Image editing</option><option>Voice generation</option><option>Text generation</option></select></div>'
+      +'<div class="ls-ctp-field"><label>Prompt sent</label><textarea id="ctp-pr-prompt" placeholder="The prompt or request sent to the provider"></textarea></div>'
+      +'<div class="ls-ctp-field"><label>Result status</label><select id="ctp-pr-status"><option value="">Select...</option><option>Prompt saved</option><option>Result received</option><option>Partial result returned</option><option>Error returned</option><option>No response</option></select></div>'
+      +'<div class="ls-ctp-field"><label>Error details</label><textarea id="ctp-pr-error" placeholder="Paste error message or describe what went wrong"></textarea></div>'
+      +'<div class="ls-ctp-field"><label>Fallback used</label><input id="ctp-pr-fallback" type="text" placeholder="Which fallback provider or method was used, if any"></div>'
+      +'<div class="ls-ctp-field"><label>Asset proof path</label><input id="ctp-pr-assetpath" type="text" placeholder="File path, blob URL, or external URL of the result asset"></div>'
+      +'<div class="ls-ctp-field"><label>Approved take status</label><select id="ctp-pr-approvedstatus"><option value="">Select...</option><option>Approved take</option><option>Rejected take</option><option>Under review</option></select></div>'
+      +'<div class="ls-ctp-actions"><button class="ls-ctp-btn primary" type="button" onclick="window.lsSaveCTP_providerReport()">Save provider report</button></div>'
   };
   var html=panels[id];
   if(!html)return;
   p.innerHTML=html;
   p.style.display='block';
+};
+window.lsCalcCTPAvg=function(){
+  var ids=['ctp-ce-face','ctp-ce-skin','ctp-ce-body','ctp-ce-hair','ctp-ce-wardrobe','ctp-ce-era','ctp-ce-style'];
+  var vals=ids.map(function(id){var el=document.getElementById(id);return(el&&el.value!=='')?+el.value:null;}).filter(function(v){return v!==null;});
+  var avg=vals.length?Math.round(vals.reduce(function(a,b){return a+b;},0)/vals.length):0;
+  var avgEl=document.getElementById('ctp-ce-avg');if(avgEl)avgEl.value=avg;
+};
+window.lsSaveCTP_ownImageClone=function(){
+  var g=function(id){var el=document.getElementById(id);return el?(el.value||''):''};
+  var cb=document.getElementById('ctp-oic-ownership');
+  var rec={id:'oic-'+Date.now(),ownershipConfirmed:!!(cb&&cb.checked),likenessType:g('ctp-oic-likeness'),characterName:g('ctp-oic-name'),faceNotes:g('ctp-oic-face'),skinToneNotes:g('ctp-oic-skin'),bodyTypeNotes:g('ctp-oic-body'),hairNotes:g('ctp-oic-hair'),wardrobeNotes:g('ctp-oic-wardrobe'),allowedChanges:g('ctp-oic-allowed'),forbiddenChanges:g('ctp-oic-forbidden'),rightsNotes:g('ctp-oic-rights'),generationStatus:'Integration Required',savedAt:new Date().toISOString()};
+  var p=document.getElementById('continuityToolsPanel');
+  if(!rec.characterName){if(p){var e=document.createElement('p');e.style.cssText='color:#ff6e9c;font:500 13px Inter,system-ui,sans-serif;margin-top:10px';e.textContent='Character name is required.';p.appendChild(e);}return;}
+  var list=JSON.parse(localStorage.getItem('ls_own_image_clones')||'[]');
+  var idx=list.findIndex(function(x){return x.characterName===rec.characterName;});
+  if(idx>=0)list[idx]=rec;else list.push(rec);
+  localStorage.setItem('ls_own_image_clones',JSON.stringify(list));
+  if(p){var fb=document.createElement('p');fb.style.cssText='color:#5ee0a5;font:500 13px Inter,system-ui,sans-serif;margin-top:10px';fb.textContent='Character saved locally.';p.appendChild(fb);}
+};
+window.lsSaveCTP_referencePack=function(){
+  var g=function(id){var el=document.getElementById(id);return el?(el.value||''):''};
+  var pack={id:'rp-'+Date.now(),character:g('ctp-rp-character'),scene:g('ctp-rp-scene'),slots:{},savedAt:new Date().toISOString()};
+  ['front','side','body','wardrobe','expression','style'].forEach(function(s){var el=document.getElementById('ctp-rp-'+s);if(el&&el.files&&el.files[0]){var f=el.files[0];pack.slots[s]={name:f.name,size:f.size,type:f.type,lastModified:f.lastModified};}else pack.slots[s]=null;});
+  var list=JSON.parse(localStorage.getItem('ls_reference_packs')||'[]');
+  list.push(pack);localStorage.setItem('ls_reference_packs',JSON.stringify(list));
+  var p=document.getElementById('continuityToolsPanel');
+  if(p){var fb=document.createElement('p');fb.style.cssText='color:#5ee0a5;font:500 13px Inter,system-ui,sans-serif;margin-top:10px';fb.textContent='Reference pack metadata saved. Binary file storage requires IndexedDB (future).';p.appendChild(fb);}
+};
+window.lsExportCTP_referencePack=function(){
+  var list=JSON.parse(localStorage.getItem('ls_reference_packs')||'[]');
+  var a=document.createElement('a');a.href='data:application/json,'+encodeURIComponent(JSON.stringify({referencePacks:list},null,2));a.download='reference-packs.json';a.click();
+};
+window.lsSaveCTP_continuityEngine=function(){
+  var g=function(id){var el=document.getElementById(id);return el?(el.value||''):''};
+  window.lsCalcCTPAvg();
+  var scores={face:+g('ctp-ce-face')||0,skin:+g('ctp-ce-skin')||0,body:+g('ctp-ce-body')||0,hair:+g('ctp-ce-hair')||0,wardrobe:+g('ctp-ce-wardrobe')||0,era:+g('ctp-ce-era')||0,style:+g('ctp-ce-style')||0};
+  var avg=+g('ctp-ce-avg')||0;
+  var approvedRaw=g('ctp-ce-approved');
+  if(approvedRaw.trim()){var approved=JSON.parse(localStorage.getItem('ls_approved_takes')||'[]');approvedRaw.split('\n').forEach(function(line){line=line.trim();if(line)approved.push({id:'at-'+Date.now()+'-'+Math.random().toString(36).slice(2),takeRef:line,savedAt:new Date().toISOString()});});localStorage.setItem('ls_approved_takes',JSON.stringify(approved));}
+  var rejectedRaw=g('ctp-ce-rejected');
+  if(rejectedRaw.trim()){var rejected=JSON.parse(localStorage.getItem('ls_rejected_takes')||'[]');rejectedRaw.split('\n').forEach(function(line){line=line.trim();if(line)rejected.push({id:'rt-'+Date.now()+'-'+Math.random().toString(36).slice(2),takeRef:line,savedAt:new Date().toISOString()});});localStorage.setItem('ls_rejected_takes',JSON.stringify(rejected));}
+  var report={id:'cr-'+Date.now(),doNotRepeat:g('ctp-ce-dnr'),scores:scores,averageConsistencyScore:avg,savedAt:new Date().toISOString()};
+  var crList=JSON.parse(localStorage.getItem('ls_continuity_report')||'[]');
+  crList.push(report);localStorage.setItem('ls_continuity_report',JSON.stringify(crList));
+  var p=document.getElementById('continuityToolsPanel');
+  if(p){var fb=document.createElement('p');fb.style.cssText='color:#5ee0a5;font:500 13px Inter,system-ui,sans-serif;margin-top:10px';fb.textContent='Continuity report saved. Average score: '+avg+'/100.';p.appendChild(fb);}
+};
+window.lsCompileCTP_promptLock=function(){
+  var g=function(id){var el=document.getElementById(id);return el?(el.value||''):''};
+  var parts=[];
+  var dna=g('ctp-pl-dna');if(dna)parts.push('Character: '+dna);
+  var ref=g('ctp-pl-refnotes');if(ref)parts.push('References: '+ref);
+  var forbidden=g('ctp-pl-forbidden');if(forbidden)parts.push('Forbidden: '+forbidden);
+  var wardrobe=g('ctp-pl-wardrobe');if(wardrobe)parts.push('Wardrobe: '+wardrobe);
+  var camera=g('ctp-pl-camera');if(camera)parts.push('Camera: '+camera);
+  var lighting=g('ctp-pl-lighting');if(lighting)parts.push('Lighting: '+lighting);
+  var mood=g('ctp-pl-mood');if(mood)parts.push('Mood: '+mood);
+  var neg=g('ctp-pl-negative');
+  var format=g('ctp-pl-format');
+  var compiled;
+  if(format==='Structured JSON'){compiled=JSON.stringify({prompt:parts.join('. '),negativePrompt:neg||'',format:format},null,2);}
+  else if(format==='Negative-prompt split'){compiled='Prompt: '+parts.join(', ')+(neg?'\nNegative: '+neg:'');}
+  else{compiled=parts.join('. ')+(neg?' Negative: '+neg:'');}
+  var out=document.getElementById('ctp-pl-compiled');if(out)out.value=compiled;
+};
+window.lsSaveCTP_promptLock=function(){
+  var g=function(id){var el=document.getElementById(id);return el?(el.value||''):''};
+  var compiled=g('ctp-pl-compiled');
+  var p=document.getElementById('continuityToolsPanel');
+  if(!compiled.trim()){if(p){var e=document.createElement('p');e.style.cssText='color:#ff6e9c;font:500 13px Inter,system-ui,sans-serif;margin-top:10px';e.textContent='Compile the prompt first.';p.appendChild(e);}return;}
+  var entry={id:'pl-'+Date.now(),characterDNA:g('ctp-pl-dna'),approvedRefNotes:g('ctp-pl-refnotes'),forbiddenChanges:g('ctp-pl-forbidden'),wardrobeNotes:g('ctp-pl-wardrobe'),cameraSetup:g('ctp-pl-camera'),lightingSetup:g('ctp-pl-lighting'),sceneMood:g('ctp-pl-mood'),negativePromptAdditions:g('ctp-pl-negative'),providerFormat:g('ctp-pl-format'),compiledPrompt:compiled,savedAt:new Date().toISOString()};
+  var log=JSON.parse(localStorage.getItem('ls_prompt_log')||'[]');
+  log.push(entry);localStorage.setItem('ls_prompt_log',JSON.stringify(log));
+  if(p){var fb=document.createElement('p');fb.style.cssText='color:#5ee0a5;font:500 13px Inter,system-ui,sans-serif;margin-top:10px';fb.textContent='Prompt saved to log.';p.appendChild(fb);}
+};
+window.lsSaveCTP_sceneProof=function(){
+  var g=function(id){var el=document.getElementById(id);return el?(el.value||''):''};
+  var fPath=g('ctp-sp-filepath'),blob=g('ctp-sp-blob'),extUrl=g('ctp-sp-url'),b64=g('ctp-sp-b64');
+  var entry={id:'proof-'+Date.now(),assetId:g('ctp-sp-assetid'),assetType:g('ctp-sp-type'),provider:g('ctp-sp-provider'),promptUsed:g('ctp-sp-prompt'),sourceScene:g('ctp-sp-scene'),sourceCharacter:g('ctp-sp-char'),filePath:fPath,blobUrl:blob,externalUrl:extUrl,base64Preview:b64,rightsStatus:g('ctp-sp-rights'),approvedStatus:g('ctp-sp-approved'),consistencyScore:+g('ctp-sp-score')||0,fileExists:!!(fPath||blob||extUrl||b64),savedAt:new Date().toISOString()};
+  var log=JSON.parse(localStorage.getItem('ls_scene_proof')||'[]');
+  log.push(entry);localStorage.setItem('ls_scene_proof',JSON.stringify(log));
+  var p=document.getElementById('continuityToolsPanel');
+  if(p){var fb=document.createElement('p');fb.style.cssText='color:#5ee0a5;font:500 13px Inter,system-ui,sans-serif;margin-top:10px';fb.textContent='Scene proof saved.'+(entry.fileExists?'':' No file proof on record.');p.appendChild(fb);}
+};
+window.lsExportCTP_sceneProof=function(){
+  var log=JSON.parse(localStorage.getItem('ls_scene_proof')||'[]');
+  var a=document.createElement('a');a.href='data:application/json,'+encodeURIComponent(JSON.stringify({sceneProof:log},null,2));a.download='scene-proof.json';a.click();
+};
+window.lsSaveCTP_providerReport=function(){
+  var g=function(id){var el=document.getElementById(id);return el?(el.value||''):''};
+  var assetPath=g('ctp-pr-assetpath');
+  var entry={id:'pr-'+Date.now(),providerTried:g('ctp-pr-provider'),taskType:g('ctp-pr-task'),promptSent:g('ctp-pr-prompt'),resultStatus:g('ctp-pr-status')||'Provider Required',errorDetails:g('ctp-pr-error'),fallbackUsed:g('ctp-pr-fallback'),assetProofPath:assetPath,approvedTakeStatus:g('ctp-pr-approvedstatus'),realAssetExists:!!assetPath,integrationStatus:assetPath?'Result received':'Integration Required',savedAt:new Date().toISOString()};
+  var list=JSON.parse(localStorage.getItem('ls_provider_reports')||'[]');
+  list.push(entry);localStorage.setItem('ls_provider_reports',JSON.stringify(list));
+  var genReport=JSON.parse(localStorage.getItem('ls_generation_report')||'[]');
+  genReport.push({id:entry.id,provider:entry.providerTried,task:entry.taskType,status:entry.integrationStatus,hasProof:entry.realAssetExists,savedAt:entry.savedAt});
+  localStorage.setItem('ls_generation_report',JSON.stringify(genReport));
+  var p=document.getElementById('continuityToolsPanel');
+  if(p){var fb=document.createElement('p');fb.style.cssText='color:#5ee0a5;font:500 13px Inter,system-ui,sans-serif;margin-top:10px';fb.textContent='Provider report saved. Status: '+entry.integrationStatus+'.';p.appendChild(fb);}
 };
 
 })();
