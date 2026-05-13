@@ -777,7 +777,6 @@ window.lsCTP=function(id,ev){
   if(!html)return;
   p.innerHTML=html;
   p.style.display='block';
-  setTimeout(function(){p.scrollIntoView({behavior:'smooth',block:'nearest'});},50);
 };
 
 })();
