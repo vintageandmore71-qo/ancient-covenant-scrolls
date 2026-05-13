@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Duplicate ID Test Fixture</title>
+</head>
+<body>
+  <main>
+    <section id="panel">
+      <h1 id="title">First Title</h1>
+      <label for="email">Email One</label>
+      <input id="email" type="email">
+
+      <label for="name">Name One</label>
+      <input id="name" type="text">
+    </section>
+
+    <section id="panel">
+      <h2 id="title">Second Title Duplicate</h2>
+      <label for="email">Email Two Duplicate</label>
+      <input id="email" type="email">
+
+      <label for="name">Name Two Duplicate</label>
+      <input id="name" type="text">
+    </section>
+
+    <section id="panel">
+      <h2 id="title">Third Title Duplicate</h2>
+      <label for="email">Email Three Duplicate</label>
+      <input id="email" type="email">
+    </section>
+
+    <script>
+      const emailField = document.getElementById("email");
+      const titleNode = document.querySelector("#title");
+    </script>
+  </main>
+</body>
+</html>

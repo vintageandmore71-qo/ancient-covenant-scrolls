@@ -1,0 +1,12 @@
+{
+  "version": "1.0",
+  "looks": [],
+  "schema": {
+    "id": "string",
+    "name": "string",
+    "style": "string",
+    "colorPalette": "string",
+    "cinematicReference": "string",
+    "notes": "string"
+  }
+}

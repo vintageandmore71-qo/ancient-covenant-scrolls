@@ -1,0 +1,1 @@
+{"version":"1.0","rejectedTakes":[],"schema":{"id":"string","characterId":"string","sceneId":"string","rejected":true,"reason":"string","negativePromptAdditions":"string","provider":"string","prompt":"string"}}

@@ -1,0 +1,13 @@
+{
+  "version": "1.0",
+  "locations": [],
+  "schema": {
+    "id": "string",
+    "name": "string",
+    "description": "string",
+    "era": "string",
+    "interior": true,
+    "lighting": "string",
+    "notes": "string"
+  }
+}

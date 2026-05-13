@@ -1,0 +1,13 @@
+{
+  "version": "1.0",
+  "report": [],
+  "schema": {
+    "provider": "string",
+    "task": "string",
+    "result": "Success|Failed|Partial|Skipped",
+    "reason": "string",
+    "asset": "string",
+    "time": "ISO8601"
+  },
+  "noFalseSuccessRule": "Never mark a result as Success unless a real file, blob, URL, or base64 data was returned."
+}

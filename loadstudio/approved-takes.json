@@ -1,0 +1,1 @@
+{"version":"1.0","approvedTakes":[],"schema":{"id":"string","characterId":"string","sceneId":"string","approvedTake":true,"useAsReference":false,"consistencyScore":0,"notes":"string","provider":"string","prompt":"string","filePath":"string","blobUrl":"string","externalUrl":"string"}}

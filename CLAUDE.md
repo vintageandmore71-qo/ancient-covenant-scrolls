@@ -265,3 +265,19 @@ Pages is current or stale.
   Internal identifiers (data-section ids, feature keys) may keep
   short codes but the visible label must never reference an outside
   product.
+
+## SNAPSHOT CLEANUP RULE (mandatory, automatic)
+
+After every successful commit and push:
+
+1. Verify `git status` is clean and latest local commit matches `origin`.
+2. Check `.snapshots/` folder exists.
+3. Keep only the 3 most recent files inside `.snapshots/`.
+4. Delete all older snapshot files automatically — no prompt needed.
+
+Never delete:
+- `.git/`
+- Source files, site folders, assets, public folders
+- Export ZIPs outside `.snapshots/`
+
+This runs after every shipping push, not just session end.
