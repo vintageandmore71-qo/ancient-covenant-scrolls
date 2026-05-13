@@ -694,7 +694,8 @@ window.showToolSection=function(id){
   go(id);
 };
 window.lsNav=window.showToolSection;
-window.lsCTP=function(id){
+window.lsCTP=function(id,ev){
+  if(ev){ev.stopPropagation();ev.preventDefault();}
   var p=document.getElementById('continuityToolsPanel');
   if(!p)return;
   var cl='<button class="ls-ctp-close" type="button" onclick="document.getElementById(\'continuityToolsPanel\').style.display=\'none\'" aria-label="Close">&#x2715;</button>';
