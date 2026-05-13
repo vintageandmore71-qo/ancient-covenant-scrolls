@@ -494,7 +494,7 @@ body:has(#section-timeline-editor.active) .ls-eb-fs-back,body:has(#section-vn-to
 .ls-eb-launch-btn.create .ic{color:#5ee0a5;background:rgba(94,224,165,.16)}
 .ls-eb-launch-foot{font:300 12.5px Inter,system-ui,sans-serif;color:#9c93b5;line-height:1.65;max-width:760px;margin:14px auto 0;padding-top:14px;border-top:1px dashed rgba(125,42,232,.22)}
 
-/* LS-1 — dyslexia-friendly reorganization for the 36 generic sections.
+/* LS-1 — readability-first reorganization for the 36 generic sections.
    Hide the wall-of-feature-btn panel + the redundant section-head;
    the lsFrame wrapper already provides title + dept badge + lead +
    color bar + related-tile jumps. The remaining .ls-panel becomes
@@ -971,8 +971,13 @@ body.ls-contrast-safe{filter:contrast(1.15)}
         <label>Forbidden Changes<textarea id="ls-cs-forbidden" rows="2" placeholder="What must never change"></textarea></label>
         <label>Prompt Lock Phrases<textarea id="ls-cs-prompt-lock" rows="2" placeholder="Phrases to always include in prompts"></textarea></label>
         <label>Negative Prompt Lock Phrases<textarea id="ls-cs-neg-lock" rows="2" placeholder="Phrases to always include in negative prompts"></textarea></label>
-        <label>Face Consistency Score<input id="ls-cs-face-score" type="number" min="0" max="100" value="0"></label>
-        <label>Wardrobe Consistency Score<input id="ls-cs-wardrobe-score" type="number" min="0" max="100" value="0"></label>
+        <label>Face Match Score (1-5)<input id="ls-cs-face-score" type="number" min="1" max="5" placeholder="-"></label>
+        <label>Skin Tone Match Score (1-5)<input id="ls-cs-skin-score" type="number" min="1" max="5" placeholder="-"></label>
+        <label>Body Type Match Score (1-5)<input id="ls-cs-body-score" type="number" min="1" max="5" placeholder="-"></label>
+        <label>Hair Match Score (1-5)<input id="ls-cs-hair-score" type="number" min="1" max="5" placeholder="-"></label>
+        <label>Wardrobe Match Score (1-5)<input id="ls-cs-wardrobe-score" type="number" min="1" max="5" placeholder="-"></label>
+        <label>Era Match Score (1-5)<input id="ls-cs-era-score" type="number" min="1" max="5" placeholder="-"></label>
+        <label>Style Match Score (1-5)<input id="ls-cs-style-score" type="number" min="1" max="5" placeholder="-"></label>
       </div>
     </div>
     <div class="ls-panel">
@@ -993,18 +998,15 @@ body.ls-contrast-safe{filter:contrast(1.15)}
       <button class="btn secondary" type="button" onclick="var t=document.getElementById('ls-cs-rejected-input');var l=document.getElementById('ls-cs-rejected-list');if(t&&t.value&&l){var d=document.createElement('div');d.style.cssText='padding:8px 10px;background:rgba(255,110,156,.08);border:1px solid rgba(255,110,156,.28);border-radius:8px;margin-bottom:6px;font:400 13px Inter,system-ui,sans-serif;color:#ff6e9c';d.textContent=t.value;l.appendChild(d);t.value='';}" style="margin-top:8px">Add Rejected Take</button>
     </div>
     <div class="ls-panel">
-      <h3>Output Review</h3>
-      <div id="ls-cs-review-panel" style="color:#c0b8d9;font:300 13px Inter,system-ui,sans-serif;margin-bottom:10px">Upload output image here for manual review.</div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn primary" type="button" onclick="var p=document.getElementById('ls-cs-review-panel');if(p)p.style.borderColor='rgba(94,224,165,.5)'">Mark Approved</button>
-        <button class="btn secondary" type="button" onclick="var p=document.getElementById('ls-cs-review-panel');if(p)p.style.borderColor='rgba(255,110,156,.5)'">Mark Rejected</button>
-      </div>
+      <h3>Average Consistency Score</h3>
+      <div id="ls-cs-avg-display" style="margin:8px 0 4px;font:600 18px Inter,system-ui,sans-serif;color:#5fc8ff">Score: --</div>
+      <p style="margin:0;font:300 12.5px Inter,system-ui,sans-serif;color:#9c93b5">Average of all 7 fields (1-5 scale). Calculated on Save.</p>
     </div>
     <div class="ls-panel">
       <div class="ls-warn-badge">Perfect character consistency depends on the provider or local engine. LoadStudio improves consistency with reference images, approved takes, prompt locks, and continuity checks.</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
         <button id="ls-cs-save-btn" class="btn primary" type="button">Save Character Profile</button>
-        <button class="btn secondary" type="button" onclick="var a=document.createElement('a');a.href='character-stability.json';a.download='character-stability.json';a.click()">Export Stability Pack</button>
+        <button id="ls-cs-export-btn" class="btn secondary" type="button">Export Stability Pack</button>
       </div>
     </div>
     <div class="ls-related"></div>
@@ -1341,6 +1343,8 @@ body.ls-contrast-safe{filter:contrast(1.15)}
         <label>Result<select id="ls-pr-result"><option>Success</option><option>Failed</option><option>Partial</option><option>Skipped</option></select></label>
         <label>Reason / Notes<input id="ls-pr-reason" type="text" placeholder="What happened?"></label>
         <label>Asset Path or URL<input id="ls-pr-asset" type="text" placeholder="File path, blob URL, or asset URL"></label>
+        <label>Fallback Used<select id="ls-pr-fallback"><option>No</option><option>Yes</option><option>Not Applicable</option></select></label>
+        <label>Approved Take Status<select id="ls-pr-take-status"><option>pending</option><option>approved</option><option>rejected</option><option>not reviewed</option></select></label>
       </div>
       <button id="ls-pr-add-btn" class="btn primary" type="button" style="margin-top:12px">Add Entry</button>
     </div>
@@ -1357,7 +1361,6 @@ body.ls-contrast-safe{filter:contrast(1.15)}
     <div class="ls-related"></div>
   </div>
 </section>
-</section>
 <section id="section-own-image-clone" class="section" data-title="Own Image and Character Clone Studio">
   <div class="ls-frame">
     <div class="ls-bar"></div>
@@ -1371,6 +1374,10 @@ body.ls-contrast-safe{filter:contrast(1.15)}
         <div class="field"><label>Rights Status</label><select id="ls-oc-rights"><option>I own this image</option><option>I have permission to use this image</option><option>This is a fictional character I created</option><option>Public domain or licensed</option><option>Requires Rights Review</option></select></div>
         <div class="field"><label>Commercial Use Allowed</label><select id="ls-oc-commercial"><option>No</option><option>Yes</option><option>Platform Only</option></select></div>
         <div class="field"><label>Private Asset Only</label><select id="ls-oc-private"><option>No</option><option>Yes</option></select></div>
+        <div class="field"><label>Marketplace Allowed</label><select id="ls-oc-marketplace"><option>No</option><option>Yes - Own Platform Only</option><option>Yes - All Platforms</option></select></div>
+        <div class="field"><label>Attach to Scene ID</label><input type="text" id="ls-oc-scene-id" placeholder="scene-001 (optional)"></div>
+        <div class="field"><label>Attach to Reference Pack ID</label><input type="text" id="ls-oc-refpack-id" placeholder="rp-001 (optional)"></div>
+        <div class="field" style="grid-column:span 2"><label style="display:flex;align-items:flex-start;gap:8px"><input type="checkbox" id="ls-oc-confirm" style="margin-top:3px;flex-shrink:0"><span>I confirm I own this image or have permission to use it. I accept responsibility for all rights and usage restrictions.</span></label></div>
       </div>
       <div id="ls-oc-preview" style="margin-top:12px"></div>
     </div>
@@ -1439,6 +1446,22 @@ body.ls-contrast-safe{filter:contrast(1.15)}
       <h3 style="margin:0 0 10px;font:600 15px Inter,system-ui,sans-serif;color:#fff">Take Log</h3>
       <div id="ls-ce-log"><p style="color:#9c93b5;font:300 13px Inter,system-ui,sans-serif">No takes logged yet.</p></div>
     </div>
+    <div class="ls-panel" style="border-color:rgba(94,224,165,.28);background:rgba(94,224,165,.04)">
+      <h3 style="margin:0 0 6px;font:600 15px Inter,system-ui,sans-serif;color:#5ee0a5">Approved Takes</h3>
+      <p style="margin:0 0 10px;font:300 12.5px Inter,system-ui,sans-serif;color:#9c93b5">Takes marked Approved. Use these as future references.</p>
+      <div id="ls-ce-approved-log"><p style="color:#9c93b5;font:300 13px Inter,system-ui,sans-serif">No approved takes yet.</p></div>
+      <button id="ls-ce-export-approved-btn" style="margin-top:10px;padding:8px 16px;border-radius:9px;font:500 13px Inter,system-ui,sans-serif;border:1px solid rgba(94,224,165,.32);background:transparent;color:#5ee0a5;cursor:pointer">Export Approved Takes</button>
+    </div>
+    <div class="ls-panel" style="border-color:rgba(255,110,156,.28);background:rgba(255,110,156,.04)">
+      <h3 style="margin:0 0 6px;font:600 15px Inter,system-ui,sans-serif;color:#ff6e9c">Rejected Takes — Do Not Repeat</h3>
+      <p style="margin:0 0 10px;font:300 12.5px Inter,system-ui,sans-serif;color:#9c93b5">Takes marked Rejected. Rejection reasons convert to negative prompt additions automatically.</p>
+      <div id="ls-ce-rejected-log"><p style="color:#9c93b5;font:300 13px Inter,system-ui,sans-serif">No rejected takes yet.</p></div>
+      <div style="margin-top:10px">
+        <p style="margin:0 0 6px;font:500 12px Inter,system-ui,sans-serif;color:#ff6e9c">Negative Prompt Additions from Rejections:</p>
+        <textarea id="ls-ce-neg-additions" readonly rows="3" placeholder="Negative prompt phrases from rejected takes will appear here." style="width:100%;padding:10px 12px;background:#0c0518;border:1px solid rgba(255,110,156,.28);border-radius:9px;color:#fff;font:400 13px Inter,system-ui,sans-serif;resize:vertical"></textarea>
+      </div>
+      <button id="ls-ce-export-rejected-btn" style="margin-top:10px;padding:8px 16px;border-radius:9px;font:500 13px Inter,system-ui,sans-serif;border:1px solid rgba(255,110,156,.32);background:transparent;color:#ff6e9c;cursor:pointer">Export Rejected Takes</button>
+    </div>
     <div class="ls-related"><div class="ls-related-h">Related</div><div class="ls-related-row">
       <button class="ls-related-tile" onclick="lsNav('character-stability')"><div class="ls-related-tile-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><span class="ls-related-tile-label">Char Stability</span></button>
       <button class="ls-related-tile" onclick="lsNav('scene-proof')"><div class="ls-related-tile-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><span class="ls-related-tile-label">Scene Proof</span></button>
@@ -1457,18 +1480,39 @@ body.ls-contrast-safe{filter:contrast(1.15)}
         <div class="field"><label>Character ID</label><input type="text" id="ls-rp-char-id" placeholder="character-001"></div>
       </div>
       <div style="margin:12px 0">
-        <p style="margin:0 0 8px;font:500 12.5px Inter,system-ui,sans-serif;color:#c0b8d9">Pack Contents</p>
-        <div style="display:flex;flex-wrap:wrap;gap:8px">
-          <label style="display:flex;align-items:center;gap:6px;font:400 13px Inter,system-ui,sans-serif;color:#c0b8d9"><input type="checkbox" id="ls-rp-front"> Front portrait</label>
-          <label style="display:flex;align-items:center;gap:6px;font:400 13px Inter,system-ui,sans-serif;color:#c0b8d9"><input type="checkbox" id="ls-rp-side"> Side profile</label>
-          <label style="display:flex;align-items:center;gap:6px;font:400 13px Inter,system-ui,sans-serif;color:#c0b8d9"><input type="checkbox" id="ls-rp-full"> Full body</label>
-          <label style="display:flex;align-items:center;gap:6px;font:400 13px Inter,system-ui,sans-serif;color:#c0b8d9"><input type="checkbox" id="ls-rp-wardrobe"> Wardrobe reference</label>
-          <label style="display:flex;align-items:center;gap:6px;font:400 13px Inter,system-ui,sans-serif;color:#c0b8d9"><input type="checkbox" id="ls-rp-expression"> Expression sheet</label>
-          <label style="display:flex;align-items:center;gap:6px;font:400 13px Inter,system-ui,sans-serif;color:#c0b8d9"><input type="checkbox" id="ls-rp-approved"> Approved takes</label>
-          <label style="display:flex;align-items:center;gap:6px;font:400 13px Inter,system-ui,sans-serif;color:#c0b8d9"><input type="checkbox" id="ls-rp-rejected"> Rejected mistakes</label>
-          <label style="display:flex;align-items:center;gap:6px;font:400 13px Inter,system-ui,sans-serif;color:#c0b8d9"><input type="checkbox" id="ls-rp-style"> Style reference</label>
-          <label style="display:flex;align-items:center;gap:6px;font:400 13px Inter,system-ui,sans-serif;color:#c0b8d9"><input type="checkbox" id="ls-rp-scene"> Scene reference</label>
-          <label style="display:flex;align-items:center;gap:6px;font:400 13px Inter,system-ui,sans-serif;color:#c0b8d9"><input type="checkbox" id="ls-rp-source"> Source images</label>
+        <p style="margin:0 0 10px;font:500 12.5px Inter,system-ui,sans-serif;color:#c0b8d9">Reference Slots</p>
+        <div style="display:grid;grid-template-columns:1fr;gap:12px">
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:rgba(255,255,255,.025);border:1px solid rgba(94,180,214,.16);border-radius:10px">
+            <input type="checkbox" id="ls-rp-front" style="margin-top:2px;flex-shrink:0">
+            <div style="flex:1"><label for="ls-rp-front" style="font:500 13px Inter,system-ui,sans-serif;color:#fff;display:block;margin-bottom:4px">Front portrait</label><input type="file" id="ls-rp-front-file" accept="image/*" style="font:400 12px Inter,system-ui,sans-serif;color:#c0b8d9"></div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:rgba(255,255,255,.025);border:1px solid rgba(94,180,214,.16);border-radius:10px">
+            <input type="checkbox" id="ls-rp-side" style="margin-top:2px;flex-shrink:0">
+            <div style="flex:1"><label for="ls-rp-side" style="font:500 13px Inter,system-ui,sans-serif;color:#fff;display:block;margin-bottom:4px">Side profile</label><input type="file" id="ls-rp-side-file" accept="image/*" style="font:400 12px Inter,system-ui,sans-serif;color:#c0b8d9"></div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:rgba(255,255,255,.025);border:1px solid rgba(94,180,214,.16);border-radius:10px">
+            <input type="checkbox" id="ls-rp-full" style="margin-top:2px;flex-shrink:0">
+            <div style="flex:1"><label for="ls-rp-full" style="font:500 13px Inter,system-ui,sans-serif;color:#fff;display:block;margin-bottom:4px">Full body</label><input type="file" id="ls-rp-full-file" accept="image/*" style="font:400 12px Inter,system-ui,sans-serif;color:#c0b8d9"></div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:rgba(255,255,255,.025);border:1px solid rgba(94,180,214,.16);border-radius:10px">
+            <input type="checkbox" id="ls-rp-wardrobe" style="margin-top:2px;flex-shrink:0">
+            <div style="flex:1"><label for="ls-rp-wardrobe" style="font:500 13px Inter,system-ui,sans-serif;color:#fff;display:block;margin-bottom:4px">Wardrobe reference</label><input type="file" id="ls-rp-wardrobe-file" accept="image/*" style="font:400 12px Inter,system-ui,sans-serif;color:#c0b8d9"></div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:rgba(255,255,255,.025);border:1px solid rgba(94,180,214,.16);border-radius:10px">
+            <input type="checkbox" id="ls-rp-expression" style="margin-top:2px;flex-shrink:0">
+            <div style="flex:1"><label for="ls-rp-expression" style="font:500 13px Inter,system-ui,sans-serif;color:#fff;display:block;margin-bottom:4px">Expression reference slots</label><input type="file" id="ls-rp-expression-file" accept="image/*" multiple style="font:400 12px Inter,system-ui,sans-serif;color:#c0b8d9"></div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:rgba(255,255,255,.025);border:1px solid rgba(94,180,214,.16);border-radius:10px">
+            <input type="checkbox" id="ls-rp-style" style="margin-top:2px;flex-shrink:0">
+            <div style="flex:1"><label for="ls-rp-style" style="font:500 13px Inter,system-ui,sans-serif;color:#fff;display:block;margin-bottom:4px">Style reference</label><input type="file" id="ls-rp-style-file" accept="image/*" style="font:400 12px Inter,system-ui,sans-serif;color:#c0b8d9"></div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:rgba(255,255,255,.025);border:1px solid rgba(94,180,214,.16);border-radius:10px">
+            <input type="checkbox" id="ls-rp-scene" style="margin-top:2px;flex-shrink:0">
+            <div style="flex:1"><label for="ls-rp-scene" style="font:500 13px Inter,system-ui,sans-serif;color:#fff;display:block;margin-bottom:4px">Scene reference</label><input type="file" id="ls-rp-scene-file" accept="image/*" style="font:400 12px Inter,system-ui,sans-serif;color:#c0b8d9"></div>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(255,255,255,.025);border:1px solid rgba(94,180,214,.16);border-radius:10px;font:500 13px Inter,system-ui,sans-serif;color:#fff"><input type="checkbox" id="ls-rp-approved"> Include approved takes from continuity log</label>
+          <label style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(255,255,255,.025);border:1px solid rgba(94,180,214,.16);border-radius:10px;font:500 13px Inter,system-ui,sans-serif;color:#fff"><input type="checkbox" id="ls-rp-rejected"> Include rejected mistake notes from continuity log</label>
+          <label style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(255,255,255,.025);border:1px solid rgba(94,180,214,.16);border-radius:10px;font:500 13px Inter,system-ui,sans-serif;color:#fff"><input type="checkbox" id="ls-rp-source"> Source images from own-image-clone studio</label>
         </div>
       </div>
       <div class="field" style="margin-bottom:12px"><label>Pack Notes</label><textarea id="ls-rp-notes" rows="2" placeholder="Notes for this reference pack."></textarea></div>
@@ -1501,6 +1545,7 @@ body.ls-contrast-safe{filter:contrast(1.15)}
         <div class="field"><label>Lighting Setup</label><input type="text" id="ls-pl-lighting" placeholder="e.g. golden hour, neon city"></div>
         <div class="field"><label>Scene Mood</label><input type="text" id="ls-pl-mood" placeholder="e.g. tense, calm, mysterious"></div>
         <div class="field"><label>Extra Negative Prompt</label><textarea id="ls-pl-neg-extra" rows="2" placeholder="Additional things to avoid."></textarea></div>
+        <div class="field"><label>Provider Format</label><select id="ls-pl-provider-format"><option value="generic">Generic (any provider)</option><option value="pollinations">Pollinations Flux</option><option value="comfyui">ComfyUI / AUTOMATIC1111</option><option value="openrouter">OpenRouter</option><option value="hf">Hugging Face</option></select></div>
       </div>
       <div style="margin:12px 0">
         <p style="margin:0 0 8px;font:500 12.5px Inter,system-ui,sans-serif;color:#c0b8d9">Always Include</p>
@@ -1545,6 +1590,8 @@ body.ls-contrast-safe{filter:contrast(1.15)}
         <div class="field"><label>Source Character</label><input type="text" id="ls-sp-char" placeholder="character-001"></div>
         <div class="field"><label>File Path</label><input type="text" id="ls-sp-path" placeholder="assets/images/scene-001-take-1.png"></div>
         <div class="field"><label>External URL (if any)</label><input type="text" id="ls-sp-url" placeholder="https://..."></div>
+        <div class="field"><label>Blob URL (if any)</label><input type="text" id="ls-sp-blob" placeholder="blob:..."></div>
+        <div class="field"><label>Base64 Preview (paste or generated)</label><textarea id="ls-sp-b64" rows="2" placeholder="data:image/png;base64,..."></textarea></div>
         <div class="field"><label>Rights Status</label><select id="ls-sp-rights"><option>owned</option><option>licensed</option><option>public-domain</option><option>pending</option></select></div>
         <div class="field"><label>Approved Status</label><select id="ls-sp-approved"><option>pending</option><option>approved</option><option>rejected</option></select></div>
         <div class="field"><label>Consistency Score (0-100)</label><input type="number" id="ls-sp-score" min="0" max="100" placeholder="0"></div>
