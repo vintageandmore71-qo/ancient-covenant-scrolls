@@ -421,7 +421,17 @@ render();
   }
   document.addEventListener('DOMContentLoaded',function(){
     var loadBtn=document.getElementById('ls-pb-load-btn');
-    if(loadBtn){loadBtn.addEventListener('click',function(){populateSceneSel();renderBoard();showConfirm('Scenes loaded.','#b388ff');});}
+    if(loadBtn){loadBtn.addEventListener('click',function(){
+      var existing=getScenes();
+      if(existing.length){populateSceneSel();renderBoard();showConfirm(existing.length+' scene'+(existing.length!==1?'s':'')+' loaded.','#b388ff');return;}
+      fetch('scenes.json').then(function(r){return r.json();}).then(function(data){
+        if(Array.isArray(data)&&data.length){
+          localStorage.setItem('ls_scenes',JSON.stringify(data));
+          populateSceneSel();renderBoard();
+          showConfirm(data.length+' scene'+(data.length!==1?'s':'')+' loaded.','#b388ff');
+        } else {showConfirm('No scenes found. Add a scene first.','#ff8080');}
+      }).catch(function(){showConfirm('No scenes found. Add a scene first.','#ff8080');});
+    });}
     var assignBtn=document.getElementById('ls-pb-assign-btn');
     if(assignBtn){assignBtn.addEventListener('click',function(){
       var sel=document.getElementById('ls-pb-scene-sel');
