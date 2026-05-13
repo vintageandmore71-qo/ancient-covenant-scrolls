@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "voices": [],
+  "schema": {
+    "id": "string",
+    "character": "string",
+    "archetype": "string",
+    "tone": 50,
+    "pitch": 50,
+    "speed": 50,
+    "warmth": 50,
+    "breathiness": 50,
+    "rasp": 50,
+    "clarity": 50,
+    "authority": 50,
+    "notes": "string",
+    "assignedScene": "string"
+  }
+}

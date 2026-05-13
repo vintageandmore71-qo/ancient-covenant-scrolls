@@ -1,0 +1,13 @@
+{
+  "version": "1.0",
+  "continuityChecks": [],
+  "schema": {
+    "sceneId": "string",
+    "characterId": "string",
+    "faceScore": 0,
+    "wardrobeScore": 0,
+    "approvedStatus": "pending|approved|rejected",
+    "notes": "string",
+    "reviewedAt": "ISO8601"
+  }
+}

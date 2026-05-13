@@ -1,6 +1,6 @@
 {
-  "sections_count": 40,
-  "features_count": 661,
+  "sections_count": 60,
+  "features_count": 718,
   "manual_package_items": [
     "index.html",
     "manifest.json",
@@ -61,7 +61,27 @@
     "developer-lab",
     "api-keys",
     "connectivity",
-    "help-tour"
+    "help-tour",
+    "advertiser",
+    "inbox",
+    "display-focus-controls",
+    "director-ai",
+    "character-stability",
+    "text-to-video",
+    "image-to-video",
+    "video-stylizer",
+    "sfx-generator",
+    "voice-character-engine",
+    "video-outpainting",
+    "prompt-writer",
+    "multilingual",
+    "production-board",
+    "provider-report",
+    "own-image-clone",
+    "continuity-engine",
+    "reference-pack",
+    "prompt-lock",
+    "scene-proof"
   ],
   "locked_rule": "No delivery unless all requests and build-plan functions are represented, verified, or marked Integration Required when external dependencies are required."
 }

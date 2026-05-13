@@ -1,0 +1,35 @@
+{
+  "version": "1.1",
+  "profiles": [],
+  "schema": {
+    "id": "string",
+    "characterId": "string",
+    "characterName": "string",
+    "consistencyMode": "strict|moderate|loose",
+    "faceNotes": "string",
+    "bodyNotes": "string",
+    "skinToneNotes": "string",
+    "hairNotes": "string",
+    "wardrobeNotes": "string",
+    "era": "string",
+    "expressionRange": "string",
+    "allowedVariations": "string",
+    "forbiddenChanges": "string",
+    "promptLockPhrases": "string",
+    "negativePromptLockPhrases": "string",
+    "scores": {
+      "face": 0,
+      "skinTone": 0,
+      "bodyType": 0,
+      "hair": 0,
+      "wardrobe": 0,
+      "era": 0,
+      "style": 0
+    },
+    "consistencyScore": 0,
+    "referenceImages": [],
+    "approvedTakes": [],
+    "rejectedTakes": [],
+    "savedAt": "ISO8601"
+  }
+}

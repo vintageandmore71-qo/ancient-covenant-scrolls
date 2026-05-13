@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "props": [],
+  "schema": {
+    "id": "string",
+    "name": "string",
+    "description": "string",
+    "assignedScene": "string",
+    "notes": "string"
+  }
+}

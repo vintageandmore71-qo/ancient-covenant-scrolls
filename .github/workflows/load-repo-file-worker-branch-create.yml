@@ -1,0 +1,228 @@
+name: Repo File Worker - Branch Create (2C2)
+# SELF-PROTECTION: This workflow must never be edited via the 2D file-edit pipeline.
+# .github/workflows/ is a HIGH-risk target. Edit only via direct PR with human review.
+
+on:
+  workflow_dispatch:
+    inputs:
+      job_file:
+        description: 'Path to job file'
+        required: false
+        default: 'loadtasks-inbox/repo-file-job.json'
+
+permissions:
+  contents: write
+
+jobs:
+  branch-create:
+    name: Create Feature Branch from Approved Job
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate and create branch
+        id: branch
+        run: |
+          python3 << 'PYEOF'
+          import json, os, sys, subprocess, re, datetime
+
+          JOB_FILE = os.environ.get('JOB_FILE', 'loadtasks-inbox/repo-file-job.json')
+
+          if not os.path.isfile(JOB_FILE):
+              print('ERROR: Job file not found: ' + JOB_FILE)
+              sys.exit(1)
+
+          with open(JOB_FILE) as fh:
+              try:
+                  job = json.load(fh)
+              except json.JSONDecodeError as e:
+                  print('ERROR: Invalid JSON: ' + str(e))
+                  sys.exit(1)
+
+          REQUIRED = [
+              'targetSite', 'targetFiles', 'fileAction', 'riskLevel',
+              'rollbackPlan', 'proposedChangeSummary', 'acceptanceCriteria',
+              ]
+          missing = [f for f in REQUIRED if not str(job.get(f, '')).strip()]
+          if missing:
+              print('BLOCKED - Missing required fields: ' + ', '.join(missing))
+              sys.exit(1)
+
+          job_id = str(job.get('jobId', job.get('id', 'UNKNOWN')))
+
+          HIGH_PATTERNS = [
+              'sw.js', 'service-worker', 'ai-chat-studio', 'image-prompt',
+              'lib-load-image-providers', 'provider', 'audio', 'animation',
+              'export-pack', 'deploy', 'security', 'token', 'secret',
+              'credential', 'cloudflare', '.github/workflows', 'acr.css',
+              'content/', 'load/sw',
+              ]
+          MED_PATTERNS = [
+              'load.js', 'load/load', 'loadstudio', 'loadplay', 'attain',
+              'study', 'acr', 'index.html', 'lib-',
+              ]
+
+          target_files_raw = str(job.get('targetFiles', ''))
+          pl = target_files_raw.lower()
+          if any(p.lower() in pl for p in HIGH_PATTERNS):
+              auto_risk = 'HIGH'
+          elif any(p.lower() in pl for p in MED_PATTERNS):
+              auto_risk = 'MEDIUM'
+          else:
+              auto_risk = 'LOW'
+
+          declared_risk = str(job.get('riskLevel', 'UNKNOWN')).upper()
+
+          raw = target_files_raw.replace(',', '\n')
+          file_paths = [f.strip() for f in raw.splitlines() if f.strip()]
+
+          blocks = []
+
+          job_status = str(job.get('status', 'draft')).lower()
+          if job_status != 'approved':
+              blocks.append('status is "' + job_status + '" — must be "approved"')
+
+          user_approval = str(job.get('userApprovalRequired', ''))
+          if user_approval.lower() not in ('yes', 'true', '1'):
+              blocks.append('userApprovalRequired is "' + user_approval + '" — must be "Yes"')
+
+          if auto_risk == 'HIGH':
+              has_override = str(job.get('highRiskOverride', '')).lower() in ('true', 'yes', '1')
+              if not has_override:
+                  blocks.append('auto risk is HIGH — add highRiskOverride:true to job to proceed')
+
+          if auto_risk != declared_risk:
+              blocks.append('risk mismatch: declared=' + declared_risk + ' auto=' + auto_risk)
+
+          for fp in file_paths:
+              r = subprocess.run(
+                  ['git', 'ls-files', '--error-unmatch', fp],
+                  capture_output=True, text=True
+                  )
+              if r.returncode != 0:
+                  blocks.append('target file not found in repo: ' + fp)
+
+          branch_suggestion = str(job.get('branchNameSuggestion', ''))
+          today = datetime.date.today().isoformat()
+          if branch_suggestion:
+              branch_name = branch_suggestion.replace('YYYY-MM-DD', today)
+          else:
+              safe_id = re.sub(r'[^a-z0-9-]', '-', job_id.lower())
+              branch_name = 'rfw/' + safe_id + '-' + today
+
+          branch_name = re.sub(r'[^a-zA-Z0-9/_.-]', '-', branch_name)
+          branch_name = re.sub(r'-+', '-', branch_name).strip('-')
+
+          PROTECTED = ['main', 'master', 'develop', 'release',
+              ]
+          for p in PROTECTED:
+              if branch_name.lower() == p:
+                  blocks.append('branch name "' + branch_name + '" is a protected name')
+
+          if not re.match(r'^[a-zA-Z0-9][a-zA-Z0-9/_.-]*$', branch_name):
+              blocks.append('branch name "' + branch_name + '" contains invalid characters')
+
+          if blocks:
+              print('BLOCKED:')
+              for b in blocks:
+                  print('  - ' + b)
+              blocked_report = '=== RFW BRANCH CREATE BLOCKED ===\n'
+              blocked_report += 'Job ID:  ' + job_id + '\n'
+              blocked_report += 'VERDICT: BLOCKED\n\n'
+              blocked_report += 'Reasons:\n'
+              for b in blocks:
+                  blocked_report += '  - ' + b + '\n'
+              blocked_report += '\nNo branch was created. No files were modified.\n'
+              blocked_report += '=== END ===\n'
+              blocked_file = 'branch-creation-report-' + job_id + '.txt'
+              with open(blocked_file, 'w') as fh:
+                  fh.write(blocked_report)
+              github_env = os.environ.get('GITHUB_ENV', '')
+              if github_env:
+                  with open(github_env, 'a') as fh:
+                      fh.write('REPORT_FILE=' + blocked_file + '\n')
+                      fh.write('JOB_ID=' + job_id + '\n')
+              sys.exit(1)
+
+          exist_r = subprocess.run(
+              ['git', 'ls-remote', '--exit-code', 'origin', branch_name],
+              capture_output=True, text=True
+              )
+          if exist_r.returncode == 0:
+              print('BLOCKED: branch "' + branch_name + '" already exists on origin')
+              sys.exit(1)
+
+          head_r = subprocess.run(['git', 'rev-parse', 'origin/main'], capture_output=True, text=True)
+          head_sha = head_r.stdout.strip()
+
+          fetch_r = subprocess.run(
+              ['git', 'checkout', '-b', branch_name, 'origin/main'],
+              capture_output=True, text=True
+              )
+          if fetch_r.returncode != 0:
+              print('ERROR creating branch: ' + fetch_r.stderr)
+              sys.exit(1)
+
+          push_r = subprocess.run(
+              ['git', 'push', 'origin', branch_name],
+              capture_output=True, text=True
+              )
+          if push_r.returncode != 0:
+              print('ERROR pushing branch: ' + push_r.stderr)
+              sys.exit(1)
+
+          repo = os.environ.get('GITHUB_REPOSITORY', 'DssOrit/ancient-covenant-scrolls')
+          branch_url = 'https://github.com/' + repo + '/tree/' + branch_name
+
+          report = '=== RFW BRANCH CREATION REPORT ===\n'
+          report += 'Job ID:       ' + job_id + '\n'
+          report += 'Branch:       ' + branch_name + '\n'
+          report += 'From SHA:     ' + head_sha + '\n'
+          report += 'Created at:   ' + datetime.datetime.utcnow().isoformat() + 'Z\n'
+          report += 'Branch URL:   ' + branch_url + '\n'
+          report += '\n'
+          report += 'Safety checks passed:\n'
+          report += '  status=approved           OK\n'
+          report += '  userApprovalRequired=Yes  OK\n'
+          report += '  risk level match          OK\n'
+          report += '  all target files exist    OK\n'
+          report += '  branch name valid         OK\n'
+          report += '  branch did not exist      OK\n'
+          report += '\n'
+          report += 'File changes in branch: NONE\n'
+          report += 'Branch is identical to origin/main at SHA ' + head_sha + '\n'
+          report += '\n'
+          report += 'VERDICT: BRANCH CREATED\n'
+          report += '\n'
+          report += 'Rollback: git push origin --delete ' + branch_name + '\n'
+          report += '=== END ===\n'
+
+          print(report)
+          print('Branch URL: ' + branch_url)
+
+          report_file = 'branch-creation-report-' + job_id + '.txt'
+          with open(report_file, 'w') as fh:
+              fh.write(report)
+
+          github_env = os.environ.get('GITHUB_ENV', '')
+          if github_env:
+              with open(github_env, 'a') as fh:
+                  fh.write('BRANCH_NAME=' + branch_name + '\n')
+                  fh.write('REPORT_FILE=' + report_file + '\n')
+                  fh.write('JOB_ID=' + job_id + '\n')
+          PYEOF
+        env:
+          JOB_FILE: ${{ inputs.job_file || 'loadtasks-inbox/repo-file-job.json' }}
+
+      - name: Upload branch creation report artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: branch-creation-report-${{ env.JOB_ID || 'unknown' }}
+          path: ${{ env.REPORT_FILE || 'branch-creation-report-*.txt' }}
+          retention-days: 30
+          if-no-files-found: warn

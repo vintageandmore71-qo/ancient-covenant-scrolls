@@ -1,0 +1,14 @@
+{
+  "version": "1.0",
+  "wardrobe": [],
+  "schema": {
+    "id": "string",
+    "name": "string",
+    "characterId": "string",
+    "description": "string",
+    "era": "string",
+    "color": "string",
+    "material": "string",
+    "notes": "string"
+  }
+}

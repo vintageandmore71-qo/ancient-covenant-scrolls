@@ -1,0 +1,241 @@
+name: Repo File Worker - PR Create (2C3)
+# SELF-PROTECTION: This workflow must never be edited via the 2D file-edit pipeline.
+# .github/workflows/ is a HIGH-risk target. Edit only via direct PR with human review.
+
+on:
+  workflow_dispatch:
+    inputs:
+      job_file:
+        description: 'Path to job file'
+        required: false
+        default: 'loadtasks-inbox/repo-file-job.json'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  pr-create:
+    name: Create Draft PR from Approved Branch
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate and create draft PR
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_FILE: ${{ inputs.job_file || 'loadtasks-inbox/repo-file-job.json' }}
+        run: |
+          python3 << 'PYEOF'
+          import json, os, sys, subprocess, re, datetime
+
+          JOB_FILE = os.environ.get('JOB_FILE', 'loadtasks-inbox/repo-file-job.json')
+
+          def write_report_and_exit(job_id, blocks, report_file):
+              report = '=== RFW PR CREATE BLOCKED ===\n'
+              report += 'Job ID:  ' + job_id + '\n'
+              report += 'VERDICT: BLOCKED\n\n'
+              report += 'Reasons:\n'
+              for b in blocks:
+                  report += '  - ' + b + '\n'
+              report += '\nNo PR was created. No files were modified.\n'
+              report += '=== END ===\n'
+              print(report)
+              with open(report_file, 'w') as fh:
+                  fh.write(report)
+              github_env = os.environ.get('GITHUB_ENV', '')
+              if github_env:
+                  with open(github_env, 'a') as fh:
+                      fh.write('REPORT_FILE=' + report_file + '\n')
+                      fh.write('JOB_ID=UNKNOWN\n')
+              sys.exit(1)
+
+          if not os.path.isfile(JOB_FILE):
+              write_report_and_exit('UNKNOWN', ['Job file not found: ' + JOB_FILE], 'pr-creation-report-UNKNOWN.txt')
+
+          with open(JOB_FILE) as fh:
+              try:
+                  job = json.load(fh)
+              except json.JSONDecodeError as e:
+                  write_report_and_exit('UNKNOWN', ['Invalid JSON: ' + str(e)], 'pr-creation-report-UNKNOWN.txt')
+
+          job_id = str(job.get('jobId', job.get('id', 'UNKNOWN')))
+          report_file = 'pr-creation-report-' + job_id + '.txt'
+
+          REQUIRED = [
+              'targetSite', 'targetFiles', 'fileAction', 'riskLevel',
+              'rollbackPlan', 'proposedChangeSummary', 'acceptanceCriteria',
+              ]
+          missing = [f for f in REQUIRED if not str(job.get(f, '')).strip()]
+          if missing:
+              write_report_and_exit(job_id, ['Missing required fields: ' + ', '.join(missing)], report_file)
+
+          HIGH_PATTERNS = [
+              'sw.js', 'service-worker', 'ai-chat-studio', 'image-prompt',
+              'lib-load-image-providers', 'provider', 'audio', 'animation',
+              'export-pack', 'deploy', 'security', 'token', 'secret',
+              'credential', 'cloudflare', '.github/workflows', 'acr.css',
+              'content/', 'load/sw',
+              ]
+          MED_PATTERNS = [
+              'load.js', 'load/load', 'loadstudio', 'loadplay', 'attain',
+              'study', 'acr', 'index.html', 'lib-',
+              ]
+
+          target_files_raw = str(job.get('targetFiles', ''))
+          pl = target_files_raw.lower()
+          if any(p.lower() in pl for p in HIGH_PATTERNS):
+              auto_risk = 'HIGH'
+          elif any(p.lower() in pl for p in MED_PATTERNS):
+              auto_risk = 'MEDIUM'
+          else:
+              auto_risk = 'LOW'
+
+          declared_risk = str(job.get('riskLevel', 'UNKNOWN')).upper()
+
+          raw = target_files_raw.replace(',', '\n')
+          file_paths = [f.strip() for f in raw.splitlines() if f.strip()]
+
+          blocks = []
+
+          job_status = str(job.get('status', 'draft')).lower()
+          if job_status != 'approved':
+              blocks.append('status is "' + job_status + '" — must be "approved"')
+
+          user_approval = str(job.get('userApprovalRequired', ''))
+          if user_approval.lower() not in ('yes', 'true', '1'):
+              blocks.append('userApprovalRequired is "' + user_approval + '" — must be "Yes"')
+
+          if auto_risk == 'HIGH':
+              has_override = str(job.get('highRiskOverride', '')).lower() in ('true', 'yes', '1')
+              if not has_override:
+                  blocks.append('auto risk is HIGH — add highRiskOverride:true to job to proceed')
+
+          if auto_risk != declared_risk:
+              blocks.append('risk mismatch: declared=' + declared_risk + ' auto=' + auto_risk)
+
+          for fp in file_paths:
+              r = subprocess.run(
+                  ['git', 'ls-files', '--error-unmatch', fp],
+                  capture_output=True, text=True
+                  )
+              if r.returncode != 0:
+                  blocks.append('target file not found in repo: ' + fp)
+
+          branch_suggestion = str(job.get('branchNameSuggestion', ''))
+          today = datetime.date.today().isoformat()
+          if branch_suggestion:
+              branch_name = branch_suggestion.replace('YYYY-MM-DD', today)
+          else:
+              safe_id = re.sub(r'[^a-z0-9-]', '-', job_id.lower())
+              branch_name = 'rfw/' + safe_id + '-' + today
+
+          branch_name = re.sub(r'[^a-zA-Z0-9/_.-]', '-', branch_name)
+          branch_name = re.sub(r'-+', '-', branch_name).strip('-')
+
+          exist_r = subprocess.run(
+              ['git', 'ls-remote', '--exit-code', 'origin', branch_name],
+              capture_output=True, text=True
+              )
+          if exist_r.returncode != 0:
+              blocks.append('branch "' + branch_name + '" does not exist on origin — run 2C2 first')
+
+          if blocks:
+              write_report_and_exit(job_id, blocks, report_file)
+
+          pr_title = str(job.get('prTitleSuggestion', ''))
+          if not pr_title:
+              pr_title = str(job.get('fileAction', 'edit')).capitalize() + ': ' + target_files_raw
+
+          pr_body = '## Job Details\n'
+          pr_body += '- **Job ID:** ' + job_id + '\n'
+          pr_body += '- **Target Site:** ' + str(job.get('targetSite', 'Unknown')) + '\n'
+          pr_body += '- **File Action:** ' + str(job.get('fileAction', 'Unknown')) + '\n'
+          pr_body += '\n## Risk\n'
+          pr_body += '- **Declared:** ' + declared_risk + '\n'
+          pr_body += '- **Auto-classified:** ' + auto_risk + '\n'
+          pr_body += '\n## Target Files\n'
+          for fp in file_paths:
+              pr_body += '- `' + fp + '`\n'
+          pr_body += '\n## Proposed Change\n'
+          pr_body += str(job.get('proposedChangeSummary', '(none)')) + '\n'
+          pr_body += '\n## Acceptance Criteria\n'
+          pr_body += str(job.get('acceptanceCriteria', '(none)')) + '\n'
+          pr_body += '\n## Impact Flags\n'
+          pr_body += '- Live site impact: ' + str(job.get('liveSiteImpact', 'Unknown')) + '\n'
+          pr_body += '- Service worker impact: ' + str(job.get('serviceWorkerImpact', 'Unknown')) + '\n'
+          pr_body += '- AI provider impact: ' + str(job.get('aiProviderImpact', 'Unknown')) + '\n'
+          pr_body += '- Export package impact: ' + str(job.get('exportPackageImpact', 'Unknown')) + '\n'
+          pr_body += '- Security impact: ' + str(job.get('securityImpact', 'Unknown')) + '\n'
+          pr_body += '\n## Boundaries\n'
+          pr_body += '- SW/cache: No\n'
+          pr_body += '- Load AI/providers: No\n'
+          pr_body += '- Audio/animation: No\n'
+          pr_body += '- Deployment: No\n'
+          pr_body += '- Auto-merge: No\n'
+          pr_body += '\n## Rollback\n'
+          pr_body += str(job.get('rollbackPlan', '(none)')) + '\n'
+          pr_body += '\n---\n_Draft PR created by Repo File Worker 2C3. No files were changed in this PR._\n'
+
+          pr_result = subprocess.run(
+              ['gh', 'pr', 'create',
+               '--title', pr_title,
+               '--body', pr_body,
+               '--head', branch_name,
+               '--base', 'main',
+               '--draft',
+               ],
+              capture_output=True, text=True
+              )
+
+          if pr_result.returncode != 0:
+              print('gh pr create stdout: ' + pr_result.stdout.strip())
+              print('gh pr create stderr: ' + pr_result.stderr.strip())
+              write_report_and_exit(job_id, ['gh pr create failed: ' + pr_result.stderr.strip()], report_file)
+
+          pr_url = pr_result.stdout.strip()
+          print('Draft PR created: ' + pr_url)
+
+          report = '=== RFW PR CREATION REPORT ===\n'
+          report += 'Job ID:    ' + job_id + '\n'
+          report += 'Branch:    ' + branch_name + '\n'
+          report += 'PR Title:  ' + pr_title + '\n'
+          report += 'PR URL:    ' + pr_url + '\n'
+          report += 'PR Status: DRAFT (not ready for review)\n'
+          report += '\n'
+          report += 'Safety checks passed:\n'
+          report += '  status=approved           OK\n'
+          report += '  userApprovalRequired=Yes  OK\n'
+          report += '  risk level match          OK\n'
+          report += '  all target files exist    OK\n'
+          report += '  branch exists on origin   OK\n'
+          report += '\n'
+          report += 'Auto-merge enabled: NO\n'
+          report += 'Files edited: NONE\n'
+          report += 'VERDICT: DRAFT PR CREATED\n'
+          report += '=== END ===\n'
+
+          with open(report_file, 'w') as fh:
+              fh.write(report)
+
+          github_env = os.environ.get('GITHUB_ENV', '')
+          if github_env:
+              with open(github_env, 'a') as fh:
+                  fh.write('REPORT_FILE=' + report_file + '\n')
+                  fh.write('JOB_ID=' + job_id + '\n')
+                  fh.write('PR_URL=' + pr_url + '\n')
+          PYEOF
+
+      - name: Upload PR creation report artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pr-creation-report-${{ env.JOB_ID || 'unknown' }}
+          path: ${{ env.REPORT_FILE || 'pr-creation-report-*.txt' }}
+          retention-days: 30
+          if-no-files-found: warn

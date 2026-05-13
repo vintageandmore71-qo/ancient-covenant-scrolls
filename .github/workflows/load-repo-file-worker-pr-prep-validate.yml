@@ -1,0 +1,233 @@
+name: Repo File Worker - PR Prep Validate (2C1)
+# SELF-PROTECTION: This workflow must never be edited via the 2D file-edit pipeline.
+# .github/workflows/ is a HIGH-risk target. Edit only via direct PR with human review.
+
+on:
+  push:
+    paths:
+      - 'loadtasks-inbox/repo-file-job.json'
+  workflow_dispatch:
+    inputs:
+      job_file:
+        description: 'Path to job file'
+        required: false
+        default: 'loadtasks-inbox/repo-file-job.json'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate - Branch Name + PR Draft + Safety Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run validation
+        id: validate
+        run: |
+          python3 << 'PYEOF'
+          import json, os, sys, subprocess, re, zipfile, datetime
+
+          JOB_FILE = os.environ.get('JOB_FILE', 'loadtasks-inbox/repo-file-job.json')
+
+          if not os.path.isfile(JOB_FILE):
+              print('ERROR: Job file not found: ' + JOB_FILE)
+              sys.exit(1)
+
+          with open(JOB_FILE) as fh:
+              try:
+                  job = json.load(fh)
+              except json.JSONDecodeError as e:
+                  print('ERROR: Invalid JSON: ' + str(e))
+                  sys.exit(1)
+
+          REQUIRED = [
+              'targetSite', 'targetFiles', 'fileAction', 'riskLevel',
+              'rollbackPlan', 'proposedChangeSummary', 'acceptanceCriteria',
+              ]
+          missing = [f for f in REQUIRED if not str(job.get(f, '')).strip()]
+          if missing:
+              print('VALIDATION FAIL - Missing required fields: ' + ', '.join(missing))
+              sys.exit(1)
+
+          job_id = str(job.get('jobId', job.get('id', 'UNKNOWN')))
+
+          HIGH_PATTERNS = [
+              'sw.js', 'service-worker', 'ai-chat-studio', 'image-prompt',
+              'lib-load-image-providers', 'provider', 'audio', 'animation',
+              'export-pack', 'deploy', 'security', 'token', 'secret',
+              'credential', 'cloudflare', '.github/workflows', 'acr.css',
+              'content/', 'load/sw',
+              ]
+          MED_PATTERNS = [
+              'load.js', 'load/load', 'loadstudio', 'loadplay', 'attain',
+              'study', 'acr', 'index.html', 'lib-',
+              ]
+
+          target_files_raw = str(job.get('targetFiles', ''))
+          pl = target_files_raw.lower()
+          if any(p.lower() in pl for p in HIGH_PATTERNS):
+              auto_risk = 'HIGH'
+          elif any(p.lower() in pl for p in MED_PATTERNS):
+              auto_risk = 'MEDIUM'
+          else:
+              auto_risk = 'LOW'
+
+          declared_risk = str(job.get('riskLevel', 'UNKNOWN')).upper()
+
+          raw = target_files_raw.replace(',', '\n')
+          file_paths = [f.strip() for f in raw.splitlines() if f.strip()]
+
+          file_check_lines = []
+          all_found = True
+          for fp in file_paths:
+              r = subprocess.run(
+                  ['git', 'ls-files', '--error-unmatch', fp],
+                  capture_output=True, text=True
+                  )
+              if r.returncode == 0:
+                  file_check_lines.append('  FOUND:     ' + fp)
+              else:
+                  file_check_lines.append('  NOT FOUND: ' + fp)
+                  all_found = False
+
+          job_status = str(job.get('status', 'draft')).lower()
+          user_approval = str(job.get('userApprovalRequired', 'Yes'))
+
+          blocks = []
+
+          if job_status != 'approved':
+              blocks.append('status is "' + job_status + '" (must be "approved")')
+
+          if user_approval.lower() not in ('yes', 'true', '1'):
+              blocks.append('userApprovalRequired is "' + user_approval + '" (must be "Yes")')
+
+          if auto_risk == 'HIGH':
+              has_override = str(job.get('highRiskOverride', '')).lower() in ('true', 'yes', '1')
+              if not has_override:
+                  blocks.append('auto risk is HIGH (add highRiskOverride:true to job to proceed)')
+
+          if auto_risk != declared_risk:
+              blocks.append('risk mismatch: declared=' + declared_risk + ' auto=' + auto_risk)
+
+          if not all_found:
+              blocks.append('one or more target files not found in repo')
+
+          branch_suggestion = str(job.get('branchNameSuggestion', ''))
+          today = datetime.date.today().isoformat()
+          if branch_suggestion:
+              branch_name = branch_suggestion.replace('YYYY-MM-DD', today)
+          else:
+              safe_id = re.sub(r'[^a-z0-9-]', '-', job_id.lower())
+              branch_name = 'rfw/' + safe_id + '-' + today
+
+          branch_name = re.sub(r'[^a-zA-Z0-9/_.-]', '-', branch_name)
+          branch_name = re.sub(r'-+', '-', branch_name).strip('-')
+
+          branch_blocked = False
+          protected = ['main', 'master', 'develop', 'release', 'origin/main']
+          for p in protected:
+              if branch_name.lower() == p:
+                  blocks.append('branch name "' + branch_name + '" is a protected branch name')
+                  branch_blocked = True
+
+          if not branch_blocked and not re.match(r'^[a-zA-Z0-9][a-zA-Z0-9/_.-]*$', branch_name):
+              blocks.append('branch name "' + branch_name + '" contains invalid characters')
+
+          pr_title = str(job.get('prTitleSuggestion', ''))
+          if not pr_title:
+              pr_title = str(job.get('fileAction', 'edit')).capitalize() + ': ' + target_files_raw
+
+          pr_body = str(job.get('prBodyDraft', ''))
+          if not pr_body:
+              pr_body = '## Summary\n'
+              pr_body += str(job.get('proposedChangeSummary', '(none)')) + '\n\n'
+              pr_body += '## Risk\n'
+              pr_body += declared_risk + ' (auto: ' + auto_risk + ')\n\n'
+              pr_body += '## Files Changed\n'
+              for fp in file_paths:
+                  pr_body += '- ' + fp + '\n'
+              pr_body += '\n## Acceptance Criteria\n'
+              pr_body += str(job.get('acceptanceCriteria', '(none)')) + '\n\n'
+              pr_body += '## Rollback\n'
+              pr_body += str(job.get('rollbackPlan', '(none)')) + '\n'
+
+          verdict = 'SAFE TO PROCEED' if not blocks else 'BLOCKED'
+
+          head_r = subprocess.run(['git', 'rev-parse', 'HEAD'], capture_output=True, text=True)
+          head_sha = head_r.stdout.strip()
+
+          report = '=== RFW PR PREP VALIDATION REPORT ===\n'
+          report += 'Job ID:           ' + job_id + '\n'
+          report += 'Target Site:      ' + str(job.get('targetSite', 'UNKNOWN')) + '\n'
+          report += 'File Action:      ' + str(job.get('fileAction', 'UNKNOWN')) + '\n'
+          report += 'Risk (declared):  ' + declared_risk + '\n'
+          report += 'Risk (auto):      ' + auto_risk + '\n'
+          report += 'HEAD SHA:         ' + head_sha + '\n'
+          report += '\n'
+          report += 'Target Files:\n'
+          for line in file_check_lines:
+              report += line + '\n'
+          report += '\n'
+          report += 'Approval Fields:\n'
+          report += '  status:               ' + job_status + '\n'
+          report += '  userApprovalRequired: ' + user_approval + '\n'
+          report += '\n'
+          if blocks:
+              report += 'BLOCKS (' + str(len(blocks)) + '):\n'
+              for b in blocks:
+                  report += '  - ' + b + '\n'
+          else:
+              report += 'BLOCKS: none\n'
+          report += '\n'
+          report += 'Branch Name: ' + branch_name + '\n'
+          report += '\n'
+          report += 'VERDICT: ' + verdict + '\n'
+          report += '\n'
+          report += '=== NO FILES WERE MODIFIED ===\n'
+
+          out_dir = 'rfw-2c1-' + job_id
+          os.makedirs(out_dir, exist_ok=True)
+
+          with open(os.path.join(out_dir, 'validation-report.txt'), 'w') as fh:
+              fh.write(report)
+
+          with open(os.path.join(out_dir, 'branch-name.txt'), 'w') as fh:
+              fh.write(branch_name + '\n')
+
+          pr_full = pr_title + '\n\n' + pr_body
+          with open(os.path.join(out_dir, 'pr-draft.txt'), 'w') as fh:
+              fh.write(pr_full)
+
+          zip_name = 'rfw-pr-prep-validate-' + job_id + '.zip'
+          with zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED) as zf:
+              for fname in os.listdir(out_dir):
+                  full = os.path.join(out_dir, fname)
+                  zf.write(full, fname)
+
+          print(report)
+          print('Artifact: ' + zip_name)
+
+          github_env = os.environ.get('GITHUB_ENV', '')
+          if github_env:
+              with open(github_env, 'a') as fh:
+                  fh.write('VALIDATE_ZIP=' + zip_name + '\n')
+                  fh.write('JOB_ID=' + job_id + '\n')
+                  fh.write('VERDICT=' + verdict + '\n')
+          PYEOF
+        env:
+          JOB_FILE: ${{ inputs.job_file || 'loadtasks-inbox/repo-file-job.json' }}
+
+      - name: Upload validation artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rfw-pr-prep-validate-${{ env.JOB_ID || 'unknown' }}
+          path: ${{ env.VALIDATE_ZIP || 'rfw-pr-prep-validate-*.zip' }}
+          retention-days: 30
+          if-no-files-found: warn
