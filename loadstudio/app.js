@@ -368,29 +368,100 @@ render();
 
 // Production Board
 (function(){
-  document.addEventListener('DOMContentLoaded',function(){
-    var refreshBtn=document.getElementById('ls-pb-refresh-btn');
-    if(refreshBtn){refreshBtn.addEventListener('click',function(){renderPBScenes();});}
-    var exportBtn=document.getElementById('ls-pb-export-btn');
-    if(exportBtn){exportBtn.addEventListener('click',function(){
-      var data={scenes:JSON.parse(localStorage.getItem('ls_scenes')||'[]'),chars:JSON.parse(localStorage.getItem('ls_characters')||'[]'),voices:JSON.parse(localStorage.getItem('ls_voices')||'[]')};
-      var a=document.createElement('a');a.href='data:application/json,'+encodeURIComponent(JSON.stringify(data,null,2));a.download='production-board.json';a.click();
-    });}
-  });
-  function renderPBScenes(){
-    var list=document.getElementById('ls-pb-scene-list');if(!list)return;
-    var scenes=JSON.parse(localStorage.getItem('ls_scenes')||'[]');
-    if(!scenes.length){list.innerHTML='<p style="color:#9c93b5;font:300 13px Inter,system-ui,sans-serif">No scenes saved yet. Add scenes in Scene Builder.</p>';return;}
-    list.innerHTML=scenes.map(function(s,i){
-      return '<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(125,42,232,.18);border-radius:10px;margin-bottom:6px;">'+'<button onclick="lsPBMove('+i+',-1)" style="padding:4px 8px;border-radius:6px;border:1px solid rgba(179,136,255,.28);background:transparent;color:#c0b8d9;font-size:12px;cursor:pointer">Up</button>'+'<button onclick="lsPBMove('+i+',1)" style="padding:4px 8px;border-radius:6px;border:1px solid rgba(179,136,255,.28);background:transparent;color:#c0b8d9;font-size:12px;cursor:pointer">Down</button>'+'<span style="flex:1;font:500 14px Inter,system-ui,sans-serif;color:#fff">'+(s.title||s.id||'Scene '+i)+'</span>'+'<span style="font:400 12px Inter,system-ui,sans-serif;color:#9c9cff;padding:2px 8px;border-radius:5px;border:1px solid rgba(156,156,255,.28);background:rgba(156,156,255,.08)">'+(s.status||'draft')+'</span>'+'</div>';
+  var BOARD_KEY='ls_production_board';
+  function v(id){var el=document.getElementById(id);return el?(el.value||''):'';}
+  function loadBoard(){return JSON.parse(localStorage.getItem(BOARD_KEY)||'{"assignments":[]}');}
+  function saveBoard(board){localStorage.setItem(BOARD_KEY,JSON.stringify(board));}
+  function getScenes(){return JSON.parse(localStorage.getItem('ls_scenes')||'[]');}
+  function showConfirm(msg,color){
+    var el=document.getElementById('ls-pb-confirm');
+    if(!el)return;
+    el.textContent=msg;el.style.color=color||'#b388ff';el.style.display='block';
+    setTimeout(function(){el.style.display='none';},3000);
+  }
+  function populateSceneSel(){
+    var sel=document.getElementById('ls-pb-scene-sel');if(!sel)return;
+    var scenes=getScenes();
+    sel.innerHTML='<option value="">Select a scene...</option>'+scenes.map(function(s,i){
+      return '<option value="'+i+'">'+(s.title||s.id||'Scene '+i)+'</option>';
     }).join('');
   }
+  function renderBoard(){
+    var container=document.getElementById('ls-pb-board');if(!container)return;
+    var board=loadBoard();
+    var scenes=getScenes();
+    if(!scenes.length){container.innerHTML='<p style="color:#9c93b5;font:300 13px Inter,system-ui,sans-serif">No scenes loaded. Click Load scenes.</p>';return;}
+    if(!board.assignments.length){container.innerHTML='<p style="color:#9c93b5;font:300 13px Inter,system-ui,sans-serif">No assignments yet. Select a scene and item above, then click Assign to scene.</p>';return;}
+    var grouped={};
+    board.assignments.forEach(function(a,idx){
+      var key=a.sceneIdx+'';
+      if(!grouped[key])grouped[key]=[];
+      grouped[key].push({a:a,idx:idx});
+    });
+    var html='';
+    scenes.forEach(function(s,si){
+      var items=grouped[si+'']||[];
+      html+='<div style="margin-bottom:14px;padding:12px;background:rgba(255,255,255,.03);border:1px solid rgba(125,42,232,.18);border-radius:10px;">';
+      html+='<div style="font:600 14px Inter,system-ui,sans-serif;color:#fff;margin-bottom:8px">'+(s.title||s.id||'Scene '+si)+'<span style="font:400 12px Inter,system-ui,sans-serif;color:#9c9cff;margin-left:8px">'+(s.status||'draft')+'</span></div>';
+      if(!items.length){html+='<p style="color:#9c93b5;font:300 12px Inter,system-ui,sans-serif;margin:0">No items assigned.</p>';}
+      items.forEach(function(entry,ii){
+        var a=entry.a;
+        html+='<div style="display:flex;align-items:center;gap:6px;padding:7px 10px;background:rgba(179,136,255,.06);border:1px solid rgba(179,136,255,.16);border-radius:7px;margin-bottom:5px;">';
+        html+='<button onclick="lsPBMoveItem('+si+','+ii+',-1)" style="padding:3px 7px;border-radius:5px;border:1px solid rgba(179,136,255,.28);background:transparent;color:#c0b8d9;font-size:11px;cursor:pointer">Up</button>';
+        html+='<button onclick="lsPBMoveItem('+si+','+ii+',1)" style="padding:3px 7px;border-radius:5px;border:1px solid rgba(179,136,255,.28);background:transparent;color:#c0b8d9;font-size:11px;cursor:pointer">Down</button>';
+        html+='<span style="flex:1;font:500 13px Inter,system-ui,sans-serif;color:#e0daf5">'+a.label+'</span>';
+        html+='<span style="font:400 11px Inter,system-ui,sans-serif;color:#9c9cff;padding:2px 6px;border-radius:4px;border:1px solid rgba(156,156,255,.22);background:rgba(156,156,255,.07)">'+a.type+'</span>';
+        if(a.notes){html+='<span style="font:300 11px Inter,system-ui,sans-serif;color:#9c93b5;margin-left:4px">'+a.notes+'</span>';}
+        html+='<button onclick="lsPBRemoveItem('+si+','+ii+')" style="padding:3px 7px;border-radius:5px;border:1px solid rgba(255,80,80,.28);background:transparent;color:#ff8080;font-size:11px;cursor:pointer">Remove</button>';
+        html+='</div>';
+      });
+      html+='</div>';
+    });
+    container.innerHTML=html;
+  }
+  document.addEventListener('DOMContentLoaded',function(){
+    var loadBtn=document.getElementById('ls-pb-load-btn');
+    if(loadBtn){loadBtn.addEventListener('click',function(){populateSceneSel();renderBoard();showConfirm('Scenes loaded.','#b388ff');});}
+    var assignBtn=document.getElementById('ls-pb-assign-btn');
+    if(assignBtn){assignBtn.addEventListener('click',function(){
+      var sel=document.getElementById('ls-pb-scene-sel');
+      var sceneIdx=sel?parseInt(sel.value,10):NaN;
+      var type=v('ls-pb-item-type');var label=v('ls-pb-item-label');
+      if(isNaN(sceneIdx)||sceneIdx<0||!type||!label){showConfirm('Select a scene, type, and label.','#ff8080');return;}
+      var board=loadBoard();
+      board.assignments.push({sceneIdx:sceneIdx,type:type,label:label,notes:v('ls-pb-item-notes'),time:new Date().toISOString()});
+      saveBoard(board);renderBoard();showConfirm('Item assigned.','#b388ff');
+    });}
+    var saveBtn=document.getElementById('ls-pb-save-btn');
+    if(saveBtn){saveBtn.addEventListener('click',function(){
+      var board=loadBoard();saveBoard(board);showConfirm('Board saved.','#b388ff');
+    });}
+    var exportBtn=document.getElementById('ls-pb-export-btn');
+    if(exportBtn){exportBtn.addEventListener('click',function(){
+      var board=loadBoard();var scenes=getScenes();
+      var out={board:board,scenes:scenes,exported:new Date().toISOString()};
+      var a=document.createElement('a');a.href='data:application/json,'+encodeURIComponent(JSON.stringify(out,null,2));a.download='production-board.json';a.click();
+    });}
+  });
+  window.lsPBMoveItem=function(si,ii,dir){
+    var board=loadBoard();var scenes=getScenes();
+    var items=board.assignments.filter(function(a){return a.sceneIdx===si;});
+    var jj=ii+dir;if(jj<0||jj>=items.length)return;
+    var allIdx=[];board.assignments.forEach(function(a,idx){if(a.sceneIdx===si)allIdx.push(idx);});
+    var tmp=board.assignments[allIdx[ii]];board.assignments[allIdx[ii]]=board.assignments[allIdx[jj]];board.assignments[allIdx[jj]]=tmp;
+    saveBoard(board);renderBoard();
+  };
+  window.lsPBRemoveItem=function(si,ii){
+    var board=loadBoard();var allIdx=[];
+    board.assignments.forEach(function(a,idx){if(a.sceneIdx===si)allIdx.push(idx);});
+    if(ii<0||ii>=allIdx.length)return;
+    board.assignments.splice(allIdx[ii],1);saveBoard(board);renderBoard();
+  };
   window.lsPBMove=function(i,dir){
-    var scenes=JSON.parse(localStorage.getItem('ls_scenes')||'[]');
+    var board=loadBoard();var scenes=getScenes();
     var j=i+dir;if(j<0||j>=scenes.length)return;
     var tmp=scenes[i];scenes[i]=scenes[j];scenes[j]=tmp;
-    localStorage.setItem('ls_scenes',JSON.stringify(scenes));
-    renderPBScenes();
+    localStorage.setItem('ls_scenes',JSON.stringify(scenes));renderBoard();
   };
 })();
 
