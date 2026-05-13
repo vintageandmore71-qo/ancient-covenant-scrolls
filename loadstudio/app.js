@@ -685,4 +685,11 @@ Additional: '+details;
   function v(id){var el=document.getElementById(id);return el?(el.value||''):''}
 })();
 
+window.lsNav=function(id){
+  document.body.classList.add('ls-studio');
+  document.body.classList.remove('ls-front');
+  document.body.classList.remove('ls-wsp-on');
+  go(id);
+};
+
 })();
