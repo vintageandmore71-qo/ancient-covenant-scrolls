@@ -1361,20 +1361,28 @@ window.lsSaveCTP_providerReport=function(){
       var pd=document.getElementById('aid-v74-prompt-display');
       if(pd)pd.textContent=prompt;
       try{lsAID_updateCinematicPreview();}catch(_){}
-      lsAID_v74_frame_state('Generating...','Checking provider...','#b388ff');
-      lsAID_v74_status('Generating...','#b388ff');
-      window.LoadAIProviderRouter.generateImage({prompt:prompt,settings:{width:768,height:512}}).then(function(result){
+      lsAID_v74_frame_state('Preparing...','Checking provider...','#b388ff');
+      lsAID_v74_status('Preparing...','#b388ff');
+      window.LoadAIProviderRouter.generateImage({prompt:prompt,settings:{width:768,height:512},onAttempt:function(ev){
+        if(ev.phase==='start'){
+          lsAID_v74_frame_state('Generating with '+ev.providerName,'Sending request...','#b388ff');
+          lsAID_v74_status('Trying '+ev.providerName+'...','#b388ff');
+        }else if(ev.phase==='fail'&&ev.remaining>0){
+          lsAID_v74_frame_state('Trying next provider',ev.providerName+' failed. Trying next...','#ffb300');
+          lsAID_v74_status(ev.providerName+' failed. Trying next...','#ffb300');
+        }
+      }}).then(function(result){
         if(result.ok){
           var src=result.imageUrl||result.base64||result.blob;
           _currentImageData=src;_currentImageName='generated';
           lsAID_v74_show_image(src);
-          lsAID_v74_status('Image via '+(result.providerName||result.providerId)+'.','#5ee0a5');
+          lsAID_v74_status('Image returned via '+(result.providerName||result.providerId)+'.','#5ee0a5');
         }else if(result.status==='no-provider'){
           lsAID_v74_frame_state('Provider Required','No provider connected. Open Provider Settings, or copy the prompt.','#ffb300');
           if(notice)notice.style.display='block';
           lsAID_v74_status('No provider. Add one in Providers.','#ffb300');
         }else{
-          lsAID_v74_frame_state('Provider Failed',(result.error||'Generation failed. Try again or import manually.'),'#ff8080');
+          lsAID_v74_frame_state('Provider Failed',(result.error||'All providers failed. Try again or import manually.'),'#ff8080');
           lsAID_v74_status('Failed: '+(result.error||'Unknown error.'),'#ff8080');
           if(notice)notice.style.display='block';
         }
@@ -1823,9 +1831,21 @@ window.lsSaveCTP_providerReport=function(){
       var o=opts||{};var cfg=_cfg();
       var queue=[cfg.primary].concat(cfg.fallback||[]).filter(Boolean);
       if(!queue.length)return Promise.resolve({ok:false,error:'No provider configured.',status:'no-provider'});
+      function _logAttempt(entry){try{var ex=JSON.parse(localStorage.getItem('ls_generation_report')||'[]');ex.push(entry);if(ex.length>200)ex=ex.slice(-200);localStorage.setItem('ls_generation_report',JSON.stringify(ex));}catch(_){}}
       function tryNext(ids){
         if(!ids.length)return Promise.resolve({ok:false,error:'All providers failed.',status:'all-failed'});
-        return _tryOne(ids[0],o.prompt||'',o.settings||{}).then(function(r){return r.ok?r:tryNext(ids.slice(1));}).catch(function(){return tryNext(ids.slice(1));});
+        var id=ids[0];var pName=(REG[id]&&REG[id].name)||id;var ts=new Date().toISOString();
+        if(o.onAttempt)try{o.onAttempt({phase:'start',providerId:id,providerName:pName,remaining:ids.length});}catch(_){}
+        return _tryOne(id,o.prompt||'',o.settings||{}).then(function(r){
+          _logAttempt({providerId:id,providerName:pName,prompt:(o.prompt||'').substring(0,200),timestamp:ts,success:r.ok,imageReturned:!!(r.ok&&(r.imageUrl||r.base64||r.blob)),error:r.ok?null:(r.error||null)});
+          if(r.ok)return r;
+          if(o.onAttempt)try{o.onAttempt({phase:'fail',providerId:id,providerName:pName,remaining:ids.length-1,error:r.error});}catch(_){}
+          return tryNext(ids.slice(1));
+        }).catch(function(e){
+          _logAttempt({providerId:id,providerName:pName,prompt:(o.prompt||'').substring(0,200),timestamp:ts,success:false,imageReturned:false,error:(e&&e.message)||'unknown'});
+          if(o.onAttempt)try{o.onAttempt({phase:'fail',providerId:id,providerName:pName,remaining:ids.length-1,error:(e&&e.message)||'unknown'});}catch(_){}
+          return tryNext(ids.slice(1));
+        });
       }
       return tryNext(queue);
     }
