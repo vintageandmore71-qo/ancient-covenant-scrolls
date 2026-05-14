@@ -1361,23 +1361,27 @@ window.lsSaveCTP_providerReport=function(){
       var pd=document.getElementById('aid-v74-prompt-display');
       if(pd)pd.textContent=prompt;
       try{lsAID_updateCinematicPreview();}catch(_){}
-      var _provCfg=aid_read(KEYS.providers)||{};
-      if(_provCfg.active==='pollinations'){
-        lsAID_v74_frame_state('Generating...','Sending to Pollinations — may take 15–30 seconds...','#b388ff');
-        lsAID_v74_status('Generating image...','#b388ff');
-        var _promptShort=prompt.length>500?prompt.substring(0,500):prompt;
-        var _enc=encodeURIComponent(_promptShort);
-        var _seed=Math.floor(Math.random()*99999);
-        var _imgUrl='https://image.pollinations.ai/prompt/'+_enc+'?width=768&height=512&seed='+_seed+'&nologo=true&model=flux';
-        var _pimg=new Image();
-        _pimg.onload=function(){lsAID_v74_show_image(_imgUrl);_currentImageData=_imgUrl;lsAID_v74_status('Image generated.','#5ee0a5');};
-        _pimg.onerror=function(){lsAID_v74_frame_state('Provider returned no image','Try again or import manually.','#ff8080');lsAID_v74_status('Generation failed. Try again or import manually.','#ff8080');if(notice)notice.style.display='block';};
-        _pimg.src=_imgUrl;
-      } else {
-        lsAID_v74_frame_state('Provider Required','No provider connected. Open Provider Settings to connect one, or copy the prompt and use any image tool.','#ffb300');
-        if(notice)notice.style.display='block';
-        lsAID_v74_status('Prompt ready. Connect a provider or copy the prompt.','#ffb300');
-      }
+      lsAID_v74_frame_state('Generating...','Checking provider...','#b388ff');
+      lsAID_v74_status('Generating...','#b388ff');
+      window.LoadAIProviderRouter.generateImage({prompt:prompt,settings:{width:768,height:512}}).then(function(result){
+        if(result.ok){
+          var src=result.imageUrl||result.base64||result.blob;
+          _currentImageData=src;_currentImageName='generated';
+          lsAID_v74_show_image(src);
+          lsAID_v74_status('Image via '+(result.providerName||result.providerId)+'.','#5ee0a5');
+        }else if(result.status==='no-provider'){
+          lsAID_v74_frame_state('Provider Required','No provider connected. Open Provider Settings, or copy the prompt.','#ffb300');
+          if(notice)notice.style.display='block';
+          lsAID_v74_status('No provider. Add one in Providers.','#ffb300');
+        }else{
+          lsAID_v74_frame_state('Provider Failed',(result.error||'Generation failed. Try again or import manually.'),'#ff8080');
+          lsAID_v74_status('Failed: '+(result.error||'Unknown error.'),'#ff8080');
+          if(notice)notice.style.display='block';
+        }
+      }).catch(function(e){
+        lsAID_v74_frame_state('Error',(e.message||'Unexpected error.'),'#ff8080');
+        lsAID_v74_status('Error: '+(e.message||'Unknown.'),'#ff8080');
+      });
     }catch(err){
       lsAID_v74_status('Something went wrong. Try shorter text.','#ff8080');
       lsAID_v74_frame_state('Could not process scene','Try again with simpler text.','#ff8080');
@@ -1681,88 +1685,282 @@ window.lsSaveCTP_providerReport=function(){
     lsAID_render_chars_panel();
     aid_confirm('aid-chars-confirm',(removed[0]?removed[0].name:'Character')+' deleted.','#ff8080');
   }
+  window.LoadAIProviderRouter=(function(){
+    var _PKEY=KEYS.providers;
+    var REG={
+      pollinations:{id:'pollinations',name:'Pollinations',group:'free-web',free:true,imageCapable:true,description:'Free, browser-ready. No key needed.'},
+      horde:{id:'horde',name:'AI Horde',group:'free-web',free:true,needsKey:false,imageCapable:true,description:'Community-powered. Optional key for priority.'},
+      huggingface:{id:'huggingface',name:'Hugging Face Inference',group:'api-key',needsKey:true,imageCapable:true,description:'Open model inference. Free tier available.'},
+      cloudflare:{id:'cloudflare',name:'Cloudflare Workers AI',group:'api-key',needsKey:true,optional:true,imageCapable:true,description:'Optional. Add your Workers AI key.'},
+      together:{id:'together',name:'Together AI',group:'api-key',needsKey:true,optional:true,imageCapable:true,description:'Optional. Free tier with open models.'},
+      replicate:{id:'replicate',name:'Replicate',group:'api-key',needsKey:true,paidOnly:true,disabled:true,imageCapable:true,description:'Paid. Future support — off by default.'},
+      comfyui:{id:'comfyui',name:'ComfyUI',group:'local-image',needsUrl:true,imageCapable:true,description:'Local ComfyUI endpoint.'},
+      localsd:{id:'localsd',name:'Stable Diffusion (A1111 / WebUI)',group:'local-image',needsUrl:true,imageCapable:true,description:'Local A1111 or WebUI API endpoint.'},
+      forge:{id:'forge',name:'Forge',group:'local-image',needsUrl:true,imageCapable:true,description:'Local Forge endpoint (A1111-compatible API).'},
+      fooocus:{id:'fooocus',name:'Fooocus',group:'local-image',needsUrl:true,imageCapable:true,description:'Local Fooocus endpoint.'},
+      invokeai:{id:'invokeai',name:'InvokeAI',group:'local-image',needsUrl:true,imageCapable:true,description:'Local InvokeAI endpoint.'},
+      diffusers:{id:'diffusers',name:'Diffusers Local',group:'local-image',needsUrl:true,imageCapable:true,description:'Local Diffusers HTTP endpoint.'},
+      ollama_img:{id:'ollama_img',name:'Ollama (image, future)',group:'local-image',future:true,disabled:true,description:'Future: Ollama image-capable models.'},
+      load_local:{id:'load_local',name:'Load Local Engine',group:'local-image',future:true,disabled:true,description:'Coming soon.'},
+      browser_tts:{id:'browser_tts',name:'Browser TTS',group:'voice-tts',free:true,audioCapable:true,description:'Built-in browser speech synthesis.'},
+      piper:{id:'piper',name:'Piper',group:'voice-tts',needsUrl:true,audioCapable:true,description:'Local Piper TTS endpoint.'},
+      kokoro:{id:'kokoro',name:'Kokoro',group:'voice-tts',needsUrl:true,audioCapable:true,description:'Local Kokoro TTS endpoint.'},
+      coqui:{id:'coqui',name:'Coqui XTTS',group:'voice-tts',needsUrl:true,audioCapable:true,description:'Local Coqui XTTS / v2 endpoint.'},
+      bark_tts:{id:'bark_tts',name:'Bark TTS',group:'voice-tts',needsUrl:true,audioCapable:true,description:'Local Bark speech endpoint.'},
+      f5_tts:{id:'f5_tts',name:'F5-TTS',group:'voice-tts',needsUrl:true,audioCapable:true,description:'Local F5-TTS endpoint.'},
+      parler:{id:'parler',name:'Parler-TTS',group:'voice-tts',needsUrl:true,audioCapable:true,description:'Local Parler-TTS endpoint.'},
+      fish_speech:{id:'fish_speech',name:'Fish Speech',group:'voice-tts',needsUrl:true,audioCapable:true,description:'Local Fish Speech endpoint.'},
+      chatterbox:{id:'chatterbox',name:'Chatterbox (future)',group:'voice-tts',future:true,disabled:true,description:'Future: Chatterbox / Chatterbox-Turbo.'},
+      dia_tts:{id:'dia_tts',name:'Dia (future)',group:'voice-tts',future:true,disabled:true,description:'Future: Dia-style TTS.'},
+      user_recording:{id:'user_recording',name:'User Recording',group:'local-audio',free:true,audioCapable:true,description:'Record from device microphone.'},
+      imported_audio:{id:'imported_audio',name:'Imported Audio',group:'local-audio',free:true,audioCapable:true,description:'Import existing audio files.'},
+      imported_sfx:{id:'imported_sfx',name:'Imported SFX',group:'local-audio',free:true,audioCapable:true,description:'Import sound effects.'},
+      web_audio:{id:'web_audio',name:'Web Audio Mixer',group:'local-audio',free:true,audioCapable:true,description:'Browser-based scene audio mixer.'},
+      local_audio_engine:{id:'local_audio_engine',name:'Local Audio Engine',group:'local-audio',future:true,disabled:true,description:'Coming soon: Load Local Audio Engine.'},
+      audiocraft:{id:'audiocraft',name:'AudioCraft / MusicGen',group:'music-sfx',needsUrl:true,audioCapable:true,description:'Local AudioCraft / MusicGen endpoint.'},
+      audiogen:{id:'audiogen',name:'AudioGen',group:'music-sfx',needsUrl:true,audioCapable:true,description:'Local AudioGen SFX endpoint.'},
+      stable_audio:{id:'stable_audio',name:'Stable Audio Open',group:'music-sfx',needsUrl:true,audioCapable:true,description:'Local Stable Audio Open endpoint.'},
+      magnet:{id:'magnet',name:'MAGNeT',group:'music-sfx',needsUrl:true,audioCapable:true,description:'Local MAGNeT endpoint.'},
+      riffusion:{id:'riffusion',name:'Riffusion',group:'music-sfx',needsUrl:true,audioCapable:true,description:'Local Riffusion endpoint.'},
+      sfx_library:{id:'sfx_library',name:'Public-Domain SFX Library',group:'music-sfx',free:true,audioCapable:true,description:'Import from local public-domain SFX.'},
+      comfyui_audio:{id:'comfyui_audio',name:'ComfyUI Audio',group:'music-sfx',needsUrl:true,audioCapable:true,description:'ComfyUI audio workflow endpoint.'},
+      load_ai_engine:{id:'load_ai_engine',name:'Load AI Engine',group:'load-engine',future:true,disabled:true,description:'Coming soon: Load AI Engine.'}
+    };
+    var GROUPS=[
+      {id:'free-web',label:'Free Web'},
+      {id:'api-key',label:'API Key'},
+      {id:'local-image',label:'Local Image'},
+      {id:'voice-tts',label:'Voice / TTS'},
+      {id:'local-audio',label:'Local Audio'},
+      {id:'music-sfx',label:'Music / SFX'},
+      {id:'load-engine',label:'Future Load Engine'}
+    ];
+    function _cfg(){
+      var raw=aid_read(_PKEY)||{};
+      if(!raw.primary&&raw.active){
+        raw.primary=raw.active;delete raw.active;
+        if(!raw.providers)raw.providers={};
+        ['horde','huggingface','localsd','comfyui'].forEach(function(k){if(raw[k]){raw.providers[k]=raw[k];delete raw[k];}});
+        aid_write(_PKEY,raw);
+      }
+      return raw;
+    }
+    function listProviders(){return Object.values(REG);}
+    function getProviderStatus(){
+      var cfg=_cfg();var result={primary:cfg.primary,fallback:cfg.fallback||[],configured:{}};
+      Object.keys(REG).forEach(function(id){
+        var r=REG[id];var pdata=cfg.providers&&cfg.providers[id]||{};
+        result.configured[id]={configured:r.disabled||r.future?false:(r.needsKey?!!(pdata.key):r.needsUrl?!!(pdata.url):true)};
+      });
+      return result;
+    }
+    function saveProviderSettings(id,data){
+      var cfg=_cfg();if(!cfg.providers)cfg.providers={};
+      var e=cfg.providers[id]||{};cfg.providers[id]=Object.assign(e,data);aid_write(_PKEY,cfg);
+    }
+    function setPrimary(id){
+      var cfg=_cfg();cfg.primary=(cfg.primary===id?null:id);aid_write(_PKEY,cfg);
+    }
+    function toggleFallback(id){
+      var cfg=_cfg();if(!cfg.fallback)cfg.fallback=[];
+      var i=cfg.fallback.indexOf(id);if(i>=0)cfg.fallback.splice(i,1);else cfg.fallback.push(id);
+      aid_write(_PKEY,cfg);
+    }
+    function testProvider(id){
+      var r=REG[id];if(!r||r.disabled||r.future)return Promise.reject(new Error('Provider not available.'));
+      if(id==='pollinations'){
+        return new Promise(function(res,rej){
+          var img=new Image();
+          img.onload=function(){res({ok:true,message:'Pollinations reachable.'});};
+          img.onerror=function(){rej(new Error('Pollinations unreachable. Check network.'));};
+          img.src='https://image.pollinations.ai/prompt/test?width=64&height=64&seed=1&nologo=true';
+        });
+      }
+      var cfg=_cfg();var pdata=cfg.providers&&cfg.providers[id]||{};
+      if(r.needsKey&&!pdata.key)return Promise.reject(new Error('API key required.'));
+      if(r.needsUrl&&!pdata.url)return Promise.reject(new Error('Endpoint URL required.'));
+      if(id==='browser_tts')return Promise.resolve({ok:!!(window.speechSynthesis),message:window.speechSynthesis?'Browser TTS ready.':'Not supported in this browser.'});
+      return Promise.resolve({ok:true,message:'Settings saved. Live test requires active connection.'});
+    }
+    function _sdApiCall(id,prompt,settings){
+      var cfg=_cfg();var pdata=cfg.providers&&cfg.providers[id]||{};
+      var base=(pdata.url||'').replace(/\/+$/,'');
+      if(!base)return Promise.resolve({ok:false,providerId:id,error:'No endpoint URL set.',status:'no-url'});
+      var body=JSON.stringify({prompt:prompt,negative_prompt:settings.negativePrompt||'',width:settings.width||768,height:settings.height||512,steps:settings.steps||20,cfg_scale:settings.cfgScale||7});
+      return fetch(base+'/sdapi/v1/txt2img',{method:'POST',headers:{'Content-Type':'application/json'},body:body})
+        .then(function(r){return r.json();})
+        .then(function(d){
+          if(d.images&&d.images[0]){return {ok:true,providerId:id,providerName:REG[id].name,type:'image',imageUrl:null,base64:'data:image/png;base64,'+d.images[0],status:'ok',raw:d};}
+          return {ok:false,providerId:id,error:'No image in response.',status:'provider-failed',raw:d};
+        }).catch(function(e){return {ok:false,providerId:id,error:e.message||'Request failed.',status:'provider-failed'};});
+    }
+    function _tryOne(id,prompt,settings){
+      var r=REG[id];
+      if(!r||r.disabled||r.future)return Promise.resolve({ok:false,providerId:id,error:'Not available.'});
+      if(id==='pollinations'){
+        return new Promise(function(res){
+          var p=prompt.length>500?prompt.substring(0,500):prompt;
+          var url='https://image.pollinations.ai/prompt/'+encodeURIComponent(p)+'?width='+(settings.width||768)+'&height='+(settings.height||512)+'&seed='+Math.floor(Math.random()*99999)+'&nologo=true&model=flux';
+          var img=new Image();
+          img.onload=function(){res({ok:true,providerId:'pollinations',providerName:'Pollinations',type:'image',imageUrl:url,base64:null,blob:null,error:null,status:'ok',raw:{url:url}});};
+          img.onerror=function(){res({ok:false,providerId:'pollinations',providerName:'Pollinations',error:'Pollinations returned no image.',status:'provider-failed'});};
+          img.src=url;
+        });
+      }
+      if(['localsd','forge','fooocus','invokeai','diffusers'].indexOf(id)>=0)return _sdApiCall(id,prompt,settings);
+      if(id==='browser_tts'){
+        return new Promise(function(res){
+          if(!window.speechSynthesis)return res({ok:false,providerId:'browser_tts',error:'Not supported.',status:'unsupported'});
+          var u=new SpeechSynthesisUtterance(prompt.length>200?prompt.substring(0,200):prompt);
+          u.onend=function(){res({ok:true,providerId:'browser_tts',providerName:'Browser TTS',type:'audio',status:'ok'});};
+          u.onerror=function(e){res({ok:false,providerId:'browser_tts',error:e.error||'TTS error.',status:'provider-failed'});};
+          window.speechSynthesis.speak(u);
+        });
+      }
+      return Promise.resolve({ok:false,providerId:id,error:'Generation not yet implemented for this provider.',status:'not-implemented'});
+    }
+    function generateImage(opts){
+      var o=opts||{};var cfg=_cfg();
+      var queue=[cfg.primary].concat(cfg.fallback||[]).filter(Boolean);
+      if(!queue.length)return Promise.resolve({ok:false,error:'No provider configured.',status:'no-provider'});
+      function tryNext(ids){
+        if(!ids.length)return Promise.resolve({ok:false,error:'All providers failed.',status:'all-failed'});
+        return _tryOne(ids[0],o.prompt||'',o.settings||{}).then(function(r){return r.ok?r:tryNext(ids.slice(1));}).catch(function(){return tryNext(ids.slice(1));});
+      }
+      return tryNext(queue);
+    }
+    function generateAudio(opts){
+      var o=opts||{};var cfg=_cfg();
+      var id=cfg.audioPrimary||null;
+      if(!id)return Promise.resolve({ok:false,error:'No audio provider configured.',status:'no-provider'});
+      return _tryOne(id,o.prompt||'',o.settings||{});
+    }
+    function fallbackToNextProvider(){var cfg=_cfg();return (cfg.fallback||[])[0]||null;}
+    function returnImageToFrame(result){
+      if(!result||!result.ok)return false;
+      var src=result.imageUrl||result.base64||result.blob;if(!src)return false;
+      try{lsAID_v74_show_image(src);lsAID_v74_status('Image from '+(result.providerName||result.providerId)+'.','#5ee0a5');}catch(_){}
+      return true;
+    }
+    function returnAudioToScene(result){return !!(result&&result.ok);}
+    return {listProviders:listProviders,getProviderStatus:getProviderStatus,saveProviderSettings:saveProviderSettings,setPrimary:setPrimary,toggleFallback:toggleFallback,testProvider:testProvider,generateImage:generateImage,generateAudio:generateAudio,fallbackToNextProvider:fallbackToNextProvider,returnImageToFrame:returnImageToFrame,returnAudioToScene:returnAudioToScene,_registry:REG,_groups:GROUPS,_getConfig:_cfg};
+  }());
+
   function lsAID_update_provider_bar(){
     var dot=document.getElementById('aid-provider-bar-dot');
     var txt=document.getElementById('aid-provider-bar-text');
     if(!dot&&!txt)return;
-    var cfg=aid_read(KEYS.providers)||{};
-    var provLabels={pollinations:'Pollinations (free)',horde:'AI Horde',huggingface:'Hugging Face',localsd:'Local SD',comfyui:'ComfyUI'};
-    if(cfg.active&&provLabels[cfg.active]){
+    var status=window.LoadAIProviderRouter.getProviderStatus();
+    var pid=status.primary;
+    var reg=window.LoadAIProviderRouter._registry;
+    if(pid&&reg[pid]){
       if(dot)dot.style.background='#5ee0a5';
-      if(txt)txt.textContent=provLabels[cfg.active]+' connected';
+      if(txt)txt.textContent=reg[pid].name+' connected';
     }else{
       if(dot)dot.style.background='#7a6fa0';
       if(txt)txt.textContent='No provider connected';
     }
   }
   function lsAID_render_providers_panel(){
-    var cfg=aid_read(KEYS.providers)||{};
-    var active=cfg.active||'';
-    var notice=document.getElementById('aid-prov-active-notice');
-    if(notice){notice.style.display='block';notice.textContent=active?('Active: '+(active.charAt(0).toUpperCase()+active.slice(1))):'No provider selected. Tap Select below.';notice.style.color=active?'#5ee0a5':'#ffb300';}
-    ['pollinations','horde','huggingface','localsd','comfyui'].forEach(function(key){
-      var btn=document.getElementById('aid-prov-sel-'+key);
-      if(btn){
-        var isActive=active===key;
-        btn.style.background=isActive?'rgba(94,224,165,.15)':'rgba(125,42,232,.1)';
-        btn.style.borderColor=isActive?'rgba(94,224,165,.5)':'rgba(125,42,232,.3)';
-        btn.style.color=isActive?'#5ee0a5':'#c0b8d9';
-      }
+    var el=document.getElementById('aid-providers-registry');
+    if(!el)return;
+    var status=window.LoadAIProviderRouter.getProviderStatus();
+    var reg=window.LoadAIProviderRouter._registry;
+    var groups=window.LoadAIProviderRouter._groups;
+    var cfg=window.LoadAIProviderRouter._getConfig();
+    var html='';
+    groups.forEach(function(g){
+      var provs=Object.values(reg).filter(function(r){return r.group===g.id;});
+      if(!provs.length)return;
+      html+='<div style="color:#b388ff;font:700 10px Inter,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:12px 0 6px;border-bottom:1px solid rgba(125,42,232,.15);margin-bottom:8px;">'+g.label+'</div>';
+      provs.forEach(function(r){
+        var isPrimary=status.primary===r.id;
+        var isFallback=(status.fallback||[]).indexOf(r.id)>=0;
+        var disabled=!!(r.disabled||r.future);
+        var badge=r.free?'Free':r.paidOnly?'Paid':r.needsKey?'API Key':r.needsUrl?'Local':'Built-in';
+        var badgeColor=r.free?'#5ee0a5':r.paidOnly?'#ff8080':r.needsKey?'#ffb300':'#b388ff';
+        var statusBg=disabled?'#09060f':'#0e0720';
+        var bdColor=disabled?'rgba(125,42,232,.1)':'rgba(125,42,232,.22)';
+        html+='<div style="border:1px solid '+bdColor+';border-radius:10px;padding:10px 12px;margin-bottom:7px;background:'+statusBg+';opacity:'+(disabled?.45:1)+';">';
+        html+='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;">';
+        html+='<div><div style="color:'+(disabled?'#3a2a5a':'#f5f0ff')+';font:700 13px Inter,system-ui,sans-serif;">'+r.name+'</div>';
+        html+='<div style="color:'+badgeColor+';font:500 10px Inter,system-ui,sans-serif;margin-top:1px;">'+badge+(r.future?' · Coming soon':r.disabled?' · Off by default':'')+'</div></div>';
+        html+='<div style="width:7px;height:7px;border-radius:50%;background:'+(isPrimary?'#5ee0a5':isFallback?'#b388ff':'#3a2a5a')+';flex-shrink:0;margin-top:4px;"></div>';
+        html+='</div>';
+        html+='<div style="color:#6a5a8a;font:400 11px Inter,system-ui,sans-serif;margin-bottom:7px;line-height:1.4;">'+r.description+'</div>';
+        if(!disabled){
+          html+='<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:'+(r.needsKey||r.needsUrl?'7':'0')+'px;">';
+          html+='<button type="button" data-action="set-primary" data-provider="'+r.id+'" style="padding:4px 10px;background:'+(isPrimary?'rgba(94,224,165,.15)':'rgba(125,42,232,.12)')+';border:1px solid '+(isPrimary?'rgba(94,224,165,.45)':'rgba(125,42,232,.25)')+';border-radius:6px;color:'+(isPrimary?'#5ee0a5':'#b0a8d0')+';font:600 11px Inter,system-ui,sans-serif;cursor:pointer;">'+(isPrimary?'Primary':'Set Primary')+'</button>';
+          html+='<button type="button" data-action="set-fallback" data-provider="'+r.id+'" style="padding:4px 10px;background:'+(isFallback?'rgba(179,136,255,.12)':'rgba(125,42,232,.08)')+';border:1px solid '+(isFallback?'rgba(179,136,255,.35)':'rgba(125,42,232,.18)')+';border-radius:6px;color:'+(isFallback?'#b388ff':'#7a6fa0')+';font:600 11px Inter,system-ui,sans-serif;cursor:pointer;">'+(isFallback?'Fallback':'Add Fallback')+'</button>';
+          html+='<button type="button" data-action="test-provider-btn" data-provider="'+r.id+'" style="padding:4px 10px;background:rgba(125,42,232,.08);border:1px solid rgba(125,42,232,.15);border-radius:6px;color:#7a6fa0;font:600 11px Inter,system-ui,sans-serif;cursor:pointer;">Test</button>';
+          html+='</div>';
+          if(r.needsKey){html+='<input type="password" data-provider-id="'+r.id+'" data-setting-type="key" placeholder="API key" autocomplete="off" style="width:100%;box-sizing:border-box;background:#160b26;border:1px solid rgba(125,42,232,.2);border-radius:7px;color:#f5f0ff;font:400 13px Inter,system-ui,sans-serif;padding:7px 10px;-webkit-appearance:none;" value="">';}
+          if(r.needsUrl){html+='<input type="url" data-provider-id="'+r.id+'" data-setting-type="url" placeholder="Endpoint URL (e.g. http://localhost:7860)" autocomplete="off" style="width:100%;box-sizing:border-box;background:#160b26;border:1px solid rgba(125,42,232,.2);border-radius:7px;color:#f5f0ff;font:400 13px Inter,system-ui,sans-serif;padding:7px 10px;-webkit-appearance:none;" value="">';}
+        }
+        html+='</div>';
+      });
     });
-    var hordeKey=document.getElementById('aid-prov-key-horde');if(hordeKey&&cfg.horde)hordeKey.value=cfg.horde.key||'';
-    var hfKey=document.getElementById('aid-prov-key-huggingface');if(hfKey&&cfg.huggingface)hfKey.value=cfg.huggingface.key||'';
-    var sdUrl=document.getElementById('aid-prov-url-localsd');if(sdUrl&&cfg.localsd)sdUrl.value=cfg.localsd.url||'';
-    var cuUrl=document.getElementById('aid-prov-url-comfyui');if(cuUrl&&cfg.comfyui)cuUrl.value=cfg.comfyui.url||'';
+    html+='<button type="button" data-action="save-providers" style="width:100%;padding:12px;background:linear-gradient(135deg,#7d2ae8,#b33af0);color:#fff;border:none;border-radius:10px;font:700 13px Inter,system-ui,sans-serif;cursor:pointer;margin-top:6px;">Save Provider Settings</button>';
+    el.innerHTML=html;
+    // Restore saved key/url values (never log them)
+    if(cfg.providers){
+      el.querySelectorAll('[data-provider-id][data-setting-type]').forEach(function(inp){
+        var pid=inp.getAttribute('data-provider-id');
+        var stype=inp.getAttribute('data-setting-type');
+        var pdata=cfg.providers[pid];
+        if(pdata&&pdata[stype])inp.value=pdata[stype];
+      });
+    }
+    // Update active notice
+    var notice=document.getElementById('aid-prov-active-notice');
+    if(notice){
+      notice.style.display='block';
+      if(status.primary&&reg[status.primary]){
+        notice.style.color='#5ee0a5';
+        notice.textContent='Primary: '+reg[status.primary].name+(status.fallback&&status.fallback.length?' · '+status.fallback.length+' fallback':'');
+      }else{
+        notice.style.color='#ffb300';
+        notice.textContent='No primary provider selected. Tap Set Primary on any provider below.';
+      }
+    }
   }
   function lsAID_select_provider(key){
-    var cfg=aid_read(KEYS.providers)||{};
-    cfg.active=cfg.active===key?null:key;
-    aid_write(KEYS.providers,cfg);
+    window.LoadAIProviderRouter.setPrimary(key);
     lsAID_render_providers_panel();
     lsAID_update_provider_bar();
-    var st=document.getElementById('aid-providers-status');
-    if(st){st.style.display='block';st.style.color='#5ee0a5';st.textContent=cfg.active?(key.charAt(0).toUpperCase()+key.slice(1)+' selected.'):'Provider deselected.';}
+  }
+  function lsAID_toggle_fallback(key){
+    window.LoadAIProviderRouter.toggleFallback(key);
+    lsAID_render_providers_panel();
+    lsAID_update_provider_bar();
   }
   function lsAID_save_providers(){
-    var cfg=aid_read(KEYS.providers)||{};
-    var hordeKey=document.getElementById('aid-prov-key-horde');
-    var hfKey=document.getElementById('aid-prov-key-huggingface');
-    var sdUrl=document.getElementById('aid-prov-url-localsd');
-    var cuUrl=document.getElementById('aid-prov-url-comfyui');
-    if(hordeKey)cfg.horde={key:hordeKey.value||''};
-    if(hfKey)cfg.huggingface={key:hfKey.value||''};
-    if(sdUrl)cfg.localsd={url:sdUrl.value||''};
-    if(cuUrl)cfg.comfyui={url:cuUrl.value||''};
-    aid_write(KEYS.providers,cfg);
+    var reg=document.getElementById('aid-providers-registry');
+    if(reg){
+      reg.querySelectorAll('[data-provider-id][data-setting-type]').forEach(function(inp){
+        var pid=inp.getAttribute('data-provider-id');
+        var stype=inp.getAttribute('data-setting-type');
+        var data={};data[stype]=inp.value||'';
+        window.LoadAIProviderRouter.saveProviderSettings(pid,data);
+      });
+    }
     lsAID_render_providers_panel();
     lsAID_update_provider_bar();
     var st=document.getElementById('aid-providers-status');
     if(st){st.style.display='block';st.style.color='#5ee0a5';st.textContent='Settings saved.';}
   }
   function lsAID_test_provider(){
-    var cfg=aid_read(KEYS.providers)||{};
+    var cfg=window.LoadAIProviderRouter._getConfig();
+    lsAID_test_provider_btn(cfg.primary||null);
+  }
+  function lsAID_test_provider_btn(pid){
     var st=document.getElementById('aid-providers-status');
     function setStatus(msg,color){if(st){st.style.display='block';st.style.color=color||'#c0b8d9';st.textContent=msg;}}
-    if(!cfg.active){setStatus('No provider selected. Select one first.','#ff8080');return;}
-    if(cfg.active==='pollinations'){
-      setStatus('Testing Pollinations...','#b388ff');
-      var _ti=new Image();
-      _ti.onload=function(){setStatus('Pollinations connected.','#5ee0a5');};
-      _ti.onerror=function(){setStatus('Pollinations unreachable. Check your connection.','#ff8080');};
-      _ti.src='https://image.pollinations.ai/prompt/test?width=64&height=64&seed=1&nologo=true';
-    }else if(cfg.active==='horde'){
-      setStatus('AI Horde: key saved. Live test requires network access.','#ffb300');
-    }else if(cfg.active==='huggingface'){
-      setStatus('Hugging Face: key saved. Live test requires network access.','#ffb300');
-    }else if(cfg.active==='localsd'){
-      var sdUrl=(cfg.localsd&&cfg.localsd.url)||'';
-      setStatus(sdUrl?'Local SD URL saved: '+sdUrl:'Enter a URL first.','#ffb300');
-    }else if(cfg.active==='comfyui'){
-      var cuUrl=(cfg.comfyui&&cfg.comfyui.url)||'';
-      setStatus(cuUrl?'ComfyUI URL saved: '+cuUrl:'Enter a URL first.','#ffb300');
-    }else{
-      setStatus('Provider not recognized.','#ff8080');
-    }
+    if(!pid){setStatus('No provider selected.','#ff8080');return;}
+    var reg=window.LoadAIProviderRouter._registry;
+    var name=reg[pid]?reg[pid].name:pid;
+    setStatus('Testing '+name+'...','#b388ff');
+    window.LoadAIProviderRouter.testProvider(pid).then(function(r){setStatus(r.message||'Connected.','#5ee0a5');}).catch(function(e){setStatus('Failed: '+(e.message||'Unknown error.'),'#ff8080');});
   }
   function lsAID_apply_world_chip(field,value){
     var map={'period':'aid-v74w-period','style':'aid-v74w-style','clothing':'aid-v74w-clothing','forbidden':'aid-v74w-forbidden'};
@@ -1807,15 +2005,17 @@ window.lsSaveCTP_providerReport=function(){
       case 'save-char-inline':lsAID_save_char_inline();break;
       case 'edit-char-inline':lsAID_edit_char_inline(idx);break;
       case 'delete-char-inline':lsAID_delete_char_inline(idx);break;
-      case 'provider-select':lsAID_select_provider(btn.getAttribute('data-provider')||'');break;
+      case 'provider-select':case 'set-primary':lsAID_select_provider(btn.getAttribute('data-provider')||'');break;
+      case 'set-fallback':lsAID_toggle_fallback(btn.getAttribute('data-provider')||'');break;
       case 'save-providers':lsAID_save_providers();break;
       case 'test-provider':lsAID_test_provider();break;
+      case 'test-provider-btn':lsAID_test_provider_btn(btn.getAttribute('data-provider')||null);break;
       case 'world-save':case 'world-save-new':lsAID_world_save_new();break;
       case 'world-chip':lsAID_apply_world_chip(btn.getAttribute('data-field')||'',btn.getAttribute('data-value')||'');break;
       case 'flag-issue':(function(){var issue=btn.getAttribute('data-issue')||'';btn.classList.toggle('active');var on=btn.classList.contains('active');btn.style.background=on?'rgba(255,128,0,.2)':'';btn.style.borderColor=on?'rgba(255,128,0,.5)':'rgba(125,42,232,.3)';}());break;
       case 'filter-takes':_currentFilter=btn.getAttribute('data-filter')||'all';render_takes_list(_currentFilter);break;
       case 'export-takes':window.lsAID_v74Export();break;
-      case 'export-bundle':(function(){var bundle={exportVersion:'loadstudio-v80',characters:aid_read(KEYS.chars)||[],worldRules:aid_read(KEYS.world)||{},scenes:aid_read(KEYS.scenes)||[],prompts:aid_read(KEYS.prompts)||[],reviews:aid_read(KEYS.reviews)||[],takes:aid_read(KEYS.takes)||[],exported:new Date().toISOString()};aid_dl('ai-image-director-bundle.json',bundle);aid_confirm('aid-v74ie-confirm','Bundle downloaded.','#5ee0a5');}());break;
+      case 'export-bundle':(function(){var bundle={exportVersion:'loadstudio-v82',characters:aid_read(KEYS.chars)||[],worldRules:aid_read(KEYS.world)||{},scenes:aid_read(KEYS.scenes)||[],prompts:aid_read(KEYS.prompts)||[],reviews:aid_read(KEYS.reviews)||[],takes:aid_read(KEYS.takes)||[],exported:new Date().toISOString()};aid_dl('ai-image-director-bundle.json',bundle);aid_confirm('aid-v74ie-confirm','Bundle downloaded.','#5ee0a5');}());break;
       case 'export-characters':aid_dl('character-bible.json',{'character-bible':{characters:aid_read(KEYS.chars)||[],exported:new Date().toISOString()}});aid_confirm('aid-v74ie-confirm','Character bible downloaded.','#5ee0a5');break;
       case 'export-scenes':aid_dl('scene-bible.json',{'scene-bible':{scenes:aid_read(KEYS.scenes)||[],exported:new Date().toISOString()}});aid_confirm('aid-v74ie-confirm','Scene bible downloaded.','#5ee0a5');break;
       case 'export-continuity':aid_dl('continuity-data.json',{takes:aid_read(KEYS.takes)||[],reviews:aid_read(KEYS.reviews)||[],exported:new Date().toISOString()});aid_confirm('aid-v74ie-confirm','Continuity data downloaded.','#5ee0a5');break;
