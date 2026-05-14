@@ -339,10 +339,8 @@ var _CSS =
   '#lseb-editor .video-track{height:90px;display:flex;align-items:center;gap:0;position:relative}' +
   '#lseb-editor .timeline-clip{position:relative;height:84px;border-radius:6px;overflow:hidden;background:#08080d;display:flex;align-items:center;cursor:pointer;flex:0 0 auto;border:2px solid rgba(179,58,240,.4)}' +
   '#lseb-editor .timeline-clip.selected{border:3px solid #b33af0}' +
-  '#lseb-editor .thumbnail-strip{width:100%;height:100%;display:flex;align-items:stretch;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}' +
-  '#lseb-editor .thumbnail-strip::-webkit-scrollbar{display:none}' +
-  '#lseb-editor .thumbnail-strip img{flex:0 0 auto;width:auto;height:100%;object-fit:contain;object-position:center;display:block;border-right:1px solid rgba(255,255,255,.15)}' +
-  '#lseb-editor .thumbnail-strip img:last-child{border-right:none}' +
+  '#lseb-editor .thumbnail-strip{position:absolute;inset:0;display:flex;align-items:stretch;overflow:hidden}' +
+  '#lseb-editor .thumbnail-strip img{flex:0 0 86px;width:86px;height:100%;object-fit:cover;object-position:center top;display:block;border-right:1px solid rgba(255,255,255,.1)}' +
   '#lseb-editor .clip-duration{position:absolute;left:6px;bottom:4px;background:rgba(0,0,0,.7);color:#fff;font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px;font-variant-numeric:tabular-nums;pointer-events:none}' +
   '#lseb-editor .empty-slot{flex:0 0 100px;height:84px;border:1px dashed #2a2a40;border-radius:6px;background:#0c0c14;cursor:pointer}' +
   '#lseb-editor .big-add{flex:0 0 44px;height:84px;background:#1e1e2a;border:none;border-radius:8px;color:#cfcfdc;font-size:22px;font-weight:900;cursor:pointer;font-family:inherit}' +
@@ -623,8 +621,17 @@ function _openSceneEditor(idx) {
 
   // Wire everything
   _bindEditor(idx);
+  // Preload audio from restored state so playback works after reload
+  if (scene.media.music) _preloadAudio(scene.id, 'music', scene.media.music);
+  if (scene.media.narration) _preloadAudio(scene.id, 'narration', scene.media.narration);
+  if (scene.media.sfxAudio) _preloadAudio(scene.id, 'sfxAudio', scene.media.sfxAudio);
+  (scene.tracks.music || []).forEach(function (it, i) { if (it.src) _preloadAudio(scene.id, 'music_track_' + i, it.src); });
   _renderImageStrip(idx);
   _renderTracks(idx);
+  // Restore waveform if audio was previously attached
+  if (scene.media.music || (scene.tracks.music && scene.tracks.music.length > 0)) {
+    setTimeout(function () { _renderWaveformPlaceholder(0.35); }, 0);
+  }
   _renderRuler(idx);
 }
 
@@ -893,7 +900,29 @@ function _bindEditor(idx) {
   if (strip) strip.addEventListener('click', function () { _el('lseb-img-pick') && _el('lseb-img-pick').click(); });
 }
 
-// ─── IMAGE STRIP ─────────────────────────────────────────────────────────────
+// ─── VIDEO FIRST-FRAME CAPTURE ────────────────────────────────────────────────
+function _captureVideoFirstFrame(src, cb) {
+  try {
+    var vid = document.createElement('video');
+    vid.muted = true; vid.playsInline = true; vid.preload = 'metadata'; vid.src = src;
+    var done = false;
+    function _cap() {
+      if (done) return; done = true;
+      try {
+        var c = document.createElement('canvas'); c.width = 86; c.height = 84;
+        c.getContext('2d').drawImage(vid, 0, 0, 86, 84);
+        cb(c.toDataURL('image/jpeg', 0.7));
+      } catch (_) { cb(null); }
+      vid.src = '';
+    }
+    vid.addEventListener('seeked', _cap);
+    vid.addEventListener('loadeddata', function () { vid.currentTime = 0.01; });
+    vid.addEventListener('error', function () { if (!done) { done = true; cb(null); } });
+    vid.load();
+  } catch (_) { cb(null); }
+}
+
+// ─── IMAGE / MEDIA STRIP ─────────────────────────────────────────────────────
 function _renderImageStrip(idx) {
   var strip = _el('lseb-image-strip');
   if (!strip) return;
@@ -902,6 +931,7 @@ function _renderImageStrip(idx) {
 
   var dur = scene.duration || 5;
   var totalWidth = Math.max(360, dur * PX_PER_SECOND);
+  var thumbCount = Math.max(1, Math.ceil(totalWidth / 86));
 
   var clip = document.createElement('div');
   clip.className = 'timeline-clip selected';
@@ -910,15 +940,37 @@ function _renderImageStrip(idx) {
   if (scene.media.image) {
     var thumbStrip = document.createElement('div');
     thumbStrip.className = 'thumbnail-strip';
-    var thumbCount = Math.max(1, Math.ceil(totalWidth / 86));
     for (var i = 0; i < thumbCount; i++) {
       var img = document.createElement('img');
       img.src = scene.media.image;
       img.alt = '';
-      img.style.width = '86px';
       thumbStrip.appendChild(img);
     }
     clip.appendChild(thumbStrip);
+  } else if (scene.media.video) {
+    var vidThumbStrip = document.createElement('div');
+    vidThumbStrip.className = 'thumbnail-strip';
+    // Placeholder frames until first-frame capture completes
+    for (var vi = 0; vi < thumbCount; vi++) {
+      var vph = document.createElement('div');
+      vph.style.cssText = 'flex:0 0 86px;width:86px;height:100%;background:#0a0820;border-right:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;color:#4a3a6a;font-size:10px;font-weight:600';
+      vph.textContent = vi === 0 ? 'Video' : '';
+      vidThumbStrip.appendChild(vph);
+    }
+    clip.appendChild(vidThumbStrip);
+    // Async: replace placeholders with captured first frame
+    _captureVideoFirstFrame(scene.media.video, function (frameSrc) {
+      if (!frameSrc) return;
+      var s = _el('lseb-image-strip');
+      var cl = s && s.querySelector('.timeline-clip');
+      var ts = cl && cl.querySelector('.thumbnail-strip');
+      if (!ts) return;
+      ts.innerHTML = '';
+      for (var fi = 0; fi < thumbCount; fi++) {
+        var fimg = document.createElement('img'); fimg.src = frameSrc; fimg.alt = '';
+        ts.appendChild(fimg);
+      }
+    });
   } else {
     clip.style.background = '#1a0a2e';
     clip.style.border = '1px dashed rgba(179,58,240,.4)';
