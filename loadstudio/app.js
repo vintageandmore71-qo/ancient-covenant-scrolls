@@ -166,6 +166,100 @@ render();
       btn.style.background=on?'rgba(179,136,255,.28)':'';
     });
   }
+
+  // ── Scene Ideas: extract from text ────────────────────────────────────────
+  function extract_scenes_from_text(text){
+    var chars=load_chars().map(function(c){return c.name;});
+    var chunks=text.split(/\n{2,}/);
+    var paragraphs=[];
+    var currentScene=null;
+    chunks.forEach(function(chunk){
+      chunk=chunk.trim();if(!chunk)return;
+      if(/^(INT\.|EXT\.|SCENE\s*\d+|Scene\s*\d+|Chapter\s*\d+|CHAPTER\s*\d+)/i.test(chunk)){
+        if(currentScene)paragraphs.push(currentScene);
+        currentScene={header:chunk,body:''};
+      }else{
+        if(currentScene){currentScene.body+=' '+chunk;}
+        else{paragraphs.push({header:'',body:chunk});}
+      }
+    });
+    if(currentScene)paragraphs.push(currentScene);
+    if(!paragraphs.length){
+      chunks.forEach(function(chunk,i){if(chunk.trim().length>60)paragraphs.push({header:'Passage '+(i+1),body:chunk.trim()});});
+    }
+    paragraphs=paragraphs.slice(0,12);
+    var suggestions=[];
+    paragraphs.forEach(function(p,i){
+      var t=p.header+' '+p.body;
+      var location='';
+      if(/ark|ship|boat|vessel/i.test(t))location='The Ark';
+      else if(/mountain|hill|wilderness|desert/i.test(t))location='Wilderness';
+      else if(/town|village|market|crowd/i.test(t))location='Ancient town';
+      else if(/river|water|flood|rain/i.test(t))location='Waterside';
+      else if(/tent|home|dwelling|inside|interior/i.test(t))location='Interior dwelling';
+      else if(/field|land|earth|ground/i.test(t))location='Open land';
+      else location='Biblical setting';
+      var type='Narrative';
+      if(/wept|cried|grief|mourn|fear|terror/i.test(t))type='Emotional';
+      else if(/crowd|people|gathered|multitude/i.test(t))type='Crowd';
+      else if(/prayer|worship|voice|spoke|said/i.test(t))type='Dialogue';
+      else if(/built|carried|walked|moved|fled/i.test(t))type='Action';
+      else if(/stood|looked|watched|saw|beheld/i.test(t))type='Contemplative';
+      var mood='Solemn';
+      if(/joy|rejoice|celebrate|glad/i.test(t))mood='Hopeful';
+      else if(/fear|terror|trembl/i.test(t))mood='Fearful';
+      else if(/grief|mourn|weep|wept/i.test(t))mood='Grieving';
+      else if(/rain|flood/i.test(t))mood='Ominous';
+      else if(/peace|calm|quiet/i.test(t))mood='Peaceful';
+      var camera='Medium shot';
+      if(type==='Emotional')camera='Close-up on face';
+      else if(type==='Crowd')camera='Wide establishing shot';
+      else if(/horizon|sky|vast/i.test(t))camera='Wide angle';
+      var matchedChars=chars.filter(function(n){return t.toLowerCase().indexOf(n.toLowerCase())!==-1;});
+      var risks=[];
+      if(/crowd|people|multitude/i.test(t))risks.push('Crowd size must match world rules');
+      if(/family|ark|sons|wife/i.test(t))risks.push('Family count must match approved count');
+      if(/cloth|dress|garment/i.test(t))risks.push('Wardrobe must remain ancient');
+      var title=p.header||(type+' scene '+(i+1));
+      if(title.length>60)title=title.substring(0,60)+'...';
+      suggestions.push({title:title,type:type,location:location,characters:matchedChars.join(', '),mood:mood,action:p.body.length>100?p.body.substring(0,100)+'...':p.body,camera:camera,lighting:'Natural light',continuityRisks:risks.join('; '),promptStarter:type+' scene at '+location+', '+mood+' mood'+(matchedChars.length?', featuring '+matchedChars.join(', '):''),source:'script'});
+    });
+    return suggestions;
+  }
+
+  // ── Scene Ideas: project-based suggestions ─────────────────────────────────
+  function generate_project_suggestions(){
+    var chars=load_chars();
+    var scenes=load_scenes();
+    var wr=aid_read(KEYS.world)||{};
+    var suggestions=[];
+    chars.slice(0,4).forEach(function(c){
+      suggestions.push({title:c.name+' — character moment',type:'Emotional',location:'Biblical setting',characters:c.name,mood:c.tone||'Dignified',action:'Character visible in their natural environment, expression conveying inner state',camera:'Close-up on face',lighting:'Golden hour, warm natural light',continuityRisks:'Face and wardrobe must match canonical description',promptStarter:c.name+' close-up portrait, '+(c.ethnicity||'')+', '+(c.wardrobe||''),source:'project'});
+    });
+    scenes.slice(0,3).forEach(function(s){
+      suggestions.push({title:s.title+' — wide establishing shot',type:'Establishing',location:s.location||'Biblical setting',characters:s.characters||'',mood:s.mood||'Cinematic',action:'Wide shot establishing the location before main action begins',camera:'Wide angle establishing shot',lighting:(s.time||'Natural')+' light',continuityRisks:'Location must match scene continuity notes',promptStarter:'Wide establishing shot, '+(s.location||'ancient setting')+', '+(s.mood||'cinematic')+' mood',source:'project'});
+    });
+    var templates=[
+      {title:'Image-worthy moment — emotional close-up',type:'Emotional',location:'Any approved location',characters:'',mood:'Intense',action:'Character reacting to a pivotal moment, face fully visible',camera:'Tight close-up',lighting:'Dramatic side lighting',continuityRisks:'Face must match canonical approved reference',promptStarter:'Emotional close-up portrait, ancient setting, dramatic lighting',source:'template'},
+      {title:'Wide cinematic shot — landscape with figures',type:'Establishing',location:'Open landscape',characters:'',mood:'Epic',action:'Figures small against large dramatic landscape, conveying scale',camera:'Wide angle, low horizon line',lighting:'Golden hour or storm light',continuityRisks:'No modern elements in landscape',promptStarter:'Epic wide shot, ancient landscape, tiny figures, cinematic scale',source:'template'},
+      {title:'Group scene — family or community',type:'Group',location:'Community space',characters:'',mood:'Tense or unified',action:'Multiple characters together, interaction visible',camera:'Medium wide, group framing',lighting:'Even daylight',continuityRisks:'Character count must match world rules, diverse ancient population',promptStarter:'Group scene, ancient community, multiple characters, cinematic framing',source:'template'},
+      {title:'Action scene — movement and urgency',type:'Action',location:'Open terrain',characters:'',mood:'Urgent',action:'Character in motion, body language showing physical effort or urgency',camera:'Dynamic angle',lighting:'High contrast, dramatic',continuityRisks:'Wardrobe must remain practical, no modern clothing',promptStarter:'Action scene, ancient setting, dynamic movement, dramatic light',source:'template'},
+      {title:'Missing coverage — quiet interior moment',type:'Interior',location:'Interior dwelling',characters:'',mood:'Intimate',action:'Private interior moment, personal detail visible',camera:'Medium, intimate framing',lighting:'Warm interior light — fire glow or oil lamp',continuityRisks:'Interior must be period-correct, no modern objects',promptStarter:'Ancient interior dwelling, intimate moment, warm firelight, period-correct details',source:'template'},
+      {title:'Continuity check — repeated character scene',type:'Continuity',location:'Recurring location',characters:'',mood:'Consistent',action:'Scene that requires matching a previously approved image for character consistency',camera:'Match previous approved framing',lighting:'Match previous approved lighting',continuityRisks:'Must match all canonical character references for face, wardrobe, and body',promptStarter:'Character consistency scene, matching approved canonical references',source:'template'}
+    ];
+    return suggestions.concat(templates);
+  }
+
+  // ── Scene Ideas: render ────────────────────────────────────────────────────
+  function render_scene_suggestions(suggestions,source){
+    var el=document.getElementById('aid-si-list');if(!el)return;
+    window._aidSuggestions=suggestions;
+    if(!suggestions.length){el.innerHTML='<p style="color:#9c93b5;font:300 13px Inter,system-ui,sans-serif">No suggestions generated.</p>';return;}
+    var heading=source==='script'?'Scenes extracted from script or book':'Suggested scenes from your project — select one to fill the Scene Builder';
+    var sourceBadge={'script':'#b388ff','project':'#5ee0a5','template':'#9c93b5'};
+    el.innerHTML='<p style="font:600 12px Inter,system-ui,sans-serif;color:#b0a8d0;margin:0 0 10px">'+heading+'</p>'+suggestions.map(function(s,i){return '<div style="border:1px solid rgba(125,42,232,.25);border-radius:10px;padding:12px;margin-bottom:8px;background:#0e0720"><div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:6px;margin-bottom:6px"><strong style="color:#f5f0ff;font:600 13px Inter,system-ui,sans-serif">'+s.title+'</strong><span style="color:'+(sourceBadge[s.source]||'#9c93b5')+';font:600 11px Inter,system-ui,sans-serif;padding:2px 7px;border-radius:5px;border:1px solid currentColor">'+s.type+'</span></div>'+(s.location?'<div style="color:#c0b8d9;font:400 12px Inter,system-ui,sans-serif">Location: '+s.location+'</div>':'')+(s.characters?'<div style="color:#c0b8d9;font:400 12px Inter,system-ui,sans-serif">Characters: '+s.characters+'</div>':'')+(s.mood?'<div style="color:#c0b8d9;font:400 12px Inter,system-ui,sans-serif">Mood: '+s.mood+' | Camera: '+s.camera+'</div>':'')+(s.continuityRisks?'<div style="color:#ffb300;font:400 11px Inter,system-ui,sans-serif;margin-top:4px">Risk: '+s.continuityRisks+'</div>':'')+'<button class="ls-ctp-btn primary" type="button" style="margin-top:8px;font-size:12px" onclick="window.lsAID_applyScene('+i+')">Use This Scene</button></div>';}).join('');
+  }
+
   document.addEventListener('DOMContentLoaded',function(){
     toggles.forEach(bindToggle);
     var tourBtn=document.getElementById('ls-open-tour');
@@ -1070,6 +1164,9 @@ window.lsSaveCTP_providerReport=function(){
     var providerBtn=document.getElementById('aid-po-provider-btn');if(providerBtn){providerBtn.addEventListener('click',function(){var note=document.getElementById('aid-po-provider-note');if(note)note.style.display=note.style.display==='none'?'block':'none';});}
     var goReviewBtn=document.getElementById('aid-po-go-review-btn');if(goReviewBtn){goReviewBtn.addEventListener('click',function(){var note=document.getElementById('aid-po-provider-note');if(note)note.style.display='none';aid_switch_tab('image-review');});}
     var advToggle=document.getElementById('aid-rv-advanced-toggle');if(advToggle){advToggle.addEventListener('click',function(){var adv=document.getElementById('aid-rv-advanced');if(!adv)return;var open=adv.style.display!=='none';adv.style.display=open?'none':'block';this.textContent=open?'Advanced options':'Hide advanced options';});}
+    var siExtractBtn=document.getElementById('aid-si-extract-btn');if(siExtractBtn){siExtractBtn.addEventListener('click',function(){var paste=document.getElementById('aid-si-paste');var text=paste?paste.value.trim():'';if(!text){aid_confirm('aid-si-confirm','Paste text or upload a file first.','#ff8080');return;}var suggestions=extract_scenes_from_text(text);render_scene_suggestions(suggestions,'script');aid_confirm('aid-si-confirm',suggestions.length+' scene suggestion'+(suggestions.length===1?'':'s')+' extracted. Select one to fill the Scene Builder.','#5ee0a5');});}
+    var siFile=document.getElementById('aid-si-file');if(siFile){siFile.addEventListener('change',function(){var f=this.files[0];if(!f)return;var reader=new FileReader();reader.onload=function(ev){var text=ev.target.result;if(f.name.endsWith('.json')){try{var obj=JSON.parse(text);text=JSON.stringify(obj,null,2);}catch(e){}}var paste=document.getElementById('aid-si-paste');if(paste)paste.value=text;var suggestions=extract_scenes_from_text(text);render_scene_suggestions(suggestions,'script');aid_confirm('aid-si-confirm',suggestions.length+' scene suggestion'+(suggestions.length===1?'':'s')+' extracted from '+f.name+'. Select one to fill the Scene Builder.','#5ee0a5');};reader.readAsText(f);});}
+    var siSuggestBtn=document.getElementById('aid-si-suggest-btn');if(siSuggestBtn){siSuggestBtn.addEventListener('click',function(){var suggestions=generate_project_suggestions();render_scene_suggestions(suggestions,'project');aid_confirm('aid-si-confirm',suggestions.length+' scene ideas generated from your project data.','#5ee0a5');});}
     var rvFile=document.getElementById('aid-rv-file');if(rvFile){rvFile.addEventListener('change',function(){var f=this.files[0];if(!f)return;if(!f.type.startsWith('image/')){aid_confirm('aid-rv-confirm','Select an image file.','#ff8080');return;}_currentImageName=f.name;var reader=new FileReader();reader.onload=function(ev){_currentImageData=ev.target.result;_reviewZoom=1;var img=document.getElementById('aid-rv-img');var ph=document.getElementById('aid-rv-placeholder');var lbl=document.getElementById('aid-rv-img-label');if(img){img.src=_currentImageData;img.style.transform='scale(1)';img.style.display='block';}if(ph)ph.style.display='none';if(lbl)lbl.textContent='Local preview: '+_currentImageName;};reader.readAsDataURL(f);});}
     var zIn=document.getElementById('aid-rv-zoom-in');if(zIn){zIn.addEventListener('click',function(){_reviewZoom=Math.min(_reviewZoom+0.25,4);var img=document.getElementById('aid-rv-img');if(img)img.style.transform='scale('+_reviewZoom+')';});}
     var zOut=document.getElementById('aid-rv-zoom-out');if(zOut){zOut.addEventListener('click',function(){_reviewZoom=Math.max(_reviewZoom-0.25,0.25);var img=document.getElementById('aid-rv-img');if(img)img.style.transform='scale('+_reviewZoom+')';});}
@@ -1080,6 +1177,7 @@ window.lsSaveCTP_providerReport=function(){
     var addCharRefBtn=document.getElementById('aid-rv-add-char-ref-btn');if(addCharRefBtn){addCharRefBtn.addEventListener('click',function(){if(!_currentImageData){aid_confirm('aid-rv-confirm','Upload an image first.','#ff8080');return;}var name=gv('aid-rv-scene-ref')||'Character reference';var refs=aid_read('loadstudio_aid_char_refs')||[];refs.push({name:name,imageData:_currentImageData,imageName:_currentImageName,savedAt:new Date().toISOString()});try{aid_write('loadstudio_aid_char_refs',refs);}catch(e){}aid_confirm('aid-rv-confirm','Added to character references: '+name,'#5ee0a5');});}
     var addSceneRefBtn=document.getElementById('aid-rv-add-scene-ref-btn');if(addSceneRefBtn){addSceneRefBtn.addEventListener('click',function(){if(!_currentImageData){aid_confirm('aid-rv-confirm','Upload an image first.','#ff8080');return;}var name=gv('aid-rv-scene-ref')||'Scene reference';var refs=aid_read('loadstudio_aid_scene_refs')||[];refs.push({name:name,imageData:_currentImageData,imageName:_currentImageName,savedAt:new Date().toISOString()});try{aid_write('loadstudio_aid_scene_refs',refs);}catch(e){}aid_confirm('aid-rv-confirm','Added to scene references: '+name,'#5ee0a5');});}
   });
+  window.lsAID_applyScene=function(idx){var s=window._aidSuggestions&&window._aidSuggestions[idx];if(!s)return;sv('aid-sc-title',s.title);sv('aid-sc-type',s.type);sv('aid-sc-location',s.location);sv('aid-sc-mood',s.mood);sv('aid-sc-characters',s.characters);sv('aid-sc-action',s.action);sv('aid-sc-camera',s.camera);sv('aid-sc-lighting',s.lighting);sv('aid-sc-continuity-notes',s.continuityRisks);aid_confirm('aid-si-confirm','Scene loaded into Scene Builder.','#5ee0a5');aid_switch_tab('scene-builder');};
   window.lsAID_updateTake=function(idx,status){var takes=load_takes();if(!takes[idx])return;takes[idx].status=status;takes[idx].updatedAt=new Date().toISOString();aid_write(KEYS.takes,takes);render_takes_list(_currentFilter);};
   window.lsAID_exportTake=function(idx){var takes=load_takes();if(!takes[idx])return;aid_dl('take-'+idx+'-metadata.json',takes[idx]);};
   window.lsAID=function(ev){if(ev){ev.stopPropagation();ev.preventDefault();}var p=document.getElementById('lsAIDirectorPanel');if(!p)return;var wr=aid_read(KEYS.world)||{};sv('aid-wr-project',wr.project);sv('aid-wr-period',wr.period);sv('aid-wr-clothing',wr.clothing);sv('aid-wr-diversity',wr.diversity);sv('aid-wr-forbidden',wr.forbidden);sv('aid-wr-style',wr.style);sv('aid-wr-family-count',wr.familyCount);sv('aid-wr-crowd',wr.crowd);sv('aid-wr-authenticity',wr.authenticity);sv('aid-wr-negative',wr.negative);render_char_select();render_char_list();render_scene_list();render_takes_list(_currentFilter);p.style.display='block';aid_switch_tab('characters');};
