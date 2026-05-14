@@ -1414,18 +1414,18 @@ window.lsSaveCTP_providerReport=function(){
 
 
   function lsAID_v74_show_flow(){
-    var flow=document.getElementById('aid-v74-flow');
+    var mb=document.getElementById('aid-v74-main-body');
     var sp=document.getElementById('aid-v74-shortcut-panel');
-    if(flow){flow.style.display='block';}
+    if(mb){mb.style.display='block';}
     if(sp){sp.style.display='none';}
   }
 
   function lsAID_v74_show_panel(title, bodyHtml){
-    var flow=document.getElementById('aid-v74-flow');
+    var mb=document.getElementById('aid-v74-main-body');
     var sp=document.getElementById('aid-v74-shortcut-panel');
     var pt=document.getElementById('aid-v74-panel-title');
     var pb=document.getElementById('aid-v74-panel-body');
-    if(flow)flow.style.display='none';
+    if(mb)mb.style.display='none';
     if(sp)sp.style.display='block';
     if(pt)pt.textContent=title;
     if(pb)pb.innerHTML=bodyHtml;
@@ -1438,7 +1438,7 @@ window.lsSaveCTP_providerReport=function(){
       lsAID_v74_show_panel('Pull From Script or Book',
         '<p style="color:#c0b8d9;font:400 13px Inter,system-ui,sans-serif;margin:0 0 10px">Paste text from a script or book. Tap Extract to pull scene ideas.</p>'+
         '<textarea id="aid-v74p-paste" placeholder="Paste script or book text here..." style="width:100%;box-sizing:border-box;min-height:130px;background:#0e0720;border:2px solid rgba(125,42,232,.4);border-radius:10px;color:#f5f0ff;font:400 15px Inter,system-ui,sans-serif;padding:12px;resize:vertical;line-height:1.5"></textarea>'+
-        '<button type="button" onclick="window.lsAID_v74ExtractScript&&window.lsAID_v74ExtractScript()" style="width:100%;margin-top:10px;padding:13px;background:linear-gradient(135deg,#7d2ae8,#b33af0);color:#fff;border:none;border-radius:10px;font:700 15px Inter,system-ui,sans-serif;cursor:pointer">Extract Scene Ideas</button>'+
+        '<button type="button" data-action="extract-script" style="width:100%;margin-top:10px;padding:13px;background:linear-gradient(135deg,#7d2ae8,#b33af0);color:#fff;border:none;border-radius:10px;font:700 15px Inter,system-ui,sans-serif;cursor:pointer">Extract Scene Ideas</button>'+
         '<div id="aid-v74p-script-results" style="margin-top:14px"></div>'
       );
     } else if(type==='suggestions'){
@@ -1456,7 +1456,7 @@ window.lsSaveCTP_providerReport=function(){
           return '<div style="border:1px solid rgba(125,42,232,.25);border-radius:10px;padding:12px;margin-bottom:8px;background:#0e0720">'+
             '<div style="color:#f5f0ff;font:700 13px Inter,system-ui,sans-serif;margin-bottom:4px">'+s.title+'</div>'+
             '<div style="color:#c0b8d9;font:400 12px Inter,system-ui,sans-serif;margin-bottom:8px">'+s.action+'</div>'+
-            '<button type="button" onclick="window.lsAID_v74UseScene&&window.lsAID_v74UseScene('+i+')" style="padding:8px 16px;background:linear-gradient(135deg,#7d2ae8,#b33af0);color:#fff;border:none;border-radius:8px;font:600 13px Inter,system-ui,sans-serif;cursor:pointer">Use This Scene</button>'+
+            '<button type="button" data-action="use-scene" data-idx="'+i+'" style="padding:8px 16px;background:linear-gradient(135deg,#7d2ae8,#b33af0);color:#fff;border:none;border-radius:8px;font:600 13px Inter,system-ui,sans-serif;cursor:pointer">Use This Scene</button>'+
           '</div>';
         }).join('');
         window._v74Suggestions=suggestions;
@@ -1472,11 +1472,11 @@ window.lsSaveCTP_providerReport=function(){
           return '<div style="border:1px solid rgba(125,42,232,.25);border-radius:10px;padding:12px;margin-bottom:8px;background:#0e0720;display:flex;align-items:center;justify-content:space-between">'+
             '<div><div style="color:#f5f0ff;font:700 13px Inter,system-ui,sans-serif">'+c.name+'</div>'+
             '<div style="color:#9c93b5;font:400 11px Inter,system-ui,sans-serif">'+[c.role,c.ethnicity].filter(Boolean).join(' · ')+'</div></div>'+
-            '<button type="button" onclick="window.lsAID_v74AddChar&&window.lsAID_v74AddChar('+i+')" style="padding:7px 13px;background:rgba(125,42,232,.25);border:1px solid rgba(125,42,232,.5);border-radius:7px;color:#e0d8f8;font:600 12px Inter,system-ui,sans-serif;cursor:pointer">Add to Scene</button>'+
+            '<button type="button" data-action="add-char" data-idx="'+i+'" style="padding:7px 13px;background:rgba(125,42,232,.25);border:1px solid rgba(125,42,232,.5);border-radius:7px;color:#e0d8f8;font:600 12px Inter,system-ui,sans-serif;cursor:pointer">Add to Scene</button>'+
           '</div>';
         }).join('');
       }
-      html2+='<button type="button" onclick="window.lsAID_v74ClosePanel&&window.lsAID_v74ClosePanel()" style="width:100%;margin-top:4px;padding:11px;background:rgba(125,42,232,.15);border:1px solid rgba(125,42,232,.3);border-radius:9px;color:#c0b8d9;font:600 13px Inter,system-ui,sans-serif;cursor:pointer">Done</button>';
+      html2+='<button type="button" data-action="back-main" style="width:100%;margin-top:4px;padding:11px;background:rgba(125,42,232,.15);border:1px solid rgba(125,42,232,.3);border-radius:9px;color:#c0b8d9;font:600 13px Inter,system-ui,sans-serif;cursor:pointer">Done</button>';
       lsAID_v74_show_panel('Characters', html2);
     } else if(type==='world'){
       var wr=aid_read(KEYS.world)||{};
@@ -1485,13 +1485,13 @@ window.lsSaveCTP_providerReport=function(){
         fld('aid-v74w-style','Visual style',wr.style,'e.g. Cinematic, Documentary')+
         fld('aid-v74w-clothing','Clothing era',wr.clothing,'e.g. First century, Ancient Near East')+
         fld('aid-v74w-forbidden','Forbidden elements',wr.forbidden,'Things that must not appear')+
-        '<button type="button" onclick="window.lsAID_v74SaveWorld&&window.lsAID_v74SaveWorld()" style="width:100%;padding:12px;background:linear-gradient(135deg,#7d2ae8,#b33af0);color:#fff;border:none;border-radius:10px;font:700 14px Inter,system-ui,sans-serif;cursor:pointer;margin-top:4px">Save World Rules</button>'+
+        '<button type="button" data-action="world-save" style="width:100%;padding:12px;background:linear-gradient(135deg,#7d2ae8,#b33af0);color:#fff;border:none;border-radius:10px;font:700 14px Inter,system-ui,sans-serif;cursor:pointer;margin-top:4px">Save World Rules</button>'+
         '<div id="aid-v74w-confirm" style="display:none;margin-top:8px;color:#5ee0a5;font:500 13px Inter,system-ui,sans-serif"></div>';
       lsAID_v74_show_panel('World Rules', worldHtml);
     } else if(type==='importexport'){
       var ieHtml='<p style="color:#c0b8d9;font:400 13px Inter,system-ui,sans-serif;margin:0 0 14px">Import an image result or export your project data.</p>'+
-        '<button type="button" onclick="window.lsAID_v74TriggerImport&&window.lsAID_v74TriggerImport()" style="width:100%;padding:14px;background:rgba(125,42,232,.2);border:2px solid rgba(125,42,232,.5);border-radius:10px;color:#e0d8f8;font:700 15px Inter,system-ui,sans-serif;cursor:pointer;margin-bottom:10px">Import Image Result</button>'+
-        '<button type="button" onclick="window.lsAID_v74Export&&window.lsAID_v74Export()" style="width:100%;padding:13px;background:rgba(94,224,165,.1);border:1px solid rgba(94,224,165,.35);border-radius:10px;color:#5ee0a5;font:700 14px Inter,system-ui,sans-serif;cursor:pointer">Export Approved Takes</button>'+
+        '<button type="button" data-action="import-trigger" style="width:100%;padding:14px;background:rgba(125,42,232,.2);border:2px solid rgba(125,42,232,.5);border-radius:10px;color:#e0d8f8;font:700 15px Inter,system-ui,sans-serif;cursor:pointer;margin-bottom:10px">Import Image Result</button>'+
+        '<button type="button" data-action="export-takes" style="width:100%;padding:13px;background:rgba(94,224,165,.1);border:1px solid rgba(94,224,165,.35);border-radius:10px;color:#5ee0a5;font:700 14px Inter,system-ui,sans-serif;cursor:pointer">Export Approved Takes</button>'+
         '<div id="aid-v74ie-confirm" style="display:none;margin-top:8px;color:#5ee0a5;font:500 13px Inter,system-ui,sans-serif"></div>';
       lsAID_v74_show_panel('Import / Export', ieHtml);
     }
@@ -1512,7 +1512,7 @@ window.lsSaveCTP_providerReport=function(){
           return '<div style="border:1px solid rgba(125,42,232,.25);border-radius:10px;padding:12px;margin-bottom:8px;background:#0e0720">'+
             '<div style="color:#f5f0ff;font:700 13px Inter,system-ui,sans-serif;margin-bottom:4px">'+s.title+'</div>'+
             '<div style="color:#c0b8d9;font:400 12px Inter,system-ui,sans-serif;margin-bottom:8px">'+s.action+'</div>'+
-            '<button type="button" onclick="window.lsAID_v74UseScene&&window.lsAID_v74UseScene('+i+')" style="padding:8px 16px;background:linear-gradient(135deg,#7d2ae8,#b33af0);color:#fff;border:none;border-radius:8px;font:600 13px Inter,system-ui,sans-serif;cursor:pointer">Use This Scene</button>'+
+            '<button type="button" data-action="use-scene" data-idx="'+i+'" style="padding:8px 16px;background:linear-gradient(135deg,#7d2ae8,#b33af0);color:#fff;border:none;border-radius:8px;font:600 13px Inter,system-ui,sans-serif;cursor:pointer">Use This Scene</button>'+
           '</div>';
         }).join('');
     }
@@ -1589,17 +1589,76 @@ window.lsSaveCTP_providerReport=function(){
     }
   };
 
+  function lsAID_router(e){
+    var btn=e.target;
+    while(btn&&btn!==this){
+      if(btn.getAttribute&&btn.getAttribute('data-action'))break;
+      btn=btn.parentElement;
+    }
+    if(!btn||!btn.getAttribute)return;
+    var action=btn.getAttribute('data-action');
+    if(!action)return;
+    var idx=parseInt(btn.getAttribute('data-idx')||'0',10);
+    switch(action){
+      case 'close-overlay':
+        var p=document.getElementById('lsAIDirectorPanel');if(p)p.style.display='none';break;
+      case 'back-main':lsAID_v74_show_flow();break;
+      case 'pull-script':window.lsAID_v74Panel('script');break;
+      case 'scene-suggestions':window.lsAID_v74Panel('suggestions');break;
+      case 'characters':window.lsAID_v74Panel('characters');break;
+      case 'world-rules':window.lsAID_v74Panel('world');break;
+      case 'import-export':window.lsAID_v74Panel('importexport');break;
+      case 'create-image':window.lsAID_createImage();break;
+      case 'copy-prompt':window.lsAID_v74CopyPrompt();break;
+      case 'import-trigger':var fi=document.getElementById('aid-v74-import');if(fi)fi.click();break;
+      case 'approve':window.lsAID_v74Review('approve');break;
+      case 'needs-correction':window.lsAID_v74Review('correction');break;
+      case 'reject':window.lsAID_v74Review('reject');break;
+      case 'extract-script':window.lsAID_v74ExtractScript();break;
+      case 'use-scene':window.lsAID_v74UseScene(idx);break;
+      case 'add-char':window.lsAID_v74AddChar(idx);break;
+      case 'world-save':window.lsAID_v74SaveWorld();break;
+      case 'export-takes':window.lsAID_v74Export();break;
+    }
+  }
+
+  var _aidOverlayEl=document.getElementById('lsAIDirectorPanel');
+  if(_aidOverlayEl&&!_aidOverlayEl._routerBound){
+    _aidOverlayEl._routerBound=true;
+    _aidOverlayEl.addEventListener('click',lsAID_router);
+  }
+
   window.lsAID_selfTest=function(){
     var results=[];
-    var tile=document.querySelector('[onclick*="lsAID"]');
+    var tile=document.querySelector('[data-action="close-overlay"],[onclick*="lsAID"]');
     results.push('tile found: '+(tile?'yes':'NO'));
     var overlay=document.getElementById('lsAIDirectorPanel');
     results.push('overlay found: '+(overlay?'yes':'NO'));
     results.push('open function: '+(typeof window.lsAID==='function'?'yes':'NO'));
-    results.push('onclick uses window.: '+(tile&&tile.getAttribute('onclick')&&tile.getAttribute('onclick').indexOf('window.lsAID(')>-1?'yes':'NO - CHECK TILE'));
+    results.push('router bound: '+(overlay&&overlay._routerBound?'yes':'NO'));
     var prevDisplay=overlay?overlay.style.display:null;
     if(overlay&&typeof window.lsAID==='function'){try{window.lsAID();}catch(e){results.push('open() threw: '+e.message);}results.push('overlay visible after open: '+(overlay.style.display!=='none'?'yes':'NO'));overlay.style.display=prevDisplay||'none';}
     console.log('[lsAID selfTest]\n'+results.join('\n'));
+    return results;
+  };
+
+  window.lsAID_buttonSelfTest=function(){
+    var p=document.getElementById('lsAIDirectorPanel');
+    if(!p){console.error('[lsAID_buttonSelfTest] overlay not found');return [{action:'overlay',pass:false}];}
+    var wasHidden=p.style.display==='none';
+    p.style.display='block';
+    var results=[];
+    results.push({action:'router-bound',text:'event delegation',pass:!!p._routerBound});
+    var keyActions=['close-overlay','back-main','pull-script','scene-suggestions','characters','world-rules','import-export','create-image','approve','needs-correction','reject'];
+    var found=Array.from(p.querySelectorAll('[data-action]')).map(function(b){return b.getAttribute('data-action');});
+    keyActions.forEach(function(a){
+      var inDom=found.indexOf(a)>-1;
+      results.push({action:a,text:inDom?'in DOM':'MISSING from DOM',pass:inDom});
+    });
+    var allPass=results.every(function(r){return r.pass;});
+    console.log('[lsAID_buttonSelfTest] '+(allPass?'PASS':'FAIL'));
+    results.forEach(function(r){console.log((r.pass?'PASS':'FAIL')+' ['+r.action+'] '+r.text);});
+    if(wasHidden)p.style.display='none';
     return results;
   };
 
