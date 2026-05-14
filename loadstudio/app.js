@@ -1436,9 +1436,14 @@ window.lsSaveCTP_providerReport=function(){
   window.lsAID_v74Panel=function(type){
     if(type==='script'){
       lsAID_v74_show_panel('Pull From Script or Book',
-        '<p style="color:#c0b8d9;font:400 13px Inter,system-ui,sans-serif;margin:0 0 10px">Paste text from a script or book. Tap Extract to pull scene ideas.</p>'+
+        '<div style="color:#b0a8d0;font:700 13px Inter,system-ui,sans-serif;margin:0 0 8px">Paste Script or Book Text</div>'+
         '<textarea id="aid-v74p-paste" placeholder="Paste script or book text here..." style="width:100%;box-sizing:border-box;min-height:130px;background:#0e0720;border:2px solid rgba(125,42,232,.4);border-radius:10px;color:#f5f0ff;font:400 15px Inter,system-ui,sans-serif;padding:12px;resize:vertical;line-height:1.5"></textarea>'+
-        '<button type="button" data-action="extract-script" style="width:100%;margin-top:10px;padding:13px;background:linear-gradient(135deg,#7d2ae8,#b33af0);color:#fff;border:none;border-radius:10px;font:700 15px Inter,system-ui,sans-serif;cursor:pointer">Extract Scene Ideas</button>'+
+        '<div style="color:#b0a8d0;font:700 13px Inter,system-ui,sans-serif;margin:16px 0 8px">Upload Script or Book File</div>'+
+        '<label style="display:flex;align-items:center;justify-content:space-between;width:100%;box-sizing:border-box;padding:12px 14px;background:rgba(125,42,232,.15);border:1px solid rgba(125,42,232,.4);border-radius:8px;color:#c0b8d9;font:600 14px Inter,system-ui,sans-serif;cursor:pointer;margin-bottom:10px"><span>Choose .txt file</span><span style="color:#9c93b5;font:400 12px Inter,system-ui,sans-serif">Tap to browse</span><input type="file" id="aid-v74p-txt" accept=".txt,text/plain" style="display:none"></label>'+
+        '<label style="display:flex;align-items:center;justify-content:space-between;width:100%;box-sizing:border-box;padding:12px 14px;background:rgba(125,42,232,.15);border:1px solid rgba(125,42,232,.4);border-radius:8px;color:#c0b8d9;font:600 14px Inter,system-ui,sans-serif;cursor:pointer;margin-bottom:10px"><span>Choose .json file</span><span style="color:#9c93b5;font:400 12px Inter,system-ui,sans-serif">Tap to browse</span><input type="file" id="aid-v74p-json" accept=".json,application/json" style="display:none"></label>'+
+        '<div style="color:#4a3a6a;font:400 12px Inter,system-ui,sans-serif;margin-bottom:14px">.docx, .pdf, .epub — Coming later</div>'+
+        '<div id="aid-v74p-load-status" style="display:none;margin-bottom:12px;padding:8px 12px;border-radius:8px;font:500 13px Inter,system-ui,sans-serif;background:rgba(94,224,165,.1);color:#5ee0a5"></div>'+
+        '<button type="button" data-action="extract-script" style="width:100%;padding:14px;background:linear-gradient(135deg,#7d2ae8,#b33af0);color:#fff;border:none;border-radius:10px;font:700 15px Inter,system-ui,sans-serif;cursor:pointer">Extract Scene Ideas</button>'+
         '<div id="aid-v74p-script-results" style="margin-top:14px"></div>'
       );
     } else if(type==='suggestions'){
@@ -1501,7 +1506,7 @@ window.lsSaveCTP_providerReport=function(){
     var ta=document.getElementById('aid-v74p-paste');
     var text=ta?ta.value.trim():'';
     var res=document.getElementById('aid-v74p-script-results');
-    if(!text){if(res)res.innerHTML='<p style="color:#ff8080;font:500 13px Inter,system-ui,sans-serif">Paste text first.</p>';return;}
+    if(!text){if(res)res.innerHTML='<p style="color:#ff8080;font:500 13px Inter,system-ui,sans-serif">Paste text or upload a file first, then tap Extract Scene Ideas.</p>';return;}
     var suggestions=[];
     try{suggestions=extract_scenes_from_text(text);}catch(_){}
     if(!suggestions.length){suggestions=[{title:'Scene from text',action:text.length>150?text.substring(0,150)+'...':text,location:'Setting',mood:'',camera:'Medium shot',lighting:'Natural light'}];}
@@ -1622,10 +1627,50 @@ window.lsSaveCTP_providerReport=function(){
     }
   }
 
+  function lsAID_file_router(e){
+    var input=e.target;
+    if(!input||input.type!=='file')return;
+    var files=input.files;
+    if(!files||!files.length)return;
+    var f=files[0];
+    var statusEl=document.getElementById('aid-v74p-load-status');
+    var ta=document.getElementById('aid-v74p-paste');
+    function showStatus(msg,color){if(statusEl){statusEl.style.display='block';statusEl.style.color=color||'#5ee0a5';statusEl.textContent=msg;}}
+    var reader=new FileReader();
+    if(input.id==='aid-v74p-txt'){
+      reader.onload=function(ev){
+        var text=ev.target.result;
+        if(ta)ta.value=text;
+        showStatus(f.name+' loaded. Tap Extract Scene Ideas.','#5ee0a5');
+      };
+      reader.onerror=function(){showStatus('Could not read file. Try again.','#ff8080');};
+      reader.readAsText(f);
+    } else if(input.id==='aid-v74p-json'){
+      reader.onload=function(ev){
+        var raw=ev.target.result;
+        var text='';
+        try{
+          var obj=JSON.parse(raw);
+          if(typeof obj==='string'){text=obj;}
+          else if(obj.scenes&&Array.isArray(obj.scenes)){text=obj.scenes.map(function(s){return (s.title||'')+(s.action||s.description||s.content?'\n'+(s.action||s.description||s.content):'');}).join('\n\n');}
+          else if(Array.isArray(obj)){text=obj.map(function(s){return typeof s==='string'?s:(s.title||'')+(s.action||s.description||s.content||s.text?'\n'+(s.action||s.description||s.content||s.text):'');}).join('\n\n');}
+          else if(obj.content||obj.text||obj.body){text=obj.content||obj.text||obj.body;}
+          else{text=raw;}
+        }catch(_){text=raw;}
+        if(ta)ta.value=text;
+        showStatus(f.name+' loaded. Tap Extract Scene Ideas.','#5ee0a5');
+      };
+      reader.onerror=function(){showStatus('Could not read file.','#ff8080');};
+      reader.readAsText(f);
+    }
+    input.value='';
+  }
+
   var _aidOverlayEl=document.getElementById('lsAIDirectorPanel');
   if(_aidOverlayEl&&!_aidOverlayEl._routerBound){
     _aidOverlayEl._routerBound=true;
     _aidOverlayEl.addEventListener('click',lsAID_router);
+    _aidOverlayEl.addEventListener('change',lsAID_file_router);
   }
 
   window.lsAID_selfTest=function(){
