@@ -1,0 +1,259 @@
+{
+  "items": [
+    {
+      "feature": "Standalone GitHub Pages PWA",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Splash screen",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Orange black Load UI",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Large image monitor",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Large video monitor",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Chat-style directing console",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Direct/Image/Video/Scene/Edit/Sound/Handoff modes",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Midjourney-style image workflow",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "MagicLight-style script-to-video workflow",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Script paste and scene split",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Scene continuation",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Reference image upload",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Image/video/audio upload with persistent DataURL",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Asset library",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Negative prompt",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Aspect ratio controls",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Camera motion controls",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Subject motion controls",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Shot duration",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Storyboard timeline",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Move scenes up/down",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Character lock engine",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Character bible",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Style bible",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Sound direction",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Browser TTS",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Proof ledger",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Provider status hub",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Pollinations image connector",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Pollinations text connector",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Ollama local connector",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "ComfyUI local connector",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Automatic1111 connector",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "AI Horde connector",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Hugging Face connector",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "OpenAI connector",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "ElevenLabs connector",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Generic video endpoint connector",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "API key vault",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "No key export",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Import project JSON",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Export project JSON",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Export CinePWA plan",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Export provider registry",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Export handoff",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Export HTML report",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Export real ZIP package",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Export feature matrix",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Local verification tests",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Service worker",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    },
+    {
+      "feature": "Manifest",
+      "status": "Built",
+      "notes": "Included in app code and verification matrix"
+    }
+  ]
+}

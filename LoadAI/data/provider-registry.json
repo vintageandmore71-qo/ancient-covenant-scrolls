@@ -1,0 +1,82 @@
+{
+  "rules": [
+    "Provider status changes only after a browser call, local endpoint test, uploaded file, DataURL, URL, blob, or provider response.",
+    "Keys are stored only in localStorage.",
+    "Keys are never exported.",
+    "Generated media is verified only when a file, DataURL, URL, blob, or provider response exists."
+  ],
+  "providers": [
+    {
+      "id": "upload",
+      "name": "User Uploads",
+      "status": "built",
+      "type": "image/video/audio"
+    },
+    {
+      "id": "browser-tts",
+      "name": "Browser Speech",
+      "status": "built",
+      "type": "voice preview"
+    },
+    {
+      "id": "pollinations-image",
+      "name": "Pollinations Image",
+      "status": "built",
+      "type": "image URL"
+    },
+    {
+      "id": "pollinations-text",
+      "name": "Pollinations Text",
+      "status": "built",
+      "type": "text"
+    },
+    {
+      "id": "ollama",
+      "name": "Ollama Local",
+      "status": "built",
+      "type": "local text"
+    },
+    {
+      "id": "comfyui",
+      "name": "ComfyUI Local",
+      "status": "built",
+      "type": "local workflow test"
+    },
+    {
+      "id": "a1111",
+      "name": "Automatic1111 Local",
+      "status": "built",
+      "type": "local image test"
+    },
+    {
+      "id": "aihorde",
+      "name": "AI Horde",
+      "status": "built",
+      "type": "image API"
+    },
+    {
+      "id": "huggingface",
+      "name": "Hugging Face",
+      "status": "built",
+      "type": "model endpoint"
+    },
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "status": "built",
+      "type": "text API"
+    },
+    {
+      "id": "elevenlabs",
+      "name": "ElevenLabs",
+      "status": "built",
+      "type": "TTS API"
+    },
+    {
+      "id": "generic-video",
+      "name": "Generic Video Provider or Proxy",
+      "status": "built",
+      "type": "user endpoint JSON POST"
+    }
+  ]
+}

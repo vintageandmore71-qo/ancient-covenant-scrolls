@@ -1,0 +1,18 @@
+{
+  "projectType": "loadai.director",
+  "version": "7.0.0",
+  "title": "Untitled Load AI Director Project",
+  "mode": "direct",
+  "messages": [],
+  "assets": [],
+  "scenes": [],
+  "characters": [],
+  "proofLedger": [],
+  "providerEvents": [],
+  "styleBible": {},
+  "rights": {
+    "owner": "",
+    "license": "user-owned",
+    "notes": "Creator confirms rights before distribution."
+  }
+}
