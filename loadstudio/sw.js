@@ -1,4 +1,4 @@
-const CACHE='loadstudio-complete-v86';
+const CACHE='loadstudio-complete-v87';
 const ASSETS=['./','index.html','styles.css','app.js','lseditor.js','lseb.js','manifest.json','project.json','scenes.json','characters.json','rights.json','credits.json','platform.json','data/feature-registry.json','data/initial-state.json','director-ai.json','character-stability.json','prompt-log.json','generation-report.json','continuity-report.json','asset-declarations.json','voices.json','wardrobe.json','props.json','locations.json','looks.json','assets/brand/loadstudio-logo.png','assets/brand/loadstudio-splash.jpeg','icons/icon-72.png','icons/icon-96.png','icons/icon-128.png','icons/icon-144.png','icons/icon-152.png','icons/icon-180.png','icons/icon-192.png','icons/icon-384.png','icons/icon-512.png','own-image-clones.json','provider-routing.json','reference-packs.json','approved-takes.json','rejected-takes.json','scene-proof.json','production-board.json'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS).catch(()=>{})));self.skipWaiting();});
 // SCOPED cleanup — only delete loadstudio-* caches. Without this filter
