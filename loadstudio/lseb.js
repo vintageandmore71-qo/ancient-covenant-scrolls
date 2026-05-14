@@ -204,7 +204,7 @@ var _CSS =
   '#lseb-editor .playhead{position:absolute;top:12px;bottom:12px;width:2px;background:#b33af0;left:0;pointer-events:none;box-shadow:0 0 6px rgba(179,58,240,.7);z-index:10}' +
   '#lseb-editor .playhead::before{content:"";position:absolute;top:-3px;left:-5px;width:12px;height:12px;background:#b33af0;border-radius:50%;box-shadow:0 0 0 2px #101018}' +
   // Action bar
-  '#lseb-editor #lseb-actions{display:flex;align-items:center;background:#0a0a14;padding:6px 8px max(6px,env(safe-area-inset-bottom));border-top:1px solid #1a1a26;flex-shrink:0;overflow-x:auto;gap:6px;scrollbar-width:none}' +
+  '#lseb-editor #lseb-actions{display:flex;align-items:center;background:#0a0a14;padding:6px 8px max(6px,env(safe-area-inset-bottom));border-top:1px solid #1a1a26;flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x;gap:6px;scrollbar-width:none}' +
   '#lseb-editor #lseb-actions::-webkit-scrollbar{display:none}' +
   '#lseb-editor .ve-action{flex:0 0 auto;background:transparent;border:none;color:#cfcfdc;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 2px;cursor:pointer;min-width:46px;font-family:inherit}' +
   '#lseb-editor .ve-action:active{transform:scale(.94)}' +
@@ -219,6 +219,17 @@ var _CSS =
   '#lseb-editor .ve-lbl{font-size:12.5px;color:#a0a0b0;display:block}' +
   '#lseb-editor .ve-input{display:block;width:100%;margin-top:4px;padding:6px 8px;background:#0e0e18;color:#fff;border:1px solid #2a2a40;border-radius:6px;font-size:13px;font-family:inherit}' +
   '#lseb-editor.ve-panel-open #lseb-actions{display:none}' +
+  // Ken Burns animation for playback
+  '@keyframes lsebKenBurns0{0%{transform:scale(1) translate(0,0)}100%{transform:scale(1.08) translate(-2%,-1%)}}' +
+  '@keyframes lsebKenBurns1{0%{transform:scale(1) translate(0,0)}100%{transform:scale(1.07) translate(2%,-1.5%)}}' +
+  '@keyframes lsebKenBurns2{0%{transform:scale(1.02) translate(-1%,1%)}100%{transform:scale(1.09) translate(1.5%,-1%)}}' +
+  '#lseb-stage-img.kb-play{transform-origin:center center;will-change:transform}' +
+  // Subtitle overlay
+  '#lseb-sub-overlay{position:absolute;left:0;right:0;text-align:center;pointer-events:none;z-index:8;transition:opacity .2s}' +
+  '#lseb-sub-overlay.sub-top{top:14px}' +
+  '#lseb-sub-overlay.sub-middle{top:50%;transform:translateY(-50%)}' +
+  '#lseb-sub-overlay.sub-bottom{bottom:14px}' +
+  '#lseb-sub-overlay span{display:inline-block;background:rgba(0,0,0,.72);color:#fff;font:600 18px/1.4 Inter,system-ui,sans-serif;padding:6px 16px;border-radius:6px;max-width:92%;word-break:break-word}' +
   // Ratio select in topbar
   '#lseb-editor .lseb-ratio-wrap{display:flex;align-items:center;gap:6px;background:#1a1a26;padding:6px 12px;border-radius:8px}' +
   '#lseb-editor #lseb-ratio{background:transparent;color:#fff;border:none;font-size:14px;font-weight:600;outline:none}';
@@ -404,6 +415,30 @@ function _openSceneEditor(idx) {
           '<label class="ve-lbl">Size<input id="lseb-text-size" type="number" value="48" min="12" max="200" class="ve-input"></label>' +
         '</div>' +
       '</div>' +
+      '<div id="lseb-filter-panel" class="ve-panel" hidden>' +
+        '<div class="ve-panel-head"><span>Filter</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
+        '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px" id="lseb-filter-grid"></div>' +
+      '</div>' +
+      '<div id="lseb-opacity-panel" class="ve-panel" hidden>' +
+        '<div class="ve-panel-head"><span>Opacity</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
+        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">' +
+          '<label class="ve-lbl">Transparency</label>' +
+          '<input id="lseb-opacity-range" type="range" min="0" max="100" step="5" value="100" style="flex:1;min-width:160px;accent-color:#7d2ae8">' +
+          '<span id="lseb-opacity-val" style="font-size:14px;color:#b33af0;font-weight:800;min-width:48px;text-align:right">100%</span>' +
+        '</div>' +
+      '</div>' +
+      '<div id="lseb-blur-panel" class="ve-panel" hidden>' +
+        '<div class="ve-panel-head"><span>Blur</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
+        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">' +
+          '<label class="ve-lbl">Blur amount</label>' +
+          '<input id="lseb-blur-range" type="range" min="0" max="20" step="0.5" value="0" style="flex:1;min-width:160px;accent-color:#7d2ae8">' +
+          '<span id="lseb-blur-val" style="font-size:14px;color:#b33af0;font-weight:800;min-width:48px;text-align:right">0px</span>' +
+        '</div>' +
+      '</div>' +
+      '<div id="lseb-info-panel" class="ve-panel" hidden>' +
+        '<div class="ve-panel-head"><span id="lseb-info-title">Tool</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
+        '<p id="lseb-info-msg" style="color:#c0b8d9;font-size:13px;line-height:1.55;margin:0"></p>' +
+      '</div>' +
       // Hidden image/sticker pickers
       '<input type="file" id="lseb-sticker-pick" accept="image/*,video/*" style="display:none">' +
       // Bottom action bar
@@ -483,12 +518,50 @@ function _bindEditor(idx) {
   if (coverBtn && imgPick) coverBtn.addEventListener('click', function () { imgPick.click(); });
 
   // Track-add + empty-track tap → open panels
+  var _ALL_PANELS = ['lseb-music-panel','lseb-text-panel','lseb-filter-panel','lseb-opacity-panel','lseb-blur-panel','lseb-info-panel'];
   function _showPanel(id) {
-    ['lseb-music-panel', 'lseb-text-panel'].forEach(function (p) {
+    _ALL_PANELS.forEach(function (p) {
       var el = _el(p); if (el) el.hidden = (p !== id);
     });
     var ed = _el('lseb-editor');
     if (ed) ed.classList.toggle('ve-panel-open', !!id);
+  }
+  function _showInfo(title, msg) {
+    var t = _el('lseb-info-title'); if (t) t.textContent = title;
+    var m = _el('lseb-info-msg'); if (m) m.textContent = msg;
+    _showPanel('lseb-info-panel');
+  }
+  // Build filter grid
+  var _FILTERS = {
+    none:'None', warm:'sepia(0.25) saturate(1.2) hue-rotate(-10deg)',
+    cool:'saturate(1.1) hue-rotate(15deg) brightness(1.05)',
+    noir:'grayscale(1) contrast(1.15)', vivid:'saturate(1.6) contrast(1.1)',
+    soft:'brightness(1.1) contrast(0.92)', vintage:'sepia(0.55) contrast(1.1) brightness(0.95)',
+    bw:'grayscale(1)', cinema:'contrast(1.25) saturate(0.85) brightness(0.95)',
+    golden:'sepia(0.6) saturate(1.3) hue-rotate(-15deg) brightness(1.08)'
+  };
+  var _FILTER_LABELS = { none:'None', warm:'Warm', cool:'Cool', noir:'Noir', vivid:'Vivid', soft:'Soft', vintage:'Vintage', bw:'B&W', cinema:'Cinema', golden:'Golden' };
+  function _buildFilterGrid(idx) {
+    var grid = _el('lseb-filter-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    var scene = _state.scenes[idx];
+    var curFilter = scene && scene.fx ? scene.fx.filter : 'none';
+    Object.keys(_FILTER_LABELS).forEach(function (key) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.style.cssText = 'background:' + (key === curFilter ? '#7d2ae8' : '#2a2a40') + ';border:1.5px solid ' + (key === curFilter ? '#b33af0' : 'transparent') + ';color:#fff;border-radius:10px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;font-family:inherit;font-size:11px;font-weight:600';
+      btn.textContent = _FILTER_LABELS[key];
+      btn.addEventListener('click', function () {
+        if (!scene) return;
+        scene.fx.filter = key;
+        var img = _el('lseb-stage-img');
+        if (img) img.style.filter = key === 'none' ? '' : _FILTERS[key];
+        _saveState();
+        _buildFilterGrid(idx);
+      });
+      grid.appendChild(btn);
+    });
   }
 
   var editor = _el('lseb-editor');
@@ -585,17 +658,44 @@ function _bindEditor(idx) {
   });
 
   // Bottom action bar
+  // Opacity panel wiring
+  var opRange = _el('lseb-opacity-range');
+  var opVal = _el('lseb-opacity-val');
+  if (opRange) {
+    var sceneOpacity = scene.fx ? (scene.fx.opacity != null ? scene.fx.opacity : 100) : 100;
+    opRange.value = sceneOpacity;
+    if (opVal) opVal.textContent = sceneOpacity + '%';
+    opRange.addEventListener('input', function () {
+      var v = parseInt(opRange.value, 10);
+      if (opVal) opVal.textContent = v + '%';
+      var img = _el('lseb-stage-img');
+      if (img) img.style.opacity = v / 100;
+      if (scene.fx) scene.fx.opacity = v;
+      _saveState();
+    });
+  }
+  // Blur panel wiring
+  var blurRange = _el('lseb-blur-range');
+  var blurVal = _el('lseb-blur-val');
+  if (blurRange) {
+    blurRange.addEventListener('input', function () {
+      var v = parseFloat(blurRange.value);
+      if (blurVal) blurVal.textContent = v + 'px';
+      var img = _el('lseb-stage-img');
+      if (img) img.style.filter = _buildFilterStr(scene.fx, v);
+    });
+  }
   if (editor) editor.querySelectorAll('.ve-action[data-action]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var action = btn.dataset.action;
-      if (action === 'filter') { _toast('Filter: tap a clip thumbnail to apply.'); }
-      else if (action === 'crop') { _toast('Crop: use the image controls in a future build.'); }
+      if (action === 'filter') { _buildFilterGrid(idx); _showPanel('lseb-filter-panel'); }
+      else if (action === 'crop') { _showInfo('Crop', 'Crop editing is coming in the next build. You can use Rotate, Mirror, and Flip right now.'); }
       else if (action === 'rotate') { _rotateScene(idx); }
       else if (action === 'mirror') { _mirrorScene(idx); }
       else if (action === 'flip') { _flipScene(idx); }
-      else if (action === 'opacity') { _toast('Opacity: drag the slider (coming next).'); }
-      else if (action === 'fx') { _toast('FX: tap to apply effects (coming next).'); }
-      else if (action === 'blur') { _toast('Blur: coming next.'); }
+      else if (action === 'opacity') { _showPanel('lseb-opacity-panel'); }
+      else if (action === 'fx') { _showInfo('FX', 'Visual effects (keyframe, curve, motion) are coming in the next build.'); }
+      else if (action === 'blur') { _showPanel('lseb-blur-panel'); }
       else if (action === 'speed') { _promptDuration(idx); }
       else if (action === 'tts') { _showPanel('lseb-text-panel'); }
       else if (action === 'delete-scene') { _deleteScene(idx); }
@@ -831,7 +931,7 @@ function _attachImage(idx, src) {
   // Update stage
   var img = _el('lseb-stage-img');
   var ph = _el('lseb-stage-ph');
-  if (img) { img.src = src; img.style.display = 'block'; }
+  if (img) { img.src = src; img.style.display = 'block'; _applyFxToImg(img, scene.fx); }
   if (ph) ph.style.display = 'none';
   // Re-render strip
   _renderImageStrip(idx);
@@ -861,17 +961,51 @@ function _startPlayback(idx) {
   _playStart = Date.now();
   _setPlayBtn(true);
 
+  // Ken Burns animation on stage image
+  var img = _el('lseb-stage-img');
+  if (img && scene.media.image) {
+    var kbIdx = Math.floor(Math.random() * 3);
+    var dur = scene.duration || 5;
+    img.classList.add('kb-play');
+    img.style.animation = 'lsebKenBurns' + kbIdx + ' ' + dur + 's ease-in-out forwards';
+  }
+
+  // Subtitle overlay — show first text track item if any
+  var stage = _el('lseb-stage');
+  if (stage) {
+    var existing = document.getElementById('lseb-sub-overlay');
+    if (existing) existing.remove();
+    var textItems = (scene.tracks && scene.tracks.text) || [];
+    if (textItems.length) {
+      var sub = document.createElement('div');
+      sub.id = 'lseb-sub-overlay';
+      sub.className = 'sub-bottom';
+      sub.innerHTML = '<span>' + _esc(textItems[0].text || '') + '</span>';
+      stage.appendChild(sub);
+    }
+  }
+
   var timeEl = _el('lseb-time');
   var playhead = _el('lseb-playhead');
   var strip = _el('lseb-image-strip');
-  var stripW = strip ? (strip.querySelector('.timeline-clip') || {clientWidth: 360}).clientWidth : 360;
+  var stripW = strip ? ((strip.querySelector('.timeline-clip') || {}).clientWidth || 360) : 360;
 
   _playInterval = setInterval(function () {
     var elapsed = Date.now() - _playStart;
     var t = elapsed / 1000;
-    var dur = scene.duration || 5;
-    if (timeEl) timeEl.textContent = t.toFixed(2) + ' / ' + dur.toFixed(2) + 's';
+    var sceneDur = scene.duration || 5;
+    if (timeEl) timeEl.textContent = t.toFixed(2) + ' / ' + sceneDur.toFixed(2) + 's';
     if (playhead) playhead.style.left = Math.min(t * PX_PER_SECOND, stripW) + 'px';
+    // Cycle subtitle text blocks by time position
+    if (stage && scene.tracks && scene.tracks.text && scene.tracks.text.length > 1) {
+      var subEl = document.getElementById('lseb-sub-overlay');
+      if (subEl) {
+        var active = null;
+        scene.tracks.text.forEach(function (it) { if (t >= it.t0 && t < it.t0 + it.dur) active = it; });
+        subEl.style.opacity = active ? '1' : '0';
+        if (active) subEl.innerHTML = '<span>' + _esc(active.text || '') + '</span>';
+      }
+    }
     if (elapsed >= _playDur) _stopPlayback();
   }, 50);
 }
@@ -882,6 +1016,12 @@ function _stopPlayback() {
   clearTimeout(_playTimer);
   _stopAudio();
   _setPlayBtn(false);
+  // Remove Ken Burns
+  var img = _el('lseb-stage-img');
+  if (img) { img.classList.remove('kb-play'); img.style.animation = ''; }
+  // Remove subtitle overlay
+  var sub = document.getElementById('lseb-sub-overlay');
+  if (sub) sub.remove();
   var timeEl = _el('lseb-time');
   var playhead = _el('lseb-playhead');
   if (timeEl) {
@@ -933,6 +1073,19 @@ function _buildTransform(fx) {
   if (fx.mirror) parts.push('scaleX(-1)');
   if (fx.flip) parts.push('scaleY(-1)');
   return parts.join(' ') || 'none';
+}
+function _buildFilterStr(fx, blurOverride) {
+  var parts = [];
+  var blur = blurOverride != null ? blurOverride : 0;
+  if (blur > 0) parts.push('blur(' + blur + 'px)');
+  if (fx && fx.filter && fx.filter !== 'none' && _FILTERS && _FILTERS[fx.filter]) parts.push(_FILTERS[fx.filter]);
+  return parts.join(' ') || '';
+}
+function _applyFxToImg(img, fx) {
+  if (!img || !fx) return;
+  img.style.transform = _buildTransform(fx);
+  img.style.filter = _buildFilterStr(fx);
+  img.style.opacity = (fx.opacity != null ? fx.opacity : 100) / 100;
 }
 
 // ─── DURATION PROMPT ─────────────────────────────────────────────────────────
