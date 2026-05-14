@@ -1,70 +1,100 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#ff9f1a">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Load AI">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Load AI</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="assets/icons/icon-180x180.png">
-  <link rel="apple-touch-startup-image" href="assets/images/load-ai-splash-1080x1920.jpg">
-  <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffa726">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Load AI">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Load AI Director Studio</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="assets/icons/icon-180x180.png">
+<link rel="apple-touch-startup-image" href="assets/images/load-ai-splash-1080x1920.jpg">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- LOAD_AI_BUILD: v2.0.0 cinema prompt display PWA -->
-  <a class="skip-link" href="#promptInput">Skip to prompt box</a>
+<!-- LOAD_AI_BUILD: v7.0.0 COMPLETE LOCAL PROVIDER BUILD -->
+<a class="skip-link" href="#directorInput">Skip to director input</a>
+<section id="splashScreen" class="splash-screen">
+  <div class="splash-frame"><img class="splash-art" src="assets/images/load-ai-splash-1080x1920.jpg" alt="Load AI opening image"></div>
+  <button id="enterAppBtn" class="splash-enter" type="button">Enter</button>
+</section>
+<main id="appShell" class="app-shell" hidden>
+<header class="topbar">
+  <button class="round-button" id="backToSplashBtn" type="button">‹</button>
+  <div class="brand-lockup"><img src="assets/icons/icon-72x72.png" alt="" class="brand-icon"><div><p class="eyebrow">Load Ecosystem</p><h1>Load AI Director Studio</h1></div></div>
+  <button id="hardRefreshBtn" class="round-button" type="button">↻</button>
+</header>
+<nav class="module-strip">
+  <button class="nav-chip active" data-panel="directorPanel" type="button">Director</button>
+  <button class="nav-chip" data-panel="providerPanel" type="button">Providers</button>
+  <button class="nav-chip" data-panel="imagePanel" type="button">Image Monitor</button>
+  <button class="nav-chip" data-panel="videoPanel" type="button">Video Monitor</button>
+  <button class="nav-chip" data-panel="scriptPanel" type="button">Script Video</button>
+  <button class="nav-chip" data-panel="continuityPanel" type="button">Continuity</button>
+  <button class="nav-chip" data-panel="audioPanel" type="button">Sound</button>
+  <button class="nav-chip" data-panel="timelinePanel" type="button">Storyboard</button>
+  <button class="nav-chip" data-panel="proofPanel" type="button">Proof</button>
+  <button class="nav-chip" data-panel="importExportPanel" type="button">Import Export</button>
+  <button class="nav-chip" data-panel="matrixPanel" type="button">Matrix</button>
+  <button class="nav-chip" data-panel="testsPanel" type="button">Tests</button>
+</nav>
+<section class="hero-grid">
+  <div class="hero-copy"><p class="eyebrow">Complete local provider build.</p><h2>Direct cinematic worlds with image, video, script, sound, continuity, proof, and export.</h2><p>This build contains the requested Load AI image and video director workflow. External providers require valid keys, local engines, or endpoint access, but the connector surfaces and test actions are built into the app and proof is logged only after real output or response.</p></div>
+  <div class="status-stack"><div><span>Mode</span><strong id="activeModeLabel">Direct</strong></div><div><span>Project</span><strong id="projectTitleMini">Untitled</strong></div><div><span>Truth Rule</span><strong>No proof, no claim</strong></div></div>
+</section>
 
-  <section id="splashScreen" class="splash-screen" aria-label="Load AI opening screen">
-    <div class="splash-frame"><img class="splash-art" src="assets/images/load-ai-splash-1080x1920.jpg" alt="Load AI opening image"></div>
-    <button id="enterAppBtn" class="splash-enter" type="button">Enter</button>
-  </section>
+<section id="directorPanel" class="panel active-panel">
+<div class="panel-head"><div><p class="eyebrow">Director Console</p><h3>Command images, video, sound, and scenes</h3></div><div class="head-actions"><button id="newProjectBtn" class="secondary-button" type="button">New Project</button><button id="saveProjectBtn" class="primary-button" type="button">Save</button></div></div>
+<div class="director-layout">
+<aside class="director-rail"><button class="mode-pill active" data-mode="direct" type="button">Direct</button><button class="mode-pill" data-mode="image" type="button">Image</button><button class="mode-pill" data-mode="video" type="button">Video</button><button class="mode-pill" data-mode="scene" type="button">Scene</button><button class="mode-pill" data-mode="edit" type="button">Edit</button><button class="mode-pill" data-mode="sound" type="button">Sound</button><button class="mode-pill" data-mode="handoff" type="button">Handoff</button></aside>
+<div class="director-board"><div id="directorStream" class="director-stream"></div>
+<form id="directorForm" class="composer">
+<div class="composer-toolbar"><label class="file-button">Upload Image<input id="imageUpload" type="file" accept="image/*" hidden></label><label class="file-button">Upload Video<input id="videoUpload" type="file" accept="video/*" hidden></label><label class="file-button">Upload Audio<input id="audioUpload" type="file" accept="audio/*" hidden></label><button id="templateBtn" class="mini-button" type="button">Template</button><button id="continueSceneBtn" class="mini-button" type="button">Continue Scene</button><button id="copyDirectorBtn" class="mini-button" type="button">Copy</button><button id="speakBtn" class="mini-button" type="button">Read</button></div>
+<label for="directorInput">Describe what you want to direct</label>
+<textarea id="directorInput" rows="8" placeholder="Example: Continue this scene with the same character, same wardrobe, slow dolly inward, warm afternoon light, subtle environmental motion, no identity drift."></textarea>
+<div class="composer-actions"><button id="saveDraftBtn" class="secondary-button" type="button">Save Draft</button><button class="primary-button" type="submit">Build Director Prompt</button></div>
+</form></div></div>
+</section>
 
-  <main id="appShell" class="app-shell" hidden>
-    <header class="topbar">
-      <button class="round-button" id="backBtn" type="button" aria-label="Back to splash"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11H7.8l5.6-5.6L12 4 4 12l8 8 1.4-1.4L7.8 13H20z"/></svg></button>
-      <div class="brand-lockup"><img src="assets/icons/icon-72x72.png" alt="" class="brand-icon"><div><p class="eyebrow">Load Ecosystem</p><h1>Load AI</h1></div></div>
-      <button id="hardRefreshBtn" class="round-button" type="button" aria-label="Refresh"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.7 6.3A8 8 0 1 0 20 12h-2.2A5.8 5.8 0 1 1 16.1 7.9L13 11h8V3z"/></svg></button>
-    </header>
+<section id="providerPanel" class="panel">
+<div class="panel-head"><div><p class="eyebrow">Provider Hub</p><h3>Built-in, local, open, and user-key providers</h3></div><button id="exportProvidersBtn" class="secondary-button" type="button">Export Registry</button></div>
+<div class="provider-action-grid">
+<article class="action-card"><h4>Pollinations Image</h4><p>No-key image URL connector.</p><button id="runPollinationsImageBtn" class="primary-button" type="button">Generate Image URL</button></article>
+<article class="action-card"><h4>Pollinations Text</h4><p>No-key text attempt.</p><button id="runPollinationsTextBtn" class="secondary-button" type="button">Try Text</button></article>
+<article class="action-card"><h4>Browser Voice</h4><p>Browser speech preview.</p><button id="runBrowserTtsBtn" class="primary-button" type="button">Speak Prompt</button></article>
+<article class="action-card"><h4>Ollama Local</h4><input id="ollamaBase" type="text" value="http://localhost:11434"><input id="ollamaModel" type="text" value="llama3.2"><button id="testOllamaBtn" class="secondary-button" type="button">Test</button><button id="runOllamaBtn" class="secondary-button" type="button">Generate</button></article>
+<article class="action-card"><h4>ComfyUI Local</h4><input id="comfyBase" type="text" value="http://127.0.0.1:8188"><button id="testComfyBtn" class="secondary-button" type="button">Test</button></article>
+<article class="action-card"><h4>Automatic1111 Local</h4><input id="a1111Base" type="text" value="http://127.0.0.1:7860"><button id="testA1111Btn" class="secondary-button" type="button">Test</button></article>
+<article class="action-card"><h4>AI Horde Image</h4><input id="aihordeKey" type="password" placeholder="AI Horde key optional"><button id="runAIHordeBtn" class="secondary-button" type="button">Submit Job</button></article>
+<article class="action-card"><h4>Hugging Face</h4><input id="hfToken" type="password" placeholder="HF token"><input id="hfModel" type="text" value="stabilityai/stable-diffusion-xl-base-1.0"><button id="runHFBtn" class="secondary-button" type="button">Run Model</button></article>
+<article class="action-card"><h4>OpenAI Text</h4><input id="openaiKey" type="password" placeholder="OpenAI key"><input id="openaiModel" type="text" value="gpt-4o-mini"><button id="runOpenAIBtn" class="secondary-button" type="button">Run Text</button></article>
+<article class="action-card"><h4>ElevenLabs TTS</h4><input id="elevenKey" type="password" placeholder="ElevenLabs key"><input id="elevenVoice" type="text" placeholder="Voice ID"><button id="runElevenBtn" class="secondary-button" type="button">Create Audio</button></article>
+<article class="action-card"><h4>Generic Video Provider</h4><input id="videoEndpoint" type="text" placeholder="API/proxy endpoint"><input id="videoKey" type="password" placeholder="API key optional"><button id="runGenericVideoBtn" class="secondary-button" type="button">POST Video Request</button></article>
+<article class="action-card"><h4>Key Vault</h4><p>Keys save locally only, never exported.</p><button id="saveKeysBtn" class="secondary-button" type="button">Save Keys</button><button id="clearKeysBtn" class="secondary-button" type="button">Clear Keys</button></article>
+</div>
+<div id="providerStatusList" class="provider-list"></div>
+</section>
 
-    <nav class="module-strip" aria-label="Load AI tools">
-      <button class="nav-chip active" data-panel="promptPanel" type="button">Prompt Studio</button>
-      <button class="nav-chip" data-panel="imagePanel" type="button">Image Display</button>
-      <button class="nav-chip" data-panel="scenePanel" type="button">Scene Review</button>
-      <button class="nav-chip" data-panel="guidePanel" type="button">Visual Guide</button>
-      <button class="nav-chip" data-panel="libraryPanel" type="button">Library</button>
-      <button class="nav-chip" data-panel="exportPanel" type="button">Export</button>
-    </nav>
+<section id="imagePanel" class="panel"><div class="panel-head"><div><p class="eyebrow">Image Monitor</p><h3>Large image display and prompt review</h3></div><button id="downloadImagePromptBtn" class="secondary-button" type="button">Download Prompt</button></div><div class="monitor-layout"><div class="image-monitor"><div id="imageStage" class="stage-content"><img src="assets/images/load-ai-logo-orange.png" class="stage-logo" alt=""><p id="imagePromptText">Image prompt preview appears here.</p></div></div><aside class="control-stack"><div class="control-card"><span>Prompt Status</span><strong id="imagePromptStatus">Draft</strong></div><div class="control-card"><span>Reference</span><strong id="referenceStatus">None uploaded</strong></div><div class="control-card"><span>Proof</span><strong id="imageProofStatus">No generated file</strong></div><textarea id="negativePromptInput" rows="6" placeholder="Negative prompt: no identity drift, no warped hands, no unreadable text."></textarea></aside></div></section>
 
-    <section class="hero-row">
-      <div class="hero-copy"><p class="eyebrow">Prompt-first visual workspace</p><h2>Create, review, and refine visual ideas in one large display space.</h2><p>Use Load AI for image prompts, scene prompt reviews, project notes, and developer-ready handoffs. This MVP is local-first and does not claim live generation until a real provider is connected.</p></div>
-      <div class="hero-card"><img src="assets/images/load-ai-logo-orange.png" alt="" class="hero-logo"><strong>Orange Glow Build</strong><span>Large display, chat composer, scene review, visual guide.</span></div>
-    </section>
+<section id="videoPanel" class="panel"><div class="panel-head"><div><p class="eyebrow">Video Monitor</p><h3>Text-to-video, image-to-video, and scene continuation</h3></div><button id="downloadVideoPlanBtn" class="secondary-button" type="button">Download Video Plan</button></div><div class="monitor-layout"><div class="video-monitor"><div class="screen-overlay"><p class="scene-kicker">Director Preview</p><h4 id="videoTitle">Video direction appears here</h4><p id="videoPromptText">Add motion, camera, pacing, audio, and continuity controls.</p></div></div><aside class="control-stack"><label>Camera Motion<select id="cameraMotion"><option>slow dolly inward</option><option>push in</option><option>pull back</option><option>pan left</option><option>pan right</option><option>handheld subtle</option><option>crane up</option><option>locked tripod</option></select></label><label>Subject Motion<select id="subjectMotion"><option>subtle eye movement</option><option>walk forward</option><option>turn slowly</option><option>reach toward camera</option><option>wind moves clothing</option></select></label><label>Duration<select id="shotDuration"><option>5 seconds</option><option>8 seconds</option><option>12 seconds</option><option>20 seconds</option></select></label><label>Aspect Ratio<select id="aspectRatio"><option>16:9 cinematic</option><option>9:16 vertical</option><option>1:1 square</option><option>2.39:1 widescreen</option></select></label><button id="applyVideoControlsBtn" class="primary-button" type="button">Apply Direction</button></aside></div></section>
 
-    <section id="promptPanel" class="panel active-panel">
-      <div class="panel-head"><div><p class="eyebrow">AI Chat Request</p><h3>Large prompt workspace</h3></div><button id="clearAllBtn" class="secondary-button" type="button">Clear</button></div>
-      <div class="prompt-layout">
-        <aside class="tool-rail" aria-label="Prompt tools"><button class="tool-pill active" data-mode="image" type="button">Image</button><button class="tool-pill" data-mode="scene" type="button">Scene</button><button class="tool-pill" data-mode="edit" type="button">Edit</button><button class="tool-pill" data-mode="handoff" type="button">Handoff</button></aside>
-        <div class="chat-board"><div id="chatStream" class="chat-stream" aria-live="polite"></div><form id="promptForm" class="composer"><div class="composer-toolbar"><button class="mini-button" id="attachBtn" type="button">Add Image</button><button class="mini-button" id="templateBtn" type="button">Use Template</button><button class="mini-button" id="copyPromptBtn" type="button">Copy</button></div><label for="promptInput">Describe your idea or ask</label><textarea id="promptInput" rows="7" placeholder="Example: Create a cinematic image prompt for an ancient harbor at night with orange torchlight, rain, reflective stone streets, and a wide film still composition."></textarea><div class="composer-actions"><button class="secondary-button" id="saveDraftBtn" type="button">Save Draft</button><button class="primary-button" type="submit">Create Preview</button></div></form></div>
-      </div>
-    </section>
+<section id="scriptPanel" class="panel"><div class="panel-head"><div><p class="eyebrow">Script To Video</p><h3>Break a script into scene cards</h3></div><button id="breakScriptBtn" class="primary-button" type="button">Break Into Scenes</button></div><div class="split-editor"><textarea id="scriptInput" rows="14" placeholder="Paste script, chapter, scene paragraph, or story sequence here."></textarea><div class="control-stack"><label>Scene Style<select id="scriptStyle"><option>cinematic realism</option><option>animated feature</option><option>documentary drama</option><option>premium streaming series</option></select></label><label>Target Length<select id="scriptLength"><option>short sequence</option><option>pilot scene</option><option>full trailer</option><option>episode outline</option></select></label><button id="scriptToPromptBtn" class="secondary-button" type="button">Send To Director</button></div></div></section>
 
-    <section id="imagePanel" class="panel">
-      <div class="panel-head"><div><p class="eyebrow">Image Prompt Display</p><h3>Large image review screen</h3></div><button id="downloadPromptBtn" class="secondary-button" type="button">Download Prompt</button></div>
-      <div class="image-workbench"><div class="image-screen"><div id="imagePlaceholder" class="image-placeholder"><img src="assets/images/load-ai-logo-orange.png" alt="" class="placeholder-logo"><p id="imagePromptDisplay">Prompt preview appears here.</p></div></div><aside class="review-stack"><div class="review-card"><span>Prompt Status</span><strong id="promptStatus">Draft</strong></div><div class="review-card"><span>Provider</span><strong>Not connected</strong></div><div class="review-card"><span>Output Rule</span><strong>Verified file required</strong></div><div class="review-card"><span>Best Use</span><strong>Prompt review before generation</strong></div></aside></div>
-    </section>
+<section id="continuityPanel" class="panel"><div class="panel-head"><div><p class="eyebrow">Consistency Engine</p><h3>Character and world locks</h3></div><button id="addCharacterBtn" class="secondary-button" type="button">Add Character</button></div><div class="continuity-grid"><div class="lock-card"><span>Face</span><strong>Identity Protected</strong><input id="faceLock" type="checkbox" checked></div><div class="lock-card"><span>Hair</span><strong>Hair Locked</strong><input id="hairLock" type="checkbox" checked></div><div class="lock-card"><span>Wardrobe</span><strong>Wardrobe Locked</strong><input id="wardrobeLock" type="checkbox" checked></div><div class="lock-card"><span>Age</span><strong>Age Locked</strong><input id="ageLock" type="checkbox" checked></div><div class="lock-card"><span>Body</span><strong>Body Locked</strong><input id="bodyLock" type="checkbox" checked></div><div class="lock-card"><span>Location</span><strong>Scene Locked</strong><input id="locationLock" type="checkbox" checked></div></div><div class="split-editor"><textarea id="characterBibleInput" rows="10" placeholder="Character bible: face, hair, age range, wardrobe, voice, body language, references, do-not-change rules."></textarea><textarea id="styleBibleInput" rows="10" placeholder="Style bible: lens, lighting, color palette, pacing, genre, visual rules, negative style."></textarea></div></section>
 
-    <section id="scenePanel" class="panel">
-      <div class="panel-head"><div><p class="eyebrow">Scene Prompt Review</p><h3>Large movie screen display</h3></div><button id="addSceneBtn" class="secondary-button" type="button">Add Scene</button></div>
-      <div class="movie-review"><div class="movie-screen"><div class="screen-glow"></div><div class="screen-content"><p class="scene-kicker">Scene 001</p><h4 id="sceneTitle">Opening Establishing Shot</h4><p id="scenePromptText">Create a wide cinematic scene with a glowing orange AI interface, large format display, and polished studio lighting.</p></div></div><div id="sceneCards" class="scene-cards"></div></div>
-    </section>
+<section id="audioPanel" class="panel"><div class="panel-head"><div><p class="eyebrow">Sound Director</p><h3>Ambience, score, SFX, voice, and silence</h3></div><button id="downloadSoundPlanBtn" class="secondary-button" type="button">Download Sound Plan</button></div><div class="split-editor"><textarea id="soundPromptInput" rows="12" placeholder="Sound direction: distant rain, room tone, footsteps, crowd murmur, emotional score swell, silence beat, voice texture."></textarea><div class="control-stack"><div class="control-card"><span>Audio Status</span><strong id="audioStatus">Sound prompt saved</strong></div><label>Voice Mood<select id="voiceMood"><option>warm narration</option><option>grave elder</option><option>urgent whisper</option><option>calm documentary</option></select></label><label>Music Cue<select id="musicCue"><option>quiet tension</option><option>rising awe</option><option>melancholy strings</option><option>no music, only silence</option></select></label><button id="previewSpeechBtn" class="primary-button" type="button">Read Sound Direction</button></div></div></section>
 
-    <section id="guidePanel" class="panel"><div class="panel-head"><div><p class="eyebrow">Guided Help</p><h3>Step-by-step visual cards</h3></div><button id="exportGuideBtn" class="secondary-button" type="button">Export Guide</button></div><div id="guideSteps" class="guide-steps"></div></section>
-    <section id="libraryPanel" class="panel"><div class="panel-head"><div><p class="eyebrow">Prompt Library</p><h3>Saved drafts and scene prompts</h3></div><button id="clearLibraryBtn" class="secondary-button" type="button">Clear Library</button></div><div id="libraryList" class="library-list"></div></section>
-    <section id="exportPanel" class="panel"><div class="panel-head"><div><p class="eyebrow">Export Center</p><h3>Download working files</h3></div></div><div class="export-grid"><button id="downloadSessionBtn" class="primary-button" type="button">Download Session JSON</button><button id="downloadHandoffBtn" class="secondary-button" type="button">Download Handoff TXT</button><button id="downloadSceneBtn" class="secondary-button" type="button">Download Scene JSON</button></div><p class="panel-note">Provider connections can be added later. This build keeps the interface honest: no generated media is marked complete without a real file, blob, or URL.</p></section>
-  </main>
-  <script src="app.js"></script>
+<section id="timelinePanel" class="panel"><div class="panel-head"><div><p class="eyebrow">Storyboard Timeline</p><h3>Scenes, shots, duration, and status</h3></div><div class="head-actions"><button id="addSceneBtn" class="secondary-button" type="button">Add Scene</button><button id="addShotBtn" class="secondary-button" type="button">Add Shot</button></div></div><div id="timelineList" class="timeline-list"></div></section>
+<section id="proofPanel" class="panel"><div class="panel-head"><div><p class="eyebrow">Proof Ledger</p><h3>No false generation claims</h3></div><button id="addProofBtn" class="secondary-button" type="button">Add Proof Entry</button></div><div id="proofList" class="proof-list"></div></section>
+
+<section id="importExportPanel" class="panel"><div class="panel-head"><div><p class="eyebrow">Import Export Center</p><h3>Project packages, media, JSON, and reports</h3></div></div><div class="import-export-grid"><article class="action-card"><h4>Import Project</h4><label class="primary-button file-wide">Import JSON<input id="projectImport" type="file" accept=".json,application/json" hidden></label></article><article class="action-card"><h4>Export Project JSON</h4><button id="exportProjectJsonBtn" class="primary-button" type="button">Download JSON</button></article><article class="action-card"><h4>Export Full Package</h4><button id="exportPackageBtn" class="primary-button" type="button">Download Package ZIP</button></article><article class="action-card"><h4>Export CinePWA Plan</h4><button id="exportCinePwaBtn" class="primary-button" type="button">Download CinePWA JSON</button></article><article class="action-card"><h4>Export HTML Report</h4><button id="exportHtmlReportBtn" class="secondary-button" type="button">Download HTML</button></article><article class="action-card"><h4>Download Handoff</h4><button id="exportHandoffBtn" class="secondary-button" type="button">Download TXT</button></article><article class="action-card"><h4>Asset Library</h4><button id="clearAssetsBtn" class="secondary-button" type="button">Clear Assets</button></article></div><div id="assetLibrary" class="asset-library"></div></section>
+
+<section id="matrixPanel" class="panel"><div class="panel-head"><div><p class="eyebrow">Feature Matrix</p><h3>Every locked request and function</h3></div><button id="downloadMatrixBtn" class="secondary-button" type="button">Download Matrix</button></div><div id="matrixList" class="matrix-list"></div></section>
+<section id="testsPanel" class="panel"><div class="panel-head"><div><p class="eyebrow">Local Verification</p><h3>Run app checks</h3></div><button id="runTestsBtn" class="primary-button" type="button">Run Tests</button></div><div id="testResults" class="test-results"></div></section>
+</main>
+<script src="app.js"></script>
 </body>
 </html>

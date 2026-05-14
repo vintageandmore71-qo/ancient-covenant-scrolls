@@ -1,13 +1,13 @@
 {
-  "name": "Load AI",
+  "name": "Load AI Director Studio",
   "short_name": "Load AI",
-  "description": "Large visual AI prompt workspace for image prompts, scene review, guide cards, and Load ecosystem handoffs.",
-  "start_url": "./index.html",
+  "description": "Director-controlled AI image, video, script, sound, continuity, provider, proof, upload, import, and export studio.",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#050302",
-  "theme_color": "#ff9f1a",
+  "theme_color": "#ffa726",
   "icons": [
     {
       "src": "assets/icons/icon-192x192.png",

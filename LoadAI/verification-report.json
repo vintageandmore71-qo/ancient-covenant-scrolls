@@ -1,5 +1,5 @@
 {
-  "build": "LOAD_AI_BUILD_v2_0_0",
+  "build": "LOAD_AI_BUILD_v7_0_0_COMPLETE_LOCAL",
   "files_created": [
     "README.md",
     "app.js",
@@ -16,31 +16,29 @@
     "assets/images/load-ai-logo-orange.png",
     "assets/images/load-ai-splash-1080x1920.jpg",
     "assets/images/load-ai-splash-1536x2048.jpg",
-    "data/project.json",
+    "data/feature-matrix.json",
+    "data/provider-registry.json",
+    "data/sample-project.json",
     "index.html",
     "manifest.json",
     "styles.css",
-    "sw.js"
+    "sw.js",
+    "verification-report.json"
   ],
   "checks": {
-    "standalone_pwa_files_present": true,
-    "data_project_json_present": true,
-    "icon_files_present": true,
-    "splash_file_present": true,
-    "large_image_display_present": true,
-    "large_movie_screen_present": true,
-    "chat_prompting_present": true,
-    "library_present": true,
-    "visual_guide_present": true,
-    "orange_theme_applied": true,
-    "no_banned_user_facing_terms": true,
-    "build_marker_present": true,
-    "service_worker_present": true
+    "repo_files_present": true,
+    "data_files_present": true,
+    "assets_present": true,
+    "node_syntax": true,
+    "no_banned_terms": true,
+    "feature_matrix_present": true,
+    "provider_registry_present": true,
+    "upload_controls_present": true,
+    "provider_controls_present": true,
+    "exports_present": true,
+    "script_to_video_present": true,
+    "real_zip_export_function_present": true
   },
-  "known_limitations": [
-    "No live AI provider connected yet.",
-    "Prompt preview output is local UI logic.",
-    "No generated media is claimed without a verified file, blob, URL, or provider response."
-  ],
-  "acceptance_summary": "Static package checks passed. Browser interaction should be tested after GitHub Pages upload or local open."
+  "headless_browser_note": "Chromium/Playwright could not run reliably in this container, so this report does not claim automated browser testing. The app was repaired, Node syntax checked, and static feature checks passed.",
+  "important_truth": "External provider success depends on valid keys, account access, local engines, CORS, or proxy endpoints. The app only verifies output after a real file, DataURL, URL, blob, or provider response exists."
 }
