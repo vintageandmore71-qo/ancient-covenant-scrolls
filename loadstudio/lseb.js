@@ -26,7 +26,7 @@ function _newScene(title) {
     title: title || 'Scene',
     narration: '', captions: '', musicMood: '', sfx: '',
     transition: 'cut', duration: 5,
-    media: { image: null, narration: null, music: null, sfxAudio: null },
+    media: { image: null, video: null, narration: null, music: null, sfxAudio: null },
     tracks: { music: [], text: [], sticker: [] },
     fx: { filter: 'none', mirror: false, flip: false, rotate: 0, opacity: 100 },
     status: 'empty',
@@ -43,6 +43,8 @@ function _initState() {
     _state.scenes = saved.scenes.map(function (s) {
       if (!s.tracks) s.tracks = { music: [], text: [], sticker: [] };
       if (!s.fx) s.fx = { filter: 'none', mirror: false, flip: false, rotate: 0, opacity: 100 };
+      if (!s.media) s.media = { image: null, video: null, narration: null, music: null, sfxAudio: null };
+      if (s.media.video === undefined) s.media.video = null;
       return s;
     });
     _state.selectedIdx = Math.min(saved.selectedIdx || 0, _state.scenes.length - 1);
@@ -56,42 +58,196 @@ function _saveState() {
   _persist({ scenes: _state.scenes, selectedIdx: _state.selectedIdx });
 }
 
-// ─── AUDIO PLAYBACK ──────────────────────────────────────────────────────────
-var _audioEls = {};
+// ─── AUDIO ENGINE (preload at attach time; play synchronously in user gesture) ─
+// Ported from Load Eco engine pattern: media elements are created once when
+// content is attached, not recreated on every play click. This satisfies iOS
+// Safari's requirement that .play() is called inside a user-gesture context
+// with a fully-loaded element.
+
+var _audioPre = {};   // sceneId_lane → <audio> preloaded at attach time
+var _playHandles = []; // currently active <audio> elements (play/pause/seek)
 var _playTimer = null;
 var _playing = false;
 
-function _playAudio(scene) {
-  _stopAudio();
-  ['narration', 'music', 'sfxAudio'].forEach(function (lane) {
-    var src = scene.media[lane];
-    if (!src) return;
-    try {
-      var el = new Audio(src);
-      el.volume = lane === 'narration' ? 0.9 : lane === 'music' ? 0.35 : 0.5;
-      el.play().catch(function () {});
-      _audioEls[lane] = el;
-    } catch (_) {}
-  });
-  // Also play any music track items
-  (scene.tracks.music || []).forEach(function (it, i) {
-    if (!it.src) return;
-    try {
-      var el = new Audio(it.src);
-      el.volume = 0.35;
-      el.currentTime = it.t0 || 0;
-      el.play().catch(function () {});
-      _audioEls['music_track_' + i] = el;
-    } catch (_) {}
-  });
+function _preloadAudio(sceneId, lane, src) {
+  var key = sceneId + '_' + lane;
+  var existing = _audioPre[key];
+  if (existing) { try { existing.pause(); existing.src = ''; } catch (_) {} }
+  if (!src) { delete _audioPre[key]; return; }
+  var el = document.createElement('audio');
+  el.preload = 'auto';
+  el.src = src;
+  el.load();
+  _audioPre[key] = el;
 }
 
 function _stopAudio() {
-  Object.keys(_audioEls).forEach(function (k) {
-    try { _audioEls[k].pause(); _audioEls[k].src = ''; } catch (_) {}
-  });
-  _audioEls = {};
+  _playHandles.forEach(function (h) { try { h.pause(); } catch (_) {} });
+  _playHandles = [];
 }
+
+// ─── SUBTITLE HELPERS ────────────────────────────────────────────────────────
+function _initSubOverlay(scene) {
+  var stage = _el('lseb-stage');
+  if (!stage) return;
+  var existing = document.getElementById('lseb-sub-overlay');
+  if (existing) existing.remove();
+  var textItems = (scene.tracks && scene.tracks.text) || [];
+  if (!textItems.length) return;
+  var sub = document.createElement('div');
+  sub.id = 'lseb-sub-overlay';
+  sub.className = 'sub-bottom';
+  sub.style.opacity = '0';
+  stage.appendChild(sub);
+}
+
+function _updateSubOverlay(scene, t) {
+  var sub = document.getElementById('lseb-sub-overlay');
+  if (!sub) return;
+  var textItems = (scene.tracks && scene.tracks.text) || [];
+  if (!textItems.length) return;
+  var active = null;
+  textItems.forEach(function (it) {
+    var t0 = it.t0 || 0;
+    if (t >= t0 && t < t0 + (it.dur || 3)) active = it;
+  });
+  sub.style.opacity = active ? '1' : '0';
+  if (active) sub.innerHTML = '<span>' + _esc(active.text || '') + '</span>';
+}
+
+// ─── PLAYBACK ENGINE (RAF-based, ported from Load Eco engine) ────────────────
+// For video assets: video element is master clock; RAF reads video.currentTime.
+// For image assets: RAF advances _engine.t by dt; Ken Burns CSS runs in parallel.
+// Audio is driven by preloaded <audio> elements started synchronously in play().
+var _engine = {
+  t: 0,
+  isPlaying: false,
+  rafId: null,
+  lastFrame: 0,
+
+  play: function (idx) {
+    if (this.isPlaying) return;
+    var scene = _state.scenes[idx];
+    if (!scene) return;
+    var dur = scene.duration || 5;
+    if (this.t >= dur - 0.01) this.t = 0;
+    this.isPlaying = true;
+    _playing = true;
+    this.lastFrame = performance.now();
+    _setPlayBtn(true);
+
+    var hasVideo = !!(scene.media && scene.media.video);
+
+    // CRITICAL: start media SYNCHRONOUSLY inside the user-gesture event
+    // so iOS Safari does not reject the play() call.
+    if (hasVideo) {
+      var vid = _el('lseb-stage-vid');
+      if (vid) { try { vid.currentTime = this.t; vid.play().catch(function () {}); } catch (e) {} }
+    } else if (scene.media && scene.media.image) {
+      var img = _el('lseb-stage-img');
+      if (img) {
+        img.classList.remove('kb-play');
+        img.style.animation = '';
+        void img.offsetWidth; // force reflow so animation restarts cleanly
+        var kbIdx = Math.floor(Math.random() * 3);
+        img.classList.add('kb-play');
+        img.style.animation = 'lsebKenBurns' + kbIdx + ' ' + dur + 's ease-in-out forwards';
+      }
+    }
+
+    // Audio: use pre-loaded elements (created at attach time)
+    var sceneId = scene.id;
+    var LANE_VOL = { narration: 0.9, music: 0.35, sfxAudio: 0.5 };
+    _playHandles = [];
+    ['narration', 'music', 'sfxAudio'].forEach(function (lane) {
+      var pre = _audioPre[sceneId + '_' + lane];
+      if (!pre) return;
+      try {
+        pre.currentTime = 0;
+        pre.volume = LANE_VOL[lane];
+        pre.play().catch(function () {});
+        _playHandles.push(pre);
+      } catch (e) {}
+    });
+    (scene.tracks.music || []).forEach(function (it, i) {
+      var pre = _audioPre[sceneId + '_music_track_' + i];
+      if (!pre) return;
+      try {
+        pre.currentTime = it.t0 || 0;
+        pre.volume = it.vol || 0.35;
+        pre.play().catch(function () {});
+        _playHandles.push(pre);
+      } catch (e) {}
+    });
+
+    _initSubOverlay(scene);
+
+    var self = this;
+    var step = function (now) {
+      if (!self.isPlaying) return;
+      var dt = (now - self.lastFrame) / 1000;
+      self.lastFrame = now;
+      var vid2 = _el('lseb-stage-vid');
+      var hasVid = !!(scene.media && scene.media.video);
+      if (hasVid && vid2) {
+        // Video is master clock
+        if (vid2.ended || (vid2.paused && vid2.currentTime >= vid2.duration - 0.05)) {
+          self._pause(idx);
+          self._tick(idx, vid2.duration || dur);
+          return;
+        }
+        self.t = vid2.currentTime;
+      } else {
+        self.t += dt;
+        if (self.t >= dur) {
+          self._pause(idx);
+          self._tick(idx, dur);
+          return;
+        }
+      }
+      self._tick(idx, self.t);
+      self.rafId = requestAnimationFrame(step);
+    };
+    this.rafId = requestAnimationFrame(step);
+  },
+
+  _pause: function (idx) {
+    this.isPlaying = false;
+    _playing = false;
+    if (this.rafId) { cancelAnimationFrame(this.rafId); this.rafId = null; }
+    _setPlayBtn(false);
+    var vid = _el('lseb-stage-vid');
+    if (vid) try { vid.pause(); } catch (e) {}
+    var img = _el('lseb-stage-img');
+    if (img) { img.classList.remove('kb-play'); img.style.animation = ''; }
+    var sub = document.getElementById('lseb-sub-overlay');
+    if (sub) sub.remove();
+    _stopAudio();
+  },
+
+  seekTo: function (t, idx) {
+    var scene = _state.scenes[idx];
+    var dur = scene ? (scene.duration || 5) : 5;
+    t = Math.max(0, Math.min(dur, t));
+    this.t = t;
+    this._tick(idx, t);
+    var vid = _el('lseb-stage-vid');
+    if (vid && scene && scene.media && scene.media.video) {
+      try { vid.fastSeek ? vid.fastSeek(t) : (vid.currentTime = t); } catch (e) {}
+    }
+    _playHandles.forEach(function (h) { try { h.currentTime = t; } catch (_) {} });
+  },
+
+  _tick: function (idx, t) {
+    var scene = _state.scenes[idx];
+    var dur = scene ? (scene.duration || 5) : 5;
+    var timeEl = _el('lseb-time');
+    if (timeEl) timeEl.textContent = t.toFixed(2) + ' / ' + dur.toFixed(2) + 's';
+    var playhead = _el('lseb-playhead');
+    if (playhead) playhead.style.left = Math.min(t * PX_PER_SECOND, dur * PX_PER_SECOND) + 'px';
+    if (scene) _updateSubOverlay(scene, t);
+  }
+};
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 function _esc(s) {
@@ -335,17 +491,21 @@ function _openSceneEditor(idx) {
       '</div>' +
       // Stage
       '<div id="lseb-stage">' +
-        (scene.media.image
-          ? '<img id="lseb-stage-img" src="' + scene.media.image + '" alt="" style="display:block;max-width:100%;max-height:100%;object-fit:contain">'
-          : '<img id="lseb-stage-img" alt="" style="display:none;max-width:100%;max-height:100%;object-fit:contain">') +
-        '<div id="lseb-stage-ph"' + (scene.media.image ? ' style="display:none"' : '') + '>' +
+        (scene.media.video
+          ? '<video id="lseb-stage-vid" src="' + _esc(scene.media.video) + '" playsinline preload="auto" style="max-width:100%;max-height:100%;background:#000;display:block"></video>' +
+            '<img id="lseb-stage-img" alt="" style="display:none;max-width:100%;max-height:100%;object-fit:contain">'
+          : '<video id="lseb-stage-vid" playsinline preload="auto" style="display:none;max-width:100%;max-height:100%;background:#000"></video>' +
+            (scene.media.image
+              ? '<img id="lseb-stage-img" src="' + _esc(scene.media.image) + '" alt="" style="display:block;max-width:100%;max-height:100%;object-fit:contain">'
+              : '<img id="lseb-stage-img" alt="" style="display:none;max-width:100%;max-height:100%;object-fit:contain">')) +
+        '<div id="lseb-stage-ph"' + (scene.media.image || scene.media.video ? ' style="display:none"' : '') + '>' +
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" width="48" height="48"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5-9 9"/></svg>' +
           '<span>Tap to attach image</span>' +
         '</div>' +
         '<button class="ve-iconbtn" id="lseb-fullscreen-btn" aria-label="Fullscreen" style="position:absolute;right:10px;bottom:10px;background:rgba(255,255,255,.1)">' +
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>' +
         '</button>' +
-        '<input type="file" id="lseb-img-pick" accept="image/*,.jpg,.jpeg,.png,.gif,.webp" style="display:none">' +
+        '<input type="file" id="lseb-img-pick" accept="image/*,video/*,.jpg,.jpeg,.png,.gif,.webp,.mp4,.mov,.webm,.m4v" style="display:none">' +
       '</div>' +
       // Transport
       '<div class="lseb-transport">' +
@@ -503,12 +663,16 @@ function _bindEditor(idx) {
     stagePh.addEventListener('click', function () { imgPick.click(); });
   }
 
-  // Image pick handler
+  // Image / video pick handler
   if (imgPick) imgPick.addEventListener('change', function (e) {
     var file = e.target.files && e.target.files[0];
     if (!file) return;
     _readDataURL(file).then(function (dataURL) {
-      _attachImage(idx, dataURL);
+      if (/^video\//i.test(file.type)) {
+        _attachVideo(idx, dataURL);
+      } else {
+        _attachImage(idx, dataURL);
+      }
     }).catch(function () {});
     e.target.value = '';
   });
@@ -531,15 +695,7 @@ function _bindEditor(idx) {
     var m = _el('lseb-info-msg'); if (m) m.textContent = msg;
     _showPanel('lseb-info-panel');
   }
-  // Build filter grid
-  var _FILTERS = {
-    none:'None', warm:'sepia(0.25) saturate(1.2) hue-rotate(-10deg)',
-    cool:'saturate(1.1) hue-rotate(15deg) brightness(1.05)',
-    noir:'grayscale(1) contrast(1.15)', vivid:'saturate(1.6) contrast(1.1)',
-    soft:'brightness(1.1) contrast(0.92)', vintage:'sepia(0.55) contrast(1.1) brightness(0.95)',
-    bw:'grayscale(1)', cinema:'contrast(1.25) saturate(0.85) brightness(0.95)',
-    golden:'sepia(0.6) saturate(1.3) hue-rotate(-15deg) brightness(1.08)'
-  };
+  // Build filter grid (uses module-level _FILTERS / _FILTER_LABELS)
   var _FILTER_LABELS = { none:'None', warm:'Warm', cool:'Cool', noir:'Noir', vivid:'Vivid', soft:'Soft', vintage:'Vintage', bw:'B&W', cinema:'Cinema', golden:'Golden' };
   function _buildFilterGrid(idx) {
     var grid = _el('lseb-filter-grid');
@@ -600,6 +756,9 @@ function _bindEditor(idx) {
       var it = _addTrackItem(idx, 'music', { name: file.name.replace(/\.[^.]+$/, ''), dur: scene.duration || 5, src: dataURL, vol: volNow });
       scene.media.music = dataURL;
       _saveState();
+      _preloadAudio(scene.id, 'music', dataURL);
+      var trackIdx = (scene.tracks.music || []).length - 1;
+      if (trackIdx >= 0) _preloadAudio(scene.id, 'music_track_' + trackIdx, dataURL);
       _renderTracks(idx);
       _renderWaveformPlaceholder(volNow);
       _showPanel(null);
@@ -635,10 +794,32 @@ function _bindEditor(idx) {
     e.target.value = '';
   });
 
+  // Timeline scrub — pointerdown + move on the scroll area seeks to that position
+  var tlScroll = _el('lseb-tl-scroll');
+  if (tlScroll) {
+    var _scrubbing = false;
+    function _scrubFromPointer(e) {
+      var rect = tlScroll.getBoundingClientRect();
+      var clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+      var x = (clientX - rect.left) + tlScroll.scrollLeft;
+      _engine.seekTo(Math.max(0, x / PX_PER_SECOND), idx);
+    }
+    tlScroll.addEventListener('pointerdown', function (e) {
+      if (e.target && (e.target.classList.contains('ve-clip-handle') || e.target.dataset.edge)) return;
+      _scrubbing = true;
+      _scrubFromPointer(e);
+    }, { passive: true });
+    document.addEventListener('pointermove', function (e) {
+      if (!_scrubbing) return;
+      _scrubFromPointer(e);
+    }, { passive: true });
+    document.addEventListener('pointerup', function () { _scrubbing = false; });
+  }
+
   // Transport
   var playBtn = _el('lseb-play-btn');
   if (playBtn) playBtn.addEventListener('click', function () {
-    _playing ? _stopPlayback() : _startPlayback(idx);
+    _engine.isPlaying ? _engine._pause(idx) : _engine.play(idx);
   });
   var prevBtn = _el('lseb-prev-btn');
   if (prevBtn) prevBtn.addEventListener('click', function () {
@@ -938,6 +1119,24 @@ function _attachImage(idx, src) {
   _toast('Image attached.');
 }
 
+function _attachVideo(idx, src) {
+  var scene = _state.scenes[idx];
+  if (!scene) return;
+  scene.media.video = src;
+  scene.media.image = null;
+  scene.status = 'has-video';
+  scene.updatedAt = new Date().toISOString();
+  _saveState();
+  var vid = _el('lseb-stage-vid');
+  var img = _el('lseb-stage-img');
+  var ph = _el('lseb-stage-ph');
+  if (vid) { vid.src = src; vid.style.display = 'block'; vid.load(); }
+  if (img) img.style.display = 'none';
+  if (ph) ph.style.display = 'none';
+  _renderImageStrip(idx);
+  _toast('Video attached.');
+}
+
 function _attachFromAIDirector(idx) {
   try {
     var takes = JSON.parse(localStorage.getItem('loadstudio_ai_image_director_takes') || '[]');
@@ -947,89 +1146,21 @@ function _attachFromAIDirector(idx) {
   } catch (e) { _toast('Could not read AI Director takes.'); }
 }
 
-// ─── PLAYBACK ────────────────────────────────────────────────────────────────
-var _playInterval = null;
-var _playStart = 0;
-var _playDur = 0;
-
-function _startPlayback(idx) {
-  var scene = _state.scenes[idx];
-  if (!scene) return;
-  _playing = true;
-  _playAudio(scene);
-  _playDur = (scene.duration || 5) * 1000;
-  _playStart = Date.now();
-  _setPlayBtn(true);
-
-  // Ken Burns animation on stage image
-  var img = _el('lseb-stage-img');
-  if (img && scene.media.image) {
-    var kbIdx = Math.floor(Math.random() * 3);
-    var dur = scene.duration || 5;
-    img.classList.add('kb-play');
-    img.style.animation = 'lsebKenBurns' + kbIdx + ' ' + dur + 's ease-in-out forwards';
-  }
-
-  // Subtitle overlay — show first text track item if any
-  var stage = _el('lseb-stage');
-  if (stage) {
-    var existing = document.getElementById('lseb-sub-overlay');
-    if (existing) existing.remove();
-    var textItems = (scene.tracks && scene.tracks.text) || [];
-    if (textItems.length) {
-      var sub = document.createElement('div');
-      sub.id = 'lseb-sub-overlay';
-      sub.className = 'sub-bottom';
-      sub.innerHTML = '<span>' + _esc(textItems[0].text || '') + '</span>';
-      stage.appendChild(sub);
-    }
-  }
-
-  var timeEl = _el('lseb-time');
-  var playhead = _el('lseb-playhead');
-  var strip = _el('lseb-image-strip');
-  var stripW = strip ? ((strip.querySelector('.timeline-clip') || {}).clientWidth || 360) : 360;
-
-  _playInterval = setInterval(function () {
-    var elapsed = Date.now() - _playStart;
-    var t = elapsed / 1000;
-    var sceneDur = scene.duration || 5;
-    if (timeEl) timeEl.textContent = t.toFixed(2) + ' / ' + sceneDur.toFixed(2) + 's';
-    if (playhead) playhead.style.left = Math.min(t * PX_PER_SECOND, stripW) + 'px';
-    // Cycle subtitle text blocks by time position
-    if (stage && scene.tracks && scene.tracks.text && scene.tracks.text.length > 1) {
-      var subEl = document.getElementById('lseb-sub-overlay');
-      if (subEl) {
-        var active = null;
-        scene.tracks.text.forEach(function (it) { if (t >= it.t0 && t < it.t0 + it.dur) active = it; });
-        subEl.style.opacity = active ? '1' : '0';
-        if (active) subEl.innerHTML = '<span>' + _esc(active.text || '') + '</span>';
-      }
-    }
-    if (elapsed >= _playDur) _stopPlayback();
-  }, 50);
-}
+// ─── PLAYBACK SHIMS (delegate to _engine) ────────────────────────────────────
+function _startPlayback(idx) { _engine.play(idx); }
 
 function _stopPlayback() {
-  _playing = false;
-  clearInterval(_playInterval);
+  _engine._pause(_state.selectedIdx);
+  _engine.t = 0;
   clearTimeout(_playTimer);
-  _stopAudio();
-  _setPlayBtn(false);
-  // Remove Ken Burns
-  var img = _el('lseb-stage-img');
-  if (img) { img.classList.remove('kb-play'); img.style.animation = ''; }
-  // Remove subtitle overlay
-  var sub = document.getElementById('lseb-sub-overlay');
-  if (sub) sub.remove();
-  var timeEl = _el('lseb-time');
   var playhead = _el('lseb-playhead');
+  if (playhead) playhead.style.left = '0';
+  var timeEl = _el('lseb-time');
   if (timeEl) {
     var scene = _state.scenes[_state.selectedIdx];
     var dur = (scene && scene.duration) || 5;
     timeEl.textContent = '0.00 / ' + dur.toFixed(2) + 's';
   }
-  if (playhead) playhead.style.left = '0';
 }
 
 function _setPlayBtn(isPlaying) {
@@ -1074,6 +1205,14 @@ function _buildTransform(fx) {
   if (fx.flip) parts.push('scaleY(-1)');
   return parts.join(' ') || 'none';
 }
+var _FILTERS = {
+  none:'', warm:'sepia(0.25) saturate(1.2) hue-rotate(-10deg)',
+  cool:'saturate(1.1) hue-rotate(15deg) brightness(1.05)',
+  noir:'grayscale(1) contrast(1.15)', vivid:'saturate(1.6) contrast(1.1)',
+  soft:'brightness(1.1) contrast(0.92)', vintage:'sepia(0.55) contrast(1.1) brightness(0.95)',
+  bw:'grayscale(1)', cinema:'contrast(1.25) saturate(0.85) brightness(0.95)',
+  golden:'sepia(0.6) saturate(1.3) hue-rotate(-15deg) brightness(1.08)'
+};
 function _buildFilterStr(fx, blurOverride) {
   var parts = [];
   var blur = blurOverride != null ? blurOverride : 0;
