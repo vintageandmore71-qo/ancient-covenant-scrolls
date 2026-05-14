@@ -1180,19 +1180,20 @@ window.lsSaveCTP_providerReport=function(){
   window.lsAID_projectSuggestions=function(){try{aid_si_status('Processing...','#b388ff');var suggestions=[];try{suggestions=generate_project_suggestions();}catch(e1){}var el=document.getElementById('aid-si-list');if(el){window._aidSuggestions=suggestions;try{render_scene_suggestions(suggestions,'project');}catch(e2){el.innerHTML=suggestions.slice(0,6).map(function(s,i){return '<div style="border:1px solid rgba(125,42,232,.25);border-radius:10px;padding:12px;margin-bottom:8px;background:#0e0720">'+'<strong style="color:#f5f0ff;font:600 13px Inter,system-ui,sans-serif">'+s.title+'</strong>'+'<div style="color:#c0b8d9;font:400 12px Inter,system-ui,sans-serif;margin-top:6px">'+s.mood+' | '+s.camera+'</div>'+'<button type="button" onclick="window.lsAID_applyScene('+i+')" style="margin-top:10px;background:linear-gradient(135deg,#7d2ae8,#b33af0);color:#fff;border:none;border-radius:8px;padding:8px 18px;font:600 13px Inter,system-ui,sans-serif;cursor:pointer">Use This Scene</button>'+'</div>';}).join('');}}aid_si_status(suggestions.length+' scene idea'+(suggestions.length===1?'':'s')+' created. Select one below.','#5ee0a5');}catch(fatal){aid_si_status('Suggestion error. Try again.','#ff8080');}};
   function lsAID_updateCinematicPreview(opts){
     var o=opts||{};
-    var title=gv('aid-sc-title')||o.title||'';
-    var type=gv('aid-sc-type')||'';
-    var location=gv('aid-sc-location')||'';
-    var time=gv('aid-sc-time')||'';
-    var weather=gv('aid-sc-weather')||'';
-    var mood=gv('aid-sc-mood')||'';
-    var chars=gv('aid-sc-characters')||'';
-    var action=gv('aid-sc-action')||'';
-    var camera=gv('aid-sc-camera')||'';
-    var lighting=gv('aid-sc-lighting')||'';
-    var composition=gv('aid-sc-composition')||'';
-    var continuity=gv('aid-sc-continuity-notes')||'';
-    var prompt=o.prompt||_savedPrompt||'';
+    function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+    var title=esc(gv('aid-sc-title')||o.title||'');
+    var type=esc(gv('aid-sc-type')||'');
+    var location=esc(gv('aid-sc-location')||'');
+    var time=esc(gv('aid-sc-time')||'');
+    var weather=esc(gv('aid-sc-weather')||'');
+    var mood=esc(gv('aid-sc-mood')||'');
+    var chars=esc(gv('aid-sc-characters')||'');
+    var action=esc(gv('aid-sc-action')||'');
+    var camera=esc(gv('aid-sc-camera')||'');
+    var lighting=esc(gv('aid-sc-lighting')||'');
+    var composition=esc(gv('aid-sc-composition')||'');
+    var continuity=esc(gv('aid-sc-continuity-notes')||'');
+    var prompt=esc(o.prompt||_savedPrompt||'');
     if(!title&&!location&&!action){return;}
     var rows=[];
     if(title){rows.push('<div style="color:#f5f0ff;font:700 14px Inter,system-ui,sans-serif;margin-bottom:8px">'+title+'</div>');}
