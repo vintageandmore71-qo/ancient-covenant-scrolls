@@ -1363,9 +1363,10 @@ window.lsSaveCTP_providerReport=function(){
       try{lsAID_updateCinematicPreview();}catch(_){}
       var _provCfg=aid_read(KEYS.providers)||{};
       if(_provCfg.active==='pollinations'){
-        lsAID_v74_frame_state('Generating...','Sending to Pollinations...','#b388ff');
+        lsAID_v74_frame_state('Generating...','Sending to Pollinations — may take 15–30 seconds...','#b388ff');
         lsAID_v74_status('Generating image...','#b388ff');
-        var _enc=encodeURIComponent(prompt);
+        var _promptShort=prompt.length>500?prompt.substring(0,500):prompt;
+        var _enc=encodeURIComponent(_promptShort);
         var _seed=Math.floor(Math.random()*99999);
         var _imgUrl='https://image.pollinations.ai/prompt/'+_enc+'?width=768&height=512&seed='+_seed+'&nologo=true&model=flux';
         var _pimg=new Image();
@@ -1373,9 +1374,9 @@ window.lsSaveCTP_providerReport=function(){
         _pimg.onerror=function(){lsAID_v74_frame_state('Provider returned no image','Try again or import manually.','#ff8080');lsAID_v74_status('Generation failed. Try again or import manually.','#ff8080');if(notice)notice.style.display='block';};
         _pimg.src=_imgUrl;
       } else {
-        lsAID_v74_frame_state('Prompt ready','Paste your prompt into an image provider, then tap Import Image Result.','#5ee0a5');
+        lsAID_v74_frame_state('Provider Required','No provider connected. Open Provider Settings to connect one, or copy the prompt and use any image tool.','#ffb300');
         if(notice)notice.style.display='block';
-        lsAID_v74_status('Prompt created and saved.','#5ee0a5');
+        lsAID_v74_status('Prompt ready. Connect a provider or copy the prompt.','#ffb300');
       }
     }catch(err){
       lsAID_v74_status('Something went wrong. Try shorter text.','#ff8080');
@@ -1438,7 +1439,7 @@ window.lsSaveCTP_providerReport=function(){
       _b.style.background=_active?'rgba(125,42,232,.2)':'none';
       _b.style.borderRadius='10px';
     }
-    if(panelName==='characters')lsAID_render_chars_panel();
+    if(panelName==='characters'){lsAID_render_chars_panel();if(!load_chars().length)lsAID_open_char_form(-1);}
     if(panelName==='world')lsAID_load_world_panel();
     if(panelName==='providers')lsAID_render_providers_panel();
     if(panelName==='review'){try{render_takes_list(_currentFilter);}catch(_){}}
@@ -1628,7 +1629,7 @@ window.lsSaveCTP_providerReport=function(){
       if(title)title.textContent='Add Character';
       if(idxEl)idxEl.value='';
       ['aid-cp-name','aid-cp-role','aid-cp-appearance','aid-cp-wardrobe','aid-cp-notes'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
-      if(preview){preview.src='';preview.style.display='none';}
+      if(preview){preview.innerHTML='';preview.style.display='none';}
       if(refData)refData.value='';
     }
     form.style.display='block';
@@ -1670,7 +1671,7 @@ window.lsSaveCTP_providerReport=function(){
     sv('aid-cp-name',c.name);sv('aid-cp-role',c.role);sv('aid-cp-appearance',c.face||c.ethnicity||'');sv('aid-cp-wardrobe',c.wardrobe);sv('aid-cp-notes',c.notes||'');
     var refData=document.getElementById('aid-cp-ref-data');if(refData)refData.value=c.refImage||'';
     var preview=document.getElementById('aid-cp-ref-preview');
-    if(preview){if(c.refImage){preview.src=c.refImage;preview.style.display='block';}else{preview.src='';preview.style.display='none';}}
+    if(preview){if(c.refImage){preview.innerHTML='<img src="'+c.refImage+'" alt="" style="width:100%;border-radius:8px;display:block;">';preview.style.display='block';}else{preview.innerHTML='';preview.style.display='none';}}
   }
   function lsAID_delete_char_inline(idx){
     var chars=load_chars();
@@ -1698,7 +1699,7 @@ window.lsSaveCTP_providerReport=function(){
     var cfg=aid_read(KEYS.providers)||{};
     var active=cfg.active||'';
     var notice=document.getElementById('aid-prov-active-notice');
-    if(notice)notice.textContent=active?('Active: '+(active.charAt(0).toUpperCase()+active.slice(1))):'No provider selected.';
+    if(notice){notice.style.display='block';notice.textContent=active?('Active: '+(active.charAt(0).toUpperCase()+active.slice(1))):'No provider selected. Tap Select below.';notice.style.color=active?'#5ee0a5':'#ffb300';}
     ['pollinations','horde','huggingface','localsd','comfyui'].forEach(function(key){
       var btn=document.getElementById('aid-prov-sel-'+key);
       if(btn){
@@ -1794,6 +1795,7 @@ window.lsSaveCTP_providerReport=function(){
       case 'create-image':window.lsAID_createImage();break;
       case 'copy-prompt':window.lsAID_v74CopyPrompt();break;
       case 'import-trigger':var fi=document.getElementById('aid-v74-import');if(fi)fi.click();break;
+      case 'trigger-file':(function(){var tgt=btn.getAttribute('data-target');var fi2=tgt?document.getElementById(tgt):null;if(fi2)fi2.click();}());break;
       case 'approve':window.lsAID_v74Review('approve');lsAID_switch_rail('review');break;
       case 'needs-correction':window.lsAID_v74Review('correction');lsAID_switch_rail('review');break;
       case 'reject':window.lsAID_v74Review('reject');lsAID_switch_rail('review');break;
@@ -1839,7 +1841,7 @@ window.lsSaveCTP_providerReport=function(){
         var preview=document.getElementById('aid-cp-ref-preview');
         var refData=document.getElementById('aid-cp-ref-data');
         if(refData)refData.value=data;
-        if(preview){preview.src=data;preview.style.display='block';}
+        if(preview){preview.innerHTML='<img src="'+data+'" alt="" style="width:100%;border-radius:8px;display:block;">';preview.style.display='block';}
       };
       _r2.onerror=function(){};
       _r2.readAsDataURL(f);
