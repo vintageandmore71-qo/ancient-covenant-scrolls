@@ -1413,4 +1413,168 @@ window.lsSaveCTP_providerReport=function(){
   };
 
 
+  function lsAID_v74_show_flow(){
+    var flow=document.getElementById('aid-v74-flow');
+    var sp=document.getElementById('aid-v74-shortcut-panel');
+    if(flow){flow.style.display='block';}
+    if(sp){sp.style.display='none';}
+  }
+
+  function lsAID_v74_show_panel(title, bodyHtml){
+    var flow=document.getElementById('aid-v74-flow');
+    var sp=document.getElementById('aid-v74-shortcut-panel');
+    var pt=document.getElementById('aid-v74-panel-title');
+    var pb=document.getElementById('aid-v74-panel-body');
+    if(flow)flow.style.display='none';
+    if(sp)sp.style.display='block';
+    if(pt)pt.textContent=title;
+    if(pb)pb.innerHTML=bodyHtml;
+  }
+
+  window.lsAID_v74ClosePanel=function(){lsAID_v74_show_flow();};
+
+  window.lsAID_v74Panel=function(type){
+    if(type==='script'){
+      lsAID_v74_show_panel('Pull From Script or Book',
+        '<p style="color:#c0b8d9;font:400 13px Inter,system-ui,sans-serif;margin:0 0 10px">Paste text from a script or book. Tap Extract to pull scene ideas.</p>'+
+        '<textarea id="aid-v74p-paste" placeholder="Paste script or book text here..." style="width:100%;box-sizing:border-box;min-height:130px;background:#0e0720;border:2px solid rgba(125,42,232,.4);border-radius:10px;color:#f5f0ff;font:400 15px Inter,system-ui,sans-serif;padding:12px;resize:vertical;line-height:1.5"></textarea>'+
+        '<button type="button" onclick="window.lsAID_v74ExtractScript&&window.lsAID_v74ExtractScript()" style="width:100%;margin-top:10px;padding:13px;background:linear-gradient(135deg,#7d2ae8,#b33af0);color:#fff;border:none;border-radius:10px;font:700 15px Inter,system-ui,sans-serif;cursor:pointer">Extract Scene Ideas</button>'+
+        '<div id="aid-v74p-script-results" style="margin-top:14px"></div>'
+      );
+    } else if(type==='suggestions'){
+      var chars=load_chars();
+      var scenes=load_scenes?load_scenes():[];
+      var suggestions=generate_project_suggestions?generate_project_suggestions():[];
+      var html='<p style="color:#c0b8d9;font:400 13px Inter,system-ui,sans-serif;margin:0 0 12px">Scene ideas based on your saved characters and scenes.</p>';
+      if(!suggestions.length&&!chars.length){
+        html+='<p style="color:#7a6fa0;font:400 13px Inter,system-ui,sans-serif">Save characters or scenes first to see suggestions.</p>';
+      } else {
+        if(!suggestions.length){
+          suggestions=[{title:'New scene',action:'Characters gather in the setting.',location:'Primary setting',mood:'Neutral',camera:'Medium shot',lighting:'Natural light',continuityRisks:''}];
+        }
+        html+=suggestions.slice(0,6).map(function(s,i){
+          return '<div style="border:1px solid rgba(125,42,232,.25);border-radius:10px;padding:12px;margin-bottom:8px;background:#0e0720">'+
+            '<div style="color:#f5f0ff;font:700 13px Inter,system-ui,sans-serif;margin-bottom:4px">'+s.title+'</div>'+
+            '<div style="color:#c0b8d9;font:400 12px Inter,system-ui,sans-serif;margin-bottom:8px">'+s.action+'</div>'+
+            '<button type="button" onclick="window.lsAID_v74UseScene&&window.lsAID_v74UseScene('+i+')" style="padding:8px 16px;background:linear-gradient(135deg,#7d2ae8,#b33af0);color:#fff;border:none;border-radius:8px;font:600 13px Inter,system-ui,sans-serif;cursor:pointer">Use This Scene</button>'+
+          '</div>';
+        }).join('');
+        window._v74Suggestions=suggestions;
+      }
+      lsAID_v74_show_panel('Scene Suggestions', html);
+    } else if(type==='characters'){
+      var chars2=load_chars();
+      var html2='<p style="color:#c0b8d9;font:400 13px Inter,system-ui,sans-serif;margin:0 0 12px">Saved characters appear in your prompts. Tap a character to add them to the scene.</p>';
+      if(!chars2.length){
+        html2+='<p style="color:#7a6fa0;font:400 13px Inter,system-ui,sans-serif;margin-bottom:12px">No characters saved yet. Add characters in Advanced.</p>';
+      } else {
+        html2+=chars2.map(function(c,i){
+          return '<div style="border:1px solid rgba(125,42,232,.25);border-radius:10px;padding:12px;margin-bottom:8px;background:#0e0720;display:flex;align-items:center;justify-content:space-between">'+
+            '<div><div style="color:#f5f0ff;font:700 13px Inter,system-ui,sans-serif">'+c.name+'</div>'+
+            '<div style="color:#9c93b5;font:400 11px Inter,system-ui,sans-serif">'+[c.role,c.ethnicity].filter(Boolean).join(' · ')+'</div></div>'+
+            '<button type="button" onclick="window.lsAID_v74AddChar&&window.lsAID_v74AddChar('+i+')" style="padding:7px 13px;background:rgba(125,42,232,.25);border:1px solid rgba(125,42,232,.5);border-radius:7px;color:#e0d8f8;font:600 12px Inter,system-ui,sans-serif;cursor:pointer">Add to Scene</button>'+
+          '</div>';
+        }).join('');
+      }
+      html2+='<button type="button" onclick="window.lsAID_v74ClosePanel&&window.lsAID_v74ClosePanel()" style="width:100%;margin-top:4px;padding:11px;background:rgba(125,42,232,.15);border:1px solid rgba(125,42,232,.3);border-radius:9px;color:#c0b8d9;font:600 13px Inter,system-ui,sans-serif;cursor:pointer">Done</button>';
+      lsAID_v74_show_panel('Characters', html2);
+    } else if(type==='world'){
+      var wr=aid_read(KEYS.world)||{};
+      var fld=function(id,label,val,ph){return '<div style="margin-bottom:10px"><label style="display:block;color:#b0a8d0;font:600 12px Inter,system-ui,sans-serif;margin-bottom:4px">'+label+'</label><input id="'+id+'" type="text" value="'+(val||'')+'" placeholder="'+ph+'" style="width:100%;box-sizing:border-box;background:#0e0720;border:1px solid rgba(125,42,232,.35);border-radius:8px;color:#f5f0ff;font:400 14px Inter,system-ui,sans-serif;padding:9px 11px"></div>';};
+      var worldHtml=fld('aid-v74w-period','Time period',wr.period,'e.g. Ancient, Biblical')+
+        fld('aid-v74w-style','Visual style',wr.style,'e.g. Cinematic, Documentary')+
+        fld('aid-v74w-clothing','Clothing era',wr.clothing,'e.g. First century, Ancient Near East')+
+        fld('aid-v74w-forbidden','Forbidden elements',wr.forbidden,'Things that must not appear')+
+        '<button type="button" onclick="window.lsAID_v74SaveWorld&&window.lsAID_v74SaveWorld()" style="width:100%;padding:12px;background:linear-gradient(135deg,#7d2ae8,#b33af0);color:#fff;border:none;border-radius:10px;font:700 14px Inter,system-ui,sans-serif;cursor:pointer;margin-top:4px">Save World Rules</button>'+
+        '<div id="aid-v74w-confirm" style="display:none;margin-top:8px;color:#5ee0a5;font:500 13px Inter,system-ui,sans-serif"></div>';
+      lsAID_v74_show_panel('World Rules', worldHtml);
+    } else if(type==='importexport'){
+      var ieHtml='<p style="color:#c0b8d9;font:400 13px Inter,system-ui,sans-serif;margin:0 0 14px">Import an image result or export your project data.</p>'+
+        '<button type="button" onclick="document.getElementById('aid-v74-import').click()" style="width:100%;padding:14px;background:rgba(125,42,232,.2);border:2px solid rgba(125,42,232,.5);border-radius:10px;color:#e0d8f8;font:700 15px Inter,system-ui,sans-serif;cursor:pointer;margin-bottom:10px">Import Image Result</button>'+
+        '<button type="button" onclick="window.lsAID_v74Export&&window.lsAID_v74Export()" style="width:100%;padding:13px;background:rgba(94,224,165,.1);border:1px solid rgba(94,224,165,.35);border-radius:10px;color:#5ee0a5;font:700 14px Inter,system-ui,sans-serif;cursor:pointer">Export Approved Takes</button>'+
+        '<div id="aid-v74ie-confirm" style="display:none;margin-top:8px;color:#5ee0a5;font:500 13px Inter,system-ui,sans-serif"></div>';
+      lsAID_v74_show_panel('Import / Export', ieHtml);
+    }
+  };
+
+  window.lsAID_v74ExtractScript=function(){
+    var ta=document.getElementById('aid-v74p-paste');
+    var text=ta?ta.value.trim():'';
+    var res=document.getElementById('aid-v74p-script-results');
+    if(!text){if(res)res.innerHTML='<p style="color:#ff8080;font:500 13px Inter,system-ui,sans-serif">Paste text first.</p>';return;}
+    var suggestions=[];
+    try{suggestions=extract_scenes_from_text(text);}catch(_){}
+    if(!suggestions.length){suggestions=[{title:'Scene from text',action:text.length>150?text.substring(0,150)+'...':text,location:'Setting',mood:'',camera:'Medium shot',lighting:'Natural light'}];}
+    window._v74Suggestions=suggestions;
+    if(res){
+      res.innerHTML='<p style="color:#5ee0a5;font:600 13px Inter,system-ui,sans-serif;margin-bottom:10px">'+suggestions.length+' scene idea'+(suggestions.length===1?'':'s')+' found. Tap one to use it.</p>'+
+        suggestions.slice(0,5).map(function(s,i){
+          return '<div style="border:1px solid rgba(125,42,232,.25);border-radius:10px;padding:12px;margin-bottom:8px;background:#0e0720">'+
+            '<div style="color:#f5f0ff;font:700 13px Inter,system-ui,sans-serif;margin-bottom:4px">'+s.title+'</div>'+
+            '<div style="color:#c0b8d9;font:400 12px Inter,system-ui,sans-serif;margin-bottom:8px">'+s.action+'</div>'+
+            '<button type="button" onclick="window.lsAID_v74UseScene&&window.lsAID_v74UseScene('+i+')" style="padding:8px 16px;background:linear-gradient(135deg,#7d2ae8,#b33af0);color:#fff;border:none;border-radius:8px;font:600 13px Inter,system-ui,sans-serif;cursor:pointer">Use This Scene</button>'+
+          '</div>';
+        }).join('');
+    }
+  };
+
+  window.lsAID_v74UseScene=function(idx){
+    var s=window._v74Suggestions&&window._v74Suggestions[idx];
+    if(!s)return;
+    var ta=document.getElementById('aid-v74-scene');
+    if(ta){
+      var parts=[s.action,s.location?'Location: '+s.location:'',s.mood?'Mood: '+s.mood:''].filter(Boolean);
+      ta.value=parts.join('. ');
+    }
+    sv('aid-sc-title',s.title||'');sv('aid-sc-type',s.type||'');sv('aid-sc-location',s.location||'');
+    sv('aid-sc-mood',s.mood||'');sv('aid-sc-action',s.action||'');sv('aid-sc-camera',s.camera||'');
+    sv('aid-sc-lighting',s.lighting||'');sv('aid-sc-continuity-notes',s.continuityRisks||'');
+    lsAID_v74_show_flow();
+  };
+
+  window.lsAID_v74AddChar=function(idx){
+    var chars=load_chars();
+    var c=chars[idx];
+    if(!c)return;
+    var ta=document.getElementById('aid-v74-scene');
+    if(ta){
+      var cur=ta.value.trim();
+      var charNote='Character: '+c.name+(c.role?' ('+c.role+')':'');
+      ta.value=cur?(cur+'. '+charNote):charNote;
+    }
+    var cur2=gv('aid-sc-characters')||'';
+    sv('aid-sc-characters',cur2?cur2+', '+c.name:c.name);
+    lsAID_v74_show_flow();
+  };
+
+  window.lsAID_v74SaveWorld=function(){
+    var wr={
+      period:document.getElementById('aid-v74w-period')?document.getElementById('aid-v74w-period').value:'',
+      style:document.getElementById('aid-v74w-style')?document.getElementById('aid-v74w-style').value:'',
+      clothing:document.getElementById('aid-v74w-clothing')?document.getElementById('aid-v74w-clothing').value:'',
+      forbidden:document.getElementById('aid-v74w-forbidden')?document.getElementById('aid-v74w-forbidden').value:''
+    };
+    var existing=aid_read(KEYS.world)||{};
+    aid_write(KEYS.world,Object.assign(existing,wr));
+    var c=document.getElementById('aid-v74w-confirm');
+    if(c){c.style.display='block';c.textContent='World rules saved.';}
+    setTimeout(function(){lsAID_v74_show_flow();},900);
+  };
+
+  window.lsAID_v74Export=function(){
+    var takes=load_takes().filter(function(t){return t.status==='approve';});
+    if(!takes.length){
+      var c=document.getElementById('aid-v74ie-confirm');
+      if(c){c.style.display='block';c.style.color='#ff8080';c.textContent='No approved takes to export.';}
+      return;
+    }
+    var blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),takes:takes},null,2)],{type:'application/json'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=url;a.download='approved-takes-'+Date.now()+'.json';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+    var c2=document.getElementById('aid-v74ie-confirm');
+    if(c2){c2.style.display='block';c2.textContent=takes.length+' take'+(takes.length===1?'':'s')+' exported.';}
+  };
+
+
 })();
