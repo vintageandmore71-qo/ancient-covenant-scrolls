@@ -27,6 +27,39 @@
 'use strict';
 
 var STORE_KEY = 'load_provider_registry_v1';
+var AID_STORE_KEY = 'loadstudio_ai_image_director_providers';
+
+// Registry provider IDs → AI Director router IDs
+var REGISTRY_TO_ROUTER = {
+  'pollinations-flux':  'pollinations',
+  'pollinations-sdxl':  'pollinations',
+  'ai-horde':           'horde',
+  'ai-horde-sdxl':      'horde',
+  'huggingface-image':  'huggingface',
+  'comfyui':            'comfyui',
+  'a1111':              'localsd',
+  'forge':              'forge',
+  'fooocus':            'fooocus',
+  'invokeai':           'invokeai',
+  'kokoro':             'kokoro',
+  'piper':              'piper',
+  'browser-tts':        'browser_tts'
+};
+
+// AI Director router IDs → registry provider IDs (first canonical match)
+var ROUTER_TO_REGISTRY = {
+  'pollinations': 'pollinations-flux',
+  'horde':        'ai-horde',
+  'huggingface':  'huggingface-image',
+  'comfyui':      'comfyui',
+  'localsd':      'a1111',
+  'forge':        'forge',
+  'fooocus':      'fooocus',
+  'invokeai':     'invokeai',
+  'kokoro':       'kokoro',
+  'piper':        'piper',
+  'browser_tts':  'browser-tts'
+};
 
 // ── Provider definitions ─────────────────────────────────────────────────────
 var PROVIDERS = [
@@ -901,6 +934,39 @@ function _saveSettings() {
 }
 _loadSettings();
 
+// ── AID sync helpers ──────────────────────────────────────────────────────────
+function _readAIDConfig() {
+  try { var r = localStorage.getItem(AID_STORE_KEY); return r ? JSON.parse(r) : {}; } catch (_) { return {}; }
+}
+function _writeAIDConfig(cfg) {
+  try { localStorage.setItem(AID_STORE_KEY, JSON.stringify(cfg)); } catch (_) {}
+}
+function _syncRegistryPrimaryToAID(registryId) {
+  var routerId = REGISTRY_TO_ROUTER[registryId] || null;
+  var cfg = _readAIDConfig();
+  cfg.primary = routerId;
+  _writeAIDConfig(cfg);
+}
+function _migrateAIDToRegistry() {
+  var aidCfg = _readAIDConfig();
+  var aidPrimary = aidCfg.primary || aidCfg.active || null;
+  if (!aidPrimary) return false;
+  var hasPrimary = Object.keys(_settings).some(function (id) { return _settings[id] && _settings[id].primary; });
+  if (hasPrimary) return false;
+  var registryId = ROUTER_TO_REGISTRY[aidPrimary] || null;
+  if (!registryId) return false;
+  _settings[registryId] = _settings[registryId] || {};
+  _settings[registryId].primary = true;
+  _saveSettings();
+  return true;
+}
+function _initSync() {
+  _migrateAIDToRegistry();
+  var primaryId = null;
+  Object.keys(_settings).forEach(function (id) { if (_settings[id] && _settings[id].primary) primaryId = id; });
+  if (primaryId) _syncRegistryPrimaryToAID(primaryId);
+}
+
 // ── Normalise result ──────────────────────────────────────────────────────────
 function normalizeResult(raw) {
   if (raw && raw.__normalized) return raw;
@@ -1046,10 +1112,27 @@ var Registry = {
 
   saveProviderSettings: function (id, settings) {
     if (!this.getProvider(id)) return;
-    // Security: never log or export the settings object
+    if (settings.primary === true) {
+      // Only one primary at a time across all providers
+      Object.keys(_settings).forEach(function (pid) { if (pid !== id && _settings[pid]) _settings[pid].primary = false; });
+    }
     _settings[id] = _settings[id] || {};
     Object.keys(settings).forEach(function (k) { _settings[id][k] = settings[k]; });
     _saveSettings();
+    // Sync primary to AI Director
+    if ('primary' in settings) {
+      if (settings.primary === true) {
+        _syncRegistryPrimaryToAID(id);
+      } else {
+        var anyPrimary = null;
+        Object.keys(_settings).forEach(function (pid) { if (_settings[pid] && _settings[pid].primary) anyPrimary = pid; });
+        if (anyPrimary) {
+          _syncRegistryPrimaryToAID(anyPrimary);
+        } else {
+          var cfg = _readAIDConfig(); cfg.primary = null; _writeAIDConfig(cfg);
+        }
+      }
+    }
   },
 
   testProvider: function (id) {
@@ -1360,6 +1443,7 @@ function _lsprToast(msg) {
 
 // ── Auto-wire buttons in both apps ────────────────────────────────────────────
 function _autoWire() {
+  _initSync();
   document.querySelectorAll('[data-action="provider-registry"],[data-lspr-open]').forEach(function (btn) {
     btn.addEventListener('click', function () { Registry.openPanel(); });
   });
@@ -1380,5 +1464,53 @@ if (document.readyState === 'loading') {
 }
 
 window.LoadProviderRegistry = Registry;
+
+window.LoadProviderRegistrySelfTest = function () {
+  _loadSettings();
+  var primaryId = null;
+  Object.keys(_settings).forEach(function (id) { if (_settings[id] && _settings[id].primary) primaryId = id; });
+  var routerId = primaryId ? (REGISTRY_TO_ROUTER[primaryId] || null) : null;
+  var aidCfg = _readAIDConfig();
+  var aidPrimary = aidCfg.primary || null;
+  return {
+    registryPrimaryProvider: primaryId,
+    registryPrimaryStatus: primaryId ? Registry.getProviderStatus(primaryId) : 'none',
+    aidDetectedProvider: aidPrimary,
+    aidProviderConnected: !!(aidPrimary),
+    localStorage_registry: STORE_KEY,
+    localStorage_aid: AID_STORE_KEY,
+    routerIdExpected: routerId,
+    inSync: routerId === aidPrimary,
+    migrationApplied: false
+  };
+};
+
+window.lsAID_providerSyncSelfTest = function () {
+  _loadSettings();
+  var primaryId = null;
+  Object.keys(_settings).forEach(function (id) { if (_settings[id] && _settings[id].primary) primaryId = id; });
+  var routerId = primaryId ? (REGISTRY_TO_ROUTER[primaryId] || null) : null;
+  var aidCfg = _readAIDConfig();
+  var aidPrimary = aidCfg.primary || null;
+  var migApplied = false;
+  if (!primaryId && aidPrimary) {
+    migApplied = _migrateAIDToRegistry();
+    if (migApplied) {
+      _loadSettings();
+      primaryId = null;
+      Object.keys(_settings).forEach(function (id) { if (_settings[id] && _settings[id].primary) primaryId = id; });
+      routerId = primaryId ? (REGISTRY_TO_ROUTER[primaryId] || null) : null;
+    }
+  }
+  return {
+    registryPrimaryProvider: primaryId,
+    registryPrimaryStatus: primaryId ? Registry.getProviderStatus(primaryId) : 'none',
+    aidDetectedProvider: aidPrimary,
+    aidProviderConnected: !!(aidPrimary),
+    localStorageKeys: { registry: STORE_KEY, aid: AID_STORE_KEY },
+    migrationApplied: migApplied,
+    syncStatus: routerId === aidPrimary ? 'in-sync' : 'out-of-sync'
+  };
+};
 
 })();
