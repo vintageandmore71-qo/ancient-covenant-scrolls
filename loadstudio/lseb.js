@@ -128,8 +128,34 @@ function _updateSubOverlay(scene, t) {
 // For video assets: video element is master clock; RAF reads video.currentTime.
 // For image assets: RAF advances _engine.t by dt; Ken Burns CSS runs in parallel.
 // Audio is driven by preloaded <audio> elements started synchronously in play().
+// ─── TIMELINE DURATION HELPER ─────────────────────────────────────────────────
+function _tlDuration(scene) {
+  if (!scene || !scene.clips || !scene.clips.length) return (scene && scene.duration) || 5;
+  var total = 0;
+  scene.clips.forEach(function (c) { total += c.dur || (scene.duration) || 5; });
+  return total;
+}
+function _tlStartTimes(scene) {
+  var clips = (scene && scene.clips) || [];
+  var starts = [], total = 0;
+  clips.forEach(function (c) { starts.push(total); total += c.dur || (scene.duration) || 5; });
+  return starts;
+}
+function _tlClipAt(gt, scene) {
+  var clips = (scene && scene.clips) || [];
+  if (!clips.length) return { idx: 0, localTime: gt, startTime: 0 };
+  var starts = _tlStartTimes(scene);
+  var idx = 0;
+  for (var i = starts.length - 1; i >= 0; i--) {
+    if (gt >= starts[i]) { idx = i; break; }
+  }
+  return { idx: idx, localTime: Math.max(0, gt - starts[idx]), startTime: starts[idx] };
+}
+
 var _engine = {
-  t: 0,
+  t: 0,           // local time within current clip
+  globalTime: 0,  // absolute position across all clips
+  clipIdx: 0,
   isPlaying: false,
   rafId: null,
   lastFrame: 0,
@@ -138,86 +164,125 @@ var _engine = {
     if (this.isPlaying) return;
     var scene = _state.scenes[idx];
     if (!scene) return;
-    var dur = scene.duration || 5;
-    if (this.t >= dur - 0.01) this.t = 0;
+    if (!scene.clips) scene.clips = [];
+    var total = _tlDuration(scene);
+    if (this.globalTime >= total - 0.01) { this.globalTime = 0; }
+    var info = _tlClipAt(this.globalTime, scene);
+    this.clipIdx = info.idx;
+    this.t = info.localTime;
+    _selectedClipIdx = this.clipIdx;
+    var clip = scene.clips[this.clipIdx] || null;
+    var clipDur = clip ? (clip.dur || scene.duration || 5) : (scene.duration || 5);
     this.isPlaying = true;
     _playing = true;
     this.lastFrame = performance.now();
     _setPlayBtn(true);
-
-    var hasVideo = !!(scene.media && scene.media.video);
-
-    // CRITICAL: start media SYNCHRONOUSLY inside the user-gesture event
-    // so iOS Safari does not reject the play() call.
-    if (hasVideo) {
-      var vid = _el('lseb-stage-vid');
-      if (vid) { try { vid.currentTime = this.t; vid.play().catch(function () {}); } catch (e) {} }
-    } else if (scene.media && scene.media.image) {
-      var img = _el('lseb-stage-img');
-      if (img) {
-        img.classList.remove('kb-play');
-        img.style.animation = '';
-        void img.offsetWidth; // force reflow so animation restarts cleanly
-        var kbIdx = Math.floor(Math.random() * 3);
-        img.classList.add('kb-play');
-        img.style.animation = 'lsebKenBurns' + kbIdx + ' ' + dur + 's ease-in-out forwards';
-      }
-    }
-
-    // Audio: use pre-loaded elements (created at attach time)
+    this._startClipMedia(clip, clipDur);
     var sceneId = scene.id;
     var LANE_VOL = { narration: 0.9, music: 0.35, sfxAudio: 0.5 };
     _playHandles = [];
     ['narration', 'music', 'sfxAudio'].forEach(function (lane) {
       var pre = _audioPre[sceneId + '_' + lane];
       if (!pre) return;
-      try {
-        pre.currentTime = 0;
-        pre.volume = LANE_VOL[lane];
-        pre.play().catch(function () {});
-        _playHandles.push(pre);
-      } catch (e) {}
+      try { pre.currentTime = 0; pre.volume = LANE_VOL[lane]; pre.play().catch(function () {}); _playHandles.push(pre); } catch (e) {}
     });
     (scene.tracks.music || []).forEach(function (it, i) {
       var pre = _audioPre[sceneId + '_music_track_' + i];
       if (!pre) return;
-      try {
-        pre.currentTime = it.t0 || 0;
-        pre.volume = it.vol || 0.35;
-        pre.play().catch(function () {});
-        _playHandles.push(pre);
-      } catch (e) {}
+      try { pre.currentTime = it.t0 || 0; pre.volume = it.vol || 0.35; pre.play().catch(function () {}); _playHandles.push(pre); } catch (e) {}
     });
-
     _initSubOverlay(scene);
+    this._runStep(idx);
+  },
 
+  _startClipMedia: function (clip, clipDur) {
+    if (!clip) return;
+    if (clip.type === 'video' && clip.src) {
+      var vid = _el('lseb-stage-vid');
+      var img = _el('lseb-stage-img');
+      if (img) { img.classList.remove('kb-play'); img.style.animation = ''; img.style.display = 'none'; }
+      if (vid) {
+        if (vid.src !== clip.src) { vid.src = clip.src; vid.load(); }
+        vid.style.display = 'block';
+        try { vid.currentTime = this.t; vid.play().catch(function () {}); } catch (e) {}
+      }
+    } else if (clip.type === 'image' && clip.src) {
+      var vid2 = _el('lseb-stage-vid');
+      var img2 = _el('lseb-stage-img');
+      if (vid2) { vid2.style.display = 'none'; try { vid2.pause(); } catch (e) {} }
+      if (img2) {
+        if (img2.src !== clip.src) img2.src = clip.src;
+        img2.style.display = 'block';
+        img2.classList.remove('kb-play'); img2.style.animation = '';
+        void img2.offsetWidth;
+        var kbIdx = Math.floor(Math.random() * 3);
+        img2.classList.add('kb-play');
+        img2.style.animation = 'lsebKenBurns' + kbIdx + ' ' + clipDur + 's ease-in-out forwards';
+      }
+    }
+  },
+
+  _runStep: function (idx) {
     var self = this;
+    var starts = null;
     var step = function (now) {
       if (!self.isPlaying) return;
+      var scene = _state.scenes[idx];
+      if (!scene) { self._pause(idx); return; }
       var dt = (now - self.lastFrame) / 1000;
       self.lastFrame = now;
-      var vid2 = _el('lseb-stage-vid');
-      var hasVid = !!(scene.media && scene.media.video);
-      if (hasVid && vid2) {
-        // Video is master clock
-        if (vid2.ended || (vid2.paused && vid2.currentTime >= vid2.duration - 0.05)) {
-          self._pause(idx);
-          self._tick(idx, vid2.duration || dur);
+      if (!starts) starts = _tlStartTimes(scene);
+      var clip = (scene.clips && scene.clips[self.clipIdx]) || null;
+      var clipDur = clip ? (clip.dur || scene.duration || 5) : (scene.duration || 5);
+      var clipStart = starts[self.clipIdx] || 0;
+      var hasVid = clip && clip.type === 'video' && !!clip.src;
+      var vid = _el('lseb-stage-vid');
+      if (hasVid && vid && vid.readyState >= 2) {
+        if (vid.ended || (vid.paused && vid.currentTime >= (vid.duration || clipDur) - 0.05)) {
+          self.globalTime = clipStart + clipDur;
+          self._advanceClip(idx);
           return;
         }
-        self.t = vid2.currentTime;
+        self.t = vid.currentTime;
+        self.globalTime = clipStart + self.t;
       } else {
         self.t += dt;
-        if (self.t >= dur) {
-          self._pause(idx);
-          self._tick(idx, dur);
+        self.globalTime += dt;
+        if (self.t >= clipDur) {
+          self.globalTime = clipStart + clipDur;
+          self._advanceClip(idx);
           return;
         }
       }
-      self._tick(idx, self.t);
+      var total = _tlDuration(scene);
+      if (self.globalTime >= total) { self._pause(idx); self._tick(idx, total); return; }
+      self._tick(idx, self.globalTime);
       self.rafId = requestAnimationFrame(step);
     };
     this.rafId = requestAnimationFrame(step);
+  },
+
+  _advanceClip: function (idx) {
+    var scene = _state.scenes[idx];
+    if (!scene || !scene.clips) { this._pause(idx); return; }
+    var img = _el('lseb-stage-img');
+    if (img) { img.classList.remove('kb-play'); img.style.animation = ''; }
+    this.clipIdx++;
+    if (this.clipIdx >= scene.clips.length) {
+      this._pause(idx);
+      this.globalTime = 0; this.t = 0;
+      _selectedClipIdx = 0;
+      _renderImageStrip(idx);
+      return;
+    }
+    _selectedClipIdx = this.clipIdx;
+    var clip = scene.clips[this.clipIdx];
+    var clipDur = clip.dur || scene.duration || 5;
+    this.t = 0;
+    this.lastFrame = performance.now();
+    _renderImageStrip(idx);
+    this._startClipMedia(clip, clipDur);
+    this._runStep(idx);
   },
 
   _pause: function (idx) {
@@ -234,28 +299,45 @@ var _engine = {
     _stopAudio();
   },
 
-  seekTo: function (t, idx) {
+  // seekTo receives globalTime (x / PX_PER_SECOND from scrub handler)
+  seekTo: function (globalTime, idx) {
     var scene = _state.scenes[idx];
-    var dur = scene ? (scene.duration || 5) : 5;
-    t = Math.max(0, Math.min(dur, t));
-    this.t = t;
-    this._tick(idx, t);
-    var vid = _el('lseb-stage-vid');
-    if (vid && scene && scene.media && scene.media.video) {
-      try { vid.fastSeek ? vid.fastSeek(t) : (vid.currentTime = t); } catch (e) {}
+    if (!scene) return;
+    var total = _tlDuration(scene);
+    globalTime = Math.max(0, Math.min(total, globalTime));
+    var info = _tlClipAt(globalTime, scene);
+    this.globalTime = globalTime;
+    this.t = info.localTime;
+    this.clipIdx = info.idx;
+    _selectedClipIdx = info.idx;
+    var clip = scene.clips && scene.clips[info.idx];
+    if (clip) {
+      var img = _el('lseb-stage-img');
+      var vid = _el('lseb-stage-vid');
+      var ph = _el('lseb-stage-ph');
+      if (clip.type === 'image') {
+        if (img) { if (img.src !== clip.src) img.src = clip.src; img.style.display = 'block'; }
+        if (vid) vid.style.display = 'none';
+      } else if (clip.type === 'video') {
+        if (vid) { if (vid.src !== clip.src) { vid.src = clip.src; vid.load(); } vid.style.display = 'block'; try { vid.currentTime = info.localTime; } catch (e) {} }
+        if (img) img.style.display = 'none';
+      }
+      if (ph) ph.style.display = 'none';
     }
-    _playHandles.forEach(function (h) { try { h.currentTime = t; } catch (_) {} });
+    _renderImageStrip(idx);
+    this._tick(idx, globalTime);
+    _playHandles.forEach(function (h) { try { h.currentTime = globalTime; } catch (_) {} });
   },
 
-  _tick: function (idx, t) {
+  _tick: function (idx, globalTime) {
     var scene = _state.scenes[idx];
-    var dur = scene ? (scene.duration || 5) : 5;
+    var total = _tlDuration(scene);
     var timeEl = _el('lseb-time');
-    if (timeEl) timeEl.textContent = t.toFixed(2) + ' / ' + dur.toFixed(2) + 's';
+    if (timeEl) timeEl.textContent = globalTime.toFixed(2) + ' / ' + total.toFixed(2) + 's';
     var playhead = _el('lseb-playhead');
-    if (playhead) playhead.style.left = Math.min(t * PX_PER_SECOND, dur * PX_PER_SECOND) + 'px';
-    if (scene) _updateSubOverlay(scene, t);
-    if (scene) _renderOverlayLayer(scene, t);
+    if (playhead) playhead.style.left = Math.min(globalTime * PX_PER_SECOND, total * PX_PER_SECOND) + 'px';
+    if (scene) _updateSubOverlay(scene, globalTime);
+    if (scene) _renderOverlayLayer(scene, globalTime);
   }
 };
 
@@ -480,6 +562,9 @@ function _openSceneEditor(idx) {
   var scene = _state.scenes[idx];
   if (!scene) return;
   _selectedClipIdx = 0;
+  _engine.globalTime = 0;
+  _engine.clipIdx = 0;
+  _engine.t = 0;
   if (scene.clips && scene.clips.length > 0) {
     var _fc = scene.clips[0];
     scene.media.image = _fc.type === 'image' ? _fc.src : null;
@@ -527,7 +612,7 @@ function _openSceneEditor(idx) {
       '</div>' +
       // Transport
       '<div class="lseb-transport">' +
-        '<span id="lseb-time">0.00 / ' + (scene.duration || 5).toFixed(2) + 's</span>' +
+        '<span id="lseb-time">0.00 / ' + _tlDuration(scene).toFixed(2) + 's</span>' +
         '<div class="lseb-transport-center">' +
           '<button class="ve-iconbtn" id="lseb-prev-btn" aria-label="Previous scene">' +
             '<svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><polygon points="19 20 9 12 19 4"/><rect x="5" y="4" width="3" height="16"/></svg>' +
@@ -1184,7 +1269,7 @@ function _renderRuler(idx) {
   var ruler = _el('lseb-ruler');
   if (!ruler) return;
   var scene = _state.scenes[idx];
-  var dur = (scene && scene.duration) || 5;
+  var dur = _tlDuration(scene);
   var totalPx = Math.max(dur * PX_PER_SECOND + 120, 400);
   ruler.style.width = totalPx + 'px';
   ruler.innerHTML = '';
@@ -1376,13 +1461,14 @@ function _startPlayback(idx) { _engine.play(idx); }
 function _stopPlayback() {
   _engine._pause(_state.selectedIdx);
   _engine.t = 0;
+  _engine.globalTime = 0;
   clearTimeout(_playTimer);
   var playhead = _el('lseb-playhead');
   if (playhead) playhead.style.left = '0';
   var timeEl = _el('lseb-time');
   if (timeEl) {
     var scene = _state.scenes[_state.selectedIdx];
-    var dur = (scene && scene.duration) || 5;
+    var dur = _tlDuration(scene);
     timeEl.textContent = '0.00 / ' + dur.toFixed(2) + 's';
   }
 }
