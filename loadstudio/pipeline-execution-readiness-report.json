@@ -2,7 +2,7 @@
   "_meta": {
     "title": "Pipeline Execution Readiness Report",
     "generated": "2026-05-15",
-    "registryVersion": "v116",
+    "registryVersion": "v118",
     "purpose": "Per-pipeline execution readiness. Shows whether each pipeline can actually execute end-to-end today vs. what is blocked or pending provider wiring.",
     "executionStatusVocabulary": {
       "RUNNABLE":       "All required steps have a working provider. Can execute today.",
@@ -13,7 +13,7 @@
     }
   },
   "summary": {
-    "total": 15,
+    "total": 19,
     "RUNNABLE":    2,
     "PARTIAL":     3,
     "DEMO_ONLY":   2,
