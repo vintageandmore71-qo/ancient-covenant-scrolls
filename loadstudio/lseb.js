@@ -444,7 +444,7 @@ var _CSS =
   '#lseb-editor .lseb-export-btn{background:#7d2ae8;border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px}' +
   '#lseb-editor .lseb-export-btn:active{background:#9c3aff}' +
   // Stage
-  '#lseb-editor #lseb-stage{flex:3 1 0;min-height:240px;position:relative;background:#000;display:flex;align-items:center;justify-content:center}' +
+  '#lseb-editor #lseb-stage{flex:3 1 0;min-height:240px;position:relative;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}' +
   '#lseb-editor #lseb-stage-img{max-width:100%;max-height:100%;object-fit:contain;display:none}' +
   '#lseb-editor #lseb-stage-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#2a1a42;font:400 14px Inter,system-ui,sans-serif;cursor:pointer}' +
   '#lseb-editor #lseb-stage-ph svg{opacity:.3}' +
@@ -518,11 +518,14 @@ var _CSS =
   '#lseb-editor .ve-action.on .ve-act-icon{color:#b33af0}' +
   '#lseb-editor .ve-action-sep{flex:0 0 auto;width:1px;height:36px;background:#2a2a40;margin:0 4px;display:inline-block}' +
   // Panels (music, subtitle, speed, opacity)
-  '#lseb-editor .ve-panel{position:fixed;left:0;right:0;bottom:calc(80px + env(safe-area-inset-bottom));background:#1a1a26;border:1px solid #2a2a40;padding:14px 16px 18px;z-index:30;max-width:580px;margin:0 auto;border-radius:18px;box-shadow:0 -10px 36px rgba(0,0,0,.55)}' +
+  '#lseb-editor .ve-panel{position:absolute;left:0;right:0;bottom:0;background:#1a1a26;border-top:1px solid #3a3a50;padding:0 16px max(16px,env(safe-area-inset-bottom,8px));z-index:30;border-radius:18px 18px 0 0;box-shadow:0 -10px 36px rgba(0,0,0,.6);transform:translateY(100%);visibility:hidden;pointer-events:none;transition:transform .26s cubic-bezier(.32,.72,0,1),visibility 0s linear .26s;max-height:85%;overflow-y:auto;-webkit-overflow-scrolling:touch}' +
+  '#lseb-editor .ve-panel.panel-open{transform:translateY(0);visibility:visible;pointer-events:all;transition:transform .26s cubic-bezier(.32,.72,0,1)}' +
+  '#lseb-editor .ve-panel-handle{width:36px;height:4px;background:rgba(255,255,255,.18);border-radius:2px;margin:10px auto 14px;display:block}' +
   '#lseb-editor .ve-panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-weight:700;color:#fff;font-size:14px}' +
   '#lseb-editor .ve-lbl{font-size:12.5px;color:#a0a0b0;display:block}' +
   '#lseb-editor .ve-input{display:block;width:100%;margin-top:4px;padding:6px 8px;background:#0e0e18;color:#fff;border:1px solid #2a2a40;border-radius:6px;font-size:13px;font-family:inherit}' +
-  '#lseb-editor.ve-panel-open #lseb-actions{display:none}' +
+  '#lseb-drawer-scrim{position:absolute;inset:0;background:rgba(0,0,0,.38);z-index:29;visibility:hidden;opacity:0;transition:opacity .26s,visibility 0s linear .26s;pointer-events:none}' +
+  '#lseb-editor.ve-panel-open #lseb-drawer-scrim{visibility:visible;opacity:1;transition:opacity .26s;pointer-events:all}' +
   // Ken Burns animation for playback
   '@keyframes lsebKenBurns0{0%{transform:scale(1) translate(0,0)}100%{transform:scale(1.08) translate(-2%,-1%)}}' +
   '@keyframes lsebKenBurns1{0%{transform:scale(1) translate(0,0)}100%{transform:scale(1.07) translate(2%,-1.5%)}}' +
@@ -679,6 +682,87 @@ function _openSceneEditor(idx) {
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>' +
         '</button>' +
         '<input type="file" id="lseb-img-pick" accept="image/*,video/*,.jpg,.jpeg,.png,.gif,.webp,.mp4,.mov,.webm,.m4v,.heic,.heif" style="display:none">' +
+        '<div id="lseb-drawer-scrim"></div>' +
+        '<div id="lseb-music-panel" class="ve-panel">' +
+          '<div class="ve-panel-handle" aria-hidden="true"></div>' +
+          '<div class="ve-panel-head"><span>Music / Narration</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
+          '<input id="lseb-audio-pick" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg,.flac,.aiff,.webm,.opus" style="font-size:13px;">' +
+          '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;">' +
+            '<label class="ve-lbl">Volume</label>' +
+            '<input id="lseb-vol" type="range" min="0" max="1" step="0.05" value="0.35" style="flex:1;min-width:140px;accent-color:#7d2ae8;">' +
+            '<span id="lseb-vol-val" style="font-size:13px;color:#cfcfdc;font-weight:700;">35%</span>' +
+          '</div>' +
+        '</div>' +
+        '<div id="lseb-text-panel" class="ve-panel">' +
+          '<div class="ve-panel-handle" aria-hidden="true"></div>' +
+          '<div class="ve-panel-head"><span>Subtitle / overlay</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
+          '<input id="lseb-text-inp" placeholder="Caption / title" class="ve-input" style="margin-bottom:10px;">' +
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">' +
+            '<label class="ve-lbl">Position<select id="lseb-text-pos" class="ve-input"><option value="top">Top</option><option value="middle">Middle</option><option value="bottom" selected>Bottom</option></select></label>' +
+            '<label class="ve-lbl">Size (px)<input id="lseb-text-size" type="number" value="18" min="10" max="120" class="ve-input"></label>' +
+          '</div>' +
+          '<button id="lseb-text-add-btn" type="button" style="width:100%;padding:10px;background:#7d2ae8;border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Add Text</button>' +
+        '</div>' +
+        '<div id="lseb-filter-panel" class="ve-panel">' +
+          '<div class="ve-panel-handle" aria-hidden="true"></div>' +
+          '<div class="ve-panel-head"><span>Filter</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
+          '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px" id="lseb-filter-grid"></div>' +
+        '</div>' +
+        '<div id="lseb-opacity-panel" class="ve-panel">' +
+          '<div class="ve-panel-handle" aria-hidden="true"></div>' +
+          '<div class="ve-panel-head"><span>Opacity</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
+          '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">' +
+            '<label class="ve-lbl">Transparency</label>' +
+            '<input id="lseb-opacity-range" type="range" min="0" max="100" step="5" value="100" style="flex:1;min-width:160px;accent-color:#7d2ae8">' +
+            '<span id="lseb-opacity-val" style="font-size:14px;color:#b33af0;font-weight:800;min-width:48px;text-align:right">100%</span>' +
+          '</div>' +
+        '</div>' +
+        '<div id="lseb-blur-panel" class="ve-panel">' +
+          '<div class="ve-panel-handle" aria-hidden="true"></div>' +
+          '<div class="ve-panel-head"><span>Blur</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
+          '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">' +
+            '<label class="ve-lbl">Blur amount</label>' +
+            '<input id="lseb-blur-range" type="range" min="0" max="20" step="0.5" value="0" style="flex:1;min-width:160px;accent-color:#7d2ae8">' +
+            '<span id="lseb-blur-val" style="font-size:14px;color:#b33af0;font-weight:800;min-width:48px;text-align:right">0px</span>' +
+          '</div>' +
+        '</div>' +
+        '<div id="lseb-info-panel" class="ve-panel">' +
+          '<div class="ve-panel-handle" aria-hidden="true"></div>' +
+          '<div class="ve-panel-head"><span id="lseb-info-title">Tool</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
+          '<p id="lseb-info-msg" style="color:#c0b8d9;font-size:13px;line-height:1.55;margin:0"></p>' +
+        '</div>' +
+        '<div id="lseb-sfx-panel" class="ve-panel">' +
+          '<div class="ve-panel-handle" aria-hidden="true"></div>' +
+          '<div class="ve-panel-head"><span>Sound FX</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
+          '<label class="ve-lbl" style="display:block;margin-bottom:6px">Upload audio file</label>' +
+          '<input id="lseb-sfx-pick" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg,.flac" style="font-size:13px;margin-bottom:14px">' +
+          '<div style="margin-bottom:8px;color:#a0a0b0;font:600 10px Inter,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase">Free SFX Sources</div>' +
+          '<div class="lseb-sfx-card"><div class="lseb-sfx-card-name">Freesound.org</div><div class="lseb-sfx-card-note">Free, CC licensed. Download and upload above.</div></div>' +
+          '<div class="lseb-sfx-card"><div class="lseb-sfx-card-name">ZapSplat</div><div class="lseb-sfx-card-note">Free account. Download and upload above.</div></div>' +
+          '<div class="lseb-sfx-card"><div class="lseb-sfx-card-name">Mixkit SFX</div><div class="lseb-sfx-card-note">Free, no attribution required. Download and upload above.</div></div>' +
+        '</div>' +
+        '<div id="lseb-voice-panel" class="ve-panel">' +
+          '<div class="ve-panel-handle" aria-hidden="true"></div>' +
+          '<div class="ve-panel-head"><span>Narration / Voice</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
+          '<div id="lseb-record-indicator"></div>' +
+          '<button id="lseb-record-btn" type="button" aria-label="Record narration">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" width="24" height="24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>' +
+          '</button>' +
+          '<div style="text-align:center;color:#7a6fa0;font:400 11px Inter,system-ui,sans-serif;margin-bottom:12px">Tap to record — tap again to stop and attach</div>' +
+          '<div style="text-align:center;margin-bottom:8px;color:#4a4a60;font:400 11px Inter,system-ui,sans-serif">or upload a file</div>' +
+          '<input id="lseb-voice-pick" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg" style="font-size:13px;">' +
+        '</div>' +
+        '<div id="lseb-transition-panel" class="ve-panel">' +
+          '<div class="ve-panel-handle" aria-hidden="true"></div>' +
+          '<div class="ve-panel-head"><span>Transition</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
+          '<div style="color:#a0a0b0;font:400 12px Inter,system-ui,sans-serif;margin-bottom:12px">Applies to the end of the selected clip.</div>' +
+          '<div style="display:flex;gap:8px;flex-wrap:wrap" id="lseb-tr-options">' +
+            '<button class="lseb-tr-option" data-tr="cut" type="button"><span class="lseb-tr-option-icon">|</span><span class="lseb-tr-option-lbl">Cut</span></button>' +
+            '<button class="lseb-tr-option" data-tr="fade" type="button"><span class="lseb-tr-option-icon">&#9618;</span><span class="lseb-tr-option-lbl">Fade</span></button>' +
+            '<button class="lseb-tr-option" data-tr="dissolve" type="button"><span class="lseb-tr-option-icon">&#9617;</span><span class="lseb-tr-option-lbl">Dissolve</span></button>' +
+          '</div>' +
+          '<div style="margin-top:10px;color:#5a5a78;font:400 11px Inter,system-ui,sans-serif">Fade and Dissolve will render in the next build.</div>' +
+        '</div>' +
       '</div>' +
       // Transport
       '<div class="lseb-transport">' +
@@ -745,78 +829,6 @@ function _openSceneEditor(idx) {
           '<div class="time-ruler" id="lseb-ruler"></div>' +
           '<div class="playhead" id="lseb-playhead" style="left:0"></div>' +
         '</div>' +
-      '</div>' +
-      // Panels (hidden by default)
-      '<div id="lseb-music-panel" class="ve-panel" hidden>' +
-        '<div class="ve-panel-head"><span>Music / Narration</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
-        '<input id="lseb-audio-pick" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg,.flac,.aiff,.webm,.opus" style="font-size:13px;">' +
-        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;">' +
-          '<label class="ve-lbl">Volume</label>' +
-          '<input id="lseb-vol" type="range" min="0" max="1" step="0.05" value="0.35" style="flex:1;min-width:140px;accent-color:#7d2ae8;">' +
-          '<span id="lseb-vol-val" style="font-size:13px;color:#cfcfdc;font-weight:700;">35%</span>' +
-        '</div>' +
-      '</div>' +
-      '<div id="lseb-text-panel" class="ve-panel" hidden>' +
-        '<div class="ve-panel-head"><span>Subtitle / overlay</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
-        '<input id="lseb-text-inp" placeholder="Caption / title" class="ve-input" style="margin-bottom:10px;">' +
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">' +
-          '<label class="ve-lbl">Position<select id="lseb-text-pos" class="ve-input"><option value="top">Top</option><option value="middle">Middle</option><option value="bottom" selected>Bottom</option></select></label>' +
-          '<label class="ve-lbl">Size (px)<input id="lseb-text-size" type="number" value="18" min="10" max="120" class="ve-input"></label>' +
-        '</div>' +
-        '<button id="lseb-text-add-btn" type="button" style="width:100%;padding:10px;background:#7d2ae8;border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Add Text</button>' +
-      '</div>' +
-      '<div id="lseb-filter-panel" class="ve-panel" hidden>' +
-        '<div class="ve-panel-head"><span>Filter</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
-        '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px" id="lseb-filter-grid"></div>' +
-      '</div>' +
-      '<div id="lseb-opacity-panel" class="ve-panel" hidden>' +
-        '<div class="ve-panel-head"><span>Opacity</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
-        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">' +
-          '<label class="ve-lbl">Transparency</label>' +
-          '<input id="lseb-opacity-range" type="range" min="0" max="100" step="5" value="100" style="flex:1;min-width:160px;accent-color:#7d2ae8">' +
-          '<span id="lseb-opacity-val" style="font-size:14px;color:#b33af0;font-weight:800;min-width:48px;text-align:right">100%</span>' +
-        '</div>' +
-      '</div>' +
-      '<div id="lseb-blur-panel" class="ve-panel" hidden>' +
-        '<div class="ve-panel-head"><span>Blur</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
-        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">' +
-          '<label class="ve-lbl">Blur amount</label>' +
-          '<input id="lseb-blur-range" type="range" min="0" max="20" step="0.5" value="0" style="flex:1;min-width:160px;accent-color:#7d2ae8">' +
-          '<span id="lseb-blur-val" style="font-size:14px;color:#b33af0;font-weight:800;min-width:48px;text-align:right">0px</span>' +
-        '</div>' +
-      '</div>' +
-      '<div id="lseb-info-panel" class="ve-panel" hidden>' +
-        '<div class="ve-panel-head"><span id="lseb-info-title">Tool</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
-        '<p id="lseb-info-msg" style="color:#c0b8d9;font-size:13px;line-height:1.55;margin:0"></p>' +
-      '</div>' +
-      '<div id="lseb-sfx-panel" class="ve-panel" hidden>' +
-        '<div class="ve-panel-head"><span>Sound FX</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
-        '<label class="ve-lbl" style="display:block;margin-bottom:6px">Upload audio file</label>' +
-        '<input id="lseb-sfx-pick" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg,.flac" style="font-size:13px;margin-bottom:14px">' +
-        '<div style="margin-bottom:8px;color:#a0a0b0;font:600 10px Inter,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase">Free SFX Sources</div>' +
-        '<div class="lseb-sfx-card"><div class="lseb-sfx-card-name">Freesound.org</div><div class="lseb-sfx-card-note">Free, CC licensed — API key optional. Download and upload above.</div></div>' +
-        '<div class="lseb-sfx-card"><div class="lseb-sfx-card-name">ZapSplat</div><div class="lseb-sfx-card-note">Free account — download and upload above.</div></div>' +
-        '<div class="lseb-sfx-card"><div class="lseb-sfx-card-name">Mixkit SFX</div><div class="lseb-sfx-card-note">Free, no attribution required. Download and upload above.</div></div>' +
-      '</div>' +
-      '<div id="lseb-voice-panel" class="ve-panel" hidden>' +
-        '<div class="ve-panel-head"><span>Narration / Voice</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
-        '<div id="lseb-record-indicator"></div>' +
-        '<button id="lseb-record-btn" type="button" aria-label="Record narration">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" width="24" height="24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>' +
-        '</button>' +
-        '<div style="text-align:center;color:#7a6fa0;font:400 11px Inter,system-ui,sans-serif;margin-bottom:12px">Tap to record — tap again to stop and attach</div>' +
-        '<div style="text-align:center;margin-bottom:8px;color:#4a4a60;font:400 11px Inter,system-ui,sans-serif">or upload a file</div>' +
-        '<input id="lseb-voice-pick" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg" style="font-size:13px;">' +
-      '</div>' +
-      '<div id="lseb-transition-panel" class="ve-panel" hidden>' +
-        '<div class="ve-panel-head"><span>Transition</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
-        '<div style="color:#a0a0b0;font:400 12px Inter,system-ui,sans-serif;margin-bottom:12px">Applies to the end of the selected clip.</div>' +
-        '<div style="display:flex;gap:8px;flex-wrap:wrap" id="lseb-tr-options">' +
-          '<button class="lseb-tr-option" data-tr="cut" type="button"><span class="lseb-tr-option-icon">|</span><span class="lseb-tr-option-lbl">Cut</span></button>' +
-          '<button class="lseb-tr-option" data-tr="fade" type="button"><span class="lseb-tr-option-icon">&#9618;</span><span class="lseb-tr-option-lbl">Fade</span></button>' +
-          '<button class="lseb-tr-option" data-tr="dissolve" type="button"><span class="lseb-tr-option-icon">&#9617;</span><span class="lseb-tr-option-lbl">Dissolve</span></button>' +
-        '</div>' +
-        '<div style="margin-top:10px;color:#5a5a78;font:400 11px Inter,system-ui,sans-serif">Fade and Dissolve will render in the next build.</div>' +
       '</div>' +
       // Hidden image/sticker pickers
       '<input type="file" id="lseb-sticker-pick" accept="image/*,video/*" style="display:none">' +
@@ -921,11 +933,14 @@ function _bindEditor(idx) {
   var _ALL_PANELS = ['lseb-music-panel','lseb-text-panel','lseb-sfx-panel','lseb-voice-panel','lseb-transition-panel','lseb-filter-panel','lseb-opacity-panel','lseb-blur-panel','lseb-info-panel'];
   function _showPanel(id) {
     _ALL_PANELS.forEach(function (p) {
-      var el = _el(p); if (el) el.hidden = (p !== id);
+      var el = _el(p);
+      if (el) el.classList.toggle('panel-open', p === id);
     });
     var ed = _el('lseb-editor');
     if (ed) ed.classList.toggle('ve-panel-open', !!id);
   }
+  var scrim = _el('lseb-drawer-scrim');
+  if (scrim) scrim.addEventListener('click', function () { _showPanel(null); });
   function _showInfo(title, msg) {
     var t = _el('lseb-info-title'); if (t) t.textContent = title;
     var m = _el('lseb-info-msg'); if (m) m.textContent = msg;
