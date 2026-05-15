@@ -454,8 +454,8 @@ var _CSS =
   '#lseb-editor #lseb-time{font-size:13px;color:#cfcfdc;font-variant-numeric:tabular-nums;min-width:120px}' +
   '#lseb-editor .lseb-transport-center{margin:0 auto;display:flex;align-items:center;gap:18px}' +
   // Timeline engine — identical structure to openVideoEditor
-  '#lseb-editor .timeline-engine{width:100%;height:380px;background:#101018;display:grid;grid-template-columns:92px 1fr;color:#fff;overflow:hidden;font-family:system-ui,sans-serif;flex-shrink:0}' +
-  '#lseb-editor .track-labels{padding-top:12px;display:flex;flex-direction:column;gap:10px;align-items:center;overflow-y:auto;max-height:360px;scrollbar-width:none}' +
+  '#lseb-editor .timeline-engine{width:100%;height:220px;background:#101018;display:grid;grid-template-columns:92px 1fr;color:#fff;overflow:hidden;font-family:system-ui,sans-serif;flex-shrink:0}' +
+  '#lseb-editor .track-labels{padding-top:12px;display:flex;flex-direction:column;gap:10px;align-items:center;overflow-y:auto;max-height:200px;scrollbar-width:none}' +
   '#lseb-editor .track-labels::-webkit-scrollbar{display:none}' +
   '#lseb-editor .track-add,.cover-btn{position:relative;width:64px;height:44px;border:none;border-radius:12px;background:#1e1e2a;color:#fff;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}' +
   '#lseb-editor .track-add svg,.cover-btn svg{width:22px;height:22px;color:#fff;display:block;pointer-events:none}' +
@@ -908,6 +908,7 @@ function _openSceneEditor(idx) {
       '</div>' +
       // Hidden image/sticker pickers
       '<input type="file" id="lseb-sticker-pick" accept="image/*,video/*" style="display:none">' +
+      '<input type="file" id="lseb-clip-img-pick" accept="image/*,.jpg,.jpeg,.png,.gif,.webp,.heic,.heif" style="display:none">' +
       '<input type="file" id="lseb-overlay-pick" accept="image/*" style="display:none">' +
       // Bottom action bar
       '<div id="lseb-actions">' +
@@ -1055,7 +1056,8 @@ function _bindEditor(idx) {
         if (add === 'music') { _showPanel('lseb-insert-panel'); }
         else if (add === 'text') { _showPanel('lseb-text-panel'); }
         else if (add === 'sticker') { _el('lseb-sticker-pick') && _el('lseb-sticker-pick').click(); }
-        else if (add === 'image' || add === 'overlay-img') { _el('lseb-overlay-pick') && _el('lseb-overlay-pick').click(); }
+        else if (add === 'image') { _el('lseb-clip-img-pick') && _el('lseb-clip-img-pick').click(); }
+        else if (add === 'overlay-img') { _el('lseb-overlay-pick') && _el('lseb-overlay-pick').click(); }
         else if (add === 'sfx') { _showPanel('lseb-sfx-panel'); }
         else if (add === 'voice') { _showPanel('lseb-voice-panel'); }
         else if (add === 'transition') { _showPanel('lseb-transition-panel'); }
@@ -1169,6 +1171,17 @@ function _bindEditor(idx) {
   });
 
   // Overlay image pick
+  // Clip image pick → add as main clip (shows thumbnail in clip strip)
+  var clipImgPick = _el('lseb-clip-img-pick');
+  if (clipImgPick) clipImgPick.addEventListener('change', function (e) {
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+    _readDataURL(file).then(function (dataURL) {
+      _attachImage(idx, dataURL, true);
+    }).catch(function () { _toast('Could not read image.'); });
+    e.target.value = '';
+  });
+
   var overlayPick = _el('lseb-overlay-pick');
   if (overlayPick) overlayPick.addEventListener('change', function (e) {
     var file = e.target.files && e.target.files[0];
