@@ -1,0 +1,351 @@
+{
+  "_meta": {
+    "title": "Pipeline Execution Readiness Report",
+    "generated": "2026-05-15",
+    "registryVersion": "v116",
+    "purpose": "Per-pipeline execution readiness. Shows whether each pipeline can actually execute end-to-end today vs. what is blocked or pending provider wiring.",
+    "executionStatusVocabulary": {
+      "RUNNABLE":       "All required steps have a working provider. Can execute today.",
+      "PARTIAL":        "Core steps work but optional steps need provider wiring.",
+      "DEMO_ONLY":      "Executes with demo/placeholder data. Real provider wiring pending.",
+      "NEEDS_SETUP":    "Requires user setup (install server, add API key) before any step runs.",
+      "BLOCKED":        "A required step has no working provider. Cannot execute."
+    }
+  },
+  "summary": {
+    "total": 15,
+    "RUNNABLE":    2,
+    "PARTIAL":     3,
+    "DEMO_ONLY":   2,
+    "NEEDS_SETUP": 7,
+    "BLOCKED":     1
+  },
+  "pipelines": [
+    {
+      "pipelineId": "vn-editing",
+      "pipelineName": "VN Editing Pipeline",
+      "executionStatus": "PARTIAL",
+      "description": "Core editing works via browser APIs. Optional steps (music provider fetch, TTS) need provider wiring.",
+      "requiredInputs": ["video-clip or image", "audio-clip (optional)", "project-config"],
+      "expectedOutputs": ["rendered-video", "timeline-state-json"],
+      "outputValidation": ["output file exists", "duration matches timeline", "audio track present if added"],
+      "assetRegistryWrite": true,
+      "timelineWrite": true,
+      "packageWrite": false,
+      "steps": [
+        { "step": 1, "name": "Media In",       "executionStatus": "RUNNABLE",    "blockReason": null },
+        { "step": 2, "name": "Timeline Edit",  "executionStatus": "RUNNABLE",    "blockReason": null },
+        { "step": 3, "name": "Text / Titles",  "executionStatus": "PARTIAL",     "blockReason": "Google Fonts needs network; Bunny Fonts is fallback" },
+        { "step": 4, "name": "Music / SFX",    "executionStatus": "DEMO_ONLY",   "blockReason": "Demo WAV files play. Pixabay/Mixkit/Freesound connectors not yet built." },
+        { "step": 5, "name": "Voice Track",    "executionStatus": "NEEDS_SETUP", "blockReason": "Kokoro/Piper/XTTS require local server install." },
+        { "step": 6, "name": "Export / Render","executionStatus": "RUNNABLE",    "blockReason": null }
+      ],
+      "blockers": ["Music/SFX provider connectors not built", "TTS requires local server"],
+      "readyForUser": true,
+      "notes": "Pipeline is usable for editing. Music plays from demo. Export works."
+    },
+    {
+      "pipelineId": "vn-asset-browser",
+      "pipelineName": "VN Asset Browser Pipeline",
+      "executionStatus": "NEEDS_SETUP",
+      "description": "Asset browser UI is built. Provider connectors (Pexels, Pixabay) need API keys and connector code.",
+      "requiredInputs": ["search-query or browse-request"],
+      "expectedOutputs": ["asset-reference", "asset-metadata", "file-download"],
+      "outputValidation": ["asset appears in browser panel", "can be inserted to timeline", "asset recorded in LoadAssetRegistry"],
+      "assetRegistryWrite": true,
+      "timelineWrite": true,
+      "packageWrite": false,
+      "steps": [
+        { "step": 1, "name": "Query / Browse",  "executionStatus": "NEEDS_SETUP", "blockReason": "Pexels/Pixabay need API keys. Coverr/Wikimedia/NASA are keyless but connectors not built." },
+        { "step": 2, "name": "Preview",         "executionStatus": "RUNNABLE",    "blockReason": null },
+        { "step": 3, "name": "Download",        "executionStatus": "RUNNABLE",    "blockReason": null },
+        { "step": 4, "name": "Timeline Insert", "executionStatus": "RUNNABLE",    "blockReason": null }
+      ],
+      "blockers": ["Pexels/Pixabay connectors not built", "No API keys configured"],
+      "readyForUser": false,
+      "notes": "UI shell exists. Needs connector code + API keys to browse real assets."
+    },
+    {
+      "pipelineId": "music-sfx-panel",
+      "pipelineName": "Music / SFX VN Panel Pipeline",
+      "executionStatus": "DEMO_ONLY",
+      "description": "Music and SFX panels show demo audio from on-disk WAV files. Preview plays real audio. Add to timeline stores file path. Real provider connectors not yet built.",
+      "requiredInputs": ["category-selection or search-query"],
+      "expectedOutputs": ["audio-clip-reference", "timeline-track-item"],
+      "outputValidation": [
+        "preview plays real audio (not silence, not beep)",
+        "Add button creates timeline track item with src field",
+        "timeline item src resolves to playable audio",
+        "asset recorded in LoadAssetRegistry with mimeType audio/*"
+      ],
+      "assetRegistryWrite": false,
+      "timelineWrite": true,
+      "packageWrite": false,
+      "steps": [
+        { "step": 1, "name": "Browse / Search", "executionStatus": "DEMO_ONLY",   "blockReason": "Shows demo items only. Pixabay Music/Mixkit/Freesound connectors not built." },
+        { "step": 2, "name": "Preview",         "executionStatus": "DEMO_ONLY",   "blockReason": "Demo WAV plays from assets/audio/demo/. Provider audio fetch not wired." },
+        { "step": 3, "name": "Timeline Insert", "executionStatus": "DEMO_ONLY",   "blockReason": "Adds demo file path to timeline. Real provider download not wired." }
+      ],
+      "blockers": [
+        "Pixabay Music / Freesound / Mixkit connectors not built",
+        "LoadAssetRegistry.addAsset not called on Add (assetRegistryWrite false)"
+      ],
+      "readyForUser": true,
+      "notes": "Demo audio plays correctly. User sees real waveform previews. Provider wiring is the next step."
+    },
+    {
+      "pipelineId": "ai-image-glamour",
+      "pipelineName": "AI Image Glamour Pipeline",
+      "executionStatus": "PARTIAL",
+      "description": "Pollinations free tier works as fallback. ComfyUI/A1111 work if user has local server. Identity steps need setup.",
+      "requiredInputs": ["character-description or prompt", "optional: reference-image"],
+      "expectedOutputs": ["image-blob or image-url", "asset-registry-entry"],
+      "outputValidation": [
+        "image blob returned (not null, not error)",
+        "image displays in stage",
+        "asset recorded with assetType: image"
+      ],
+      "assetRegistryWrite": true,
+      "timelineWrite": false,
+      "packageWrite": false,
+      "steps": [
+        { "step": 1, "name": "Prompt Build",    "executionStatus": "PARTIAL",     "blockReason": "Ollama needs local server. Pollinations text works as fallback." },
+        { "step": 2, "name": "Image Generate",  "executionStatus": "PARTIAL",     "blockReason": "Pollinations/AI Horde work. ComfyUI/A1111 need local install." },
+        { "step": 3, "name": "Identity Lock",   "executionStatus": "NEEDS_SETUP", "blockReason": "IP-Adapter / InstantID need ComfyUI + model download." },
+        { "step": 4, "name": "Enhance",         "executionStatus": "NEEDS_SETUP", "blockReason": "CodeFormer/ESRGAN need local server." },
+        { "step": 5, "name": "Review / Use",    "executionStatus": "RUNNABLE",    "blockReason": null }
+      ],
+      "blockers": ["Identity consistency (step 3) not runnable without local SD setup"],
+      "readyForUser": true,
+      "notes": "Basic image generation works via Pollinations. Identity locking needs local setup."
+    },
+    {
+      "pipelineId": "commercial-image",
+      "pipelineName": "Commercial Image Pipeline",
+      "executionStatus": "NEEDS_SETUP",
+      "description": "Requires ComfyUI or A1111 with commercial-safe model. No cloud fallback without paying API.",
+      "requiredInputs": ["prompt", "commercial-use-confirmation"],
+      "expectedOutputs": ["image-blob", "rights-record"],
+      "outputValidation": ["image returned", "rights status set to commercial-safe", "no restricted model used"],
+      "assetRegistryWrite": true,
+      "timelineWrite": false,
+      "packageWrite": true,
+      "steps": [
+        { "step": 1, "name": "Rights Check",    "executionStatus": "RUNNABLE",    "blockReason": null },
+        { "step": 2, "name": "Generate",        "executionStatus": "NEEDS_SETUP", "blockReason": "Needs local SD with commercially-safe model (e.g. FLUX schnell)." },
+        { "step": 3, "name": "Watermark / Tag", "executionStatus": "RUNNABLE",    "blockReason": null }
+      ],
+      "blockers": ["No commercial-safe cloud image provider wired"],
+      "readyForUser": false,
+      "notes": "Pollinations output may not be commercial-safe without review. ComfyUI + FLUX schnell is the recommended path."
+    },
+    {
+      "pipelineId": "comfyui-production",
+      "pipelineName": "ComfyUI Production Pipeline",
+      "executionStatus": "NEEDS_SETUP",
+      "description": "Full ComfyUI workflow execution. Requires local ComfyUI server with models loaded.",
+      "requiredInputs": ["comfyui-workflow-json", "input-images (optional)"],
+      "expectedOutputs": ["image-blob or video-blob"],
+      "outputValidation": ["response from ComfyUI /prompt endpoint", "output image/video returned"],
+      "assetRegistryWrite": true,
+      "timelineWrite": false,
+      "packageWrite": false,
+      "steps": [
+        { "step": 1, "name": "Connect",    "executionStatus": "NEEDS_SETUP", "blockReason": "localhost:8188 must be reachable." },
+        { "step": 2, "name": "Queue",      "executionStatus": "NEEDS_SETUP", "blockReason": "Same." },
+        { "step": 3, "name": "Poll",       "executionStatus": "NEEDS_SETUP", "blockReason": "Same." },
+        { "step": 4, "name": "Download",   "executionStatus": "NEEDS_SETUP", "blockReason": "Same." }
+      ],
+      "blockers": ["No ComfyUI instance configured"],
+      "readyForUser": false,
+      "notes": "Connector code reads endpoint from registry. User must install ComfyUI and set endpoint."
+    },
+    {
+      "pipelineId": "openai-compat-routing",
+      "pipelineName": "OpenAI-Compatible Routing Pipeline",
+      "executionStatus": "PARTIAL",
+      "description": "Routes LLM calls to Ollama (local), LM Studio, or OpenRouter. Local path works if Ollama is running.",
+      "requiredInputs": ["prompt or messages-array", "target-model"],
+      "expectedOutputs": ["text-completion or structured-json"],
+      "outputValidation": ["response.choices[0].message.content is non-empty"],
+      "assetRegistryWrite": false,
+      "timelineWrite": false,
+      "packageWrite": false,
+      "steps": [
+        { "step": 1, "name": "Select Provider", "executionStatus": "RUNNABLE",    "blockReason": null },
+        { "step": 2, "name": "Send Request",    "executionStatus": "PARTIAL",     "blockReason": "Ollama works if running. OpenRouter needs API key. OpenAI needs paid key." },
+        { "step": 3, "name": "Parse Response",  "executionStatus": "RUNNABLE",    "blockReason": null }
+      ],
+      "blockers": ["Cloud LLM providers need API keys"],
+      "readyForUser": true,
+      "notes": "Local Ollama path works today if user has Ollama installed."
+    },
+    {
+      "pipelineId": "local-selfhosted-ai",
+      "pipelineName": "Local Self-Hosted AI Pipeline",
+      "executionStatus": "NEEDS_SETUP",
+      "description": "Unified routing to any local AI server. Works once user sets up at least one local server.",
+      "requiredInputs": ["capability-request", "input-data"],
+      "expectedOutputs": ["ai-generated-asset"],
+      "outputValidation": ["non-null response", "asset has correct mimeType"],
+      "assetRegistryWrite": true,
+      "timelineWrite": false,
+      "packageWrite": false,
+      "steps": [
+        { "step": 1, "name": "Probe Endpoint",  "executionStatus": "NEEDS_SETUP", "blockReason": "Needs at least one running local server." },
+        { "step": 2, "name": "Route Request",   "executionStatus": "NEEDS_SETUP", "blockReason": "Same." },
+        { "step": 3, "name": "Return Asset",    "executionStatus": "NEEDS_SETUP", "blockReason": "Same." }
+      ],
+      "blockers": ["No local servers running in default state"],
+      "readyForUser": false,
+      "notes": "Designed for power users with local GPU setups."
+    },
+    {
+      "pipelineId": "tts-voice",
+      "pipelineName": "TTS Voice Pipeline",
+      "executionStatus": "PARTIAL",
+      "description": "Browser TTS works natively. High-quality TTS (Kokoro, Piper) requires local server.",
+      "requiredInputs": ["text-to-speak", "character-voice-id (optional)"],
+      "expectedOutputs": ["audio-blob", "duration"],
+      "outputValidation": ["audio blob is non-empty", "duration > 0", "plays without error"],
+      "assetRegistryWrite": true,
+      "timelineWrite": true,
+      "packageWrite": false,
+      "steps": [
+        { "step": 1, "name": "Select Voice",   "executionStatus": "RUNNABLE",    "blockReason": null },
+        { "step": 2, "name": "Synthesize",     "executionStatus": "PARTIAL",     "blockReason": "Browser TTS works. Kokoro/Piper need local server." },
+        { "step": 3, "name": "Insert Track",   "executionStatus": "RUNNABLE",    "blockReason": null }
+      ],
+      "blockers": ["High-quality TTS needs local server setup"],
+      "readyForUser": true,
+      "notes": "Browser TTS provides working baseline. Local TTS servers add quality."
+    },
+    {
+      "pipelineId": "stt-subtitle",
+      "pipelineName": "STT Subtitle Pipeline",
+      "executionStatus": "PARTIAL",
+      "description": "Whisper WASM and Vosk work in-browser. Higher-accuracy models need local server.",
+      "requiredInputs": ["audio-clip or video-clip"],
+      "expectedOutputs": ["srt-file or vtt-file", "word-timestamps"],
+      "outputValidation": ["SRT output is non-empty", "timestamps are sequential", "no garbled text"],
+      "assetRegistryWrite": true,
+      "timelineWrite": true,
+      "packageWrite": false,
+      "steps": [
+        { "step": 1, "name": "Transcribe",     "executionStatus": "PARTIAL",     "blockReason": "Whisper WASM works but is slow on iPad. Faster-Whisper needs local server." },
+        { "step": 2, "name": "Generate SRT",   "executionStatus": "RUNNABLE",    "blockReason": null },
+        { "step": 3, "name": "Burn / Overlay", "executionStatus": "RUNNABLE",    "blockReason": null }
+      ],
+      "blockers": ["Accurate transcription is slow in WASM on iPad"],
+      "readyForUser": true,
+      "notes": "Functional. Performance may be limited on iPad without server-side help."
+    },
+    {
+      "pipelineId": "music-audio-gen",
+      "pipelineName": "Music / Audio Generation Pipeline",
+      "executionStatus": "NEEDS_SETUP",
+      "description": "MusicGen / AudioGen / Riffusion all need local server. No free cloud fallback available today.",
+      "requiredInputs": ["music-prompt or style-tags", "duration"],
+      "expectedOutputs": ["audio-blob (wav or mp3)"],
+      "outputValidation": ["audio blob non-empty", "duration matches request", "audio plays without error"],
+      "assetRegistryWrite": true,
+      "timelineWrite": true,
+      "packageWrite": false,
+      "steps": [
+        { "step": 1, "name": "Prompt",          "executionStatus": "RUNNABLE",    "blockReason": null },
+        { "step": 2, "name": "Generate",        "executionStatus": "NEEDS_SETUP", "blockReason": "MusicGen/AudioGen/Riffusion all need local GPU server." },
+        { "step": 3, "name": "Insert Track",    "executionStatus": "RUNNABLE",    "blockReason": null }
+      ],
+      "blockers": ["No free cloud music generation provider wired"],
+      "readyForUser": false,
+      "notes": "Needs local GPU. Hugging Face Spaces could be added as a free fallback but has rate limits."
+    },
+    {
+      "pipelineId": "ai-video",
+      "pipelineName": "AI Video Generation Pipeline",
+      "executionStatus": "NEEDS_SETUP",
+      "description": "WAN, HunyuanVideo, LTX-Video etc. all require local GPU server. Heavy compute.",
+      "requiredInputs": ["video-prompt or image-to-animate", "duration"],
+      "expectedOutputs": ["video-blob (mp4)"],
+      "outputValidation": ["video blob non-empty", "plays without error", "duration matches request"],
+      "assetRegistryWrite": true,
+      "timelineWrite": true,
+      "packageWrite": false,
+      "steps": [
+        { "step": 1, "name": "Prompt",          "executionStatus": "RUNNABLE",    "blockReason": null },
+        { "step": 2, "name": "Generate",        "executionStatus": "NEEDS_SETUP", "blockReason": "All video gen models need local GPU server." },
+        { "step": 3, "name": "Insert Clip",     "executionStatus": "RUNNABLE",    "blockReason": null }
+      ],
+      "blockers": ["All video gen providers require local GPU setup"],
+      "readyForUser": false,
+      "notes": "Very heavy workload. Designed for local workstation / Mac Studio setups."
+    },
+    {
+      "pipelineId": "lip-sync-avatar",
+      "pipelineName": "Lip Sync Avatar Pipeline",
+      "executionStatus": "NEEDS_SETUP",
+      "description": "MuseTalk, Wav2Lip, SadTalker, LivePortrait all require local server.",
+      "requiredInputs": ["character-image or video", "audio-clip"],
+      "expectedOutputs": ["animated-video-blob"],
+      "outputValidation": ["video blob non-empty", "lip movement visible", "audio in sync"],
+      "assetRegistryWrite": true,
+      "timelineWrite": true,
+      "packageWrite": false,
+      "steps": [
+        { "step": 1, "name": "Input Prep",      "executionStatus": "RUNNABLE",    "blockReason": null },
+        { "step": 2, "name": "Lip Sync",        "executionStatus": "NEEDS_SETUP", "blockReason": "MuseTalk/Wav2Lip/SadTalker need local server." },
+        { "step": 3, "name": "Output",          "executionStatus": "RUNNABLE",    "blockReason": null }
+      ],
+      "blockers": ["All lip sync providers need local setup"],
+      "readyForUser": false,
+      "notes": "Key feature for character animation. Requires local server."
+    },
+    {
+      "pipelineId": "cinepwa-package",
+      "pipelineName": "CinePWA Package Pipeline",
+      "executionStatus": "RUNNABLE",
+      "description": "Packages project into a standalone CinePWA. No external providers needed — all local.",
+      "requiredInputs": ["scenes.json", "project.json", "rights.json", "assets/"],
+      "expectedOutputs": ["cinepwa.zip containing manifest + assets + viewer"],
+      "outputValidation": [
+        "ZIP contains all required files",
+        "No API keys included in package",
+        "No tokens in any exported JSON",
+        "rights.json present",
+        "scenes.json present"
+      ],
+      "assetRegistryWrite": false,
+      "timelineWrite": false,
+      "packageWrite": true,
+      "steps": [
+        { "step": 1, "name": "Gather Assets",   "executionStatus": "RUNNABLE", "blockReason": null },
+        { "step": 2, "name": "Build Manifest",  "executionStatus": "RUNNABLE", "blockReason": null },
+        { "step": 3, "name": "Package ZIP",     "executionStatus": "RUNNABLE", "blockReason": null },
+        { "step": 4, "name": "Security Scrub",  "executionStatus": "RUNNABLE", "blockReason": null }
+      ],
+      "blockers": [],
+      "readyForUser": true,
+      "notes": "Fully self-contained. No network required. Keys are scrubbed before packaging."
+    },
+    {
+      "pipelineId": "load-play-publish",
+      "pipelineName": "Load Play Publish Pipeline",
+      "executionStatus": "BLOCKED",
+      "description": "Publishing to Load Play requires the Load Play platform to be built and deployed.",
+      "requiredInputs": ["cinepwa-package", "creator-channel-id"],
+      "expectedOutputs": ["published-url", "channel-listing"],
+      "outputValidation": ["URL returns 200", "appears in creator channel"],
+      "assetRegistryWrite": false,
+      "timelineWrite": false,
+      "packageWrite": false,
+      "steps": [
+        { "step": 1, "name": "Auth",      "executionStatus": "BLOCKED", "blockReason": "Load Play platform not yet deployed." },
+        { "step": 2, "name": "Upload",    "executionStatus": "BLOCKED", "blockReason": "Same." },
+        { "step": 3, "name": "Publish",   "executionStatus": "BLOCKED", "blockReason": "Same." }
+      ],
+      "blockers": ["Load Play platform not yet built"],
+      "readyForUser": false,
+      "notes": "Blocked on Load Play build. PeerTube/Owncast are self-hosted fallback options when user runs their own server."
+    }
+  ]
+}

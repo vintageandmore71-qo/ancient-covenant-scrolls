@@ -41,42 +41,21 @@ var _SFX_DEMO = {
   emotion:[{t:'Heartbeat',a:'Freesound',d:'0:04',c:'#ff375f'},{t:'Sad Tone',a:'ZapSplat',d:'0:03',c:'#cc2040'},{t:'Hope Rise',a:'Mixkit SFX',d:'0:05',c:'#ff6080'},{t:'Tension Hum',a:'Freesound',d:'0:04',c:'#ee2050'}]
 };
 
-// ─── DEMO AUDIO GENERATION ────────────────────────────────────────────────────
-// Real WAV data URIs generated from pure math — no external files needed.
-// Each audio key is generated once and cached in _DEMO_AUDIO.
-// Data URIs persist in localStorage when stored on timeline items.
-var _DEMO_AUDIO = null;
-
-function _wavDataUri(sr, dur, fn) {
-  var n = Math.floor(sr * dur);
-  var buf = new Uint8Array(44 + n);
-  var u32 = function(o,v){buf[o]=v&255;buf[o+1]=(v>>8)&255;buf[o+2]=(v>>16)&255;buf[o+3]=(v>>24)&255;};
-  var u16 = function(o,v){buf[o]=v&255;buf[o+1]=(v>>8)&255;};
-  var str = function(o,s){for(var i=0;i<s.length;i++)buf[o+i]=s.charCodeAt(i);};
-  str(0,'RIFF'); u32(4,36+n); str(8,'WAVE'); str(12,'fmt ');
-  u32(16,16); u16(20,1); u16(22,1); u32(24,sr); u32(28,sr); u16(32,1); u16(34,8);
-  str(36,'data'); u32(40,n);
-  for (var i=0;i<n;i++) buf[44+i]=Math.max(0,Math.min(255,Math.round(128+fn(i,sr))));
-  var b=''; buf.forEach(function(x){b+=String.fromCharCode(x);});
-  return 'data:audio/wav;base64,'+btoa(b);
-}
-
-function _ensureDemoAudio() {
-  if (_DEMO_AUDIO) return;
-  try {
-    var S = 8000;
-    _DEMO_AUDIO = {
-      'music-mellow':    _wavDataUri(S, 1.5, function(i,sr){var t=i/sr, e=Math.min(t*4,1)*Math.min((1.5-t)*4,1); return 52*e*Math.sin(2*Math.PI*220*t);}),
-      'music-modern':    _wavDataUri(S, 1.5, function(i,sr){var t=i/sr, e=Math.min(t*5,1)*Math.min((1.5-t)*3,1); return 44*e*(Math.sin(2*Math.PI*280*t)+0.3*Math.sin(2*Math.PI*560*t));}),
-      'music-energetic': _wavDataUri(S, 1.5, function(i,sr){var t=i/sr, e=Math.min(t*6,1)*Math.min((1.5-t)*4,1); return 44*e*(Math.sin(2*Math.PI*180*t)+0.5*Math.sin(2*Math.PI*360*t));}),
-      'sfx-spring':      _wavDataUri(S, 0.4, function(i,sr){var t=i/sr, f=880*Math.pow(0.25,t/0.4); return 75*(1-t/0.4)*Math.sin(2*Math.PI*f*t);}),
-      'sfx-swish':       _wavDataUri(S, 0.3, function(i,sr){var t=i/sr, e=Math.min(t*15,1)*Math.max(0,1-t/0.3); return 55*e*(Math.random()*2-1);}),
-      'sfx-ding':        _wavDataUri(S, 0.35,function(i,sr){var t=i/sr; return 70*Math.exp(-t*7)*Math.sin(2*Math.PI*880*t);}),
-      'sfx-hit':         _wavDataUri(S, 0.2, function(i,sr){var t=i/sr; return 80*Math.exp(-t*18)*Math.sin(2*Math.PI*120*t);}),
-      'sfx-rumble':      _wavDataUri(S, 0.6, function(i,sr){var t=i/sr, e=Math.min(t*5,1)*Math.max(0,1-(t-0.4)*5); return 55*e*Math.sin(2*Math.PI*60*t)*(1+0.3*Math.sin(2*Math.PI*180*t));})
-    };
-  } catch(_) { _DEMO_AUDIO = {}; }
-}
+// ─── DEMO AUDIO — real WAV files served from assets/audio/demo/ ──────────────
+// Each file is an original mathematically-synthesised WAV (creator-owned).
+// Rights: see assets/audio/demo/RIGHTS.md. Commercial use: yes.
+// These are demo placeholders. When a real provider (Pixabay Music, Mixkit,
+// Freesound, etc.) is connected and authenticated, it replaces these paths.
+var _DEMO_AUDIO = {
+  'music-mellow':    'assets/audio/demo/demo-music-mellow.wav',
+  'music-modern':    'assets/audio/demo/demo-music-upbeat.wav',
+  'music-energetic': 'assets/audio/demo/demo-music-energetic.wav',
+  'sfx-spring':      'assets/audio/demo/demo-sfx-boing.wav',
+  'sfx-swish':       'assets/audio/demo/demo-sfx-whoosh.wav',
+  'sfx-ding':        'assets/audio/demo/demo-sfx-ding.wav',
+  'sfx-hit':         'assets/audio/demo/demo-sfx-hit.wav',
+  'sfx-rumble':      'assets/audio/demo/demo-sfx-rumble.wav'
+};
 
 var _MUSIC_AUDIO_KEY = {
   vlog:'music-mellow', fresh:'music-mellow', acoustic:'music-mellow',
@@ -95,7 +74,6 @@ var _SPK_ICO  = '<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.
 var _PLAY_ICO = '<svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><polygon points="6 4 20 12 6 20"/></svg>';
 
 function _buildAssetList(listId, demo, cat, q, icon, trackKind, tone, audioKeyMap) {
-  _ensureDemoAudio();
   var list = document.getElementById(listId);
   if (!list) return;
   list.innerHTML = '';
@@ -111,7 +89,7 @@ function _buildAssetList(listId, demo, cat, q, icon, trackKind, tone, audioKeyMa
       var hasAudio   = !!audioSrc;
       var playAttrs  = hasAudio ? 'data-tone="'+tone+'" data-audio-key="'+audioKey+'"' : 'data-tone="'+tone+'" data-no-src="1"';
       var addAttrs   = hasAudio ? 'data-audio-key="'+audioKey+'"' : 'data-no-src="1"';
-      var subText    = tr.a + ' \xb7 ' + tr.d + (hasAudio ? '' : ' \xb7 No source');
+      var subText    = tr.d + (hasAudio ? ' \xb7 Demo' : ' \xb7 Source missing');
       row.innerHTML =
         '<div class="ve-asset-art" style="background:linear-gradient(135deg,' + tr.c + ',' + tr.c + '88)">' + icon + '</div>' +
         '<div class="ve-asset-info">' +
