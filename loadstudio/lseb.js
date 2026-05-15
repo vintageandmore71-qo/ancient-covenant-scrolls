@@ -237,22 +237,43 @@ var _engine = {
       var clipStart = starts[self.clipIdx] || 0;
       var hasVid = clip && clip.type === 'video' && !!clip.src;
       var vid = _el('lseb-stage-vid');
+      var clipEnded = false;
       if (hasVid && vid && vid.readyState >= 2) {
         if (vid.ended || (vid.paused && vid.currentTime >= (vid.duration || clipDur) - 0.05)) {
           self.globalTime = clipStart + clipDur;
-          self._advanceClip(idx);
-          return;
+          clipEnded = true;
+        } else {
+          self.t = vid.currentTime;
+          self.globalTime = clipStart + self.t;
         }
-        self.t = vid.currentTime;
-        self.globalTime = clipStart + self.t;
       } else {
         self.t += dt;
         self.globalTime += dt;
         if (self.t >= clipDur) {
           self.globalTime = clipStart + clipDur;
-          self._advanceClip(idx);
+          clipEnded = true;
+        }
+      }
+      if (clipEnded) {
+        var stageImg = _el('lseb-stage-img');
+        if (stageImg) { stageImg.classList.remove('kb-play'); stageImg.style.animation = ''; }
+        self.clipIdx++;
+        if (self.clipIdx >= (scene.clips ? scene.clips.length : 0)) {
+          self._pause(idx);
+          self.globalTime = 0; self.t = 0;
+          _selectedClipIdx = 0;
+          setTimeout(function () { _renderImageStrip(idx); }, 0);
           return;
         }
+        _selectedClipIdx = self.clipIdx;
+        var nextClip = scene.clips[self.clipIdx];
+        var nextClipDur = nextClip.dur || scene.duration || 5;
+        self.t = 0;
+        starts = null;
+        self._startClipMedia(nextClip, nextClipDur);
+        setTimeout(function () { _renderImageStrip(idx); }, 0);
+        self.rafId = requestAnimationFrame(step);
+        return;
       }
       var total = _tlDuration(scene);
       if (self.globalTime >= total) { self._pause(idx); self._tick(idx, total); return; }
@@ -260,29 +281,6 @@ var _engine = {
       self.rafId = requestAnimationFrame(step);
     };
     this.rafId = requestAnimationFrame(step);
-  },
-
-  _advanceClip: function (idx) {
-    var scene = _state.scenes[idx];
-    if (!scene || !scene.clips) { this._pause(idx); return; }
-    var img = _el('lseb-stage-img');
-    if (img) { img.classList.remove('kb-play'); img.style.animation = ''; }
-    this.clipIdx++;
-    if (this.clipIdx >= scene.clips.length) {
-      this._pause(idx);
-      this.globalTime = 0; this.t = 0;
-      _selectedClipIdx = 0;
-      _renderImageStrip(idx);
-      return;
-    }
-    _selectedClipIdx = this.clipIdx;
-    var clip = scene.clips[this.clipIdx];
-    var clipDur = clip.dur || scene.duration || 5;
-    this.t = 0;
-    this.lastFrame = performance.now();
-    _renderImageStrip(idx);
-    this._startClipMedia(clip, clipDur);
-    this._runStep(idx);
   },
 
   _pause: function (idx) {
