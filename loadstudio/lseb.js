@@ -14,6 +14,33 @@ var _appendingClip = false;
 var _selectedClipIdx = 0;
 var _ctxData = null;
 
+var _MUSIC_DEMO = {
+  vlog:[{t:'Morning Light',a:'Pixabay Music',d:'2:34',c:'#7d2ae8'},{t:'City Walk',a:'Bensound',d:'3:01',c:'#5b1fa8'},{t:'Easy Ride',a:'Mixkit',d:'1:52',c:'#9c3aff'},{t:'Golden Hour',a:'Free Music Archive',d:'2:48',c:'#6a1fcc'}],
+  pop:[{t:'Sparkle',a:'Pixabay Music',d:'2:18',c:'#e82a7d'},{t:'Feel Good',a:'Bensound',d:'3:22',c:'#a81f5b'},{t:'On My Way',a:'Mixkit',d:'2:45',c:'#ff6aae'},{t:'Bright Side',a:'ccMixter',d:'2:59',c:'#cc1f6a'}],
+  dynamic:[{t:'Power Up',a:'Pixabay Music',d:'1:45',c:'#2ae8a0'},{t:'Rush',a:'Incompetech',d:'2:12',c:'#1fa87d'},{t:'Drive',a:'Mixkit',d:'2:30',c:'#3affc0'},{t:'Rise',a:'Bensound',d:'1:58',c:'#1fcc8a'}],
+  fresh:[{t:'Summer Breeze',a:'Pixabay Music',d:'3:05',c:'#e8c42a'},{t:'Sunny Days',a:'Bensound',d:'2:40',c:'#a88c1f'},{t:'Open Air',a:'Free Music Archive',d:'2:22',c:'#ffd93d'},{t:'Chill Out',a:'ccMixter',d:'3:14',c:'#cc9a1f'}],
+  acoustic:[{t:'Wooden Heart',a:'Bensound',d:'2:55',c:'#c4842a'},{t:'Simple Path',a:'Incompetech',d:'3:18',c:'#8b5e1f'},{t:'Quiet Moment',a:'Free Music Archive',d:'2:37',c:'#e0a040'},{t:'The River',a:'ccMixter',d:'3:44',c:'#a06020'}],
+  electronic:[{t:'Pulse',a:'Pixabay Music',d:'2:26',c:'#2a8be8'},{t:'Neon',a:'Bensound',d:'3:00',c:'#1f6aad'},{t:'Grid',a:'Mixkit',d:'2:15',c:'#5ab8ff'},{t:'Voltage',a:'Free Music Archive',d:'2:50',c:'#1f5aad'}],
+  hiphop:[{t:'Street Beat',a:'Pixabay Music',d:'2:10',c:'#e84a2a'},{t:'Flow State',a:'ccMixter',d:'2:48',c:'#a83520'},{t:'Block Walk',a:'Free Music Archive',d:'3:02',c:'#ff6b4a'},{t:'Rhythm Check',a:'Bensound',d:'2:35',c:'#cc3d20'}]
+};
+
+var _SFX_DEMO = {
+  cartoon:[{t:'Boing Spring',a:'Mixkit SFX',d:'0:02',c:'#ff9500'},{t:'Silly Pop',a:'Freesound',d:'0:01',c:'#ff7a00'},{t:'Woosh Whoosh',a:'SoundBible',d:'0:03',c:'#ffb340'},{t:'Twinkle Hit',a:'Mixkit SFX',d:'0:01',c:'#ff8800'}],
+  swish:[{t:'Fast Swipe',a:'Mixkit SFX',d:'0:01',c:'#4cd964'},{t:'Quick Swoosh',a:'ZapSplat',d:'0:02',c:'#3aa84f'},{t:'Air Rush',a:'Freesound',d:'0:01',c:'#6aed80'},{t:'Speed Line',a:'Mixkit SFX',d:'0:01',c:'#2a9e3c'}],
+  funny:[{t:'Comedy Slide',a:'Mixkit SFX',d:'0:02',c:'#ff3b30'},{t:'Laugh Track',a:'SoundBible',d:'0:04',c:'#cc2d24'},{t:'Squeaky Step',a:'Freesound',d:'0:02',c:'#ff6059'},{t:'Wacky Spin',a:'Mixkit SFX',d:'0:02',c:'#e83028'}],
+  machine:[{t:'Gear Click',a:'Freesound',d:'0:03',c:'#8e8e93'},{t:'Engine Hum',a:'ZapSplat',d:'0:05',c:'#636366'},{t:'Motor Start',a:'BBC Sound Effects',d:'0:04',c:'#aeaeb2'},{t:'Whir Loop',a:'Freesound',d:'0:06',c:'#6d6d72'}],
+  ringing:[{t:'Phone Bell',a:'Mixkit SFX',d:'0:03',c:'#5ac8fa'},{t:'Notification',a:'SoundBible',d:'0:01',c:'#32ade6'},{t:'Alert Chime',a:'Mixkit SFX',d:'0:02',c:'#80d8ff'},{t:'Ding Dong',a:'Freesound',d:'0:02',c:'#28a8e0'}],
+  vehicles:[{t:'Car Horn',a:'BBC Sound Effects',d:'0:02',c:'#5856d6'},{t:'Truck Rev',a:'Freesound',d:'0:04',c:'#3634a3'},{t:'Bike Zoom',a:'ZapSplat',d:'0:02',c:'#7876e0'},{t:'Tire Screech',a:'BBC Sound Effects',d:'0:03',c:'#4240b0'}],
+  weather:[{t:'Thunder Roll',a:'BBC Sound Effects',d:'0:05',c:'#34aadc'},{t:'Rain Heavy',a:'Freesound',d:'0:08',c:'#258ab0'},{t:'Wind Gust',a:'ZapSplat',d:'0:04',c:'#5ac8fa'},{t:'Storm Crack',a:'BBC Sound Effects',d:'0:03',c:'#1a7a9e'}],
+  variety:[{t:'Applause',a:'Mixkit SFX',d:'0:05',c:'#ff2d55'},{t:'Crowd Cheer',a:'Freesound',d:'0:06',c:'#cc2440'},{t:'TV Static',a:'SoundBible',d:'0:03',c:'#ff5577'},{t:'News Sting',a:'ZapSplat',d:'0:02',c:'#ee1a42'}],
+  vlogsf:[{t:'Camera Click',a:'Mixkit SFX',d:'0:01',c:'#7d2ae8'},{t:'Page Turn',a:'Freesound',d:'0:02',c:'#5b1fa8'},{t:'Type Keys',a:'ZapSplat',d:'0:03',c:'#9c3aff'},{t:'Pen Scribble',a:'Freesound',d:'0:02',c:'#6a1fcc'}],
+  physical:[{t:'Heavy Punch',a:'Mixkit SFX',d:'0:01',c:'#ff6b35'},{t:'Footsteps',a:'Freesound',d:'0:04',c:'#cc4a20'},{t:'Door Slam',a:'BBC Sound Effects',d:'0:02',c:'#ff8c55'},{t:'Wood Break',a:'ZapSplat',d:'0:02',c:'#e05c28'}],
+  transitions:[{t:'Whoosh Up',a:'Mixkit SFX',d:'0:02',c:'#636366'},{t:'Glitch Cut',a:'ZapSplat',d:'0:01',c:'#4a4a50'},{t:'Slide Zoom',a:'Mixkit SFX',d:'0:02',c:'#8e8e93'},{t:'Fade Hiss',a:'Freesound',d:'0:02',c:'#5a5a5e'}],
+  cues:[{t:'Drama Hit',a:'Mixkit SFX',d:'0:02',c:'#ffcc00'},{t:'Tension Rise',a:'ZapSplat',d:'0:04',c:'#cc9e00'},{t:'Impact Boom',a:'Freesound',d:'0:03',c:'#ffe040'},{t:'Reveal Sting',a:'Mixkit SFX',d:'0:02',c:'#e6b400'}],
+  game:[{t:'Power Up',a:'Mixkit SFX',d:'0:02',c:'#32ade6'},{t:'Coin Collect',a:'SoundBible',d:'0:01',c:'#1a8fcc'},{t:'Level Up',a:'Mixkit SFX',d:'0:02',c:'#5ac8fa'},{t:'Error Buzz',a:'Freesound',d:'0:01',c:'#1078b5'}],
+  emotion:[{t:'Heartbeat',a:'Freesound',d:'0:04',c:'#ff375f'},{t:'Sad Tone',a:'ZapSplat',d:'0:03',c:'#cc2040'},{t:'Hope Rise',a:'Mixkit SFX',d:'0:05',c:'#ff6080'},{t:'Tension Hum',a:'Freesound',d:'0:04',c:'#ee2050'}]
+};
+
 // ─── STORAGE ─────────────────────────────────────────────────────────────────
 function _persist(data) {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch (_) {}
@@ -570,7 +597,36 @@ var _CSS =
   '#lseb-editor .ve-tab.active{color:#b33af0;border-bottom-color:#b33af0}' +
   '#lseb-editor .ve-cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:8px 0 4px}' +
   '#lseb-editor .ve-cat-tile{background:#1e1e30;border:1.5px solid rgba(125,42,232,.22);border-radius:10px;padding:14px 4px;font:600 11px system-ui,sans-serif;color:#cfcfdc;cursor:pointer;text-align:center;touch-action:manipulation;-webkit-tap-highlight-color:transparent;line-height:1.35;word-break:break-word}' +
-  '#lseb-editor .ve-cat-tile:active{background:rgba(125,42,232,.22);border-color:#b33af0}';
+  '#lseb-editor .ve-cat-tile:active{background:rgba(125,42,232,.22);border-color:#b33af0}' +
+  '#lseb-editor .ve-search-bar{display:flex;align-items:center;gap:8px;background:#0e0e18;border:1px solid #2a2a40;border-radius:10px;padding:7px 12px;margin-bottom:12px}' +
+  '#lseb-editor .ve-search-inp{flex:1;background:transparent;border:none;color:#f0eeff;font:400 13px system-ui,sans-serif;outline:none;min-width:0}' +
+  '#lseb-editor .ve-search-inp::placeholder{color:#4a4a68}' +
+  '#lseb-editor .ve-cat-card-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:2px 0 6px}' +
+  '#lseb-editor .ve-cat-card{background:#1a1a2a;border:1.5px solid rgba(125,42,232,.2);border-radius:12px;overflow:hidden;cursor:pointer;text-align:left;font-family:inherit;display:flex;flex-direction:column;touch-action:manipulation;-webkit-tap-highlight-color:transparent;width:100%}' +
+  '#lseb-editor .ve-cat-card:active{border-color:#b33af0}' +
+  '#lseb-editor .ve-cat-card-art{height:68px;display:flex;align-items:center;justify-content:center}' +
+  '#lseb-editor .ve-cat-card-info{padding:7px 10px 9px}' +
+  '#lseb-editor .ve-cat-card-name{font:700 12px system-ui,sans-serif;color:#f0eeff;display:block}' +
+  '#lseb-editor .ve-cat-card-count{font:400 10px system-ui,sans-serif;color:#6a6a8a;display:block;margin-top:1px}' +
+  '#lseb-editor .ve-panel-back{display:flex;align-items:center;gap:6px;background:transparent;border:none;color:#b33af0;font:600 13px system-ui,sans-serif;cursor:pointer;padding:0 0 12px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}' +
+  '#lseb-editor .ve-asset-list{display:flex;flex-direction:column;gap:8px;padding-bottom:8px}' +
+  '#lseb-editor .ve-asset-row{display:flex;align-items:center;gap:10px;background:#1a1a26;border:1px solid rgba(125,42,232,.15);border-radius:10px;padding:8px 10px}' +
+  '#lseb-editor .ve-asset-art{width:42px;height:42px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center}' +
+  '#lseb-editor .ve-asset-info{flex:1;min-width:0}' +
+  '#lseb-editor .ve-asset-title{font:600 12px system-ui,sans-serif;color:#f0eeff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}' +
+  '#lseb-editor .ve-asset-sub{font:400 10px system-ui,sans-serif;color:#6a6a8a;margin-top:1px;display:block}' +
+  '#lseb-editor .ve-asset-acts{display:flex;gap:6px;flex-shrink:0;align-items:center}' +
+  '#lseb-editor .ve-asset-play{background:rgba(179,58,240,.18);border:1px solid rgba(179,58,240,.3);color:#b33af0;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;flex-shrink:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent}' +
+  '#lseb-editor .ve-asset-play:active{background:rgba(179,58,240,.38)}' +
+  '#lseb-editor .ve-asset-add{background:#7d2ae8;border:none;color:#fff;border-radius:8px;padding:6px 10px;font:700 11px system-ui,sans-serif;cursor:pointer;flex-shrink:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent}' +
+  '#lseb-editor .ve-asset-add:active{background:#9c3aff}' +
+  '#lseb-editor .ve-rec-strip{display:flex;gap:6px;padding:8px 0 12px;overflow-x:auto;scrollbar-width:none;min-height:76px;align-items:center;border-bottom:1px solid #1e1e2a;margin-bottom:12px}' +
+  '#lseb-editor .ve-rec-strip::-webkit-scrollbar{display:none}' +
+  '#lseb-editor .ve-rec-strip img{height:60px;width:88px;border-radius:6px;object-fit:cover;flex-shrink:0}' +
+  '#lseb-editor .ve-rec-controls{display:flex;align-items:center;justify-content:space-between;padding:4px 8px 8px}' +
+  '#lseb-editor .ve-rec-cancel{background:transparent;border:1.5px solid #3a3a50;color:#8a8a9a;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;font-family:inherit;touch-action:manipulation}' +
+  '#lseb-editor .ve-rec-confirm{background:#7d2ae8;border:none;color:#fff;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;touch-action:manipulation;font-size:18px}' +
+  '#lseb-editor .ve-rec-confirm:disabled{background:#2a1a4a;color:#5a4a8a}';
 
 // ─── STORYBOARD VIEW ─────────────────────────────────────────────────────────
 function _showStoryboard() {
@@ -703,16 +759,25 @@ function _openSceneEditor(idx) {
             '<button class="ve-tab" data-tab="music-my" type="button">My Music</button>' +
           '</div>' +
           '<div id="lseb-music-lib" class="ve-tab-pane">' +
-            '<div class="ve-cat-grid">' +
-              '<button class="ve-cat-tile" data-pick="lseb-audio-pick" type="button">Vlog</button>' +
-              '<button class="ve-cat-tile" data-pick="lseb-audio-pick" type="button">Pop</button>' +
-              '<button class="ve-cat-tile" data-pick="lseb-audio-pick" type="button">Dynamic</button>' +
-              '<button class="ve-cat-tile" data-pick="lseb-audio-pick" type="button">Fresh</button>' +
-              '<button class="ve-cat-tile" data-pick="lseb-audio-pick" type="button">Acoustic</button>' +
-              '<button class="ve-cat-tile" data-pick="lseb-audio-pick" type="button">Electronic</button>' +
-              '<button class="ve-cat-tile" data-pick="lseb-audio-pick" type="button">Hip-Hop</button>' +
+            '<div class="ve-search-bar">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="color:#5a5a78;flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+              '<input class="ve-search-inp" id="lseb-music-search" placeholder="Search music..." autocomplete="off">' +
             '</div>' +
-            '<p style="color:#5a5a78;font:400 11px Inter,system-ui,sans-serif;margin:10px 0 0;text-align:center">Choose a category to pick a file from your device.</p>' +
+            '<div id="lseb-music-cats">' +
+              '<div class="ve-cat-card-grid">' +
+                '<button class="ve-cat-card" data-music-cat="vlog" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#7d2ae8,#3a0f70)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Vlog</span><span class="ve-cat-card-count">4 tracks</span></div></button>' +
+                '<button class="ve-cat-card" data-music-cat="pop" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#e82a7d,#7a0f3e)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Pop</span><span class="ve-cat-card-count">4 tracks</span></div></button>' +
+                '<button class="ve-cat-card" data-music-cat="dynamic" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#2ae8a0,#0f7a45)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Dynamic</span><span class="ve-cat-card-count">4 tracks</span></div></button>' +
+                '<button class="ve-cat-card" data-music-cat="fresh" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#e8c42a,#7a620f)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Fresh</span><span class="ve-cat-card-count">4 tracks</span></div></button>' +
+                '<button class="ve-cat-card" data-music-cat="acoustic" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#c4842a,#6b3f0f)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Acoustic</span><span class="ve-cat-card-count">4 tracks</span></div></button>' +
+                '<button class="ve-cat-card" data-music-cat="electronic" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#2a8be8,#0f3e7a)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Electronic</span><span class="ve-cat-card-count">4 tracks</span></div></button>' +
+                '<button class="ve-cat-card" data-music-cat="hiphop" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#e84a2a,#7a1f0f)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Hip-Hop</span><span class="ve-cat-card-count">4 tracks</span></div></button>' +
+              '</div>' +
+            '</div>' +
+            '<div id="lseb-music-assets" style="display:none">' +
+              '<button class="ve-panel-back" id="lseb-music-back" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>Back</button>' +
+              '<div class="ve-asset-list" id="lseb-music-list"></div>' +
+            '</div>' +
           '</div>' +
           '<div id="lseb-music-fav" class="ve-tab-pane" style="display:none">' +
             '<p style="color:#5a5a78;font:400 12px Inter,system-ui,sans-serif;margin:18px 0;text-align:center">No favorites yet.</p>' +
@@ -723,7 +788,7 @@ function _openSceneEditor(idx) {
               '<input id="lseb-vol" type="range" min="0" max="1" step="0.05" value="0.35" style="flex:1;min-width:140px;accent-color:#7d2ae8;">' +
               '<span id="lseb-vol-val" style="font-size:13px;color:#cfcfdc;font-weight:700;">35%</span>' +
             '</div>' +
-            '<button type="button" data-pick="lseb-audio-pick" style="width:100%;padding:12px;background:#7d2ae8;border:none;border-radius:10px;color:#fff;font:600 14px system-ui,sans-serif;cursor:pointer;touch-action:manipulation">Browse music files</button>' +
+            '<button type="button" data-open-pick="lseb-audio-pick" style="width:100%;padding:12px;background:#7d2ae8;border:none;border-radius:10px;color:#fff;font:600 14px system-ui,sans-serif;cursor:pointer;touch-action:manipulation">Browse music files</button>' +
           '</div>' +
         '</div>' +
         '<div id="lseb-text-panel" class="ve-panel">' +
@@ -774,40 +839,54 @@ function _openSceneEditor(idx) {
             '<button class="ve-tab" data-tab="sfx-my" type="button">My Sound</button>' +
           '</div>' +
           '<div id="lseb-sfx-lib" class="ve-tab-pane">' +
-            '<div class="ve-cat-grid">' +
-              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Cartoon</button>' +
-              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Fast Swish</button>' +
-              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Funny</button>' +
-              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Machine</button>' +
-              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Ringing</button>' +
-              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Vehicles</button>' +
-              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Weather</button>' +
-              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Variety Show</button>' +
-              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Vlog</button>' +
-              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Physical</button>' +
-              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Transitions</button>' +
-              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Cues</button>' +
-              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Game</button>' +
-              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Emotion</button>' +
+            '<div class="ve-search-bar">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="color:#5a5a78;flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+              '<input class="ve-search-inp" id="lseb-sfx-search" placeholder="Search sound FX..." autocomplete="off">' +
             '</div>' +
-            '<p style="color:#5a5a78;font:400 11px Inter,system-ui,sans-serif;margin:10px 0 0;text-align:center">Choose a category to pick a file from your device.</p>' +
+            '<div id="lseb-sfx-cats">' +
+              '<div class="ve-cat-card-grid">' +
+                '<button class="ve-cat-card" data-sfx-cat="cartoon" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#ff9500,#8b4500)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Cartoon</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
+                '<button class="ve-cat-card" data-sfx-cat="swish" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#4cd964,#1a6b2a)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Fast Swish</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
+                '<button class="ve-cat-card" data-sfx-cat="funny" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#ff3b30,#8b1a14)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Funny</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
+                '<button class="ve-cat-card" data-sfx-cat="machine" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#8e8e93,#3a3a3d)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Machine</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
+                '<button class="ve-cat-card" data-sfx-cat="ringing" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#5ac8fa,#1a6a8b)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Ringing</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
+                '<button class="ve-cat-card" data-sfx-cat="vehicles" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#5856d6,#1e1d6e)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Vehicles</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
+                '<button class="ve-cat-card" data-sfx-cat="weather" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#34aadc,#0f4a6b)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Weather</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
+                '<button class="ve-cat-card" data-sfx-cat="variety" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#ff2d55,#8b0f24)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Variety Show</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
+                '<button class="ve-cat-card" data-sfx-cat="vlogsf" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#7d2ae8,#3a0f70)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Vlog</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
+                '<button class="ve-cat-card" data-sfx-cat="physical" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#ff6b35,#8b2f0f)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Physical</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
+                '<button class="ve-cat-card" data-sfx-cat="transitions" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#636366,#1c1c1e)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Transitions</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
+                '<button class="ve-cat-card" data-sfx-cat="cues" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#ffcc00,#7a5f00)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Cues</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
+                '<button class="ve-cat-card" data-sfx-cat="game" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#32ade6,#0f4a6b)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Game</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
+                '<button class="ve-cat-card" data-sfx-cat="emotion" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#ff375f,#8b0f24)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Emotion</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
+              '</div>' +
+            '</div>' +
+            '<div id="lseb-sfx-assets" style="display:none">' +
+              '<button class="ve-panel-back" id="lseb-sfx-back" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>Back</button>' +
+              '<div class="ve-asset-list" id="lseb-sfx-list"></div>' +
+            '</div>' +
           '</div>' +
           '<div id="lseb-sfx-fav" class="ve-tab-pane" style="display:none">' +
             '<p style="color:#5a5a78;font:400 12px Inter,system-ui,sans-serif;margin:18px 0;text-align:center">No favorites yet.</p>' +
           '</div>' +
           '<div id="lseb-sfx-my" class="ve-tab-pane" style="display:none">' +
-            '<button type="button" data-pick="lseb-sfx-pick" style="width:100%;padding:12px;background:#7d2ae8;border:none;border-radius:10px;color:#fff;font:600 14px system-ui,sans-serif;cursor:pointer;touch-action:manipulation">Browse sound files</button>' +
+            '<button type="button" data-open-pick="lseb-sfx-pick" style="width:100%;padding:12px;background:#7d2ae8;border:none;border-radius:10px;color:#fff;font:600 14px system-ui,sans-serif;cursor:pointer;touch-action:manipulation">Browse sound files</button>' +
           '</div>' +
         '</div>' +
         '<div id="lseb-voice-panel" class="ve-panel">' +
           '<div class="ve-panel-handle" aria-hidden="true"></div>' +
-          '<div class="ve-panel-head"><span>Narration / Voice</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
-          '<div id="lseb-record-indicator"></div>' +
-          '<button id="lseb-record-btn" type="button" aria-label="Record narration">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" width="24" height="24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>' +
-          '</button>' +
-          '<div style="text-align:center;color:#7a6fa0;font:400 11px Inter,system-ui,sans-serif;margin-bottom:12px">Tap to record — tap again to stop and attach</div>' +
-          '<div style="text-align:center;margin-bottom:8px;color:#4a4a60;font:400 11px Inter,system-ui,sans-serif">or upload a file</div>' +
+          '<div class="ve-panel-head"><span>Record</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
+          '<div class="ve-rec-strip" id="lseb-rec-strip"></div>' +
+          '<div id="lseb-record-indicator" style="text-align:center;font:600 12px system-ui,sans-serif;color:#ff3b5c;height:20px;margin-bottom:8px"></div>' +
+          '<div class="ve-rec-controls">' +
+            '<button class="ve-rec-cancel" data-close-panel type="button">&times;</button>' +
+            '<button id="lseb-record-btn" type="button" aria-label="Record narration">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" width="24" height="24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>' +
+            '</button>' +
+            '<button class="ve-rec-confirm" id="lseb-rec-done" type="button" disabled>&#10003;</button>' +
+          '</div>' +
+          '<div style="text-align:center;color:#7a6fa0;font:400 11px system-ui,sans-serif;margin:8px 0 10px">Tap to record — tap again to stop</div>' +
+          '<div style="text-align:center;margin-bottom:6px;color:#4a4a60;font:400 11px system-ui,sans-serif">or upload a file</div>' +
           '<input id="lseb-voice-pick" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg" style="font-size:13px;">' +
         '</div>' +
         '<div id="lseb-transition-panel" class="ve-panel">' +
@@ -1086,7 +1165,7 @@ function _bindEditor(idx) {
         else if (ins === 'record') _showPanel('lseb-voice-panel');
       });
     });
-    // Tab switching for music and sfx panels
+    // Tab switching
     editor.querySelectorAll('.ve-tab-bar').forEach(function (bar) {
       bar.addEventListener('click', function (e) {
         var tab = e.target.closest('.ve-tab');
@@ -1098,17 +1177,121 @@ function _bindEditor(idx) {
         if (panel) panel.querySelectorAll('.ve-tab-pane').forEach(function (p) {
           p.style.display = p.id === paneId ? '' : 'none';
         });
-        if (tab.dataset.tab === 'music-my') { var ap = _el('lseb-audio-pick'); if (ap) ap.click(); }
-        else if (tab.dataset.tab === 'sfx-my') { var sp = _el('lseb-sfx-pick'); if (sp) sp.click(); }
       });
     });
-    // Category tile and browse button → open file picker
+    // Asset browser delegated handler
     editor.addEventListener('click', function (e) {
-      var btn = e.target.closest('[data-pick]');
-      if (!btn) return;
-      var pick = _el(btn.dataset.pick);
-      if (pick) pick.click();
+      // Music category card
+      var mcard = e.target.closest('[data-music-cat]');
+      if (mcard) {
+        var catId = mcard.dataset.musicCat;
+        var tracks = _MUSIC_DEMO[catId] || [];
+        var list = _el('lseb-music-list');
+        if (list) {
+          list.innerHTML = '';
+          tracks.forEach(function (tr) {
+            var row = document.createElement('div');
+            row.className = 've-asset-row';
+            row.innerHTML =
+              '<div class="ve-asset-art" style="background:linear-gradient(135deg,' + tr.c + ',' + tr.c + '88)">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5" width="18" height="18"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>' +
+              '</div>' +
+              '<div class="ve-asset-info"><span class="ve-asset-title">' + _esc(tr.t) + '</span><span class="ve-asset-sub">' + _esc(tr.a) + ' \xb7 ' + tr.d + '</span></div>' +
+              '<div class="ve-asset-acts">' +
+                '<button class="ve-asset-play" type="button" data-tone="music" aria-label="Preview"><svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><polygon points="6 4 20 12 6 20"/></svg></button>' +
+                '<button class="ve-asset-add" type="button" data-open-pick="lseb-audio-pick">Add</button>' +
+              '</div>';
+            list.appendChild(row);
+          });
+        }
+        var cats = _el('lseb-music-cats'); var assets = _el('lseb-music-assets');
+        if (cats) cats.style.display = 'none'; if (assets) assets.style.display = '';
+        return;
+      }
+      // Music back
+      if (e.target.closest('#lseb-music-back')) {
+        var cats2 = _el('lseb-music-cats'); var assets2 = _el('lseb-music-assets');
+        if (cats2) cats2.style.display = ''; if (assets2) assets2.style.display = 'none';
+        return;
+      }
+      // SFX category card
+      var scard = e.target.closest('[data-sfx-cat]');
+      if (scard) {
+        var scatId = scard.dataset.sfxCat;
+        var sfxTracks = _SFX_DEMO[scatId] || [];
+        var sfxList = _el('lseb-sfx-list');
+        if (sfxList) {
+          sfxList.innerHTML = '';
+          sfxTracks.forEach(function (tr) {
+            var row = document.createElement('div');
+            row.className = 've-asset-row';
+            row.innerHTML =
+              '<div class="ve-asset-art" style="background:linear-gradient(135deg,' + tr.c + ',' + tr.c + '88)">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5" width="18" height="18"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>' +
+              '</div>' +
+              '<div class="ve-asset-info"><span class="ve-asset-title">' + _esc(tr.t) + '</span><span class="ve-asset-sub">' + _esc(tr.a) + ' \xb7 ' + tr.d + '</span></div>' +
+              '<div class="ve-asset-acts">' +
+                '<button class="ve-asset-play" type="button" data-tone="sfx" aria-label="Preview"><svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><polygon points="6 4 20 12 6 20"/></svg></button>' +
+                '<button class="ve-asset-add" type="button" data-open-pick="lseb-sfx-pick">Add</button>' +
+              '</div>';
+            sfxList.appendChild(row);
+          });
+        }
+        var scats = _el('lseb-sfx-cats'); var sassets = _el('lseb-sfx-assets');
+        if (scats) scats.style.display = 'none'; if (sassets) sassets.style.display = '';
+        return;
+      }
+      // SFX back
+      if (e.target.closest('#lseb-sfx-back')) {
+        var scats2 = _el('lseb-sfx-cats'); var sassets2 = _el('lseb-sfx-assets');
+        if (scats2) scats2.style.display = ''; if (sassets2) sassets2.style.display = 'none';
+        return;
+      }
+      // Preview tone
+      var playBtn = e.target.closest('[data-tone]');
+      if (playBtn) {
+        var isMus = playBtn.dataset.tone === 'music';
+        try {
+          var aC = new (window.AudioContext || window.webkitAudioContext)();
+          var osc = aC.createOscillator(); var gain = aC.createGain();
+          osc.connect(gain); gain.connect(aC.destination);
+          osc.type = isMus ? 'sine' : 'square';
+          osc.frequency.value = isMus ? 440 : 880;
+          gain.gain.setValueAtTime(0.2, aC.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, aC.currentTime + (isMus ? 1.2 : 0.4));
+          osc.start(); osc.stop(aC.currentTime + (isMus ? 1.2 : 0.4));
+        } catch (_) {}
+        return;
+      }
+      // data-open-pick or data-pick → open file picker
+      var pickBtn = e.target.closest('[data-open-pick],[data-pick]');
+      if (pickBtn) {
+        var pickId = pickBtn.dataset.openPick || pickBtn.dataset.pick;
+        var pick = _el(pickId); if (pick) pick.click();
+      }
     });
+    // Populate record panel mini strip with current scene clips
+    (function () {
+      var strip = _el('lseb-rec-strip');
+      if (!strip) return;
+      var clips = (scene && scene.clips) || [];
+      if (!clips.length) {
+        strip.innerHTML = '<span class="ve-rec-strip-empty">No clips yet — add an image above.</span>';
+      } else {
+        strip.innerHTML = '';
+        clips.forEach(function (c) {
+          if (c.type === 'image' && c.src) {
+            var img = document.createElement('img');
+            img.src = c.src; img.alt = '';
+            strip.appendChild(img);
+          }
+        });
+        if (!strip.children.length) strip.innerHTML = '<span class="ve-rec-strip-empty">No image clips.</span>';
+      }
+    })();
+    // Record done button — enable after recording completes
+    var recDone = _el('lseb-rec-done');
+    if (recDone) recDone.addEventListener('click', function () { _showPanel(null); });
   }
 
   // Music panel — file pick → attach audio
@@ -1245,6 +1428,7 @@ function _bindEditor(idx) {
           stream.getTracks().forEach(function (t) { t.stop(); });
           var blob = new Blob(_recChunks, { type: _recorder.mimeType || 'audio/webm' });
           _attachVoiceBlob(blob);
+          var rd = _el('lseb-rec-done'); if (rd) rd.disabled = false;
         };
         _recorder.start();
         recordBtn.classList.add('recording');
