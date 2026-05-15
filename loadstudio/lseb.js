@@ -12,6 +12,7 @@ var PX_PER_SECOND = 90;
 var _nextId = 1;
 var _appendingClip = false;
 var _selectedClipIdx = 0;
+var _ctxData = null;
 
 // ─── STORAGE ─────────────────────────────────────────────────────────────────
 function _persist(data) {
@@ -550,7 +551,13 @@ var _CSS =
   '.lseb-tr-option{display:flex;flex-direction:column;align-items:center;gap:4px;background:#1a1a26;border:1.5px solid rgba(125,42,232,.22);border-radius:8px;padding:10px 14px;cursor:pointer;min-width:64px;font-family:inherit}' +
   '.lseb-tr-option.active{border-color:#b33af0;background:rgba(125,42,232,.18)}' +
   '.lseb-tr-option-icon{font-size:18px;color:#fff}' +
-  '.lseb-tr-option-lbl{font:600 10px Inter,system-ui,sans-serif;color:#c0b8d9}';
+  '.lseb-tr-option-lbl{font:600 10px Inter,system-ui,sans-serif;color:#c0b8d9}' +
+  '#lseb-clip-ctx{position:absolute;z-index:60;background:#1a1a2e;border:1px solid rgba(179,58,240,.45);border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.72);display:none;align-items:center;gap:0;padding:3px 5px;pointer-events:all;white-space:nowrap}' +
+  '#lseb-clip-ctx::after{content:"";position:absolute;bottom:-7px;left:var(--ctx-arrow,50%);transform:translateX(-50%);width:0;height:0;border:7px solid transparent;border-top-color:#1a1a2e;border-bottom:none;pointer-events:none}' +
+  '.lseb-ctx-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 8px 6px;background:none;border:none;border-radius:8px;color:#cfcfdc;cursor:pointer;font:600 9px system-ui,sans-serif;min-width:46px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;flex-shrink:0}' +
+  '.lseb-ctx-btn:active{background:rgba(179,58,240,.2)}' +
+  '.lseb-ctx-btn.ctx-danger{color:#ff3b5c}' +
+  '.lseb-ctx-sep{width:1px;height:30px;background:rgba(255,255,255,.1);margin:0 2px;flex-shrink:0;align-self:center}';
 
 // ─── STORYBOARD VIEW ─────────────────────────────────────────────────────────
 function _showStoryboard() {
@@ -831,6 +838,7 @@ function _openSceneEditor(idx) {
         _actionBtn('delete-scene', 'Delete', '<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>') +
         _actionBtn('ai-img', 'AI Image', '<polygon points="9 3 11 8 16 9 11 10 9 15 7 10 2 9 7 8"/><rect x="14" y="14" width="8" height="8" rx="1"/>') +
       '</div>' +
+      '<div id="lseb-clip-ctx" role="toolbar" aria-label="Clip actions"></div>' +
       '<div id="lseb-toast" style="opacity:0"></div>' +
     '</div>';
 
@@ -1163,6 +1171,21 @@ function _bindEditor(idx) {
     document.addEventListener('pointerup', function () { _scrubbing = false; });
   }
 
+  // Dismiss context toolbar on tap outside
+  var editor = _el('lseb-editor');
+  if (editor) {
+    editor.addEventListener('pointerdown', function (e) {
+      var ctx = _el('lseb-clip-ctx');
+      if (ctx && ctx.style.display !== 'none' && !ctx.contains(e.target) &&
+          !e.target.classList.contains('timeline-clip') &&
+          !e.target.closest('.timeline-clip') &&
+          !e.target.classList.contains('ve-track-block') &&
+          !e.target.closest('.ve-track-block')) {
+        _hideClipCtx();
+      }
+    }, true);
+  }
+
   // Transport
   var playBtn = _el('lseb-play-btn');
   if (playBtn) playBtn.addEventListener('click', function () {
@@ -1434,6 +1457,160 @@ function _removeTrackItem(idx, kind, itemId) {
   _saveState();
 }
 
+// ─── CLIP CONTEXT TOOLBAR ────────────────────────────────────────────────────
+function _ctxSvgI(path) {
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="18" height="18" aria-hidden="true">' + path + '</svg>';
+}
+function _ctxBtn(action, label, svgPath, extra) {
+  return '<button class="lseb-ctx-btn' + (extra || '') + '" data-ctx="' + action + '" type="button" aria-label="' + label + '">' + _ctxSvgI(svgPath) + '<span>' + label + '</span></button>';
+}
+var _CTX_SEP = '<span class="lseb-ctx-sep" aria-hidden="true"></span>';
+var _CTX_ICONS = {
+  rep: '<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-5.1"/>',
+  kf:  '<polygon points="12 2 19 9 12 16 5 9"/>',
+  cur: '<path d="M3 12c3-6 6-6 9 0s6 6 9 0"/>',
+  lck: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  dup: '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+  del: '<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>',
+  vol: '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>',
+  edt: '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/>',
+};
+function _ctxHtml(type) {
+  var I = _CTX_ICONS; var S = _CTX_SEP;
+  if (type === 'clip') {
+    return _ctxBtn('replace', 'Replace', I.rep) + S +
+           _ctxBtn('keyframe', 'Keyframe', I.kf) +
+           _ctxBtn('curve', 'Curve', I.cur) + S +
+           _ctxBtn('lock', 'Lock', I.lck) + S +
+           _ctxBtn('duplicate', 'Duplicate', I.dup) + S +
+           _ctxBtn('delete', 'Delete', I.del, ' ctx-danger');
+  }
+  if (type === 'text') {
+    return _ctxBtn('track-edit', 'Edit', I.edt) + S +
+           _ctxBtn('track-lock', 'Lock', I.lck) + S +
+           _ctxBtn('track-dup', 'Duplicate', I.dup) + S +
+           _ctxBtn('track-del', 'Delete', I.del, ' ctx-danger');
+  }
+  if (type === 'music' || type === 'sfx' || type === 'voice') {
+    return _ctxBtn('track-vol', 'Volume', I.vol) + S +
+           _ctxBtn('track-lock', 'Lock', I.lck) + S +
+           _ctxBtn('track-dup', 'Duplicate', I.dup) + S +
+           _ctxBtn('track-del', 'Delete', I.del, ' ctx-danger');
+  }
+  if (type === 'sticker' || type === 'overlay') {
+    return _ctxBtn('replace-asset', 'Replace', I.rep) + S +
+           _ctxBtn('track-lock', 'Lock', I.lck) + S +
+           _ctxBtn('track-dup', 'Duplicate', I.dup) + S +
+           _ctxBtn('track-del', 'Delete', I.del, ' ctx-danger');
+  }
+  return _ctxBtn('track-del', 'Delete', I.del, ' ctx-danger');
+}
+function _showClipCtx(anchorEl, type, data) {
+  var ctx = _el('lseb-clip-ctx');
+  var editor = _el('lseb-editor');
+  if (!ctx || !editor) return;
+  _ctxData = data;
+  ctx.innerHTML = _ctxHtml(type);
+  ctx.style.display = 'flex';
+  var eRect = editor.getBoundingClientRect();
+  var aRect = anchorEl ? anchorEl.getBoundingClientRect() : null;
+  if (aRect) {
+    var ctxH = ctx.offsetHeight || 56;
+    var top = aRect.top - eRect.top - ctxH - 8;
+    var centerX = aRect.left - eRect.left + aRect.width / 2;
+    var ctxW = ctx.offsetWidth || 300;
+    var left = Math.max(8, Math.min(centerX - ctxW / 2, eRect.width - ctxW - 8));
+    var arrowPct = Math.round(Math.max(10, Math.min(90, (centerX - left) / ctxW * 100)));
+    ctx.style.setProperty('--ctx-arrow', arrowPct + '%');
+    ctx.style.top = Math.max(8, top) + 'px';
+    ctx.style.left = left + 'px';
+  }
+  Array.prototype.forEach.call(ctx.querySelectorAll('.lseb-ctx-btn'), function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      _handleCtxAction(btn.dataset.ctx, _ctxData);
+    });
+  });
+}
+function _hideClipCtx() {
+  var ctx = _el('lseb-clip-ctx');
+  if (ctx) ctx.style.display = 'none';
+  _ctxData = null;
+}
+function _handleCtxAction(action, data) {
+  if (!data) return;
+  var sceneIdx = data.sceneIdx;
+  var scene = _state.scenes && _state.scenes[sceneIdx];
+  if (!scene) return;
+  if (action === 'replace') {
+    _hideClipCtx();
+    var p = _el('lseb-img-pick');
+    if (p) { _appendingClip = false; p.click(); }
+    return;
+  }
+  if (action === 'duplicate') {
+    _hideClipCtx();
+    if (data.ci == null) return;
+    var clips = scene.clips;
+    if (!clips || !clips[data.ci]) return;
+    var orig = clips[data.ci];
+    var dup = Object.assign({}, orig, { id: 'clip_' + (_nextId++), _previewEl: null, _kbIdx: null });
+    clips.splice(data.ci + 1, 0, dup);
+    _selectedClipIdx = data.ci + 1;
+    _saveState();
+    _renderImageStrip(sceneIdx);
+    _mountClipPreview(scene.clips[_selectedClipIdx], 0, false, sceneIdx);
+    _toast('Clip duplicated.');
+    return;
+  }
+  if (action === 'delete') {
+    _hideClipCtx();
+    if (data.ci != null) _deleteClip(sceneIdx, data.ci);
+    return;
+  }
+  if (action === 'lock') {
+    var clip = scene.clips && scene.clips[data.ci];
+    if (clip) { clip.locked = !clip.locked; _saveState(); _toast(clip.locked ? 'Locked.' : 'Unlocked.'); }
+    _hideClipCtx();
+    return;
+  }
+  if (action === 'keyframe' || action === 'curve' || action === 'track-edit' || action === 'replace-asset') {
+    _toast('Coming soon.');
+    return;
+  }
+  if (action === 'track-del') {
+    _hideClipCtx();
+    if (data.it && data.trackKind) {
+      _removeTrackItem(sceneIdx, data.trackKind, data.it.id);
+      _renderTracks(sceneIdx);
+      if (data.trackKind === 'music') { scene.media.music = null; _renderWaveformPlaceholder(0); }
+    }
+    return;
+  }
+  if (action === 'track-dup') {
+    _hideClipCtx();
+    if (data.it && data.trackKind) {
+      var itCopy = Object.assign({}, data.it, { id: data.trackKind + '_' + (_nextId++) });
+      scene.tracks[data.trackKind] = scene.tracks[data.trackKind] || [];
+      scene.tracks[data.trackKind].push(itCopy);
+      _saveState();
+      _renderTracks(sceneIdx);
+      _toast('Duplicated.');
+    }
+    return;
+  }
+  if (action === 'track-lock') {
+    if (data.it) { data.it.locked = !data.it.locked; _saveState(); _toast(data.it.locked ? 'Locked.' : 'Unlocked.'); }
+    _hideClipCtx();
+    return;
+  }
+  if (action === 'track-vol') {
+    _toast('Use the panel volume slider.');
+    _hideClipCtx();
+    return;
+  }
+}
+
 function _renderTracks(idx) {
   var editor = _el('lseb-editor');
   if (!editor) return;
@@ -1464,6 +1641,12 @@ function _renderTracks(idx) {
         '<span class="ve-tb-lbl" style="pointer-events:none">' + _esc(label.substring(0, 24)) + '</span>' +
         '<div class="ve-tb-trim r" data-edge="r"></div>' +
         '<button class="ve-tb-x" type="button" aria-label="Remove">×</button>';
+      (function (it_, kind_) {
+        el.addEventListener('click', function (e) {
+          if (e.target.classList.contains('ve-tb-x') || e.target.classList.contains('ve-tb-trim')) return;
+          _showClipCtx(el, kind_, { sceneIdx: idx, trackKind: kind_, it: it_ });
+        });
+      })(it, kind);
       row.appendChild(el);
 
       // Drag to reposition
@@ -1642,6 +1825,9 @@ function _selectClip(idx, ci) {
   _saveState();
   _mountClipPreview(clip, 0, false, idx);
   _renderImageStrip(idx);
+  var strip = _el('lseb-image-strip');
+  var anchor = strip && strip.querySelectorAll('.timeline-clip')[ci];
+  if (anchor) _showClipCtx(anchor, 'clip', { sceneIdx: idx, ci: ci });
 }
 
 // ─── OVERLAY IMAGE ────────────────────────────────────────────────────────────
