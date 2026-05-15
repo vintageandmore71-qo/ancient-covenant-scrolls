@@ -948,7 +948,11 @@ body.ls-contrast-safe{filter:contrast(1.15)}
         <label>Shot Type<select id="ls-dir-shot-type"><option>Wide Establishing</option><option>Medium Two-Shot</option><option>Close Up</option><option>Extreme Close Up</option><option>Over the Shoulder</option><option>POV</option><option>Aerial</option><option>Tracking</option></select></label>
         <label>Camera Movement<select id="ls-dir-camera-move"><option>Static</option><option>Pan Left</option><option>Pan Right</option><option>Tilt Up</option><option>Tilt Down</option><option>Push In</option><option>Pull Out</option><option>Tracking Shot</option></select></label>
       </div>
-      <button id="ls-dir-genshot" class="btn secondary" type="button" style="margin-top:12px">Generate Shot List</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+        <button id="ls-dir-genshot" class="btn secondary" type="button">Generate Shot List</button>
+        <button id="ls-dir-llm-btn" class="btn primary" type="button">Generate with AI</button>
+      </div>
+      <div id="ls-dir-llm-status" style="color:#9c93b5;font:300 12.5px Inter,system-ui,sans-serif;margin-top:6px">Checking AI provider...</div>
       <textarea id="ls-dir-shotlist-out" rows="6" readonly placeholder="Shot list will appear here..." style="margin-top:10px;width:100%;box-sizing:border-box"></textarea>
       <button class="btn secondary" type="button" onclick="var el=document.getElementById('ls-dir-shotlist-out');if(el&&el.value){navigator.clipboard.writeText(el.value).catch(function(){})}" style="margin-top:8px">Copy Shot List</button>
     </div>
@@ -1052,8 +1056,10 @@ body.ls-contrast-safe{filter:contrast(1.15)}
       </div>
     </div>
     <div class="ls-panel">
-      <div class="ls-integration-badge"><strong>Integration Required</strong> — Actual video generation requires a connected provider (Runway, Kling, local ComfyUI, or similar). This panel saves and exports prompts. Generated video files or URLs must be attached manually until a provider is connected.</div>
-      <div id="ls-t2v-provider-status" style="color:#9c9cff;font:300 13px Inter,system-ui,sans-serif;margin-top:8px">Provider: Not connected</div>
+      <div id="ls-t2v-provider-status" style="color:#9c93b5;font:300 13px Inter,system-ui,sans-serif;margin-top:8px">Checking provider...</div>
+      <button id="ls-t2v-attempt" class="btn primary" type="button" style="margin-top:10px">Attempt Generation</button>
+      <div id="ls-t2v-result" style="margin-top:10px"></div>
+      <div class="ls-integration-badge" style="margin-top:10px"><strong>Integration Required</strong> — Actual video generation requires a configured provider key or local engine. Prompts save and export locally when no provider is connected.</div>
     </div>
     <div class="ls-related"></div>
   </div>
@@ -1159,8 +1165,12 @@ body.ls-contrast-safe{filter:contrast(1.15)}
         <label>Sync to Timeline Moment<input id="ls-sfx-sync" type="text" placeholder="e.g. 00:01:32"></label>
         <label>Attach to Scene<input id="ls-sfx-scene-attach" type="text" placeholder="Scene ID"></label>
       </div>
-      <button id="ls-sfx-build-btn" class="btn primary" type="button" style="margin-top:12px">Build SFX Prompt</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+        <button id="ls-sfx-build-btn" class="btn secondary" type="button">Build SFX Prompt</button>
+        <button id="ls-sfx-search-btn" class="btn primary" type="button">Search Live SFX</button>
+      </div>
       <textarea id="ls-sfx-output" rows="5" readonly placeholder="SFX prompt will appear here..." style="margin-top:10px;width:100%;box-sizing:border-box"></textarea>
+      <div id="ls-sfx-results" style="margin-top:10px"></div>
       <button id="ls-sfx-export-btn" class="btn secondary" type="button" style="margin-top:8px">Export Cue Sheet</button>
     </div>
     <div class="ls-panel">
@@ -1210,7 +1220,8 @@ body.ls-contrast-safe{filter:contrast(1.15)}
       <label>Assign to Scene ID<input id="ls-vce-scene" type="text" placeholder="Scene ID"></label>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
         <button id="ls-vce-save-btn" class="btn primary" type="button">Save Voice Profile</button>
-        <button id="ls-vce-queue-btn" class="btn secondary" type="button">Queue for Batch Processing</button>
+        <button id="ls-vce-preview-btn" class="btn secondary" type="button">Preview in Browser</button>
+        <button id="ls-vce-queue-btn" class="btn secondary" type="button">Queue for Batch</button>
       </div>
       <div id="ls-vce-queue" style="margin-top:12px"></div>
     </div>
