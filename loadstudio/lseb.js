@@ -454,15 +454,15 @@ var _CSS =
   '#lseb-editor #lseb-time{font-size:13px;color:#cfcfdc;font-variant-numeric:tabular-nums;min-width:120px}' +
   '#lseb-editor .lseb-transport-center{margin:0 auto;display:flex;align-items:center;gap:18px}' +
   // Timeline engine — identical structure to openVideoEditor
-  '#lseb-editor .timeline-engine{width:100%;height:320px;background:#101018;display:grid;grid-template-columns:92px 1fr;color:#fff;overflow:hidden;font-family:system-ui,sans-serif;flex-shrink:0}' +
-  '#lseb-editor .track-labels{padding-top:12px;display:flex;flex-direction:column;gap:10px;align-items:center;overflow-y:auto;max-height:300px;scrollbar-width:none}' +
+  '#lseb-editor .timeline-engine{width:100%;height:380px;background:#101018;display:grid;grid-template-columns:92px 1fr;color:#fff;overflow:hidden;font-family:system-ui,sans-serif;flex-shrink:0}' +
+  '#lseb-editor .track-labels{padding-top:12px;display:flex;flex-direction:column;gap:10px;align-items:center;overflow-y:auto;max-height:360px;scrollbar-width:none}' +
   '#lseb-editor .track-labels::-webkit-scrollbar{display:none}' +
   '#lseb-editor .track-add,.cover-btn{position:relative;width:64px;height:44px;border:none;border-radius:12px;background:#1e1e2a;color:#fff;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}' +
   '#lseb-editor .track-add svg,.cover-btn svg{width:22px;height:22px;color:#fff;display:block;pointer-events:none}' +
   '#lseb-editor .track-add .ta-plus{position:absolute;right:6px;bottom:5px;background:#fff;color:#0a0a14;font-weight:700;font-size:10px;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;line-height:1;pointer-events:none}' +
   '#lseb-editor .cover-btn{height:54px;border:1px dashed rgba(255,255,255,.45);flex-direction:column;gap:3px}' +
   '#lseb-editor .cover-btn .ta-lbl{font-size:10.5px;font-weight:600;color:#fff;pointer-events:none}' +
-  '#lseb-editor .timeline-scroll{position:relative;overflow-x:auto;overflow-y:hidden;padding:12px 24px 0 0;scrollbar-width:none}' +
+  '#lseb-editor .timeline-scroll{position:relative;overflow-x:auto;overflow-y:auto;padding:12px 24px 8px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch}' +
   '#lseb-editor .timeline-scroll::-webkit-scrollbar{display:none}' +
   '#lseb-editor .ve-track-row{position:relative;height:38px;margin-bottom:8px;border-radius:8px;background:#191923;color:#8f8f9d;display:block;padding:0;overflow:visible}' +
   '#lseb-editor .ve-track-empty{position:absolute;top:50%;left:18px;transform:translateY(-50%);font-size:13px;color:#5a5a78;pointer-events:auto;cursor:pointer}' +
@@ -560,7 +560,10 @@ var _CSS =
   '.lseb-ctx-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 8px 6px;background:none;border:none;border-radius:8px;color:#cfcfdc;cursor:pointer;font:600 9px system-ui,sans-serif;min-width:46px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;flex-shrink:0}' +
   '.lseb-ctx-btn:active{background:rgba(179,58,240,.2)}' +
   '.lseb-ctx-btn.ctx-danger{color:#ff3b5c}' +
-  '.lseb-ctx-sep{width:1px;height:30px;background:rgba(255,255,255,.1);margin:0 2px;flex-shrink:0;align-self:center}';
+  '.lseb-ctx-sep{width:1px;height:30px;background:rgba(255,255,255,.1);margin:0 2px;flex-shrink:0;align-self:center}' +
+  '#lseb-editor .ve-insert-grid{display:flex;gap:10px;padding:8px 0 4px;justify-content:center}' +
+  '#lseb-editor .ve-insert-tile{display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px 10px 14px;background:#1e1e30;border:1.5px solid rgba(125,42,232,.25);border-radius:14px;flex:1;cursor:pointer;font:600 12px system-ui,sans-serif;color:#cfcfdc;touch-action:manipulation;-webkit-tap-highlight-color:transparent}' +
+  '#lseb-editor .ve-insert-tile:active{background:rgba(125,42,232,.18);border-color:#b33af0}';
 
 // ─── STORYBOARD VIEW ─────────────────────────────────────────────────────────
 function _showStoryboard() {
@@ -763,6 +766,24 @@ function _openSceneEditor(idx) {
           '</div>' +
           '<div style="margin-top:10px;color:#5a5a78;font:400 11px Inter,system-ui,sans-serif">Fade and Dissolve will render in the next build.</div>' +
         '</div>' +
+        '<div id="lseb-insert-panel" class="ve-panel">' +
+          '<div class="ve-panel-handle" aria-hidden="true"></div>' +
+          '<div class="ve-panel-head"><span>Add Audio</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
+          '<div class="ve-insert-grid">' +
+            '<button class="ve-insert-tile" data-insert="music" type="button">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>' +
+              'Music' +
+            '</button>' +
+            '<button class="ve-insert-tile" data-insert="sfx" type="button">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>' +
+              'Sound FX' +
+            '</button>' +
+            '<button class="ve-insert-tile" data-insert="record" type="button">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>' +
+              'Record' +
+            '</button>' +
+          '</div>' +
+        '</div>' +
       '</div>' +
       // Transport
       '<div class="lseb-transport">' +
@@ -930,7 +951,15 @@ function _bindEditor(idx) {
   if (coverBtn && imgPick) coverBtn.addEventListener('click', function () { imgPick.click(); });
 
   // Track-add + empty-track tap → open panels
-  var _ALL_PANELS = ['lseb-music-panel','lseb-text-panel','lseb-sfx-panel','lseb-voice-panel','lseb-transition-panel','lseb-filter-panel','lseb-opacity-panel','lseb-blur-panel','lseb-info-panel'];
+  var _ALL_PANELS = ['lseb-insert-panel','lseb-music-panel','lseb-text-panel','lseb-sfx-panel','lseb-voice-panel','lseb-transition-panel','lseb-filter-panel','lseb-opacity-panel','lseb-blur-panel','lseb-info-panel'];
+  // Add bottom padding to clear install banner if visible
+  (function () {
+    var banner = document.querySelector('.ls-install-banner');
+    if (banner && !banner.hidden && banner.offsetHeight) {
+      var ed = _el('lseb-editor');
+      if (ed) ed.style.paddingBottom = (banner.offsetHeight + 22) + 'px';
+    }
+  })();
   function _showPanel(id) {
     _ALL_PANELS.forEach(function (p) {
       var el = _el(p);
@@ -976,7 +1005,7 @@ function _bindEditor(idx) {
     editor.querySelectorAll('.track-add,[data-add]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var add = btn.dataset.add;
-        if (add === 'music') { _showPanel('lseb-music-panel'); }
+        if (add === 'music') { _showPanel('lseb-insert-panel'); }
         else if (add === 'text') { _showPanel('lseb-text-panel'); }
         else if (add === 'sticker') { _el('lseb-sticker-pick') && _el('lseb-sticker-pick').click(); }
         else if (add === 'image' || add === 'overlay-img') { _el('lseb-overlay-pick') && _el('lseb-overlay-pick').click(); }
@@ -988,7 +1017,7 @@ function _bindEditor(idx) {
     editor.querySelectorAll('.ve-track-empty[data-add]').forEach(function (span) {
       span.addEventListener('click', function () {
         var add = span.dataset.add;
-        if (add === 'music') _showPanel('lseb-music-panel');
+        if (add === 'music') _showPanel('lseb-insert-panel');
         else if (add === 'text') _showPanel('lseb-text-panel');
         else if (add === 'sticker') { _el('lseb-sticker-pick') && _el('lseb-sticker-pick').click(); }
         else if (add === 'overlay-img') { _el('lseb-overlay-pick') && _el('lseb-overlay-pick').click(); }
@@ -999,6 +1028,14 @@ function _bindEditor(idx) {
     });
     editor.querySelectorAll('[data-close-panel]').forEach(function (btn) {
       btn.addEventListener('click', function () { _showPanel(null); });
+    });
+    editor.querySelectorAll('.ve-insert-tile').forEach(function (tile) {
+      tile.addEventListener('click', function () {
+        var ins = tile.dataset.insert;
+        if (ins === 'music') _showPanel('lseb-music-panel');
+        else if (ins === 'sfx') _showPanel('lseb-sfx-panel');
+        else if (ins === 'record') _showPanel('lseb-voice-panel');
+      });
     });
   }
 
