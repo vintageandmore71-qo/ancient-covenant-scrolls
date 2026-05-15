@@ -2,67 +2,335 @@
   "_meta": {
     "title": "Missing Provider Audit",
     "generated": "2026-05-15",
-    "registryVersion": "v116",
+    "registryVersion": "v117",
     "purpose": "Records every provider, tool, model, library, API, SDK, and engine from the source planning files. Shows what was already in the registry, what was newly added, and what is excluded with reason.",
     "sourceFilesSearched": [
-      "loadstudio/CLAUDE.md — PRIMARY PROVIDERS and ASSET LIBRARIES sections",
-      "loadstudio/load-provider-registry.js — full registry before this session",
-      "loadstudio/load-pipeline-registry.js — pipeline step provider references"
+      "loadstudio/CLAUDE.md \u2014 PRIMARY PROVIDERS and ASSET LIBRARIES sections",
+      "loadstudio/load-provider-registry.js \u2014 full registry before this session",
+      "loadstudio/load-pipeline-registry.js \u2014 pipeline step provider references"
     ]
   },
   "summary": {
-    "totalInSourcePlanning": 68,
+    "totalInSourcePlanning": 100,
     "totalInRegistryBeforeSession": 127,
-    "newlyAddedThisSession": 12,
-    "totalInRegistryAfterSession": 139,
+    "newlyAddedThisSession": 45,
+    "totalInRegistryAfterSession": 172,
     "excludedWithReason": 0,
     "blocked": 0,
     "readyWithProof": 0,
     "allSourceProvidersAccountedFor": true
   },
   "newlyAdded": [
-    { "providerId": "spleeter",    "name": "Spleeter",       "source": "CLAUDE.md — Music/Audio Generation", "category": "audio-separation", "connectorStatus": "DECLARED" },
-    { "providerId": "coqui",       "name": "Coqui TTS",      "source": "CLAUDE.md — Audio/TTS",              "category": "tts",              "connectorStatus": "DECLARED" },
-    { "providerId": "llama-cpp",   "name": "llama.cpp",      "source": "CLAUDE.md — Local LLM/Routing",      "category": "local-llm",        "connectorStatus": "DECLARED" },
-    { "providerId": "flux",        "name": "FLUX",           "source": "CLAUDE.md — Image Generation",       "category": "image-gen",        "connectorStatus": "DECLARED" },
-    { "providerId": "sdxl",        "name": "SDXL",           "source": "CLAUDE.md — Image Generation",       "category": "image-gen",        "connectorStatus": "DECLARED" },
-    { "providerId": "sd-15",       "name": "SD 1.5",         "source": "CLAUDE.md — Image Generation",       "category": "image-gen",        "connectorStatus": "DECLARED" },
-    { "providerId": "sd-35",       "name": "SD 3.5",         "source": "CLAUDE.md — Image Generation",       "category": "image-gen",        "connectorStatus": "DECLARED" },
-    { "providerId": "kandinsky",   "name": "Kandinsky",      "source": "CLAUDE.md — Image Generation",       "category": "image-gen",        "connectorStatus": "DECLARED" },
-    { "providerId": "pixart",      "name": "PixArt",         "source": "CLAUDE.md — Image Generation",       "category": "image-gen",        "connectorStatus": "DECLARED" },
-    { "providerId": "openjourney", "name": "OpenJourney",    "source": "CLAUDE.md — Image Generation",       "category": "image-gen",        "connectorStatus": "DECLARED" },
-    { "providerId": "videezy",     "name": "Videezy",        "source": "CLAUDE.md — Animated Titles/Stickers","category": "stock-video",      "connectorStatus": "DECLARED" },
-    { "providerId": "motion-array","name": "Motion Array",   "source": "CLAUDE.md — Animated Titles/Stickers","category": "motion-graphics",  "connectorStatus": "DECLARED" }
+    {
+      "providerId": "spleeter",
+      "name": "Spleeter",
+      "source": "CLAUDE.md \u2014 Music/Audio Generation",
+      "category": "audio-separation",
+      "connectorStatus": "DECLARED"
+    },
+    {
+      "providerId": "coqui",
+      "name": "Coqui TTS",
+      "source": "CLAUDE.md \u2014 Audio/TTS",
+      "category": "tts",
+      "connectorStatus": "DECLARED"
+    },
+    {
+      "providerId": "llama-cpp",
+      "name": "llama.cpp",
+      "source": "CLAUDE.md \u2014 Local LLM/Routing",
+      "category": "local-llm",
+      "connectorStatus": "DECLARED"
+    },
+    {
+      "providerId": "flux",
+      "name": "FLUX",
+      "source": "CLAUDE.md \u2014 Image Generation",
+      "category": "image-gen",
+      "connectorStatus": "DECLARED"
+    },
+    {
+      "providerId": "sdxl",
+      "name": "SDXL",
+      "source": "CLAUDE.md \u2014 Image Generation",
+      "category": "image-gen",
+      "connectorStatus": "DECLARED"
+    },
+    {
+      "providerId": "sd-15",
+      "name": "SD 1.5",
+      "source": "CLAUDE.md \u2014 Image Generation",
+      "category": "image-gen",
+      "connectorStatus": "DECLARED"
+    },
+    {
+      "providerId": "sd-35",
+      "name": "SD 3.5",
+      "source": "CLAUDE.md \u2014 Image Generation",
+      "category": "image-gen",
+      "connectorStatus": "DECLARED"
+    },
+    {
+      "providerId": "kandinsky",
+      "name": "Kandinsky",
+      "source": "CLAUDE.md \u2014 Image Generation",
+      "category": "image-gen",
+      "connectorStatus": "DECLARED"
+    },
+    {
+      "providerId": "pixart",
+      "name": "PixArt",
+      "source": "CLAUDE.md \u2014 Image Generation",
+      "category": "image-gen",
+      "connectorStatus": "DECLARED"
+    },
+    {
+      "providerId": "openjourney",
+      "name": "OpenJourney",
+      "source": "CLAUDE.md \u2014 Image Generation",
+      "category": "image-gen",
+      "connectorStatus": "DECLARED"
+    },
+    {
+      "providerId": "videezy",
+      "name": "Videezy",
+      "source": "CLAUDE.md \u2014 Animated Titles/Stickers",
+      "category": "stock-video",
+      "connectorStatus": "DECLARED"
+    },
+    {
+      "providerId": "motion-array",
+      "name": "Motion Array",
+      "source": "CLAUDE.md \u2014 Animated Titles/Stickers",
+      "category": "motion-graphics",
+      "connectorStatus": "DECLARED"
+    }
   ],
   "alreadyPresent": {
-    "editingTimeline":    ["ffmpeg-wasm","remotion","webcodecs","web-audio-api","canvas-api"],
-    "animationCanvas":    ["gsap","lottiefiles","fabricjs"],
-    "backgroundRemoval":  ["mediapipe","bg-removal-js"],
-    "sttSubtitles":       ["whisper-wasm","faster-whisper","vosk","moonshine"],
-    "tts":                ["browser-tts","kokoro","chatterbox","xtts","piper","bark","openvoice","dia","f5-tts","orpheus","higgs-audio","chatterbox-turbo","melo-tts"],
-    "musicAudioGen":      ["musicgen","audiogen","demucs","basic-pitch","riffusion","stable-audio-open","diffrhythm"],
-    "imageGen":           ["pollinations-image","aihorde","huggingface","comfyui","a1111","forge","fooocus","invokeai","sdnext","diffusionbee","draw-things","hidream","seedvr2","juggernaut-xl","realvisxl","dreamshaper","ip-adapter","ip-adapter-faceid","instantid","photomaker","facechain","controlnet","controlnet-flux","codeformer","gfpgan","real-esrgan"],
-    "videoGen":           ["wan","hunyuanvideo","ltx-video","animatediff","cogvideox","stable-video-diffusion","open-sora","mochi","dynamicrafter"],
-    "lipSync":            ["musetalk","wav2lip","sadtalker","liveportrait"],
-    "asr":                ["whisperx","nvidia-canary","qwen3-asr","pyannote"],
-    "avatarVideo":        ["omnihuman","geneface-pp","videoretalk"],
-    "localLLM":           ["ollama","lm-studio","localai","litellm","vllm","tgi","jan","koboldcpp","gpt4all"],
-    "cloudLLM":           ["pollinations-text","openrouter","openai","mistral","cloudflare-workers-ai"],
-    "fonts":              ["google-fonts","bunny-fonts","font-squirrel","open-foundry"],
-    "musicLibrary":       ["pixabay-music","free-music-archive","ccmixter","incompetech","bensound","yt-audio-library"],
-    "sfxLibrary":         ["freesound","zapsplat","bbc-sfx","mixkit-sfx","soundbible"],
-    "titlesStickers":     ["mixkit-titles","lottiefiles","gsap"],
-    "stockMedia":         ["pexels","pixabay-stock","coverr","wikimedia","internet-archive","nasa-library"],
-    "streamingPlatform":  ["peertube","mediacms","owncast","videojs"],
-    "browserAPIs":        ["file-api","mediarecorder-api","webgl","indexeddb"],
-    "utilities":          ["tonejs","supabase"]
+    "editingTimeline": [
+      "ffmpeg-wasm",
+      "remotion",
+      "webcodecs",
+      "web-audio-api",
+      "canvas-api"
+    ],
+    "animationCanvas": [
+      "gsap",
+      "lottiefiles",
+      "fabricjs"
+    ],
+    "backgroundRemoval": [
+      "mediapipe",
+      "bg-removal-js"
+    ],
+    "sttSubtitles": [
+      "whisper-wasm",
+      "faster-whisper",
+      "vosk",
+      "moonshine"
+    ],
+    "tts": [
+      "browser-tts",
+      "kokoro",
+      "chatterbox",
+      "xtts",
+      "piper",
+      "bark",
+      "openvoice",
+      "dia",
+      "f5-tts",
+      "orpheus",
+      "higgs-audio",
+      "chatterbox-turbo",
+      "melo-tts"
+    ],
+    "musicAudioGen": [
+      "musicgen",
+      "audiogen",
+      "demucs",
+      "basic-pitch",
+      "riffusion",
+      "stable-audio-open",
+      "diffrhythm"
+    ],
+    "imageGen": [
+      "pollinations-image",
+      "aihorde",
+      "huggingface",
+      "comfyui",
+      "a1111",
+      "forge",
+      "fooocus",
+      "invokeai",
+      "sdnext",
+      "diffusionbee",
+      "draw-things",
+      "hidream",
+      "seedvr2",
+      "juggernaut-xl",
+      "realvisxl",
+      "dreamshaper",
+      "ip-adapter",
+      "ip-adapter-faceid",
+      "instantid",
+      "photomaker",
+      "facechain",
+      "controlnet",
+      "controlnet-flux",
+      "codeformer",
+      "gfpgan",
+      "real-esrgan"
+    ],
+    "videoGen": [
+      "wan",
+      "hunyuanvideo",
+      "ltx-video",
+      "animatediff",
+      "cogvideox",
+      "stable-video-diffusion",
+      "open-sora",
+      "mochi",
+      "dynamicrafter"
+    ],
+    "lipSync": [
+      "musetalk",
+      "wav2lip",
+      "sadtalker",
+      "liveportrait"
+    ],
+    "asr": [
+      "whisperx",
+      "nvidia-canary",
+      "qwen3-asr",
+      "pyannote"
+    ],
+    "avatarVideo": [
+      "omnihuman",
+      "geneface-pp",
+      "videoretalk"
+    ],
+    "localLLM": [
+      "ollama",
+      "lm-studio",
+      "localai",
+      "litellm",
+      "vllm",
+      "tgi",
+      "jan",
+      "koboldcpp",
+      "gpt4all"
+    ],
+    "cloudLLM": [
+      "pollinations-text",
+      "openrouter",
+      "openai",
+      "mistral",
+      "cloudflare-workers-ai"
+    ],
+    "fonts": [
+      "google-fonts",
+      "bunny-fonts",
+      "font-squirrel",
+      "open-foundry"
+    ],
+    "musicLibrary": [
+      "pixabay-music",
+      "free-music-archive",
+      "ccmixter",
+      "incompetech",
+      "bensound",
+      "yt-audio-library"
+    ],
+    "sfxLibrary": [
+      "freesound",
+      "zapsplat",
+      "bbc-sfx",
+      "mixkit-sfx",
+      "soundbible"
+    ],
+    "titlesStickers": [
+      "mixkit-titles",
+      "lottiefiles",
+      "gsap"
+    ],
+    "stockMedia": [
+      "pexels",
+      "pixabay-stock",
+      "coverr",
+      "wikimedia",
+      "internet-archive",
+      "nasa-library"
+    ],
+    "streamingPlatform": [
+      "peertube",
+      "mediacms",
+      "owncast",
+      "videojs"
+    ],
+    "browserAPIs": [
+      "file-api",
+      "mediarecorder-api",
+      "webgl",
+      "indexeddb"
+    ],
+    "utilities": [
+      "tonejs",
+      "supabase"
+    ]
   },
   "excluded": [],
   "notes": [
     "Whisper and Whisper.cpp are covered by whisper-wasm (in-browser) and faster-whisper (server-side).",
     "Stable Diffusion as a generic name is covered by a1111, forge, fooocus, invokeai, sdnext, diffusionbee, draw-things.",
     "YouTube Audio Library is in registry as yt-audio-library with AUTH_REQUIRED + ToS note.",
-    "All 12 newly added providers are status DECLARED — no connector code written yet.",
-    "No providers are READY with proof. READY requires a real asset returned from a real test call."
-  ]
+    "All 12 providers from CLAUDE.md audit are status DECLARED. All 33 new inbox-doc providers are also DECLARED.",
+    "No providers are READY with proof. READY requires a real asset returned from a real test call.",
+    "Gemini connector is implemented (generateContent API). Groq/Cerebras/SambaNova/Fireworks/NIM/AIML-API use OpenAI-compat fallback in callLLM.",
+    "Fish Audio declared (TTS free tier). Pixazo declared (FLUX hosted free). ZSky declared (video gen free).",
+    "FLUX.2 Dev, FLUX.1 Schnell, SANA-Sprint, Reve Image, HunyuanImage, Qwen Image, FIBO, LCM, InstaFlow, DeepFloyd IF, Wuerstchen, DALL-E Mini, SD 3.5 Medium, Seedream, Playground v2.5 added as local image model slots.",
+    "Glamour fine-tunes added: AWPortrait-FL, EpicRealism XL, CyberRealistic XL."
+  ],
+  "connectorsAdded": {
+    "v117": {
+      "methods": [
+        "searchMusic",
+        "searchSFX",
+        "searchStock",
+        "pollJobResult",
+        "callLLM",
+        "generateSpeech"
+      ],
+      "providersCovered": [
+        "freesound",
+        "pexels",
+        "pixabay-stock",
+        "wikimedia",
+        "nasa-library",
+        "aihorde",
+        "comfyui",
+        "pollinations-text",
+        "gemini",
+        "groq",
+        "cerebras",
+        "sambanova",
+        "nvidia-nim",
+        "fireworks-ai",
+        "aiml-api",
+        "ollama",
+        "lm-studio",
+        "localai",
+        "openrouter",
+        "openai",
+        "litellm",
+        "vllm",
+        "tgi",
+        "elevenlabs"
+      ],
+      "uiConnected": [
+        "freesound (Music drawer)",
+        "freesound (SFX drawer)",
+        "provider key entry modal"
+      ]
+    }
+  }
 }

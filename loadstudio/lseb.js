@@ -73,6 +73,9 @@ var _NOTE_ICO = '<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.
 var _SPK_ICO  = '<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5" width="18" height="18"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
 var _PLAY_ICO = '<svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><polygon points="6 4 20 12 6 20"/></svg>';
 
+var _currentMusicCat = 'all';
+var _currentSfxCat   = 'all';
+
 function _buildAssetList(listId, demo, cat, q, icon, trackKind, tone, audioKeyMap) {
   var list = document.getElementById(listId);
   if (!list) return;
@@ -107,8 +110,157 @@ function _buildAssetList(listId, demo, cat, q, icon, trackKind, tone, audioKeyMa
     list.innerHTML = '<p style="color:#5a5a78;font:400 12px system-ui,sans-serif;text-align:center;margin:18px 0">No results.</p>';
   }
 }
-function _buildMusicList(cat, q) { _buildAssetList('lseb-music-list', _MUSIC_DEMO, cat || 'all', q, _NOTE_ICO, 'music', 'music', _MUSIC_AUDIO_KEY); }
-function _buildSFXList(cat, q)   { _buildAssetList('lseb-sfx-list',   _SFX_DEMO,   cat || 'all', q, _SPK_ICO,  'sfx',   'sfx',   _SFX_AUDIO_KEY);   }
+function _buildMusicList(cat, q) {
+  _currentMusicCat = cat || 'all';
+  _buildAssetList('lseb-music-list', _MUSIC_DEMO, _currentMusicCat, q, _NOTE_ICO, 'music', 'music', _MUSIC_AUDIO_KEY);
+  var list = document.getElementById('lseb-music-list');
+  if (!list) return;
+  var reg = window.LoadProviderRegistry;
+  if (!reg) { _appendConnectBanner(list, 'music'); return; }
+  var fsKey = null;
+  try { var fsS = JSON.parse(localStorage.getItem('lpr_settings_v1') || '{}'); fsKey = (fsS['freesound'] || {}).apiKey || null; } catch (_) {}
+  if (!fsKey) { _appendConnectBanner(list, 'music'); return; }
+  var loader = document.createElement('p');
+  loader.id = 'lseb-music-loader';
+  loader.style.cssText = 'color:#7d2ae8;font:400 12px system-ui,sans-serif;text-align:center;margin:6px 0';
+  loader.textContent = 'Searching Freesound...';
+  list.insertBefore(loader, list.firstChild);
+  reg.searchMusic({query: _currentMusicCat === 'all' ? (q || 'music') : _currentMusicCat}).then(function (result) {
+    var ldr = document.getElementById('lseb-music-loader');
+    if (ldr) ldr.remove();
+    if (!result.results || !result.results.length) return;
+    var frag = document.createDocumentFragment();
+    result.results.forEach(function (item) {
+      if (!item.previewUrl) return;
+      var dur = item.duration || 0;
+      var durStr = Math.floor(dur / 60) + ':' + String(Math.round(dur % 60)).padStart(2, '0');
+      var row = document.createElement('div');
+      row.className = 've-asset-row';
+      var safeTitle = (item.title || '').replace(/"/g, '');
+      var safeAttr  = (item.attribution || '').replace(/"/g, '');
+      row.innerHTML =
+        '<div class="ve-asset-art" style="background:linear-gradient(135deg,#1f5a80,#1f5a8088)">' + _NOTE_ICO + '</div>' +
+        '<div class="ve-asset-info">' +
+          '<span class="ve-asset-title">' + (safeTitle.length > 22 ? safeTitle.slice(0, 21) + '…' : safeTitle) + '</span>' +
+          '<span class="ve-asset-sub">' + durStr + ' \xb7 ' + (item.attribution || item.provider) + '</span>' +
+        '</div>' +
+        '<div class="ve-asset-acts">' +
+          '<button class="ve-asset-play" type="button" data-tone="music" data-src="' + item.previewUrl + '" aria-label="Preview">' + _PLAY_ICO + '</button>' +
+          '<button class="ve-asset-add" type="button" data-add-track="music" data-src="' + item.previewUrl + '" data-provider="' + item.provider + '" data-license="' + (item.licenseType || '') + '" data-tn="' + safeTitle + '" data-ta="' + safeAttr + '" data-td="' + durStr + '">Add</button>' +
+        '</div>';
+      frag.appendChild(row);
+    });
+    var currentList = document.getElementById('lseb-music-list');
+    if (currentList && frag.childNodes.length) currentList.insertBefore(frag, currentList.firstChild);
+  }).catch(function () {
+    var ldr = document.getElementById('lseb-music-loader');
+    if (ldr) ldr.remove();
+  });
+}
+
+function _buildSFXList(cat, q) {
+  _currentSfxCat = cat || 'all';
+  _buildAssetList('lseb-sfx-list', _SFX_DEMO, _currentSfxCat, q, _SPK_ICO, 'sfx', 'sfx', _SFX_AUDIO_KEY);
+  var list = document.getElementById('lseb-sfx-list');
+  if (!list) return;
+  var reg = window.LoadProviderRegistry;
+  if (!reg) { _appendConnectBanner(list, 'sfx'); return; }
+  var fsKey = null;
+  try { var fsS = JSON.parse(localStorage.getItem('lpr_settings_v1') || '{}'); fsKey = (fsS['freesound'] || {}).apiKey || null; } catch (_) {}
+  if (!fsKey) { _appendConnectBanner(list, 'sfx'); return; }
+  var loader = document.createElement('p');
+  loader.id = 'lseb-sfx-loader';
+  loader.style.cssText = 'color:#7d2ae8;font:400 12px system-ui,sans-serif;text-align:center;margin:6px 0';
+  loader.textContent = 'Searching Freesound...';
+  list.insertBefore(loader, list.firstChild);
+  reg.searchSFX({query: _currentSfxCat === 'all' ? (q || 'sound effect') : _currentSfxCat}).then(function (result) {
+    var ldr = document.getElementById('lseb-sfx-loader');
+    if (ldr) ldr.remove();
+    if (!result.results || !result.results.length) return;
+    var frag = document.createDocumentFragment();
+    result.results.forEach(function (item) {
+      if (!item.previewUrl) return;
+      var dur = item.duration || 0;
+      var durStr = (dur < 60 ? '0:' : Math.floor(dur / 60) + ':') + String(Math.round(dur % 60)).padStart(2, '0');
+      var row = document.createElement('div');
+      row.className = 've-asset-row';
+      var safeTitle = (item.title || '').replace(/"/g, '');
+      var safeAttr  = (item.attribution || '').replace(/"/g, '');
+      row.innerHTML =
+        '<div class="ve-asset-art" style="background:linear-gradient(135deg,#1f6640,#1f664088)">' + _SPK_ICO + '</div>' +
+        '<div class="ve-asset-info">' +
+          '<span class="ve-asset-title">' + (safeTitle.length > 22 ? safeTitle.slice(0, 21) + '…' : safeTitle) + '</span>' +
+          '<span class="ve-asset-sub">' + durStr + ' \xb7 ' + (item.attribution || item.provider) + '</span>' +
+        '</div>' +
+        '<div class="ve-asset-acts">' +
+          '<button class="ve-asset-play" type="button" data-tone="sfx" data-src="' + item.previewUrl + '" aria-label="Preview">' + _PLAY_ICO + '</button>' +
+          '<button class="ve-asset-add" type="button" data-add-track="sfx" data-src="' + item.previewUrl + '" data-provider="' + item.provider + '" data-license="' + (item.licenseType || '') + '" data-tn="' + safeTitle + '" data-ta="' + safeAttr + '" data-td="' + durStr + '">Add</button>' +
+        '</div>';
+      frag.appendChild(row);
+    });
+    var currentList = document.getElementById('lseb-sfx-list');
+    if (currentList && frag.childNodes.length) currentList.insertBefore(frag, currentList.firstChild);
+  }).catch(function () {
+    var ldr = document.getElementById('lseb-sfx-loader');
+    if (ldr) ldr.remove();
+  });
+}
+
+function _appendConnectBanner(list, kind) {
+  var banner = document.createElement('div');
+  banner.style.cssText = 'margin:10px 0 4px;padding:9px 12px;background:#1a0a30;border:1px solid #7d2ae855;border-radius:8px;display:flex;align-items:center;gap:10px';
+  banner.innerHTML =
+    '<span style="flex:1;font:400 11px system-ui,sans-serif;color:#9a85c2">' +
+      'Add a Freesound API key to search real ' + (kind === 'music' ? 'music' : 'sound effects') + '.' +
+    '</span>' +
+    '<button type="button" data-connect-provider="freesound" style="padding:4px 10px;background:#7d2ae8;border:none;border-radius:5px;color:#fff;font:600 11px system-ui,sans-serif;cursor:pointer;touch-action:manipulation">Connect</button>';
+  list.appendChild(banner);
+}
+
+function _showProviderKeyEntry(providerId) {
+  var existing = document.getElementById('lseb-provider-key-modal');
+  if (existing) existing.remove();
+  var modal = document.createElement('div');
+  modal.id = 'lseb-provider-key-modal';
+  modal.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#1a0a30;border-top:2px solid #7d2ae8;padding:16px;box-shadow:0 -4px 24px #7d2ae844;display:flex;flex-direction:column;gap:10px';
+  var name = providerId === 'freesound' ? 'Freesound' : providerId;
+  modal.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between">' +
+      '<span style="font:600 14px system-ui,sans-serif;color:#f5f0ff">' + name + ' API Key</span>' +
+      '<button type="button" id="lseb-pkey-close" style="background:none;border:none;color:#9a85c2;font-size:22px;cursor:pointer;padding:0 4px;line-height:1">&times;</button>' +
+    '</div>' +
+    '<input id="lseb-pkey-inp" type="password" placeholder="Paste your API key here..." autocomplete="off" style="width:100%;box-sizing:border-box;padding:10px 12px;background:#0d0019;border:1px solid #7d2ae888;border-radius:8px;color:#f5f0ff;font:400 14px system-ui,sans-serif;outline:none">' +
+    '<p style="margin:0;font:400 11px system-ui,sans-serif;color:#5a5a78">Stored locally in this browser only. Never sent anywhere except ' + name + '.</p>' +
+    '<button type="button" id="lseb-pkey-save" style="padding:10px;background:#7d2ae8;border:none;border-radius:8px;color:#fff;font:600 14px system-ui,sans-serif;cursor:pointer;touch-action:manipulation">Save and test</button>' +
+    '<p id="lseb-pkey-status" style="margin:0;font:400 12px system-ui,sans-serif;color:#5a5a78"></p>';
+  document.body.appendChild(modal);
+  var inp = document.getElementById('lseb-pkey-inp');
+  if (inp) inp.focus();
+  document.getElementById('lseb-pkey-close').addEventListener('click', function () { modal.remove(); });
+  document.getElementById('lseb-pkey-save').addEventListener('click', function () {
+    var key = (inp ? inp.value : '').trim();
+    if (!key) return;
+    var status = document.getElementById('lseb-pkey-status');
+    if (status) { status.style.color = '#9a85c2'; status.textContent = 'Testing connection...'; }
+    var reg = window.LoadProviderRegistry;
+    if (!reg) { if (status) { status.style.color = '#ff3b30'; status.textContent = 'Registry not available.'; } return; }
+    reg.saveProviderSettings(providerId, {apiKey: key});
+    reg.testProvider(providerId).then(function (result) {
+      if (result.ok) {
+        if (status) { status.style.color = '#4cd964'; status.textContent = 'Connected.'; }
+        setTimeout(function () {
+          modal.remove();
+          _buildMusicList(_currentMusicCat, null);
+          _buildSFXList(_currentSfxCat, null);
+        }, 900);
+      } else {
+        if (status) { status.style.color = '#ff3b30'; status.textContent = 'Failed — check your key and try again.'; }
+      }
+    }).catch(function (e) {
+      if (status) { status.style.color = '#ff3b30'; status.textContent = 'Error: ' + (e.message || 'unknown'); }
+    });
+  });
+}
 
 // ─── STORAGE ─────────────────────────────────────────────────────────────────
 function _persist(data) {
@@ -1253,7 +1405,8 @@ function _bindEditor(idx) {
         if (mbar) mbar.querySelectorAll('.ve-chip').forEach(function (c) { c.classList.remove('active'); });
         mchip.classList.add('active');
         var msearch = _el('lseb-music-search');
-        _buildMusicList(mchip.dataset.musicChip, msearch ? msearch.value : '');
+        _currentMusicCat = mchip.dataset.musicChip;
+        _buildMusicList(_currentMusicCat, msearch ? msearch.value : '');
         return;
       }
       // SFX chip filter
@@ -1263,7 +1416,14 @@ function _bindEditor(idx) {
         if (sbar) sbar.querySelectorAll('.ve-chip').forEach(function (c) { c.classList.remove('active'); });
         schip.classList.add('active');
         var ssearch = _el('lseb-sfx-search');
-        _buildSFXList(schip.dataset.sfxChip, ssearch ? ssearch.value : '');
+        _currentSfxCat = schip.dataset.sfxChip;
+        _buildSFXList(_currentSfxCat, ssearch ? ssearch.value : '');
+        return;
+      }
+      // Provider key entry
+      var cpBtn = e.target.closest('[data-connect-provider]');
+      if (cpBtn) {
+        _showProviderKeyEntry(cpBtn.dataset.connectProvider);
         return;
       }
       // Library asset direct timeline insert
@@ -1277,9 +1437,25 @@ function _bindEditor(idx) {
         var label = (addTrackBtn.dataset.tn || trackKind) + (addTrackBtn.dataset.ta ? ' — ' + addTrackBtn.dataset.ta : '');
         var noSrc    = addTrackBtn.dataset.noSrc === '1';
         var addAk    = addTrackBtn.dataset.audioKey;
-        var addSrc   = (addAk && _DEMO_AUDIO && _DEMO_AUDIO[addAk]) || null;
+        var addSrc   = (addAk && _DEMO_AUDIO && _DEMO_AUDIO[addAk]) || addTrackBtn.dataset.src || null;
         var trackItem = { name: label, dur: dur };
         if (addSrc) trackItem.src = addSrc;
+        // Record in asset registry if available
+        if (addSrc && window.LoadAssetRegistry) {
+          try {
+            window.LoadAssetRegistry.addAsset({
+              assetType: trackKind === 'music' ? 'music' : 'sfx',
+              source: addTrackBtn.dataset.provider || 'demo',
+              rightsStatus: addTrackBtn.dataset.license || 'unknown',
+              commercialSafe: addTrackBtn.dataset.license ? null : true,
+              filePath: /^https?:\/\//.test(addSrc) ? null : addSrc,
+              mimeType: 'audio/' + (addSrc.split('.').pop() || 'wav'),
+              duration: dur,
+              tags: [trackKind],
+              notes: label
+            });
+          } catch (_) {}
+        }
         _addTrackItem(idx, trackKind, trackItem);
         _renderTracks(idx);
         _showPanel(null);
