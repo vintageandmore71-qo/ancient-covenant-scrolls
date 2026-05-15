@@ -41,31 +41,86 @@ var _SFX_DEMO = {
   emotion:[{t:'Heartbeat',a:'Freesound',d:'0:04',c:'#ff375f'},{t:'Sad Tone',a:'ZapSplat',d:'0:03',c:'#cc2040'},{t:'Hope Rise',a:'Mixkit SFX',d:'0:05',c:'#ff6080'},{t:'Tension Hum',a:'Freesound',d:'0:04',c:'#ee2050'}]
 };
 
-// ─── ASSET LIST BUILDERS ─────────────────────────────────────────────────────
+// ─── DEMO AUDIO GENERATION ────────────────────────────────────────────────────
+// Real WAV data URIs generated from pure math — no external files needed.
+// Each audio key is generated once and cached in _DEMO_AUDIO.
+// Data URIs persist in localStorage when stored on timeline items.
+var _DEMO_AUDIO = null;
+
+function _wavDataUri(sr, dur, fn) {
+  var n = Math.floor(sr * dur);
+  var buf = new Uint8Array(44 + n);
+  var u32 = function(o,v){buf[o]=v&255;buf[o+1]=(v>>8)&255;buf[o+2]=(v>>16)&255;buf[o+3]=(v>>24)&255;};
+  var u16 = function(o,v){buf[o]=v&255;buf[o+1]=(v>>8)&255;};
+  var str = function(o,s){for(var i=0;i<s.length;i++)buf[o+i]=s.charCodeAt(i);};
+  str(0,'RIFF'); u32(4,36+n); str(8,'WAVE'); str(12,'fmt ');
+  u32(16,16); u16(20,1); u16(22,1); u32(24,sr); u32(28,sr); u16(32,1); u16(34,8);
+  str(36,'data'); u32(40,n);
+  for (var i=0;i<n;i++) buf[44+i]=Math.max(0,Math.min(255,Math.round(128+fn(i,sr))));
+  var b=''; buf.forEach(function(x){b+=String.fromCharCode(x);});
+  return 'data:audio/wav;base64,'+btoa(b);
+}
+
+function _ensureDemoAudio() {
+  if (_DEMO_AUDIO) return;
+  try {
+    var S = 8000;
+    _DEMO_AUDIO = {
+      'music-mellow':    _wavDataUri(S, 1.5, function(i,sr){var t=i/sr, e=Math.min(t*4,1)*Math.min((1.5-t)*4,1); return 52*e*Math.sin(2*Math.PI*220*t);}),
+      'music-modern':    _wavDataUri(S, 1.5, function(i,sr){var t=i/sr, e=Math.min(t*5,1)*Math.min((1.5-t)*3,1); return 44*e*(Math.sin(2*Math.PI*280*t)+0.3*Math.sin(2*Math.PI*560*t));}),
+      'music-energetic': _wavDataUri(S, 1.5, function(i,sr){var t=i/sr, e=Math.min(t*6,1)*Math.min((1.5-t)*4,1); return 44*e*(Math.sin(2*Math.PI*180*t)+0.5*Math.sin(2*Math.PI*360*t));}),
+      'sfx-spring':      _wavDataUri(S, 0.4, function(i,sr){var t=i/sr, f=880*Math.pow(0.25,t/0.4); return 75*(1-t/0.4)*Math.sin(2*Math.PI*f*t);}),
+      'sfx-swish':       _wavDataUri(S, 0.3, function(i,sr){var t=i/sr, e=Math.min(t*15,1)*Math.max(0,1-t/0.3); return 55*e*(Math.random()*2-1);}),
+      'sfx-ding':        _wavDataUri(S, 0.35,function(i,sr){var t=i/sr; return 70*Math.exp(-t*7)*Math.sin(2*Math.PI*880*t);}),
+      'sfx-hit':         _wavDataUri(S, 0.2, function(i,sr){var t=i/sr; return 80*Math.exp(-t*18)*Math.sin(2*Math.PI*120*t);}),
+      'sfx-rumble':      _wavDataUri(S, 0.6, function(i,sr){var t=i/sr, e=Math.min(t*5,1)*Math.max(0,1-(t-0.4)*5); return 55*e*Math.sin(2*Math.PI*60*t)*(1+0.3*Math.sin(2*Math.PI*180*t));})
+    };
+  } catch(_) { _DEMO_AUDIO = {}; }
+}
+
+var _MUSIC_AUDIO_KEY = {
+  vlog:'music-mellow', fresh:'music-mellow', acoustic:'music-mellow',
+  pop:'music-modern',  electronic:'music-modern',
+  dynamic:'music-energetic', hiphop:'music-energetic'
+};
+var _SFX_AUDIO_KEY = {
+  cartoon:'sfx-spring',  funny:'sfx-spring',   emotion:'sfx-spring',
+  swish:'sfx-swish',     transitions:'sfx-swish',
+  ringing:'sfx-ding',    game:'sfx-ding',       variety:'sfx-ding',
+  machine:'sfx-hit',     vehicles:'sfx-hit',    physical:'sfx-hit', vlogsf:'sfx-hit', cues:'sfx-hit',
+  weather:'sfx-rumble'
+};
 var _NOTE_ICO = '<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5" width="18" height="18"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
 var _SPK_ICO  = '<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5" width="18" height="18"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
 var _PLAY_ICO = '<svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><polygon points="6 4 20 12 6 20"/></svg>';
 
-function _buildAssetList(listId, demo, cat, q, icon, trackKind, tone) {
+function _buildAssetList(listId, demo, cat, q, icon, trackKind, tone, audioKeyMap) {
+  _ensureDemoAudio();
   var list = document.getElementById(listId);
   if (!list) return;
   list.innerHTML = '';
   var keys = cat === 'all' ? Object.keys(demo) : [cat];
   var lq = (q || '').toLowerCase();
   keys.forEach(function (k) {
+    var audioKey = audioKeyMap && audioKeyMap[k];
+    var audioSrc = (audioKey && _DEMO_AUDIO && _DEMO_AUDIO[audioKey]) || null;
     (demo[k] || []).forEach(function (tr) {
       if (lq && tr.t.toLowerCase().indexOf(lq) < 0 && tr.a.toLowerCase().indexOf(lq) < 0) return;
       var row = document.createElement('div');
       row.className = 've-asset-row';
+      var hasAudio   = !!audioSrc;
+      var playAttrs  = hasAudio ? 'data-tone="'+tone+'" data-audio-key="'+audioKey+'"' : 'data-tone="'+tone+'" data-no-src="1"';
+      var addAttrs   = hasAudio ? 'data-audio-key="'+audioKey+'"' : 'data-no-src="1"';
+      var subText    = tr.a + ' \xb7 ' + tr.d + (hasAudio ? '' : ' \xb7 No source');
       row.innerHTML =
         '<div class="ve-asset-art" style="background:linear-gradient(135deg,' + tr.c + ',' + tr.c + '88)">' + icon + '</div>' +
         '<div class="ve-asset-info">' +
           '<span class="ve-asset-title">' + (tr.t.length > 22 ? tr.t.slice(0, 21) + '…' : tr.t) + '</span>' +
-          '<span class="ve-asset-sub">' + tr.a + ' \xb7 ' + tr.d + '</span>' +
+          '<span class="ve-asset-sub">' + subText + '</span>' +
         '</div>' +
         '<div class="ve-asset-acts">' +
-          '<button class="ve-asset-play" type="button" data-tone="' + tone + '" data-no-src="1" aria-label="Preview">' + _PLAY_ICO + '</button>' +
-          '<button class="ve-asset-add" type="button" data-add-track="' + trackKind + '" data-no-src="1" data-tn="' + tr.t.replace(/"/g,'') + '" data-ta="' + tr.a.replace(/"/g,'') + '" data-td="' + tr.d + '">Add</button>' +
+          '<button class="ve-asset-play" type="button" ' + playAttrs + ' aria-label="Preview">' + _PLAY_ICO + '</button>' +
+          '<button class="ve-asset-add" type="button" data-add-track="' + trackKind + '" ' + addAttrs + ' data-tn="' + tr.t.replace(/"/g,'') + '" data-ta="' + tr.a.replace(/"/g,'') + '" data-td="' + tr.d + '">Add</button>' +
         '</div>';
       list.appendChild(row);
     });
@@ -74,8 +129,8 @@ function _buildAssetList(listId, demo, cat, q, icon, trackKind, tone) {
     list.innerHTML = '<p style="color:#5a5a78;font:400 12px system-ui,sans-serif;text-align:center;margin:18px 0">No results.</p>';
   }
 }
-function _buildMusicList(cat, q) { _buildAssetList('lseb-music-list', _MUSIC_DEMO, cat || 'all', q, _NOTE_ICO, 'music', 'music'); }
-function _buildSFXList(cat, q)   { _buildAssetList('lseb-sfx-list',   _SFX_DEMO,   cat || 'all', q, _SPK_ICO,  'sfx',   'sfx');   }
+function _buildMusicList(cat, q) { _buildAssetList('lseb-music-list', _MUSIC_DEMO, cat || 'all', q, _NOTE_ICO, 'music', 'music', _MUSIC_AUDIO_KEY); }
+function _buildSFXList(cat, q)   { _buildAssetList('lseb-sfx-list',   _SFX_DEMO,   cat || 'all', q, _SPK_ICO,  'sfx',   'sfx',   _SFX_AUDIO_KEY);   }
 
 // ─── STORAGE ─────────────────────────────────────────────────────────────────
 function _persist(data) {
@@ -1242,21 +1297,26 @@ function _bindEditor(idx) {
         var dur = (parseInt(parts[0], 10) || 0) * 60 + (parseInt(parts[1], 10) || 0);
         if (dur < 1) dur = 30;
         var label = (addTrackBtn.dataset.tn || trackKind) + (addTrackBtn.dataset.ta ? ' — ' + addTrackBtn.dataset.ta : '');
-        var noSrc = addTrackBtn.dataset.noSrc === '1';
-        _addTrackItem(idx, trackKind, { name: label, dur: dur });
+        var noSrc    = addTrackBtn.dataset.noSrc === '1';
+        var addAk    = addTrackBtn.dataset.audioKey;
+        var addSrc   = (addAk && _DEMO_AUDIO && _DEMO_AUDIO[addAk]) || null;
+        var trackItem = { name: label, dur: dur };
+        if (addSrc) trackItem.src = addSrc;
+        _addTrackItem(idx, trackKind, trackItem);
         _renderTracks(idx);
         _showPanel(null);
-        _toast((trackKind === 'music' ? 'Music' : 'Sound FX') + ' added' + (noSrc ? ' — no audio source connected' : ''));
+        _toast((trackKind === 'music' ? 'Music' : 'Sound FX') + (noSrc ? ' added — no audio source connected' : ' added'));
         return;
       }
-      // Preview — only play if a real audio source is attached
+      // Preview — resolve audio source from key, then play
       var playBtn = e.target.closest('[data-tone]');
       if (playBtn) {
         if (playBtn.dataset.noSrc === '1') {
           _toast('No audio source — connect a provider or upload a file to preview');
           return;
         }
-        var srcUrl = playBtn.dataset.src || null;
+        var ak     = playBtn.dataset.audioKey;
+        var srcUrl = (ak && _DEMO_AUDIO && _DEMO_AUDIO[ak]) || playBtn.dataset.src || null;
         if (srcUrl) {
           try {
             var previewAudio = new Audio(srcUrl);
