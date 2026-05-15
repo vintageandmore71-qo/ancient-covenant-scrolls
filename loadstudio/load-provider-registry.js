@@ -2440,6 +2440,21 @@ var LoadProviderRegistry = {
         });
       });
     }
+    if (providerId === 'ideogram') {
+      if (!key) return Promise.reject(new Error('Ideogram: no API key'));
+      return fetch('https://api.ideogram.ai/generate', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Api-Key':key},
+        body:JSON.stringify({image_request:{prompt:request.prompt||'',aspect_ratio:'ASPECT_16_9',model:s.model||'V_2',magic_prompt_option:'AUTO'}})
+      }).then(function(r){
+        if(!r.ok) throw new Error('Ideogram '+r.status);
+        return r.json().then(function(d){
+          var url=d.data&&d.data[0]&&d.data[0].url;
+          if(!url) throw new Error('Ideogram: no image URL');
+          return LoadProviderRegistry.normalizeResult({type:'image',url:url,provider:'ideogram'});
+        });
+      });
+    }
 
     return Promise.reject(new Error('generateImage: unsupported or unconfigured provider: ' + providerId));
   },
@@ -2465,11 +2480,23 @@ var LoadProviderRegistry = {
 
     // Local TTS endpoints (Kokoro, XTTS, Piper via LocalAI, Bark, etc.)
     if (endpoint) {
-      var path = (providerId === 'xtts')   ? '/tts_to_audio/' :
-                 (providerId === 'localai')? '/v1/audio/speech' :
-                 (providerId === 'kokoro') ? '/v1/audio/speech' :
-                 (providerId === 'piper')  ? '/api/tts' :
-                 (providerId === 'f5-tts') ? '/run/predict' :
+      var path = (providerId === 'xtts')            ? '/tts_to_audio/' :
+                 (providerId === 'localai')         ? '/v1/audio/speech' :
+                 (providerId === 'kokoro')          ? '/v1/audio/speech' :
+                 (providerId === 'piper')           ? '/api/tts' :
+                 (providerId === 'f5-tts')          ? '/run/predict' :
+                 (providerId === 'styletts2')       ? '/synthesize' :
+                 (providerId === 'vits')            ? '/synthesize' :
+                 (providerId === 'tortoise-tts')    ? '/api/tts' :
+                 (providerId === 'valle-x')         ? '/generate' :
+                 (providerId === 'bark')            ? '/generate_audio' :
+                 (providerId === 'openvoice')       ? '/tts' :
+                 (providerId === 'dia')             ? '/generate' :
+                 (providerId === 'chatterbox')      ? '/tts' :
+                 (providerId === 'chatterbox-turbo')? '/tts' :
+                 (providerId === 'melo-tts')        ? '/synthesize' :
+                 (providerId === 'orpheus')         ? '/generate' :
+                 (providerId === 'higgs-audio')     ? '/generate' :
                  '/synthesize';
       var body;
       if (providerId === 'kokoro' || providerId === 'localai') {
@@ -2478,6 +2505,20 @@ var LoadProviderRegistry = {
         body = JSON.stringify({data:[request.text||'', null, '', true, 0.3, 0.7, 0.7, 32000, 0]});
       } else if (providerId === 'piper') {
         body = JSON.stringify({text:request.text||''});
+      } else if (providerId === 'bark') {
+        body = JSON.stringify({text_prompt:request.text||'', history_prompt:request.voice||null});
+      } else if (providerId === 'tortoise-tts') {
+        body = JSON.stringify({text:request.text||'', voice:request.voice||'random', preset:'fast'});
+      } else if (providerId === 'valle-x') {
+        body = JSON.stringify({text:request.text||'', language:'English', accent:'English'});
+      } else if (providerId === 'chatterbox' || providerId === 'chatterbox-turbo') {
+        body = JSON.stringify({text:request.text||'', exaggeration:0.5, cfg_weight:0.5});
+      } else if (providerId === 'melo-tts') {
+        body = JSON.stringify({text:request.text||'', speaker_id:s.speaker||0, language:s.language||'EN', speed:request.rate||1.0});
+      } else if (providerId === 'styletts2') {
+        body = JSON.stringify({text:request.text||'', diffusion_steps:10, embedding_scale:1});
+      } else if (providerId === 'orpheus') {
+        body = JSON.stringify({model:s.model||'orpheus-3b', prompt:request.text||'', voice:request.voice||s.voice||'tara', response_format:'wav'});
       } else {
         body = JSON.stringify({text:request.text, voice:request.voice||s.voice||'default', language:s.language||'en'});
       }
@@ -2501,6 +2542,7 @@ var LoadProviderRegistry = {
     var providerId = request.providerId || 'faster-whisper';
     var s = _settings[providerId] || {};
     var endpoint = s.endpoint || (this.getProvider(providerId) || {}).defaultEndpoint;
+    var key = s.apiKey;
 
     if (providerId === 'deepgram') {
       if (!key) return Promise.reject(new Error('Deepgram: no API key'));
@@ -2539,14 +2581,26 @@ var LoadProviderRegistry = {
     fd.append('file', request.blob, 'audio.wav');
     if (request.language) fd.append('language', request.language);
 
-    var path = (providerId === 'faster-whisper') ? '/transcribe' :
-               (providerId === 'localai') ? '/v1/audio/transcriptions' :
+    var path = (providerId === 'faster-whisper')  ? '/transcribe' :
+               (providerId === 'localai')          ? '/v1/audio/transcriptions' :
+               (providerId === 'whisperx')         ? '/asr' :
+               (providerId === 'vosk')             ? '/transcribe' :
+               (providerId === 'moonshine')        ? '/transcribe' :
+               (providerId === 'nvidia-canary')    ? '/transcribe' :
+               (providerId === 'qwen3-asr')        ? '/transcribe' :
+               (providerId === 'pyannote')         ? '/diarize' :
+               (providerId === 'speechbrain')      ? '/transcribe' :
+               (providerId === 'nemo-asr')         ? '/transcribe' :
+               (providerId === 'paddlespeech')     ? '/paddlespeech/asr' :
                '/transcribe';
 
     return fetch(endpoint + path, {method:'POST', body: fd})
       .then(function (r) {
         if (!r.ok) throw new Error(providerId + ' transcribe error ' + r.status);
         return r.json().then(function (d) {
+          if (providerId === 'pyannote') {
+            return LoadProviderRegistry.normalizeResult({type:'diarization', text:'', data:d, provider:providerId});
+          }
           var text = d.text || d.transcription || d.result || '';
           return LoadProviderRegistry.normalizeResult({type:'transcript', text:text, provider:providerId});
         });
@@ -2554,10 +2608,90 @@ var LoadProviderRegistry = {
   },
 
   generateVideo: function (request) {
-    // request: { prompt, image, width, height, frames, fps, providerId }
+    // request: { prompt, image, width, height, frames, fps, providerId, duration, aspectRatio }
     var providerId = request.providerId;
     var s = _settings[providerId] || {};
     var endpoint = s.endpoint || (this.getProvider(providerId) || {}).defaultEndpoint;
+    var key = s.apiKey;
+
+    if (providerId === 'kling') {
+      if (!key) return Promise.reject(new Error('Kling: no API key'));
+      return fetch('https://api.kling.ai/v1/videos/text2video', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+        body:JSON.stringify({model_name:s.model||'kling-v1',prompt:request.prompt||'',duration:request.duration||5,aspect_ratio:request.aspectRatio||'16:9'})
+      }).then(function(r){
+        if(!r.ok) throw new Error('Kling '+r.status);
+        return r.json().then(function(d){
+          return LoadProviderRegistry.normalizeResult({type:'video-job',jobId:d.data&&d.data.task_id,provider:'kling'});
+        });
+      });
+    }
+    if (providerId === 'hailuo') {
+      if (!key) return Promise.reject(new Error('Hailuo: no API key'));
+      return fetch('https://api.minimax.chat/v1/video_generation', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+        body:JSON.stringify({model:s.model||'video-01',prompt:request.prompt||''})
+      }).then(function(r){
+        if(!r.ok) throw new Error('Hailuo '+r.status);
+        return r.json().then(function(d){
+          return LoadProviderRegistry.normalizeResult({type:'video-job',jobId:d.task_id,provider:'hailuo'});
+        });
+      });
+    }
+    if (providerId === 'luma-dream') {
+      if (!key) return Promise.reject(new Error('Luma: no API key'));
+      return fetch('https://api.lumalabs.ai/dream-machine/v1/generations', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+        body:JSON.stringify({prompt:request.prompt||'',aspect_ratio:request.aspectRatio||'16:9',loop:false})
+      }).then(function(r){
+        if(!r.ok) throw new Error('Luma '+r.status);
+        return r.json().then(function(d){
+          return LoadProviderRegistry.normalizeResult({type:'video-job',jobId:d.id,provider:'luma-dream'});
+        });
+      });
+    }
+    if (providerId === 'pika') {
+      if (!key) return Promise.reject(new Error('Pika: no API key'));
+      return fetch('https://api.pika.art/v1/generate', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+        body:JSON.stringify({prompt:request.prompt||'',options:{frameRate:request.fps||24,aspectRatio:request.aspectRatio||'16:9',duration:request.duration||3}})
+      }).then(function(r){
+        if(!r.ok) throw new Error('Pika '+r.status);
+        return r.json().then(function(d){
+          return LoadProviderRegistry.normalizeResult({type:'video-job',jobId:d.id||d.job_id,provider:'pika'});
+        });
+      });
+    }
+    if (providerId === 'pixverse') {
+      if (!key) return Promise.reject(new Error('PixVerse: no API key'));
+      return fetch('https://app-api.pixverse.ai/openapi/v2/video/text/generate', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','API-KEY':key},
+        body:JSON.stringify({prompt:request.prompt||'',quality:'high',aspect_ratio:'16:9',duration:request.duration||5})
+      }).then(function(r){
+        if(!r.ok) throw new Error('PixVerse '+r.status);
+        return r.json().then(function(d){
+          return LoadProviderRegistry.normalizeResult({type:'video-job',jobId:d.Resp&&d.Resp.video_id,provider:'pixverse'});
+        });
+      });
+    }
+    if (providerId === 'heygen') {
+      if (!key) return Promise.reject(new Error('HeyGen: no API key'));
+      return fetch('https://api.heygen.com/v2/video/generate', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':key},
+        body:JSON.stringify({video_inputs:[{character:{type:'avatar',avatar_id:s.avatarId||'Anna_public_3_20240108'},voice:{type:'text',input_text:request.prompt||'',voice_id:s.voiceId||'1bd001e7e50f421d891986aad5158bc8'}}],dimension:{width:request.width||1280,height:request.height||720}})
+      }).then(function(r){
+        if(!r.ok) throw new Error('HeyGen '+r.status);
+        return r.json().then(function(d){
+          return LoadProviderRegistry.normalizeResult({type:'video-job',jobId:d.data&&d.data.video_id,provider:'heygen'});
+        });
+      });
+    }
 
     if (!endpoint) return Promise.reject(new Error('generateVideo: no endpoint for provider: ' + providerId));
 
@@ -2748,6 +2882,89 @@ var LoadProviderRegistry = {
     if (providerId === 'aihorde') {
       return _pollJobAiHorde(jobId, key);
     }
+    if (providerId === 'assemblyai') {
+      if (!key) return Promise.reject(new Error('AssemblyAI: no API key'));
+      return fetch('https://api.assemblyai.com/v2/transcript/'+jobId, {headers:{'Authorization':key}})
+        .then(function(r){ if(!r.ok) throw new Error('AssemblyAI poll '+r.status); return r.json(); })
+        .then(function(d){
+          if(d.status==='completed') return Object.assign({done:true},LoadProviderRegistry.normalizeResult({type:'transcript',text:d.text||'',provider:'assemblyai'}));
+          if(d.status==='error') return {done:true,error:d.error,provider:'assemblyai'};
+          return {done:false,status:d.status,provider:'assemblyai'};
+        });
+    }
+    if (providerId === 'kling') {
+      if (!key) return Promise.reject(new Error('Kling: no API key'));
+      return fetch('https://api.kling.ai/v1/videos/text2video/'+jobId, {headers:{'Authorization':'Bearer '+key}})
+        .then(function(r){ if(!r.ok) throw new Error('Kling poll '+r.status); return r.json(); })
+        .then(function(d){
+          var task=d.data||{};
+          if(task.task_status==='succeed'){
+            var url=task.task_result&&task.task_result.videos&&task.task_result.videos[0]&&task.task_result.videos[0].url;
+            return Object.assign({done:true},LoadProviderRegistry.normalizeResult({type:'video',url:url,provider:'kling'}));
+          }
+          if(task.task_status==='failed') return {done:true,error:'task failed',provider:'kling'};
+          return {done:false,status:task.task_status,provider:'kling'};
+        });
+    }
+    if (providerId === 'hailuo') {
+      if (!key) return Promise.reject(new Error('Hailuo: no API key'));
+      return fetch('https://api.minimax.chat/v1/query/video_generation?task_id='+jobId, {headers:{'Authorization':'Bearer '+key}})
+        .then(function(r){ if(!r.ok) throw new Error('Hailuo poll '+r.status); return r.json(); })
+        .then(function(d){
+          if(d.status==='Success'){
+            return Object.assign({done:true},LoadProviderRegistry.normalizeResult({type:'video',url:null,provider:'hailuo',metadata:{fileId:d.file_id}}));
+          }
+          if(d.status==='Fail') return {done:true,error:d.message,provider:'hailuo'};
+          return {done:false,status:d.status,provider:'hailuo'};
+        });
+    }
+    if (providerId === 'luma-dream') {
+      if (!key) return Promise.reject(new Error('Luma: no API key'));
+      return fetch('https://api.lumalabs.ai/dream-machine/v1/generations/'+jobId, {headers:{'Authorization':'Bearer '+key}})
+        .then(function(r){ if(!r.ok) throw new Error('Luma poll '+r.status); return r.json(); })
+        .then(function(d){
+          if(d.state==='completed'){
+            var url=d.assets&&d.assets.video;
+            return Object.assign({done:true},LoadProviderRegistry.normalizeResult({type:'video',url:url,provider:'luma-dream'}));
+          }
+          if(d.state==='failed') return {done:true,error:d.failure_reason||'failed',provider:'luma-dream'};
+          return {done:false,status:d.state,provider:'luma-dream'};
+        });
+    }
+    if (providerId === 'pika') {
+      if (!key) return Promise.reject(new Error('Pika: no API key'));
+      return fetch('https://api.pika.art/v1/jobs/'+jobId, {headers:{'Authorization':'Bearer '+key}})
+        .then(function(r){ if(!r.ok) throw new Error('Pika poll '+r.status); return r.json(); })
+        .then(function(d){
+          if(d.status==='succeeded'||d.status==='finished'){
+            return Object.assign({done:true},LoadProviderRegistry.normalizeResult({type:'video',url:d.video&&d.video.resultUrl,provider:'pika'}));
+          }
+          if(d.status==='failed') return {done:true,error:'task failed',provider:'pika'};
+          return {done:false,status:d.status,provider:'pika'};
+        });
+    }
+    if (providerId === 'pixverse') {
+      if (!key) return Promise.reject(new Error('PixVerse: no API key'));
+      return fetch('https://app-api.pixverse.ai/openapi/v2/video/'+jobId, {headers:{'API-KEY':key}})
+        .then(function(r){ if(!r.ok) throw new Error('PixVerse poll '+r.status); return r.json(); })
+        .then(function(d){
+          var resp=d.Resp||{};
+          if(resp.status===1) return Object.assign({done:true},LoadProviderRegistry.normalizeResult({type:'video',url:resp.url,provider:'pixverse'}));
+          if(resp.status===3) return {done:true,error:'task failed',provider:'pixverse'};
+          return {done:false,status:resp.status,provider:'pixverse'};
+        });
+    }
+    if (providerId === 'heygen') {
+      if (!key) return Promise.reject(new Error('HeyGen: no API key'));
+      return fetch('https://api.heygen.com/v1/video_status.get?video_id='+jobId, {headers:{'x-api-key':key}})
+        .then(function(r){ if(!r.ok) throw new Error('HeyGen poll '+r.status); return r.json(); })
+        .then(function(d){
+          var data=d.data||{};
+          if(data.status==='completed') return Object.assign({done:true},LoadProviderRegistry.normalizeResult({type:'video',url:data.video_url,provider:'heygen',metadata:{thumbnail:data.thumbnail_url}}));
+          if(data.status==='failed') return {done:true,error:data.error||'failed',provider:'heygen'};
+          return {done:false,status:data.status,progress:data.progress,provider:'heygen'};
+        });
+    }
     return Promise.reject(new Error('pollJobResult: unsupported provider ' + providerId));
   },
 
@@ -2875,6 +3092,88 @@ var LoadProviderRegistry = {
       });
     }
     return this.generateAudio(request);
+  },
+
+  generateMusic: function (request) {
+    // request: { prompt, duration, providerId, type ('music'|'sfx') }
+    var providerId = request.providerId || 'musicgen';
+    var s = _settings[providerId] || {};
+    var endpoint = s.endpoint || (this.getProvider(providerId) || {}).defaultEndpoint;
+    if (!endpoint) return Promise.reject(new Error('generateMusic: no endpoint for ' + providerId));
+
+    var path, body;
+    if (providerId === 'musicgen' || providerId === 'audiogen') {
+      path = '/generate';
+      body = JSON.stringify({descriptions:[request.prompt||'ambient music'], duration:request.duration||10});
+    } else if (providerId === 'riffusion') {
+      path = '/run/predict';
+      body = JSON.stringify({data:[request.prompt||'', '', 10, request.seed||42, 3, 1]});
+    } else if (providerId === 'stable-audio-open') {
+      path = '/generate';
+      body = JSON.stringify({prompt:request.prompt||'', seconds_total:request.duration||15});
+    } else if (providerId === 'diffrhythm') {
+      path = '/run/predict';
+      body = JSON.stringify({data:[request.prompt||'', '', request.duration||10]});
+    } else if (providerId === 'audiox') {
+      path = '/generate';
+      body = JSON.stringify({text:request.prompt||'', duration:request.duration||10, guidance_scale:3.5});
+    } else {
+      path = '/generate';
+      body = JSON.stringify({prompt:request.prompt||'', duration:request.duration||10});
+    }
+
+    return fetch(endpoint + path, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:body
+    }).then(function(r){
+      if(!r.ok) throw new Error(providerId+' music error '+r.status);
+      var ct=r.headers.get('content-type')||'';
+      if(ct.indexOf('audio')>=0||ct.indexOf('octet')>=0){
+        return r.blob().then(function(b){
+          return LoadProviderRegistry.normalizeResult({type:'audio',blob:b,url:URL.createObjectURL(b),provider:providerId});
+        });
+      }
+      return r.json().then(function(d){
+        var url=d.url||(Array.isArray(d.data)&&d.data[0])||null;
+        if(url) return LoadProviderRegistry.normalizeResult({type:'audio',url:url,provider:providerId});
+        throw new Error(providerId+': no audio URL in response');
+      });
+    });
+  },
+
+  generateLipSync: function (request) {
+    // request: { videoBlob, audioBlob, imageUrl, audioUrl, providerId }
+    var providerId = request.providerId || 'musetalk';
+    var s = _settings[providerId] || {};
+    var endpoint = s.endpoint || (this.getProvider(providerId) || {}).defaultEndpoint;
+    if (!endpoint) return Promise.reject(new Error('generateLipSync: no endpoint for ' + providerId));
+
+    var fd = new FormData();
+    if (request.videoBlob) fd.append('video', request.videoBlob, 'video.mp4');
+    if (request.audioBlob) fd.append('audio', request.audioBlob, 'audio.wav');
+    if (request.imageUrl)  fd.append('image_url', request.imageUrl);
+    if (request.audioUrl)  fd.append('audio_url', request.audioUrl);
+
+    var path = (providerId === 'wav2lip')      ? '/run' :
+               (providerId === 'musetalk')     ? '/inference' :
+               (providerId === 'sadtalker')    ? '/generate' :
+               (providerId === 'liveportrait') ? '/animate' :
+               (providerId === 'latentsync')   ? '/run/predict' :
+               (providerId === 'lipgan')       ? '/generate' :
+               (providerId === 'makeitalk')    ? '/generate' :
+               (providerId === 'difftalk')     ? '/generate' :
+               '/generate';
+
+    return fetch(endpoint + path, {method:'POST', body:fd})
+      .then(function(r){
+        if(!r.ok) throw new Error(providerId+' lip-sync error '+r.status);
+        return r.json().then(function(d){
+          var url=d.url||d.video_url||(Array.isArray(d.data)&&d.data[0])||null;
+          if(url) return LoadProviderRegistry.normalizeResult({type:'video',url:url,provider:providerId});
+          return LoadProviderRegistry.normalizeResult({type:'video-job',jobId:d.id||d.job_id,provider:providerId});
+        });
+      });
   },
 
   normalizeResult: function (raw) {
