@@ -2,7 +2,7 @@
   "_meta": {
     "title": "Missing Provider Audit",
     "generated": "2026-05-15",
-    "registryVersion": "v118",
+    "registryVersion": "v119",
     "purpose": "Records every provider, tool, model, library, API, SDK, and engine from the source planning files. Shows what was already in the registry, what was newly added, and what is excluded with reason.",
     "sourceFilesSearched": [
       "loadstudio/CLAUDE.md \u2014 PRIMARY PROVIDERS and ASSET LIBRARIES sections",
@@ -13,8 +13,8 @@
   "summary": {
     "totalInSourcePlanning": 100,
     "totalInRegistryBeforeSession": 127,
-    "newlyAddedThisSession": 119,
-    "totalInRegistryAfterSession": 246,
+    "newlyAddedThisSession": 128,
+    "totalInRegistryAfterSession": 255,
     "excludedWithReason": 0,
     "blocked": 0,
     "readyWithProof": 0,
