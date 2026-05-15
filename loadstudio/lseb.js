@@ -462,7 +462,7 @@ var _CSS =
   '#lseb-editor .track-add .ta-plus{position:absolute;right:6px;bottom:5px;background:#fff;color:#0a0a14;font-weight:700;font-size:10px;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;line-height:1;pointer-events:none}' +
   '#lseb-editor .cover-btn{height:54px;border:1px dashed rgba(255,255,255,.45);flex-direction:column;gap:3px}' +
   '#lseb-editor .cover-btn .ta-lbl{font-size:10.5px;font-weight:600;color:#fff;pointer-events:none}' +
-  '#lseb-editor .timeline-scroll{position:relative;overflow-x:auto;overflow-y:auto;padding:12px 24px 8px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch}' +
+  '#lseb-editor .timeline-scroll{position:relative;overflow-x:auto;overflow-y:auto;padding:12px 24px max(100px,calc(env(safe-area-inset-bottom,0px) + 80px)) 0;scrollbar-width:none;-webkit-overflow-scrolling:touch}' +
   '#lseb-editor .timeline-scroll::-webkit-scrollbar{display:none}' +
   '#lseb-editor .ve-track-row{position:relative;height:38px;margin-bottom:8px;border-radius:8px;background:#191923;color:#8f8f9d;display:block;padding:0;overflow:visible}' +
   '#lseb-editor .ve-track-empty{position:absolute;top:50%;left:18px;transform:translateY(-50%);font-size:13px;color:#5a5a78;pointer-events:auto;cursor:pointer}' +
@@ -563,7 +563,14 @@ var _CSS =
   '.lseb-ctx-sep{width:1px;height:30px;background:rgba(255,255,255,.1);margin:0 2px;flex-shrink:0;align-self:center}' +
   '#lseb-editor .ve-insert-grid{display:flex;gap:10px;padding:8px 0 4px;justify-content:center}' +
   '#lseb-editor .ve-insert-tile{display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px 10px 14px;background:#1e1e30;border:1.5px solid rgba(125,42,232,.25);border-radius:14px;flex:1;cursor:pointer;font:600 12px system-ui,sans-serif;color:#cfcfdc;touch-action:manipulation;-webkit-tap-highlight-color:transparent}' +
-  '#lseb-editor .ve-insert-tile:active{background:rgba(125,42,232,.18);border-color:#b33af0}';
+  '#lseb-editor .ve-insert-tile:active{background:rgba(125,42,232,.18);border-color:#b33af0}' +
+  '#lseb-editor .ve-tab-bar{display:flex;gap:0;margin:0 -16px 12px;padding:0 16px;border-bottom:1px solid #2a2a40;overflow-x:auto;scrollbar-width:none}' +
+  '#lseb-editor .ve-tab-bar::-webkit-scrollbar{display:none}' +
+  '#lseb-editor .ve-tab{flex:0 0 auto;background:transparent;border:none;border-bottom:2.5px solid transparent;color:#7a6fa0;font:600 13px system-ui,sans-serif;padding:8px 16px;cursor:pointer;margin-bottom:-1px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}' +
+  '#lseb-editor .ve-tab.active{color:#b33af0;border-bottom-color:#b33af0}' +
+  '#lseb-editor .ve-cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:8px 0 4px}' +
+  '#lseb-editor .ve-cat-tile{background:#1e1e30;border:1.5px solid rgba(125,42,232,.22);border-radius:10px;padding:14px 4px;font:600 11px system-ui,sans-serif;color:#cfcfdc;cursor:pointer;text-align:center;touch-action:manipulation;-webkit-tap-highlight-color:transparent;line-height:1.35;word-break:break-word}' +
+  '#lseb-editor .ve-cat-tile:active{background:rgba(125,42,232,.22);border-color:#b33af0}';
 
 // ─── STORYBOARD VIEW ─────────────────────────────────────────────────────────
 function _showStoryboard() {
@@ -688,12 +695,35 @@ function _openSceneEditor(idx) {
         '<div id="lseb-drawer-scrim"></div>' +
         '<div id="lseb-music-panel" class="ve-panel">' +
           '<div class="ve-panel-handle" aria-hidden="true"></div>' +
-          '<div class="ve-panel-head"><span>Music / Narration</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
-          '<input id="lseb-audio-pick" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg,.flac,.aiff,.webm,.opus" style="font-size:13px;">' +
-          '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;">' +
-            '<label class="ve-lbl">Volume</label>' +
-            '<input id="lseb-vol" type="range" min="0" max="1" step="0.05" value="0.35" style="flex:1;min-width:140px;accent-color:#7d2ae8;">' +
-            '<span id="lseb-vol-val" style="font-size:13px;color:#cfcfdc;font-weight:700;">35%</span>' +
+          '<div class="ve-panel-head"><span>Music</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
+          '<input id="lseb-audio-pick" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg,.flac,.aiff,.webm,.opus" style="display:none">' +
+          '<div class="ve-tab-bar" id="lseb-music-tabs">' +
+            '<button class="ve-tab active" data-tab="music-lib" type="button">Music</button>' +
+            '<button class="ve-tab" data-tab="music-fav" type="button">Favorites</button>' +
+            '<button class="ve-tab" data-tab="music-my" type="button">My Music</button>' +
+          '</div>' +
+          '<div id="lseb-music-lib" class="ve-tab-pane">' +
+            '<div class="ve-cat-grid">' +
+              '<button class="ve-cat-tile" data-pick="lseb-audio-pick" type="button">Vlog</button>' +
+              '<button class="ve-cat-tile" data-pick="lseb-audio-pick" type="button">Pop</button>' +
+              '<button class="ve-cat-tile" data-pick="lseb-audio-pick" type="button">Dynamic</button>' +
+              '<button class="ve-cat-tile" data-pick="lseb-audio-pick" type="button">Fresh</button>' +
+              '<button class="ve-cat-tile" data-pick="lseb-audio-pick" type="button">Acoustic</button>' +
+              '<button class="ve-cat-tile" data-pick="lseb-audio-pick" type="button">Electronic</button>' +
+              '<button class="ve-cat-tile" data-pick="lseb-audio-pick" type="button">Hip-Hop</button>' +
+            '</div>' +
+            '<p style="color:#5a5a78;font:400 11px Inter,system-ui,sans-serif;margin:10px 0 0;text-align:center">Choose a category to pick a file from your device.</p>' +
+          '</div>' +
+          '<div id="lseb-music-fav" class="ve-tab-pane" style="display:none">' +
+            '<p style="color:#5a5a78;font:400 12px Inter,system-ui,sans-serif;margin:18px 0;text-align:center">No favorites yet.</p>' +
+          '</div>' +
+          '<div id="lseb-music-my" class="ve-tab-pane" style="display:none">' +
+            '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">' +
+              '<label class="ve-lbl">Volume</label>' +
+              '<input id="lseb-vol" type="range" min="0" max="1" step="0.05" value="0.35" style="flex:1;min-width:140px;accent-color:#7d2ae8;">' +
+              '<span id="lseb-vol-val" style="font-size:13px;color:#cfcfdc;font-weight:700;">35%</span>' +
+            '</div>' +
+            '<button type="button" data-pick="lseb-audio-pick" style="width:100%;padding:12px;background:#7d2ae8;border:none;border-radius:10px;color:#fff;font:600 14px system-ui,sans-serif;cursor:pointer;touch-action:manipulation">Browse music files</button>' +
           '</div>' +
         '</div>' +
         '<div id="lseb-text-panel" class="ve-panel">' +
@@ -737,12 +767,37 @@ function _openSceneEditor(idx) {
         '<div id="lseb-sfx-panel" class="ve-panel">' +
           '<div class="ve-panel-handle" aria-hidden="true"></div>' +
           '<div class="ve-panel-head"><span>Sound FX</span><button class="ve-iconbtn" data-close-panel>&times;</button></div>' +
-          '<label class="ve-lbl" style="display:block;margin-bottom:6px">Upload audio file</label>' +
-          '<input id="lseb-sfx-pick" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg,.flac" style="font-size:13px;margin-bottom:14px">' +
-          '<div style="margin-bottom:8px;color:#a0a0b0;font:600 10px Inter,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase">Free SFX Sources</div>' +
-          '<div class="lseb-sfx-card"><div class="lseb-sfx-card-name">Freesound.org</div><div class="lseb-sfx-card-note">Free, CC licensed. Download and upload above.</div></div>' +
-          '<div class="lseb-sfx-card"><div class="lseb-sfx-card-name">ZapSplat</div><div class="lseb-sfx-card-note">Free account. Download and upload above.</div></div>' +
-          '<div class="lseb-sfx-card"><div class="lseb-sfx-card-name">Mixkit SFX</div><div class="lseb-sfx-card-note">Free, no attribution required. Download and upload above.</div></div>' +
+          '<input id="lseb-sfx-pick" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg,.flac" style="display:none">' +
+          '<div class="ve-tab-bar" id="lseb-sfx-tabs">' +
+            '<button class="ve-tab active" data-tab="sfx-lib" type="button">Sound FX</button>' +
+            '<button class="ve-tab" data-tab="sfx-fav" type="button">Favorites</button>' +
+            '<button class="ve-tab" data-tab="sfx-my" type="button">My Sound</button>' +
+          '</div>' +
+          '<div id="lseb-sfx-lib" class="ve-tab-pane">' +
+            '<div class="ve-cat-grid">' +
+              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Cartoon</button>' +
+              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Fast Swish</button>' +
+              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Funny</button>' +
+              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Machine</button>' +
+              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Ringing</button>' +
+              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Vehicles</button>' +
+              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Weather</button>' +
+              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Variety Show</button>' +
+              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Vlog</button>' +
+              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Physical</button>' +
+              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Transitions</button>' +
+              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Cues</button>' +
+              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Game</button>' +
+              '<button class="ve-cat-tile" data-pick="lseb-sfx-pick" type="button">Emotion</button>' +
+            '</div>' +
+            '<p style="color:#5a5a78;font:400 11px Inter,system-ui,sans-serif;margin:10px 0 0;text-align:center">Choose a category to pick a file from your device.</p>' +
+          '</div>' +
+          '<div id="lseb-sfx-fav" class="ve-tab-pane" style="display:none">' +
+            '<p style="color:#5a5a78;font:400 12px Inter,system-ui,sans-serif;margin:18px 0;text-align:center">No favorites yet.</p>' +
+          '</div>' +
+          '<div id="lseb-sfx-my" class="ve-tab-pane" style="display:none">' +
+            '<button type="button" data-pick="lseb-sfx-pick" style="width:100%;padding:12px;background:#7d2ae8;border:none;border-radius:10px;color:#fff;font:600 14px system-ui,sans-serif;cursor:pointer;touch-action:manipulation">Browse sound files</button>' +
+          '</div>' +
         '</div>' +
         '<div id="lseb-voice-panel" class="ve-panel">' +
           '<div class="ve-panel-handle" aria-hidden="true"></div>' +
@@ -952,14 +1007,6 @@ function _bindEditor(idx) {
 
   // Track-add + empty-track tap → open panels
   var _ALL_PANELS = ['lseb-insert-panel','lseb-music-panel','lseb-text-panel','lseb-sfx-panel','lseb-voice-panel','lseb-transition-panel','lseb-filter-panel','lseb-opacity-panel','lseb-blur-panel','lseb-info-panel'];
-  // Add bottom padding to clear install banner if visible
-  (function () {
-    var banner = document.querySelector('.ls-install-banner');
-    if (banner && !banner.hidden && banner.offsetHeight) {
-      var ed = _el('lseb-editor');
-      if (ed) ed.style.paddingBottom = (banner.offsetHeight + 22) + 'px';
-    }
-  })();
   function _showPanel(id) {
     _ALL_PANELS.forEach(function (p) {
       var el = _el(p);
@@ -1036,6 +1083,29 @@ function _bindEditor(idx) {
         else if (ins === 'sfx') _showPanel('lseb-sfx-panel');
         else if (ins === 'record') _showPanel('lseb-voice-panel');
       });
+    });
+    // Tab switching for music and sfx panels
+    editor.querySelectorAll('.ve-tab-bar').forEach(function (bar) {
+      bar.addEventListener('click', function (e) {
+        var tab = e.target.closest('.ve-tab');
+        if (!tab) return;
+        bar.querySelectorAll('.ve-tab').forEach(function (t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        var paneId = 'lseb-' + tab.dataset.tab;
+        var panel = bar.closest('.ve-panel');
+        if (panel) panel.querySelectorAll('.ve-tab-pane').forEach(function (p) {
+          p.style.display = p.id === paneId ? '' : 'none';
+        });
+        if (tab.dataset.tab === 'music-my') { var ap = _el('lseb-audio-pick'); if (ap) ap.click(); }
+        else if (tab.dataset.tab === 'sfx-my') { var sp = _el('lseb-sfx-pick'); if (sp) sp.click(); }
+      });
+    });
+    // Category tile and browse button → open file picker
+    editor.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-pick]');
+      if (!btn) return;
+      var pick = _el(btn.dataset.pick);
+      if (pick) pick.click();
     });
   }
 
