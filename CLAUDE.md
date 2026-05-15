@@ -53,9 +53,13 @@ These have been re-locked on 2026-05-04 after repeated violations.
    user explicitly says "edit ACR reader" / "fix the reader" /
    names a root-app file. Otherwise leave the root untouched.
 9. **SELF-MERGE POLICY — updated 2026-05-15 by user.**
-   Claude MAY call `mcp__github__merge_pull_request` (squash) and
-   `mcp__github__enable_pr_auto_merge` without per-PR manual approval
-   IF all of the following are true:
+   Claude MAY call `mcp__github__enable_pr_auto_merge` (squash) and
+   `mcp__github__merge_pull_request` without per-PR manual approval
+   for any routine PR once CI passes. This includes — but is not
+   limited to — LoadStudio UI, editor, playback, timeline, and
+   service-worker cache fixes.
+
+   Conditions that must all be true before self-merging:
    - All required CI checks have passed (conclusion: success).
    - No secrets, API keys, or tokens are exposed.
    - No destructive migrations (data deletion, schema drops).
@@ -63,23 +67,20 @@ These have been re-locked on 2026-05-04 after repeated violations.
    - No billing / payment systems are modified.
    - No production credential handling is changed.
    - No domain / DNS / deployment ownership is changed.
-
-   Normal UI, playback, editor, timeline, provider-routing, and
-   service-worker cache-bump fixes are LOW RISK and Claude should
-   merge them automatically after CI passes — do not interrupt the
-   user to ask permission for these.
+   - No mass refactors touching unrelated systems.
 
    Manual approval is ONLY required for:
    - Auth / security architecture changes.
-   - Destructive database or storage migrations.
-   - Billing / financial system changes.
+   - Billing / payment system changes.
    - Production credential or secret handling.
-   - Domain, DNS, or deployment ownership changes.
+   - Destructive data or storage migrations.
+   - DNS / domain / deployment ownership changes.
+   - Mass refactors spanning unrelated systems.
 
    Merge flow: push branch → open/update PR → enable auto-merge OR
    wait for CI then call merge_pull_request directly. Either path is
-   acceptable. Do not block completion on a manual approval step for
-   low-risk fixes.
+   acceptable. Do not block on manual approval for routine fixes.
+   Do not ask the user for permission to merge routine PRs.
 
 These are LOCKED. They take precedence over politeness, helpfulness,
 acknowledgements, "thinking out loud", or any pattern from earlier in
