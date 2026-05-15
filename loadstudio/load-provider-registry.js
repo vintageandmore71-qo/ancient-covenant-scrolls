@@ -784,6 +784,108 @@ var _PROVIDERS = [
     website: 'https://github.com/AUTOMATIC1111/stable-diffusion-webui',
     usedIn: ['AI Image Director','Scene Workshop']
   },
+  {
+    providerId: 'forge',
+    name: 'Stable Diffusion Forge',
+    category: 'image-ai',
+    capabilities: ['image-generation','sdxl','flux','local','faster-than-a1111'],
+    accessType: 'local-endpoint',
+    requiresApiKey: false,
+    requiresLocalEndpoint: true,
+    defaultEndpoint: 'http://localhost:7860',
+    privacyLabel: 'offline',
+    licenseRisk: 'low',
+    commercialUseStatus: 'check-required',
+    fallbackEligible: false,
+    status: 'untested',
+    website: 'https://github.com/lllyasviel/stable-diffusion-webui-forge',
+    usedIn: ['AI Image Director','Scene Workshop']
+  },
+  {
+    providerId: 'fooocus',
+    name: 'Fooocus',
+    category: 'image-ai',
+    capabilities: ['image-generation','sdxl','flux','simplified-local'],
+    accessType: 'local-endpoint',
+    requiresApiKey: false,
+    requiresLocalEndpoint: true,
+    defaultEndpoint: 'http://localhost:7865',
+    privacyLabel: 'offline',
+    licenseRisk: 'low',
+    commercialUseStatus: 'check-required',
+    fallbackEligible: false,
+    status: 'untested',
+    website: 'https://github.com/lllyasviel/Fooocus',
+    usedIn: ['AI Image Director','Scene Workshop']
+  },
+  {
+    providerId: 'invokeai',
+    name: 'InvokeAI',
+    category: 'image-ai',
+    capabilities: ['image-generation','sdxl','sd15','unified-canvas','local'],
+    accessType: 'local-endpoint',
+    requiresApiKey: false,
+    requiresLocalEndpoint: true,
+    defaultEndpoint: 'http://localhost:9090',
+    privacyLabel: 'offline',
+    licenseRisk: 'low',
+    commercialUseStatus: 'check-required',
+    fallbackEligible: false,
+    status: 'untested',
+    website: 'https://invoke-ai.github.io/InvokeAI',
+    usedIn: ['AI Image Director','Scene Workshop']
+  },
+  {
+    providerId: 'sdnext',
+    name: 'SD.Next',
+    category: 'image-ai',
+    capabilities: ['image-generation','sdxl','flux','sd15','local'],
+    accessType: 'local-endpoint',
+    requiresApiKey: false,
+    requiresLocalEndpoint: true,
+    defaultEndpoint: 'http://localhost:7860',
+    privacyLabel: 'offline',
+    licenseRisk: 'low',
+    commercialUseStatus: 'check-required',
+    fallbackEligible: false,
+    status: 'untested',
+    website: 'https://github.com/vladmandic/automatic',
+    usedIn: ['AI Image Director','Scene Workshop']
+  },
+  {
+    providerId: 'diffusionbee',
+    name: 'DiffusionBee',
+    category: 'image-ai',
+    capabilities: ['image-generation','macos-local','sd15','sdxl'],
+    accessType: 'local-endpoint',
+    requiresApiKey: false,
+    requiresLocalEndpoint: true,
+    defaultEndpoint: 'http://localhost:5598',
+    privacyLabel: 'offline',
+    licenseRisk: 'low',
+    commercialUseStatus: 'check-required',
+    fallbackEligible: false,
+    status: 'untested',
+    website: 'https://diffusionbee.com',
+    usedIn: ['AI Image Director']
+  },
+  {
+    providerId: 'draw-things',
+    name: 'Draw Things',
+    category: 'image-ai',
+    capabilities: ['image-generation','ios-local','macos-local','sd15','sdxl','flux'],
+    accessType: 'local-endpoint',
+    requiresApiKey: false,
+    requiresLocalEndpoint: true,
+    defaultEndpoint: 'http://localhost:7888',
+    privacyLabel: 'offline',
+    licenseRisk: 'low',
+    commercialUseStatus: 'check-required',
+    fallbackEligible: false,
+    status: 'untested',
+    website: 'https://drawthings.ai',
+    usedIn: ['AI Image Director']
+  },
 
   // ── AI Video Generation ───────────────────────────────────────────────────
   {
@@ -869,6 +971,74 @@ var _PROVIDERS = [
     fallbackEligible: false,
     status: 'untested',
     website: 'https://github.com/THUDM/CogVideo',
+    usedIn: ['Scene Workshop']
+  },
+  {
+    providerId: 'stable-video-diffusion',
+    name: 'Stable Video Diffusion',
+    category: 'video-ai',
+    capabilities: ['video-generation','image-to-video','local'],
+    accessType: 'local-endpoint',
+    requiresApiKey: false,
+    requiresLocalEndpoint: true,
+    defaultEndpoint: 'http://localhost:7860',
+    privacyLabel: 'offline',
+    licenseRisk: 'low',
+    commercialUseStatus: 'non-commercial',
+    fallbackEligible: false,
+    status: 'untested',
+    website: 'https://github.com/Stability-AI/generative-models',
+    usedIn: ['Scene Workshop']
+  },
+  {
+    providerId: 'open-sora',
+    name: 'Open-Sora',
+    category: 'video-ai',
+    capabilities: ['video-generation','local'],
+    accessType: 'local-endpoint',
+    requiresApiKey: false,
+    requiresLocalEndpoint: true,
+    defaultEndpoint: 'http://localhost:8080',
+    privacyLabel: 'offline',
+    licenseRisk: 'low',
+    commercialUseStatus: 'check-required',
+    fallbackEligible: false,
+    status: 'untested',
+    website: 'https://github.com/hpcaitech/Open-Sora',
+    usedIn: ['Scene Workshop']
+  },
+  {
+    providerId: 'mochi',
+    name: 'Mochi',
+    category: 'video-ai',
+    capabilities: ['video-generation','high-quality','local'],
+    accessType: 'local-endpoint',
+    requiresApiKey: false,
+    requiresLocalEndpoint: true,
+    defaultEndpoint: 'http://localhost:8080',
+    privacyLabel: 'offline',
+    licenseRisk: 'low',
+    commercialUseStatus: 'check-required',
+    fallbackEligible: false,
+    status: 'untested',
+    website: 'https://github.com/genmoai/mochi',
+    usedIn: ['Scene Workshop']
+  },
+  {
+    providerId: 'dynamicrafter',
+    name: 'DynamiCrafter',
+    category: 'video-ai',
+    capabilities: ['video-generation','image-to-video','local'],
+    accessType: 'local-endpoint',
+    requiresApiKey: false,
+    requiresLocalEndpoint: true,
+    defaultEndpoint: 'http://localhost:7860',
+    privacyLabel: 'offline',
+    licenseRisk: 'low',
+    commercialUseStatus: 'non-commercial',
+    fallbackEligible: false,
+    status: 'untested',
+    website: 'https://github.com/Doubiiu/DynamiCrafter',
     usedIn: ['Scene Workshop']
   },
 
@@ -1009,6 +1179,40 @@ var _PROVIDERS = [
     fallbackEligible: true,
     status: 'untested',
     website: 'https://litellm.ai',
+    usedIn: ['Developer Lab']
+  },
+  {
+    providerId: 'vllm',
+    name: 'vLLM',
+    category: 'llm-local',
+    capabilities: ['text-generation','chat','openai-compatible','high-throughput'],
+    accessType: 'local-endpoint',
+    requiresApiKey: false,
+    requiresLocalEndpoint: true,
+    defaultEndpoint: 'http://localhost:8000/v1',
+    privacyLabel: 'offline',
+    licenseRisk: 'low',
+    commercialUseStatus: 'free-commercial',
+    fallbackEligible: true,
+    status: 'untested',
+    website: 'https://github.com/vllm-project/vllm',
+    usedIn: ['Developer Lab']
+  },
+  {
+    providerId: 'tgi',
+    name: 'Text Generation Inference',
+    category: 'llm-local',
+    capabilities: ['text-generation','chat','openai-compatible','huggingface-models'],
+    accessType: 'local-endpoint',
+    requiresApiKey: false,
+    requiresLocalEndpoint: true,
+    defaultEndpoint: 'http://localhost:8080/v1',
+    privacyLabel: 'offline',
+    licenseRisk: 'low',
+    commercialUseStatus: 'check-required',
+    fallbackEligible: true,
+    status: 'untested',
+    website: 'https://github.com/huggingface/text-generation-inference',
     usedIn: ['Developer Lab']
   },
 
@@ -1256,6 +1460,61 @@ var _PROVIDERS = [
     status: 'untested',
     website: 'https://images.nasa.gov',
     usedIn: ['Scene Workshop']
+  },
+
+  // ── Audio Synthesis (browser) ─────────────────────────────────────────────
+  {
+    providerId: 'tonejs',
+    name: 'Tone.js',
+    category: 'editing',
+    capabilities: ['audio-synthesis','music-timing','sequencer','browser-audio'],
+    accessType: 'wasm',
+    requiresApiKey: false,
+    requiresLocalEndpoint: false,
+    defaultEndpoint: null,
+    privacyLabel: 'offline',
+    licenseRisk: 'low',
+    commercialUseStatus: 'free-commercial',
+    fallbackEligible: false,
+    status: 'untested',
+    website: 'https://tonejs.github.io',
+    usedIn: ['Sound Stage','Editing Bay']
+  },
+
+  // ── Project Save / Share ──────────────────────────────────────────────────
+  {
+    providerId: 'supabase',
+    name: 'Supabase',
+    category: 'project-save',
+    capabilities: ['cloud-save','project-share','auth','realtime','storage'],
+    accessType: 'free-api-key',
+    requiresApiKey: true,
+    requiresLocalEndpoint: false,
+    defaultEndpoint: null,
+    privacyLabel: 'third-party-cloud',
+    licenseRisk: 'low',
+    commercialUseStatus: 'check-required',
+    fallbackEligible: false,
+    status: 'untested',
+    website: 'https://supabase.com',
+    usedIn: ['Export Office','Developer Lab']
+  },
+  {
+    providerId: 'indexeddb',
+    name: 'IndexedDB (Local)',
+    category: 'project-save',
+    capabilities: ['local-save','offline-first','draft-storage'],
+    accessType: 'browser-api',
+    requiresApiKey: false,
+    requiresLocalEndpoint: false,
+    defaultEndpoint: null,
+    privacyLabel: 'offline',
+    licenseRisk: 'none',
+    commercialUseStatus: 'free-commercial',
+    fallbackEligible: true,
+    status: 'untested',
+    website: 'https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API',
+    usedIn: ['Export Office','Editing Bay']
   }
 ];
 
@@ -1483,7 +1742,15 @@ var LoadProviderRegistry = {
       case 'musicgen': case 'audiogen': case 'riffusion': case 'demucs':
       case 'chatterbox': case 'xtts': case 'bark': case 'openvoice': case 'dia':
       case 'wan': case 'hunyuanvideo': case 'ltx-video': case 'animatediff': case 'cogvideox':
+      case 'stable-video-diffusion': case 'open-sora': case 'mochi': case 'dynamicrafter':
+      case 'forge': case 'fooocus': case 'invokeai': case 'diffusionbee': case 'draw-things':
+      case 'vllm': case 'tgi':
         testPromise = _testLocalEndpoint(endpoint, '/');                    break;
+      case 'sdnext':
+        testPromise = _testLocalEndpoint(endpoint, '/sdapi/v1/options');    break;
+      case 'supabase':
+        if (!key) { _setStatus(providerId, 'needs-key'); return Promise.resolve({ok:false,status:'needs-key',providerId:providerId}); }
+        testPromise = Promise.resolve(true);                                break;
       default:
         // Browser/WASM providers: check for known globals or just return not-applicable
         if (p.accessType === 'browser-api' || p.accessType === 'wasm') {

@@ -46,7 +46,7 @@ var _NOTE_ICO = '<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.
 var _SPK_ICO  = '<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5" width="18" height="18"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
 var _PLAY_ICO = '<svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><polygon points="6 4 20 12 6 20"/></svg>';
 
-function _buildAssetList(listId, demo, cat, q, icon, pickId, tone) {
+function _buildAssetList(listId, demo, cat, q, icon, trackKind, tone) {
   var list = document.getElementById(listId);
   if (!list) return;
   list.innerHTML = '';
@@ -65,7 +65,7 @@ function _buildAssetList(listId, demo, cat, q, icon, pickId, tone) {
         '</div>' +
         '<div class="ve-asset-acts">' +
           '<button class="ve-asset-play" type="button" data-tone="' + tone + '" aria-label="Preview">' + _PLAY_ICO + '</button>' +
-          '<button class="ve-asset-add" type="button" data-open-pick="' + pickId + '">Add</button>' +
+          '<button class="ve-asset-add" type="button" data-add-track="' + trackKind + '" data-tn="' + tr.t.replace(/"/g,'') + '" data-ta="' + tr.a.replace(/"/g,'') + '" data-td="' + tr.d + '">Add</button>' +
         '</div>';
       list.appendChild(row);
     });
@@ -74,8 +74,8 @@ function _buildAssetList(listId, demo, cat, q, icon, pickId, tone) {
     list.innerHTML = '<p style="color:#5a5a78;font:400 12px system-ui,sans-serif;text-align:center;margin:18px 0">No results.</p>';
   }
 }
-function _buildMusicList(cat, q) { _buildAssetList('lseb-music-list', _MUSIC_DEMO, cat || 'all', q, _NOTE_ICO, 'lseb-audio-pick', 'music'); }
-function _buildSFXList(cat, q)   { _buildAssetList('lseb-sfx-list',   _SFX_DEMO,   cat || 'all', q, _SPK_ICO,  'lseb-sfx-pick',   'sfx'); }
+function _buildMusicList(cat, q) { _buildAssetList('lseb-music-list', _MUSIC_DEMO, cat || 'all', q, _NOTE_ICO, 'music', 'music'); }
+function _buildSFXList(cat, q)   { _buildAssetList('lseb-sfx-list',   _SFX_DEMO,   cat || 'all', q, _SPK_ICO,  'sfx',   'sfx');   }
 
 // ─── STORAGE ─────────────────────────────────────────────────────────────────
 function _persist(data) {
@@ -1231,6 +1231,21 @@ function _bindEditor(idx) {
         schip.classList.add('active');
         var ssearch = _el('lseb-sfx-search');
         _buildSFXList(schip.dataset.sfxChip, ssearch ? ssearch.value : '');
+        return;
+      }
+      // Library asset direct timeline insert
+      var addTrackBtn = e.target.closest('[data-add-track]');
+      if (addTrackBtn) {
+        var trackKind = addTrackBtn.dataset.addTrack;
+        var durStr = addTrackBtn.dataset.td || '0:30';
+        var parts = durStr.split(':');
+        var dur = (parseInt(parts[0], 10) || 0) * 60 + (parseInt(parts[1], 10) || 0);
+        if (dur < 1) dur = 30;
+        var label = (addTrackBtn.dataset.tn || trackKind) + (addTrackBtn.dataset.ta ? ' — ' + addTrackBtn.dataset.ta : '');
+        _addTrackItem(idx, trackKind, { name: label, dur: dur });
+        _renderTracks(idx);
+        _showPanel(null);
+        _toast((trackKind === 'music' ? 'Music' : 'Sound FX') + ' added to timeline');
         return;
       }
       // Preview tone
