@@ -41,6 +41,42 @@ var _SFX_DEMO = {
   emotion:[{t:'Heartbeat',a:'Freesound',d:'0:04',c:'#ff375f'},{t:'Sad Tone',a:'ZapSplat',d:'0:03',c:'#cc2040'},{t:'Hope Rise',a:'Mixkit SFX',d:'0:05',c:'#ff6080'},{t:'Tension Hum',a:'Freesound',d:'0:04',c:'#ee2050'}]
 };
 
+// ─── ASSET LIST BUILDERS ─────────────────────────────────────────────────────
+var _NOTE_ICO = '<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5" width="18" height="18"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
+var _SPK_ICO  = '<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5" width="18" height="18"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
+var _PLAY_ICO = '<svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><polygon points="6 4 20 12 6 20"/></svg>';
+
+function _buildAssetList(listId, demo, cat, q, icon, pickId, tone) {
+  var list = document.getElementById(listId);
+  if (!list) return;
+  list.innerHTML = '';
+  var keys = cat === 'all' ? Object.keys(demo) : [cat];
+  var lq = (q || '').toLowerCase();
+  keys.forEach(function (k) {
+    (demo[k] || []).forEach(function (tr) {
+      if (lq && tr.t.toLowerCase().indexOf(lq) < 0 && tr.a.toLowerCase().indexOf(lq) < 0) return;
+      var row = document.createElement('div');
+      row.className = 've-asset-row';
+      row.innerHTML =
+        '<div class="ve-asset-art" style="background:linear-gradient(135deg,' + tr.c + ',' + tr.c + '88)">' + icon + '</div>' +
+        '<div class="ve-asset-info">' +
+          '<span class="ve-asset-title">' + (tr.t.length > 22 ? tr.t.slice(0, 21) + '…' : tr.t) + '</span>' +
+          '<span class="ve-asset-sub">' + tr.a + ' \xb7 ' + tr.d + '</span>' +
+        '</div>' +
+        '<div class="ve-asset-acts">' +
+          '<button class="ve-asset-play" type="button" data-tone="' + tone + '" aria-label="Preview">' + _PLAY_ICO + '</button>' +
+          '<button class="ve-asset-add" type="button" data-open-pick="' + pickId + '">Add</button>' +
+        '</div>';
+      list.appendChild(row);
+    });
+  });
+  if (!list.children.length) {
+    list.innerHTML = '<p style="color:#5a5a78;font:400 12px system-ui,sans-serif;text-align:center;margin:18px 0">No results.</p>';
+  }
+}
+function _buildMusicList(cat, q) { _buildAssetList('lseb-music-list', _MUSIC_DEMO, cat || 'all', q, _NOTE_ICO, 'lseb-audio-pick', 'music'); }
+function _buildSFXList(cat, q)   { _buildAssetList('lseb-sfx-list',   _SFX_DEMO,   cat || 'all', q, _SPK_ICO,  'lseb-sfx-pick',   'sfx'); }
+
 // ─── STORAGE ─────────────────────────────────────────────────────────────────
 function _persist(data) {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch (_) {}
@@ -626,7 +662,11 @@ var _CSS =
   '#lseb-editor .ve-rec-controls{display:flex;align-items:center;justify-content:space-between;padding:4px 8px 8px}' +
   '#lseb-editor .ve-rec-cancel{background:transparent;border:1.5px solid #3a3a50;color:#8a8a9a;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;font-family:inherit;touch-action:manipulation}' +
   '#lseb-editor .ve-rec-confirm{background:#7d2ae8;border:none;color:#fff;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;touch-action:manipulation;font-size:18px}' +
-  '#lseb-editor .ve-rec-confirm:disabled{background:#2a1a4a;color:#5a4a8a}';
+  '#lseb-editor .ve-rec-confirm:disabled{background:#2a1a4a;color:#5a4a8a}' +
+  '#lseb-editor .ve-chip-bar{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:10px;flex-shrink:0}' +
+  '#lseb-editor .ve-chip-bar::-webkit-scrollbar{display:none}' +
+  '#lseb-editor .ve-chip{flex:0 0 auto;background:#1e1e2a;border:1.5px solid rgba(125,42,232,.22);border-radius:20px;color:#8a8aaa;font:600 11px system-ui,sans-serif;padding:5px 12px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}' +
+  '#lseb-editor .ve-chip.active{background:rgba(125,42,232,.25);border-color:#b33af0;color:#d4b0ff}';
 
 // ─── STORYBOARD VIEW ─────────────────────────────────────────────────────────
 function _showStoryboard() {
@@ -763,21 +803,17 @@ function _openSceneEditor(idx) {
               '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="color:#5a5a78;flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
               '<input class="ve-search-inp" id="lseb-music-search" placeholder="Search music..." autocomplete="off">' +
             '</div>' +
-            '<div id="lseb-music-cats">' +
-              '<div class="ve-cat-card-grid">' +
-                '<button class="ve-cat-card" data-music-cat="vlog" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#7d2ae8,#3a0f70)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Vlog</span><span class="ve-cat-card-count">4 tracks</span></div></button>' +
-                '<button class="ve-cat-card" data-music-cat="pop" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#e82a7d,#7a0f3e)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Pop</span><span class="ve-cat-card-count">4 tracks</span></div></button>' +
-                '<button class="ve-cat-card" data-music-cat="dynamic" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#2ae8a0,#0f7a45)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Dynamic</span><span class="ve-cat-card-count">4 tracks</span></div></button>' +
-                '<button class="ve-cat-card" data-music-cat="fresh" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#e8c42a,#7a620f)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Fresh</span><span class="ve-cat-card-count">4 tracks</span></div></button>' +
-                '<button class="ve-cat-card" data-music-cat="acoustic" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#c4842a,#6b3f0f)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Acoustic</span><span class="ve-cat-card-count">4 tracks</span></div></button>' +
-                '<button class="ve-cat-card" data-music-cat="electronic" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#2a8be8,#0f3e7a)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Electronic</span><span class="ve-cat-card-count">4 tracks</span></div></button>' +
-                '<button class="ve-cat-card" data-music-cat="hiphop" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#e84a2a,#7a1f0f)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Hip-Hop</span><span class="ve-cat-card-count">4 tracks</span></div></button>' +
-              '</div>' +
+            '<div class="ve-chip-bar" id="lseb-music-chips">' +
+              '<button class="ve-chip active" data-music-chip="all" type="button">All</button>' +
+              '<button class="ve-chip" data-music-chip="vlog" type="button">Vlog</button>' +
+              '<button class="ve-chip" data-music-chip="pop" type="button">Pop</button>' +
+              '<button class="ve-chip" data-music-chip="dynamic" type="button">Dynamic</button>' +
+              '<button class="ve-chip" data-music-chip="fresh" type="button">Fresh</button>' +
+              '<button class="ve-chip" data-music-chip="acoustic" type="button">Acoustic</button>' +
+              '<button class="ve-chip" data-music-chip="electronic" type="button">Electronic</button>' +
+              '<button class="ve-chip" data-music-chip="hiphop" type="button">Hip-Hop</button>' +
             '</div>' +
-            '<div id="lseb-music-assets" style="display:none">' +
-              '<button class="ve-panel-back" id="lseb-music-back" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>Back</button>' +
-              '<div class="ve-asset-list" id="lseb-music-list"></div>' +
-            '</div>' +
+            '<div class="ve-asset-list" id="lseb-music-list"></div>' +
           '</div>' +
           '<div id="lseb-music-fav" class="ve-tab-pane" style="display:none">' +
             '<p style="color:#5a5a78;font:400 12px Inter,system-ui,sans-serif;margin:18px 0;text-align:center">No favorites yet.</p>' +
@@ -843,28 +879,24 @@ function _openSceneEditor(idx) {
               '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="color:#5a5a78;flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
               '<input class="ve-search-inp" id="lseb-sfx-search" placeholder="Search sound FX..." autocomplete="off">' +
             '</div>' +
-            '<div id="lseb-sfx-cats">' +
-              '<div class="ve-cat-card-grid">' +
-                '<button class="ve-cat-card" data-sfx-cat="cartoon" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#ff9500,#8b4500)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Cartoon</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
-                '<button class="ve-cat-card" data-sfx-cat="swish" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#4cd964,#1a6b2a)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Fast Swish</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
-                '<button class="ve-cat-card" data-sfx-cat="funny" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#ff3b30,#8b1a14)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Funny</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
-                '<button class="ve-cat-card" data-sfx-cat="machine" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#8e8e93,#3a3a3d)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Machine</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
-                '<button class="ve-cat-card" data-sfx-cat="ringing" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#5ac8fa,#1a6a8b)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Ringing</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
-                '<button class="ve-cat-card" data-sfx-cat="vehicles" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#5856d6,#1e1d6e)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Vehicles</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
-                '<button class="ve-cat-card" data-sfx-cat="weather" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#34aadc,#0f4a6b)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Weather</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
-                '<button class="ve-cat-card" data-sfx-cat="variety" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#ff2d55,#8b0f24)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Variety Show</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
-                '<button class="ve-cat-card" data-sfx-cat="vlogsf" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#7d2ae8,#3a0f70)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Vlog</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
-                '<button class="ve-cat-card" data-sfx-cat="physical" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#ff6b35,#8b2f0f)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Physical</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
-                '<button class="ve-cat-card" data-sfx-cat="transitions" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#636366,#1c1c1e)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Transitions</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
-                '<button class="ve-cat-card" data-sfx-cat="cues" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#ffcc00,#7a5f00)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Cues</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
-                '<button class="ve-cat-card" data-sfx-cat="game" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#32ade6,#0f4a6b)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Game</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
-                '<button class="ve-cat-card" data-sfx-cat="emotion" type="button"><div class="ve-cat-card-art" style="background:linear-gradient(135deg,#ff375f,#8b0f24)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" width="28" height="28"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="ve-cat-card-info"><span class="ve-cat-card-name">Emotion</span><span class="ve-cat-card-count">4 clips</span></div></button>' +
-              '</div>' +
+            '<div class="ve-chip-bar" id="lseb-sfx-chips">' +
+              '<button class="ve-chip active" data-sfx-chip="all" type="button">All</button>' +
+              '<button class="ve-chip" data-sfx-chip="cartoon" type="button">Cartoon</button>' +
+              '<button class="ve-chip" data-sfx-chip="swish" type="button">Swish</button>' +
+              '<button class="ve-chip" data-sfx-chip="funny" type="button">Funny</button>' +
+              '<button class="ve-chip" data-sfx-chip="machine" type="button">Machine</button>' +
+              '<button class="ve-chip" data-sfx-chip="ringing" type="button">Ringing</button>' +
+              '<button class="ve-chip" data-sfx-chip="vehicles" type="button">Vehicles</button>' +
+              '<button class="ve-chip" data-sfx-chip="weather" type="button">Weather</button>' +
+              '<button class="ve-chip" data-sfx-chip="variety" type="button">Variety</button>' +
+              '<button class="ve-chip" data-sfx-chip="vlogsf" type="button">Vlog</button>' +
+              '<button class="ve-chip" data-sfx-chip="physical" type="button">Physical</button>' +
+              '<button class="ve-chip" data-sfx-chip="transitions" type="button">Transitions</button>' +
+              '<button class="ve-chip" data-sfx-chip="cues" type="button">Cues</button>' +
+              '<button class="ve-chip" data-sfx-chip="game" type="button">Game</button>' +
+              '<button class="ve-chip" data-sfx-chip="emotion" type="button">Emotion</button>' +
             '</div>' +
-            '<div id="lseb-sfx-assets" style="display:none">' +
-              '<button class="ve-panel-back" id="lseb-sfx-back" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>Back</button>' +
-              '<div class="ve-asset-list" id="lseb-sfx-list"></div>' +
-            '</div>' +
+            '<div class="ve-asset-list" id="lseb-sfx-list"></div>' +
           '</div>' +
           '<div id="lseb-sfx-fav" class="ve-tab-pane" style="display:none">' +
             '<p style="color:#5a5a78;font:400 12px Inter,system-ui,sans-serif;margin:18px 0;text-align:center">No favorites yet.</p>' +
@@ -1181,70 +1213,24 @@ function _bindEditor(idx) {
     });
     // Asset browser delegated handler
     editor.addEventListener('click', function (e) {
-      // Music category card
-      var mcard = e.target.closest('[data-music-cat]');
-      if (mcard) {
-        var catId = mcard.dataset.musicCat;
-        var tracks = _MUSIC_DEMO[catId] || [];
-        var list = _el('lseb-music-list');
-        if (list) {
-          list.innerHTML = '';
-          tracks.forEach(function (tr) {
-            var row = document.createElement('div');
-            row.className = 've-asset-row';
-            row.innerHTML =
-              '<div class="ve-asset-art" style="background:linear-gradient(135deg,' + tr.c + ',' + tr.c + '88)">' +
-                '<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5" width="18" height="18"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>' +
-              '</div>' +
-              '<div class="ve-asset-info"><span class="ve-asset-title">' + _esc(tr.t) + '</span><span class="ve-asset-sub">' + _esc(tr.a) + ' \xb7 ' + tr.d + '</span></div>' +
-              '<div class="ve-asset-acts">' +
-                '<button class="ve-asset-play" type="button" data-tone="music" aria-label="Preview"><svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><polygon points="6 4 20 12 6 20"/></svg></button>' +
-                '<button class="ve-asset-add" type="button" data-open-pick="lseb-audio-pick">Add</button>' +
-              '</div>';
-            list.appendChild(row);
-          });
-        }
-        var cats = _el('lseb-music-cats'); var assets = _el('lseb-music-assets');
-        if (cats) cats.style.display = 'none'; if (assets) assets.style.display = '';
+      // Music chip filter
+      var mchip = e.target.closest('[data-music-chip]');
+      if (mchip) {
+        var mbar = _el('lseb-music-chips');
+        if (mbar) mbar.querySelectorAll('.ve-chip').forEach(function (c) { c.classList.remove('active'); });
+        mchip.classList.add('active');
+        var msearch = _el('lseb-music-search');
+        _buildMusicList(mchip.dataset.musicChip, msearch ? msearch.value : '');
         return;
       }
-      // Music back
-      if (e.target.closest('#lseb-music-back')) {
-        var cats2 = _el('lseb-music-cats'); var assets2 = _el('lseb-music-assets');
-        if (cats2) cats2.style.display = ''; if (assets2) assets2.style.display = 'none';
-        return;
-      }
-      // SFX category card
-      var scard = e.target.closest('[data-sfx-cat]');
-      if (scard) {
-        var scatId = scard.dataset.sfxCat;
-        var sfxTracks = _SFX_DEMO[scatId] || [];
-        var sfxList = _el('lseb-sfx-list');
-        if (sfxList) {
-          sfxList.innerHTML = '';
-          sfxTracks.forEach(function (tr) {
-            var row = document.createElement('div');
-            row.className = 've-asset-row';
-            row.innerHTML =
-              '<div class="ve-asset-art" style="background:linear-gradient(135deg,' + tr.c + ',' + tr.c + '88)">' +
-                '<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5" width="18" height="18"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>' +
-              '</div>' +
-              '<div class="ve-asset-info"><span class="ve-asset-title">' + _esc(tr.t) + '</span><span class="ve-asset-sub">' + _esc(tr.a) + ' \xb7 ' + tr.d + '</span></div>' +
-              '<div class="ve-asset-acts">' +
-                '<button class="ve-asset-play" type="button" data-tone="sfx" aria-label="Preview"><svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><polygon points="6 4 20 12 6 20"/></svg></button>' +
-                '<button class="ve-asset-add" type="button" data-open-pick="lseb-sfx-pick">Add</button>' +
-              '</div>';
-            sfxList.appendChild(row);
-          });
-        }
-        var scats = _el('lseb-sfx-cats'); var sassets = _el('lseb-sfx-assets');
-        if (scats) scats.style.display = 'none'; if (sassets) sassets.style.display = '';
-        return;
-      }
-      // SFX back
-      if (e.target.closest('#lseb-sfx-back')) {
-        var scats2 = _el('lseb-sfx-cats'); var sassets2 = _el('lseb-sfx-assets');
-        if (scats2) scats2.style.display = ''; if (sassets2) sassets2.style.display = 'none';
+      // SFX chip filter
+      var schip = e.target.closest('[data-sfx-chip]');
+      if (schip) {
+        var sbar = _el('lseb-sfx-chips');
+        if (sbar) sbar.querySelectorAll('.ve-chip').forEach(function (c) { c.classList.remove('active'); });
+        schip.classList.add('active');
+        var ssearch = _el('lseb-sfx-search');
+        _buildSFXList(schip.dataset.sfxChip, ssearch ? ssearch.value : '');
         return;
       }
       // Preview tone
@@ -1270,6 +1256,23 @@ function _bindEditor(idx) {
         var pick = _el(pickId); if (pick) pick.click();
       }
     });
+    // Search input listeners
+    (function () {
+      var ms = _el('lseb-music-search');
+      if (ms) ms.addEventListener('input', function () {
+        var mbar = _el('lseb-music-chips');
+        var activeChip = mbar ? mbar.querySelector('.ve-chip.active') : null;
+        _buildMusicList(activeChip ? activeChip.dataset.musicChip : 'all', ms.value);
+      });
+      var ss = _el('lseb-sfx-search');
+      if (ss) ss.addEventListener('input', function () {
+        var sbar = _el('lseb-sfx-chips');
+        var activeChip = sbar ? sbar.querySelector('.ve-chip.active') : null;
+        _buildSFXList(activeChip ? activeChip.dataset.sfxChip : 'all', ss.value);
+      });
+      _buildMusicList('all', '');
+      _buildSFXList('all', '');
+    }());
     // Populate record panel mini strip with current scene clips
     (function () {
       var strip = _el('lseb-rec-strip');
