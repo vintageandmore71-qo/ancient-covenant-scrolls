@@ -1,16 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "hooks": {
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"LOCKED RULE: No narration between tool calls. No progress updates. No \\\"now doing X\\\", \\\"starting on Y\\\", \\\"almost done\\\". Build silently. One end-of-build summary AFTER the last push only. Response format: STATUS / CHANGED / RISK / BOUNDARIES / ROLLBACK / NEXT only.\"}}'"
-          }
-        ]
-      }
-    ],
     "PreToolUse": [
       {
         "matcher": "Edit|Write|NotebookEdit",
