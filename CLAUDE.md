@@ -33,12 +33,10 @@ These have been re-locked on 2026-05-04 after repeated violations.
       check for an open one, `mcp__github__create_pull_request` if
       none exists).
    c. Enable PR auto-merge via `mcp__github__enable_pr_auto_merge`
-      (squash) so it lands as soon as required checks pass.
-   d. Tell the user the PR number + URL, the list of files changed,
-      the risk level, and whether the change touches live code.
-      Wait for the user to merge. **Do not call
-      `mcp__github__merge_pull_request` unless rule 9 explicitly
-      authorizes it for that PR.**
+      (squash), or wait for CI then call `mcp__github__merge_pull_request`
+      directly. For low-risk fixes (see rule 9), complete the merge
+      without waiting for manual approval.
+   d. Tell the user the PR number + URL, files changed, and risk level.
    Never attempt `git push origin <branch>:main` — it will fail.
    NEVER force push to `main`.
 7. **SYNC FROM `origin/main` BEFORE EVERY PUSH.** Squash merges
@@ -54,22 +52,34 @@ These have been re-locked on 2026-05-04 after repeated violations.
    `content/` folder). Locked 2026-05-04 by user. Only edit if the
    user explicitly says "edit ACR reader" / "fix the reader" /
    names a root-app file. Otherwise leave the root untouched.
-9. **NEVER DIRECTLY MERGE A PR WITHOUT EXPLICIT PER-PR APPROVAL.**
-   Locked 2026-05-10 by user after a self-merge incident.
-   "Zero clicks for the user" is NOT more important than safety.
-   - For PRs that touch live site code, service worker, AI tools,
-     provider routing, export, security, package validation, or
-     deployment logic: **no direct merge ever.** Required-check
-     gating is preferred. Report changed files, explain risk
-     level, and wait for the user to merge.
-   - For PRs that only touch low-risk documentation / status
-     pages: still no default direct merge. State the files
-     changed, the risk level, whether it affects live code, and
-     ask before considering a direct merge. Only proceed if the
-     user replies with explicit approval for that specific PR.
-   - The real fix for unattended landing is a required CI check
-     so auto-merge has a gate to wait on. Direct self-merge by
-     Claude is not a substitute and is not the long-term fix.
+9. **SELF-MERGE POLICY — updated 2026-05-15 by user.**
+   Claude MAY call `mcp__github__merge_pull_request` (squash) and
+   `mcp__github__enable_pr_auto_merge` without per-PR manual approval
+   IF all of the following are true:
+   - All required CI checks have passed (conclusion: success).
+   - No secrets, API keys, or tokens are exposed.
+   - No destructive migrations (data deletion, schema drops).
+   - No auth / security architecture is modified.
+   - No billing / payment systems are modified.
+   - No production credential handling is changed.
+   - No domain / DNS / deployment ownership is changed.
+
+   Normal UI, playback, editor, timeline, provider-routing, and
+   service-worker cache-bump fixes are LOW RISK and Claude should
+   merge them automatically after CI passes — do not interrupt the
+   user to ask permission for these.
+
+   Manual approval is ONLY required for:
+   - Auth / security architecture changes.
+   - Destructive database or storage migrations.
+   - Billing / financial system changes.
+   - Production credential or secret handling.
+   - Domain, DNS, or deployment ownership changes.
+
+   Merge flow: push branch → open/update PR → enable auto-merge OR
+   wait for CI then call merge_pull_request directly. Either path is
+   acceptable. Do not block completion on a manual approval step for
+   low-risk fixes.
 
 These are LOCKED. They take precedence over politeness, helpfulness,
 acknowledgements, "thinking out loud", or any pattern from earlier in
