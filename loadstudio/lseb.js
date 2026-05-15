@@ -324,7 +324,13 @@ var _engine = {
       }
       if (ph) ph.style.display = 'none';
     }
-    _renderImageStrip(idx);
+    var _seekStrip = _el('lseb-image-strip');
+    if (_seekStrip) {
+      var _seekClips = _seekStrip.querySelectorAll('.timeline-clip');
+      for (var _sci = 0; _sci < _seekClips.length; _sci++) {
+        _seekClips[_sci].classList.toggle('selected', _sci === info.idx);
+      }
+    }
     this._tick(idx, globalTime);
     _playHandles.forEach(function (h) { try { h.currentTime = globalTime; } catch (_) {} });
   },
