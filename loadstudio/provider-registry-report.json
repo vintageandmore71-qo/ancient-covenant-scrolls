@@ -1,196 +1,881 @@
 {
   "generatedAt": "2026-05-15",
-  "cacheVersion": "v112",
+  "cacheVersion": "v117",
   "summary": {
-    "total": 86,
+    "total": 172,
     "included": 17,
-    "connected": 63,
-    "blocked": 6,
+    "connected": 155,
+    "blocked": 0,
     "excluded": 0
   },
   "legend": {
-    "INCLUDED":  "Works fully offline / in-browser with no external config required.",
+    "INCLUDED": "Works fully offline / in-browser with no external config required.",
     "CONNECTED": "Works when user provides network access, API key, or local endpoint.",
-    "BLOCKED":   "Cannot be used for commercial or general purposes due to license restrictions.",
-    "EXCLUDED":  "Deliberately omitted. Reason documented."
+    "BLOCKED": "Cannot be used for commercial or general purposes due to license restrictions.",
+    "EXCLUDED": "Deliberately omitted. Reason documented."
   },
   "pipelines": [
     {
       "pipelineId": "story-pipeline",
       "name": "Story Pipeline",
       "description": "Text input to script, scene extraction, character mapping",
-      "steps": ["user-text-input", "llm-completion", "scene-parse", "character-map"],
-      "primaryProviders": ["pollinations-text", "openrouter", "ollama", "lm-studio"],
-      "fallbackProviders": ["localai", "litellm"]
+      "steps": [
+        "user-text-input",
+        "llm-completion",
+        "scene-parse",
+        "character-map"
+      ],
+      "primaryProviders": [
+        "pollinations-text",
+        "openrouter",
+        "ollama",
+        "lm-studio"
+      ],
+      "fallbackProviders": [
+        "localai",
+        "litellm"
+      ]
     },
     {
       "pipelineId": "image-ai-pipeline",
       "name": "AI Image Pipeline",
       "description": "Prompt to image generation with fallback chain",
-      "steps": ["prompt-build", "provider-route", "image-generate", "result-review"],
-      "primaryProviders": ["pollinations-image", "aihorde", "draw-things"],
-      "fallbackProviders": ["huggingface", "comfyui", "a1111", "forge"]
+      "steps": [
+        "prompt-build",
+        "provider-route",
+        "image-generate",
+        "result-review"
+      ],
+      "primaryProviders": [
+        "pollinations-image",
+        "aihorde",
+        "draw-things"
+      ],
+      "fallbackProviders": [
+        "huggingface",
+        "comfyui",
+        "a1111",
+        "forge"
+      ]
     },
     {
       "pipelineId": "video-ai-pipeline",
       "name": "AI Video Pipeline",
       "description": "Prompt or image to short video clip",
-      "steps": ["prompt-or-image", "provider-route", "video-generate", "clip-insert"],
-      "primaryProviders": ["ltx-video", "wan", "hunyuanvideo"],
-      "fallbackProviders": ["animatediff", "cogvideox", "open-sora", "mochi"]
+      "steps": [
+        "prompt-or-image",
+        "provider-route",
+        "video-generate",
+        "clip-insert"
+      ],
+      "primaryProviders": [
+        "ltx-video",
+        "wan",
+        "hunyuanvideo"
+      ],
+      "fallbackProviders": [
+        "animatediff",
+        "cogvideox",
+        "open-sora",
+        "mochi"
+      ]
     },
     {
       "pipelineId": "tts-pipeline",
       "name": "Voice Synthesis Pipeline",
       "description": "Text to spoken audio, inserted to timeline voice track",
-      "steps": ["text-in", "provider-route", "synthesize-audio", "timeline-insert"],
-      "primaryProviders": ["browser-tts", "kokoro", "piper"],
-      "fallbackProviders": ["xtts", "chatterbox", "openvoice", "dia", "elevenlabs"]
+      "steps": [
+        "text-in",
+        "provider-route",
+        "synthesize-audio",
+        "timeline-insert"
+      ],
+      "primaryProviders": [
+        "browser-tts",
+        "kokoro",
+        "piper"
+      ],
+      "fallbackProviders": [
+        "xtts",
+        "chatterbox",
+        "openvoice",
+        "dia",
+        "elevenlabs"
+      ]
     },
     {
       "pipelineId": "stt-pipeline",
       "name": "Transcription Pipeline",
       "description": "Audio to subtitle track via speech recognition",
-      "steps": ["audio-in", "provider-route", "transcribe", "subtitle-track-insert"],
-      "primaryProviders": ["whisper-wasm", "vosk", "moonshine"],
-      "fallbackProviders": ["faster-whisper"]
+      "steps": [
+        "audio-in",
+        "provider-route",
+        "transcribe",
+        "subtitle-track-insert"
+      ],
+      "primaryProviders": [
+        "whisper-wasm",
+        "vosk",
+        "moonshine"
+      ],
+      "fallbackProviders": [
+        "faster-whisper"
+      ]
     },
     {
       "pipelineId": "lip-sync-pipeline",
       "name": "Lip Sync Pipeline",
       "description": "Portrait image plus audio to animated lip-synced clip",
-      "steps": ["portrait-in", "audio-in", "provider-route", "lip-sync-generate", "clip-out"],
-      "primaryProviders": ["musetalk", "liveportrait"],
+      "steps": [
+        "portrait-in",
+        "audio-in",
+        "provider-route",
+        "lip-sync-generate",
+        "clip-out"
+      ],
+      "primaryProviders": [
+        "musetalk",
+        "liveportrait"
+      ],
       "fallbackProviders": []
     },
     {
       "pipelineId": "music-pipeline",
       "name": "Music and Audio Pipeline",
       "description": "Search or generate music and SFX, insert to timeline",
-      "steps": ["query-or-generate", "browse-results", "preview", "timeline-insert"],
-      "primaryProviders": ["pixabay-music", "mixkit-sfx", "freesound"],
-      "fallbackProviders": ["musicgen", "audiogen", "riffusion", "incompetech", "bensound"]
+      "steps": [
+        "query-or-generate",
+        "browse-results",
+        "preview",
+        "timeline-insert"
+      ],
+      "primaryProviders": [
+        "pixabay-music",
+        "mixkit-sfx",
+        "freesound"
+      ],
+      "fallbackProviders": [
+        "musicgen",
+        "audiogen",
+        "riffusion",
+        "incompetech",
+        "bensound"
+      ]
     },
     {
       "pipelineId": "stock-pipeline",
       "name": "Stock Media Pipeline",
       "description": "Search and download stock photos, video, and audio from free libraries",
-      "steps": ["query", "search-api", "browse-results", "download", "asset-library"],
-      "primaryProviders": ["pexels", "pixabay-stock", "wikimedia", "nasa-library"],
-      "fallbackProviders": ["coverr", "internet-archive"]
+      "steps": [
+        "query",
+        "search-api",
+        "browse-results",
+        "download",
+        "asset-library"
+      ],
+      "primaryProviders": [
+        "pexels",
+        "pixabay-stock",
+        "wikimedia",
+        "nasa-library"
+      ],
+      "fallbackProviders": [
+        "coverr",
+        "internet-archive"
+      ]
     },
     {
       "pipelineId": "bg-removal-pipeline",
       "name": "Background Removal Pipeline",
       "description": "Image in, masked foreground out, composited on new background",
-      "steps": ["image-in", "provider-route", "segment", "mask", "composite"],
-      "primaryProviders": ["mediapipe", "bg-removal-js"],
+      "steps": [
+        "image-in",
+        "provider-route",
+        "segment",
+        "mask",
+        "composite"
+      ],
+      "primaryProviders": [
+        "mediapipe",
+        "bg-removal-js"
+      ],
       "fallbackProviders": []
     },
     {
       "pipelineId": "export-pipeline",
       "name": "Export and Render Pipeline",
       "description": "Timeline to rendered video, CinePWA package, or still export",
-      "steps": ["timeline-finalize", "provider-route", "render", "package-zip", "output"],
-      "primaryProviders": ["ffmpeg-wasm", "canvas-api", "webcodecs"],
-      "fallbackProviders": ["remotion"]
+      "steps": [
+        "timeline-finalize",
+        "provider-route",
+        "render",
+        "package-zip",
+        "output"
+      ],
+      "primaryProviders": [
+        "ffmpeg-wasm",
+        "canvas-api",
+        "webcodecs"
+      ],
+      "fallbackProviders": [
+        "remotion"
+      ]
     },
     {
       "pipelineId": "llm-pipeline",
       "name": "LLM Copilot Pipeline",
       "description": "User prompt to AI completion, injected into scene or script",
-      "steps": ["prompt-in", "provider-route", "llm-complete", "result-insert"],
-      "primaryProviders": ["pollinations-text", "openrouter", "ollama"],
-      "fallbackProviders": ["lm-studio", "localai", "litellm", "vllm", "tgi"]
+      "steps": [
+        "prompt-in",
+        "provider-route",
+        "llm-complete",
+        "result-insert"
+      ],
+      "primaryProviders": [
+        "pollinations-text",
+        "openrouter",
+        "ollama"
+      ],
+      "fallbackProviders": [
+        "lm-studio",
+        "localai",
+        "litellm",
+        "vllm",
+        "tgi"
+      ]
     }
   ],
   "providers": [
-    { "providerId": "ffmpeg-wasm",              "name": "FFmpeg.wasm",                 "category": "editing",           "status": "INCLUDED",  "reason": "WASM, fully offline, no config needed." },
-    { "providerId": "web-audio-api",            "name": "Web Audio API",               "category": "editing",           "status": "INCLUDED",  "reason": "Browser native, always available." },
-    { "providerId": "canvas-api",               "name": "Canvas API",                  "category": "editing",           "status": "INCLUDED",  "reason": "Browser native, always available." },
-    { "providerId": "webcodecs",                "name": "WebCodecs",                   "category": "editing",           "status": "INCLUDED",  "reason": "Browser native, progressive enhancement." },
-    { "providerId": "remotion",                 "name": "Remotion",                    "category": "editing",           "status": "BLOCKED",   "reason": "Commercial license check required. Use FFmpeg.wasm for primary render." },
-    { "providerId": "fabricjs",                 "name": "Fabric.js",                   "category": "canvas",            "status": "INCLUDED",  "reason": "MIT license, WASM-loadable, fully offline." },
-    { "providerId": "gsap",                     "name": "GSAP",                        "category": "animation",         "status": "CONNECTED", "reason": "Free for basic use; some plugins require paid license. Include only free tier." },
-    { "providerId": "lottiefiles",              "name": "LottieFiles",                 "category": "titles-stickers",   "status": "CONNECTED", "reason": "Mixed license; assets require per-asset review." },
-    { "providerId": "mediapipe",                "name": "MediaPipe",                   "category": "background-removal","status": "INCLUDED",  "reason": "Apache 2.0, WASM, fully offline." },
-    { "providerId": "bg-removal-js",            "name": "background-removal-js",       "category": "background-removal","status": "INCLUDED",  "reason": "MIT license, WASM, fully offline." },
-    { "providerId": "whisper-wasm",             "name": "Whisper.cpp (WASM)",          "category": "stt",               "status": "INCLUDED",  "reason": "MIT license, WASM, fully offline." },
-    { "providerId": "vosk",                     "name": "Vosk",                        "category": "stt",               "status": "INCLUDED",  "reason": "Apache 2.0, WASM-available, offline." },
-    { "providerId": "moonshine",                "name": "Moonshine",                   "category": "stt",               "status": "INCLUDED",  "reason": "Apache 2.0, WASM-available, offline." },
-    { "providerId": "faster-whisper",           "name": "Faster-Whisper",              "category": "stt",               "status": "CONNECTED", "reason": "Requires local endpoint (Python server). User must run it." },
-    { "providerId": "browser-tts",              "name": "Browser Speech",              "category": "tts",               "status": "INCLUDED",  "reason": "Browser native Web Speech API." },
-    { "providerId": "kokoro",                   "name": "Kokoro",                      "category": "tts",               "status": "INCLUDED",  "reason": "WASM-available. License check required for commercial distribution." },
-    { "providerId": "chatterbox",               "name": "Chatterbox",                  "category": "tts",               "status": "CONNECTED", "reason": "Requires local Gradio endpoint." },
-    { "providerId": "xtts",                     "name": "XTTS",                        "category": "tts",               "status": "CONNECTED", "reason": "Requires local Coqui TTS server." },
-    { "providerId": "piper",                    "name": "Piper",                       "category": "tts",               "status": "INCLUDED",  "reason": "MIT license, WASM-available, offline." },
-    { "providerId": "bark",                     "name": "Bark",                        "category": "tts",               "status": "CONNECTED", "reason": "Requires local Gradio endpoint." },
-    { "providerId": "openvoice",                "name": "OpenVoice",                   "category": "tts",               "status": "CONNECTED", "reason": "Requires local endpoint." },
-    { "providerId": "dia",                      "name": "Dia",                         "category": "tts",               "status": "CONNECTED", "reason": "Requires local Gradio endpoint." },
-    { "providerId": "elevenlabs",               "name": "ElevenLabs",                  "category": "tts",               "status": "CONNECTED", "reason": "Paid API key required." },
-    { "providerId": "pixabay-music",            "name": "Pixabay Music",               "category": "music-library",     "status": "CONNECTED", "reason": "Free, no key required, CC license. Needs network." },
-    { "providerId": "free-music-archive",       "name": "Free Music Archive",          "category": "music-library",     "status": "CONNECTED", "reason": "Free, license varies per track. Needs network." },
-    { "providerId": "ccmixter",                 "name": "ccMixter",                    "category": "music-library",     "status": "CONNECTED", "reason": "CC license, needs network." },
-    { "providerId": "incompetech",              "name": "Incompetech",                 "category": "music-library",     "status": "CONNECTED", "reason": "CC license, needs network." },
-    { "providerId": "bensound",                 "name": "Bensound",                    "category": "music-library",     "status": "CONNECTED", "reason": "Free with attribution, needs network." },
-    { "providerId": "yt-audio-library",         "name": "YouTube Audio Library",       "category": "music-library",     "status": "CONNECTED", "reason": "Free, requires YouTube account. Needs network." },
-    { "providerId": "freesound",                "name": "Freesound",                   "category": "sfx-library",       "status": "CONNECTED", "reason": "Free API key required. License varies per sound." },
-    { "providerId": "zapsplat",                 "name": "ZapSplat",                    "category": "sfx-library",       "status": "CONNECTED", "reason": "Free account required for full access." },
-    { "providerId": "bbc-sfx",                  "name": "BBC Sound Effects",           "category": "sfx-library",       "status": "BLOCKED",   "reason": "Non-commercial license only. Cannot use in commercial productions." },
-    { "providerId": "mixkit-sfx",               "name": "Mixkit SFX",                  "category": "sfx-library",       "status": "INCLUDED",  "reason": "Free commercial use, no key, via CDN embeds." },
-    { "providerId": "soundbible",               "name": "SoundBible",                  "category": "sfx-library",       "status": "CONNECTED", "reason": "Mixed licenses, needs per-download review." },
-    { "providerId": "musicgen",                 "name": "MusicGen",                    "category": "music-generation",  "status": "CONNECTED", "reason": "Requires local Gradio endpoint (AudioCraft)." },
-    { "providerId": "audiogen",                 "name": "AudioGen",                    "category": "music-generation",  "status": "CONNECTED", "reason": "Requires local Gradio endpoint (AudioCraft)." },
-    { "providerId": "riffusion",                "name": "Riffusion",                   "category": "music-generation",  "status": "CONNECTED", "reason": "Requires local server." },
-    { "providerId": "demucs",                   "name": "Demucs",                      "category": "music-generation",  "status": "CONNECTED", "reason": "Requires local Gradio or CLI endpoint." },
-    { "providerId": "basic-pitch",              "name": "Basic Pitch",                 "category": "music-generation",  "status": "INCLUDED",  "reason": "WASM/JS, Apache 2.0, offline." },
-    { "providerId": "pollinations-image",       "name": "Pollinations Image",          "category": "image-ai",          "status": "CONNECTED", "reason": "Free, no key, public API. Needs network." },
-    { "providerId": "aihorde",                  "name": "AI Horde",                    "category": "image-ai",          "status": "CONNECTED", "reason": "Free, no key needed. Distributed. Needs network." },
-    { "providerId": "huggingface",              "name": "Hugging Face Inference",      "category": "image-ai",          "status": "CONNECTED", "reason": "Free tier API key required." },
-    { "providerId": "comfyui",                  "name": "ComfyUI",                     "category": "image-ai",          "status": "CONNECTED", "reason": "Requires local ComfyUI server." },
-    { "providerId": "a1111",                    "name": "Automatic1111",               "category": "image-ai",          "status": "CONNECTED", "reason": "Requires local A1111 server." },
-    { "providerId": "forge",                    "name": "Stable Diffusion Forge",      "category": "image-ai",          "status": "CONNECTED", "reason": "Requires local Forge server." },
-    { "providerId": "fooocus",                  "name": "Fooocus",                     "category": "image-ai",          "status": "CONNECTED", "reason": "Requires local Fooocus server." },
-    { "providerId": "invokeai",                 "name": "InvokeAI",                    "category": "image-ai",          "status": "CONNECTED", "reason": "Requires local InvokeAI server." },
-    { "providerId": "sdnext",                   "name": "SD.Next",                     "category": "image-ai",          "status": "CONNECTED", "reason": "Requires local SD.Next server." },
-    { "providerId": "diffusionbee",             "name": "DiffusionBee",                "category": "image-ai",          "status": "CONNECTED", "reason": "macOS app with local API. Requires DiffusionBee running." },
-    { "providerId": "draw-things",              "name": "Draw Things",                 "category": "image-ai",          "status": "CONNECTED", "reason": "iOS/macOS app with local API. Best option for iPad-native generation." },
-    { "providerId": "wan",                      "name": "WAN",                         "category": "video-ai",          "status": "CONNECTED", "reason": "Requires local server." },
-    { "providerId": "hunyuanvideo",             "name": "HunyuanVideo",                "category": "video-ai",          "status": "CONNECTED", "reason": "Requires local server. High VRAM." },
-    { "providerId": "ltx-video",               "name": "LTX-Video",                   "category": "video-ai",          "status": "CONNECTED", "reason": "Apache 2.0, commercial use allowed. Requires local server." },
-    { "providerId": "animatediff",              "name": "AnimateDiff",                 "category": "video-ai",          "status": "CONNECTED", "reason": "Requires local server." },
-    { "providerId": "cogvideox",                "name": "CogVideoX",                   "category": "video-ai",          "status": "CONNECTED", "reason": "Requires local server." },
-    { "providerId": "stable-video-diffusion",   "name": "Stable Video Diffusion",     "category": "video-ai",          "status": "BLOCKED",   "reason": "Non-commercial license only." },
-    { "providerId": "open-sora",                "name": "Open-Sora",                   "category": "video-ai",          "status": "CONNECTED", "reason": "Requires local server." },
-    { "providerId": "mochi",                    "name": "Mochi",                       "category": "video-ai",          "status": "CONNECTED", "reason": "Requires local server." },
-    { "providerId": "dynamicrafter",            "name": "DynamiCrafter",               "category": "video-ai",          "status": "BLOCKED",   "reason": "Non-commercial license only." },
-    { "providerId": "musetalk",                 "name": "MuseTalk",                    "category": "lip-sync",          "status": "CONNECTED", "reason": "Requires local server. License check required for commercial use." },
-    { "providerId": "wav2lip",                  "name": "Wav2Lip",                     "category": "lip-sync",          "status": "BLOCKED",   "reason": "Non-commercial research license." },
-    { "providerId": "sadtalker",                "name": "SadTalker",                   "category": "lip-sync",          "status": "BLOCKED",   "reason": "Non-commercial research license." },
-    { "providerId": "liveportrait",             "name": "LivePortrait",                "category": "lip-sync",          "status": "CONNECTED", "reason": "Requires local server. License check for commercial use." },
-    { "providerId": "ollama",                   "name": "Ollama",                      "category": "llm-local",         "status": "CONNECTED", "reason": "MIT license. Requires local Ollama server." },
-    { "providerId": "lm-studio",               "name": "LM Studio",                   "category": "llm-local",         "status": "CONNECTED", "reason": "Requires LM Studio desktop app running." },
-    { "providerId": "localai",                  "name": "LocalAI",                     "category": "llm-local",         "status": "CONNECTED", "reason": "MIT license, OpenAI-compatible. Requires local server." },
-    { "providerId": "litellm",                  "name": "LiteLLM",                     "category": "llm-local",         "status": "CONNECTED", "reason": "MIT license, OpenAI-compatible proxy. Requires local server." },
-    { "providerId": "vllm",                     "name": "vLLM",                        "category": "llm-local",         "status": "CONNECTED", "reason": "Apache 2.0. Requires CUDA GPU server." },
-    { "providerId": "tgi",                      "name": "Text Generation Inference",   "category": "llm-local",         "status": "CONNECTED", "reason": "Apache 2.0. Requires local server." },
-    { "providerId": "pollinations-text",        "name": "Pollinations Text",           "category": "llm-cloud",         "status": "CONNECTED", "reason": "Free, no key, public API. Needs network." },
-    { "providerId": "openrouter",               "name": "OpenRouter",                  "category": "llm-cloud",         "status": "CONNECTED", "reason": "Free API key required. Wide model selection." },
-    { "providerId": "openai",                   "name": "OpenAI",                      "category": "llm-cloud",         "status": "CONNECTED", "reason": "Paid API key required." },
-    { "providerId": "google-fonts",             "name": "Google Fonts",                "category": "fonts",             "status": "CONNECTED", "reason": "Free, no key, needs network." },
-    { "providerId": "bunny-fonts",              "name": "Bunny Fonts",                 "category": "fonts",             "status": "CONNECTED", "reason": "Free, no key, privacy-friendly, needs network." },
-    { "providerId": "font-squirrel",            "name": "Font Squirrel",               "category": "fonts",             "status": "CONNECTED", "reason": "Free download, needs network." },
-    { "providerId": "open-foundry",             "name": "Open Foundry",                "category": "fonts",             "status": "CONNECTED", "reason": "Open-source fonts, needs network." },
-    { "providerId": "mixkit-titles",            "name": "Mixkit",                      "category": "titles-stickers",   "status": "CONNECTED", "reason": "Free commercial use, needs network for assets." },
-    { "providerId": "pexels",                   "name": "Pexels",                      "category": "stock-media",       "status": "CONNECTED", "reason": "Free API key required. Pexels license allows commercial use." },
-    { "providerId": "pixabay-stock",            "name": "Pixabay",                     "category": "stock-media",       "status": "CONNECTED", "reason": "Free API key required. Pixabay license allows commercial use." },
-    { "providerId": "coverr",                   "name": "Coverr",                      "category": "stock-media",       "status": "CONNECTED", "reason": "Free, no key, commercial use allowed." },
-    { "providerId": "wikimedia",                "name": "Wikimedia Commons",           "category": "stock-media",       "status": "CONNECTED", "reason": "Free API, license varies per asset (CC/public domain)." },
-    { "providerId": "internet-archive",         "name": "Internet Archive",            "category": "stock-media",       "status": "CONNECTED", "reason": "Free API, public domain and open-license assets." },
-    { "providerId": "nasa-library",             "name": "NASA Image Library",          "category": "stock-media",       "status": "CONNECTED", "reason": "Free API, public domain (US government works)." },
-    { "providerId": "tonejs",                   "name": "Tone.js",                     "category": "editing",           "status": "INCLUDED",  "reason": "MIT license, browser JS library, offline." },
-    { "providerId": "supabase",                 "name": "Supabase",                    "category": "project-save",      "status": "CONNECTED", "reason": "Free tier with account required. Cloud save only." },
-    { "providerId": "indexeddb",                "name": "IndexedDB (Local)",           "category": "project-save",      "status": "INCLUDED",  "reason": "Browser native, always available, fully offline." }
+    {
+      "providerId": "ffmpeg-wasm",
+      "name": "FFmpeg.wasm",
+      "category": "editing",
+      "status": "INCLUDED",
+      "reason": "WASM, fully offline, no config needed."
+    },
+    {
+      "providerId": "web-audio-api",
+      "name": "Web Audio API",
+      "category": "editing",
+      "status": "INCLUDED",
+      "reason": "Browser native, always available."
+    },
+    {
+      "providerId": "canvas-api",
+      "name": "Canvas API",
+      "category": "editing",
+      "status": "INCLUDED",
+      "reason": "Browser native, always available."
+    },
+    {
+      "providerId": "webcodecs",
+      "name": "WebCodecs",
+      "category": "editing",
+      "status": "INCLUDED",
+      "reason": "Browser native, progressive enhancement."
+    },
+    {
+      "providerId": "remotion",
+      "name": "Remotion",
+      "category": "editing",
+      "status": "BLOCKED",
+      "reason": "Commercial license check required. Use FFmpeg.wasm for primary render."
+    },
+    {
+      "providerId": "fabricjs",
+      "name": "Fabric.js",
+      "category": "canvas",
+      "status": "INCLUDED",
+      "reason": "MIT license, WASM-loadable, fully offline."
+    },
+    {
+      "providerId": "gsap",
+      "name": "GSAP",
+      "category": "animation",
+      "status": "CONNECTED",
+      "reason": "Free for basic use; some plugins require paid license. Include only free tier."
+    },
+    {
+      "providerId": "lottiefiles",
+      "name": "LottieFiles",
+      "category": "titles-stickers",
+      "status": "CONNECTED",
+      "reason": "Mixed license; assets require per-asset review."
+    },
+    {
+      "providerId": "mediapipe",
+      "name": "MediaPipe",
+      "category": "background-removal",
+      "status": "INCLUDED",
+      "reason": "Apache 2.0, WASM, fully offline."
+    },
+    {
+      "providerId": "bg-removal-js",
+      "name": "background-removal-js",
+      "category": "background-removal",
+      "status": "INCLUDED",
+      "reason": "MIT license, WASM, fully offline."
+    },
+    {
+      "providerId": "whisper-wasm",
+      "name": "Whisper.cpp (WASM)",
+      "category": "stt",
+      "status": "INCLUDED",
+      "reason": "MIT license, WASM, fully offline."
+    },
+    {
+      "providerId": "vosk",
+      "name": "Vosk",
+      "category": "stt",
+      "status": "INCLUDED",
+      "reason": "Apache 2.0, WASM-available, offline."
+    },
+    {
+      "providerId": "moonshine",
+      "name": "Moonshine",
+      "category": "stt",
+      "status": "INCLUDED",
+      "reason": "Apache 2.0, WASM-available, offline."
+    },
+    {
+      "providerId": "faster-whisper",
+      "name": "Faster-Whisper",
+      "category": "stt",
+      "status": "CONNECTED",
+      "reason": "Requires local endpoint (Python server). User must run it."
+    },
+    {
+      "providerId": "browser-tts",
+      "name": "Browser Speech",
+      "category": "tts",
+      "status": "INCLUDED",
+      "reason": "Browser native Web Speech API."
+    },
+    {
+      "providerId": "kokoro",
+      "name": "Kokoro",
+      "category": "tts",
+      "status": "INCLUDED",
+      "reason": "WASM-available. License check required for commercial distribution."
+    },
+    {
+      "providerId": "chatterbox",
+      "name": "Chatterbox",
+      "category": "tts",
+      "status": "CONNECTED",
+      "reason": "Requires local Gradio endpoint."
+    },
+    {
+      "providerId": "xtts",
+      "name": "XTTS",
+      "category": "tts",
+      "status": "CONNECTED",
+      "reason": "Requires local Coqui TTS server."
+    },
+    {
+      "providerId": "piper",
+      "name": "Piper",
+      "category": "tts",
+      "status": "INCLUDED",
+      "reason": "MIT license, WASM-available, offline."
+    },
+    {
+      "providerId": "bark",
+      "name": "Bark",
+      "category": "tts",
+      "status": "CONNECTED",
+      "reason": "Requires local Gradio endpoint."
+    },
+    {
+      "providerId": "openvoice",
+      "name": "OpenVoice",
+      "category": "tts",
+      "status": "CONNECTED",
+      "reason": "Requires local endpoint."
+    },
+    {
+      "providerId": "dia",
+      "name": "Dia",
+      "category": "tts",
+      "status": "CONNECTED",
+      "reason": "Requires local Gradio endpoint."
+    },
+    {
+      "providerId": "elevenlabs",
+      "name": "ElevenLabs",
+      "category": "tts",
+      "status": "CONNECTED",
+      "reason": "Paid API key required."
+    },
+    {
+      "providerId": "pixabay-music",
+      "name": "Pixabay Music",
+      "category": "music-library",
+      "status": "CONNECTED",
+      "reason": "Free, no key required, CC license. Needs network."
+    },
+    {
+      "providerId": "free-music-archive",
+      "name": "Free Music Archive",
+      "category": "music-library",
+      "status": "CONNECTED",
+      "reason": "Free, license varies per track. Needs network."
+    },
+    {
+      "providerId": "ccmixter",
+      "name": "ccMixter",
+      "category": "music-library",
+      "status": "CONNECTED",
+      "reason": "CC license, needs network."
+    },
+    {
+      "providerId": "incompetech",
+      "name": "Incompetech",
+      "category": "music-library",
+      "status": "CONNECTED",
+      "reason": "CC license, needs network."
+    },
+    {
+      "providerId": "bensound",
+      "name": "Bensound",
+      "category": "music-library",
+      "status": "CONNECTED",
+      "reason": "Free with attribution, needs network."
+    },
+    {
+      "providerId": "yt-audio-library",
+      "name": "YouTube Audio Library",
+      "category": "music-library",
+      "status": "CONNECTED",
+      "reason": "Free, requires YouTube account. Needs network."
+    },
+    {
+      "providerId": "freesound",
+      "name": "Freesound",
+      "category": "sfx-library",
+      "status": "CONNECTED",
+      "reason": "Free API key required. License varies per sound."
+    },
+    {
+      "providerId": "zapsplat",
+      "name": "ZapSplat",
+      "category": "sfx-library",
+      "status": "CONNECTED",
+      "reason": "Free account required for full access."
+    },
+    {
+      "providerId": "bbc-sfx",
+      "name": "BBC Sound Effects",
+      "category": "sfx-library",
+      "status": "BLOCKED",
+      "reason": "Non-commercial license only. Cannot use in commercial productions."
+    },
+    {
+      "providerId": "mixkit-sfx",
+      "name": "Mixkit SFX",
+      "category": "sfx-library",
+      "status": "INCLUDED",
+      "reason": "Free commercial use, no key, via CDN embeds."
+    },
+    {
+      "providerId": "soundbible",
+      "name": "SoundBible",
+      "category": "sfx-library",
+      "status": "CONNECTED",
+      "reason": "Mixed licenses, needs per-download review."
+    },
+    {
+      "providerId": "musicgen",
+      "name": "MusicGen",
+      "category": "music-generation",
+      "status": "CONNECTED",
+      "reason": "Requires local Gradio endpoint (AudioCraft)."
+    },
+    {
+      "providerId": "audiogen",
+      "name": "AudioGen",
+      "category": "music-generation",
+      "status": "CONNECTED",
+      "reason": "Requires local Gradio endpoint (AudioCraft)."
+    },
+    {
+      "providerId": "riffusion",
+      "name": "Riffusion",
+      "category": "music-generation",
+      "status": "CONNECTED",
+      "reason": "Requires local server."
+    },
+    {
+      "providerId": "demucs",
+      "name": "Demucs",
+      "category": "music-generation",
+      "status": "CONNECTED",
+      "reason": "Requires local Gradio or CLI endpoint."
+    },
+    {
+      "providerId": "basic-pitch",
+      "name": "Basic Pitch",
+      "category": "music-generation",
+      "status": "INCLUDED",
+      "reason": "WASM/JS, Apache 2.0, offline."
+    },
+    {
+      "providerId": "pollinations-image",
+      "name": "Pollinations Image",
+      "category": "image-ai",
+      "status": "CONNECTED",
+      "reason": "Free, no key, public API. Needs network."
+    },
+    {
+      "providerId": "aihorde",
+      "name": "AI Horde",
+      "category": "image-ai",
+      "status": "CONNECTED",
+      "reason": "Free, no key needed. Distributed. Needs network."
+    },
+    {
+      "providerId": "huggingface",
+      "name": "Hugging Face Inference",
+      "category": "image-ai",
+      "status": "CONNECTED",
+      "reason": "Free tier API key required."
+    },
+    {
+      "providerId": "comfyui",
+      "name": "ComfyUI",
+      "category": "image-ai",
+      "status": "CONNECTED",
+      "reason": "Requires local ComfyUI server."
+    },
+    {
+      "providerId": "a1111",
+      "name": "Automatic1111",
+      "category": "image-ai",
+      "status": "CONNECTED",
+      "reason": "Requires local A1111 server."
+    },
+    {
+      "providerId": "forge",
+      "name": "Stable Diffusion Forge",
+      "category": "image-ai",
+      "status": "CONNECTED",
+      "reason": "Requires local Forge server."
+    },
+    {
+      "providerId": "fooocus",
+      "name": "Fooocus",
+      "category": "image-ai",
+      "status": "CONNECTED",
+      "reason": "Requires local Fooocus server."
+    },
+    {
+      "providerId": "invokeai",
+      "name": "InvokeAI",
+      "category": "image-ai",
+      "status": "CONNECTED",
+      "reason": "Requires local InvokeAI server."
+    },
+    {
+      "providerId": "sdnext",
+      "name": "SD.Next",
+      "category": "image-ai",
+      "status": "CONNECTED",
+      "reason": "Requires local SD.Next server."
+    },
+    {
+      "providerId": "diffusionbee",
+      "name": "DiffusionBee",
+      "category": "image-ai",
+      "status": "CONNECTED",
+      "reason": "macOS app with local API. Requires DiffusionBee running."
+    },
+    {
+      "providerId": "draw-things",
+      "name": "Draw Things",
+      "category": "image-ai",
+      "status": "CONNECTED",
+      "reason": "iOS/macOS app with local API. Best option for iPad-native generation."
+    },
+    {
+      "providerId": "wan",
+      "name": "WAN",
+      "category": "video-ai",
+      "status": "CONNECTED",
+      "reason": "Requires local server."
+    },
+    {
+      "providerId": "hunyuanvideo",
+      "name": "HunyuanVideo",
+      "category": "video-ai",
+      "status": "CONNECTED",
+      "reason": "Requires local server. High VRAM."
+    },
+    {
+      "providerId": "ltx-video",
+      "name": "LTX-Video",
+      "category": "video-ai",
+      "status": "CONNECTED",
+      "reason": "Apache 2.0, commercial use allowed. Requires local server."
+    },
+    {
+      "providerId": "animatediff",
+      "name": "AnimateDiff",
+      "category": "video-ai",
+      "status": "CONNECTED",
+      "reason": "Requires local server."
+    },
+    {
+      "providerId": "cogvideox",
+      "name": "CogVideoX",
+      "category": "video-ai",
+      "status": "CONNECTED",
+      "reason": "Requires local server."
+    },
+    {
+      "providerId": "stable-video-diffusion",
+      "name": "Stable Video Diffusion",
+      "category": "video-ai",
+      "status": "BLOCKED",
+      "reason": "Non-commercial license only."
+    },
+    {
+      "providerId": "open-sora",
+      "name": "Open-Sora",
+      "category": "video-ai",
+      "status": "CONNECTED",
+      "reason": "Requires local server."
+    },
+    {
+      "providerId": "mochi",
+      "name": "Mochi",
+      "category": "video-ai",
+      "status": "CONNECTED",
+      "reason": "Requires local server."
+    },
+    {
+      "providerId": "dynamicrafter",
+      "name": "DynamiCrafter",
+      "category": "video-ai",
+      "status": "BLOCKED",
+      "reason": "Non-commercial license only."
+    },
+    {
+      "providerId": "musetalk",
+      "name": "MuseTalk",
+      "category": "lip-sync",
+      "status": "CONNECTED",
+      "reason": "Requires local server. License check required for commercial use."
+    },
+    {
+      "providerId": "wav2lip",
+      "name": "Wav2Lip",
+      "category": "lip-sync",
+      "status": "BLOCKED",
+      "reason": "Non-commercial research license."
+    },
+    {
+      "providerId": "sadtalker",
+      "name": "SadTalker",
+      "category": "lip-sync",
+      "status": "BLOCKED",
+      "reason": "Non-commercial research license."
+    },
+    {
+      "providerId": "liveportrait",
+      "name": "LivePortrait",
+      "category": "lip-sync",
+      "status": "CONNECTED",
+      "reason": "Requires local server. License check for commercial use."
+    },
+    {
+      "providerId": "ollama",
+      "name": "Ollama",
+      "category": "llm-local",
+      "status": "CONNECTED",
+      "reason": "MIT license. Requires local Ollama server."
+    },
+    {
+      "providerId": "lm-studio",
+      "name": "LM Studio",
+      "category": "llm-local",
+      "status": "CONNECTED",
+      "reason": "Requires LM Studio desktop app running."
+    },
+    {
+      "providerId": "localai",
+      "name": "LocalAI",
+      "category": "llm-local",
+      "status": "CONNECTED",
+      "reason": "MIT license, OpenAI-compatible. Requires local server."
+    },
+    {
+      "providerId": "litellm",
+      "name": "LiteLLM",
+      "category": "llm-local",
+      "status": "CONNECTED",
+      "reason": "MIT license, OpenAI-compatible proxy. Requires local server."
+    },
+    {
+      "providerId": "vllm",
+      "name": "vLLM",
+      "category": "llm-local",
+      "status": "CONNECTED",
+      "reason": "Apache 2.0. Requires CUDA GPU server."
+    },
+    {
+      "providerId": "tgi",
+      "name": "Text Generation Inference",
+      "category": "llm-local",
+      "status": "CONNECTED",
+      "reason": "Apache 2.0. Requires local server."
+    },
+    {
+      "providerId": "pollinations-text",
+      "name": "Pollinations Text",
+      "category": "llm-cloud",
+      "status": "CONNECTED",
+      "reason": "Free, no key, public API. Needs network."
+    },
+    {
+      "providerId": "openrouter",
+      "name": "OpenRouter",
+      "category": "llm-cloud",
+      "status": "CONNECTED",
+      "reason": "Free API key required. Wide model selection."
+    },
+    {
+      "providerId": "openai",
+      "name": "OpenAI",
+      "category": "llm-cloud",
+      "status": "CONNECTED",
+      "reason": "Paid API key required."
+    },
+    {
+      "providerId": "google-fonts",
+      "name": "Google Fonts",
+      "category": "fonts",
+      "status": "CONNECTED",
+      "reason": "Free, no key, needs network."
+    },
+    {
+      "providerId": "bunny-fonts",
+      "name": "Bunny Fonts",
+      "category": "fonts",
+      "status": "CONNECTED",
+      "reason": "Free, no key, privacy-friendly, needs network."
+    },
+    {
+      "providerId": "font-squirrel",
+      "name": "Font Squirrel",
+      "category": "fonts",
+      "status": "CONNECTED",
+      "reason": "Free download, needs network."
+    },
+    {
+      "providerId": "open-foundry",
+      "name": "Open Foundry",
+      "category": "fonts",
+      "status": "CONNECTED",
+      "reason": "Open-source fonts, needs network."
+    },
+    {
+      "providerId": "mixkit-titles",
+      "name": "Mixkit",
+      "category": "titles-stickers",
+      "status": "CONNECTED",
+      "reason": "Free commercial use, needs network for assets."
+    },
+    {
+      "providerId": "pexels",
+      "name": "Pexels",
+      "category": "stock-media",
+      "status": "CONNECTED",
+      "reason": "Free API key required. Pexels license allows commercial use."
+    },
+    {
+      "providerId": "pixabay-stock",
+      "name": "Pixabay",
+      "category": "stock-media",
+      "status": "CONNECTED",
+      "reason": "Free API key required. Pixabay license allows commercial use."
+    },
+    {
+      "providerId": "coverr",
+      "name": "Coverr",
+      "category": "stock-media",
+      "status": "CONNECTED",
+      "reason": "Free, no key, commercial use allowed."
+    },
+    {
+      "providerId": "wikimedia",
+      "name": "Wikimedia Commons",
+      "category": "stock-media",
+      "status": "CONNECTED",
+      "reason": "Free API, license varies per asset (CC/public domain)."
+    },
+    {
+      "providerId": "internet-archive",
+      "name": "Internet Archive",
+      "category": "stock-media",
+      "status": "CONNECTED",
+      "reason": "Free API, public domain and open-license assets."
+    },
+    {
+      "providerId": "nasa-library",
+      "name": "NASA Image Library",
+      "category": "stock-media",
+      "status": "CONNECTED",
+      "reason": "Free API, public domain (US government works)."
+    },
+    {
+      "providerId": "tonejs",
+      "name": "Tone.js",
+      "category": "editing",
+      "status": "INCLUDED",
+      "reason": "MIT license, browser JS library, offline."
+    },
+    {
+      "providerId": "supabase",
+      "name": "Supabase",
+      "category": "project-save",
+      "status": "CONNECTED",
+      "reason": "Free tier with account required. Cloud save only."
+    },
+    {
+      "providerId": "indexeddb",
+      "name": "IndexedDB (Local)",
+      "category": "project-save",
+      "status": "INCLUDED",
+      "reason": "Browser native, always available, fully offline."
+    }
   ],
-  "excluded": []
+  "excluded": [],
+  "publicMethods": [
+    "listProviders()",
+    "listByCapability(capability)",
+    "getProvider(providerId)",
+    "getProviderStatus(providerId)",
+    "saveProviderSettings(providerId, settings)",
+    "testProvider(providerId)",
+    "generateImage(request)",
+    "generateAudio(request)",
+    "generateSpeech(request)",
+    "generateVideo(request)",
+    "transcribeAudio(request)",
+    "routeToFallback(request)",
+    "searchMusic(request)",
+    "searchSFX(request)",
+    "searchStock(request)",
+    "pollJobResult(request)",
+    "callLLM(request)",
+    "normalizeResult(raw)"
+  ],
+  "connectorNotes": {
+    "searchMusic": "Routes to Freesound (requires API key). Returns previewUrl for real playback.",
+    "searchSFX": "Routes to Freesound (requires API key). Returns previewUrl for real playback.",
+    "searchStock": "Routes to Pexels/Pixabay (key required), Wikimedia/NASA (no key).",
+    "pollJobResult": "Polls ComfyUI /history/{id} or AI Horde /generate/check/{id}.",
+    "callLLM": "Routes to Pollinations (free/no key), Ollama/LMStudio/LocalAI/OpenRouter/OpenAI (endpoint or key).",
+    "generateSpeech": "Extends generateAudio with ElevenLabs support."
+  }
 }

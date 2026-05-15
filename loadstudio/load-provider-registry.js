@@ -1591,7 +1591,58 @@ var _PROVIDERS_EXTRA = [
   { providerId:'openjourney',         name:'OpenJourney',           aliases:['Openjourney'],         category:'image-ai',         capabilities:['image-generation','midjourney-style','stylized'],              accessType:'local-endpoint',  requiresApiKey:false, requiresLocalEndpoint:true,  defaultEndpoint:'http://localhost:7860', isFree:true,  isOpenSource:true,  isLocal:true,  isBrowserNative:false, isHosted:false, isOpenAICompatible:false, requiresAccount:false, requiresBackendProxy:false, privacyLabel:'offline',           licenseRisk:'low',    commercialUseStatus:'check-required',  license:'CreativeML OpenRAIL', costLabel:'Free', fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://huggingface.co/prompthero/openjourney', docsUrl:'https://huggingface.co/prompthero/openjourney', whereUsedInLoadStudio:['AI Image Director'], whereUsedInLoadEco:false, futureLoadAIUse:'image-generation', testAction:'test-local-endpoint', settingsAction:'set-endpoint', useAsPrimary:false, useAsFallback:false, notes:'MidJourney-style aesthetics via SD 1.5.', pipelineMembership:['ai-image-glamour'], inputTypes:['text'], outputTypes:['image'] },
   // Titles / stickers / motion
   { providerId:'videezy',             name:'Videezy',               aliases:[],                      category:'titles-stickers',  capabilities:['stock-video','motion-backgrounds','animated-elements'],         accessType:'free-api-key',    requiresApiKey:true,  requiresLocalEndpoint:false, defaultEndpoint:null,                     isFree:true,  isOpenSource:false, isLocal:false, isBrowserNative:false, isHosted:true,  isOpenAICompatible:false, requiresAccount:true,  requiresBackendProxy:false, privacyLabel:'third-party-cloud',  licenseRisk:'low',    commercialUseStatus:'check-required',  license:'Proprietary',  costLabel:'Free tier',    fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://www.videezy.com', docsUrl:'https://www.videezy.com', whereUsedInLoadStudio:['Editing Bay'], whereUsedInLoadEco:false, futureLoadAIUse:'motion-elements', testAction:'test-with-key', settingsAction:'set-key', useAsPrimary:false, useAsFallback:false, notes:'Free account required. Attribution required on free plan.', pipelineMembership:['vn-asset-browser'], inputTypes:[], outputTypes:['video','image'] },
-  { providerId:'motion-array',        name:'Motion Array',          aliases:[],                      category:'titles-stickers',  capabilities:['motion-graphics','templates','luts','presets','transitions'],   accessType:'paid-api-key',    requiresApiKey:true,  requiresLocalEndpoint:false, defaultEndpoint:null,                     isFree:false, isOpenSource:false, isLocal:false, isBrowserNative:false, isHosted:true,  isOpenAICompatible:false, requiresAccount:true,  requiresBackendProxy:false, privacyLabel:'third-party-cloud',  licenseRisk:'low',    commercialUseStatus:'check-required',  license:'Proprietary',  costLabel:'Paid subscription', fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://motionarray.com', docsUrl:'https://motionarray.com', whereUsedInLoadStudio:['Editing Bay'], whereUsedInLoadEco:false, futureLoadAIUse:'motion-elements', testAction:'none', settingsAction:'set-key', useAsPrimary:false, useAsFallback:false, notes:'Paid subscription. After Effects / Premiere assets only.', pipelineMembership:[], inputTypes:[], outputTypes:['video','image'] }
+  { providerId:'motion-array',        name:'Motion Array',          aliases:[],                      category:'titles-stickers',  capabilities:['motion-graphics','templates','luts','presets','transitions'],   accessType:'paid-api-key',    requiresApiKey:true,  requiresLocalEndpoint:false, defaultEndpoint:null,                     isFree:false, isOpenSource:false, isLocal:false, isBrowserNative:false, isHosted:true,  isOpenAICompatible:false, requiresAccount:true,  requiresBackendProxy:false, privacyLabel:'third-party-cloud',  licenseRisk:'low',    commercialUseStatus:'check-required',  license:'Proprietary',  costLabel:'Paid subscription', fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://motionarray.com', docsUrl:'https://motionarray.com', whereUsedInLoadStudio:['Editing Bay'], whereUsedInLoadEco:false, futureLoadAIUse:'motion-elements', testAction:'none', settingsAction:'set-key', useAsPrimary:false, useAsFallback:false, notes:'Paid subscription. After Effects / Premiere assets only.', pipelineMembership:[], inputTypes:[], outputTypes:['video','image'] },
+
+  // ─── PROVIDERS FROM INBOX DOCS — added 2026-05-15 ────────────────────────────
+  // Cloud LLM — permanent free tiers (no credit card)
+  { providerId:'gemini',              name:'Gemini',                aliases:['Google Gemini','Gemini Flash','Gemini Pro','Google AI Studio'], category:'llm-cloud', capabilities:['text-generation','chat','vision','image-generation','audio','multimodal'], accessType:'free-api-key', requiresApiKey:true, requiresLocalEndpoint:false, defaultEndpoint:'https://generativelanguage.googleapis.com/v1beta', isFree:true, isOpenSource:false, isLocal:false, isBrowserNative:false, isHosted:true, isOpenAICompatible:true, requiresAccount:true, requiresBackendProxy:false, privacyLabel:'third-party-cloud', licenseRisk:'low', commercialUseStatus:'check-required', license:'Proprietary', costLabel:'Free (1500 req/day Flash)', fallbackEligible:true, status:'untested', blockedReason:null, websiteUrl:'https://aistudio.google.com', docsUrl:'https://ai.google.dev/docs', whereUsedInLoadStudio:['Developer Lab','AI Image Director','Director AI'], whereUsedInLoadEco:false, futureLoadAIUse:'llm-routing', testAction:'test-with-key', settingsAction:'set-key', useAsPrimary:false, useAsFallback:true, notes:'1500 req/day Gemini 2.0 Flash free. Multimodal: text/image/audio/video. Also has OpenAI-compat endpoint. Imagen 4 for images.', pipelineMembership:['openai-compat-routing','ai-image-glamour'], inputTypes:['text','image','audio'], outputTypes:['text','image'] },
+  { providerId:'groq',                name:'Groq',                  aliases:['Groq Cloud','Groq LPU'], category:'llm-cloud',       capabilities:['text-generation','chat','speech-to-text','fast-inference'],     accessType:'free-api-key',    requiresApiKey:true,  requiresLocalEndpoint:false, defaultEndpoint:'https://api.groq.com/openai/v1', isFree:true, isOpenSource:false, isLocal:false, isBrowserNative:false, isHosted:true, isOpenAICompatible:true, requiresAccount:true, requiresBackendProxy:false, privacyLabel:'third-party-cloud', licenseRisk:'low', commercialUseStatus:'check-required', license:'Proprietary', costLabel:'Free (~6000 req/day)', fallbackEligible:true, status:'untested', blockedReason:null, websiteUrl:'https://console.groq.com', docsUrl:'https://console.groq.com/docs', whereUsedInLoadStudio:['Developer Lab','Director AI'], whereUsedInLoadEco:false, futureLoadAIUse:'llm-routing', testAction:'test-with-key', settingsAction:'set-key', useAsPrimary:false, useAsFallback:true, notes:'Fastest free inference. LPU hardware. 300-800 tok/s. Llama 3.3 70B, Mixtral, Gemma. OpenAI-compat.', pipelineMembership:['openai-compat-routing'], inputTypes:['text'], outputTypes:['text'] },
+  { providerId:'cerebras',            name:'Cerebras',              aliases:['Cerebras Inference'],  category:'llm-cloud',        capabilities:['text-generation','chat','fast-inference'],                     accessType:'free-api-key',    requiresApiKey:true,  requiresLocalEndpoint:false, defaultEndpoint:'https://api.cerebras.ai/v1', isFree:true, isOpenSource:false, isLocal:false, isBrowserNative:false, isHosted:true, isOpenAICompatible:true, requiresAccount:true, requiresBackendProxy:false, privacyLabel:'third-party-cloud', licenseRisk:'low', commercialUseStatus:'check-required', license:'Proprietary', costLabel:'Free (1M tokens/day)', fallbackEligible:true, status:'untested', blockedReason:null, websiteUrl:'https://cloud.cerebras.ai', docsUrl:'https://inference-docs.cerebras.ai', whereUsedInLoadStudio:['Developer Lab','Director AI'], whereUsedInLoadEco:false, futureLoadAIUse:'llm-routing', testAction:'test-with-key', settingsAction:'set-key', useAsPrimary:false, useAsFallback:true, notes:'2600+ tok/s. 1M tokens/day free. Llama 3.3 70B. OpenAI-compat.', pipelineMembership:['openai-compat-routing'], inputTypes:['text'], outputTypes:['text'] },
+  { providerId:'sambanova',           name:'SambaNova',             aliases:['SambaNova Cloud'],     category:'llm-cloud',        capabilities:['text-generation','chat','large-models'],                       accessType:'free-api-key',    requiresApiKey:true,  requiresLocalEndpoint:false, defaultEndpoint:'https://fast-api.snova.ai/v1', isFree:true, isOpenSource:false, isLocal:false, isBrowserNative:false, isHosted:true, isOpenAICompatible:true, requiresAccount:true, requiresBackendProxy:false, privacyLabel:'third-party-cloud', licenseRisk:'low', commercialUseStatus:'check-required', license:'Proprietary', costLabel:'Free tier', fallbackEligible:true, status:'untested', blockedReason:null, websiteUrl:'https://cloud.sambanova.ai', docsUrl:'https://cloud.sambanova.ai/apis', whereUsedInLoadStudio:['Developer Lab','Director AI'], whereUsedInLoadEco:false, futureLoadAIUse:'llm-routing', testAction:'test-with-key', settingsAction:'set-key', useAsPrimary:false, useAsFallback:true, notes:'Llama 3.1 405B, DeepSeek R1, Qwen. RDU architecture. OpenAI-compat.', pipelineMembership:['openai-compat-routing'], inputTypes:['text'], outputTypes:['text'] },
+  { providerId:'nvidia-nim',          name:'NVIDIA NIM',            aliases:['NIM','NVIDIA Inference Microservices'], category:'llm-cloud', capabilities:['text-generation','chat','vision','audio','scientific'],     accessType:'free-api-key',    requiresApiKey:true,  requiresLocalEndpoint:false, defaultEndpoint:'https://integrate.api.nvidia.com/v1', isFree:true, isOpenSource:false, isLocal:false, isBrowserNative:false, isHosted:true, isOpenAICompatible:true, requiresAccount:true, requiresBackendProxy:false, privacyLabel:'third-party-cloud', licenseRisk:'low', commercialUseStatus:'check-required', license:'Proprietary', costLabel:'Free (1000 credits signup)', fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://build.nvidia.com', docsUrl:'https://docs.api.nvidia.com', whereUsedInLoadStudio:['Developer Lab'], whereUsedInLoadEco:false, futureLoadAIUse:'llm-routing', testAction:'test-with-key', settingsAction:'set-key', useAsPrimary:false, useAsFallback:false, notes:'91 free endpoints. DeepSeek, Llama, Kimi, vision + biology models. Docker containers for self-host.', pipelineMembership:['openai-compat-routing'], inputTypes:['text','image'], outputTypes:['text'] },
+  { providerId:'cohere',              name:'Cohere',                aliases:['Cohere AI'],           category:'llm-cloud',        capabilities:['text-generation','chat','embeddings','rerank','rag'],           accessType:'free-api-key',    requiresApiKey:true,  requiresLocalEndpoint:false, defaultEndpoint:'https://api.cohere.com/v2', isFree:true, isOpenSource:false, isLocal:false, isBrowserNative:false, isHosted:true, isOpenAICompatible:false, requiresAccount:true, requiresBackendProxy:false, privacyLabel:'third-party-cloud', licenseRisk:'low', commercialUseStatus:'check-required', license:'Proprietary', costLabel:'Free (1000 calls/month)', fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://cohere.com', docsUrl:'https://docs.cohere.com', whereUsedInLoadStudio:['Developer Lab'], whereUsedInLoadEco:false, futureLoadAIUse:'llm-routing', testAction:'test-with-key', settingsAction:'set-key', useAsPrimary:false, useAsFallback:false, notes:'Best free RAG pipeline. Embeddings + reranking + generation in one SDK.', pipelineMembership:['openai-compat-routing'], inputTypes:['text'], outputTypes:['text'] },
+  { providerId:'fireworks-ai',        name:'Fireworks AI',          aliases:['Fireworks'],           category:'llm-cloud',        capabilities:['text-generation','chat','fast-inference','structured-output'],  accessType:'free-api-key',    requiresApiKey:true,  requiresLocalEndpoint:false, defaultEndpoint:'https://api.fireworks.ai/inference/v1', isFree:true, isOpenSource:false, isLocal:false, isBrowserNative:false, isHosted:true, isOpenAICompatible:true, requiresAccount:true, requiresBackendProxy:false, privacyLabel:'third-party-cloud', licenseRisk:'low', commercialUseStatus:'check-required', license:'Proprietary', costLabel:'Free (10 RPM no card)', fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://fireworks.ai', docsUrl:'https://readme.fireworks.ai/docs', whereUsedInLoadStudio:['Developer Lab'], whereUsedInLoadEco:false, futureLoadAIUse:'llm-routing', testAction:'test-with-key', settingsAction:'set-key', useAsPrimary:false, useAsFallback:false, notes:'Fastest structured output. Llama 3.1 405B, DeepSeek R1. OpenAI-compat.', pipelineMembership:['openai-compat-routing'], inputTypes:['text'], outputTypes:['text'] },
+  { providerId:'aiml-api',            name:'AI/ML API',             aliases:['AIML API'],            category:'llm-cloud',        capabilities:['text-generation','image-generation','speech-to-text','multi-model'], accessType:'free-api-key', requiresApiKey:true, requiresLocalEndpoint:false, defaultEndpoint:'https://api.aimlapi.com/v1', isFree:true, isOpenSource:false, isLocal:false, isBrowserNative:false, isHosted:true, isOpenAICompatible:true, requiresAccount:true, requiresBackendProxy:false, privacyLabel:'third-party-cloud', licenseRisk:'low', commercialUseStatus:'check-required', license:'Proprietary', costLabel:'Free tier', fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://aimlapi.com', docsUrl:'https://docs.aimlapi.com', whereUsedInLoadStudio:['Developer Lab'], whereUsedInLoadEco:false, futureLoadAIUse:'llm-routing', testAction:'test-with-key', settingsAction:'set-key', useAsPrimary:false, useAsFallback:false, notes:'400+ models aggregated in one API. OpenAI-compat routing.', pipelineMembership:['openai-compat-routing'], inputTypes:['text','image'], outputTypes:['text','image'] },
+
+  // Image models — high-tier (local / self-hosted)
+  { providerId:'flux-2-dev',          name:'FLUX.2 Dev',            aliases:['FLUX 2','FLUX.2'],     category:'image-ai',         capabilities:['image-generation','photorealistic','s-tier','multi-reference'], accessType:'local-endpoint',  requiresApiKey:false, requiresLocalEndpoint:true,  defaultEndpoint:'http://localhost:8188', isFree:true,  isOpenSource:true,  isLocal:true,  isBrowserNative:false, isHosted:false, isOpenAICompatible:false, requiresAccount:false, requiresBackendProxy:false, privacyLabel:'offline', licenseRisk:'medium', commercialUseStatus:'non-commercial', license:'FLUX open weights (non-commercial)', costLabel:'Free', fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://github.com/black-forest-labs/flux', docsUrl:'https://github.com/black-forest-labs/flux', whereUsedInLoadStudio:['AI Image Director'], whereUsedInLoadEco:false, futureLoadAIUse:'image-generation', testAction:'test-local-endpoint', settingsAction:'set-endpoint', useAsPrimary:false, useAsFallback:false, notes:'S-Tier 2026. Rivals MidJourney v7 on photorealism. 16GB VRAM. Non-commercial.', pipelineMembership:['ai-image-glamour','comfyui-production'], inputTypes:['text','image'], outputTypes:['image'] },
+  { providerId:'flux-1-schnell',      name:'FLUX.1 Schnell',        aliases:['FLUX Schnell','FLUX Fast'], category:'image-ai',    capabilities:['image-generation','fast-inference','commercial-safe'],         accessType:'local-endpoint',  requiresApiKey:false, requiresLocalEndpoint:true,  defaultEndpoint:'http://localhost:8188', isFree:true,  isOpenSource:true,  isLocal:true,  isBrowserNative:false, isHosted:false, isOpenAICompatible:false, requiresAccount:false, requiresBackendProxy:false, privacyLabel:'offline', licenseRisk:'none', commercialUseStatus:'free-commercial', license:'Apache 2.0', costLabel:'Free', fallbackEligible:true, status:'untested', blockedReason:null, websiteUrl:'https://huggingface.co/black-forest-labs/FLUX.1-schnell', docsUrl:'https://huggingface.co/black-forest-labs', whereUsedInLoadStudio:['AI Image Director'], whereUsedInLoadEco:false, futureLoadAIUse:'image-generation', testAction:'test-local-endpoint', settingsAction:'set-endpoint', useAsPrimary:false, useAsFallback:true, notes:'Apache 2.0 — fully commercial safe. Sub-2s generation. 8GB VRAM. Best for pipelines.', pipelineMembership:['ai-image-glamour','comfyui-production'], inputTypes:['text'], outputTypes:['image'] },
+  { providerId:'sana-sprint',         name:'SANA-Sprint',           aliases:['SANA Sprint 1.6B'],    category:'image-ai',         capabilities:['image-generation','fast-inference','low-vram'],                accessType:'local-endpoint',  requiresApiKey:false, requiresLocalEndpoint:true,  defaultEndpoint:'http://localhost:8188', isFree:true,  isOpenSource:true,  isLocal:true,  isBrowserNative:false, isHosted:false, isOpenAICompatible:false, requiresAccount:false, requiresBackendProxy:false, privacyLabel:'offline', licenseRisk:'none', commercialUseStatus:'free-commercial', license:'Apache 2.0', costLabel:'Free', fallbackEligible:true, status:'untested', blockedReason:null, websiteUrl:'https://huggingface.co/Efficient-Large-Model/Sana_Sprint_1.6B_1024px_MultiLing_diffusers', docsUrl:'https://huggingface.co/Efficient-Large-Model', whereUsedInLoadStudio:['AI Image Director'], whereUsedInLoadEco:false, futureLoadAIUse:'image-generation', testAction:'test-local-endpoint', settingsAction:'set-endpoint', useAsPrimary:false, useAsFallback:true, notes:'NVIDIA Research. 6GB VRAM. Fastest open generation. Apache 2.0 commercial.', pipelineMembership:['ai-image-glamour','comfyui-production'], inputTypes:['text'], outputTypes:['image'] },
+  { providerId:'reve-image',          name:'Reve Image',            aliases:['Reve Image 1.0'],      category:'image-ai',         capabilities:['image-generation','s-tier','prompt-adherence'],                accessType:'local-endpoint',  requiresApiKey:false, requiresLocalEndpoint:true,  defaultEndpoint:'http://localhost:8188', isFree:true,  isOpenSource:true,  isLocal:true,  isBrowserNative:false, isHosted:false, isOpenAICompatible:false, requiresAccount:false, requiresBackendProxy:false, privacyLabel:'offline', licenseRisk:'low', commercialUseStatus:'check-required', license:'Open weights', costLabel:'Free', fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://huggingface.co/reve-image', docsUrl:'https://huggingface.co/reve-image', whereUsedInLoadStudio:['AI Image Director'], whereUsedInLoadEco:false, futureLoadAIUse:'image-generation', testAction:'test-local-endpoint', settingsAction:'set-endpoint', useAsPrimary:false, useAsFallback:false, notes:'Top prompt-adherence leaderboard 2026. S-tier quality.', pipelineMembership:['ai-image-glamour'], inputTypes:['text'], outputTypes:['image'] },
+  { providerId:'hunyuan-image',       name:'HunyuanImage',          aliases:['HunyuanImage 3.0'],    category:'image-ai',         capabilities:['image-generation','complex-scenes','long-prompts'],            accessType:'local-endpoint',  requiresApiKey:false, requiresLocalEndpoint:true,  defaultEndpoint:'http://localhost:8188', isFree:true,  isOpenSource:true,  isLocal:true,  isBrowserNative:false, isHosted:false, isOpenAICompatible:false, requiresAccount:false, requiresBackendProxy:false, privacyLabel:'offline', licenseRisk:'low', commercialUseStatus:'check-required', license:'Open', costLabel:'Free', fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://huggingface.co/tencent/HunyuanImage', docsUrl:'https://huggingface.co/tencent/HunyuanImage', whereUsedInLoadStudio:['AI Image Director'], whereUsedInLoadEco:false, futureLoadAIUse:'image-generation', testAction:'test-local-endpoint', settingsAction:'set-endpoint', useAsPrimary:false, useAsFallback:false, notes:'Tencent. 80B MoE architecture, 13B active. Handles complex multi-element scenes. 24GB+ VRAM.', pipelineMembership:['ai-image-glamour'], inputTypes:['text'], outputTypes:['image'] },
+  { providerId:'qwen-image',          name:'Qwen Image',            aliases:['Qwen Image Max 2512'], category:'image-ai',         capabilities:['image-generation','text-in-image','multilingual'],             accessType:'local-endpoint',  requiresApiKey:false, requiresLocalEndpoint:true,  defaultEndpoint:'http://localhost:8188', isFree:true,  isOpenSource:true,  isLocal:true,  isBrowserNative:false, isHosted:false, isOpenAICompatible:false, requiresAccount:false, requiresBackendProxy:false, privacyLabel:'offline', licenseRisk:'low', commercialUseStatus:'check-required', license:'Qwen License', costLabel:'Free', fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://huggingface.co/Qwen', docsUrl:'https://huggingface.co/Qwen', whereUsedInLoadStudio:['AI Image Director'], whereUsedInLoadEco:false, futureLoadAIUse:'image-generation', testAction:'test-local-endpoint', settingsAction:'set-endpoint', useAsPrimary:false, useAsFallback:false, notes:'Alibaba. Superior legible text in images. Best open-source text-in-image. 16GB VRAM.', pipelineMembership:['ai-image-glamour'], inputTypes:['text'], outputTypes:['image'] },
+  { providerId:'fibo',                name:'FIBO',                  aliases:['Bria AI FIBO'],        category:'image-ai',         capabilities:['image-generation','structured-control','commercial-safe'],      accessType:'local-endpoint',  requiresApiKey:false, requiresLocalEndpoint:true,  defaultEndpoint:'http://localhost:8188', isFree:true,  isOpenSource:true,  isLocal:true,  isBrowserNative:false, isHosted:false, isOpenAICompatible:false, requiresAccount:false, requiresBackendProxy:false, privacyLabel:'offline', licenseRisk:'none', commercialUseStatus:'free-commercial', license:'Commercial-safe (trained on licensed data)', costLabel:'Free', fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://bria.ai', docsUrl:'https://bria.ai/docs', whereUsedInLoadStudio:['AI Image Director'], whereUsedInLoadEco:false, futureLoadAIUse:'image-generation', testAction:'test-local-endpoint', settingsAction:'set-endpoint', useAsPrimary:false, useAsFallback:false, notes:'Bria AI. JSON-native structured control: camera, lighting, depth. Trained on licensed data only.', pipelineMembership:['ai-image-glamour','comfyui-production'], inputTypes:['text'], outputTypes:['image'] },
+  { providerId:'lcm',                 name:'LCM',                   aliases:['Latent Consistency Model','LCM-LoRA'], category:'image-ai', capabilities:['image-generation','fast-inference','sd-compatible'],     accessType:'local-endpoint',  requiresApiKey:false, requiresLocalEndpoint:true,  defaultEndpoint:'http://localhost:7860', isFree:true,  isOpenSource:true,  isLocal:true,  isBrowserNative:false, isHosted:false, isOpenAICompatible:false, requiresAccount:false, requiresBackendProxy:false, privacyLabel:'offline', licenseRisk:'none', commercialUseStatus:'free-commercial', license:'MIT', costLabel:'Free', fallbackEligible:true, status:'untested', blockedReason:null, websiteUrl:'https://github.com/luosialen/latent-consistency-model', docsUrl:'https://huggingface.co/SimianLuo/LCM_Dreamshaper_v7', whereUsedInLoadStudio:['AI Image Director'], whereUsedInLoadEco:false, futureLoadAIUse:'image-generation', testAction:'test-local-endpoint', settingsAction:'set-endpoint', useAsPrimary:false, useAsFallback:true, notes:'MIT license. 4-8 step generation. Based on SD fine-tuning. Extremely fast. 6GB VRAM.', pipelineMembership:['ai-image-glamour','comfyui-production'], inputTypes:['text'], outputTypes:['image'] },
+  { providerId:'instaflow',           name:'InstaFlow',             aliases:['InstaFlow one-step'],  category:'image-ai',         capabilities:['image-generation','one-step','fast-inference'],                accessType:'local-endpoint',  requiresApiKey:false, requiresLocalEndpoint:true,  defaultEndpoint:'http://localhost:7860', isFree:true,  isOpenSource:true,  isLocal:true,  isBrowserNative:false, isHosted:false, isOpenAICompatible:false, requiresAccount:false, requiresBackendProxy:false, privacyLabel:'offline', licenseRisk:'none', commercialUseStatus:'free-commercial', license:'MIT', costLabel:'Free', fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://github.com/gaosilas/instaflow', docsUrl:'https://github.com/gaosilas/instaflow', whereUsedInLoadStudio:['AI Image Director'], whereUsedInLoadEco:false, futureLoadAIUse:'image-generation', testAction:'test-local-endpoint', settingsAction:'set-endpoint', useAsPrimary:false, useAsFallback:false, notes:'MIT. One-step text-to-image. Near-instant generation on capable GPU.', pipelineMembership:['comfyui-production'], inputTypes:['text'], outputTypes:['image'] },
+  { providerId:'deepfloyd-if',        name:'DeepFloyd IF',          aliases:['DeepFloyd'],           category:'image-ai',         capabilities:['image-generation','cascaded-diffusion','text-in-image'],       accessType:'local-endpoint',  requiresApiKey:false, requiresLocalEndpoint:true,  defaultEndpoint:'http://localhost:7860', isFree:true,  isOpenSource:true,  isLocal:true,  isBrowserNative:false, isHosted:false, isOpenAICompatible:false, requiresAccount:false, requiresBackendProxy:false, privacyLabel:'offline', licenseRisk:'low', commercialUseStatus:'non-commercial', license:'Stability AI non-commercial', costLabel:'Free', fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://github.com/deep-floyd/IF', docsUrl:'https://github.com/deep-floyd/IF', whereUsedInLoadStudio:['AI Image Director'], whereUsedInLoadEco:false, futureLoadAIUse:'image-generation', testAction:'test-local-endpoint', settingsAction:'set-endpoint', useAsPrimary:false, useAsFallback:false, notes:'Cascaded pixel-space diffusion. Strong text in images. Non-commercial only.', pipelineMembership:['ai-image-glamour'], inputTypes:['text'], outputTypes:['image'] },
+  { providerId:'wuerstchen',          name:'Wurstchen',             aliases:['Wuerstchen','Würstchen'], category:'image-ai',       capabilities:['image-generation','efficient','low-compute'],                  accessType:'local-endpoint',  requiresApiKey:false, requiresLocalEndpoint:true,  defaultEndpoint:'http://localhost:7860', isFree:true,  isOpenSource:true,  isLocal:true,  isBrowserNative:false, isHosted:false, isOpenAICompatible:false, requiresAccount:false, requiresBackendProxy:false, privacyLabel:'offline', licenseRisk:'none', commercialUseStatus:'free-commercial', license:'MIT', costLabel:'Free', fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://huggingface.co/warp-ai/wuerstchen', docsUrl:'https://huggingface.co/warp-ai/wuerstchen', whereUsedInLoadStudio:['AI Image Director'], whereUsedInLoadEco:false, futureLoadAIUse:'image-generation', testAction:'test-local-endpoint', settingsAction:'set-endpoint', useAsPrimary:false, useAsFallback:false, notes:'MIT. Extremely compute-efficient. Runs on consumer hardware.', pipelineMembership:['comfyui-production'], inputTypes:['text'], outputTypes:['image'] },
+  { providerId:'dalle-mini',          name:'DALL-E Mini',           aliases:['Craiyon','dalle-mini'], category:'image-ai',        capabilities:['image-generation','cpu-friendly','free-hosted'],               accessType:'free-no-key',     requiresApiKey:false, requiresLocalEndpoint:false, defaultEndpoint:'https://backend.craiyon.com', isFree:true, isOpenSource:true, isLocal:false, isBrowserNative:false, isHosted:true, isOpenAICompatible:false, requiresAccount:false, requiresBackendProxy:false, privacyLabel:'third-party-cloud', licenseRisk:'none', commercialUseStatus:'free-commercial', license:'Apache 2.0', costLabel:'Free', fallbackEligible:true, status:'untested', blockedReason:null, websiteUrl:'https://www.craiyon.com', docsUrl:'https://github.com/borisdayma/dalle-mini', whereUsedInLoadStudio:['AI Image Director'], whereUsedInLoadEco:false, futureLoadAIUse:'image-generation', testAction:'test-no-key', settingsAction:'none', useAsPrimary:false, useAsFallback:true, notes:'Apache 2.0. Runs on CPU. Lower quality. Good as zero-config fallback.', pipelineMembership:['commercial-image'], inputTypes:['text'], outputTypes:['image'] },
+  { providerId:'sd-35-medium',        name:'SD 3.5 Medium',         aliases:['Stable Diffusion 3.5 Medium'], category:'image-ai', capabilities:['image-generation','lower-vram','sd35-compatible'],           accessType:'local-endpoint',  requiresApiKey:false, requiresLocalEndpoint:true,  defaultEndpoint:'http://localhost:8188', isFree:true,  isOpenSource:true,  isLocal:true,  isBrowserNative:false, isHosted:false, isOpenAICompatible:false, requiresAccount:false, requiresBackendProxy:false, privacyLabel:'offline', licenseRisk:'low', commercialUseStatus:'check-required', license:'Stability Community License', costLabel:'Free', fallbackEligible:true, status:'untested', blockedReason:null, websiteUrl:'https://github.com/Stability-AI/generative-models', docsUrl:'https://huggingface.co/stabilityai', whereUsedInLoadStudio:['AI Image Director'], whereUsedInLoadEco:false, futureLoadAIUse:'image-generation', testAction:'test-local-endpoint', settingsAction:'set-endpoint', useAsPrimary:false, useAsFallback:true, notes:'Lighter SD3.5 variant. 8GB VRAM. Faster inference. All SD ecosystem tools compatible.', pipelineMembership:['ai-image-glamour','comfyui-production'], inputTypes:['text'], outputTypes:['image'] },
+  { providerId:'seedream',            name:'Seedream',              aliases:['Seedream 5.0'],        category:'image-ai',         capabilities:['image-generation','photorealistic'],                            accessType:'local-endpoint',  requiresApiKey:false, requiresLocalEndpoint:true,  defaultEndpoint:'http://localhost:8188', isFree:true,  isOpenSource:true,  isLocal:true,  isBrowserNative:false, isHosted:false, isOpenAICompatible:false, requiresAccount:false, requiresBackendProxy:false, privacyLabel:'offline', licenseRisk:'low', commercialUseStatus:'check-required', license:'Open weights', costLabel:'Free', fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://huggingface.co/ByteDance-Seed', docsUrl:'https://huggingface.co/ByteDance-Seed', whereUsedInLoadStudio:['AI Image Director'], whereUsedInLoadEco:false, futureLoadAIUse:'image-generation', testAction:'test-local-endpoint', settingsAction:'set-endpoint', useAsPrimary:false, useAsFallback:false, notes:'ByteDance. Seedream 5.0.', pipelineMembership:['ai-image-glamour'], inputTypes:['text'], outputTypes:['image'] },
+  { providerId:'playground-v25',      name:'Playground v2.5',       aliases:['Playground 2.5'],      category:'image-ai',         capabilities:['image-generation','aesthetic','sdxl-compatible'],              accessType:'local-endpoint',  requiresApiKey:false, requiresLocalEndpoint:true,  defaultEndpoint:'http://localhost:8188', isFree:true,  isOpenSource:true,  isLocal:true,  isBrowserNative:false, isHosted:false, isOpenAICompatible:false, requiresAccount:false, requiresBackendProxy:false, privacyLabel:'offline', licenseRisk:'low', commercialUseStatus:'check-required', license:'Playground Community License', costLabel:'Free', fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://huggingface.co/playgroundai/playground-v2.5-1024px-aesthetic', docsUrl:'https://huggingface.co/playgroundai', whereUsedInLoadStudio:['AI Image Director'], whereUsedInLoadEco:false, futureLoadAIUse:'image-generation', testAction:'test-local-endpoint', settingsAction:'set-endpoint', useAsPrimary:false, useAsFallback:false, notes:'Strong aesthetic quality. SDXL-compatible.', pipelineMembership:['ai-image-glamour'], inputTypes:['text'], outputTypes:['image'] },
+
+  // Glamour fine-tunes
+  { providerId:'awportrait-fl',       name:'AWPortrait-FL',         aliases:['AW Portrait FLUX'],    category:'image-ai',         capabilities:['image-generation','portrait','flux-finetune','glamour'],       accessType:'local-endpoint',  requiresApiKey:false, requiresLocalEndpoint:true,  defaultEndpoint:'http://localhost:8188', isFree:true,  isOpenSource:true,  isLocal:true,  isBrowserNative:false, isHosted:false, isOpenAICompatible:false, requiresAccount:false, requiresBackendProxy:false, privacyLabel:'offline', licenseRisk:'medium', commercialUseStatus:'check-required', license:'FLUX non-commercial base', costLabel:'Free', fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://civitai.com', docsUrl:'https://civitai.com', whereUsedInLoadStudio:['AI Image Director','Character Lab'], whereUsedInLoadEco:false, futureLoadAIUse:'image-generation', testAction:'test-local-endpoint', settingsAction:'set-endpoint', useAsPrimary:false, useAsFallback:false, notes:'FLUX.1-dev fine-tune for glamour portrait photography.', pipelineMembership:['ai-image-glamour'], inputTypes:['text'], outputTypes:['image'] },
+  { providerId:'epicrealism-xl',      name:'EpicRealism XL',        aliases:['Epic Realism XL'],     category:'image-ai',         capabilities:['image-generation','photorealistic','sdxl-finetune','glamour'],  accessType:'local-endpoint',  requiresApiKey:false, requiresLocalEndpoint:true,  defaultEndpoint:'http://localhost:8188', isFree:true,  isOpenSource:true,  isLocal:true,  isBrowserNative:false, isHosted:false, isOpenAICompatible:false, requiresAccount:false, requiresBackendProxy:false, privacyLabel:'offline', licenseRisk:'low', commercialUseStatus:'check-required', license:'CreativeML', costLabel:'Free', fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://civitai.com/models/277058', docsUrl:'https://civitai.com/models/277058', whereUsedInLoadStudio:['AI Image Director','Character Lab'], whereUsedInLoadEco:false, futureLoadAIUse:'image-generation', testAction:'test-local-endpoint', settingsAction:'set-endpoint', useAsPrimary:false, useAsFallback:false, notes:'SDXL glamour portrait fine-tune.', pipelineMembership:['ai-image-glamour'], inputTypes:['text'], outputTypes:['image'] },
+  { providerId:'cyberrealistic-xl',   name:'CyberRealistic XL',     aliases:['Cyber Realistic XL'],  category:'image-ai',         capabilities:['image-generation','photorealistic','sdxl-finetune'],           accessType:'local-endpoint',  requiresApiKey:false, requiresLocalEndpoint:true,  defaultEndpoint:'http://localhost:8188', isFree:true,  isOpenSource:true,  isLocal:true,  isBrowserNative:false, isHosted:false, isOpenAICompatible:false, requiresAccount:false, requiresBackendProxy:false, privacyLabel:'offline', licenseRisk:'low', commercialUseStatus:'check-required', license:'CreativeML', costLabel:'Free', fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://civitai.com', docsUrl:'https://civitai.com', whereUsedInLoadStudio:['AI Image Director'], whereUsedInLoadEco:false, futureLoadAIUse:'image-generation', testAction:'test-local-endpoint', settingsAction:'set-endpoint', useAsPrimary:false, useAsFallback:false, notes:'SDXL photorealistic fine-tune.', pipelineMembership:['ai-image-glamour'], inputTypes:['text'], outputTypes:['image'] },
+
+  // Hosted image (free, no GPU required)
+  { providerId:'pixazo',              name:'Pixazo',                aliases:['Pixazo FLUX API'],     category:'image-ai',         capabilities:['image-generation','flux-hosted','free-api'],                   accessType:'free-no-key',     requiresApiKey:false, requiresLocalEndpoint:false, defaultEndpoint:'https://api.pixazo.com', isFree:true, isOpenSource:false, isLocal:false, isBrowserNative:false, isHosted:true, isOpenAICompatible:false, requiresAccount:false, requiresBackendProxy:false, privacyLabel:'third-party-cloud', licenseRisk:'low', commercialUseStatus:'check-required', license:'Proprietary', costLabel:'Free tier', fallbackEligible:true, status:'untested', blockedReason:null, websiteUrl:'https://pixazo.com', docsUrl:'https://pixazo.com/api', whereUsedInLoadStudio:['AI Image Director'], whereUsedInLoadEco:false, futureLoadAIUse:'image-generation', testAction:'test-no-key', settingsAction:'none', useAsPrimary:false, useAsFallback:true, notes:'Free FLUX image API. No GPU required.', pipelineMembership:['commercial-image'], inputTypes:['text'], outputTypes:['image'] },
+
+  // TTS — hosted free tier
+  { providerId:'fish-audio',          name:'Fish Audio',            aliases:['Fish TTS'],            category:'tts',              capabilities:['text-to-speech','voice-clone','emotion-control'],               accessType:'free-api-key',    requiresApiKey:true,  requiresLocalEndpoint:false, defaultEndpoint:'https://api.fish.audio/v1', isFree:true, isOpenSource:false, isLocal:false, isBrowserNative:false, isHosted:true, isOpenAICompatible:false, requiresAccount:true, requiresBackendProxy:false, privacyLabel:'third-party-cloud', licenseRisk:'low', commercialUseStatus:'check-required', license:'Proprietary', costLabel:'Free tier', fallbackEligible:true, status:'untested', blockedReason:null, websiteUrl:'https://fish.audio', docsUrl:'https://docs.fish.audio', whereUsedInLoadStudio:['Voice Studio'], whereUsedInLoadEco:false, futureLoadAIUse:'character-voice', testAction:'test-with-key', settingsAction:'set-key', useAsPrimary:false, useAsFallback:true, notes:'TTS + voice cloning. Free tier available.', pipelineMembership:['tts-voice'], inputTypes:['text','audio'], outputTypes:['audio'] },
+
+  // Video generation — hosted free
+  { providerId:'zsky',                name:'ZSky',                  aliases:['ZSky AI'],             category:'video-gen',        capabilities:['video-generation','text-to-video','free-hosted'],              accessType:'free-api-key',    requiresApiKey:true,  requiresLocalEndpoint:false, defaultEndpoint:null,                     isFree:true, isOpenSource:false, isLocal:false, isBrowserNative:false, isHosted:true, isOpenAICompatible:false, requiresAccount:true, requiresBackendProxy:false, privacyLabel:'third-party-cloud', licenseRisk:'low', commercialUseStatus:'check-required', license:'Proprietary', costLabel:'Free tier', fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://zsky.ai', docsUrl:'https://zsky.ai/docs', whereUsedInLoadStudio:['Scene Workshop'], whereUsedInLoadEco:false, futureLoadAIUse:'video-generation', testAction:'test-with-key', settingsAction:'set-key', useAsPrimary:false, useAsFallback:false, notes:'Free-tier video generation API.', pipelineMembership:['ai-video'], inputTypes:['text','image'], outputTypes:['video'] },
+
+  // Audio / SFX generation
+  { providerId:'gensfx',              name:'GenSFX',                aliases:['Gen SFX'],             category:'sfx-generation',   capabilities:['sfx-generation','audio-generation','prompt-to-sfx'],           accessType:'free-no-key',     requiresApiKey:false, requiresLocalEndpoint:false, defaultEndpoint:null,                     isFree:true, isOpenSource:false, isLocal:false, isBrowserNative:false, isHosted:true, isOpenAICompatible:false, requiresAccount:false, requiresBackendProxy:false, privacyLabel:'third-party-cloud', licenseRisk:'low', commercialUseStatus:'check-required', license:'Proprietary', costLabel:'Free tier', fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://www.gensfx.com', docsUrl:'https://www.gensfx.com', whereUsedInLoadStudio:['Sound Stage'], whereUsedInLoadEco:false, futureLoadAIUse:'sfx-generation', testAction:'test-no-key', settingsAction:'none', useAsPrimary:false, useAsFallback:false, notes:'AI SFX generation from text prompts.', pipelineMembership:['music-audio-gen'], inputTypes:['text'], outputTypes:['audio'] },
+
+  // Location / map overlay
+  { providerId:'mapbox',              name:'Mapbox',                aliases:[],                      category:'overlay',          capabilities:['map-overlay','location','geolocation-ui'],                     accessType:'free-api-key',    requiresApiKey:true,  requiresLocalEndpoint:false, defaultEndpoint:'https://api.mapbox.com', isFree:true, isOpenSource:false, isLocal:false, isBrowserNative:false, isHosted:true, isOpenAICompatible:false, requiresAccount:true, requiresBackendProxy:false, privacyLabel:'third-party-cloud', licenseRisk:'low', commercialUseStatus:'check-required', license:'Proprietary', costLabel:'Free (50k tiles/month)', fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://mapbox.com', docsUrl:'https://docs.mapbox.com', whereUsedInLoadStudio:['Editing Bay'], whereUsedInLoadEco:false, futureLoadAIUse:'location-overlay', testAction:'test-with-key', settingsAction:'set-key', useAsPrimary:false, useAsFallback:false, notes:'Location overlay and map visuals. Free tier 50k tiles/month.', pipelineMembership:['vn-asset-browser'], inputTypes:[], outputTypes:['image','overlay'] },
+
+  // Color / LUT tools
+  { providerId:'uncut-video',         name:'Uncut.video LUTs',      aliases:['Uncut Video'],         category:'color-grading',    capabilities:['lut-files','color-grade','free-download'],                     accessType:'free-no-key',     requiresApiKey:false, requiresLocalEndpoint:false, defaultEndpoint:null,                     isFree:true, isOpenSource:false, isLocal:false, isBrowserNative:false, isHosted:true, isOpenAICompatible:false, requiresAccount:false, requiresBackendProxy:false, privacyLabel:'third-party-cloud', licenseRisk:'none', commercialUseStatus:'free-commercial', license:'Free', costLabel:'Free', fallbackEligible:false, status:'untested', blockedReason:null, websiteUrl:'https://uncut.video', docsUrl:'https://uncut.video', whereUsedInLoadStudio:['Editing Bay','Look Lab'], whereUsedInLoadEco:false, futureLoadAIUse:'color-grade', testAction:'none', settingsAction:'none', useAsPrimary:false, useAsFallback:false, notes:'Free downloadable colour grade LUT packs.', pipelineMembership:['vn-editing'], inputTypes:[], outputTypes:['lut'] }
 ];
 
 // Merge extra providers into main list
@@ -1797,6 +1848,178 @@ function _testOpenRouter(key) {
   return fetch('https://openrouter.ai/api/v1/models', {headers:{'Authorization':'Bearer ' + key}})
     .then(function (r) { return r.ok; })
     .catch(function () { return false; });
+}
+
+// ─── SEARCH / FETCH CONNECTORS ───────────────────────────────────────────────
+
+function _freesoundSearch(key, query, filter, limit, page) {
+  var url = 'https://freesound.org/apiv2/search/text/' +
+    '?query=' + encodeURIComponent(query || '') +
+    '&fields=id,name,previews,duration,license,username,tags' +
+    '&page_size=' + (limit || 20) +
+    '&page=' + (page || 1) +
+    (filter ? '&filter=' + encodeURIComponent(filter) : '') +
+    '&token=' + key;
+  return fetch(url).then(function (r) {
+    if (!r.ok) throw new Error('Freesound ' + r.status);
+    return r.json().then(function (d) {
+      return (d.results || []).map(function (item) {
+        var dur = Math.round(item.duration || 0);
+        return {
+          id: String(item.id),
+          title: item.name || ('sound-' + item.id),
+          artist: item.username || '',
+          duration: dur,
+          previewUrl: item.previews && (item.previews['preview-hq-mp3'] || item.previews['preview-lq-mp3']) || null,
+          licenseType: item.license || 'unknown',
+          attribution: (item.username || 'unknown') + ' via Freesound',
+          provider: 'freesound',
+          tags: item.tags || []
+        };
+      });
+    });
+  });
+}
+
+function _pexelsSearch(key, query, mediaType, page) {
+  var base = mediaType === 'video' ? 'https://api.pexels.com/videos/search' : 'https://api.pexels.com/v1/search';
+  var url = base + '?query=' + encodeURIComponent(query) + '&per_page=20&page=' + (page || 1);
+  return fetch(url, {headers: {'Authorization': key}}).then(function (r) {
+    if (!r.ok) throw new Error('Pexels ' + r.status);
+    return r.json().then(function (d) {
+      if (mediaType === 'video') {
+        return (d.videos || []).map(function (v) {
+          var file = (v.video_files || []).filter(function (f) { return f.quality === 'sd'; })[0] || (v.video_files || [])[0] || {};
+          return {
+            id: String(v.id), title: (v.url || '').split('/').filter(Boolean).pop() || ('pexels-' + v.id),
+            artist: (v.user && v.user.name) || 'Pexels',
+            thumbnailUrl: v.image || null, url: file.link || null,
+            mimeType: 'video/mp4', width: v.width, height: v.height, duration: v.duration || 0,
+            licenseType: 'Pexels License', attribution: (v.user && v.user.name) || 'Pexels', provider: 'pexels'
+          };
+        });
+      }
+      return (d.photos || []).map(function (p) {
+        return {
+          id: String(p.id), title: p.alt || ('pexels-' + p.id),
+          artist: p.photographer || 'Pexels',
+          thumbnailUrl: p.src && p.src.small || null, url: p.src && p.src.large2x || p.src && p.src.original || null,
+          mimeType: 'image/jpeg', width: p.width, height: p.height,
+          licenseType: 'Pexels License', attribution: p.photographer || 'Pexels', provider: 'pexels'
+        };
+      });
+    });
+  });
+}
+
+function _pixabaySearch(key, query, mediaType, page) {
+  var base = mediaType === 'video' ? 'https://pixabay.com/api/videos/' : 'https://pixabay.com/api/';
+  var url = base + '?key=' + key + '&q=' + encodeURIComponent(query) + '&per_page=20&page=' + (page || 1) + '&safesearch=true';
+  return fetch(url).then(function (r) {
+    if (!r.ok) throw new Error('Pixabay ' + r.status);
+    return r.json().then(function (d) {
+      return (d.hits || []).map(function (h) {
+        if (mediaType === 'video') {
+          var vid = (h.videos && (h.videos.small || h.videos.tiny)) || {};
+          return {
+            id: String(h.id), title: h.tags || ('pixabay-' + h.id), artist: h.user || 'Pixabay',
+            thumbnailUrl: h.userImageURL || null, url: vid.url || null,
+            mimeType: 'video/mp4', width: vid.width, height: vid.height, duration: h.duration || 0,
+            licenseType: 'Pixabay License', attribution: (h.user || 'Pixabay') + ' via Pixabay', provider: 'pixabay-stock'
+          };
+        }
+        return {
+          id: String(h.id), title: h.tags || ('pixabay-' + h.id), artist: h.user || 'Pixabay',
+          thumbnailUrl: h.webformatURL || null, url: h.largeImageURL || h.webformatURL || null,
+          mimeType: 'image/jpeg', width: h.imageWidth, height: h.imageHeight,
+          licenseType: 'Pixabay License', attribution: (h.user || 'Pixabay') + ' via Pixabay', provider: 'pixabay-stock'
+        };
+      });
+    });
+  });
+}
+
+function _wikimediaSearch(query, mediaType, page) {
+  var url = 'https://commons.wikimedia.org/w/api.php' +
+    '?action=query&list=search&srsearch=' + encodeURIComponent(query + ' ' + (mediaType || 'image')) +
+    '&srnamespace=6&srlimit=20&format=json&origin=*' +
+    '&sroffset=' + (((page || 1) - 1) * 20);
+  return fetch(url).then(function (r) {
+    if (!r.ok) throw new Error('Wikimedia ' + r.status);
+    return r.json().then(function (d) {
+      return ((d.query && d.query.search) || []).map(function (item) {
+        var title = item.title.replace('File:', '');
+        var enc = encodeURIComponent(item.title.replace(/ /g, '_'));
+        return {
+          id: String(item.pageid), title: title, artist: 'Wikimedia Commons',
+          thumbnailUrl: 'https://commons.wikimedia.org/wiki/Special:FilePath/' + enc + '?width=200',
+          url: 'https://commons.wikimedia.org/wiki/Special:FilePath/' + enc,
+          licenseType: 'Various CC', attribution: title + ' via Wikimedia Commons',
+          provider: 'wikimedia', pageUrl: 'https://commons.wikimedia.org/wiki/' + enc
+        };
+      });
+    });
+  });
+}
+
+function _nasaSearch(query, mediaType, page) {
+  var type = mediaType === 'video' ? 'video' : (mediaType === 'audio' ? 'audio' : 'image');
+  var url = 'https://images-api.nasa.gov/search?q=' + encodeURIComponent(query) +
+    '&media_type=' + type + '&page=' + (page || 1) + '&page_size=20';
+  return fetch(url).then(function (r) {
+    if (!r.ok) throw new Error('NASA ' + r.status);
+    return r.json().then(function (d) {
+      return ((d.collection && d.collection.items) || []).map(function (item) {
+        var data = (item.data && item.data[0]) || {};
+        var link = (item.links && item.links[0]) || {};
+        return {
+          id: data.nasa_id || '', title: data.title || data.nasa_id || '', artist: data.center || 'NASA',
+          thumbnailUrl: link.href || null, url: link.href || null,
+          licenseType: 'Public Domain (NASA)', attribution: (data.title || '') + ' — NASA',
+          provider: 'nasa-library', description: data.description || ''
+        };
+      });
+    });
+  });
+}
+
+function _pollJobComfyUI(endpoint, jobId) {
+  return fetch(endpoint + '/history/' + jobId).then(function (r) {
+    if (!r.ok) throw new Error('ComfyUI history ' + r.status);
+    return r.json().then(function (d) {
+      var job = d[jobId];
+      if (!job || !(job.status && job.status.completed)) return {done: false, provider: 'comfyui'};
+      var outputs = job.outputs || {};
+      var imageNode = null;
+      Object.keys(outputs).forEach(function (k) { if (!imageNode && outputs[k].images && outputs[k].images.length) imageNode = outputs[k]; });
+      if (!imageNode) return {done: true, provider: 'comfyui', error: 'no-image-output'};
+      var img = imageNode.images[0];
+      var viewUrl = endpoint + '/view?filename=' + encodeURIComponent(img.filename) + '&subfolder=' + (img.subfolder || '') + '&type=' + (img.type || 'output');
+      return fetch(viewUrl).then(function (r2) {
+        return r2.blob().then(function (b) {
+          return Object.assign({done: true}, LoadProviderRegistry.normalizeResult({type: 'image', blob: b, url: URL.createObjectURL(b), provider: 'comfyui'}));
+        });
+      });
+    });
+  });
+}
+
+function _pollJobAiHorde(jobId, key) {
+  var hKey = key || '0000000000';
+  return fetch('https://stablehorde.net/api/v2/generate/check/' + jobId, {headers: {'apikey': hKey}}).then(function (r) {
+    if (!r.ok) throw new Error('AI Horde check ' + r.status);
+    return r.json().then(function (d) {
+      if (!d.done) return {done: false, provider: 'aihorde', waiting: d.waiting, processing: d.processing};
+      return fetch('https://stablehorde.net/api/v2/generate/status/' + jobId, {headers: {'apikey': hKey}}).then(function (r2) {
+        if (!r2.ok) throw new Error('AI Horde status ' + r2.status);
+        return r2.json().then(function (d2) {
+          var gen = (d2.generations || [])[0];
+          if (!gen) return {done: true, provider: 'aihorde', error: 'no-generation'};
+          return Object.assign({done: true}, LoadProviderRegistry.normalizeResult({type: 'image', url: gen.img, provider: 'aihorde'}));
+        });
+      });
+    });
+  });
 }
 
 // ─── PUBLIC API ───────────────────────────────────────────────────────────────
@@ -2165,6 +2388,192 @@ var LoadProviderRegistry = {
     }
 
     return tryNext(0);
+  },
+
+  searchMusic: function (request) {
+    // request: { query, genre, page, providerId, limit }
+    // Returns Promise<{ provider, results: [{id,title,artist,duration,previewUrl,licenseType,attribution,provider}] }>
+    var providerId = request.providerId || 'freesound';
+    var s = _settings[providerId] || {};
+    var key = s.apiKey || null;
+    var query = request.query || request.genre || 'music';
+    var page = request.page || 1;
+    var limit = request.limit || 20;
+
+    if (providerId === 'freesound') {
+      if (!key) return Promise.resolve({provider: 'freesound', results: [], status: 'needs-key', needsKey: true});
+      return _freesoundSearch(key, query, 'tag:music', limit, page)
+        .then(function (r) { return {provider: 'freesound', results: r}; })
+        .catch(function (e) { return {provider: 'freesound', results: [], error: e.message}; });
+    }
+    return Promise.resolve({provider: providerId, results: [], status: 'no-connector'});
+  },
+
+  searchSFX: function (request) {
+    // request: { query, category, page, providerId, limit }
+    var providerId = request.providerId || 'freesound';
+    var s = _settings[providerId] || {};
+    var key = s.apiKey || null;
+    var query = request.query || request.category || 'sound effect';
+    var page = request.page || 1;
+    var limit = request.limit || 20;
+
+    if (providerId === 'freesound') {
+      if (!key) return Promise.resolve({provider: 'freesound', results: [], status: 'needs-key', needsKey: true});
+      return _freesoundSearch(key, query, null, limit, page)
+        .then(function (r) { return {provider: 'freesound', results: r}; })
+        .catch(function (e) { return {provider: 'freesound', results: [], error: e.message}; });
+    }
+    return Promise.resolve({provider: providerId, results: [], status: 'no-connector'});
+  },
+
+  searchStock: function (request) {
+    // request: { query, mediaType ('image'|'video'|'audio'), page, providerId }
+    var providerId = request.providerId;
+    var mediaType = request.mediaType || 'image';
+    var query = request.query || 'nature';
+    var page = request.page || 1;
+
+    if (!providerId) {
+      var pKey = (_settings['pexels'] || {}).apiKey;
+      var pbKey = (_settings['pixabay-stock'] || {}).apiKey;
+      providerId = pKey ? 'pexels' : pbKey ? 'pixabay-stock' : 'wikimedia';
+    }
+    var s = _settings[providerId] || {};
+    var key = s.apiKey || null;
+
+    if (providerId === 'pexels') {
+      if (!key) return Promise.resolve({provider: 'pexels', results: [], status: 'needs-key', needsKey: true});
+      return _pexelsSearch(key, query, mediaType, page)
+        .then(function (r) { return {provider: 'pexels', results: r}; })
+        .catch(function (e) { return {provider: 'pexels', results: [], error: e.message}; });
+    }
+    if (providerId === 'pixabay-stock') {
+      if (!key) return Promise.resolve({provider: 'pixabay-stock', results: [], status: 'needs-key', needsKey: true});
+      return _pixabaySearch(key, query, mediaType, page)
+        .then(function (r) { return {provider: 'pixabay-stock', results: r}; })
+        .catch(function (e) { return {provider: 'pixabay-stock', results: [], error: e.message}; });
+    }
+    if (providerId === 'wikimedia') {
+      return _wikimediaSearch(query, mediaType, page)
+        .then(function (r) { return {provider: 'wikimedia', results: r}; })
+        .catch(function (e) { return {provider: 'wikimedia', results: [], error: e.message}; });
+    }
+    if (providerId === 'nasa-library') {
+      return _nasaSearch(query, mediaType, page)
+        .then(function (r) { return {provider: 'nasa-library', results: r}; })
+        .catch(function (e) { return {provider: 'nasa-library', results: [], error: e.message}; });
+    }
+    return Promise.resolve({provider: providerId, results: [], status: 'no-connector'});
+  },
+
+  pollJobResult: function (request) {
+    // request: { jobId, providerId }
+    var providerId = request.providerId;
+    var jobId = request.jobId;
+    var s = _settings[providerId] || {};
+    var endpoint = s.endpoint || (this.getProvider(providerId) || {}).defaultEndpoint;
+    var key = s.apiKey;
+    if (providerId === 'comfyui') {
+      if (!endpoint) return Promise.reject(new Error('ComfyUI: no endpoint'));
+      return _pollJobComfyUI(endpoint, jobId);
+    }
+    if (providerId === 'aihorde') {
+      return _pollJobAiHorde(jobId, key);
+    }
+    return Promise.reject(new Error('pollJobResult: unsupported provider ' + providerId));
+  },
+
+  callLLM: function (request) {
+    // request: { messages, prompt, model, providerId, maxTokens, temperature }
+    var providerId = request.providerId || 'pollinations-text';
+    var s = _settings[providerId] || {};
+    var endpoint = s.endpoint || (this.getProvider(providerId) || {}).defaultEndpoint;
+    var key = s.apiKey;
+
+    if (providerId === 'pollinations-text') {
+      var msgs = Array.isArray(request.messages) ? request.messages : [{role: 'user', content: request.prompt || ''}];
+      return fetch('https://text.pollinations.ai/openai', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({model: request.model || 'openai', messages: msgs, max_tokens: request.maxTokens || 1024})
+      }).then(function (r) {
+        if (!r.ok) throw new Error('Pollinations text ' + r.status);
+        return r.json().then(function (d) {
+          var text = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || d.text || '';
+          return LoadProviderRegistry.normalizeResult({type: 'text', text: text, provider: 'pollinations-text'});
+        });
+      });
+    }
+
+    // Gemini: uses generateContent API (not OpenAI-compat chat/completions)
+    if (providerId === 'gemini') {
+      if (!key) return Promise.reject(new Error('Gemini: no API key'));
+      var geminiModel = s.model || request.model || 'gemini-2.0-flash';
+      var geminiParts = [];
+      var geminiMsgs = Array.isArray(request.messages) ? request.messages : [{role: 'user', content: request.prompt || ''}];
+      geminiMsgs.forEach(function (m) { if (m.role === 'user') geminiParts.push({text: m.content || ''}); });
+      if (!geminiParts.length) geminiParts.push({text: request.prompt || ''});
+      return fetch('https://generativelanguage.googleapis.com/v1beta/models/' + geminiModel + ':generateContent?key=' + key, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({contents: [{role: 'user', parts: geminiParts}], generationConfig: {maxOutputTokens: request.maxTokens || 1024, temperature: request.temperature || 0.7}})
+      }).then(function (r) {
+        if (!r.ok) throw new Error('Gemini error ' + r.status);
+        return r.json().then(function (d) {
+          var text = ((d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts && d.candidates[0].content.parts[0]) || {}).text || '';
+          return LoadProviderRegistry.normalizeResult({type: 'text', text: text, provider: 'gemini'});
+        });
+      });
+    }
+
+    // OpenAI-compatible (Ollama, LM Studio, LocalAI, OpenRouter, OpenAI, Mistral, vLLM, TGI, LiteLLM,
+    // Groq, Cerebras, SambaNova, Fireworks AI, NVIDIA NIM, AI/ML API, etc.)
+    if (endpoint || key) {
+      var baseUrl = endpoint || 'https://api.openai.com';
+      var headers = {'Content-Type': 'application/json'};
+      if (key) headers['Authorization'] = 'Bearer ' + key;
+      var messages = Array.isArray(request.messages) ? request.messages : [{role: 'user', content: request.prompt || ''}];
+      return fetch(baseUrl + '/v1/chat/completions', {
+        method: 'POST', headers: headers,
+        body: JSON.stringify({
+          model: s.model || request.model || 'gpt-4o-mini',
+          messages: messages,
+          max_tokens: request.maxTokens || 1024,
+          temperature: request.temperature || 0.7
+        })
+      }).then(function (r) {
+        if (!r.ok) throw new Error(providerId + ' LLM error ' + r.status);
+        return r.json().then(function (d) {
+          var text = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
+          return LoadProviderRegistry.normalizeResult({type: 'text', text: text, provider: providerId});
+        });
+      });
+    }
+    return Promise.reject(new Error('callLLM: no endpoint or key for: ' + providerId));
+  },
+
+  generateSpeech: function (request) {
+    // Alias for generateAudio with ElevenLabs support added
+    var providerId = request.providerId || 'browser-tts';
+    var s = _settings[providerId] || {};
+    var key = s.apiKey;
+
+    if (providerId === 'elevenlabs') {
+      if (!key) return Promise.reject(new Error('ElevenLabs: no API key'));
+      var voiceId = s.voiceId || request.voiceId || 'Rachel';
+      return fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voiceId, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'xi-api-key': key},
+        body: JSON.stringify({text: request.text || '', model_id: 'eleven_monolingual_v1', voice_settings: {stability: 0.5, similarity_boost: 0.75}})
+      }).then(function (r) {
+        if (!r.ok) throw new Error('ElevenLabs error ' + r.status);
+        return r.blob().then(function (b) {
+          return LoadProviderRegistry.normalizeResult({type: 'audio', blob: b, url: URL.createObjectURL(b), provider: 'elevenlabs'});
+        });
+      });
+    }
+    return this.generateAudio(request);
   },
 
   normalizeResult: function (raw) {

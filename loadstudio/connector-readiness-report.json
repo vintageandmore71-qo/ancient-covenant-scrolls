@@ -2,30 +2,30 @@
   "_meta": {
     "title": "Connector Readiness Report",
     "generated": "2026-05-15",
-    "registryVersion": "v116",
+    "registryVersion": "v117",
     "purpose": "Per-provider connector status. Shows whether a real working connector exists for each provider.",
     "statusVocabulary": {
-      "LOCAL_ONLY":   "No connector needed. Provider is a browser API or WASM module called directly.",
-      "SELF_HOSTED":  "User must run a local server or install the tool. Connector code exists but requires endpoint.",
-      "AUTH_REQUIRED":"Needs API key or account before any connection attempt. Connector logic exists.",
-      "PAID_OPTIONAL":"Free tier available but full use requires paid subscription.",
-      "DECLARED":     "Provider is registered but no connector code has been written yet.",
-      "CONNECTOR_BUILT":"Connector code is written. Not yet tested with a real response.",
-      "TESTED":       "Connector was tested and returned a real response at some point.",
-      "READY":        "Connector tested and confirmed returning real usable assets. Requires proof on record.",
-      "BLOCKED":      "Cannot be used due to legal, policy, or technical blockers.",
-      "EXCLUDED":     "Intentionally not wired. Reason recorded."
+      "LOCAL_ONLY": "No connector needed. Provider is a browser API or WASM module called directly.",
+      "SELF_HOSTED": "User must run a local server or install the tool. Connector code exists but requires endpoint.",
+      "AUTH_REQUIRED": "Needs API key or account before any connection attempt. Connector logic exists.",
+      "PAID_OPTIONAL": "Free tier available but full use requires paid subscription.",
+      "DECLARED": "Provider is registered but no connector code has been written yet.",
+      "CONNECTOR_BUILT": "Connector code is written. Not yet tested with a real response.",
+      "TESTED": "Connector was tested and returned a real response at some point.",
+      "READY": "Connector tested and confirmed returning real usable assets. Requires proof on record.",
+      "BLOCKED": "Cannot be used due to legal, policy, or technical blockers.",
+      "EXCLUDED": "Intentionally not wired. Reason recorded."
     },
     "rule": "READY status is never assigned without a real file, blob, or URL returned from a live provider call."
   },
   "summary": {
-    "total": 139,
+    "total": 172,
     "LOCAL_ONLY": 17,
-    "SELF_HOSTED": 73,
-    "AUTH_REQUIRED": 28,
+    "SELF_HOSTED": 90,
+    "AUTH_REQUIRED": 44,
     "PAID_OPTIONAL": 3,
-    "DECLARED": 18,
-    "CONNECTOR_BUILT": 0,
+    "DECLARED": 13,
+    "CONNECTOR_BUILT": 5,
     "TESTED": 0,
     "READY": 0,
     "BLOCKED": 0,
@@ -35,167 +35,773 @@
     "LOCAL_ONLY": {
       "note": "These providers require no network connector. They are browser-native or WASM. Works offline by definition.",
       "providers": [
-        { "providerId": "ffmpeg-wasm",       "name": "FFmpeg.wasm",         "notes": "WASM build; no endpoint needed." },
-        { "providerId": "web-audio-api",     "name": "Web Audio API",       "notes": "Browser built-in." },
-        { "providerId": "canvas-api",        "name": "Canvas API",          "notes": "Browser built-in." },
-        { "providerId": "webcodecs",         "name": "WebCodecs",           "notes": "Browser built-in." },
-        { "providerId": "browser-tts",       "name": "Browser TTS",         "notes": "Browser built-in SpeechSynthesis." },
-        { "providerId": "fabricjs",          "name": "Fabric.js",           "notes": "Bundled JS library." },
-        { "providerId": "gsap",              "name": "GSAP",                "notes": "Bundled JS library." },
-        { "providerId": "mediapipe",         "name": "Mediapipe",           "notes": "WASM; no endpoint needed." },
-        { "providerId": "bg-removal-js",     "name": "background-removal-js","notes": "WASM; no endpoint needed." },
-        { "providerId": "whisper-wasm",      "name": "Whisper WASM",        "notes": "WASM build of Whisper.cpp." },
-        { "providerId": "vosk",              "name": "Vosk",                "notes": "WASM; runs in browser." },
-        { "providerId": "moonshine",         "name": "Moonshine",           "notes": "WASM; runs in browser." },
-        { "providerId": "basic-pitch",       "name": "Basic Pitch",         "notes": "JS/WASM; runs in browser." },
-        { "providerId": "tonejs",            "name": "Tone.js",             "notes": "JS library; no network needed." },
-        { "providerId": "file-api",          "name": "File API",            "notes": "Browser built-in." },
-        { "providerId": "mediarecorder-api", "name": "MediaRecorder API",   "notes": "Browser built-in." },
-        { "providerId": "webgl",             "name": "WebGL",               "notes": "Browser built-in." }
+        {
+          "providerId": "ffmpeg-wasm",
+          "name": "FFmpeg.wasm",
+          "notes": "WASM build; no endpoint needed."
+        },
+        {
+          "providerId": "web-audio-api",
+          "name": "Web Audio API",
+          "notes": "Browser built-in."
+        },
+        {
+          "providerId": "canvas-api",
+          "name": "Canvas API",
+          "notes": "Browser built-in."
+        },
+        {
+          "providerId": "webcodecs",
+          "name": "WebCodecs",
+          "notes": "Browser built-in."
+        },
+        {
+          "providerId": "browser-tts",
+          "name": "Browser TTS",
+          "notes": "Browser built-in SpeechSynthesis."
+        },
+        {
+          "providerId": "fabricjs",
+          "name": "Fabric.js",
+          "notes": "Bundled JS library."
+        },
+        {
+          "providerId": "gsap",
+          "name": "GSAP",
+          "notes": "Bundled JS library."
+        },
+        {
+          "providerId": "mediapipe",
+          "name": "Mediapipe",
+          "notes": "WASM; no endpoint needed."
+        },
+        {
+          "providerId": "bg-removal-js",
+          "name": "background-removal-js",
+          "notes": "WASM; no endpoint needed."
+        },
+        {
+          "providerId": "whisper-wasm",
+          "name": "Whisper WASM",
+          "notes": "WASM build of Whisper.cpp."
+        },
+        {
+          "providerId": "vosk",
+          "name": "Vosk",
+          "notes": "WASM; runs in browser."
+        },
+        {
+          "providerId": "moonshine",
+          "name": "Moonshine",
+          "notes": "WASM; runs in browser."
+        },
+        {
+          "providerId": "basic-pitch",
+          "name": "Basic Pitch",
+          "notes": "JS/WASM; runs in browser."
+        },
+        {
+          "providerId": "tonejs",
+          "name": "Tone.js",
+          "notes": "JS library; no network needed."
+        },
+        {
+          "providerId": "file-api",
+          "name": "File API",
+          "notes": "Browser built-in."
+        },
+        {
+          "providerId": "mediarecorder-api",
+          "name": "MediaRecorder API",
+          "notes": "Browser built-in."
+        },
+        {
+          "providerId": "webgl",
+          "name": "WebGL",
+          "notes": "Browser built-in."
+        }
       ]
     },
     "SELF_HOSTED": {
       "note": "User must run a local server. Connector code in registry reads the defaultEndpoint field. Works fully offline once server is running.",
       "providers": [
-        { "providerId": "ollama",                "name": "Ollama",               "defaultEndpoint": "http://localhost:11434" },
-        { "providerId": "lm-studio",             "name": "LM Studio",            "defaultEndpoint": "http://localhost:1234" },
-        { "providerId": "localai",               "name": "LocalAI",              "defaultEndpoint": "http://localhost:8080" },
-        { "providerId": "vllm",                  "name": "vLLM",                 "defaultEndpoint": "http://localhost:8000" },
-        { "providerId": "litellm",               "name": "LiteLLM",              "defaultEndpoint": "http://localhost:4000" },
-        { "providerId": "tgi",                   "name": "TGI",                  "defaultEndpoint": "http://localhost:8080" },
-        { "providerId": "jan",                   "name": "Jan",                  "defaultEndpoint": "http://localhost:1337" },
-        { "providerId": "koboldcpp",             "name": "KoboldCpp",            "defaultEndpoint": "http://localhost:5001" },
-        { "providerId": "gpt4all",               "name": "GPT4All",              "defaultEndpoint": "http://localhost:4891" },
-        { "providerId": "llama-cpp",             "name": "llama.cpp",            "defaultEndpoint": "http://localhost:8080" },
-        { "providerId": "comfyui",               "name": "ComfyUI",              "defaultEndpoint": "http://localhost:8188" },
-        { "providerId": "a1111",                 "name": "A1111 / WebUI",        "defaultEndpoint": "http://localhost:7860" },
-        { "providerId": "forge",                 "name": "Forge WebUI",          "defaultEndpoint": "http://localhost:7860" },
-        { "providerId": "fooocus",               "name": "Fooocus",              "defaultEndpoint": "http://localhost:7865" },
-        { "providerId": "invokeai",              "name": "InvokeAI",             "defaultEndpoint": "http://localhost:9090" },
-        { "providerId": "sdnext",                "name": "SD.Next",              "defaultEndpoint": "http://localhost:7860" },
-        { "providerId": "diffusionbee",          "name": "DiffusionBee",         "defaultEndpoint": "local-app" },
-        { "providerId": "draw-things",           "name": "Draw Things",          "defaultEndpoint": "local-app" },
-        { "providerId": "flux",                  "name": "FLUX",                 "defaultEndpoint": "via-comfyui-or-a1111" },
-        { "providerId": "sdxl",                  "name": "SDXL",                 "defaultEndpoint": "via-comfyui-or-a1111" },
-        { "providerId": "sd-15",                 "name": "SD 1.5",               "defaultEndpoint": "via-comfyui-or-a1111" },
-        { "providerId": "sd-35",                 "name": "SD 3.5",               "defaultEndpoint": "via-comfyui-or-a1111" },
-        { "providerId": "kandinsky",             "name": "Kandinsky",            "defaultEndpoint": "via-comfyui-or-a1111" },
-        { "providerId": "pixart",                "name": "PixArt",               "defaultEndpoint": "via-comfyui-or-a1111" },
-        { "providerId": "openjourney",           "name": "OpenJourney",          "defaultEndpoint": "via-comfyui-or-a1111" },
-        { "providerId": "hidream",               "name": "HiDream",              "defaultEndpoint": "via-comfyui" },
-        { "providerId": "seedvr2",               "name": "SeedVR2",              "defaultEndpoint": "via-comfyui" },
-        { "providerId": "juggernaut-xl",         "name": "Juggernaut XL",        "defaultEndpoint": "via-comfyui-or-a1111" },
-        { "providerId": "realvisxl",             "name": "RealVisXL",            "defaultEndpoint": "via-comfyui-or-a1111" },
-        { "providerId": "dreamshaper",           "name": "DreamShaper",          "defaultEndpoint": "via-comfyui-or-a1111" },
-        { "providerId": "ip-adapter",            "name": "IP-Adapter",           "defaultEndpoint": "via-comfyui" },
-        { "providerId": "ip-adapter-faceid",     "name": "IP-Adapter FaceID",    "defaultEndpoint": "via-comfyui" },
-        { "providerId": "instantid",             "name": "InstantID",            "defaultEndpoint": "via-comfyui" },
-        { "providerId": "photomaker",            "name": "PhotoMaker",           "defaultEndpoint": "via-comfyui-or-gradio" },
-        { "providerId": "facechain",             "name": "FaceChain",            "defaultEndpoint": "via-gradio" },
-        { "providerId": "controlnet",            "name": "ControlNet",           "defaultEndpoint": "via-comfyui-or-a1111" },
-        { "providerId": "controlnet-flux",       "name": "ControlNet FLUX",      "defaultEndpoint": "via-comfyui" },
-        { "providerId": "codeformer",            "name": "CodeFormer",           "defaultEndpoint": "via-comfyui-or-a1111" },
-        { "providerId": "gfpgan",                "name": "GFPGAN",               "defaultEndpoint": "via-comfyui-or-a1111" },
-        { "providerId": "real-esrgan",           "name": "Real-ESRGAN",          "defaultEndpoint": "via-comfyui-or-a1111" },
-        { "providerId": "wan",                   "name": "WAN",                  "defaultEndpoint": "via-comfyui" },
-        { "providerId": "hunyuanvideo",          "name": "HunyuanVideo",         "defaultEndpoint": "via-comfyui" },
-        { "providerId": "ltx-video",             "name": "LTX-Video",            "defaultEndpoint": "via-comfyui" },
-        { "providerId": "animatediff",           "name": "AnimateDiff",          "defaultEndpoint": "via-comfyui-or-a1111" },
-        { "providerId": "cogvideox",             "name": "CogVideoX",            "defaultEndpoint": "via-comfyui" },
-        { "providerId": "stable-video-diffusion","name": "Stable Video Diffusion","defaultEndpoint": "via-comfyui-or-a1111" },
-        { "providerId": "open-sora",             "name": "Open-Sora",            "defaultEndpoint": "local-gradio" },
-        { "providerId": "mochi",                 "name": "Mochi",                "defaultEndpoint": "via-comfyui" },
-        { "providerId": "dynamicrafter",         "name": "DynamiCrafter",        "defaultEndpoint": "via-comfyui-or-gradio" },
-        { "providerId": "musetalk",              "name": "MuseTalk",             "defaultEndpoint": "local-server" },
-        { "providerId": "wav2lip",               "name": "Wav2Lip",              "defaultEndpoint": "local-server" },
-        { "providerId": "sadtalker",             "name": "SadTalker",            "defaultEndpoint": "local-server" },
-        { "providerId": "liveportrait",          "name": "LivePortrait",         "defaultEndpoint": "local-server" },
-        { "providerId": "omnihuman",             "name": "OmniHuman",            "defaultEndpoint": "local-server" },
-        { "providerId": "geneface-pp",           "name": "GeneFace++",           "defaultEndpoint": "local-server" },
-        { "providerId": "videoretalk",           "name": "VideoReTalker",        "defaultEndpoint": "local-server" },
-        { "providerId": "kokoro",                "name": "Kokoro",               "defaultEndpoint": "http://localhost:8880" },
-        { "providerId": "chatterbox",            "name": "Chatterbox",           "defaultEndpoint": "local-server" },
-        { "providerId": "chatterbox-turbo",      "name": "Chatterbox Turbo",     "defaultEndpoint": "local-server" },
-        { "providerId": "xtts",                  "name": "XTTS",                 "defaultEndpoint": "http://localhost:8020" },
-        { "providerId": "piper",                 "name": "Piper",                "defaultEndpoint": "local-binary" },
-        { "providerId": "bark",                  "name": "Bark",                 "defaultEndpoint": "local-server" },
-        { "providerId": "openvoice",             "name": "OpenVoice",            "defaultEndpoint": "local-server" },
-        { "providerId": "dia",                   "name": "Dia",                  "defaultEndpoint": "local-server" },
-        { "providerId": "f5-tts",                "name": "F5-TTS",               "defaultEndpoint": "local-server" },
-        { "providerId": "orpheus",               "name": "Orpheus TTS",          "defaultEndpoint": "local-server" },
-        { "providerId": "higgs-audio",           "name": "Higgs Audio",          "defaultEndpoint": "local-server" },
-        { "providerId": "melo-tts",              "name": "MeloTTS",              "defaultEndpoint": "local-server" },
-        { "providerId": "coqui",                 "name": "Coqui TTS",            "defaultEndpoint": "http://localhost:5002" },
-        { "providerId": "faster-whisper",        "name": "Faster-Whisper",       "defaultEndpoint": "local-server" },
-        { "providerId": "whisperx",              "name": "WhisperX",             "defaultEndpoint": "local-server" },
-        { "providerId": "nvidia-canary",         "name": "NVIDIA Canary",        "defaultEndpoint": "local-server" },
-        { "providerId": "qwen3-asr",             "name": "Qwen3 ASR",            "defaultEndpoint": "local-server" },
-        { "providerId": "pyannote",              "name": "Pyannote",             "defaultEndpoint": "local-server" },
-        { "providerId": "musicgen",              "name": "MusicGen",             "defaultEndpoint": "local-server" },
-        { "providerId": "audiogen",              "name": "AudioGen",             "defaultEndpoint": "local-server" },
-        { "providerId": "demucs",               "name": "Demucs",               "defaultEndpoint": "local-server" },
-        { "providerId": "spleeter",              "name": "Spleeter",             "defaultEndpoint": "local-server" },
-        { "providerId": "riffusion",             "name": "Riffusion",            "defaultEndpoint": "local-server" },
-        { "providerId": "stable-audio-open",     "name": "Stable Audio Open",    "defaultEndpoint": "local-server" },
-        { "providerId": "diffrhythm",            "name": "DiffRhythm",           "defaultEndpoint": "local-server" },
-        { "providerId": "peertube",              "name": "PeerTube",             "defaultEndpoint": "user-configured" },
-        { "providerId": "mediacms",              "name": "MediaCMS",             "defaultEndpoint": "user-configured" },
-        { "providerId": "owncast",               "name": "Owncast",              "defaultEndpoint": "user-configured" }
+        {
+          "providerId": "ollama",
+          "name": "Ollama",
+          "defaultEndpoint": "http://localhost:11434"
+        },
+        {
+          "providerId": "lm-studio",
+          "name": "LM Studio",
+          "defaultEndpoint": "http://localhost:1234"
+        },
+        {
+          "providerId": "localai",
+          "name": "LocalAI",
+          "defaultEndpoint": "http://localhost:8080"
+        },
+        {
+          "providerId": "vllm",
+          "name": "vLLM",
+          "defaultEndpoint": "http://localhost:8000"
+        },
+        {
+          "providerId": "litellm",
+          "name": "LiteLLM",
+          "defaultEndpoint": "http://localhost:4000"
+        },
+        {
+          "providerId": "tgi",
+          "name": "TGI",
+          "defaultEndpoint": "http://localhost:8080"
+        },
+        {
+          "providerId": "jan",
+          "name": "Jan",
+          "defaultEndpoint": "http://localhost:1337"
+        },
+        {
+          "providerId": "koboldcpp",
+          "name": "KoboldCpp",
+          "defaultEndpoint": "http://localhost:5001"
+        },
+        {
+          "providerId": "gpt4all",
+          "name": "GPT4All",
+          "defaultEndpoint": "http://localhost:4891"
+        },
+        {
+          "providerId": "llama-cpp",
+          "name": "llama.cpp",
+          "defaultEndpoint": "http://localhost:8080"
+        },
+        {
+          "providerId": "comfyui",
+          "name": "ComfyUI",
+          "defaultEndpoint": "http://localhost:8188"
+        },
+        {
+          "providerId": "a1111",
+          "name": "A1111 / WebUI",
+          "defaultEndpoint": "http://localhost:7860"
+        },
+        {
+          "providerId": "forge",
+          "name": "Forge WebUI",
+          "defaultEndpoint": "http://localhost:7860"
+        },
+        {
+          "providerId": "fooocus",
+          "name": "Fooocus",
+          "defaultEndpoint": "http://localhost:7865"
+        },
+        {
+          "providerId": "invokeai",
+          "name": "InvokeAI",
+          "defaultEndpoint": "http://localhost:9090"
+        },
+        {
+          "providerId": "sdnext",
+          "name": "SD.Next",
+          "defaultEndpoint": "http://localhost:7860"
+        },
+        {
+          "providerId": "diffusionbee",
+          "name": "DiffusionBee",
+          "defaultEndpoint": "local-app"
+        },
+        {
+          "providerId": "draw-things",
+          "name": "Draw Things",
+          "defaultEndpoint": "local-app"
+        },
+        {
+          "providerId": "flux",
+          "name": "FLUX",
+          "defaultEndpoint": "via-comfyui-or-a1111"
+        },
+        {
+          "providerId": "sdxl",
+          "name": "SDXL",
+          "defaultEndpoint": "via-comfyui-or-a1111"
+        },
+        {
+          "providerId": "sd-15",
+          "name": "SD 1.5",
+          "defaultEndpoint": "via-comfyui-or-a1111"
+        },
+        {
+          "providerId": "sd-35",
+          "name": "SD 3.5",
+          "defaultEndpoint": "via-comfyui-or-a1111"
+        },
+        {
+          "providerId": "kandinsky",
+          "name": "Kandinsky",
+          "defaultEndpoint": "via-comfyui-or-a1111"
+        },
+        {
+          "providerId": "pixart",
+          "name": "PixArt",
+          "defaultEndpoint": "via-comfyui-or-a1111"
+        },
+        {
+          "providerId": "openjourney",
+          "name": "OpenJourney",
+          "defaultEndpoint": "via-comfyui-or-a1111"
+        },
+        {
+          "providerId": "hidream",
+          "name": "HiDream",
+          "defaultEndpoint": "via-comfyui"
+        },
+        {
+          "providerId": "seedvr2",
+          "name": "SeedVR2",
+          "defaultEndpoint": "via-comfyui"
+        },
+        {
+          "providerId": "juggernaut-xl",
+          "name": "Juggernaut XL",
+          "defaultEndpoint": "via-comfyui-or-a1111"
+        },
+        {
+          "providerId": "realvisxl",
+          "name": "RealVisXL",
+          "defaultEndpoint": "via-comfyui-or-a1111"
+        },
+        {
+          "providerId": "dreamshaper",
+          "name": "DreamShaper",
+          "defaultEndpoint": "via-comfyui-or-a1111"
+        },
+        {
+          "providerId": "ip-adapter",
+          "name": "IP-Adapter",
+          "defaultEndpoint": "via-comfyui"
+        },
+        {
+          "providerId": "ip-adapter-faceid",
+          "name": "IP-Adapter FaceID",
+          "defaultEndpoint": "via-comfyui"
+        },
+        {
+          "providerId": "instantid",
+          "name": "InstantID",
+          "defaultEndpoint": "via-comfyui"
+        },
+        {
+          "providerId": "photomaker",
+          "name": "PhotoMaker",
+          "defaultEndpoint": "via-comfyui-or-gradio"
+        },
+        {
+          "providerId": "facechain",
+          "name": "FaceChain",
+          "defaultEndpoint": "via-gradio"
+        },
+        {
+          "providerId": "controlnet",
+          "name": "ControlNet",
+          "defaultEndpoint": "via-comfyui-or-a1111"
+        },
+        {
+          "providerId": "controlnet-flux",
+          "name": "ControlNet FLUX",
+          "defaultEndpoint": "via-comfyui"
+        },
+        {
+          "providerId": "codeformer",
+          "name": "CodeFormer",
+          "defaultEndpoint": "via-comfyui-or-a1111"
+        },
+        {
+          "providerId": "gfpgan",
+          "name": "GFPGAN",
+          "defaultEndpoint": "via-comfyui-or-a1111"
+        },
+        {
+          "providerId": "real-esrgan",
+          "name": "Real-ESRGAN",
+          "defaultEndpoint": "via-comfyui-or-a1111"
+        },
+        {
+          "providerId": "wan",
+          "name": "WAN",
+          "defaultEndpoint": "via-comfyui"
+        },
+        {
+          "providerId": "hunyuanvideo",
+          "name": "HunyuanVideo",
+          "defaultEndpoint": "via-comfyui"
+        },
+        {
+          "providerId": "ltx-video",
+          "name": "LTX-Video",
+          "defaultEndpoint": "via-comfyui"
+        },
+        {
+          "providerId": "animatediff",
+          "name": "AnimateDiff",
+          "defaultEndpoint": "via-comfyui-or-a1111"
+        },
+        {
+          "providerId": "cogvideox",
+          "name": "CogVideoX",
+          "defaultEndpoint": "via-comfyui"
+        },
+        {
+          "providerId": "stable-video-diffusion",
+          "name": "Stable Video Diffusion",
+          "defaultEndpoint": "via-comfyui-or-a1111"
+        },
+        {
+          "providerId": "open-sora",
+          "name": "Open-Sora",
+          "defaultEndpoint": "local-gradio"
+        },
+        {
+          "providerId": "mochi",
+          "name": "Mochi",
+          "defaultEndpoint": "via-comfyui"
+        },
+        {
+          "providerId": "dynamicrafter",
+          "name": "DynamiCrafter",
+          "defaultEndpoint": "via-comfyui-or-gradio"
+        },
+        {
+          "providerId": "musetalk",
+          "name": "MuseTalk",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "wav2lip",
+          "name": "Wav2Lip",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "sadtalker",
+          "name": "SadTalker",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "liveportrait",
+          "name": "LivePortrait",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "omnihuman",
+          "name": "OmniHuman",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "geneface-pp",
+          "name": "GeneFace++",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "videoretalk",
+          "name": "VideoReTalker",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "kokoro",
+          "name": "Kokoro",
+          "defaultEndpoint": "http://localhost:8880"
+        },
+        {
+          "providerId": "chatterbox",
+          "name": "Chatterbox",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "chatterbox-turbo",
+          "name": "Chatterbox Turbo",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "xtts",
+          "name": "XTTS",
+          "defaultEndpoint": "http://localhost:8020"
+        },
+        {
+          "providerId": "piper",
+          "name": "Piper",
+          "defaultEndpoint": "local-binary"
+        },
+        {
+          "providerId": "bark",
+          "name": "Bark",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "openvoice",
+          "name": "OpenVoice",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "dia",
+          "name": "Dia",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "f5-tts",
+          "name": "F5-TTS",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "orpheus",
+          "name": "Orpheus TTS",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "higgs-audio",
+          "name": "Higgs Audio",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "melo-tts",
+          "name": "MeloTTS",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "coqui",
+          "name": "Coqui TTS",
+          "defaultEndpoint": "http://localhost:5002"
+        },
+        {
+          "providerId": "faster-whisper",
+          "name": "Faster-Whisper",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "whisperx",
+          "name": "WhisperX",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "nvidia-canary",
+          "name": "NVIDIA Canary",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "qwen3-asr",
+          "name": "Qwen3 ASR",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "pyannote",
+          "name": "Pyannote",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "musicgen",
+          "name": "MusicGen",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "audiogen",
+          "name": "AudioGen",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "demucs",
+          "name": "Demucs",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "spleeter",
+          "name": "Spleeter",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "riffusion",
+          "name": "Riffusion",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "stable-audio-open",
+          "name": "Stable Audio Open",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "diffrhythm",
+          "name": "DiffRhythm",
+          "defaultEndpoint": "local-server"
+        },
+        {
+          "providerId": "peertube",
+          "name": "PeerTube",
+          "defaultEndpoint": "user-configured"
+        },
+        {
+          "providerId": "mediacms",
+          "name": "MediaCMS",
+          "defaultEndpoint": "user-configured"
+        },
+        {
+          "providerId": "owncast",
+          "name": "Owncast",
+          "defaultEndpoint": "user-configured"
+        }
       ]
     },
     "AUTH_REQUIRED": {
       "note": "Needs API key or account. Connector logic exists in registry. No key = no connection attempt.",
       "providers": [
-        { "providerId": "pollinations-image",  "name": "Pollinations Image",   "authType": "free-no-key",    "tier": "free" },
-        { "providerId": "aihorde",             "name": "AI Horde",             "authType": "free-account",   "tier": "free" },
-        { "providerId": "huggingface",         "name": "Hugging Face",         "authType": "api-token",      "tier": "free-with-limits" },
-        { "providerId": "pollinations-text",   "name": "Pollinations Text",    "authType": "free-no-key",    "tier": "free" },
-        { "providerId": "openrouter",          "name": "OpenRouter",           "authType": "api-key",        "tier": "pay-per-use" },
-        { "providerId": "cloudflare-workers-ai","name": "Cloudflare Workers AI","authType": "api-key",       "tier": "free-with-limits" },
-        { "providerId": "mistral",             "name": "Mistral",              "authType": "api-key",        "tier": "pay-per-use" },
-        { "providerId": "supabase",            "name": "Supabase",             "authType": "project-url+key","tier": "free-with-limits" },
-        { "providerId": "pixabay-music",       "name": "Pixabay Music",        "authType": "api-key",        "tier": "free" },
-        { "providerId": "free-music-archive",  "name": "Free Music Archive",   "authType": "api-key",        "tier": "free" },
-        { "providerId": "ccmixter",            "name": "ccMixter",             "authType": "api-key",        "tier": "free" },
-        { "providerId": "incompetech",         "name": "Incompetech",          "authType": "account",        "tier": "free" },
-        { "providerId": "bensound",            "name": "Bensound",             "authType": "license",        "tier": "attribution-required" },
-        { "providerId": "yt-audio-library",    "name": "YouTube Audio Library","authType": "terms-of-service","tier": "free-with-restrictions" },
-        { "providerId": "freesound",           "name": "Freesound",            "authType": "api-key",        "tier": "free" },
-        { "providerId": "zapsplat",            "name": "ZapSplat",             "authType": "membership",     "tier": "free-with-limits" },
-        { "providerId": "bbc-sfx",             "name": "BBC Sound Effects",    "authType": "terms-of-service","tier": "free-non-commercial" },
-        { "providerId": "mixkit-sfx",          "name": "Mixkit SFX",           "authType": "none-required",  "tier": "free" },
-        { "providerId": "soundbible",          "name": "SoundBible",           "authType": "none-required",  "tier": "free-with-license-check" },
-        { "providerId": "google-fonts",        "name": "Google Fonts",         "authType": "none-required",  "tier": "free" },
-        { "providerId": "bunny-fonts",         "name": "Bunny Fonts",          "authType": "none-required",  "tier": "free" },
-        { "providerId": "font-squirrel",       "name": "Font Squirrel",        "authType": "none-required",  "tier": "free" },
-        { "providerId": "open-foundry",        "name": "Open Foundry",         "authType": "none-required",  "tier": "free" },
-        { "providerId": "pexels",              "name": "Pexels",               "authType": "api-key",        "tier": "free" },
-        { "providerId": "pixabay-stock",       "name": "Pixabay",              "authType": "api-key",        "tier": "free" },
-        { "providerId": "coverr",              "name": "Coverr",               "authType": "none-required",  "tier": "free" },
-        { "providerId": "wikimedia",           "name": "Wikimedia Commons",    "authType": "none-required",  "tier": "free" },
-        { "providerId": "internet-archive",    "name": "Internet Archive",     "authType": "none-required",  "tier": "free" },
-        { "providerId": "nasa-library",        "name": "NASA Image Library",   "authType": "none-required",  "tier": "free" }
+        {
+          "providerId": "pollinations-image",
+          "name": "Pollinations Image",
+          "authType": "free-no-key",
+          "tier": "free"
+        },
+        {
+          "providerId": "aihorde",
+          "name": "AI Horde",
+          "authType": "free-account",
+          "tier": "free"
+        },
+        {
+          "providerId": "huggingface",
+          "name": "Hugging Face",
+          "authType": "api-token",
+          "tier": "free-with-limits"
+        },
+        {
+          "providerId": "pollinations-text",
+          "name": "Pollinations Text",
+          "authType": "free-no-key",
+          "tier": "free"
+        },
+        {
+          "providerId": "openrouter",
+          "name": "OpenRouter",
+          "authType": "api-key",
+          "tier": "pay-per-use"
+        },
+        {
+          "providerId": "cloudflare-workers-ai",
+          "name": "Cloudflare Workers AI",
+          "authType": "api-key",
+          "tier": "free-with-limits"
+        },
+        {
+          "providerId": "mistral",
+          "name": "Mistral",
+          "authType": "api-key",
+          "tier": "pay-per-use"
+        },
+        {
+          "providerId": "supabase",
+          "name": "Supabase",
+          "authType": "project-url+key",
+          "tier": "free-with-limits"
+        },
+        {
+          "providerId": "pixabay-music",
+          "name": "Pixabay Music",
+          "authType": "api-key",
+          "tier": "free"
+        },
+        {
+          "providerId": "free-music-archive",
+          "name": "Free Music Archive",
+          "authType": "api-key",
+          "tier": "free"
+        },
+        {
+          "providerId": "ccmixter",
+          "name": "ccMixter",
+          "authType": "api-key",
+          "tier": "free"
+        },
+        {
+          "providerId": "incompetech",
+          "name": "Incompetech",
+          "authType": "account",
+          "tier": "free"
+        },
+        {
+          "providerId": "bensound",
+          "name": "Bensound",
+          "authType": "license",
+          "tier": "attribution-required"
+        },
+        {
+          "providerId": "yt-audio-library",
+          "name": "YouTube Audio Library",
+          "authType": "terms-of-service",
+          "tier": "free-with-restrictions"
+        },
+        {
+          "providerId": "freesound",
+          "name": "Freesound",
+          "authType": "api-key",
+          "tier": "free"
+        },
+        {
+          "providerId": "zapsplat",
+          "name": "ZapSplat",
+          "authType": "membership",
+          "tier": "free-with-limits"
+        },
+        {
+          "providerId": "bbc-sfx",
+          "name": "BBC Sound Effects",
+          "authType": "terms-of-service",
+          "tier": "free-non-commercial"
+        },
+        {
+          "providerId": "mixkit-sfx",
+          "name": "Mixkit SFX",
+          "authType": "none-required",
+          "tier": "free"
+        },
+        {
+          "providerId": "soundbible",
+          "name": "SoundBible",
+          "authType": "none-required",
+          "tier": "free-with-license-check"
+        },
+        {
+          "providerId": "google-fonts",
+          "name": "Google Fonts",
+          "authType": "none-required",
+          "tier": "free"
+        },
+        {
+          "providerId": "bunny-fonts",
+          "name": "Bunny Fonts",
+          "authType": "none-required",
+          "tier": "free"
+        },
+        {
+          "providerId": "font-squirrel",
+          "name": "Font Squirrel",
+          "authType": "none-required",
+          "tier": "free"
+        },
+        {
+          "providerId": "open-foundry",
+          "name": "Open Foundry",
+          "authType": "none-required",
+          "tier": "free"
+        },
+        {
+          "providerId": "pexels",
+          "name": "Pexels",
+          "authType": "api-key",
+          "tier": "free"
+        },
+        {
+          "providerId": "pixabay-stock",
+          "name": "Pixabay",
+          "authType": "api-key",
+          "tier": "free"
+        },
+        {
+          "providerId": "coverr",
+          "name": "Coverr",
+          "authType": "none-required",
+          "tier": "free"
+        },
+        {
+          "providerId": "wikimedia",
+          "name": "Wikimedia Commons",
+          "authType": "none-required",
+          "tier": "free"
+        },
+        {
+          "providerId": "internet-archive",
+          "name": "Internet Archive",
+          "authType": "none-required",
+          "tier": "free"
+        },
+        {
+          "providerId": "nasa-library",
+          "name": "NASA Image Library",
+          "authType": "none-required",
+          "tier": "free"
+        }
       ]
     },
     "PAID_OPTIONAL": {
       "note": "Free tier covers basic use. Key features require subscription.",
       "providers": [
-        { "providerId": "elevenlabs", "name": "ElevenLabs", "authType": "api-key", "freeTier": "limited monthly chars", "paidTier": "higher quality + more voices" },
-        { "providerId": "openai",     "name": "OpenAI",     "authType": "api-key", "freeTier": "none", "paidTier": "pay-per-token" },
-        { "providerId": "lottiefiles","name": "LottieFiles","authType": "account", "freeTier": "browse free", "paidTier": "premium animations" }
+        {
+          "providerId": "elevenlabs",
+          "name": "ElevenLabs",
+          "authType": "api-key",
+          "freeTier": "limited monthly chars",
+          "paidTier": "higher quality + more voices"
+        },
+        {
+          "providerId": "openai",
+          "name": "OpenAI",
+          "authType": "api-key",
+          "freeTier": "none",
+          "paidTier": "pay-per-token"
+        },
+        {
+          "providerId": "lottiefiles",
+          "name": "LottieFiles",
+          "authType": "account",
+          "freeTier": "browse free",
+          "paidTier": "premium animations"
+        }
       ]
     },
     "DECLARED": {
       "note": "In registry. No connector code written yet. These are future wiring targets.",
       "providers": [
-        { "providerId": "remotion",       "name": "Remotion",       "category": "editing" },
-        { "providerId": "lottiefiles",    "name": "LottieFiles",    "category": "animation" },
-        { "providerId": "videojs",        "name": "Video.js",       "category": "playback" },
-        { "providerId": "mixkit-titles",  "name": "Mixkit Titles",  "category": "motion-graphics" },
-        { "providerId": "videezy",        "name": "Videezy",        "category": "stock-video" },
-        { "providerId": "motion-array",   "name": "Motion Array",   "category": "motion-graphics" },
-        { "providerId": "indexeddb",      "name": "IndexedDB",      "category": "storage" }
+        {
+          "providerId": "remotion",
+          "name": "Remotion",
+          "category": "editing"
+        },
+        {
+          "providerId": "lottiefiles",
+          "name": "LottieFiles",
+          "category": "animation"
+        },
+        {
+          "providerId": "videojs",
+          "name": "Video.js",
+          "category": "playback"
+        },
+        {
+          "providerId": "mixkit-titles",
+          "name": "Mixkit Titles",
+          "category": "motion-graphics"
+        },
+        {
+          "providerId": "videezy",
+          "name": "Videezy",
+          "category": "stock-video"
+        },
+        {
+          "providerId": "motion-array",
+          "name": "Motion Array",
+          "category": "motion-graphics"
+        },
+        {
+          "providerId": "indexeddb",
+          "name": "IndexedDB",
+          "category": "storage"
+        }
       ]
     }
+  },
+  "connectorMethodsAdded": {
+    "v117": [
+      "searchMusic()",
+      "searchSFX()",
+      "searchStock()",
+      "pollJobResult()",
+      "callLLM()",
+      "generateSpeech()"
+    ],
+    "note": "These 6 methods wire real provider search and execution. Freesound, Pexels, Pixabay, Wikimedia, NASA, AI Horde, ComfyUI, Ollama/OpenRouter/Pollinations are now callable from the UI."
   }
 }
