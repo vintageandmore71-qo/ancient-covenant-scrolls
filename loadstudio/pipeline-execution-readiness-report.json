@@ -2,7 +2,10 @@
   "_meta": {
     "title": "Pipeline Execution Readiness Report",
     "generated": "2026-05-15",
-    "registryVersion": "v119",
+    "registryVersion": "v121",
+    "orchestratorBuilt": true,
+    "orchestratorFile": "load-orchestrator.js",
+    "orchestratorGlobal": "window.LoadOrchestrator",
     "purpose": "Per-pipeline execution readiness. Shows whether each pipeline can actually execute end-to-end today vs. what is blocked or pending provider wiring.",
     "executionStatusVocabulary": {
       "RUNNABLE":       "All required steps have a working provider. Can execute today.",
@@ -14,11 +17,21 @@
   },
   "summary": {
     "total": 19,
-    "RUNNABLE":    2,
-    "PARTIAL":     3,
+    "RUNNABLE":    4,
+    "PARTIAL":     6,
     "DEMO_ONLY":   2,
     "NEEDS_SETUP": 7,
-    "BLOCKED":     1
+    "BLOCKED":     0,
+    "newInV121": [
+      "hosted-video-platform (kling/hailuo/luma-dream/pika/pixverse/heygen) — generateVideo + pollJobResult wired",
+      "assemblyai poll — pollJobResult wired",
+      "ideogram — generateImage wired",
+      "TTS expanded: bark, tortoise-tts, valle-x, chatterbox, melo-tts, styletts2, vits, orpheus, higgs-audio, openvoice, dia",
+      "STT expanded: whisperx, vosk, moonshine, nvidia-canary, qwen3-asr, pyannote, speechbrain, nemo-asr, paddlespeech",
+      "generateMusic — musicgen, audiogen, riffusion, stable-audio-open, diffrhythm, audiox",
+      "generateLipSync — musetalk, wav2lip, sadtalker, liveportrait, latentsync, lipgan, makeitalk, difftalk",
+      "load-orchestrator.js — window.LoadOrchestrator built; runPipeline, runStep, pollUntilDone, selectProvider, abortPipeline"
+    ]
   },
   "pipelines": [
     {
