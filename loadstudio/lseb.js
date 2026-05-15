@@ -64,8 +64,8 @@ function _buildAssetList(listId, demo, cat, q, icon, trackKind, tone) {
           '<span class="ve-asset-sub">' + tr.a + ' \xb7 ' + tr.d + '</span>' +
         '</div>' +
         '<div class="ve-asset-acts">' +
-          '<button class="ve-asset-play" type="button" data-tone="' + tone + '" aria-label="Preview">' + _PLAY_ICO + '</button>' +
-          '<button class="ve-asset-add" type="button" data-add-track="' + trackKind + '" data-tn="' + tr.t.replace(/"/g,'') + '" data-ta="' + tr.a.replace(/"/g,'') + '" data-td="' + tr.d + '">Add</button>' +
+          '<button class="ve-asset-play" type="button" data-tone="' + tone + '" data-no-src="1" aria-label="Preview">' + _PLAY_ICO + '</button>' +
+          '<button class="ve-asset-add" type="button" data-add-track="' + trackKind + '" data-no-src="1" data-tn="' + tr.t.replace(/"/g,'') + '" data-ta="' + tr.a.replace(/"/g,'') + '" data-td="' + tr.d + '">Add</button>' +
         '</div>';
       list.appendChild(row);
     });
@@ -1242,26 +1242,28 @@ function _bindEditor(idx) {
         var dur = (parseInt(parts[0], 10) || 0) * 60 + (parseInt(parts[1], 10) || 0);
         if (dur < 1) dur = 30;
         var label = (addTrackBtn.dataset.tn || trackKind) + (addTrackBtn.dataset.ta ? ' — ' + addTrackBtn.dataset.ta : '');
+        var noSrc = addTrackBtn.dataset.noSrc === '1';
         _addTrackItem(idx, trackKind, { name: label, dur: dur });
         _renderTracks(idx);
         _showPanel(null);
-        _toast((trackKind === 'music' ? 'Music' : 'Sound FX') + ' added to timeline');
+        _toast((trackKind === 'music' ? 'Music' : 'Sound FX') + ' added' + (noSrc ? ' — no audio source connected' : ''));
         return;
       }
-      // Preview tone
+      // Preview — only play if a real audio source is attached
       var playBtn = e.target.closest('[data-tone]');
       if (playBtn) {
-        var isMus = playBtn.dataset.tone === 'music';
-        try {
-          var aC = new (window.AudioContext || window.webkitAudioContext)();
-          var osc = aC.createOscillator(); var gain = aC.createGain();
-          osc.connect(gain); gain.connect(aC.destination);
-          osc.type = isMus ? 'sine' : 'square';
-          osc.frequency.value = isMus ? 440 : 880;
-          gain.gain.setValueAtTime(0.2, aC.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, aC.currentTime + (isMus ? 1.2 : 0.4));
-          osc.start(); osc.stop(aC.currentTime + (isMus ? 1.2 : 0.4));
-        } catch (_) {}
+        if (playBtn.dataset.noSrc === '1') {
+          _toast('No audio source — connect a provider or upload a file to preview');
+          return;
+        }
+        var srcUrl = playBtn.dataset.src || null;
+        if (srcUrl) {
+          try {
+            var previewAudio = new Audio(srcUrl);
+            previewAudio.volume = 0.6;
+            previewAudio.play().catch(function () { _toast('Could not play preview.'); });
+          } catch (_) { _toast('Could not play preview.'); }
+        }
         return;
       }
       // data-open-pick or data-pick → open file picker
