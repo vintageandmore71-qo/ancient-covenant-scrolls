@@ -114,6 +114,11 @@ overrides it for a specific build.
      left across every site (ACR, Load, LoadStudio, LoadPlay, Attain,
      Attain Jr, Study). The user's lock-rule: nothing they've asked
      for should fall off the list.
+   - `PROVIDER_REGISTRY_REFERENCE.md` — **MANDATORY. Complete provider list,
+     pipeline chains, key wiring, implementation status, and gap list for
+     Load Eco / Load Studio / Load AI. Compiled from 8 inbox spec docs.
+     Never re-read the inbox .docx files to answer provider questions —
+     use this file. Never ask the user to re-explain providers.**
    - `SUGGESTIONS_PARKED.md` — exploratory ideas the user asked me to
      hold. **If today's date is on or after the "review by" date in
      that file, surface those suggestions to the user.**
