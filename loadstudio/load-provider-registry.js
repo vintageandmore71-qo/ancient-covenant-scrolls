@@ -13,6 +13,51 @@ var _STATUS_KEY  = 'lpr_status_v1';
 var _settings = {};  // { providerId: { apiKey, endpoint, model, ... } }
 var _status   = {};  // { providerId: 'untested'|'testing'|'ok'|'error'|'needs-key'|'needs-endpoint' }
 
+// ─── QUOTA / AVAILABILITY ERROR DETECTION ─────────────────────────────────────
+// Returns true when the error means "this provider is unavailable right now" —
+// quota hit, rate limit, auth missing, no endpoint — so the fallback chain
+// should advance to the next provider.
+function _isQuotaError(err) {
+  var msg = err ? (err.message || '').toLowerCase() : '';
+  return msg.indexOf(' 429') !== -1 ||   // rate limited
+         msg.indexOf(' 402') !== -1 ||   // payment / quota
+         msg.indexOf(' 401') !== -1 ||   // no valid key
+         msg.indexOf(' 403') !== -1 ||   // forbidden / key wrong
+         msg.indexOf('quota') !== -1 ||
+         msg.indexOf('rate limit') !== -1 ||
+         msg.indexOf('rate_limit') !== -1 ||
+         msg.indexOf('ratelimit') !== -1 ||
+         msg.indexOf('exceeded') !== -1 ||
+         msg.indexOf('too many') !== -1 ||
+         msg.indexOf('insufficient') !== -1 ||
+         msg.indexOf('billing') !== -1 ||
+         msg.indexOf('no api key') !== -1 ||
+         msg.indexOf('no endpoint') !== -1 ||
+         msg.indexOf('needs-key') !== -1 ||
+         msg.indexOf('unsupported or unconfigured') !== -1 ||
+         msg.indexOf('no connector') !== -1;
+}
+
+// ─── FALLBACK CHAINS ──────────────────────────────────────────────────────────
+// Order derived from the 8 inbox spec docs:
+// - File 1 (Director Addendum): image = Pollinations → AI Horde → HF → local
+// - File 8 (Providers doc): TTS list order Kokoro→Chatterbox→…→browser-tts,
+//   STT list Whisper→Faster-Whisper→Whisper.cpp→Vosk→Moonshine,
+//   music MusicGen→AudioGen→Riffusion, video local list order
+// - File 2 (Free AI APIs): video = ZSky cloud first then local; LLM = Gemini→Groq→OpenRouter→Ollama
+// Free/no-key providers are always placed first in each chain.
+var _FALLBACK_CHAINS = {
+  'image':        ['pollinations-image', 'aihorde', 'pixazo', 'flux', 'flux-1-schnell', 'sdxl', 'sd-15', 'huggingface', 'comfyui', 'a1111'],
+  'audio':        ['kokoro', 'chatterbox', 'chatterbox-turbo', 'f5-tts', 'bark', 'openvoice', 'xtts-v2', 'piper', 'coqui', 'dia', 'elevenlabs', 'browser-tts'],
+  'video':        ['zsky', 'wan', 'hunyuanvideo', 'ltx-video', 'animatediff', 'cogvideox', 'kling', 'hailuo', 'luma-dream', 'pika', 'pixverse'],
+  'transcript':   ['faster-whisper', 'whisper', 'whisperx', 'vosk', 'moonshine', 'distil-whisper', 'deepgram', 'assemblyai'],
+  'music':        ['musicgen', 'audiogen', 'riffusion', 'stable-audio-open', 'diffrhythm', 'audiox'],
+  'music-search': ['ccmixter', 'openverse-audio', 'pixabay-music', 'free-music-archive', 'jamendo', 'freesound'],
+  'sfx':          ['audiogen', 'openverse-sfx', 'bbc-sfx', 'freesound'],
+  'stock':        ['wikimedia', 'openverse', 'nasa-library', 'internet-archive', 'coverr', 'pexels', 'pixabay-stock'],
+  'llm':          ['pollinations-text', 'ollama', 'gemini', 'groq', 'openrouter', 'cerebras', 'sambanova', 'mistral', 'deepinfra']
+};
+
 // ─── PROVIDER DEFINITIONS ────────────────────────────────────────────────────
 // Every provider must declare all required fields.
 var _PROVIDERS = [
@@ -2896,34 +2941,39 @@ var LoadProviderRegistry = {
   },
 
   routeToFallback: function (request) {
-    // request must have: type ('image'|'audio'|'video'|'transcript'), originalProviderId, ...rest
     var self = this;
     var type = request.type;
     var failed = request.originalProviderId;
 
-    var capMap = {
-      'image':      'image-generation',
-      'audio':      'text-to-speech',
-      'video':      'video-generation',
-      'transcript': 'speech-to-text'
-    };
-    var cap = capMap[type];
-    if (!cap) return Promise.reject(new Error('routeToFallback: unknown type ' + type));
+    var chain = _FALLBACK_CHAINS[type] || [];
+    var startIdx = failed ? chain.indexOf(failed) + 1 : 0;
+    if (startIdx < 0) startIdx = 0;
+    var candidates = chain.slice(startIdx).concat(
+      startIdx > 0 ? [] : []
+    ).filter(function(id) { return id !== failed; });
 
-    var candidates = this.listByCapability(cap).filter(function (p) {
-      return p.fallbackEligible && p.providerId !== failed;
-    });
+    var _methodMap = {
+      'image':        function(r){ return self.generateImage(r); },
+      'audio':        function(r){ return self.generateAudio(r); },
+      'video':        function(r){ return self.generateVideo(r); },
+      'transcript':   function(r){ return self.transcribeAudio(r); },
+      'music':        function(r){ return self.generateMusic(r); },
+      'music-search': function(r){ return self.searchMusic(r); },
+      'sfx':          function(r){ return self.searchSFX(r); },
+      'stock':        function(r){ return self.searchStock(r); },
+      'llm':          function(r){ return self.callLLM(r); }
+    };
+    var fn = _methodMap[type];
+    if (!fn) return Promise.reject(new Error('routeToFallback: unknown type ' + type));
 
     function tryNext(idx) {
       if (idx >= candidates.length) return Promise.reject(new Error('All fallbacks exhausted for ' + type));
-      var p = candidates[idx];
-      var req = Object.assign({}, request, {providerId: p.providerId, originalProviderId: undefined, type: undefined});
-      var fn = type === 'image'      ? self.generateImage.bind(self)    :
-               type === 'audio'      ? self.generateAudio.bind(self)    :
-               type === 'video'      ? self.generateVideo.bind(self)    :
-               type === 'transcript' ? self.transcribeAudio.bind(self)  : null;
-      if (!fn) return Promise.reject(new Error('No generator for type ' + type));
-      return fn(req).catch(function () { return tryNext(idx + 1); });
+      var id = candidates[idx];
+      var req = Object.assign({}, request, {providerId: id, originalProviderId: undefined, type: undefined, _inFallback: true});
+      return fn(req).catch(function(err) {
+        if (_isQuotaError(err)) return tryNext(idx + 1);
+        throw err;
+      });
     }
 
     return tryNext(0);
@@ -3500,6 +3550,44 @@ LoadProviderRegistry.getPipelineMembership = function (providerId) {
   var meta = _PROVIDER_META[providerId];
   return (meta && meta.pipelineMembership) || [];
 };
+
+// ─── AUTO-FALLBACK WRAPPER ────────────────────────────────────────────────────
+// Wraps each generate*/search* method so that when a quota/auth/rate-limit
+// error occurs, routeToFallback() is called automatically with the next
+// provider in _FALLBACK_CHAINS. Requests already inside a fallback chain
+// (_inFallback:true) skip the wrapper to prevent infinite loops.
+(function() {
+  var _autoWrap = {
+    generateImage:   'image',
+    generateAudio:   'audio',
+    generateVideo:   'video',
+    transcribeAudio: 'transcript',
+    generateMusic:   'music',
+    searchMusic:     'music-search',
+    searchSFX:       'sfx',
+    searchStock:     'stock',
+    callLLM:         'llm'
+  };
+  Object.keys(_autoWrap).forEach(function(name) {
+    var orig = LoadProviderRegistry[name];
+    var chainType = _autoWrap[name];
+    LoadProviderRegistry[name] = function(request) {
+      var self = this;
+      if (request && request._inFallback) return orig.call(self, request);
+      return orig.call(self, request).catch(function(err) {
+        if (_isQuotaError(err) && _FALLBACK_CHAINS[chainType] && _FALLBACK_CHAINS[chainType].length) {
+          return self.routeToFallback({
+            type: chainType,
+            originalProviderId: (request && request.providerId) || null,
+            _quota_reason: err.message
+          });
+        }
+        throw err;
+      });
+    };
+  });
+}());
+
 window.LoadProviderRegistry = LoadProviderRegistry;
 
 }());

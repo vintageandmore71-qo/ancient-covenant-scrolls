@@ -2,6 +2,14 @@
 
 ## READ THESE FIRST (in order)
 1. The 8 inbox docx files — fallback chain order and connection details come from these files. Read them before building anything Sunday.
+   - `inbox/LoadStudio_Director_AI_Production_System_Addendum.docx`
+   - `inbox/Free_AI_APIs_SDKs_2026.docx`
+   - `inbox/LoadCap_Free_Providers.docx`
+   - `inbox/LoadCap_Asset_Libraries.docx`
+   - `inbox/VN_Feature_Provider_Map.docx`
+   - `inbox/Free_OpenSource_AI_Providers_2026.docx`
+   - `inbox/Free_OpenSource_AI_Image_Rivals_MJ_Adobe_2026.docx`
+   - `inbox/Providers for Load Studio, Eco, AI.docx`
 2. `loadstudio/PROVIDER_REGISTRY_REFERENCE.md` — master provider list (compiled from the 8 files)
 3. This file
 4. `git log --oneline -20`
