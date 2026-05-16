@@ -537,6 +537,7 @@ body.ls-contrast-safe{filter:contrast(1.15)}
   <button class="ls-drawer-item" type="button" data-section="image-to-video" data-ls-drawer-close="1"><span class="dot"></span>Image to Video Studio</button>
   <button class="ls-drawer-item" type="button" data-section="video-stylizer" data-ls-drawer-close="1"><span class="dot"></span>AI Video Stylizer</button>
   <button class="ls-drawer-item" type="button" data-section="video-outpainting" data-ls-drawer-close="1"><span class="dot"></span>Video Outpainting</button>
+  <button class="ls-drawer-item" type="button" data-section="video-pipeline" data-ls-drawer-close="1"><span class="dot"></span>Video Pipeline Manager</button>
 </div>
 <div class="ls-drawer-section">
   <div class="ls-drawer-heading">Voice and Sound</div>
@@ -1784,6 +1785,68 @@ body.ls-contrast-safe{filter:contrast(1.15)}
     <div class="ls-panel" style="margin-top:12px">
       <h3 style="margin:0 0 12px;font:600 15px Inter,system-ui,sans-serif;color:#fff">Asset Review List</h3>
       <div id="ls-or-list" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+  </div>
+</section>
+
+<section id="section-video-pipeline" class="section" data-title="Video Pipeline Manager">
+  <div class="ls-frame">
+    <div class="ls-bar" style="background:linear-gradient(90deg,#ff6e9c,#6c5ce7)"></div>
+    <div class="ls-h"><h2>Video Pipeline Manager</h2><span class="ls-dept" style="color:#ff6e9c;background:rgba(255,110,156,.10);border-color:rgba(255,110,156,.36)">AI Production</span></div>
+    <p class="ls-lead">Track every video generation job across all pipeline stages. Route to providers, record results, and never claim success without a real video file, blob, or URL.</p>
+    <div class="ls-panel">
+      <h3 style="margin:0 0 12px;font:600 15px Inter,system-ui,sans-serif;color:#fff">Log Video Job</h3>
+      <div class="form-grid">
+        <div class="field"><label>Scene ID</label><input type="text" id="ls-vp-scene" placeholder="scene-001"></div>
+        <div class="field"><label>Pipeline Stage</label><select id="ls-vp-stage"><option>text-to-video</option><option>image-to-video</option><option>stylizer</option><option>outpainting</option><option>animation</option></select></div>
+        <div class="field"><label>Primary Provider</label><select id="ls-vp-provider">
+          <option>wan</option><option>hunyuanvideo</option><option>ltx-video</option><option>animatediff</option>
+          <option>cogvideox</option><option>kling</option><option>luma-dream</option><option>pika</option>
+          <option>pixverse</option><option>hailuo</option><option>stable-video-diffusion</option>
+          <option>open-sora</option><option>mochi</option><option>local-engine</option>
+        </select></div>
+        <div class="field"><label>Fallback Provider</label><select id="ls-vp-fallback">
+          <option>none</option><option>wan</option><option>hunyuanvideo</option><option>ltx-video</option>
+          <option>animatediff</option><option>cogvideox</option><option>local-engine</option>
+        </select></div>
+        <div class="field"><label>Job Status</label><select id="ls-vp-status">
+          <option value="pending">pending</option>
+          <option value="prompted">prompted</option>
+          <option value="attempting">attempting</option>
+          <option value="provider-failed">provider-failed</option>
+          <option value="fallback-tried">fallback-tried</option>
+          <option value="no-provider">no-provider — Integration Required</option>
+          <option value="done">done</option>
+          <option value="rejected">rejected</option>
+        </select></div>
+        <div class="field"><label>Clip Duration</label><select id="ls-vp-duration"><option>3s</option><option>5s</option><option>8s</option><option>10s</option><option>custom</option></select></div>
+        <div class="field" style="grid-column:1/-1"><label>Video Prompt</label><textarea id="ls-vp-prompt" rows="3" placeholder="The exact prompt sent to the provider."></textarea></div>
+        <div class="field" style="grid-column:1/-1"><label>Result URL / Blob / Path (leave blank if generation failed)</label><input type="text" id="ls-vp-result-url" placeholder="Only fill if a real video file, blob, or URL was returned."></div>
+        <div class="field" style="grid-column:1/-1"><label>Failure Reason (if failed)</label><input type="text" id="ls-vp-fail-reason" placeholder="e.g. no API key, timeout, model unavailable"></div>
+        <div class="field" style="grid-column:1/-1"><label>Director Notes</label><textarea id="ls-vp-notes" rows="2" placeholder="What to change on the next attempt."></textarea></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+        <button data-action="log-video-job" style="padding:10px 18px;border-radius:10px;font:500 13.5px Inter,system-ui,sans-serif;border:1px solid rgba(255,110,156,.5);background:rgba(255,110,156,.12);color:#ff6e9c;cursor:pointer">Log Job</button>
+        <button data-action="export-video-pipeline" style="padding:10px 18px;border-radius:10px;font:500 13.5px Inter,system-ui,sans-serif;border:1px solid rgba(255,255,255,.2);background:transparent;color:#c0b8d9;cursor:pointer">Export video-pipeline.json</button>
+        <button data-action="clear-video-done" style="padding:10px 18px;border-radius:10px;font:500 13.5px Inter,system-ui,sans-serif;border:1px solid rgba(255,255,255,.2);background:transparent;color:#c0b8d9;cursor:pointer">Clear Completed</button>
+      </div>
+      <div id="ls-vp-status-msg" style="display:none;margin-top:8px;font:400 13px Inter,system-ui,sans-serif;color:#5ee0a5"></div>
+    </div>
+    <div class="ls-panel" style="margin-top:12px">
+      <h3 style="margin:0 0 10px;font:600 15px Inter,system-ui,sans-serif;color:#fff">Provider Registry — Video</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:6px" id="ls-vp-provider-badges"></div>
+    </div>
+    <div class="ls-panel" style="margin-top:12px">
+      <h3 style="margin:0 0 10px;font:600 15px Inter,system-ui,sans-serif;color:#fff">Load Main Export</h3>
+      <p style="color:#c0b8d9;font:300 13px Inter,system-ui,sans-serif;margin:0 0 10px">Send completed video jobs to Load main as a video asset package.</p>
+      <button data-action="export-video-for-load" style="padding:10px 18px;border-radius:10px;font:500 13.5px Inter,system-ui,sans-serif;border:1px solid rgba(108,92,231,.5);background:rgba(108,92,231,.12);color:#a29bfe;cursor:pointer">Export for Load Main</button>
+    </div>
+    <div class="ls-panel" style="margin-top:12px">
+      <h3 style="margin:0 0 12px;font:600 15px Inter,system-ui,sans-serif;color:#fff">Job Log</h3>
+      <div id="ls-vp-list" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+    <div class="ls-panel" style="margin-top:12px">
+      <div class="ls-integration-badge"><strong>Integration Required</strong> — Actual video generation requires a connected provider key or local engine (WAN, HunyuanVideo, LTX-Video, AnimateDiff, ComfyUI). Jobs and prompts log locally. Result URL field stays blank until a real video is returned.</div>
     </div>
   </div>
 </section>

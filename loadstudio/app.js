@@ -223,7 +223,7 @@ function openAssetBrowser(){
 function saveProvider(){let provider={id:'provider-'+Date.now(),name:$('#providerName').value,type:$('#providerType').value,keyStatus:$('#providerKey').value?'stored locally':'empty'}; state['developer-lab']=state['developer-lab']||[]; state['developer-lab'].push(provider); log('Provider saved: '+provider.name); save();}
 function saveAdvertiser(){let n=$('#adv-name'); if(!n||!n.value){modal('Advertiser','<p class="lead">Enter an advertiser name first.</p>');return;} let adv={id:'adv-'+Date.now(),name:n.value,email:$('#adv-email')?.value||'',slot:$('#adv-slot')?.value||'',status:$('#adv-status')?.value||'draft',notes:$('#adv-notes')?.value||''}; state.advertiser=state.advertiser||[]; state.advertiser.push(adv); log('Advertiser saved: '+adv.name); save(); render();}
 function saveInboxMessage(){let to=$('#inbox-to'),sub=$('#inbox-subject'); if(!to||!to.value){modal('Inbox','<p class="lead">Enter a recipient first.</p>');return;} let msg={id:'msg-'+Date.now(),title:(sub&&sub.value)||'(no subject)',sub:'to '+to.value,to:to.value,subject:(sub&&sub.value)||'',body:$('#inbox-body')?.value||'',status:'draft'}; state.inbox=state.inbox||[]; state.inbox.push(msg); log('Inbox draft saved: '+msg.title); save(); render();}
-function action(a,el){let secid=el.dataset.sectionId; if(a==='close-modal') return closeModal(); if(a==='create-project') return createProject(); if(a==='add-item') return addSectionItem(secid); if(a==='audit-section') return auditSection(secid); if(a==='export-section') return exportSection(secid); if(a==='open-integration') return openIntegration(secid); if(a==='add-scene') return addScene(); if(a==='add-character') return addCharacter(); if(a==='save-imports') return saveImports(); if(a==='run-full-audit') return fullAudit(); if(a==='run-diagnostics') return diagnostics(); if(a==='validate-package') return validatePackage(); if(a==='export-readiness') return exportReadiness(); if(a==='play-preview'){let bar=$('#playerProgress'); bar.style.width=bar.style.width==='82%'?'35%':'82%'; return log('Preview toggled');} if(a==='next-scene'){currentScene=(currentScene+1)%state.scenes.length; renderPreview(); return;} if(a==='export-scenes') return download('scenes.json',JSON.stringify(state.scenes,null,2)); if(a==='export-characters') return download('characters.json',JSON.stringify(state.characters,null,2)); if(a==='view-state') return modal('Current State','<pre class="log">'+esc(JSON.stringify(state,null,2))+'</pre>'); if(a==='run-ls-tour'){ if(typeof window.lsStartTour==='function') window.lsStartTour(); return; } if(a==='open-asset-browser') return openAssetBrowser(); if(a==='open-provider-registry') return openProviderRegistry(); if(a==='open-pipeline-registry') return openPipelineRegistry(); if(a==='save-provider') return saveProvider(); if(a==='save-advertiser') return saveAdvertiser(); if(a==='export-advertisers') return download('advertisers.json',JSON.stringify(state.advertiser||[],null,2)); if(a==='save-inbox-message') return saveInboxMessage(); if(a==='export-inbox') return download('inbox.json',JSON.stringify(state.inbox||[],null,2)); if(a==='mark-used') return markUsed(el.dataset.featureId); if(a==='preview-scene'){let i=state.scenes.findIndex(s=>s.id===el.dataset.id); if(i>=0){currentScene=i;renderPreview();modal('Scene Preview','<p class="lead">Preview loaded for '+esc(state.scenes[i].title)+'</p>')}} if(a==='duplicate-project'){let p=state.projects.find(x=>x.id===el.dataset.id); if(p){state.projects.push({...p,id:'project-'+Date.now(),title:p.title+' Copy'});save();}} if(a==='duplicate-character'){let c=state.characters.find(x=>x.id===el.dataset.id); if(c){state.characters.push({...c,id:'character-'+Date.now(),name:c.name+' Copy'});save();}} if(a==='preview-asset') return modal('Asset Preview','<p class="lead">Asset metadata opened.</p>'); if(a==='preview-generic') return modal('Saved Item','<p class="lead">Local saved item opened.</p>'); if(a==='save-style-bible') return lsPS_saveStyleBible(); if(a==='export-style-bible') return lsPS_exportStyleBible(); if(a==='save-voice-bible') return lsPS_saveVoiceBible(); if(a==='export-voice-bible') return lsPS_exportVoiceBible(); if(a==='add-to-gen-queue') return lsPS_addToQueue(); if(a==='clear-queue-done') return lsPS_clearQueueDone(); if(a==='export-gen-queue') return lsPS_exportQueue(); if(a==='log-output-asset') return lsPS_logOutputAsset(); if(a==='export-output-report') return lsPS_exportOutputReport(); if(a==='export-loadstudio-pkg') return lsPS_exportLoadStudioPkg(); if(a==='export-cinepwa-pkg') return lsPS_exportCinePWAPkg(); if(a==='save-scene-audio') return lsAudio_save(); if(a==='export-scene-audio') return lsAudio_export(); if(a==='export-audio-cuesheet') return lsAudio_exportCueSheet();}
+function action(a,el){let secid=el.dataset.sectionId; if(a==='close-modal') return closeModal(); if(a==='create-project') return createProject(); if(a==='add-item') return addSectionItem(secid); if(a==='audit-section') return auditSection(secid); if(a==='export-section') return exportSection(secid); if(a==='open-integration') return openIntegration(secid); if(a==='add-scene') return addScene(); if(a==='add-character') return addCharacter(); if(a==='save-imports') return saveImports(); if(a==='run-full-audit') return fullAudit(); if(a==='run-diagnostics') return diagnostics(); if(a==='validate-package') return validatePackage(); if(a==='export-readiness') return exportReadiness(); if(a==='play-preview'){let bar=$('#playerProgress'); bar.style.width=bar.style.width==='82%'?'35%':'82%'; return log('Preview toggled');} if(a==='next-scene'){currentScene=(currentScene+1)%state.scenes.length; renderPreview(); return;} if(a==='export-scenes') return download('scenes.json',JSON.stringify(state.scenes,null,2)); if(a==='export-characters') return download('characters.json',JSON.stringify(state.characters,null,2)); if(a==='view-state') return modal('Current State','<pre class="log">'+esc(JSON.stringify(state,null,2))+'</pre>'); if(a==='run-ls-tour'){ if(typeof window.lsStartTour==='function') window.lsStartTour(); return; } if(a==='open-asset-browser') return openAssetBrowser(); if(a==='open-provider-registry') return openProviderRegistry(); if(a==='open-pipeline-registry') return openPipelineRegistry(); if(a==='save-provider') return saveProvider(); if(a==='save-advertiser') return saveAdvertiser(); if(a==='export-advertisers') return download('advertisers.json',JSON.stringify(state.advertiser||[],null,2)); if(a==='save-inbox-message') return saveInboxMessage(); if(a==='export-inbox') return download('inbox.json',JSON.stringify(state.inbox||[],null,2)); if(a==='mark-used') return markUsed(el.dataset.featureId); if(a==='preview-scene'){let i=state.scenes.findIndex(s=>s.id===el.dataset.id); if(i>=0){currentScene=i;renderPreview();modal('Scene Preview','<p class="lead">Preview loaded for '+esc(state.scenes[i].title)+'</p>')}} if(a==='duplicate-project'){let p=state.projects.find(x=>x.id===el.dataset.id); if(p){state.projects.push({...p,id:'project-'+Date.now(),title:p.title+' Copy'});save();}} if(a==='duplicate-character'){let c=state.characters.find(x=>x.id===el.dataset.id); if(c){state.characters.push({...c,id:'character-'+Date.now(),name:c.name+' Copy'});save();}} if(a==='preview-asset') return modal('Asset Preview','<p class="lead">Asset metadata opened.</p>'); if(a==='preview-generic') return modal('Saved Item','<p class="lead">Local saved item opened.</p>'); if(a==='save-style-bible') return lsPS_saveStyleBible(); if(a==='export-style-bible') return lsPS_exportStyleBible(); if(a==='save-voice-bible') return lsPS_saveVoiceBible(); if(a==='export-voice-bible') return lsPS_exportVoiceBible(); if(a==='add-to-gen-queue') return lsPS_addToQueue(); if(a==='clear-queue-done') return lsPS_clearQueueDone(); if(a==='export-gen-queue') return lsPS_exportQueue(); if(a==='log-output-asset') return lsPS_logOutputAsset(); if(a==='export-output-report') return lsPS_exportOutputReport(); if(a==='export-loadstudio-pkg') return lsPS_exportLoadStudioPkg(); if(a==='export-cinepwa-pkg') return lsPS_exportCinePWAPkg(); if(a==='save-scene-audio') return lsAudio_save(); if(a==='export-scene-audio') return lsAudio_export(); if(a==='export-audio-cuesheet') return lsAudio_exportCueSheet(); if(a==='log-video-job') return lsVP_logJob(); if(a==='export-video-pipeline') return lsVP_export(); if(a==='clear-video-done') return lsVP_clearDone(); if(a==='export-video-for-load') return lsVP_exportForLoad();}
 document.addEventListener('click',e=>{let s=e.target.closest('[data-section]'); if(s) go(s.dataset.section); let f=e.target.closest('[data-feature]'); if(f) featureClick(f.dataset.feature); let a=e.target.closest('[data-action]'); if(a) action(a.dataset.action,a);});
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
 render();
@@ -2700,6 +2700,151 @@ window.lsSaveCTP_providerReport=function(){
     _initVCE();
   }
 
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _init);
+  } else {
+    _init();
+  }
+
+}());
+
+// Video Pipeline Manager — provider routing, job tracking, asset proof, Load main export
+(function () {
+  'use strict';
+
+  var VP_KEY = 'ls_video_pipeline_v1';
+  var VIDEO_PROVIDERS = ['wan','hunyuanvideo','ltx-video','animatediff','cogvideox','kling','luma-dream','pika','pixverse','hailuo','stable-video-diffusion','open-sora','mochi','local-engine'];
+
+  function _g(id) { return document.getElementById(id); }
+  function _v(id) { var el = _g(id); return el ? (el.value || '').trim() : ''; }
+  function _show(id, msg, color) { var el = _g(id); if (!el) return; el.textContent = msg; el.style.color = color || '#5ee0a5'; el.style.display = 'block'; setTimeout(function () { el.style.display = 'none'; }, 3000); }
+  function _dl(name, obj) { var b = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' }); var u = URL.createObjectURL(b); var a = document.createElement('a'); a.href = u; a.download = name; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u); }
+  function _load() { try { return JSON.parse(localStorage.getItem(VP_KEY) || '[]'); } catch (_) { return []; } }
+  function _saveAll(arr) { try { localStorage.setItem(VP_KEY, JSON.stringify(arr)); } catch (_) {} }
+
+  var STATUS_COLOR = {
+    'pending': '#9c93b5', 'prompted': '#fbd24a', 'attempting': '#5ac8fa',
+    'provider-failed': '#ff8080', 'fallback-tried': '#ffb300',
+    'no-provider': '#ffb300', 'done': '#5ee0a5', 'rejected': '#ff8080'
+  };
+
+  function lsVP_logJob() {
+    var sceneId = _v('ls-vp-scene');
+    var prompt = _v('ls-vp-prompt');
+    if (!sceneId || !prompt) { _show('ls-vp-status-msg', 'Scene ID and prompt required.', '#ff8080'); return; }
+    var resultUrl = _v('ls-vp-result-url');
+    var status = _v('ls-vp-status') || 'pending';
+    if (resultUrl && status === 'done') {
+      // valid — has proof
+    } else if (!resultUrl && status === 'done') {
+      status = 'prompted';
+    }
+    var job = {
+      id: 'vp-' + Date.now(),
+      sceneId: sceneId,
+      stage: _v('ls-vp-stage') || 'text-to-video',
+      provider: _v('ls-vp-provider'),
+      fallback: _v('ls-vp-fallback'),
+      status: status,
+      duration: _v('ls-vp-duration'),
+      prompt: prompt,
+      resultUrl: resultUrl,
+      failReason: _v('ls-vp-fail-reason'),
+      notes: _v('ls-vp-notes'),
+      logged: new Date().toISOString()
+    };
+    var list = _load();
+    list.push(job);
+    _saveAll(list);
+    var msg = resultUrl ? 'Job logged — result attached.' : 'Job logged. Result URL empty — not yet complete.';
+    _show('ls-vp-status-msg', msg, resultUrl ? '#5ee0a5' : '#ffb300');
+    lsVP_render();
+  }
+
+  function lsVP_export() {
+    var jobs = _load();
+    _dl('video-pipeline.json', {
+      videoPipeline: {
+        version: '1.0',
+        jobs: jobs,
+        summary: {
+          total: jobs.length,
+          done: jobs.filter(function (j) { return j.status === 'done' && j.resultUrl; }).length,
+          pending: jobs.filter(function (j) { return j.status === 'pending' || j.status === 'prompted'; }).length,
+          failed: jobs.filter(function (j) { return j.status === 'provider-failed'; }).length
+        },
+        exported: new Date().toISOString(),
+        exportedBy: 'LoadStudio'
+      }
+    });
+  }
+
+  function lsVP_clearDone() {
+    var list = _load().filter(function (j) { return j.status !== 'done'; });
+    _saveAll(list);
+    _show('ls-vp-status-msg', 'Completed jobs cleared.', '#5ee0a5');
+    lsVP_render();
+  }
+
+  function lsVP_exportForLoad() {
+    var jobs = _load().filter(function (j) { return j.resultUrl; });
+    _dl('load-video-assets.json', {
+      loadVideoAssets: {
+        version: '1.0',
+        source: 'LoadStudio',
+        exported: new Date().toISOString(),
+        assets: jobs.map(function (j) {
+          return { sceneId: j.sceneId, stage: j.stage, provider: j.provider, resultUrl: j.resultUrl, prompt: j.prompt, duration: j.duration };
+        }),
+        note: 'Import into Load main via the asset registry. Only entries with a resultUrl are included.'
+      }
+    });
+  }
+
+  function lsVP_renderProviderBadges() {
+    var el = _g('ls-vp-provider-badges');
+    if (!el) return;
+    var reg = window.LoadProviderRegistry;
+    el.innerHTML = VIDEO_PROVIDERS.map(function (id) {
+      var status = 'declared';
+      if (reg) {
+        try { var p = reg.getProvider(id); if (p && p.status) status = p.status; } catch (_) {}
+      }
+      var color = status === 'READY' ? '#5ee0a5' : status === 'TESTED' ? '#5ac8fa' : '#9c93b5';
+      return '<span style="padding:3px 9px;border-radius:5px;font:500 11.5px Inter,system-ui,sans-serif;color:' + color + ';border:1px solid ' + color + ';background:rgba(255,255,255,.04)">' + id + '</span>';
+    }).join('');
+  }
+
+  function lsVP_render() {
+    var el = _g('ls-vp-list');
+    if (!el) return;
+    var list = _load();
+    if (!list.length) { el.innerHTML = '<p style="color:#9c93b5;font:300 13px Inter,system-ui,sans-serif">No video jobs logged yet.</p>'; return; }
+    el.innerHTML = list.slice().reverse().map(function (j) {
+      var sc = STATUS_COLOR[j.status] || '#c0b8d9';
+      var hasProof = !!j.resultUrl;
+      return '<div style="background:rgba(255,110,156,.05);border:1px solid rgba(255,110,156,.18);border-radius:10px;padding:10px 12px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">' +
+        '<span style="font:600 13.5px Inter,system-ui,sans-serif;color:#ff6e9c">' + j.sceneId + ' &mdash; ' + (j.stage || '') + '</span>' +
+        '<span style="font:500 11px Inter,system-ui,sans-serif;color:' + sc + ';border:1px solid ' + sc + ';border-radius:5px;padding:1px 7px">' + j.status + '</span>' +
+        '</div>' +
+        '<div style="font:300 12px Inter,system-ui,sans-serif;color:#9c93b5;margin-top:4px">Provider: ' + (j.provider || '') + (j.fallback && j.fallback !== 'none' ? ' | Fallback: ' + j.fallback : '') + '</div>' +
+        (j.prompt ? '<div style="font:300 11.5px Inter,system-ui,sans-serif;color:#7a6fa0;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + j.prompt.slice(0, 80) + (j.prompt.length > 80 ? '...' : '') + '</div>' : '') +
+        (hasProof ? '<div style="font:500 11.5px Inter,system-ui,sans-serif;color:#5ee0a5;margin-top:4px">Asset proof: ' + j.resultUrl.slice(0, 60) + '</div>' : '<div style="font:500 11.5px Inter,system-ui,sans-serif;color:#ffb300;margin-top:4px">No asset proof yet</div>') +
+        (j.failReason ? '<div style="font:300 11.5px Inter,system-ui,sans-serif;color:#ff8080;margin-top:2px">Failed: ' + j.failReason + '</div>' : '') +
+        '</div>';
+    }).join('');
+  }
+
+  window.lsVP_logJob = lsVP_logJob;
+  window.lsVP_export = lsVP_export;
+  window.lsVP_clearDone = lsVP_clearDone;
+  window.lsVP_exportForLoad = lsVP_exportForLoad;
+
+  function _init() {
+    lsVP_renderProviderBadges();
+    lsVP_render();
+  }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', _init);
   } else {
