@@ -2628,21 +2628,6 @@ var LoadProviderRegistry = {
       });
     }
 
-    if (providerId === 'fish-audio') {
-      if (!key) return Promise.reject(new Error('Fish Audio: no API key'));
-      var faEndpoint = endpoint || 'https://api.fish.audio/v1';
-      return fetch(faEndpoint + '/tts', {
-        method: 'POST',
-        headers: {'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json'},
-        body: JSON.stringify({text: request.text || '', reference_id: s.voiceId || null, format: 'mp3', latency: 'normal'})
-      }).then(function (r) {
-        if (!r.ok) throw new Error('Fish Audio ' + r.status);
-        return r.blob().then(function (b) {
-          return LoadProviderRegistry.normalizeResult({type: 'audio', blob: b, url: URL.createObjectURL(b), provider: 'fish-audio'});
-        });
-      });
-    }
-
     if (providerId === 'coqui') {
       var cqEp = endpoint || 'http://localhost:5002';
       var cqUrl = cqEp + '/api/tts?text=' + encodeURIComponent(request.text || '') + '&speaker_id=' + encodeURIComponent(s.speaker || '') + '&language_id=';
@@ -3054,17 +3039,6 @@ var LoadProviderRegistry = {
         })
         .catch(function(e){ return {provider:'bbc-sfx',results:[],error:e.message}; });
     }
-    if (providerId === 'zapsplat') {
-      if (!key) return Promise.resolve({provider:'zapsplat', results:[], status:'needs-key', needsKey:true});
-      return fetch('https://www.zapsplat.com/api/v1/search?q='+encodeURIComponent(query)+'&per_page='+limit+'&page='+page, {
-        headers: {'X-API-Key': key}
-      }).then(function(r){ if(!r.ok) throw new Error('ZapSplat '+r.status); return r.json(); })
-      .then(function(d){
-        return {provider:'zapsplat', results:(d.data||[]).map(function(item){
-          return {id:String(item.id||''),title:item.name||'',previewUrl:item.url||null,downloadUrl:item.url||null,licenseType:'ZapSplat',attribution:'ZapSplat',mediaType:'audio',provider:'zapsplat'};
-        })};
-      }).catch(function(e){ return {provider:'zapsplat',results:[],error:e.message}; });
-    }
     return Promise.resolve({provider: providerId, results: [], status: 'no-connector'});
   },
 
@@ -3115,17 +3089,6 @@ var LoadProviderRegistry = {
           })};
         })
         .catch(function(e){ return {provider:'openverse',results:[],error:e.message}; });
-    }
-    if (providerId === 'unsplash') {
-      if (!key) return Promise.resolve({provider:'unsplash', results:[], status:'needs-key', needsKey:true});
-      return fetch('https://api.unsplash.com/search/photos?query='+encodeURIComponent(query)+'&per_page=20&page='+page, {
-        headers: {'Authorization': 'Client-ID ' + key}
-      }).then(function(r){ if(!r.ok) throw new Error('Unsplash '+r.status); return r.json(); })
-      .then(function(d){
-        return {provider:'unsplash', results:(d.results||[]).map(function(item){
-          return {id:String(item.id||''),title:item.description||item.alt_description||'',url:item.urls&&item.urls.regular||null,thumbUrl:item.urls&&item.urls.small||null,attribution:'Photo by '+((item.user&&item.user.name)||'Unknown')+' on Unsplash',mediaType:'image',provider:'unsplash'};
-        })};
-      }).catch(function(e){ return {provider:'unsplash',results:[],error:e.message}; });
     }
     if (providerId === 'internet-archive') {
       var iaMediaType = mediaType === 'video' ? 'movies' : mediaType === 'audio' ? 'audio' : 'image';
