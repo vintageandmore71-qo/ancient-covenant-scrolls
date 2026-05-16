@@ -2515,96 +2515,6 @@ var LoadProviderRegistry = {
       });
     }
 
-    if (providerId === 'deepai') {
-      if (!key) return Promise.reject(new Error('DeepAI: no API key'));
-      var daFd = new FormData();
-      daFd.append('text', request.prompt || '');
-      if (request.width) daFd.append('width', String(request.width));
-      if (request.height) daFd.append('height', String(request.height));
-      return fetch('https://api.deepai.org/api/text2img', {
-        method: 'POST', headers: {'api-key': key}, body: daFd
-      }).then(function (r) {
-        if (!r.ok) throw new Error('DeepAI ' + r.status);
-        return r.json().then(function (d) {
-          if (!d.output_url) throw new Error('DeepAI: no output URL');
-          return LoadProviderRegistry.normalizeResult({type: 'image', url: d.output_url, provider: 'deepai'});
-        });
-      });
-    }
-
-    if (providerId === 'siliconflow') {
-      if (!key) return Promise.reject(new Error('SiliconFlow: no API key'));
-      return fetch('https://api.siliconflow.cn/v1/images/generations', {
-        method: 'POST',
-        headers: {'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json'},
-        body: JSON.stringify({model: s.model || 'black-forest-labs/FLUX.1-schnell', prompt: request.prompt || '', image_size: (request.width || 1024) + 'x' + (request.height || 1024), num_inference_steps: 20})
-      }).then(function (r) {
-        if (!r.ok) throw new Error('SiliconFlow ' + r.status);
-        return r.json().then(function (d) {
-          var sfUrl = d.images && d.images[0] && d.images[0].url;
-          if (!sfUrl) throw new Error('SiliconFlow: no image URL');
-          return LoadProviderRegistry.normalizeResult({type: 'image', url: sfUrl, provider: 'siliconflow'});
-        });
-      });
-    }
-
-    if (providerId === 'cloudflare-workers-ai') {
-      var cfAccountId = s.accountId || '';
-      if (!cfAccountId) return Promise.reject(new Error('Cloudflare Workers AI: no account ID configured in provider settings'));
-      if (!key) return Promise.reject(new Error('Cloudflare Workers AI: no API token'));
-      var cfModel = s.model || '@cf/black-forest-labs/flux-1-schnell';
-      return fetch('https://api.cloudflare.com/client/v4/accounts/' + cfAccountId + '/ai/run/' + cfModel, {
-        method: 'POST',
-        headers: {'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json'},
-        body: JSON.stringify({prompt: request.prompt || '', num_steps: 8})
-      }).then(function (r) {
-        if (!r.ok) throw new Error('Cloudflare AI ' + r.status);
-        var ct = r.headers.get('content-type') || '';
-        if (ct.indexOf('image') >= 0) {
-          return r.blob().then(function (b) {
-            return LoadProviderRegistry.normalizeResult({type: 'image', blob: b, url: URL.createObjectURL(b), provider: 'cloudflare-workers-ai'});
-          });
-        }
-        return r.json().then(function (d) {
-          var cfImgB64 = d.result && d.result.image;
-          if (!cfImgB64) throw new Error('Cloudflare AI: no image in response');
-          return LoadProviderRegistry.normalizeResult({type: 'image', url: 'data:image/png;base64,' + cfImgB64, provider: 'cloudflare-workers-ai'});
-        });
-      });
-    }
-
-    if (providerId === 'leonardo-ai') {
-      if (!key) return Promise.reject(new Error('Leonardo AI: no API key'));
-      return fetch('https://cloud.leonardo.ai/api/rest/v1/generations', {
-        method: 'POST',
-        headers: {'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json'},
-        body: JSON.stringify({prompt: request.prompt || '', modelId: s.model || '6bef9f1b-29cb-40c7-b9df-32b51c1f67d3', width: request.width || 1024, height: request.height || 1024, num_images: 1})
-      }).then(function (r) {
-        if (!r.ok) throw new Error('Leonardo AI ' + r.status);
-        return r.json().then(function (d) {
-          var genId = d.sdGenerationJob && d.sdGenerationJob.generationId;
-          if (!genId) throw new Error('Leonardo AI: no generation ID');
-          return LoadProviderRegistry.normalizeResult({type: 'image-job', jobId: genId, provider: 'leonardo-ai'});
-        });
-      });
-    }
-
-    if (providerId === 'tensor-art') {
-      if (!key) return Promise.reject(new Error('Tensor Art: no API key'));
-      return fetch('https://api.tensor.art/v1/job/text-to-image', {
-        method: 'POST',
-        headers: {'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json'},
-        body: JSON.stringify({stages: [{type: 'TEXT_DENOISING', inputInitialize: {seed: -1, count: 1}, diffusion: {width: request.width || 1024, height: request.height || 1024, prompts: [{text: request.prompt || ''}], steps: 20, samplerName: 'Euler a'}}]})
-      }).then(function (r) {
-        if (!r.ok) throw new Error('Tensor Art ' + r.status);
-        return r.json().then(function (d) {
-          var taJobId = d.job && d.job.id;
-          if (!taJobId) throw new Error('Tensor Art: no job ID');
-          return LoadProviderRegistry.normalizeResult({type: 'image-job', jobId: taJobId, provider: 'tensor-art'});
-        });
-      });
-    }
-
     return Promise.reject(new Error('generateImage: unsupported or unconfigured provider: ' + providerId));
   },
 
@@ -3440,25 +3350,6 @@ var LoadProviderRegistry = {
         });
       });
     }
-    if (providerId === 'cloudflare-workers-ai') {
-      var cfLlmAccountId = s.accountId || '';
-      if (!cfLlmAccountId) return Promise.reject(new Error('Cloudflare Workers AI: no account ID configured in provider settings'));
-      if (!key) return Promise.reject(new Error('Cloudflare Workers AI: no API token'));
-      var cfLlmModel = s.model || request.model || '@cf/meta/llama-3.1-8b-instruct';
-      var cfLlmMsgs = Array.isArray(request.messages) ? request.messages : [{role:'user',content:request.prompt||''}];
-      return fetch('https://api.cloudflare.com/client/v4/accounts/' + cfLlmAccountId + '/ai/run/' + cfLlmModel, {
-        method: 'POST',
-        headers: {'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json'},
-        body: JSON.stringify({messages: cfLlmMsgs, max_tokens: request.maxTokens || 1024})
-      }).then(function(r){
-        if (!r.ok) throw new Error('Cloudflare Workers AI LLM ' + r.status);
-        return r.json().then(function(d){
-          var cfText = (d.result && d.result.response) || '';
-          return LoadProviderRegistry.normalizeResult({type:'text', text:cfText, provider:'cloudflare-workers-ai'});
-        });
-      });
-    }
-
     return Promise.reject(new Error('callLLM: no endpoint or key for: ' + providerId));
   },
 
