@@ -565,6 +565,13 @@ body.ls-contrast-safe{filter:contrast(1.15)}
   <div class="ls-drawer-heading">Scene &amp; Editing</div>
   <button class="ls-drawer-item" type="button" data-section="scene-builder" data-ls-drawer-close="1"><span class="dot"></span>Scene Cards</button>
   <button class="ls-drawer-item" type="button" data-section="timeline-editor" data-ls-drawer-close="1"><span class="dot"></span>Editing Bay</button>
+</div>
+<div class="ls-drawer-section">
+  <div class="ls-drawer-heading">Production Studio</div>
+  <button class="ls-drawer-item" type="button" data-section="style-bible" data-ls-drawer-close="1"><span class="dot"></span>Style Bible</button>
+  <button class="ls-drawer-item" type="button" data-section="voice-bible" data-ls-drawer-close="1"><span class="dot"></span>Voice Bible</button>
+  <button class="ls-drawer-item" type="button" data-section="generation-queue" data-ls-drawer-close="1"><span class="dot"></span>Generation Queue</button>
+  <button class="ls-drawer-item" type="button" data-section="output-review" data-ls-drawer-close="1"><span class="dot"></span>Output Review</button>
 </div></aside><header class="topbar"><button class="ls-hamb" id="lsHambBtn" type="button" aria-label="Open studio menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><div class="brand"><img class="logo" src="icons/icon-192.png" alt="Load Studio™" onerror="this.onerror=null;this.src='icon.png';"><div><b>Load Studio™</b><span>Production Studio</span></div><div class="ls-toolrow" role="toolbar" aria-label="LoadStudio tools">
 <button class="ls-tool" id="ls-tool-back" type="button" title="Back" aria-label="Back" onclick="history.back()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
 <button class="ls-tool" id="ls-tool-home" type="button" title="Home" aria-label="Home" onclick="(function(){var s=document.getElementById('ls-splash');if(s&&s.scrollIntoView)s.scrollIntoView({behavior:'smooth',block:'start'});else window.scrollTo({top:0,behavior:'smooth'});})()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg></button>
@@ -804,6 +811,24 @@ body.ls-contrast-safe{filter:contrast(1.15)}
   <div class="panel-grid">
     <div class="panel"><h3>Feature tools</h3><div class="feature-list"><button class="feature-btn" data-feature="export-studio-load-studio-project" data-section-id="export-studio"><b>Load Studio™ project</b><small>local plus integration</small></button><button class="feature-btn" data-feature="export-studio-cinepwa-package" data-section-id="export-studio"><b>CinePWA package</b><small>local plus integration</small></button><button class="feature-btn" data-feature="export-studio-standalone-html" data-section-id="export-studio"><b>standalone HTML</b><small>local plus integration</small></button><button class="feature-btn" data-feature="export-studio-pwa-zip" data-section-id="export-studio"><b>PWA zip</b><small>local plus integration</small></button><button class="feature-btn" data-feature="export-studio-mp4-later" data-section-id="export-studio"><b>MP4 later</b><small>local plus integration</small></button><button class="feature-btn" data-feature="export-studio-webm-later" data-section-id="export-studio"><b>WebM later</b><small>local plus integration</small></button><button class="feature-btn" data-feature="export-studio-audio-only" data-section-id="export-studio"><b>audio-only</b><small>local plus integration</small></button><button class="feature-btn" data-feature="export-studio-subtitles" data-section-id="export-studio"><b>subtitles</b><small>local plus integration</small></button><button class="feature-btn" data-feature="export-studio-poster" data-section-id="export-studio"><b>poster</b><small>local plus integration</small></button><button class="feature-btn" data-feature="export-studio-thumbnails" data-section-id="export-studio"><b>thumbnails</b><small>local plus integration</small></button><button class="feature-btn" data-feature="export-studio-project-json" data-section-id="export-studio"><b>project JSON</b><small>local plus integration</small></button><button class="feature-btn" data-feature="export-studio-character-bible" data-section-id="export-studio"><b>character bible</b><small>local plus integration</small></button><button class="feature-btn" data-feature="export-studio-rights-metadata" data-section-id="export-studio"><b>rights metadata</b><small>local plus integration</small></button><button class="feature-btn" data-feature="export-studio-credits-file" data-section-id="export-studio"><b>credits file</b><small>local plus integration</small></button></div></div>
     <div class="panel"><h3>Working controls</h3><div class="section-controls" data-controls="export-studio"></div><div class="local-list" id="list-export-studio"></div></div>
+  </div>
+  <div class="ls-frame" style="margin-top:18px">
+    <div class="ls-bar" style="background:linear-gradient(90deg,#f39c12,#e74c3c)"></div>
+    <div class="ls-h"><h2>Package Builder</h2></div>
+    <p class="ls-lead">Download your production as a portable package. Local JSON packages work now. Actual .zip export requires a backend integration.</p>
+    <div class="ls-panel">
+      <h3 style="margin:0 0 10px;font:600 15px Inter,system-ui,sans-serif;color:#fff">Load Studio Package</h3>
+      <p style="color:#c0b8d9;font:300 13px Inter,system-ui,sans-serif;margin:0 0 12px">Collects all project data: scenes, characters, style bible, voice bible, generation report, and prompt log into one file.</p>
+      <button data-action="export-loadstudio-pkg" style="padding:10px 18px;border-radius:10px;font:500 13.5px Inter,system-ui,sans-serif;border:1px solid rgba(243,156,18,.5);background:rgba(243,156,18,.15);color:#f39c12;cursor:pointer">Download .loadstudio Package</button>
+      <div id="ls-exp-ls-status" style="display:none;margin-top:8px;font:400 13px Inter,system-ui,sans-serif;color:#5ee0a5"></div>
+    </div>
+    <div class="ls-panel" style="margin-top:12px">
+      <h3 style="margin:0 0 10px;font:600 15px Inter,system-ui,sans-serif;color:#fff">CinePWA Package</h3>
+      <p style="color:#c0b8d9;font:300 13px Inter,system-ui,sans-serif;margin:0 0 8px">Exports scenes, characters, voices, rights, and credits in CinePWA format for Load Play.</p>
+      <span style="display:inline-block;padding:3px 10px;border-radius:6px;background:rgba(255,160,0,.12);border:1px solid rgba(255,160,0,.3);color:#ffb300;font:500 11.5px Inter,system-ui,sans-serif;margin-bottom:10px">Integration Required for .zip</span>
+      <br><button data-action="export-cinepwa-pkg" style="padding:10px 18px;border-radius:10px;font:500 13.5px Inter,system-ui,sans-serif;border:1px solid rgba(90,200,250,.5);background:rgba(90,200,250,.15);color:#5ac8fa;cursor:pointer">Download CinePWA Package JSON</button>
+      <div id="ls-exp-cp-status" style="display:none;margin-top:8px;font:400 13px Inter,system-ui,sans-serif;color:#5ee0a5"></div>
+    </div>
   </div>
 </section>
 <section id="section-load-play-prep" class="section" data-title="Publish to Load Play™ Preparation">
@@ -1643,6 +1668,123 @@ body.ls-contrast-safe{filter:contrast(1.15)}
       <button class="ls-related-tile" onclick="lsNav('continuity-engine')"><div class="ls-related-tile-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><span class="ls-related-tile-label">Continuity Engine</span></button>
       <button class="ls-related-tile" onclick="lsNav('export-studio')"><div class="ls-related-tile-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div><span class="ls-related-tile-label">Export Studio</span></button>
     </div></div>
+  </div>
+</section>
+
+<section id="section-style-bible" class="section" data-title="Style Bible">
+  <div class="ls-frame">
+    <div class="ls-bar" style="background:linear-gradient(90deg,#f8c471,#e74c3c)"></div>
+    <div class="ls-h"><h2>Style Bible</h2><span class="ls-dept" style="color:#f8c471;background:rgba(248,196,113,.10);border-color:rgba(248,196,113,.36)">Production Studio</span></div>
+    <p class="ls-lead">Lock the visual style of your production. Era, color palette, lighting, and mood are saved as the Style Bible and attached to every export.</p>
+    <div class="ls-panel">
+      <h3 style="margin:0 0 12px;font:600 15px Inter,system-ui,sans-serif;color:#fff">Visual Style</h3>
+      <div class="form-grid">
+        <div class="field"><label>Production title</label><input type="text" id="ls-sb-title" placeholder="e.g. Dark Harbor"></div>
+        <div class="field"><label>Era / Period</label><select id="ls-sb-era"><option>Contemporary</option><option>Near Future</option><option>Far Future</option><option>1990s</option><option>1980s</option><option>1970s</option><option>1960s</option><option>1950s</option><option>1940s Noir</option><option>1920s</option><option>Victorian</option><option>Medieval</option><option>Ancient</option><option>Fantasy</option><option>Post-Apocalyptic</option></select></div>
+        <div class="field"><label>Visual style</label><select id="ls-sb-style"><option>Cinematic Realism</option><option>Noir</option><option>Anime-inspired</option><option>Comic Book</option><option>Watercolor</option><option>Documentary</option><option>Vintage Film</option><option>Music Video</option><option>Prestige TV</option><option>Trailer Look</option><option>Children Illustration</option><option>2D Animation</option><option>Motion Comic</option></select></div>
+        <div class="field"><label>Lighting style</label><select id="ls-sb-lighting"><option>Natural</option><option>Studio</option><option>Dramatic</option><option>Atmospheric</option><option>Low-key</option><option>High-key</option><option>Golden Hour</option><option>Night / Practical</option><option>Neon / Cyberpunk</option></select></div>
+        <div class="field"><label>Color palette</label><input type="text" id="ls-sb-palette" placeholder="e.g. desaturated blues, amber highlights"></div>
+        <div class="field"><label>Mood / Tone</label><input type="text" id="ls-sb-mood" placeholder="e.g. tense, melancholic, hopeful"></div>
+        <div class="field" style="grid-column:1/-1"><label>Reference mood board notes</label><textarea id="ls-sb-moodboard" rows="3" placeholder="Describe the visual references or productions that match this look."></textarea></div>
+        <div class="field" style="grid-column:1/-1"><label>Negative style (avoid)</label><textarea id="ls-sb-negative" rows="2" placeholder="What look, color, or style must never appear in this production."></textarea></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+        <button data-action="save-style-bible" style="padding:10px 18px;border-radius:10px;font:500 13.5px Inter,system-ui,sans-serif;border:1px solid rgba(248,196,113,.5);background:rgba(248,196,113,.15);color:#f8c471;cursor:pointer">Save Style Bible</button>
+        <button data-action="export-style-bible" style="padding:10px 18px;border-radius:10px;font:500 13.5px Inter,system-ui,sans-serif;border:1px solid rgba(255,255,255,.2);background:transparent;color:#c0b8d9;cursor:pointer">Export style-bible.json</button>
+      </div>
+      <div id="ls-sb-status" style="display:none;margin-top:8px;font:400 13px Inter,system-ui,sans-serif;color:#5ee0a5"></div>
+    </div>
+    <div class="ls-panel" style="margin-top:12px">
+      <h3 style="margin:0 0 12px;font:600 15px Inter,system-ui,sans-serif;color:#fff">Saved Style Presets</h3>
+      <div id="ls-sb-list" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+  </div>
+</section>
+
+<section id="section-voice-bible" class="section" data-title="Voice Bible">
+  <div class="ls-frame">
+    <div class="ls-bar" style="background:linear-gradient(90deg,#a29bfe,#fd79a8)"></div>
+    <div class="ls-h"><h2>Voice Bible</h2><span class="ls-dept" style="color:#a29bfe;background:rgba(162,155,254,.10);border-color:rgba(162,155,254,.36)">Production Studio</span></div>
+    <p class="ls-lead">Define the voice profile for every character in the production. Tone, pitch, pace, accent, and delivery notes are saved and attached to the Voice Character Engine.</p>
+    <div class="ls-panel">
+      <h3 style="margin:0 0 12px;font:600 15px Inter,system-ui,sans-serif;color:#fff">Add Voice Profile</h3>
+      <div class="form-grid">
+        <div class="field"><label>Character name</label><input type="text" id="ls-vb-char" placeholder="e.g. Dr. Mira Santos"></div>
+        <div class="field"><label>Voice type</label><select id="ls-vb-type"><option>Narrator</option><option>Hero</option><option>Villain</option><option>Elder</option><option>Child</option><option>Royal</option><option>Comedic sidekick</option><option>News reporter</option><option>Creature</option><option>AI voice</option><option>Custom</option></select></div>
+        <div class="field"><label>Pitch</label><select id="ls-vb-pitch"><option>Low</option><option>Mid-low</option><option>Mid</option><option>Mid-high</option><option>High</option></select></div>
+        <div class="field"><label>Pace</label><select id="ls-vb-pace"><option>Slow</option><option>Measured</option><option>Normal</option><option>Brisk</option><option>Fast</option></select></div>
+        <div class="field"><label>Tone</label><input type="text" id="ls-vb-tone" placeholder="e.g. warm, raspy, authoritative"></div>
+        <div class="field"><label>Accent / Language</label><input type="text" id="ls-vb-accent" placeholder="e.g. British RP, Southern US, neutral"></div>
+        <div class="field" style="grid-column:1/-1"><label>Delivery notes</label><textarea id="ls-vb-notes" rows="3" placeholder="How does this character speak? Pauses, emphasis, emotional range, catchphrases."></textarea></div>
+        <div class="field" style="grid-column:1/-1"><label>Sample line</label><textarea id="ls-vb-sample" rows="2" placeholder="A representative line for voice testing."></textarea></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+        <button data-action="save-voice-bible" style="padding:10px 18px;border-radius:10px;font:500 13.5px Inter,system-ui,sans-serif;border:1px solid rgba(162,155,254,.5);background:rgba(162,155,254,.15);color:#a29bfe;cursor:pointer">Save Voice Profile</button>
+        <button data-action="export-voice-bible" style="padding:10px 18px;border-radius:10px;font:500 13.5px Inter,system-ui,sans-serif;border:1px solid rgba(255,255,255,.2);background:transparent;color:#c0b8d9;cursor:pointer">Export voice-bible.json</button>
+      </div>
+      <div id="ls-vb-status" style="display:none;margin-top:8px;font:400 13px Inter,system-ui,sans-serif;color:#5ee0a5"></div>
+    </div>
+    <div class="ls-panel" style="margin-top:12px">
+      <h3 style="margin:0 0 12px;font:600 15px Inter,system-ui,sans-serif;color:#fff">Saved Voice Profiles</h3>
+      <div id="ls-vb-list" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+  </div>
+</section>
+
+<section id="section-generation-queue" class="section" data-title="Generation Queue">
+  <div class="ls-frame">
+    <div class="ls-bar" style="background:linear-gradient(90deg,#00cec9,#55efc4)"></div>
+    <div class="ls-h"><h2>Generation Queue</h2><span class="ls-dept" style="color:#00cec9;background:rgba(0,206,201,.10);border-color:rgba(0,206,201,.36)">Production Studio</span></div>
+    <p class="ls-lead">Queue generation jobs for images, video, audio, and speech. Track status, retry failures, and route completed jobs to Output Review.</p>
+    <div class="ls-panel">
+      <h3 style="margin:0 0 12px;font:600 15px Inter,system-ui,sans-serif;color:#fff">Add to Queue</h3>
+      <div class="form-grid">
+        <div class="field"><label>Job type</label><select id="ls-gq-type"><option>image</option><option>video</option><option>audio</option><option>speech</option><option>prompt</option></select></div>
+        <div class="field"><label>Provider</label><input type="text" id="ls-gq-provider" placeholder="e.g. Pollinations, browser-tts, Freesound"></div>
+        <div class="field"><label>Scene ID</label><input type="text" id="ls-gq-scene" placeholder="scene-001"></div>
+        <div class="field"><label>Priority</label><select id="ls-gq-priority"><option>normal</option><option>high</option><option>low</option></select></div>
+        <div class="field" style="grid-column:1/-1"><label>Prompt</label><textarea id="ls-gq-prompt" rows="3" placeholder="Describe what should be generated."></textarea></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+        <button data-action="add-to-gen-queue" style="padding:10px 18px;border-radius:10px;font:500 13.5px Inter,system-ui,sans-serif;border:1px solid rgba(0,206,201,.5);background:rgba(0,206,201,.15);color:#00cec9;cursor:pointer">Add to Queue</button>
+        <button data-action="clear-queue-done" style="padding:10px 18px;border-radius:10px;font:500 13.5px Inter,system-ui,sans-serif;border:1px solid rgba(255,255,255,.2);background:transparent;color:#c0b8d9;cursor:pointer">Clear Completed</button>
+        <button data-action="export-gen-queue" style="padding:10px 18px;border-radius:10px;font:500 13.5px Inter,system-ui,sans-serif;border:1px solid rgba(255,255,255,.2);background:transparent;color:#c0b8d9;cursor:pointer">Export Queue JSON</button>
+      </div>
+      <div id="ls-gq-status" style="display:none;margin-top:8px;font:400 13px Inter,system-ui,sans-serif;color:#5ee0a5"></div>
+    </div>
+    <div class="ls-panel" style="margin-top:12px">
+      <h3 style="margin:0 0 12px;font:600 15px Inter,system-ui,sans-serif;color:#fff">Queue</h3>
+      <div id="ls-gq-list" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+  </div>
+</section>
+
+<section id="section-output-review" class="section" data-title="Output Review">
+  <div class="ls-frame">
+    <div class="ls-bar" style="background:linear-gradient(90deg,#6c5ce7,#a29bfe)"></div>
+    <div class="ls-h"><h2>Output Review</h2><span class="ls-dept" style="color:#a29bfe;background:rgba(108,92,231,.10);border-color:rgba(108,92,231,.36)">Production Studio</span></div>
+    <p class="ls-lead">Review every generated asset. Approve, reject, or save each one. Approved assets are included in the generation report and export packages.</p>
+    <div class="ls-panel">
+      <h3 style="margin:0 0 12px;font:600 15px Inter,system-ui,sans-serif;color:#fff">Log Output Asset</h3>
+      <div class="form-grid">
+        <div class="field"><label>Asset type</label><select id="ls-or-type"><option>image</option><option>video</option><option>audio</option><option>speech</option><option>prompt</option></select></div>
+        <div class="field"><label>Provider used</label><input type="text" id="ls-or-provider" placeholder="e.g. Pollinations"></div>
+        <div class="field"><label>Scene ID</label><input type="text" id="ls-or-scene" placeholder="scene-001"></div>
+        <div class="field"><label>Status</label><select id="ls-or-status"><option>pending-review</option><option>approved</option><option>rejected</option></select></div>
+        <div class="field"><label>Asset URL or path</label><input type="text" id="ls-or-url" placeholder="blob:..., https://..., or assets/..."></div>
+        <div class="field"><label>Consistency score (0-100)</label><input type="number" id="ls-or-score" min="0" max="100" placeholder="0"></div>
+        <div class="field" style="grid-column:1/-1"><label>Notes</label><textarea id="ls-or-notes" rows="2" placeholder="What worked, what to fix, or why rejected."></textarea></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+        <button data-action="log-output-asset" style="padding:10px 18px;border-radius:10px;font:500 13.5px Inter,system-ui,sans-serif;border:1px solid rgba(108,92,231,.5);background:rgba(108,92,231,.15);color:#a29bfe;cursor:pointer">Log Asset</button>
+        <button data-action="export-output-report" style="padding:10px 18px;border-radius:10px;font:500 13.5px Inter,system-ui,sans-serif;border:1px solid rgba(255,255,255,.2);background:transparent;color:#c0b8d9;cursor:pointer">Export generation-report.json</button>
+      </div>
+      <div id="ls-or-status" style="display:none;margin-top:8px;font:400 13px Inter,system-ui,sans-serif;color:#5ee0a5"></div>
+    </div>
+    <div class="ls-panel" style="margin-top:12px">
+      <h3 style="margin:0 0 12px;font:600 15px Inter,system-ui,sans-serif;color:#fff">Asset Review List</h3>
+      <div id="ls-or-list" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
   </div>
 </section>
 

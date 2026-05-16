@@ -223,7 +223,7 @@ function openAssetBrowser(){
 function saveProvider(){let provider={id:'provider-'+Date.now(),name:$('#providerName').value,type:$('#providerType').value,keyStatus:$('#providerKey').value?'stored locally':'empty'}; state['developer-lab']=state['developer-lab']||[]; state['developer-lab'].push(provider); log('Provider saved: '+provider.name); save();}
 function saveAdvertiser(){let n=$('#adv-name'); if(!n||!n.value){modal('Advertiser','<p class="lead">Enter an advertiser name first.</p>');return;} let adv={id:'adv-'+Date.now(),name:n.value,email:$('#adv-email')?.value||'',slot:$('#adv-slot')?.value||'',status:$('#adv-status')?.value||'draft',notes:$('#adv-notes')?.value||''}; state.advertiser=state.advertiser||[]; state.advertiser.push(adv); log('Advertiser saved: '+adv.name); save(); render();}
 function saveInboxMessage(){let to=$('#inbox-to'),sub=$('#inbox-subject'); if(!to||!to.value){modal('Inbox','<p class="lead">Enter a recipient first.</p>');return;} let msg={id:'msg-'+Date.now(),title:(sub&&sub.value)||'(no subject)',sub:'to '+to.value,to:to.value,subject:(sub&&sub.value)||'',body:$('#inbox-body')?.value||'',status:'draft'}; state.inbox=state.inbox||[]; state.inbox.push(msg); log('Inbox draft saved: '+msg.title); save(); render();}
-function action(a,el){let secid=el.dataset.sectionId; if(a==='close-modal') return closeModal(); if(a==='create-project') return createProject(); if(a==='add-item') return addSectionItem(secid); if(a==='audit-section') return auditSection(secid); if(a==='export-section') return exportSection(secid); if(a==='open-integration') return openIntegration(secid); if(a==='add-scene') return addScene(); if(a==='add-character') return addCharacter(); if(a==='save-imports') return saveImports(); if(a==='run-full-audit') return fullAudit(); if(a==='run-diagnostics') return diagnostics(); if(a==='validate-package') return validatePackage(); if(a==='export-readiness') return exportReadiness(); if(a==='play-preview'){let bar=$('#playerProgress'); bar.style.width=bar.style.width==='82%'?'35%':'82%'; return log('Preview toggled');} if(a==='next-scene'){currentScene=(currentScene+1)%state.scenes.length; renderPreview(); return;} if(a==='export-scenes') return download('scenes.json',JSON.stringify(state.scenes,null,2)); if(a==='export-characters') return download('characters.json',JSON.stringify(state.characters,null,2)); if(a==='view-state') return modal('Current State','<pre class="log">'+esc(JSON.stringify(state,null,2))+'</pre>'); if(a==='run-ls-tour'){ if(typeof window.lsStartTour==='function') window.lsStartTour(); return; } if(a==='open-asset-browser') return openAssetBrowser(); if(a==='open-provider-registry') return openProviderRegistry(); if(a==='open-pipeline-registry') return openPipelineRegistry(); if(a==='save-provider') return saveProvider(); if(a==='save-advertiser') return saveAdvertiser(); if(a==='export-advertisers') return download('advertisers.json',JSON.stringify(state.advertiser||[],null,2)); if(a==='save-inbox-message') return saveInboxMessage(); if(a==='export-inbox') return download('inbox.json',JSON.stringify(state.inbox||[],null,2)); if(a==='mark-used') return markUsed(el.dataset.featureId); if(a==='preview-scene'){let i=state.scenes.findIndex(s=>s.id===el.dataset.id); if(i>=0){currentScene=i;renderPreview();modal('Scene Preview','<p class="lead">Preview loaded for '+esc(state.scenes[i].title)+'</p>')}} if(a==='duplicate-project'){let p=state.projects.find(x=>x.id===el.dataset.id); if(p){state.projects.push({...p,id:'project-'+Date.now(),title:p.title+' Copy'});save();}} if(a==='duplicate-character'){let c=state.characters.find(x=>x.id===el.dataset.id); if(c){state.characters.push({...c,id:'character-'+Date.now(),name:c.name+' Copy'});save();}} if(a==='preview-asset') return modal('Asset Preview','<p class="lead">Asset metadata opened.</p>'); if(a==='preview-generic') return modal('Saved Item','<p class="lead">Local saved item opened.</p>');}
+function action(a,el){let secid=el.dataset.sectionId; if(a==='close-modal') return closeModal(); if(a==='create-project') return createProject(); if(a==='add-item') return addSectionItem(secid); if(a==='audit-section') return auditSection(secid); if(a==='export-section') return exportSection(secid); if(a==='open-integration') return openIntegration(secid); if(a==='add-scene') return addScene(); if(a==='add-character') return addCharacter(); if(a==='save-imports') return saveImports(); if(a==='run-full-audit') return fullAudit(); if(a==='run-diagnostics') return diagnostics(); if(a==='validate-package') return validatePackage(); if(a==='export-readiness') return exportReadiness(); if(a==='play-preview'){let bar=$('#playerProgress'); bar.style.width=bar.style.width==='82%'?'35%':'82%'; return log('Preview toggled');} if(a==='next-scene'){currentScene=(currentScene+1)%state.scenes.length; renderPreview(); return;} if(a==='export-scenes') return download('scenes.json',JSON.stringify(state.scenes,null,2)); if(a==='export-characters') return download('characters.json',JSON.stringify(state.characters,null,2)); if(a==='view-state') return modal('Current State','<pre class="log">'+esc(JSON.stringify(state,null,2))+'</pre>'); if(a==='run-ls-tour'){ if(typeof window.lsStartTour==='function') window.lsStartTour(); return; } if(a==='open-asset-browser') return openAssetBrowser(); if(a==='open-provider-registry') return openProviderRegistry(); if(a==='open-pipeline-registry') return openPipelineRegistry(); if(a==='save-provider') return saveProvider(); if(a==='save-advertiser') return saveAdvertiser(); if(a==='export-advertisers') return download('advertisers.json',JSON.stringify(state.advertiser||[],null,2)); if(a==='save-inbox-message') return saveInboxMessage(); if(a==='export-inbox') return download('inbox.json',JSON.stringify(state.inbox||[],null,2)); if(a==='mark-used') return markUsed(el.dataset.featureId); if(a==='preview-scene'){let i=state.scenes.findIndex(s=>s.id===el.dataset.id); if(i>=0){currentScene=i;renderPreview();modal('Scene Preview','<p class="lead">Preview loaded for '+esc(state.scenes[i].title)+'</p>')}} if(a==='duplicate-project'){let p=state.projects.find(x=>x.id===el.dataset.id); if(p){state.projects.push({...p,id:'project-'+Date.now(),title:p.title+' Copy'});save();}} if(a==='duplicate-character'){let c=state.characters.find(x=>x.id===el.dataset.id); if(c){state.characters.push({...c,id:'character-'+Date.now(),name:c.name+' Copy'});save();}} if(a==='preview-asset') return modal('Asset Preview','<p class="lead">Asset metadata opened.</p>'); if(a==='preview-generic') return modal('Saved Item','<p class="lead">Local saved item opened.</p>'); if(a==='save-style-bible') return lsPS_saveStyleBible(); if(a==='export-style-bible') return lsPS_exportStyleBible(); if(a==='save-voice-bible') return lsPS_saveVoiceBible(); if(a==='export-voice-bible') return lsPS_exportVoiceBible(); if(a==='add-to-gen-queue') return lsPS_addToQueue(); if(a==='clear-queue-done') return lsPS_clearQueueDone(); if(a==='export-gen-queue') return lsPS_exportQueue(); if(a==='log-output-asset') return lsPS_logOutputAsset(); if(a==='export-output-report') return lsPS_exportOutputReport(); if(a==='export-loadstudio-pkg') return lsPS_exportLoadStudioPkg(); if(a==='export-cinepwa-pkg') return lsPS_exportCinePWAPkg();}
 document.addEventListener('click',e=>{let s=e.target.closest('[data-section]'); if(s) go(s.dataset.section); let f=e.target.closest('[data-feature]'); if(f) featureClick(f.dataset.feature); let a=e.target.closest('[data-action]'); if(a) action(a.dataset.action,a);});
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
 render();
@@ -2704,6 +2704,287 @@ window.lsSaveCTP_providerReport=function(){
     document.addEventListener('DOMContentLoaded', _init);
   } else {
     _init();
+  }
+
+}());
+
+// Production Studio — Style Bible, Voice Bible, Generation Queue, Output Review, Package Builder
+(function () {
+  'use strict';
+
+  var SB_KEY = 'ls_style_bible_v1';
+  var VB_KEY = 'ls_voice_bible_v1';
+  var GQ_KEY = 'ls_gen_queue_v1';
+  var OR_KEY = 'ls_output_review_v1';
+
+  function _g(id) { return document.getElementById(id); }
+  function _v(id) { var el = _g(id); return el ? (el.value || '').trim() : ''; }
+  function _cls(id, v) { var el = _g(id); if (el) el.value = v || ''; }
+  function _show(id, msg, color) { var el = _g(id); if (!el) return; el.textContent = msg; el.style.color = color || '#5ee0a5'; el.style.display = 'block'; setTimeout(function () { el.style.display = 'none'; }, 3000); }
+  function _dl(name, obj) { var b = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' }); var u = URL.createObjectURL(b); var a = document.createElement('a'); a.href = u; a.download = name; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u); }
+  function _load(key) { try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch (_) { return []; } }
+  function _save(key, arr) { try { localStorage.setItem(key, JSON.stringify(arr)); } catch (_) {} }
+
+  // --- Style Bible ---
+  function lsPS_saveStyleBible() {
+    var entry = {
+      id: 'sb-' + Date.now(),
+      title: _v('ls-sb-title'),
+      era: _v('ls-sb-era'),
+      style: _v('ls-sb-style'),
+      lighting: _v('ls-sb-lighting'),
+      palette: _v('ls-sb-palette'),
+      mood: _v('ls-sb-mood'),
+      moodboard: _v('ls-sb-moodboard'),
+      negative: _v('ls-sb-negative'),
+      saved: new Date().toISOString()
+    };
+    var list = _load(SB_KEY);
+    list.push(entry);
+    _save(SB_KEY, list);
+    _show('ls-sb-status', 'Style Bible entry saved.', '#5ee0a5');
+    lsPS_renderStyleBible();
+  }
+
+  function lsPS_exportStyleBible() {
+    var list = _load(SB_KEY);
+    _dl('style-bible.json', { styleBible: { version: '1.0', presets: list, exported: new Date().toISOString(), exportedBy: 'LoadStudio' } });
+  }
+
+  function lsPS_renderStyleBible() {
+    var el = _g('ls-sb-list');
+    if (!el) return;
+    var list = _load(SB_KEY);
+    if (!list.length) { el.innerHTML = '<p style="color:#9c93b5;font:300 13px Inter,system-ui,sans-serif">No style presets saved yet.</p>'; return; }
+    el.innerHTML = list.map(function (e) {
+      return '<div style="background:rgba(248,196,113,.08);border:1px solid rgba(248,196,113,.2);border-radius:10px;padding:10px 12px">' +
+        '<div style="font:600 14px Inter,system-ui,sans-serif;color:#f8c471">' + (e.title || 'Untitled') + '</div>' +
+        '<div style="font:400 12px Inter,system-ui,sans-serif;color:#c0b8d9;margin-top:4px">' + (e.era || '') + ' &mdash; ' + (e.style || '') + ' &mdash; ' + (e.lighting || '') + '</div>' +
+        (e.mood ? '<div style="font:300 12px Inter,system-ui,sans-serif;color:#9c93b5;margin-top:2px">Mood: ' + e.mood + '</div>' : '') +
+        '</div>';
+    }).join('');
+  }
+
+  // --- Voice Bible ---
+  function lsPS_saveVoiceBible() {
+    var entry = {
+      id: 'vb-' + Date.now(),
+      character: _v('ls-vb-char'),
+      type: _v('ls-vb-type'),
+      pitch: _v('ls-vb-pitch'),
+      pace: _v('ls-vb-pace'),
+      tone: _v('ls-vb-tone'),
+      accent: _v('ls-vb-accent'),
+      notes: _v('ls-vb-notes'),
+      sample: _v('ls-vb-sample'),
+      saved: new Date().toISOString()
+    };
+    if (!entry.character) { _show('ls-vb-status', 'Enter a character name.', '#ff8080'); return; }
+    var list = _load(VB_KEY);
+    list.push(entry);
+    _save(VB_KEY, list);
+    _show('ls-vb-status', 'Voice profile saved for ' + entry.character + '.', '#5ee0a5');
+    lsPS_renderVoiceBible();
+  }
+
+  function lsPS_exportVoiceBible() {
+    var list = _load(VB_KEY);
+    _dl('voice-bible.json', { voiceBible: { version: '1.0', profiles: list, exported: new Date().toISOString(), exportedBy: 'LoadStudio' } });
+  }
+
+  function lsPS_renderVoiceBible() {
+    var el = _g('ls-vb-list');
+    if (!el) return;
+    var list = _load(VB_KEY);
+    if (!list.length) { el.innerHTML = '<p style="color:#9c93b5;font:300 13px Inter,system-ui,sans-serif">No voice profiles saved yet.</p>'; return; }
+    el.innerHTML = list.map(function (e) {
+      return '<div style="background:rgba(162,155,254,.08);border:1px solid rgba(162,155,254,.2);border-radius:10px;padding:10px 12px">' +
+        '<div style="font:600 14px Inter,system-ui,sans-serif;color:#a29bfe">' + (e.character || 'Unnamed') + '</div>' +
+        '<div style="font:400 12px Inter,system-ui,sans-serif;color:#c0b8d9;margin-top:4px">' + (e.type || '') + ' &mdash; Pitch: ' + (e.pitch || '') + ' &mdash; Pace: ' + (e.pace || '') + '</div>' +
+        (e.tone ? '<div style="font:300 12px Inter,system-ui,sans-serif;color:#9c93b5;margin-top:2px">Tone: ' + e.tone + '</div>' : '') +
+        (e.sample ? '<div style="font:300 11.5px Inter,system-ui,sans-serif;color:#7a6fa0;margin-top:4px;font-style:italic">"' + e.sample + '"</div>' : '') +
+        '</div>';
+    }).join('');
+  }
+
+  // --- Generation Queue ---
+  function lsPS_addToQueue() {
+    var prompt = _v('ls-gq-prompt');
+    if (!prompt) { _show('ls-gq-status', 'Enter a prompt.', '#ff8080'); return; }
+    var job = {
+      id: 'gq-' + Date.now(),
+      type: _v('ls-gq-type') || 'image',
+      provider: _v('ls-gq-provider'),
+      scene: _v('ls-gq-scene'),
+      priority: _v('ls-gq-priority') || 'normal',
+      prompt: prompt,
+      status: 'pending',
+      added: new Date().toISOString(),
+      result: null
+    };
+    var list = _load(GQ_KEY);
+    list.push(job);
+    _save(GQ_KEY, list);
+    _cls('ls-gq-prompt', '');
+    _show('ls-gq-status', 'Job added to queue.', '#5ee0a5');
+    lsPS_renderQueue();
+  }
+
+  function lsPS_clearQueueDone() {
+    var list = _load(GQ_KEY).filter(function (j) { return j.status !== 'done'; });
+    _save(GQ_KEY, list);
+    _show('ls-gq-status', 'Completed jobs cleared.', '#5ee0a5');
+    lsPS_renderQueue();
+  }
+
+  function lsPS_exportQueue() {
+    _dl('generation-queue.json', { generationQueue: { jobs: _load(GQ_KEY), exported: new Date().toISOString() } });
+  }
+
+  function lsPS_renderQueue() {
+    var el = _g('ls-gq-list');
+    if (!el) return;
+    var list = _load(GQ_KEY);
+    if (!list.length) { el.innerHTML = '<p style="color:#9c93b5;font:300 13px Inter,system-ui,sans-serif">Queue is empty.</p>'; return; }
+    var statusColor = { pending: '#ffb300', running: '#5ac8fa', done: '#5ee0a5', failed: '#ff8080' };
+    el.innerHTML = list.slice().reverse().map(function (j) {
+      var sc = statusColor[j.status] || '#c0b8d9';
+      return '<div style="background:rgba(0,206,201,.06);border:1px solid rgba(0,206,201,.2);border-radius:10px;padding:10px 12px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center">' +
+        '<span style="font:600 13.5px Inter,system-ui,sans-serif;color:#00cec9">' + (j.type || 'image') + (j.scene ? ' &mdash; ' + j.scene : '') + '</span>' +
+        '<span style="font:500 11.5px Inter,system-ui,sans-serif;color:' + sc + ';border:1px solid ' + sc + ';border-radius:5px;padding:1px 7px">' + (j.status || 'pending') + '</span>' +
+        '</div>' +
+        '<div style="font:300 12px Inter,system-ui,sans-serif;color:#9c93b5;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (j.prompt || '') + '</div>' +
+        (j.provider ? '<div style="font:300 11.5px Inter,system-ui,sans-serif;color:#7a6fa0;margin-top:2px">Provider: ' + j.provider + '</div>' : '') +
+        '</div>';
+    }).join('');
+  }
+
+  // --- Output Review ---
+  function lsPS_logOutputAsset() {
+    var url = _v('ls-or-url');
+    var entry = {
+      id: 'or-' + Date.now(),
+      type: _v('ls-or-type') || 'image',
+      provider: _v('ls-or-provider'),
+      scene: _v('ls-or-scene'),
+      status: _v('ls-or-status') || 'pending-review',
+      url: url,
+      score: parseInt(_v('ls-or-score'), 10) || 0,
+      notes: _v('ls-or-notes'),
+      logged: new Date().toISOString()
+    };
+    var list = _load(OR_KEY);
+    list.push(entry);
+    _save(OR_KEY, list);
+    _show('ls-or-status', 'Asset logged.', '#5ee0a5');
+    lsPS_renderOutputReview();
+  }
+
+  function lsPS_exportOutputReport() {
+    var list = _load(OR_KEY);
+    var report = {
+      generationReport: {
+        version: '1.0',
+        assets: list,
+        approved: list.filter(function (a) { return a.status === 'approved'; }).length,
+        rejected: list.filter(function (a) { return a.status === 'rejected'; }).length,
+        pendingReview: list.filter(function (a) { return a.status === 'pending-review'; }).length,
+        exported: new Date().toISOString(),
+        exportedBy: 'LoadStudio'
+      }
+    };
+    _dl('generation-report.json', report);
+  }
+
+  function lsPS_renderOutputReview() {
+    var el = _g('ls-or-list');
+    if (!el) return;
+    var list = _load(OR_KEY);
+    if (!list.length) { el.innerHTML = '<p style="color:#9c93b5;font:300 13px Inter,system-ui,sans-serif">No output assets logged yet.</p>'; return; }
+    var statusColor = { 'pending-review': '#ffb300', 'approved': '#5ee0a5', 'rejected': '#ff8080' };
+    el.innerHTML = list.slice().reverse().map(function (e) {
+      var sc = statusColor[e.status] || '#c0b8d9';
+      return '<div style="background:rgba(108,92,231,.06);border:1px solid rgba(108,92,231,.2);border-radius:10px;padding:10px 12px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center">' +
+        '<span style="font:600 13.5px Inter,system-ui,sans-serif;color:#a29bfe">' + (e.type || 'asset') + (e.scene ? ' &mdash; ' + e.scene : '') + '</span>' +
+        '<span style="font:500 11.5px Inter,system-ui,sans-serif;color:' + sc + ';border:1px solid ' + sc + ';border-radius:5px;padding:1px 7px">' + (e.status || 'pending-review') + '</span>' +
+        '</div>' +
+        (e.provider ? '<div style="font:300 12px Inter,system-ui,sans-serif;color:#9c93b5;margin-top:3px">Provider: ' + e.provider + '</div>' : '') +
+        (e.score ? '<div style="font:300 12px Inter,system-ui,sans-serif;color:#9c93b5;margin-top:2px">Consistency: ' + e.score + '/100</div>' : '') +
+        (e.notes ? '<div style="font:300 11.5px Inter,system-ui,sans-serif;color:#7a6fa0;margin-top:3px">' + e.notes + '</div>' : '') +
+        '</div>';
+    }).join('');
+  }
+
+  // --- Package Builder ---
+  function lsPS_exportLoadStudioPkg() {
+    var pkg = {
+      loadstudioPackage: {
+        version: '1.0',
+        exportedBy: 'LoadStudio',
+        exported: new Date().toISOString(),
+        project: (function () { try { return JSON.parse(localStorage.getItem('ls_project') || 'null'); } catch (_) { return null; } }()),
+        scenes: (function () { try { return JSON.parse(localStorage.getItem('ls_scenes') || '[]'); } catch (_) { return []; } }()),
+        characters: (function () { try { return JSON.parse(localStorage.getItem('ls_characters') || '[]'); } catch (_) { return []; } }()),
+        styleBible: _load(SB_KEY),
+        voiceBible: _load(VB_KEY),
+        generationReport: _load(OR_KEY),
+        promptLog: (function () { try { return JSON.parse(localStorage.getItem('ls_prompts') || '[]'); } catch (_) { return []; } }()),
+        genQueue: _load(GQ_KEY)
+      }
+    };
+    _dl('project.loadstudio.json', pkg);
+    var el = _g('ls-exp-ls-status');
+    if (el) { el.textContent = 'Package downloaded.'; el.style.color = '#5ee0a5'; el.style.display = 'block'; setTimeout(function () { el.style.display = 'none'; }, 3000); }
+  }
+
+  function lsPS_exportCinePWAPkg() {
+    var scenes = (function () { try { return JSON.parse(localStorage.getItem('ls_scenes') || '[]'); } catch (_) { return []; } }());
+    var chars = (function () { try { return JSON.parse(localStorage.getItem('ls_characters') || '[]'); } catch (_) { return []; } }());
+    var pkg = {
+      cinePWAPackage: {
+        version: '1.0',
+        exportedBy: 'LoadStudio',
+        exported: new Date().toISOString(),
+        scenes: scenes,
+        characters: chars,
+        voices: (function () { try { return JSON.parse(localStorage.getItem('ls_voices') || '[]'); } catch (_) { return []; } }()),
+        rights: (function () { try { return JSON.parse(localStorage.getItem('ls_rights') || 'null'); } catch (_) { return null; } }()),
+        credits: (function () { try { return JSON.parse(localStorage.getItem('ls_credits') || '[]'); } catch (_) { return []; } }()),
+        voiceBible: _load(VB_KEY),
+        note: 'Actual .zip packaging requires backend integration. This JSON package contains all metadata.'
+      }
+    };
+    _dl('project.cinepwa.json', pkg);
+    var el = _g('ls-exp-cp-status');
+    if (el) { el.textContent = 'CinePWA package downloaded.'; el.style.color = '#5ee0a5'; el.style.display = 'block'; setTimeout(function () { el.style.display = 'none'; }, 3000); }
+  }
+
+  // Expose to global scope so action() can call them
+  window.lsPS_saveStyleBible = lsPS_saveStyleBible;
+  window.lsPS_exportStyleBible = lsPS_exportStyleBible;
+  window.lsPS_saveVoiceBible = lsPS_saveVoiceBible;
+  window.lsPS_exportVoiceBible = lsPS_exportVoiceBible;
+  window.lsPS_addToQueue = lsPS_addToQueue;
+  window.lsPS_clearQueueDone = lsPS_clearQueueDone;
+  window.lsPS_exportQueue = lsPS_exportQueue;
+  window.lsPS_logOutputAsset = lsPS_logOutputAsset;
+  window.lsPS_exportOutputReport = lsPS_exportOutputReport;
+  window.lsPS_exportLoadStudioPkg = lsPS_exportLoadStudioPkg;
+  window.lsPS_exportCinePWAPkg = lsPS_exportCinePWAPkg;
+
+  function _initPS() {
+    lsPS_renderStyleBible();
+    lsPS_renderVoiceBible();
+    lsPS_renderQueue();
+    lsPS_renderOutputReview();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _initPS);
+  } else {
+    _initPS();
   }
 
 }());
