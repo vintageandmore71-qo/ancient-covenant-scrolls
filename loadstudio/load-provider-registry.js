@@ -2166,6 +2166,10 @@ var LoadProviderRegistry = {
     return _status[providerId] || 'untested';
   },
 
+  getProviderSettings: function (providerId) {
+    return Object.assign({}, _settings[providerId] || {});
+  },
+
   saveProviderSettings: function (providerId, settings) {
     // Accept endpoint + model + apiKey. Keys go only to localStorage.
     _settings[providerId] = Object.assign(_settings[providerId] || {}, settings);
@@ -2689,6 +2693,21 @@ var LoadProviderRegistry = {
         if(!r.ok) throw new Error('HeyGen '+r.status);
         return r.json().then(function(d){
           return LoadProviderRegistry.normalizeResult({type:'video-job',jobId:d.data&&d.data.video_id,provider:'heygen'});
+        });
+      });
+    }
+
+    if (providerId === 'zsky') {
+      if (!key) return Promise.reject(new Error('ZSky: no API key'));
+      if (!endpoint) return Promise.reject(new Error('ZSky: no endpoint configured — set endpoint in provider settings'));
+      return fetch(endpoint + '/v1/video/generate', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key},
+        body: JSON.stringify({prompt: request.prompt || '', aspect_ratio: request.aspectRatio || '16:9', duration: request.duration || 5})
+      }).then(function (r) {
+        if (!r.ok) throw new Error('ZSky ' + r.status);
+        return r.json().then(function (d) {
+          return LoadProviderRegistry.normalizeResult({type: 'video-job', jobId: d.id || d.job_id || d.task_id, provider: 'zsky', data: d});
         });
       });
     }
