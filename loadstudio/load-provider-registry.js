@@ -2460,6 +2460,22 @@ var LoadProviderRegistry = {
       });
     }
 
+    if (providerId === 'pixazo') {
+      var pxKey = s.apiKey || null;
+      var pxHeaders = {'Content-Type': 'application/json'};
+      if (pxKey) pxHeaders['Authorization'] = 'Bearer ' + pxKey;
+      return fetch('https://api.pixazo.com/v1/text-to-image', {
+        method: 'POST',
+        headers: pxHeaders,
+        body: JSON.stringify({prompt: request.prompt || '', width: request.width || 1024, height: request.height || 1024})
+      }).then(function (r) {
+        if (!r.ok) throw new Error('Pixazo ' + r.status);
+        return r.blob().then(function (b) {
+          return LoadProviderRegistry.normalizeResult({type: 'image', blob: b, url: URL.createObjectURL(b), provider: 'pixazo'});
+        });
+      });
+    }
+
     return Promise.reject(new Error('generateImage: unsupported or unconfigured provider: ' + providerId));
   },
 
@@ -2569,6 +2585,21 @@ var LoadProviderRegistry = {
         if (!r.ok) throw new Error(providerId + ' TTS error ' + r.status);
         return r.blob().then(function (b) {
           return LoadProviderRegistry.normalizeResult({type:'audio', blob:b, url:URL.createObjectURL(b), provider:providerId});
+        });
+      });
+    }
+
+    if (providerId === 'fish-audio') {
+      if (!key) return Promise.reject(new Error('Fish Audio: no API key'));
+      var faEndpoint = endpoint || 'https://api.fish.audio/v1';
+      return fetch(faEndpoint + '/tts', {
+        method: 'POST',
+        headers: {'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json'},
+        body: JSON.stringify({text: request.text || '', reference_id: s.voiceId || null, format: 'mp3', latency: 'normal'})
+      }).then(function (r) {
+        if (!r.ok) throw new Error('Fish Audio ' + r.status);
+        return r.blob().then(function (b) {
+          return LoadProviderRegistry.normalizeResult({type: 'audio', blob: b, url: URL.createObjectURL(b), provider: 'fish-audio'});
         });
       });
     }
