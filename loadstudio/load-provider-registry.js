@@ -2482,6 +2482,41 @@ var LoadProviderRegistry = {
       });
     }
 
+    // Cloud HF Inference API paths — work with HF key, no local server needed
+    var hfKey = (_settings['huggingface'] || {}).apiKey || null;
+    var hfBase = 'https://api-inference.huggingface.co/models/';
+
+    if (hfKey && !endpoint) {
+      var hfModel = null;
+      var hfBody = null;
+      if (providerId === 'kokoro') {
+        hfModel = 'hexgrad/Kokoro-82M';
+        hfBody = JSON.stringify({inputs: request.text || '', parameters: {voice: request.voice || s.voice || 'af_heart'}});
+      } else if (providerId === 'bark') {
+        hfModel = 'suno/bark';
+        hfBody = JSON.stringify({inputs: request.text || ''});
+      } else if (providerId === 'xtts' || providerId === 'xtts-v2') {
+        hfModel = 'coqui/XTTS-v2';
+        hfBody = JSON.stringify({inputs: request.text || '', parameters: {language: s.language || 'en'}});
+      } else if (providerId === 'mms-tts' || providerId === 'vits') {
+        hfModel = 'facebook/mms-tts-eng';
+        hfBody = JSON.stringify({inputs: request.text || ''});
+      }
+      if (hfModel && hfBody) {
+        return fetch(hfBase + hfModel, {
+          method: 'POST',
+          headers: {'Authorization': 'Bearer ' + hfKey, 'Content-Type': 'application/json'},
+          body: hfBody
+        }).then(function(r) {
+          if (r.status === 503) return r.json().then(function(d) { throw new Error('HF model loading (~' + Math.round(d.estimated_time || 20) + 's), retry shortly'); });
+          if (!r.ok) throw new Error(providerId + ' HF error ' + r.status);
+          return r.blob().then(function(b) {
+            return LoadProviderRegistry.normalizeResult({type:'audio', blob:b, url:URL.createObjectURL(b), provider:providerId});
+          });
+        });
+      }
+    }
+
     // Local TTS endpoints (Kokoro, XTTS, Piper via LocalAI, Bark, etc.)
     if (endpoint) {
       var path = (providerId === 'xtts')            ? '/tts_to_audio/' :
@@ -2579,7 +2614,30 @@ var LoadProviderRegistry = {
           return LoadProviderRegistry.normalizeResult({type:'transcript-job',jobId:tr.id,provider:'assemblyai',metadata:{status:tr.status}});
         });
     }
-    if (!endpoint) return Promise.reject(new Error('transcribeAudio: no endpoint for provider: ' + providerId));
+    // Cloud HF Inference API for Whisper — works with HF key, no local server needed
+    var hfKeySTT = (_settings['huggingface'] || {}).apiKey || null;
+    var isWhisperProvider = providerId === 'whisper' || providerId === 'faster-whisper' ||
+                            providerId === 'whisperx' || providerId === 'moonshine' ||
+                            providerId === 'distil-whisper';
+    if (hfKeySTT && !endpoint && isWhisperProvider) {
+      var whisperModel = (providerId === 'moonshine') ? 'UsefulSensors/moonshine-base'
+                       : (providerId === 'distil-whisper') ? 'distil-whisper/distil-large-v3'
+                       : 'openai/whisper-large-v3-turbo';
+      return fetch('https://api-inference.huggingface.co/models/' + whisperModel, {
+        method: 'POST',
+        headers: {'Authorization': 'Bearer ' + hfKeySTT, 'Content-Type': request.blob.type || 'audio/wav'},
+        body: request.blob
+      }).then(function(r) {
+        if (r.status === 503) return r.json().then(function(d) { throw new Error('HF Whisper loading (~' + Math.round(d.estimated_time || 20) + 's), retry shortly'); });
+        if (!r.ok) throw new Error('HF Whisper error ' + r.status);
+        return r.json().then(function(d) {
+          var text = d.text || (Array.isArray(d.chunks) ? d.chunks.map(function(c){return c.text;}).join(' ') : '') || '';
+          return LoadProviderRegistry.normalizeResult({type:'transcript', text:text, provider:providerId});
+        });
+      });
+    }
+
+    if (!endpoint) return Promise.reject(new Error('transcribeAudio: no endpoint for provider: ' + providerId + ' — set HuggingFace key or local endpoint in provider settings'));
 
     var fd = new FormData();
     fd.append('file', request.blob, 'audio.wav');
@@ -3161,7 +3219,25 @@ var LoadProviderRegistry = {
     var providerId = request.providerId || 'musicgen';
     var s = _settings[providerId] || {};
     var endpoint = s.endpoint || (this.getProvider(providerId) || {}).defaultEndpoint;
-    if (!endpoint) return Promise.reject(new Error('generateMusic: no endpoint for ' + providerId));
+
+    // Cloud HF Inference API — works with HF key, no local server needed
+    var hfKey = (_settings['huggingface'] || {}).apiKey || null;
+    if (hfKey && !endpoint) {
+      var hfModel = (providerId === 'audiogen') ? 'facebook/audiogen-medium' : 'facebook/musicgen-small';
+      return fetch('https://api-inference.huggingface.co/models/' + hfModel, {
+        method: 'POST',
+        headers: {'Authorization': 'Bearer ' + hfKey, 'Content-Type': 'application/json'},
+        body: JSON.stringify({inputs: request.prompt || 'ambient music'})
+      }).then(function(r) {
+        if (r.status === 503) return r.json().then(function(d) { throw new Error('HF model loading (~' + Math.round(d.estimated_time || 30) + 's), retry shortly'); });
+        if (!r.ok) throw new Error(providerId + ' HF error ' + r.status);
+        return r.blob().then(function(b) {
+          return LoadProviderRegistry.normalizeResult({type:'audio', blob:b, url:URL.createObjectURL(b), provider:providerId});
+        });
+      });
+    }
+
+    if (!endpoint) return Promise.reject(new Error('generateMusic: no endpoint for ' + providerId + ' — set HuggingFace key or local endpoint in provider settings'));
 
     var path, body;
     if (providerId === 'musicgen' || providerId === 'audiogen') {
