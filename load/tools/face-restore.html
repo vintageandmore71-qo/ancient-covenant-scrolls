@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Face Restore &mdash; Load</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<style>
+:root{--bg:#0a0a14;--bg2:#141422;--bg3:#1f1f30;--fg:#e9e9f0;--mute:#9aa0b0;--accent:#7c3aed;--ok:#4ade80;--warn:#facc15;--err:#ff6e6e;--border:#2a2a40}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;font-size:14px;-webkit-font-smoothing:antialiased}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#150a28 0,#0a0514 100%);border-bottom:1px solid var(--border)}
+header a.back{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)}
+header h1{margin:0;font-size:16px;font-weight:800;flex:1}
+.wrap{max-width:960px;margin:0 auto;padding:24px 18px 80px}
+.intro{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin:0 0 18px}
+.intro h2{margin:0 0 6px;font-size:18px;font-weight:800}
+.intro p{margin:0;color:var(--mute);font-size:13.5px}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:6px;font-size:11.5px;font-weight:700;margin-top:8px;background:rgba(250,204,21,.12);border:1px solid rgba(250,204,21,.35);color:var(--warn)}
+.dz{position:relative;border:2px dashed var(--border);background:#0a0e18;border-radius:14px;padding:40px 18px;text-align:center;color:var(--mute);transition:border-color .2s}
+.dz.over{border-color:var(--accent)}
+.dz input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.dz strong{display:block;font-size:16px;color:#fff;margin-bottom:4px}
+.section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin:14px 0}
+.section h3{margin:0 0 10px;font-size:14px;font-weight:800}
+label{display:block;font-size:11.5px;color:var(--mute);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.radio-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.radio-card{flex:1;min-width:180px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:#0a0e18;cursor:pointer}
+.radio-card input{display:none}
+.radio-card.selected{border-color:var(--accent);background:rgba(124,58,237,.1)}
+.radio-card strong{display:block;font-size:13px;font-weight:800;margin-bottom:2px}
+.radio-card p{margin:0;font-size:12px;color:var(--mute)}
+select,input[type=text]{width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:#0a0e18;color:var(--fg);font:inherit;font-size:13px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-weight:700;font-size:13px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.preview{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+@media (max-width:600px){.preview{grid-template-columns:1fr}}
+.previewBox{background:#0a0e18;border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.previewBox img{max-width:100%;max-height:280px;border-radius:6px}
+.previewBox .lbl{font-size:11.5px;color:var(--mute);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.callout{background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.35);border-radius:10px;padding:12px 14px;font-size:12.5px;line-height:1.6}
+.callout strong{color:#fff}
+.hf-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.url-pill{display:flex;align-items:center;gap:8px;background:#0a0e18;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;flex:1;min-width:0;overflow:hidden}
+.url-pill span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--mute)}
+.copy-btn{padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.copy-btn:active{background:var(--accent);border-color:var(--accent)}
+.how-steps{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.how-step{display:flex;gap:10px;align-items:flex-start;font-size:12.5px}
+.step-n{min-width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;margin-top:1px}
+.stat{font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);margin-top:10px;display:none}
+.stat.on{display:block}
+.stat.ok{border-color:var(--ok);background:rgba(74,222,128,.08);color:var(--ok)}
+.stat.err{border-color:var(--err);background:rgba(255,110,110,.08);color:var(--err)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1a1a26;color:#fff;padding:10px 16px;border-radius:8px;border:1px solid var(--border);font-size:13px;z-index:50;box-shadow:0 6px 24px rgba(0,0,0,.4);display:none}
+.toast.on{display:block}
+</style>
+<script src="../../branding.js" data-brand-skip></script>
+</head>
+<body>
+<header>
+  <a class="back" href="../">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 18 4 12 10 6"/></svg>
+    Back to Load
+  </a>
+  <h1>Face Restore</h1>
+</header>
+
+<div class="wrap">
+
+<div class="intro">
+  <h2>Face restoration &mdash; sharpen blurry or degraded faces</h2>
+  <p>Drop a photo and use browser-side contrast sharpening for instant results on this device. For AI-quality restoration (GFPGAN or CodeFormer), use the Hugging Face Spaces handoff below &mdash; free, no sign-in required.</p>
+  <span class="badge">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" style="width:12px;height:12px"><circle cx="8" cy="8" r="6.5"/><path d="M8 5v4M8 11v.5"/></svg>
+    Integration Required for AI restoration &mdash; browser preview only without an API
+  </span>
+</div>
+
+<div class="dz" id="dz">
+  <input type="file" id="file" accept="image/png,image/jpeg,image/webp,image/bmp">
+  <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" style="width:48px;height:48px;margin:0 auto 10px;display:block;opacity:.4"><rect x="8" y="10" width="32" height="28" rx="3"/><circle cx="18" cy="20" r="4"/><path d="M8 30l10-8 6 5 5-4 11 10"/></svg>
+  <strong>Drop a photo or tap to pick</strong>
+  PNG, JPEG, WEBP &mdash; faces must be at least 64 px
+</div>
+
+<div id="optsHost" style="display:none">
+
+  <div class="section">
+    <h3>Method</h3>
+    <div class="radio-row">
+      <label class="radio-card selected" id="card-browser">
+        <input type="radio" name="method" value="browser" checked>
+        <strong>Browser sharpen</strong>
+        <p>Contrast + sharpness pass using Canvas. Fast, fully offline. No API needed.</p>
+      </label>
+      <label class="radio-card" id="card-gfpgan">
+        <input type="radio" name="method" value="gfpgan">
+        <strong>GFPGAN (HF Spaces)</strong>
+        <p>AI face restoration via Hugging Face. Requires copy-paste handoff below.</p>
+      </label>
+      <label class="radio-card" id="card-codeformer">
+        <input type="radio" name="method" value="codeformer">
+        <strong>CodeFormer (HF Spaces)</strong>
+        <p>Transformer-based face restoration. Higher fidelity for severely degraded faces.</p>
+      </label>
+    </div>
+
+    <div id="opts-browser">
+      <label>Sharpness</label>
+      <input type="range" id="sharp" min="0" max="4" step="0.5" value="1.5" style="width:100%;accent-color:var(--accent)">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--mute);margin-top:2px"><span>Subtle</span><span>Strong</span></div>
+    </div>
+
+    <div id="opts-ai" style="display:none">
+      <div class="callout">
+        <strong>AI restoration via Hugging Face Spaces &mdash; free</strong>
+        <p style="margin:4px 0 0;color:var(--mute)">Copy the URL below, open it, drop your image there, and download the restored result back into Load.</p>
+        <div id="hf-gfpgan" class="hf-row">
+          <div class="url-pill"><span>huggingface.co/spaces/Xintao/GFPGAN</span></div>
+          <button class="copy-btn" onclick="cpURL('https://huggingface.co/spaces/Xintao/GFPGAN',this)">Copy link</button>
+        </div>
+        <div id="hf-codeformer" class="hf-row" style="display:none">
+          <div class="url-pill"><span>huggingface.co/spaces/sczhou/CodeFormer</span></div>
+          <button class="copy-btn" onclick="cpURL('https://huggingface.co/spaces/sczhou/CodeFormer',this)">Copy link</button>
+        </div>
+        <div class="how-steps">
+          <div class="how-step"><span class="step-n">1</span><span>Tap <strong>Copy link</strong> and open it in Safari.</span></div>
+          <div class="how-step"><span class="step-n">2</span><span>Upload your photo there and run the restoration.</span></div>
+          <div class="how-step"><span class="step-n">3</span><span>Download the result, then come back here to compare.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn primary" id="runBtn" onclick="run()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg>
+      Run browser sharpen
+    </button>
+    <button class="btn" id="dlBtn" style="display:none" onclick="dlResult()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M12 16V4"/><polyline points="6 20 12 16 18 20"/><path d="M4 20h16"/></svg>
+      Download
+    </button>
+  </div>
+
+  <div class="stat" id="stat"></div>
+
+  <div class="preview" id="preview" style="display:none">
+    <div class="previewBox">
+      <div class="lbl">Original</div>
+      <img id="prevOrig" alt="Original">
+    </div>
+    <div class="previewBox">
+      <div class="lbl">Processed</div>
+      <img id="prevOut" alt="Processed">
+    </div>
+  </div>
+
+</div><!-- /optsHost -->
+
+</div><!-- /wrap -->
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+
+var origFile = null;
+var origURL = null;
+var outURL = null;
+var canvas = document.createElement('canvas');
+var ctx = canvas.getContext('2d');
+
+function toast(msg){
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('on');
+  setTimeout(function(){t.classList.remove('on');},2600);
+}
+function stat(msg,type){
+  var el=document.getElementById('stat');
+  el.textContent=msg;
+  el.className='stat on'+(type?' '+type:'');
+}
+function cpURL(url,btn){
+  navigator.clipboard.writeText(url).then(function(){
+    var old=btn.textContent;
+    btn.textContent='Copied';
+    setTimeout(function(){btn.textContent=old;},1800);
+  }).catch(function(){toast('Could not copy. Long-press the link to copy manually.');});
+}
+window.cpURL=cpURL;
+
+// drag-drop
+var dz=document.getElementById('dz');
+dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('over');});
+dz.addEventListener('dragleave',function(){dz.classList.remove('over');});
+dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('over');var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(f)loadFile(f);});
+
+document.getElementById('file').addEventListener('change',function(e){
+  if(e.target.files&&e.target.files[0])loadFile(e.target.files[0]);
+});
+
+function loadFile(f){
+  if(!f.type.startsWith('image/')){toast('Please pick an image file.');return;}
+  origFile=f;
+  if(origURL){URL.revokeObjectURL(origURL);}
+  origURL=URL.createObjectURL(f);
+  document.getElementById('prevOrig').src=origURL;
+  document.getElementById('optsHost').style.display='';
+  document.getElementById('preview').style.display='grid';
+  document.getElementById('dlBtn').style.display='none';
+  document.getElementById('prevOut').src='';
+  document.getElementById('stat').className='stat';
+}
+
+// method toggle
+document.querySelectorAll('input[name=method]').forEach(function(r){
+  r.addEventListener('change',function(){
+    var v=r.value;
+    document.getElementById('opts-browser').style.display=v==='browser'?'':'none';
+    document.getElementById('opts-ai').style.display=v!=='browser'?'':'none';
+    document.getElementById('hf-gfpgan').style.display=v==='gfpgan'?'flex':'none';
+    document.getElementById('hf-codeformer').style.display=v==='codeformer'?'flex':'none';
+    document.getElementById('card-browser').classList.toggle('selected',v==='browser');
+    document.getElementById('card-gfpgan').classList.toggle('selected',v==='gfpgan');
+    document.getElementById('card-codeformer').classList.toggle('selected',v==='codeformer');
+    document.getElementById('runBtn').textContent = v==='browser'?'Run browser sharpen':'Open Hugging Face Space';
+  });
+});
+
+function run(){
+  var method=document.querySelector('input[name=method]:checked').value;
+  if(method!=='browser'){
+    // AI methods: open the HF Space in a new tab
+    var url = method==='gfpgan'
+      ? 'https://huggingface.co/spaces/Xintao/GFPGAN'
+      : 'https://huggingface.co/spaces/sczhou/CodeFormer';
+    window.open(url,'_blank','noopener');
+    stat('Hugging Face Space opened in a new tab. Upload your photo there, then download and compare.','');
+    return;
+  }
+  if(!origFile){toast('Drop an image first.');return;}
+  var sharpAmt=parseFloat(document.getElementById('sharp').value)||1.5;
+  var img=new Image();
+  img.onload=function(){
+    canvas.width=img.naturalWidth;
+    canvas.height=img.naturalHeight;
+    ctx.drawImage(img,0,0);
+    try{
+      var iData=ctx.getImageData(0,0,canvas.width,canvas.height);
+      sharpen(iData.data,canvas.width,canvas.height,sharpAmt);
+      ctx.putImageData(iData,0,0);
+      if(outURL){URL.revokeObjectURL(outURL);outURL=null;}
+      canvas.toBlob(function(b){
+        if(!b){stat('Canvas export failed. Try a different format.','err');return;}
+        outURL=URL.createObjectURL(b);
+        document.getElementById('prevOut').src=outURL;
+        document.getElementById('dlBtn').style.display='';
+        stat('Browser sharpen done. Download to save.','ok');
+      },'image/png');
+    }catch(e){stat('Processing error: '+e.message,'err');}
+  };
+  img.onerror=function(){stat('Could not load image.','err');};
+  img.src=origURL;
+}
+window.run=run;
+
+function sharpen(data,w,h,amt){
+  var kernel=[-amt,-amt,-amt,-amt,1+8*amt,-amt,-amt,-amt,-amt];
+  var src=new Uint8ClampedArray(data);
+  for(var y=1;y<h-1;y++){
+    for(var x=1;x<w-1;x++){
+      var i=(y*w+x)*4;
+      for(var c=0;c<3;c++){
+        var v=0;
+        var ki=0;
+        for(var ky=-1;ky<=1;ky++){
+          for(var kx=-1;kx<=1;kx++){
+            v+=src[((y+ky)*w+(x+kx))*4+c]*kernel[ki++];
+          }
+        }
+        data[i+c]=Math.max(0,Math.min(255,Math.round(v)));
+      }
+    }
+  }
+}
+
+function dlResult(){
+  if(!outURL){toast('Run browser sharpen first.');return;}
+  var a=document.createElement('a');
+  a.href=outURL;
+  a.download=(origFile?origFile.name.replace(/\.[^.]+$/,''):'restored')+'-face-restored.png';
+  a.click();
+}
+window.dlResult=dlResult;
+
+})();
+</script>
+</body>
+</html>
