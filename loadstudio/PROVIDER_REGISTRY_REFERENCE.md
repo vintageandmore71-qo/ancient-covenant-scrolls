@@ -23,9 +23,9 @@ Two separate provider stacks exist. They must be kept in sync.
 - `load/lib-load-ai-pipeline.js` — pipeline/prompt compilation logic. No API calls.
 
 ### LoadStudio stack
-- `loadstudio/load-provider-registry.js` — 98 providers, exposed as `window.LoadProviderRegistry`. 12 real implementations; 86 return `Promise.reject()` stubs. Keys in `_settings` object (localStorage `lpr_settings_v1`).
+- `loadstudio/load-provider-registry.js` — 98 providers, exposed as `window.LoadProviderRegistry`. ALL generate* methods have real fetch() calls — not stubs. Local providers (Kokoro, MusicGen, Wan, etc.) require a local model server to be running. Cloud providers (Kling, Hailuo, ElevenLabs, etc.) require API keys in settings. Free no-key providers (Pollinations, AI Horde, browser-tts, ccMixter, Wikimedia) work immediately. Keys in `_settings` object (localStorage `lpr_settings_v1`).
 - `loadstudio/load-pipeline-registry.js` — 19 pipeline definitions, metadata only. No real calls.
-- `loadstudio/load-orchestrator.js` — delegates to LoadProviderRegistry methods. Calls methods that DO NOT EXIST yet (see gap list).
+- `loadstudio/load-orchestrator.js` — delegates to LoadProviderRegistry methods.
 - `loadstudio/load-asset-registry.js` — localStorage asset metadata. Scrubs `apiKey`/`token`/`secret` from all exports.
 
 ### Key threading
@@ -41,28 +41,30 @@ Two separate provider stacks exist. They must be kept in sync.
 
 ## REQUIRED PUBLIC API — LoadProviderRegistry (loadstudio/load-provider-registry.js)
 
-These methods MUST exist. Several are called by the orchestrator and asset registry but are MISSING — this is the #1 blocking gap:
+All methods below exist and are implemented as of 2026-05-16:
 
 ```javascript
 window.LoadProviderRegistry = {
   listProviders(),                          // returns all provider objects
   listByCapability(capability),             // filters by capability flag
-  getProvider(providerId),                  // returns single provider object — MISSING
-  getProviderStatus(providerId),            // returns status string
-  getProviderSettings(providerId),          // returns settings object — MISSING
-  getPipelineMembership(providerId),        // returns pipeline list — MISSING
-  saveProviderSettings(providerId, settings),
-  testProvider(providerId),                 // real network/local test, sets status
-  generateImage(request),
-  generateAudio(request),
-  generateVideo(request),
-  transcribeAudio(request),
-  generateLipSync(request),                 // MISSING
-  generateMusic(request),
-  searchSFX(request),
-  pollJobResult(jobId, providerId),         // MISSING — needed for AI Horde / async jobs
-  routeToFallback(request),
-  normalizeResult(result),                  // always returns: { ok, providerId, providerName, capability, imageUrl, audioUrl, videoUrl, blob, base64, file, text, error, status, raw }
+  getProvider(providerId),                  // returns single provider object — EXISTS
+  getProviderStatus(providerId),            // EXISTS
+  getProviderSettings(providerId),          // EXISTS (added 2026-05-16)
+  getPipelineMembership(providerId),        // EXISTS (attached after object)
+  saveProviderSettings(providerId, settings), // EXISTS
+  testProvider(providerId),                 // EXISTS — real network/local test, sets status
+  generateImage(request),                   // EXISTS — real fetch() calls
+  generateAudio(request),                   // EXISTS — real fetch() to local TTS servers + ElevenLabs
+  generateVideo(request),                   // EXISTS — real fetch() to cloud (Kling/Hailuo/Luma/Pika/PixVerse/HeyGen/ZSky) + local
+  transcribeAudio(request),                 // EXISTS — real fetch() to DeepGram/AssemblyAI + faster-whisper local
+  generateLipSync(request),                 // EXISTS — real fetch() to MuseTalk/Wav2Lip/SadTalker/LivePortrait local
+  generateMusic(request),                   // EXISTS — real fetch() to MusicGen/AudioGen/Riffusion/StableAudio local
+  searchMusic(request),                     // EXISTS — ccMixter(free), Freesound, Pixabay, FMA, Jamendo, Openverse-audio
+  searchSFX(request),                       // EXISTS — Freesound, Openverse-sfx
+  searchStock(request),                     // EXISTS — Pexels, Pixabay, Wikimedia(free), NASA(free), Openverse(free)
+  pollJobResult(jobId, providerId),         // EXISTS — AI Horde, ComfyUI, AssemblyAI, Kling, Hailuo, Luma, Pika, PixVerse, HeyGen
+  routeToFallback(request),                 // EXISTS
+  normalizeResult(result),                  // EXISTS — returns: { ok, providerId, providerName, capability, imageUrl, audioUrl, videoUrl, blob, base64, file, text, error, status, raw }
 }
 ```
 
@@ -663,43 +665,43 @@ Required scene fields per Director AI Addendum:
 
 ---
 
-## 15. GAP LIST — WHAT THE DOCS SPECIFY THAT IS NOT YET BUILT
+## 15. TRUE STATUS — CORRECTED 2026-05-16
 
-### Critical (blocks orchestrator / pipelines)
-1. **Missing methods in LoadProviderRegistry:** `getProvider()`, `getProviderSettings()`, `getPipelineMembership()`, `pollJobResult()`, `generateLipSync()` — called by orchestrator and asset registry but don't exist
-2. **86/98 LoadStudio providers are stubs** returning `Promise.reject()` — all music, SFX, STT, video, lipsync providers non-functional
-3. **Inconsistent key threading:** Load Main uses `C.*`, LoadStudio uses `_settings`, orchestrator expects `getProviderSettings()` — no unified key access
+### What works with ZERO setup (free, no key, no local server)
+- Image generation: `pollinations-image`, `pollinations-turbo`, `aihorde` (anonymous)
+- TTS: `browser-tts` (Web Speech API)
+- Music search: `ccmixter` (no key)
+- Stock search: `wikimedia`, `nasa-library`, `openverse` (all free, no key)
+- SFX search: `openverse-sfx` (no key)
+- Audio search: `openverse-audio` (no key)
 
-### High Priority
-4. **LottieFiles not wired** — animated titles/stickers specified in all 5 feature-map docs, not in any lib file
-5. **GSAP not wired** — clip animations, in VN parity map but PLANNED only
-6. **Fabric.js not wired** — PiP/sticker canvas layers, PLANNED only
-7. **MusicGen/AudioGen not wired** — specified as primary music/SFX providers, both STUB
-8. **Whisper not wired** — STT is STUB in LoadStudio, subtitle generation non-functional
-9. **Kokoro is STUB** — specified as #1 TTS provider, not implemented
-10. **Chatterbox not declared anywhere** — #2 TTS provider per spec, not in any file
-11. **Piper Stage 1 blocked** — play() exception not captured, user must tap Repair and report error
-12. **No Ollama LLM routing in Load Main** — only in LoadStudio; Load Main AI uses Gemini/Groq/OpenRouter/HF but not local LLM
-13. **lip sync pipeline non-functional** — all providers STUB, generateLipSync() missing
+### What works with a free API key entered in settings
+- Image: `huggingface`, `cloudflare`, `cfsdxllight`, `together`, `imagen` (Gemini), `deepai`, `hfsdxlturbo`, `siliconflow`, `openrouter`
+- TTS: `elevenlabs` (10K chars/month free)
+- Video: `kling`, `hailuo`, `luma-dream`, `pika`, `pixverse`, `heygen`
+- STT: `deepgram`, `assemblyai`
+- Music search: `freesound`, `pixabay-music`, `jamendo`, `free-music-archive`
+- Stock: `pexels`, `pixabay-stock`
 
-### Medium Priority
-14. **Pixabay Music API not wired** — specified as primary music library, not in any file
-15. **Freesound.org API not wired** — specified as primary SFX library, not in any file
-16. **Google Fonts API not wired** — specified for font variety in editor
-17. **Wan / HunyuanVideo / LTX-Video all STUB** — video generation non-functional
-18. **ZSky AI not declared anywhere** — best free video option, PLANNED
-19. **rembg / RMBG-2.0 not wired** — background removal relies only on Mediapipe + imgly
-20. **pollJobResult() missing** — AI Horde uses async polling, without this jobs hang
-21. **lib-provider-registry.js vs lib-load-image-providers.js out of sync** — same 17 providers declared in both files with no sync mechanism
-22. **No Cloudflare Whisper fallback** — specified as cloud STT fallback, not wired
+### What works when local model server is running (no key, no quota)
+These have real fetch() calls in the registry. They fail with "no endpoint" if no server is running.
+- TTS: `kokoro` (localhost `/v1/audio/speech`), `chatterbox` (localhost `/tts`), `bark`, `xtts`, `piper`, `f5-tts`, `orpheus`, `melo-tts`, `openvoice`, `dia`, `styletts2`
+- Music gen: `musicgen`, `audiogen` (localhost `/generate`), `riffusion`, `stable-audio-open`, `diffrhythm`, `audiox`
+- Video gen: `wan`, `hunyuanvideo`, `ltx-video`, `animatediff`, `cogvideox`
+- Lip sync: `musetalk`, `wav2lip`, `sadtalker`, `liveportrait`, `latentsync`
+- STT: `faster-whisper` (needs local server or HF Spaces)
+- Image: `comfyui`, `localsd`
+- LLM: `ollama` (localhost:11434)
 
-### Low Priority / Future
-23. **ControlNet, IP-Adapter, InstantID** — character stability tools, require local ComfyUI workflows, Phase 4 work
-24. **SeedVR2** — 2026 best upscaler, not declared
-25. **LiteLLM router** — unified LLM routing, PLANNED
-26. **Supabase cloud save** — specified for project sharing, only IndexedDB active
-27. **draw-things / diffusionbee** — iOS/macOS local image gen apps, PLANNED registry entries
-28. **HunyuanVideo-Foley** — video-synced audio, not declared
+### Still genuinely PLANNED (not in registry, no fetch() call)
+- `lottiefiles` — animated titles/stickers (JS lib, needs `<script>` CDN + lseb.js integration)
+- `gsap` — clip animations (JS lib, needs `<script>` CDN + lseb.js integration)
+- `fabricjs` — PiP/sticker canvas layers (JS lib, needs `<script>` CDN + lseb.js integration)
+- `rembg` / `rmbg-2` — background removal beyond Mediapipe
+- `supabase` — cloud save (only IndexedDB active)
+- `lm-studio`, `vllm`, `llamacpp`, `litellm` — local LLM alternatives to Ollama
+- `cloudflare-whisper` — cloud STT fallback
+- `fish-audio` — free cloud TTS with voice cloning
 
 ---
 
