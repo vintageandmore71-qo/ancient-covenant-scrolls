@@ -2476,6 +2476,135 @@ var LoadProviderRegistry = {
       });
     }
 
+    // HF Inference API — open-source image models routed via HuggingFace key
+    var _hfImgKey = (_settings['huggingface'] || {}).apiKey || null;
+    var _hfImgModels = {
+      'flux':             'black-forest-labs/FLUX.1-schnell',
+      'flux-1-schnell':   'black-forest-labs/FLUX.1-schnell',
+      'flux-2-dev':       'black-forest-labs/FLUX.1-dev',
+      'sdxl':             'stabilityai/stable-diffusion-xl-base-1.0',
+      'sd-15':            'runwayml/stable-diffusion-v1-5',
+      'sd-35':            'stabilityai/stable-diffusion-3.5-large',
+      'sd-35-medium':     'stabilityai/stable-diffusion-3.5-medium',
+      'kandinsky':        'kandinsky-community/kandinsky-2-2-decoder',
+      'pixart':           'PixArt-alpha/PixArt-Sigma-XL-2-1024-MS',
+      'hidream':          'HiDream-ai/HiDream-I1-Fast',
+      'sana':             'Efficient-Large-Model/Sana_1600M_1024px_diffusers',
+      'sana-sprint':      'Efficient-Large-Model/Sana_Sprint_1.6B_1024px_diffusers',
+      'wuerstchen':       'warp-ai/wuerstchen',
+      'dreamshaper':      'Lykon/dreamshaper-7',
+      'openjourney':      'prompthero/openjourney',
+      'cyberrealistic-xl':'cyberdelia/CyberRealistic-XL',
+      'realvisxl':        'SG161222/RealVisXL_V4.0',
+      'juggernaut-xl':    'RunDiffusion/Juggernaut-XL-v9',
+      'deepfloyd-if':     'DeepFloyd/IF-I-XL-v1.0',
+      'dalle-mini':       'dalle-mini/dalle-mini'
+    };
+    if (_hfImgKey && !endpoint && _hfImgModels[providerId]) {
+      var _hfImgModel = s.model || _hfImgModels[providerId];
+      return fetch('https://api-inference.huggingface.co/models/' + _hfImgModel, {
+        method: 'POST',
+        headers: {'Authorization': 'Bearer ' + _hfImgKey, 'Content-Type': 'application/json'},
+        body: JSON.stringify({inputs: request.prompt || '', parameters: {width: request.width || 1024, height: request.height || 1024, negative_prompt: request.negativePrompt || ''}})
+      }).then(function (r) {
+        if (r.status === 503) return r.json().then(function (d) { throw new Error('HF model loading (~' + Math.round(d.estimated_time || 30) + 's), retry shortly'); });
+        if (!r.ok) throw new Error(providerId + ' HF error ' + r.status);
+        return r.blob().then(function (b) {
+          return LoadProviderRegistry.normalizeResult({type: 'image', blob: b, url: URL.createObjectURL(b), provider: providerId});
+        });
+      });
+    }
+
+    if (providerId === 'deepai') {
+      if (!key) return Promise.reject(new Error('DeepAI: no API key'));
+      var daFd = new FormData();
+      daFd.append('text', request.prompt || '');
+      if (request.width) daFd.append('width', String(request.width));
+      if (request.height) daFd.append('height', String(request.height));
+      return fetch('https://api.deepai.org/api/text2img', {
+        method: 'POST', headers: {'api-key': key}, body: daFd
+      }).then(function (r) {
+        if (!r.ok) throw new Error('DeepAI ' + r.status);
+        return r.json().then(function (d) {
+          if (!d.output_url) throw new Error('DeepAI: no output URL');
+          return LoadProviderRegistry.normalizeResult({type: 'image', url: d.output_url, provider: 'deepai'});
+        });
+      });
+    }
+
+    if (providerId === 'siliconflow') {
+      if (!key) return Promise.reject(new Error('SiliconFlow: no API key'));
+      return fetch('https://api.siliconflow.cn/v1/images/generations', {
+        method: 'POST',
+        headers: {'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json'},
+        body: JSON.stringify({model: s.model || 'black-forest-labs/FLUX.1-schnell', prompt: request.prompt || '', image_size: (request.width || 1024) + 'x' + (request.height || 1024), num_inference_steps: 20})
+      }).then(function (r) {
+        if (!r.ok) throw new Error('SiliconFlow ' + r.status);
+        return r.json().then(function (d) {
+          var sfUrl = d.images && d.images[0] && d.images[0].url;
+          if (!sfUrl) throw new Error('SiliconFlow: no image URL');
+          return LoadProviderRegistry.normalizeResult({type: 'image', url: sfUrl, provider: 'siliconflow'});
+        });
+      });
+    }
+
+    if (providerId === 'cloudflare-workers-ai') {
+      var cfAccountId = s.accountId || '';
+      if (!cfAccountId) return Promise.reject(new Error('Cloudflare Workers AI: no account ID configured in provider settings'));
+      if (!key) return Promise.reject(new Error('Cloudflare Workers AI: no API token'));
+      var cfModel = s.model || '@cf/black-forest-labs/flux-1-schnell';
+      return fetch('https://api.cloudflare.com/client/v4/accounts/' + cfAccountId + '/ai/run/' + cfModel, {
+        method: 'POST',
+        headers: {'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json'},
+        body: JSON.stringify({prompt: request.prompt || '', num_steps: 8})
+      }).then(function (r) {
+        if (!r.ok) throw new Error('Cloudflare AI ' + r.status);
+        var ct = r.headers.get('content-type') || '';
+        if (ct.indexOf('image') >= 0) {
+          return r.blob().then(function (b) {
+            return LoadProviderRegistry.normalizeResult({type: 'image', blob: b, url: URL.createObjectURL(b), provider: 'cloudflare-workers-ai'});
+          });
+        }
+        return r.json().then(function (d) {
+          var cfImgB64 = d.result && d.result.image;
+          if (!cfImgB64) throw new Error('Cloudflare AI: no image in response');
+          return LoadProviderRegistry.normalizeResult({type: 'image', url: 'data:image/png;base64,' + cfImgB64, provider: 'cloudflare-workers-ai'});
+        });
+      });
+    }
+
+    if (providerId === 'leonardo-ai') {
+      if (!key) return Promise.reject(new Error('Leonardo AI: no API key'));
+      return fetch('https://cloud.leonardo.ai/api/rest/v1/generations', {
+        method: 'POST',
+        headers: {'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json'},
+        body: JSON.stringify({prompt: request.prompt || '', modelId: s.model || '6bef9f1b-29cb-40c7-b9df-32b51c1f67d3', width: request.width || 1024, height: request.height || 1024, num_images: 1})
+      }).then(function (r) {
+        if (!r.ok) throw new Error('Leonardo AI ' + r.status);
+        return r.json().then(function (d) {
+          var genId = d.sdGenerationJob && d.sdGenerationJob.generationId;
+          if (!genId) throw new Error('Leonardo AI: no generation ID');
+          return LoadProviderRegistry.normalizeResult({type: 'image-job', jobId: genId, provider: 'leonardo-ai'});
+        });
+      });
+    }
+
+    if (providerId === 'tensor-art') {
+      if (!key) return Promise.reject(new Error('Tensor Art: no API key'));
+      return fetch('https://api.tensor.art/v1/job/text-to-image', {
+        method: 'POST',
+        headers: {'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json'},
+        body: JSON.stringify({stages: [{type: 'TEXT_DENOISING', inputInitialize: {seed: -1, count: 1}, diffusion: {width: request.width || 1024, height: request.height || 1024, prompts: [{text: request.prompt || ''}], steps: 20, samplerName: 'Euler a'}}]})
+      }).then(function (r) {
+        if (!r.ok) throw new Error('Tensor Art ' + r.status);
+        return r.json().then(function (d) {
+          var taJobId = d.job && d.job.id;
+          if (!taJobId) throw new Error('Tensor Art: no job ID');
+          return LoadProviderRegistry.normalizeResult({type: 'image-job', jobId: taJobId, provider: 'tensor-art'});
+        });
+      });
+    }
+
     return Promise.reject(new Error('generateImage: unsupported or unconfigured provider: ' + providerId));
   },
 
@@ -2601,6 +2730,46 @@ var LoadProviderRegistry = {
         return r.blob().then(function (b) {
           return LoadProviderRegistry.normalizeResult({type: 'audio', blob: b, url: URL.createObjectURL(b), provider: 'fish-audio'});
         });
+      });
+    }
+
+    if (providerId === 'coqui') {
+      var cqEp = endpoint || 'http://localhost:5002';
+      var cqUrl = cqEp + '/api/tts?text=' + encodeURIComponent(request.text || '') + '&speaker_id=' + encodeURIComponent(s.speaker || '') + '&language_id=';
+      return fetch(cqUrl)
+        .then(function (r) {
+          if (!r.ok) throw new Error('Coqui TTS ' + r.status);
+          return r.blob();
+        }).then(function (b) {
+          return LoadProviderRegistry.normalizeResult({type: 'audio', blob: b, url: URL.createObjectURL(b), provider: 'coqui'});
+        });
+    }
+
+    if (providerId === 'dia') {
+      var hfDiaKey = (_settings['huggingface'] || {}).apiKey || key || null;
+      if (hfDiaKey && !endpoint) {
+        return fetch('https://api-inference.huggingface.co/models/nari-labs/Dia-1.6B', {
+          method: 'POST',
+          headers: {'Authorization': 'Bearer ' + hfDiaKey, 'Content-Type': 'application/json'},
+          body: JSON.stringify({inputs: request.text || ''})
+        }).then(function (r) {
+          if (r.status === 503) return r.json().then(function (d) { throw new Error('HF model loading (~' + Math.round(d.estimated_time || 30) + 's), retry shortly'); });
+          if (!r.ok) throw new Error('Dia HF error ' + r.status);
+          return r.blob().then(function (b) {
+            return LoadProviderRegistry.normalizeResult({type: 'audio', blob: b, url: URL.createObjectURL(b), provider: 'dia'});
+          });
+        });
+      }
+      if (!endpoint) return Promise.reject(new Error('Dia: no HuggingFace key or local endpoint configured'));
+      return fetch(endpoint + '/generate', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({text: request.text || '', voice: s.voice || null})
+      }).then(function (r) {
+        if (!r.ok) throw new Error('Dia ' + r.status);
+        return r.blob();
+      }).then(function (b) {
+        return LoadProviderRegistry.normalizeResult({type: 'audio', blob: b, url: URL.createObjectURL(b), provider: 'dia'});
       });
     }
 
@@ -2965,6 +3134,27 @@ var LoadProviderRegistry = {
         })
         .catch(function(e){ return {provider:'openverse-sfx',results:[],error:e.message}; });
     }
+    if (providerId === 'bbc-sfx') {
+      return fetch('https://sound-effects.bbcrewind.co.uk/api/sfx/results?q='+encodeURIComponent(query)+'&limit='+limit+'&page='+page)
+        .then(function(r){ if(!r.ok) throw new Error('BBC SFX '+r.status); return r.json(); })
+        .then(function(d){
+          return {provider:'bbc-sfx', results:((d.soundeffects&&d.soundeffects.results)||[]).map(function(item){
+            return {id:String(item.id||''),title:item.description||'',previewUrl:'https://sound-effects-media.bbcrewind.co.uk/mp3/'+item.id+'.mp3',downloadUrl:'https://sound-effects-media.bbcrewind.co.uk/mp3/'+item.id+'.mp3',licenseType:'RemArc',attribution:'BBC Sound Effects',mediaType:'audio',provider:'bbc-sfx'};
+          })};
+        })
+        .catch(function(e){ return {provider:'bbc-sfx',results:[],error:e.message}; });
+    }
+    if (providerId === 'zapsplat') {
+      if (!key) return Promise.resolve({provider:'zapsplat', results:[], status:'needs-key', needsKey:true});
+      return fetch('https://www.zapsplat.com/api/v1/search?q='+encodeURIComponent(query)+'&per_page='+limit+'&page='+page, {
+        headers: {'X-API-Key': key}
+      }).then(function(r){ if(!r.ok) throw new Error('ZapSplat '+r.status); return r.json(); })
+      .then(function(d){
+        return {provider:'zapsplat', results:(d.data||[]).map(function(item){
+          return {id:String(item.id||''),title:item.name||'',previewUrl:item.url||null,downloadUrl:item.url||null,licenseType:'ZapSplat',attribution:'ZapSplat',mediaType:'audio',provider:'zapsplat'};
+        })};
+      }).catch(function(e){ return {provider:'zapsplat',results:[],error:e.message}; });
+    }
     return Promise.resolve({provider: providerId, results: [], status: 'no-connector'});
   },
 
@@ -3015,6 +3205,37 @@ var LoadProviderRegistry = {
           })};
         })
         .catch(function(e){ return {provider:'openverse',results:[],error:e.message}; });
+    }
+    if (providerId === 'unsplash') {
+      if (!key) return Promise.resolve({provider:'unsplash', results:[], status:'needs-key', needsKey:true});
+      return fetch('https://api.unsplash.com/search/photos?query='+encodeURIComponent(query)+'&per_page=20&page='+page, {
+        headers: {'Authorization': 'Client-ID ' + key}
+      }).then(function(r){ if(!r.ok) throw new Error('Unsplash '+r.status); return r.json(); })
+      .then(function(d){
+        return {provider:'unsplash', results:(d.results||[]).map(function(item){
+          return {id:String(item.id||''),title:item.description||item.alt_description||'',url:item.urls&&item.urls.regular||null,thumbUrl:item.urls&&item.urls.small||null,attribution:'Photo by '+((item.user&&item.user.name)||'Unknown')+' on Unsplash',mediaType:'image',provider:'unsplash'};
+        })};
+      }).catch(function(e){ return {provider:'unsplash',results:[],error:e.message}; });
+    }
+    if (providerId === 'internet-archive') {
+      var iaMediaType = mediaType === 'video' ? 'movies' : mediaType === 'audio' ? 'audio' : 'image';
+      return fetch('https://archive.org/advancedsearch.php?q='+encodeURIComponent(query)+'+AND+mediatype:'+iaMediaType+'&fl[]=identifier,title,mediatype,description&output=json&rows=20&page='+page)
+        .then(function(r){ if(!r.ok) throw new Error('Internet Archive '+r.status); return r.json(); })
+        .then(function(d){
+          return {provider:'internet-archive', results:((d.response&&d.response.docs)||[]).map(function(item){
+            return {id:String(item.identifier||''),title:item.title||'',url:'https://archive.org/details/'+item.identifier,thumbUrl:'https://archive.org/services/img/'+item.identifier,attribution:'Internet Archive — '+item.title,mediaType:mediaType,provider:'internet-archive'};
+          })};
+        }).catch(function(e){ return {provider:'internet-archive',results:[],error:e.message}; });
+    }
+    if (providerId === 'coverr') {
+      return fetch('https://coverr.co/api/videos?keywords='+encodeURIComponent(query)+'&page='+page)
+        .then(function(r){ if(!r.ok) throw new Error('Coverr '+r.status); return r.json(); })
+        .then(function(d){
+          return {provider:'coverr', results:((d.hits&&d.hits.hits)||[]).map(function(item){
+            var src=item&&item._source||{};
+            return {id:String(item._id||''),title:src.title||'',url:src.urls&&src.urls.mp4_720||null,thumbUrl:src.urls&&src.urls.preview||null,attribution:'Coverr.co — free stock video',mediaType:'video',provider:'coverr'};
+          })};
+        }).catch(function(e){ return {provider:'coverr',results:[],error:e.message}; });
     }
     return Promise.resolve({provider: providerId, results: [], status: 'no-connector'});
   },
@@ -3219,6 +3440,25 @@ var LoadProviderRegistry = {
         });
       });
     }
+    if (providerId === 'cloudflare-workers-ai') {
+      var cfLlmAccountId = s.accountId || '';
+      if (!cfLlmAccountId) return Promise.reject(new Error('Cloudflare Workers AI: no account ID configured in provider settings'));
+      if (!key) return Promise.reject(new Error('Cloudflare Workers AI: no API token'));
+      var cfLlmModel = s.model || request.model || '@cf/meta/llama-3.1-8b-instruct';
+      var cfLlmMsgs = Array.isArray(request.messages) ? request.messages : [{role:'user',content:request.prompt||''}];
+      return fetch('https://api.cloudflare.com/client/v4/accounts/' + cfLlmAccountId + '/ai/run/' + cfLlmModel, {
+        method: 'POST',
+        headers: {'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json'},
+        body: JSON.stringify({messages: cfLlmMsgs, max_tokens: request.maxTokens || 1024})
+      }).then(function(r){
+        if (!r.ok) throw new Error('Cloudflare Workers AI LLM ' + r.status);
+        return r.json().then(function(d){
+          var cfText = (d.result && d.result.response) || '';
+          return LoadProviderRegistry.normalizeResult({type:'text', text:cfText, provider:'cloudflare-workers-ai'});
+        });
+      });
+    }
+
     return Promise.reject(new Error('callLLM: no endpoint or key for: ' + providerId));
   },
 
@@ -3343,6 +3583,40 @@ var LoadProviderRegistry = {
           return LoadProviderRegistry.normalizeResult({type:'video-job',jobId:d.id||d.job_id,provider:providerId});
         });
       });
+  },
+
+  removeBackground: function (request) {
+    // request: { blob, imageUrl, providerId }
+    var providerId = request.providerId || 'rmbg';
+    var s = _settings[providerId] || {};
+    var key = s.apiKey || (_settings['huggingface'] || {}).apiKey || null;
+
+    if (providerId === 'rmbg' || providerId === 'bg-removal-hf') {
+      if (!key) return Promise.reject(new Error('RMBG-2.0: no HuggingFace API key configured'));
+      var self = LoadProviderRegistry;
+      if (!request.blob && request.imageUrl) {
+        return fetch(request.imageUrl).then(function(r){ return r.blob(); })
+          .then(function(b){ return self.removeBackground(Object.assign({}, request, {blob:b, imageUrl:null})); });
+      }
+      if (!request.blob) return Promise.reject(new Error('RMBG-2.0: provide blob or imageUrl'));
+      return fetch('https://api-inference.huggingface.co/models/briaai/RMBG-2.0', {
+        method: 'POST',
+        headers: {'Authorization': 'Bearer ' + key, 'Content-Type': request.blob.type || 'image/png'},
+        body: request.blob
+      }).then(function(r){
+        if (r.status === 503) return r.json().then(function(d){ throw new Error('HF model loading (~'+Math.round(d.estimated_time||30)+'s), retry shortly'); });
+        if (!r.ok) throw new Error('RMBG-2.0 error ' + r.status);
+        return r.blob().then(function(b){
+          return LoadProviderRegistry.normalizeResult({type:'image', blob:b, url:URL.createObjectURL(b), provider:'rmbg', metadata:{backgroundRemoved:true}});
+        });
+      });
+    }
+
+    if (providerId === 'mediapipe' || providerId === 'bg-removal-js') {
+      return Promise.reject(new Error(providerId + ' is a browser-native library — call it via its JS API directly'));
+    }
+
+    return Promise.reject(new Error('removeBackground: unsupported provider: ' + providerId));
   },
 
   normalizeResult: function (raw) {
