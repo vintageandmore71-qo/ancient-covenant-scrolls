@@ -2,6 +2,15 @@
 
 L.Bond | Copyright 2026 | All Rights Reserved
 
+## MANDATORY SESSION-START READ
+
+Before any LoadStudio / Load Eco / Load AI work, read this file first:
+
+- `PROVIDER_REGISTRY_REFERENCE.md` — complete provider list, pipeline chains,
+  key wiring, implementation status, and 28-item gap list compiled from 8 inbox
+  spec docs. Never re-read the inbox .docx files to answer provider questions.
+  Never ask the user to re-explain providers. This file has everything.
+
 ## CURRENT USE
 
 This file is the governing specification and persistent project memory for:
