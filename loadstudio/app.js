@@ -223,7 +223,7 @@ function openAssetBrowser(){
 function saveProvider(){let provider={id:'provider-'+Date.now(),name:$('#providerName').value,type:$('#providerType').value,keyStatus:$('#providerKey').value?'stored locally':'empty'}; state['developer-lab']=state['developer-lab']||[]; state['developer-lab'].push(provider); log('Provider saved: '+provider.name); save();}
 function saveAdvertiser(){let n=$('#adv-name'); if(!n||!n.value){modal('Advertiser','<p class="lead">Enter an advertiser name first.</p>');return;} let adv={id:'adv-'+Date.now(),name:n.value,email:$('#adv-email')?.value||'',slot:$('#adv-slot')?.value||'',status:$('#adv-status')?.value||'draft',notes:$('#adv-notes')?.value||''}; state.advertiser=state.advertiser||[]; state.advertiser.push(adv); log('Advertiser saved: '+adv.name); save(); render();}
 function saveInboxMessage(){let to=$('#inbox-to'),sub=$('#inbox-subject'); if(!to||!to.value){modal('Inbox','<p class="lead">Enter a recipient first.</p>');return;} let msg={id:'msg-'+Date.now(),title:(sub&&sub.value)||'(no subject)',sub:'to '+to.value,to:to.value,subject:(sub&&sub.value)||'',body:$('#inbox-body')?.value||'',status:'draft'}; state.inbox=state.inbox||[]; state.inbox.push(msg); log('Inbox draft saved: '+msg.title); save(); render();}
-function action(a,el){let secid=el.dataset.sectionId; if(a==='close-modal') return closeModal(); if(a==='create-project') return createProject(); if(a==='add-item') return addSectionItem(secid); if(a==='audit-section') return auditSection(secid); if(a==='export-section') return exportSection(secid); if(a==='open-integration') return openIntegration(secid); if(a==='add-scene') return addScene(); if(a==='add-character') return addCharacter(); if(a==='save-imports') return saveImports(); if(a==='run-full-audit') return fullAudit(); if(a==='run-diagnostics') return diagnostics(); if(a==='validate-package') return validatePackage(); if(a==='export-readiness') return exportReadiness(); if(a==='play-preview'){let bar=$('#playerProgress'); bar.style.width=bar.style.width==='82%'?'35%':'82%'; return log('Preview toggled');} if(a==='next-scene'){currentScene=(currentScene+1)%state.scenes.length; renderPreview(); return;} if(a==='export-scenes') return download('scenes.json',JSON.stringify(state.scenes,null,2)); if(a==='export-characters') return download('characters.json',JSON.stringify(state.characters,null,2)); if(a==='view-state') return modal('Current State','<pre class="log">'+esc(JSON.stringify(state,null,2))+'</pre>'); if(a==='run-ls-tour'){ if(typeof window.lsStartTour==='function') window.lsStartTour(); return; } if(a==='open-asset-browser') return openAssetBrowser(); if(a==='open-provider-registry') return openProviderRegistry(); if(a==='open-pipeline-registry') return openPipelineRegistry(); if(a==='save-provider') return saveProvider(); if(a==='save-advertiser') return saveAdvertiser(); if(a==='export-advertisers') return download('advertisers.json',JSON.stringify(state.advertiser||[],null,2)); if(a==='save-inbox-message') return saveInboxMessage(); if(a==='export-inbox') return download('inbox.json',JSON.stringify(state.inbox||[],null,2)); if(a==='mark-used') return markUsed(el.dataset.featureId); if(a==='preview-scene'){let i=state.scenes.findIndex(s=>s.id===el.dataset.id); if(i>=0){currentScene=i;renderPreview();modal('Scene Preview','<p class="lead">Preview loaded for '+esc(state.scenes[i].title)+'</p>')}} if(a==='duplicate-project'){let p=state.projects.find(x=>x.id===el.dataset.id); if(p){state.projects.push({...p,id:'project-'+Date.now(),title:p.title+' Copy'});save();}} if(a==='duplicate-character'){let c=state.characters.find(x=>x.id===el.dataset.id); if(c){state.characters.push({...c,id:'character-'+Date.now(),name:c.name+' Copy'});save();}} if(a==='preview-asset') return modal('Asset Preview','<p class="lead">Asset metadata opened.</p>'); if(a==='preview-generic') return modal('Saved Item','<p class="lead">Local saved item opened.</p>'); if(a==='save-style-bible') return lsPS_saveStyleBible(); if(a==='export-style-bible') return lsPS_exportStyleBible(); if(a==='save-voice-bible') return lsPS_saveVoiceBible(); if(a==='export-voice-bible') return lsPS_exportVoiceBible(); if(a==='add-to-gen-queue') return lsPS_addToQueue(); if(a==='clear-queue-done') return lsPS_clearQueueDone(); if(a==='export-gen-queue') return lsPS_exportQueue(); if(a==='log-output-asset') return lsPS_logOutputAsset(); if(a==='export-output-report') return lsPS_exportOutputReport(); if(a==='export-loadstudio-pkg') return lsPS_exportLoadStudioPkg(); if(a==='export-cinepwa-pkg') return lsPS_exportCinePWAPkg();}
+function action(a,el){let secid=el.dataset.sectionId; if(a==='close-modal') return closeModal(); if(a==='create-project') return createProject(); if(a==='add-item') return addSectionItem(secid); if(a==='audit-section') return auditSection(secid); if(a==='export-section') return exportSection(secid); if(a==='open-integration') return openIntegration(secid); if(a==='add-scene') return addScene(); if(a==='add-character') return addCharacter(); if(a==='save-imports') return saveImports(); if(a==='run-full-audit') return fullAudit(); if(a==='run-diagnostics') return diagnostics(); if(a==='validate-package') return validatePackage(); if(a==='export-readiness') return exportReadiness(); if(a==='play-preview'){let bar=$('#playerProgress'); bar.style.width=bar.style.width==='82%'?'35%':'82%'; return log('Preview toggled');} if(a==='next-scene'){currentScene=(currentScene+1)%state.scenes.length; renderPreview(); return;} if(a==='export-scenes') return download('scenes.json',JSON.stringify(state.scenes,null,2)); if(a==='export-characters') return download('characters.json',JSON.stringify(state.characters,null,2)); if(a==='view-state') return modal('Current State','<pre class="log">'+esc(JSON.stringify(state,null,2))+'</pre>'); if(a==='run-ls-tour'){ if(typeof window.lsStartTour==='function') window.lsStartTour(); return; } if(a==='open-asset-browser') return openAssetBrowser(); if(a==='open-provider-registry') return openProviderRegistry(); if(a==='open-pipeline-registry') return openPipelineRegistry(); if(a==='save-provider') return saveProvider(); if(a==='save-advertiser') return saveAdvertiser(); if(a==='export-advertisers') return download('advertisers.json',JSON.stringify(state.advertiser||[],null,2)); if(a==='save-inbox-message') return saveInboxMessage(); if(a==='export-inbox') return download('inbox.json',JSON.stringify(state.inbox||[],null,2)); if(a==='mark-used') return markUsed(el.dataset.featureId); if(a==='preview-scene'){let i=state.scenes.findIndex(s=>s.id===el.dataset.id); if(i>=0){currentScene=i;renderPreview();modal('Scene Preview','<p class="lead">Preview loaded for '+esc(state.scenes[i].title)+'</p>')}} if(a==='duplicate-project'){let p=state.projects.find(x=>x.id===el.dataset.id); if(p){state.projects.push({...p,id:'project-'+Date.now(),title:p.title+' Copy'});save();}} if(a==='duplicate-character'){let c=state.characters.find(x=>x.id===el.dataset.id); if(c){state.characters.push({...c,id:'character-'+Date.now(),name:c.name+' Copy'});save();}} if(a==='preview-asset') return modal('Asset Preview','<p class="lead">Asset metadata opened.</p>'); if(a==='preview-generic') return modal('Saved Item','<p class="lead">Local saved item opened.</p>'); if(a==='save-style-bible') return lsPS_saveStyleBible(); if(a==='export-style-bible') return lsPS_exportStyleBible(); if(a==='save-voice-bible') return lsPS_saveVoiceBible(); if(a==='export-voice-bible') return lsPS_exportVoiceBible(); if(a==='add-to-gen-queue') return lsPS_addToQueue(); if(a==='clear-queue-done') return lsPS_clearQueueDone(); if(a==='export-gen-queue') return lsPS_exportQueue(); if(a==='log-output-asset') return lsPS_logOutputAsset(); if(a==='export-output-report') return lsPS_exportOutputReport(); if(a==='export-loadstudio-pkg') return lsPS_exportLoadStudioPkg(); if(a==='export-cinepwa-pkg') return lsPS_exportCinePWAPkg(); if(a==='save-scene-audio') return lsAudio_save(); if(a==='export-scene-audio') return lsAudio_export(); if(a==='export-audio-cuesheet') return lsAudio_exportCueSheet();}
 document.addEventListener('click',e=>{let s=e.target.closest('[data-section]'); if(s) go(s.dataset.section); let f=e.target.closest('[data-feature]'); if(f) featureClick(f.dataset.feature); let a=e.target.closest('[data-action]'); if(a) action(a.dataset.action,a);});
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
 render();
@@ -2700,6 +2700,130 @@ window.lsSaveCTP_providerReport=function(){
     _initVCE();
   }
 
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _init);
+  } else {
+    _init();
+  }
+
+}());
+
+// Scene Audio Engine — 14 scene audio fields, 10 status labels, cue sheet export
+(function () {
+  'use strict';
+
+  var SA_KEY = 'ls_scene_audio_v1';
+
+  function _g(id) { return document.getElementById(id); }
+  function _v(id) { var el = _g(id); return el ? (el.value || '').trim() : ''; }
+  function _show(id, msg, color) { var el = _g(id); if (!el) return; el.textContent = msg; el.style.color = color || '#5ee0a5'; el.style.display = 'block'; setTimeout(function () { el.style.display = 'none'; }, 3000); }
+  function _dl(name, obj) { var b = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' }); var u = URL.createObjectURL(b); var a = document.createElement('a'); a.href = u; a.download = name; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u); }
+  function _load() { try { return JSON.parse(localStorage.getItem(SA_KEY) || '[]'); } catch (_) { return []; } }
+  function _saveAll(arr) { try { localStorage.setItem(SA_KEY, JSON.stringify(arr)); } catch (_) {} }
+
+  var STATUS_COLOR = {
+    'no-audio-needed': '#9c93b5',
+    'sfx-prompted': '#fbd24a',
+    'sfx-attached': '#5ac8fa',
+    'ambience-attached': '#5ac8fa',
+    'music-attached': '#5ac8fa',
+    'narration-drafted': '#a29bfe',
+    'narration-voiced': '#a29bfe',
+    'audio-review': '#ffb300',
+    'audio-approved': '#5ee0a5',
+    'audio-complete': '#5ee0a5'
+  };
+
+  function lsAudio_save() {
+    var sceneId = _v('ls-sa-scene');
+    if (!sceneId) { _show('ls-sa-status-msg', 'Enter a Scene ID.', '#ff8080'); return; }
+    var entry = {
+      id: 'sa-' + Date.now(),
+      sceneId: sceneId,
+      audioStatus: _v('ls-sa-status') || 'sfx-prompted',
+      sfxType: _v('ls-sa-sfx-type'),
+      sfxLoop: _v('ls-sa-sfx-loop'),
+      sfxTimelineSync: _v('ls-sa-sync'),
+      audioProvider: _v('ls-sa-provider'),
+      sfxPrompt: _v('ls-sa-sfx-prompt'),
+      ambiencePrompt: _v('ls-sa-ambience'),
+      ambienceLoop: _v('ls-sa-amb-loop'),
+      musicCue: _v('ls-sa-music-cue'),
+      musicMood: _v('ls-sa-music-mood'),
+      narrationText: _v('ls-sa-narration'),
+      roomTone: _v('ls-sa-roomtone'),
+      audioCueNotes: _v('ls-sa-cue-notes'),
+      audioAssetUrl: _v('ls-sa-asset-url'),
+      saved: new Date().toISOString()
+    };
+    var list = _load();
+    list.push(entry);
+    _saveAll(list);
+    _show('ls-sa-status-msg', 'Scene audio saved for ' + sceneId + '.', '#5ee0a5');
+    lsAudio_render();
+  }
+
+  function lsAudio_export() {
+    _dl('scene-audio.json', {
+      sceneAudio: {
+        version: '1.0',
+        entries: _load(),
+        exported: new Date().toISOString(),
+        exportedBy: 'LoadStudio'
+      }
+    });
+  }
+
+  function lsAudio_exportCueSheet() {
+    var list = _load();
+    var lines = ['SCENE AUDIO CUE SHEET', 'Exported: ' + new Date().toISOString(), ''];
+    list.forEach(function (e) {
+      lines.push('Scene: ' + e.sceneId + '  Status: ' + e.audioStatus);
+      if (e.sfxPrompt)     lines.push('  SFX: ' + e.sfxPrompt + (e.sfxLoop === 'yes' ? ' [loop]' : ''));
+      if (e.ambiencePrompt) lines.push('  Ambience: ' + e.ambiencePrompt + (e.ambienceLoop === 'yes' ? ' [loop]' : ''));
+      if (e.musicCue)      lines.push('  Music: ' + e.musicCue + (e.musicMood ? ' (' + e.musicMood + ')' : ''));
+      if (e.narrationText) lines.push('  Narration: ' + e.narrationText);
+      if (e.sfxTimelineSync) lines.push('  Sync: ' + e.sfxTimelineSync);
+      if (e.audioProvider) lines.push('  Provider: ' + e.audioProvider);
+      if (e.audioAssetUrl) lines.push('  Asset: ' + e.audioAssetUrl);
+      if (e.audioCueNotes) lines.push('  Notes: ' + e.audioCueNotes);
+      lines.push('');
+    });
+    var blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+    var u = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = u; a.download = 'audio-cue-sheet.txt';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(u);
+  }
+
+  function lsAudio_render() {
+    var el = _g('ls-sa-list');
+    if (!el) return;
+    var list = _load();
+    if (!list.length) { el.innerHTML = '<p style="color:#9c93b5;font:300 13px Inter,system-ui,sans-serif">No scene audio records saved yet.</p>'; return; }
+    el.innerHTML = list.slice().reverse().map(function (e) {
+      var sc = STATUS_COLOR[e.audioStatus] || '#c0b8d9';
+      var parts = [];
+      if (e.sfxPrompt) parts.push('SFX: ' + e.sfxPrompt.slice(0, 60) + (e.sfxPrompt.length > 60 ? '...' : ''));
+      if (e.ambiencePrompt) parts.push('Amb: ' + e.ambiencePrompt.slice(0, 50) + (e.ambiencePrompt.length > 50 ? '...' : ''));
+      if (e.musicCue) parts.push('Music: ' + e.musicCue);
+      if (e.narrationText) parts.push('Narr: ' + e.narrationText.slice(0, 50) + (e.narrationText.length > 50 ? '...' : ''));
+      return '<div style="background:rgba(251,210,74,.06);border:1px solid rgba(251,210,74,.18);border-radius:10px;padding:10px 12px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center">' +
+        '<span style="font:600 13.5px Inter,system-ui,sans-serif;color:#fbd24a">' + e.sceneId + '</span>' +
+        '<span style="font:500 11px Inter,system-ui,sans-serif;color:' + sc + ';border:1px solid ' + sc + ';border-radius:5px;padding:1px 7px">' + e.audioStatus + '</span>' +
+        '</div>' +
+        (parts.length ? '<div style="font:300 12px Inter,system-ui,sans-serif;color:#9c93b5;margin-top:5px">' + parts.join('<br>') + '</div>' : '') +
+        '</div>';
+    }).join('');
+  }
+
+  window.lsAudio_save = lsAudio_save;
+  window.lsAudio_export = lsAudio_export;
+  window.lsAudio_exportCueSheet = lsAudio_exportCueSheet;
+
+  function _init() { lsAudio_render(); }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', _init);
   } else {
