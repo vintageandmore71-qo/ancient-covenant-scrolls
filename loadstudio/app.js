@@ -1500,6 +1500,7 @@ window.lsSaveCTP_providerReport=function(){
           _currentImageData=src;_currentImageName='generated';
           lsAID_v74_show_image(src);
           lsAID_v74_status('Image returned via '+(result.providerName||result.providerId)+'.','#5ee0a5');
+          try{lsAID_afterImageGenerated(src,_savedPrompt);}catch(_){}
         }else if(result.status==='no-provider'){
           lsAID_v74_frame_state('Provider Required','No provider connected. Open Provider Settings, or copy the prompt.','#ffb300');
           if(notice)notice.style.display='block';
@@ -2134,6 +2135,11 @@ window.lsSaveCTP_providerReport=function(){
       case 'import-export':lsAID_switch_rail('export');break;
       case 'open-providers':lsAID_switch_rail('providers');break;
       case 'create-image':window.lsAID_createImage();break;
+      case 'animate-image':lsAID_animateImage();break;
+      case 'save-video':lsAID_saveVideo();break;
+      case 'attach-video-scene':lsAID_attachVideoScene();break;
+      case 'clear-gen-history':lsAID_clearGenHistory();break;
+      case 'reuse-prompt':(function(){var p=btn.getAttribute('data-prompt');if(p){var ta=document.getElementById('aid-v74-scene');if(ta)ta.value=p;}}());break;
       case 'copy-prompt':window.lsAID_v74CopyPrompt();break;
       case 'import-trigger':var fi=document.getElementById('aid-v74-import');if(fi)fi.click();break;
       case 'trigger-file':(function(){var tgt=btn.getAttribute('data-target');var fi2=tgt?document.getElementById(tgt):null;if(fi2)fi2.click();}());break;
@@ -2289,6 +2295,149 @@ window.lsSaveCTP_providerReport=function(){
     results.forEach(function(r){console.log((r.pass?'PASS':'FAIL')+' ['+r.action+'] '+r.text);});
     if(wasHidden)p.style.display='none';
     return results;
+  };
+
+  // --- Animate, video result, and generation history ---
+
+  var _HIST_KEY = 'ls_aid_gen_history';
+  var _currentVideoUrl = null;
+
+  function lsAID_afterImageGenerated(src, prompt) {
+    var bar = document.getElementById('aid-animate-bar');
+    if (bar) bar.style.display = 'block';
+    var vr = document.getElementById('aid-video-result');
+    if (vr) vr.style.display = 'none';
+    _currentVideoUrl = null;
+    lsAID_historyAdd({type:'image', src:src, prompt:prompt||''});
+  }
+
+  function lsAID_animateImage() {
+    var reg = window.LoadProviderRegistry;
+    if (!reg) { lsAID_animStatus('Provider registry not loaded.','#ff8080'); return; }
+    var src = _currentImageData;
+    if (!src) { lsAID_animStatus('Generate an image first.','#ffb300'); return; }
+    var orch = window.LoadOrchestrator;
+    var VIDEO_PROVIDERS = ['wan','hunyuanvideo','ltx-video','animatediff','cogvideox','kling','luma-dream','pika','pixverse','hailuo'];
+    var providerId = orch ? orch.selectProvider(VIDEO_PROVIDERS) : null;
+    if (!providerId) {
+      lsAID_animStatus('No video provider connected. Add a provider key in Provider Settings.','#ffb300');
+      return;
+    }
+    var prompt = (_savedPrompt||'') + ' subtle cinematic motion, camera push-in';
+    lsAID_animStatus('Submitting to '+(_provLabel(providerId)||providerId)+'...','#b388ff');
+    var btn = document.getElementById('aid-animate-btn');
+    if (btn) btn.disabled = true;
+
+    reg.generateVideo({providerId:providerId, prompt:prompt, duration:4, aspectRatio:'16:9'})
+      .then(function(r) {
+        if (!r) { lsAID_animStatus('No response from provider.','#ff8080'); return; }
+        if (r.type === 'video-job') {
+          lsAID_animStatus('Job queued (ID: '+r.jobId+'). Polling...','#b388ff');
+          return (window.LoadOrchestrator||{pollUntilDone:function(){return Promise.reject(new Error('no orchestrator'));}})
+            .pollUntilDone({jobId:r.jobId, provider:providerId}, 180000, 4000)
+            .then(function(done) { return done; });
+        }
+        return r;
+      })
+      .then(function(r) {
+        if (!r) return;
+        var url = r.url || r.dataURL || (r.blob ? URL.createObjectURL(r.blob) : null);
+        if (url) {
+          _currentVideoUrl = url;
+          var el = document.getElementById('aid-video-el');
+          if (el) { el.src = url; el.load(); }
+          var vr = document.getElementById('aid-video-result');
+          if (vr) vr.style.display = 'block';
+          lsAID_animStatus('Video ready via '+(_provLabel(providerId)||providerId)+'.','#5ee0a5');
+          lsAID_historyAdd({type:'video', src:url, prompt:_savedPrompt||''});
+        } else {
+          lsAID_animStatus('Provider returned no video URL.','#ff8080');
+        }
+      })
+      .catch(function(e) {
+        lsAID_animStatus('Error: '+(e&&e.message||'animation failed'),'#ff8080');
+      })
+      .then(function() { var btn2=document.getElementById('aid-animate-btn'); if(btn2)btn2.disabled=false; });
+  }
+
+  function _provLabel(id) {
+    var reg = window.LoadProviderRegistry;
+    if (!id || !reg) return id;
+    var p = reg.getProvider(id);
+    return p ? (p.name || id) : id;
+  }
+
+  function lsAID_animStatus(msg, color) {
+    var el = document.getElementById('aid-animate-status');
+    if (!el) return;
+    el.style.display = 'block';
+    el.textContent = msg;
+    el.style.color = color || '#c0b8d9';
+  }
+
+  function lsAID_saveVideo() {
+    if (!_currentVideoUrl) return;
+    var a = document.createElement('a');
+    a.href = _currentVideoUrl;
+    a.download = 'generated-video-' + Date.now() + '.mp4';
+    a.click();
+    lsAID_animStatus('Video saved.','#5ee0a5');
+  }
+
+  function lsAID_attachVideoScene() {
+    if (!_currentVideoUrl) return;
+    var sceneId = window.prompt('Scene ID to attach to:');
+    if (!sceneId) return;
+    var log = JSON.parse(localStorage.getItem('ls_scene_videos')||'[]');
+    log.push({sceneId:sceneId, videoUrl:_currentVideoUrl, prompt:_savedPrompt||'', savedAt:new Date().toISOString()});
+    localStorage.setItem('ls_scene_videos', JSON.stringify(log));
+    lsAID_animStatus('Attached to scene: '+sceneId,'#5ee0a5');
+  }
+
+  function lsAID_historyAdd(entry) {
+    var hist = JSON.parse(localStorage.getItem(_HIST_KEY)||'[]');
+    hist.unshift({type:entry.type, src:entry.src, prompt:(entry.prompt||'').slice(0,200), ts:Date.now()});
+    if (hist.length > 20) hist = hist.slice(0, 20);
+    localStorage.setItem(_HIST_KEY, JSON.stringify(hist));
+    lsAID_renderHistory();
+  }
+
+  function lsAID_renderHistory() {
+    var hist = JSON.parse(localStorage.getItem(_HIST_KEY)||'[]');
+    var wrap = document.getElementById('aid-gen-history');
+    var list = document.getElementById('aid-gen-history-list');
+    if (!wrap || !list) return;
+    if (!hist.length) { wrap.style.display='none'; return; }
+    wrap.style.display = 'block';
+    list.innerHTML = hist.map(function(h, i) {
+      var thumb = h.type === 'image'
+        ? '<img src="'+h.src+'" alt="" style="width:100%;height:80px;object-fit:cover;border-radius:6px;display:block;margin-bottom:6px">'
+        : '<div style="width:100%;height:40px;display:flex;align-items:center;justify-content:center;border-radius:6px;background:#0a051a;margin-bottom:6px;color:#9c9cff;font:600 11px Inter,sans-serif">Video clip</div>';
+      var label = h.type === 'image' ? 'Image' : 'Video';
+      var date = new Date(h.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+      var prompt = h.prompt ? h.prompt.slice(0,80)+(h.prompt.length>80?'...':'') : '';
+      return '<div style="border:1px solid rgba(125,42,232,.2);border-radius:8px;padding:8px;margin-bottom:8px;background:#0e0720">'
+        + thumb
+        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
+        + '<span style="color:#9c9cff;font:600 11px Inter,sans-serif">'+label+'</span>'
+        + '<span style="color:#5a4a7a;font:400 11px Inter,sans-serif">'+date+'</span>'
+        + '</div>'
+        + (prompt ? '<div style="color:#c0b8d9;font:300 11px Inter,sans-serif;line-height:1.5;margin-bottom:6px">'+prompt+'</div>' : '')
+        + (h.type==='image' ? '<button type="button" data-action="reuse-prompt" data-prompt="'+h.prompt.replace(/"/g,'&quot;')+'" style="padding:5px 10px;background:rgba(125,42,232,.18);border:1px solid rgba(125,42,232,.4);border-radius:6px;color:#c0b8d9;font:600 10px Inter,sans-serif;cursor:pointer">Reuse Prompt</button>' : '')
+        + '</div>';
+    }).join('');
+  }
+
+  function lsAID_clearGenHistory() {
+    localStorage.removeItem(_HIST_KEY);
+    lsAID_renderHistory();
+  }
+
+  // Render history on panel open
+  var _origLsAID = window.lsAID;
+  window.lsAID = function(ev) {
+    if (_origLsAID) _origLsAID(ev);
+    try { lsAID_renderHistory(); } catch(_) {}
   };
 
 })();
