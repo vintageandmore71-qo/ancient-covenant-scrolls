@@ -2826,6 +2826,28 @@ var LoadProviderRegistry = {
         })
         .catch(function(e){ return {provider:'free-music-archive',results:[],error:e.message}; });
     }
+    if (providerId === 'jamendo') {
+      if (!key) return Promise.resolve({provider:'jamendo', results:[], status:'needs-key', needsKey:true});
+      var offset = (page - 1) * limit;
+      return fetch('https://api.jamendo.com/v3.0/tracks/?client_id='+encodeURIComponent(key)+'&format=json&limit='+limit+'&offset='+offset+'&search='+encodeURIComponent(query)+'&audioformat=mp32&include=musicinfo')
+        .then(function(r){ if(!r.ok) throw new Error('Jamendo '+r.status); return r.json(); })
+        .then(function(d){
+          return {provider:'jamendo', results:(d.results||[]).map(function(t){
+            return {id:String(t.id||''),title:t.name||'',artist:t.artist_name||'',duration:t.duration||null,previewUrl:t.audiodownload||t.audio||null,downloadUrl:t.audiodownload||null,licenseType:t.license_ccurl||'CC',attribution:(t.name||'')+' by '+(t.artist_name||'')+' (Jamendo)',provider:'jamendo'};
+          })};
+        })
+        .catch(function(e){ return {provider:'jamendo',results:[],error:e.message}; });
+    }
+    if (providerId === 'openverse-audio') {
+      return fetch('https://api.openverse.org/v1/audio/?q='+encodeURIComponent(query)+'&page_size='+limit+'&page='+page)
+        .then(function(r){ if(!r.ok) throw new Error('Openverse audio '+r.status); return r.json(); })
+        .then(function(d){
+          return {provider:'openverse-audio', results:(d.results||[]).map(function(t){
+            return {id:String(t.id||''),title:t.title||'',artist:t.creator||'',duration:t.duration||null,previewUrl:t.url||null,downloadUrl:t.url||null,licenseType:t.license||'CC',attribution:(t.title||'')+' by '+(t.creator||'')+' (Openverse)',provider:'openverse-audio'};
+          })};
+        })
+        .catch(function(e){ return {provider:'openverse-audio',results:[],error:e.message}; });
+    }
     return Promise.resolve({provider: providerId, results: [], status: 'no-connector'});
   },
 
@@ -2843,6 +2865,16 @@ var LoadProviderRegistry = {
       return _freesoundSearch(key, query, null, limit, page)
         .then(function (r) { return {provider: 'freesound', results: r}; })
         .catch(function (e) { return {provider: 'freesound', results: [], error: e.message}; });
+    }
+    if (providerId === 'openverse-sfx') {
+      return fetch('https://api.openverse.org/v1/audio/?q='+encodeURIComponent(query)+'&page_size='+limit+'&page='+page+'&category=sound_effect')
+        .then(function(r){ if(!r.ok) throw new Error('Openverse SFX '+r.status); return r.json(); })
+        .then(function(d){
+          return {provider:'openverse-sfx', results:(d.results||[]).map(function(t){
+            return {id:String(t.id||''),title:t.title||'',artist:t.creator||'',duration:t.duration||null,previewUrl:t.url||null,downloadUrl:t.url||null,licenseType:t.license||'CC',attribution:(t.title||'')+' by '+(t.creator||'')+' (Openverse)',provider:'openverse-sfx'};
+          })};
+        })
+        .catch(function(e){ return {provider:'openverse-sfx',results:[],error:e.message}; });
     }
     return Promise.resolve({provider: providerId, results: [], status: 'no-connector'});
   },
@@ -2883,6 +2915,17 @@ var LoadProviderRegistry = {
       return _nasaSearch(query, mediaType, page)
         .then(function (r) { return {provider: 'nasa-library', results: r}; })
         .catch(function (e) { return {provider: 'nasa-library', results: [], error: e.message}; });
+    }
+    if (providerId === 'openverse') {
+      var ovPath = (mediaType === 'audio') ? 'audio' : 'images';
+      return fetch('https://api.openverse.org/v1/'+ovPath+'/?q='+encodeURIComponent(query)+'&page_size=20&page='+page)
+        .then(function(r){ if(!r.ok) throw new Error('Openverse '+r.status); return r.json(); })
+        .then(function(d){
+          return {provider:'openverse', results:(d.results||[]).map(function(item){
+            return {id:String(item.id||''),title:item.title||'',url:item.url||null,thumbUrl:item.thumbnail||item.url||null,attribution:(item.title||'')+' by '+(item.creator||'Unknown')+' (Openverse - '+item.license+')',mediaType:ovPath==='audio'?'audio':'image',provider:'openverse'};
+          })};
+        })
+        .catch(function(e){ return {provider:'openverse',results:[],error:e.message}; });
     }
     return Promise.resolve({provider: providerId, results: [], status: 'no-connector'});
   },
