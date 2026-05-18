@@ -25,20 +25,20 @@ var _MUSIC_DEMO = {
 };
 
 var _SFX_DEMO = {
-  cartoon:[{t:'Boing Spring',a:'Mixkit SFX',d:'0:02',c:'#ff9500'},{t:'Silly Pop',a:'Freesound',d:'0:01',c:'#ff7a00'},{t:'Woosh Whoosh',a:'SoundBible',d:'0:03',c:'#ffb340'},{t:'Twinkle Hit',a:'Mixkit SFX',d:'0:01',c:'#ff8800'}],
-  swish:[{t:'Fast Swipe',a:'Mixkit SFX',d:'0:01',c:'#4cd964'},{t:'Quick Swoosh',a:'ZapSplat',d:'0:02',c:'#3aa84f'},{t:'Air Rush',a:'Freesound',d:'0:01',c:'#6aed80'},{t:'Speed Line',a:'Mixkit SFX',d:'0:01',c:'#2a9e3c'}],
-  funny:[{t:'Comedy Slide',a:'Mixkit SFX',d:'0:02',c:'#ff3b30'},{t:'Laugh Track',a:'SoundBible',d:'0:04',c:'#cc2d24'},{t:'Squeaky Step',a:'Freesound',d:'0:02',c:'#ff6059'},{t:'Wacky Spin',a:'Mixkit SFX',d:'0:02',c:'#e83028'}],
-  machine:[{t:'Gear Click',a:'Freesound',d:'0:03',c:'#8e8e93'},{t:'Engine Hum',a:'ZapSplat',d:'0:05',c:'#636366'},{t:'Motor Start',a:'BBC Sound Effects',d:'0:04',c:'#aeaeb2'},{t:'Whir Loop',a:'Freesound',d:'0:06',c:'#6d6d72'}],
-  ringing:[{t:'Phone Bell',a:'Mixkit SFX',d:'0:03',c:'#5ac8fa'},{t:'Notification',a:'SoundBible',d:'0:01',c:'#32ade6'},{t:'Alert Chime',a:'Mixkit SFX',d:'0:02',c:'#80d8ff'},{t:'Ding Dong',a:'Freesound',d:'0:02',c:'#28a8e0'}],
-  vehicles:[{t:'Car Horn',a:'BBC Sound Effects',d:'0:02',c:'#5856d6'},{t:'Truck Rev',a:'Freesound',d:'0:04',c:'#3634a3'},{t:'Bike Zoom',a:'ZapSplat',d:'0:02',c:'#7876e0'},{t:'Tire Screech',a:'BBC Sound Effects',d:'0:03',c:'#4240b0'}],
-  weather:[{t:'Thunder Roll',a:'BBC Sound Effects',d:'0:05',c:'#34aadc'},{t:'Rain Heavy',a:'Freesound',d:'0:08',c:'#258ab0'},{t:'Wind Gust',a:'ZapSplat',d:'0:04',c:'#5ac8fa'},{t:'Storm Crack',a:'BBC Sound Effects',d:'0:03',c:'#1a7a9e'}],
-  variety:[{t:'Applause',a:'Mixkit SFX',d:'0:05',c:'#ff2d55'},{t:'Crowd Cheer',a:'Freesound',d:'0:06',c:'#cc2440'},{t:'TV Static',a:'SoundBible',d:'0:03',c:'#ff5577'},{t:'News Sting',a:'ZapSplat',d:'0:02',c:'#ee1a42'}],
-  vlogsf:[{t:'Camera Click',a:'Mixkit SFX',d:'0:01',c:'#7d2ae8'},{t:'Page Turn',a:'Freesound',d:'0:02',c:'#5b1fa8'},{t:'Type Keys',a:'ZapSplat',d:'0:03',c:'#9c3aff'},{t:'Pen Scribble',a:'Freesound',d:'0:02',c:'#6a1fcc'}],
-  physical:[{t:'Heavy Punch',a:'Mixkit SFX',d:'0:01',c:'#ff6b35'},{t:'Footsteps',a:'Freesound',d:'0:04',c:'#cc4a20'},{t:'Door Slam',a:'BBC Sound Effects',d:'0:02',c:'#ff8c55'},{t:'Wood Break',a:'ZapSplat',d:'0:02',c:'#e05c28'}],
-  transitions:[{t:'Whoosh Up',a:'Mixkit SFX',d:'0:02',c:'#636366'},{t:'Glitch Cut',a:'ZapSplat',d:'0:01',c:'#4a4a50'},{t:'Slide Zoom',a:'Mixkit SFX',d:'0:02',c:'#8e8e93'},{t:'Fade Hiss',a:'Freesound',d:'0:02',c:'#5a5a5e'}],
-  cues:[{t:'Drama Hit',a:'Mixkit SFX',d:'0:02',c:'#ffcc00'},{t:'Tension Rise',a:'ZapSplat',d:'0:04',c:'#cc9e00'},{t:'Impact Boom',a:'Freesound',d:'0:03',c:'#ffe040'},{t:'Reveal Sting',a:'Mixkit SFX',d:'0:02',c:'#e6b400'}],
-  game:[{t:'Power Up',a:'Mixkit SFX',d:'0:02',c:'#32ade6'},{t:'Coin Collect',a:'SoundBible',d:'0:01',c:'#1a8fcc'},{t:'Level Up',a:'Mixkit SFX',d:'0:02',c:'#5ac8fa'},{t:'Error Buzz',a:'Freesound',d:'0:01',c:'#1078b5'}],
-  emotion:[{t:'Heartbeat',a:'Freesound',d:'0:04',c:'#ff375f'},{t:'Sad Tone',a:'ZapSplat',d:'0:03',c:'#cc2040'},{t:'Hope Rise',a:'Mixkit SFX',d:'0:05',c:'#ff6080'},{t:'Tension Hum',a:'Freesound',d:'0:04',c:'#ee2050'}]
+  cartoon:[{t:'Boing Spring',a:'Mixkit SFX',d:'0:02',c:'#ff9500',k:'sfx-spring'},{t:'Silly Pop',a:'Freesound',d:'0:01',c:'#ff7a00',k:'sfx-spring'},{t:'Woosh Whoosh',a:'SoundBible',d:'0:03',c:'#ffb340',k:'sfx-swish'},{t:'Twinkle Hit',a:'Mixkit SFX',d:'0:01',c:'#ff8800',k:'sfx-ding'}],
+  swish:[{t:'Fast Swipe',a:'Mixkit SFX',d:'0:01',c:'#4cd964',k:'sfx-swish'},{t:'Quick Swoosh',a:'ZapSplat',d:'0:02',c:'#3aa84f',k:'sfx-swish'},{t:'Air Rush',a:'Freesound',d:'0:01',c:'#6aed80',k:'sfx-swish'},{t:'Speed Line',a:'Mixkit SFX',d:'0:01',c:'#2a9e3c',k:'sfx-swish'}],
+  funny:[{t:'Comedy Slide',a:'Mixkit SFX',d:'0:02',c:'#ff3b30',k:'sfx-swish'},{t:'Laugh Track',a:'SoundBible',d:'0:04',c:'#cc2d24',k:'sfx-spring'},{t:'Squeaky Step',a:'Freesound',d:'0:02',c:'#ff6059',k:'sfx-spring'},{t:'Wacky Spin',a:'Mixkit SFX',d:'0:02',c:'#e83028',k:'sfx-swish'}],
+  machine:[{t:'Gear Click',a:'Freesound',d:'0:03',c:'#8e8e93',k:'sfx-hit'},{t:'Engine Hum',a:'ZapSplat',d:'0:05',c:'#636366',k:'sfx-rumble'},{t:'Motor Start',a:'BBC Sound Effects',d:'0:04',c:'#aeaeb2',k:'sfx-rumble'},{t:'Whir Loop',a:'Freesound',d:'0:06',c:'#6d6d72',k:'sfx-rumble'}],
+  ringing:[{t:'Phone Bell',a:'Mixkit SFX',d:'0:03',c:'#5ac8fa',k:'sfx-ding'},{t:'Notification',a:'SoundBible',d:'0:01',c:'#32ade6',k:'sfx-ding'},{t:'Alert Chime',a:'Mixkit SFX',d:'0:02',c:'#80d8ff',k:'sfx-ding'},{t:'Ding Dong',a:'Freesound',d:'0:02',c:'#28a8e0',k:'sfx-ding'}],
+  vehicles:[{t:'Car Horn',a:'BBC Sound Effects',d:'0:02',c:'#5856d6',k:'sfx-hit'},{t:'Truck Rev',a:'Freesound',d:'0:04',c:'#3634a3',k:'sfx-rumble'},{t:'Bike Zoom',a:'ZapSplat',d:'0:02',c:'#7876e0',k:'sfx-swish'},{t:'Tire Screech',a:'BBC Sound Effects',d:'0:03',c:'#4240b0',k:'sfx-swish'}],
+  weather:[{t:'Thunder Roll',a:'BBC Sound Effects',d:'0:05',c:'#34aadc',k:'sfx-rumble'},{t:'Rain Heavy',a:'Freesound',d:'0:08',c:'#258ab0',k:'sfx-rumble'},{t:'Wind Gust',a:'ZapSplat',d:'0:04',c:'#5ac8fa',k:'sfx-swish'},{t:'Storm Crack',a:'BBC Sound Effects',d:'0:03',c:'#1a7a9e',k:'sfx-hit'}],
+  variety:[{t:'Applause',a:'Mixkit SFX',d:'0:05',c:'#ff2d55',k:'sfx-hit'},{t:'Crowd Cheer',a:'Freesound',d:'0:06',c:'#cc2440',k:'sfx-hit'},{t:'TV Static',a:'SoundBible',d:'0:03',c:'#ff5577',k:'sfx-rumble'},{t:'News Sting',a:'ZapSplat',d:'0:02',c:'#ee1a42',k:'sfx-ding'}],
+  vlogsf:[{t:'Camera Click',a:'Mixkit SFX',d:'0:01',c:'#7d2ae8',k:'sfx-hit'},{t:'Page Turn',a:'Freesound',d:'0:02',c:'#5b1fa8',k:'sfx-swish'},{t:'Type Keys',a:'ZapSplat',d:'0:03',c:'#9c3aff',k:'sfx-hit'},{t:'Pen Scribble',a:'Freesound',d:'0:02',c:'#6a1fcc',k:'sfx-hit'}],
+  physical:[{t:'Heavy Punch',a:'Mixkit SFX',d:'0:01',c:'#ff6b35',k:'sfx-hit'},{t:'Footsteps',a:'Freesound',d:'0:04',c:'#cc4a20',k:'sfx-hit'},{t:'Door Slam',a:'BBC Sound Effects',d:'0:02',c:'#ff8c55',k:'sfx-hit'},{t:'Wood Break',a:'ZapSplat',d:'0:02',c:'#e05c28',k:'sfx-hit'}],
+  transitions:[{t:'Whoosh Up',a:'Mixkit SFX',d:'0:02',c:'#636366',k:'sfx-swish'},{t:'Glitch Cut',a:'ZapSplat',d:'0:01',c:'#4a4a50',k:'sfx-hit'},{t:'Slide Zoom',a:'Mixkit SFX',d:'0:02',c:'#8e8e93',k:'sfx-swish'},{t:'Fade Hiss',a:'Freesound',d:'0:02',c:'#5a5a5e',k:'sfx-rumble'}],
+  cues:[{t:'Drama Hit',a:'Mixkit SFX',d:'0:02',c:'#ffcc00',k:'sfx-hit'},{t:'Tension Rise',a:'ZapSplat',d:'0:04',c:'#cc9e00',k:'sfx-rumble'},{t:'Impact Boom',a:'Freesound',d:'0:03',c:'#ffe040',k:'sfx-hit'},{t:'Reveal Sting',a:'Mixkit SFX',d:'0:02',c:'#e6b400',k:'sfx-ding'}],
+  game:[{t:'Power Up',a:'Mixkit SFX',d:'0:02',c:'#32ade6',k:'sfx-ding'},{t:'Coin Collect',a:'SoundBible',d:'0:01',c:'#1a8fcc',k:'sfx-ding'},{t:'Level Up',a:'Mixkit SFX',d:'0:02',c:'#5ac8fa',k:'sfx-ding'},{t:'Error Buzz',a:'Freesound',d:'0:01',c:'#1078b5',k:'sfx-rumble'}],
+  emotion:[{t:'Heartbeat',a:'Freesound',d:'0:04',c:'#ff375f',k:'sfx-rumble'},{t:'Sad Tone',a:'ZapSplat',d:'0:03',c:'#cc2040',k:'sfx-rumble'},{t:'Hope Rise',a:'Mixkit SFX',d:'0:05',c:'#ff6080',k:'sfx-ding'},{t:'Tension Hum',a:'Freesound',d:'0:04',c:'#ee2050',k:'sfx-rumble'}]
 };
 
 // ─── DEMO AUDIO — real WAV files served from assets/audio/demo/ ──────────────
@@ -83,10 +83,11 @@ function _buildAssetList(listId, demo, cat, q, icon, trackKind, tone, audioKeyMa
   var keys = cat === 'all' ? Object.keys(demo) : [cat];
   var lq = (q || '').toLowerCase();
   keys.forEach(function (k) {
-    var audioKey = audioKeyMap && audioKeyMap[k];
-    var audioSrc = (audioKey && _DEMO_AUDIO && _DEMO_AUDIO[audioKey]) || null;
+    var catAudioKey = audioKeyMap && audioKeyMap[k];
     (demo[k] || []).forEach(function (tr) {
       if (lq && tr.t.toLowerCase().indexOf(lq) < 0 && tr.a.toLowerCase().indexOf(lq) < 0) return;
+      var audioKey = tr.k || catAudioKey;
+      var audioSrc = (audioKey && _DEMO_AUDIO && _DEMO_AUDIO[audioKey]) || null;
       var row = document.createElement('div');
       row.className = 've-asset-row';
       var hasAudio   = !!audioSrc;
