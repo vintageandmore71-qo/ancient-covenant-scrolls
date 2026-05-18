@@ -15,13 +15,13 @@ var _selectedClipIdx = 0;
 var _ctxData = null;
 
 var _MUSIC_DEMO = {
-  'vlog':       [{id:'music-demo-0', t:'Chill Background',  a:'Demo', d:'0:05', c:'#7d2ae8', k:'music-mellow'}],
-  'pop':        [{id:'music-demo-1', t:'Upbeat Loop',       a:'Demo', d:'0:05', c:'#e82a7d', k:'music-modern'}],
-  'dynamic':    [{id:'music-demo-2', t:'Driving Loop',      a:'Demo', d:'0:05', c:'#2ae8a0', k:'music-energetic'}],
-  'fresh':      [{id:'music-demo-3', t:'Bright Arpeggio',   a:'Demo', d:'0:05', c:'#2e7d32', k:'music-fresh'}],
-  'acoustic':   [{id:'music-demo-4', t:'Fingerpick Loop',   a:'Demo', d:'0:05', c:'#f57f17', k:'music-acoustic'}],
-  'electronic': [{id:'music-demo-5', t:'Synth Arpeggio',    a:'Demo', d:'0:05', c:'#283593', k:'music-electronic'}],
-  'hiphop':     [{id:'music-demo-6', t:'Beat Loop',         a:'Demo', d:'0:05', c:'#e65100', k:'music-hiphop'}]
+  'vlog':       [{id:'music-demo-0', t:'Mellow Demo',   a:'Demo', d:'0:30', c:'#7d2ae8', k:'music-mellow'}],
+  'pop':        [{id:'music-demo-1', t:'Upbeat Demo',   a:'Demo', d:'0:30', c:'#e82a7d', k:'music-modern'}],
+  'dynamic':    [{id:'music-demo-2', t:'Energetic Demo',a:'Demo', d:'0:30', c:'#2ae8a0', k:'music-energetic'}],
+  'fresh':      [{id:'music-demo-3', t:'Fresh Demo',    a:'Demo', d:'0:05', c:'#2e7d32', k:'music-fresh'}],
+  'acoustic':   [{id:'music-demo-4', t:'Acoustic Demo', a:'Demo', d:'0:05', c:'#f57f17', k:'music-acoustic'}],
+  'electronic': [{id:'music-demo-5', t:'Electronic Demo',a:'Demo', d:'0:05', c:'#283593', k:'music-electronic'}],
+  'hiphop':     [{id:'music-demo-6', t:'Hip-Hop Demo',  a:'Demo', d:'0:05', c:'#e65100', k:'music-hiphop'}]
 };
 
 // cs=commercialSafe  ar=attributionRequired  po=personalOnly
