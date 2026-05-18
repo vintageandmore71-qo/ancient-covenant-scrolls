@@ -650,40 +650,38 @@ var _engine = {
       // gesture-blessed). Fall back to new Audio only if missing.
       var _mKey = sceneId + '_music_track_' + i;
       var a = _audioPre[_mKey];
-      if (!a || a.error) {
+      if (!a || a.error || a.networkState === 3) {
         a = new Audio(it.src);
         _dbg('  WARN: no unlocked el — fallback new Audio');
-      } else {
-        _dbg('  using gesture-unlocked element');
       }
       a.volume = it.vol || 0.35;
-      // Only seek if the element has buffered data (readyState>=2). Seeking on an
-      // element still loading aborts the iOS Safari network request silently.
-      if (a.readyState >= 2) {
-        try { a.currentTime = lt > 0.05 ? lt : 0; } catch (_) {}
+      // Only seek if data is buffered. Seeking at rs=0 aborts load on iOS Safari.
+      if (a.readyState >= 2 && lt > 0.05) {
+        try { a.currentTime = lt; } catch (_) {}
       }
-      _dbg('  calling play()... rs=' + a.readyState + ' ns=' + a.networkState + ' vol=' + a.volume + ' src=' + (a.src || '').slice(-50));
+      _dbg('  rs=' + a.readyState + ' ns=' + a.networkState + ' paused=' + a.paused + ' vol=' + a.volume + ' src=' + (a.src || '').slice(-40));
       var _aRef = a;
       var _evtPlay = false; var _evtCtStart = null;
-      _aRef.addEventListener('loadstart', function () { _dbg('  EVT loadstart'); });
-      _aRef.addEventListener('canplay', function () { _dbg('  EVT canplay rs=' + _aRef.readyState); });
-      _aRef.addEventListener('playing', function () { if (!_evtPlay) { _evtPlay = true; _evtCtStart = _aRef.currentTime; } _dbg('  EVT playing ct=' + _aRef.currentTime.toFixed(2) + ' vol=' + _aRef.volume + ' muted=' + _aRef.muted); });
-      _aRef.addEventListener('volumechange', function () { _dbg('  EVT volchange vol=' + _aRef.volume + ' muted=' + _aRef.muted); });
-      _aRef.addEventListener('suspend', function () { _dbg('  EVT suspend rs=' + _aRef.readyState + ' ns=' + _aRef.networkState); });
-      _aRef.addEventListener('waiting', function () { _dbg('  EVT waiting rs=' + _aRef.readyState); });
-      _aRef.addEventListener('ended', function () { _dbg('  EVT ended'); });
+      _aRef.addEventListener('playing', function () { if (!_evtPlay) { _evtPlay = true; _evtCtStart = _aRef.currentTime; } _dbg('  EVT playing ct=' + _aRef.currentTime.toFixed(2) + ' vol=' + _aRef.volume); });
       _aRef.addEventListener('error', function () { var _e = _aRef.error; _dbg('  EVT error code=' + (_e && _e.code) + ' ' + (_e && _e.message)); });
-      a.play()
-        .then(function () {
-          _dbg('  PLAY OK vol=' + _aRef.volume + ' muted=' + _aRef.muted + ' rs=' + _aRef.readyState + ' ns=' + _aRef.networkState + ' dur=' + (_aRef.duration || 0).toFixed(1));
-          setTimeout(function () {
-            var _ct = _aRef.currentTime;
-            var _adv = (_evtCtStart !== null) ? (_ct - _evtCtStart) : _ct;
-            var _audible = _evtPlay && _adv > 0.1 && _aRef.volume > 0 && !_aRef.muted && !_aRef.error;
-            _dbg('  AUDIBLE=' + _audible + ' playing-evt=' + _evtPlay + ' ct=' + _ct.toFixed(2) + ' adv=' + _adv.toFixed(2) + ' vol=' + _aRef.volume + ' muted=' + _aRef.muted + ' err=' + (_aRef.error ? _aRef.error.code : 'none') + ' paused=' + _aRef.paused);
-          }, 500);
-        })
-        .catch(function (err) { _dbg('  PLAY FAIL: track ' + i + ' ' + (err && err.message)); });
+      if (!a.paused) {
+        // Already playing silently from Add gesture — just unmuted, no play() call needed
+        _dbg('  already playing — unmuted to ' + a.volume);
+        setTimeout(function () {
+          _dbg('  500ms: ct=' + _aRef.currentTime.toFixed(2) + ' paused=' + _aRef.paused + ' vol=' + _aRef.volume + ' err=' + (_aRef.error ? _aRef.error.code : 'none'));
+        }, 500);
+      } else {
+        a.play()
+          .then(function () {
+            _dbg('  PLAY OK rs=' + _aRef.readyState + ' vol=' + _aRef.volume + ' muted=' + _aRef.muted);
+            setTimeout(function () {
+              var _ct = _aRef.currentTime;
+              var _adv = (_evtCtStart !== null) ? (_ct - _evtCtStart) : _ct;
+              _dbg('  500ms: AUDIBLE=' + (_evtPlay && _adv > 0.1 && _aRef.volume > 0 && !_aRef.muted && !_aRef.error) + ' playing-evt=' + _evtPlay + ' adv=' + _adv.toFixed(2) + ' ct=' + _ct.toFixed(2));
+            }, 500);
+          })
+          .catch(function (err) { _dbg('  PLAY FAIL: track ' + i + ' ' + (err && err.message)); });
+      }
       _playHandles.push(a);
       _audioPre[_mKey] = a;
     });
@@ -1653,16 +1651,14 @@ function _bindEditor(idx) {
             _ulEl.addEventListener('waiting', function () { _dbg('  unlock EVT waiting'); });
             _ulEl.addEventListener('error', function () { var _ue = _ulEl.error; _dbg('  unlock EVT error code=' + (_ue && _ue.code) + ' ' + (_ue && _ue.message)); });
             _ulEl.addEventListener('ended', function () { _dbg('  unlock EVT ended'); });
+            // Play silently at volume=0. Do NOT pause — pausing before the remote
+            // URL has buffered (Jamendo takes ~10s) leaves rs=0 when Play fires,
+            // which iOS Safari rejects. The element keeps loading silently; when Play
+            // fires it is already playing and just gets unmuted.
             var _ulP = _ulEl.play();
             if (_ulP && _ulP.catch) _ulP.catch(function () {});
             _audioPre[_ulKey] = _ulEl;
-            // Pause silently after gesture-unlock. Do NOT seek — seeking to 0
-            // while the network load is in flight aborts the request on iOS Safari,
-            // leaving the element with no buffered data when Play fires.
-            setTimeout(function () {
-              try { _ulEl.pause(); _ulEl.volume = 0.35; } catch (_) {}
-            }, 80);
-            _dbg('  unlocked ' + _ulKey.slice(-24));
+            _dbg('  unlocked (silent play) ' + _ulKey.slice(-24));
           }
         }
         _renderTracks(idx);
