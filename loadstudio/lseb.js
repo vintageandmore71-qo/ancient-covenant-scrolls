@@ -138,6 +138,60 @@ var _SFX_AUDIO_KEY = {
 var _NOTE_ICO = '<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5" width="18" height="18"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
 var _SPK_ICO  = '<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5" width="18" height="18"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
 var _PLAY_ICO = '<svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><polygon points="6 4 20 12 6 20"/></svg>';
+var _STOP_ICO = '<svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><rect x="5" y="5" width="14" height="14" rx="1"/></svg>';
+
+// ─── Singleton preview audio controller ──────────────────────────────────────
+// One Audio instance at a time. Toggle tap stops. Panel close stops.
+// Timeline play stops. Button reflects: idle / loading / playing / failed.
+var _PreviewCtrl = (function () {
+  var _audio = null;
+  var _activeBtn = null;
+  function _setState(btn, state) {
+    if (!btn) return;
+    btn.dataset.previewState = state;
+    if (state === 'idle')    { btn.innerHTML = _PLAY_ICO; btn.disabled = false; }
+    else if (state === 'loading') { btn.textContent = '…'; btn.disabled = true; }
+    else if (state === 'playing') { btn.innerHTML = _STOP_ICO; btn.disabled = false; }
+    else if (state === 'failed')  { btn.textContent = '!'; btn.disabled = false; }
+  }
+  function stop() {
+    if (_audio) { try { _audio.pause(); _audio.src = ''; } catch (_) {} _audio = null; }
+    if (_activeBtn) { _setState(_activeBtn, 'idle'); _activeBtn = null; }
+  }
+  function play(btn, src) {
+    stop();
+    if (!src) { if (btn) _setState(btn, 'failed'); return; }
+    _activeBtn = btn;
+    _setState(btn, 'loading');
+    var a = new Audio();
+    a.volume = 0.6;
+    a.preload = 'metadata';
+    var tid = setTimeout(function () { stop(); }, 10000);
+    a.oncanplay = function () {
+      clearTimeout(tid);
+      if (_activeBtn !== btn) return;
+      _audio = a;
+      _setState(btn, 'playing');
+      a.play().catch(function () { clearTimeout(tid); stop(); if (btn) _setState(btn, 'failed'); });
+    };
+    a.onerror = function () {
+      clearTimeout(tid);
+      if (_activeBtn === btn) { _audio = null; _setState(btn, 'failed'); _activeBtn = null; }
+    };
+    a.onended = function () {
+      _audio = null;
+      if (_activeBtn === btn) { _setState(btn, 'idle'); _activeBtn = null; }
+    };
+    a.src = src;
+    a.load();
+  }
+  function toggle(btn, src) {
+    if (_activeBtn === btn) { stop(); return; }
+    play(btn, src);
+  }
+  function isActive(btn) { return _activeBtn === btn; }
+  return { stop: stop, play: play, toggle: toggle, isActive: isActive };
+}());
 
 var _currentMusicCat = 'all';
 var _currentSfxCat   = 'all';
@@ -1379,6 +1433,7 @@ function _bindEditor(idx) {
   // Track-add + empty-track tap → open panels
   var _ALL_PANELS = ['lseb-insert-panel','lseb-music-panel','lseb-text-panel','lseb-sfx-panel','lseb-voice-panel','lseb-transition-panel','lseb-filter-panel','lseb-opacity-panel','lseb-blur-panel','lseb-info-panel'];
   function _showPanel(id) {
+    _PreviewCtrl.stop();
     _ALL_PANELS.forEach(function (p) {
       var el = _el(p);
       if (el) el.classList.toggle('panel-open', p === id);
@@ -1536,47 +1591,30 @@ function _bindEditor(idx) {
         _toast((trackKind === 'music' ? 'Music' : 'Sound FX') + (noSrc ? ' added — no audio source connected' : ' added'));
         return;
       }
-      // Preview — exact audio-key match; live search only when no local demo exists
+      // Preview — centralized controller; one preview at a time; toggle stops
       var playBtn = e.target.closest('[data-tone]');
       if (playBtn) {
-        var ak2      = playBtn.dataset.audioKey;
-        var demoSrc  = (ak2 && _DEMO_AUDIO && _DEMO_AUDIO[ak2]) || null;
-        var cachedSrc= playBtn.dataset.src || null;
-        var sq       = playBtn.dataset.searchQuery;
-        var reg2     = window.LoadProviderRegistry;
-        if (playBtn.dataset.tone === 'music' && sq && reg2 && !demoSrc && !cachedSrc) {
-          playBtn.disabled = true;
-          var _tryProviders = function (providers, pi) {
-            if (pi >= providers.length) {
-              playBtn.disabled = false;
-              _toast('No preview available — connect a music provider');
-              return;
-            }
-            reg2.searchMusic({query: sq, providerId: providers[pi]}).then(function (r) {
+        var ak2     = playBtn.dataset.audioKey;
+        var demoSrc = (ak2 && _DEMO_AUDIO[ak2]) || null;
+        var dataSrc = playBtn.dataset.src || null;
+        var src     = dataSrc || demoSrc;
+        var sq      = playBtn.dataset.searchQuery;
+        if (src) { _PreviewCtrl.toggle(playBtn, src); return; }
+        if (_PreviewCtrl.isActive(playBtn)) { _PreviewCtrl.stop(); return; }
+        if (sq && window.LoadProviderRegistry) {
+          if (playBtn.dataset.previewState === 'loading') return;
+          playBtn.textContent = '…'; playBtn.disabled = true;
+          var _tryLive = function (provs, pi) {
+            if (pi >= provs.length) { playBtn.innerHTML = _PLAY_ICO; playBtn.disabled = false; return; }
+            window.LoadProviderRegistry.searchMusic({query: sq, providerId: provs[pi]}).then(function (r) {
               var url = r && r.results && r.results[0] && r.results[0].previewUrl;
-              if (!url) { _tryProviders(providers, pi + 1); return; }
+              if (!url) { _tryLive(provs, pi + 1); return; }
               playBtn.dataset.src = url;
-              playBtn.disabled = false;
-              try {
-                var pa = new Audio(url); pa.volume = 0.6;
-                pa.play().catch(function () { _tryProviders(providers, pi + 1); });
-              } catch (_) { _tryProviders(providers, pi + 1); }
-            }).catch(function () { _tryProviders(providers, pi + 1); });
+              _PreviewCtrl.play(playBtn, url);
+            }).catch(function () { _tryLive(provs, pi + 1); });
           };
-          _tryProviders(['ccmixter', 'openverse-audio'], 0);
+          _tryLive(['ccmixter', 'openverse-audio'], 0);
           return;
-        }
-        if (playBtn.dataset.noSrc === '1' && !sq) {
-          _toast('No audio source — connect a provider or upload a file to preview');
-          return;
-        }
-        var srcUrl = cachedSrc || demoSrc;
-        if (srcUrl) {
-          try {
-            var previewAudio = new Audio(srcUrl);
-            previewAudio.volume = 0.6;
-            previewAudio.play().catch(function () { _toast('Could not play preview.'); });
-          } catch (_) { _toast('Could not play preview.'); }
         }
         return;
       }
@@ -1842,6 +1880,7 @@ function _bindEditor(idx) {
   // Transport
   var playBtn = _el('lseb-play-btn');
   if (playBtn) playBtn.addEventListener('click', function () {
+    _PreviewCtrl.stop();
     _engine.isPlaying ? _engine._pause(idx) : _engine.play(idx);
   });
   var prevBtn = _el('lseb-prev-btn');
