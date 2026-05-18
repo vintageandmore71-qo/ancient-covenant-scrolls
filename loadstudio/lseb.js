@@ -1677,6 +1677,74 @@ function _bindEditor(idx) {
         console.log('[LS add]', trackKind, '| id:', addTrackBtn.dataset.itemId || 'n/a',
           '| title:', label, '| src:', addSrc || 'NONE');
         if (addSrc && addSrc.indexOf('http://') === 0) addSrc = addSrc.replace('http://', 'https://');
+        // SFX from provider: download to data URL → local path → timeline never streams remote.
+        // Music path is BELOW and completely unchanged. Do NOT reorder.
+        if (trackKind === 'sfx' && addSrc && /^https?:\/\//.test(addSrc)) {
+          if (addTrackBtn.dataset.downloading === '1') return;
+          addTrackBtn.dataset.downloading = '1';
+          var _sfxOrigTxt = addTrackBtn.textContent;
+          addTrackBtn.textContent = '...';
+          addTrackBtn.disabled = true;
+          var _sfxRemote   = addSrc;
+          var _sfxLabel    = label;
+          var _sfxDur      = dur;
+          var _sfxProvider = addTrackBtn.dataset.provider || 'provider';
+          var _sfxLicense  = addTrackBtn.dataset.license  || 'unknown';
+          _dbg('SFX DL start: ' + _sfxRemote.slice(0, 80));
+          var _sfxRestore = function () {
+            addTrackBtn.dataset.downloading = '';
+            addTrackBtn.textContent = _sfxOrigTxt;
+            addTrackBtn.disabled = false;
+          };
+          var _sfxCommit = function (localSrc, blobType) {
+            var ti = { name: _sfxLabel, dur: _sfxDur, src: localSrc };
+            if (window.LoadAssetRegistry) {
+              try {
+                window.LoadAssetRegistry.addAsset({
+                  assetType: 'sfx', source: _sfxProvider, rightsStatus: _sfxLicense,
+                  mimeType: blobType || 'audio/mpeg', duration: _sfxDur, tags: ['sfx'],
+                  notes: _sfxLabel + ' [local; origin=' + _sfxRemote.slice(0, 80) + ']'
+                });
+                _dbg('SFX AssetRegistry: saved');
+              } catch (_re) { _dbg('SFX AssetRegistry err: ' + (_re && _re.message)); }
+            }
+            _addTrackItem(idx, 'sfx', ti);
+            var _sc3 = _state.scenes[idx];
+            var _ulIdx3 = (_sc3 && _sc3.tracks.sfx) ? _sc3.tracks.sfx.length - 1 : -1;
+            if (_sc3 && _ulIdx3 >= 0) {
+              var _ulKey3 = _sc3.id + '_sfx_track_' + _ulIdx3;
+              // Data URL lives in memory — readyState=4 immediately, no streaming needed.
+              // play() from Play-button gesture works without prior gesture unlock.
+              _audioPre[_ulKey3] = new Audio(localSrc);
+              var _addedSfx = _sc3.tracks.sfx[_ulIdx3] || {};
+              _dbg('SFX cached key=' + _ulKey3.slice(-24) + ' src=data:[' + (blobType || 'audio/mpeg') + '] size=' + Math.round(localSrc.length / 1024) + 'KB');
+              _dbg('SFX scene.sfx: name=' + (_addedSfx.name || '?') + ' dur=' + (_addedSfx.dur || 0) + ' src=data:[' + Math.round(localSrc.length / 1024) + 'KB]');
+            }
+            _renderTracks(idx);
+            _showPanel(null);
+            _toast('Sound FX added');
+            _sfxRestore();
+          };
+          fetch(_sfxRemote, {mode: 'cors'}).then(function (r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.blob();
+          }).then(function (blob) {
+            var rd = new FileReader();
+            rd.onload = function (ev) {
+              _dbg('SFX DL ok size=' + Math.round(ev.target.result.length / 1024) + 'KB type=' + blob.type);
+              _sfxCommit(ev.target.result, blob.type);
+            };
+            rd.onerror = function () {
+              _dbg('SFX DL FileReader err — remote fallback');
+              _sfxCommit(_sfxRemote, 'audio/mpeg');
+            };
+            rd.readAsDataURL(blob);
+          }).catch(function (err) {
+            _dbg('SFX DL fetch fail: ' + (err && err.message) + ' — remote fallback');
+            _sfxCommit(_sfxRemote, 'audio/mpeg');
+          });
+          return;
+        }
         var trackItem = { name: label, dur: dur };
         if (addSrc) trackItem.src = addSrc;
         // Record in asset registry if available
