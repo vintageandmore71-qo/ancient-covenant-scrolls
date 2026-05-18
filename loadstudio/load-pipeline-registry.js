@@ -162,7 +162,7 @@ var _PIPELINES = [
     orderedSteps: [
       { step: 1, name: 'Request',        providers: ['litellm', 'openrouter', 'lm-studio'], required: true, blocked: false },
       { step: 2, name: 'Route',          providers: ['litellm', 'openrouter'], required: true, blocked: false },
-      { step: 3, name: 'Provider Call',  providers: ['ollama', 'localai', 'vllm', 'tgi', 'openai', 'groq', 'cerebras', 'sambanova', 'nvidia-nim', 'fireworks-ai', 'aiml-api', 'gemini', 'mistral', 'cloudflare-workers-ai'], required: true, blocked: false },
+      { step: 3, name: 'Provider Call',  providers: ['ollama', 'localai', 'vllm', 'tgi', 'openai', 'groq', 'cerebras', 'sambanova', 'nvidia-nim', 'fireworks-ai', 'aiml-api', 'gemini', 'together-ai', 'deepinfra'], required: true, blocked: false },
       { step: 4, name: 'Fallback',       providers: ['pollinations-text', 'openrouter'], required: false, blocked: false }
     ],
     requiredSetup: 'LiteLLM or OpenRouter API key recommended. Ollama/LocalAI need local server.',
