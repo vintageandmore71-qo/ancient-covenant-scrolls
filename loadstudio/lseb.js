@@ -413,6 +413,28 @@ function _stopAudio() {
   _playHandles = [];
 }
 
+// ─── VISIBLE DEBUG PANEL ─────────────────────────────────────────────────────
+// Temporary panel for diagnosing music playback on iPad where Safari console
+// is not easily accessible. Remove once playback is verified working.
+var _dbgEl = null;
+function _dbgPanel() {
+  if (_dbgEl && _dbgEl.parentNode) return _dbgEl;
+  _dbgEl = document.createElement('div');
+  _dbgEl.id = 'lseb-dbg';
+  _dbgEl.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:99999;background:rgba(0,0,0,.88);color:#0f0;font:11px/1.5 monospace;padding:8px 10px;max-height:38vh;overflow-y:auto;border-top:1px solid #0f0;pointer-events:auto;-webkit-overflow-scrolling:touch';
+  _dbgEl.innerHTML = '<b style="color:#fff">AUDIO DEBUG</b> <button onclick="document.getElementById(\'lseb-dbg\').style.display=\'none\'" style="background:#333;border:1px solid #666;color:#fff;font:11px monospace;padding:1px 6px;cursor:pointer;float:right">x</button><br>';
+  document.body.appendChild(_dbgEl);
+  return _dbgEl;
+}
+function _dbg(msg) {
+  var p = _dbgPanel();
+  var line = document.createElement('div');
+  line.textContent = new Date().toLocaleTimeString() + ' ' + msg;
+  p.appendChild(line);
+  p.scrollTop = p.scrollHeight;
+  console.log('[LSDBG]', msg);
+}
+
 // ─── SUBTITLE HELPERS ────────────────────────────────────────────────────────
 function _initSubOverlay(scene) {
   var stage = _el('lseb-stage');
@@ -604,20 +626,21 @@ var _engine = {
       try { pre.volume = LANE_VOL[lane]; pre.play().catch(function (err) { console.warn('[LS play] legacy', lane, 'rejected:', err && err.message); }); _playHandles.push(pre); } catch (e) { console.warn('[LS play] legacy', lane, 'threw:', e && e.message); }
     });
     var _musicTracks = scene.tracks.music || [];
-    console.log('[LS play:music]', _musicTracks.length, 'track(s) in scene', sceneId.slice(-8));
+    _dbg('PLAY scene ' + sceneId.slice(-8) + ' musicTracks=' + _musicTracks.length + ' resumeT=' + _resumeT.toFixed(2));
     _musicTracks.forEach(function (it, i) {
-      if (!it.src) { console.warn('[LS play:music] track', i, 'no src — skipped'); return; }
+      _dbg('  track[' + i + '] src=' + (it.src ? it.src.slice(0, 60) : 'NONE'));
+      if (!it.src) { _dbg('  SKIP: no src'); return; }
       if (it.src.indexOf('http://') === 0) { it.src = it.src.replace('http://', 'https://'); _saveState(); }
       var lt = _resumeT - (it.t0 || 0);
-      if (lt < 0 || lt >= (it.dur || 999)) { console.warn('[LS play:music] track', i, 'out of window lt=', lt.toFixed(2)); return; }
-      // new Audio(src) called synchronously within play gesture — iOS Safari
-      // blocks play() on elements created outside the current gesture event.
+      _dbg('  lt=' + lt.toFixed(2) + ' dur=' + (it.dur || 0) + ' t0=' + (it.t0 || 0));
+      if (lt < 0 || lt >= (it.dur || 999)) { _dbg('  SKIP: out of window'); return; }
       var a = new Audio(it.src);
       a.volume = it.vol || 0.35;
       try { a.currentTime = Math.max(0, lt); } catch (_) {}
+      _dbg('  calling play() on new Audio...');
       a.play()
-        .then(function () { console.log('[LS play:music:started] track', i, it.name); })
-        .catch(function (err) { console.warn('[LS play:music:error] track', i, err && err.message); });
+        .then(function () { _dbg('  PLAY OK: track ' + i); })
+        .catch(function (err) { _dbg('  PLAY FAIL: track ' + i + ' ' + (err && err.message)); });
       _playHandles.push(a);
       _audioPre[sceneId + '_music_track_' + i] = a;
     });
@@ -1554,16 +1577,16 @@ function _bindEditor(idx) {
         }
         console.log('[LS add] AssetRegistry:', regResult);
         _addTrackItem(idx, trackKind, trackItem);
-        // Preload audio immediately so timeline playback works without re-opening the editor
         var sc2 = _state.scenes[idx];
+        var _addedList = sc2 ? (sc2.tracks[trackKind] || []) : [];
+        var _addedIt   = _addedList[_addedList.length - 1] || {};
+        _dbg('ADD ' + trackKind + ' id=' + (_addedIt.id || 'NONE'));
+        _dbg('  title=' + (_addedIt.name || 'NONE'));
+        _dbg('  src=' + (_addedIt.src ? _addedIt.src.slice(0, 80) : 'NONE -- WILL NOT PLAY'));
+        _dbg('  dur=' + (_addedIt.dur || 0) + 's t0=' + (_addedIt.t0 || 0));
         if (sc2 && addSrc) {
-          var tIdx2 = (sc2.tracks[trackKind] || []).length - 1;
-          if (tIdx2 >= 0) {
-            console.log('[LS add] preloading', trackKind + '_track_' + tIdx2);
-            _preloadAudio(sc2.id, trackKind + '_track_' + tIdx2, addSrc);
-          }
-        } else if (!addSrc) {
-          console.log('[LS add] no src — timeline will show Source Missing');
+          var tIdx2 = _addedList.length - 1;
+          if (tIdx2 >= 0) _preloadAudio(sc2.id, trackKind + '_track_' + tIdx2, addSrc);
         }
         _renderTracks(idx);
         _showPanel(null);
