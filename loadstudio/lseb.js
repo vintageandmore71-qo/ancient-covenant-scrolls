@@ -249,8 +249,9 @@ function _buildSFXList(cat, q) {
       frag.appendChild(row);
     });
     var currentList = document.getElementById('lseb-sfx-list');
-    if (currentList && frag.childNodes.length) currentList.insertBefore(frag, currentList.firstChild);
-    return frag.childNodes.length > 0;
+    var added = frag.childNodes.length > 0;
+    if (currentList && added) currentList.insertBefore(frag, currentList.firstChild);
+    return added;
   };
   var _trySFXProvider = function (idx) {
     if (idx >= sfxProviders.length) {
@@ -603,32 +604,32 @@ var _engine = {
     (scene.tracks.music || []).forEach(function (it, i) {
       var key = sceneId + '_music_track_' + i;
       var pre = _audioPre[key];
-      // Recreate within user gesture if missing, errored, or readyState=0 (silently blocked — e.g. mixed-content)
+      // Recreate within user gesture if missing, errored, or readyState=0 (blocked/not loaded)
+      // Do NOT set crossOrigin — not needed for <audio> playback; breaks servers without CORS headers
       if ((!pre || pre.error || pre.readyState === 0) && it.src) {
         pre = document.createElement('audio');
         pre.preload = 'auto';
-        if (/^https?:\/\//.test(it.src)) pre.crossOrigin = 'anonymous';
         pre.src = it.src;
         pre.load();
         _audioPre[key] = pre;
         console.log('[LS play] music_track_' + i, 'created on-demand, src:', it.src.slice(0, 60));
       } else {
-        console.log('[LS play] music_track_' + i, 'pre?', !!pre, 'src:', it.src ? it.src.slice(0, 50) : 'none');
+        console.log('[LS play] music_track_' + i, 'pre?', !!pre, 'readyState:', pre ? pre.readyState : 'n/a', 'src:', it.src ? it.src.slice(0, 50) : 'none');
       }
       if (!pre) return;
       var lt = _resumeT - (it.t0 || 0);
       if (lt < 0 || lt >= (it.dur || 999)) { console.log('[LS play] music_track_' + i, 'out of range lt=' + lt.toFixed(2)); return; }
       try { pre.currentTime = Math.max(0, lt); } catch (_) {}
-      try { pre.volume = it.vol || 0.35; pre.play().catch(function (err) { console.warn('[LS play] music_track_' + i, 'rejected:', err && err.message); }); _playHandles.push(pre); } catch (e) { console.warn('[LS play] music_track_' + i, 'threw:', e && e.message); }
+      try { pre.volume = it.vol || 0.35; pre.play().catch(function (err) { console.warn('[LS play] music_track_' + i, 'REJECTED:', err && err.message, 'readyState:', pre.readyState); }); _playHandles.push(pre); } catch (e) { console.warn('[LS play] music_track_' + i, 'threw:', e && e.message); }
     });
     (scene.tracks.sfx || []).forEach(function (it, i) {
       var key = sceneId + '_sfx_track_' + i;
       var pre = _audioPre[key];
-      // Recreate within user gesture if missing, errored, or readyState=0 (silently blocked)
+      // Recreate within user gesture if missing, errored, or readyState=0 (blocked/not loaded)
+      // Do NOT set crossOrigin — not needed for <audio> playback; breaks servers without CORS headers
       if ((!pre || pre.error || pre.readyState === 0) && it.src) {
         pre = document.createElement('audio');
         pre.preload = 'auto';
-        if (/^https?:\/\//.test(it.src)) pre.crossOrigin = 'anonymous';
         pre.src = it.src;
         pre.load();
         _audioPre[key] = pre;
