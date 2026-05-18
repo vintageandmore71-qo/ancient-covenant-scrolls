@@ -3106,7 +3106,7 @@ var LoadProviderRegistry = {
         .catch(function(e){ return {provider:'jamendo',results:[],error:e.message}; });
     }
     if (providerId === 'openverse-audio') {
-      return fetch('https://api.openverse.org/v1/audio/?q='+encodeURIComponent(query)+'&page_size='+limit+'&page='+page)
+      return fetch('https://api.openverse.org/v1/audio/?q='+encodeURIComponent(query)+'&page_size='+limit+'&page='+page+'&filetype=mp3')
         .then(function(r){ if(!r.ok) throw new Error('Openverse audio '+r.status); return r.json(); })
         .then(function(d){
           return {provider:'openverse-audio', results:(d.results||[]).map(function(t){
@@ -3134,7 +3134,7 @@ var LoadProviderRegistry = {
         .catch(function (e) { return {provider: 'freesound', results: [], error: e.message}; });
     }
     if (providerId === 'openverse-sfx') {
-      return fetch('https://api.openverse.org/v1/audio/?q='+encodeURIComponent(query)+'&page_size='+limit+'&page='+page+'&category=sound_effect')
+      return fetch('https://api.openverse.org/v1/audio/?q='+encodeURIComponent(query)+'&page_size='+limit+'&page='+page+'&category=sound_effect&filetype=mp3')
         .then(function(r){ if(!r.ok) throw new Error('Openverse SFX '+r.status); return r.json(); })
         .then(function(d){
           return {provider:'openverse-sfx', results:(d.results||[]).map(function(t){

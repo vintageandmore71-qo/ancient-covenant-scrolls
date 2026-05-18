@@ -657,8 +657,11 @@ var _engine = {
         _dbg('  using gesture-unlocked element');
       }
       a.volume = it.vol || 0.35;
-      if (lt > 0.05) try { a.currentTime = lt; } catch (_) {}
-      else try { a.currentTime = 0; } catch (_) {}
+      // Only seek if the element has buffered data (readyState>=2). Seeking on an
+      // element still loading aborts the iOS Safari network request silently.
+      if (a.readyState >= 2) {
+        try { a.currentTime = lt > 0.05 ? lt : 0; } catch (_) {}
+      }
       _dbg('  calling play()... rs=' + a.readyState + ' ns=' + a.networkState + ' vol=' + a.volume + ' src=' + (a.src || '').slice(-50));
       var _aRef = a;
       var _evtPlay = false; var _evtCtStart = null;
@@ -1653,8 +1656,11 @@ function _bindEditor(idx) {
             var _ulP = _ulEl.play();
             if (_ulP && _ulP.catch) _ulP.catch(function () {});
             _audioPre[_ulKey] = _ulEl;
+            // Pause silently after gesture-unlock. Do NOT seek — seeking to 0
+            // while the network load is in flight aborts the request on iOS Safari,
+            // leaving the element with no buffered data when Play fires.
             setTimeout(function () {
-              try { _ulEl.pause(); _ulEl.currentTime = 0; _ulEl.volume = 0.35; } catch (_) {}
+              try { _ulEl.pause(); _ulEl.volume = 0.35; } catch (_) {}
             }, 80);
             _dbg('  unlocked ' + _ulKey.slice(-24));
           }
