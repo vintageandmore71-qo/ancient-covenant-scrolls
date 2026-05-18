@@ -562,9 +562,6 @@ function _mountClipPreview(clip, localTime, isPlaying, sceneIdx) {
       if (drift > 0.05) try { clip._previewEl.currentTime = Math.max(0, localTime); } catch (_) {}
     }
     if (isPlaying) {
-      // Mute the video element — audio is managed by the timeline tracks
-      // (narration, music, sfx lanes). Without this, clip audio overrides music.
-      clip._previewEl.muted = true;
       try { clip._previewEl.play().catch(function () {}); } catch (_) {}
     } else try { clip._previewEl.pause(); } catch (_) {}
   }
