@@ -75,6 +75,8 @@ var _DEMO_AUDIO = {
 // Prevents re-downloading the same provider sound when Add is tapped multiple times.
 var _sfxCache = {};
 function _sfxCacheKey(url) { return (url || '').split('?')[0].toLowerCase().slice(-120); }
+var _musicCache = {};
+function _musicCacheKey(url) { return (url || '').split('?')[0].toLowerCase().slice(-120); }
 
 var _NOTE_ICO = '<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5" width="18" height="18"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
 var _SPK_ICO  = '<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5" width="18" height="18"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
@@ -721,9 +723,13 @@ var _engine = {
     var _musicTracks = scene.tracks.music || [];
     _dbg('PLAY scene ' + sceneId.slice(-8) + ' musicTracks=' + _musicTracks.length + ' resumeT=' + _resumeT.toFixed(2));
     _musicTracks.forEach(function (it, i) {
-      _dbg('  track[' + i + '] src=' + (it.src ? it.src.slice(0, 60) : 'NONE'));
-      if (!it.src) { _dbg('  SKIP: no src'); return; }
-      if (it.src.indexOf('http://') === 0) { it.src = it.src.replace('http://', 'https://'); _saveState(); }
+      // localPath is a data URL or SW-cached local path — never a remote stream.
+      // For old saved tracks that only have src: allow local paths, skip remote URLs.
+      var _rawSrc = it.localPath || it.src || '';
+      var _playbackSrc = _rawSrc && (/^data:/.test(_rawSrc) || !/^https?:\/\//.test(_rawSrc)) ? _rawSrc : null;
+      _dbg('  track[' + i + '] localPath=' + (_playbackSrc ? _playbackSrc.slice(0, 60) : 'NONE') +
+        ' sourceUrl=' + (it.sourceUrl || it.src || '').slice(0, 40));
+      if (!_playbackSrc) { _dbg('  SKIP: no localPath — re-add track to cache'); return; }
       // Fix legacy tracks stored with millisecond duration (Openverse bug)
       var trackDur = (it.dur > 3600) ? Math.round(it.dur / 1000) : (it.dur || 30);
       var lt = _resumeT - (it.t0 || 0);
@@ -734,8 +740,8 @@ var _engine = {
       var _mKey = sceneId + '_music_track_' + i;
       var a = _audioPre[_mKey];
       if (!a || a.error || a.networkState === 3) {
-        a = new Audio(it.src);
-        _dbg('  WARN: no unlocked el — fallback new Audio');
+        a = new Audio(_playbackSrc);
+        _dbg('  WARN: no unlocked el — fallback new Audio(localPath)');
       }
       a.volume = it.vol || 0.35;
       // Only seek if data is buffered. Seeking at rs=0 aborts load on iOS Safari.
@@ -1739,8 +1745,66 @@ function _bindEditor(idx) {
         console.log('[LS add]', trackKind, '| id:', addTrackBtn.dataset.itemId || 'n/a',
           '| title:', label, '| src:', addSrc || 'NONE');
         if (addSrc && addSrc.indexOf('http://') === 0) addSrc = addSrc.replace('http://', 'https://');
+        // Music from provider: download to data URL → localPath → timeline plays local only.
+        // Same proven pattern as SFX. Preview plays remote URL; Add always caches first.
+        if (trackKind === 'music' && addSrc && /^https?:\/\//.test(addSrc)) {
+          if (addTrackBtn.dataset.downloading === '1') return;
+          addTrackBtn.dataset.downloading = '1';
+          var _mOrigTxt = addTrackBtn.textContent;
+          addTrackBtn.textContent = '...';
+          addTrackBtn.disabled = true;
+          var _mRemote   = addSrc;
+          var _mLabel    = label;
+          var _mDur      = dur;
+          var _mProvider = addTrackBtn.dataset.provider || 'provider';
+          var _mLicense  = addTrackBtn.dataset.license  || '';
+          var _mAttr     = (addTrackBtn.dataset.ta || '').replace(/"/g, '');
+          var _mRestore = function () {
+            addTrackBtn.dataset.downloading = '';
+            addTrackBtn.textContent = _mOrigTxt;
+            addTrackBtn.disabled = false;
+          };
+          var _mCacheKey = _musicCacheKey(_mRemote);
+          var _mCommit = function (localSrc) {
+            _musicCache[_mCacheKey] = localSrc;
+            var ti = {
+              name: _mLabel, dur: _mDur,
+              src: localSrc, localPath: localSrc, sourceUrl: _mRemote,
+              trackType: 'music', volume: 0.7, vol: 0.35, fadeIn: 0, fadeOut: 0,
+              license: _mLicense, attribution: _mAttr, providerId: _mProvider
+            };
+            _addTrackItem(idx, 'music', ti);
+            var _msc = _state.scenes[idx];
+            var _mulIdx = (_msc && _msc.tracks.music) ? _msc.tracks.music.length - 1 : -1;
+            if (_msc && _mulIdx >= 0) {
+              var _mulKey = _msc.id + '_music_track_' + _mulIdx;
+              _audioPre[_mulKey] = new Audio(localSrc);
+              _dbg('Music DL cached key=' + _mulKey.slice(-24) + ' size=' + Math.round(localSrc.length / 1024) + 'KB');
+            }
+            _renderTracks(idx);
+            _showPanel(null);
+            _toast('Music added');
+            _mRestore();
+          };
+          if (_musicCache[_mCacheKey]) {
+            _mCommit(_musicCache[_mCacheKey]);
+            return;
+          }
+          fetch(_mRemote, {mode: 'cors'}).then(function (r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.blob();
+          }).then(function (blob) {
+            var rd = new FileReader();
+            rd.onload  = function (ev) { _mCommit(ev.target.result); };
+            rd.onerror = function () { _toast('Music could not be cached — check connection.'); _mRestore(); };
+            rd.readAsDataURL(blob);
+          }).catch(function () {
+            _toast('Music could not be cached — check connection.');
+            _mRestore();
+          });
+          return;
+        }
         // SFX from provider: download to data URL → local path → timeline never streams remote.
-        // Music path is BELOW and completely unchanged. Do NOT reorder.
         if (trackKind === 'sfx' && addSrc && /^https?:\/\//.test(addSrc)) {
           if (addTrackBtn.dataset.downloading === '1') return;
           addTrackBtn.dataset.downloading = '1';
@@ -1847,8 +1911,14 @@ function _bindEditor(idx) {
         var _tPo  = addTrackBtn.dataset.po === '1';
         var _tSu  = addTrackBtn.dataset.sourceUrl || '';
         var _tPid = addTrackBtn.dataset.provider  || 'local';
-        var trackItem = { name: label, dur: dur, volume: 0.7, fadeIn: 0, fadeOut: 0 };
-        if (addSrc) trackItem.src = addSrc;
+        var trackItem = { name: label, dur: dur, volume: 0.7, fadeIn: 0, fadeOut: 0, trackType: trackKind };
+        if (addSrc) {
+          trackItem.src = addSrc;
+          if (trackKind === 'music') {
+            trackItem.localPath = addSrc;  // local path (SW-cached demo file) is the playback source
+            trackItem.sourceUrl = '';
+          }
+        }
         if (trackKind === 'sfx') {
           trackItem.license          = _tLic;
           trackItem.commercialSafe   = _tCs === '1' ? true : _tCs === '0' ? false : null;
@@ -2024,7 +2094,7 @@ function _bindEditor(idx) {
     if (!file) return;
     var volNow = volSlider ? parseFloat(volSlider.value) : 0.35;
     _readDataURL(file).then(function (dataURL) {
-      var it = _addTrackItem(idx, 'music', { name: file.name.replace(/\.[^.]+$/, ''), dur: scene.duration || 5, src: dataURL, vol: volNow });
+      var it = _addTrackItem(idx, 'music', { name: file.name.replace(/\.[^.]+$/, ''), dur: scene.duration || 5, src: dataURL, localPath: dataURL, trackType: 'music', sourceUrl: '', vol: volNow });
       scene.media.music = dataURL;
       _saveState();
       _preloadAudio(scene.id, 'music', dataURL);
