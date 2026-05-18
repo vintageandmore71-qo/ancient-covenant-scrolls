@@ -218,18 +218,17 @@ function _buildSFXList(cat, q) {
   if (!reg) { _appendConnectBanner(list, 'sfx'); return; }
   var fsKey = null;
   try { var fsS = JSON.parse(localStorage.getItem('lpr_settings_v1') || '{}'); fsKey = (fsS['freesound'] || {}).apiKey || null; } catch (_) {}
-  if (!fsKey) { _appendConnectBanner(list, 'sfx'); return; }
+  var sfxProviders = ['openverse-sfx', 'openverse-audio'];
+  if (fsKey) sfxProviders.push('freesound');
+  var searchQ = _currentSfxCat === 'all' ? (q || 'sound effect') : _currentSfxCat;
   var loader = document.createElement('p');
   loader.id = 'lseb-sfx-loader';
   loader.style.cssText = 'color:#7d2ae8;font:400 12px system-ui,sans-serif;text-align:center;margin:6px 0';
-  loader.textContent = 'Searching Freesound...';
+  loader.textContent = 'Searching...';
   list.insertBefore(loader, list.firstChild);
-  reg.searchSFX({query: _currentSfxCat === 'all' ? (q || 'sound effect') : _currentSfxCat}).then(function (result) {
-    var ldr = document.getElementById('lseb-sfx-loader');
-    if (ldr) ldr.remove();
-    if (!result.results || !result.results.length) return;
+  var _appendSFXRows = function (results) {
     var frag = document.createDocumentFragment();
-    result.results.forEach(function (item) {
+    results.forEach(function (item) {
       if (!item.previewUrl) return;
       var dur = item.duration || 0;
       var durStr = (dur < 60 ? '0:' : Math.floor(dur / 60) + ':') + String(Math.round(dur % 60)).padStart(2, '0');
@@ -251,10 +250,22 @@ function _buildSFXList(cat, q) {
     });
     var currentList = document.getElementById('lseb-sfx-list');
     if (currentList && frag.childNodes.length) currentList.insertBefore(frag, currentList.firstChild);
-  }).catch(function () {
-    var ldr = document.getElementById('lseb-sfx-loader');
-    if (ldr) ldr.remove();
-  });
+    return frag.childNodes.length > 0;
+  };
+  var _trySFXProvider = function (idx) {
+    if (idx >= sfxProviders.length) {
+      var ldr = document.getElementById('lseb-sfx-loader'); if (ldr) ldr.remove();
+      if (!fsKey) _appendConnectBanner(document.getElementById('lseb-sfx-list') || list, 'sfx');
+      return;
+    }
+    var pid = sfxProviders[idx];
+    reg.searchSFX({query: searchQ, providerId: pid}).then(function (result) {
+      if (!result.results || !result.results.length) { _trySFXProvider(idx + 1); return; }
+      var ldr = document.getElementById('lseb-sfx-loader'); if (ldr) ldr.remove();
+      _appendSFXRows(result.results);
+    }).catch(function () { _trySFXProvider(idx + 1); });
+  };
+  _trySFXProvider(0);
 }
 
 function _appendConnectBanner(list, kind) {
@@ -590,8 +601,20 @@ var _engine = {
       try { pre.volume = LANE_VOL[lane]; pre.play().catch(function (err) { console.warn('[LS play] legacy', lane, 'rejected:', err && err.message); }); _playHandles.push(pre); } catch (e) { console.warn('[LS play] legacy', lane, 'threw:', e && e.message); }
     });
     (scene.tracks.music || []).forEach(function (it, i) {
-      var pre = _audioPre[sceneId + '_music_track_' + i];
-      console.log('[LS play] music_track_' + i, 'pre?', !!pre, 'src:', it.src ? it.src.slice(0, 50) : 'none');
+      var key = sceneId + '_music_track_' + i;
+      var pre = _audioPre[key];
+      // Create on-demand inside user gesture if missing or errored (iOS Safari requirement)
+      if ((!pre || (pre.error)) && it.src) {
+        pre = document.createElement('audio');
+        pre.preload = 'auto';
+        if (/^https?:\/\//.test(it.src)) pre.crossOrigin = 'anonymous';
+        pre.src = it.src;
+        pre.load();
+        _audioPre[key] = pre;
+        console.log('[LS play] music_track_' + i, 'created on-demand, src:', it.src.slice(0, 60));
+      } else {
+        console.log('[LS play] music_track_' + i, 'pre?', !!pre, 'src:', it.src ? it.src.slice(0, 50) : 'none');
+      }
       if (!pre) return;
       var lt = _resumeT - (it.t0 || 0);
       if (lt < 0 || lt >= (it.dur || 999)) { console.log('[LS play] music_track_' + i, 'out of range lt=' + lt.toFixed(2)); return; }
@@ -599,8 +622,20 @@ var _engine = {
       try { pre.volume = it.vol || 0.35; pre.play().catch(function (err) { console.warn('[LS play] music_track_' + i, 'rejected:', err && err.message); }); _playHandles.push(pre); } catch (e) { console.warn('[LS play] music_track_' + i, 'threw:', e && e.message); }
     });
     (scene.tracks.sfx || []).forEach(function (it, i) {
-      var pre = _audioPre[sceneId + '_sfx_track_' + i];
-      console.log('[LS play] sfx_track_' + i, 'pre?', !!pre, 'src:', it.src ? it.src.slice(0, 50) : 'none');
+      var key = sceneId + '_sfx_track_' + i;
+      var pre = _audioPre[key];
+      // Create on-demand inside user gesture if missing or errored (iOS Safari requirement)
+      if ((!pre || (pre.error)) && it.src) {
+        pre = document.createElement('audio');
+        pre.preload = 'auto';
+        if (/^https?:\/\//.test(it.src)) pre.crossOrigin = 'anonymous';
+        pre.src = it.src;
+        pre.load();
+        _audioPre[key] = pre;
+        console.log('[LS play] sfx_track_' + i, 'created on-demand, src:', it.src.slice(0, 60));
+      } else {
+        console.log('[LS play] sfx_track_' + i, 'pre?', !!pre, 'src:', it.src ? it.src.slice(0, 50) : 'none');
+      }
       if (!pre) return;
       var lt = _resumeT - (it.t0 || 0);
       if (lt < 0 || lt >= (it.dur || 999)) { console.log('[LS play] sfx_track_' + i, 'out of range lt=' + lt.toFixed(2)); return; }
