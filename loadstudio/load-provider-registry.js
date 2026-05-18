@@ -2635,6 +2635,7 @@ var LoadProviderRegistry = {
                  (providerId === 'chatterbox-turbo')? '/tts' :
                  (providerId === 'melo-tts')        ? '/synthesize' :
                  (providerId === 'orpheus')         ? '/generate' :
+                 (providerId === 'emotivoice')      ? '/synthesize' :
                  (providerId === 'higgs-audio')     ? '/generate' :
                  '/synthesize';
       var body;
