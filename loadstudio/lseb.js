@@ -15,13 +15,13 @@ var _selectedClipIdx = 0;
 var _ctxData = null;
 
 var _MUSIC_DEMO = {
-  'vlog':       [{id:'music-demo-0', t:'Chill Background', a:'Demo', d:'0:30', c:'#7d2ae8', k:'music-mellow'}],
-  'pop':        [{id:'music-demo-1', t:'Upbeat Sample',    a:'Demo', d:'0:30', c:'#e82a7d', k:'music-modern'}],
-  'dynamic':    [{id:'music-demo-2', t:'Driving Sample',   a:'Demo', d:'0:30', c:'#2ae8a0', k:'music-energetic'}],
-  'fresh':      [{id:'music-demo-3', t:'Upbeat Sample',    a:'Demo', d:'0:30', c:'#2e7d32', k:'music-modern'}],
-  'acoustic':   [{id:'music-demo-4', t:'Chill Background', a:'Demo', d:'0:30', c:'#f57f17', k:'music-mellow'}],
-  'electronic': [{id:'music-demo-5', t:'Driving Sample',   a:'Demo', d:'0:30', c:'#283593', k:'music-energetic'}],
-  'hiphop':     [{id:'music-demo-6', t:'Driving Sample',   a:'Demo', d:'0:30', c:'#e65100', k:'music-energetic'}]
+  'vlog':       [{id:'music-demo-0', t:'Chill Background',  a:'Demo', d:'0:05', c:'#7d2ae8', k:'music-mellow'}],
+  'pop':        [{id:'music-demo-1', t:'Upbeat Loop',       a:'Demo', d:'0:05', c:'#e82a7d', k:'music-modern'}],
+  'dynamic':    [{id:'music-demo-2', t:'Driving Loop',      a:'Demo', d:'0:05', c:'#2ae8a0', k:'music-energetic'}],
+  'fresh':      [{id:'music-demo-3', t:'Bright Arpeggio',   a:'Demo', d:'0:05', c:'#2e7d32', k:'music-fresh'}],
+  'acoustic':   [{id:'music-demo-4', t:'Fingerpick Loop',   a:'Demo', d:'0:05', c:'#f57f17', k:'music-acoustic'}],
+  'electronic': [{id:'music-demo-5', t:'Synth Arpeggio',    a:'Demo', d:'0:05', c:'#283593', k:'music-electronic'}],
+  'hiphop':     [{id:'music-demo-6', t:'Beat Loop',         a:'Demo', d:'0:05', c:'#e65100', k:'music-hiphop'}]
 };
 
 // cs=commercialSafe  ar=attributionRequired  po=personalOnly
@@ -49,6 +49,10 @@ var _DEMO_AUDIO = {
   'music-mellow':          'assets/audio/demo/demo-music-mellow.wav',
   'music-modern':          'assets/audio/demo/demo-music-upbeat.wav',
   'music-energetic':       'assets/audio/demo/demo-music-energetic.wav',
+  'music-acoustic':        'assets/audio/demo/demo-music-acoustic.wav',
+  'music-electronic':      'assets/audio/demo/demo-music-electronic.wav',
+  'music-hiphop':          'assets/audio/demo/demo-music-hiphop.wav',
+  'music-fresh':           'assets/audio/demo/demo-music-fresh.wav',
   // Legacy aliases kept so old saved scenes continue to resolve
   'sfx-spring':            'assets/audio/demo/demo-sfx-boing.wav',
   'sfx-swish':             'assets/audio/demo/demo-sfx-whoosh.wav',
