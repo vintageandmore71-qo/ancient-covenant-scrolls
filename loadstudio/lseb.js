@@ -30,7 +30,7 @@ var _SFX_DEMO = {
     {id:'sfx-demo-3',t:'Hit',a:'Demo',d:'0:01',c:'#ff6b35',k:'sfx-hit'},
     {id:'sfx-demo-4',t:'Rumble',a:'Demo',d:'0:01',c:'#34aadc',k:'sfx-rumble'}
   ]
-
+};
 
 // ─── DEMO AUDIO — real WAV files served from assets/audio/demo/ ──────────────
 // Each file is an original mathematically-synthesised WAV (creator-owned).
