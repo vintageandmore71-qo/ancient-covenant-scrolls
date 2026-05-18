@@ -15,13 +15,13 @@ var _selectedClipIdx = 0;
 var _ctxData = null;
 
 var _MUSIC_DEMO = {
-  'vlog':       [{id:'music-demo-0', t:'Mellow Demo',     a:'Demo', d:'0:30', c:'#7d2ae8', k:'music-mellow'}],
-  'pop':        [{id:'music-demo-1', t:'Upbeat Demo',     a:'Demo', d:'0:30', c:'#e82a7d', k:'music-modern'}],
-  'dynamic':    [{id:'music-demo-2', t:'Energetic Demo',  a:'Demo', d:'0:30', c:'#2ae8a0', k:'music-energetic'}],
-  'fresh':      [{id:'music-demo-3', t:'Fresh Demo',      a:'Demo', d:'0:30', c:'#2e7d32', k:'music-modern'}],
-  'acoustic':   [{id:'music-demo-4', t:'Acoustic Demo',   a:'Demo', d:'0:30', c:'#f57f17', k:'music-mellow'}],
-  'electronic': [{id:'music-demo-5', t:'Electronic Demo', a:'Demo', d:'0:30', c:'#283593', k:'music-modern'}],
-  'hiphop':     [{id:'music-demo-6', t:'Hip-Hop Demo',    a:'Demo', d:'0:30', c:'#e65100', k:'music-energetic'}]
+  'vlog':       [{id:'music-demo-0', t:'Chill Background', a:'Demo', d:'0:30', c:'#7d2ae8', k:'music-mellow'}],
+  'pop':        [{id:'music-demo-1', t:'Upbeat Sample',    a:'Demo', d:'0:30', c:'#e82a7d', k:'music-modern'}],
+  'dynamic':    [{id:'music-demo-2', t:'Driving Sample',   a:'Demo', d:'0:30', c:'#2ae8a0', k:'music-energetic'}],
+  'fresh':      [{id:'music-demo-3', t:'Upbeat Sample',    a:'Demo', d:'0:30', c:'#2e7d32', k:'music-modern'}],
+  'acoustic':   [{id:'music-demo-4', t:'Chill Background', a:'Demo', d:'0:30', c:'#f57f17', k:'music-mellow'}],
+  'electronic': [{id:'music-demo-5', t:'Driving Sample',   a:'Demo', d:'0:30', c:'#283593', k:'music-energetic'}],
+  'hiphop':     [{id:'music-demo-6', t:'Driving Sample',   a:'Demo', d:'0:30', c:'#e65100', k:'music-energetic'}]
 };
 
 // cs=commercialSafe  ar=attributionRequired  po=personalOnly
@@ -744,11 +744,15 @@ var _engine = {
         _dbg('  WARN: no unlocked el — fallback new Audio(localPath)');
       }
       a.volume = it.vol || 0.35;
-      // Only seek if data is buffered. Seeking at rs=0 aborts load on iOS Safari.
-      if (a.readyState >= 2 && lt > 0.05) {
-        try { a.currentTime = lt; } catch (_) {}
+      // Seek if: (a) buffered and past 50ms into the clip, OR (b) element has
+      // ended (gesture-unlock played it to the end silently — must reset to 0
+      // or play() will immediately fire 'ended' again with no audible output).
+      if (a.readyState >= 2) {
+        if (a.ended || lt > 0.05) {
+          try { a.currentTime = Math.max(0, lt); } catch (_) {}
+        }
       }
-      _dbg('  rs=' + a.readyState + ' ns=' + a.networkState + ' paused=' + a.paused + ' vol=' + a.volume + ' src=' + (a.src || '').slice(-40));
+      _dbg('  rs=' + a.readyState + ' ns=' + a.networkState + ' paused=' + a.paused + ' ended=' + a.ended + ' vol=' + a.volume + ' src=' + (a.src || '').slice(-40));
       var _aRef = a;
       var _evtPlay = false; var _evtCtStart = null;
       _aRef.addEventListener('playing', function () { if (!_evtPlay) { _evtPlay = true; _evtCtStart = _aRef.currentTime; } _dbg('  EVT playing ct=' + _aRef.currentTime.toFixed(2) + ' vol=' + _aRef.volume); });
