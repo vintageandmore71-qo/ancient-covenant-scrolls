@@ -23,97 +23,18 @@ var _MUSIC_DEMO = {
 };
 
 var _SFX_DEMO = {
-  cartoon:[
-    {id:'sfx-cartoon-0',t:'Boing Spring',a:'Mixkit SFX',d:'0:02',c:'#ff9500',k:'sfx-spring'},
-    {id:'sfx-cartoon-1',t:'Silly Pop',a:'Freesound',d:'0:01',c:'#ff7a00',k:'sfx-ding'},
-    {id:'sfx-cartoon-2',t:'Woosh Whoosh',a:'SoundBible',d:'0:03',c:'#ffb340',k:'sfx-swish'},
-    {id:'sfx-cartoon-3',t:'Twinkle Hit',a:'Mixkit SFX',d:'0:01',c:'#ff8800',k:'sfx-ding'}
-  ],
-  swish:[
-    {id:'sfx-swish-0',t:'Fast Swipe',a:'Mixkit SFX',d:'0:01',c:'#4cd964',k:'sfx-swish'},
-    {id:'sfx-swish-1',t:'Quick Swoosh',a:'Freesound',d:'0:02',c:'#3aa84f',k:'sfx-swish'},
-    {id:'sfx-swish-2',t:'Air Rush',a:'Freesound',d:'0:01',c:'#6aed80',k:'sfx-swish'},
-    {id:'sfx-swish-3',t:'Speed Line',a:'Mixkit SFX',d:'0:01',c:'#2a9e3c',k:'sfx-swish'}
-  ],
-  funny:[
-    {id:'sfx-funny-0',t:'Comedy Slide',a:'Mixkit SFX',d:'0:02',c:'#ff3b30',k:'sfx-swish'},
-    {id:'sfx-funny-1',t:'Laugh Track',a:'SoundBible',d:'0:04',c:'#cc2d24',k:'sfx-rumble'},
-    {id:'sfx-funny-2',t:'Squeaky Step',a:'Freesound',d:'0:02',c:'#ff6059',k:'sfx-spring'},
-    {id:'sfx-funny-3',t:'Wacky Spin',a:'Mixkit SFX',d:'0:02',c:'#e83028',k:'sfx-swish'}
-  ],
-  machine:[
-    {id:'sfx-machine-0',t:'Gear Click',a:'Freesound',d:'0:03',c:'#8e8e93',k:'sfx-ding'},
-    {id:'sfx-machine-1',t:'Engine Hum',a:'Freesound',d:'0:05',c:'#636366',k:'sfx-rumble'},
-    {id:'sfx-machine-2',t:'Motor Start',a:'BBC Sound Effects',d:'0:04',c:'#aeaeb2',k:'sfx-rumble'},
-    {id:'sfx-machine-3',t:'Whir Loop',a:'Freesound',d:'0:06',c:'#6d6d72',k:'sfx-rumble'}
-  ],
-  ringing:[
-    {id:'sfx-ringing-0',t:'Phone Bell',a:'Mixkit SFX',d:'0:03',c:'#5ac8fa',k:'sfx-ding'},
-    {id:'sfx-ringing-1',t:'Notification',a:'SoundBible',d:'0:01',c:'#32ade6',k:'sfx-ding'},
-    {id:'sfx-ringing-2',t:'Alert Chime',a:'Mixkit SFX',d:'0:02',c:'#80d8ff',k:'sfx-ding'},
-    {id:'sfx-ringing-3',t:'Ding Dong',a:'Freesound',d:'0:02',c:'#28a8e0',k:'sfx-ding'}
-  ],
-  vehicles:[
-    {id:'sfx-vehicles-0',t:'Car Horn',a:'BBC Sound Effects',d:'0:02',c:'#5856d6',k:'sfx-ding'},
-    {id:'sfx-vehicles-1',t:'Truck Rev',a:'Freesound',d:'0:04',c:'#3634a3',k:'sfx-rumble'},
-    {id:'sfx-vehicles-2',t:'Bike Zoom',a:'Freesound',d:'0:02',c:'#7876e0',k:'sfx-swish'},
-    {id:'sfx-vehicles-3',t:'Tire Screech',a:'BBC Sound Effects',d:'0:03',c:'#4240b0',k:'sfx-swish'}
-  ],
-  weather:[
-    {id:'sfx-weather-0',t:'Thunder Roll',a:'BBC Sound Effects',d:'0:05',c:'#34aadc',k:'sfx-rumble'},
-    {id:'sfx-weather-1',t:'Rain Heavy',a:'Freesound',d:'0:08',c:'#258ab0',k:'sfx-rumble'},
-    {id:'sfx-weather-2',t:'Wind Gust',a:'Freesound',d:'0:04',c:'#5ac8fa',k:'sfx-swish'},
-    {id:'sfx-weather-3',t:'Storm Crack',a:'BBC Sound Effects',d:'0:03',c:'#1a7a9e',k:'sfx-hit'}
-  ],
-  variety:[
-    {id:'sfx-variety-0',t:'Applause',a:'Mixkit SFX',d:'0:05',c:'#ff2d55',k:'sfx-rumble'},
-    {id:'sfx-variety-1',t:'Crowd Cheer',a:'Freesound',d:'0:06',c:'#cc2440',k:'sfx-rumble'},
-    {id:'sfx-variety-2',t:'TV Static',a:'SoundBible',d:'0:03',c:'#ff5577',k:'sfx-rumble'},
-    {id:'sfx-variety-3',t:'News Sting',a:'Freesound',d:'0:02',c:'#ee1a42',k:'sfx-ding'}
-  ],
-  vlogsf:[
-    {id:'sfx-vlogsf-0',t:'Camera Click',a:'Mixkit SFX',d:'0:01',c:'#7d2ae8',k:'sfx-ding'},
-    {id:'sfx-vlogsf-1',t:'Page Turn',a:'Freesound',d:'0:02',c:'#5b1fa8',k:'sfx-swish'},
-    {id:'sfx-vlogsf-2',t:'Type Keys',a:'Freesound',d:'0:03',c:'#9c3aff',k:'sfx-hit'},
-    {id:'sfx-vlogsf-3',t:'Pen Scribble',a:'Freesound',d:'0:02',c:'#6a1fcc',k:'sfx-swish'}
-  ],
-  physical:[
-    {id:'sfx-physical-0',t:'Heavy Punch',a:'Mixkit SFX',d:'0:01',c:'#ff6b35',k:'sfx-hit'},
-    {id:'sfx-physical-1',t:'Footsteps',a:'Freesound',d:'0:04',c:'#cc4a20',k:'sfx-hit'},
-    {id:'sfx-physical-2',t:'Door Slam',a:'BBC Sound Effects',d:'0:02',c:'#ff8c55',k:'sfx-hit'},
-    {id:'sfx-physical-3',t:'Wood Break',a:'Freesound',d:'0:02',c:'#e05c28',k:'sfx-hit'}
-  ],
-  transitions:[
-    {id:'sfx-transitions-0',t:'Whoosh Up',a:'Mixkit SFX',d:'0:02',c:'#636366',k:'sfx-swish'},
-    {id:'sfx-transitions-1',t:'Glitch Cut',a:'Freesound',d:'0:01',c:'#4a4a50',k:'sfx-hit'},
-    {id:'sfx-transitions-2',t:'Slide Zoom',a:'Mixkit SFX',d:'0:02',c:'#8e8e93',k:'sfx-swish'},
-    {id:'sfx-transitions-3',t:'Fade Hiss',a:'Freesound',d:'0:02',c:'#5a5a5e',k:'sfx-swish'}
-  ],
-  cues:[
-    {id:'sfx-cues-0',t:'Drama Hit',a:'Mixkit SFX',d:'0:02',c:'#ffcc00',k:'sfx-hit'},
-    {id:'sfx-cues-1',t:'Tension Rise',a:'Freesound',d:'0:04',c:'#cc9e00',k:'sfx-rumble'},
-    {id:'sfx-cues-2',t:'Impact Boom',a:'Freesound',d:'0:03',c:'#ffe040',k:'sfx-hit'},
-    {id:'sfx-cues-3',t:'Reveal Sting',a:'Mixkit SFX',d:'0:02',c:'#e6b400',k:'sfx-ding'}
-  ],
-  game:[
-    {id:'sfx-game-0',t:'Power Up',a:'Mixkit SFX',d:'0:02',c:'#32ade6',k:'sfx-ding'},
-    {id:'sfx-game-1',t:'Coin Collect',a:'SoundBible',d:'0:01',c:'#1a8fcc',k:'sfx-ding'},
-    {id:'sfx-game-2',t:'Level Up',a:'Mixkit SFX',d:'0:02',c:'#5ac8fa',k:'sfx-ding'},
-    {id:'sfx-game-3',t:'Error Buzz',a:'Freesound',d:'0:01',c:'#1078b5',k:'sfx-hit'}
-  ],
-  emotion:[
-    {id:'sfx-emotion-0',t:'Heartbeat',a:'Freesound',d:'0:04',c:'#ff375f',k:'sfx-rumble'},
-    {id:'sfx-emotion-1',t:'Sad Tone',a:'Freesound',d:'0:03',c:'#cc2040',k:'sfx-ding'},
-    {id:'sfx-emotion-2',t:'Hope Rise',a:'Mixkit SFX',d:'0:05',c:'#ff6080',k:'sfx-ding'},
-    {id:'sfx-emotion-3',t:'Tension Hum',a:'Freesound',d:'0:04',c:'#ee2050',k:'sfx-rumble'}
+  demo:[
+    {id:'sfx-demo-0',t:'Boing',a:'Demo',d:'0:01',c:'#ff9500',k:'sfx-spring'},
+    {id:'sfx-demo-1',t:'Whoosh',a:'Demo',d:'0:01',c:'#4cd964',k:'sfx-swish'},
+    {id:'sfx-demo-2',t:'Ding',a:'Demo',d:'0:01',c:'#5ac8fa',k:'sfx-ding'},
+    {id:'sfx-demo-3',t:'Hit',a:'Demo',d:'0:01',c:'#ff6b35',k:'sfx-hit'},
+    {id:'sfx-demo-4',t:'Rumble',a:'Demo',d:'0:01',c:'#34aadc',k:'sfx-rumble'}
   ]
-};
+
 
 // ─── DEMO AUDIO — real WAV files served from assets/audio/demo/ ──────────────
 // Each file is an original mathematically-synthesised WAV (creator-owned).
 // Rights: see assets/audio/demo/RIGHTS.md. Commercial use: yes.
-// These are demo placeholders. When a real provider (Pixabay Music, Mixkit,
-// Freesound, etc.) is connected and authenticated, it replaces these paths.
 var _DEMO_AUDIO = {
   'music-mellow':    'assets/audio/demo/demo-music-mellow.wav',
   'music-modern':    'assets/audio/demo/demo-music-upbeat.wav',
@@ -127,13 +48,6 @@ var _DEMO_AUDIO = {
 
 var _MUSIC_AUDIO_KEY = {
   demo:'music-mellow'
-};
-var _SFX_AUDIO_KEY = {
-  cartoon:'sfx-spring',  funny:'sfx-spring',   emotion:'sfx-spring',
-  swish:'sfx-swish',     transitions:'sfx-swish',
-  ringing:'sfx-ding',    game:'sfx-ding',       variety:'sfx-ding',
-  machine:'sfx-hit',     vehicles:'sfx-hit',    physical:'sfx-hit', vlogsf:'sfx-hit', cues:'sfx-hit',
-  weather:'sfx-rumble'
 };
 var _NOTE_ICO = '<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5" width="18" height="18"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
 var _SPK_ICO  = '<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5" width="18" height="18"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
@@ -291,7 +205,9 @@ function _buildMusicList(cat, q) {
 
 function _buildSFXList(cat, q) {
   _currentSfxCat = cat || 'all';
-  _buildAssetList('lseb-sfx-list', _SFX_DEMO, _currentSfxCat, q, _SPK_ICO, 'sfx', 'sfx', _SFX_AUDIO_KEY);
+  // Demo items always show regardless of category filter.
+  // Category chips only affect live Freesound results (when key is connected).
+  _buildAssetList('lseb-sfx-list', _SFX_DEMO, 'all', q, _SPK_ICO, 'sfx', 'sfx', {});
   var list = document.getElementById('lseb-sfx-list');
   if (!list) return;
   var reg = window.LoadProviderRegistry;
