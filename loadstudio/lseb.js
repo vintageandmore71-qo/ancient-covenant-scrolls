@@ -646,35 +646,39 @@ var _engine = {
       var lt = _resumeT - (it.t0 || 0);
       _dbg('  lt=' + lt.toFixed(2) + ' dur=' + trackDur + ' t0=' + (it.t0 || 0));
       if (lt < 0 || lt >= trackDur) { _dbg('  SKIP: out of window'); return; }
-      // Release any pre-existing element at this key (e.g. from a previous play
-      // or from _preloadAudio). An active cross-origin load on the same URL causes
-      // iOS Safari to abort the new play() request with AbortError.
-      var _existPre = _audioPre[sceneId + '_music_track_' + i];
-      if (_existPre) { try { _existPre.pause(); _existPre.src = ''; } catch (_) {} delete _audioPre[sceneId + '_music_track_' + i]; }
-      var a = new Audio(it.src);
+      // Prefer the element unlocked during the Add gesture (same object, already
+      // gesture-blessed). Fall back to new Audio only if missing.
+      var _mKey = sceneId + '_music_track_' + i;
+      var a = _audioPre[_mKey];
+      if (!a || a.error) {
+        a = new Audio(it.src);
+        _dbg('  WARN: no unlocked el — fallback new Audio');
+      } else {
+        _dbg('  using gesture-unlocked element');
+      }
       a.volume = it.vol || 0.35;
-      // Only seek if resuming mid-track; do not set currentTime on a fresh element.
       if (lt > 0.05) try { a.currentTime = lt; } catch (_) {}
-      _dbg('  calling play() on new Audio...');
+      else try { a.currentTime = 0; } catch (_) {}
+      _dbg('  calling play()...');
       a.play()
         .then(function () { _dbg('  PLAY OK: track ' + i); })
         .catch(function (err) { _dbg('  PLAY FAIL: track ' + i + ' ' + (err && err.message)); });
       _playHandles.push(a);
-      _audioPre[sceneId + '_music_track_' + i] = a;
+      _audioPre[_mKey] = a;
     });
     (scene.tracks.sfx || []).forEach(function (it, i) {
       if (!it.src) return;
       if (it.src.indexOf('http://') === 0) { it.src = it.src.replace('http://', 'https://'); _saveState(); }
       var lt = _resumeT - (it.t0 || 0);
       if (lt < 0 || lt >= (it.dur || 999)) return;
-      var _existSfx = _audioPre[sceneId + '_sfx_track_' + i];
-      if (_existSfx) { try { _existSfx.pause(); _existSfx.src = ''; } catch (_) {} delete _audioPre[sceneId + '_sfx_track_' + i]; }
-      var a = new Audio(it.src);
+      var _sKey = sceneId + '_sfx_track_' + i;
+      var a = _audioPre[_sKey] || new Audio(it.src);
       a.volume = it.vol || 0.7;
       if (lt > 0.05) try { a.currentTime = lt; } catch (_) {}
+      else try { a.currentTime = 0; } catch (_) {}
       a.play().catch(function (err) { console.warn('[LS play:sfx:error] track', i, err && err.message); });
       _playHandles.push(a);
-      _audioPre[sceneId + '_sfx_track_' + i] = a;
+      _audioPre[_sKey] = a;
     });
     (scene.tracks.voice || []).forEach(function (it, i) {
       var pre = _audioPre[sceneId + '_voice_track_' + i];
@@ -1603,9 +1607,28 @@ function _bindEditor(idx) {
         _dbg('  title=' + (_addedIt.name || 'NONE'));
         _dbg('  src=' + (_addedIt.src ? _addedIt.src.slice(0, 80) : 'NONE -- WILL NOT PLAY'));
         _dbg('  dur=' + (_addedIt.dur || 0) + 's t0=' + (_addedIt.t0 || 0));
-        // Do NOT preload here — a background load on the same cross-origin URL
-        // leaves an active network request that iOS Safari aborts when the play
-        // gesture later calls new Audio(src).play() for the same URL.
+        // Unlock the audio element NOW, in this Add gesture. iOS Safari permanently
+        // grants playback permission to an element that has play() called during a
+        // user gesture. That same element can then be play()-ed later (Play button)
+        // without needing a new gesture. new Audio(src).play() in a separate Play
+        // gesture always aborts because the element was never gesture-unlocked.
+        if (addSrc && (trackKind === 'music' || trackKind === 'sfx')) {
+          var _sc2 = _state.scenes[idx];
+          var _ulIdx = (_sc2 && _sc2.tracks[trackKind] ? _sc2.tracks[trackKind].length - 1 : -1);
+          if (_sc2 && _ulIdx >= 0) {
+            var _ulKey = _sc2.id + '_' + trackKind + '_track_' + _ulIdx;
+            var _ulEl = document.createElement('audio');
+            _ulEl.src = addSrc;
+            _ulEl.volume = 0;
+            var _ulP = _ulEl.play();
+            if (_ulP && _ulP.catch) _ulP.catch(function () {});
+            _audioPre[_ulKey] = _ulEl;
+            setTimeout(function () {
+              try { _ulEl.pause(); _ulEl.currentTime = 0; _ulEl.volume = 0.35; } catch (_) {}
+            }, 80);
+            _dbg('  unlocked ' + _ulKey.slice(-24));
+          }
+        }
         _renderTracks(idx);
         _showPanel(null);
         _toast((trackKind === 'music' ? 'Music' : 'Sound FX') + (noSrc ? ' added — no audio source connected' : ' added'));
