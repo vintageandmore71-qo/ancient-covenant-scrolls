@@ -167,3 +167,53 @@ but should not be treated as known-good baselines.
 - **NOT yet tested:** all new endpoints unverified live. User to
   test on iPad Safari and confirm.
 - **Recovery if broken:** `git checkout backup/2026-04-29-v17dg`
+
+---
+
+## LOAD STUDIO — Editing Bay Music / Audio
+
+### v163 — commit `6e293be` — music categories baseline (last known clean state)
+
+- **Status:** Confirmed working by user (screenshot, 2026-05-18 session).
+- **What worked:**
+  - Vlog tab: `Mellow Demo` → `assets/audio/demo/demo-music-mellow.wav`
+  - Pop tab: `Upbeat Demo` → `assets/audio/demo/demo-music-upbeat.wav`
+  - Dynamic tab: `Energetic Demo` → `assets/audio/demo/demo-music-energetic.wav`
+  - Fresh / Acoustic / Electronic / Hip-Hop: intentionally empty (no demo tracks)
+- **Demo track names at this state:** Mellow Demo, Upbeat Demo, Energetic Demo — DO NOT RENAME THESE.
+- **Recovery:** `git show 6e293be:loadstudio/lseb.js | grep -A 10 "_MUSIC_DEMO"`
+
+### v166 — commit `77d533b` — music local-cache playback fix
+
+- **Status:** Confirmed working by user (screenshot, iPad Safari, 2026-05-18).
+- **Screenshot evidence:** debug log showed `meta dur=1.5`, `unlock EVT playing ct=0.00`, music audible.
+- **What worked:**
+  - Music Add gesture unlocks audio element silently.
+  - Main Play reuses that element, unmutes it — audible.
+  - Local path (`assets/audio/demo/demo-music-mellow.wav`) stored as `localPath` on track item.
+  - Play engine: resolves `localPath || src`, blocks remote `https://` URLs.
+- **Known quirk at this state:** WAV files are ~1.5s (not 30s). Silent replay bug still present (fixed in v168).
+- **Recovery:** `git checkout 77d533b -- loadstudio/lseb.js loadstudio/sw.js`
+
+### v168 — commit `e365717` — silent-replay fix (a.ended seek)
+
+- **Root cause found:** gesture-unlock plays the 1.5s WAV to `ended`. On next Play, `lt=0` skipped seek — element was at `currentTime=end`, `play()` fired `ended` instantly with no audio.
+- **Fix:** if `a.ended === true`, always seek to `max(0, lt)` before `play()`.
+- **Demo labels changed (mistake):** Vlog/Pop/Dynamic were renamed away from their working names. Corrected in v170.
+- **Recovery:** `git checkout e365717 -- loadstudio/lseb.js loadstudio/sw.js`
+
+### v170 — commit `fabf85d` — current verified baseline (2026-05-18)
+
+- **Status:** Built and merged. Pending iPad verification.
+- **What it has:**
+  - Vlog: `Mellow Demo` (original, confirmed working name) → `demo-music-mellow.wav`
+  - Pop: `Upbeat Demo` (original) → `demo-music-upbeat.wav`
+  - Dynamic: `Energetic Demo` (original) → `demo-music-energetic.wav`
+  - Fresh: `Fresh Demo` → `demo-music-fresh.wav` (new synthesized, 120 BPM xylophone arpeggio)
+  - Acoustic: `Acoustic Demo` → `demo-music-acoustic.wav` (new synthesized, fingerpicked G major)
+  - Electronic: `Electronic Demo` → `demo-music-electronic.wav` (new synthesized, sawtooth synth 128 BPM)
+  - Hip-Hop: `Hip-Hop Demo` → `demo-music-hiphop.wav` (new synthesized, kick/snare/bass 90 BPM)
+  - Play engine: `a.ended` seek fix prevents silent replay.
+  - SW: `loadstudio-complete-v170`
+- **Recovery:** `git checkout fabf85d -- loadstudio/lseb.js loadstudio/sw.js`
+- **NOTE:** If user says any of the 4 new synthesized tracks sound wrong, check this log before changing — do NOT rename the original 3 (Mellow/Upbeat/Energetic Demo).
