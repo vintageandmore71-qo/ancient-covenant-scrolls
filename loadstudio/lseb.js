@@ -15,47 +15,10 @@ var _selectedClipIdx = 0;
 var _ctxData = null;
 
 var _MUSIC_DEMO = {
-  vlog:[
-    {id:'music-vlog-0',t:'Morning Light',a:'Pixabay Music',d:'2:34',c:'#7d2ae8',k:'music-mellow'},
-    {id:'music-vlog-1',t:'City Walk',a:'Bensound',d:'3:01',c:'#5b1fa8',k:'music-modern'},
-    {id:'music-vlog-2',t:'Easy Ride',a:'Mixkit',d:'1:52',c:'#9c3aff',k:'music-mellow'},
-    {id:'music-vlog-3',t:'Golden Hour',a:'Free Music Archive',d:'2:48',c:'#6a1fcc',k:'music-mellow'}
-  ],
-  pop:[
-    {id:'music-pop-0',t:'Sparkle',a:'Pixabay Music',d:'2:18',c:'#e82a7d',k:'music-modern'},
-    {id:'music-pop-1',t:'Feel Good',a:'Bensound',d:'3:22',c:'#a81f5b',k:'music-modern'},
-    {id:'music-pop-2',t:'On My Way',a:'Mixkit',d:'2:45',c:'#ff6aae',k:'music-energetic'},
-    {id:'music-pop-3',t:'Bright Side',a:'ccMixter',d:'2:59',c:'#cc1f6a',k:'music-modern'}
-  ],
-  dynamic:[
-    {id:'music-dynamic-0',t:'Power Up',a:'Pixabay Music',d:'1:45',c:'#2ae8a0',k:'music-energetic'},
-    {id:'music-dynamic-1',t:'Rush',a:'Incompetech',d:'2:12',c:'#1fa87d',k:'music-energetic'},
-    {id:'music-dynamic-2',t:'Drive',a:'Mixkit',d:'2:30',c:'#3affc0',k:'music-energetic'},
-    {id:'music-dynamic-3',t:'Rise',a:'Bensound',d:'1:58',c:'#1fcc8a',k:'music-modern'}
-  ],
-  fresh:[
-    {id:'music-fresh-0',t:'Summer Breeze',a:'Pixabay Music',d:'3:05',c:'#e8c42a',k:'music-mellow'},
-    {id:'music-fresh-1',t:'Sunny Days',a:'Bensound',d:'2:40',c:'#a88c1f',k:'music-modern'},
-    {id:'music-fresh-2',t:'Open Air',a:'Free Music Archive',d:'2:22',c:'#ffd93d',k:'music-mellow'},
-    {id:'music-fresh-3',t:'Chill Out',a:'ccMixter',d:'3:14',c:'#cc9a1f',k:'music-mellow'}
-  ],
-  acoustic:[
-    {id:'music-acoustic-0',t:'Wooden Heart',a:'Bensound',d:'2:55',c:'#c4842a',k:'music-mellow'},
-    {id:'music-acoustic-1',t:'Simple Path',a:'Incompetech',d:'3:18',c:'#8b5e1f',k:'music-mellow'},
-    {id:'music-acoustic-2',t:'Quiet Moment',a:'Free Music Archive',d:'2:37',c:'#e0a040',k:'music-mellow'},
-    {id:'music-acoustic-3',t:'The River',a:'ccMixter',d:'3:44',c:'#a06020',k:'music-mellow'}
-  ],
-  electronic:[
-    {id:'music-electronic-0',t:'Pulse',a:'Pixabay Music',d:'2:26',c:'#2a8be8',k:'music-modern'},
-    {id:'music-electronic-1',t:'Neon',a:'Bensound',d:'3:00',c:'#1f6aad',k:'music-modern'},
-    {id:'music-electronic-2',t:'Grid',a:'Mixkit',d:'2:15',c:'#5ab8ff',k:'music-energetic'},
-    {id:'music-electronic-3',t:'Voltage',a:'Free Music Archive',d:'2:50',c:'#1f5aad',k:'music-energetic'}
-  ],
-  hiphop:[
-    {id:'music-hiphop-0',t:'Street Beat',a:'Pixabay Music',d:'2:10',c:'#e84a2a',k:'music-energetic'},
-    {id:'music-hiphop-1',t:'Flow State',a:'ccMixter',d:'2:48',c:'#a83520',k:'music-modern'},
-    {id:'music-hiphop-2',t:'Block Walk',a:'Free Music Archive',d:'3:02',c:'#ff6b4a',k:'music-energetic'},
-    {id:'music-hiphop-3',t:'Rhythm Check',a:'Bensound',d:'2:35',c:'#cc3d20',k:'music-modern'}
+  demo:[
+    {id:'music-demo-0',t:'Mellow Demo',a:'Demo',d:'0:30',c:'#7d2ae8',k:'music-mellow'},
+    {id:'music-demo-1',t:'Upbeat Demo',a:'Demo',d:'0:30',c:'#e82a7d',k:'music-modern'},
+    {id:'music-demo-2',t:'Energetic Demo',a:'Demo',d:'0:30',c:'#2ae8a0',k:'music-energetic'}
   ]
 };
 
@@ -163,9 +126,7 @@ var _DEMO_AUDIO = {
 };
 
 var _MUSIC_AUDIO_KEY = {
-  vlog:'music-mellow', fresh:'music-mellow', acoustic:'music-mellow',
-  pop:'music-modern',  electronic:'music-modern',
-  dynamic:'music-energetic', hiphop:'music-energetic'
+  demo:'music-mellow'
 };
 var _SFX_AUDIO_KEY = {
   cartoon:'sfx-spring',  funny:'sfx-spring',   emotion:'sfx-spring',
@@ -198,7 +159,8 @@ function _buildAssetList(listId, demo, cat, q, icon, trackKind, tone, audioKeyMa
       if (tr.id) row.dataset.itemId = tr.id;
       var hasAudio   = !!audioSrc;
       var idAttr     = tr.id ? ' data-item-id="'+tr.id+'"' : '';
-      var playAttrs  = hasAudio ? 'data-tone="'+tone+'" data-audio-key="'+audioKey+'"'+idAttr : 'data-tone="'+tone+'" data-no-src="1"'+idAttr;
+      var sqAttr     = (trackKind === 'music') ? ' data-search-query="'+tr.t.replace(/"/g,'')+'"' : '';
+      var playAttrs  = hasAudio ? 'data-tone="'+tone+'" data-audio-key="'+audioKey+'"'+idAttr+sqAttr : 'data-tone="'+tone+'" data-no-src="1"'+idAttr+sqAttr;
       var addAttrs   = hasAudio ? 'data-audio-key="'+audioKey+'"'+idAttr : 'data-no-src="1"'+idAttr;
       var subText    = tr.d + (hasAudio ? ' \xb7 Demo' : ' \xb7 Source missing');
       row.innerHTML =
@@ -224,46 +186,50 @@ function _buildMusicList(cat, q) {
   var list = document.getElementById('lseb-music-list');
   if (!list) return;
   var reg = window.LoadProviderRegistry;
-  if (!reg) { _appendConnectBanner(list, 'music'); return; }
+  if (!reg) return;
+  var searchQ = _currentMusicCat === 'all' ? (q || 'music') : _currentMusicCat;
   var fsKey = null;
   try { var fsS = JSON.parse(localStorage.getItem('lpr_settings_v1') || '{}'); fsKey = (fsS['freesound'] || {}).apiKey || null; } catch (_) {}
-  if (!fsKey) { _appendConnectBanner(list, 'music'); return; }
+  var providers = ['ccmixter', 'openverse-audio'];
+  if (fsKey) providers.push('freesound');
   var loader = document.createElement('p');
   loader.id = 'lseb-music-loader';
   loader.style.cssText = 'color:#7d2ae8;font:400 12px system-ui,sans-serif;text-align:center;margin:6px 0';
-  loader.textContent = 'Searching Freesound...';
+  loader.textContent = 'Searching...';
   list.insertBefore(loader, list.firstChild);
-  reg.searchMusic({query: _currentMusicCat === 'all' ? (q || 'music') : _currentMusicCat}).then(function (result) {
-    var ldr = document.getElementById('lseb-music-loader');
-    if (ldr) ldr.remove();
-    if (!result.results || !result.results.length) return;
-    var frag = document.createDocumentFragment();
-    result.results.forEach(function (item) {
-      if (!item.previewUrl) return;
-      var dur = item.duration || 0;
-      var durStr = Math.floor(dur / 60) + ':' + String(Math.round(dur % 60)).padStart(2, '0');
-      var row = document.createElement('div');
-      row.className = 've-asset-row';
-      var safeTitle = (item.title || '').replace(/"/g, '');
-      var safeAttr  = (item.attribution || '').replace(/"/g, '');
-      row.innerHTML =
-        '<div class="ve-asset-art" style="background:linear-gradient(135deg,#1f5a80,#1f5a8088)">' + _NOTE_ICO + '</div>' +
-        '<div class="ve-asset-info">' +
-          '<span class="ve-asset-title">' + (safeTitle.length > 22 ? safeTitle.slice(0, 21) + '…' : safeTitle) + '</span>' +
-          '<span class="ve-asset-sub">' + durStr + ' \xb7 ' + (item.attribution || item.provider) + '</span>' +
-        '</div>' +
-        '<div class="ve-asset-acts">' +
-          '<button class="ve-asset-play" type="button" data-tone="music" data-src="' + item.previewUrl + '" aria-label="Preview">' + _PLAY_ICO + '</button>' +
-          '<button class="ve-asset-add" type="button" data-add-track="music" data-src="' + item.previewUrl + '" data-provider="' + item.provider + '" data-license="' + (item.licenseType || '') + '" data-tn="' + safeTitle + '" data-ta="' + safeAttr + '" data-td="' + durStr + '">Add</button>' +
-        '</div>';
-      frag.appendChild(row);
-    });
-    var currentList = document.getElementById('lseb-music-list');
-    if (currentList && frag.childNodes.length) currentList.insertBefore(frag, currentList.firstChild);
-  }).catch(function () {
-    var ldr = document.getElementById('lseb-music-loader');
-    if (ldr) ldr.remove();
-  });
+  var _tryMusicProvider = function (idx) {
+    if (idx >= providers.length) {
+      var ldr = document.getElementById('lseb-music-loader'); if (ldr) ldr.remove(); return;
+    }
+    reg.searchMusic({query: searchQ, providerId: providers[idx]}).then(function (result) {
+      if (!result.results || !result.results.length) { _tryMusicProvider(idx + 1); return; }
+      var ldr = document.getElementById('lseb-music-loader'); if (ldr) ldr.remove();
+      var frag = document.createDocumentFragment();
+      result.results.forEach(function (item) {
+        if (!item.previewUrl) return;
+        var dur = item.duration || 0;
+        var durStr = Math.floor(dur / 60) + ':' + String(Math.round(dur % 60)).padStart(2, '0');
+        var row = document.createElement('div');
+        row.className = 've-asset-row';
+        var safeTitle = (item.title || '').replace(/"/g, '');
+        var safeAttr  = (item.attribution || '').replace(/"/g, '');
+        row.innerHTML =
+          '<div class="ve-asset-art" style="background:linear-gradient(135deg,#1f5a80,#1f5a8088)">' + _NOTE_ICO + '</div>' +
+          '<div class="ve-asset-info">' +
+            '<span class="ve-asset-title">' + (safeTitle.length > 22 ? safeTitle.slice(0, 21) + '…' : safeTitle) + '</span>' +
+            '<span class="ve-asset-sub">' + durStr + ' \xb7 ' + (item.attribution || item.provider) + '</span>' +
+          '</div>' +
+          '<div class="ve-asset-acts">' +
+            '<button class="ve-asset-play" type="button" data-tone="music" data-src="' + item.previewUrl + '" aria-label="Preview">' + _PLAY_ICO + '</button>' +
+            '<button class="ve-asset-add" type="button" data-add-track="music" data-src="' + item.previewUrl + '" data-provider="' + item.provider + '" data-license="' + (item.licenseType || '') + '" data-tn="' + safeTitle + '" data-ta="' + safeAttr + '" data-td="' + durStr + '">Add</button>' +
+          '</div>';
+        frag.appendChild(row);
+      });
+      var currentList = document.getElementById('lseb-music-list');
+      if (currentList && frag.childNodes.length) currentList.insertBefore(frag, currentList.firstChild);
+    }).catch(function () { _tryMusicProvider(idx + 1); });
+  };
+  _tryMusicProvider(0);
 }
 
 function _buildSFXList(cat, q) {
@@ -1570,15 +1536,41 @@ function _bindEditor(idx) {
         _toast((trackKind === 'music' ? 'Music' : 'Sound FX') + (noSrc ? ' added — no audio source connected' : ' added'));
         return;
       }
-      // Preview — resolve audio source from key, then play
+      // Preview — exact audio-key match; live search only when no local demo exists
       var playBtn = e.target.closest('[data-tone]');
       if (playBtn) {
-        if (playBtn.dataset.noSrc === '1') {
+        var ak2      = playBtn.dataset.audioKey;
+        var demoSrc  = (ak2 && _DEMO_AUDIO && _DEMO_AUDIO[ak2]) || null;
+        var cachedSrc= playBtn.dataset.src || null;
+        var sq       = playBtn.dataset.searchQuery;
+        var reg2     = window.LoadProviderRegistry;
+        if (playBtn.dataset.tone === 'music' && sq && reg2 && !demoSrc && !cachedSrc) {
+          playBtn.disabled = true;
+          var _tryProviders = function (providers, pi) {
+            if (pi >= providers.length) {
+              playBtn.disabled = false;
+              _toast('No preview available — connect a music provider');
+              return;
+            }
+            reg2.searchMusic({query: sq, providerId: providers[pi]}).then(function (r) {
+              var url = r && r.results && r.results[0] && r.results[0].previewUrl;
+              if (!url) { _tryProviders(providers, pi + 1); return; }
+              playBtn.dataset.src = url;
+              playBtn.disabled = false;
+              try {
+                var pa = new Audio(url); pa.volume = 0.6;
+                pa.play().catch(function () { _tryProviders(providers, pi + 1); });
+              } catch (_) { _tryProviders(providers, pi + 1); }
+            }).catch(function () { _tryProviders(providers, pi + 1); });
+          };
+          _tryProviders(['ccmixter', 'openverse-audio'], 0);
+          return;
+        }
+        if (playBtn.dataset.noSrc === '1' && !sq) {
           _toast('No audio source — connect a provider or upload a file to preview');
           return;
         }
-        var ak     = playBtn.dataset.audioKey;
-        var srcUrl = (ak && _DEMO_AUDIO && _DEMO_AUDIO[ak]) || playBtn.dataset.src || null;
+        var srcUrl = cachedSrc || demoSrc;
         if (srcUrl) {
           try {
             var previewAudio = new Audio(srcUrl);
