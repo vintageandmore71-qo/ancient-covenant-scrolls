@@ -15,22 +15,57 @@ var _selectedClipIdx = 0;
 var _ctxData = null;
 
 var _MUSIC_DEMO = {
-  demo:[
-    {id:'music-demo-0',t:'Mellow Demo',a:'Demo',d:'0:30',c:'#7d2ae8',k:'music-mellow'},
-    {id:'music-demo-1',t:'Upbeat Demo',a:'Demo',d:'0:30',c:'#e82a7d',k:'music-modern'},
-    {id:'music-demo-2',t:'Energetic Demo',a:'Demo',d:'0:30',c:'#2ae8a0',k:'music-energetic'}
-  ]
+  'vlog':       [{id:'music-demo-0',t:'Mellow Demo',a:'Demo',d:'0:30',c:'#7d2ae8',k:'music-mellow'}],
+  'pop':        [{id:'music-demo-1',t:'Upbeat Demo',a:'Demo',d:'0:30',c:'#e82a7d',k:'music-modern'}],
+  'dynamic':    [{id:'music-demo-2',t:'Energetic Demo',a:'Demo',d:'0:30',c:'#2ae8a0',k:'music-energetic'}],
+  'fresh':      [],
+  'acoustic':   [],
+  'electronic': [],
+  'hiphop':     []
 };
 
 var _SFX_DEMO = {
-  demo:[
-    {id:'sfx-demo-0',t:'Boing',a:'Demo',d:'0:01',c:'#ff9500',k:'sfx-spring'},
-    {id:'sfx-demo-1',t:'Whoosh',a:'Demo',d:'0:01',c:'#4cd964',k:'sfx-swish'},
-    {id:'sfx-demo-2',t:'Ding',a:'Demo',d:'0:01',c:'#5ac8fa',k:'sfx-ding'},
-    {id:'sfx-demo-3',t:'Hit',a:'Demo',d:'0:01',c:'#ff6b35',k:'sfx-hit'},
-    {id:'sfx-demo-4',t:'Rumble',a:'Demo',d:'0:01',c:'#34aadc',k:'sfx-rumble'}
-  ]
+  'cartoon':     [{id:'sfx-demo-0',t:'Boing',a:'Demo',d:'0:01',c:'#ff9500',k:'sfx-spring'}],
+  'swish':       [{id:'sfx-demo-1',t:'Whoosh',a:'Demo',d:'0:01',c:'#4cd964',k:'sfx-swish'}],
+  'funny':       [],
+  'machine':     [],
+  'ringing':     [{id:'sfx-demo-2',t:'Ding',a:'Demo',d:'0:01',c:'#5ac8fa',k:'sfx-ding'}],
+  'vehicles':    [],
+  'weather':     [{id:'sfx-demo-4',t:'Rumble',a:'Demo',d:'0:01',c:'#34aadc',k:'sfx-rumble'}],
+  'variety':     [],
+  'vlogsf':      [],
+  'physical':    [{id:'sfx-demo-3',t:'Hit',a:'Demo',d:'0:01',c:'#ff6b35',k:'sfx-hit'}],
+  'transitions': [],
+  'cues':        [],
+  'game':        [],
+  'emotion':     []
 };
+
+var _MUSIC_CATS = [
+  {id:'vlog',       label:'Vlog',        color:'#7d2ae8'},
+  {id:'pop',        label:'Pop',         color:'#e82a7d'},
+  {id:'dynamic',    label:'Dynamic',     color:'#2ae8a0'},
+  {id:'fresh',      label:'Fresh',       color:'#e8a02a'},
+  {id:'acoustic',   label:'Acoustic',    color:'#2a7de8'},
+  {id:'electronic', label:'Electronic',  color:'#a02ae8'},
+  {id:'hiphop',     label:'Hip-Hop',     color:'#e83a2a'}
+];
+var _SFX_CATS = [
+  {id:'cartoon',     label:'Cartoon',      color:'#ff9500'},
+  {id:'swish',       label:'Fast Swish',   color:'#4cd964'},
+  {id:'funny',       label:'Funny',        color:'#ffcc00'},
+  {id:'machine',     label:'Machine',      color:'#8e8e93'},
+  {id:'ringing',     label:'Ringing',      color:'#5ac8fa'},
+  {id:'vehicles',    label:'Vehicles',     color:'#34aadc'},
+  {id:'weather',     label:'Weather',      color:'#637aff'},
+  {id:'variety',     label:'Variety Show', color:'#ff6b35'},
+  {id:'vlogsf',      label:'Vlog',         color:'#9c59d1'},
+  {id:'physical',    label:'Physical',     color:'#ff3b30'},
+  {id:'transitions', label:'Transitions',  color:'#9c9cff'},
+  {id:'cues',        label:'Cues',         color:'#b33af0'},
+  {id:'game',        label:'Game',         color:'#32d74b'},
+  {id:'emotion',     label:'Emotion',      color:'#ff2d55'}
+];
 
 // ─── DEMO AUDIO — real WAV files served from assets/audio/demo/ ──────────────
 // Each file is an original mathematically-synthesised WAV (creator-owned).
@@ -46,9 +81,6 @@ var _DEMO_AUDIO = {
   'sfx-rumble':      'assets/audio/demo/demo-sfx-rumble.wav'
 };
 
-var _MUSIC_AUDIO_KEY = {
-  demo:'music-mellow'
-};
 var _NOTE_ICO = '<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5" width="18" height="18"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
 var _SPK_ICO  = '<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5" width="18" height="18"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
 var _PLAY_ICO = '<svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><polygon points="6 4 20 12 6 20"/></svg>';
@@ -153,7 +185,7 @@ function _buildAssetList(listId, demo, cat, q, icon, trackKind, tone, audioKeyMa
 }
 function _buildMusicList(cat, q) {
   _currentMusicCat = cat || 'all';
-  _buildAssetList('lseb-music-list', _MUSIC_DEMO, _currentMusicCat, q, _NOTE_ICO, 'music', 'music', _MUSIC_AUDIO_KEY);
+  _buildAssetList('lseb-music-list', _MUSIC_DEMO, _currentMusicCat, q, _NOTE_ICO, 'music', 'music', {});
   var list = document.getElementById('lseb-music-list');
   if (!list) return;
   var reg = window.LoadProviderRegistry;
@@ -205,9 +237,7 @@ function _buildMusicList(cat, q) {
 
 function _buildSFXList(cat, q) {
   _currentSfxCat = cat || 'all';
-  // Demo items always show regardless of category filter.
-  // Category chips only affect live Freesound results (when key is connected).
-  _buildAssetList('lseb-sfx-list', _SFX_DEMO, 'all', q, _SPK_ICO, 'sfx', 'sfx', {});
+  _buildAssetList('lseb-sfx-list', _SFX_DEMO, _currentSfxCat, q, _SPK_ICO, 'sfx', 'sfx', {});
   var list = document.getElementById('lseb-sfx-list');
   if (!list) return;
   var reg = window.LoadProviderRegistry;
@@ -250,6 +280,48 @@ function _buildSFXList(cat, q) {
   }).catch(function () {
     var ldr = document.getElementById('lseb-sfx-loader');
     if (ldr) ldr.remove();
+  });
+}
+
+function _buildMusicCatGrid() {
+  var grid = document.getElementById('lseb-music-cat-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  _MUSIC_CATS.forEach(function (cat) {
+    var items = _MUSIC_DEMO[cat.id] || [];
+    var hasDemo = items.length > 0;
+    var tile = document.createElement('button');
+    tile.type = 'button';
+    tile.className = 've-cat-card';
+    tile.dataset.musicCat = cat.id;
+    tile.innerHTML =
+      '<div class="ve-cat-card-art" style="background:linear-gradient(135deg,' + cat.color + ',' + cat.color + '88)">' + _NOTE_ICO + '</div>' +
+      '<div class="ve-cat-card-info">' +
+        '<span class="ve-cat-card-name">' + cat.label + '</span>' +
+        '<span class="ve-cat-card-count">' + (hasDemo ? items.length + ' demo' : 'Connect Provider') + '</span>' +
+      '</div>';
+    grid.appendChild(tile);
+  });
+}
+
+function _buildSFXCatGrid() {
+  var grid = document.getElementById('lseb-sfx-cat-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  _SFX_CATS.forEach(function (cat) {
+    var items = _SFX_DEMO[cat.id] || [];
+    var hasDemo = items.length > 0;
+    var tile = document.createElement('button');
+    tile.type = 'button';
+    tile.className = 've-cat-card';
+    tile.dataset.sfxCat = cat.id;
+    tile.innerHTML =
+      '<div class="ve-cat-card-art" style="background:linear-gradient(135deg,' + cat.color + ',' + cat.color + '88)">' + _SPK_ICO + '</div>' +
+      '<div class="ve-cat-card-info">' +
+        '<span class="ve-cat-card-name">' + cat.label + '</span>' +
+        '<span class="ve-cat-card-count">' + (hasDemo ? items.length + ' demo' : 'Connect Provider') + '</span>' +
+      '</div>';
+    grid.appendChild(tile);
   });
 }
 
@@ -1035,17 +1107,15 @@ function _openSceneEditor(idx) {
               '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="color:#5a5a78;flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
               '<input class="ve-search-inp" id="lseb-music-search" placeholder="Search music..." autocomplete="off">' +
             '</div>' +
-            '<div class="ve-chip-bar" id="lseb-music-chips">' +
-              '<button class="ve-chip active" data-music-chip="all" type="button">All</button>' +
-              '<button class="ve-chip" data-music-chip="vlog" type="button">Vlog</button>' +
-              '<button class="ve-chip" data-music-chip="pop" type="button">Pop</button>' +
-              '<button class="ve-chip" data-music-chip="dynamic" type="button">Dynamic</button>' +
-              '<button class="ve-chip" data-music-chip="fresh" type="button">Fresh</button>' +
-              '<button class="ve-chip" data-music-chip="acoustic" type="button">Acoustic</button>' +
-              '<button class="ve-chip" data-music-chip="electronic" type="button">Electronic</button>' +
-              '<button class="ve-chip" data-music-chip="hiphop" type="button">Hip-Hop</button>' +
+            '<div id="lseb-music-cat-view">' +
+              '<div class="ve-cat-card-grid" id="lseb-music-cat-grid"></div>' +
             '</div>' +
-            '<div class="ve-asset-list" id="lseb-music-list"></div>' +
+            '<div id="lseb-music-track-view" style="display:none">' +
+              '<button class="ve-panel-back" id="lseb-music-back-btn" type="button">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg> All' +
+              '</button>' +
+              '<div class="ve-asset-list" id="lseb-music-list"></div>' +
+            '</div>' +
           '</div>' +
           '<div id="lseb-music-fav" class="ve-tab-pane" style="display:none">' +
             '<p style="color:#5a5a78;font:400 12px Inter,system-ui,sans-serif;margin:18px 0;text-align:center">No favorites yet.</p>' +
@@ -1111,24 +1181,15 @@ function _openSceneEditor(idx) {
               '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="color:#5a5a78;flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
               '<input class="ve-search-inp" id="lseb-sfx-search" placeholder="Search sound FX..." autocomplete="off">' +
             '</div>' +
-            '<div class="ve-chip-bar" id="lseb-sfx-chips">' +
-              '<button class="ve-chip active" data-sfx-chip="all" type="button">All</button>' +
-              '<button class="ve-chip" data-sfx-chip="cartoon" type="button">Cartoon</button>' +
-              '<button class="ve-chip" data-sfx-chip="swish" type="button">Swish</button>' +
-              '<button class="ve-chip" data-sfx-chip="funny" type="button">Funny</button>' +
-              '<button class="ve-chip" data-sfx-chip="machine" type="button">Machine</button>' +
-              '<button class="ve-chip" data-sfx-chip="ringing" type="button">Ringing</button>' +
-              '<button class="ve-chip" data-sfx-chip="vehicles" type="button">Vehicles</button>' +
-              '<button class="ve-chip" data-sfx-chip="weather" type="button">Weather</button>' +
-              '<button class="ve-chip" data-sfx-chip="variety" type="button">Variety</button>' +
-              '<button class="ve-chip" data-sfx-chip="vlogsf" type="button">Vlog</button>' +
-              '<button class="ve-chip" data-sfx-chip="physical" type="button">Physical</button>' +
-              '<button class="ve-chip" data-sfx-chip="transitions" type="button">Transitions</button>' +
-              '<button class="ve-chip" data-sfx-chip="cues" type="button">Cues</button>' +
-              '<button class="ve-chip" data-sfx-chip="game" type="button">Game</button>' +
-              '<button class="ve-chip" data-sfx-chip="emotion" type="button">Emotion</button>' +
+            '<div id="lseb-sfx-cat-view">' +
+              '<div class="ve-cat-card-grid" id="lseb-sfx-cat-grid"></div>' +
             '</div>' +
-            '<div class="ve-asset-list" id="lseb-sfx-list"></div>' +
+            '<div id="lseb-sfx-track-view" style="display:none">' +
+              '<button class="ve-panel-back" id="lseb-sfx-back-btn" type="button">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg> All' +
+              '</button>' +
+              '<div class="ve-asset-list" id="lseb-sfx-list"></div>' +
+            '</div>' +
           '</div>' +
           '<div id="lseb-sfx-fav" class="ve-tab-pane" style="display:none">' +
             '<p style="color:#5a5a78;font:400 12px Inter,system-ui,sans-serif;margin:18px 0;text-align:center">No favorites yet.</p>' +
@@ -1359,6 +1420,20 @@ function _bindEditor(idx) {
     });
     var ed = _el('lseb-editor');
     if (ed) ed.classList.toggle('ve-panel-open', !!id);
+    if (id === 'lseb-music-panel') {
+      var mCv = _el('lseb-music-cat-view'), mTv = _el('lseb-music-track-view');
+      if (mTv) mTv.style.display = 'none';
+      if (mCv) mCv.style.display = '';
+      _currentMusicCat = 'all';
+      var mSrch = _el('lseb-music-search'); if (mSrch) mSrch.value = '';
+    }
+    if (id === 'lseb-sfx-panel') {
+      var sCv = _el('lseb-sfx-cat-view'), sTv = _el('lseb-sfx-track-view');
+      if (sTv) sTv.style.display = 'none';
+      if (sCv) sCv.style.display = '';
+      _currentSfxCat = 'all';
+      var sSrch = _el('lseb-sfx-search'); if (sSrch) sSrch.value = '';
+    }
   }
   var scrim = _el('lseb-drawer-scrim');
   if (scrim) scrim.addEventListener('click', function () { _showPanel(null); });
@@ -1446,26 +1521,26 @@ function _bindEditor(idx) {
     });
     // Asset browser delegated handler
     editor.addEventListener('click', function (e) {
-      // Music chip filter
-      var mchip = e.target.closest('[data-music-chip]');
-      if (mchip) {
-        var mbar = _el('lseb-music-chips');
-        if (mbar) mbar.querySelectorAll('.ve-chip').forEach(function (c) { c.classList.remove('active'); });
-        mchip.classList.add('active');
-        var msearch = _el('lseb-music-search');
-        _currentMusicCat = mchip.dataset.musicChip;
-        _buildMusicList(_currentMusicCat, msearch ? msearch.value : '');
+      // Music category tile
+      var mcat = e.target.closest('[data-music-cat]');
+      if (mcat) {
+        _currentMusicCat = mcat.dataset.musicCat;
+        var mCatView = _el('lseb-music-cat-view');
+        var mTrackView = _el('lseb-music-track-view');
+        if (mCatView) mCatView.style.display = 'none';
+        if (mTrackView) mTrackView.style.display = '';
+        _buildMusicList(_currentMusicCat, '');
         return;
       }
-      // SFX chip filter
-      var schip = e.target.closest('[data-sfx-chip]');
-      if (schip) {
-        var sbar = _el('lseb-sfx-chips');
-        if (sbar) sbar.querySelectorAll('.ve-chip').forEach(function (c) { c.classList.remove('active'); });
-        schip.classList.add('active');
-        var ssearch = _el('lseb-sfx-search');
-        _currentSfxCat = schip.dataset.sfxChip;
-        _buildSFXList(_currentSfxCat, ssearch ? ssearch.value : '');
+      // SFX category tile
+      var sfxcat = e.target.closest('[data-sfx-cat]');
+      if (sfxcat) {
+        _currentSfxCat = sfxcat.dataset.sfxCat;
+        var sCatView = _el('lseb-sfx-cat-view');
+        var sTrackView = _el('lseb-sfx-track-view');
+        if (sCatView) sCatView.style.display = 'none';
+        if (sTrackView) sTrackView.style.display = '';
+        _buildSFXList(_currentSfxCat, '');
         return;
       }
       // Provider key entry
@@ -1550,22 +1625,58 @@ function _bindEditor(idx) {
         var pick = _el(pickId); if (pick) pick.click();
       }
     });
-    // Search input listeners
+    // Search + category navigation
     (function () {
       var ms = _el('lseb-music-search');
-      if (ms) ms.addEventListener('input', function () {
-        var mbar = _el('lseb-music-chips');
-        var activeChip = mbar ? mbar.querySelector('.ve-chip.active') : null;
-        _buildMusicList(activeChip ? activeChip.dataset.musicChip : 'all', ms.value);
-      });
       var ss = _el('lseb-sfx-search');
-      if (ss) ss.addEventListener('input', function () {
-        var sbar = _el('lseb-sfx-chips');
-        var activeChip = sbar ? sbar.querySelector('.ve-chip.active') : null;
-        _buildSFXList(activeChip ? activeChip.dataset.sfxChip : 'all', ss.value);
+      if (ms) ms.addEventListener('input', function () {
+        var q = ms.value;
+        var mCatView = _el('lseb-music-cat-view');
+        var mTrackView = _el('lseb-music-track-view');
+        if (q) {
+          if (mCatView) mCatView.style.display = 'none';
+          if (mTrackView) mTrackView.style.display = '';
+          _buildMusicList(_currentMusicCat, q);
+        } else {
+          if (mTrackView) mTrackView.style.display = 'none';
+          if (mCatView) mCatView.style.display = '';
+          _currentMusicCat = 'all';
+        }
       });
-      _buildMusicList('all', '');
-      _buildSFXList('all', '');
+      if (ss) ss.addEventListener('input', function () {
+        var q = ss.value;
+        var sCatView = _el('lseb-sfx-cat-view');
+        var sTrackView = _el('lseb-sfx-track-view');
+        if (q) {
+          if (sCatView) sCatView.style.display = 'none';
+          if (sTrackView) sTrackView.style.display = '';
+          _buildSFXList(_currentSfxCat, q);
+        } else {
+          if (sTrackView) sTrackView.style.display = 'none';
+          if (sCatView) sCatView.style.display = '';
+          _currentSfxCat = 'all';
+        }
+      });
+      var musicBackBtn = _el('lseb-music-back-btn');
+      if (musicBackBtn) musicBackBtn.addEventListener('click', function () {
+        var mCatView = _el('lseb-music-cat-view');
+        var mTrackView = _el('lseb-music-track-view');
+        if (mTrackView) mTrackView.style.display = 'none';
+        if (mCatView) mCatView.style.display = '';
+        _currentMusicCat = 'all';
+        if (ms) ms.value = '';
+      });
+      var sfxBackBtn = _el('lseb-sfx-back-btn');
+      if (sfxBackBtn) sfxBackBtn.addEventListener('click', function () {
+        var sCatView = _el('lseb-sfx-cat-view');
+        var sTrackView = _el('lseb-sfx-track-view');
+        if (sTrackView) sTrackView.style.display = 'none';
+        if (sCatView) sCatView.style.display = '';
+        _currentSfxCat = 'all';
+        if (ss) ss.value = '';
+      });
+      _buildMusicCatGrid();
+      _buildSFXCatGrid();
     }());
     // Populate record panel mini strip with current scene clips
     (function () {
