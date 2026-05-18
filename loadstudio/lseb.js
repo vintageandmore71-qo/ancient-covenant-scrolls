@@ -659,9 +659,27 @@ var _engine = {
       a.volume = it.vol || 0.35;
       if (lt > 0.05) try { a.currentTime = lt; } catch (_) {}
       else try { a.currentTime = 0; } catch (_) {}
-      _dbg('  calling play()...');
+      _dbg('  calling play()... rs=' + a.readyState + ' ns=' + a.networkState + ' vol=' + a.volume + ' src=' + (a.src || '').slice(-50));
+      var _aRef = a;
+      var _evtPlay = false; var _evtCtStart = null;
+      _aRef.addEventListener('loadstart', function () { _dbg('  EVT loadstart'); });
+      _aRef.addEventListener('canplay', function () { _dbg('  EVT canplay rs=' + _aRef.readyState); });
+      _aRef.addEventListener('playing', function () { if (!_evtPlay) { _evtPlay = true; _evtCtStart = _aRef.currentTime; } _dbg('  EVT playing ct=' + _aRef.currentTime.toFixed(2) + ' vol=' + _aRef.volume + ' muted=' + _aRef.muted); });
+      _aRef.addEventListener('volumechange', function () { _dbg('  EVT volchange vol=' + _aRef.volume + ' muted=' + _aRef.muted); });
+      _aRef.addEventListener('suspend', function () { _dbg('  EVT suspend rs=' + _aRef.readyState + ' ns=' + _aRef.networkState); });
+      _aRef.addEventListener('waiting', function () { _dbg('  EVT waiting rs=' + _aRef.readyState); });
+      _aRef.addEventListener('ended', function () { _dbg('  EVT ended'); });
+      _aRef.addEventListener('error', function () { var _e = _aRef.error; _dbg('  EVT error code=' + (_e && _e.code) + ' ' + (_e && _e.message)); });
       a.play()
-        .then(function () { _dbg('  PLAY OK: track ' + i); })
+        .then(function () {
+          _dbg('  PLAY OK vol=' + _aRef.volume + ' muted=' + _aRef.muted + ' rs=' + _aRef.readyState + ' ns=' + _aRef.networkState + ' dur=' + (_aRef.duration || 0).toFixed(1));
+          setTimeout(function () {
+            var _ct = _aRef.currentTime;
+            var _adv = (_evtCtStart !== null) ? (_ct - _evtCtStart) : _ct;
+            var _audible = _evtPlay && _adv > 0.1 && _aRef.volume > 0 && !_aRef.muted && !_aRef.error;
+            _dbg('  AUDIBLE=' + _audible + ' playing-evt=' + _evtPlay + ' ct=' + _ct.toFixed(2) + ' adv=' + _adv.toFixed(2) + ' vol=' + _aRef.volume + ' muted=' + _aRef.muted + ' err=' + (_aRef.error ? _aRef.error.code : 'none') + ' paused=' + _aRef.paused);
+          }, 500);
+        })
         .catch(function (err) { _dbg('  PLAY FAIL: track ' + i + ' ' + (err && err.message)); });
       _playHandles.push(a);
       _audioPre[_mKey] = a;
@@ -1620,6 +1638,18 @@ function _bindEditor(idx) {
             var _ulEl = document.createElement('audio');
             _ulEl.src = addSrc;
             _ulEl.volume = 0;
+            _ulEl.addEventListener('loadstart', function () { _dbg('  unlock EVT loadstart'); });
+            _ulEl.addEventListener('loadedmetadata', function () { _dbg('  unlock EVT meta dur=' + _ulEl.duration.toFixed(1) + ' cs=' + (_ulEl.currentSrc || '').slice(-50)); });
+            _ulEl.addEventListener('canplay', function () { _dbg('  unlock EVT canplay rs=' + _ulEl.readyState); });
+            _ulEl.addEventListener('playing', function () { _dbg('  unlock EVT playing ct=' + _ulEl.currentTime.toFixed(2) + ' vol=' + _ulEl.volume + ' muted=' + _ulEl.muted); });
+            var _tuC = 0;
+            _ulEl.addEventListener('timeupdate', function () { if (_tuC++ < 4) _dbg('  unlock EVT timeupdate ct=' + _ulEl.currentTime.toFixed(2)); });
+            _ulEl.addEventListener('volumechange', function () { _dbg('  unlock EVT volchange vol=' + _ulEl.volume + ' muted=' + _ulEl.muted); });
+            _ulEl.addEventListener('stalled', function () { _dbg('  unlock EVT stalled'); });
+            _ulEl.addEventListener('suspend', function () { _dbg('  unlock EVT suspend rs=' + _ulEl.readyState + ' ns=' + _ulEl.networkState); });
+            _ulEl.addEventListener('waiting', function () { _dbg('  unlock EVT waiting'); });
+            _ulEl.addEventListener('error', function () { var _ue = _ulEl.error; _dbg('  unlock EVT error code=' + (_ue && _ue.code) + ' ' + (_ue && _ue.message)); });
+            _ulEl.addEventListener('ended', function () { _dbg('  unlock EVT ended'); });
             var _ulP = _ulEl.play();
             if (_ulP && _ulP.catch) _ulP.catch(function () {});
             _audioPre[_ulKey] = _ulEl;
