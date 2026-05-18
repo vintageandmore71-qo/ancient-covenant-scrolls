@@ -185,6 +185,9 @@ function _buildMusicList(cat, q) {
       result.results.forEach(function (item) {
         if (!item.previewUrl) return;
         var dur = item.duration || 0;
+        // Openverse/Jamendo returns duration in milliseconds despite API docs saying seconds.
+        // Any value > 3600 is certainly milliseconds — convert it.
+        if (dur > 3600) dur = Math.round(dur / 1000);
         var durStr = Math.floor(dur / 60) + ':' + String(Math.round(dur % 60)).padStart(2, '0');
         var row = document.createElement('div');
         row.className = 've-asset-row';
@@ -231,6 +234,7 @@ function _buildSFXList(cat, q) {
     results.forEach(function (item) {
       if (!item.previewUrl) return;
       var dur = item.duration || 0;
+      if (dur > 3600) dur = Math.round(dur / 1000);
       var durStr = (dur < 60 ? '0:' : Math.floor(dur / 60) + ':') + String(Math.round(dur % 60)).padStart(2, '0');
       var row = document.createElement('div');
       row.className = 've-asset-row';
@@ -631,12 +635,16 @@ var _engine = {
       _dbg('  track[' + i + '] src=' + (it.src ? it.src.slice(0, 60) : 'NONE'));
       if (!it.src) { _dbg('  SKIP: no src'); return; }
       if (it.src.indexOf('http://') === 0) { it.src = it.src.replace('http://', 'https://'); _saveState(); }
+      // Fix legacy tracks stored with millisecond duration (Openverse bug)
+      var trackDur = (it.dur > 3600) ? Math.round(it.dur / 1000) : (it.dur || 30);
       var lt = _resumeT - (it.t0 || 0);
-      _dbg('  lt=' + lt.toFixed(2) + ' dur=' + (it.dur || 0) + ' t0=' + (it.t0 || 0));
-      if (lt < 0 || lt >= (it.dur || 999)) { _dbg('  SKIP: out of window'); return; }
+      _dbg('  lt=' + lt.toFixed(2) + ' dur=' + trackDur + ' t0=' + (it.t0 || 0));
+      if (lt < 0 || lt >= trackDur) { _dbg('  SKIP: out of window'); return; }
       var a = new Audio(it.src);
       a.volume = it.vol || 0.35;
-      try { a.currentTime = Math.max(0, lt); } catch (_) {}
+      // Only seek if resuming mid-track. Setting currentTime=0 on a fresh
+      // unloaded element interrupts the iOS Safari network load, aborting play().
+      if (lt > 0.05) try { a.currentTime = lt; } catch (_) {}
       _dbg('  calling play() on new Audio...');
       a.play()
         .then(function () { _dbg('  PLAY OK: track ' + i); })
@@ -652,7 +660,7 @@ var _engine = {
       // same gesture-synchronous pattern as music
       var a = new Audio(it.src);
       a.volume = it.vol || 0.7;
-      try { a.currentTime = Math.max(0, lt); } catch (_) {}
+      if (lt > 0.05) try { a.currentTime = lt; } catch (_) {}
       a.play().catch(function (err) { console.warn('[LS play:sfx:error] track', i, err && err.message); });
       _playHandles.push(a);
       _audioPre[sceneId + '_sfx_track_' + i] = a;
