@@ -640,10 +640,14 @@ var _engine = {
       var lt = _resumeT - (it.t0 || 0);
       _dbg('  lt=' + lt.toFixed(2) + ' dur=' + trackDur + ' t0=' + (it.t0 || 0));
       if (lt < 0 || lt >= trackDur) { _dbg('  SKIP: out of window'); return; }
+      // Release any pre-existing element at this key (e.g. from a previous play
+      // or from _preloadAudio). An active cross-origin load on the same URL causes
+      // iOS Safari to abort the new play() request with AbortError.
+      var _existPre = _audioPre[sceneId + '_music_track_' + i];
+      if (_existPre) { try { _existPre.pause(); _existPre.src = ''; } catch (_) {} delete _audioPre[sceneId + '_music_track_' + i]; }
       var a = new Audio(it.src);
       a.volume = it.vol || 0.35;
-      // Only seek if resuming mid-track. Setting currentTime=0 on a fresh
-      // unloaded element interrupts the iOS Safari network load, aborting play().
+      // Only seek if resuming mid-track; do not set currentTime on a fresh element.
       if (lt > 0.05) try { a.currentTime = lt; } catch (_) {}
       _dbg('  calling play() on new Audio...');
       a.play()
@@ -657,7 +661,8 @@ var _engine = {
       if (it.src.indexOf('http://') === 0) { it.src = it.src.replace('http://', 'https://'); _saveState(); }
       var lt = _resumeT - (it.t0 || 0);
       if (lt < 0 || lt >= (it.dur || 999)) return;
-      // same gesture-synchronous pattern as music
+      var _existSfx = _audioPre[sceneId + '_sfx_track_' + i];
+      if (_existSfx) { try { _existSfx.pause(); _existSfx.src = ''; } catch (_) {} delete _audioPre[sceneId + '_sfx_track_' + i]; }
       var a = new Audio(it.src);
       a.volume = it.vol || 0.7;
       if (lt > 0.05) try { a.currentTime = lt; } catch (_) {}
@@ -1592,10 +1597,9 @@ function _bindEditor(idx) {
         _dbg('  title=' + (_addedIt.name || 'NONE'));
         _dbg('  src=' + (_addedIt.src ? _addedIt.src.slice(0, 80) : 'NONE -- WILL NOT PLAY'));
         _dbg('  dur=' + (_addedIt.dur || 0) + 's t0=' + (_addedIt.t0 || 0));
-        if (sc2 && addSrc) {
-          var tIdx2 = _addedList.length - 1;
-          if (tIdx2 >= 0) _preloadAudio(sc2.id, trackKind + '_track_' + tIdx2, addSrc);
-        }
+        // Do NOT preload here — a background load on the same cross-origin URL
+        // leaves an active network request that iOS Safari aborts when the play
+        // gesture later calls new Audio(src).play() for the same URL.
         _renderTracks(idx);
         _showPanel(null);
         _toast((trackKind === 'music' ? 'Music' : 'Sound FX') + (noSrc ? ' added — no audio source connected' : ' added'));
