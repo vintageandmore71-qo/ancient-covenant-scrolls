@@ -603,8 +603,8 @@ var _engine = {
     (scene.tracks.music || []).forEach(function (it, i) {
       var key = sceneId + '_music_track_' + i;
       var pre = _audioPre[key];
-      // Create on-demand inside user gesture if missing or errored (iOS Safari requirement)
-      if ((!pre || (pre.error)) && it.src) {
+      // Recreate within user gesture if missing, errored, or readyState=0 (silently blocked — e.g. mixed-content)
+      if ((!pre || pre.error || pre.readyState === 0) && it.src) {
         pre = document.createElement('audio');
         pre.preload = 'auto';
         if (/^https?:\/\//.test(it.src)) pre.crossOrigin = 'anonymous';
@@ -624,8 +624,8 @@ var _engine = {
     (scene.tracks.sfx || []).forEach(function (it, i) {
       var key = sceneId + '_sfx_track_' + i;
       var pre = _audioPre[key];
-      // Create on-demand inside user gesture if missing or errored (iOS Safari requirement)
-      if ((!pre || (pre.error)) && it.src) {
+      // Recreate within user gesture if missing, errored, or readyState=0 (silently blocked)
+      if ((!pre || pre.error || pre.readyState === 0) && it.src) {
         pre = document.createElement('audio');
         pre.preload = 'auto';
         if (/^https?:\/\//.test(it.src)) pre.crossOrigin = 'anonymous';

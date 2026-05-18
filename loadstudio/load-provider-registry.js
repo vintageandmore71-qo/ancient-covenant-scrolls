@@ -3075,7 +3075,8 @@ var LoadProviderRegistry = {
         .then(function(d){
           return {provider:'ccmixter', results:(Array.isArray(d)?d:[]).map(function(t){
             var artist=t.user_real_name||t.user_name||'Unknown';
-            var url=(t.files&&t.files[0]&&t.files[0].download_url)||null;
+            var raw=(t.files&&t.files[0]&&t.files[0].download_url)||null;
+            var url=raw?raw.replace(/^http:\/\//,'https://'):null;
             return {id:String(t.upload_id||''),title:t.upload_name||'',artist:artist,duration:null,previewUrl:url,downloadUrl:url,licenseType:t.license_name||'CC',attribution:(t.upload_name||'')+' by '+artist+' (ccMixter)',provider:'ccmixter'};
           })};
         })
