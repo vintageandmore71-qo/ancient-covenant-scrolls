@@ -163,27 +163,30 @@ var _PreviewCtrl = (function () {
     if (!src) { if (btn) _setState(btn, 'failed'); return; }
     _activeBtn = btn;
     _setState(btn, 'loading');
-    var a = new Audio();
+    // Use new Audio(src) constructor so play() is called synchronously
+    // in the user-gesture context — required for iOS Safari.
+    // Waiting for oncanplay puts play() in an async callback where Safari
+    // may block it, especially for very short SFX files.
+    var a = new Audio(src);
     a.volume = 0.6;
-    a.preload = 'metadata';
-    var tid = setTimeout(function () { stop(); }, 10000);
-    a.oncanplay = function () {
-      clearTimeout(tid);
-      if (_activeBtn !== btn) return;
-      _audio = a;
-      _setState(btn, 'playing');
-      a.play().catch(function () { clearTimeout(tid); stop(); if (btn) _setState(btn, 'failed'); });
-    };
+    _audio = a;
     a.onerror = function () {
-      clearTimeout(tid);
       if (_activeBtn === btn) { _audio = null; _setState(btn, 'failed'); _activeBtn = null; }
     };
     a.onended = function () {
       _audio = null;
       if (_activeBtn === btn) { _setState(btn, 'idle'); _activeBtn = null; }
     };
-    a.src = src;
-    a.load();
+    var p = a.play();
+    if (p && typeof p.then === 'function') {
+      p.then(function () {
+        if (_activeBtn === btn) _setState(btn, 'playing');
+      }).catch(function () {
+        if (_activeBtn === btn) { _audio = null; _setState(btn, 'failed'); _activeBtn = null; }
+      });
+    } else {
+      _setState(btn, 'playing');
+    }
   }
   function toggle(btn, src) {
     if (_activeBtn === btn) { stop(); return; }
@@ -214,8 +217,8 @@ function _buildAssetList(listId, demo, cat, q, icon, trackKind, tone, audioKeyMa
       var hasAudio   = !!audioSrc;
       var idAttr     = tr.id ? ' data-item-id="'+tr.id+'"' : '';
       var sqAttr     = (trackKind === 'music') ? ' data-search-query="'+tr.t.replace(/"/g,'')+'"' : '';
-      var playAttrs  = hasAudio ? 'data-tone="'+tone+'" data-audio-key="'+audioKey+'"'+idAttr+sqAttr : 'data-tone="'+tone+'" data-no-src="1"'+idAttr+sqAttr;
-      var addAttrs   = hasAudio ? 'data-audio-key="'+audioKey+'"'+idAttr : 'data-no-src="1"'+idAttr;
+      var playAttrs  = hasAudio ? 'data-tone="'+tone+'" data-audio-key="'+audioKey+'" data-src="'+audioSrc+'"'+idAttr+sqAttr : 'data-tone="'+tone+'" data-no-src="1"'+idAttr+sqAttr;
+      var addAttrs   = hasAudio ? 'data-audio-key="'+audioKey+'" data-src="'+audioSrc+'"'+idAttr : 'data-no-src="1"'+idAttr;
       var subText    = tr.d + (hasAudio ? ' \xb7 Demo' : ' \xb7 Source missing');
       row.innerHTML =
         '<div class="ve-asset-art" style="background:linear-gradient(135deg,' + tr.c + ',' + tr.c + '88)">' + icon + '</div>' +
@@ -1586,6 +1589,12 @@ function _bindEditor(idx) {
           } catch (_) {}
         }
         _addTrackItem(idx, trackKind, trackItem);
+        // Preload audio immediately so timeline playback works without re-opening the editor
+        var sc2 = _state.scenes[idx];
+        if (sc2 && addSrc) {
+          var tIdx2 = (sc2.tracks[trackKind] || []).length - 1;
+          if (tIdx2 >= 0) _preloadAudio(sc2.id, trackKind + '_track_' + tIdx2, addSrc);
+        }
         _renderTracks(idx);
         _showPanel(null);
         _toast((trackKind === 'music' ? 'Music' : 'Sound FX') + (noSrc ? ' added — no audio source connected' : ' added'));
