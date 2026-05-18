@@ -41,32 +41,6 @@ var _SFX_DEMO = {
   'emotion':     []
 };
 
-var _MUSIC_CATS = [
-  {id:'vlog',       label:'Vlog',        color:'#7d2ae8'},
-  {id:'pop',        label:'Pop',         color:'#e82a7d'},
-  {id:'dynamic',    label:'Dynamic',     color:'#2ae8a0'},
-  {id:'fresh',      label:'Fresh',       color:'#e8a02a'},
-  {id:'acoustic',   label:'Acoustic',    color:'#2a7de8'},
-  {id:'electronic', label:'Electronic',  color:'#a02ae8'},
-  {id:'hiphop',     label:'Hip-Hop',     color:'#e83a2a'}
-];
-var _SFX_CATS = [
-  {id:'cartoon',     label:'Cartoon',      color:'#ff9500'},
-  {id:'swish',       label:'Fast Swish',   color:'#4cd964'},
-  {id:'funny',       label:'Funny',        color:'#ffcc00'},
-  {id:'machine',     label:'Machine',      color:'#8e8e93'},
-  {id:'ringing',     label:'Ringing',      color:'#5ac8fa'},
-  {id:'vehicles',    label:'Vehicles',     color:'#34aadc'},
-  {id:'weather',     label:'Weather',      color:'#637aff'},
-  {id:'variety',     label:'Variety Show', color:'#ff6b35'},
-  {id:'vlogsf',      label:'Vlog',         color:'#9c59d1'},
-  {id:'physical',    label:'Physical',     color:'#ff3b30'},
-  {id:'transitions', label:'Transitions',  color:'#9c9cff'},
-  {id:'cues',        label:'Cues',         color:'#b33af0'},
-  {id:'game',        label:'Game',         color:'#32d74b'},
-  {id:'emotion',     label:'Emotion',      color:'#ff2d55'}
-];
-
 // ─── DEMO AUDIO — real WAV files served from assets/audio/demo/ ──────────────
 // Each file is an original mathematically-synthesised WAV (creator-owned).
 // Rights: see assets/audio/demo/RIGHTS.md. Commercial use: yes.
@@ -283,48 +257,6 @@ function _buildSFXList(cat, q) {
   });
 }
 
-function _buildMusicCatGrid() {
-  var grid = document.getElementById('lseb-music-cat-grid');
-  if (!grid) return;
-  grid.innerHTML = '';
-  _MUSIC_CATS.forEach(function (cat) {
-    var items = _MUSIC_DEMO[cat.id] || [];
-    var hasDemo = items.length > 0;
-    var tile = document.createElement('button');
-    tile.type = 'button';
-    tile.className = 've-cat-card';
-    tile.dataset.musicCat = cat.id;
-    tile.innerHTML =
-      '<div class="ve-cat-card-art" style="background:linear-gradient(135deg,' + cat.color + ',' + cat.color + '88)">' + _NOTE_ICO + '</div>' +
-      '<div class="ve-cat-card-info">' +
-        '<span class="ve-cat-card-name">' + cat.label + '</span>' +
-        '<span class="ve-cat-card-count">' + (hasDemo ? items.length + ' demo' : 'Connect Provider') + '</span>' +
-      '</div>';
-    grid.appendChild(tile);
-  });
-}
-
-function _buildSFXCatGrid() {
-  var grid = document.getElementById('lseb-sfx-cat-grid');
-  if (!grid) return;
-  grid.innerHTML = '';
-  _SFX_CATS.forEach(function (cat) {
-    var items = _SFX_DEMO[cat.id] || [];
-    var hasDemo = items.length > 0;
-    var tile = document.createElement('button');
-    tile.type = 'button';
-    tile.className = 've-cat-card';
-    tile.dataset.sfxCat = cat.id;
-    tile.innerHTML =
-      '<div class="ve-cat-card-art" style="background:linear-gradient(135deg,' + cat.color + ',' + cat.color + '88)">' + _SPK_ICO + '</div>' +
-      '<div class="ve-cat-card-info">' +
-        '<span class="ve-cat-card-name">' + cat.label + '</span>' +
-        '<span class="ve-cat-card-count">' + (hasDemo ? items.length + ' demo' : 'Connect Provider') + '</span>' +
-      '</div>';
-    grid.appendChild(tile);
-  });
-}
-
 function _appendConnectBanner(list, kind) {
   var banner = document.createElement('div');
   banner.style.cssText = 'margin:10px 0 4px;padding:9px 12px;background:#1a0a30;border:1px solid #7d2ae855;border-radius:8px;display:flex;align-items:center;gap:10px';
@@ -459,6 +391,7 @@ function _preloadAudio(sceneId, lane, src) {
   el.src = src;
   el.load();
   _audioPre[key] = el;
+  console.log('[LS preload]', key.slice(-30), src.slice(0, 60));
 }
 
 function _stopAudio() {
@@ -647,31 +580,40 @@ var _engine = {
     var LANE_VOL = { narration: 0.9, music: 0.35, sfxAudio: 0.5 };
     _playHandles = [];
     var _resumeT = this.t;
+    console.log('[LS play] scene:', sceneId.slice(-12), 'resumeT:', _resumeT.toFixed(2),
+      'music tracks:', (scene.tracks.music || []).length,
+      'sfx tracks:', (scene.tracks.sfx || []).length);
     ['narration', 'music', 'sfxAudio'].forEach(function (lane) {
       var pre = _audioPre[sceneId + '_' + lane];
       if (!pre) return;
-      try { pre.currentTime = Math.max(0, _resumeT); pre.volume = LANE_VOL[lane]; pre.play().catch(function () {}); _playHandles.push(pre); } catch (e) {}
+      try { pre.currentTime = Math.max(0, _resumeT); } catch (_) {}
+      try { pre.volume = LANE_VOL[lane]; pre.play().catch(function (err) { console.warn('[LS play] legacy', lane, 'rejected:', err && err.message); }); _playHandles.push(pre); } catch (e) { console.warn('[LS play] legacy', lane, 'threw:', e && e.message); }
     });
     (scene.tracks.music || []).forEach(function (it, i) {
       var pre = _audioPre[sceneId + '_music_track_' + i];
+      console.log('[LS play] music_track_' + i, 'pre?', !!pre, 'src:', it.src ? it.src.slice(0, 50) : 'none');
       if (!pre) return;
       var lt = _resumeT - (it.t0 || 0);
-      if (lt < 0 || lt >= (it.dur || 999)) return;
-      try { pre.currentTime = Math.max(0, lt); pre.volume = it.vol || 0.35; pre.play().catch(function () {}); _playHandles.push(pre); } catch (e) {}
+      if (lt < 0 || lt >= (it.dur || 999)) { console.log('[LS play] music_track_' + i, 'out of range lt=' + lt.toFixed(2)); return; }
+      try { pre.currentTime = Math.max(0, lt); } catch (_) {}
+      try { pre.volume = it.vol || 0.35; pre.play().catch(function (err) { console.warn('[LS play] music_track_' + i, 'rejected:', err && err.message); }); _playHandles.push(pre); } catch (e) { console.warn('[LS play] music_track_' + i, 'threw:', e && e.message); }
     });
     (scene.tracks.sfx || []).forEach(function (it, i) {
       var pre = _audioPre[sceneId + '_sfx_track_' + i];
+      console.log('[LS play] sfx_track_' + i, 'pre?', !!pre, 'src:', it.src ? it.src.slice(0, 50) : 'none');
       if (!pre) return;
       var lt = _resumeT - (it.t0 || 0);
-      if (lt < 0 || lt >= (it.dur || 999)) return;
-      try { pre.currentTime = Math.max(0, lt); pre.volume = it.vol || 0.7; pre.play().catch(function () {}); _playHandles.push(pre); } catch (e) {}
+      if (lt < 0 || lt >= (it.dur || 999)) { console.log('[LS play] sfx_track_' + i, 'out of range lt=' + lt.toFixed(2)); return; }
+      try { pre.currentTime = Math.max(0, lt); } catch (_) {}
+      try { pre.volume = it.vol || 0.7; pre.play().catch(function (err) { console.warn('[LS play] sfx_track_' + i, 'rejected:', err && err.message); }); _playHandles.push(pre); } catch (e) { console.warn('[LS play] sfx_track_' + i, 'threw:', e && e.message); }
     });
     (scene.tracks.voice || []).forEach(function (it, i) {
       var pre = _audioPre[sceneId + '_voice_track_' + i];
       if (!pre) return;
       var lt = _resumeT - (it.t0 || 0);
       if (lt < 0 || lt >= (it.dur || 999)) return;
-      try { pre.currentTime = Math.max(0, lt); pre.volume = it.vol || 0.9; pre.play().catch(function () {}); _playHandles.push(pre); } catch (e) {}
+      try { pre.currentTime = Math.max(0, lt); } catch (_) {}
+      try { pre.volume = it.vol || 0.9; pre.play().catch(function (err) { console.warn('[LS play] voice_track_' + i, 'rejected:', err && err.message); }); _playHandles.push(pre); } catch (e) {}
     });
     _initSubOverlay(scene);
     var self = this;
@@ -1107,15 +1049,17 @@ function _openSceneEditor(idx) {
               '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="color:#5a5a78;flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
               '<input class="ve-search-inp" id="lseb-music-search" placeholder="Search music..." autocomplete="off">' +
             '</div>' +
-            '<div id="lseb-music-cat-view">' +
-              '<div class="ve-cat-card-grid" id="lseb-music-cat-grid"></div>' +
+            '<div class="ve-chip-bar" id="lseb-music-chips">' +
+              '<button class="ve-chip active" data-music-chip="all" type="button">All</button>' +
+              '<button class="ve-chip" data-music-chip="vlog" type="button">Vlog</button>' +
+              '<button class="ve-chip" data-music-chip="pop" type="button">Pop</button>' +
+              '<button class="ve-chip" data-music-chip="dynamic" type="button">Dynamic</button>' +
+              '<button class="ve-chip" data-music-chip="fresh" type="button">Fresh</button>' +
+              '<button class="ve-chip" data-music-chip="acoustic" type="button">Acoustic</button>' +
+              '<button class="ve-chip" data-music-chip="electronic" type="button">Electronic</button>' +
+              '<button class="ve-chip" data-music-chip="hiphop" type="button">Hip-Hop</button>' +
             '</div>' +
-            '<div id="lseb-music-track-view" style="display:none">' +
-              '<button class="ve-panel-back" id="lseb-music-back-btn" type="button">' +
-                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg> All' +
-              '</button>' +
-              '<div class="ve-asset-list" id="lseb-music-list"></div>' +
-            '</div>' +
+            '<div class="ve-asset-list" id="lseb-music-list"></div>' +
           '</div>' +
           '<div id="lseb-music-fav" class="ve-tab-pane" style="display:none">' +
             '<p style="color:#5a5a78;font:400 12px Inter,system-ui,sans-serif;margin:18px 0;text-align:center">No favorites yet.</p>' +
@@ -1181,15 +1125,24 @@ function _openSceneEditor(idx) {
               '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="color:#5a5a78;flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
               '<input class="ve-search-inp" id="lseb-sfx-search" placeholder="Search sound FX..." autocomplete="off">' +
             '</div>' +
-            '<div id="lseb-sfx-cat-view">' +
-              '<div class="ve-cat-card-grid" id="lseb-sfx-cat-grid"></div>' +
+            '<div class="ve-chip-bar" id="lseb-sfx-chips">' +
+              '<button class="ve-chip active" data-sfx-chip="all" type="button">All</button>' +
+              '<button class="ve-chip" data-sfx-chip="cartoon" type="button">Cartoon</button>' +
+              '<button class="ve-chip" data-sfx-chip="swish" type="button">Fast Swish</button>' +
+              '<button class="ve-chip" data-sfx-chip="funny" type="button">Funny</button>' +
+              '<button class="ve-chip" data-sfx-chip="machine" type="button">Machine</button>' +
+              '<button class="ve-chip" data-sfx-chip="ringing" type="button">Ringing</button>' +
+              '<button class="ve-chip" data-sfx-chip="vehicles" type="button">Vehicles</button>' +
+              '<button class="ve-chip" data-sfx-chip="weather" type="button">Weather</button>' +
+              '<button class="ve-chip" data-sfx-chip="variety" type="button">Variety Show</button>' +
+              '<button class="ve-chip" data-sfx-chip="vlogsf" type="button">Vlog</button>' +
+              '<button class="ve-chip" data-sfx-chip="physical" type="button">Physical</button>' +
+              '<button class="ve-chip" data-sfx-chip="transitions" type="button">Transitions</button>' +
+              '<button class="ve-chip" data-sfx-chip="cues" type="button">Cues</button>' +
+              '<button class="ve-chip" data-sfx-chip="game" type="button">Game</button>' +
+              '<button class="ve-chip" data-sfx-chip="emotion" type="button">Emotion</button>' +
             '</div>' +
-            '<div id="lseb-sfx-track-view" style="display:none">' +
-              '<button class="ve-panel-back" id="lseb-sfx-back-btn" type="button">' +
-                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg> All' +
-              '</button>' +
-              '<div class="ve-asset-list" id="lseb-sfx-list"></div>' +
-            '</div>' +
+            '<div class="ve-asset-list" id="lseb-sfx-list"></div>' +
           '</div>' +
           '<div id="lseb-sfx-fav" class="ve-tab-pane" style="display:none">' +
             '<p style="color:#5a5a78;font:400 12px Inter,system-ui,sans-serif;margin:18px 0;text-align:center">No favorites yet.</p>' +
@@ -1420,20 +1373,6 @@ function _bindEditor(idx) {
     });
     var ed = _el('lseb-editor');
     if (ed) ed.classList.toggle('ve-panel-open', !!id);
-    if (id === 'lseb-music-panel') {
-      var mCv = _el('lseb-music-cat-view'), mTv = _el('lseb-music-track-view');
-      if (mTv) mTv.style.display = 'none';
-      if (mCv) mCv.style.display = '';
-      _currentMusicCat = 'all';
-      var mSrch = _el('lseb-music-search'); if (mSrch) mSrch.value = '';
-    }
-    if (id === 'lseb-sfx-panel') {
-      var sCv = _el('lseb-sfx-cat-view'), sTv = _el('lseb-sfx-track-view');
-      if (sTv) sTv.style.display = 'none';
-      if (sCv) sCv.style.display = '';
-      _currentSfxCat = 'all';
-      var sSrch = _el('lseb-sfx-search'); if (sSrch) sSrch.value = '';
-    }
   }
   var scrim = _el('lseb-drawer-scrim');
   if (scrim) scrim.addEventListener('click', function () { _showPanel(null); });
@@ -1521,26 +1460,28 @@ function _bindEditor(idx) {
     });
     // Asset browser delegated handler
     editor.addEventListener('click', function (e) {
-      // Music category tile
-      var mcat = e.target.closest('[data-music-cat]');
-      if (mcat) {
-        _currentMusicCat = mcat.dataset.musicCat;
-        var mCatView = _el('lseb-music-cat-view');
-        var mTrackView = _el('lseb-music-track-view');
-        if (mCatView) mCatView.style.display = 'none';
-        if (mTrackView) mTrackView.style.display = '';
-        _buildMusicList(_currentMusicCat, '');
+      // Music chip filter
+      var mchip = e.target.closest('[data-music-chip]');
+      if (mchip) {
+        var mbar = _el('lseb-music-chips');
+        if (mbar) mbar.querySelectorAll('.ve-chip').forEach(function (c) { c.classList.remove('active'); });
+        mchip.classList.add('active');
+        var msearch = _el('lseb-music-search');
+        _currentMusicCat = mchip.dataset.musicChip;
+        console.log('[LS chip] music cat:', _currentMusicCat);
+        _buildMusicList(_currentMusicCat, msearch ? msearch.value : '');
         return;
       }
-      // SFX category tile
-      var sfxcat = e.target.closest('[data-sfx-cat]');
-      if (sfxcat) {
-        _currentSfxCat = sfxcat.dataset.sfxCat;
-        var sCatView = _el('lseb-sfx-cat-view');
-        var sTrackView = _el('lseb-sfx-track-view');
-        if (sCatView) sCatView.style.display = 'none';
-        if (sTrackView) sTrackView.style.display = '';
-        _buildSFXList(_currentSfxCat, '');
+      // SFX chip filter
+      var schip = e.target.closest('[data-sfx-chip]');
+      if (schip) {
+        var sbar = _el('lseb-sfx-chips');
+        if (sbar) sbar.querySelectorAll('.ve-chip').forEach(function (c) { c.classList.remove('active'); });
+        schip.classList.add('active');
+        var ssearch = _el('lseb-sfx-search');
+        _currentSfxCat = schip.dataset.sfxChip;
+        console.log('[LS chip] sfx cat:', _currentSfxCat);
+        _buildSFXList(_currentSfxCat, ssearch ? ssearch.value : '');
         return;
       }
       // Provider key entry
@@ -1561,9 +1502,12 @@ function _bindEditor(idx) {
         var noSrc    = addTrackBtn.dataset.noSrc === '1';
         var addAk    = addTrackBtn.dataset.audioKey;
         var addSrc   = (addAk && _DEMO_AUDIO && _DEMO_AUDIO[addAk]) || addTrackBtn.dataset.src || null;
+        console.log('[LS add]', trackKind, '| id:', addTrackBtn.dataset.itemId || 'n/a',
+          '| title:', label, '| src:', addSrc || 'NONE');
         var trackItem = { name: label, dur: dur };
         if (addSrc) trackItem.src = addSrc;
         // Record in asset registry if available
+        var regResult = 'no registry';
         if (addSrc && window.LoadAssetRegistry) {
           try {
             window.LoadAssetRegistry.addAsset({
@@ -1577,14 +1521,21 @@ function _bindEditor(idx) {
               tags: [trackKind],
               notes: label
             });
-          } catch (_) {}
+            regResult = 'saved';
+          } catch (regErr) { regResult = 'error: ' + (regErr && regErr.message); }
         }
+        console.log('[LS add] AssetRegistry:', regResult);
         _addTrackItem(idx, trackKind, trackItem);
         // Preload audio immediately so timeline playback works without re-opening the editor
         var sc2 = _state.scenes[idx];
         if (sc2 && addSrc) {
           var tIdx2 = (sc2.tracks[trackKind] || []).length - 1;
-          if (tIdx2 >= 0) _preloadAudio(sc2.id, trackKind + '_track_' + tIdx2, addSrc);
+          if (tIdx2 >= 0) {
+            console.log('[LS add] preloading', trackKind + '_track_' + tIdx2);
+            _preloadAudio(sc2.id, trackKind + '_track_' + tIdx2, addSrc);
+          }
+        } else if (!addSrc) {
+          console.log('[LS add] no src — timeline will show Source Missing');
         }
         _renderTracks(idx);
         _showPanel(null);
@@ -1599,6 +1550,9 @@ function _bindEditor(idx) {
         var dataSrc = playBtn.dataset.src || null;
         var src     = dataSrc || demoSrc;
         var sq      = playBtn.dataset.searchQuery;
+        var rowEl   = playBtn.closest('[data-item-id]');
+        console.log('[LS preview] itemId:', rowEl ? rowEl.dataset.itemId : 'n/a',
+          '| ak:', ak2 || 'none', '| src:', src || 'NONE');
         if (src) { _PreviewCtrl.toggle(playBtn, src); return; }
         if (_PreviewCtrl.isActive(playBtn)) { _PreviewCtrl.stop(); return; }
         if (sq && window.LoadProviderRegistry) {
@@ -1625,58 +1579,22 @@ function _bindEditor(idx) {
         var pick = _el(pickId); if (pick) pick.click();
       }
     });
-    // Search + category navigation
+    // Search input listeners
     (function () {
       var ms = _el('lseb-music-search');
-      var ss = _el('lseb-sfx-search');
       if (ms) ms.addEventListener('input', function () {
-        var q = ms.value;
-        var mCatView = _el('lseb-music-cat-view');
-        var mTrackView = _el('lseb-music-track-view');
-        if (q) {
-          if (mCatView) mCatView.style.display = 'none';
-          if (mTrackView) mTrackView.style.display = '';
-          _buildMusicList(_currentMusicCat, q);
-        } else {
-          if (mTrackView) mTrackView.style.display = 'none';
-          if (mCatView) mCatView.style.display = '';
-          _currentMusicCat = 'all';
-        }
+        var mbar = _el('lseb-music-chips');
+        var activeChip = mbar ? mbar.querySelector('.ve-chip.active') : null;
+        _buildMusicList(activeChip ? activeChip.dataset.musicChip : 'all', ms.value);
       });
+      var ss = _el('lseb-sfx-search');
       if (ss) ss.addEventListener('input', function () {
-        var q = ss.value;
-        var sCatView = _el('lseb-sfx-cat-view');
-        var sTrackView = _el('lseb-sfx-track-view');
-        if (q) {
-          if (sCatView) sCatView.style.display = 'none';
-          if (sTrackView) sTrackView.style.display = '';
-          _buildSFXList(_currentSfxCat, q);
-        } else {
-          if (sTrackView) sTrackView.style.display = 'none';
-          if (sCatView) sCatView.style.display = '';
-          _currentSfxCat = 'all';
-        }
+        var sbar = _el('lseb-sfx-chips');
+        var activeChip = sbar ? sbar.querySelector('.ve-chip.active') : null;
+        _buildSFXList(activeChip ? activeChip.dataset.sfxChip : 'all', ss.value);
       });
-      var musicBackBtn = _el('lseb-music-back-btn');
-      if (musicBackBtn) musicBackBtn.addEventListener('click', function () {
-        var mCatView = _el('lseb-music-cat-view');
-        var mTrackView = _el('lseb-music-track-view');
-        if (mTrackView) mTrackView.style.display = 'none';
-        if (mCatView) mCatView.style.display = '';
-        _currentMusicCat = 'all';
-        if (ms) ms.value = '';
-      });
-      var sfxBackBtn = _el('lseb-sfx-back-btn');
-      if (sfxBackBtn) sfxBackBtn.addEventListener('click', function () {
-        var sCatView = _el('lseb-sfx-cat-view');
-        var sTrackView = _el('lseb-sfx-track-view');
-        if (sTrackView) sTrackView.style.display = 'none';
-        if (sCatView) sCatView.style.display = '';
-        _currentSfxCat = 'all';
-        if (ss) ss.value = '';
-      });
-      _buildMusicCatGrid();
-      _buildSFXCatGrid();
+      _buildMusicList('all', '');
+      _buildSFXList('all', '');
     }());
     // Populate record panel mini strip with current scene clips
     (function () {
