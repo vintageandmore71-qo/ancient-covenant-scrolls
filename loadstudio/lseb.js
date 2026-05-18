@@ -431,12 +431,18 @@ function _dbgPanel() {
   return _dbgEl;
 }
 function _dbg(msg) {
-  var p = _dbgPanel();
-  var line = document.createElement('div');
-  line.textContent = new Date().toLocaleTimeString() + ' ' + msg;
-  p.appendChild(line);
-  p.scrollTop = p.scrollHeight;
   console.log('[LSDBG]', msg);
+  // Defer DOM writes so they never run inside a gesture handler.
+  // Synchronous DOM manipulation (appendChild, scrollTop) before audio.play()
+  // triggers layout reflow that expires iOS Safari's gesture timer, causing AbortError.
+  var _ts = new Date().toLocaleTimeString();
+  setTimeout(function () {
+    var p = _dbgPanel();
+    var line = document.createElement('div');
+    line.textContent = _ts + ' ' + msg;
+    p.appendChild(line);
+    p.scrollTop = p.scrollHeight;
+  }, 0);
 }
 
 // ─── SUBTITLE HELPERS ────────────────────────────────────────────────────────
