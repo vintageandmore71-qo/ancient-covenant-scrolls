@@ -15,13 +15,13 @@ var _selectedClipIdx = 0;
 var _ctxData = null;
 
 var _MUSIC_DEMO = {
-  'vlog':       [{id:'music-demo-0',t:'Mellow Demo',a:'Demo',d:'0:30',c:'#7d2ae8',k:'music-mellow'}],
-  'pop':        [{id:'music-demo-1',t:'Upbeat Demo',a:'Demo',d:'0:30',c:'#e82a7d',k:'music-modern'}],
-  'dynamic':    [{id:'music-demo-2',t:'Energetic Demo',a:'Demo',d:'0:30',c:'#2ae8a0',k:'music-energetic'}],
-  'fresh':      [],
-  'acoustic':   [],
-  'electronic': [],
-  'hiphop':     []
+  'vlog':       [{id:'music-demo-0', t:'Mellow Demo',     a:'Demo', d:'0:30', c:'#7d2ae8', k:'music-mellow'}],
+  'pop':        [{id:'music-demo-1', t:'Upbeat Demo',     a:'Demo', d:'0:30', c:'#e82a7d', k:'music-modern'}],
+  'dynamic':    [{id:'music-demo-2', t:'Energetic Demo',  a:'Demo', d:'0:30', c:'#2ae8a0', k:'music-energetic'}],
+  'fresh':      [{id:'music-demo-3', t:'Fresh Demo',      a:'Demo', d:'0:30', c:'#2e7d32', k:'music-modern'}],
+  'acoustic':   [{id:'music-demo-4', t:'Acoustic Demo',   a:'Demo', d:'0:30', c:'#f57f17', k:'music-mellow'}],
+  'electronic': [{id:'music-demo-5', t:'Electronic Demo', a:'Demo', d:'0:30', c:'#283593', k:'music-modern'}],
+  'hiphop':     [{id:'music-demo-6', t:'Hip-Hop Demo',    a:'Demo', d:'0:30', c:'#e65100', k:'music-energetic'}]
 };
 
 // cs=commercialSafe  ar=attributionRequired  po=personalOnly
