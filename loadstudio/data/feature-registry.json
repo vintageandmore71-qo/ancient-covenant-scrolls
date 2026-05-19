@@ -5265,6 +5265,122 @@
           "status": "integration required"
         }
       ]
+    },
+    {
+      "id": "talking-photo",
+      "title": "Talking Photo Studio",
+      "desc": "Animate a still image to speak using a voice clip. Local lip-sync engine produces a short animated video clip.",
+      "tools": [
+        "source image",
+        "voice audio",
+        "animate",
+        "save settings"
+      ],
+      "type": "provider",
+      "status": "Provider Needed"
+    },
+    {
+      "id": "asset-registry",
+      "title": "Asset Registry",
+      "desc": "View and manage all declared production assets. Images, audio, video, and data files referenced by scenes.",
+      "tools": [
+        "view registry",
+        "declare asset",
+        "clear registry"
+      ],
+      "type": "local",
+      "status": "Local Ready"
+    },
+    {
+      "id": "pipeline-registry",
+      "title": "Pipeline Registry",
+      "desc": "Manage all registered production pipelines. Each pipeline is a sequence of steps from source asset to output media.",
+      "tools": [
+        "view pipelines",
+        "register pipeline",
+        "monitor pipeline"
+      ],
+      "type": "integration",
+      "status": "Integration Required"
+    },
+    {
+      "id": "generation-reports",
+      "title": "Generation Reports",
+      "desc": "Reports on all AI generation runs. Track which scenes have generated output, provider used, status, and output paths.",
+      "tools": [
+        "view report",
+        "export report"
+      ],
+      "type": "local",
+      "status": "Local Ready"
+    },
+    {
+      "id": "prompt-log",
+      "title": "Prompt Log",
+      "desc": "Full history of every prompt sent to an AI provider. Useful for debugging, auditing, and reusing successful prompts.",
+      "tools": [
+        "view log",
+        "clear log"
+      ],
+      "type": "local",
+      "status": "Local Ready"
+    },
+    {
+      "id": "asset-declarations",
+      "title": "Asset Declarations",
+      "desc": "Declare and tag every asset used in this production. Required before CinePWA export.",
+      "tools": [
+        "add declaration",
+        "view declarations"
+      ],
+      "type": "local",
+      "status": "Local Ready"
+    },
+    {
+      "id": "credits-section",
+      "title": "Credits",
+      "desc": "Manage production credits. List cast, crew, contributors, music credits, and software credits for the final output.",
+      "tools": [
+        "add credit",
+        "view credits"
+      ],
+      "type": "local",
+      "status": "Local Ready"
+    },
+    {
+      "id": "local-engine",
+      "title": "Local Engine",
+      "desc": "Connect to a locally running AI engine for image, video, audio, and text generation. Works offline once models are loaded.",
+      "tools": [
+        "engine type",
+        "endpoint url",
+        "save config",
+        "test connection"
+      ],
+      "type": "provider",
+      "status": "Provider Needed"
+    },
+    {
+      "id": "provider-testing",
+      "title": "Provider Testing",
+      "desc": "Run live tests against connected providers. Verify that generation endpoints respond correctly before production use.",
+      "tools": [
+        "run test",
+        "view results"
+      ],
+      "type": "provider",
+      "status": "Provider Needed"
+    },
+    {
+      "id": "package-validator",
+      "title": "Package Validator",
+      "desc": "Validate a production package before export. Checks all required scenes, assets, rights, and metadata are present.",
+      "tools": [
+        "run validation",
+        "view results"
+      ],
+      "type": "local",
+      "status": "Local Ready"
     }
   ],
   "features": [
