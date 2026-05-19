@@ -522,22 +522,9 @@ function _preloadAudio(sceneId, lane, src) {
 }
 
 function _stopAudio() {
-  var _musicEls = [];
-  Object.keys(_audioPre).forEach(function(k) {
-    if (k.indexOf('_music_track_') !== -1) _musicEls.push(_audioPre[k]);
-  });
   _playHandles.forEach(function (h) {
-    if (_musicEls.indexOf(h) !== -1) {
-      // Mute + rewind instead of pause. pause() called outside a gesture causes
-      // iOS Safari to release the audio session; future play() then fails silently
-      // even inside a new gesture. Keeping the element playing at vol=0 means
-      // the next Play tap reaches it via the !paused path and just unmutes.
-      try { h.volume = 0; } catch (_) {}
-      try { h.currentTime = 0; } catch (_) {}
-    } else {
-      try { h.pause(); } catch (_) {}
-      try { h.currentTime = 0; } catch (_) {}
-    }
+    try { h.pause(); } catch (_) {}
+    try { h.currentTime = 0; } catch (_) {}
   });
   _playHandles = [];
 }
@@ -792,34 +779,21 @@ var _engine = {
       // Seek if: (a) buffered and past 50ms into the clip, OR (b) element has
       // ended (gesture-unlock played it to the end silently — must reset to 0
       // or play() will immediately fire 'ended' again with no audible output).
-      if (a.readyState >= 2) {
-        if (a.ended || lt > 0.05) {
-          try { a.currentTime = Math.max(0, lt); } catch (_) {}
-        }
+      // Seek inside the gesture so iOS allows currentTime assignment.
+      // Always seek to lt (0 after stop, or resume point after pause).
+      if (lt > 0.05 || a.ended) {
+        try { a.currentTime = Math.max(0, lt); } catch (_) {}
+      } else if (a.currentTime > 0.05) {
+        try { a.currentTime = 0; } catch (_) {}
       }
       _dbg('  rs=' + a.readyState + ' ns=' + a.networkState + ' paused=' + a.paused + ' ended=' + a.ended + ' vol=' + a.volume + ' src=' + (a.src || '').slice(-40));
       var _aRef = a;
-      var _evtPlay = false; var _evtCtStart = null;
-      _aRef.addEventListener('playing', function () { if (!_evtPlay) { _evtPlay = true; _evtCtStart = _aRef.currentTime; } _dbg('  EVT playing ct=' + _aRef.currentTime.toFixed(2) + ' vol=' + _aRef.volume); });
       _aRef.addEventListener('error', function () { var _e = _aRef.error; _dbg('  EVT error code=' + (_e && _e.code) + ' ' + (_e && _e.message)); });
-      if (!a.paused) {
-        // Already playing silently from Add gesture — just unmuted, no play() call needed
-        _dbg('  already playing — unmuted to ' + a.volume);
-        setTimeout(function () {
-          _dbg('  500ms: ct=' + _aRef.currentTime.toFixed(2) + ' paused=' + _aRef.paused + ' vol=' + _aRef.volume + ' err=' + (_aRef.error ? _aRef.error.code : 'none'));
-        }, 500);
-      } else {
-        a.play()
-          .then(function () {
-            _dbg('  PLAY OK rs=' + _aRef.readyState + ' vol=' + _aRef.volume + ' muted=' + _aRef.muted);
-            setTimeout(function () {
-              var _ct = _aRef.currentTime;
-              var _adv = (_evtCtStart !== null) ? (_ct - _evtCtStart) : _ct;
-              _dbg('  500ms: AUDIBLE=' + (_evtPlay && _adv > 0.1 && _aRef.volume > 0 && !_aRef.muted && !_aRef.error) + ' playing-evt=' + _evtPlay + ' adv=' + _adv.toFixed(2) + ' ct=' + _ct.toFixed(2));
-            }, 500);
-          })
-          .catch(function (err) { _dbg('  PLAY FAIL: track ' + i + ' ' + (err && err.message)); });
-      }
+      // Always call play() inside the gesture — iOS allows play() on paused
+      // elements within a tap handler regardless of session history.
+      a.play()
+        .then(function () { _dbg('  PLAY OK vol=' + _aRef.volume); })
+        .catch(function (err) { _dbg('  PLAY FAIL: track ' + i + ' ' + (err && err.message)); });
       _playHandles.push(a);
       _audioPre[_mKey] = a;
     });
