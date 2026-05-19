@@ -486,6 +486,25 @@ var _playHandles = []; // currently active <audio> elements (play/pause/seek)
 var _playTimer = null;
 var _playing = false;
 
+// iOS Safari cannot advance currentTime through large base64 data URLs.
+// Convert once per session to a blob: URL which iOS can stream properly.
+var _blobUrlCache = {};
+function _toBlobUrl(dataUrl) {
+  if (!dataUrl || !/^data:/.test(dataUrl)) return dataUrl;
+  var key = dataUrl.slice(0, 60) + ':' + dataUrl.length;
+  if (_blobUrlCache[key]) return _blobUrlCache[key];
+  try {
+    var parts = dataUrl.split(',');
+    var mime  = parts[0].match(/:(.*?);/)[1];
+    var bin   = atob(parts[1]);
+    var buf   = new Uint8Array(bin.length);
+    for (var bi = 0; bi < bin.length; bi++) buf[bi] = bin.charCodeAt(bi);
+    var url = URL.createObjectURL(new Blob([buf], {type: mime}));
+    _blobUrlCache[key] = url;
+    return url;
+  } catch (_e) { return dataUrl; }
+}
+
 function _preloadAudio(sceneId, lane, src) {
   var key = sceneId + '_' + lane;
   var existing = _audioPre[key];
@@ -731,7 +750,11 @@ var _engine = {
       // For old saved tracks that only have src: allow local paths, skip remote URLs.
       var _rawSrc = it.localPath || it.src || '';
       var _playbackSrc = _rawSrc && (/^data:/.test(_rawSrc) || !/^https?:\/\//.test(_rawSrc)) ? _rawSrc : null;
-      _dbg('  track[' + i + '] localPath=' + (_playbackSrc ? _playbackSrc.slice(0, 60) : 'NONE') +
+      // Convert data URLs to blob URLs — iOS Safari cannot advance currentTime
+      // through large base64 data URLs (plays silent, ct stays 0). Blob URLs
+      // give iOS direct binary access and work reliably for any file size.
+      if (_playbackSrc && /^data:/.test(_playbackSrc)) _playbackSrc = _toBlobUrl(_playbackSrc);
+      _dbg('  track[' + i + '] src=' + (_playbackSrc ? _playbackSrc.slice(0, 60) : 'NONE') +
         ' sourceUrl=' + (it.sourceUrl || it.src || '').slice(0, 40));
       if (!_playbackSrc) { _dbg('  SKIP: no localPath — re-add track to cache'); return; }
       // Fix legacy tracks stored with millisecond duration (Openverse bug)
@@ -1786,8 +1809,13 @@ function _bindEditor(idx) {
             var _mulIdx = (_msc && _msc.tracks.music) ? _msc.tracks.music.length - 1 : -1;
             if (_msc && _mulIdx >= 0) {
               var _mulKey = _msc.id + '_music_track_' + _mulIdx;
-              _audioPre[_mulKey] = new Audio(localSrc);
-              _dbg('Music DL cached key=' + _mulKey.slice(-24) + ' size=' + Math.round(localSrc.length / 1024) + 'KB');
+              // Use blob URL so iOS Safari can advance currentTime (data URLs stall at ct=0)
+              var _mBlobUrl = _toBlobUrl(localSrc);
+              var _mEl = document.createElement('audio');
+              _mEl.src = _mBlobUrl;
+              _mEl.load();
+              _audioPre[_mulKey] = _mEl;
+              _dbg('Music DL cached key=' + _mulKey.slice(-24) + ' size=' + Math.round(localSrc.length / 1024) + 'KB blobUrl=' + _mBlobUrl.slice(0, 30));
             }
             _renderTracks(idx);
             _showPanel(null);
