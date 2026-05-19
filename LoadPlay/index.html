@@ -3368,6 +3368,9 @@ window.addEventListener('online',  () => toast('Back online'));
       lpDevRow('Published',           String(readPublished().length)) +
       lpDevRow('Watch history',       String(readWatchHistory().length)) +
       lpDevRow('Profile saved',       (localStorage.getItem('lp_profile') ? 'yes' : 'no'), !!localStorage.getItem('lp_profile')) +
+      lpDevRow('Provider tests run',  String(readProviderTestReport().tests.length)) +
+      lpDevRow('Media cache entries', String(readMediaCacheMeta().entries.length)) +
+      lpDevRow('Build',               'LoadPlay v2 provider-wiring-pass') +
       '</div>';
     el.innerHTML = html;
   }
@@ -4627,12 +4630,19 @@ window.addEventListener('online',  () => toast('Back online'));
     { id: 'gdelt',            name: 'GDELT',                      requiresKey: false, type: 'news_research',           rows: ['News', 'World Events'] },
     { id: 'nasa',             name: 'NASA Open APIs',             requiresKey: true,  keyName: 'lp_api_nasa',       type: 'science_space',           rows: ['Space', 'Kids Science', 'Educational'] },
     { id: 'nps',              name: 'National Park Service API',  requiresKey: true,  keyName: 'lp_api_nps',        type: 'nature_history_places',   rows: ['Nature', 'History', 'Educational'] },
-    { id: 'rss',              name: 'RSS Feed Importer',          requiresKey: false, type: 'feed_metadata',           rows: ['News', 'Newly Added'] }
+    { id: 'rss',              name: 'RSS Feed Importer',          requiresKey: false, type: 'feed_metadata',           rows: ['News', 'Newly Added'] },
+    { id: 'ccmixter',          name: 'ccMixter',                   requiresKey: false, type: 'creative_commons_music',   rows: ['Music', 'Soundtrack Discovery'] },
+    { id: 'fma',               name: 'Free Music Archive',         requiresKey: false, type: 'open_license_music',       rows: ['Music', 'Soundtrack Discovery'] }
   ];
   function readConnectorState() { try { return JSON.parse(localStorage.getItem('lp_connector_state') || 'null') || {}; } catch (e) { return {}; } }
   function writeConnectorState(s) { try { localStorage.setItem('lp_connector_state', JSON.stringify(s)); } catch (e) {} }
   function readConnectorContent() { try { var a = JSON.parse(localStorage.getItem('lp_imported_content') || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
   function writeConnectorContent(a) { try { localStorage.setItem('lp_imported_content', JSON.stringify(a)); } catch (e) {} }
+  function readProviderTestReport() { try { var d = JSON.parse(localStorage.getItem('lp_provider_test_report') || 'null'); return d || { tests: [] }; } catch (e) { return { tests: [] }; } }
+  function writeProviderTestReport(r) { try { localStorage.setItem('lp_provider_test_report', JSON.stringify(r)); } catch (e) {} }
+  function readMediaCacheMeta() { try { var d = JSON.parse(localStorage.getItem('lp_media_cache_meta') || 'null'); return d || { entries: [], lastUpdated: null }; } catch (e) { return { entries: [], lastUpdated: null }; } }
+  function writeMediaCacheMeta(m) { try { localStorage.setItem('lp_media_cache_meta', JSON.stringify(m)); } catch (e) {} }
+  function lpMarkCacheStatus(itemId, status) { var m = readMediaCacheMeta(); var idx = -1; m.entries.forEach(function(e,i){ if(e.itemId===itemId) idx=i; }); var entry = { itemId: itemId, downloadStatus: status, updatedAt: new Date().toISOString() }; if (idx >= 0) { m.entries[idx] = Object.assign(m.entries[idx], entry); } else { m.entries.push(entry); } m.lastUpdated = new Date().toISOString(); writeMediaCacheMeta(m); }
   function lpStatusForLicense(license) {
     if (!license) return 'rights_review';
     var s = String(license).toLowerCase();
@@ -4744,6 +4754,144 @@ window.addEventListener('online',  () => toast('Back online'));
       });
     });
   }
+
+  function lpFetchPexels(key) {
+    var url = 'https://api.pexels.com/videos/search?query=nature+landscape&per_page=10';
+    return fetch(url, { headers: { Authorization: key } })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        return ((data || {}).videos || []).map(function (item) {
+          var vf = ((item.video_files || []).filter(function (f) { return f.quality === 'sd'; })[0]) || (item.video_files || [])[0] || {};
+          return lpNormalizeImportedItem({
+            id: String(item.id), title: (item.url || '').split('/').filter(Boolean).pop() || ('Pexels Video ' + item.id),
+            creator: (item.user || {}).name || 'Pexels creator', sourceUrl: item.url || '',
+            mediaUrl: vf.link || '', thumbnailUrl: item.image || '', mediaType: 'video',
+            license: 'Pexels License', licenseUrl: 'https://www.pexels.com/license/',
+            category: 'Background Loops', duration: item.duration || null
+          }, 'pexels');
+        });
+      });
+  }
+  function lpFetchPixabay(key) {
+    var url = 'https://pixabay.com/api/videos/?key=' + encodeURIComponent(key) + '&q=nature&per_page=10&safesearch=true';
+    return fetch(url)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        return ((data || {}).hits || []).map(function (item) {
+          var src = (((item.videos || {}).medium) || ((item.videos || {}).small) || ((item.videos || {}).tiny) || {});
+          return lpNormalizeImportedItem({
+            id: String(item.id), title: 'Pixabay Video ' + item.id, creator: item.user || 'Pixabay creator',
+            sourceUrl: item.pageURL || '', mediaUrl: src.url || '',
+            thumbnailUrl: item.picture_id ? ('https://i.vimeocdn.com/video/' + item.picture_id + '_640x360.jpg') : '',
+            mediaType: 'video', license: 'Pixabay License', licenseUrl: 'https://pixabay.com/service/license-summary/',
+            category: 'Background Loops', tags: (item.tags || '').split(',').map(function (t) { return t.trim(); })
+          }, 'pixabay');
+        });
+      });
+  }
+  function lpFetchFreesound(key) {
+    var url = 'https://freesound.org/apiv2/search/text/?query=ambient&token=' + encodeURIComponent(key) + '&format=json&fields=id,name,description,username,license,previews,duration,tags&page_size=10';
+    return fetch(url)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        return ((data || {}).results || []).map(function (item) {
+          var pre = item.previews || {};
+          return lpNormalizeImportedItem({
+            id: String(item.id), title: item.name || ('Freesound ' + item.id), creator: item.username || 'Freesound creator',
+            sourceUrl: 'https://freesound.org/s/' + item.id + '/', mediaUrl: pre['preview-hq-mp3'] || pre['preview-lq-mp3'] || '',
+            mediaType: 'audio', license: item.license || 'CC', licenseUrl: item.license || '',
+            description: (item.description || '').slice(0, 300), category: 'SFX',
+            duration: item.duration || null, tags: item.tags || []
+          }, 'freesound');
+        });
+      });
+  }
+  function lpFetchJamendo(key) {
+    var url = 'https://api.jamendo.com/v3.0/tracks/?client_id=' + encodeURIComponent(key) + '&format=json&limit=10&audioformat=mp32';
+    return fetch(url)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        return ((data || {}).results || []).map(function (item) {
+          return lpNormalizeImportedItem({
+            id: item.id, title: item.name || 'Jamendo track', creator: item.artist_name || 'Jamendo artist',
+            sourceUrl: item.shareurl || '', mediaUrl: item.audio || '', thumbnailUrl: item.album_image || '',
+            mediaType: 'audio', license: 'CC BY-NC-SA', licenseUrl: 'https://creativecommons.org/licenses/by-nc-sa/3.0/',
+            category: 'Music', duration: item.duration || null
+          }, 'jamendo');
+        });
+      });
+  }
+  function lpFetchNasa(key) {
+    var url = 'https://images-api.nasa.gov/search?q=space+exploration&media_type=image,video&page_size=10';
+    return fetch(url)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        return (((data || {}).collection || {}).items || []).slice(0, 10).map(function (item) {
+          var d = (item.data || [])[0] || {};
+          var lnk = ((item.links || []).filter(function (l) { return l.rel === 'preview'; })[0] || (item.links || [])[0] || {}).href || '';
+          return lpNormalizeImportedItem({
+            id: d.nasa_id || ('nasa_' + Math.random().toString(36).slice(2)), title: d.title || 'NASA media',
+            creator: d.photographer || d.secondary_creator || 'NASA',
+            sourceUrl: 'https://images.nasa.gov/details/' + (d.nasa_id || ''),
+            mediaUrl: lnk, thumbnailUrl: lnk, mediaType: d.media_type || 'image',
+            license: 'NASA Public', licenseUrl: 'https://www.nasa.gov/multimedia/guidelines/',
+            description: (d.description || '').slice(0, 300), category: 'Space', tags: d.keywords || []
+          }, 'nasa');
+        });
+      });
+  }
+  function lpFetchNps(key) {
+    var url = 'https://developer.nps.gov/api/v1/multimedia/images?limit=10&api_key=' + encodeURIComponent(key);
+    return fetch(url)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        return ((data || {}).data || []).map(function (item) {
+          var imgUrl = ((item.images || [])[0] || {}).url || '';
+          return lpNormalizeImportedItem({
+            id: item.id || ('nps_' + Math.random().toString(36).slice(2)), title: item.title || 'National Park media',
+            creator: item.credit || 'National Park Service', sourceUrl: item.url || '',
+            mediaUrl: imgUrl, thumbnailUrl: imgUrl, mediaType: 'image',
+            license: 'US Government Public Domain', licenseUrl: 'https://www.nps.gov/aboutus/disclaimer.htm',
+            description: (item.caption || item.altText || '').slice(0, 300), category: 'Nature'
+          }, 'nps');
+        });
+      });
+  }
+  function lpFetchCcMixter() {
+    var url = 'https://ccmixter.org/api/query?f=json&t=media&limit=10&lic=c';
+    return fetch(url)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        return (Array.isArray(data) ? data : []).map(function (item) {
+          var fileUrl = (item.files && item.files[0]) ? (item.files[0].download_url || '') : '';
+          return lpNormalizeImportedItem({
+            id: item.upload_id ? String(item.upload_id) : ('ccm_' + Math.random().toString(36).slice(2)),
+            title: item.upload_name || 'ccMixter track',
+            creator: item.user_real_name || item.user_name || 'ccMixter artist',
+            sourceUrl: item.upload_url || '', mediaUrl: fileUrl, mediaType: 'audio',
+            license: item.license_name || 'CC', licenseUrl: item.license_url || '',
+            category: 'Music', description: (item.upload_description || '').slice(0, 300)
+          }, 'ccmixter');
+        });
+      });
+  }
+  function lpFetchFma() {
+    var url = 'https://freemusicarchive.org/api/get/tracks.json?limit=10&license_id=1';
+    return fetch(url)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        return ((data || {}).dataset || []).map(function (item) {
+          return lpNormalizeImportedItem({
+            id: item.track_id ? String(item.track_id) : ('fma_' + Math.random().toString(36).slice(2)),
+            title: item.track_title || 'FMA track', creator: item.artist_name || 'FMA artist',
+            sourceUrl: item.track_url || '', mediaUrl: item.track_file || '',
+            thumbnailUrl: item.album_image_file || '', mediaType: 'audio',
+            license: item.license_title || 'CC', licenseUrl: item.license_url || '',
+            category: 'Music', duration: item.track_duration ? parseInt(item.track_duration) : null
+          }, 'fma');
+        });
+      });
+  }
   function lpConnectorFetch(connector) {
     var key = connector.requiresKey ? (function () { try { return localStorage.getItem(connector.keyName); } catch (e) { return null; } })() : null;
     if (connector.requiresKey && !key) return Promise.resolve(lpDemoPreview(connector.name));
@@ -4751,8 +4899,14 @@ window.addEventListener('online',  () => toast('Back online'));
     if (connector.id === 'wikimedia')        return lpFetchWikimedia().catch(function () { return lpDemoPreview(connector.name); });
     if (connector.id === 'openverse')        return lpFetchOpenverse().catch(function () { return lpDemoPreview(connector.name); });
     if (connector.id === 'gdelt')            return lpFetchGdelt().catch(function () { return lpDemoPreview(connector.name); });
-    // For other key-required providers we'd add real fetchers when
-    // the key + endpoint policies are confirmed. Until then, demo.
+    if (connector.id === 'pexels')           return lpFetchPexels(key).catch(function () { return lpDemoPreview(connector.name); });
+    if (connector.id === 'pixabay')          return lpFetchPixabay(key).catch(function () { return lpDemoPreview(connector.name); });
+    if (connector.id === 'freesound')        return lpFetchFreesound(key).catch(function () { return lpDemoPreview(connector.name); });
+    if (connector.id === 'jamendo')          return lpFetchJamendo(key).catch(function () { return lpDemoPreview(connector.name); });
+    if (connector.id === 'nasa')             return lpFetchNasa(key).catch(function () { return lpDemoPreview(connector.name); });
+    if (connector.id === 'nps')              return lpFetchNps(key).catch(function () { return lpDemoPreview(connector.name); });
+    if (connector.id === 'ccmixter')         return lpFetchCcMixter().catch(function () { return lpDemoPreview(connector.name); });
+    if (connector.id === 'fma')              return lpFetchFma().catch(function () { return lpDemoPreview(connector.name); });
     return Promise.resolve(lpDemoPreview(connector.name));
   }
   function renderContentSources() {
@@ -4761,7 +4915,7 @@ window.addEventListener('online',  () => toast('Back online'));
     document.body.classList.add('lp-paging');
     var pg = $$('lp-page'); if (pg) pg.hidden = false;
     $$('lp-page-title').textContent = 'Content Sources';
-    $$('lp-page-blurb').textContent = '11 free / public-domain / open-license / open-data sources. Discovery only — every item passes through Draft Catalog or Rights Review before publication.';
+    $$('lp-page-blurb').textContent = '13 free / public-domain / open-license / open-data sources. Discovery only — every item passes through Draft Catalog or Rights Review before publication.';
     var st = readConnectorState();
     var rows = LP_CONNECTORS.map(function (c) {
       var s = st[c.id] || { enabled: true, lastChecked: null, status: c.requiresKey ? 'needs_key' : 'no_key_required' };
@@ -4799,11 +4953,13 @@ window.addEventListener('online',  () => toast('Back online'));
         lpConnectorFetch(c).then(function (items) {
           st[cid].status = items.length ? 'connected' : 'empty';
           writeConnectorState(st);
+          var rpt = readProviderTestReport(); rpt.tests.push({ connectorId: cid, providerName: c.name, testedAt: new Date().toISOString(), status: items.length ? 'ok' : 'empty', itemCount: items.length }); if (rpt.tests.length > 200) rpt.tests = rpt.tests.slice(-200); writeProviderTestReport(rpt);
           try { window.toast(c.name + ': ' + items.length + ' result(s).'); } catch (e2) {}
           renderContentSources();
         }).catch(function () {
           st[cid].status = 'error';
           writeConnectorState(st);
+          var rptE = readProviderTestReport(); rptE.tests.push({ connectorId: cid, providerName: c.name, testedAt: new Date().toISOString(), status: 'error', itemCount: 0 }); if (rptE.tests.length > 200) rptE.tests = rptE.tests.slice(-200); writeProviderTestReport(rptE);
           try { window.toast(c.name + ': connection error.'); } catch (e2) {}
           renderContentSources();
         });
