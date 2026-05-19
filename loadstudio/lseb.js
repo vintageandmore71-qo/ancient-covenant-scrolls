@@ -522,7 +522,21 @@ function _preloadAudio(sceneId, lane, src) {
 }
 
 function _stopAudio() {
-  _playHandles.forEach(function (h) { try { h.pause(); } catch (_) {} });
+  _playHandles.forEach(function (h) {
+    try { h.pause(); } catch (_) {}
+    try { h.currentTime = 0; } catch (_) {}
+    try { h.src = ''; } catch (_) {}
+    try { h.load(); } catch (_) {}
+  });
+  // Remove stale music elements from _audioPre so the next Play call (which IS
+  // inside a user-gesture click) creates a fresh element and can call play()
+  // without iOS Safari rejecting it as a suspended/ended stale element.
+  // Scoped to _music_track_ keys — voice/narration/sfx lanes left intact.
+  Object.keys(_audioPre).forEach(function (k) {
+    if (k.indexOf('_music_track_') !== -1 && _playHandles.indexOf(_audioPre[k]) !== -1) {
+      delete _audioPre[k];
+    }
+  });
   _playHandles = [];
 }
 
