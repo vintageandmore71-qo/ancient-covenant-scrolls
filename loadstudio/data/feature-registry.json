@@ -5381,6 +5381,120 @@
       ],
       "type": "local",
       "status": "Local Ready"
+    },
+    {
+      "id": "director-ai",
+      "title": "Director AI",
+      "desc": "AI-assisted scene direction. Generates scene instructions, narration cues, pacing notes, and director notes for each scene.",
+      "tools": [
+        "generate scene direction",
+        "generate narration cue",
+        "pacing notes",
+        "save director notes"
+      ],
+      "type": "provider",
+      "status": "Provider Needed"
+    },
+    {
+      "id": "character-stability",
+      "title": "Character Stability Engine",
+      "desc": "Lock character appearance across scenes. Manages consistency scores, approved reference images, and visual anchors per character.",
+      "tools": [
+        "consistency score",
+        "approved reference",
+        "lock character",
+        "save stability settings"
+      ],
+      "type": "local",
+      "status": "Local Ready"
+    },
+    {
+      "id": "text-to-video",
+      "title": "Text-to-Video Studio",
+      "desc": "Generate video clips from text prompts. Connects to local or remote video generation providers.",
+      "tools": [
+        "text prompt",
+        "style",
+        "duration",
+        "provider select",
+        "generate",
+        "save to vault"
+      ],
+      "type": "provider",
+      "status": "Provider Needed"
+    },
+    {
+      "id": "image-to-video",
+      "title": "Image-to-Video Studio",
+      "desc": "Animate a still image into a video clip using a motion prompt and local or remote video generation.",
+      "tools": [
+        "source image",
+        "motion prompt",
+        "duration",
+        "provider select",
+        "generate",
+        "save to vault"
+      ],
+      "type": "provider",
+      "status": "Provider Needed"
+    },
+    {
+      "id": "video-stylizer",
+      "title": "Video Stylizer",
+      "desc": "Apply visual style transfer to video clips. Change art style, color grade, or visual tone of generated footage.",
+      "tools": [
+        "source clip",
+        "style prompt",
+        "provider select",
+        "apply style",
+        "save result"
+      ],
+      "type": "provider",
+      "status": "Provider Needed"
+    },
+    {
+      "id": "video-outpainting",
+      "title": "Video Outpainting",
+      "desc": "Extend the frame of a video clip beyond its original edges using AI outpainting.",
+      "tools": [
+        "source clip",
+        "expand direction",
+        "outpaint prompt",
+        "provider select",
+        "generate",
+        "save result"
+      ],
+      "type": "provider",
+      "status": "Provider Needed"
+    },
+    {
+      "id": "prompt-writer",
+      "title": "Prompt Writer",
+      "desc": "Write and manage image, video, and audio prompts for each scene. Stores prompt drafts and approved versions.",
+      "tools": [
+        "scene prompt",
+        "image prompt",
+        "video prompt",
+        "audio prompt",
+        "save prompt",
+        "copy prompt"
+      ],
+      "type": "local",
+      "status": "Local Ready"
+    },
+    {
+      "id": "provider-registry",
+      "title": "Provider Registry",
+      "desc": "Manage all connected AI and media providers. Configure endpoints, API keys, capability routing, and fallback chains.",
+      "tools": [
+        "list providers",
+        "add provider",
+        "test provider",
+        "set routing",
+        "save config"
+      ],
+      "type": "integration",
+      "status": "Integration Required"
     }
   ],
   "features": [
