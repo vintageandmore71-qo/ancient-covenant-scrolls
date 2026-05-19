@@ -801,6 +801,19 @@ var _engine = {
           _dbg('  500ms: ct=' + _aRef.currentTime.toFixed(2) + ' paused=' + _aRef.paused + ' vol=' + _aRef.volume + ' err=' + (_aRef.error ? _aRef.error.code : 'none'));
         }, 500);
       } else {
+        // iOS Safari releases the audio session when pause() is called outside
+        // a user gesture (e.g. from RAF). Reassigning src + load() inside this
+        // gesture re-registers the element with iOS's session manager.
+        // The canplay listener handles mid-scene resume seek after the reload.
+        if (lt > 0.05) {
+          (function (_rEl, _rT) {
+            _rEl.addEventListener('canplay', function _rSeek() {
+              _rEl.removeEventListener('canplay', _rSeek);
+              try { _rEl.currentTime = _rT; } catch (_) {}
+            });
+          })(a, lt);
+        }
+        try { a.src = _playbackSrc; a.load(); } catch (_) {}
         a.play()
           .then(function () {
             _dbg('  PLAY OK rs=' + _aRef.readyState + ' vol=' + _aRef.volume + ' muted=' + _aRef.muted);
