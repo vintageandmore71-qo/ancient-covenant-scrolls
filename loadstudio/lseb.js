@@ -21,7 +21,8 @@ var _MUSIC_DEMO = {
   'fresh':      [{id:'music-demo-3', t:'Fresh Demo',    a:'Demo', d:'0:05', c:'#2e7d32', k:'music-fresh'}],
   'acoustic':   [{id:'music-demo-4', t:'Acoustic Demo', a:'Demo', d:'0:05', c:'#f57f17', k:'music-acoustic'}],
   'electronic': [{id:'music-demo-5', t:'Electronic Demo',a:'Demo', d:'0:05', c:'#283593', k:'music-electronic'}],
-  'hiphop':     [{id:'music-demo-6', t:'Hip-Hop Demo',  a:'Demo', d:'0:05', c:'#e65100', k:'music-hiphop'}]
+  'hiphop':     [{id:'music-demo-6', t:'Hip-Hop Demo',  a:'Demo', d:'0:05', c:'#e65100', k:'music-hiphop'}],
+  'test':       [{id:'music-demo-7', t:'Audible Test',  a:'Demo', d:'0:05', c:'#555555', k:'music-test'}]
 };
 
 // cs=commercialSafe  ar=attributionRequired  po=personalOnly
@@ -46,13 +47,14 @@ var _SFX_DEMO = {
 // Music + legacy SFX demo: assets/audio/demo/  (creator-owned, commercial OK)
 // Per-category SFX:        assets/sfx/         (CC0, creator-owned synth WAVs)
 var _DEMO_AUDIO = {
-  'music-mellow':          'assets/audio/demo/demo-music-mellow.wav',
-  'music-modern':          'assets/audio/demo/demo-music-upbeat.wav',
-  'music-energetic':       'assets/audio/demo/demo-music-energetic.wav',
-  'music-acoustic':        'assets/audio/demo/demo-music-acoustic.wav',
-  'music-electronic':      'assets/audio/demo/demo-music-electronic.wav',
-  'music-hiphop':          'assets/audio/demo/demo-music-hiphop.wav',
-  'music-fresh':           'assets/audio/demo/demo-music-fresh.wav',
+  'music-mellow':          'assets/audio/demo/demo-music-mellow.mp3',
+  'music-modern':          'assets/audio/demo/demo-music-upbeat.mp3',
+  'music-energetic':       'assets/audio/demo/demo-music-energetic.mp3',
+  'music-acoustic':        'assets/audio/demo/demo-music-acoustic.mp3',
+  'music-electronic':      'assets/audio/demo/demo-music-electronic.mp3',
+  'music-hiphop':          'assets/audio/demo/demo-music-hiphop.mp3',
+  'music-fresh':           'assets/audio/demo/demo-music-fresh.mp3',
+  'music-test':            'assets/audio/demo/audible-test.mp3',
   // Legacy aliases kept so old saved scenes continue to resolve
   'sfx-spring':            'assets/audio/demo/demo-sfx-boing.wav',
   'sfx-swish':             'assets/audio/demo/demo-sfx-whoosh.wav',
@@ -1274,6 +1276,7 @@ function _openSceneEditor(idx) {
                 '<button class="ve-cat-tile" data-music-cat="acoustic"  type="button" style="background:linear-gradient(135deg,#5d4037,#f57f17)"><span class="ve-cat-tile-label">Acoustic</span></button>' +
                 '<button class="ve-cat-tile" data-music-cat="electronic" type="button" style="background:linear-gradient(135deg,#283593,#6a1b9a)"><span class="ve-cat-tile-label">Electronic</span></button>' +
                 '<button class="ve-cat-tile" data-music-cat="hiphop"    type="button" style="background:linear-gradient(135deg,#212121,#e65100)"><span class="ve-cat-tile-label">Hip-Hop</span></button>' +
+                '<button class="ve-cat-tile" data-music-cat="test"     type="button" style="background:linear-gradient(135deg,#333,#555)"><span class="ve-cat-tile-label">Test</span></button>' +
               '</div>' +
             '</div>' +
             '<div id="lseb-music-list-pane" style="display:none">' +
