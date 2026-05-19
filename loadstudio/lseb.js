@@ -522,14 +522,22 @@ function _preloadAudio(sceneId, lane, src) {
 }
 
 function _stopAudio() {
+  var _musicEls = [];
+  Object.keys(_audioPre).forEach(function(k) {
+    if (k.indexOf('_music_track_') !== -1) _musicEls.push(_audioPre[k]);
+  });
   _playHandles.forEach(function (h) {
-    try { h.pause(); } catch (_) {}
-    try { h.currentTime = 0; } catch (_) {}
-    // src and load() intentionally omitted: clearing src revokes the iOS Safari
-    // gesture-unlock granted during the Add tap. Without that permission the
-    // next play() call on a fresh element is silently rejected by Safari.
-    // Keeping the element in _audioPre with its src intact lets replay call
-    // play() on the same gesture-blessed element, which Safari allows.
+    if (_musicEls.indexOf(h) !== -1) {
+      // Mute + rewind instead of pause. pause() called outside a gesture causes
+      // iOS Safari to release the audio session; future play() then fails silently
+      // even inside a new gesture. Keeping the element playing at vol=0 means
+      // the next Play tap reaches it via the !paused path and just unmutes.
+      try { h.volume = 0; } catch (_) {}
+      try { h.currentTime = 0; } catch (_) {}
+    } else {
+      try { h.pause(); } catch (_) {}
+      try { h.currentTime = 0; } catch (_) {}
+    }
   });
   _playHandles = [];
 }
@@ -801,19 +809,6 @@ var _engine = {
           _dbg('  500ms: ct=' + _aRef.currentTime.toFixed(2) + ' paused=' + _aRef.paused + ' vol=' + _aRef.volume + ' err=' + (_aRef.error ? _aRef.error.code : 'none'));
         }, 500);
       } else {
-        // iOS Safari releases the audio session when pause() is called outside
-        // a user gesture (e.g. from RAF). Reassigning src + load() inside this
-        // gesture re-registers the element with iOS's session manager.
-        // The canplay listener handles mid-scene resume seek after the reload.
-        if (lt > 0.05) {
-          (function (_rEl, _rT) {
-            _rEl.addEventListener('canplay', function _rSeek() {
-              _rEl.removeEventListener('canplay', _rSeek);
-              try { _rEl.currentTime = _rT; } catch (_) {}
-            });
-          })(a, lt);
-        }
-        try { a.src = _playbackSrc; a.load(); } catch (_) {}
         a.play()
           .then(function () {
             _dbg('  PLAY OK rs=' + _aRef.readyState + ' vol=' + _aRef.volume + ' muted=' + _aRef.muted);
