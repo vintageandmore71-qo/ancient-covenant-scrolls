@@ -5218,6 +5218,53 @@
           "status": "local implemented"
         }
       ]
+    },
+    {
+      "id": "cinepwa",
+      "title": "CinePWA Package Builder",
+      "desc": "Package production into a portable offline CinePWA with scenes, characters, rights, voices, and assets.",
+      "tools": [
+        "package title",
+        "version",
+        "author",
+        "license",
+        "export CinePWA"
+      ],
+      "type": "local",
+      "toolRecords": [
+        {
+          "id": "cinepwa-package-title",
+          "label": "package title",
+          "section": "cinepwa",
+          "status": "local implemented"
+        },
+        {
+          "id": "cinepwa-export",
+          "label": "export CinePWA",
+          "section": "cinepwa",
+          "status": "local implemented"
+        }
+      ]
+    },
+    {
+      "id": "load-eco",
+      "title": "Load Eco Infrastructure",
+      "desc": "Shared provider registry, pipeline routing, and asset registry for Load Studio and Load Play.",
+      "tools": [
+        "provider registry",
+        "pipeline registry",
+        "asset registry",
+        "health check"
+      ],
+      "type": "integration",
+      "toolRecords": [
+        {
+          "id": "load-eco-health-check",
+          "label": "health check",
+          "section": "load-eco",
+          "status": "integration required"
+        }
+      ]
     }
   ],
   "features": [
@@ -9306,6 +9353,24 @@
       "label": "export asset-registry.json",
       "section": "media-vault",
       "status": "local implemented"
+    },
+    {
+      "id": "cinepwa-package-title",
+      "label": "package title",
+      "section": "cinepwa",
+      "status": "local implemented"
+    },
+    {
+      "id": "cinepwa-export",
+      "label": "export CinePWA",
+      "section": "cinepwa",
+      "status": "local implemented"
+    },
+    {
+      "id": "load-eco-health-check",
+      "label": "health check",
+      "section": "load-eco",
+      "status": "integration required"
     }
   ]
 }
