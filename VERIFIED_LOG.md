@@ -202,6 +202,19 @@ but should not be treated as known-good baselines.
 - **Demo labels changed (mistake):** Vlog/Pop/Dynamic were renamed away from their working names. Corrected in v170.
 - **Recovery:** `git checkout e365717 -- loadstudio/lseb.js loadstudio/sw.js`
 
+### v172 — commit `cc6cbc2` — 2026-05-19
+
+- **Status:** Confirmed working by user ("it works in safari").
+- **Browser/device:** iPad Safari
+- **What it has:**
+  - All 7 demo music tracks converted to MP3 (44100 Hz stereo 128 kbps) — WAV files kept as fallback for legacy saves
+  - `audible-test.mp3` (5s 440 Hz sine tone) added as Test category in Music drawer
+  - `_DEMO_AUDIO` keys updated to `.mp3` paths
+  - SW: `loadstudio-complete-v172`
+- **Root cause resolved:** iOS Safari was suspending silent WAV audio elements during gesture-unlock playback. MP3 at 44100 Hz stereo plays reliably without suspension.
+- **NOT tested in this run:** individual genre demos (Mellow/Upbeat/Energetic/Fresh/Acoustic/Electronic/Hip-Hop) — user confirmed the Test category track specifically.
+- **Recovery:** `git checkout cc6cbc2 -- loadstudio/lseb.js loadstudio/sw.js loadstudio/assets/audio/demo/`
+
 ### v170 — commit `fabf85d` — current verified baseline (2026-05-18)
 
 - **Status:** Built and merged. Pending iPad verification.
