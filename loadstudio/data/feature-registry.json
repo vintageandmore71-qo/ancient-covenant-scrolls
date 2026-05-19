@@ -3,7 +3,7 @@
     {
       "id": "dashboard",
       "title": "Studio Lobby",
-      "desc": "Recent projects, create new project, import project, export project, return to Main Load, open Load Play™.",
+      "desc": "Recent projects, create new project, import project, export project, return to Main Load, open Load Play\u2122.",
       "tools": [
         "recent projects",
         "create new project",
@@ -21,7 +21,7 @@
         "project thumbnail",
         "project status draft editing ready exported published",
         "return to Main Load",
-        "open Load Play™"
+        "open Load Play\u2122"
       ],
       "type": "local",
       "toolRecords": [
@@ -123,7 +123,7 @@
         },
         {
           "id": "dashboard-open-load-play",
-          "label": "open Load Play™",
+          "label": "open Load Play\u2122",
           "section": "dashboard",
           "status": "local implemented"
         }
@@ -144,7 +144,7 @@
         "docuseries",
         "biography",
         "news segment",
-        "children’s animation",
+        "children\u2019s animation",
         "2D animation",
         "motion comic",
         "book trailer",
@@ -233,7 +233,7 @@
         },
         {
           "id": "templates-children-s-animation",
-          "label": "children’s animation",
+          "label": "children\u2019s animation",
           "section": "templates",
           "status": "local implemented"
         },
@@ -392,7 +392,7 @@
         "Markdown import",
         "HTML import",
         "PWA zip import",
-        "Load Studio™ package import",
+        "Load Studio\u2122 package import",
         "CinePWA package import",
         "subtitle file import",
         "JSON project file import",
@@ -478,7 +478,7 @@
         },
         {
           "id": "import-center-load-studio-package-import",
-          "label": "Load Studio™ package import",
+          "label": "Load Studio\u2122 package import",
           "section": "import-center",
           "status": "local plus integration"
         },
@@ -1221,7 +1221,7 @@
     {
       "id": "timeline-editor",
       "title": "Editing Bay",
-      "desc": "Edit Video bay — multi-track timeline + large preview, in LoadStudio purple.",
+      "desc": "Edit Video bay \u2014 multi-track timeline + large preview, in LoadStudio purple.",
       "tools": [
         "add scene",
         "delete scene",
@@ -3702,7 +3702,7 @@
         "2D animation look",
         "documentary look",
         "news look",
-        "children’s animation look",
+        "children\u2019s animation look",
         "motion comic look"
       ],
       "type": "local",
@@ -3817,7 +3817,7 @@
         },
         {
           "id": "look-lab-children-s-animation-look",
-          "label": "children’s animation look",
+          "label": "children\u2019s animation look",
           "section": "look-lab",
           "status": "local implemented"
         },
@@ -4270,7 +4270,7 @@
       "title": "Export Studio",
       "desc": "Export production packages and metadata.",
       "tools": [
-        "Load Studio™ project",
+        "Load Studio\u2122 project",
         "CinePWA package",
         "standalone HTML",
         "PWA zip",
@@ -4289,7 +4289,7 @@
       "toolRecords": [
         {
           "id": "export-studio-load-studio-project",
-          "label": "Load Studio™ project",
+          "label": "Load Studio\u2122 project",
           "section": "export-studio",
           "status": "local plus integration"
         },
@@ -4375,15 +4375,15 @@
     },
     {
       "id": "load-play-prep",
-      "title": "Publish to Load Play™ Preparation",
-      "desc": "Prepare content for Load Play™ without mixing viewer features into Studio.",
+      "title": "Publish to Load Play\u2122 Preparation",
+      "desc": "Prepare content for Load Play\u2122 without mixing viewer features into Studio.",
       "tools": [
         "validate package",
         "check rights",
         "check content safety",
         "check thumbnail safety",
         "prepare preview",
-        "upload to Load Play™",
+        "upload to Load Play\u2122",
         "choose category",
         "add poster",
         "add description",
@@ -4423,7 +4423,7 @@
         },
         {
           "id": "load-play-prep-upload-to-load-play",
-          "label": "upload to Load Play™",
+          "label": "upload to Load Play\u2122",
           "section": "load-play-prep",
           "status": "integration required"
         },
@@ -4915,7 +4915,7 @@
       "desc": "Links between the standalone Load apps.",
       "tools": [
         "link to Main Load",
-        "link to Load Play™",
+        "link to Load Play\u2122",
         "link to Marketplace",
         "link to Help",
         "link to Developer Lab",
@@ -4931,7 +4931,7 @@
         },
         {
           "id": "connectivity-link-to-load-play",
-          "label": "link to Load Play™",
+          "label": "link to Load Play\u2122",
           "section": "connectivity",
           "status": "local implemented"
         },
@@ -5023,6 +5023,198 @@
           "id": "help-tour-how-to-diagnose-project",
           "label": "how to diagnose project",
           "section": "help-tour",
+          "status": "local implemented"
+        }
+      ]
+    },
+    {
+      "id": "lipsync",
+      "title": "Lip Sync Studio",
+      "desc": "Animate a still photo with synced audio. Upload a portrait and audio, then generate a talking-photo when a local provider is connected.",
+      "tools": [
+        "image upload",
+        "audio upload",
+        "TTS text input",
+        "provider selector",
+        "scene attachment",
+        "queue save"
+      ],
+      "type": "integration",
+      "toolRecords": [
+        {
+          "id": "lipsync-image-upload",
+          "label": "image upload",
+          "section": "lipsync",
+          "status": "integration required"
+        },
+        {
+          "id": "lipsync-audio-upload",
+          "label": "audio upload",
+          "section": "lipsync",
+          "status": "integration required"
+        },
+        {
+          "id": "lipsync-tts-text-input",
+          "label": "TTS text input",
+          "section": "lipsync",
+          "status": "integration required"
+        },
+        {
+          "id": "lipsync-provider-selector",
+          "label": "provider selector",
+          "section": "lipsync",
+          "status": "integration required"
+        },
+        {
+          "id": "lipsync-scene-attachment",
+          "label": "scene attachment",
+          "section": "lipsync",
+          "status": "local implemented"
+        },
+        {
+          "id": "lipsync-queue-save",
+          "label": "queue save",
+          "section": "lipsync",
+          "status": "local implemented"
+        }
+      ]
+    },
+    {
+      "id": "world-builder",
+      "title": "World Builder",
+      "desc": "Lock the rules, physics, history, geography, and culture of your production world. Saves locally and feeds Director AI prompts.",
+      "tools": [
+        "world name",
+        "genre",
+        "era",
+        "tone",
+        "geography",
+        "physics",
+        "culture",
+        "forbidden rules",
+        "world notes",
+        "local save"
+      ],
+      "type": "local",
+      "toolRecords": [
+        {
+          "id": "world-builder-world-name",
+          "label": "world name",
+          "section": "world-builder",
+          "status": "local implemented"
+        },
+        {
+          "id": "world-builder-genre",
+          "label": "genre",
+          "section": "world-builder",
+          "status": "local implemented"
+        },
+        {
+          "id": "world-builder-era",
+          "label": "era",
+          "section": "world-builder",
+          "status": "local implemented"
+        },
+        {
+          "id": "world-builder-tone",
+          "label": "tone",
+          "section": "world-builder",
+          "status": "local implemented"
+        },
+        {
+          "id": "world-builder-geography",
+          "label": "geography",
+          "section": "world-builder",
+          "status": "local implemented"
+        },
+        {
+          "id": "world-builder-local-save",
+          "label": "local save",
+          "section": "world-builder",
+          "status": "local implemented"
+        }
+      ]
+    },
+    {
+      "id": "rights-credits",
+      "title": "Rights and Credits",
+      "desc": "Manage ownership, license, source material, and credits for this production. Exports rights.json and credits.json.",
+      "tools": [
+        "owner",
+        "license",
+        "source material",
+        "production credits",
+        "asset declarations",
+        "export rights.json",
+        "export credits.json"
+      ],
+      "type": "local",
+      "toolRecords": [
+        {
+          "id": "rights-credits-owner",
+          "label": "owner",
+          "section": "rights-credits",
+          "status": "local implemented"
+        },
+        {
+          "id": "rights-credits-license",
+          "label": "license",
+          "section": "rights-credits",
+          "status": "local implemented"
+        },
+        {
+          "id": "rights-credits-production-credits",
+          "label": "production credits",
+          "section": "rights-credits",
+          "status": "local implemented"
+        },
+        {
+          "id": "rights-credits-export-rights",
+          "label": "export rights.json",
+          "section": "rights-credits",
+          "status": "local implemented"
+        },
+        {
+          "id": "rights-credits-export-credits",
+          "label": "export credits.json",
+          "section": "rights-credits",
+          "status": "local implemented"
+        }
+      ]
+    },
+    {
+      "id": "media-vault",
+      "title": "Media Vault",
+      "desc": "All production media in one place \u2014 images, video, audio, music, SFX, subtitles. Every asset carries license and rights metadata.",
+      "tools": [
+        "category browse",
+        "asset log",
+        "name",
+        "type",
+        "source",
+        "license",
+        "scene link",
+        "path",
+        "export asset-registry.json"
+      ],
+      "type": "local",
+      "toolRecords": [
+        {
+          "id": "media-vault-category-browse",
+          "label": "category browse",
+          "section": "media-vault",
+          "status": "local implemented"
+        },
+        {
+          "id": "media-vault-asset-log",
+          "label": "asset log",
+          "section": "media-vault",
+          "status": "local implemented"
+        },
+        {
+          "id": "media-vault-export",
+          "label": "export asset-registry.json",
+          "section": "media-vault",
           "status": "local implemented"
         }
       ]
@@ -5127,7 +5319,7 @@
     },
     {
       "id": "dashboard-open-load-play",
-      "label": "open Load Play™",
+      "label": "open Load Play\u2122",
       "section": "dashboard",
       "status": "local implemented"
     },
@@ -5193,7 +5385,7 @@
     },
     {
       "id": "templates-children-s-animation",
-      "label": "children’s animation",
+      "label": "children\u2019s animation",
       "section": "templates",
       "status": "local implemented"
     },
@@ -5397,7 +5589,7 @@
     },
     {
       "id": "import-center-load-studio-package-import",
-      "label": "Load Studio™ package import",
+      "label": "Load Studio\u2122 package import",
       "section": "import-center",
       "status": "local plus integration"
     },
@@ -8061,7 +8253,7 @@
     },
     {
       "id": "look-lab-children-s-animation-look",
-      "label": "children’s animation look",
+      "label": "children\u2019s animation look",
       "section": "look-lab",
       "status": "local implemented"
     },
@@ -8421,7 +8613,7 @@
     },
     {
       "id": "export-studio-load-studio-project",
-      "label": "Load Studio™ project",
+      "label": "Load Studio\u2122 project",
       "section": "export-studio",
       "status": "local plus integration"
     },
@@ -8535,7 +8727,7 @@
     },
     {
       "id": "load-play-prep-upload-to-load-play",
-      "label": "upload to Load Play™",
+      "label": "upload to Load Play\u2122",
       "section": "load-play-prep",
       "status": "integration required"
     },
@@ -8919,7 +9111,7 @@
     },
     {
       "id": "connectivity-link-to-load-play",
-      "label": "link to Load Play™",
+      "label": "link to Load Play\u2122",
       "section": "connectivity",
       "status": "local implemented"
     },
@@ -8993,6 +9185,126 @@
       "id": "help-tour-how-to-diagnose-project",
       "label": "how to diagnose project",
       "section": "help-tour",
+      "status": "local implemented"
+    },
+    {
+      "id": "lipsync-image-upload",
+      "label": "image upload",
+      "section": "lipsync",
+      "status": "integration required"
+    },
+    {
+      "id": "lipsync-audio-upload",
+      "label": "audio upload",
+      "section": "lipsync",
+      "status": "integration required"
+    },
+    {
+      "id": "lipsync-tts-text-input",
+      "label": "TTS text input",
+      "section": "lipsync",
+      "status": "integration required"
+    },
+    {
+      "id": "lipsync-provider-selector",
+      "label": "provider selector",
+      "section": "lipsync",
+      "status": "integration required"
+    },
+    {
+      "id": "lipsync-scene-attachment",
+      "label": "scene attachment",
+      "section": "lipsync",
+      "status": "local implemented"
+    },
+    {
+      "id": "lipsync-queue-save",
+      "label": "queue save",
+      "section": "lipsync",
+      "status": "local implemented"
+    },
+    {
+      "id": "world-builder-world-name",
+      "label": "world name",
+      "section": "world-builder",
+      "status": "local implemented"
+    },
+    {
+      "id": "world-builder-genre",
+      "label": "genre",
+      "section": "world-builder",
+      "status": "local implemented"
+    },
+    {
+      "id": "world-builder-era",
+      "label": "era",
+      "section": "world-builder",
+      "status": "local implemented"
+    },
+    {
+      "id": "world-builder-tone",
+      "label": "tone",
+      "section": "world-builder",
+      "status": "local implemented"
+    },
+    {
+      "id": "world-builder-geography",
+      "label": "geography",
+      "section": "world-builder",
+      "status": "local implemented"
+    },
+    {
+      "id": "world-builder-local-save",
+      "label": "local save",
+      "section": "world-builder",
+      "status": "local implemented"
+    },
+    {
+      "id": "rights-credits-owner",
+      "label": "owner",
+      "section": "rights-credits",
+      "status": "local implemented"
+    },
+    {
+      "id": "rights-credits-license",
+      "label": "license",
+      "section": "rights-credits",
+      "status": "local implemented"
+    },
+    {
+      "id": "rights-credits-production-credits",
+      "label": "production credits",
+      "section": "rights-credits",
+      "status": "local implemented"
+    },
+    {
+      "id": "rights-credits-export-rights",
+      "label": "export rights.json",
+      "section": "rights-credits",
+      "status": "local implemented"
+    },
+    {
+      "id": "rights-credits-export-credits",
+      "label": "export credits.json",
+      "section": "rights-credits",
+      "status": "local implemented"
+    },
+    {
+      "id": "media-vault-category-browse",
+      "label": "category browse",
+      "section": "media-vault",
+      "status": "local implemented"
+    },
+    {
+      "id": "media-vault-asset-log",
+      "label": "asset log",
+      "section": "media-vault",
+      "status": "local implemented"
+    },
+    {
+      "id": "media-vault-export",
+      "label": "export asset-registry.json",
+      "section": "media-vault",
       "status": "local implemented"
     }
   ]
