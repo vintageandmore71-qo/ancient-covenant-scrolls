@@ -1,13 +1,14 @@
 # Provider Registry Reference — Load Eco / Load Studio / Load AI
 
 Permanent reference. Read at every session start alongside SESSION_NOTES, HANDOFF.md, MASTER_BACKLOG.md.
-Source: 8 inbox docs (LoadStudio_Director_AI_Production_System_Addendum.docx,
+Source: 10 inbox docs (LoadStudio_Director_AI_Production_System_Addendum.docx,
 Free_AI_APIs_SDKs_2026.docx, LoadCap_Free_Providers.docx, LoadCap_Asset_Libraries.docx,
 VN_Feature_Provider_Map.docx, Free_OpenSource_AI_Providers_2026.docx,
-Free_OpenSource_AI_Image_Rivals_MJ_Adobe_2026.docx, Providers for Load Studio, Eco, AI.docx)
+Free_OpenSource_AI_Image_Rivals_MJ_Adobe_2026.docx, Providers for Load Studio, Eco, AI.docx,
+Free_SFX_Provider_Guide_2026.docx, Free_AI_Provider_Connection_Guide_2026.docx)
 + code audit of the 8 provider/registry lib files.
 
-Last updated: 2026-05-16. Update this file whenever a provider is wired, a stub is promoted to real, or a
+Last updated: 2026-05-19. Update this file whenever a provider is wired, a stub is promoted to real, or a
 new provider is added. Never re-read the inbox docs to answer provider questions — use this file.
 
 ---
@@ -125,7 +126,7 @@ window.LoadProviderRegistry = {
 
 | Provider ID | Name | Capability | Where implemented | Key storage | Notes |
 |------------|------|-----------|------------------|------------|-------|
-| `huggingface` | HF Inference API | img-gen, img2img | lib-load-image-providers.js REAL | `ps_hf_key` → C.hfImgKey | SDXL, FLUX.1, SD cascade |
+| `huggingface` | HF Inference API | img-gen, img2img | lib-load-image-providers.js REAL | `ps_hf_key` → C.hfImgKey | SDXL, FLUX.1-schnell (Apache 2.0 commercial OK), SD cascade |
 | `cloudflare` | Cloudflare Workers AI | img-gen | lib-load-image-providers.js REAL | `ps_cf_token` + `ps_cf_account` → C.cfToken/cfAccount | 10K neurons/day |
 | `cfsdxllight` | Cloudflare SDXL-Lightning | img-gen | lib-load-image-providers.js REAL | same as cloudflare | |
 | `together` | Together FLUX-schnell-Free | img-gen | lib-load-image-providers.js REAL | `ps_together_key` → C.togetherKey | |
@@ -135,6 +136,8 @@ window.LoadProviderRegistry = {
 | `siliconflow` | SiliconFlow | img-gen, img2img | lib-load-image-providers.js REAL | `ps_sfk` → C.siliconflowKey | FLUX.1 Kontext + image-to-video. Settings in load/image-prompt/index.html |
 | `huggingface` | HF Inference API | img-gen | loadstudio/load-provider-registry.js REAL | `lpr_settings_v1` | |
 | `openrouter` | OpenRouter | llm + img-gen | loadstudio/load-provider-registry.js REAL | `lpr_settings_v1` | 50 req/day free, 29+ free models |
+| `replicate` | Replicate | img-gen, video | META only | — | Free credits on signup (card required after). flux-schnell, wan-2.1. PLANNED |
+| `fal-ai` | fal.ai | img-gen, video | META only | — | Free credits on signup. fal-ai/flux/schnell, fal-ai/stable-video. PLANNED |
 | `nvidia-nim` | NVIDIA NIM | img-gen + llm | META only | — | 1K credits signup. PLANNED |
 | `fish-audio` | Fish Audio | tts | META only | — | Free monthly, voice cloning. PLANNED |
 
@@ -340,15 +343,38 @@ Pipeline order:
 
 ## 6. SOUND EFFECTS
 
-Pipeline order:
-1. `audiogen` — Meta AudioCraft, text-to-SFX, local
-2. `gen-sfx` — free browser/API
-3. Freesound.org API (search + download)
-4. ZapSplat free tier
-5. BBC Sound Effects (33,000+, personal/research)
-6. Mixkit SFX (no account)
-7. SoundBible (free download)
-8. User-imported SFX library (local, always available)
+### 6A. AI SFX Generation Pipeline (text-to-SFX)
+1. `audiogen` — Meta AudioCraft, MIT, text-to-SFX, local (localhost `/generate`)
+2. `audiogen-hf` — HuggingFace Inference API for AudioGen (free tier, no local GPU needed, key: HF_TOKEN)
+3. `elevenlabs-sfx` — ElevenLabs Sound Effects API, free tier (limited generations/month), best cloud quality. Endpoint: `https://api.elevenlabs.io/v1/sound-generation`. Key: ELEVENLABS_API_KEY. Prompt tips: be specific about material, action, environment, distance, intensity (5–500 chars).
+
+### 6B. SFX Library Search Fallback (no AI needed)
+| Library | License | Commercial | Notes |
+|---------|---------|-----------|-------|
+| Freesound.org | CC0 / CC-BY (varies per sound) | CC0 sounds yes | 500K+ sounds. API available (FREESOUND_API_KEY). Filter by `license:"Creative Commons 0"` for commercial-safe. Preview MP3 = no OAuth. Full WAV = OAuth2. |
+| ZapSplat | Free with attribution | Yes with credit | 150K+ professionally recorded. MP3 free, WAV = paid. Attribution: "Sound effects by ZapSplat.com". |
+| Mixkit SFX | Royalty-free | Yes, no attribution | 1,500+ curated. No account needed. mixkit.co/free-sound-effects |
+| Pixabay SFX | CC0 | Yes, no attribution | Same API key as Pixabay images (PIXABAY_API_KEY). 100 req/min. Do not hotlink — always download. |
+| BBC Sound Effects | Personal/educational | NO — personal only | 33,000+ sounds. WAV format. NOT for commercial/monetized use. |
+| SoundBible | Public domain / CC-BY | Varies per sound | Check individual sound license. |
+| Kenney.nl | CC0 | Yes, no attribution | Complete game SFX packs (ZIP). Interface, Impact, Sci-fi, RPG. kenney.nl/assets?q=audio |
+| Internet Archive | Public domain | Yes | Millions of audio files incl. Hollywood SFX archives. API: archive.org/advancedsearch.php (no key). |
+
+### 6C. SFX API Quick Reference
+| API | Key | Rate Limit | License | Notes |
+|-----|-----|-----------|---------|-------|
+| Freesound | FREESOUND_API_KEY | 60 req/min | CC0 sounds available | Apply at freesound.org/apiv2/apply/ |
+| Pixabay | PIXABAY_API_KEY | 100 req/min | CC0 | Same key covers images + video + SFX |
+| ElevenLabs SFX | ELEVENLABS_API_KEY | Limited/month free | Royalty-free (paid plan for commercial) | POST /v1/sound-generation |
+| Internet Archive | None | Undocumented | Public domain | archive.org/advancedsearch.php |
+
+### 6D. Local Audio Processing Tools (SFX manipulation)
+| Tool | License | Install | Capability |
+|------|---------|---------|-----------|
+| FFmpeg | LGPL | apt/brew | Convert, trim, mix, fade, reverb, normalize, pitch, tempo — gold standard |
+| pydub | MIT | pip install pydub | Python: trim/mix/fade/volume/export — wraps FFmpeg |
+| librosa | ISC | pip install librosa soundfile | Python: beat tracking, pitch detection, time-stretch, harmonic/percussive sep |
+| Audacity | GPL | audacityteam.org | GUI: record, edit, effects, export |
 
 ---
 
@@ -391,6 +417,8 @@ Status: All PLANNED (not in any lib file yet)
 | PixVerse | Free tier | |
 | Luma Dream Machine | Free credits | |
 | HeyGen | Free tier (talking avatars) | |
+| Replicate WAN 2.2 | Free credits on signup | `wavespeedai/wan-2.1` via Replicate API. No local 24GB GPU needed. Apache 2.0. |
+| fal.ai video models | Free credits on signup | fal-ai/stable-video, backup cloud option |
 
 ### 8C. Video Editing Tools
 | Tool | License | Capability | Where |
@@ -409,6 +437,19 @@ Status: All PLANNED (not in any lib file yet)
 
 ### 8D. Video Status in loadstudio/load-provider-registry.js
 All video providers (`wan`, `hunyuanvideo`, `ltx-video`, `animatediff`, `cogvideox`, etc.) are STUBS.
+
+### 8E. Self-Hosted Streaming Servers (100% free, open-source)
+For LoadPlay live streaming and on-demand hosting. All require Docker.
+
+| Tool | License | Use case | Launch |
+|------|---------|---------|--------|
+| SRS (Simple Realtime Server) | MIT | RTMP ingest → HLS output. 10K+ concurrent viewers. | `docker run ossrs/srs:5` |
+| Owncast | GPL | Self-hosted live streaming with chat. OBS → RTMP in. | curl install + OBS |
+| PeerTube | AGPL | Full YouTube-alternative platform with federation. | docker-compose |
+| Jellyfin | GPL | On-demand streaming of your own media library. | `docker run jellyfin/jellyfin` |
+
+OBS settings for self-hosted: Service = Custom, Server = `rtmp://YOUR_IP/live`, stream key set in server admin panel.
+HLS viewer URL pattern: `http://YOUR_IP:8080/live/livestream.m3u8`
 
 ---
 
@@ -442,27 +483,30 @@ Pipeline order:
 | Provider | Free Tier | Models | Notes |
 |---------|-----------|--------|-------|
 | Google AI Studio / Gemini | 1,500 req/day | Gemini 2.5 Flash/Pro, Imagen 4 | Best daily driver. Text + image + audio + video |
-| Groq | ~6,000 req/day | Llama 3.3 70B, Mixtral | Fastest LLM inference |
-| Cerebras | 1M tokens/day | Llama 3.3 70B | Fastest throughput |
+| Groq | 14,400 req/day (~6K effective) | Llama 3.3 70B, Mixtral, Gemma2-9B | Fastest LLM inference. Key: GROQ_API_KEY |
+| Cerebras | 30 req/min | Llama 3.1 70B, Llama 4 Scout 17B | Ultra-fast hardware. Key: CEREBRAS_API_KEY |
 | SambaNova | Free cloud | Llama 405B, DeepSeek R1 | Best for large models |
-| Cloudflare Workers AI | 10K neurons/day | Llama 70B, Whisper, SD | Edge inference |
+| Cloudflare Workers AI | 10K neurons/day | Llama 70B, Whisper, SD | Edge inference. Keys: CLOUDFLARE_ACCOUNT_ID + CLOUDFLARE_API_TOKEN |
 | Mistral | 1B tokens/month | Mistral Small/7B, Mixtral, Codestral | May train on prompts |
-| OpenRouter | 50 req/day | 29+ free models (`:free` suffix) | DeepSeek R1, Llama 4, Qwen3 235B |
-| HF Inference API | Hundreds req/hour | 90,000+ models | |
+| OpenRouter | 50 req/day free models | 29+ free (`:free` suffix) | DeepSeek R1, Llama 4, Qwen3 235B. Key: OPENROUTER_API_KEY |
+| HF Inference API | Hundreds req/hour | 90,000+ models | Key: HF_TOKEN |
 | NVIDIA NIM | 1,000 credits signup | 91 models | Vision, audio included |
 | Cohere | 1,000 calls/month | Command R+, Embed 4, Rerank | Best for RAG |
 | DeepSeek | ~free | DeepSeek R1 | $0.14/M tokens after trial |
 | AI/ML API | 400+ models | GPT, Claude, Gemini, FLUX, Llama | Single key for all |
 
+**Optimal LLM routing order (from Free_AI_Provider_Connection_Guide_2026.docx):**
+1st Groq (fastest, highest free rate limit) → 2nd Gemini 2.0 Flash (best quality free) → 3rd Cerebras (ultra-fast backup) → 4th OpenRouter :free models → 5th Ollama local (no limits)
+
 ### 10B. Local LLM (no key, no quota)
 | Provider | Notes |
 |---------|-------|
-| Ollama | OpenAI-compatible, localhost:11434, 100+ models — REAL in LoadStudio |
+| Ollama | OpenAI-compatible, localhost:11434, 100+ models — REAL in LoadStudio. `ollama pull llama3.2` to start. |
 | LM Studio | GGUF, GUI, localhost:1234 — PLANNED |
 | vLLM | Any HF model, production-grade, localhost:8000 — PLANNED |
 | llama.cpp | GGUF, CPU inference, fastest without GPU — PLANNED |
 | LocalAI | Drop-in OpenAI replacement + TTS + image gen — PLANNED |
-| LiteLLM | Routes to 100+ providers, one interface — PLANNED |
+| LiteLLM | Routes to 100+ providers, one interface, auto-fallback. `pip install litellm`. PLANNED for LoadStudio routing layer. |
 | Jan | GGUF via Ollama, cross-platform GUI — PLANNED |
 
 ### 10C. Key threading for LLM in Load Main
@@ -510,11 +554,14 @@ All four are REAL in `load.js`. Gemini, Groq, OpenRouter, HF are the primary LLM
 ### Sound FX Libraries
 | Library | Notes |
 |---------|-------|
-| Freesound.org | Largest open-source SFX — PLANNED API integration |
-| ZapSplat | Free tier, all categories |
-| BBC Sound Effects | 33,000+ sounds, personal/research use |
-| Mixkit SFX | Free, no account |
-| SoundBible | Free downloadable SFX |
+| Freesound.org | Largest open-source SFX — PLANNED API integration. Filter CC0 for commercial. |
+| ZapSplat | Free tier with attribution, all categories |
+| BBC Sound Effects | 33,000+ sounds, personal/research ONLY — not commercial |
+| Mixkit SFX | Free, no account, no attribution |
+| Pixabay SFX | CC0, same API key as Pixabay images |
+| SoundBible | Free downloadable SFX — check per-sound license |
+| Kenney.nl | CC0 game SFX packs (ZIP), no attribution, commercial OK |
+| Internet Archive | Public domain SFX archives incl. historic Hollywood libraries |
 
 ### Stock Media
 | Library | Notes |
